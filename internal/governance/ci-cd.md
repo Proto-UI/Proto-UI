@@ -107,6 +107,8 @@ Config-parse verification (runs in the `ci-config-audit` job on every CI lane):
 - `ci.yml` has no workflow-level token grant. The history-reading `cycle-plan` and `cycle-report` jobs carry explicit `contents: read` and `actions: read`; the callable coverage-governance job retains its declared read-only Issue/PR permissions. No cycle job receives a write grant.
 - `node --test scripts/ci/test/ci-scheduling-policy.test.mjs` covers the same rules against positive and negative fixture inventories plus the live tree.
 
+Obsolete source-text tests that pin per-PR evidence triggers, unconditional aggregate execution or cancelling shared evidence are removed, not re-pinned to new YAML strings. The scheduling audit exercises the replacement policy with positive and negative workflow inventories; the surviving contrast, homepage, startup and Dropdown behavior checks and native evidence suites retain their existing assertions.
+
 Behavioral verification (performed by the parent on the first post-merge cycles):
 
 - On the first scheduled slot, confirm a `ci.yml` run with `event=schedule` produces a `regression-cycle-<sha>` artifact whose `sourceRevision` equals the default-branch head at trigger time, whose lane inventory covers every `cycle-report.needs` entry including production suites, and whose receipt reports the cron slot, actual start and queue delay.
