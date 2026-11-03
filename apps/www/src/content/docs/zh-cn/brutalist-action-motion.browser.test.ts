@@ -849,3 +849,518 @@ it('records community and Header anchor geometry through the unchanged native mo
     if (!failed && secondaryErrors.length) throw new Error(secondaryErrors.join('\n'));
   }
 }, 90_000);
+
+// Additional WC Item evidence. Preserve the complete published motion and
+// ancestor-diagnostic prefix. Other runtimes require separate native evidence.
+type ItemPaint = {
+  background: number[];
+  foreground: number[];
+  border: string;
+  contrast: number;
+  highlighted: boolean;
+  connected: boolean;
+  hit: boolean;
+  rect: number[];
+  transitions: string[];
+};
+type ItemPairFrame = { at: number; reducedMotion: boolean; items: ItemPaint[] };
+type ItemPairProbe = {
+  frames: ItemPairFrame[];
+  events: Array<{ index: number; type: string; at: number }>;
+  error: string | null;
+  started: number;
+  done: Promise<void>;
+  cancel: () => void;
+  cleanup: { raf: number; deadline: number; listeners: number };
+};
+declare global {
+  interface Window {
+    __brutalistItemPair?: ItemPairProbe;
+  }
+}
+async function itemBounded<T>(label: string, work: Promise<T>, milliseconds = 5_000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`${label}: ${milliseconds}ms exceeded; completion unconfirmed`)),
+          milliseconds
+        );
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+async function captureItemPair(
+  page: Page,
+  items: Locator,
+  originalRects: number[][] | null,
+  action: () => Promise<void>
+) {
+  await itemBounded(
+    'Item observer installation',
+    items.evaluateAll((all, fixedRects) => {
+      if (window.__brutalistItemPair) throw new Error('Existing Item observer');
+      const nodes = all.slice(0, 2);
+      if (nodes.length !== 2) throw new Error('Two real WC Item instances are required');
+      const points = nodes.map((node, index) => {
+        const rect = node.getBoundingClientRect();
+        const original = fixedRects?.[index] ?? [rect.x, rect.y, rect.width, rect.height];
+        return [original[0] + original[2] / 2, original[1] + original[3] / 2];
+      });
+      const rgba = (css: string): number[] => {
+        const match = css.match(/^rgba?\(([^)]+)\)$/);
+        if (!match || match[1].includes('%')) throw new Error(`Unsupported measured color ${css}`);
+        const values = match[1].replace(/[,/]/g, ' ').trim().split(/\s+/).map(Number);
+        if (values.length === 3) values.push(1);
+        if (
+          values.length !== 4 ||
+          values.some((value) => !Number.isFinite(value)) ||
+          values.slice(0, 3).some((value) => value < 0 || value > 255) ||
+          values[3] < 0 ||
+          values[3] > 1
+        )
+          throw new Error(`Invalid measured color ${css}`);
+        return values;
+      };
+      const over = (front: number[], back: number[]): number[] => {
+        const alpha = front[3] + back[3] * (1 - front[3]);
+        if (alpha <= 0) return [0, 0, 0, 0];
+        return [0, 1, 2]
+          .map(
+            (index) => (front[index] * front[3] + back[index] * back[3] * (1 - front[3])) / alpha
+          )
+          .concat(alpha);
+      };
+      const background = (node: Element) => {
+        const layers: number[][] = [];
+        let opaqueBackingFound = false;
+        for (let current: Element | null = node; current; ) {
+          const css = getComputedStyle(current);
+          if (
+            css.backgroundImage !== 'none' ||
+            css.filter !== 'none' ||
+            css.backdropFilter !== 'none' ||
+            css.mixBlendMode !== 'normal' ||
+            Number(css.opacity) !== 1
+          )
+            throw new Error(
+              'Unsupported actual ancestor paint/effect; contrast cannot be certified'
+            );
+          // An opaque child does not make ancestor effects irrelevant.
+          if (!opaqueBackingFound) {
+            const color = rgba(css.backgroundColor);
+            layers.push(color);
+            opaqueBackingFound = color[3] === 1;
+          }
+          const root = current.getRootNode();
+          current = current.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+        }
+        if (!opaqueBackingFound) throw new Error('No actual opaque backing found');
+        return layers.reverse().reduce((back, front) => over(front, back), [0, 0, 0, 0]);
+      };
+      const luminance = (color: number[]) =>
+        color
+          .slice(0, 3)
+          .map((channel) => {
+            const value = channel / 255;
+            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          })
+          .reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0);
+      let finish: () => void = () => {};
+      let active = true;
+      let raf = 0;
+      let deadline = 0;
+      const listeners: Array<{ node: Element; kind: string; listener: EventListener }> = [];
+      const done = new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+      const probe: ItemPairProbe = {
+        frames: [],
+        events: [],
+        error: null,
+        started: performance.now(),
+        done,
+        cleanup: { raf: 0, deadline: 0, listeners: 0 },
+        cancel: () => {
+          active = false;
+          cancelAnimationFrame(raf);
+          clearTimeout(deadline);
+          raf = 0;
+          deadline = 0;
+          for (const { node, kind, listener } of listeners)
+            node.removeEventListener(kind, listener);
+          listeners.length = 0;
+          probe.cleanup = { raf, deadline, listeners: listeners.length };
+          finish();
+        },
+      };
+      // Publish owned cleanup before installing any listener or scheduling work.
+      window.__brutalistItemPair = probe;
+      const sample = () => {
+        raf = 0;
+        if (!active) return;
+        try {
+          if (probe.frames.length >= 180) throw new Error('Item frame limit reached');
+          probe.frames.push({
+            at: performance.now() - probe.started,
+            reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+            items: nodes.map((node, index) => {
+              const css = getComputedStyle(node);
+              const bg = background(node);
+              const fg = over(rgba(css.color), bg);
+              const first = luminance(fg),
+                second = luminance(bg);
+              const rect = node.getBoundingClientRect();
+              const hit = document.elementFromPoint(points[index][0], points[index][1]);
+              return {
+                background: bg,
+                foreground: fg,
+                border: css.borderTopColor,
+                contrast: (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05),
+                highlighted: (node.getAttribute('data-pui-style') ?? '')
+                  .split(/\s+/)
+                  .includes('bg-main'),
+                connected: node.isConnected,
+                hit: hit === node || (hit !== null && node.contains(hit)),
+                rect: [rect.x, rect.y, rect.width, rect.height],
+                transitions: node
+                  .getAnimations()
+                  .filter((animation) => animation instanceof CSSTransition)
+                  .map((animation) => (animation as CSSTransition).transitionProperty),
+              };
+            }),
+          });
+          if (!nodes.every((node) => node.isConnected))
+            throw new Error('Observed Item disconnected');
+          if (performance.now() - probe.started < 650) raf = requestAnimationFrame(sample);
+          else probe.cancel();
+        } catch (error) {
+          probe.error = String(error);
+          probe.cancel();
+        }
+      };
+      try {
+        nodes.forEach((node, index) => {
+          for (const kind of [
+            'pointerenter',
+            'pointerleave',
+            'transitionrun',
+            'transitionend',
+            'transitioncancel',
+          ]) {
+            const listener: EventListener = () =>
+              probe.events.push({ index, type: kind, at: performance.now() - probe.started });
+            node.addEventListener(kind, listener);
+            listeners.push({ node, kind, listener });
+          }
+        });
+        // Independent wall deadline: a paused rAF cannot masquerade as completion.
+        deadline = window.setTimeout(() => {
+          probe.error = 'Item wall deadline reached';
+          probe.cancel();
+        }, 2_000);
+        sample();
+      } catch (error) {
+        probe.error = String(error);
+        probe.cancel();
+        delete window.__brutalistItemPair;
+        throw error;
+      }
+    }, originalRects)
+  );
+  let actionError: string | null = null;
+  const cleanupErrors: string[] = [];
+  try {
+    const actionAt = await itemBounded(
+      'Item action timestamp',
+      page.evaluate(() => performance.now() - window.__brutalistItemPair!.started)
+    );
+    try {
+      await itemBounded('Item native input', action());
+    } catch (error) {
+      actionError = String(error);
+    }
+    const captured = await itemBounded(
+      'Item measured frames',
+      page.evaluate(
+        async ({ actionAt, actionError }) => {
+          const probe = window.__brutalistItemPair!;
+          await probe.done;
+          return {
+            frames: probe.frames,
+            events: probe.events,
+            measurementError: probe.error,
+            actionAt,
+            actionError,
+            cleanup: probe.cleanup,
+          };
+        },
+        { actionAt, actionError }
+      )
+    );
+    return { ...captured, cleanupErrors };
+  } finally {
+    try {
+      await itemBounded(
+        'Item observer cleanup',
+        page.evaluate(() => {
+          window.__brutalistItemPair?.cancel();
+          delete window.__brutalistItemPair;
+        })
+      );
+    } catch (error) {
+      // Retain measured frames and the primary input/read failure.
+      cleanupErrors.push(String(error));
+    }
+  }
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  it(`measures real WC ${theme} Item border handoff and fixed geometry through live preferences`, async () => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      colorScheme: theme,
+      reducedMotion: 'no-preference',
+    });
+    context.setDefaultTimeout(5_000);
+    context.setDefaultNavigationTimeout(15_000);
+    let contextClosed = false;
+    context.on('close', () => {
+      contextClosed = true;
+    });
+    let page: Page | undefined;
+    const external: string[] = [];
+    const traces: unknown[] = [];
+    const secondaryErrors: string[] = [];
+    let failed: string | null = null;
+    let native: unknown = null;
+    const handles: Array<Awaited<ReturnType<Locator['elementHandle']>>> = [];
+    try {
+      await itemBounded(
+        'Item route installation',
+        context.route('**/*', (route) => {
+          const url = new URL(route.request().url());
+          if (
+            url.origin === new URL(baseUrl).origin ||
+            url.protocol === 'data:' ||
+            url.protocol === 'blob:'
+          )
+            return route.continue();
+          external.push(url.origin);
+          return route.abort();
+        })
+      );
+      page = await itemBounded('Item page creation', context.newPage());
+      await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/button/`, {
+        waitUntil: 'networkidle',
+      });
+      await itemBounded('Item preferences reveal', revealHeaderPreferences(page), 10_000);
+      if ((await page.evaluate(() => document.documentElement.dataset.theme)) !== theme) {
+        await page
+          .locator(
+            '.site-header-theme [data-projection-generation-state="active"] [data-demo-ref="home-theme"]'
+          )
+          .click();
+        await page.waitForFunction(
+          (expected) => document.documentElement.dataset.theme === expected,
+          theme
+        );
+      }
+      const trigger = page.locator(
+        '[data-adapter-select] wc-brutalist-select-trigger[data-appearance="elevated"]:visible'
+      );
+      expect(await trigger.count()).toBe(1);
+      await trigger.click();
+      const contentId = await trigger.getAttribute('aria-controls');
+      if (!contentId) throw new Error('Missing owned native listbox id');
+      const content = page
+        .locator('[role="listbox"]:visible')
+        .filter({ has: page.locator('wc-brutalist-select-item') });
+      expect(await content.count()).toBe(1);
+      expect(await content.getAttribute('id')).toBe(contentId);
+      const items = content.locator('wc-brutalist-select-item[role="option"]:visible');
+      await expect.poll(() => items.count()).toBeGreaterThanOrEqual(2);
+      for (const index of [0, 1]) {
+        const handle = await items.nth(index).elementHandle();
+        if (!handle) throw new Error('Missing WC Item identity');
+        handles.push(handle);
+      }
+      native = await itemBounded(
+        'Item native identity read',
+        items.evaluateAll((all) =>
+          all.slice(0, 2).map((node) => ({
+            tag: node.localName,
+            role: node.getAttribute('role'),
+            id: node.id,
+            selected: node.getAttribute('aria-selected'),
+            disabled: node.getAttribute('aria-disabled'),
+            root: node.getRootNode() instanceof ShadowRoot ? 'shadow' : 'document',
+          }))
+        )
+      );
+      let originalRects: number[][] | null = null;
+      let expectedRest: ItemPaint | undefined;
+      let expectedHighlighted: ItemPaint | undefined;
+      const paintKey = (paint: ItemPaint) => JSON.stringify([paint.background, paint.foreground]);
+      const activePage = page;
+      for (const preference of ['no-preference', 'reduce', 'no-preference'] as const) {
+        for (const incoming of [1, 0]) {
+          const captured = await captureItemPair(activePage, items, originalRects, async () => {
+            await activePage.emulateMedia({ reducedMotion: preference });
+            await items.nth(incoming).hover();
+          });
+          traces.push({ theme, preference, incoming, ...captured });
+          await itemBounded(
+            'Item raw trace write',
+            writeFile(
+              path.join(output, `items-${theme}.json`),
+              JSON.stringify({ source, native, traces, external }, null, 2)
+            )
+          );
+          if (captured.actionError || captured.measurementError)
+            throw new Error(captured.actionError ?? captured.measurementError!);
+          expect(captured.cleanupErrors).toEqual([]);
+          expect(captured.cleanup).toEqual({ raf: 0, deadline: 0, listeners: 0 });
+          const frames = captured.frames;
+          expect(frames.length).toBeGreaterThan(3);
+          // Bootstrap from the pre-input frame only, never from a successful tail.
+          if (originalRects === null) {
+            const first = frames[0].items;
+            expect(first.filter((item) => item.highlighted)).toHaveLength(1);
+            expectedRest = first.find((item) => !item.highlighted)!;
+            expectedHighlighted = first.find((item) => item.highlighted)!;
+            originalRects = first.map((item) => [...item.rect]);
+          }
+          const rest = expectedRest!;
+          const highlight = expectedHighlighted!;
+          const allowedPaint = [paintKey(rest), paintKey(highlight)];
+          expect(allowedPaint[0]).not.toBe(allowedPaint[1]);
+          expect(highlight.border).toBe('rgb(0, 0, 0)');
+          expect(rest.border).toBe('rgba(0, 0, 0, 0)');
+          const outgoing = 1 - incoming;
+          for (const frame of frames) {
+            expect(frame.items.filter((item) => item.highlighted).length).toBeLessThanOrEqual(1);
+            for (const [index, item] of frame.items.entries()) {
+              expect(item.connected && item.hit).toBe(true);
+              expect(item.contrast).toBeGreaterThanOrEqual(4.5);
+              expect(allowedPaint).toContain(paintKey(item));
+              expect(paintKey(item)).toBe(item.highlighted ? allowedPaint[1] : allowedPaint[0]);
+              item.rect.forEach((value, axis) =>
+                expect(Math.abs(value - originalRects![index][axis])).toBeLessThanOrEqual(0.05)
+              );
+              expect(
+                item.transitions.every((name) =>
+                  /^border-(top|right|bottom|left)-color$/.test(name)
+                )
+              ).toBe(true);
+            }
+            if (frame.items[incoming].highlighted) {
+              expect(frame.items[outgoing].border).toBe(rest.border);
+              expect(frame.items[outgoing].transitions).toEqual([]);
+              if (preference === 'reduce') expect(frame.items[incoming].transitions).toEqual([]);
+            }
+          }
+          const tail = frames.at(-1)!;
+          expect(tail.reducedMotion).toBe(preference === 'reduce');
+          expect(tail.items[incoming].highlighted).toBe(true);
+          expect(tail.items[outgoing].highlighted).toBe(false);
+          expect(tail.items[incoming].border).toBe(highlight.border);
+          expect(tail.items[outgoing].border).toBe(rest.border);
+          expect(
+            frames
+              .slice(-3)
+              .every((frame) => frame.items[incoming].border === tail.items[incoming].border)
+          ).toBe(true);
+          if (preference === 'reduce')
+            expect(
+              frames.flatMap((frame) => frame.items.flatMap((item) => item.transitions))
+            ).toEqual([]);
+          if (preference !== 'reduce') {
+            expect(
+              new Set(frames.map((frame) => frame.items[incoming].border)).size
+            ).toBeGreaterThan(2);
+            expect(frames.some((frame) => frame.items[incoming].transitions.length > 0)).toBe(true);
+          }
+          expect(
+            captured.events.some(
+              (event) => event.index === incoming && event.type === 'pointerenter'
+            )
+          ).toBe(true);
+          for (const index of [0, 1])
+            expect(
+              await items.nth(index).evaluate((node, original) => node === original, handles[index])
+            ).toBe(true);
+          expect(external).toEqual([]);
+        }
+      }
+      expect(traces).toHaveLength(6);
+      await page.screenshot({
+        path: path.join(output, `items-${theme}-open-highlight.png`),
+        timeout: 5_000,
+      });
+      await page.keyboard.press('Escape');
+      await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+      expect(context.pages()).toHaveLength(1);
+      expect(external).toEqual([]);
+    } catch (error) {
+      failed = String(error);
+      throw error;
+    } finally {
+      if (page) {
+        try {
+          await itemBounded(
+            'Item final observer cleanup',
+            page.evaluate(() => {
+              window.__brutalistItemPair?.cancel();
+              delete window.__brutalistItemPair;
+            })
+          );
+        } catch (error) {
+          secondaryErrors.push(`observer cleanup: ${String(error)}`);
+        }
+        try {
+          await page.screenshot({
+            path: path.join(output, `items-${theme}-final.png`),
+            timeout: 5_000,
+          });
+        } catch (error) {
+          secondaryErrors.push(`screenshot: ${String(error)}`);
+        }
+      }
+      for (const handle of handles) {
+        try {
+          await itemBounded('Item identity dispose', handle!.dispose());
+        } catch (error) {
+          secondaryErrors.push(`identity cleanup: ${String(error)}`);
+        }
+      }
+      try {
+        await itemBounded('Item context close', context.close());
+      } catch (error) {
+        secondaryErrors.push(`context cleanup: ${String(error)}`);
+      }
+      if (!contextClosed)
+        secondaryErrors.push('Context close event not observed; teardown incomplete');
+      try {
+        await itemBounded(
+          'Item final raw write',
+          writeFile(
+            path.join(output, `items-${theme}-final.json`),
+            JSON.stringify(
+              { source, theme, native, traces, external, failed, secondaryErrors, contextClosed },
+              null,
+              2
+            )
+          )
+        );
+      } catch (error) {
+        secondaryErrors.push(`raw output: ${String(error)}`);
+      }
+      if (!failed && secondaryErrors.length) throw new Error(secondaryErrors.join('\n'));
+    }
+  }, 90_000);
+}
