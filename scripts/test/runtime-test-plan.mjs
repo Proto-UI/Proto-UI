@@ -108,7 +108,6 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
@@ -175,6 +174,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'packages/compiler/test/web-component-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts',
@@ -208,6 +208,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'packages/compiler/test/web-component-native.browser.test.ts':
     '.github/workflows/compiler-wc-native-evidence.yml',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':

@@ -1,6 +1,7 @@
 // @vitest-environment node
 // Harness/source checks only. Never imports the browser suite or launches a browser.
 import { existsSync, readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -166,6 +167,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'popover-command-density': 0,
       'popover-title': 0,
       'resident-motion-capability': 0,
+      'shadcn-card': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
@@ -514,3 +516,150 @@ describe.each(['fixed-family', 'generic'] as const)(
     });
   }
 );
+
+describe('Shadcn Card official evidence carrier, no native browser', () => {
+  const cardFile = 'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts';
+  const inventory = createRequire(import.meta.url)(
+    '../../../../../../scripts/test/runtime-test-plan.mjs'
+  ) as {
+    BROWSER_SUITES: string[];
+    PRODUCTION_BROWSER_SUITES: string[];
+    PRODUCTION_BROWSER_OWNERS: Record<string, string>;
+    discoverBrowserSuites(root: string): string[];
+    assertBrowserInventory(
+      discovered: string[],
+      development?: string[],
+      production?: string[]
+    ): unknown;
+  };
+  const capture = workflow.jobs['representative-features'].steps.find(
+    (step: { env?: { PUI_FINF_FEATURE_GROUP?: string } }) => step.env?.PUI_FINF_FEATURE_GROUP
+  );
+
+  it('owns the exact Card suite once and rejects missing or duplicate whole-inventory registration', () => {
+    const all = inventory.discoverBrowserSuites(process.cwd());
+    expect(inventory.BROWSER_SUITES).not.toContain(cardFile);
+    expect(inventory.PRODUCTION_BROWSER_SUITES.filter((file) => file === cardFile)).toHaveLength(1);
+    expect(inventory.PRODUCTION_BROWSER_OWNERS[cardFile]).toBe(workflowFile);
+    inventory.assertBrowserInventory(all);
+    expect(() =>
+      inventory.assertBrowserInventory(
+        all,
+        inventory.BROWSER_SUITES,
+        inventory.PRODUCTION_BROWSER_SUITES.filter((file) => file !== cardFile)
+      )
+    ).toThrow(/unregistered=/);
+    expect(() =>
+      inventory.assertBrowserInventory(all, inventory.BROWSER_SUITES, [
+        ...inventory.PRODUCTION_BROWSER_SUITES,
+        cardFile,
+      ])
+    ).toThrow(/Duplicate/);
+  });
+
+  it('binds the unchanged ten journeys to exact-head sandboxed CI and retained Card artifacts', () => {
+    const groups: string[] = workflow.jobs['representative-features'].strategy.matrix.group;
+    expect(groups.filter((group) => group === 'shadcn-card')).toHaveLength(1);
+    expect(capture.run).toContain('elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then');
+    expect(capture.run).toContain(`TEST_FILE=${cardFile}`);
+    expect(capture.run).toContain(
+      'export PUI_SHADCN_CARD_EVIDENCE_DIR="$PUI_FINF_FEATURE_EVIDENCE_DIR/shadcn-card"'
+    );
+    expect(capture.run).toContain(
+      "assertShadcnCardReport(JSON.parse(readFileSync(process.argv[2], 'utf8')))"
+    );
+    expect(workflow.permissions).toEqual({ contents: 'read' });
+    expect(workflow.jobs['representative-features']['timeout-minutes']).toBe(35);
+    expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
+    const browserSource = readFileSync(cardFile, 'utf8');
+    const cardConsumerTriggers = [
+      'apps/www/src/pages/en/test/shadcn-card-compat/\\[runtime\\].astro',
+      'apps/www/test/fixtures/shadcn-card-new-york.ts',
+      'apps/www/src/components/UiLibraryGallery.astro',
+    ];
+    for (const trigger of cardConsumerTriggers) {
+      expect(
+        workflow.on.pull_request.paths.filter((pattern: string) => pattern === trigger)
+      ).toHaveLength(1);
+    }
+    expect(browserSource).toContain('`/en/test/shadcn-card-compat/${runtime}/`;');
+    const compatibilityPage = readFileSync(
+      'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro',
+      'utf8'
+    );
+    expect(compatibilityPage).toContain(
+      "import demo from '../../../../../test/fixtures/shadcn-card-new-york';"
+    );
+    expect(browserSource).toContain("const galleryRoute = '/zh-cn/ui-libraries/';");
+    const galleryPage = readFileSync(
+      'apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx',
+      'utf8'
+    );
+    expect(galleryPage).toContain(
+      "import UiLibraryGallery from '@/components/UiLibraryGallery.astro';"
+    );
+    expect(galleryPage).toContain('<UiLibraryGallery locale="zh-cn" />');
+    expect(browserSource).toContain("process.env.GITHUB_ACTIONS !== 'true'");
+    expect(browserSource).toContain('!process.env.CANDIDATE_SHA');
+    expect(browserSource).toContain('!process.env.CHROME_PATH');
+    expect(browserSource).toContain('executablePath: process.env.CHROME_PATH');
+    expect(browserSource).not.toMatch(/\bchromeExecutable\b/);
+    expect(browserSource).toContain('chromiumSandbox: true');
+    expect(browserSource).not.toContain('--no-sandbox');
+    expect(browserSource).not.toMatch(/\blaunchBrowser\b/);
+    expect(browserSource).toContain('expect(binding.sha).toBe(process.env.CANDIDATE_SHA)');
+    expect(browserSource).toContain('expect(binding.dirty).toBe(false)');
+    expect(browserSource).toContain('process.env.PUI_SHADCN_CARD_EVIDENCE_DIR');
+  });
+
+  it('executes the actual workflow report guard and rejects incomplete, duplicate, renamed or nonpassing journeys', () => {
+    const match = capture.run.match(
+      /\/\/ CARD_REPORT_VALIDATOR_BEGIN([\s\S]*?)\/\/ CARD_REPORT_VALIDATOR_END/
+    );
+    expect(match).not.toBeNull();
+    if (!match) throw new Error('Actual Card report validator absent');
+    const validate = vm.runInNewContext(`${match[1]}\nassertShadcnCardReport`, { assert }) as (
+      report: unknown
+    ) => void;
+    const assertions = ['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => [
+      {
+        ancestorTitles: [`Shadcn Card New York compatibility native ${runtime}`],
+        title: 'preserves distinct card paint, inherited content ink and native navigation',
+        status: 'passed',
+      },
+      {
+        ancestorTitles: [`Shadcn Card ordinary Rhea native ${runtime}`],
+        title: 'preserves default light Rhea paint, passive content and native navigation',
+        status: 'passed',
+      },
+    ]);
+    for (const enabled of [false, true])
+      assertions.push({
+        ancestorTitles: [],
+        title: `gallery keeps distinct Card ink with JavaScript=${enabled}`,
+        status: 'passed',
+      });
+    const valid = {
+      success: true,
+      numTotalTests: 10,
+      numPassedTests: 10,
+      numFailedTests: 0,
+      numPendingTests: 0,
+      testResults: [{ name: `/work/repo/${cardFile}`, assertionResults: assertions }],
+    };
+    validate(valid);
+    const missing = structuredClone(valid);
+    missing.testResults[0]!.assertionResults.pop();
+    expect(() => validate(missing)).toThrow();
+    const duplicate = structuredClone(valid);
+    duplicate.testResults[0]!.assertionResults[1] = duplicate.testResults[0]!.assertionResults[0]!;
+    expect(() => validate(duplicate)).toThrow();
+    const renamed = structuredClone(valid);
+    renamed.testResults[0]!.assertionResults[0]!.title += ' renamed';
+    expect(() => validate(renamed)).toThrow();
+    const pending = structuredClone(valid);
+    pending.testResults[0]!.assertionResults[0]!.status = 'pending';
+    expect(() => validate(pending)).toThrow();
+    expect(() => validate({ ...valid, success: false })).toThrow();
+  });
+});

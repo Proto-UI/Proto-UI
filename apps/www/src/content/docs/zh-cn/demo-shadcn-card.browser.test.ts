@@ -3,9 +3,9 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import type { Browser } from 'playwright-core';
+import { chromium, type Browser } from 'playwright-core';
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
-import { launchBrowser, startServer, stopServer, selectRuntime, RUNTIMES } from './browser-harness';
+import { startServer, stopServer, selectRuntime, RUNTIMES } from './browser-harness';
 import { captureCurrentViewport } from './library-card-capture';
 
 const route = '/en/ui-libraries/shadcn/card/';
@@ -18,6 +18,13 @@ let browser: Browser;
 let baseUrl: string;
 let binding: { sha: string; tree: string; dirty: boolean };
 beforeAll(async () => {
+  if (
+    process.env.GITHUB_ACTIONS !== 'true' ||
+    !process.env.CANDIDATE_SHA ||
+    !process.env.CHROME_PATH
+  ) {
+    throw new Error('Official exact-head CI only; collection never launches a browser.');
+  }
   const git = (args: string[]) => execFileSync('git', args, { encoding: 'utf8' }).trim();
   binding = {
     sha: git(['rev-parse', 'HEAD']),
@@ -30,7 +37,12 @@ beforeAll(async () => {
   }
   await mkdir(directory, { recursive: true });
   baseUrl = await startServer([route, galleryRoute, ...RUNTIMES.map(compatibilityRoute)]);
-  browser = await launchBrowser();
+  browser = await chromium.launch({
+    executablePath: process.env.CHROME_PATH,
+    headless: true,
+    chromiumSandbox: true,
+    args: ['--disable-dev-shm-usage'],
+  });
 }, 150_000);
 afterAll(async () => {
   await browser?.close();

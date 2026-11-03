@@ -5,6 +5,9 @@ on:
       - '.github/workflows/finf-representative-features-evidence.yml'
       - 'packages/**'
       - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'apps/www/src/pages/en/test/shadcn-card-compat/\[runtime\].astro'
+      - 'apps/www/test/fixtures/shadcn-card-new-york.ts'
+      - 'apps/www/src/components/UiLibraryGallery.astro'
       - 'apps/www/src/content/docs/**'
       - 'apps/www/src/styles/**'
       - 'apps/www/astro.config.mjs'
@@ -47,6 +50,7 @@ jobs:
           - shadcn-toggle
           - shadcn-switch-consumer
           - shadcn-drawer-presence
+          - shadcn-card
           - brutalist-switch-consumer
     steps:
       - uses: actions/checkout@v4
@@ -92,6 +96,9 @@ jobs:
           TEST_FILE=apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
           if [ "$PUI_FINF_FEATURE_GROUP" = resident-motion-capability ]; then
             TEST_FILE=packages/adapters/base/test/resident-motion.browser.test.ts
+          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then
+            TEST_FILE=apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts
+            export PUI_SHADCN_CARD_EVIDENCE_DIR="$PUI_FINF_FEATURE_EVIDENCE_DIR/shadcn-card"
           elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-drawer-presence ]; then
             TEST_FILE=packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
           elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-switch-consumer ]; then
@@ -122,6 +129,35 @@ jobs:
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
             --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
             2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
+          if [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then
+            node --input-type=module - "$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          // CARD_REPORT_VALIDATOR_BEGIN
+          function assertShadcnCardReport(report) {
+            assert.equal(report.success, true);
+            assert.equal(report.numTotalTests, 10);
+            assert.equal(report.numPassedTests, 10);
+            assert.equal(report.numFailedTests, 0);
+            assert.equal(report.numPendingTests, 0);
+            assert.equal(report.testResults.length, 1);
+            const suite = report.testResults[0];
+            assert.ok(suite.name.replaceAll('\\', '/').endsWith('/apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts'));
+            const actual = suite.assertionResults.map((result) => {
+              assert.equal(result.status, 'passed');
+              return [...result.ancestorTitles, result.title].filter(Boolean).join(' > ');
+            }).sort();
+            const expected = ['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => [
+              `Shadcn Card New York compatibility native ${runtime} > preserves distinct card paint, inherited content ink and native navigation`,
+              `Shadcn Card ordinary Rhea native ${runtime} > preserves default light Rhea paint, passive content and native navigation`,
+            ]);
+            expected.push('gallery keeps distinct Card ink with JavaScript=false', 'gallery keeps distinct Card ink with JavaScript=true');
+            assert.equal(JSON.stringify(actual), JSON.stringify(expected.sort()));
+          }
+          // CARD_REPORT_VALIDATOR_END
+          assertShadcnCardReport(JSON.parse(readFileSync(process.argv[2], 'utf8')));
+          JS
+          fi
       - name: Retain actual source-bound images and failures
         if: always()
         uses: actions/upload-artifact@v4
