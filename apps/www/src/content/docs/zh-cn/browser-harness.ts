@@ -28,6 +28,69 @@ export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 let devServer: ChildProcess | null = null;
 let serverOutput = '';
+let styleGeneration: ReturnType<typeof createStyleGenerationOwner> | null = null;
+// A static child program keeps the process-group leader alive until the real
+// generator has exited and closed its output. Keeping it in this file also
+// preserves the source-bound browser probe closure copied by evidence jobs.
+const styleSupervisor = String.raw`
+const { spawn } = require('node:child_process');
+const executable = process.argv[2];
+if (!executable || !process.send) throw new Error('Missing generation supervisor inputs.');
+
+let released = false;
+let childClosed = false;
+const send = (message) => {
+  if (process.connected)
+    process.send(message, (error) => {
+      if (error) console.error('Style generation supervisor IPC failed: ' + error.message);
+    });
+};
+const finish = () => {
+  if (released && childClosed && process.connected) process.disconnect();
+};
+const child = spawn(
+  executable,
+  ['pnpm@10.32.1', '--filter', 'apps-www', 'run', 'generate:proto-ui-style'],
+  { cwd: process.cwd(), env: process.env, shell: process.platform === 'win32',
+    stdio: ['ignore', 'pipe', 'pipe'] }
+);
+child.stdout?.pipe(process.stdout, { end: false });
+child.stderr?.pipe(process.stderr, { end: false });
+child.once('spawn', () => send({ kind: 'spawn', pid: child.pid }));
+child.once('error', (error) => send({ kind: 'error', message: error.message, code: error.code }));
+child.once('exit', (code, signal) => send({ kind: 'exit', code, signal }));
+child.once('close', async () => {
+  try {
+    await Promise.all([process.stdout, process.stderr].map((stream) =>
+      new Promise((resolve, reject) =>
+        stream.write('', (error) => error ? reject(error) : resolve())
+      )
+    ));
+  } catch (error) {
+    send({ kind: 'error', message: 'Could not forward generator output: ' + error.message });
+  } finally {
+    childClosed = true;
+    send({ kind: 'closed' });
+    finish();
+  }
+});
+process.on('message', (message) => {
+  if (message?.kind !== 'release') return;
+  released = true;
+  finish();
+});
+process.on('SIGTERM', () => {});
+process.on('disconnect', () => {
+  if (released) return;
+  if (process.platform === 'win32') { child.kill(); return; }
+  try { process.kill(-process.pid, 'SIGTERM'); }
+  catch (error) { if (error.code !== 'ESRCH') throw error; }
+  setTimeout(() => {
+    try { process.kill(-process.pid, 'SIGKILL'); }
+    catch (error) { if (error.code !== 'ESRCH') throw error; }
+  }, 5_000);
+});
+`;
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -95,44 +158,294 @@ function recordServerOutput(chunk: Buffer): void {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
 }
 
-/**
- * The style/CLI generation runs before the dev server exists and is unrelated
- * to server readiness. Awaiting it separately keeps the readiness budget
- * measuring only the Astro start and the route's first compile; folding it
- * into the same spawn charges build tooling to the readiness deadline.
- */
-export function runStyleGeneration(
-  executable: string = process.platform === 'win32' ? 'corepack.cmd' : 'corepack'
-): Promise<void> {
+async function settlesWithin(promise: Promise<void>, timeoutMs: number): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise.then(() => true),
+      new Promise<boolean>((resolve) => {
+        timer = setTimeout(() => resolve(false), timeoutMs);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function releaseStyleSupervisor(generation: ChildProcess): Promise<void> {
   return new Promise((resolve, reject) => {
-    const generation = spawn(
-      executable,
-      ['pnpm@10.32.1', '--filter', 'apps-www', 'run', 'generate:proto-ui-style'],
-      {
-        cwd: process.cwd(),
-        env: process.env,
-        stdio: ['ignore', 'pipe', 'pipe'],
-      }
-    );
-    let output = '';
-    const collect = (chunk: Buffer) => {
-      output = `${output}${chunk.toString()}`.slice(-8_000);
-    };
-    generation.stdout?.on('data', collect);
-    generation.stderr?.on('data', collect);
-    generation.on('error', reject);
-    generation.on('exit', (code) =>
-      code === 0
-        ? resolve()
-        : reject(new Error(`generate:proto-ui-style exited with code ${String(code)}\n${output}`))
-    );
+    if (!generation.connected || !generation.send) {
+      reject(new Error('Style generation supervisor is not connected.'));
+      return;
+    }
+    generation.send({ kind: 'release' }, (error) => (error ? reject(error) : resolve()));
   });
 }
 
-async function spawnServer(readyRoutes: readonly string[]): Promise<string> {
+async function terminateStyleGeneration(
+  generation: ChildProcess,
+  ready: Promise<void>,
+  drained: Promise<void>,
+  closed: Promise<void>,
+  getChildPid: () => number | null,
+  isDrained: () => boolean
+) {
+  const pid = generation.pid;
+  if (!(await settlesWithin(ready, 5_000))) {
+    generation.kill('SIGKILL');
+    await settlesWithin(closed, 5_000);
+    throw new Error('Style generation supervisor did not initialize.');
+  }
+  if (!pid || generation.exitCode !== null || generation.signalCode !== null) {
+    if (!isDrained()) throw new Error('Style generation supervisor exited before output closed.');
+    return;
+  }
+  try {
+    if (process.platform === 'win32') {
+      const target = getChildPid() ?? pid;
+      const killer = spawn('taskkill', ['/PID', String(target), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true,
+      });
+      const killed = new Promise<void>((resolve, reject) => {
+        killer.once('error', reject);
+        killer.once('exit', (code) =>
+          code === 0
+            ? resolve()
+            : reject(new Error(`Failed to terminate style generation tree ${target}.`))
+        );
+      });
+      if (!(await settlesWithin(killed, 5_000))) {
+        killer.kill();
+        throw new Error(`Timed out terminating style generation tree ${target}.`);
+      }
+      if (!(await settlesWithin(drained, 5_000))) {
+        generation.kill();
+        throw new Error('Style generation did not finish after teardown.');
+      }
+      await releaseStyleSupervisor(generation);
+    } else {
+      try {
+        process.kill(-pid, 'SIGTERM');
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+      }
+      await settlesWithin(drained, 5_000);
+      // The supervisor normally remains alive until release or SIGKILL. If its
+      // exit has already been observed, do not signal its former group id.
+      if (generation.exitCode === null && generation.signalCode === null) {
+        try {
+          process.kill(-pid, 'SIGKILL');
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+        }
+      }
+    }
+    if (!(await settlesWithin(closed, 5_000)) || !isDrained())
+      throw new Error('Style generation did not finish after teardown.');
+  } catch (error) {
+    // Failure to terminate the generator must not leave the supervisor itself
+    // holding the caller's IPC or output handles indefinitely.
+    try {
+      if (generation.exitCode === null && generation.signalCode === null)
+        generation.kill('SIGKILL');
+      if (!(await settlesWithin(closed, 5_000)))
+        throw new Error('Style generation supervisor did not exit.');
+    } catch (cleanupError) {
+      throw new AggregateError([error, cleanupError], 'Style generation cleanup failed.');
+    }
+    throw error;
+  }
+}
+
+/** Own generation separately from the readiness deadline and cancel it on teardown. */
+export function createStyleGenerationOwner() {
+  let stopped = false;
+  let stopPromise: Promise<void> | null = null;
+  let interrupt: (() => void) | null = null;
+  let terminateCurrent: (() => Promise<void>) | null = null;
+
+  return {
+    get stopped() {
+      return stopped;
+    },
+    run(executable: string): Promise<void> {
+      if (stopped) return Promise.reject(new Error('Style generation was cancelled.'));
+      const generation = spawn(
+        process.execPath,
+        ['--eval', styleSupervisor, '--', '--style-generation-supervisor', executable],
+        {
+          cwd: process.cwd(),
+          env: process.env,
+          detached: process.platform !== 'win32',
+          shell: false,
+          stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        }
+      );
+      let output = '';
+      const collect = (chunk: Buffer) => {
+        output = `${output}${chunk.toString()}`.slice(-8_000);
+      };
+      generation.stdout?.on('data', collect);
+      generation.stderr?.on('data', collect);
+      const failureError = (code: number | null, signal: NodeJS.Signals | null) =>
+        new Error(
+          signal
+            ? `generate:proto-ui-style exited on ${signal}\n${output}`
+            : `generate:proto-ui-style exited with code ${String(code)}\n${output}`
+        );
+      let primaryFailure: (() => Error) | null = null;
+      let childPid: number | null = null;
+      let childDrained = false;
+      let childSucceeded = false;
+      let closeTimer: ReturnType<typeof setTimeout> | undefined;
+      let resolveReady!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        resolveReady = resolve;
+      });
+      let resolveDrained!: () => void;
+      const drained = new Promise<void>((resolve) => {
+        resolveDrained = resolve;
+      });
+      let resolveClosed!: () => void;
+      const closed = new Promise<void>((resolve) => {
+        resolveClosed = resolve;
+      });
+      let termination: Promise<void> | null = null;
+      const terminate = () =>
+        (termination ??= terminateStyleGeneration(
+          generation,
+          ready,
+          drained,
+          closed,
+          () => childPid,
+          () => childDrained
+        ));
+      terminateCurrent = terminate;
+
+      const pending = new Promise<void>((resolve, reject) => {
+        const fail = (getFailure: () => Error) => {
+          if (stopped || primaryFailure) return;
+          primaryFailure = getFailure;
+          void terminate().then(
+            () => reject(getFailure()),
+            (cleanupError) => {
+              stopped = true;
+              const failure = getFailure();
+              reject(
+                new AggregateError([failure, cleanupError], `${failure.message}\nCleanup failed.`)
+              );
+            }
+          );
+        };
+        generation.once('error', (error) => fail(() => error));
+        generation.on('message', (message: unknown) => {
+          if (!message || typeof message !== 'object' || !('kind' in message)) {
+            fail(() => new Error('Invalid style generation supervisor receipt.'));
+            return;
+          }
+          const receipt = message as {
+            kind: string;
+            pid?: number;
+            code?: number | string | null;
+            signal?: NodeJS.Signals | null;
+            message?: string;
+          };
+          if (receipt.kind === 'spawn' && typeof receipt.pid === 'number') {
+            childPid = receipt.pid;
+            resolveReady();
+          } else if (receipt.kind === 'error' && typeof receipt.message === 'string') {
+            resolveReady();
+            fail(() => new Error(`Could not start style generation: ${receipt.message}`));
+          } else if (
+            receipt.kind === 'exit' &&
+            (typeof receipt.code === 'number' || receipt.code === null) &&
+            (typeof receipt.signal === 'string' || receipt.signal === null)
+          ) {
+            const code = receipt.code;
+            const signal = receipt.signal;
+            if (code === 0 && signal === null) {
+              childSucceeded = true;
+              closeTimer = setTimeout(() => {
+                fail(
+                  () =>
+                    new Error('Style generation output remained open after its launcher exited.')
+                );
+              }, 5_000);
+            } else {
+              fail(() => failureError(code, signal));
+            }
+          } else if (receipt.kind === 'closed') {
+            if (childDrained) {
+              fail(() => new Error('Duplicate style generation close receipt.'));
+              return;
+            }
+            childDrained = true;
+            clearTimeout(closeTimer);
+            resolveReady();
+            resolveDrained();
+            if (!stopped && !primaryFailure) {
+              if (!childSucceeded) {
+                fail(() => new Error('Style generation closed without a successful exit receipt.'));
+              } else {
+                void releaseStyleSupervisor(generation).catch((error: unknown) => {
+                  fail(
+                    () =>
+                      new Error('Could not release style generation supervisor.', { cause: error })
+                  );
+                });
+              }
+            }
+          } else {
+            fail(() => new Error('Invalid style generation supervisor receipt.'));
+          }
+        });
+        generation.once('close', (code, signal) => {
+          clearTimeout(closeTimer);
+          resolveReady();
+          resolveClosed();
+          if (primaryFailure) return;
+          if (stopped) reject(new Error('Style generation was cancelled.'));
+          else if (!childDrained || !childSucceeded || signal || code !== 0) {
+            stopped = true;
+            reject(new Error('Style generation supervisor exited before reporting completion.'));
+          } else resolve();
+        });
+      });
+      let interruptThisRun!: () => void;
+      const interrupted = new Promise<void>((_resolve, reject) => {
+        interruptThisRun = () =>
+          reject(primaryFailure ? primaryFailure() : new Error('Style generation was cancelled.'));
+      });
+      interrupt = interruptThisRun;
+      void closed.then(async () => {
+        try {
+          await termination;
+        } catch {
+          // The startup or teardown caller receives the termination failure.
+        }
+        if (terminateCurrent === terminate) terminateCurrent = null;
+        if (interrupt === interruptThisRun) interrupt = null;
+      });
+      return Promise.race([pending, interrupted]);
+    },
+    stop(): Promise<void> {
+      stopped = true;
+      interrupt?.();
+      if (!stopPromise) stopPromise = terminateCurrent?.() ?? Promise.resolve();
+      return stopPromise;
+    },
+  };
+}
+
+async function spawnServer(
+  readyRoutes: readonly string[],
+  generation: ReturnType<typeof createStyleGenerationOwner>
+): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
-  await runStyleGeneration(executable);
+  await generation.run(executable);
+  if (generation.stopped) throw new Error('Documentation server startup was cancelled.');
   devServer = spawn(
     executable,
     [
@@ -176,16 +489,20 @@ export async function startServer(readyRouteOrRoutes: string | readonly string[]
     return externalBaseUrl;
   }
 
+  const generation = createStyleGenerationOwner();
+  styleGeneration = generation;
+
   // availablePort() releases the socket before the child binds it, so two
   // browser suites running in parallel can be handed the same port and
   // --strictPort kills the loser. Retry on a fresh port instead.
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await spawnServer(readyRoutes);
+      return await spawnServer(readyRoutes, generation);
     } catch (error) {
+      if (generation.stopped) throw error;
       lastError = error;
-      await stopServer();
+      await stopDevServer();
       devServer = null;
       serverOutput = '';
     }
@@ -194,7 +511,16 @@ export async function startServer(readyRouteOrRoutes: string | readonly string[]
 }
 
 export async function stopServer(): Promise<void> {
-  if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
+  try {
+    await styleGeneration?.stop();
+  } finally {
+    await stopDevServer();
+  }
+}
+
+async function stopDevServer(): Promise<void> {
+  if (!devServer || devServer.exitCode !== null || devServer.signalCode !== null || !devServer.pid)
+    return;
   const pid = devServer.pid;
   if (process.platform === 'win32') {
     // `corepack.cmd` runs through a cmd.exe wrapper. Killing only that shell
@@ -211,13 +537,19 @@ export async function stopServer(): Promise<void> {
   }
 
   const signalTarget = -pid;
-  process.kill(signalTarget, 'SIGTERM');
+  try {
+    process.kill(signalTarget, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    return;
+  }
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
+  if (!exited && devServer.exitCode === null && devServer.signalCode === null)
+    process.kill(signalTarget, 'SIGKILL');
 }
 
 export async function launchBrowser(): Promise<Browser> {
