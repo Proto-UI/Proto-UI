@@ -353,3 +353,499 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
     }
   }, 90_000);
 }
+
+// Read-only diagnostic for the preserved community absolute-coordinate failure.
+// This independent case does not replace either original motion assertion or
+// redefine rest. Its sampler can affect scheduling; results are new evidence.
+it('records community and Header anchor geometry through the unchanged native motion journey', async () => {
+  const boundedWait = async <T>(
+    label: string,
+    work: Promise<T>,
+    milliseconds = 5_000
+  ): Promise<T> => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        work,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () =>
+              reject(new Error(`${label} wait exceeded ${milliseconds}ms; completion unconfirmed`)),
+            milliseconds
+          );
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  };
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    reducedMotion: 'no-preference',
+  });
+  let contextClosed = false;
+  context.on('close', () => {
+    contextClosed = true;
+  });
+  const external: string[] = [];
+  let page: Page;
+  try {
+    await context.route('**/*', (route) => {
+      const url = new URL(route.request().url());
+      if (
+        url.origin === new URL(baseUrl).origin ||
+        url.protocol === 'data:' ||
+        url.protocol === 'blob:'
+      )
+        return route.continue();
+      external.push(url.origin);
+      return route.abort();
+    });
+    page = await context.newPage();
+  } catch (error) {
+    try {
+      await boundedWait('setup context close', context.close());
+    } catch (cleanupError) {
+      await writeFile(
+        path.join(output, 'community-anchor-geometry-setup-failure.json'),
+        JSON.stringify(
+          { source, failed: String(error), cleanupError: String(cleanupError), contextClosed },
+          null,
+          2
+        )
+      ).catch(() => {});
+    }
+    throw error;
+  }
+  const traces: unknown[] = [];
+  const secondaryErrors: string[] = [];
+  let failed: string | null = null;
+  let diagnostic: unknown = null;
+  let installed = false;
+  const key = '__brutalistAnchorDiagnostic';
+  const stopDiagnostic = () =>
+    page.evaluate((key) => {
+      const host = window as unknown as Record<string, { stop(): unknown }>;
+      const result = host[key].stop();
+      delete host[key];
+      return result;
+    }, key);
+  try {
+    await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/button/`, {
+      waitUntil: 'networkidle',
+    });
+    await revealHeaderPreferences(page);
+    const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+    const control = page.locator(
+      '.site-social-links a[data-site-native-link][aria-label="GitHub"]'
+    );
+    const paint = control.locator('wc-site-brutalist-surface[data-pui-root]');
+    expect(await menu.count()).toBe(1);
+    expect(await control.count()).toBe(1);
+    await paint.waitFor({ state: 'attached' });
+    expect(await paint.count()).toBe(1);
+    expect(await menu.getAttribute('aria-expanded')).toBe('false');
+    // Install before the real menu click. Do not settle geometry or change
+    // application styles/state to make the initial position convenient.
+    await page.evaluate((key) => {
+      const host = window as unknown as Record<string, unknown>;
+      if (host[key]) throw new Error('Anchor diagnostic already installed');
+      const selectors = {
+        header: '[data-docs-site-header]',
+        menu: '[data-docs-site-header] [data-site-menu-button]',
+        panel: '[data-docs-site-header] [data-site-header-panel]',
+        control: '.site-social-links a[data-site-native-link][aria-label="GitHub"]',
+        paint:
+          '.site-social-links a[data-site-native-link][aria-label="GitHub"] wc-site-brutalist-surface[data-pui-root]',
+      };
+      const identities = new WeakMap<Element, number>();
+      let serial = 0;
+      const id = (node: Element) => {
+        let value = identities.get(node);
+        if (value === undefined) {
+          value = ++serial;
+          identities.set(node, value);
+        }
+        return value;
+      };
+      const started = performance.now();
+      const frames: unknown[] = [];
+      const events: unknown[] = [];
+      let stage = 'before-menu-click';
+      let raf = 0;
+      let deadlineTimer = 0;
+      let active = true;
+      let limit: string | null = null;
+      const maxFrames = 1800;
+      const maxEvents = 4000;
+      const deadlineMs = 20_000;
+      const listeners: Array<() => void> = [];
+      let observer: MutationObserver | undefined;
+      const stamp = () => performance.now() - started;
+      const mark = (kind: string, data: unknown = null) => {
+        if (!active) return;
+        if (events.length >= maxEvents) {
+          limit = 'event-limit';
+          stop();
+          return;
+        }
+        events.push({ at: stamp(), stage, kind, data });
+      };
+      const parent = (node: Element): Element | null => {
+        if (node.parentElement) return node.parentElement;
+        const root = node.getRootNode();
+        return root instanceof ShadowRoot ? root.host : null;
+      };
+      const snapshot = (node: Element) => {
+        const box = node.getBoundingClientRect();
+        const css = getComputedStyle(node);
+        const html = node instanceof HTMLElement ? node : null;
+        return {
+          id: id(node),
+          tag: node.localName,
+          parent: parent(node) ? id(parent(node)!) : null,
+          connected: node.isConnected,
+          rect: [box.x, box.y, box.width, box.height],
+          offset: html
+            ? [html.offsetLeft, html.offsetTop, html.offsetWidth, html.offsetHeight]
+            : null,
+          offsetParent: html?.offsetParent ? id(html.offsetParent) : null,
+          scroll: [node.scrollLeft, node.scrollTop],
+          transform: css.transform,
+          translate: css.translate,
+          scale: css.scale,
+          transformOrigin: css.transformOrigin,
+          zoom: css.zoom,
+          position: css.position,
+          display: css.display,
+          visibility: css.visibility,
+          fontSize: css.fontSize,
+          lineHeight: css.lineHeight,
+          transitionProperty: css.transitionProperty,
+          transitionDuration: css.transitionDuration,
+          transitionDelay: css.transitionDelay,
+          transitionTimingFunction: css.transitionTimingFunction,
+          animations: node.getAnimations().map((animation) => ({
+            kind: animation.constructor.name,
+            property: animation instanceof CSSTransition ? animation.transitionProperty : null,
+            currentTime:
+              typeof animation.currentTime === 'number'
+                ? animation.currentTime
+                : (animation.currentTime?.toString() ?? null),
+            playState: animation.playState,
+          })),
+          panelOffsets: node.matches('[data-site-header-panel]')
+            ? ['left', 'top', 'max-width', 'max-height'].map((name) => {
+                const property = `--site-header-panel-${name}`;
+                return [
+                  property,
+                  html?.style.getPropertyValue(property) ?? '',
+                  html?.style.getPropertyPriority(property) ?? '',
+                  css.getPropertyValue(property),
+                ];
+              })
+            : null,
+        };
+      };
+      const sample = (schedule = true) => {
+        if (!active) return;
+        if (frames.length >= maxFrames || stamp() >= deadlineMs) {
+          limit = frames.length >= maxFrames ? 'frame-limit' : 'deadline';
+          stop();
+          return;
+        }
+        try {
+          const elements = new Map<number, Element>();
+          const subjects = Object.fromEntries(
+            Object.entries(selectors).map(([name, selector]) => {
+              const matches = [...document.querySelectorAll(selector)];
+              const node = matches.length === 1 ? matches[0] : null;
+              const chain: number[] = [];
+              for (let current = node; current; current = parent(current)) {
+                const identity = id(current);
+                if (chain.includes(identity) || chain.length >= 64) {
+                  limit = 'ancestor-cycle-or-limit';
+                  stop();
+                  break;
+                }
+                chain.push(identity);
+                elements.set(identity, current);
+              }
+              return [name, { count: matches.length, id: node ? id(node) : null, chain }];
+            })
+          );
+          frames.push({
+            at: stamp(),
+            stage,
+            reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+            fonts: document.fonts.status,
+            scroll: [scrollX, scrollY],
+            viewport: visualViewport
+              ? [
+                  visualViewport.offsetLeft,
+                  visualViewport.offsetTop,
+                  visualViewport.width,
+                  visualViewport.height,
+                  visualViewport.scale,
+                ]
+              : null,
+            subjects,
+            elements: [...elements.values()].map(snapshot),
+          });
+          if (active && schedule) raf = requestAnimationFrame(() => sample());
+        } catch (error) {
+          limit = `sampler-error: ${String(error)}`;
+          stop();
+        }
+      };
+      const listen = (
+        target: EventTarget,
+        kind: string,
+        handler: EventListener,
+        capture = false
+      ) => {
+        target.addEventListener(kind, handler, capture);
+        listeners.push(() => target.removeEventListener(kind, handler, capture));
+      };
+      const stop = () => {
+        if (!active) return;
+        active = false;
+        cancelAnimationFrame(raf);
+        raf = 0;
+        clearTimeout(deadlineTimer);
+        deadlineTimer = 0;
+        for (const release of listeners) release();
+        listeners.length = 0;
+        observer?.disconnect();
+        observer = undefined;
+      };
+      const onEvent: EventListener = (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        const header = document.querySelector(selectors.header);
+        if (target && header && !header.contains(target) && event.type !== 'scroll') return;
+        mark(event.type, {
+          target: target ? id(target) : null,
+          property: event instanceof TransitionEvent ? event.propertyName : null,
+          elapsedTime: event instanceof TransitionEvent ? event.elapsedTime : null,
+          trusted: event.isTrusted,
+        });
+      };
+      try {
+        const header = document.querySelector(selectors.header);
+        if (!header) throw new Error('Missing Header diagnostic owner');
+        for (const kind of [
+          'pointerenter',
+          'pointerleave',
+          'pointerdown',
+          'pointerup',
+          'transitionrun',
+          'transitionstart',
+          'transitionend',
+          'transitioncancel',
+          'scroll',
+        ])
+          listen(document, kind, onEvent, true);
+        const media = matchMedia('(prefers-reduced-motion: reduce)');
+        listen(media, 'change', () => mark('media-change', media.matches));
+        if (visualViewport) {
+          listen(visualViewport, 'resize', () => mark('viewport-resize'));
+          listen(visualViewport, 'scroll', () => mark('viewport-scroll'));
+        }
+        listen(document.fonts, 'loadingdone', () => mark('fonts-loadingdone'));
+        observer = new MutationObserver((records) => {
+          for (const record of records) {
+            const node = record.target as Element;
+            mark('attribute', { target: id(node), name: record.attributeName });
+          }
+        });
+        observer.observe(header, {
+          subtree: true,
+          attributes: true,
+          attributeFilter: [
+            'style',
+            'class',
+            'data-pui-style',
+            'data-hovered',
+            'data-pressed',
+            'data-focused',
+            'data-focus-visible',
+            'aria-expanded',
+            'hidden',
+          ],
+        });
+        host[key] = {
+          mark(next: string) {
+            stage = next;
+            mark('checkpoint');
+            sample(false);
+          },
+          stop() {
+            mark('terminal');
+            stop();
+            return {
+              started,
+              frames,
+              events,
+              limit,
+              active,
+              maxFrames,
+              maxEvents,
+              deadlineMs,
+              cleanup: {
+                raf,
+                deadlineTimer,
+                listenersRemaining: listeners.length,
+                observerActive: !!observer,
+              },
+            };
+          },
+        };
+        // Timer also ends sampling when rAF is suspended. Browser scheduling and
+        // the outer90s test limit remain separate from this20s observation cap.
+        deadlineTimer = window.setTimeout(() => {
+          limit = 'deadline-timer';
+          stop();
+        }, deadlineMs);
+        mark('checkpoint');
+        sample();
+      } catch (error) {
+        stop();
+        delete host[key];
+        throw error;
+      }
+    }, key);
+    installed = true;
+    const mark = (stage: string) =>
+      page.evaluate(
+        ({ key, stage }) => {
+          const host = window as unknown as Record<string, { mark(stage: string): void }>;
+          host[key].mark(stage);
+        },
+        { key, stage }
+      );
+    await menu.click();
+    await mark('after-menu-click');
+    await paint.waitFor({ state: 'visible' });
+    await control.scrollIntoViewIfNeeded();
+    await mark('after-scroll-into-view');
+    const original = await control.elementHandle();
+    if (!original) throw new Error('Missing diagnostic control');
+    try {
+      for (const preference of ['no-preference', 'reduce', 'no-preference'] as const) {
+        await mark(`before-leave:${preference}`);
+        await page.mouse.move(1400, 950);
+        await mark(`before-preference:${preference}`);
+        await page.emulateMedia({ reducedMotion: preference });
+        await mark(`after-preference:${preference}`);
+        await expect
+          .poll(() => paint.evaluate((node) => getComputedStyle(node).transitionDuration))
+          .toBe(preference === 'reduce' ? '0s' : '0.15s');
+        const box = await control.boundingBox();
+        if (!box) throw new Error('Missing diagnostic hit box');
+        for (const phase of ['entry', 'exit', 'interrupted'] as const) {
+          await mark(`before-input:${preference}:${phase}`);
+          const captured = await capture(page, paint, async () => {
+            if (phase === 'exit') await page.mouse.move(1400, 950);
+            else {
+              await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+              if (phase === 'interrupted') {
+                await page.waitForTimeout(40);
+                await page.mouse.move(1400, 950);
+              }
+            }
+          });
+          traces.push({ preference, phase, inputBox: box, ...captured });
+          await mark(`after-input:${preference}:${phase}`);
+          if (captured.actionError) throw new Error(captured.actionError);
+          expect(await control.evaluate((node, first) => node === first, original)).toBe(true);
+        }
+      }
+    } finally {
+      try {
+        await boundedWait('identity handle dispose', original.dispose());
+      } catch (error) {
+        secondaryErrors.push(`identity cleanup: ${String(error)}`);
+      }
+    }
+    expect(context.pages()).toHaveLength(1);
+    expect(external).toEqual([]);
+    diagnostic = await boundedWait('diagnostic stop', stopDiagnostic());
+    installed = false;
+    const result = diagnostic as {
+      frames: Array<{
+        stage: string;
+        subjects: Record<string, { count: number; id: number | null; chain: number[] }>;
+      }>;
+      limit: string | null;
+      active: boolean;
+      cleanup: {
+        raf: number;
+        deadlineTimer: number;
+        listenersRemaining: number;
+        observerActive: boolean;
+      };
+    };
+    expect(result).not.toBeNull();
+    expect(result.limit).toBeNull();
+    expect(result.active).toBe(false);
+    expect(result.cleanup).toEqual({
+      raf: 0,
+      deadlineTimer: 0,
+      listenersRemaining: 0,
+      observerActive: false,
+    });
+    expect(result.frames.length).toBeGreaterThan(3);
+    expect(result.frames[0].stage).toBe('before-menu-click');
+    expect(result.frames.at(-1)?.stage).toBe('after-input:no-preference:interrupted');
+    expect(
+      result.frames.every(
+        (frame) =>
+          Object.keys(frame.subjects).length === 5 &&
+          Object.values(frame.subjects).every(
+            (subject) => subject.count === 1 && subject.id !== null && subject.chain.length > 0
+          )
+      )
+    ).toBe(true);
+    expect(traces).toHaveLength(9);
+  } catch (error) {
+    failed = String(error);
+    throw error;
+  } finally {
+    if (installed) {
+      try {
+        diagnostic = await boundedWait('diagnostic cleanup', stopDiagnostic());
+      } catch (error) {
+        secondaryErrors.push(`diagnostic cleanup: ${String(error)}`);
+      }
+    }
+    try {
+      await page.screenshot({
+        path: path.join(output, 'community-anchor-geometry-diagnostic.png'),
+        timeout: 5_000,
+      });
+    } catch (error) {
+      secondaryErrors.push(`screenshot: ${String(error)}`);
+    }
+    try {
+      await boundedWait('context close', context.close());
+    } catch (error) {
+      secondaryErrors.push(`context cleanup: ${String(error)}`);
+    }
+    if (!contextClosed)
+      secondaryErrors.push('context close event not observed; teardown incomplete');
+    try {
+      await writeFile(
+        path.join(output, 'community-anchor-geometry-diagnostic.json'),
+        JSON.stringify(
+          { source, traces, diagnostic, external, failed, secondaryErrors, contextClosed },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      secondaryErrors.push(`raw output: ${String(error)}`);
+    }
+    // Do not mask the original assertion/action error with later cleanup debt.
+    if (!failed && secondaryErrors.length) throw new Error(secondaryErrors.join('\n'));
+  }
+}, 90_000);
