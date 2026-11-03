@@ -55,6 +55,10 @@ The release-level cadence policy — red-light rules, repair-only mode and resum
 
 Manual `workflow_dispatch` runs the same complete lane set for targeted diagnosis and produces the same receipt with `scheduledSlot: null`; it does not create cycles on behalf of the schedule.
 
+Scheduled runs publish their triggering cron in the native `display_title` as `regression-cycle:<cron>`. Historical slot attribution uses that declared cron, not the closest slot to `created_at`: an 08:00 cycle created at 16:30 still covers 08:00 and cannot hide a missing 16:00 cycle. A missing or unrecognized declaration is explicit unknown attribution; it occupies no slot, cannot form a scheduled baseline or recovery green, and still interrupts the recovery chain when observed before the current run was created.
+
+History collection filters the native workflow-runs endpoint to `event=schedule` and the exact source branch, paginates lazily through the post-activation interval, and preserves the native run metadata. It fails closed on incomplete acquisition instead of treating the latest 100 mixed PR/manual runs as complete scheduled history. The report therefore retains early missed slots even after more than 100 later cycles; a manual run never evicts or impersonates a scheduled cycle.
+
 `ci-production-suites.yml` includes the dedicated owners of all 29 registered production browser suites, including production Search through `homepage-visual-evidence.yml`; they are not silently excluded by the shared development shards. Two independent dependency chains bound heavyweight workflow fan-out, retain each lane's artifacts, and continue after predecessor failures unless the cycle is cancelled. The four former push-only source-check lanes are also called once per cycle. Experimental suites retain their real failures; their execution does not promote another family into 0.3.
 
 Activation is the first-parent integration timestamp that introduced `scripts/ci/cycle-report.mjs`, read from full source history, not the planning date. A successful current cycle resets the red chain; two successive scheduled green cycles are separately counted for recovery. With no green baseline, the 24-hour timer starts at activation. Manual runs cannot manufacture scheduled recovery cycles.
@@ -120,9 +124,9 @@ Ordinary Contributor Agents use the lazy skill registry under `internal/agent-op
 
 ## Intranet contributor preview workflows
 
-`intranet-preview-build.yml` runs for PR changes or an exact-head manual build. It has only `contents: read`, uses a disposable hosted builder and receives no deployment secrets. It uploads an Actions identity marker before executing the contributor checkout, then uploads the canonical documentation ZIP. Both artifacts have three-day retention.
+`intranet-preview-build.yml` runs only through manual dispatch or a reusable call with the requested PR number and exact expected head SHA. It has only `contents: read`, uses a disposable hosted builder and receives no deployment secrets. It uploads an Actions identity marker before executing the contributor checkout, then uploads the canonical documentation ZIP. Both artifacts have three-day retention.
 
-`intranet-preview-checks.yml` runs the focused native Node admission, extraction, sanitation, publication and serving suite when preview files change on a PR or `main`. Neither workflow deploys Poppy, calls Cloudflare, writes PR comments, or executes contributor code on the persistent publisher.
+`intranet-preview-checks.yml` runs the focused native Node admission, extraction, sanitation, publication and serving suite when preview files change on a PR, or through manual dispatch/reusable calls. Main-line execution belongs to the coordinated regression cycle, not a push trigger. Neither workflow deploys Poppy, calls Cloudflare, writes PR comments, or executes contributor code on the persistent publisher.
 
 The sole publisher is a separately configured trusted intranet process. It downloads hostile artifacts, revalidates the live PR/head/run/attempt and supersession, and publishes ordinary non-executable files under separate generation origins. The static server has no credential or control API. An intranet audience replaces the retired per-author/reviewer OAuth access policy; polling and the five-minute catalog lease provide bounded, not instantaneous, revocation. Configuration, security limits and runtime acceptance are documented in `scripts/preview/README.md`.
 

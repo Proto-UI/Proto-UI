@@ -9,28 +9,34 @@ import {
   expectedSlotsBetween,
   laneOutcome,
   runIsBaseline,
-  slotLabelForCron,
 } from '../cycle-report.mjs';
 
 const auditCycle = (input) => buildAudit({ policyActivatedAt: '2026-11-04T00:00:00Z', ...input });
 
-const run = (id, fields) => ({
-  id,
-  event: 'schedule',
-  status: 'completed',
-  conclusion: 'success',
-  created_at: '2026-11-04T08:00:00Z',
-  run_started_at: '2026-11-04T08:00:05Z',
-  head_sha: 'a'.repeat(40),
-  ...fields,
-});
+const SLOT_CRONS = Object.freeze({ 0: '0 0 * * *', 8: '0 8 * * *', 16: '0 16 * * *' });
 
-test('cron labels map to the documented UTC and Asia/Shanghai slots', () => {
-  assert.equal(slotLabelForCron('0 0 * * *'), '00:00 UTC / 08:00 Asia/Shanghai');
-  assert.equal(slotLabelForCron('0 8 * * *'), '08:00 UTC / 16:00 Asia/Shanghai');
-  assert.equal(slotLabelForCron('0 16 * * *'), '16:00 UTC / 00:00 Asia/Shanghai');
-  assert.equal(slotLabelForCron('17 * * * *'), null);
-});
+// A scheduled cycle carries its cron in its native run name.
+const runName = (cron) => `regression-cycle:${cron}`;
+
+// The cron a scheduled cycle declares, derived from its creation instant the
+// way the reporter does: the latest slot at or before that instant.
+const cronForCreatedAt = (createdAt) =>
+  SLOT_CRONS[new Date(expectedSlotAt(createdAt)).getUTCHours()];
+
+const run = (id, fields = {}) => {
+  const created_at = fields.created_at ?? '2026-11-04T08:00:00Z';
+  return {
+    id,
+    event: 'schedule',
+    status: 'completed',
+    conclusion: 'success',
+    created_at,
+    run_started_at: '2026-11-04T08:00:05Z',
+    head_sha: 'a'.repeat(40),
+    display_title: runName(cronForCreatedAt(created_at)),
+    ...fields,
+  };
+};
 
 test('expected slot calculation resolves the previous UTC slot', () => {
   assert.equal(expectedSlotAt('2026-11-04T09:00:00Z'), Date.parse('2026-11-04T08:00:00Z'));
@@ -271,9 +277,174 @@ test('a cron created after the next slot retains its declared slot', () => {
     currentRun: run(9, {
       created_at: '2026-11-04T16:30:00Z',
       run_started_at: '2026-11-04T17:00:00Z',
+      display_title: 'regression-cycle:0 8 * * *',
     }),
     recentRuns: [],
   });
   assert.equal(receipt.scheduledSlot.expectedAt, '2026-11-04T08:00:00.000Z');
   assert.ok(!receipt.missedSlots.includes('2026-11-04T08:00:00.000Z'));
+});
+
+test('a delayed 08:00 cycle created at 16:30 keeps its declared slot and leaves the 16:00 slot missing', () => {
+  const input = {
+    now: '2026-11-05T00:30:00Z',
+    cron: '0 0 * * *',
+    laneResults: { build: 'success' },
+    currentRun: run(9, {
+      created_at: '2026-11-05T00:00:00Z',
+      run_started_at: '2026-11-05T00:00:10Z',
+    }),
+    recentRuns: [
+      run(1, { created_at: '2026-11-04T00:00:00Z' }),
+      // The 08:00 cycle was created 8.5 hours late. Its native run name still
+      // declares the 08:00 cron, so it covers the 08:00 slot and not the
+      // 16:00 slot its creation instant falls into.
+      run(2, {
+        created_at: '2026-11-04T16:30:00Z',
+        display_title: 'regression-cycle:0 8 * * *',
+      }),
+    ],
+  };
+  const { receipt, incidents } = auditCycle(input);
+  assert.ok(
+    !receipt.missedSlots.includes('2026-11-04T08:00:00.000Z'),
+    'the delayed 08:00 cycle must cover the 08:00 slot it declared'
+  );
+  assert.ok(
+    receipt.missedSlots.includes('2026-11-04T16:00:00.000Z'),
+    'the 16:00 slot is missing while no 16:00 cycle exists'
+  );
+  assert.ok(
+    incidents.some(
+      (incident) =>
+        incident.type === 'missed-slot' && incident.detail.includes('2026-11-04T16:00:00')
+    )
+  );
+  // Only an actual 16:00 cycle covers the 16:00 slot.
+  const withSixteen = auditCycle({
+    ...input,
+    recentRuns: [
+      ...input.recentRuns,
+      run(3, {
+        created_at: '2026-11-04T16:00:00Z',
+        display_title: 'regression-cycle:0 16 * * *',
+      }),
+    ],
+  });
+  assert.ok(!withSixteen.receipt.missedSlots.includes('2026-11-04T16:00:00.000Z'));
+});
+
+test('a failed 16:00 cycle stays the latest cycle when the earlier 08:00 cycle was created later', () => {
+  const { receipt, incidents } = auditCycle({
+    now: '2026-11-05T00:30:00Z',
+    cron: '0 0 * * *',
+    laneResults: { build: 'failure' },
+    currentRun: run(9, {
+      created_at: '2026-11-05T00:00:00Z',
+      run_started_at: '2026-11-05T00:00:10Z',
+    }),
+    recentRuns: [
+      run(1, { created_at: '2026-11-04T00:00:00Z' }),
+      run(2, {
+        created_at: '2026-11-04T16:30:00Z',
+        display_title: 'regression-cycle:0 8 * * *',
+      }),
+      run(3, {
+        created_at: '2026-11-04T16:00:00Z',
+        conclusion: 'failure',
+        display_title: 'regression-cycle:0 16 * * *',
+      }),
+    ],
+  });
+  // Slot order is 00:00 green, 08:00 green, 16:00 failed, current failed:
+  // the earlier 08:00 cycle must not reset the failure chain.
+  assert.equal(receipt.consecutiveFailedCycles, 2);
+  assert.ok(incidents.some((incident) => incident.type === 'consecutive-failures'));
+});
+
+test('a scheduled run without a declared cron never covers a slot', () => {
+  for (const display_title of [null, 'regression-cycle:17 * * * *']) {
+    const input = {
+      now: '2026-11-05T00:30:00Z',
+      cron: '0 0 * * *',
+      laneResults: { build: 'success' },
+      currentRun: run(9, {
+        created_at: '2026-11-05T00:00:00Z',
+        run_started_at: '2026-11-05T00:00:10Z',
+      }),
+      recentRuns: [
+        run(1, { created_at: '2026-11-04T00:00:00Z' }),
+        // Created inside the 16:00 slot window but declaring no known cron:
+        // it is explicitly unknown and stands in for no slot at all.
+        run(2, { created_at: '2026-11-04T16:10:00Z', display_title }),
+      ],
+    };
+    const { receipt, incidents } = auditCycle(input);
+    assert.ok(
+      receipt.missedSlots.includes('2026-11-04T16:00:00.000Z'),
+      'an unknown label must not cover a slot it never declared'
+    );
+    const unknown = incidents.find((incident) => incident.type === 'unknown-attribution');
+    assert.ok(unknown, 'an unattributable scheduled run must be reported as unknown');
+    assert.match(unknown.detail, /#2/);
+    assert.equal(
+      receipt.consecutiveGreenCycles,
+      1,
+      'unknown attribution cannot authorize recovery'
+    );
+    const failedCurrent = auditCycle({ ...input, laneResults: { build: 'failure' } });
+    assert.equal(failedCurrent.receipt.lastBaseline.id, 1);
+    assert.ok(failedCurrent.incidents.some((incident) => incident.type === 'stale-baseline'));
+  }
+});
+
+test('unknown cycles before a delayed current creation still fence recovery and count red', () => {
+  for (const result of ['success', 'failure']) {
+    const { receipt } = auditCycle({
+      now: '2026-11-04T17:00:00Z',
+      cron: '0 8 * * *',
+      laneResults: { build: result },
+      currentRun: run(9, { created_at: '2026-11-04T16:30:00Z' }),
+      recentRuns: [
+        run(1, { created_at: '2026-11-04T00:00:00Z' }),
+        run(2, { created_at: '2026-11-04T12:00:00Z', display_title: null }),
+      ],
+    });
+    assert.equal(receipt.consecutiveGreenCycles, result === 'success' ? 1 : 0);
+    assert.equal(receipt.consecutiveFailedCycles, result === 'failure' ? 2 : 0);
+  }
+});
+
+test('complete history retains an early missed slot after a hundred observed cycles', () => {
+  const start = Date.parse('2026-11-04T00:00:00Z');
+  const interval = 8 * 60 * 60 * 1000;
+  const { receipt } = auditCycle({
+    now: new Date(start + 102 * interval).toISOString(),
+    cron: null,
+    laneResults: { build: 'failure' },
+    currentRun: run(999, {
+      event: 'workflow_dispatch',
+      created_at: new Date(start + 102 * interval).toISOString(),
+    }),
+    recentRuns: Array.from({ length: 100 }, (_, index) =>
+      run(index + 1, { created_at: new Date(start + (index + 2) * interval).toISOString() })
+    ),
+  });
+  assert.ok(receipt.missedSlots.includes('2026-11-04T08:00:00.000Z'));
+});
+
+test('a manual cycle has no slot and never stands in for a scheduled slot', () => {
+  const { receipt } = auditCycle({
+    now: '2026-11-04T18:00:00Z',
+    cron: null,
+    laneResults: { build: 'success' },
+    currentRun: run(9, {
+      event: 'workflow_dispatch',
+      created_at: '2026-11-04T16:00:00Z',
+      run_started_at: '2026-11-04T16:00:10Z',
+    }),
+    recentRuns: [],
+  });
+  assert.equal(receipt.scheduledSlot, null);
+  assert.ok(receipt.missedSlots.includes('2026-11-04T16:00:00.000Z'));
 });

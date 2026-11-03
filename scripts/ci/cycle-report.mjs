@@ -10,6 +10,13 @@
 // slots, consecutive failed/unknown cycles and hours since the last valid
 // complete baseline. Incidents are surfaced as workflow annotations; the job
 // exit code is fail-closed on the lane verdict only.
+//
+// Slot attribution of the scheduled history comes from the native run name:
+// a scheduled cycle is named `regression-cycle:<cron>`, and that declared cron
+// is the only authority for the slot a run belongs to. A run whose name is
+// missing or declares an unknown cron has an UNKNOWN slot: it never occupies
+// a slot, it is never guessed from its creation time, and it is reported
+// explicitly.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -25,8 +32,35 @@ export const EXPECTED_CRONS = Object.freeze({
 export const SLOT_HOURS = Object.freeze([0, 8, 16]);
 export const SLOT_GRACE_MS = 90 * 60 * 1000;
 
+// Native run-name prefix that carries the declared cron of a scheduled cycle.
+const RUN_NAME_PREFIX = 'regression-cycle:';
+
 export function slotLabelForCron(cron) {
   return EXPECTED_CRONS[cron] ?? null;
+}
+
+// The declared cron of a native run name, or null together with the reason
+// why the attribution is unknown. Only the declared EXPECTED_CRONS are valid.
+function parseDeclaredCron(displayTitle) {
+  if (typeof displayTitle !== 'string' || !displayTitle.startsWith(RUN_NAME_PREFIX)) {
+    return { cron: null, reason: 'missing-declared-cron' };
+  }
+  const cron = displayTitle.slice(RUN_NAME_PREFIX.length).trim();
+  if (!Object.hasOwn(EXPECTED_CRONS, cron)) return { cron: null, reason: 'undeclared-cron' };
+  return { cron, reason: null };
+}
+
+// The intended UTC slot of a declared cron relative to a creation instant:
+// the slot hour of that UTC day, rolled back one day when the instant is
+// still before the slot. This is the same convention the current cycle uses
+// for its own cron binding, so a cycle created long after its slot keeps the
+// slot it declared.
+function expectedSlotForCron(cron, createdMs) {
+  const hour = Number(cron.split(' ')[1]);
+  const created = new Date(createdMs);
+  let slot = Date.UTC(created.getUTCFullYear(), created.getUTCMonth(), created.getUTCDate(), hour);
+  if (slot > createdMs) slot -= 86400000;
+  return slot;
 }
 
 // Latest expected slot time at or before `date`, in UTC millisecond space.
@@ -97,17 +131,9 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
   // cycle-report job finished evaluating: a long-running cycle must not drift
   // its slot attribution toward the report's completion time.
   if (cron && !Object.hasOwn(EXPECTED_CRONS, cron)) throw new Error(`Unknown cycle cron: ${cron}`);
+  // The current cycle keeps its cron binding: the schedule that triggered it.
   // A delayed 08:00 cron created after 16:00 still belongs to the 08:00 slot.
-  const scheduledHour = cron ? Number(cron.split(' ')[1]) : null;
-  let expectedMs = cron
-    ? Date.UTC(
-        new Date(createdMs).getUTCFullYear(),
-        new Date(createdMs).getUTCMonth(),
-        new Date(createdMs).getUTCDate(),
-        scheduledHour
-      )
-    : null;
-  if (expectedMs !== null && expectedMs > createdMs) expectedMs -= 86400000;
+  const expectedMs = cron ? expectedSlotForCron(cron, createdMs) : null;
   const queueDelayMs = Math.max(0, startedMs - createdMs);
   const slotDelayMs = expectedMs === null ? null : Math.max(0, startedMs - expectedMs);
 
@@ -120,6 +146,11 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
   // All scheduled runs, including queued/in_progress/never-finished ones: an
   // unknown cycle still counts (it breaks the green chain and is counted as
   // non-green), only stale pre-policy history is ignored below.
+  //
+  // Each run is attributed to the slot its native run name declares, never to
+  // the slot its creation instant happens to fall near: a 08:00 cycle that
+  // was created at 16:30 still occupies the 08:00 slot and must not occupy
+  // or reorder behind the 16:00 cycle.
   const scheduleRuns = (recentRuns ?? [])
     .filter(
       (run) =>
@@ -128,31 +159,41 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
         Date.parse(run.created_at) <= nowMs &&
         run.id !== currentRun.id
     )
-    .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
-  const observedRuns =
-    currentRun.event === 'schedule' ? [...scheduleRuns, currentRun] : scheduleRuns;
+    .map((run) => {
+      const declared = parseDeclaredCron(run.display_title);
+      const slotMs = declared.cron
+        ? expectedSlotForCron(declared.cron, Date.parse(run.created_at))
+        : null;
+      return {
+        run,
+        cron: declared.cron,
+        slotMs,
+        unknownReason: declared.reason,
+        // Chronological position of the cycle: the declared slot when it is
+        // known, otherwise the observed creation instant. An unknown
+        // attribution is never turned into a slot.
+        cycleTimeMs: slotMs ?? Date.parse(run.created_at),
+      };
+    })
+    .sort(
+      (a, b) =>
+        a.cycleTimeMs - b.cycleTimeMs ||
+        Date.parse(a.run.created_at) - Date.parse(b.run.created_at) ||
+        (a.run.id < b.run.id ? -1 : a.run.id > b.run.id ? 1 : 0)
+    );
+  // The current cycle occupies the slot its own cron binding names. A manual
+  // cycle has no slot at all and never stands in for a scheduled slot.
+  const currentSlotMs = currentRun.event === 'schedule' ? expectedMs : null;
+  const occupiedSlotTimes = [
+    ...scheduleRuns.filter((entry) => entry.slotMs !== null).map((entry) => entry.slotMs),
+    ...(currentSlotMs === null ? [] : [currentSlotMs]),
+  ];
 
-  const earliestSeenMs = observedRuns.length ? Date.parse(observedRuns[0].created_at) : null;
-
-  // Missed slots: expected slots older than the grace window and newer than
-  // the oldest fetched run (or policy activation, whichever is later), with no
-  // scheduled run within +/- grace.
-  const missedSlots = expectedSlotsBetween(
-    Math.max(
-      activationMs,
-      (recentRuns?.length ?? 0) >= 100 ? (earliestSeenMs ?? activationMs) : activationMs
-    ),
-    nowMs - SLOT_GRACE_MS
-  ).filter(
-    (slot) =>
-      !observedRuns.some(
-        (run) =>
-          Math.abs(
-            (run.id === currentRun.id && expectedMs !== null
-              ? expectedMs
-              : Date.parse(run.created_at)) - slot
-          ) <= SLOT_GRACE_MS
-      )
+  // The producer supplies complete post-activation history or fails closed.
+  // A hundred observed runs must not hide earlier genuinely missed slots.
+  // A run without a declared slot covers nothing.
+  const missedSlots = expectedSlotsBetween(activationMs, nowMs - SLOT_GRACE_MS).filter(
+    (slot) => !occupiedSlotTimes.some((occupied) => Math.abs(occupied - slot) <= SLOT_GRACE_MS)
   );
 
   // Non-green chains: anything that is not a completed-successful cycle —
@@ -161,8 +202,18 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
   // current cycle itself.
   let consecutiveFailedCycles = 0;
   let consecutiveGreenCycles = 0;
-  const priorRuns = scheduleRuns.filter((run) => Date.parse(run.created_at) <= createdMs);
-  const scheduledVerdicts = priorRuns.map(runIsBaseline);
+  // Prior cycles are the ones that precede the current cycle in slot order,
+  // not in creation order: a cycle that was created late still precedes every
+  // cycle of a later slot.
+  const priorBoundMs = currentSlotMs ?? createdMs;
+  const priorRuns = scheduleRuns.filter((entry) =>
+    entry.slotMs !== null
+      ? entry.cycleTimeMs <= priorBoundMs
+      : Date.parse(entry.run.created_at) <= createdMs
+  );
+  const scheduledVerdicts = priorRuns.map(
+    (entry) => entry.slotMs !== null && runIsBaseline(entry.run)
+  );
   if (currentRun.event === 'schedule') scheduledVerdicts.push(verdict === 'pass');
   const latestGreen = scheduledVerdicts.at(-1);
   for (const green of scheduledVerdicts.reverse()) {
@@ -171,12 +222,18 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
     else consecutiveFailedCycles++;
   }
 
-  const baselineRuns = priorRuns.filter((run) => runIsBaseline(run) && run.id !== currentRun.id);
-  const lastBaseline = verdict === 'pass' ? currentRun : (baselineRuns.at(-1) ?? null);
+  const baselineRuns = priorRuns.filter(
+    (entry) => entry.slotMs !== null && runIsBaseline(entry.run) && entry.run.id !== currentRun.id
+  );
+  const lastBaselineEntry = baselineRuns.at(-1) ?? null;
+  const lastBaseline = verdict === 'pass' ? currentRun : (lastBaselineEntry?.run ?? null);
   const hoursSinceBaseline =
     verdict === 'pass'
       ? 0
-      : (nowMs - (lastBaseline === null ? activationMs : Date.parse(lastBaseline.created_at))) /
+      : (nowMs -
+          (lastBaselineEntry === null
+            ? activationMs
+            : Date.parse(lastBaselineEntry.run.created_at))) /
         3600000;
 
   const incidents = [];
@@ -194,7 +251,20 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
   for (const slot of missedSlots) {
     incidents.push({
       type: 'missed-slot',
-      detail: `no scheduled run found for slot ${new Date(slot).toISOString()}`,
+      detail: `no scheduled run with a declared cron slot found for slot ${new Date(slot).toISOString()}`,
+    });
+  }
+  // Scheduled runs whose native run name declares no known cron have an
+  // unknown slot: they never occupy a slot and are never taken for one.
+  const unknownAttribution = scheduleRuns.filter((entry) => entry.slotMs === null);
+  if (unknownAttribution.length > 0) {
+    incidents.push({
+      type: 'unknown-attribution',
+      detail:
+        `${unknownAttribution.length} scheduled run(s) declare no known cron slot ` +
+        `(${unknownAttribution
+          .map((entry) => `#${entry.run.id} ${entry.run.created_at} ${entry.unknownReason}`)
+          .join(', ')}); their slot coverage is unknown`,
     });
   }
   if (consecutiveFailedCycles >= 2) {

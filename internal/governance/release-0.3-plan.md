@@ -36,7 +36,7 @@ A family being in 0.3 is a delivery obligation, not an automatic promotion of it
 
 Maintain one source-bound ledger for the split, linked from Finf V2 #890. Each row retains the original Issue/comment URL, a stable criterion key and complete source wording. Add these fields rather than replacing history:
 
-- release disposition: `0.3`, `0.4`, or `needs-owner-decision`;
+- release disposition: `0.3`, `0.4`, `split` (known requirements in both releases), or `criterion-split` (mixed source conditions still requiring criterion-level reconciliation);
 - reason, affected family/surface and prerequisite links;
 - owner, bounded acceptance and exact validation route;
 - development state, integration SHA, acceptance state and evidence URLs;

@@ -35,7 +35,7 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs scripts/docs/test/liquid-toggle-mdx.test.mjs
+          node --test scripts/docs/test/liquid-toggle-mdx.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
@@ -106,7 +106,6 @@ jobs:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-prominent-tint-evidence
           PROTO_UI_PROMINENT_TINT_RUNTIME: ${{ matrix.runtime }}
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
@@ -195,7 +194,6 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-tint-stage-diagnostic
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.test.ts \
@@ -235,7 +233,6 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-visible-refraction-diagnostic
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.test.ts \

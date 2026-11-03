@@ -1,4 +1,8 @@
 name: CI
+# A scheduled cycle is named after the cron it declares, so the run title is
+# the authoritative record of which slot a cycle belongs to even when GitHub
+# creates it late. Every other event keeps the plain workflow name.
+run-name: ${{ github.event_name == 'schedule' && format('regression-cycle:{0}', github.event.schedule) || github.workflow }}
 
 on:
   pull_request:
@@ -950,8 +954,15 @@ jobs:
           export CYCLE_POLICY_ACTIVATED_AT="$(git log --first-parent --diff-filter=A --format=%cI -- scripts/ci/cycle-report.mjs)"
           gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
             > "$RUNNER_TEMP/cycle/current-run.json"
-          gh api "repos/${{ github.repository }}/actions/workflows/ci.yml/runs?per_page=100" \
-            > "$RUNNER_TEMP/cycle/recent-runs.json"
+          # The scheduled history of this branch is collected on its own: the
+          # unfiltered window was crowded out by pull-request and manual runs
+          # and no longer carried the green baseline. The collector fails
+          # closed when it cannot prove the window complete.
+          node scripts/ci/collect-cycle-history.mjs \
+            --current-run "$RUNNER_TEMP/cycle/current-run.json" \
+            --policy-activated-at "$CYCLE_POLICY_ACTIVATED_AT" \
+            --repo "${{ github.repository }}" \
+            --out "$RUNNER_TEMP/cycle/recent-runs.json"
           node scripts/ci/cycle-report.mjs \
             --current-run "$RUNNER_TEMP/cycle/current-run.json" \
             --recent-runs "$RUNNER_TEMP/cycle/recent-runs.json" \

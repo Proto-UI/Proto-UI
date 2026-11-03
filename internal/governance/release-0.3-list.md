@@ -4,6 +4,8 @@ Production deadline: **2026-11-04 23:59 Asia/Shanghai**. Feature integration tar
 
 This is a source inventory, **not a claim that these capabilities have passed acceptance**. The [source ledger](release-0.3-source-ledger.json) binds package surfaces, CLI entries, 203 original Finf comment checkboxes, 68 named delivery criteria, and the 187-open-Issue snapshot with its 1,233 checkbox conditions to their sources. Historical checks remain historical; each current development and acceptance result needs its own exact source and evidence. Mixed Issue conditions retain `criterion-split` until their concrete family and prerequisite role are reconciled; the snapshot does not authorize title-only closure or deferral. Counts of export roots or aliases are not counts of independent Prototypes.
 
+Repository file fingerprints in the ledger bind to its explicit `sourceRevision`, not to later worktree bytes. In particular, the delivery checklist fingerprint preserves the complete pre-preface source at that revision; the additive release-stage preface does not replace that historical source or certify acceptance.
+
 ## Committed libraries
 
 - **Base:** all current exports, including the full Form, Collection/Search, Disclosure, Overlay, value/date, geometry/long-collection and existing-control families below.
