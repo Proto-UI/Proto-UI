@@ -5,6 +5,8 @@ description: Update Proto UI human documentation, localized pages, contributor g
 
 # Maintain human documentation
 
+Apply the [current release stages and completion policy](../../../internal/governance/release-0.3-plan.md). Keep 0.3 committed libraries distinct from WIP / Experimental 0.4 work. Complete the named reader-facing projection and validate its actual surface, then carry the satisfied criterion through review/integration and an authorized checkbox update; unrelated umbrella debt is not a reason to hide completed documentation work.
+
 1. Read the target document completely, including its original purpose, neighboring navigation, other locale, linked entities, and real implementation surface.
 2. Require a `pui-trace` map. State which source owns every behavioral claim.
 3. Preserve the document's role: entry pages route readers, governance pages define stable process, dated records preserve current observations, and public pages explain governed behavior.

@@ -1,32 +1,7 @@
 name: Accordion family native evidence
 on:
-  pull_request:
-    paths:
-      - 'scripts/test/evidence-input-paths.test.mjs'
-      - '.github/workflows/accordion-family-evidence.yml'
-      - 'packages/prototypes/**/src/accordion/**'
-      - 'packages/prototypes/bootstrap-2-3-2/src/theme.ts'
-      - 'packages/prototypes/liquid-glass/src/theme.ts'
-      - 'packages/prototypes/brutalist/src/theme.ts'
-      - 'packages/adapters/**'
-      - 'packages/core/**'
-      - 'packages/hooks/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/cli/src/**'
-      - 'apps/www/src/content/docs/**/accordion.mdx'
-      - 'apps/www/src/content/docs/accordion-demo.shared.ts'
-      - 'apps/www/src/content/docs/demo-*-accordion.demo.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/content/docs/zh-cn/accordion-activation-observation*'
-      - 'apps/www/src/content/docs/zh-cn/docs-query-timing*'
-      - 'apps/www/scripts/accordion-activation-probe*'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'scripts/test/server-readiness*'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
