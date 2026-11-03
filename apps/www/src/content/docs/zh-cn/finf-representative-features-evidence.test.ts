@@ -577,22 +577,12 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     expect(workflow.jobs['representative-features']['timeout-minutes']).toBe(35);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
     const browserSource = readFileSync(cardFile, 'utf8');
-    const cardConsumerTriggers = [
-      'apps/www/src/pages/en/test/shadcn-card-compat/\\[runtime\\].astro',
-      'apps/www/test/fixtures/shadcn-card-new-york.ts',
-      'apps/www/src/components/UiLibraryGallery.astro',
-    ];
     // The heavy Card evidence lane runs from the single scheduled regression
     // owner, so it carries no automatic pull_request trigger and no per-source
     // path filter. Its Card consumer sources stay bound by the reviewed
     // coverage-matrix Source-scan binding and by the exact imports below.
     expect(workflow.on.pull_request).toBeUndefined();
     expect(workflow.on.workflow_call).toBeDefined();
-    expect(cardConsumerTriggers).toEqual([
-      'apps/www/src/pages/en/test/shadcn-card-compat/\\[runtime\\].astro',
-      'apps/www/test/fixtures/shadcn-card-new-york.ts',
-      'apps/www/src/components/UiLibraryGallery.astro',
-    ]);
     expect(browserSource).toContain('shadcn-card-compat/${runtime}/');
     expect(browserSource).toContain('`/en/test/shadcn-card-compat/${runtime}/`;');
     const compatibilityPage = readFileSync(
