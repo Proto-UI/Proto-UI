@@ -252,7 +252,8 @@ export function assertStyledSwitch(element, label) {
     }
     // Match the exact bounded generator rule, not a CSSOM-normalized px result.
     // HappyDOM does not reliably resolve arbitrary-value selectors or transforms.
-    const selector = `:where([data-pui-style~="${token}"])${suffix}`;
+    const parserToken = token.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+    const selector = `:where([data-pui-style~="${parserToken}"])${suffix}`;
     // Parse with the host's CSSOM, not a handwritten declaration/cascade parser.
     // HappyDOM 15 cannot parse some arbitrary-value selectors. Substitute only
     // this exact selector in a detached parsing copy; the installed CSS and DOM
