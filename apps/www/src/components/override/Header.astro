@@ -54,7 +54,7 @@ const navigation = [
         aria-label={zh ? '主导航' : 'Primary navigation'}
       >
         {navigation.map(({ label, href }) => (
-          <a data-site-native-button href={href}>
+          <a data-site-primary-nav-link href={href}>
             {label}
           </a>
         ))}
@@ -78,7 +78,7 @@ const navigation = [
             >
               <span class="site-header-group-label">{zh ? '浏览' : 'Explore'}</span>
               {navigation.map(({ label, href }) => (
-                <a data-site-native-button href={href}>
+                <a data-site-primary-nav-link href={href}>
                   {label}
                 </a>
               ))}
