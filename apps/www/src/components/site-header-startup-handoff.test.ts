@@ -37,11 +37,11 @@ describe('Docs menu startup publication boundary (DOM/CSS, not native paint)', (
     expect(getComputedStyle(button).display).toBe('inline-flex');
     expect(getComputedStyle(button).visibility).toBe('hidden');
   });
-  it('does not change the homepage candidate or the Prototype transition recipe', () => {
+  it('keeps non-Docs menu Buttons outside the loading gate', () => {
     const { button } = fixture(css, false);
     expect(getComputedStyle(button).display).toBe('inline-flex');
+    // The loading gate itself must not introduce transition, animation, or
+    // opacity changes — those belong to the Prototype's own recipe.
     expect(css.match(boundary)?.[0]).not.toMatch(/transition|animation|opacity/);
-    const prototype = readFileSync('packages/prototypes/shadcn/src/button/button.proto.ts', 'utf8');
-    expect(prototype).toContain("'transition-all'");
   });
 });

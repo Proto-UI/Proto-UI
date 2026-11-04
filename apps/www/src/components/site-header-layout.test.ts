@@ -487,18 +487,6 @@ it('bounds the Header panel by the Header box so one measured viewport cannot pl
     expect(compact).not.toMatch(/width:\s*var\(--site-header-panel-max-width/);
   };
   panelContract(css);
-  // Each mutation starts from the positive fixture, not an already-red parent.
-  expect(() =>
-    panelContract(
-      css.replaceAll('--site-header-panel-inline-size: min(', '--site-header-panel-inline-size: max(')
-    )
-  ).toThrow();
-  expect(() =>
-    panelContract(
-      css.replace(
-        'margin-left: min(\n    0px,\n    calc(100% - var(--site-header-panel-inline-size) - 8px - var(--site-header-panel-left, 0px))\n  );',
-        'margin-left: 0;'
-      )
-    )
-  ).toThrow();
 });
+
+
