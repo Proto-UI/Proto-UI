@@ -67,7 +67,7 @@ async function facts(dialog: Locator) {
     );
     const m = mask?.getBoundingClientRect();
     const v = visualViewport;
-    return {
+    const original = {
       rect: r.toJSON(),
       viewport: {
         width: innerWidth,
@@ -112,6 +112,90 @@ async function facts(dialog: Locator) {
       available: {
         width: s.getPropertyValue('--proto-ui-available-region-width'),
         height: s.getPropertyValue('--proto-ui-available-region-height'),
+      },
+    };
+    // These concrete demo recipes each contain one Dialog Root. Scope identity
+    // alone would not distinguish two Dialogs mounted by the same previewer.
+    const coordinateNames = ['owner', 'family', 'runtime', 'generation'];
+    const coordinates = Object.fromEntries(
+      coordinateNames.map((name) => [name, e.getAttribute(`data-projection-${name}`)])
+    );
+    const sameCoordinates = (node: Element) =>
+      coordinateNames.every(
+        (name) => node.getAttribute(`data-projection-${name}`) === coordinates[name]
+      );
+    const physicalRoots = Array.from(document.querySelectorAll('[data-pui-root]'));
+    const part = (name: string) =>
+      physicalRoots.filter(
+        (node) =>
+          sameCoordinates(node) &&
+          node.getAttribute('data-projection-prototype') === `${coordinates.family}-dialog-${name}`
+      );
+    const masks = part('mask'),
+      roots = part('root'),
+      contents = part('content');
+    const triggers = Array.from(
+      document.querySelectorAll('[aria-haspopup="dialog"][aria-controls]')
+    ).filter((node) => node.getAttribute('aria-controls') === e.id && sameCoordinates(node));
+    const scope = triggers[0]?.closest('[data-projection-scope]');
+    const triggerRoot = triggers[0]?.closest(
+      '[data-pui-root][data-projection-prototype$="-dialog-root"]'
+    );
+    const generationHost = scope?.closest('[data-projection-generation-host]');
+    const resolved =
+      Object.values(coordinates).every(Boolean) &&
+      ['shadcn', 'brutalist'].includes(coordinates.family ?? '') &&
+      masks.length === 1 &&
+      masks[0].hasAttribute('data-is-present') &&
+      roots.length === 1 &&
+      contents.length === 1 &&
+      contents[0] === e &&
+      !!e.id &&
+      triggers.length === 1 &&
+      triggerRoot === roots[0] &&
+      scope?.getAttribute('data-projection-scope') === coordinates.owner &&
+      ['family', 'runtime', 'generation'].every(
+        (name) => scope?.getAttribute(`data-projection-${name}`) === coordinates[name]
+      ) &&
+      scope?.getAttribute('data-projection-state') === 'ready' &&
+      generationHost?.getAttribute('data-projection-owner-host') === coordinates.owner &&
+      generationHost?.getAttribute('data-projection-generation-host') === coordinates.generation &&
+      generationHost?.getAttribute('data-projection-generation-state') === 'active';
+    const attributes = (node: Element) =>
+      Object.fromEntries(
+        Array.from(node.attributes)
+          .filter(({ name }) =>
+            /^(id|role|aria-controls|aria-haspopup|data-projection-.+|data-demo-(owner|ref)|data-pui-(root|portal-mount|view-detached|view-pending)|data-is-present|data-transition-state)$/.test(
+              name
+            )
+          )
+          .map(({ name, value }) => [name, value])
+      );
+    const describe = (node: Element) => ({
+      tag: node.tagName,
+      attributes: attributes(node),
+      rect: node.getBoundingClientRect().toJSON(),
+      parent: node.parentElement
+        ? { tag: node.parentElement.tagName, attributes: attributes(node.parentElement) }
+        : null,
+    });
+    return {
+      ...original,
+      mask: resolved ? masks[0].getBoundingClientRect().toJSON() : undefined,
+      maskIdentity: {
+        status: resolved ? 'resolved' : 'unresolved',
+        coordinates,
+        rootCount: roots.length,
+        contentCount: contents.length,
+        triggerCount: triggers.length,
+        maskCount: masks.length,
+        originalFirstMatch: mask ? describe(mask) : null,
+        originalRect: original.mask,
+        content: describe(e),
+        masks: masks.map(describe),
+        triggers: triggers.map(describe),
+        scope: scope ? attributes(scope) : null,
+        generationHost: generationHost ? attributes(generationHost) : null,
       },
     };
   });
@@ -391,8 +475,13 @@ for (const family of ['shadcn', 'brutalist'] as const)
         await selectRuntime(page, previewer, runtime, '[aria-haspopup="dialog"]', 1);
         const trigger = page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first();
         await trigger.click();
-        const dialog = page.getByRole('dialog').last();
+        const controlledId = await trigger.getAttribute('aria-controls');
+        expect(controlledId, 'The clicked Trigger identifies its Content').toBeTruthy();
+        const dialog = page.locator(`[role="dialog"][id=${JSON.stringify(controlledId)}]`);
         await dialog.waitFor({ state: 'visible' });
+        expect(await dialog.count(), 'The clicked Trigger controls one Content').toBe(1);
+        expect(await dialog.getAttribute('data-projection-family')).toBe(family);
+        expect(await dialog.getAttribute('data-projection-runtime')).toBe(runtime);
         await capture(page, dialog, `${family}-${runtime}-390-immediate`);
         await page.evaluate(() => document.fonts.ready);
         await settle(dialog);
@@ -420,6 +509,10 @@ for (const family of ['shadcn', 'brutalist'] as const)
           expect(data.scrollWidth, 'Content has no hidden horizontal overflow').toBeLessThanOrEqual(
             data.clientWidth + 1
           );
+          expect(
+            data.maskIdentity.status,
+            'Mask identity is unique in the clicked Dialog scope'
+          ).toBe('resolved');
           expect(data.mask?.x).toBe(0);
           expect(data.mask?.y).toBe(0);
           expect(data.mask?.width).toBe(width);
