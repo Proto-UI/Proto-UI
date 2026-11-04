@@ -200,6 +200,78 @@ describe('shared website navigation disclosure', () => {
     expect(root.dataset.siteMenuOpen).toBe('false');
   });
 
+  it.each(['popup-ancestor', 'trigger-ancestor', 'popup-itself'] as const)(
+    'does not give a CSS-closed retained listbox the Header Escape (%s)',
+    async (closedOwner) => {
+      const { root, button, navigation } = fixture();
+      const triggerOwner = document.createElement('section');
+      const trigger = document.createElement('input');
+      trigger.setAttribute('role', 'combobox');
+      trigger.setAttribute('aria-expanded', 'true');
+      trigger.setAttribute('aria-controls', 'retained-command-options');
+      triggerOwner.append(trigger);
+      root.append(triggerOwner);
+      const popupOwner = document.createElement('section');
+      const popup = document.createElement('div');
+      popup.id = 'retained-command-options';
+      popup.setAttribute('role', 'listbox');
+      popupOwner.append(popup);
+      document.body.append(popupOwner);
+      const closed =
+        closedOwner === 'popup-ancestor'
+          ? popupOwner
+          : closedOwner === 'trigger-ancestor'
+            ? triggerOwner
+            : popup;
+      closed.style.display = 'none';
+      // This is the observed retained Command shape, not a component-name
+      // exception: expanded + owned listbox, but only CSS closes its owner.
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      expect(popup.closest('[hidden], [inert]')).toBeNull();
+      expect(window.getComputedStyle(closed).display).toBe('none');
+      disclosure!.enhance();
+      disclosure!.toggle();
+      await Promise.resolve();
+      expect(document.activeElement).toBe(navigation.querySelector('a'));
+      document.activeElement!.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+      );
+      expect(button.getAttribute('aria-expanded')).toBe('false');
+      expect(root.dataset.siteMenuOpen).toBe('false');
+      expect(document.activeElement).toBe(button);
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      popupOwner.remove();
+    }
+  );
+
+  it('keeps a genuinely available nested popup as the first Escape owner without layout boxes', () => {
+    const { root, button } = fixture();
+    disclosure!.enhance();
+    disclosure!.toggle();
+    const trigger = root.querySelector<HTMLElement>('[data-runtime]')!;
+    const popup = document.createElement('div');
+    popup.id = 'available-zero-box-options';
+    popup.setAttribute('role', 'listbox');
+    document.body.append(popup);
+    trigger.setAttribute('aria-controls', popup.id);
+    trigger.setAttribute('aria-expanded', 'true');
+    vi.spyOn(popup, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 0, 0));
+    trigger.addEventListener(
+      'keydown',
+      () => {
+        trigger.setAttribute('aria-expanded', 'false');
+        popup.remove();
+      },
+      { once: true }
+    );
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(root.dataset.siteMenuOpen).toBe('true');
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(button);
+  });
+
   it('restores a focused inline link to Menu when shrinking, without moving mounted nodes', () => {
     const { desktopNavigation: navigation, button } = fixture(false);
     disclosure!.enhance();

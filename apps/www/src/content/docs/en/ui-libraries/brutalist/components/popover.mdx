@@ -21,3 +21,16 @@ Root supports controlled open or uncontrolled defaultOpen. Disabled commands do 
 Parts: Root, Trigger, Content, Title, Description, Close.
 
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+
+## Navigation presentation
+
+This separate example explicitly selects `presentation="navigation"` on Trigger and Content. Content uses the available anchored area and its own scrolling; the original default example above is unchanged.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-navigation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The native links keep normal browser activation. This example does not implement the website directory’s unique-tree handback or a page-specific focus owner. Trigger styling remains provisional pending design review. New navigation-mode four-runtime native evidence is still pending; ordinary Popover results do not certify this mode.
