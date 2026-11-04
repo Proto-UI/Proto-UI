@@ -34,6 +34,8 @@ export type TargetAlignmentMetrics = Readonly<{
     height: number;
     atStart: boolean;
     atEnd: boolean;
+    /** Optional measured outer chrome needed to retain a requested row border box. */
+    minimumOuterInlineSpan?: number;
   }>;
   scrollport: Readonly<{
     scrollHeight: number;
@@ -82,6 +84,7 @@ export function solveTargetAlignment(
     t.textRight,
     t.offset,
     t.height,
+    ...(t.minimumOuterInlineSpan === undefined ? [] : [t.minimumOuterInlineSpan]),
     ...Object.values(s),
   ];
   if (!finite(facts)) return invalid('nonfinite-fact');
@@ -99,6 +102,7 @@ export function solveTargetAlignment(
       c.paddingTop,
       c.paddingBottom,
       t.offset,
+      ...(t.minimumOuterInlineSpan === undefined ? [] : [t.minimumOuterInlineSpan]),
       s.scrollHeight,
       s.offsetTop,
       s.height,
@@ -127,7 +131,10 @@ export function solveTargetAlignment(
   const textInset = rtl ? c.right - t.textRight : t.textLeft - c.left;
   const desiredInset = (rtl ? v.width - a.valueRight : a.valueLeft) - textInset;
   const referenceInset = rtl ? v.width - a.right : a.left;
-  const minimumInlineSpan = a.width + referenceInset - desiredInset;
+  const minimumInlineSpan = Math.max(
+    a.width + referenceInset - desiredInset,
+    t.minimumOuterInlineSpan ?? 0
+  );
   const widthForClamp = Math.max(minimumInlineSpan, c.width);
   const inlineInset = clamp(
     desiredInset,

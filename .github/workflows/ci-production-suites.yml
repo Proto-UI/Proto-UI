@@ -65,3 +65,8 @@ jobs:
     needs: select-target-alignment
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/site-startup-theme-evidence.yml
+
+  select-item-sizing:
+    needs: site-startup-theme
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/select-item-sizing-evidence.yml

@@ -1,0 +1,91 @@
+id: T-TARGET-SIZE-MATCH-0001
+type: test
+title: Neutral size matching preserves geometry, pending recovery and ownership
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Deterministic module and Host execution provides isolated logic evidence, including explicit edge sizing and admission falsifiers. Earlier fixture, product and formatting failures remain recorded separately rather than erased. Native geometry, public Select consumer behavior, compiled-target coverage and independent acceptance remain open.
+summary: Separates neutral numerical, association and ownership checks from the unimplemented consumer integration and outstanding native evidence.
+cases:
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-SAFE
+    title: Same-domain current safe size associations and stale callback rejection
+    covers: [C-TARGET-SIZE-MATCH-0001-ASSOCIATION]
+    expectation: valid-size-targets-or-explicit-rejection
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-LEASE
+    title: Used border boxes, containing constraints, resize and transactional ownership
+    covers:
+      - C-TARGET-SIZE-MATCH-0001-GEOMETRY
+      - C-TARGET-SIZE-MATCH-0001-OWNERSHIP
+      - C-TARGET-SIZE-MATCH-0001-CONTENT
+    expectation: measured-layout-equality-not-write-success
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-PENDING
+    title: Missing reference or target layout recovers without admitting invalid geometry or stale ownership
+    covers: [C-TARGET-SIZE-MATCH-0001-PENDING, C-TARGET-SIZE-MATCH-0001-OWNERSHIP]
+    expectation: pending-then-current-applied-or-explicit-terminal-rejection
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-EDGE
+    title: Explicit size request cannot be silently treated as ordinary edge placement
+    covers: [C-TARGET-SIZE-MATCH-0001-EDGE, C-TARGET-SIZE-MATCH-0001-EDGE-LIFETIME]
+    expectation: current-size-and-edge-result-or-explicit-unavailable
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-EDGE-SAFE
+    title: Independent safe edge parts preserve placement and reject stale or invalid delivery
+    covers: [C-TARGET-SIZE-MATCH-0001-EDGE-SAFE]
+    expectation: current-owned-edge-size-association-or-explicit-rejection
+implementations:
+  - id: edge-size-safe-bridge
+    kind: module-test
+    status: needs-review
+    path: packages/modules/overlay/test/size-match-binding.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-EDGE-SAFE]
+  - id: size-association
+    kind: module-test
+    status: needs-review
+    path: packages/modules/overlay/test/target-alignment-binding.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-SAFE]
+  - id: size-lease
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/border-box-size-lease.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-LEASE, T-TARGET-SIZE-MATCH-0001-CASE-PENDING]
+  - id: size-plan
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/target-alignment.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-LEASE]
+  - id: size-admission
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/target-alignment-host.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-LEASE, T-TARGET-SIZE-MATCH-0001-CASE-PENDING]
+  - id: edge-size-host
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/edge-size-match-host.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-EDGE]
+  - id: edge-size-delivery
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/edge-size-match-delivery.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-EDGE]
+verifies:
+  contracts: [C-TARGET-SIZE-MATCH-0001]
+openQuestions:
+  - id: T-TARGET-SIZE-MATCH-0001-Q-NATIVE
+    question:
+      en: What exact-head native evidence establishes border and content invalidation, first layout, disappearance and recovery, containing constraints, RTL, scrollbars, text scaling and author overrides without fabricated CSSOM facts?
+    blocks: [activation:T-TARGET-SIZE-MATCH-0001]
+  - id: T-TARGET-SIZE-MATCH-0001-Q-CONSUMER
+    question:
+      en: How will public Select consumers connect item-aligned and popper strategies without component dispatch, then verify four-family and four-runtime item dimensions against their own Trigger? The current neutral host test mapping does not claim that integration.
+    blocks: [activation:T-TARGET-SIZE-MATCH-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Declared unrun neutral association, size-lease, containing-layout and recoverable-pending source tests; consumer and native evidence remain separate dependencies.
+tags: [positioning, geometry, size, conformance]

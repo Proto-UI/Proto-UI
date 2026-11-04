@@ -7,6 +7,10 @@ lifecycleRationale:
   en: Source-bound real four-Adapter and Web compiler cases pass locally; exact-source browser review and independent admission remain pending.
 summary: Verifies roleless content ownership and finite presentation inputs without a second interaction owner.
 cases:
+  - id: T-SURFACE-0001-CASE-BRUTALIST-MOTION
+    title: Raised passive timing does not compete with the opacity fade clock
+    covers: [P-BRUTALIST-SURFACE-RAISED-MOTION]
+    expectation: One timing writer follows live preference, retains existing hover/press endpoints and withdraws on category removal; negative controls preserve flat/default/fade behavior. Native animation curves remain separately unverified.
   - id: T-SURFACE-0001-CASE-PASSIVE
     title: Real framework and WC adapters preserve native ownership
     covers:
@@ -35,6 +39,14 @@ cases:
     covers: [P-SHADCN-SURFACE-ACTION-APPEARANCE, P-BRUTALIST-SURFACE-ACTION-APPEARANCE]
     expectation: Public composition geometry matches the compiled default wrapped Button and supplies only passive Surface/Text props and layout. Native anchor identity and Space behavior remain native; action-label drag selection is suppressed without suppressing prose or editor selection. Ordinary navigation and Surface defaults are unchanged.
 implementations:
+  - id: brutalist-surface-action-motion
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/action-control-motion.test.ts
+    required: true
+    consumesCases: [T-SURFACE-0001-CASE-BRUTALIST-MOTION]
+    exercises: [P-BRUTALIST-SURFACE]
+    notes: [Static candidate only; no executed result or browser timing acceptance.]
   - id: public-action-appearance
     kind: module-test
     status: planned

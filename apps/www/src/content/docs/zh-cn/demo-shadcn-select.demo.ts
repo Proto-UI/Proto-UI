@@ -25,6 +25,7 @@ export default withShadcnRheaDemo({
   root: {
     kind: 'proto',
     prototypeId: 'shadcn-select-root',
+    props: { itemSizing: 'match-trigger' },
     children: [
       {
         kind: 'proto',

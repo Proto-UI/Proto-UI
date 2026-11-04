@@ -153,9 +153,6 @@ it('keeps exact-head, read-only and bounded independent evidence preparation', (
     'prepare-homepage-composition-fonts.sh',
   ])
     expect(workflow).toContain(token);
-  expect(readFileSync('.github/workflows/toc-motion-evidence.yml', 'utf8')).toContain(
-    "'apps/www/src/styles/code-surfaces.css'"
-  );
   expect(browser).toContain('trusted: event.isTrusted');
 });
 
@@ -322,6 +319,108 @@ it('keeps retargeted and missing targets distinct from the selected PRE in the a
   expect(traceDeclaration).toHaveLength(1);
   const trace = traceDeclaration[0] as ts.VariableDeclaration;
   expect(() => check(replaceNodes(browser, [trace.initializer!], '() => {}'))).toThrow();
+});
+
+// The observer is also reachable only through one unambiguous statement scope
+// that binds the identity map and the recorder together. Drive that scope
+// directly so a scope split or a duplicated observer is rejected.
+it('locates the actual wheel observer through its unique binding scope', () => {
+  const syntax = ts.createSourceFile('probe.ts', browser, ts.ScriptTarget.Latest, true);
+  const binds = (statement: ts.Statement, name: string) =>
+    (ts.isVariableStatement(statement) &&
+      statement.declarationList.declarations.some(
+        (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
+      )) ||
+    (ts.isFunctionDeclaration(statement) && statement.name?.text === name);
+  let statements: readonly ts.Statement[] | undefined;
+  const visit = (node: ts.Node) => {
+    if (ts.isBlock(node)) {
+      const start = node.statements.findIndex((statement) => binds(statement, 'eventIds'));
+      const end = node.statements.findIndex((statement) => binds(statement, 'trace'));
+      if (start >= 0 && end >= start) {
+        if (statements) throw new Error('Ambiguous actual wheel observer scope');
+        statements = node.statements.slice(start, end + 1);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(syntax);
+  if (!statements) throw new Error('Missing actual wheel observer scope');
+  const source = ts.transpileModule(
+    statements.map((statement) => statement.getText(syntax)).join('\n') +
+      '\n globalThis.recordWheel = trace;',
+    {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
+    }
+  ).outputText;
+  class ElementFixture {
+    tagName: string;
+    isConnected = true;
+    scrollTop = 0;
+    children: ElementFixture[] = [];
+    constructor(tag: string) {
+      this.tagName = tag;
+    }
+    getAttribute() {
+      return 'fixture';
+    }
+    getBoundingClientRect() {
+      return { toJSON: () => ({ top: 12 }) };
+    }
+    contains(node: unknown) {
+      return node === this || this.children.includes(node as ElementFixture);
+    }
+  }
+  const selected = new ElementFixture('PRE');
+  const inner = new ElementFixture('SPAN');
+  selected.children.push(inner);
+  const retarget = new ElementFixture('WC-TEXT-ROOT');
+  const window = {
+    __selectedScrollPre: selected,
+    __codeScrollEventTrace: [] as any[],
+    __scrollInputSequence: 0,
+  };
+  const state: any = {
+    window,
+    document: { elementFromPoint: () => inner },
+    Element: ElementFixture,
+    Node: ElementFixture,
+    scrollY: 777,
+    performance: { now: () => 40 },
+  };
+  vm.runInNewContext(source, state);
+  const nativePath = [inner, selected, window];
+  const event = {
+    target: retarget,
+    composedPath: () => nativePath,
+    timeStamp: 30,
+    isTrusted: false,
+    clientX: 4,
+    clientY: 5,
+    deltaX: 0,
+    deltaY: -220,
+    defaultPrevented: false,
+  };
+  state.recordWheel(event, 'capture');
+  state.scrollY = 557;
+  state.recordWheel(event, 'bubble');
+  const first = window.__codeScrollEventTrace[0];
+  const second = window.__codeScrollEventTrace[1];
+  expect(first.target.tag).toBe('WC-TEXT-ROOT');
+  expect(first.selectedContainsTarget).toBe(false);
+  expect(first.selectedInPath).toBe(true);
+  expect(first.trusted).toBe(false);
+  expect(first.scrollY).toBe(777);
+  expect(second.scrollY).toBe(557);
+  expect(first.eventId).toBe(second.eventId);
+  expect(first.eventTimeStamp).toBe(second.eventTimeStamp);
+  nativePath.length = 0;
+  expect(first.composedPath).toHaveLength(3);
+  state.recordWheel({ ...event, target: null, composedPath: () => [] }, 'capture');
+  const missing = window.__codeScrollEventTrace[2];
+  expect(missing.selectedContainsTarget).toBe(false);
+  expect(missing.selectedInPath).toBe(false);
+  expect(missing.eventId).toBeGreaterThan(first.eventId);
 });
 
 it('keeps the non-passive scheduling control separate from passive product acceptance', () => {
@@ -538,7 +637,6 @@ it('requires contain negative control, restored product auto, exact input identi
   );
   expect(browser.match(/}, 45_000\);/g)).toHaveLength(4); // three explicit cases and one two-width loop
 });
-
 it('correlates actual stage capture logic without assuming one DOM event per wheel command', () => {
   const source = ts.createSourceFile('probe.ts', browser, ts.ScriptTarget.Latest, true);
   const declaration = source.statements.find(

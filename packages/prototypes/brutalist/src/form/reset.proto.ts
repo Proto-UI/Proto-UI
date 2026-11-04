@@ -26,6 +26,15 @@ export default definePrototype<FormActionProps, FormActionExposes>({
     );
     def.feedback.style.use(tw(BRUTALIST_STRUCTURE_TOKENS));
     def.feedback.style.use(tw('bg-secondary-background text-foreground'));
+    // P-BRUTALIST-FORM-ACTION-MOTION: paint timing only; Base owns action.
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('no-preference'),
+      intent: (i) => i.feedback.style.use(tw('transition-all')),
+    });
+    def.rule({
+      when: (w) => w.not(w.meta('preference.reducedMotion').eq('no-preference')),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (w) => w.state(state.hovered).eq(true),
       intent: (i) =>

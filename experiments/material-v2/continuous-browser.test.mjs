@@ -623,35 +623,191 @@ try {
       });
     }
     // Blur observation is a real page focus change, asserted by native trace.
-    const nativeBeforeBlur = await page.evaluate(() => window.__native.length);
-    const beforeBlur = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
-    await page.mouse.move(p.x, p.y);
-    await page.mouse.down();
-    await page.waitForTimeout(40);
-    const other = await context.newPage();
-    await other.goto('about:blank');
-    await other.bringToFront();
-    await page.waitForTimeout(100);
-    await page.mouse.up();
-    await other.close();
-    await page.bringToFront();
-    await page.waitForTimeout(400);
-    assert.equal(
-      await page.evaluate(
-        (start) =>
-          window.__native.slice(start).some((e) => e.type === 'blur' && e.trust && e.windowTarget),
-        nativeBeforeBlur
-      ),
-      true,
-      'native window blur was observed'
-    );
-    assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
-    assert.equal(
-      Number(await page.locator(`[data-count="${runtime}"]`).textContent()),
-      beforeBlur,
-      'blur must not activate'
-    );
-    results.push({ runtime, flow: 'focus second page', nativeBlur: true });
+    // Keep the pinned driver's default as a real negative stimulus control.
+    // Only the second arm changes focus emulation; neither arm mocks events.
+    for (const disableFocusEmulation of [false, true]) {
+      const focusEvidence = {
+        runtime,
+        flow: 'focus second page',
+        disableFocusEmulation,
+        operations: [],
+        cleanupErrors: [],
+        native: [],
+        nativeBlur: null,
+        trustedWindowBlurBeforeUp: null,
+        activationCountBefore: null,
+        activationCountAfter: null,
+        error: null,
+        timingScope: 'Node operation times and browser event times are separate clocks',
+        stimulusScope: 'Includes new-page creation and protocol round trips, not only bringToFront',
+      };
+      results.push(focusEvidence);
+      let other,
+        otherCdp,
+        mainSwitchAttempted = false,
+        otherSwitchAttempted = false;
+      let upPending = false,
+        armError;
+      const action = async (name, run) => {
+        const operation = {
+          name,
+          startedAt: globalThis.performance.now(),
+          completedAt: null,
+          error: null,
+        };
+        focusEvidence.operations.push(operation);
+        try {
+          const result = await run();
+          operation.completedAt = globalThis.performance.now();
+          return result;
+        } catch (error) {
+          operation.error = String(error?.stack ?? error);
+          throw error;
+        }
+      };
+      try {
+        if (disableFocusEmulation) {
+          mainSwitchAttempted = true;
+          await action('main.focusEmulation(false)', () =>
+            cdp.send('Emulation.setFocusEmulationEnabled', { enabled: false })
+          );
+        }
+        await page.bringToFront();
+        const nativeBeforeBlur = await page.evaluate(() => window.__native.length);
+        const beforeBlur = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
+        focusEvidence.activationCountBefore = beforeBlur;
+        await page.mouse.move(p.x, p.y);
+        upPending = true;
+        await action('main.mouse.down', () => page.mouse.down());
+        await page.waitForTimeout(40);
+        other = await action('other.newPage', () => context.newPage());
+        await other.goto('about:blank');
+        if (disableFocusEmulation) {
+          otherCdp = await context.newCDPSession(other);
+          otherSwitchAttempted = true;
+          await action('other.focusEmulation(false)', () =>
+            otherCdp.send('Emulation.setFocusEmulationEnabled', { enabled: false })
+          );
+        }
+        await action('other.bringToFront', () => other.bringToFront());
+        await page.waitForTimeout(100);
+        await action('main.mouse.up', () => page.mouse.up());
+        upPending = false;
+        await action('other.close', () => other.close());
+        await page.bringToFront();
+        await page.waitForTimeout(400);
+        const observed = await page.evaluate((start) => {
+          const native = window.__native.slice(start);
+          return {
+            native,
+            nativeBlur: native.some((e) => e.type === 'blur' && e.trust && e.windowTarget),
+          };
+        }, nativeBeforeBlur);
+        focusEvidence.native = observed.native;
+        focusEvidence.nativeBlur = observed.nativeBlur;
+        const downIndex = observed.native.findIndex(
+          (e) =>
+            e.type === 'pointerdown' &&
+            e.trust &&
+            e.pointerType === 'mouse' &&
+            e.runtime === runtime &&
+            e.control === 'regular'
+        );
+        assert.ok(downIndex >= 0, 'focus stimulus has a real trusted regular-control pointerdown');
+        const down = observed.native[downIndex];
+        const upIndex = observed.native.findIndex(
+          (e, i) =>
+            i > downIndex &&
+            e.type === 'pointerup' &&
+            e.trust &&
+            e.pointerId === down.pointerId &&
+            e.pointerType === down.pointerType
+        );
+        assert.ok(upIndex > downIndex, 'focus stimulus has a matching trusted pointerup');
+        focusEvidence.trustedWindowBlurBeforeUp = observed.native
+          .slice(downIndex + 1, upIndex)
+          .some((e) => e.type === 'blur' && e.trust && e.windowTarget);
+        if (disableFocusEmulation) {
+          assert.equal(observed.nativeBlur, true, 'native window blur was observed');
+          assert.equal(
+            focusEvidence.trustedWindowBlurBeforeUp,
+            true,
+            'trusted window blur must follow pointerdown and precede pointerup'
+          );
+          assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
+          assert.equal(
+            Number(await page.locator(`[data-count="${runtime}"]`).textContent()),
+            beforeBlur,
+            'blur must not activate'
+          );
+        } else {
+          assert.equal(
+            focusEvidence.trustedWindowBlurBeforeUp,
+            false,
+            'default focus emulation must reproduce the missing window-blur stimulus'
+          );
+          assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
+        }
+        focusEvidence.activationCountAfter = Number(
+          await page.locator(`[data-count="${runtime}"]`).textContent()
+        );
+      } catch (error) {
+        armError = error;
+        focusEvidence.error = String(error?.stack ?? error);
+      } finally {
+        const cleanup = async (name, run) => {
+          try {
+            await action(name, run);
+          } catch (error) {
+            focusEvidence.cleanupErrors.push({ name, error: String(error?.stack ?? error) });
+          }
+        };
+        if (upPending && !page.isClosed()) {
+          await cleanup('main.mouse.up-cleanup', () => page.mouse.up());
+        }
+        for (const [name, target, session, attempted] of [
+          ['main', page, cdp, mainSwitchAttempted],
+          ['other', other, otherCdp, otherSwitchAttempted],
+        ]) {
+          if (!attempted) continue;
+          if (target.isClosed()) {
+            focusEvidence.operations.push({
+              name: `${name}.restore-skipped-closed`,
+              at: globalThis.performance.now(),
+            });
+          } else {
+            await cleanup(`${name}.focusEmulation(true)-restore`, () =>
+              session.send('Emulation.setFocusEmulationEnabled', { enabled: true })
+            );
+          }
+        }
+        if (otherCdp) {
+          if (other.isClosed()) {
+            focusEvidence.operations.push({
+              name: 'other.detach-skipped-target-closed',
+              at: globalThis.performance.now(),
+            });
+          } else {
+            await cleanup('other.cdp.detach', () => otherCdp.detach());
+          }
+        }
+        if (other && !other.isClosed()) await cleanup('other.close-cleanup', () => other.close());
+        if (!page.isClosed()) await cleanup('main.bringToFront-cleanup', () => page.bringToFront());
+        focusEvidence.mainClosed = page.isClosed();
+        focusEvidence.otherClosed = other ? other.isClosed() : null;
+        if (focusEvidence.error !== null || focusEvidence.cleanupErrors.length) {
+          throw new AggregateError(
+            [
+              ...(focusEvidence.error !== null ? [armError] : []),
+              ...focusEvidence.cleanupErrors.map(
+                (entry) => new Error(`${entry.name}: ${entry.error}`)
+              ),
+            ],
+            'focus scenario or restoration failed'
+          );
+        }
+      }
+    }
     // Preferences should immediately settle dynamic output.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.waitForTimeout(400);
