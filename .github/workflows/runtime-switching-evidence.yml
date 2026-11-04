@@ -1,19 +1,7 @@
 name: Runtime layout and loading mask native evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/runtime-switching-evidence.yml'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/scripts/runtime-retry-urls.mjs'
-      - 'apps/www/src/components/Homepage/**'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts'
-      - 'apps/www/src/content/docs/accordion-demo.shared.ts'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

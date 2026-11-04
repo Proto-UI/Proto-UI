@@ -49,6 +49,45 @@ const temp = () => mkdtempSync(path.join(os.tmpdir(), 'search-profile-test-'));
 const read = (directory, file) => JSON.parse(readFileSync(path.join(directory, file), 'utf8'));
 const source = readFileSync(new URL('./search-startup-profile.mjs', import.meta.url), 'utf8');
 
+// Both bound failure checkouts use this inert warmup list. The current runner's
+// imported plan is not the workload captured by either historical scenario.
+const originalRunnerSource = `const READY_ROUTES = [
+  '/en/test/style-isolation/',
+  '/en/test/new-projection-families/',
+  '/en/test/liquid-glass-material/',
+  '/en/ui-libraries/base/image/',
+  '/en/start-here/quick-start/',
+  '/en/ui-libraries/shadcn/select/',
+  '/en/ui-libraries/shadcn/input/',
+  '/en/ui-libraries/base/scroll-area/',
+  '/en/ui-libraries/base/textarea/',
+  '/en/ui-libraries/brutalist/components/badge/',
+  '/en/ui-libraries/brutalist/components/button/',
+  '/en/ui-libraries/brutalist/components/card/',
+  '/en/ui-libraries/brutalist/components/dialog/',
+  '/en/ui-libraries/brutalist/components/hover-card/',
+  '/en/ui-libraries/brutalist/components/select/',
+  '/en/ui-libraries/brutalist/components/separator/',
+  '/en/ui-libraries/brutalist/components/skeleton/',
+  '/en/ui-libraries/brutalist/components/switch/',
+  '/en/ui-libraries/brutalist/components/tabs/',
+  '/en/ui-libraries/brutalist/components/toggle/',
+  '/en/ui-libraries/brutalist/components/tooltip/',
+  '/en/ui-libraries/shadcn/checkbox/',
+  '/en/ui-libraries/shadcn/dropdown-menu/',
+  '/en/ui-libraries/shadcn/switch/',
+  '/en/ui-libraries/shadcn/textarea/',
+  '/zh-cn/ui-libraries/base/transition/',
+  '/zh-cn/ui-libraries/shadcn/button/',
+  '/zh-cn/',
+  '/zh-cn/start-here/quick-start/',
+  '/zh-cn/internal/demo-matrix/',
+  '/zh-cn/ui-libraries/shadcn/select/',
+  '/zh-cn/ui-libraries/shadcn/scroll-area/',
+  '/zh-cn/ui-libraries/brutalist/components/checkbox/',
+  '/zh-cn/ui-libraries/shadcn/tooltip/',
+];`;
+
 test('locks the failing case, original oracle import and actual budget boundary', () => {
   assert.deepEqual(searchScenario('shadcn-dark-1440').viewport, { width: 1440, height: 960 });
   assert.equal(SEARCH_PROFILE.readinessBudgetMs, 1000);
@@ -92,10 +131,10 @@ test('binds two independent scenes to their actual failed checkouts without mixi
 });
 
 test('uses inert main-CI warmup routes and rejects changed or executable shapes', () => {
-  const actual = readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8');
-  const routes = mainReadyRoutes(actual);
+  const routes = mainReadyRoutes(originalRunnerSource);
   assert.ok(routes.includes(SEARCH_PROFILE.route));
-  assert.ok(routes.length > 20);
+  assert.equal(routes[0], '/en/test/style-isolation/');
+  assert.equal(routes.at(-1), '/zh-cn/ui-libraries/shadcn/tooltip/');
   assert.throws(() => mainReadyRoutes('const READY_ROUTES = [evil()];'));
   assert.throws(() => mainReadyRoutes("const READY_ROUTES = ['https://outside.invalid/'];"));
   assert.throws(() => mainReadyRoutes('const routes = [];'));
@@ -413,8 +452,6 @@ test('workflow is narrowly opt-in, read-only, paired once, timeout-bounded and u
     'utf8'
   );
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /pull_request.number == 777/);
-  assert.match(workflow, /head.repo.full_name == github.repository/);
   assert.match(workflow, /contents: read/);
   assert.doesNotMatch(workflow, /^\s+[a-z-]+: write$/m);
   assert.match(workflow, /mode: \[unprofiled, profiled\]/);
@@ -788,7 +825,7 @@ async function fakeVisit(
         return { sha, dirty: false };
       },
       digestFile: () => 'b'.repeat(64),
-      readSource: () => readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8'),
+      readSource: () => originalRunnerSource,
       enterDirectory: () => {},
       monotonicNow: () => monotonicTime,
       loadModule: async (file) => {

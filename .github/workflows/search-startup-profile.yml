@@ -1,11 +1,8 @@
 name: Bounded Search startup profile
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/search-startup-profile.yml'
-      - 'scripts/test/search-startup-profile*.mjs'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -16,7 +13,6 @@ jobs:
     # Its exit status requires complete capture, including cleanup/source checks.
     # Historical readiness misses remain FAIL in artifacts and the step summary;
     # current-product Search CI retains its separate, unchanged 1000ms gate.
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.number == 777 && github.event.pull_request.head.repo.full_name == github.repository)
     env:
       APP_SHA: ${{ matrix.scenario.app_sha }}
       CASE_ID: ${{ matrix.scenario.id }}

@@ -1,14 +1,7 @@
 name: Shadcn Card shared style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/card/**'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/prototypes/shadcn/test/card*.test.ts'
-      - 'packages/adapters/**/src/**'
-      - 'scripts/prototypes/shadcn-card-evidence*'
-      - '.github/workflows/shadcn-card-style.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

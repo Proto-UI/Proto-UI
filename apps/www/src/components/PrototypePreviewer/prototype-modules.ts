@@ -478,12 +478,136 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     registerPrototype('liquid-glass-button', mod.default);
   },
   'base-button': async () => {
-    const mod = await import('@proto.ui/prototypes-base');
+    const mod = await import('@proto.ui/prototypes-base/button');
     registerPrototype('base-button', mod.button);
   },
   'base-toggle': async () => {
     const mod = await import('@proto.ui/prototypes-base/toggle');
     registerPrototype('base-toggle', mod.toggle);
+  },
+  'base-resizable-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-root', mod.resizableRoot);
+  },
+  'base-resizable-panel': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-panel', mod.resizablePanel);
+  },
+  'base-resizable-handle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-handle', mod.resizableHandle);
+  },
+  'base-message-scroller-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/message-scroller');
+    registerPrototype('base-message-scroller-root', mod.messageScrollerRoot);
+  },
+  'base-message-scroller-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/message-scroller');
+    registerPrototype('base-message-scroller-viewport', mod.messageScrollerViewport);
+  },
+  'base-message-scroller-jump': async () => {
+    const mod = await import('@proto.ui/prototypes-base/message-scroller');
+    registerPrototype('base-message-scroller-jump', mod.messageScrollerJump);
+  },
+  'base-virtual-list-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/virtual-list');
+    registerPrototype('base-virtual-list-root', mod.virtualListRoot);
+  },
+  'base-virtual-list-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/virtual-list');
+    registerPrototype('base-virtual-list-viewport', mod.virtualListViewport);
+  },
+  'base-virtual-list-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/virtual-list');
+    registerPrototype('base-virtual-list-content', mod.virtualListContent);
+  },
+  'base-tree-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-root', mod.treeRoot);
+  },
+  'base-tree-item': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-item', mod.treeItem);
+  },
+  'base-tree-toggle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-toggle', mod.treeToggle);
+  },
+  'base-carousel-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-root', mod.carouselRoot);
+  },
+  'base-carousel-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-viewport', mod.carouselViewport);
+  },
+  'base-carousel-slide': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-slide', mod.carouselSlide);
+  },
+  'base-carousel-previous': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-previous', mod.carouselPrevious);
+  },
+  'base-carousel-next': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-next', mod.carouselNext);
+  },
+  'base-data-table-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-root', mod.dataTableRoot);
+  },
+  'base-data-table-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-row', mod.dataTableRow);
+  },
+  'base-data-table-cell': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-cell', mod.dataTableCell);
+  },
+  'base-data-table-header': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-header', mod.dataTableHeader);
+  },
+  'base-data-table-caption': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-caption', mod.dataTableCaption);
+  },
+  'base-data-table-header-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-header-row', mod.dataTableHeaderRow);
+  },
+  'base-date-picker-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-root', mod.datePickerRoot);
+  },
+  'base-date-picker-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-trigger', mod.datePickerTrigger);
+  },
+  'base-date-picker-value': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-value', mod.datePickerValue);
+  },
+  'base-date-picker-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-content', mod.datePickerContent);
+  },
+  'base-date-picker-day': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-day', mod.datePickerDay);
+  },
+  'base-calendar-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-heading', mod.calendarHeading);
+  },
+  'base-calendar-grid': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-grid', mod.calendarGrid);
+  },
+  'base-calendar-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-row', mod.calendarRow);
   },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
@@ -959,6 +1083,23 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'base-dropdown-item': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/dropdown/item.proto');
     registerPrototype('base-dropdown-item', mod.default);
+  },
+  'base-dropdown-group': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/group.proto');
+    registerPrototype('base-dropdown-group', mod.default);
+  },
+  'base-dropdown-label': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/label.proto');
+    registerPrototype('base-dropdown-label', mod.default);
+  },
+  'base-dropdown-separator': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/base/src/dropdown/separator.proto');
+    registerPrototype('base-dropdown-separator', mod.default);
+  },
+  'base-dropdown-shortcut': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/shortcut.proto');
+    registerPrototype('base-dropdown-shortcut', mod.default);
   },
   'base-checkbox-root': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/checkbox/root.proto');

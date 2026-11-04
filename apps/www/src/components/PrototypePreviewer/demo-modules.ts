@@ -1,32 +1,10 @@
 import { assertDemoSpec } from './demo-types';
+import { buildDemoRegistry } from './demo-registry';
 
-export type DemoModuleLoader = () => Promise<any>;
-
-const DEMO_SUFFIX = '.demo.ts';
-
-function getDemoIdFromPath(path: string): string | null {
-  const file = path.split('/').pop();
-  if (!file || !file.endsWith(DEMO_SUFFIX)) return null;
-  return file.slice(0, -DEMO_SUFFIX.length);
-}
+export type { DemoModuleLoader } from './demo-registry';
 
 const demoModuleLoaders = import.meta.glob('../../content/**/*.demo.ts');
-const demoModules: Record<string, DemoModuleLoader> = {};
-const demoSourcePaths: Record<string, string> = {};
-
-for (const [path, loader] of Object.entries(demoModuleLoaders)) {
-  const id = getDemoIdFromPath(path);
-  if (!id) continue;
-  if (demoModules[id]) {
-    throw new Error(
-      `[PrototypePreviewer] demo ID 冲突: "${id}"。\n` +
-        `请确保 *.demo.ts 文件名唯一。\n` +
-        `冲突文件: ${path}`
-    );
-  }
-  demoModules[id] = loader as DemoModuleLoader;
-  demoSourcePaths[id] = path.replace('../../content/', 'apps/www/src/content/');
-}
+const { demoModules, demoSourcePaths } = buildDemoRegistry(demoModuleLoaders);
 
 export async function loadDemo(demoId: string) {
   const loader = demoModules[demoId];

@@ -17,6 +17,8 @@ One release is jointly identified by:
 
 A release is incomplete whenever any of these facts disagree.
 
+For the November 2026 0.3 train, [release scope, dates and development/acceptance stages](release-0.3-plan.md) define the admitted portfolio, feature freeze and repair-only regression rules. That plan does not waive this workflow's publication or immutable-evidence requirements.
+
 ## 2. V Entity Lifecycle
 
 ### 2.1 Draft

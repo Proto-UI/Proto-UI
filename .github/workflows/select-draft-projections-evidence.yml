@@ -1,26 +1,7 @@
 name: Select draft projection evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/select-draft-projections-evidence.yml'
-      - 'packages/prototypes/**/src/select/**'
-      - 'packages/prototypes/**/src/text/**'
-      - 'packages/prototypes/**/src/theme.ts'
-      - 'packages/adapters/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/cli/src/**'
-      - 'apps/www/src/content/docs/**/select.mdx'
-      - 'apps/www/src/content/docs/demo-*-select.demo.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'scripts/test/server-readiness.mjs'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/package.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'vitest.config.ts'
-      - 'apps/www/src/components/PrototypePreviewer/**'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -33,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -60,7 +41,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: select-draft-projections-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: select-draft-projections-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/select-draft-projections
           if-no-files-found: warn
           retention-days: 30

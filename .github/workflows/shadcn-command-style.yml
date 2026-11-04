@@ -1,26 +1,7 @@
 name: Shadcn Command shared style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/command/**'
-      - 'packages/prototypes/shadcn/src/input-shell/**'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/prototypes/shadcn/test/command*.test.ts'
-      - 'packages/prototypes/shadcn/test/input-shell*.test.ts'
-      - 'packages/adapters/**/src/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'scripts/prototypes/shadcn-command-evidence*'
-      - 'apps/www/src/components/site-search-*.ts'
-      - 'apps/www/src/components/site-pagefind-resource*.ts'
-      - 'apps/www/src/components/override/Search*'
-      - 'apps/www/src/components/PrototypePreviewer/demo-*.ts'
-      - 'apps/www/src/components/PrototypePreviewer/projection-composition*.ts'
-      - 'apps/www/src/components/PrototypePreviewer/prototype-modules*.ts'
-      - 'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts'
-      - 'spec/decisions/D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001.yaml'
-      - 'spec/tests/T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001.yaml'
-      - '.github/workflows/shadcn-command-style.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
