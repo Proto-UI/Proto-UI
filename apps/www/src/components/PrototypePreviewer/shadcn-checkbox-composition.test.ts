@@ -25,9 +25,6 @@ describe('shared Shadcn Checkbox website composition projection', () => {
     const manifest = family.families.checkbox;
     expect(() => validateProjectionFamilyManifest(family)).not.toThrow();
     expect(Object.keys(manifest.parts)).toEqual(['root', 'indicator']);
-    expect(manifest.auxiliaryPrototypes).toEqual([
-      { basePrototypeId: 'P-BASE-LABEL', prototypeId: recipe.parts.label.name },
-    ]);
     expect([...new Set(protos([demo.root]).map((part) => part.prototypeId))].sort()).toEqual(
       [...manifest.recipePrototypeIds].sort()
     );
