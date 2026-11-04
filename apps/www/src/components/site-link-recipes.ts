@@ -79,6 +79,14 @@ export function linkSurfaceProps(
       hovered: facts.hovered || facts.current,
     }).surface;
   if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
+  // Community icons share the selected Rhea paint, not Button semantics.
+  // Their existing 44px native-link target remains in linkSurfaceLayout.
+  if (family === 'shadcn' && appearance === 'icon')
+    return shadcnActionAppearance({
+      styleProfile: 'rhea',
+      emphasis: emphasis === 'link' ? 'minimal' : emphasis,
+      ...facts,
+    }).surface;
   const action =
     ['icon', 'pagination'].includes(appearance) && !['minimal', 'link'].includes(emphasis);
   const framedNavigation = family === 'brutalist' && ['brand', 'nav'].includes(appearance);
@@ -129,6 +137,8 @@ export function linkTextProps(
       weight: facts.current ? 'semibold' : 'medium',
     };
   if (appearance === 'action') return linkActionAppearance(family, 'primary', facts).text;
+  if (family === 'shadcn' && appearance === 'icon')
+    return shadcnActionAppearance({ styleProfile: 'rhea', ...facts }).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
     size: appearance === 'brand' ? 'base' : appearance === 'nav-group' ? 'xs' : 'sm',
