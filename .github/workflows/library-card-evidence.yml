@@ -2,15 +2,22 @@ name: Library Card first-frame evidence
 on:
   workflow_dispatch:
   workflow_call:
+    inputs:
+      supplemental-only:
+        type: boolean
+        default: false
+        description: Run the supplemental font boundary while the shared browser shard owns Card9.
 permissions:
   contents: read
 concurrency:
   group: library-card-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:
   browser-evidence:
+    if: ${{ !inputs.supplemental-only }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
