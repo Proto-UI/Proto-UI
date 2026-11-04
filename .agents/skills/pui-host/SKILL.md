@@ -5,6 +5,8 @@ description: Implement or revise one governed Proto UI Host Capability connectin
 
 # Implement a Host Capability slice
 
+Apply `pui-dev`'s bounded-completion loop and the [current release stages](../../../internal/governance/release-0.3-plan.md). Name the exact host criterion and observable evidence; distinguish its completed implementation from pending native acceptance without withholding completed child checkboxes. Continue the authorized validation/review/integration path.
+
 1. Require a `pui-trace` map and current-user or standing authorization for the governed capability boundary.
 2. Read the owning semantic criteria, Module, Host Capability, Adapter profile, test entities, and current realization.
 3. Model the smallest host responsibility that satisfies the portable need. Keep independently failing responsibilities separate.

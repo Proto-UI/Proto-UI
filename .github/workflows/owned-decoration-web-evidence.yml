@@ -1,21 +1,7 @@
 name: Draft four-Web-adapter decoration native evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/core/src/handles.ts'
-      - 'packages/core/src/spec/template.ts'
-      - 'packages/modules/feedback/**'
-      - 'packages/modules/rule/**'
-      - 'packages/modules/rule-expose-state-web/**'
-      - 'packages/adapters/web-component/src/**'
-      - 'packages/adapters/base/src/platform/web-owned-decoration.ts'
-      - 'packages/adapters/react/src/**'
-      - 'packages/adapters/react/test/fixtures/owned-decoration-web-evidence-app.ts'
-      - 'packages/adapters/vue/src/**'
-      - 'packages/adapters/vue2/src/**'
-      - 'scripts/feedback/owned-decoration-web-evidence*'
-      - '.github/workflows/owned-decoration-web-evidence.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

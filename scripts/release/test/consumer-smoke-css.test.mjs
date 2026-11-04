@@ -41,6 +41,8 @@ const generated = spawnSync(
 assert.equal(generated.status, 0, generated.stderr);
 const css = JSON.parse(generated.stdout);
 const tokens = css['proto-ui-tokens.generated.css'];
+const tokenSelector = (token, suffix = '') =>
+  `:where([data-pui-style~="${token.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"])${suffix}`;
 const marker = '@layer proto-ui {';
 const prefix = tokens.slice(0, tokens.indexOf(marker) + marker.length);
 const body = tokens.slice(prefix.length, -2);
@@ -115,7 +117,12 @@ test('loads actual complete CLI output, preserves original bytes/hash, and obser
     result.styles[0].textContent,
     unwrapGeneratedThemeSelectionLayer(css['shadcn-theme.css'])
   );
-  assert.equal(result.styles[1].textContent, body);
+  assert.equal(
+    result.styles[1].textContent,
+    body.replace(/\[data-pui-style~="((?:\\.|[^"\\])*)"\]/g, (_selector, value) =>
+      `[data-pui-style~="${value.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"]`
+    )
+  );
   const manifest = JSON.parse(readFileSync(join(result.evidenceDir, 'manifest.json'), 'utf8'));
   for (const file of manifest.files) {
     const before = readFileSync(join(stylesDir, file.name));
@@ -187,7 +194,7 @@ for (const [name, token, from, to] of [
     const element = switchFixture(window.document);
     const { styles } = loadConsumerStyles(window.document, { root: directory });
     const text = styles[1].textContent;
-    const start = text.indexOf(`:where([data-pui-style~="${token}"])`);
+    const start = text.indexOf(tokenSelector(token));
     assert.ok(start >= 0);
     const end = text.indexOf('}', start) + 1;
     const rule = text.slice(start, end);
@@ -201,8 +208,10 @@ test('rejects removal of the non-draggable guard from the checked rule', (t) => 
   const { directory, window } = fixture(t);
   const element = switchFixture(window.document);
   const { styles } = loadConsumerStyles(window.document, { root: directory });
-  const selector =
-    ':where([data-pui-style~=\"data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]\"])[data-checked]:not([data-draggable])';
+  const selector = tokenSelector(
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    '[data-checked]:not([data-draggable])'
+  );
   assert.ok(styles[1].textContent.includes(selector));
   styles[1].textContent = styles[1].textContent.replace(
     selector,
@@ -220,8 +229,14 @@ test('rejects a missing checked selector and a missing or unstyled default Thumb
   const { styles } = loadConsumerStyles(window.document, { root: directory });
   const text = styles[1].textContent;
   styles[1].textContent = text.replace(
-    ':where([data-pui-style~="data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]"])[data-checked]:not([data-draggable])',
-    ':where([data-pui-style~="data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]"])[data-unchecked]:not([data-draggable])'
+    tokenSelector(
+      'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+      '[data-checked]:not([data-draggable])'
+    ),
+    tokenSelector(
+      'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+      '[data-unchecked]:not([data-draggable])'
+    )
   );
   assert.throws(() => assertStyledSwitch(element, 'wrong state'), /generated CSS rule is missing/);
   styles[1].textContent = text;
@@ -412,7 +427,7 @@ for (const [name, token, mutate] of [
     const element = switchFixture(window.document);
     const { styles } = loadConsumerStyles(window.document, { root: directory });
     const text = styles[1].textContent;
-    const start = text.indexOf(`:where([data-pui-style~="${token}"])`);
+    const start = text.indexOf(tokenSelector(token));
     const end = text.indexOf('}', start) + 1;
     styles[1].textContent = mutate(text.slice(start, end), text);
     assert.throws(
@@ -428,7 +443,7 @@ test('rejects a missing active checked CSS rule even while the unused lowered ru
   loadConsumerStyles(window.document, { root: directory });
   const style = window.document.querySelector('style[data-consumer-smoke-css="tokens"]');
   const text = style.textContent;
-  const start = text.indexOf(':where([data-pui-style~="translate-x-[calc(100%_-_2px)]"])');
+  const start = text.indexOf(tokenSelector('translate-x-[calc(100%_-_2px)]'));
   assert.ok(start >= 0);
   const end = text.indexOf('}', start) + 1;
   style.textContent = text.slice(0, start) + text.slice(end);

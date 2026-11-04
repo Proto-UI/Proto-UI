@@ -21,25 +21,14 @@ function verifySourceGate(value) {
     if (step.uses !== 'actions/upload-artifact@v4') assert.equal(step.if, undefined);
   }
   const checkout = job.steps.find((step) => step.uses === 'actions/checkout@v4');
-  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha }}');
+  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha || github.sha }}');
   assert.equal(checkout.with['persist-credentials'], false);
   const verifyHead = job.steps.find((step) => step.name === 'Verify exact pull request head');
   assert.deepEqual(verifyHead.env, {
-    EXPECTED_SOURCE_SHA: '${{ github.event.pull_request.head.sha }}',
+    EXPECTED_SOURCE_SHA: '${{ github.event.pull_request.head.sha || github.sha }}',
   });
   assert.equal(verifyHead.run, 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"');
   assert.ok(job.steps.indexOf(verifyHead) > job.steps.indexOf(checkout));
-  const paths = value.on.pull_request.paths;
-  for (const path of [
-    'experiments/material-initial-paint/**',
-    'packages/**',
-    'apps/www/src/content/docs/zh-cn/browser-harness.ts',
-    'apps/www/src/content/docs/zh-cn/library-card-capture.ts',
-    'scripts/test/server-readiness.mjs',
-    '.npmrc',
-    'pnpm-workspace.yaml',
-  ])
-    assert.ok(paths.includes(path), `missing input trigger: ${path}`);
   const commands = job.steps.filter((step) => step.run).map((step) => step.run);
   assert.ok(
     commands.some((run) => run.includes('initial-paint-media-session.test.ts')),
@@ -61,7 +50,7 @@ function verifySourceGate(value) {
   assert.equal(upload.if, 'always()');
   assert.equal(
     upload.with.name,
-    'material-initial-paint-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}'
+    'material-initial-paint-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}'
   );
   assert.deepEqual(upload.with.path.trim().split(/\s+/), [
     '/tmp/pui-initial-paint/',
@@ -88,12 +77,6 @@ test('actual head-verification command accepts only the checked-out source', () 
 });
 
 for (const [name, mutate] of [
-  ...['scripts/test/server-readiness.mjs', '.npmrc', 'pnpm-workspace.yaml'].map((path) => [
-    `missing declared input ${path}`,
-    (v) => {
-      v.on.pull_request.paths = v.on.pull_request.paths.filter((p) => p !== path);
-    },
-  ]),
   [
     'missing media lifecycle controls',
     (v) => {
@@ -160,14 +143,6 @@ for (const [name, mutate] of [
       v.jobs['finite-rest-source'].steps.find(
         (s) => s.name === 'Exercise real producer and static consumers'
       )['continue-on-error'] = true;
-    },
-  ],
-  [
-    'missing experiment trigger',
-    (v) => {
-      v.on.pull_request.paths = v.on.pull_request.paths.filter(
-        (p) => p !== 'experiments/material-initial-paint/**'
-      );
     },
   ],
   [

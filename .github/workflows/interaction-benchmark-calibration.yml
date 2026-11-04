@@ -1,16 +1,8 @@
 name: Interaction benchmark calibration
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/interaction-benchmark-calibration.yml'
-      - 'scripts/benchmark/**'
-      - 'benchmarks/interaction/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'apps/www/package.json'
-      - 'pnpm-workspace.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Public handwritten calibration only. No model endpoint, credentials, hidden
 # oracle, repository mutations, release, deployment, or pull_request_target.

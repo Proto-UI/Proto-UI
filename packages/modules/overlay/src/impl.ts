@@ -1,4 +1,5 @@
 import { OverlayTargetAlignment } from './target-alignment-binding';
+import { OverlaySizeMatch } from './size-match-binding';
 import { joinEscapeScope, ownsEscapeSample } from './escape-coordinator';
 import type {
   BoundaryHandle,
@@ -22,7 +23,6 @@ import { ModuleBase } from '@proto.ui/module-base';
 import type { EventPort } from '@proto.ui/module-event';
 import type { BoundaryPort } from '@proto.ui/module-boundary';
 import type { StateEvent } from '@proto.ui/types';
-import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import { HOST_ELEMENT_CAP } from '@proto.ui/core';
 import {
   OVERLAY_GLOBAL_MOUNT_CAP,
@@ -33,6 +33,8 @@ import {
   type OverlayLayerScheduler,
   type OverlayModal,
 } from './caps';
+
+type OverlayAnatomyPort = ConstructorParameters<typeof OverlayTargetAlignment>[0];
 
 const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   defaultOpen: false,
@@ -258,6 +260,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private reconcileViewAgain = false;
   private anchorPart: AnatomyPartView | null = null;
   private readonly targetAlignment: OverlayTargetAlignment;
+  private readonly sizeMatch: OverlaySizeMatch;
   private inputAnchor: import('@proto.ui/core').InputOriginAnchor | null = null;
   private layerLease: HostResourceLease | null = null;
   private modalLease: HostResourceLease | null = null;
@@ -296,12 +299,15 @@ export class OverlayModuleImpl extends ModuleBase {
     boundary: BoundaryHandle<any>,
     private readonly boundaryPort: BoundaryPort,
     private readonly eventPort: EventPort,
-    private readonly anatomyPort: AnatomyPort,
+    private readonly anatomyPort: OverlayAnatomyPort,
     private readonly anchoredPosition: AnchoredPositionHandle,
     private readonly availableSpace: AvailableSpaceHandle | null = null
   ) {
     super(caps);
     this.targetAlignment = new OverlayTargetAlignment(anatomyPort, boundaryPort, () => {
+      if (this.viewActive) this.reconcileViewResourcesAfterCallback();
+    });
+    this.sizeMatch = new OverlaySizeMatch(anatomyPort, boundaryPort, () => {
       if (this.viewActive) this.reconcileViewResourcesAfterCallback();
     });
     this.prototypeName = prototypeName;
@@ -359,6 +365,7 @@ export class OverlayModuleImpl extends ModuleBase {
       () => this.clearBoundaryRegistrations(),
       () => this.offBoundaryOutside?.(),
       () => this.targetAlignment.dispose(),
+      () => this.sizeMatch.dispose(),
     ]);
   }
 
@@ -606,6 +613,8 @@ export class OverlayModuleImpl extends ModuleBase {
     if (!validView()) return false;
     this.targetAlignment.syncSurface();
     if (!validView()) return false;
+    this.sizeMatch.syncSurface();
+    if (!validView()) return false;
     const registration = this.registration;
     const config = this.config;
     const current = () =>
@@ -653,6 +662,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private deactivateViewSideEffects(): void {
     this.deferResourceReentry(() => {
       this.targetAlignment.clearPhysical();
+      this.sizeMatch.clearPhysical();
       this.anchoredPosition.disconnect();
       this.availableSpace?.disconnect();
       this.unlockModalIfNeeded();
@@ -664,6 +674,7 @@ export class OverlayModuleImpl extends ModuleBase {
       completeOverlayResourceWork([
         () => this.clearLayer(),
         () => this.targetAlignment.clearPhysical(),
+        () => this.sizeMatch.clearPhysical(),
         () => this.anchoredPosition.disconnect(),
         () => this.availableSpace?.disconnect(),
         () => this.unmountGlobalIfNeeded(),
@@ -757,7 +768,7 @@ export class OverlayModuleImpl extends ModuleBase {
     prevTarget: unknown,
     nextTarget: unknown
   ) {
-    if (role === 'content' && this.targetAlignment.hasBinding()) {
+    if (role === 'content' && (this.targetAlignment.hasBinding() || this.sizeMatch.hasBinding())) {
       this.boundaryDisposers.content?.();
       this.boundaryDisposers.content = null;
       return;
@@ -923,9 +934,15 @@ export class OverlayModuleImpl extends ModuleBase {
     }
     const anchor = this.inputAnchor ?? this.resolveAnchorTarget();
     if (!current()) return;
-    const floating = availableTarget;
+    const openRevision = this.openRevision;
+    const sizing = this.sizeMatch.resolve(anchor);
+    const currentSizing = () => current() && this.isOpen() && openRevision === this.openRevision;
+    if (!current() || (sizing && !currentSizing())) return;
+    const floating = sizing ? sizing.floating : availableTarget;
     if (!anchor || !floating) {
       this.anchoredPosition.disconnect();
+      if (currentSizing())
+        sizing?.onSizeMatch({ status: 'pending-target', reason: 'missing-target' });
       return;
     }
     const alignment = this.targetAlignment.resolve();
@@ -934,6 +951,14 @@ export class OverlayModuleImpl extends ModuleBase {
       anchor,
       floating,
       ...(alignment ?? {}),
+      ...(sizing
+        ? {
+            sizeMatch: sizing.sizeMatch,
+            onSizeMatch: (status: import('@proto.ui/core').TargetAlignmentStatus) => {
+              if (currentSizing()) sizing.onSizeMatch(status);
+            },
+          }
+        : {}),
       config: {
         side: this.config.placement,
         align: this.config.align,
@@ -976,7 +1001,19 @@ export class OverlayModuleImpl extends ModuleBase {
   ): void {
     this.sys?.ensureRuntime('overlay.registerTargetAlignment');
     if (this.protoPhase === 'unmounted') return;
+    if (binding) this.sizeMatch.set(null);
     this.targetAlignment.set(binding);
+    this.boundaryDisposers.content?.();
+    this.boundaryDisposers.content = null;
+    if (!binding) this.syncBoundaryRegistration('content', null, this.registration.content);
+    if (this.viewActive) this.reconcileViewResourcesAfterCallback();
+  }
+
+  registerSizeMatch(binding: import('@proto.ui/core').OverlaySizeMatchBinding | null): void {
+    this.sys?.ensureRuntime('overlay.registerSizeMatch');
+    if (this.protoPhase === 'unmounted') return;
+    if (binding) this.targetAlignment.set(null);
+    this.sizeMatch.set(binding);
     this.boundaryDisposers.content?.();
     this.boundaryDisposers.content = null;
     if (!binding) this.syncBoundaryRegistration('content', null, this.registration.content);
@@ -1005,6 +1042,7 @@ export class OverlayModuleImpl extends ModuleBase {
     registerAnchorPart: (part: AnatomyPartView) => this.registerAnchorPart(part),
     registerContent: (target: unknown) => this.registerContent(target),
     registerTargetAlignment: (binding) => this.registerTargetAlignment(binding),
+    registerSizeMatch: (binding) => this.registerSizeMatch(binding),
     getPositionSnapshot: () => this.getPositionSnapshot(),
   };
 }

@@ -1165,25 +1165,6 @@ test('result and run timestamps must be canonical and ordered inside their obser
   }
 });
 
-test('calibration CI triggers on every captured source and dependency input', () => {
-  const workflow = YAML.parse(
-    fs.readFileSync(
-      path.join(root, '.github/workflows/interaction-benchmark-calibration.yml'),
-      'utf8'
-    )
-  );
-  const paths = workflow.on.pull_request.paths;
-  const { dataset, cases } = loadDataset();
-  for (const file of calibrationSourcePaths(dataset, cases))
-    assert.ok(
-      paths.some(
-        (pattern) =>
-          pattern === file || (pattern.endsWith('/**') && file.startsWith(pattern.slice(0, -2)))
-      ),
-      `Missing calibration trigger for ${file}`
-    );
-});
-
 test('interrupted preparation is an ordered file prefix and every started cell has complete inputs', async () => {
   const original = path.join(temporary(), 'original');
   await dryRun({

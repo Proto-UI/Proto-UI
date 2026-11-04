@@ -1,15 +1,8 @@
 name: Homepage visual evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/homepage-visual-evidence.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Public homepage only; no secrets, deployment, repository writes or privileged
 # PR context. Artifacts are review evidence, not a new branch-protection gate.
@@ -18,7 +11,8 @@ permissions:
 
 concurrency:
   group: homepage-evidence-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 env:
   BASELINE_SHA: 1fd4c08a067a8322295c78b2b708d2b4cbc01304
@@ -255,6 +249,9 @@ jobs:
         include:
           - name: native-links
             suite: site-native-links
+          # Dedicated owner: apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts
+          - name: brutalist-action-motion
+            suite: brutalist-action-motion
           - name: code-surfaces
             suite: code-surfaces
           - name: code-surface-grammar

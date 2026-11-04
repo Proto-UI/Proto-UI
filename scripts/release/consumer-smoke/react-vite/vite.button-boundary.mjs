@@ -3,6 +3,15 @@ import { fileURLToPath } from 'node:url';
 const input = fileURLToPath(new URL('./button-boundary.html', import.meta.url));
 const prototypeModulePattern =
   /\/node_modules\/@proto\.ui\/(prototypes-(?:base|shadcn))\/dist\/(.+?)(?:\?.*)?$/;
+const SHADCN_BUTTON_SHARED_SUPPORT = new Set([
+  'style-scope/context.js',
+  'style-scope/selection.js',
+]);
+
+export function isButtonFamilyModule({ packageName, path }) {
+  if (path.startsWith('button/')) return true;
+  return packageName === 'prototypes-shadcn' && SHADCN_BUTTON_SHARED_SUPPORT.has(path);
+}
 
 export default {
   build: {
@@ -26,7 +35,7 @@ export default {
         }
 
         const entries = [...prototypeModules.entries()];
-        const unexpected = entries.filter(([, module]) => !module.path.startsWith('button/'));
+        const unexpected = entries.filter(([, module]) => !isButtonFamilyModule(module));
         if (unexpected.length > 0) {
           throw new Error(
             `Button family boundary included unrelated prototype modules:\n${unexpected
@@ -42,7 +51,7 @@ export default {
         }
 
         console.log(
-          `Button family boundary: ${entries.length} prototype modules, Base/Shadcn Button only`
+          `Button family boundary: ${entries.length} prototype modules, Base/Shadcn Button and shared style selection only`
         );
       },
     },

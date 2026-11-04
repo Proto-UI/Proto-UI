@@ -51,6 +51,25 @@ const selectTrigger = definePrototype<BrutalistSelectTriggerProps, BrutalistSele
         'flex w-full items-center justify-between gap-2 rounded-base border-2 border-black bg-main text-main-foreground font-sans font-medium px-3 py-2 text-sm whitespace-nowrap outline-none select-none'
       )
     );
+    // Elevated controls share Button timing; flat keeps its existing geometry
+    // and paint. This does not claim upstream prohibits color transitions.
+    // Preference changes update the mounted subject.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('elevated'),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-all')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('elevated'),
+          w.not(w.meta('preference.reducedMotion').eq('no-preference'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→paired ink, flat hover/press, focus-visible ring, disabled fade).
     def.rule({
       when: (w) => w.prop('size').eq('default'),
