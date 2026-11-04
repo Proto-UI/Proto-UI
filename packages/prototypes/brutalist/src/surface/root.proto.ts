@@ -8,6 +8,26 @@ export const BrutalistSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRoo
   name: 'brutalist-surface-root',
   setup(def) {
     asSurfaceRoot();
+    // Raised action surfaces share Button timing, not its semantic owner.
+    // Fade keeps its separately governed opacity clock and duration input.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('elevation').eq('raised'),
+          w.prop('fade').eq(false),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-all')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('elevation').eq('raised'),
+          w.prop('fade').eq(false),
+          w.not(w.meta('preference.reducedMotion').eq('no-preference'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     def.rule({
       when: (w) => w.prop('variant').eq('scrim'),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),

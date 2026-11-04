@@ -1,14 +1,7 @@
 name: Draft projection family evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/projection-family-evidence.yml'
-      - 'packages/prototypes/bootstrap-2-3-2/**'
-      - 'packages/prototypes/liquid-glass/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'packages/cli/src/generated/draft-family-style-tokens.ts'
-      - 'apps/www/src/pages/en/test/new-projection-families.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -21,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -50,7 +43,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: projection-families-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: projection-families-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/projection-family-evidence
           if-no-files-found: warn
           retention-days: 30

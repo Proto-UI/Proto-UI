@@ -165,6 +165,40 @@ test('Shadcn families depend only on their corresponding Base family', () => {
   }
 });
 
+test('packed Button boundary allows its shared style-selection support but rejects sibling families', async () => {
+  const { isButtonFamilyModule } =
+    await import('../consumer-smoke/react-vite/vite.button-boundary.mjs');
+
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-base', path: 'button/index.js' }),
+    true
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'button/button.proto.js' }),
+    true
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/context.js' }),
+    true
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/selection.js' }),
+    true
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'dialog/index.js' }),
+    false
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-shadcn', path: 'style-scope/root.proto.js' }),
+    false
+  );
+  assert.equal(
+    isButtonFamilyModule({ packageName: 'prototypes-base', path: 'style-scope/context.js' }),
+    false
+  );
+});
+
 function assertFamilyExports(packageRoot, families) {
   const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
   assert.equal(manifest.sideEffects, false, `${manifest.name} must declare sideEffects=false`);

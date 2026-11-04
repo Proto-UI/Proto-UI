@@ -1,16 +1,7 @@
 name: Shadcn Textarea shared style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/textarea/**'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/prototypes/shadcn/test/textarea*.test.ts'
-      - 'packages/prototypes/shadcn/src/field/textarea.proto.ts'
-      - 'packages/adapters/**/src/**'
-      - 'scripts/prototypes/shadcn-textarea-evidence*'
-      - 'scripts/prototypes/shadcn-textarea-shadow-oracle.mjs'
-      - '.github/workflows/shadcn-textarea-style.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

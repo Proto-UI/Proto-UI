@@ -92,6 +92,16 @@ function verifyPage(source: string, family: string) {
 // Execute the real registry initializer with the real full filesystem glob as
 // input. Only Vite's host-provided glob call is replaced; its ID algorithm and
 // duplicate rejection are not reimplemented in this test.
+function realRegistryModule() {
+  const file = 'apps/www/src/components/PrototypePreviewer/demo-registry.ts';
+  const source = readFileSync(file, 'utf8');
+  const code = ts.transpileModule(source, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as { buildDemoRegistry: unknown } };
+  vm.runInNewContext(code, { module, exports: module.exports });
+  return module.exports;
+}
 function registryFromFiles(files: string[]) {
   const file = 'apps/www/src/components/PrototypePreviewer/demo-modules.ts';
   const source = readFileSync(file, 'utf8');
@@ -112,6 +122,7 @@ function registryFromFiles(files: string[]) {
     exports: module.exports,
     __loaders__: loaders,
     require(id: string) {
+      if (id === './demo-registry') return realRegistryModule();
       if (id !== './demo-types') throw new Error(`Unexpected registry dependency ${id}`);
       return { assertDemoSpec };
     },

@@ -12,7 +12,11 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { runtimeSelectTrigger, selectRuntime as selectPreviewRuntime } from './browser-harness';
+import {
+  createStyleGenerationOwner,
+  runtimeSelectTrigger,
+  selectRuntime as selectPreviewRuntime,
+} from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -35,6 +39,7 @@ let browser: Browser;
 let devServer: ChildProcess | null = null;
 let baseUrl = '';
 let serverOutput = '';
+let styleGeneration: ReturnType<typeof createStyleGenerationOwner> | null = null;
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -100,15 +105,21 @@ function recordServerOutput(chunk: Buffer): void {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
 }
 
-async function spawnServer(): Promise<string> {
+async function spawnServer(
+  generation: ReturnType<typeof createStyleGenerationOwner>
+): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  await generation.run(executable);
+  if (generation.stopped) throw new Error('Documentation server startup was cancelled.');
   devServer = spawn(
     executable,
     [
       'pnpm@10.32.1',
       '--filter',
       'apps-www',
+      'exec',
+      'astro',
       'dev',
       '--host',
       '127.0.0.1',
@@ -139,16 +150,20 @@ async function startServer(): Promise<string> {
     return externalBaseUrl;
   }
 
+  const generation = createStyleGenerationOwner();
+  styleGeneration = generation;
+
   // availablePort() releases the socket before the child binds it, so two
   // browser suites running in parallel can be handed the same port and
   // --strictPort kills the loser. Retry on a fresh port instead.
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await spawnServer();
+      return await spawnServer(generation);
     } catch (error) {
+      if (generation.stopped) throw error;
       lastError = error;
-      await stopServer();
+      await stopDevServer();
       devServer = null;
       serverOutput = '';
     }
@@ -157,7 +172,16 @@ async function startServer(): Promise<string> {
 }
 
 async function stopServer(): Promise<void> {
-  if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
+  try {
+    await styleGeneration?.stop();
+  } finally {
+    await stopDevServer();
+  }
+}
+
+async function stopDevServer(): Promise<void> {
+  if (!devServer || devServer.exitCode !== null || devServer.signalCode !== null || !devServer.pid)
+    return;
   const pid = devServer.pid;
   if (process.platform === 'win32') {
     await new Promise<void>((resolve) => {
@@ -172,13 +196,19 @@ async function stopServer(): Promise<void> {
   }
 
   const signalTarget = -pid;
-  process.kill(signalTarget, 'SIGTERM');
+  try {
+    process.kill(signalTarget, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    return;
+  }
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
+  if (!exited && devServer.exitCode === null && devServer.signalCode === null)
+    process.kill(signalTarget, 'SIGKILL');
 }
 
 async function openRoute(

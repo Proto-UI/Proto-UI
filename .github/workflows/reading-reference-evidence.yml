@@ -1,42 +1,8 @@
 name: Matched reading reference evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/reading-reference-evidence.yml'
-      - 'apps/www/scripts/*reading-reference*'
-      - 'apps/www/scripts/search-production-preview.mjs'
-      - 'apps/www/package.json'
-      - 'scripts/test/reading-reference-evidence.test.mjs'
-      - 'scripts/test/reading-reference-breakpoints.test.mjs'
-      - 'apps/www/src/content/docs/zh-cn/reading-reflow-evidence.ts'
-      - 'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx'
-      - 'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'scripts/test/server-readiness.mjs'
-      - 'scripts/test/server-readiness.d.mts'
-      - 'apps/www/src/components/site-text-recipes*'
-      - 'apps/www/src/components/site-typography*'
-      - 'apps/www/src/components/SiteTypographyBootstrap.astro'
-      - 'apps/www/src/components/override/MarkdownContent.astro'
-      - 'apps/www/src/components/override/PageTitle.astro'
-      - 'apps/www/src/components/override/ContentPanel.astro'
-      - 'apps/www/src/components/override/PageFrame.astro'
-      - 'apps/www/src/components/override/TwoColumnContent.astro'
-      - 'apps/www/src/styles/markdown.css'
-      - 'apps/www/src/styles/global.css'
-      - 'apps/www/src/styles/proto-ui-*.css'
-      - 'apps/www/src/styles/shadcn-theme.css'
-      - 'apps/www/scripts/generate-website-prototype-tokens.mjs'
-      - 'apps/www/astro.config.mjs'
-      - 'packages/prototypes/base/src/text/**'
-      - 'packages/prototypes/shadcn/src/text/**'
-      - 'packages/prototypes/brutalist/src/text/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'packages/cli/src/services/prototype-style-tokens.ts'
-      - 'scripts/styles/generate-*-style-tokens.ts'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Source-owned candidate only. Production remains an externally observed,
 # SHA-unknown reference. No existing browser matrix or production code changes.

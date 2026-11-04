@@ -1,0 +1,44 @@
+id: T-BRUTALIST-SELECT-ITEM-MOTION-0001
+type: test
+title: Brutalist Select Item incoming border motion and immediate outgoing handoff
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Logical feedback controls have been exercised, but required native border interpolation, composited contrast, stable geometry and cross-runtime evidence remain unverified. Keep this test definition draft without promoting its implementations.
+summary: Explicit Proto extension; paired logical feedback and actual native frame obligations.
+cases:
+  - id: T-BRUTALIST-SELECT-ITEM-MOTION-0001-CASE-TIMING
+    title: Incoming-only live timing preserves Base ownership and paint
+    covers:
+      [P-BRUTALIST-SELECT-ITEM-INCOMING-MOTION, P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT]
+    expectation: only-highlighted-enabled-no-preference-border-clock-and-immediate-otherwise
+  - id: T-BRUTALIST-SELECT-ITEM-MOTION-0001-CASE-NATIVE
+    title: Native two-Item border handoff keeps contrast and geometry
+    covers: [P-BRUTALIST-SELECT-ITEM-INCOMING-MOTION, P-BRUTALIST-SELECT-ITEM-BASE-INHERITANCE]
+    expectation: real-frames-one-highlight-immediate-exit-live-preference-contrast
+implementations:
+  - id: T-BRUTALIST-SELECT-ITEM-MOTION-0001-LOGICAL
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/select-item-motion.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SELECT-ITEM-MOTION-0001-CASE-TIMING]
+    exercises: [P-BRUTALIST-SELECT-ITEM]
+  - id: T-BRUTALIST-SELECT-ITEM-MOTION-0001-NATIVE
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SELECT-ITEM-MOTION-0001-CASE-NATIVE]
+    exercises: [P-BRUTALIST-SELECT-ITEM]
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SELECT-ITEM
+sources:
+  - path: packages/prototypes/brutalist/src/select/item.proto.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Draft incoming-only border color control; native contrast and geometry remain unverified.
+tags: [test, brutalist, select, motion]

@@ -1,18 +1,8 @@
 name: Passive atom documentation evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/passive-atom-docs-evidence.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/**'
-      - 'packages/cli/**'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'scripts/test/passive-atom-docs-evidence.test.mjs'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

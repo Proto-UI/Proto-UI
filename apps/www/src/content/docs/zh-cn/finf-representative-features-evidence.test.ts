@@ -162,11 +162,16 @@ describe('Finf representative evidence harness, no native browser', () => {
       'drawer-command-density': 0,
       'drawer-intrinsic': 0,
       dropdown: 0,
+      'liquid-dropdown': 0, // Separate suites register their own runtime cases.
       'neo-popover-title': 0,
       'popover-command-density': 0,
       'popover-title': 0,
       'popover-navigation': 0, // Dedicated 32-subject suite, not a representative case.
       'resident-motion-capability': 0,
+      'shadcn-toggle': 0, // Separate suites register their own runtime cases.
+      'shadcn-switch-consumer': 0,
+      'shadcn-drawer-presence': 0,
+      'brutalist-switch-consumer': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
@@ -523,20 +528,25 @@ describe('Finf acceptance concurrency policy, configuration only', () => {
       expect(actual.concurrency).toEqual({
         group: 'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}',
         'cancel-in-progress': false,
-        queue: 'max',
       });
       expect(actual.permissions).toEqual({ contents: 'read' });
       expect(actual.jobs['representative-features'].strategy['max-parallel']).toBe(4);
       expect(actual.jobs['representative-features'].strategy['fail-fast']).toBe(false);
       expect(actual.jobs['representative-features']['timeout-minutes']).toBe(35);
+      // The obsolete per-pull-request heavy admission stays retired. This lane
+      // is dispatched by the existing serial production cycle only.
+      expect(actual.on).not.toHaveProperty('pull_request');
+      expect(actual.on).not.toHaveProperty('push');
     };
     check(workflow);
     const faults = [
       (value: typeof workflow) => {
-        delete value.concurrency.queue;
+        // The obsolete per-push queue policy stays retired: an active run is
+        // preserved, and pending acceptance is owned by the serial cycle.
+        value.concurrency.queue = 'max';
       },
       (value: typeof workflow) => {
-        value.concurrency.queue = 'single';
+        value.on.pull_request = { paths: ['packages/**'] };
       },
       (value: typeof workflow) => {
         value.concurrency['cancel-in-progress'] = true;
