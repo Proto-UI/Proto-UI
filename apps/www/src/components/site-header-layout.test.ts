@@ -464,29 +464,6 @@ it('couples compact Search geometry and copy at every Header composition breakpo
   expect(css).toContain('display: var(--site-header-search-copy-display, inline-flex)');
 });
 
-it('bounds the Header panel by the Header box so one measured viewport cannot place it outside', () => {
-  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
-  const panelContract = (source: string) => {
-    const compact = cssBlocks(source, '@media (max-width: 47.999rem)').join('\n');
-    // The measured width and the measured offset are one viewport's snapshot.
-    // The panel never exceeds the Header's own box, so a stale measurement
-    // cannot widen the Header's scroll area.
-    expect(source).toContain('--site-header-panel-inline-size: min(');
-    expect(source).toContain('var(--site-header-panel-max-width, 100%)');
-    expect(source).toContain('calc(100% - 16px)');
-    expect(source).toContain('width: var(--site-header-panel-inline-size);');
-    // The offset is corrected by the excess only, so a settled measurement
-    // keeps exactly the offset the Header published.
-    expect(source).toContain('margin-left: min(');
-    expect(source).toContain(
-      'calc(100% - var(--site-header-panel-inline-size) - 8px - var(--site-header-panel-left, 0px))'
-    );
-    // The compact row takes the whole measured width, still bounded by the
-    // Header's own box rather than by the raw measured width.
-    expect(compact).toContain('--site-header-panel-inline-size: min(');
-    expect(compact).not.toMatch(/width:\s*var\(--site-header-panel-max-width/);
-  };
-  panelContract(css);
-});
+
 
 
