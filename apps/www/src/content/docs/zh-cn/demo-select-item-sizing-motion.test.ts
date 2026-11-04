@@ -255,6 +255,40 @@ describe('Select sizing animation prerequisite', () => {
     expect(result.samples).toHaveLength(1);
     expect(sizingMotionIssues(result, 'wc').length).toBeGreaterThan(0);
   });
+  it('frame cancellation failure remains visible while timer cleanup continues', async () => {
+    const f = fixture();
+    f.open();
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {
+      throw 0;
+    });
+    f.trigger.__puiSizingMotion!.stop();
+    const result = await f.done;
+    expect(result.status).toBe('stopped');
+    expect(result.error).toContain('cancelAnimationFrame failed: 0');
+    expect(result.cleanup).toEqual({ frame: false, timer: true });
+    expect(sizingMotionIssues(result, 'wc')).toContain('trace cleanup incomplete');
+    expect(f.frames.size).toBe(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('timer cancellation failure remains visible while frame cleanup continues', async () => {
+    const f = fixture();
+    f.open();
+    vi.spyOn(window, 'clearTimeout').mockImplementation(() => {
+      throw false;
+    });
+    try {
+      f.trigger.__puiSizingMotion!.stop();
+      const result = await f.done;
+      expect(result.status).toBe('stopped');
+      expect(result.error).toContain('clearTimeout failed: false');
+      expect(result.cleanup).toEqual({ frame: true, timer: false });
+      expect(sizingMotionIssues(result, 'wc')).toContain('trace cleanup incomplete');
+      expect(f.frames.size).toBe(0);
+      expect(vi.getTimerCount()).toBe(1);
+    } finally {
+      vi.clearAllTimers();
+    }
+  });
 });
 
 describe('retained animation identity and trajectory falsifiers', () => {

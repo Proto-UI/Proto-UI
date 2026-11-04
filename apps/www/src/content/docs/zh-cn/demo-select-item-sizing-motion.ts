@@ -75,17 +75,33 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger) {
   const stop = (status: SizingMotionResult['status'], error: string | null = null) => {
     if (finished) return;
     finished = true;
-    if (frame !== null) win.cancelAnimationFrame(frame);
-    if (timer !== null) win.clearTimeout(timer);
+    let frameClean = frame === null;
+    let timerClean = timer === null;
+    if (frame !== null) {
+      try {
+        win.cancelAnimationFrame(frame);
+        frameClean = true;
+      } catch (cause) {
+        error = `${error === null ? '' : `${error}; `}cancelAnimationFrame failed: ${String(cause)}`;
+      }
+    }
+    if (timer !== null) {
+      try {
+        win.clearTimeout(timer);
+        timerClean = true;
+      } catch (cause) {
+        error = `${error === null ? '' : `${error}; `}clearTimeout failed: ${String(cause)}`;
+      }
+    }
     frame = null;
     timer = null;
     resolve({
-      status,
+      status: status === 'settled' && (!frameClean || !timerClean) ? 'error' : status,
       startedAt,
       endedAt: win.performance.now(),
       samples,
       error,
-      cleanup: { frame: frame === null, timer: timer === null },
+      cleanup: { frame: frameClean, timer: timerClean },
     });
   };
   trigger.__puiSizingMotion = { done, stop: () => stop('stopped') };
