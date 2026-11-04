@@ -16,6 +16,8 @@ import type { SelectFocusReason, SelectOpenRequest, SelectValueRequest } from '.
 import type { TransitionExposes, TransitionHandles, TransitionProps } from '../transition/types';
 
 export interface SelectRootProps {
+  /** Explicit author policy; Base defaults to intrinsic, independent of position. */
+  itemSizing?: 'intrinsic' | 'match-trigger';
   open?: boolean;
   defaultOpen?: boolean;
   value?: string;
@@ -123,6 +125,8 @@ export type SelectContentHandles = {
 };
 
 export interface SelectItemProps {
+  /** Inherit Root policy by default, or retain intrinsic author sizing. */
+  itemSizing?: 'inherit' | 'intrinsic';
   disabled?: boolean;
   value?: string;
   textValue?: string;
@@ -146,7 +150,12 @@ export type SelectItemAsHookContract = {
 };
 
 export type SelectItemSnapshot = CollectionItemSnapshot &
-  Readonly<{ value: string; textValue: string; disabled: boolean }>;
+  Readonly<{
+    value: string;
+    textValue: string;
+    disabled: boolean;
+    itemSizing: 'inherit' | 'intrinsic';
+  }>;
 
 export type SelectGroupProps = {};
 export type SelectGroupExposes = {};

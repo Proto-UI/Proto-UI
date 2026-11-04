@@ -175,6 +175,8 @@ export const BROWSER_SUITES = Object.freeze([
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
   'packages/compiler/test/web-component-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts',
@@ -210,6 +212,10 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts':
+    '.github/workflows/select-item-sizing-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
+    '.github/workflows/homepage-visual-evidence.yml',
   'packages/compiler/test/web-component-native.browser.test.ts':
     '.github/workflows/compiler-wc-native-evidence.yml',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':

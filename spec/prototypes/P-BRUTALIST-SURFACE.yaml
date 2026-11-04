@@ -9,6 +9,9 @@ summary: Reusable passive content surface with presentation-only facts, independ
 statement:
   en: Surface owns a slotted visual shell. Its consumer supplies layout, content and facts from the existing semantic owner. It does not own hover detection, focus, activation, selection, navigation, disclosure, clipboard, source editing or material effects. This design projection inherits Base Surface and lowers visual rules through standard feedback styles. No homepage, preview, code-toolbar or social-icon vocabulary is part of the API.
 criteria:
+  - id: P-BRUTALIST-SURFACE-RAISED-MOTION
+    text:
+      en: A raised Surface with fade false uses one preference-aware CSS timing writer for its existing observed hover/press feedback. No-preference selects transition-all with the existing 150ms cubic-bezier(0.4,0,0.2,1) mapping; reduce or unknown selects transition-none. Preference changes are live. Removing raised elevation or enabling fade withdraws these timing rules. Non-raised defaults and the separately governed surface-fade opacity clock remain unchanged. This changes presentation timing only; no disabled prop, interaction detection, activation, navigation or second semantic owner is introduced. Native action/community consumers retain their original semantic host and pointer envelope. Broader minimal-action/color timing and unintended theme/responsive animation require separate evidence, not an inferred acceptance claim.
   - id: P-BRUTALIST-SURFACE-PASSIVE
     text:
       en: Surface introduces no role, tabindex, focus request, event listener, activation, semantic state, native property forwarding or exposed method. Authored content remains in its original semantic ownership. Observed presentation inputs are not an event simulation or an independent interaction truth.
