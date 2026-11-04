@@ -6,12 +6,10 @@ on:
       - 'experiments/effect-graph/**'
       - 'internal/records/2026-10-03-typed-effect-graph-adr.md'
       - '.github/workflows/effect-graph-model.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'experiments/effect-graph/**'
-      - 'internal/records/2026-10-03-typed-effect-graph-adr.md'
-      - '.github/workflows/effect-graph-model.yml'
+  # Main-head coverage is provided by the daily ci.yml regression cycle; this
+  # lane stays callable for an exact-ref diagnosis without its own schedule.
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

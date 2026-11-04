@@ -2,6 +2,8 @@
 
 > 内部治理文档。本文定义 Proto UI 在 `v0.2.0-rc.0` 首次公开发布时，应如何划分 package 层级、哪些 package 属于首发承诺面，以及在最后准备窗口中新增什么样的 package 仍可计入首发范围。
 
+2026 年 11 月当前发行线的精确 package 角色以 `launch-package-governance.json` 为准；发布范围、功能冻结和验收阶段以 [0.3 执行计划](release-0.3-plan.md) 为准。UI libraries 承诺面为 Base、Shadcn、Brutalist 和 Lucide，其他家族均为 WIP／Experimental，不属于 0.3 承诺。下文历史首发条款不扩大本次范围，也不排除交付这四个家族所必需的共享依赖。
+
 ---
 
 ## 1. 本文目的

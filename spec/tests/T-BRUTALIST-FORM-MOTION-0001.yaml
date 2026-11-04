@@ -1,0 +1,34 @@
+id: T-BRUTALIST-FORM-MOTION-0001
+type: test
+title: Brutalist Form action timing and inherited ownership
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Prepared independent action controls; no execution or native animation acceptance yet.
+summary: Separates timing projection from Base Form submission and reset semantics.
+cases:
+  - id: T-BRUTALIST-FORM-MOTION-0001-CASE-TIMING
+    title: Same-instance live timing and unchanged endpoints
+    covers: [P-BRUTALIST-FORM-ACTION-MOTION]
+    expectation: No-preference alone enables transition-all; reduce and unknown remain responsive and subscription disposal is verified.
+  - id: T-BRUTALIST-FORM-MOTION-0001-CASE-OWNER
+    title: Exactly one inherited action owner
+    covers: [P-BRUTALIST-FORM-ACTION-OWNER, P-BRUTALIST-FORM-ACTION-DISABLED]
+    expectation: Actual Form composition emits exactly one submit or reset, and parent/local disabled suppress action while clearing hover/press.
+implementations:
+  - id: brutalist-form-action-motion
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/form-action-motion.test.ts
+    required: true
+    consumesCases:
+      [T-BRUTALIST-FORM-MOTION-0001-CASE-TIMING, T-BRUTALIST-FORM-MOTION-0001-CASE-OWNER]
+    exercises: [P-BRUTALIST-FORM]
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-FORM
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded independent Form action timing and ownership controls; native timing remains unverified.
+tags: [test, brutalist, form, motion]

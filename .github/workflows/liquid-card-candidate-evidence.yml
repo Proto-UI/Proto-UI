@@ -1,36 +1,12 @@
 name: Liquid Card candidate producer evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/liquid-card-candidate-evidence.yml'
-      - 'apps/www/src/components/**'
-      - 'apps/www/src/pages/**/test/liquid-library-card.astro'
-      - 'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/library-liquid-card-observation.ts'
-      - 'apps/www/src/content/docs/zh-cn/library-no-script-interaction.ts'
-      - 'apps/www/src/content/docs/zh-cn/library-card*.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/styles/**'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/package.json'
-      - 'experiments/material-initial-paint/media-session.ts'
-      - 'scripts/release/test/liquid-card-candidate-workflow.test.mjs'
-      - 'scripts/test/liquid-card-observation.test.mjs'
-      - 'scripts/test/no-script-interaction.test.mjs'
-      - 'scripts/test/server-readiness.mjs'
-      - '.npmrc'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig*.json'
-      - 'packages/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'vitest.config.ts'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
   group: liquid-card-candidate-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:

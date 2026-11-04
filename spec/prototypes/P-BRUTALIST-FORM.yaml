@@ -11,6 +11,18 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-BRUTALIST-FORM-ACTION-OWNER
+    text:
+      en: Submit and Reset project the inherited Base Form action states and rendering; Base Form alone owns activation, submission, reset, cancellation and effective disabled policy. No additional Button activation owner or listener is introduced by paint.
+      zh-CN: Submit 与 Reset 仅投影继承的 Base Form 状态及渲染；提交、重置、激活、取消及有效禁用策略由 Base Form 唯一拥有，不增加 Button 激活 owner 或监听器。
+  - id: P-BRUTALIST-FORM-ACTION-MOTION
+    text:
+      en: Raised Submit and Reset retain their existing rest shadow and hover/press positive quarter-rem translation with cleared shadow. One live transition-all writer uses the Button 150ms cubic-bezier(0.4,0,0.2,1) timing only for no-preference; reduce and unknown are transition-none without freezing endpoint feedback. Preference changes apply to the mounted instance and dispose subscriptions.
+      zh-CN: 立体 Submit/Reset 保留原静止阴影、hover/press 正向四分之一 rem 位移及消影端点；仅 no-preference 使用 Button 的 transition-all、150ms cubic-bezier(0.4,0,0.2,1) 时序，reduce/unknown 使用 transition-none 但不冻结端点。偏好实时作用于同一实例，销毁时回收订阅。
+  - id: P-BRUTALIST-FORM-ACTION-DISABLED
+    text:
+      en: Parent or local disabled state clears hover/press and suppresses action; cancellation and release preserve Base semantics. Timing must not create a second submit/reset, bypass disabled state or change focus ownership.
+      zh-CN: 父级或本地禁用清除 hover/press 并阻止动作；取消与释放保留 Base 语义，时序不得重复提交/重置、绕过禁用或改变焦点所有权。
   - id: P-BRUTALIST-FORM-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -20,7 +32,8 @@ dependsOn:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests:
+    - T-BRUTALIST-FORM-MOTION-0001
 sources:
   - path: packages/prototypes/brutalist/src/form/
 openQuestions:
@@ -31,6 +44,9 @@ openQuestions:
     blocks:
       - activation:P-BRUTALIST-FORM
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Defined bounded Form action projection ownership and live preference timing; draft admission remains blocked pending native evidence and independent review.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Brutalist form family as draft.

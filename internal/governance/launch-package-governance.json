@@ -1,6 +1,6 @@
 {
   "releaseLine": "v0.3.0-alpha.1",
-  "targetDate": null,
+  "targetDate": "2026-11-30",
   "cliLaunchDate": null,
   "launchCommitmentPackages": [
     "@proto.ui/adapter-react",

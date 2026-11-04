@@ -5,6 +5,8 @@ description: Implement one governed Proto UI Adapter-profile realization slice. 
 
 # Implement one Adapter realization
 
+Apply `pui-dev`'s bounded-completion loop and the [current release stages](../../../internal/governance/release-0.3-plan.md). Keep each target/profile criterion addressable; complete and check an actually verified child independently of unrelated targets, while retaining every unverified host obligation. Continue through validation, independent review and authorized integration.
+
 1. Require current `pui-orient` and `pui-trace` artifacts plus current-user or standing implementation authorization for the complete governed slice.
 2. Read the governing decision or assessment packet, target Adapter profile, related Module and Host Capability entities, tests, current realization, and exact exclusions.
 3. Confirm that identity, target and runtime range, support or omission role, capability fidelity, lifecycle ownership, failure behavior, compatibility, and evidence scope are fixed. When this transition is ineligible, identify the single appropriate registered leaf in the handoff without loading it.

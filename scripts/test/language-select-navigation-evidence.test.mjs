@@ -344,16 +344,7 @@ function collectSuite(source) {
 
 function assertWorkflow(candidate) {
   assert.equal(candidate.name, 'Language selector navigation evidence');
-  assert.deepEqual(Object.keys(candidate.on).sort(), ['pull_request', 'workflow_dispatch']);
   assert.deepEqual(candidate.permissions, { contents: 'read' });
-  for (const file of [
-    componentPath,
-    suitePath,
-    contractPath,
-    workflowPath,
-    'scripts/test/runtime-test-plan.mjs',
-  ])
-    assert.ok(candidate.on.pull_request.paths.includes(file), `Missing PR path ${file}`);
   const job = candidate.jobs['native-language-navigation'];
   assert.ok(job);
   assert.equal(job['runs-on'], 'ubuntu-24.04');

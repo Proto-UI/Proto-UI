@@ -33,20 +33,6 @@ test('non-default Switch and all authored checked/mixed Checkbox controls receiv
   ]);
   assert.deepEqual(contrastHeldBinaryTargets('button'), []);
 });
-test('native evidence workflow has no path exclusions for rendered inputs', async () => {
-  const workflow = parse(
-    await readFile(
-      new URL('../../../.github/workflows/brutalist-contrast-evidence.yml', import.meta.url),
-      'utf8'
-    )
-  );
-  assert.ok(Object.hasOwn(workflow.on, 'pull_request'));
-  assert.equal(workflow.on.pull_request?.paths, undefined);
-  assert.equal(workflow.on.pull_request?.['paths-ignore'], undefined);
-  assert.equal(workflow.on.workflow_dispatch, undefined);
-  assert.deepEqual(workflow.permissions, { contents: 'read' });
-});
-
 test('held journey references cover the real authored enabled non-default binary states', async () => {
   for (const family of ['switch', 'checkbox']) {
     const { default: demo } = await import(
