@@ -60,3 +60,14 @@ export const POPOVER_DESCRIPTION = {
   rhea: tw('text-muted-foreground'),
   'new-york-v4': tw('text-muted-foreground'),
 } as const satisfies OverlayRecipes;
+
+/** Website navigation presentation pinned independently to shadcn-ui/ui
+ * c0d63c339d6cd2fc26135590a54cf1f362269451 apps/v4/components/mobile-nav.tsx.
+ * This explicit family variant is not the default Popover card or a new owner.
+ * Opaque fallback is deliberate; the source's bare blur needs a separate support
+ * fact before exact translucent parity can be claimed. The current bounded
+ * 4px supported enhancement below is recorded as a Proto adaptation. */
+export const POPOVER_NAVIGATION_PANEL = tw(
+  'z-50 w-[var(--proto-ui-available-width)] h-[var(--proto-ui-available-height)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto overscroll-contain rounded-none border-0 ring-0 bg-background text-foreground p-0 shadow-none outline-none duration-100'
+);
+export const POPOVER_NAVIGATION_SUPPORTED_TRANSLUCENCY = tw('bg-background/90 backdrop-blur-xs');

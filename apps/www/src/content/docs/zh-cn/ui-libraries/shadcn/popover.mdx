@@ -23,3 +23,16 @@ Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入
 组成: Root, Trigger, Content, Title, Description, Close.
 
 当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+
+## 导航呈现
+
+此独立示例为 Trigger 和 Content 显式选择 `presentation="navigation"`。内容使用锚点的可用区域并在自身内部滚动；上方原默认示例保持不变。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover-navigation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+链接保留浏览器原生活动语义。本示例不实现网站目录的唯一树借用/归还，也不增加页面特有的焦点所有者。Trigger 样式仍待设计核对；新导航模式的四 runtime 原生证据尚待完成，普通 Popover 的结果不替代此模式验收。

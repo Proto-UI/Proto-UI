@@ -192,6 +192,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts',
@@ -245,6 +246,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',

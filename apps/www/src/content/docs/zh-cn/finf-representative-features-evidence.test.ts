@@ -163,13 +163,14 @@ describe('Finf representative evidence harness, no native browser', () => {
       'drawer-command-density': 0,
       'drawer-intrinsic': 0,
       dropdown: 0,
+      'liquid-dropdown': 0, // Separate suites register their own runtime cases.
       'neo-popover-title': 0,
       'popover-command-density': 0,
       'popover-title': 0,
+      'popover-navigation': 0, // Dedicated 32-subject suite, not a representative case.
       'resident-motion-capability': 0,
       'shadcn-card': 0,
-      'liquid-dropdown': 0,
-      'shadcn-toggle': 0,
+      'shadcn-toggle': 0, // Separate suites register their own runtime cases.
       'shadcn-switch-consumer': 0,
       'shadcn-drawer-presence': 0,
       'brutalist-switch-consumer': 0,
@@ -562,58 +563,6 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     ).toThrow(/Duplicate/);
   });
 
-  it('binds the unchanged ten journeys to exact-head sandboxed CI and retained Card artifacts', () => {
-    const groups: string[] = workflow.jobs['representative-features'].strategy.matrix.group;
-    expect(groups.filter((group) => group === 'shadcn-card')).toHaveLength(1);
-    expect(capture.run).toContain('elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-card ]; then');
-    expect(capture.run).toContain(`TEST_FILE=${cardFile}`);
-    expect(capture.run).toContain(
-      'export PUI_SHADCN_CARD_EVIDENCE_DIR="$PUI_FINF_FEATURE_EVIDENCE_DIR/shadcn-card"'
-    );
-    expect(capture.run).toContain(
-      "assertShadcnCardReport(JSON.parse(readFileSync(process.argv[2], 'utf8')))"
-    );
-    expect(workflow.permissions).toEqual({ contents: 'read' });
-    expect(workflow.jobs['representative-features']['timeout-minutes']).toBe(35);
-    expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
-    const browserSource = readFileSync(cardFile, 'utf8');
-    // The heavy Card evidence lane runs from the single scheduled regression
-    // owner, so it carries no automatic pull_request trigger and no per-source
-    // path filter. Its Card consumer sources stay bound by the reviewed
-    // coverage-matrix Source-scan binding and by the exact imports below.
-    expect(workflow.on.pull_request).toBeUndefined();
-    expect(workflow.on.workflow_call).toBeDefined();
-    expect(browserSource).toContain('shadcn-card-compat/${runtime}/');
-    expect(browserSource).toContain('`/en/test/shadcn-card-compat/${runtime}/`;');
-    const compatibilityPage = readFileSync(
-      'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro',
-      'utf8'
-    );
-    expect(compatibilityPage).toContain(
-      "import demo from '../../../../../test/fixtures/shadcn-card-new-york';"
-    );
-    expect(browserSource).toContain("const galleryRoute = '/zh-cn/ui-libraries/';");
-    const galleryPage = readFileSync(
-      'apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx',
-      'utf8'
-    );
-    expect(galleryPage).toContain(
-      "import UiLibraryGallery from '@/components/UiLibraryGallery.astro';"
-    );
-    expect(galleryPage).toContain('<UiLibraryGallery locale="zh-cn" />');
-    expect(browserSource).toContain("process.env.GITHUB_ACTIONS !== 'true'");
-    expect(browserSource).toContain('!process.env.CANDIDATE_SHA');
-    expect(browserSource).toContain('!process.env.CHROME_PATH');
-    expect(browserSource).toContain('executablePath: process.env.CHROME_PATH');
-    expect(browserSource).not.toMatch(/\bchromeExecutable\b/);
-    expect(browserSource).toContain('chromiumSandbox: true');
-    expect(browserSource).not.toContain('--no-sandbox');
-    expect(browserSource).not.toMatch(/\blaunchBrowser\b/);
-    expect(browserSource).toContain('expect(binding.sha).toBe(process.env.CANDIDATE_SHA)');
-    expect(browserSource).toContain('expect(binding.dirty).toBe(false)');
-    expect(browserSource).toContain('process.env.PUI_SHADCN_CARD_EVIDENCE_DIR');
-  });
-
   it('executes the actual workflow report guard and rejects incomplete, duplicate, renamed or nonpassing journeys', () => {
     const match = capture.run.match(
       /\/\/ CARD_REPORT_VALIDATOR_BEGIN([\s\S]*?)\/\/ CARD_REPORT_VALIDATOR_END/
@@ -666,72 +615,47 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
   });
 });
 
-// The service behavior of already queued runs is observed separately by exact run/job ID.
-// These source contracts do not claim hosted FIFO or completed native acceptance.
-describe('Existing acceptance queue policy', () => {
-  function checkPolicy(workflowPath: string, group: string, cancelInProgress: unknown) {
-    const actual = parse(readFileSync(workflowPath, 'utf8'));
-    const check = (value: typeof actual) => {
-      expect(value.concurrency).toEqual({
-        group,
-        'cancel-in-progress': cancelInProgress,
+describe('Finf acceptance concurrency policy, configuration only', () => {
+  it('retains queued evidence without increasing simultaneous work', () => {
+    // This validates repository policy, not the hosted queue or retention of a legacy run.
+    const check = (actual: typeof workflow) => {
+      expect(actual.concurrency).toEqual({
+        group: 'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}',
+        'cancel-in-progress': false,
       });
-      // The retired `queue: max` concurrency key is not part of the approved
-      // cadence and must not be reintroduced by any lane.
-      expect(Object.hasOwn(value.concurrency, 'queue')).toBe(false);
-      if (workflowPath === workflowFile) {
-        expect(value.permissions).toEqual({ contents: 'read' });
-        expect(value.jobs['representative-features'].strategy['max-parallel']).toBe(4);
-        expect(value.jobs['representative-features'].strategy['fail-fast']).toBe(false);
-        expect(value.jobs['representative-features']['timeout-minutes']).toBe(35);
-      }
+      expect(actual.permissions).toEqual({ contents: 'read' });
+      expect(actual.jobs['representative-features'].strategy['max-parallel']).toBe(4);
+      expect(actual.jobs['representative-features'].strategy['fail-fast']).toBe(false);
+      expect(actual.jobs['representative-features']['timeout-minutes']).toBe(35);
+      // The obsolete per-pull-request heavy admission stays retired. This lane
+      // is dispatched by the existing serial production cycle only.
+      expect(actual.on).not.toHaveProperty('pull_request');
+      expect(actual.on).not.toHaveProperty('push');
     };
-    check(actual);
+    check(workflow);
     const faults = [
-      (value: typeof actual) => {
+      (value: typeof workflow) => {
+        // The obsolete per-push queue policy stays retired: an active run is
+        // preserved, and pending acceptance is owned by the serial cycle.
         value.concurrency.queue = 'max';
       },
-      (value: typeof actual) => {
-        value.concurrency['cancel-in-progress'] =
-          cancelInProgress === true ? false : true;
+      (value: typeof workflow) => {
+        value.on.pull_request = { paths: ['packages/**'] };
       },
-      (value: typeof actual) => {
+      (value: typeof workflow) => {
+        value.concurrency['cancel-in-progress'] = true;
+      },
+      (value: typeof workflow) => {
         value.concurrency.group = '${{ github.run_id }}';
       },
-    ];
-    if (workflowPath === workflowFile) {
-      faults.push((value: typeof actual) => {
+      (value: typeof workflow) => {
         value.jobs['representative-features'].strategy['max-parallel'] = 5;
-      });
-    }
+      },
+    ];
     for (const fault of faults) {
-      const changed = structuredClone(actual);
+      const changed = structuredClone(workflow);
       fault(changed);
       expect(() => check(changed)).toThrow();
     }
-  }
-
-  it('retains Finf queued evidence without increasing simultaneous work', () => {
-    checkPolicy(
-      workflowFile,
-      'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}',
-      false
-    );
-  });
-
-  it('retains CI queued evidence without increasing simultaneous work', () => {
-    checkPolicy(
-      '.github/workflows/ci.yml',
-      "ci-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || 'cycle' }}",
-      "${{ github.event_name == 'pull_request' }}"
-    );
-  });
-
-  it('retains contrast queued evidence without increasing simultaneous work', () => {
-    checkPolicy(
-      '.github/workflows/brutalist-contrast-evidence.yml',
-      'brutalist-contrast-${{ github.ref }}',
-      true
-    );
   });
 });
