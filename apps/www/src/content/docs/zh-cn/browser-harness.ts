@@ -548,12 +548,19 @@ async function stopDevServer(): Promise<void> {
     return;
   }
 
-  const exited = await Promise.race([
-    new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
-    new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
-  ]);
-  if (!exited && devServer.exitCode === null && devServer.signalCode === null)
-    process.kill(signalTarget, 'SIGKILL');
+  let deadline: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const exited = await Promise.race([
+      new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
+      new Promise<boolean>((resolve) => {
+        deadline = setTimeout(() => resolve(false), 5_000);
+      }),
+    ]);
+    if (!exited && devServer.exitCode === null && devServer.signalCode === null)
+      process.kill(signalTarget, 'SIGKILL');
+  } finally {
+    if (deadline !== undefined) clearTimeout(deadline);
+  }
 }
 
 export async function launchBrowser(): Promise<Browser> {

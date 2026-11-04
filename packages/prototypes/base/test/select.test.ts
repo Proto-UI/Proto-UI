@@ -149,6 +149,140 @@ describe('prototypes/base: select', () => {
     );
   });
 
+  it.each([
+    ['selected-or-first', '', 0],
+    ['selected-or-last', '', 2],
+    ['selected-or-first', 'gamma', 2],
+    ['selected-or-last', 'alpha', 0],
+  ] as const)(
+    'keeps genuine opening entry %s with selected value %s',
+    async (entry, selected, target) => {
+      // T-BASE-SELECT-0001-CASE-REPEATED-OPEN-BOUNDARIES
+      vi.useFakeTimers();
+      const { root, trigger, items } = createSelect({
+        root: { defaultValue: selected },
+        items: [
+          { value: 'alpha', textValue: 'Alpha' },
+          { value: 'beta', textValue: 'Beta', disabled: true },
+          { value: 'gamma', textValue: 'Gamma' },
+        ],
+      });
+      await settle();
+      trigger.focus();
+      const requests: unknown[] = [];
+      root.addEventListener('openChange', (event: Event) =>
+        requests.push((event as CustomEvent).detail)
+      );
+      expect(
+        root.getExposes().requestOpen({
+          open: true,
+          reason: 'entry-regression',
+          focusReason: 'keyboard',
+          entry,
+        })
+      ).toBe(true);
+      await settle();
+      expect(root.getExposes().open.get()).toBe(true);
+      expect(root.getExposes().value.get()).toBe(selected);
+      expect(document.activeElement).toBe(items[target]);
+      expect(items.map((item: any) => item.getExposes().active.get())).toEqual(
+        items.map((_item: any, index: number) => index === target)
+      );
+      expect(items.map((item: any) => item.getExposes().selected.get())).toEqual([
+        selected === 'alpha',
+        false,
+        selected === 'gamma',
+      ]);
+      expect(requests).toEqual([
+        { open: true, reason: 'entry-regression', focusReason: 'keyboard' },
+      ]);
+    }
+  );
+
+  it.each(['refused', 'synchronous', 'asynchronous'] as const)(
+    'keeps controlled opening acceptance with the owner (%s)',
+    async (acceptance) => {
+      // T-BASE-SELECT-0001-CASE-REPEATED-OPEN-BOUNDARIES
+      vi.useFakeTimers();
+      const { root, trigger, items } = createSelect({ root: { open: false, value: 'alpha' } });
+      await settle();
+      trigger.focus();
+      const requests: unknown[] = [];
+      root.addEventListener('openChange', (event: Event) => {
+        requests.push((event as CustomEvent).detail);
+        if (acceptance === 'synchronous') setElementProps(root, { open: true, value: 'alpha' });
+      });
+      expect(
+        root.getExposes().requestOpen({
+          open: true,
+          reason: 'controlled-entry-regression',
+          focusReason: 'keyboard',
+          entry: 'selected-or-last',
+        })
+      ).toBe(true);
+      await settle();
+      expect(root.getExposes().open.get()).toBe(acceptance === 'synchronous');
+      expect(root.getExposes().value.get()).toBe('alpha');
+      if (acceptance !== 'synchronous') {
+        expect(document.activeElement).toBe(trigger);
+        expect(items.map((item: any) => item.getExposes().active.get())).toEqual([
+          false,
+          false,
+          false,
+        ]);
+      }
+      if (acceptance === 'asynchronous') {
+        setElementProps(root, { open: true, value: 'alpha' });
+        await settle();
+      }
+      if (acceptance !== 'refused') {
+        expect(document.activeElement).toBe(items[0]);
+        expect(items.map((item: any) => item.getExposes().active.get())).toEqual([
+          true,
+          false,
+          false,
+        ]);
+      }
+      expect(requests).toEqual([
+        { open: true, reason: 'controlled-entry-regression', focusReason: 'keyboard' },
+      ]);
+    }
+  );
+
+  it('rejects repeated public open when Root is disabled without publishing a request', async () => {
+    // T-BASE-SELECT-0001-CASE-REPEATED-OPEN-BOUNDARIES
+    vi.useFakeTimers();
+    const { root, items } = createSelect({
+      root: { defaultOpen: true, defaultValue: 'alpha' },
+    });
+    await settle();
+    setElementProps(root, { disabled: true });
+    await settle();
+    const read = () => ({
+      open: root.getExposes().open.get(),
+      value: root.getExposes().value.get(),
+      active: items.map((item: any) => item.getExposes().active.get()),
+      selected: items.map((item: any) => item.getExposes().selected.get()),
+    });
+    const before = read();
+    const focused = document.activeElement;
+    const requests: unknown[] = [];
+    root.addEventListener('openChange', (event: Event) =>
+      requests.push((event as CustomEvent).detail)
+    );
+    expect(
+      root.getExposes().requestOpen({
+        open: true,
+        reason: 'disabled-repeat-regression',
+        focusReason: 'programmatic',
+      })
+    ).toBe(false);
+    await settle();
+    expect(read()).toEqual(before);
+    expect(document.activeElement).toBe(focused);
+    expect(requests).toEqual([]);
+  });
+
   it('projects combobox, listbox, option, and stable relationship semantics', async () => {
     // T-BASE-SELECT-TRIGGER-0001-CASE-COMMAND-A11Y
     // T-BASE-SELECT-CONTENT-0001-CASE-A11Y-FOCUS

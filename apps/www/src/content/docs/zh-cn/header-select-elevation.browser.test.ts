@@ -39,6 +39,229 @@ afterAll(async () => {
   await stopServer();
 }, 60_000);
 
+// Read-only bounded diagnostics for the original 320px Header-panel assertion.
+// Sampling never waits for convergence and never changes product state or style.
+// Geometry reads can flush layout; this diagnostic does not establish that the
+// uninstrumented historical failure necessarily reproduces on a new checkout.
+type HeaderPanelResizeTrace = {
+  samples: unknown[];
+  error: string | null;
+  done: boolean;
+  stopReason: string | null;
+  droppedSamples: number;
+  sample: (phase: string) => unknown;
+  snapshot: (phase: string) => unknown;
+  stop: (reason: string) => void;
+};
+type HeaderPanelTraceWindow = Window & {
+  __puiHeaderPanelResizeTrace?: HeaderPanelResizeTrace;
+};
+async function armHeaderPanelResizeTrace(page: Page, targetWidth: number) {
+  await page.evaluate((target) => {
+    const host = window as HeaderPanelTraceWindow;
+    host.__puiHeaderPanelResizeTrace?.stop('replaced');
+    const started = performance.now();
+    let frame: number | null = null;
+    let deadline: ReturnType<typeof setTimeout> | null = null;
+    let frameCount = 0;
+    const sampleLimit = 96;
+    const state: HeaderPanelResizeTrace = {
+      samples: [],
+      error: null,
+      done: false,
+      stopReason: null,
+      droppedSamples: 0,
+      sample: () => null,
+      snapshot: () => null,
+      stop: () => {},
+    };
+    const rect = (element: Element | null) => element?.getBoundingClientRect().toJSON() ?? null;
+    const box = (element: HTMLElement | null) => {
+      if (!element) return null;
+      const css = getComputedStyle(element);
+      const generation = element.closest<HTMLElement>('[data-projection-generation]');
+      return {
+        tag: element.localName,
+        id: element.id,
+        prototype: element.getAttribute('data-projection-prototype'),
+        owner:
+          element.closest('[data-projection-owner]')?.getAttribute('data-projection-owner') ?? null,
+        generation: generation?.getAttribute('data-projection-generation') ?? null,
+        generationState:
+          element
+            .closest('[data-projection-generation-state]')
+            ?.getAttribute('data-projection-generation-state') ?? null,
+        connected: element.isConnected,
+        hiddenOrInert: !!element.closest('[hidden], [inert]'),
+        rect: rect(element),
+        clientWidth: element.clientWidth,
+        scrollWidth: element.scrollWidth,
+        offsetWidth: element.offsetWidth,
+        display: css.display,
+        position: css.position,
+        transform: css.transform,
+        width: css.width,
+        minWidth: css.minWidth,
+        maxWidth: css.maxWidth,
+        boxSizing: css.boxSizing,
+        border: [
+          css.borderTopWidth,
+          css.borderRightWidth,
+          css.borderBottomWidth,
+          css.borderLeftWidth,
+        ],
+        padding: [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft],
+        transition: {
+          property: css.transitionProperty,
+          duration: css.transitionDuration,
+          delay: css.transitionDelay,
+        },
+      };
+    };
+    state.snapshot = (phase) => {
+      const header = document.querySelector<HTMLElement>('.site-header');
+      const panel = header?.querySelector<HTMLElement>('[data-site-header-panel]') ?? null;
+      const surface = panel?.querySelector<HTMLElement>('.site-header-popup-surface') ?? null;
+      const menu =
+        header?.querySelector<HTMLElement>(
+          '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"], [data-site-menu-button]'
+        ) ?? null;
+      const viewport = visualViewport;
+      const sample = {
+        phase,
+        now: performance.now(),
+        elapsed: performance.now() - started,
+        timeOrigin: performance.timeOrigin,
+        dateNow: Date.now(),
+        targetWidth: target,
+        innerWidth,
+        documentClientWidth: document.documentElement.clientWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        visualViewport: viewport
+          ? {
+              width: viewport.width,
+              height: viewport.height,
+              offsetLeft: viewport.offsetLeft,
+              offsetTop: viewport.offsetTop,
+              scale: viewport.scale,
+            }
+          : null,
+        header: box(header),
+        menu: box(menu),
+        panel: box(panel),
+        surface: box(surface),
+        panelVariables: Object.fromEntries(
+          [
+            '--site-header-panel-left',
+            '--site-header-panel-top',
+            '--site-header-panel-max-width',
+            '--site-header-panel-max-height',
+          ].map((name) => [
+            name,
+            {
+              inline: panel?.style.getPropertyValue(name) ?? null,
+              computed: panel ? getComputedStyle(panel).getPropertyValue(name) : null,
+            },
+          ])
+        ),
+        panelOpen: panel instanceof HTMLDetailsElement ? panel.open : null,
+        openMarker: header?.getAttribute('data-site-menu-open') ?? null,
+        expanded: menu?.getAttribute('aria-expanded') ?? null,
+        focus: document.activeElement
+          ? {
+              tag: document.activeElement.localName,
+              id: document.activeElement.id,
+              owner: document.activeElement.getAttribute('data-projection-owner'),
+            }
+          : null,
+      };
+      return sample;
+    };
+    state.sample = (phase) => {
+      if (
+        state.done ||
+        performance.now() - started >= 1000 ||
+        state.samples.length >= sampleLimit
+      ) {
+        state.droppedSamples++;
+        state.stop('bounded-window-ended');
+        return null;
+      }
+      const sample = state.snapshot(phase);
+      state.samples.push(sample);
+      return sample;
+    };
+    const observe = (phase: string) => {
+      try {
+        state.sample(phase);
+      } catch (error) {
+        state.error = String(error);
+        state.stop('observation-error');
+      }
+    };
+    const onWindowResize = () => observe('window-resize');
+    const onVisualResize = () => observe('visual-viewport-resize');
+    state.stop = (reason) => {
+      if (state.done) return;
+      state.done = true;
+      state.stopReason = reason;
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+      if (deadline !== null) clearTimeout(deadline);
+      deadline = null;
+      window.removeEventListener('resize', onWindowResize);
+      visualViewport?.removeEventListener('resize', onVisualResize);
+    };
+    host.__puiHeaderPanelResizeTrace = state;
+    window.addEventListener('resize', onWindowResize, { passive: true });
+    visualViewport?.addEventListener('resize', onVisualResize, { passive: true });
+    // This timer only removes observers; it never delays the original assertion.
+    deadline = setTimeout(() => state.stop('deadline'), 1000);
+    observe('before-resize');
+    const tick = () => {
+      frame = null;
+      if (state.done) return;
+      observe('raf');
+      frameCount++;
+      if (state.done) return;
+      if (
+        frameCount >= 32 ||
+        performance.now() - started >= 1000 ||
+        state.samples.length >= sampleLimit
+      )
+        state.stop('bounded-window-ended');
+      else frame = requestAnimationFrame(tick);
+    };
+    if (!state.done) frame = requestAnimationFrame(tick);
+  }, targetWidth);
+}
+async function finishHeaderPanelResizeTrace(page: Page) {
+  return page.evaluate(() => {
+    const host = window as HeaderPanelTraceWindow;
+    const trace = host.__puiHeaderPanelResizeTrace;
+    if (!trace) return null;
+    let finalSnapshot: unknown = null;
+    try {
+      finalSnapshot = trace.snapshot('case-finally-outside-window');
+    } catch (error) {
+      trace.error = String(error);
+    } finally {
+      trace.stop('case-finally');
+    }
+    return {
+      samples: trace.samples,
+      finalSnapshot,
+      error: trace.error,
+      done: trace.done,
+      stopReason: trace.stopReason,
+      droppedSamples: trace.droppedSamples,
+      limits: { samples: 96, animationFrames: 32, samplingDeadlineMs: 1000 },
+      semantics:
+        'Read-only observations; no convergence wait before original assertion. Geometry reads can flush layout. Screenshot request/completion timestamps are not proof of same paint frame.',
+    };
+  });
+}
+
 // Arm before changing viewport: do not wait for transitionend or discard early
 // overflowing frames. The finite sample window exceeds the actual family
 // feedback duration; responsive geometry itself must already be discrete.
@@ -237,6 +460,15 @@ describe.sequential('Header public family presentation and labelled compact fiel
           page.on('pageerror', (error) => errors.push(error.message));
           const measurements: unknown[] = [];
           let disposition = 'not-completed';
+          const panelDiagnostic =
+            appearance === 'family' &&
+            family === 'shadcn' &&
+            ((runtime === 'react' && theme === 'dark') ||
+              ((runtime === 'vue' || runtime === 'vue2') && theme === 'light'));
+          const panelDiagnosticErrors: string[] = [];
+          let panelResizeTrace: unknown = null;
+          let failureScreenshotTiming: { requestedAt: string; completedAt: string | null } | null =
+            null;
           const capture = async (state: string) => {
             if (output)
               await page.screenshot({
@@ -519,6 +751,13 @@ describe.sequential('Header public family presentation and labelled compact fiel
             }
             if (appearance === 'family') {
               for (const width of [320, 390, 1099, 1100, 1180, 1279, 1280, 1920]) {
+                if (panelDiagnostic && width === 320) {
+                  try {
+                    await armHeaderPanelResizeTrace(page, width);
+                  } catch (error) {
+                    panelDiagnosticErrors.push(`arm: ${String(error)}`);
+                  }
+                }
                 await page.setViewportSize({ width, height: 1000 });
                 await revealHeaderPreferences(page);
                 const geometry = await page.locator('.site-header').evaluate((header) => {
@@ -543,6 +782,16 @@ describe.sequential('Header public family presentation and labelled compact fiel
                     viewport: document.documentElement.clientWidth,
                     scrollWidth: document.documentElement.scrollWidth,
                     headerScrollWidth: header.scrollWidth,
+                    panelResizeObservation: (() => {
+                      const trace = (window as HeaderPanelTraceWindow).__puiHeaderPanelResizeTrace;
+                      try {
+                        return innerWidth === 320
+                          ? (trace?.snapshot('assertion-readback-outside-ring') ?? null)
+                          : null;
+                      } catch (error) {
+                        return { error: String(error) };
+                      }
+                    })(),
                     overflowElements: [...document.querySelectorAll<HTMLElement>('body *')]
                       .filter((element) => {
                         const box = element.getBoundingClientRect();
@@ -784,12 +1033,27 @@ describe.sequential('Header public family presentation and labelled compact fiel
           } catch (error) {
             disposition = 'unexpected-failure';
             try {
+              if (panelDiagnostic)
+                failureScreenshotTiming = {
+                  requestedAt: new Date().toISOString(),
+                  completedAt: null,
+                };
               await capture('failure');
             } catch (captureError) {
               console.error('Header failure capture unavailable', captureError);
+            } finally {
+              if (failureScreenshotTiming)
+                failureScreenshotTiming.completedAt = new Date().toISOString();
             }
             throw error;
           } finally {
+            if (panelDiagnostic) {
+              try {
+                panelResizeTrace = await finishHeaderPanelResizeTrace(page);
+              } catch (error) {
+                panelDiagnosticErrors.push(`finish: ${String(error)}`);
+              }
+            }
             if (output)
               await writeFile(
                 path.join(output, `${family}-${runtime}-${theme}-${appearance}.json`),
@@ -811,6 +1075,9 @@ describe.sequential('Header public family presentation and labelled compact fiel
                     theme,
                     measurements,
                     errors,
+                    panelResizeTrace,
+                    panelDiagnosticErrors,
+                    failureScreenshotTiming,
                   },
                   null,
                   2

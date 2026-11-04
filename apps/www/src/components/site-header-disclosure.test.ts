@@ -750,3 +750,254 @@ describe('server-authored compact preferences', () => {
     }
   );
 });
+
+describe('Header anchor transition settlement', () => {
+  for (const kind of ['transitionend', 'transitioncancel']) {
+    it(`remeasures the current Button after ${kind} without another attribute or resize`, async () => {
+      const widthDescriptor = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+      const frames = new Map<number, FrameRequestCallback>();
+      let nextFrame = 0;
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+        frames.set(++nextFrame, callback);
+        return nextFrame;
+      });
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => frames.delete(id));
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
+      try {
+        const { root, button, panel } = fixture(false);
+        root.style.direction = 'ltr';
+        vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+        vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+        vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
+        let translation = 4;
+        const anchor = vi
+          .spyOn(button, 'getBoundingClientRect')
+          .mockImplementation(() => new DOMRect(280 + translation, 6 + translation, 44, 44));
+        vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 300));
+        disclosure!.enhance();
+        disclosure!.toggle();
+        await Promise.resolve();
+        const focus = document.activeElement;
+        expect(button.getAttribute('aria-expanded')).toBe('true');
+        expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('59px');
+        button.setAttribute('data-hovered', '');
+        await vi.waitFor(() => expect(frames.size).toBe(1));
+        const [firstId, firstFrame] = [...frames][0];
+        frames.delete(firstId);
+        firstFrame(10);
+        expect(frames.size).toBe(0);
+        expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('48px');
+        const readsBeforeEnd = anchor.mock.calls.length;
+
+        // CSS interpolation can end without another attribute mutation or resize.
+        // Only the real event and current rect change; do not synthesize a fresh mutation.
+        translation = 0;
+        const event = new Event(kind, { bubbles: true });
+        Object.defineProperty(event, 'propertyName', { value: 'transform' });
+        button.dispatchEvent(event);
+        expect(frames.size).toBe(1);
+        const [endId, endFrame] = [...frames][0];
+        frames.delete(endId);
+        endFrame(20);
+        expect(anchor.mock.calls.length).toBeGreaterThan(readsBeforeEnd);
+        expect(
+          Math.abs(parseFloat(panel.style.getPropertyValue('--site-header-panel-left')) - 44)
+        ).toBeLessThanOrEqual(0.05);
+        expect(
+          Math.abs(parseFloat(panel.style.getPropertyValue('--site-header-panel-top')) - 55)
+        ).toBeLessThanOrEqual(0.05);
+        expect(document.activeElement).toBe(focus);
+        expect(button.getAttribute('aria-expanded')).toBe('true');
+        expect(panel.hidden).toBe(false);
+      } finally {
+        disclosure?.destroy();
+        if (widthDescriptor) Object.defineProperty(window, 'innerWidth', widthDescriptor);
+        else Reflect.deleteProperty(window, 'innerWidth');
+      }
+    });
+  }
+});
+
+describe('Header settlement callback ownership', () => {
+  function setupSettlement() {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => frames.delete(id));
+    const owner = fixture(false);
+    owner.root.style.direction = 'ltr';
+    vi.spyOn(owner.root, 'offsetWidth', 'get').mockReturnValue(360);
+    vi.spyOn(owner.root, 'offsetHeight', 'get').mockReturnValue(56);
+    vi.spyOn(owner.root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
+    let translation = 0;
+    const reads = vi
+      .spyOn(owner.button, 'getBoundingClientRect')
+      .mockImplementation(() => new DOMRect(280 + translation, 6 + translation, 44, 44));
+    vi.spyOn(owner.panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 300));
+    disclosure!.enhance();
+    disclosure!.toggle();
+    const dispatch = (target: HTMLElement = owner.button, kind = 'transitionend') => {
+      const event = new Event(kind, { bubbles: true });
+      Object.defineProperty(event, 'propertyName', { value: 'transform' });
+      target.dispatchEvent(event);
+    };
+    const flush = () => {
+      expect(frames.size).toBe(1);
+      const [id, callback] = [...frames][0];
+      frames.delete(id);
+      callback(100);
+    };
+    return {
+      ...owner,
+      frames,
+      reads,
+      dispatch,
+      flush,
+      move: (value: number) => {
+        translation = value;
+      },
+    };
+  }
+
+  it('ignores descendant transition events and coalesces current end/cancel without stealing focus', async () => {
+    const owner = setupSettlement();
+    await Promise.resolve();
+    const focus = document.activeElement;
+    const child = document.createElement('span');
+    owner.button.append(child);
+    owner.move(3);
+    owner.dispatch(child);
+    expect(owner.frames.size).toBe(0);
+    owner.dispatch();
+    owner.dispatch(owner.button, 'transitioncancel');
+    expect(owner.frames.size).toBe(1);
+    owner.flush();
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('47px');
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-top')).toBe('58px');
+    expect(document.activeElement).toBe(focus);
+  });
+
+  it('retires a same-node lease without letting its callback or cleanup retire the successor', () => {
+    const owner = setupSettlement();
+    const retire = disclosure!.bindButton(owner.button);
+    owner.dispatch();
+    const stale = [...owner.frames.values()][0];
+    expect(stale).toBeTypeOf('function');
+    disclosure!.bindButton(owner.button);
+    expect(owner.frames.size).toBe(0);
+    retire();
+    owner.move(2);
+    owner.dispatch();
+    expect(owner.frames.size).toBe(1);
+    const reads = owner.reads.mock.calls.length;
+    stale(20);
+    expect(owner.reads.mock.calls.length).toBe(reads);
+    expect(owner.frames.size).toBe(1);
+    owner.flush();
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('46px');
+  });
+
+  it('does not let an old projection event or queued callback position the new active Button', () => {
+    const owner = setupSettlement();
+    const oldGeneration = document.createElement('div');
+    oldGeneration.dataset.projectionGenerationState = 'active';
+    owner.root.append(oldGeneration);
+    oldGeneration.append(owner.button);
+    owner.dispatch();
+    const [oldId, stale] = [...owner.frames][0];
+    expect(stale).toBeTypeOf('function');
+    oldGeneration.dataset.projectionGenerationState = 'retired';
+    const current = document.createElement('button');
+    owner.root.append(current);
+    let x = 240;
+    const currentReads = vi
+      .spyOn(current, 'getBoundingClientRect')
+      .mockImplementation(() => new DOMRect(x, 10, 44, 44));
+    disclosure!.bindButton(current);
+    const reads = currentReads.mock.calls.length;
+    owner.frames.delete(oldId);
+    stale(20);
+    expect(currentReads.mock.calls.length).toBe(reads);
+    owner.dispatch(owner.button);
+    expect(owner.frames.size).toBe(0);
+    x = 250;
+    owner.dispatch(current);
+    owner.flush();
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('14px');
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-top')).toBe('59px');
+  });
+
+  it('fences a close/reopen callback without consuming the current open cycle frame', async () => {
+    const owner = setupSettlement();
+    await Promise.resolve();
+    owner.dispatch();
+    const stale = [...owner.frames.values()][0];
+    expect(stale).toBeTypeOf('function');
+    disclosure!.close();
+    expect(owner.frames.size).toBe(0);
+    owner.dispatch();
+    expect(owner.frames.size).toBe(0);
+    owner.move(1);
+    disclosure!.toggle();
+    await Promise.resolve();
+    const focus = document.activeElement;
+    owner.move(2);
+    owner.dispatch();
+    const reads = owner.reads.mock.calls.length;
+    stale(20);
+    expect(owner.reads.mock.calls.length).toBe(reads);
+    expect(owner.frames.size).toBe(1);
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('45px');
+    owner.flush();
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('46px');
+    expect(owner.button.getAttribute('aria-expanded')).toBe('true');
+    expect(document.activeElement).toBe(focus);
+  });
+
+  it('removes settlement listeners and fences the pending frame when destroyed', () => {
+    const owner = setupSettlement();
+    owner.dispatch();
+    const stale = [...owner.frames.values()][0];
+    expect(stale).toBeTypeOf('function');
+    disclosure!.destroy();
+    expect(owner.frames.size).toBe(0);
+    const reads = owner.reads.mock.calls.length;
+    stale(20);
+    owner.dispatch();
+    owner.dispatch(owner.button, 'transitioncancel');
+    expect(owner.frames.size).toBe(0);
+    expect(owner.reads.mock.calls.length).toBe(reads);
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('');
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-top')).toBe('');
+  });
+
+  it('settles a zero-duration transform through the existing mutation frame without any transition event', async () => {
+    const owner = setupSettlement();
+    await Promise.resolve();
+    owner.move(4);
+    owner.button.setAttribute('style', 'transform: translate(4px, 4px); transition-duration: 0s');
+    await vi.waitFor(() => expect(owner.frames.size).toBe(1));
+    owner.flush();
+    expect(owner.panel.style.getPropertyValue('--site-header-panel-left')).toBe('48px');
+    owner.move(0);
+    owner.button.setAttribute('style', 'transform: none; transition-duration: 0s');
+    await vi.waitFor(() => expect(owner.frames.size).toBe(1));
+    owner.flush();
+    expect(
+      Math.abs(parseFloat(owner.panel.style.getPropertyValue('--site-header-panel-left')) - 44)
+    ).toBeLessThanOrEqual(0.05);
+    expect(
+      Math.abs(parseFloat(owner.panel.style.getPropertyValue('--site-header-panel-top')) - 55)
+    ).toBeLessThanOrEqual(0.05);
+  });
+
+  it('does not schedule a detached Button transition', () => {
+    const owner = setupSettlement();
+    owner.button.remove();
+    owner.dispatch();
+    expect(owner.frames.size).toBe(0);
+  });
+});

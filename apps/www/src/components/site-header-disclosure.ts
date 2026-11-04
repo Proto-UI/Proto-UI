@@ -69,8 +69,9 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       : (preferencesParent?.firstChild ?? null);
   const compact = window?.matchMedia('(max-width: 47.999rem)');
   const buttons = new Set<HTMLElement>();
-  const buttonLeases = new Map<HTMLElement, { observer: MutationObserver | null }>();
-  let pendingPositionFrame: number | null = null;
+  type ButtonLease = { observer: MutationObserver | null; settle: (event: Event) => void };
+  const buttonLeases = new Map<HTMLElement, ButtonLease>();
+  let pendingPosition: { frame: number; button: HTMLElement; lease: ButtonLease } | null = null;
   let enhanced = false;
   let open = false;
   const nativePanel = panel?.localName === 'details' ? (panel as HTMLDetailsElement) : null;
@@ -159,11 +160,25 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     measureHeader();
     positionPanel();
   };
+  const cancelPosition = () => {
+    const pending = pendingPosition;
+    pendingPosition = null;
+    if (pending) window?.cancelAnimationFrame(pending.frame);
+  };
   const schedulePosition = () => {
-    if (destroyed || !open || pendingPositionFrame !== null) return;
+    const button = activeButton();
+    const lease = button && buttonLeases.get(button);
+    if (destroyed || !open || !button || !lease) return;
+    if (pendingPosition?.button === button && pendingPosition.lease === lease) return;
+    cancelPosition();
     if (!window?.requestAnimationFrame) return positionPanel();
-    pendingPositionFrame = window.requestAnimationFrame(() => {
-      pendingPositionFrame = null;
+    const pending = { frame: 0, button, lease };
+    pendingPosition = pending;
+    pending.frame = window.requestAnimationFrame(() => {
+      if (pendingPosition !== pending) return;
+      pendingPosition = null;
+      if (destroyed || !open || activeButton() !== button || buttonLeases.get(button) !== lease)
+        return;
       positionPanel();
     });
   };
@@ -215,6 +230,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const hidingFocus = !!focused && (!!panel?.contains(focused) || ownsSelectPopup(focused));
     if (panel) closeSiteSelects(panel, 'parent.dismiss');
     open = false;
+    cancelPosition();
     sync();
     if (restoreFocus || hidingFocus) activeButton()?.focus({ preventScroll: true });
   };
@@ -295,9 +311,12 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
-    if (pendingPositionFrame !== null) window?.cancelAnimationFrame(pendingPositionFrame);
-    pendingPositionFrame = null;
-    for (const lease of buttonLeases.values()) lease.observer?.disconnect();
+    cancelPosition();
+    for (const [button, lease] of buttonLeases) {
+      lease.observer?.disconnect();
+      button.removeEventListener('transitionend', lease.settle);
+      button.removeEventListener('transitioncancel', lease.settle);
+    }
     buttonLeases.clear();
     geometryObserver?.disconnect();
     window?.removeEventListener('resize', measureLayout);
@@ -346,11 +365,35 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const handle: SiteHeaderDisclosure = {
     bindButton(button) {
       if (destroyed) return () => {};
-      buttonLeases.get(button)?.observer?.disconnect();
-      const lease = {
-        observer: window?.MutationObserver ? new window.MutationObserver(schedulePosition) : null,
+      const previous = buttonLeases.get(button);
+      previous?.observer?.disconnect();
+      if (previous) {
+        button.removeEventListener('transitionend', previous.settle);
+        button.removeEventListener('transitioncancel', previous.settle);
+      }
+      if (pendingPosition?.button === button) cancelPosition();
+      const lease: ButtonLease = {
+        observer: window?.MutationObserver
+          ? new window.MutationObserver(() => {
+              if (buttonLeases.get(button) === lease && activeButton() === button)
+                schedulePosition();
+            })
+          : null,
+        settle: (event) => {
+          // Ignore bubbled descendants and retired projection owners. The final
+          // transformed rect need not produce another mutation or ResizeObserver.
+          if (
+            event.target !== button ||
+            buttonLeases.get(button) !== lease ||
+            activeButton() !== button
+          )
+            return;
+          schedulePosition();
+        },
       };
       buttonLeases.set(button, lease);
+      button.addEventListener('transitionend', lease.settle);
+      button.addEventListener('transitioncancel', lease.settle);
       buttons.add(button);
       geometryObserver?.observe(button);
       // Prototype hover/press translations do not trigger ResizeObserver. Read
@@ -370,7 +413,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       sync();
       return () => {
         lease.observer?.disconnect();
+        button.removeEventListener('transitionend', lease.settle);
+        button.removeEventListener('transitioncancel', lease.settle);
         if (buttonLeases.get(button) !== lease) return;
+        if (pendingPosition?.lease === lease) cancelPosition();
         buttonLeases.delete(button);
         buttons.delete(button);
         geometryObserver?.unobserve(button);
