@@ -1,16 +1,29 @@
 name: Library Card first-frame evidence
 on:
   workflow_dispatch:
+    inputs:
+      font_comparison:
+        description: Run the bounded fixed historical baseline versus candidate font comparison
+        type: boolean
+        required: false
+        default: false
   workflow_call:
+    inputs:
+      supplemental-only:
+        type: boolean
+        default: false
+        description: Run the supplemental font boundary while the shared browser shard owns Card9.
 permissions:
   contents: read
 concurrency:
   group: library-card-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:
   browser-evidence:
+    if: ${{ !inputs.supplemental-only }}
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -71,5 +84,343 @@ jobs:
         with:
           name: library-card-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/library-card
+          if-no-files-found: error
+          retention-days: 30
+
+  font-parent-comparison:
+    # Explicit manual diagnostic only; never part of the periodic regression cycle.
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.font_comparison == true }}
+    # Fixed historical baseline versus the selected dispatch ref; retain old d850 runs.
+    # The original browser-evidence job and all its gates above remain intact.
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ matrix.job_minutes }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lane: library-card
+            job_minutes: 25
+          - lane: quick-start
+            job_minutes: 35
+          - lane: visual-density
+            job_minutes: 25
+    env:
+      PAIR_LANE: ${{ matrix.lane }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1fbbe8cadf4e4592d54dabdb1c346f2d080a094f
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare the same locked dependencies, browser and CJK fonts
+        id: environment
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack enable
+          OUT="$RUNNER_TEMP/font-parent-pair/$PAIR_LANE"
+          mkdir -p "$OUT"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version > "$OUT/browser-environment.txt"
+          node --version > "$OUT/node-environment.txt"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$OUT/font-environment.txt"
+          for role in baseline candidate; do
+            (
+              cd "$role"
+              corepack pnpm@10.32.1 install --frozen-lockfile
+              corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+              SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+              printf '%s\n' "$SETTING" > "$OUT/$role-toolbar.txt"
+              grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$SETTING"
+            )
+          done
+      - name: Bind both clean product trees and the original acceptance inventory
+        id: prepare
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/font-parent-pair.py" <<'PY'
+          import hashlib, json, os, pathlib, stat, subprocess, sys
+          ROOT = pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          OUT = pathlib.Path(os.environ['RUNNER_TEMP']) / 'font-parent-pair' / os.environ['PAIR_LANE']
+          CANDIDATE_HEAD = os.environ['CANDIDATE_SHA']
+          assert len(CANDIDATE_HEAD) == 40 and all(c in '0123456789abcdef' for c in CANDIDATE_HEAD)
+          CANDIDATE_TREE = subprocess.check_output(['git', '-C', str(ROOT / 'candidate'), 'rev-parse', CANDIDATE_HEAD + '^{tree}']).decode().strip()
+          SOURCES = {
+              'baseline': ('1fbbe8cadf4e4592d54dabdb1c346f2d080a094f', '9d32bc9734f0fccdeca9024b87a365cb395f7f2e'),
+              'candidate': (CANDIDATE_HEAD, CANDIDATE_TREE),
+          }
+          EXPECTED_CHANGED = [".github/workflows/ci-production-suites.yml",".github/workflows/finf-representative-features-evidence.yml",".github/workflows/library-card-evidence.yml",".github/workflows/liquid-card-candidate-evidence.yml","apps/www/public/fonts/geist-OFL.txt","apps/www/src/components/PrototypePreviewer/demo-ref-observer.test.ts","apps/www/src/components/PrototypePreviewer/demo-renderer.expose-events.test.ts","apps/www/src/components/PrototypePreviewer/demo-renderer.native-facts.test.ts","apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts","apps/www/src/components/PrototypePreviewer/projection-composition.test.ts","apps/www/src/components/PrototypePreviewer/projection-families.ts","apps/www/src/components/PrototypePreviewer/projection-theme.test.ts","apps/www/src/components/PrototypePreviewer/projection-theme.ts","apps/www/src/components/PrototypePreviewer/prototype-modules.ts","apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts","apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts","apps/www/src/components/PrototypePreviewer/runtime-tabs-projection.test.ts","apps/www/src/components/PrototypePreviewer/select-public-parts.test.ts","apps/www/src/components/PrototypePreviewer/shadcn-alert-dialog-layout.test.ts","apps/www/src/components/PrototypePreviewer/shadcn-checkbox-composition.test.ts","apps/www/src/components/UiLibraryGallery.astro","apps/www/src/components/header-ghost-appearance.test.ts","apps/www/src/components/library-card-source.test.ts","apps/www/src/components/site-header-disclosure.test.ts","apps/www/src/components/site-header-disclosure.ts","apps/www/src/components/site-link-recipes.test.ts","apps/www/src/components/site-link-recipes.ts","apps/www/src/components/site-typography.test.ts","apps/www/src/components/site-typography.ts","apps/www/src/content/docs/accordion-demo.shared.ts","apps/www/src/content/docs/demo-brutalist-popover-navigation.demo.ts","apps/www/src/content/docs/demo-shadcn-accordion.demo.ts","apps/www/src/content/docs/demo-shadcn-alert-dialog.demo.ts","apps/www/src/content/docs/demo-shadcn-autocomplete.demo.ts","apps/www/src/content/docs/demo-shadcn-checkbox-group.demo.ts","apps/www/src/content/docs/demo-shadcn-collapsible.demo.ts","apps/www/src/content/docs/demo-shadcn-combobox.demo.ts","apps/www/src/content/docs/demo-shadcn-command.demo.ts","apps/www/src/content/docs/demo-shadcn-context-menu.demo.ts","apps/www/src/content/docs/demo-shadcn-drawer-scroll.demo.ts","apps/www/src/content/docs/demo-shadcn-drawer-snap.demo.ts","apps/www/src/content/docs/demo-shadcn-drawer.demo.ts","apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts","apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts","apps/www/src/content/docs/demo-shadcn-field.demo.ts","apps/www/src/content/docs/demo-shadcn-fieldset.demo.ts","apps/www/src/content/docs/demo-shadcn-form.demo.ts","apps/www/src/content/docs/demo-shadcn-input-otp.demo.ts","apps/www/src/content/docs/demo-shadcn-menubar.demo.ts","apps/www/src/content/docs/demo-shadcn-meter.demo.ts","apps/www/src/content/docs/demo-shadcn-navigation-menu.demo.ts","apps/www/src/content/docs/demo-shadcn-number-field.demo.ts","apps/www/src/content/docs/demo-shadcn-popover-navigation.demo.ts","apps/www/src/content/docs/demo-shadcn-popover.demo.ts","apps/www/src/content/docs/demo-shadcn-progress.demo.ts","apps/www/src/content/docs/demo-shadcn-slider.demo.ts","apps/www/src/content/docs/demo-shadcn-toast.demo.ts","apps/www/src/content/docs/demo-shadcn-toggle-group.demo.ts","apps/www/src/content/docs/demo-shadcn-toolbar.demo.ts","apps/www/src/content/docs/demo_components/button/buttonCode.ts","apps/www/src/content/docs/demo_components/button/demo-button-default.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-destructive.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-disabled.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-ghost.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-outline.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-secondary.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-sizes.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button-variants.demo.ts","apps/www/src/content/docs/demo_components/button/demo-button.demo.ts","apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts","apps/www/src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode.ts","apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs.demo.ts","apps/www/src/content/docs/demo_components/tabs/tabsCode.ts","apps/www/src/content/docs/en/ui-libraries/brutalist/components/popover.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/accordion.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/alert-dialog.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/autocomplete.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/button.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/calendar.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/card.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/carousel.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/checkbox-group.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/checkbox.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/collapsible.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/combobox.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/command.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/context-menu.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/data-table.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/date-picker.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/dialog.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/drawer.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/dropdown-menu.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/field.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/fieldset.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/form.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/hover-card.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/index.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/input-otp.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/label.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/menubar.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/message-scroller.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/meter.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/navigation-menu.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/number-field.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/popover.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/progress.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/radio-group.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/resizable.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/scroll-area.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/select.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/separator.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/slider.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/surface.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/switch.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/tabs.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/text.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/textarea.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/toast.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/toggle-group.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/toggle.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/toolbar.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/tooltip.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/tree.mdx","apps/www/src/content/docs/en/ui-libraries/shadcn/virtual-list.mdx","apps/www/src/content/docs/field-demo.shared.ts","apps/www/src/content/docs/shadcn-demo-style.ts","apps/www/src/content/docs/zh-cn/code-scroll-chain.test.ts","apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-calendar.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-card.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-carousel.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-checkbox.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-data-table.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-date-picker.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-hover-card.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-label.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-message-scroller.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-resizable.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-separator.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-surface.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-switch.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-text.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-textarea.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-toggle.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-tree.demo.ts","apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts","apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts","apps/www/src/content/docs/zh-cn/finf-representative-features-evidence.test.ts","apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts","apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts","apps/www/src/content/docs/zh-cn/finf-slider-upstream-evidence.test.ts","apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts","apps/www/src/content/docs/zh-cn/ghost-paint-oracle.ts","apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts","apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts","apps/www/src/content/docs/zh-cn/library-card-platform-fonts.test.ts","apps/www/src/content/docs/zh-cn/library-card-platform-fonts.ts","apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts","apps/www/src/content/docs/zh-cn/popover-navigation-evidence.test.ts","apps/www/src/content/docs/zh-cn/popover-navigation-scroll-headroom.test.ts","apps/www/src/content/docs/zh-cn/popover-navigation-scroll-headroom.ts","apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts","apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts","apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts","apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts","apps/www/src/content/docs/zh-cn/switch-demo-fixture.test.ts","apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/popover.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/accordion.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/alert-dialog.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/autocomplete.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/calendar.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/card.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/carousel.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/checkbox-group.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/checkbox.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/collapsible.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/combobox.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/command.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/context-menu.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/data-table.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/date-picker.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/drawer.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dropdown-menu.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/field.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/fieldset.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/form.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/hover-card.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/index.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input-otp.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/label.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/menubar.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/message-scroller.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/meter.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/navigation-menu.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/number-field.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/popover.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/progress.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/resizable.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/scroll-area.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/select.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/separator.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/slider.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/surface.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/switch.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/tabs.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/text.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/textarea.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toast.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toggle-group.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toggle.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toolbar.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/tooltip.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/tree.mdx","apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/virtual-list.mdx","apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro","apps/www/src/pages/styles/site-library-theme.css.ts","apps/www/src/prototypes/site-link-surface.test.ts","apps/www/src/styles/assets/font/geist/Geist-Variable.ttf","apps/www/src/styles/assets/font/geist/OFL.txt","apps/www/src/styles/assets/font/geist/README.md","apps/www/src/styles/site-library-family.css","apps/www/src/styles/tailwindcss.css","apps/www/test/fixtures/shadcn-card-new-york.ts","apps/www/test/shadcn-font-license.test.ts","apps/www/test/shadcn-rhea-demo-policy.test.ts","apps/www/test/shadcn-typography-theme.test.ts","internal/records/2026-10-10-finf-b-popover-focus-outside-source.md","internal/records/2026-10-29-header-shared-control-recipes.md","internal/records/2026-11-02-font-author-boundary.md","internal/records/2026-11-03-select-website-item-sizing.md","internal/website/self-hosting-coverage-matrix.md","packages/cli/src/generated/brutalist-style-tokens.ts","packages/cli/src/generated/shadcn-style-tokens.ts","packages/cli/test/popover-navigation-preset.test.ts","packages/prototypes/brutalist/src/popover/content.proto.ts","packages/prototypes/brutalist/src/popover/index.ts","packages/prototypes/brutalist/src/popover/trigger.proto.ts","packages/prototypes/brutalist/src/popover/types.ts","packages/prototypes/shadcn/README.md","packages/prototypes/shadcn/src/popover/command-paint.ts","packages/prototypes/shadcn/src/popover/content.proto.ts","packages/prototypes/shadcn/src/popover/motion.ts","packages/prototypes/shadcn/src/popover/recipes.ts","packages/prototypes/shadcn/src/popover/trigger.proto.ts","packages/prototypes/shadcn/src/popover/types.ts","packages/prototypes/shadcn/src/text/index.ts","packages/prototypes/shadcn/src/text/typography.ts","packages/prototypes/shadcn/test/drawer-presence.browser.test.ts","packages/prototypes/shadcn/test/fixtures/drawer-entry-build.ts","packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts","packages/prototypes/shadcn/test/popover-navigation.test.ts","packages/prototypes/shadcn/test/typography-theme.test.ts","scripts/ci/test/ci-scheduling-policy.test.mjs","scripts/coverage-matrices/README.md","scripts/coverage-matrices/check-coverage-matrices.mjs","scripts/coverage-matrices/check-website-production-bundle.mjs","scripts/coverage-matrices/test/check-coverage-matrices.test.mjs","scripts/coverage-matrices/test/check-website-production-bundle.test.mjs","scripts/release/test/liquid-card-candidate-workflow.test.mjs","scripts/test/runtime-test-plan.mjs","spec/prototypes/P-BRUTALIST-POPOVER.yaml","spec/prototypes/P-SHADCN-POPOVER.yaml","spec/prototypes/P-SHADCN-TEXT.yaml","spec/tests/T-POPOVER-NAVIGATION-PRESENTATION-0001.yaml","spec/tests/T-SHADCN-TYPOGRAPHY-THEME-0001.yaml"]
+          DENSITY_HASH = '6f23b528bd0142a449333d5f6ea452a75fa439f1ccea6d3e6e55c3f2e6fd8f4c'
+
+          def git(root, *args):
+              return subprocess.check_output(['git', '-C', str(root), *args])
+
+          def guard(role, label):
+              root = ROOT / role
+              head, tree = SOURCES[role]
+              assert git(root, 'rev-parse', 'HEAD').decode().strip() == head
+              assert git(root, 'rev-parse', 'HEAD^{tree}').decode().strip() == tree
+              assert not git(root, 'status', '--porcelain', '--untracked-files=all').strip()
+              entries = {}
+              for item in git(root, 'ls-tree', '-rz', 'HEAD').split(b'\0'):
+                  if not item:
+                      continue
+                  metadata, raw_name = item.split(b'\t', 1)
+                  mode, kind, oid = metadata.decode().split()
+                  name = raw_name.decode()
+                  assert kind == 'blob' and mode in ('100644', '100755', '120000')
+                  file = root / name
+                  info = file.lstat()
+                  if mode == '120000':
+                      assert stat.S_ISLNK(info.st_mode)
+                      data = os.readlink(file).encode()
+                  else:
+                      assert stat.S_ISREG(info.st_mode) and not file.is_symlink()
+                      assert bool(info.st_mode & 0o111) == (mode == '100755')
+                      data = file.read_bytes()
+                  assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, name
+                  entries[name] = {'mode': mode, 'gitBlob': oid, 'sha256': hashlib.sha256(data).hexdigest()}
+              out = OUT / role
+              out.mkdir(parents=True, exist_ok=True)
+              (out / (label + '-source.json')).write_text(json.dumps({'role': role, 'head': head, 'tree': tree, 'dirty': False, 'trackedFileCount': len(entries), 'files': entries}, indent=2) + '\n')
+              return entries
+
+          def prepare():
+              a, b = guard('baseline', 'prepared'), guard('candidate', 'prepared')
+              assert sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k)) == EXPECTED_CHANGED
+              assert a['pnpm-lock.yaml'] == b['pnpm-lock.yaml']
+              for name in ['vitest.config.ts', 'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+                           'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
+                           'apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts',
+                           'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts',
+                           'apps/www/scripts/capture-visual-density-evidence.ts']:
+                  assert a[name] == b[name], name
+              assert a['apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts']['sha256'] == '0321dc7b6eed1fa9660f9e5c5bd00e2e125f277b980c1bada12f9a6b39fa2ac1'
+              assert a['apps/www/scripts/capture-visual-density-evidence.ts']['sha256'] == DENSITY_HASH
+              (OUT / 'source-roles.json').write_text(json.dumps({'sources': {r: {'head': h, 'tree': t} for r, (h,t) in SOURCES.items()}, 'workflowEventSha': os.environ.get('GITHUB_SHA'), 'workflowCandidateHead': os.environ.get('CANDIDATE_SHA'), 'historicalFixed026ComparisonRun': 41483779188, 'historicalBaselineHead': 'd850c28a40bfbc31f10d244b075d6f27038f46fa', 'comparisonBaselineKind': 'fixed-historical-1fbbe8ca', 'lane': os.environ['PAIR_LANE'], 'changedPaths': EXPECTED_CHANGED, 'densityRevisionKind': 'candidate on BOTH roles solely to enable the same original assertions', 'unchangedLock': a['pnpm-lock.yaml'], 'acceptance': 'Both original outcomes retained; any ordinary red or incomplete evidence keeps this lane failed.'}, indent=2) + '\n')
+
+          def unit_report(file, expected):
+              report = json.loads(file.read_text())
+              rows = [r for f in report['testResults'] for r in f['assertionResults']]
+              identities = [(f['name'], r['fullName']) for f in report['testResults'] for r in f['assertionResults']]
+              assert report['numTotalTests'] == len(rows) == len(set(identities)) == expected
+              assert all(r['status'] in ('passed', 'failed') for r in rows)
+              assert report['numPassedTests'] == sum(r['status'] == 'passed' for r in rows)
+              assert report['numFailedTests'] == sum(r['status'] == 'failed' for r in rows)
+              assert report['numPassedTests'] + report['numFailedTests'] == expected
+              return {'tests': expected, 'passed': report['numPassedTests'], 'failed': report['numFailedTests'], 'identities': identities}
+
+          def run(role):
+              guard(role, 'before')
+              out = OUT / role
+              env = os.environ.copy()
+              env['CANDIDATE_SHA'] = SOURCES[role][0]
+              env['PUI_LIBRARY_CARD_EVIDENCE_DIR'] = str(out / 'library-frames')
+              env['PUI_QUICK_START_EVIDENCE_DIR'] = str(out / 'quick-start-frames')
+              lane = os.environ['PAIR_LANE']
+              results = []
+              def command(label, seconds, argv, count=None):
+                  with (out / (label + '.raw.log')).open('wb') as log:
+                      result = subprocess.run(['timeout', '--signal=TERM', '--kill-after=10s', str(seconds) + 's', *argv], cwd=ROOT / role, env=env, stdout=log, stderr=subprocess.STDOUT)
+                  row = {'label': label, 'argv': argv, 'timeoutSeconds': seconds, 'exit': result.returncode}
+                  results.append(row)
+                  # Save the actual exit before any report/source validation can fail.
+                  (out / 'command-exits.json').write_text(json.dumps(results, indent=2) + '\n')
+                  print(role, label, 'actual exit', result.returncode, flush=True)
+                  if count is not None:
+                      row['coverage'] = unit_report(out / (label + '.json'), count)
+                      assert result.returncode != 0 or row['coverage']['failed'] == 0, 'False-green unit exit/report disagreement'
+                  (out / 'command-exits.json').write_text(json.dumps(results, indent=2) + '\n')
+                  guard(role, 'after-' + label)
+              def unit(label, filename, count, seconds):
+                  command(label, seconds, ['corepack', 'pnpm@10.32.1', 'exec', 'vitest', 'run', 'apps/www/src/content/docs/zh-cn/' + filename, '--maxWorkers=1', '--minWorkers=1', '--reporter=default', '--reporter=json', '--outputFile=' + str(out / (label + '.json'))], count)
+              if lane == 'library-card':
+                  unit('library-card', 'library-cards-first-frame.browser.test.ts', 9, 1200)
+              elif lane == 'quick-start':
+                  unit('quick-start', 'quick-start-first-frame.browser.test.ts', 20, 1200)
+                  unit('fragment-controls', 'quick-start-first-frame-fragment-control.browser.test.ts', 4, 600)
+                  for owner in ['menu', 'content-link']:
+                      debt = json.loads((out / 'quick-start-frames' / ('react-' + owner + '-early-native-ownership.json')).read_text())['endToEndEarlyInputDebt']
+                      assert debt['passed'] is False and debt['productFixClaimed'] is False
+              elif lane == 'visual-density':
+                  command('density', 180, ['node', '--import', 'tsx', 'apps/www/scripts/capture-visual-density-evidence.ts', '--revision-kind', 'candidate', '--expected-revision', SOURCES[role][0], '--quick-preview', '--out', str(out / 'density')])
+                  report = json.loads((out / 'density/metrics.json').read_text())
+                  assert report['revision'] == SOURCES[role][0] and report['scriptSha256'] == DENSITY_HASH
+                  expected = ['zh-cn-1440-light-shadcn-quick-start', 'zh-cn-1440-light-shadcn-docs', 'zh-cn-1440-dark-brutalist-docs']
+                  assert [x['id'] for x in report['cases']] == expected
+                  assert all(x['outcome'] in ('passed', 'failed') for x in report['cases'])
+                  assert len(report['failures']) == sum(x['outcome'] == 'failed' for x in report['cases'])
+                  assert results[-1]['exit'] != 0 or not report['failures'], 'False-green density exit/report disagreement'
+              else:
+                  raise AssertionError('Unknown fixed lane')
+              guard(role, 'terminal')
+              (out / 'terminal.json').write_text(json.dumps({'role': role, 'head': SOURCES[role][0], 'complete': True, 'commands': results}, indent=2) + '\n')
+              # Ordinary assertion failures remain failed steps but permit the counterpart.
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+                  stream.write('complete=true\n')
+              return 1 if any(row['exit'] != 0 for row in results) else 0
+
+          if sys.argv[1] == 'prepare':
+              prepare()
+          elif sys.argv[1] == 'run':
+              sys.exit(run(sys.argv[2]))
+          elif sys.argv[1] == 'finish':
+              rows = [json.loads((OUT / role / 'terminal.json').read_text()) for role in SOURCES]
+              assert all(row['complete'] and row['head'] == SOURCES[row['role']][0] for row in rows)
+              for row in rows:
+                  guard(row['role'], 'final')
+              (OUT / 'paired-terminal.json').write_text(json.dumps({'complete': True, 'allOriginalCommandsPassed': all(c['exit'] == 0 for r in rows for c in r['commands']), 'sources': rows}, indent=2) + '\n')
+              assert all(c['exit'] == 0 for r in rows for c in r['commands']), 'Original baseline/candidate failures retained, not waived'
+          else:
+              raise AssertionError('Unknown own metadata action')
+          PY
+          python "$RUNNER_TEMP/font-parent-pair.py" prepare
+      - name: Run the unchanged gates against the exact parent
+        id: baseline
+        continue-on-error: true
+        run: python "$RUNNER_TEMP/font-parent-pair.py" run baseline
+      - name: Run the same gates against the actual event head after ordinary parent failure
+        id: candidate
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' && steps.baseline.outputs.complete == 'true' }}
+        continue-on-error: true
+        run: python "$RUNNER_TEMP/font-parent-pair.py" run candidate
+      - name: Require complete pair and retain every original failure as failure
+        if: ${{ always() && !cancelled() }}
+        run: python "$RUNNER_TEMP/font-parent-pair.py" finish
+      - name: Preserve both exact-source raw logs, frames, reports and partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: font-parent-pair-${{ matrix.lane }}-1fbbe8ca-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/font-parent-pair/${{ matrix.lane }}
+          if-no-files-found: error
+          retention-days: 30
+
+  font-author-boundary:
+    # Eight font cases plus one layout diagnosis, separate from original Card9.
+    # Callable owner for the registered supplemental suite; the original Card9
+    # job above keeps its own unchanged gates and budgets.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare the same locked browser and public CJK fallback
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          OUT="$RUNNER_TEMP/font-author-boundary"
+          mkdir -p "$OUT"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version > "$OUT/browser-environment.txt"
+          node --version > "$OUT/node-environment.txt"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$OUT/font-environment.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$SETTING" > "$OUT/toolbar.txt"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$SETTING"
+      - name: Bind the actual clean event head and complete tracked source
+        id: prepare
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/font-author-boundary-source.py" <<'PY'
+          import hashlib, json, os, pathlib, stat, subprocess, sys
+          ROOT = pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          OUT = pathlib.Path(os.environ['RUNNER_TEMP']) / 'font-author-boundary'
+          def git(*args):
+              return subprocess.check_output(['git', '-C', str(ROOT), *args])
+          head = git('rev-parse', 'HEAD').decode().strip()
+          assert head == os.environ['CANDIDATE_SHA']
+          assert not git('status', '--porcelain', '--untracked-files=all').strip()
+          files = {}
+          for item in git('ls-tree', '-rz', 'HEAD').split(b'\0'):
+              if not item:
+                  continue
+              metadata, raw_name = item.split(b'\t', 1)
+              mode, kind, oid = metadata.decode().split()
+              name = raw_name.decode()
+              assert kind == 'blob' and mode in ('100644', '100755', '120000')
+              file = ROOT / name
+              info = file.lstat()
+              if mode == '120000':
+                  assert stat.S_ISLNK(info.st_mode)
+                  data = os.readlink(file).encode()
+              else:
+                  assert stat.S_ISREG(info.st_mode) and not file.is_symlink()
+                  assert bool(info.st_mode & 0o111) == (mode == '100755')
+                  data = file.read_bytes()
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, name
+              files[name] = {'mode': mode, 'gitBlob': oid, 'sha256': hashlib.sha256(data).hexdigest()}
+          assert files['apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts']['sha256'] == '0321dc7b6eed1fa9660f9e5c5bd00e2e125f277b980c1bada12f9a6b39fa2ac1'
+          snapshot = {'head': head, 'tree': git('rev-parse', 'HEAD^{tree}').decode().strip(), 'dirty': False, 'workflowEventSha': os.environ.get('GITHUB_SHA'), 'files': files}
+          label = sys.argv[1]
+          assert label in ('prepared', 'before', 'after', 'final')
+          if label != 'prepared':
+              assert snapshot == json.loads((OUT / 'prepared-source.json').read_text())
+          (OUT / (label + '-source.json')).write_text(json.dumps(snapshot, indent=2) + '\n')
+          PY
+          python "$RUNNER_TEMP/font-author-boundary-source.py" prepared
+      - name: Run eight font journeys and one independent shared layout diagnosis
+        timeout-minutes: 17
+        env:
+          PUI_LIBRARY_FONT_BOUNDARY_EVIDENCE_DIR: ${{ runner.temp }}/font-author-boundary/frames
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/font-author-boundary"
+          python "$RUNNER_TEMP/font-author-boundary-source.py" before
+          set +e
+          timeout --signal=TERM --kill-after=10s 960s corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$OUT/vitest.json" 2>&1 | tee "$OUT/browser.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '{"testExit":%s,"teeExit":%s}\n' "${codes[0]}" "${codes[1]}" > "$OUT/command-exits.json"
+          python "$RUNNER_TEMP/font-author-boundary-source.py" after
+          python - "$OUT" <<'PY'
+          import json, pathlib, sys
+          out = pathlib.Path(sys.argv[1])
+          report = json.loads((out / 'vitest.json').read_text())
+          rows = [r for f in report['testResults'] for r in f['assertionResults']]
+          identities = [(f['name'], r['fullName']) for f in report['testResults'] for r in f['assertionResults']]
+          assert report['numTotalTests'] == len(rows) == len(set(identities)) == 9
+          assert all(r['status'] in ('passed', 'failed') for r in rows)
+          assert report['numPassedTests'] == sum(r['status'] == 'passed' for r in rows)
+          assert report['numFailedTests'] == sum(r['status'] == 'failed' for r in rows)
+          exits = json.loads((out / 'command-exits.json').read_text())
+          coverage = {'tests': 9, 'passed': report['numPassedTests'], 'failed': report['numFailedTests'], 'identities': identities, 'exits': exits}
+          (out / 'coverage.json').write_text(json.dumps(coverage, indent=2) + '\n')
+          assert exits['testExit'] == exits['teeExit'] == 0
+          assert report['numPassedTests'] == 9 and report['numFailedTests'] == 0
+          PY
+      - name: Recheck the complete clean source even after diagnostic failure
+        if: ${{ always() && steps.prepare.outcome == 'success' }}
+        run: python "$RUNNER_TEMP/font-author-boundary-source.py" final
+      - name: Preserve exact-source supplemental results and partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: font-author-boundary-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/font-author-boundary
           if-no-files-found: error
           retention-days: 30

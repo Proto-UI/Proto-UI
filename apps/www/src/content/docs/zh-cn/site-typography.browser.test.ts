@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -140,6 +141,46 @@ async function capture(page: Page, record: Record<string, unknown>, id: string) 
   const filename = `${id}.png`;
   await page.screenshot({ path: path.join(output, filename) });
   (record.screenshots as string[]).push(filename);
+}
+// Observe the browser's actual same-origin response, never a second fetch or a
+// fulfilled mock. The filename only selects the response; bytes establish identity.
+async function receivedGeistFont(page: Page) {
+  try {
+    const response = await page.waitForResponse(
+      (response) => {
+        const url = new URL(response.url());
+        return (
+          url.origin === new URL(baseUrl).origin &&
+          response.request().resourceType() === 'font' &&
+          /\/Geist-Variable(?:\.[^/]+)?\.ttf$/.test(url.pathname)
+        );
+      },
+      { timeout: 20_000 }
+    );
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const body = await Promise.race([
+        response.body(),
+        new Promise<never>((_resolve, reject) => {
+          timer = setTimeout(() => reject(new Error('Geist response body timeout')), 20_000);
+        }),
+      ]);
+      return {
+        kind: 'received' as const,
+        url: response.url(),
+        status: response.status(),
+        contentType: response.headers()['content-type'] ?? null,
+        bytes: body.byteLength,
+        sha256: createHash('sha256').update(body).digest('hex'),
+      };
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  } catch (error) {
+    // Capture explicitly, then fail the exact case below; no unhandled promise
+    // if navigation itself fails before the response is awaited.
+    return { kind: 'error' as const, error: String(error) };
+  }
 }
 async function platformFonts(context: BrowserContext, page: Page, selector: string) {
   const cdp = await context.newCDPSession(page);
@@ -321,7 +362,24 @@ describe.sequential('native SiteTypography rendered evidence', () => {
         await runCase(
           `native-${runtime}-${family}`,
           async (page, context, record) => {
+            const geistResponse =
+              family === 'shadcn'
+                ? receivedGeistFont(page).then((evidence) => {
+                    record.geistFontResponse = evidence;
+                    return evidence;
+                  })
+                : undefined;
             await page.goto(baseUrl + FIXTURE, { waitUntil: 'networkidle' });
+            if (geistResponse) {
+              const received = await geistResponse;
+              expect(received.kind, 'actual Geist response must be readable').toBe('received');
+              if (received.kind !== 'received') throw new Error(received.error);
+              expect(received.status).toBe(200);
+              expect(received.bytes).toBe(169056);
+              expect(received.sha256).toBe(
+                '73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659'
+              );
+            }
             await page.locator('#fixture-family').selectOption(family);
             await fixtureReady(page, runtime, family);
             record.initial = await sourceIntegrity(page);
@@ -454,6 +512,25 @@ describe.sequential('native SiteTypography rendered evidence', () => {
             expect(
               cjk.some((font) => font.glyphCount > 0 && /^DM Sans(?:\s|$)/.test(font.familyName))
             ).toBe(false);
+            if (family === 'shadcn') {
+              expect(
+                latin.some(
+                  (font) =>
+                    font.glyphCount > 0 &&
+                    font.isCustomFont &&
+                    /^Geist(?:\s|$)/.test(font.familyName)
+                )
+              ).toBe(true);
+              expect(
+                cjk.some(
+                  (font) =>
+                    font.glyphCount > 0 && /^Noto (?:Sans|Serif) CJK(?:\s|$)/.test(font.familyName)
+                )
+              ).toBe(true);
+              expect(
+                cjk.some((font) => font.glyphCount > 0 && /^Geist(?:\s|$)/.test(font.familyName))
+              ).toBe(false);
+            }
             if (family === 'brutalist')
               expect(
                 latin.some(

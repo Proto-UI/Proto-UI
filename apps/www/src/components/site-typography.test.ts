@@ -10,6 +10,7 @@ import { renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { siteTypographyParticipant, collectSiteTypographyTargets } from './site-typography';
+import { SHADCN_TYPOGRAPHY } from '../../../../packages/prototypes/shadcn/src/text/typography';
 import { initDocumentationTypography } from './site-typography-client';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { PREFERRED_ADAPTER_EVENT } from './adapter-preference';
@@ -38,18 +39,28 @@ vi.mock('./PrototypePreviewer/runtimes/vue2-runtime', async (original) => {
 });
 vi.mock('./PrototypePreviewer/projection-theme', async (original) => {
   const actual = await original<typeof import('./PrototypePreviewer/projection-theme')>();
+  const { SHADCN_TYPOGRAPHY } =
+    await import('../../../../packages/prototypes/shadcn/src/text/typography');
+  const { BRUTALIST_THEME } = await import('../../../../packages/prototypes/brutalist/src/theme');
+  const theme = (family: unknown) => ({
+    '--pui-background': '#fff',
+    '--pui-foreground': '#111',
+    '--pui-font-sans':
+      family === 'shadcn' ? SHADCN_TYPOGRAPHY['font-sans'] : BRUTALIST_THEME.light['font-sans'],
+    '--pui-font-heading':
+      family === 'shadcn'
+        ? SHADCN_TYPOGRAPHY['font-heading']
+        : BRUTALIST_THEME.light['font-heading'],
+  });
   return {
-    resolveProjectionThemeSurfaceStyle: () => ({
-      '--pui-background': '#fff',
-      '--pui-foreground': '#111',
-    }),
+    resolveProjectionThemeSurfaceStyle: theme,
     applyProjectionThemeSurfaceStyle: actual.applyProjectionThemeSurfaceStyle,
     watchProjectionThemeSurfaceStyle: (
-      _family: unknown,
+      family: unknown,
       _root: unknown,
       callback: (value: Record<string, string>) => void
     ) => {
-      callback({ '--pui-background': '#fff', '--pui-foreground': '#111' });
+      callback(theme(family));
       return () => {};
     },
   };
@@ -120,6 +131,9 @@ describe('batched real typography adapters and stable native semantic owners', (
       const surface = heading.querySelector<HTMLElement>('[data-typography-prototype]')!;
       expect(surface.dataset.typographyRuntime).toBe(runtime);
       expect(surface.style.getPropertyValue('--pui-font-sans')).toContain('system-ui');
+      expect(surface.style.getPropertyValue('--pui-font-sans')).toBe(
+        SHADCN_TYPOGRAPHY['font-sans']
+      );
       expect(surface.getAttribute('data-pui-style')).toContain('text-3xl');
       expect(surface.getAttribute('data-pui-style')).toContain('font-semibold');
       expect(surface.getAttribute('data-pui-style')).not.toContain('pointer-events-none');
@@ -140,6 +154,7 @@ describe('batched real typography adapters and stable native semantic owners', (
       const replacement = heading.querySelector<HTMLElement>('[data-typography-prototype]')!;
       expect(replacement.getAttribute('data-pui-style')).toContain('font-bold');
       expect(replacement.getAttribute('data-pui-style')).toContain('font-heading');
+      expect(replacement.style.getPropertyValue('--pui-font-sans')).not.toContain('Geist');
       expect(first.host.textContent).toBe('');
       await first.dispose();
       expect(root.querySelector('#body a')).toBe(link);

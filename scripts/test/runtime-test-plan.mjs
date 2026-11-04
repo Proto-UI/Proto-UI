@@ -200,6 +200,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
   'packages/adapters/base/test/resident-motion.browser.test.ts',
@@ -263,6 +264,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/liquid-elevation-control-evidence.yml',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
     '.github/workflows/liquid-card-candidate-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts':
+    '.github/workflows/library-card-evidence.yml',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
     'apps/www/scripts/run-search-production-evidence.mjs',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':

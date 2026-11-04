@@ -48,7 +48,7 @@ jobs:
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
           grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
-      - name: Produce eight Card profiles, two no-script fallbacks and two native input controls
+      - name: Run original twelve Card cases and six response collector controls
         timeout-minutes: 20
         env:
           PUI_LIQUID_CARD_EVIDENCE_DIR: ${{ runner.temp }}/liquid-card/evidence
@@ -63,9 +63,13 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 12, 'Eight Card profiles, two no-script fallbacks and two native input controls must run.');
-          assert.equal(report.numPassedTests, 12);
+          assert.equal(report.numTotalTests, 18, 'All original twelve Card cases plus six independent response collector controls must run.');
+          assert.equal(report.numPassedTests, 18);
           assert.equal(report.numFailedTests, 0);
+          const expected = ["actual complete Liquid Card optical producer en-light-1440-text100", "actual complete Liquid Card optical producer en-light-320-text200", "actual complete Liquid Card optical producer en-dark-1440-text100", "actual complete Liquid Card optical producer en-dark-320-text200", "actual complete Liquid Card optical producer zh-cn-light-1440-text100", "actual complete Liquid Card optical producer zh-cn-light-320-text200", "actual complete Liquid Card optical producer zh-cn-dark-1440-text100", "actual complete Liquid Card optical producer zh-cn-dark-320-text200", "no-script native input controls scrolls a long no-script document and follows a real same-origin link", "no-script native input controls refuses a stable action hidden beneath a real fixed header", "candidate Card keeps its complete opaque no-JS fallback en 320px with 200% text", "candidate Card keeps its complete opaque no-JS fallback zh-cn 320px with 200% text", "same-origin response collector native controls success", "same-origin response collector native controls http-error", "same-origin response collector native controls request-abort", "same-origin response collector native controls missing-location", "same-origin response collector native controls invalid-location", "same-origin response collector native controls unknown-status"];
+          const rows = report.testResults.flatMap(file => file.assertionResults);
+          assert.deepEqual(rows.map(row => row.fullName).sort(), [...expected].sort());
+          assert.ok(rows.every(row => row.status === 'passed'));
           JS
       - name: Retain exact-head raw Cards, renderer receipts and original failures
         if: always()

@@ -121,6 +121,79 @@ function actualSurface(boundary: HTMLElement): HTMLElement {
 
 describe('generic preview owned portal theme', () => {
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`${runtime}: preserves authored portal classes and inline fonts across physical reparenting`, async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      let context!: DemoSetupContext;
+      const cleanup = vi.fn();
+      const child = fixture((value) => {
+        context = value;
+        return cleanup;
+      });
+      const addAuthoredInputs = (node: DemoChild): void => {
+        if (typeof node === 'string' || node.kind === 'text') return;
+        if (node.kind === 'proto') {
+          if (node.ref === 'content') node.className = 'font-mono authored-content';
+          if (node.ref === 'mask') {
+            node.className = 'font-serif authored-mask';
+            node.surfaceStyle = [{ font: 'italic 18px serif' }, { fontFamily: 'monospace' }];
+          }
+          if (node.ref === 'trigger') node.className = 'font-serif authored-trigger';
+        }
+        node.children?.forEach(addAuthoredInputs);
+      };
+      addAuthoredInputs(child.root);
+      const authoredBefore = JSON.stringify(child.root);
+      const theme = { '--pui-font-sans': 'Selected Family', '--pui-background': '#fafafa' };
+      const surface = createRuntimePreviewSurface(child, 'brutalist', theme, runtime);
+      expect(JSON.stringify(child.root)).toBe(authoredBefore);
+      const rendered = await renderDemo({ runtime, host, demo: surface.demo });
+      let retiredContent: HTMLElement | undefined;
+      const current = (ref: string) => actualSurface(context.refs[ref]!);
+      // These real-adapter checks establish transport, not Happy DOM cascade.
+      // Compiled-browser utility/default/inline precedence is a separate gate.
+      const assertInputs = () => {
+        const content = current('content');
+        const mask = current('mask');
+        const trigger = current('trigger');
+        expect(content.classList.contains('font-mono')).toBe(true);
+        expect(content.classList.contains('authored-content')).toBe(true);
+        expect(mask.classList.contains('font-serif')).toBe(true);
+        expect(mask.classList.contains('authored-mask')).toBe(true);
+        for (const target of [content, mask]) {
+          expect(target.classList.contains('pui-runtime-preview-owned-surface')).toBe(true);
+          expect(target.style.getPropertyValue('--pui-font-sans')).toBe('Selected Family');
+        }
+        expect(content.style.fontFamily).toBe('');
+        expect(mask.style.fontFamily).toBe('monospace');
+        expect(mask.style.fontStyle).toBe('italic');
+        expect(mask.style.fontSize).toBe('18px');
+        expect(trigger.classList.contains('font-serif')).toBe(true);
+        expect(trigger.classList.contains('pui-runtime-preview-owned-surface')).toBe(false);
+        expect(trigger.style.getPropertyValue('--pui-font-sans')).toBe('');
+        expect(host.querySelectorAll('.pui-runtime-preview-surface')).toHaveLength(1);
+      };
+      try {
+        await surface.ready;
+        await vi.waitFor(assertInputs);
+        context.api.call('root', 'openAlertDialog');
+        await vi.waitFor(() => expect(host.contains(current('content'))).toBe(false));
+        assertInputs();
+        context.api.call('root', 'close');
+        await vi.waitFor(() => expect(host.contains(current('content'))).toBe(true));
+        assertInputs();
+        context.api.call('root', 'openAlertDialog');
+        await vi.waitFor(() => expect(host.contains(current('content'))).toBe(false));
+        assertInputs();
+        retiredContent = current('content');
+        expect(JSON.stringify(child.root)).toBe(authoredBefore);
+      } finally {
+        await rendered.destroy();
+      }
+      expect(retiredContent?.isConnected).toBe(false);
+      expect(document.querySelector('.pui-runtime-preview-owned-surface')).toBeNull();
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
     it(`${runtime}: supplies the complete map through actual normalized surfaces`, async () => {
       const host = document.createElement('div');
       host.dataset.theme = 'light';
@@ -469,8 +542,16 @@ describe('generic preview owned portal theme', () => {
         document.body.append(host);
         let context!: DemoSetupContext;
         let fail = false;
-        const theme = { '--pui-background': '#111111', '--pui-retained': 'yes' };
-        const next = { '--pui-background': '#222222', '--pui-candidate': 'yes' };
+        const theme = {
+          '--pui-background': '#111111',
+          '--pui-retained': 'yes',
+          '--pui-font-sans': 'Retained Family',
+        };
+        const next = {
+          '--pui-background': '#222222',
+          '--pui-candidate': 'yes',
+          '--pui-font-sans': 'Candidate Family',
+        };
         const surface = createRuntimePreviewSurface(
           fixture((value) => {
             context = value;
@@ -508,17 +589,31 @@ describe('generic preview owned portal theme', () => {
               expect(style.getPropertyValue('--pui-background')).toBe('#111111');
               expect(style.getPropertyValue('--pui-retained')).toBe('yes');
               expect(style.getPropertyValue('--pui-candidate')).toBe('');
+              expect(style.getPropertyValue('--pui-font-sans')).toBe('Retained Family');
+              // The selected font is now a base-layer default on the actual target,
+              // not an inline default that could suppress authored utilities.
+              expect(style.fontFamily).toBe('');
+              expect(
+                actualSurface(context.refs[ref]!).classList.contains(
+                  'pui-runtime-preview-owned-surface'
+                )
+              ).toBe(true);
             }
           });
           const retained = host.querySelector<HTMLElement>('.pui-runtime-preview-surface')!;
           expect(retained.dataset.projectionFamily).toBe('brutalist');
           expect(retained.style.getPropertyValue('--pui-background')).toBe('#111111');
+          expect(retained.style.getPropertyValue('--pui-font-sans')).toBe('Retained Family');
           await surface.setAppearance(nextFamily, next);
           await vi.waitFor(() => {
-            for (const ref of ['mask', 'content'])
+            for (const ref of ['mask', 'content']) {
               expect(
                 actualSurface(context.refs[ref]!).style.getPropertyValue('--pui-background')
               ).toBe('#222222');
+              expect(
+                actualSurface(context.refs[ref]!).style.getPropertyValue('--pui-font-sans')
+              ).toBe('Candidate Family');
+            }
           });
         } finally {
           await rendered.destroy();
@@ -609,11 +704,20 @@ describe('generic preview owned portal theme', () => {
             '--pui-secondary-background'
           )
         ).toBe(light['--pui-secondary-background']);
+        for (const context of contexts) {
+          expect(
+            actualSurface(context.refs.mask!).classList.contains(
+              'pui-runtime-preview-owned-surface'
+            )
+          ).toBe(true);
+        }
         expect(JSON.stringify(child.root)).toBe(before);
         const replacement = createRuntimePreviewSurface(child, 'brutalist', light, runtime);
         const next = await renderDemo({ runtime, host: hosts[1]!, demo: replacement.demo });
         try {
           await replacement.ready;
+          const newMask = actualSurface(contexts[2]!.refs.mask!);
+          expect(newMask.classList.contains('pui-runtime-preview-owned-surface')).toBe(true);
           await second.setAppearance('brutalist', dark);
           contexts[1]!.api.setSurfaceStyle!('mask', { '--pui-secondary-background': 'red' });
           await vi.waitFor(() =>
@@ -623,6 +727,8 @@ describe('generic preview owned portal theme', () => {
               )
             ).toBe(light['--pui-secondary-background'])
           );
+          expect(actualSurface(contexts[2]!.refs.mask!)).toBe(newMask);
+          expect(newMask.classList.contains('pui-runtime-preview-owned-surface')).toBe(true);
         } finally {
           await next.destroy();
         }

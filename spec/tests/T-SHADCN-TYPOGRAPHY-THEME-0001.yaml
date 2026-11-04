@@ -1,0 +1,49 @@
+id: T-SHADCN-TYPOGRAPHY-THEME-0001
+type: test
+title: Shadcn shared typography input and website font boundaries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Candidate tree 5a17f82c6ab367051d8aeec721ef522e726bfbfc on d850c28a has bounded paired DOM-host, font-distribution, type and format evidence; ordinary full-suite and workspace-type failures remain recorded. Later main revisions have not been integrated or executed here. Real computed author-font precedence, browser font loading, per-glyph fallback, layout stability, visual parity and native backend realization remain open.
+summary: Optional family font input, unchanged licensed bytes and ownership across document and portal consumers.
+cases:
+  - id: T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-PRESET
+    title: Immutable opt-in public family input preserves existing defaults
+    covers: [P-SHADCN-TEXT-THEME-PRESET]
+    expectation: opt-in-preset-without-loading-or-global-paint
+  - id: T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-CONSUMERS
+    title: Non-Text controls and escaped portals receive the selected family theme
+    covers: [P-SHADCN-TEXT-THEME-PRESET]
+    expectation: theme-boundaries-keep-authored-overrides-and-release-retired-fonts
+  - id: T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-DISTRIBUTION
+    title: Original Geist bytes and OFL attribution are delivered by the website
+    covers: [P-SHADCN-TEXT-THEME-PRESET]
+    expectation: pinned-same-origin-face-with-system-and-cjk-fallbacks
+exercises:
+  prototypes: [P-SHADCN-TEXT]
+implementations:
+  - id: shadcn-typography-preset
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/typography-theme.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-PRESET]
+    exercises: [P-SHADCN-TEXT]
+  - id: website-shadcn-typography
+    kind: adapter-test
+    status: planned
+    path: apps/www/test/shadcn-typography-theme.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-CONSUMERS]
+    exercises: [P-SHADCN-TEXT]
+    notes:
+      - Four Web runtime normalized-style observations are not native font rendering or layout acceptance.
+  - id: website-geist-distribution
+    kind: module-test
+    status: planned
+    path: apps/www/test/shadcn-font-license.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TYPOGRAPHY-THEME-0001-CASE-DISTRIBUTION]
+    exercises: [P-SHADCN-TEXT]
+    notes:
+      - Immutable bytes and same-origin declarations do not prove offline loading, per-glyph CJK fallback or zero layout shift.
