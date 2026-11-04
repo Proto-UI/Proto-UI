@@ -92,6 +92,11 @@ export function createWebProtoEventRouter(opt: {
   const isEnabled = () => activeRouterByRoot.get(rootEl) === routerIdentity && opt.isEnabled();
   const contactWriter = createWebPointerContactWriter(rootEl);
   let suppressFollowupDirectClick = false;
+  let pointerActivation: {
+    pointerId: number;
+    pointerType: string;
+    cancelled: boolean;
+  } | null = null;
   let contact: {
     pointerId: number;
     rect: DOMRect;
@@ -166,6 +171,23 @@ export function createWebProtoEventRouter(opt: {
 
   // --- helper: emit proto event to proto bus ---
   function emit(target: EventTarget, type: string, native: any) {
+    if (
+      target === protoRootBus &&
+      type === 'pointer.down' &&
+      native.button === 0 &&
+      native.isPrimary !== false &&
+      Number.isFinite(native.pointerId)
+    ) {
+      pointerActivation = null;
+      const kind = readPointerSampleField(native, 'pointerType');
+      if (kind.readable && typeof kind.value === 'string') {
+        pointerActivation = {
+          pointerId: native.pointerId,
+          pointerType: kind.value,
+          cancelled: false,
+        };
+      }
+    }
     if (
       target === protoRootBus &&
       ['pointer.down', 'pointer.move', 'pointer.up', 'pointer.cancel'].includes(type)
@@ -447,6 +469,22 @@ export function createWebProtoEventRouter(opt: {
     return true;
   }
 
+  function shouldSuppressCancelledPointerClick(native: MouseEvent) {
+    const pointer = native as PointerEvent;
+    const kind = readPointerSampleField(native, 'pointerType');
+    if (
+      !pointerActivation ||
+      native.detail === 0 ||
+      pointer.pointerId !== pointerActivation.pointerId ||
+      !kind.readable ||
+      kind.value !== pointerActivation.pointerType
+    )
+      return false;
+    const cancelled = pointerActivation.cancelled;
+    pointerActivation = null;
+    return cancelled;
+  }
+
   // -------------------------
   // (A) 固定监听：解释“协议语义事件”
   // -------------------------
@@ -510,6 +548,7 @@ export function createWebProtoEventRouter(opt: {
   );
   unsubs.push(
     listen(globalEl, 'blur', (e) => {
+      if (pointerActivation) pointerActivation.cancelled = true;
       endContact('blur');
       if (isEnabled()) emit(protoRootBus, 'press.cancel', e);
     })
@@ -634,6 +673,11 @@ export function createWebProtoEventRouter(opt: {
       if (!isNativeMouseClick(e)) return;
       if (!shouldRouteToCurrentRoot(e)) return;
       if (suppressDirectionalClick(rootEl, e) || shouldSuppressFollowupClick(e)) return;
+      if (shouldSuppressCancelledPointerClick(e)) {
+        // The root consumed this dispatch; a retargeted Portal fallback must not replay it.
+        physicalRootDeliveries.add(e);
+        return;
+      }
       emitFromPhysicalRoot('press.commit', e);
     })
   );
@@ -644,6 +688,7 @@ export function createWebProtoEventRouter(opt: {
       if (!isNativeMouseClick(e)) return;
       if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
       if (suppressDirectionalClick(rootEl, e) || shouldSuppressFollowupClick(e)) return;
+      if (shouldSuppressCancelledPointerClick(e)) return;
       emit(protoRootBus, 'press.commit', e);
     })
   );
