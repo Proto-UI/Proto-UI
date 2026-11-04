@@ -219,14 +219,20 @@ export function hasBorderBoxInlineClipping(
   const left = layoutInlineStart(target);
   const width = target.offsetWidth;
   if (!Number.isFinite(left) || !Number.isFinite(width) || width < 0) return null;
+  const position = view.getComputedStyle(target).position;
+  // null reaches the viewport; undefined follows ordinary ancestor clipping.
+  let containingBlock =
+    position === 'absolute' || position === 'fixed' ? target.offsetParent : undefined;
   for (let parent = target.parentElement; parent; parent = parent.parentElement) {
+    if (parent === containingBlock) containingBlock = undefined;
     const style = view.getComputedStyle(parent);
     const overflow = style.overflowX || style.overflow;
     if (
-      overflow === 'hidden' ||
-      overflow === 'clip' ||
-      overflow === 'scroll' ||
-      overflow === 'auto'
+      containingBlock === undefined &&
+      (overflow === 'hidden' ||
+        overflow === 'clip' ||
+        overflow === 'scroll' ||
+        overflow === 'auto')
     ) {
       const start = layoutInlineStart(parent) + parent.clientLeft;
       const available = parent.clientWidth;
@@ -234,6 +240,11 @@ export function hasBorderBoxInlineClipping(
       if (left < start - 1 || left + width > start + available + 1) return true;
     }
     if (parent === frame) return false;
+    if (
+      containingBlock === undefined &&
+      (style.position === 'absolute' || style.position === 'fixed')
+    )
+      containingBlock = parent.offsetParent;
   }
   return null;
 }

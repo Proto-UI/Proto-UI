@@ -293,6 +293,48 @@ function edgeFixture(
 }
 
 it.each([
+  { name: 'escaping absolute row', positionedWrapper: false, nested: false, clipped: false },
+  { name: 'containing wrapper', positionedWrapper: true, nested: false, clipped: true },
+  { name: 'escaping absolute parent', positionedWrapper: false, nested: true, clipped: false },
+])('edge sizing follows the containing block for $name', async (scenario) => {
+  const f = edgeFixture();
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = `position:${scenario.positionedWrapper ? 'relative' : 'static'};overflow:hidden;margin:0;padding:0;border:0`;
+  Object.defineProperties(wrapper, {
+    offsetWidth: { configurable: true, get: () => 100 },
+    clientWidth: { configurable: true, get: () => 100 },
+  });
+  f.floating.append(wrapper);
+  const positioned = scenario.nested ? document.createElement('div') : f.row;
+  positioned.style.cssText = 'position:absolute;margin:0;padding:0;border:0';
+  // Controlled CSSOM facts; native clipping is exercised separately.
+  Object.defineProperty(positioned, 'offsetParent', {
+    configurable: true,
+    get: () => (scenario.positionedWrapper ? wrapper : f.floating),
+  });
+  wrapper.append(positioned);
+  if (scenario.nested) positioned.append(f.row);
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual(
+      scenario.clipped
+        ? { status: 'unavailable', reason: 'size-conflict' }
+        : { status: 'applied' }
+    );
+    if (scenario.clipped) {
+      expect(statuses).not.toContainEqual({ status: 'applied' });
+      expect([f.row.style.width, f.row.style.height]).toEqual(['', '']);
+    } else {
+      expect([f.row.offsetWidth, f.row.offsetHeight]).toEqual([180, 36]);
+    }
+  } finally {
+    f.dispose();
+  }
+});
+
+it.each([
   { contentWidth: 150, expected: { status: 'unavailable', reason: 'size-conflict' } },
   { contentWidth: 40, expected: { status: 'applied' } },
 ])(
