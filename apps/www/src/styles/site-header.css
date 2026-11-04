@@ -63,8 +63,26 @@
   z-index: 70;
   top: var(--site-header-panel-top, 100%);
   left: var(--site-header-panel-left, 0);
-  width: 22rem;
-  max-width: var(--site-header-panel-max-width, calc(100vw - 1rem));
+  /* The published offset and the published max width are one viewport's
+     snapshot. The inline size and the offset are both bounded by the Header's
+     own box, so a stale snapshot can neither widen the Header's scroll area
+     nor place the panel outside the Header. 16px is the measured 8px edge
+     margin on both sides. */
+  --site-header-panel-inline-size: min(
+    22rem,
+    var(--site-header-panel-max-width, 100%),
+    calc(100% - 16px)
+  );
+  width: var(--site-header-panel-inline-size);
+  max-width: var(--site-header-panel-inline-size);
+  /* A viewport change re-lays out the Header before the Header republishes the
+     offset, so the published offset can still belong to a wider viewport.
+     Correct the offset by the excess only, so a settled measurement keeps
+     exactly the offset the Header published. */
+  margin-left: min(
+    0px,
+    calc(100% - var(--site-header-panel-inline-size) - 8px - var(--site-header-panel-left, 0px))
+  );
   max-height: var(--site-header-panel-max-height, calc(100svh - 5rem));
   overflow: visible;
 }
@@ -626,7 +644,12 @@
 }
 @media (max-width: 47.999rem) {
   .site-header[data-site-menu-ready] .site-header-panel {
-    width: var(--site-header-panel-max-width, calc(100vw - 1rem));
+    /* The compact panel takes the whole measured width, still bounded by the
+       Header's own box. */
+    --site-header-panel-inline-size: min(
+      var(--site-header-panel-max-width, calc(100vw - 1rem)),
+      calc(100% - 16px)
+    );
   }
   .site-header-group-label {
     display: block;
