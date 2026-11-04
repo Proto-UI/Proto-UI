@@ -50,4 +50,22 @@ No JavaScript changed, no viewport is widened, nothing is clipped, and no upstre
 
 ## Open
 
-The upstream compact→desktop reparent oracle and the `#933` whole-page overflow stay as separate issues; this repair bounds the Header panel only. Exact-head CI and the remaining Header acceptance breadth are pending.
+The `#933` whole-page overflow stays a separate issue; this repair bounds the Header panel only. The compact-to-desktop reparent case was revised upstream in `b27742508` and its authority is reconciled in `2026-11-02-header-escape-focus-return.md` under "Rhea style authority for the revised compact-to-desktop reparent case". Exact-head CI and the remaining Header acceptance breadth are pending.
+
+The measured cause, the native reproduction, the source contract and the retained `#933` attribution recorded for the earlier width-only bound are consolidated here; this record additionally carries the position axis, which the earlier bound did not cover.
+
+## Integration review corrections
+
+The newly added clamp test only matched CSS source strings and was removed rather than retained as behavioral coverage. The unrelated startup-handoff check also pinned a literal `transition-all` in a prototype file: that source assertion was removed, while its real non-Docs Button visibility assertion remains. Both affected Header suites then passed **27/27**. No production CSS changed during this cleanup.
+
+The retained native probe script was found to hard-code `sourceSha: 04f0ba7e45f701a9901bc1bc1e7346638966616b`, rather than recording the executed base/fix revisions. Its raw measured samples remain historical observations, but that field does not establish the claimed candidate binding. Fresh byte-bound before/after proof is required before asserting exact-source native verification; old receipts will not be rewritten or relabeled. The earlier source-pin failure is a test defect, not evidence of a Shadcn Button product defect.
+
+The first corrected probe was prepared as `/tmp/pr1210-header-geometry-sourcebound-probe.mjs` before execution: `node /tmp/pr1210-header-geometry-sourcebound-probe.mjs <output.json> [runtime] [worktree]` against `PROTO_UI_BROWSER_BASE_URL` (default `http://127.0.0.1:4319`). That version described a source-derived arithmetic model; the execution below uses its subsequent revision with actual browser used styles instead.
+
+### Corrected probe execution on 2026-11-04
+
+The subsequent revision removes the generic CSS arithmetic interpreter. It binds the complete stylesheet, geometry publisher, probe bytes and actual `HEAD`; uses stable owner identities; and checks the browser's used geometry during the stale-publication window. Missing mappings, non-finite geometry and browser console errors reject the observation.
+
+The actual Vue attempt at `2026-11-04T13:11:30.338Z` produced `/tmp/pr1210-corrected-probe-post-recovery-20261104.json`. Its before/after source bindings matched at `b57cc569570fc8314871a68fc0a9913e58cbac4d`: stylesheet SHA-256 `b8b72d14201be8e4aafec267c9d7d3b073bfe96bdb077ee07c246a3f0ed462c0`, publisher SHA-256 `f1fdabecbcea76a920a564f43d86ebc5a5077011226a278410f2e954a0fea60a`, and probe SHA-256 `96df82aabf7fd87d24cd37898bd6734ea265ea19b3c0c50b0e87f862dbf92204`.
+
+Chromium failed during launch with sandboxing requested, before a page or geometry sample existed. The sandbox helper `/usr/lib/chromium/chrome-sandbox` was absent. The receipt retains `fits: false` and the launch failure; neither is a product-geometry verdict. There was no retry with `--no-sandbox`. Exact-source native before/after geometry remains unverified and requires a working sandboxed browser environment. The historical samples and focused unit results above do not close that condition.

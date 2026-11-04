@@ -42,3 +42,13 @@ Independent static review found no definite new product defect. Native keyboard/
 
 - `apps/www/src/components/site-header-disclosure.test.ts`: `85e3cfed774835b06d894ff0f450154d0c9e41b0dde2f87146a5fb6bbd4b987e`
 - `apps/www/src/components/site-header-disclosure.ts`: `8bac00183922de04d25f8b3699adf4848c44226522fe66b4891611d4e8bf3801`
+
+### Rhea style authority for the revised compact-to-desktop reparent case — 2026-11-04
+
+The paragraph above records the compact-to-desktop reparent case as a retained red. That disposition described the tree before the expectation revision in `b27742508` ("test(www): align Header Select lifecycle fixture"), which is an ancestor of the current tree and renamed the case to `preserves the public Rhea default through a complete compact-to-desktop reparent`. The revised expectation is reconciled against authority outside the implementation, because the base expectation was itself red for the reason recorded above.
+
+`packages/prototypes/shadcn/src/select/recipes.ts` gives the Rhea Select trigger `gap-1.5 rounded-[var(--pui-radius-2xl)] border border-transparent bg-input/50 px-3 py-2 text-sm transition-[color,box-shadow] duration-200`. `packages/prototypes/shadcn/src/select/trigger-visual.ts` defines the `appearance` variants (`default`/`ghost`) only under `w.state(style).eq('new-york-v4')`, so those variants never reach the Rhea profile. `apps/www/src/components/site-shadcn-controls.ts` pins `styleProfile: 'rhea'` on the Select root and `appearance: 'default'` on the trigger for every Select inside `[data-site-header]`, in the compact panel and in the desktop row alike, because the condition is `root.closest('[data-site-header]')` and not a placement.
+
+The public Rhea style is therefore placement-invariant, and the base expectation "the compact placement drops `border-transparent`" contradicted the Rhea body that the same Header wiring selects. Verified on this tree: with the pre-revision expectation restored, the case fails with `expected 'flex w-fit items-center justify-betwe…' not to contain 'border-transparent'`; with the revised expectation it passes, and `apps/www/src/components/site-header-select-lifecycle.test.ts` passes 9/9.
+
+This reconciliation changes no product byte: the Rhea recipe, the Header's own `styleProfile`/`appearance` wiring and the disclosure reparent are untouched. It records why the retained red case was a stale oracle rather than a product defect.
