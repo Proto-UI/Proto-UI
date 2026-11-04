@@ -188,3 +188,21 @@ it('declares a private author font scope without changing family recipes or runt
   expect(rule).toContain('font-family: var(--site-font-sans);');
   expect(rule).not.toMatch(/important|width|height|opacity|visibility|display|--pui-/);
 });
+
+it('keeps the author scope able to outrank the family default that selects the family font', () => {
+  const css = readFileSync('apps/www/src/styles/site-library-family.css', 'utf8');
+  // Same specificity inside one base layer, so source order is the tie-break.
+  // A family default declared after the author scope would silently repaint
+  // the Gallery with the family font bank and break the held first frame.
+  const familyDefault = css.indexOf("[data-site-family-scope][data-site-library-family='shadcn']");
+  const authorScope = css.indexOf('[data-site-font-scope]:not(:root)');
+  expect(familyDefault).toBeGreaterThan(-1);
+  expect(authorScope).toBeGreaterThan(familyDefault);
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  const section = source.match(/<section[\s\S]*?>/)?.[0] ?? '';
+  // The Gallery subtree keeps the site bank and never opts into the family
+  // scope, so it issues no request for the family font face.
+  expect(section).not.toContain('data-site-family-scope');
+  expect(section).not.toContain('data-site-library-family');
+  expect(section).not.toContain('data-site-control-family');
+});

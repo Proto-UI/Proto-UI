@@ -73,3 +73,121 @@ jobs:
           path: ${{ runner.temp }}/library-card
           if-no-files-found: error
           retention-days: 30
+
+  font-author-boundary:
+    # Eight font cases plus one layout diagnosis, separate from original Card9.
+    # Callable owner for the registered supplemental suite; the original Card9
+    # job above keeps its own unchanged gates and budgets.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare the same locked browser and public CJK fallback
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          OUT="$RUNNER_TEMP/font-author-boundary"
+          mkdir -p "$OUT"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version > "$OUT/browser-environment.txt"
+          node --version > "$OUT/node-environment.txt"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$OUT/font-environment.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$SETTING" > "$OUT/toolbar.txt"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$SETTING"
+      - name: Bind the actual clean event head and complete tracked source
+        id: prepare
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/font-author-boundary-source.py" <<'PY'
+          import hashlib, json, os, pathlib, stat, subprocess, sys
+          ROOT = pathlib.Path(os.environ['GITHUB_WORKSPACE'])
+          OUT = pathlib.Path(os.environ['RUNNER_TEMP']) / 'font-author-boundary'
+          def git(*args):
+              return subprocess.check_output(['git', '-C', str(ROOT), *args])
+          head = git('rev-parse', 'HEAD').decode().strip()
+          assert head == os.environ['CANDIDATE_SHA']
+          assert not git('status', '--porcelain', '--untracked-files=all').strip()
+          files = {}
+          for item in git('ls-tree', '-rz', 'HEAD').split(b'\0'):
+              if not item:
+                  continue
+              metadata, raw_name = item.split(b'\t', 1)
+              mode, kind, oid = metadata.decode().split()
+              name = raw_name.decode()
+              assert kind == 'blob' and mode in ('100644', '100755', '120000')
+              file = ROOT / name
+              info = file.lstat()
+              if mode == '120000':
+                  assert stat.S_ISLNK(info.st_mode)
+                  data = os.readlink(file).encode()
+              else:
+                  assert stat.S_ISREG(info.st_mode) and not file.is_symlink()
+                  assert bool(info.st_mode & 0o111) == (mode == '100755')
+                  data = file.read_bytes()
+              assert hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest() == oid, name
+              files[name] = {'mode': mode, 'gitBlob': oid, 'sha256': hashlib.sha256(data).hexdigest()}
+          assert files['apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts']['sha256'] == '0321dc7b6eed1fa9660f9e5c5bd00e2e125f277b980c1bada12f9a6b39fa2ac1'
+          snapshot = {'head': head, 'tree': git('rev-parse', 'HEAD^{tree}').decode().strip(), 'dirty': False, 'workflowEventSha': os.environ.get('GITHUB_SHA'), 'files': files}
+          label = sys.argv[1]
+          assert label in ('prepared', 'before', 'after', 'final')
+          if label != 'prepared':
+              assert snapshot == json.loads((OUT / 'prepared-source.json').read_text())
+          (OUT / (label + '-source.json')).write_text(json.dumps(snapshot, indent=2) + '\n')
+          PY
+          python "$RUNNER_TEMP/font-author-boundary-source.py" prepared
+      - name: Run eight font journeys and one independent shared layout diagnosis
+        timeout-minutes: 17
+        env:
+          PUI_LIBRARY_FONT_BOUNDARY_EVIDENCE_DIR: ${{ runner.temp }}/font-author-boundary/frames
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/font-author-boundary"
+          python "$RUNNER_TEMP/font-author-boundary-source.py" before
+          set +e
+          timeout --signal=TERM --kill-after=10s 960s corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$OUT/vitest.json" 2>&1 | tee "$OUT/browser.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '{"testExit":%s,"teeExit":%s}\n' "${codes[0]}" "${codes[1]}" > "$OUT/command-exits.json"
+          python "$RUNNER_TEMP/font-author-boundary-source.py" after
+          python - "$OUT" <<'PY'
+          import json, pathlib, sys
+          out = pathlib.Path(sys.argv[1])
+          report = json.loads((out / 'vitest.json').read_text())
+          rows = [r for f in report['testResults'] for r in f['assertionResults']]
+          identities = [(f['name'], r['fullName']) for f in report['testResults'] for r in f['assertionResults']]
+          assert report['numTotalTests'] == len(rows) == len(set(identities)) == 9
+          assert all(r['status'] in ('passed', 'failed') for r in rows)
+          assert report['numPassedTests'] == sum(r['status'] == 'passed' for r in rows)
+          assert report['numFailedTests'] == sum(r['status'] == 'failed' for r in rows)
+          exits = json.loads((out / 'command-exits.json').read_text())
+          coverage = {'tests': 9, 'passed': report['numPassedTests'], 'failed': report['numFailedTests'], 'identities': identities, 'exits': exits}
+          (out / 'coverage.json').write_text(json.dumps(coverage, indent=2) + '\n')
+          assert exits['testExit'] == exits['teeExit'] == 0
+          assert report['numPassedTests'] == 9 and report['numFailedTests'] == 0
+          PY
+      - name: Recheck the complete clean source even after diagnostic failure
+        if: ${{ always() && steps.prepare.outcome == 'success' }}
+        run: python "$RUNNER_TEMP/font-author-boundary-source.py" final
+      - name: Preserve exact-source supplemental results and partial failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: font-author-boundary-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/font-author-boundary
+          if-no-files-found: error
+          retention-days: 30
