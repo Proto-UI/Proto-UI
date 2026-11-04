@@ -1,0 +1,13 @@
+# Window-blur pointer activation cancellation
+
+The source-bound continuation starts at main `dd621dd00f77eb1358a13c1ff94419b048deef59`, after #1277 integrated #1278. Those merges retain the original continuous-product failures; integration alone did not establish product acceptance.
+
+Draft `C-EVENT-TYPE-0002-D/E` distinguishes a valid activation commit from a canceled activation intent. The Web router already emits `press.cancel` on window blur, but previously admitted the same pointer's later click without a fresh pointer down. The retained packed trace at `352af52c` observed down, window-target blur, matching up, and then an additional consumer activation. Visual contact had already ended with reason `blur`; it does not own activation suppression.
+
+The bounded repair records the identity of an admitted primary pointer down independently of visual geometry. Window blur cancels that pending activation. Only a later nonzero-detail click with the matching readable pointer identity consumes that cancellation. A fresh admitted primary down retires the old identity before reading its replacement. Root consumption is also retained for the same dispatch's retargeted fallback, so Shadow routing cannot replay the canceled click.
+
+The existing `pointercancel` and `lostpointercapture` visual controls still admit a later valid native click. Independent zero-detail activation, fresh keyboard input, click-only input, another pointer identity, Portal routing, and unreadable pointer facts retain their separate boundaries. This does not change a public API or promote the draft contract.
+
+The original focused reproduction had seven failures and one pass. Broader compatibility checks exposed four unreadable-kind failures in the first candidate; reusing the existing private pointer reader fixed that regression. Independent review then identified stale cancellation surviving a fresh down with an unreadable kind. Its ten-test control failed only that case before the one-line retirement repair. The final eleven-file input run passed all 215 tests, retaining the original keyboard-owner and visual-contact controls. These are injected host-unit controls, not native assistive-technology evidence.
+
+The original continuous source/packed inputs, 40/100/400 ms waits, contact-rest/no-activation assertions and subsequent flows are unchanged. Accurate-commit product execution, source/package bindings, screenshots and any remaining failures are recorded separately. In particular, an operation sent through a page's CDP client is not proof of operating-system active-window input routing. The original default-arm rest read and its retained failure must not be replaced by a later settled frame.
