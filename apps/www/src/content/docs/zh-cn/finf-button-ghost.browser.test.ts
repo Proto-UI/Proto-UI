@@ -1,5 +1,5 @@
 // @vitest-environment node
-// Public consumer evidence for P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT, not full Button parity.
+// Public consumer evidence for P-SHADCN-BUTTON-GHOST-MODERN-PAINT, not full Button parity.
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -22,7 +22,7 @@ import {
   applyColorScheme,
 } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
-import { ghostPaintFailures } from './ghost-paint-oracle';
+import { rheaGhostPaintFailures } from './ghost-paint-oracle';
 
 const route = '/zh-cn/ui-libraries/shadcn/button/';
 const demoId = 'demo-button-ghost';
@@ -45,10 +45,17 @@ const candidate = {
 };
 const references = {
   productBase: 'f9a1240ade95a58ccb03864a17ba1b9753e37073',
-  upstream: '02cad61166c4c20edbc8a3f71bd720eed4c1f49b',
-  blob: 'e3345d985d14c33e3cb9d8c45cf973807326c944',
-  url: 'https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx#L18-L19',
-  criterion: 'P-SHADCN-BUTTON#P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT',
+  publicDemo: '2cecc0e013bcb90da94861805589ec8f5a008559',
+  upstream: '25af02b1b467fcd53b63e0c6d6d324c57c16ef18',
+  blob: null,
+  url: 'https://github.com/shadcn-ui/ui/blob/25af02b1b467fcd53b63e0c6d6d324c57c16ef18/apps/v4/registry/styles/style-rhea.css',
+  catalogedSource: {
+    revision: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
+    path: 'apps/v4/registry/styles/style-rhea.css',
+    gitBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
+    sha256: 'bac4eff75a0e21d9dd90ce40634937f54730471d8f7fa50ca67b317892cf908f',
+  },
+  criterion: 'P-SHADCN-BUTTON#P-SHADCN-BUTTON-GHOST-MODERN-PAINT',
   limit:
     'Real public ghost paint and bounded input journey only. Not packed, GPUI, complete Button parity, animation timing or visual design approval. Screenshots bind the actual candidate, not productBase.',
 };
@@ -61,12 +68,19 @@ beforeAll(async () => {
   const sourceHashes: Record<string, string> = {};
   for (const file of [
     'packages/prototypes/shadcn/src/button/button.proto.ts',
+    'packages/prototypes/shadcn/src/button/new-york.ts',
+    'packages/prototypes/shadcn/src/button/profiles.ts',
     'packages/prototypes/shadcn/src/button/paint.ts',
+    'packages/prototypes/shadcn/src/style-scope/root.proto.ts',
+    'packages/prototypes/shadcn/src/style-scope/selection.ts',
     'packages/prototypes/base/src/button/button.proto.ts',
     'packages/cli/src/generated/shadcn-style-tokens.ts',
     'apps/www/src/content/docs/demo_components/button/demo-button-ghost.demo.ts',
     'apps/www/src/content/docs/demo_components/button/buttonCode.ts',
+    'apps/www/src/content/docs/shadcn-demo-style.ts',
     'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx',
+    'internal/fixtures/shadcn-style-source/manifest.json',
+    'internal/fixtures/shadcn-style-source/upstream/apps/v4/registry/styles/style-rhea.css',
     'apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts',
     'apps/www/src/content/docs/zh-cn/ghost-paint-oracle.ts',
     'apps/www/src/content/docs/zh-cn/browser-harness.ts',
@@ -176,7 +190,8 @@ async function selectPublicPanel(page: Page, runtime: (typeof RUNTIMES)[number])
         '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
       );
       const first = surface?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!host || !surface || !first || surface.querySelectorAll('[data-pui-root]').length !== 2)
+      // The explicit Rhea scope wrapper contributes the third root: scope + two buttons.
+      if (!host || !surface || !first || surface.querySelectorAll('[data-pui-root]').length !== 3)
         return false;
       const committed = (
         root as HTMLElement & { __previewer__?: { getCurrentRuntime?: () => string } }
@@ -233,7 +248,7 @@ async function metrics(control: Locator) {
       return Array.from(ctx.getImageData(0, 0, 1, 1).data) as [number, number, number, number];
     };
     const palette = Object.fromEntries(
-      ['accent', 'accent-foreground', 'foreground'].map((key) => [
+      ['accent', 'accent-foreground', 'foreground', 'muted'].map((key) => [
         key,
         css.getPropertyValue(`--pui-${key}`).trim(),
       ])
@@ -249,6 +264,7 @@ async function metrics(control: Locator) {
       background: rgba(css.backgroundColor),
       foreground: rgba(css.color),
       accent: rgba(palette.accent),
+      muted: rgba(palette.muted),
       accentForeground: rgba(palette['accent-foreground']),
       normalForeground: rgba(palette.foreground),
       hovered: element.hasAttribute('data-hovered'),
@@ -357,10 +373,7 @@ for (const runtime of RUNTIMES)
           await page.evaluate(() => document.fonts.ready);
           const enabled = previewer.getByRole('button', { name: 'Ghost', exact: true });
           const disabled = previewer.getByRole('button', { name: 'Disabled ghost', exact: true });
-          observations.profile = 'new-york';
-          expect((await metrics(enabled)).tokens?.split(/\s+/)).toEqual(
-            expect.arrayContaining(['h-9', 'rounded-md'])
-          );
+          observations.profile = 'rhea';
           const status = previewer.getByRole('status');
           const counts = (enabledCount: number) =>
             expect
@@ -371,7 +384,7 @@ for (const runtime of RUNTIMES)
               .poll(async () => {
                 const actual = await metrics(target);
                 observations[`${stage}LastPaint`] = actual;
-                return ghostPaintFailures(actual, scheme, hovered, isDisabled);
+                return rheaGhostPaintFailures(actual, scheme, hovered, isDisabled);
               })
               .toEqual([]);
             const observed = await metrics(target);
@@ -416,8 +429,9 @@ for (const runtime of RUNTIMES)
           stage = 'disabled-tab-exclusion';
           await page.keyboard.press('Tab');
           await settleInput(page!);
-          observations.afterTab = await metrics(disabled);
-          expect((observations.afterTab as Awaited<ReturnType<typeof metrics>>).active).toBe(false);
+          const afterTab = await metrics(disabled);
+          observations.afterTab = afterTab;
+          expect(afterTab.active).toBe(false);
           await counts(3);
           // Host focus() is a diagnostic attempt, not Base focusSelf(). Do not add
           // tabindex to force access. If the browser excludes this disabled host,

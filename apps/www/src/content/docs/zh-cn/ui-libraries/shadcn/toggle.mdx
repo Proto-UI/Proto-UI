@@ -7,7 +7,9 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `toggle` 条目。尺寸、间距、圆角、outline 阴影与 active/hover 配方对照固定 [New York 02cad611](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/toggle.tsx)：default/sm/lg 高度为 36/32/40px（16px 根字号），active 使用 accent 与 accent-foreground；default 非 active hover 使用 muted 与 muted-foreground，outline hover 使用 accent。
+当前页面展示 Proto UI 中 `shadcn` 风格的 `toggle` 条目。
+
+本页 Rhea 配方对照固定 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)：default/sm/lg 高度为 2rem/1.75rem/2.25rem（16px 根字号），min-width 与高度一致，内边距均为 0.625rem，gap 0.25rem，圆角 `rounded-2xl`（上游约定为 `--radius` ×1.8；Proto 当前以 `--pui-radius` +8px 近似，仅在固定 0.625rem/10px 基础下同为18px，不宣称动态一致）；outline 保留 border-input、无 shadow；pressed 使用 muted 表面，hover 使用 foreground 墨色，上游仅 outline 另有 muted hover 表面，当前 Proto hover 对两变体均补 muted 表面——default 变体的 hover 表面仍处未治理状态，只记录不验收。独立 [02cad611 New York 源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/toggle.tsx) 仍保留 36/32/40px 高度、accent active、outline shadow-xs 与 muted-foreground default hover，属于兼容 profile；两者不混称跨宿主已视觉等价。
 
 Toggle 的 active、disabled、键盘与 a11y 仍由 Base 所有。`asChild` 有意不提供；原生属性/pressed API 别名、invalid 与任意嵌套 SVG 样式仍属兼容性差异。本页和源码测试不等于四 runtime、双主题的原生像素验收。
 
