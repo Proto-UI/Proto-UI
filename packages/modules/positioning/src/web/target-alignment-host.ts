@@ -1,5 +1,10 @@
 import { ownStyles } from './owned-style-lease';
-import { createBorderBoxSizeLease, measureBorderBoxInlineGutter } from './border-box-size-lease';
+import {
+  createBorderBoxSizeLease,
+  hasBorderBoxInlineClipping,
+  layoutInlineStart,
+  measureBorderBoxInlineGutter,
+} from './border-box-size-lease';
 import type {
   AnchoredPositionConnection,
   TargetAlignmentConnection,
@@ -34,21 +39,6 @@ function layoutTop(node: HTMLElement): number {
 }
 const relativeTop = (node: HTMLElement, ancestor: HTMLElement) =>
   layoutTop(node) - layoutTop(ancestor) - ancestor.clientTop;
-
-function layoutLeft(node: HTMLElement): number {
-  let left = 0;
-  let current: HTMLElement | null = node;
-  while (current) {
-    left += current.offsetLeft;
-    const parent: Element | null = current.offsetParent;
-    if (!element(parent)) break;
-    left += parent.clientLeft;
-    current = parent;
-  }
-  for (let parent = node.parentElement; parent; parent = parent.parentElement)
-    left -= parent.scrollLeft;
-  return left;
-}
 
 type Targets = {
   [K in
@@ -159,7 +149,7 @@ export function createTargetAlignmentLease(
       ? createBorderBoxSizeLease(sizing.reference as HTMLElement, sizeTargets, live)
       : null;
     const owned = ownStyles(frame);
-    const rejectAdmission = (reason: 'invalid-geometry' | 'ownership-lost') => {
+    const rejectAdmission = (reason: 'invalid-geometry' | 'ownership-lost' | 'size-conflict') => {
       // Admission failure is observable synchronously. Roll back our sizing
       // before delivery; pending layout keeps its identity claims instead.
       sizeLease?.abort(reason);
@@ -199,10 +189,10 @@ export function createTargetAlignmentLease(
       const value = targets.inlineReference.getBoundingClientRect();
       // Floating layout uses CSSOM offset precision, not the Surface's animated paint bounds.
       // Keep the neutral Frame origin and reference/value viewport fractions.
-      const origin = frame.getBoundingClientRect().left - layoutLeft(frame);
-      const surfaceLeft = origin + layoutLeft(targets.surface);
+      const origin = frame.getBoundingClientRect().left - layoutInlineStart(frame);
+      const surfaceLeft = origin + layoutInlineStart(targets.surface);
       const surfaceWidth = targets.surface.offsetWidth;
-      const textLeft = origin + layoutLeft(targets.inlineTarget);
+      const textLeft = origin + layoutInlineStart(targets.inlineTarget);
       if (targets.blockTarget.offsetHeight <= 0 || reference.height <= 0) {
         report({ status: 'pending-target', reason: 'missing-target' });
         return null;
@@ -370,6 +360,13 @@ export function createTargetAlignmentLease(
                 report({ status: 'pending-target', reason: 'detached-target' });
               else report({ status: 'unavailable', reason: sized.reason });
               return;
+            }
+            for (const target of sizeTargets) {
+              const clipped = hasBorderBoxInlineClipping(target, frame);
+              if (clipped !== false) {
+                rejectAdmission(clipped === null ? 'invalid-geometry' : 'size-conflict');
+                return;
+              }
             }
             stable = true;
             break;

@@ -1,8 +1,11 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConnection } from '@proto.ui/core';
 import { createFloatingUiAnchoredPositionHost } from '../src/web/floating-ui-host';
 
-afterEach(() => document.body.replaceChildren());
+afterEach(() => {
+  document.body.replaceChildren();
+  vi.unstubAllGlobals();
+});
 
 const rect = (x: number, y: number, width: number, height: number): DOMRect =>
   ({
@@ -288,6 +291,55 @@ function edgeFixture(
     throw error;
   }
 }
+
+it('edge sizing rechecks overflow after content-only row resize notification', async () => {
+  // Controlled observer selection and CSSOM facts, not native CSS evidence.
+  const observers: ControlledObserver[] = [];
+  class ControlledObserver implements ResizeObserver {
+    readonly targets = new Map<Element, ResizeObserverBoxOptions>();
+    active = true;
+    constructor(readonly callback: ResizeObserverCallback) {
+      observers.push(this);
+    }
+    observe(target: Element, options: ResizeObserverOptions = {}) {
+      this.targets.set(target, options.box ?? 'content-box');
+    }
+    unobserve(target: Element) {
+      this.targets.delete(target);
+    }
+    disconnect() {
+      this.active = false;
+      this.targets.clear();
+    }
+    notify(target: Element, box: ResizeObserverBoxOptions) {
+      if (this.active && this.targets.get(target) === box) this.callback([], this);
+    }
+  }
+  vi.stubGlobal('ResizeObserver', ControlledObserver);
+  const f = edgeFixture();
+  const statuses: unknown[] = [];
+  Object.defineProperties(f.row, {
+    clientWidth: {
+      configurable: true,
+      get: () => f.row.offsetWidth - (Number.parseFloat(f.row.style.paddingLeft) || 0),
+    },
+    scrollWidth: { configurable: true, get: () => 100 },
+  });
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'applied' });
+    expect([f.row.offsetWidth, f.row.offsetHeight, f.floating.offsetWidth]).toEqual([180, 36, 194]);
+    f.row.style.paddingLeft = '100px';
+    for (const observer of observers) observer.notify(f.row, 'content-box');
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'unavailable', reason: 'size-conflict' });
+    expect([f.row.style.width, f.row.style.height, f.floating.style.width]).toEqual(['', '', '']);
+    expect(f.row.style.paddingLeft).toBe('100px');
+  } finally {
+    f.dispose();
+  }
+});
 
 it('edge sizing rejects a real used-box mismatch and restores partial style writes', async () => {
   const f = edgeFixture({ rejectWrites: true });

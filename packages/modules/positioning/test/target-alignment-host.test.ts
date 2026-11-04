@@ -157,6 +157,34 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('neutral target geometry host', () => {
+  it('rejects a matched row clipped by an independently constrained viewport', () => {
+    const f = sizingFixture();
+    f.resize(180);
+    // Controlled CSSOM facts: the row keeps its requested border box while
+    // an authored Surface maximum prevents its clipping viewport from growing.
+    f.surface.style.maxWidth = '160px';
+    f.scrollport.style.overflowX = 'hidden';
+    dimensions(f.surface, { offsetWidth: 160, clientWidth: 158 });
+    dimensions(f.scrollport, { offsetWidth: 158, clientWidth: 150 });
+    Object.defineProperty(f.blockTarget, 'offsetWidth', {
+      configurable: true,
+      get: () => Number.parseFloat(f.blockTarget.style.width) || 32,
+    });
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.onAlignment).toHaveBeenLastCalledWith({
+        status: 'unavailable',
+        reason: 'size-conflict',
+      });
+      expect(f.onAlignment.mock.calls.some(([status]) => status.status === 'applied')).toBe(false);
+      expect([f.blockTarget.style.width, f.blockTarget.style.height]).toEqual(['', '']);
+      expect(f.surface.style.maxWidth).toBe('160px');
+      expect(f.scrollport.style.overflowX).toBe('hidden');
+    } finally {
+      lease.dispose();
+    }
+  });
+
   it('rolls back size writes before reporting a failed containing-layout plan', () => {
     const f = sizingFixture();
     const atFailure: string[][] = [];

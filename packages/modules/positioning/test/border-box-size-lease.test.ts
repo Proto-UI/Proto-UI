@@ -50,6 +50,40 @@ afterEach(() => {
 });
 
 describe('neutral used-border-box matching lease', () => {
+  it.each(['reference', 'target'] as const)(
+    'recovers the same lease after its %s temporarily leaves the document',
+    (part) => {
+      const f = fixture();
+      const lease = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+      expect(lease.apply()).toEqual({ kind: 'matched', width: 192, height: 44 });
+      const detached = part === 'reference' ? f.reference : f.rows[0];
+      detached.remove();
+      expect(lease.verify()).toEqual({ kind: 'unavailable', reason: 'detached-target' });
+      document.body.append(detached);
+      f.resize(208, 48);
+      expect(lease.apply()).toEqual({ kind: 'matched', width: 208, height: 48 });
+      for (const row of f.rows) expect([row.offsetWidth, row.offsetHeight]).toEqual([208, 48]);
+      lease.restore();
+      for (const row of f.rows) expect(row.style.cssText).toBe('');
+    }
+  );
+
+  it('does not reclaim a detached pending target from its admitted successor', () => {
+    const f = fixture();
+    const previous = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(previous.apply().kind).toBe('matched');
+    f.rows[0].remove();
+    expect(previous.verify()).toEqual({ kind: 'unavailable', reason: 'detached-target' });
+    document.body.append(f.rows[0]);
+    const next = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(next.apply().kind).toBe('matched');
+    expect(previous.apply()).toEqual({ kind: 'unavailable', reason: 'ownership-lost' });
+    previous.restore();
+    expect(next.verify()).toEqual({ kind: 'matched', width: 192, height: 44 });
+    next.restore();
+    for (const row of f.rows) expect(row.style.cssText).toBe('');
+  });
+
   it('does not register a successor retired during reference reads or revoke the live predecessor', () => {
     const f = fixture();
     const reference = document.createElement('button');

@@ -1,7 +1,11 @@
 import { createTargetAlignmentLease } from './target-alignment-host';
 import { resolveWebInputOriginAnchor } from './input-origin-anchor';
 import { observeRootSpace } from './root-space-observer';
-import { createBorderBoxSizeLease, measureBorderBoxInlineGutter } from './border-box-size-lease';
+import {
+  createBorderBoxSizeLease,
+  hasBorderBoxInlineClipping,
+  measureBorderBoxInlineGutter,
+} from './border-box-size-lease';
 import { ownStyles, hasOwnedStyle } from './owned-style-lease';
 import {
   autoUpdate,
@@ -165,7 +169,6 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
   ): TargetAlignmentStatus => {
     if (result.kind === 'pending') return { status: 'pending-target', reason: 'missing-target' };
     if (result.reason === 'detached-target') {
-      frameStyle?.restore();
       return { status: 'pending-target', reason: 'detached-target' };
     }
     return fail(result.reason);
@@ -233,6 +236,10 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
           (frame.offsetWidth > available.width + 1 || frame.offsetHeight > available.height + 1))
       )
         return fail('size-conflict');
+      for (const target of targets as HTMLElement[]) {
+        const clipped = hasBorderBoxInlineClipping(target, frame);
+        if (clipped !== false) return fail(clipped === null ? 'invalid-geometry' : 'size-conflict');
+      }
       return { status: 'applied' };
     },
     fail,
@@ -252,11 +259,11 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let cleanup: (() => void) | null = null;
       let sizingEpoch = 0;
       let sizing: ReturnType<typeof createEdgeSizeLease> | null = null;
-      let sizeObserver: ResizeObserver | null = null;
+      let sizeObservers: ResizeObserver[] = [];
       const retireSizing = () => {
         sizingEpoch++;
-        sizeObserver?.disconnect();
-        sizeObserver = null;
+        for (const observer of sizeObservers) observer.disconnect();
+        sizeObservers = [];
         const previous = sizing;
         sizing = null;
         previous?.dispose();
@@ -384,11 +391,14 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
             ? connection.floating.ownerDocument.defaultView
             : null;
           if (typeof view?.ResizeObserver === 'function') {
-            sizeObserver = new view.ResizeObserver(() => {
-              if (!disposed && epoch === sizingEpoch) void position();
+            // A target retains one box registration per observer, not two.
+            sizeObservers = (['content-box', 'border-box'] as const).map((box) => {
+              const observer = new view.ResizeObserver(() => {
+                if (!disposed && epoch === sizingEpoch) void position();
+              });
+              for (const target of sizing!.observed) observer.observe(target, { box });
+              return observer;
             });
-            for (const target of sizing.observed)
-              sizeObserver.observe(target, { box: 'border-box' });
           }
         }
         const { anchor, floating } = connection;

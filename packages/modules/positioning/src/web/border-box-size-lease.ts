@@ -61,15 +61,26 @@ export function createBorderBoxSizeLease(
         (admittedSizeGenerations.get(target) ?? 0) <= generation && styles.isCurrent()
     );
   const hasNewAuthoredSizing = () => owners.some(({ target }) => hasAuthoredSizing(target));
-  const connectedToOwner = () =>
-    current() &&
-    reference.isConnected &&
-    reference.ownerDocument === ownerDocument &&
-    owners.every(({ target }) => target.isConnected && target.ownerDocument === ownerDocument);
+  const availabilityFailure = (): Extract<BorderBoxSizeResult, { kind: 'unavailable' }> | null => {
+    if (
+      !current() ||
+      reference.ownerDocument !== ownerDocument ||
+      owners.some(({ target }) => target.ownerDocument !== ownerDocument)
+    )
+      return unavailable('detached-target');
+    if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    if (!reference.isConnected || owners.some(({ target }) => !target.isConnected)) {
+      // Temporary DOM removal suspends certification, not this current identity.
+      // Retain claims so a successor still fences us when the nodes reconnect.
+      preparedSize = null;
+      return { kind: 'unavailable', reason: 'detached-target' };
+    }
+    return null;
+  };
   const prepare = (): BorderBoxSizePreparation => {
     if (terminal) return { kind: 'unavailable', reason: terminal };
-    if (!connectedToOwner()) return unavailable('detached-target');
-    if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    const failure = availabilityFailure();
+    if (failure) return failure;
     // Both sides use the same used-layout CSSOM border-box coordinate space.
     // Trigger hover/press or ancestor paint transforms never resize rows.
     const width = reference.offsetWidth,
@@ -80,14 +91,14 @@ export function createBorderBoxSizeLease(
     // Initial pending has no style fields to protect. A later admitted lease
     // still supersedes it, even after that successor restores its own fields.
     // Missing layout or an initial author conflict never claims this generation.
-    if (!connectedToOwner()) return unavailable('detached-target');
-    if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    const afterRead = availabilityFailure();
+    if (afterRead) return afterRead;
     for (const { target } of owners) admittedSizeGenerations.set(target, generation);
     // Do not erase author min/max constraints. Conflicting used dimensions
     // are diagnosed below; an explicit intrinsic policy opts out upstream.
     for (const { styles } of owners) {
-      if (!current()) return unavailable('detached-target');
-      if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+      const beforeWrite = availabilityFailure();
+      if (beforeWrite) return beforeWrite;
       if (
         !styles.write('box-sizing', 'border-box') ||
         !styles.write('width', `${width}px`) ||
@@ -102,8 +113,8 @@ export function createBorderBoxSizeLease(
   };
   const verify = (): BorderBoxSizeResult | Readonly<{ kind: 'reference-changed' }> => {
     if (terminal) return { kind: 'unavailable', reason: terminal };
-    if (!connectedToOwner()) return unavailable('detached-target');
-    if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    const failure = availabilityFailure();
+    if (failure) return failure;
     // A lease that only ever saw missing layout has nothing to certify, but a
     // repeated verification must stay recoverable, not turn terminal. Real
     // terminal and ownership failures above still win over pending.
@@ -125,7 +136,8 @@ export function createBorderBoxSizeLease(
     if (currentWidth === 0 || currentHeight === 0) return pending();
     if (currentWidth !== width || currentHeight !== height) return { kind: 'reference-changed' };
     for (const { target } of owners) {
-      if (!current()) return unavailable('detached-target');
+      const beforeRead = availabilityFailure();
+      if (beforeRead) return beforeRead;
       // Used dimensions and un-clipped content are verified independently
       // of successful writes. Multi-line callers must choose intrinsic.
       const targetWidth = target.offsetWidth,
@@ -150,8 +162,8 @@ export function createBorderBoxSizeLease(
       finalHeight = reference.offsetHeight;
     // Layout reads can synchronously reenter an owner/DOM boundary. Never
     // certify a disconnected/adopted target or an equal-valued successor claim.
-    if (!connectedToOwner()) return unavailable('detached-target');
-    if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    const afterRead = availabilityFailure();
+    if (afterRead) return afterRead;
     if (
       !Number.isFinite(finalWidth) ||
       !Number.isFinite(finalHeight) ||
@@ -179,6 +191,46 @@ export function createBorderBoxSizeLease(
       for (const { styles } of owners) styles.restore();
     },
   };
+}
+
+/** Scroll-adjusted layout position; paint transforms are not sizing inputs. */
+export function layoutInlineStart(node: HTMLElement): number {
+  let left = 0;
+  let current: HTMLElement | null = node;
+  while (current) {
+    left += current.offsetLeft;
+    const parent: Element | null = current.offsetParent;
+    if (!parent || !('offsetLeft' in parent)) break;
+    left += (parent as HTMLElement).clientLeft;
+    current = parent as HTMLElement;
+  }
+  for (let parent = node.parentElement; parent; parent = parent.parentElement)
+    left -= parent.scrollLeft;
+  return left;
+}
+
+/** Check clipping only inside the owning frame, in the same layout coordinates. */
+export function hasBorderBoxInlineClipping(
+  target: HTMLElement,
+  frame: HTMLElement
+): boolean | null {
+  const view = frame.ownerDocument.defaultView;
+  if (!view || target === frame || !frame.contains(target)) return null;
+  const left = layoutInlineStart(target);
+  const width = target.offsetWidth;
+  if (!Number.isFinite(left) || !Number.isFinite(width) || width < 0) return null;
+  for (let parent = target.parentElement; parent; parent = parent.parentElement) {
+    const style = view.getComputedStyle(parent);
+    const overflow = style.overflowX || style.overflow;
+    if (overflow === 'hidden' || overflow === 'clip' || overflow === 'scroll' || overflow === 'auto') {
+      const start = layoutInlineStart(parent) + parent.clientLeft;
+      const available = parent.clientWidth;
+      if (!Number.isFinite(start) || !Number.isFinite(available) || available < 0) return null;
+      if (left < start - 1 || left + width > start + available + 1) return true;
+    }
+    if (parent === frame) return false;
+  }
+  return null;
 }
 
 /** Layout chrome outside one row's border box, including reserved scrollbars. */
