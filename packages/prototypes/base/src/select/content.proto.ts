@@ -195,9 +195,9 @@ function setupSelectContent(
     return true;
   };
 
-  const resolveOpenFocusAction = (run: any, ctx: SelectContextValue) => {
+  const resolveOpenFocusAction = (run: any, ctx: SelectContextValue, defer = true) => {
     const options = {
-      defer: true,
+      defer,
       preventScroll: true,
       reason: ctx.requestFocusReason ?? ('programmatic' as const),
     };
@@ -295,8 +295,13 @@ function setupSelectContent(
       } else if (!ready) {
         entryTask?.cancel();
         entryTask = null;
-        if (entryActive) focusScope.deactivate({ reason: 'programmatic' });
-        entryActive = false;
+        // Size remeasurement is not withdrawal of an already accepted entry.
+        // Deactivating here clears the shared focused/active owner even when
+        // native focus never moved; activating a manual scope cannot restore it.
+        if (!alignment?.retainsPendingFocusScope) {
+          if (entryActive) focusScope.deactivate({ reason: 'programmatic' });
+          entryActive = false;
+        }
       }
       return;
     }
@@ -382,16 +387,29 @@ function setupSelectContent(
       if ((phase === 'legacy' || phase === 'popper') && ctx.open)
         transition.controls.capturePreparation()?.();
     },
-    applied(_run, row, current) {
+    applied(_run, row, current, admission) {
       if (!current()) return false;
       transition.controls.capturePreparation()?.();
       if (!current()) return false;
       const phase = transition.transitionState.get();
       if (phase !== 'entering' && phase !== 'entered') return false;
-      if (entryCancelled) return true;
+      // Commit only current, usable readiness before a focus callback can reenter.
+      if (!admission.accept()) return false;
+      // Readiness and focus admission are separate: a sizing-only refresh must
+      // not replace a newer Item or external Focus owner after entry completed.
+      if (entryCancelled || admission.preserveFocus) return true;
+      if (!row) {
+        // Popper preserves its own selected-or-boundary entry policy. The
+        // current size request admitted readiness; no deferred stale task.
+        const ctx = readContext(_run);
+        if (!ctx || !current()) return false;
+        resolveOpenFocusAction(_run, ctx, false);
+        return true;
+      }
       const focus = row.getExpose('focusSelf') as
         | ((options: { preventScroll: boolean; defer: boolean; reason: 'programmatic' }) => void)
         | null;
+      if (!current()) return false;
       focus?.({ preventScroll: true, defer: false, reason: 'programmatic' });
       return true;
     },
