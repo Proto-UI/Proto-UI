@@ -3628,7 +3628,120 @@ function collectRuleVariantTokens(node, scope, tokens, exposures) {
  * statically single-valued contributes one alternative per candidate, and the
  * runtime takes exactly one of them, so each combination needs its own tokens.
  */
+/** Only prove ineligibility of a direct, actually returned WhenBuilder expression.
+ * Unknown aliases/helper returns retain the existing collector boundary; this is
+ * not a second evaluator or a claim that all return/control-flow shapes resolve. */
+function hasProvenRuntimeOnlyReturnedCondition(node) {
+  const callback = unwrapTransparent(node);
+  if (!ts.isArrowFunction(callback) && !ts.isFunctionExpression(callback)) return false;
+  const parameter = callback.parameters[0];
+  if (
+    !parameter ||
+    !ts.isIdentifier(parameter.name) ||
+    parameter.initializer ||
+    parameter.dotDotDotToken
+  )
+    return false;
+  const receiver = parameter.name.text;
+  let returned = callback.body;
+  if (ts.isBlock(returned)) {
+    const statements = returned.statements;
+    const last = statements.at(-1);
+    if (!last || !ts.isReturnStatement(last) || !last.expression) return false;
+    if (
+      statements
+        .slice(0, -1)
+        .some(
+          (statement) =>
+            !ts.isExpressionStatement(statement) &&
+            !ts.isVariableStatement(statement) &&
+            !ts.isFunctionDeclaration(statement) &&
+            !ts.isEmptyStatement(statement)
+        )
+    )
+      return false;
+    returned = last.expression;
+  }
+  // Reassignment or replacement of a builder member invalidates this direct
+  // receiver proof. Do not use a method's spelling to infer another object's IR.
+  let receiverWritten = false;
+  let receiverEscaped = false;
+  const isReceiverRoot = (value) => {
+    let root = unwrapTransparent(value);
+    while (ts.isPropertyAccessExpression(root) || ts.isElementAccessExpression(root))
+      root = unwrapTransparent(root.expression);
+    return ts.isIdentifier(root) && root.text === receiver;
+  };
+  const inspectWrites = (current) => {
+    if (
+      ts.isIdentifier(current) &&
+      current.text === receiver &&
+      !(
+        (ts.isPropertyAccessExpression(current.parent) ||
+          ts.isElementAccessExpression(current.parent)) &&
+        current.parent.expression === current
+      )
+    )
+      receiverEscaped = true;
+    if (ts.isDeleteExpression(current) && isReceiverRoot(current.expression))
+      receiverWritten = true;
+    if (
+      ts.isBinaryExpression(current) &&
+      current.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      current.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
+      isReceiverRoot(current.left)
+    )
+      receiverWritten = true;
+    if (
+      (ts.isPrefixUnaryExpression(current) || ts.isPostfixUnaryExpression(current)) &&
+      (current.operator === ts.SyntaxKind.PlusPlusToken ||
+        current.operator === ts.SyntaxKind.MinusMinusToken) &&
+      isReceiverRoot(current.operand)
+    )
+      receiverWritten = true;
+    ts.forEachChild(current, inspectWrites);
+  };
+  inspectWrites(callback.body);
+  if (receiverWritten || receiverEscaped) return false;
+  const callOnBuilder = (value) => {
+    const expression = unwrapTransparent(value);
+    if (!ts.isCallExpression(expression) || !ts.isPropertyAccessExpression(expression.expression))
+      return null;
+    const owner = unwrapTransparent(expression.expression.expression);
+    return ts.isIdentifier(owner) && owner.text === receiver ? expression : null;
+  };
+  const runtimeOnly = (value) => {
+    const expression = unwrapTransparent(value);
+    const call = callOnBuilder(expression);
+    if (call) {
+      const method = call.expression.name.text;
+      if (method === 'any' || method === 'not') return true;
+      if (method === 'all') return call.arguments.some(runtimeOnly);
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      ts.isPropertyAccessExpression(expression.expression) &&
+      expression.expression.name.text === 'eq'
+    ) {
+      const subject = callOnBuilder(expression.expression.expression);
+      const key = subject?.arguments[0];
+      const expected = expression.arguments[0];
+      if (
+        subject?.expression.name.text === 'meta' &&
+        key &&
+        expected &&
+        ts.isStringLiteralLike(key) &&
+        ts.isStringLiteralLike(expected)
+      )
+        return key.text !== 'colorScheme' || expected.text !== 'dark';
+    }
+    return false;
+  };
+  return runtimeOnly(returned);
+}
+
 function analyzeWhenVariants(node, scope) {
+  if (hasProvenRuntimeOnlyReturnedCondition(node)) return [];
   const groups = [];
 
   visit(node);

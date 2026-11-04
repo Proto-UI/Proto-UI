@@ -1,39 +1,7 @@
 name: Field family native evidence
 on:
-  pull_request:
-    paths:
-      - 'scripts/test/evidence-input-paths.test.mjs'
-      - 'scripts/test/field-evidence.mjs'
-      - 'scripts/test/field-evidence.test.mjs'
-      - '.github/workflows/field-family-evidence.yml'
-      - 'packages/prototypes/**/src/field/**'
-      - 'packages/prototypes/**/src/button/**'
-      - 'packages/prototypes/bootstrap-2-3-2/src/theme.ts'
-      - 'packages/prototypes/liquid-glass/src/theme.ts'
-      - 'packages/prototypes/brutalist/src/theme.ts'
-      - 'packages/adapters/**'
-      - 'packages/core/**'
-      - 'packages/hooks/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/cli/src/**'
-      - 'apps/www/src/content/docs/**/field.mdx'
-      - 'apps/www/src/content/docs/field-demo.shared.ts'
-      - 'apps/www/src/content/docs/demo-*-field.demo.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/field-browser-oracle.ts'
-      - 'apps/www/src/content/docs/zh-cn/field-focus-observation*'
-      - 'apps/www/src/content/docs/zh-cn/field-async-observation*'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'scripts/test/server-readiness*'
-      - 'pnpm-lock.yaml'
-      - 'vitest.config.ts'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/package.json'
-      - 'package.json'
-      - 'apps/www/src/styles/**'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

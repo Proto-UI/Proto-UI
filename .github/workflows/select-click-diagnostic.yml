@@ -1,12 +1,7 @@
 name: Select public page click diagnostic
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/select-click-diagnostic.yml'
-      - 'apps/www/scripts/diagnose-select-click.ts'
-      - 'apps/www/scripts/capture-transition-frames.ts'
-      - 'apps/www/src/content/docs/zh-cn/select-click-diagnostic.test.ts'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

@@ -15,6 +15,11 @@ import {
 } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import {
+  planNavigationScrollHeadroom,
+  planNavigationWheel,
+  navigationWheelProgress,
+} from './popover-navigation-scroll-headroom';
+import {
   RUNTIMES,
   COLOR_SCHEMES,
   chromeExecutable,
@@ -111,6 +116,91 @@ async function settle(page: Page) {
       )
   );
 }
+type NativeWheelTrace = {
+  result: 'stable' | 'deadline';
+  events: Array<{ deltaY: number; trusted: boolean; at: number }>;
+  samples: Array<{ at: number; pageX: number; pageY: number; scrollTop: number }>;
+};
+async function observeEdgeWheel(page: Page, panel: Locator) {
+  // Passive observation only: no cancellation, scrolling, or style changes.
+  // Arm before native input, then retain the bounded trajectory through a
+  // stable interval. A two-frame unchanged position alone is not a receipt.
+  await panel.evaluate((element) => {
+    if (!(element instanceof HTMLElement)) throw new Error('Content is not an HTMLElement.');
+    const host = element as HTMLElement & { __puiNavigationWheel?: Promise<NativeWheelTrace> };
+    const surface =
+      element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ?? element;
+    if (host.__puiNavigationWheel) throw new Error('A wheel observation is already armed.');
+    host.__puiNavigationWheel = new Promise<NativeWheelTrace>((resolve) => {
+      const started = performance.now();
+      const events: NativeWheelTrace['events'] = [];
+      const samples: NativeWheelTrace['samples'] = [];
+      let frame = 0,
+        stableFrames = 0,
+        lastMovement = started;
+      let previous = { pageX: scrollX, pageY: scrollY, scrollTop: surface.scrollTop };
+      const finish = (result: NativeWheelTrace['result']) => {
+        cancelAnimationFrame(frame);
+        clearTimeout(deadline);
+        surface.removeEventListener('wheel', wheel, true);
+        resolve({ result, events, samples });
+      };
+      const wheel = (event: WheelEvent) => {
+        if (events.length < 16)
+          events.push({
+            deltaY: event.deltaY,
+            trusted: event.isTrusted,
+            at: performance.now() - started,
+          });
+      };
+      const sample = () => {
+        const now = performance.now();
+        const current = { pageX: scrollX, pageY: scrollY, scrollTop: surface.scrollTop };
+        if (
+          current.pageX === previous.pageX &&
+          current.pageY === previous.pageY &&
+          current.scrollTop === previous.scrollTop
+        )
+          stableFrames++;
+        else {
+          stableFrames = 0;
+          lastMovement = now;
+        }
+        previous = current;
+        if (samples.length < 256) samples.push({ at: now - started, ...current });
+        else {
+          finish('deadline');
+          return;
+        }
+        const event = events.find((value) => value.trusted && value.deltaY > 0);
+        if (
+          event &&
+          now - started - event.at >= 150 &&
+          now - lastMovement >= 100 &&
+          stableFrames >= 6
+        ) {
+          finish('stable');
+          return;
+        }
+        frame = requestAnimationFrame(sample);
+      };
+      const deadline = setTimeout(() => finish('deadline'), 2000);
+      surface.addEventListener('wheel', wheel, { capture: true, passive: true });
+      frame = requestAnimationFrame(sample);
+    });
+  });
+  await page.mouse.wheel(0, 10000);
+  const trace = await panel.evaluate(async (element) => {
+    const host = element as HTMLElement & { __puiNavigationWheel?: Promise<NativeWheelTrace> };
+    if (!host.__puiNavigationWheel) throw new Error('Native wheel observation is not armed.');
+    const result = await host.__puiNavigationWheel;
+    delete host.__puiNavigationWheel;
+    return result;
+  });
+  expect(trace.result).toBe('stable');
+  expect(trace.events.some((event) => event.trusted && event.deltaY > 0)).toBe(true);
+  return trace;
+}
 async function open(page: Page, trigger: Locator) {
   await trigger.click();
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
@@ -181,6 +271,19 @@ async function assertGeometry(panel: Locator) {
   expect(actual.overscroll).toBe('contain');
   expect(actual.scrollHeight).toBeGreaterThan(actual.clientHeight);
   return actual;
+}
+async function scrollHeadroom(trigger: Locator) {
+  return trigger.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return {
+      pageX: scrollX,
+      pageY: scrollY,
+      documentHeight: document.documentElement.scrollHeight,
+      viewportHeight: innerHeight,
+      triggerTop: box.top,
+      triggerBottom: box.bottom,
+    };
+  });
 }
 const focused = (locator: Locator) => locator.evaluate((element) => element.matches(':focus'));
 for (const family of FAMILIES)
@@ -289,13 +392,31 @@ for (const family of FAMILIES)
                 .toBeLessThanOrEqual(1.5);
               const edgeBefore = await geometry(panel);
               expect(edgeBefore.pageY).toBe(initial.pageY);
-              // A page already at its own end cannot demonstrate downward containment.
-              // Treat an unobservable fixture as failure, never as a product pass.
+              const originalDownwardRoom =
+                edgeBefore.documentHeight - edgeBefore.pageY - edgeBefore.viewport.height;
+              const originalContainmentObservable = originalDownwardRoom > 2;
+              observations.originalScrollHeadroom = {
+                before: edgeBefore,
+                downwardRoom: originalDownwardRoom,
+                result: originalContainmentObservable
+                  ? 'discriminating'
+                  : 'saturated-page control; no downward-containment inference',
+              };
+              if (originalContainmentObservable) {
+                expect(
+                  edgeBefore.documentHeight - edgeBefore.pageY - edgeBefore.viewport.height
+                ).toBeGreaterThan(2);
+              }
+              // Keep the original end-of-page gesture and original journey.
+              // When the page is saturated, this is a control, not containment evidence.
+
+              const originalEdgeWheel = await observeEdgeWheel(page, panel);
+              observations.originalEdgeWheel = originalEdgeWheel;
               expect(
-                edgeBefore.documentHeight - edgeBefore.pageY - edgeBefore.viewport.height
-              ).toBeGreaterThan(2);
-              await page.mouse.wheel(0, 10000);
-              await settle(page);
+                originalEdgeWheel.samples.every(
+                  (sample) => sample.pageY === edgeBefore.pageY && sample.pageX === edgeBefore.pageX
+                )
+              ).toBe(true);
               const edgeAfter = await geometry(panel);
               expect(
                 Math.abs(edgeAfter.scrollHeight - edgeAfter.clientHeight - edgeAfter.scrollTop)
@@ -303,7 +424,10 @@ for (const family of FAMILIES)
               expect(edgeAfter.pageY).toBe(edgeBefore.pageY);
               expect(edgeAfter.pageX).toBe(edgeBefore.pageX);
               observations.scrollEdge = { before: edgeBefore, after: edgeAfter };
-              await capture('scrolled-edge', observations.scrollEdge);
+              await capture(
+                originalContainmentObservable ? 'scrolled-edge' : 'saturated-page-control',
+                observations.scrollEdge
+              );
               stage = 'outside-focus';
               await outside.focus();
               await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
@@ -337,6 +461,95 @@ for (const family of FAMILIES)
               await settle(page);
               expect(await focused(outside)).toBe(true);
               expect(await outside.getAttribute('href')).toBe('#navigation-outside-destination');
+              if (!originalContainmentObservable) {
+                // An independent companion observation, after the untouched original
+                // Tab/outside-focus/Escape/resize/outside-pointer journey completes.
+                stage = 'prepared-scroll-observation';
+                await page.setViewportSize(viewport);
+                await trigger.scrollIntoViewIfNeeded();
+                await settle(page);
+                const beforePreparation = await scrollHeadroom(trigger);
+                const plan = planNavigationScrollHeadroom(beforePreparation);
+                await page.evaluate(
+                  ({ x, y }) => window.scrollTo({ left: x, top: y, behavior: 'instant' }),
+                  { x: beforePreparation.pageX, y: plan.pageY }
+                );
+                await settle(page);
+                const afterPreparation = await scrollHeadroom(trigger);
+                expect(afterPreparation.pageX).toBe(beforePreparation.pageX);
+                expect(afterPreparation.triggerTop).toBeGreaterThanOrEqual(0);
+                expect(afterPreparation.triggerBottom).toBeLessThanOrEqual(
+                  afterPreparation.viewportHeight
+                );
+                expect(
+                  afterPreparation.documentHeight -
+                    afterPreparation.pageY -
+                    afterPreparation.viewportHeight
+                ).toBeGreaterThan(2);
+                observations.scrollPreparation = { beforePreparation, plan, afterPreparation };
+                panel = await open(page, trigger);
+                const preparedInitial = await assertGeometry(panel);
+                const beforeWheel = await geometry(panel);
+                const wheelDeltaY = planNavigationWheel(beforeWheel);
+                await panel.hover();
+                await page.mouse.wheel(0, wheelDeltaY);
+                await expect
+                  .poll(async () =>
+                    navigationWheelProgress(
+                      beforeWheel.scrollTop,
+                      (await geometry(panel)).scrollTop,
+                      wheelDeltaY
+                    )
+                  )
+                  .toBeGreaterThan(0);
+                const afterWheel = await geometry(panel);
+                observations.preparedWheel = {
+                  before: beforeWheel,
+                  after: afterWheel,
+                  deltaY: wheelDeltaY,
+                };
+                await page.mouse.wheel(0, 10000);
+                await expect
+                  .poll(async () => {
+                    const value = await geometry(panel);
+                    return Math.abs(value.scrollHeight - value.clientHeight - value.scrollTop);
+                  })
+                  .toBeLessThanOrEqual(1.5);
+                const preparedBefore = await geometry(panel);
+                expect(preparedBefore.pageY).toBe(preparedInitial.pageY);
+                expect(
+                  preparedBefore.documentHeight -
+                    preparedBefore.pageY -
+                    preparedBefore.viewport.height
+                ).toBeGreaterThan(2);
+                const preparedEdgeWheel = await observeEdgeWheel(page, panel);
+                observations.preparedEdgeWheel = preparedEdgeWheel;
+                expect(
+                  preparedEdgeWheel.samples.every(
+                    (sample) =>
+                      sample.pageY === preparedBefore.pageY && sample.pageX === preparedBefore.pageX
+                  )
+                ).toBe(true);
+                const preparedAfter = await geometry(panel);
+                expect(
+                  Math.abs(
+                    preparedAfter.scrollHeight -
+                      preparedAfter.clientHeight -
+                      preparedAfter.scrollTop
+                  )
+                ).toBeLessThanOrEqual(1.5);
+                expect(preparedAfter.pageY).toBe(preparedBefore.pageY);
+                expect(preparedAfter.pageX).toBe(preparedBefore.pageX);
+                observations.preparedScrollEdge = {
+                  initial: preparedInitial,
+                  before: preparedBefore,
+                  after: preparedAfter,
+                };
+                await capture('prepared-scrolled-edge', observations.preparedScrollEdge);
+                await page.keyboard.press('Escape');
+                await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+                await panel.waitFor({ state: 'hidden' });
+              }
               expect(errors).toEqual([]);
               expect(deniedRequests).toEqual([]);
               result = 'passed';

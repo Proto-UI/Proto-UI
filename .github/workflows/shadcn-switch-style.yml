@@ -1,17 +1,7 @@
 name: Shadcn Switch shared style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/switch/**'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/prototypes/shadcn/test/switch*.test.ts'
-      - 'packages/adapters/**/src/**'
-      - 'scripts/prototypes/shadcn-switch-evidence*'
-      - '.github/workflows/shadcn-switch-style.yml'
-      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions*'
-      - 'apps/www/src/content/docs/zh-cn/switch-compositions.test.ts'
-      - 'apps/www/src/content/docs/*/ui-libraries/shadcn/switch.mdx'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -43,7 +33,6 @@ jobs:
           path: /tmp/pui-shadcn-switch-evidence/
           if-no-files-found: warn
           retention-days: 30
-
 
   public-compositions:
     runs-on: ubuntu-24.04

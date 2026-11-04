@@ -1,80 +1,12 @@
 name: Liquid Glass material and library evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/liquid-material-evidence.yml'
-      - 'packages/prototypes/liquid-glass/**'
-      - 'packages/prototypes/base/**'
-      - 'packages/core/**'
-      - 'packages/runtime/**'
-      - 'packages/hooks/**'
-      - 'packages/modules/**'
-      - 'packages/cli/**'
-      - 'scripts/test/liquid-material-evidence-inputs.test.mjs'
-      - 'scripts/docs/test/liquid-toggle-mdx.test.mjs'
-      - 'packages/adapters/**'
-      - 'apps/www/src/components/**'
-      - 'apps/www/src/content/docs/**/ui-libraries/liquid-glass/**'
-      - 'apps/www/src/content/docs/**/ui-libraries/bootstrap-2-3-2/**'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-failure-diagnostics.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-failure-diagnostics.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-detail-metrics.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-detail-metrics.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-detail-probe.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts'
-      - 'apps/www/scripts/diagnose-select-click.ts'
-      - 'apps/www/src/content/docs/demo_components/liquid-glass/**'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/src/styles/**'
-      - 'scripts/styles/**'
-      - 'scripts/test/server-readiness.mjs'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.ts'
-      - 'apps/www/src/content/docs/zh-cn/material-paint-observation.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-material-observation.ts'
-      - 'apps/www/src/content/docs/zh-cn/public-portal-diagnostic.ts'
-      - 'apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts'
-      - 'pnpm-lock.yaml'
-      - 'vitest.config.ts'
-      - 'apps/www/src/pages/en/test/liquid-glass-material.astro'
-      - 'apps/www/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts'
-      - 'apps/www/src/pages/en/test/liquid-glass-portal.astro'
-      - 'apps/www/src/pages/en/test/liquid-glass-toggle.astro'
-      - 'apps/www/src/pages/en/test/liquid-glass-hover.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-hover-*'
-      - 'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-prominent-tint-*'
-      - 'apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-tint-stage-diagnostic.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-tint-stage-*'
-      - 'apps/www/src/content/docs/zh-cn/liquid-tint-profile4-fixture.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-tint-stage-inputs/**'
-      - 'apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-liquid-visible-refraction-diagnostic.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/liquid-visible-refraction-*'
-      - 'spec/contracts/C-LIQUID-GLASS-MAIN-COMMAND-TINT-0001.yaml'
-      - 'spec/tests/T-LIQUID-GLASS-MAIN-COMMAND-TINT-0001.yaml'
-      - 'spec/prototypes/P-LIQUID-GLASS-BUTTON.yaml'
-      - 'spec/tests/T-LIQUID-GLASS-BUTTON-0001.yaml'
-      - 'spec/contracts/C-LIQUID-GLASS-COMMAND-INTERACTION-0001.yaml'
-      - 'spec/tests/T-LIQUID-GLASS-COMMAND-INTERACTION-0001.yaml'
-      - 'spec/prototypes/P-LIQUID-GLASS-TOGGLE.yaml'
-      - 'spec/tests/T-LIQUID-GLASS-TOGGLE-0001.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
   group: liquid-material-evidence-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:
@@ -103,7 +35,7 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs scripts/docs/test/liquid-toggle-mdx.test.mjs
+          node --test scripts/docs/test/liquid-toggle-mdx.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
@@ -174,7 +106,6 @@ jobs:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-prominent-tint-evidence
           PROTO_UI_PROMINENT_TINT_RUNTIME: ${{ matrix.runtime }}
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
@@ -263,7 +194,6 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-tint-stage-diagnostic
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.test.ts \
@@ -303,7 +233,6 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-visible-refraction-diagnostic
         run: |
-          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.test.ts \

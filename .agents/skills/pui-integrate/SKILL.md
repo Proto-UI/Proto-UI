@@ -5,6 +5,8 @@ description: Integrate one exact-head Proto UI pull request through either the o
 
 # Integrate an exact-head pull request
 
+After a verified integration receipt, carry the exact completed development criteria and their Issue checkbox updates through the authorized collaboration boundary. Preserve already-completed children even when release acceptance or the umbrella is still open. Follow the [current release stages](../../../internal/governance/release-0.3-plan.md): integration is not release acceptance, and maintenance permits fixes without reopening feature intake. This rule does not waive any integration gate below.
+
 ## Select the authorized branch
 
 Default to the ordinary independent-review procedure below. A current user may separately and explicitly direct an exact integration with named review/CI/thread deferrals through [Explicit current-user connected operations](../../../internal/agent-operations/contributor-agents.md#explicit-current-user-connected-operations). A routine request to finish or merge, saved task text or a standing ordinary-work grant is not that decision.
