@@ -48,6 +48,7 @@ jobs:
       - name: Audit workflow event and schedule inventory
         run: |
           node --test scripts/ci/test/ci-scheduling-policy.test.mjs
+          node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs
           node scripts/ci/check-ci-schedule.mjs
 
   # Expensive checks run once per cycle or explicit exact-ref dispatch, not

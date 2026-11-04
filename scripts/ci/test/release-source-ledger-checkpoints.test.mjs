@@ -258,3 +258,17 @@ test('the existing release list links the companion and its executable validatio
   );
   assert.ok(list.includes('do not override original criteria'));
 });
+
+test('the existing lightweight CI job executes the checkpoint guard once', () => {
+  const workflow = readFileSync(
+    new URL('../../../.github/workflows/ci.yml', import.meta.url),
+    'utf8'
+  );
+  const command = 'node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs';
+  const job = workflow.match(
+    /^  ci-config-audit:\n[\s\S]*?(?=^  [a-zA-Z][\w-]*:|$(?![\s\S]))/m
+  )?.[0];
+  assert.ok(job, 'the existing ci-config-audit job must remain present');
+  assert.ok(job.includes(command), 'checkpoint validation must run in the lightweight job');
+  assert.equal(workflow.split(command).length - 1, 1, 'do not duplicate the checkpoint run');
+});
