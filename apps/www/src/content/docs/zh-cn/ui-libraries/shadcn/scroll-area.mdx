@@ -5,6 +5,8 @@ description: '覆盖在 Base host-owned scrolling domain 之上的 shadcn 草案
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 这个 draft family 包含 Root、Viewport、Scrollbar 与 Thumb。logical scroll surface、normalized position/extent facts、scroll requests、focus participation、system/composed negotiation 与 bounded Thumb control leases 均由 Base 所有。shadcn 层只增加 clipped frame、full-size rounded Viewport、slim oriented tracks 与 flexible rounded Thumb。
 
 Viewport 通过 privileged Scroll surface 请求 `composed` design-language preference，但不把它设为 required；不支持 composed chrome 的 host 可以依 `D-SCROLL-PROJECTION-0001` fallback 到 `system`。无论哪种 projection，wheel、touch、keyboard、physics、inertia 与 overscroll 继续由 host 所有。该 family 不暴露 DOM scrollbar、size、position callback 或其它 host-specific API。

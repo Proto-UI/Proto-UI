@@ -1,2 +1,3 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('shadcn', 'input-otp');
+export default withShadcnRheaDemo(createNumericInputDemo('shadcn', 'input-otp'));

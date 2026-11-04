@@ -5,6 +5,8 @@ description: '在 Proto UI 上重建的 shadcn checkbox。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 这个条目展示 Proto UI 中当前的 `shadcn` checkbox 实现。
 
 协议归 Base Checkbox 所有：controlled 与 uncontrolled 的 `checked` 与 `indeterminate`、指针与 Space 的 activation、生效的 disabled 状态、focus，以及带 `mixed` 可访问状态的 `checkbox` role。anatomy 只有 Root 与 Indicator，shadcn 层只增加呈现——方框、填充、focus ring 与 disabled 处理。

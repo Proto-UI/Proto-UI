@@ -6,6 +6,7 @@ import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer
 import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
 import {
   assertDemoSpec,
+  collectPrototypeIds,
   type DemoSetupContext,
 } from '../../../components/PrototypePreviewer/demo-types';
 import {
@@ -25,7 +26,10 @@ const flush = async () => {
 };
 it('renders the real ghost demo through public props and observes outward signals only', async () => {
   assertDemoSpec(ghost);
-  await loadPrototypes(['shadcn-button']);
+  const prototypeIds = new Set<string>();
+  collectPrototypeIds(ghost.root, prototypeIds);
+  expect([...prototypeIds].sort()).toEqual(['shadcn-button', 'shadcn-style-scope']);
+  await loadPrototypes([...prototypeIds]);
   const host = document.createElement('div');
   document.body.append(host);
   let context!: DemoSetupContext;

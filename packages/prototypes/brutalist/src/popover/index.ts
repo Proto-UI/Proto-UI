@@ -8,9 +8,7 @@ export { default } from './root.proto';
 export type {
   PopoverRootProps,
   PopoverRootExposes,
-  PopoverTriggerProps,
   PopoverTriggerExposes,
-  PopoverContentProps,
   PopoverContentExposes,
   PopoverTitleProps,
   PopoverTitleExposes,
@@ -19,3 +17,8 @@ export type {
   PopoverCloseProps,
   PopoverCloseExposes,
 } from '@proto.ui/prototypes-base/popover';
+export type {
+  PopoverTriggerProps,
+  PopoverContentProps,
+  PopoverNavigationPresentationProps,
+} from './types';

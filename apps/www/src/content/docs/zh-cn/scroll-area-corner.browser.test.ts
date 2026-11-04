@@ -14,6 +14,30 @@ import {
   stopServer,
 } from './browser-harness';
 
+// Numeric computed lab() serialization only, not a general CSS color parser.
+// CSS Color 4 sections 9.3 and 16.1: three channels, optional slash alpha;
+// omitted alpha is opaque. Unsupported forms stay null and retain the raw value.
+function computedThumbFillAlpha(color: string): number | null {
+  const rgb = computedRgbAlpha(color);
+  if (rgb !== null) return rgb;
+  const match = /^lab\(\s*(.*?)\s*\)$/i.exec(color.trim());
+  if (!match) return null;
+  const parts = match[1].split(/\s*\/\s*/);
+  if (parts.length > 2) return null;
+  const number = /^[+-]?(?:\d*\.\d+|\d+)(?:e[+-]?\d+)?%?$/i;
+  const channels = parts[0].trim().split(/\s+/);
+  if (
+    channels.length !== 3 ||
+    channels.some((value) => !number.test(value) || !Number.isFinite(parseFloat(value)))
+  )
+    return null;
+  const value = parts[1];
+  if (value === undefined) return 1;
+  if (!number.test(value)) return null;
+  const alpha = parseFloat(value) / (value.endsWith('%') ? 100 : 1);
+  return Number.isFinite(alpha) && alpha >= 0 && alpha <= 1 ? alpha : null;
+}
+
 const families = [
   {
     name: 'brutalist',
@@ -299,16 +323,42 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
                 return {
                   boxSizing: s.boxSizing,
                   backgroundClip: s.backgroundClip,
-                  borderWidth: s.borderTopWidth,
-                  borderColor: s.borderTopColor,
+                  borderWidths: [
+                    s.borderTopWidth,
+                    s.borderRightWidth,
+                    s.borderBottomWidth,
+                    s.borderLeftWidth,
+                  ],
+                  background: s.backgroundColor,
                 };
               });
-              expect(style.boxSizing).toBe('border-box');
-              expect(style.backgroundClip).toBe('border-box');
-              expect(style.borderWidth).toBe('1px');
-              expect(computedRgbAlpha(style.borderColor)).toBe(0);
+              // P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE (draft):
+              // ordinary bg-border fill has no authored border. This does not
+              // certify forced colors; the separate assertions below stay intact.
               const box = await rect(thumb);
-              close(axis === 'vertical' ? box.width : box.height, 6);
+              const checkOrdinaryPaint = (paint: typeof style, geometry: typeof box) => {
+                expect(paint.boxSizing).toBe('border-box');
+                expect(paint.backgroundClip).toBe('border-box');
+                expect(paint.borderWidths).toEqual(['0px', '0px', '0px', '0px']);
+                const alpha = computedThumbFillAlpha(paint.background);
+                expect(
+                  alpha,
+                  `Unsupported computed Thumb color format: ${paint.background}`
+                ).not.toBeNull();
+                expect(alpha, `Ordinary Thumb fill alpha: ${paint.background}`).toBeGreaterThan(0);
+                close(axis === 'vertical' ? geometry.width : geometry.height, 6);
+              };
+              checkOrdinaryPaint(style, box);
+              // Counterfactual observations must not erase paint/geometry checks.
+              expect(() =>
+                checkOrdinaryPaint({ ...style, borderWidths: ['1px', '0px', '0px', '0px'] }, box)
+              ).toThrow();
+              expect(() =>
+                checkOrdinaryPaint({ ...style, background: 'rgba(0, 0, 0, 0)' }, box)
+              ).toThrow();
+              expect(() =>
+                checkOrdinaryPaint(style, { ...box, width: box.width + 2, height: box.height + 2 })
+              ).toThrow();
             }
           }
           // Real input exercises the shortened travel through the shared Move host.

@@ -5,6 +5,8 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 Calendar is a single-date Gregorian control. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
 
 ## Composition and clock ownership
@@ -19,7 +21,7 @@ The demo uses real family Select controls and `bindCalendarCaption(source, {mont
 
 The Shadcn demo restores the upstream example’s current-year-minus-100 through current-year list (101 options), without truncating it to disguise collection cost. Other families retain an explicitly application-chosen ±10-year sample. Caption month labels use the host’s `Intl` short-month format by default; `createCalendarDemo(family, {captionLocale})` can choose that host boundary separately from English weekday labels. The user’s Chinese month / English weekday example can therefore be composed explicitly. Our family Select popup is not the official page’s native-select popup and is not claimed to match native platform pixels.
 
-Shadcn targets the upstream base-nova single-date recipe: 28px cells and navigation, p2 spacing, muted today/outside states and a 3px actual-focused ring independently layered with selection, including pointer focus. The static 28px recipe is not enlarged to match a zoomed screenshot. The reference page is https://ui.shadcn.com/docs/components/base/calendar and registry is https://ui.shadcn.com/r/styles/base-nova/calendar.json (read-only snapshot 2026-10-10). This is not a claim of complete react-day-picker compatibility.
+The page selects Rhea's 32px date/navigation cells (`h-8 w-8`) and `p-3` layout at a 16px root font, from the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css). The separate [base-nova registry](https://ui.shadcn.com/r/styles/base-nova/calendar.json), observed on 2026-10-10, retains its 28px/p-2 compatibility recipe. Neither recipe is enlarged merely to match a screenshot. Actual focus and selection remain independent Base facts; this is not complete react-day-picker compatibility or native visual acceptance.
 
 ## Verification boundary
 

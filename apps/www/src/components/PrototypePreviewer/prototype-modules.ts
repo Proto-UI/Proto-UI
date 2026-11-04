@@ -25,6 +25,10 @@ function getPrototypeIdFromPath(path: string): string | null {
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   ...finfPrototypeModules,
+  'shadcn-style-scope': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/style-scope');
+    registerPrototype('shadcn-style-scope', mod.styleScope);
+  },
   'liquid-glass-text-root': async () => {
     const mod = await import('@proto.ui/prototypes-liquid-glass/text');
     registerPrototype('liquid-glass-text-root', mod.textRoot);

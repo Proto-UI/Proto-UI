@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 type OpenRequest = { open: boolean; reason: 'pointer' | 'keyboard' | 'programmatic' };
@@ -31,7 +32,7 @@ function disclosure(
   };
 }
 
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
@@ -78,4 +79,4 @@ export default {
     setControlledProps();
     api.setProps('accept', { onClick: accept });
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

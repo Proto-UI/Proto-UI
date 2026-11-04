@@ -5,11 +5,14 @@ description: 'Shadcn switch reconstructed on Proto UI.'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 This entry shows the current `shadcn` switch implementation in Proto UI.
 
 Set `size="sm"` on the Root for the small recipe; omit `size` or use `size="default"` for the default recipe. The Thumb derives size from its actual logical Switch Root and has no size prop. Changing size does not change the checked value or emit `checkedChange`.
 
-The [pinned New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) uses rem dimensions: default Root 2rem × 1.15rem with a 1rem Thumb; small Root 1.5rem × 0.875rem with a 0.75rem Thumb. Checked travel is the used Thumb width minus 2px. These source dimensions do not establish cross-target rendered parity; full upstream transition channels and API parity remain incomplete.
+The selected Rhea recipe uses a 2rem × 1.25rem default Root, a 1.5rem × 1rem small Root, 1rem/0.75rem Thumbs, a 2px transparent border and family `radius-2xl`; checked travel is Thumb width minus 4px. See the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css). The separate [02cad611 New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) retains its 2rem × 1.15rem / 1.5rem × 0.875rem dimensions and minus-2px travel as the compatibility profile. These are distinct profiles, not a claim of cross-target rendered parity.
+
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
 

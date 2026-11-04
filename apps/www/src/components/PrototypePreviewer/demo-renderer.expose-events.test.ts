@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Window } from 'happy-dom';
+import type { Window } from 'happy-dom';
 import { definePrototype } from '@proto.ui/core';
 import * as drawer from '@proto.ui/prototypes-shadcn/drawer';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import drawerDemo from '../../content/docs/demo-shadcn-drawer.demo';
 import { renderDemo } from './demo-renderer';
 import { registerPrototype } from './registry';
@@ -157,7 +158,10 @@ describe('WC DemoRuntimeApi callback projection', () => {
     const { element } = await mount(({ api }) =>
       api.setProps('subject', { onValueChange: callback })
     );
-    const foreign = new Window();
+    // Use the test environment implementation: another loaded copy has incompatible event slots.
+    const ownerWindow = element.ownerDocument.defaultView!;
+    const EnvironmentWindow = ownerWindow.Window as unknown as typeof Window;
+    const foreign = new EnvironmentWindow();
     // Happy DOM windows share event constructors. Replace the ambient constructor
     // to discriminate a global-instanceof check without claiming a real iframe run.
     const OriginalCustomEvent: new (
@@ -178,6 +182,9 @@ describe('WC DemoRuntimeApi callback projection', () => {
     const event = new foreign.CustomEvent('valueChange', { detail: payload });
     // Model the browser's standard brand, absent in Happy DOM 15.
     Object.defineProperty(event, Symbol.toStringTag, { value: 'CustomEvent' });
+    expect(foreign).not.toBe(element.ownerDocument.defaultView);
+    expect(foreign.CustomEvent).toBe(OriginalCustomEvent);
+    expect(foreign.CustomEvent).not.toBe(CustomEvent);
     expect(event instanceof CustomEvent).toBe(false);
     element.dispatchEvent(event as unknown as Event);
     element.dispatchEvent(new foreign.MouseEvent('valueChange', { detail: 1 }) as unknown as Event);
@@ -432,6 +439,7 @@ it('stops old tree construction when a connected prototype replaces the host', a
 
 it('the actual public Drawer demo updates status from the real Root outward signal across open/close', async () => {
   vi.stubGlobal('CSS', { supports: () => true });
+  registerPrototype(styleScope.name, styleScope);
   for (const value of Object.values(drawer)) {
     if (value && typeof value === 'object' && 'name' in value)
       registerPrototype(value.name, value as any);

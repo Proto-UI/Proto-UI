@@ -1,4 +1,5 @@
-export default {
+import { withShadcnRheaDemo } from '../../shadcn-demo-style';
+export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
@@ -7,8 +8,6 @@ export default {
       { kind: 'proto', prototypeId: 'shadcn-button', children: ['Default'] },
       {
         kind: 'box',
-        prototypeId: 'shadcn-button',
-        props: { variant: 'secondary' },
         children: [{ kind: 'proto', prototypeId: 'shadcn-button', children: ['Default2'] }],
       },
       {
@@ -37,4 +36,4 @@ export default {
       },
     ],
   },
-};
+});

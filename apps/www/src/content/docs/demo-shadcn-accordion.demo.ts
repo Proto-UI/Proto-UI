@@ -1,2 +1,3 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { createAccordionDemo } from './accordion-demo.shared';
-export default createAccordionDemo('shadcn');
+export default withShadcnRheaDemo(createAccordionDemo('shadcn'));

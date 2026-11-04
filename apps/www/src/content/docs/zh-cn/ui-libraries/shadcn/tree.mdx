@@ -5,6 +5,8 @@ description: 'tree functional composition and current verification limits.'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
 
 当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。

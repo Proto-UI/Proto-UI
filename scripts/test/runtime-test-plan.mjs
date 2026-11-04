@@ -108,7 +108,6 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
@@ -175,6 +174,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
   'packages/compiler/test/web-component-native.browser.test.ts',
@@ -192,6 +192,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts',
@@ -211,6 +212,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts':
     '.github/workflows/select-item-sizing-evidence.yml',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
@@ -244,6 +247,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
