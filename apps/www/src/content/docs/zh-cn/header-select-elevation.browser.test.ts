@@ -463,8 +463,8 @@ describe.sequential('Header public family presentation and labelled compact fiel
           const panelDiagnostic =
             appearance === 'family' &&
             family === 'shadcn' &&
-            runtime === 'react' &&
-            theme === 'dark';
+            ((runtime === 'react' && theme === 'dark') ||
+              ((runtime === 'vue' || runtime === 'vue2') && theme === 'light'));
           const panelDiagnosticErrors: string[] = [];
           let panelResizeTrace: unknown = null;
           let failureScreenshotTiming: { requestedAt: string; completedAt: string | null } | null =
