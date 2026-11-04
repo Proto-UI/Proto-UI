@@ -222,7 +222,12 @@ export function hasBorderBoxInlineClipping(
   for (let parent = target.parentElement; parent; parent = parent.parentElement) {
     const style = view.getComputedStyle(parent);
     const overflow = style.overflowX || style.overflow;
-    if (overflow === 'hidden' || overflow === 'clip' || overflow === 'scroll' || overflow === 'auto') {
+    if (
+      overflow === 'hidden' ||
+      overflow === 'clip' ||
+      overflow === 'scroll' ||
+      overflow === 'auto'
+    ) {
       const start = layoutInlineStart(parent) + parent.clientLeft;
       const available = parent.clientWidth;
       if (!Number.isFinite(start) || !Number.isFinite(available) || available < 0) return null;
