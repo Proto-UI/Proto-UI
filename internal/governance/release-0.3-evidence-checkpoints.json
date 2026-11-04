@@ -1,0 +1,269 @@
+{
+  "schemaVersion": 1,
+  "kind": "additive-evidence-checkpoints",
+  "authority": "Evidence extension of release-0.3-source-ledger.json, not another source inventory or an override of original criteria. Original Issue criteria and acceptance obligations remain authoritative. Checkpoints describe only their timestamped, source-bound child scopes.",
+  "sourceLedger": {
+    "path": "internal/governance/release-0.3-source-ledger.json",
+    "gitBlob": "f97e4a44443666b40592e09ff5a74631c581b633",
+    "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+    "sourceRevision": "91f2fdb5e36cfac675d22d1e07e1c4e6b051147d"
+  },
+  "liveCheckpoints": [
+    {
+      "key": "checkpoint.1073.20261104.finite-scroll-padding",
+      "recordedAt": "2026-11-04T01:00:04Z",
+      "issueNumber": 1073,
+      "sourceIssue": "https://github.com/Proto-UI/Proto-UI/issues/1073",
+      "sourceSnapshotBodySha256": "8119ad24604f2ccba2920c3ef55d972f136afc0ebaf63db4236b4ef622321593",
+      "release": "0.3",
+      "reason": "Committed-family CLI/www prerequisite; only the named child scope is reconciled.",
+      "checkpointSource": "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058",
+      "developmentOwner": {
+        "status": "verified-contribution",
+        "login": "cyjin-yl",
+        "agent": "dot",
+        "scope": "Named contribution only; no transfer of the original topic owner.",
+        "activeReservation": false,
+        "evidenceUrls": ["https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"]
+      },
+      "acceptanceOwner": {
+        "status": "unverified",
+        "nextAction": "Release integration owner must confirm the responsible reviewer/runner before acceptance."
+      },
+      "acceptanceState": "incomplete",
+      "umbrellaCompleted": false,
+      "surface": "cli",
+      "families": ["shadcn", "brutalist"],
+      "sourceCriterionKeys": [],
+      "scope": "Finite scroll-padding lowering and original CSS regression evidence, not the whole CLI/compiler or Command journey.",
+      "developmentState": "main-integrated",
+      "integration": {
+        "state": "present-on-main",
+        "observedMainRevision": "8f621173585c37cb1e975b31168177076fd80ac4",
+        "implementationCommits": [
+          "e528b318cf66a694412007f0867a0d1aa1c2d085",
+          "998b6eec660c8d3f0629e4cdcdbc406a465bfee2"
+        ],
+        "sourceBlob": "da73b18a38965ff3d7f5e2bab916b29395be10e3"
+      },
+      "children": [
+        {
+          "key": "issue.1073.child.finite-lowering",
+          "phase": "development",
+          "description": "Finite logical and physical scroll-padding mappings are present on the observed main; unsupported values remain rejected.",
+          "checked": true,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "ownerRef": "developmentOwner"
+        },
+        {
+          "key": "issue.1073.child.original-css-suite",
+          "phase": "verification",
+          "description": "Original CSS Vitest file: 75/75 in the recorded isolated source bundle; not full-repository or native acceptance.",
+          "checked": true,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "sourceRevision": "ba733f51a076eda8fc44fbbcc3d4724478b042ad",
+          "result": {
+            "passed": 75,
+            "failed": 0,
+            "scope": "original CSS file; isolated Node config"
+          },
+          "ownerRef": "developmentOwner"
+        },
+        {
+          "key": "issue.1073.child.complete-review",
+          "phase": "verification",
+          "description": "Complete the remaining independent review/source-lifecycle disposition for the bounded release criterion.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "nextAction": "Confirm the bounded reviewer and disposition owner; preserve existing contract admission debt.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1073.child.packed-consumer",
+          "phase": "acceptance",
+          "description": "Validate actual packed CLI consumer delivery on an integrated release source.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "nextAction": "Run the existing packed consumer route on an exact main/candidate and retain output hashes.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1073.child.native-consumer",
+          "phase": "acceptance",
+          "description": "Rerun the original Command native consumer on its explicitly integrated source and preserve any later browser failures.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "nextAction": "Select the integrated Command consumer owner/source; obtain native evidence rather than borrowing CSS unit counts.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1073.child.contract-cycle",
+          "phase": "acceptance",
+          "description": "Resolve contract admission and bind an actual complete regression receipt.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1073#issuecomment-6618948058"
+          ],
+          "nextAction": "Use ordinary lifecycle review and the scheduled regression owner; do not promote draft from this checkpoint.",
+          "ownerRef": "acceptanceOwner"
+        }
+      ],
+      "blocker": "Packed/native consumer, complete review and lifecycle/cycle evidence remain unverified.",
+      "nextAction": "Confirm those acceptance owners and run the existing exact-source consumer routes."
+    },
+    {
+      "key": "checkpoint.1191.20261104.navigation-scroll-diagnostic",
+      "recordedAt": "2026-11-04T01:00:04Z",
+      "issueNumber": 1191,
+      "sourceIssue": "https://github.com/Proto-UI/Proto-UI/issues/1191",
+      "sourceSnapshotBodySha256": "f6a538361c6191f76108f3f348da94eee5d42a47604db40ca526f25401c8046d",
+      "release": "0.3",
+      "reason": "Committed-family CLI/www prerequisite; only the named child scope is reconciled.",
+      "checkpointSource": "https://github.com/Proto-UI/Proto-UI/issues/1191#issuecomment-6619457493",
+      "developmentOwner": {
+        "status": "verified-contribution",
+        "login": "cyjin-yl",
+        "agent": "dot",
+        "scope": "Named contribution only; no transfer of the original topic owner.",
+        "activeReservation": false,
+        "evidenceUrls": ["https://github.com/Proto-UI/Proto-UI/issues/1191#issuecomment-6619457493"]
+      },
+      "acceptanceOwner": {
+        "status": "unverified",
+        "nextAction": "Release integration owner must confirm the responsible reviewer/runner before acceptance."
+      },
+      "acceptanceState": "incomplete",
+      "umbrellaCompleted": false,
+      "surface": "www",
+      "families": ["shadcn", "brutalist"],
+      "sourceCriterionKeys": ["issue.1191.001", "issue.1191.006"],
+      "scope": "Public navigation scroll-observation diagnostic only. Original six website criteria and all product owners remain unchanged.",
+      "developmentState": "draft-published",
+      "integration": {
+        "state": "not-integrated",
+        "pullRequest": 1214,
+        "draftRevision": "7ddbb7953729ee93eaa961ebd26c6d940b054a9b",
+        "tree": "0f51bf88366509f10db6afb96f696b9ff781f626",
+        "baseMainRevision": "8f621173585c37cb1e975b31168177076fd80ac4"
+      },
+      "children": [
+        {
+          "key": "issue.1191.child.scroll-diagnostic-published",
+          "phase": "development",
+          "description": "Publish the bounded diagnostic to existing Draft #1214, retaining original journey/control and all 32 identities.",
+          "checked": true,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345",
+            "https://github.com/Proto-UI/Proto-UI/issues/1191#issuecomment-6619457493"
+          ],
+          "sourceRevision": "7ddbb7953729ee93eaa961ebd26c6d940b054a9b",
+          "completionBoundary": "Draft publication only; not main integration or native acceptance.",
+          "ownerRef": "developmentOwner"
+        },
+        {
+          "key": "issue.1191.child.focused-source-validation",
+          "phase": "verification",
+          "description": "Same combined source: CSS75 + actual CLI preset10 + planner/numeric26; scoped strict types and six-file format passed.",
+          "checked": true,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345"
+          ],
+          "sourceRevision": "7ddbb7953729ee93eaa961ebd26c6d940b054a9b",
+          "result": {
+            "passed": 111,
+            "failed": 0,
+            "scope": "three isolated source suites; not native or packed"
+          },
+          "ownerRef": "developmentOwner"
+        },
+        {
+          "key": "issue.1191.child.lightweight-ci",
+          "phase": "verification",
+          "description": "DCO and four PR metadata checks succeeded; 17 cycle-only technical checks were skipped.",
+          "checked": true,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345",
+            "https://github.com/Proto-UI/Proto-UI/actions/runs/41749649089"
+          ],
+          "sourceRevision": "7ddbb7953729ee93eaa961ebd26c6d940b054a9b",
+          "result": {
+            "metadataPassed": 4,
+            "cycleChecksSkipped": 17,
+            "scope": "lightweight PR checks only"
+          },
+          "ownerRef": "developmentOwner"
+        },
+        {
+          "key": "issue.1191.child.main-integration",
+          "phase": "development",
+          "description": "Review and integrate the diagnostic under ordinary repository rules.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345"
+          ],
+          "nextAction": "Keep Draft while native/remaining evidence and substantive review requirements are reconciled; no approval bypass.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1191.child.native-32",
+          "phase": "acceptance",
+          "description": "Execute the 32 original navigation identities on the new exact source, with JSON/PNG and original assertions.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345"
+          ],
+          "sourceRevision": "7ddbb7953729ee93eaa961ebd26c6d940b054a9b",
+          "nextAction": "Use finf-representative-features-evidence.yml on wip/public-popover-navigation-1191-504b5041; verify exact head. Existing dispatch runs 19 groups, not a navigation-only input.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1191.child.native-fault-controls",
+          "phase": "acceptance",
+          "description": "Use the same native implementation/timing for normal, non-scrollable, swallowed-wheel and broken-containment controls.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/pull/1214#issuecomment-6619445345"
+          ],
+          "nextAction": "Implement/run the browser-level controls in supported official CI. Local attempt stopped before a browser started; numerical controls do not satisfy this item.",
+          "ownerRef": "acceptanceOwner"
+        },
+        {
+          "key": "issue.1191.child.other-original-criteria",
+          "phase": "acceptance",
+          "description": "Retain website tree handback, Focus/fatal retirement, Trigger design and every other original Issue criterion.",
+          "checked": false,
+          "evidenceUrls": [
+            "https://github.com/Proto-UI/Proto-UI/issues/1191#issuecomment-6619457493"
+          ],
+          "nextAction": "Original topic owners continue their own criteria; this diagnostic cannot close the umbrella.",
+          "ownerRef": "acceptanceOwner"
+        }
+      ],
+      "historicalNativeResult": {
+        "sourceRevision": "57cd35859b2a53fbdb7115fb582047690f7aaaa4",
+        "passed": 13,
+        "failed": 19,
+        "source": "https://github.com/Proto-UI/Proto-UI/actions/runs/41608139327/job/126024295093",
+        "note": "14 saturated-page precondition stops, 3 resize-width failures, 2 mobile-wheel failures; not relabeled as new-head results or product fixes."
+      },
+      "localBrowserAttempt": {
+        "attempted": true,
+        "browserStarted": false,
+        "casesExecuted": 0,
+        "reason": "Chromium singleton socket EPERM with sandbox retained."
+      },
+      "blocker": "Native32, same-implementation fault controls, generator freshness, complete CI/packed and new-head screenshots remain open; connector has no workflow dispatch.",
+      "nextAction": "Coordinate official exact-head execution through the existing workflow, then diagnose the actual new-source failures."
+    }
+  ]
+}
