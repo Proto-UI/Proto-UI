@@ -5,6 +5,8 @@ description: Design or implement the smallest complete executable evidence for a
 
 # Build executable evidence
 
+Apply the [bounded development and acceptance policy](../../../internal/governance/release-0.3-plan.md). Design tests for observable consumer behavior, boundaries and transitions, not source spelling or current recipe wiring. Name the original criteria each executed result completes; collection, mocks and a partial suite do not complete unexecuted acceptance. Passing a bounded criterion should produce an actionable checkbox update, not another generic debt summary.
+
 For input attribution, asynchronous ownership, CSS projection or uncertain test coverage, read `internal/agent-operations/testing-method.md`. Apply the techniques needed to distinguish the governed failure, not a universal list of Scroll cases.
 
 1. Require a `pui-trace` map and governed expected behavior.

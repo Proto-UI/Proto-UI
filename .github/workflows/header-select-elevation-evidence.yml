@@ -1,19 +1,8 @@
 name: Header Select elevation evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/header-select-elevation-evidence.yml'
-      - 'packages/prototypes/brutalist/src/select/**'
-      - 'packages/prototypes/shadcn/src/select/**'
-      - 'packages/prototypes/brutalist/src/button/**'
-      - 'apps/www/src/components/PrototypePreviewer/projection-composition.ts'
-      - 'apps/www/src/components/Homepage/homepage-runtime-client.ts'
-      - 'apps/www/src/components/override/AdapterSelect.astro'
-      - 'apps/www/src/components/site-shadcn-controls.ts'
-      - 'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts'
   workflow_dispatch:
+  workflow_call:
 
 # Actual public Header pages only. No deployment, secrets, write permissions,
 # CSS injection or manufactured screenshots. The baseline keeps its real API.

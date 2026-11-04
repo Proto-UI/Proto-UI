@@ -7,6 +7,17 @@ description: Route ordinary Proto UI development through a minimal composition o
 
 Coordinate the work without absorbing the domain skills into one long procedure.
 
+Apply the current [0.3 delivery stages and bounded-completion policy](../../../internal/governance/release-0.3-plan.md). Complete the authorized slice end to end; do not stop at implementation, a draft PR, a review request or an unposted evidence file while another authorized action is runnable. After the feature cutoff, continue repairs and acceptance, not new feature intake.
+
+## Close the actual criterion
+
+1. At intake, bind each requested outcome to its original Issue checkbox or stable criterion key, expected consumer behavior, validation, owner and exclusions. Keep a short active TODO list; select a repair when the regression policy requires repair-only mode.
+2. Separate development completion from release acceptance. A reviewed, validated, integrated bounded change completes its own development criterion even if an unrelated family, host or umbrella criterion is still open. Mark that completed checkbox promptly with its PR, merge SHA and actual evidence.
+3. If one checkbox mixes several conditions, retain its complete original wording and source, expose independently addressable child checkboxes, and check the satisfied children. Give every remaining child a concrete next action and owner; do not repeatedly use the unfinished umbrella as a reason to withhold earned progress.
+4. Continue implementation, focused consumer smoke, review fixes, conflict reconciliation and authorized integration until the slice is complete or a real unavailable prerequisite is demonstrated. A failed check is an input to diagnosis, not a stopping convention.
+5. Never convert a commit, test collection, DCO success, queued CI or a historical screenshot into unexecuted acceptance. Do not delete original failures, silently weaken assertions, invent approval, or bypass platform/rights gates to check a box.
+6. Re-read the actual Issue and current authorization before each tracking write; apply an idempotent bounded checkbox update and read back the result. Reconcile an unknown write instead of posting duplicates. An umbrella may remain open while its completed children stay checked.
+
 Read `internal/agent-operations/skills.yaml` as routing metadata. Do not preload candidate leaf skills or guess their paths. Select one leaf ID, run `pnpm agent:skill -- <leaf-id> --mode <execution-mode> --mode-source <trusted-source>`, and load the returned `loadPath` only when `blocked` is false. After the leaf returns a handoff that conforms to `internal/agent-operations/schemas/skill-handoff.schema.json`, run `pnpm agent:skill -- --handoff <handoff.json>` and load at most the one resolved next leaf.
 
 ## Establish the envelope

@@ -8,6 +8,7 @@ export interface AnchoredPositionHostLease {
 
 export interface AnchoredPositionHost {
   readonly supportsTargetAlignment?: boolean;
+  readonly supportsSizeMatch?: boolean;
   attach(connection: AnchoredPositionConnection): AnchoredPositionHostLease;
 }
 

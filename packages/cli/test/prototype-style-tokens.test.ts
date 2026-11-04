@@ -49,6 +49,122 @@ describe('collectProtoStyleTokens', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  it.each([
+    ['any', 'w.any(w.state(first).eq(true), w.state(second).eq(true))'],
+    [
+      'returned block any',
+      '{ w.state(third).eq(true); return w.any(w.state(first).eq(true), w.state(second).eq(true)); }',
+    ],
+    [
+      'all containing any',
+      'w.all(w.state(first).eq(true), w.any(w.state(second).eq(true), w.state(third).eq(true)))',
+    ],
+    ['not', 'w.not(w.state(first).eq(true))'],
+    ['all containing not', 'w.all(w.state(first).eq(true), w.not(w.state(second).eq(true)))'],
+    [
+      'reduced motion',
+      "w.all(w.meta('preference.reducedMotion').eq('no-preference'), w.state(first).eq(true))",
+    ],
+    [
+      'unknown preference',
+      "w.all(w.state(first).eq(true), w.meta('preference.other').eq('enabled'))",
+    ],
+    [
+      'light is not dark lowering',
+      "w.all(w.meta('colorScheme').eq('light'), w.state(first).eq(true))",
+    ],
+    [
+      'not all with preference and any',
+      "w.not(w.all(w.meta('preference.reducedMotion').eq('no-preference'), w.state(first).eq(false), w.any(w.state(second).eq(true), w.state(third).eq(true))))",
+    ],
+  ])(
+    'retains bare intent but no invented selector for runtime-only %s',
+    async (_label, expression) => {
+      await writeFile(
+        path.join(dir, 'runtime-only.proto.ts'),
+        `
+      import { definePrototype, tw } from '@proto.ui/core';
+      export default definePrototype({ name: 'runtime-only', setup(def) {
+        const first = def.state.bool('first', false);
+        const second = def.state.bool('second', false);
+        const third = def.state.bool('third', false);
+        def.expose.state('first', first); def.expose.state('second', second); def.expose.state('third', third);
+        def.rule({ when: (w) => ${expression}, intent: (i) => i.feedback.style.use(tw('bg-accent transition-none')) });
+      }});
+    `
+      );
+      const tokens = await collectProtoStyleTokens(dir);
+      expect(tokens).toContain('bg-accent');
+      expect(tokens).toContain('transition-none');
+      expect(
+        tokens.filter((token) => {
+          if (typeof token !== 'string') throw new TypeError('Expected a collected string token');
+          return token.endsWith(':bg-accent') || token.endsWith(':transition-none');
+        })
+      ).toEqual([]);
+    }
+  );
+
+  it.each([
+    ['eq', 'w.state(first).eq(true)', 'data-[first]:bg-accent'],
+    ['unused empty any', '{ w.any(); return w.state(first).eq(true); }', 'data-[first]:bg-accent'],
+    [
+      'unused same-name object',
+      '{ const other = { any() { return 0; } }; other.any(); return w.state(first).eq(true); }',
+      'data-[first]:bg-accent',
+    ],
+    [
+      'unused local helper',
+      '{ const unused = () => w.any(); return w.state(first).eq(true); }',
+      'data-[first]:bg-accent',
+    ],
+    [
+      'existing returned local alias',
+      '{ const condition = w.state(first).eq(true); return condition; }',
+      'data-[first]:bg-accent',
+    ],
+    [
+      'builder alias escapes direct receiver proof',
+      '{ const alias = w; alias.any = () => w.state(first).eq(true); return w.any(); }',
+      'data-[first]:bg-accent',
+    ],
+    [
+      'replaced receiver is not DSL',
+      '{ const original = w; w = { any() { return original.state(first).eq(true); } }; return w.any(); }',
+      'data-[first]:bg-accent',
+    ],
+    [
+      'nested all',
+      'w.all(w.state(first).eq(true), w.all(w.state(second).eq(true)))',
+      'data-[first]:data-[second]:bg-accent',
+    ],
+    [
+      'dark with state',
+      "w.all(w.meta('colorScheme').eq('dark'), w.state(first).eq(true))",
+      'dark:data-[first]:bg-accent',
+    ],
+  ])('preserves a genuinely lowerable %s selector', async (_label, expression, variant) => {
+    await writeFile(
+      path.join(dir, 'lowerable.proto.ts'),
+      `
+      import { definePrototype, tw } from '@proto.ui/core';
+      export default definePrototype({ name: 'lowerable', setup(def) {
+        const first = def.state.bool('first', false); const second = def.state.bool('second', false);
+        def.expose.state('first', first); def.expose.state('second', second);
+        def.rule({ when: (w) => ${expression}, intent: (i) => i.feedback.style.use(tw('bg-accent')) });
+      }});
+    `
+    );
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('bg-accent');
+    expect(
+      tokens.filter((token) => {
+        if (typeof token !== 'string') throw new TypeError('Expected a collected string token');
+        return token.endsWith(':bg-accent');
+      })
+    ).toEqual([variant]);
+  });
+
   it.each(['', ' as const', ' as const satisfies Readonly<Record<string, string>>'])(
     'collects finite string-map choices through erased type syntax %s',
     async (annotation) => {

@@ -5,6 +5,8 @@ description: Select at most one eligible Proto UI work item and return a read-on
 
 # Propose one eligible work item
 
+Apply the [current release stages and red-light policy](../../../internal/governance/release-0.3-plan.md): prioritize 0.3 committed capabilities and interaction repairs, and select repair/acceptance work rather than new features after the cutoff or in repair-only mode. Propose a criterion small enough to complete and check independently; do not require an entire umbrella to become eligible at once.
+
 1. Require a current `pui-orient` envelope.
 2. Read `CONTRIBUTING.md` and inspect the live issue queue, assignees, recent comments, linked pull requests, labels, milestones, and Project fields when available.
 3. Reject work that is unassessed, ambiguous, design-blocked, oversized, missing acceptance or validation boundaries, beyond capability or permission, already owned, actively claimed, or linked to active implementation.

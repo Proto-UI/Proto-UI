@@ -1,12 +1,7 @@
 name: Static Template style evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/template-style-evidence.yml'
-      - 'packages/adapters/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'apps/www/test/template-style.browser.test.ts'
-      - 'apps/www/test/fixtures/template-style/**'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -19,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -49,7 +44,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: template-style-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: template-style-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/template-style-evidence/*.png
             ${{ runner.temp }}/template-style-evidence/*-facts.json

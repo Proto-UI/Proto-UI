@@ -1,17 +1,7 @@
 name: Brutalist source-aligned design evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/brutalist/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'apps/www/src/content/docs/**/brutalist/**'
-      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-switch.demo.ts'
-      - 'apps/www/src/styles/assets/font/dm-sans/**'
-      - 'apps/www/test/evidence/brutalist-switch.capture.mts'
-      - 'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts'
-      - '.github/workflows/brutalist-design-evidence.yml'
-      - 'scripts/test/brutalist-design-toolbar.test.mjs'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -24,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -39,9 +29,14 @@ jobs:
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Capture baseline Switch
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
+          # Manual dispatch has no event-supplied base; compare against the
+          # previous commit on the same source line.
+          if [[ -z "${BASE_SHA}" ]]; then
+            BASE_SHA="$(git rev-parse HEAD^1)"
+          fi
           BASE="$RUNNER_TEMP/brutalist-base"
           git worktree add --detach "$BASE" "$BASE_SHA"
           mkdir -p "$BASE/apps/www/test/evidence"
@@ -69,7 +64,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: brutalist-design-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: brutalist-design-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/brutalist-evidence
           if-no-files-found: warn
           retention-days: 30
@@ -83,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
