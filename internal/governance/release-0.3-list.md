@@ -6,6 +6,12 @@ This is a source inventory, **not a claim that these capabilities have passed ac
 
 Repository file fingerprints in the ledger bind to its explicit `sourceRevision`, not to later worktree bytes. In particular, the delivery checklist fingerprint preserves the complete pre-preface source at that revision; the additive release-stage preface does not replace that historical source or certify acceptance.
 
+## Additive evidence checkpoints
+
+The [evidence checkpoints](release-0.3-evidence-checkpoints.json) extend this same source-bound ledger with timestamped child evidence for #1073 and #1191. They bind the unchanged source snapshot by Git blob and SHA-256, retain original Issue/criterion keys, and separate verified contribution owners from unconfirmed acceptance owners. They are not a second inventory, do not override original criteria, and do not close either Issue. Development integration, Draft publication, source-only tests, skipped CI and native/packed acceptance remain distinct. New inventory versions must preserve this historical snapshot rather than silently rebinding it.
+
+Validate the snapshot/companion and its negative controls with `node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs` on Node.js 24.
+
 ## Committed libraries
 
 - **Base:** all current exports, including the full Form, Collection/Search, Disclosure, Overlay, value/date, geometry/long-collection and existing-control families below.
