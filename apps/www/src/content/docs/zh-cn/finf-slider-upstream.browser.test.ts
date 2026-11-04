@@ -165,7 +165,7 @@ for (const runtime of RUNTIMES)
         Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
       );
       await expect.poll(async () => (await geometry(rail)).height).toBe(rem / 4);
-      expect((await geometry(track)).height).toBe((3 * rem) / 4);
+      expect((await geometry(track)).height).toBe(rem);
       expect(await geometry(thumb)).toMatchObject({ width: rem, height: rem });
       expect(await geometry(paint)).toMatchObject({
         width: rem,
@@ -181,7 +181,7 @@ for (const runtime of RUNTIMES)
       await capture('rest');
       expect((await geometry(thumb)).radius).toBe('0px');
       // Rhea has a 1rem rectangular hit owner and equally sized rounded ink.
-      // Probe the real corners outside the Track cross-axis, then the exterior.
+      // Track and Thumb share the 1rem cross-axis; probe corners, then exterior.
       for (const corner of [
         [0.5, 0.5],
         [rem - 0.5, 0.5],
