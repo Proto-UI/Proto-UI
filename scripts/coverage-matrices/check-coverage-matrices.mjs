@@ -1158,7 +1158,7 @@ function explicitRepositoryPaths(value) {
   for (const match of value.matchAll(/`([^`\r\n]+)`/g)) {
     const candidate = match[1].trim().replaceAll('\\', '/');
     if (!/^(?:apps|docs|packages|scripts|spec|internal)\//.test(candidate)) continue;
-    if (/[?*{}\[\]]/.test(candidate) || candidate.split('/').includes('..')) continue;
+    if (/[?*{}]/.test(candidate) || candidate.split('/').includes('..')) continue;
     paths.push(candidate);
   }
   return paths;
@@ -1168,7 +1168,7 @@ function repositoryPathsFromMatrixPath(value) {
   const paths = explicitRepositoryPaths(value);
   const candidate = value.trim().replaceAll('\\', '/');
   if (
-    /^(?:apps|docs|packages|scripts|spec|internal)\/[A-Za-z0-9._@+()/-]+$/u.test(candidate) &&
+    /^(?:apps|docs|packages|scripts|spec|internal)\/[A-Za-z0-9._@+()\[\]/-]+$/u.test(candidate) &&
     !candidate.split('/').includes('..')
   ) {
     paths.push(candidate);

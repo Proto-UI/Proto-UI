@@ -15,16 +15,17 @@ import {
   startServer,
   stopServer,
 } from './browser-harness';
-import {
-  SHADCN_SWITCH_DEMO_CASES,
-  SHADCN_SWITCH_REM_GEOMETRY,
-  SHADCN_SWITCH_SOURCE_PIN,
-} from './switch-demo-fixture';
+import { SHADCN_SWITCH_DEMO_CASES } from './switch-demo-fixture';
 
 /** Source-aligned Brutalist has a flat Thumb; Root alone owns the focus ring. */
 const BRUTALIST_SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
-/** Fixed 02cad611 New York has no hover/press scale on either size variant. */
+/** The ordinary documentation consumer explicitly selects the Rhea shared scope. */
 const SHADCN_SWITCH_ROUTE = '/en/ui-libraries/shadcn/switch/';
+/** P-SHADCN-SWITCH-RHEA-SURFACE; source units, not rendered measurements. */
+const RHEA_SWITCH_REM_GEOMETRY = {
+  default: { width: 2, height: 1.25, thumb: 1 },
+  sm: { width: 1.5, height: 1, thumb: 0.75 },
+} as const;
 
 let browser: Browser;
 let baseUrl = '';
@@ -250,7 +251,7 @@ describe.sequential('composed style isolation browser regressions', () => {
             };
           });
           geometryRecords.push({ runtime, ...variant, ...geometry });
-          const expected = SHADCN_SWITCH_REM_GEOMETRY[variant.size];
+          const expected = RHEA_SWITCH_REM_GEOMETRY[variant.size];
           const label = `${runtime}/${variant.size}/${variant.name}`;
           expect(geometry.width, `${label}/width`).toBeCloseTo(geometry.font * expected.width, 1);
           expect(geometry.height, `${label}/height`).toBeCloseTo(
@@ -411,9 +412,10 @@ describe.sequential('composed style isolation browser regressions', () => {
             path.join(dir, 'run.json'),
             JSON.stringify(
               {
-                sourcePin: SHADCN_SWITCH_SOURCE_PIN,
-                sourcePath: 'apps/v4/registry/new-york-v4/ui/switch.tsx',
-                sourceBlob: 'c45932afe4e484c900aa916e81d0e0d67137bedc',
+                styleProfile: 'rhea',
+                sourcePin: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
+                sourcePath: 'apps/v4/registry/styles/style-rhea.css',
+                sourceBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
                 phase,
                 failure,
                 records,

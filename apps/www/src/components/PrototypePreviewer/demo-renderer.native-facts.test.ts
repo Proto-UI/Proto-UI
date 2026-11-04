@@ -152,11 +152,14 @@ describe('native link facts through actual renderer props', () => {
       oldLink.dispatchEvent(new PointerEvent('pointerenter'));
       oldLink.dispatchEvent(new PointerEvent('pointerdown', { button: 0, bubbles: true }));
       // Revoke while framework prop delivery can still be queued.
-      const replacing = renderDemo({
-        runtime,
-        host,
-        demo: createHomepageContent(group, runtime, () => true, 'shadcn'),
-      });
+      const replacement = createHomepageContent(group, runtime, () => true, 'shadcn');
+      const replacementSetup = replacement.setup!;
+      let currentApi!: DemoRuntimeApi;
+      replacement.setup = (context) => {
+        currentApi = context.api;
+        return replacementSetup(context);
+      };
+      const replacing = renderDemo({ runtime, host, demo: replacement });
       staleApi.setProps('home-link-surface-0', { pressed: true, family: 'brutalist' });
       const current = await replacing;
       cleanups.push(() => current.destroy());
@@ -172,11 +175,21 @@ describe('native link facts through actual renderer props', () => {
       expect(host.querySelectorAll('a')).toHaveLength(1);
       const surface = link.querySelector('[data-pui-root]')!;
       const tokens = (surface.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      expect(tokens).toContain('rounded-lg');
+      // Explicit community Rhea uses the named Button profile corner (upstream 3d98900),
+      // not the ordinary Surface / old New York rounded-lg appearance.
+      expect(tokens).toContain('rounded-[var(--pui-radius-2xl)]');
       expect(tokens).not.toContain('rounded-base');
       expect(tokens).not.toContain('translate-y-1');
       expect(tokens).not.toContain('translate-x-1');
       expect(tokens).not.toContain('bg-main');
+      expect(tokens).not.toContain('translate-y-px');
+      // The current owner can still deliver the same pressed fact. A broken
+      // all-updates no-op must not satisfy the revoked-owner assertions above.
+      const currentTokens = () => (surface.getAttribute('data-pui-style') ?? '').split(/\s+/);
+      currentApi.setProps('home-link-surface-0', { pressed: true });
+      await vi.waitFor(() => expect(currentTokens()).toContain('translate-y-px'));
+      currentApi.setProps('home-link-surface-0', { pressed: false });
+      await vi.waitFor(() => expect(currentTokens()).not.toContain('translate-y-px'));
     }, 20_000);
   }
 });

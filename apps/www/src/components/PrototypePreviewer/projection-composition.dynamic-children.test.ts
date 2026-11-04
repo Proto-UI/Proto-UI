@@ -48,6 +48,11 @@ function composition(demo = child()) {
     runtimeId: 'wc',
     projectionFamilyId: 'shadcn',
     componentId: 'button',
+    contentRecipe: {
+      id: 'button',
+      prototypeIds: [`${'shadcn'}-button`],
+      rootPrototypeId: `${'shadcn'}-button`,
+    },
     childDemo: demo,
     controlIds: [],
     controls,

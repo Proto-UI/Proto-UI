@@ -53,6 +53,11 @@ for (const family of ['shadcn', 'brutalist'] as const)
         projectionFamilyId: family,
         generation: 7,
         componentId: 'button',
+        contentRecipe: {
+          id: 'button',
+          prototypeIds: [`${family}-button`],
+          rootPrototypeId: `${family}-button`,
+        },
         childDemo: {
           type: 'demo',
           root: { kind: 'proto', prototypeId: `${family}-button`, children: ['Command'] },

@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '../../shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 export function createGhostDemo(styleProfile: 'new-york' | 'rhea') {
@@ -52,5 +53,5 @@ export function createGhostDemo(styleProfile: 'new-york' | 'rhea') {
     },
   } satisfies DemoSpec;
 }
-// Public legacy example declares its identity; callers never inherit a modern default accidentally.
-export default createGhostDemo('new-york');
+// The ordinary website example is Rhea; the explicit legacy factory remains available for compatibility tests.
+export default withShadcnRheaDemo(createGhostDemo('rhea'));

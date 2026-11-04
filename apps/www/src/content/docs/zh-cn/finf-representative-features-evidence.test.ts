@@ -1,6 +1,7 @@
 // @vitest-environment node
 // Harness/source checks only. Never imports the browser suite or launches a browser.
 import { existsSync, readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -168,6 +169,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'popover-title': 0,
       'popover-navigation': 0, // Dedicated 32-subject suite, not a representative case.
       'resident-motion-capability': 0,
+      'shadcn-card': 0,
       'shadcn-toggle': 0, // Separate suites register their own runtime cases.
       'shadcn-switch-consumer': 0,
       'shadcn-drawer-presence': 0,
@@ -520,6 +522,98 @@ describe.each(['fixed-family', 'generic'] as const)(
     });
   }
 );
+
+describe('Shadcn Card official evidence carrier, no native browser', () => {
+  const cardFile = 'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts';
+  const inventory = createRequire(import.meta.url)(
+    '../../../../../../scripts/test/runtime-test-plan.mjs'
+  ) as {
+    BROWSER_SUITES: string[];
+    PRODUCTION_BROWSER_SUITES: string[];
+    PRODUCTION_BROWSER_OWNERS: Record<string, string>;
+    discoverBrowserSuites(root: string): string[];
+    assertBrowserInventory(
+      discovered: string[],
+      development?: string[],
+      production?: string[]
+    ): unknown;
+  };
+  const capture = workflow.jobs['representative-features'].steps.find(
+    (step: { env?: { PUI_FINF_FEATURE_GROUP?: string } }) => step.env?.PUI_FINF_FEATURE_GROUP
+  );
+
+  it('owns the exact Card suite once and rejects missing or duplicate whole-inventory registration', () => {
+    const all = inventory.discoverBrowserSuites(process.cwd());
+    expect(inventory.BROWSER_SUITES).not.toContain(cardFile);
+    expect(inventory.PRODUCTION_BROWSER_SUITES.filter((file) => file === cardFile)).toHaveLength(1);
+    expect(inventory.PRODUCTION_BROWSER_OWNERS[cardFile]).toBe(workflowFile);
+    inventory.assertBrowserInventory(all);
+    expect(() =>
+      inventory.assertBrowserInventory(
+        all,
+        inventory.BROWSER_SUITES,
+        inventory.PRODUCTION_BROWSER_SUITES.filter((file) => file !== cardFile)
+      )
+    ).toThrow(/unregistered=/);
+    expect(() =>
+      inventory.assertBrowserInventory(all, inventory.BROWSER_SUITES, [
+        ...inventory.PRODUCTION_BROWSER_SUITES,
+        cardFile,
+      ])
+    ).toThrow(/Duplicate/);
+  });
+
+  it('executes the actual workflow report guard and rejects incomplete, duplicate, renamed or nonpassing journeys', () => {
+    const match = capture.run.match(
+      /\/\/ CARD_REPORT_VALIDATOR_BEGIN([\s\S]*?)\/\/ CARD_REPORT_VALIDATOR_END/
+    );
+    expect(match).not.toBeNull();
+    if (!match) throw new Error('Actual Card report validator absent');
+    const validate = vm.runInNewContext(`${match[1]}\nassertShadcnCardReport`, { assert }) as (
+      report: unknown
+    ) => void;
+    const assertions = ['wc', 'react', 'vue', 'vue2'].flatMap((runtime) => [
+      {
+        ancestorTitles: [`Shadcn Card New York compatibility native ${runtime}`],
+        title: 'preserves distinct card paint, inherited content ink and native navigation',
+        status: 'passed',
+      },
+      {
+        ancestorTitles: [`Shadcn Card ordinary Rhea native ${runtime}`],
+        title: 'preserves default light Rhea paint, passive content and native navigation',
+        status: 'passed',
+      },
+    ]);
+    for (const enabled of [false, true])
+      assertions.push({
+        ancestorTitles: [],
+        title: `gallery keeps distinct Card ink with JavaScript=${enabled}`,
+        status: 'passed',
+      });
+    const valid = {
+      success: true,
+      numTotalTests: 10,
+      numPassedTests: 10,
+      numFailedTests: 0,
+      numPendingTests: 0,
+      testResults: [{ name: `/work/repo/${cardFile}`, assertionResults: assertions }],
+    };
+    validate(valid);
+    const missing = structuredClone(valid);
+    missing.testResults[0]!.assertionResults.pop();
+    expect(() => validate(missing)).toThrow();
+    const duplicate = structuredClone(valid);
+    duplicate.testResults[0]!.assertionResults[1] = duplicate.testResults[0]!.assertionResults[0]!;
+    expect(() => validate(duplicate)).toThrow();
+    const renamed = structuredClone(valid);
+    renamed.testResults[0]!.assertionResults[0]!.title += ' renamed';
+    expect(() => validate(renamed)).toThrow();
+    const pending = structuredClone(valid);
+    pending.testResults[0]!.assertionResults[0]!.status = 'pending';
+    expect(() => validate(pending)).toThrow();
+    expect(() => validate({ ...valid, success: false })).toThrow();
+  });
+});
 
 describe('Finf acceptance concurrency policy, configuration only', () => {
   it('retains queued evidence without increasing simultaneous work', () => {

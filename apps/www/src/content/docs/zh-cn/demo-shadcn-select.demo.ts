@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSetupContext, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
 function setup({ host }: DemoSetupContext) {
@@ -18,7 +19,7 @@ function setup({ host }: DemoSetupContext) {
   return () => observer.disconnect();
 }
 
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   setup,
   root: {
@@ -129,4 +130,4 @@ export default {
       },
     ],
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

@@ -1,2 +1,3 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { createFormPrimitivesDemo } from './form-primitives-demo.shared';
-export default createFormPrimitivesDemo('shadcn', 'fieldset');
+export default withShadcnRheaDemo(createFormPrimitivesDemo('shadcn', 'fieldset'));
