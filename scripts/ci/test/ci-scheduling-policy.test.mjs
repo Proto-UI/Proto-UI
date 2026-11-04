@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import { parse } from 'yaml';
 import { collectViolations, WORKFLOW_DIR } from '../check-ci-schedule.mjs';
 
 const repoRoot = new URL('../../../', import.meta.url).pathname;
@@ -226,6 +227,144 @@ jobs: {}
     assert.deepEqual(
       violations.map((v) => v.file),
       cancellation === 'false' ? [] : [`${WORKFLOW_DIR}/native.yml`]
+    );
+  }
+});
+
+const workflowDirectory = path.join(repoRoot, WORKFLOW_DIR);
+const sizingWorkflow = 'select-item-sizing-evidence.yml';
+
+function readWorkflows() {
+  return Object.fromEntries(
+    readdirSync(workflowDirectory)
+      .filter((name) => /\.ya?ml$/u.test(name))
+      .map((name) => [name, parse(readFileSync(path.join(workflowDirectory, name), 'utf8'))])
+  );
+}
+
+function auditSizingCycle(workflows) {
+  const failures = [];
+  const calls = [];
+  const visit = (name, ancestors = []) => {
+    if (ancestors.includes(name)) {
+      failures.push('workflow-call-cycle');
+      return;
+    }
+    const workflow = workflows[name];
+    if (!workflow) {
+      failures.push('missing-called-workflow');
+      return;
+    }
+    for (const [id, job] of Object.entries(workflow.jobs ?? {})) {
+      const called = job.uses?.match(/^\.\/\.github\/workflows\/([^/]+\.ya?ml)$/u)?.[1];
+      if (!called) continue;
+      if (called === sizingWorkflow) {
+        calls.push({ caller: name, id, job, siblings: workflow.jobs });
+      }
+      visit(called, [...ancestors, name]);
+    }
+  };
+  visit('ci.yml');
+  if (calls.length !== 1) failures.push('sizing-not-reachable-once');
+  for (const { job, siblings } of calls) {
+    const predecessors = typeof job.needs === 'string' ? [job.needs] : job.needs;
+    if (!predecessors?.length || predecessors.some((id) => !siblings[id])) {
+      failures.push('sizing-not-in-bounded-chain');
+    }
+    if (job.if !== '${{ !cancelled() }}') failures.push('predecessor-failure-hides-evidence');
+  }
+
+  const workflow = workflows[sizingWorkflow];
+  if (!workflow) return [...failures, 'missing-sizing-workflow'];
+  if (
+    JSON.stringify(Object.keys(workflow.on ?? {}).sort()) !==
+    JSON.stringify(['workflow_call', 'workflow_dispatch'])
+  )
+    failures.push('sizing-trigger-policy');
+  if (workflow.concurrency?.['cancel-in-progress'] !== false) {
+    failures.push('active-sizing-evidence-can-be-cancelled');
+  }
+  if (workflow.permissions?.contents !== 'read' || Object.keys(workflow.permissions).length !== 1) {
+    failures.push('sizing-permissions');
+  }
+  const job = workflow.jobs?.['styled-demo-eight'];
+  if (!job || /pull_request/u.test(job.if ?? '')) failures.push('pr-only-job');
+  const steps = job?.steps ?? [];
+  const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  if (
+    checkout?.with?.ref !== '${{ github.sha }}' ||
+    checkout.with['persist-credentials'] !== false
+  ) {
+    failures.push('checkout-not-bound-to-cycle-source');
+  }
+  const execution = steps.find((step) => step.env?.EXPECTED_HEAD);
+  if (execution?.env?.EXPECTED_HEAD !== '${{ github.sha }}') {
+    failures.push('receipt-not-bound-to-cycle-source');
+  }
+  const artifact = steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
+  if (!artifact?.with?.name?.includes('${{ github.sha }}') || artifact.if !== 'always()') {
+    failures.push('artifact-not-bound-and-retained');
+  }
+  return failures;
+}
+
+test('sizing evidence remains reachable once from the full cycle and binds its exact source', () => {
+  assert.deepEqual(auditSizingCycle(readWorkflows()), []);
+});
+
+test('a detached sizing owner is rejected even when its workflow still exists', () => {
+  const workflows = readWorkflows();
+  for (const workflow of Object.values(workflows)) {
+    for (const [id, job] of Object.entries(workflow.jobs ?? {})) {
+      if (job.uses === `./.github/workflows/${sizingWorkflow}`) delete workflow.jobs[id];
+    }
+  }
+  assert.ok(auditSizingCycle(workflows).includes('sizing-not-reachable-once'));
+});
+
+test('an independently stale checkout, receipt or artifact identity is rejected', () => {
+  for (const kind of ['checkout', 'receipt', 'artifact']) {
+    const workflows = readWorkflows();
+    const steps = workflows[sizingWorkflow].jobs['styled-demo-eight'].steps;
+    if (kind === 'checkout') {
+      steps.find((step) => step.uses?.startsWith('actions/checkout@')).with.ref = 'main';
+    } else if (kind === 'receipt') {
+      steps.find((step) => step.env?.EXPECTED_HEAD).env.EXPECTED_HEAD = 'old-source';
+    } else {
+      steps.find((step) => step.uses?.startsWith('actions/upload-artifact@')).with.name = 'unbound';
+    }
+    assert.ok(auditSizingCycle(workflows).some((failure) => failure.startsWith(kind)));
+  }
+});
+
+test('a restored PR-number-only condition cannot impersonate scheduled reachability', () => {
+  const workflows = readWorkflows();
+  workflows[sizingWorkflow].jobs['styled-demo-eight'].if =
+    'github.event.pull_request.number == 1229';
+  assert.ok(auditSizingCycle(workflows).includes('pr-only-job'));
+});
+
+test('active evidence cancellation and missing callable admission are rejected', () => {
+  const cancelling = readWorkflows();
+  cancelling[sizingWorkflow].concurrency['cancel-in-progress'] = true;
+  assert.ok(auditSizingCycle(cancelling).includes('active-sizing-evidence-can-be-cancelled'));
+  const manualOnly = readWorkflows();
+  delete manualOnly[sizingWorkflow].on.workflow_call;
+  assert.ok(auditSizingCycle(manualOnly).includes('sizing-trigger-policy'));
+});
+
+test('removing serial admission or failure continuation is rejected', () => {
+  for (const key of ['needs', 'if']) {
+    const workflows = readWorkflows();
+    for (const workflow of Object.values(workflows)) {
+      for (const job of Object.values(workflow.jobs ?? {})) {
+        if (job.uses === `./.github/workflows/${sizingWorkflow}`) delete job[key];
+      }
+    }
+    assert.ok(
+      auditSizingCycle(workflows).includes(
+        key === 'needs' ? 'sizing-not-in-bounded-chain' : 'predecessor-failure-hides-evidence'
+      )
     );
   }
 });
