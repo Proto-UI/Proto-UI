@@ -178,7 +178,16 @@ for (const family of ['shadcn', 'brutalist'] as const)
           text.update();
           await settle();
           expect(surface.style.pointerEvents).toBe('none');
-          expect(surface.style.marginBottom).toBe(raised ? '0.25rem' : '1px');
+          // The Sidebar and navigation-group rows are dense rows without a
+          // bottom margin; every other inline row keeps the shared 1px and the
+          // Brutalist raised rows keep their 0.25rem inset.
+          expect(surface.style.marginBottom).toBe(
+            raised
+              ? '0.25rem'
+              : appearance === 'sidebar' || appearance === 'nav-group'
+                ? '0px'
+                : '1px'
+          );
           expect(surface.style.marginRight).toBe(
             raised ? '0.25rem' : family === 'brutalist' && appearance === 'action' ? '0px' : ''
           );
@@ -193,9 +202,14 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).not.toContain('bg-muted');
           }
           expect(getElementProps(surface)?.pressed).toBe(facts.pressed);
-          const shadcnAction = family === 'shadcn' && ['action', 'icon'].includes(appearance);
-          if (family === 'shadcn' && !shadcnAction) {
-            expect(tokens).not.toContain('translate-y-px');
+          // P-SHADCN-SURFACE-ACTION-APPEARANCE: the Shadcn navigation row is a
+          // public Rhea action profile, so it shares the action press envelope.
+          // Only the Brutalist family authors the raised shadow treatment.
+          const shadcnAction =
+            family === 'shadcn' && ['action', 'icon', 'nav'].includes(appearance);
+          if (family === 'shadcn') {
+            if (shadcnAction && facts.pressed) expect(tokens).toContain('translate-y-px');
+            else expect(tokens).not.toContain('translate-y-px');
             expect(tokens).not.toContain('shadow-none');
           } else if (!raised && facts.pressed) expect(tokens).toContain('translate-y-px');
           const focusToken = shadcnAction ? 'ring-3' : 'ring-2';
@@ -203,6 +217,15 @@ for (const family of ['shadcn', 'brutalist'] as const)
           if (raised)
             expect(tokens).toContain(facts.pressed ? 'translate-y-1' : 'shadow-[4px_4px_0_0_#000]');
           else if (family === 'brutalist') expect(tokens).not.toContain('shadow-');
+          const textTokens = new Set((text.getAttribute('data-pui-style') ?? '').split(/\s+/));
+          if (appearance === 'nav') {
+            // The current navigation cue is family specific. The Rhea minimal
+            // row keeps the shared text underline off; the Brutalist row owns
+            // its own underline on hover and current.
+            const underlined = family === 'brutalist' && (facts.hovered || facts.current);
+            expect(textTokens.has('underline')).toBe(underlined);
+            expect(textTokens.has('no-underline')).toBe(!underlined);
+          }
           expect(text.getAttribute('data-pui-style')).toContain(
             appearance === 'action' || (family === 'shadcn' && appearance === 'icon')
               ? 'font-medium'
@@ -225,6 +248,50 @@ for (const family of ['shadcn', 'brutalist'] as const)
         link.remove();
       }
     });
+// The wrong-fact control for the navigation current projection: removing the
+// required current fact must actually fail the family-specific contract, and
+// the Rhea row must never be satisfiable by the Brutalist underline fact.
+it('rejects a navigation current projection built without the current fact', async () => {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    const link = document.createElement('a');
+    link.href = '/native-destination/';
+    const surface = new Constructors[family]();
+    const text = new Texts[family]();
+    const source = document.createTextNode('Original text');
+    text.append(source);
+    surface.append(text);
+    link.append(surface);
+    document.body.append(link);
+    const idle = { hovered: false, pressed: false, focusVisible: false, current: false };
+    const current = { ...idle, current: true };
+    const textTokens = () =>
+      new Set((text.getAttribute('data-pui-style') ?? '').split(/\s+/));
+    // The wrong-fact projection: the current cue without the current fact.
+    setElementProps(surface, {
+      ...linkSurfaceProps(family, 'nav', 'minimal', idle),
+      surfaceStyle: linkSurfaceLayout(family, 'nav', 'minimal', idle),
+    });
+    setElementProps(text, linkTextProps('nav', idle, family));
+    surface.update();
+    text.update();
+    await settle();
+    expect(textTokens().has('font-semibold')).toBe(false);
+    expect(textTokens().has('underline')).toBe(false);
+    // The real current projection satisfies only its own family contract.
+    setElementProps(surface, {
+      ...linkSurfaceProps(family, 'nav', 'minimal', current),
+      surfaceStyle: linkSurfaceLayout(family, 'nav', 'minimal', current),
+    });
+    setElementProps(text, linkTextProps('nav', current, family));
+    surface.update();
+    text.update();
+    await settle();
+    expect(textTokens().has('font-semibold')).toBe(true);
+    expect(textTokens().has('underline')).toBe(family === 'brutalist');
+    link.remove();
+  }
+});
+
 it('keeps brand glyph content stable across public Surface feedback changes', async () => {
   for (const icon of ['github', 'discord', 'x', 'bluesky'] as const) {
     const surface = new Constructors.brutalist();

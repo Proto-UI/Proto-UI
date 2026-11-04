@@ -471,11 +471,30 @@ async function assertHostCurrentProjection(link: Locator, family: string) {
   // Explicit host fixture, not a claim that route selection changed itself.
   await link.evaluate((anchor) => anchor.setAttribute('aria-current', 'page'));
   try {
-    await expect.poll(async () => (await linkPaint(link)).textTokens).toContain('underline');
+    // The current projection is family specific. The Brutalist navigation row
+    // underlines its current entry; the Rhea navigation row is a public minimal
+    // action profile whose current signal is the ghost background on the
+    // passive Surface, never a text underline.
+    // P-SHADCN-SURFACE-ACTION-APPEARANCE and
+    // internal/records/2026-10-29-header-shared-control-recipes.md own that
+    // decision: hover/current background replaces the shared nav/text
+    // underline for navigation.
+    await expect
+      .poll(async () => (await linkPaint(link)).textTokens)
+      .toContain(family === 'brutalist' ? 'underline' : 'font-semibold');
     const current = await linkPaint(link);
     expect(current.textTokens).toContain('font-semibold');
-    expect(current.decoration).toContain('underline');
-    expect(current.decoration).not.toBe(baseline.decoration);
+    if (family === 'brutalist') {
+      expect(current.textTokens).toContain('underline');
+      expect(current.decoration).toContain('underline');
+      expect(current.decoration).not.toBe(baseline.decoration);
+    } else {
+      expect(current.textTokens).not.toContain('underline');
+      expect(current.decoration).not.toContain('underline');
+      expect(current.decoration).toBe(baseline.decoration);
+      // The current navigation row carries the public ghost background.
+      expect(current.tokens).toContain('bg-muted');
+    }
     expect(Number(current.weight)).toBeGreaterThan(Number(baseline.weight));
   } finally {
     await link.evaluate((anchor, original) => {

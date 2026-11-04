@@ -83,6 +83,52 @@ it('community opt-in leaves existing Rhea nav, luma actions and ordinary Shadcn 
   }
 });
 
+// The current navigation projection is family specific, not a shared underline.
+// P-SHADCN-SURFACE-ACTION-APPEARANCE keeps the Rhea minimal row on its public
+// ghost feedback, and site-header-control-recipes.test.ts owns that
+// definition: "uses public ghost feedback for navigation, not text-link
+// underline". internal/records/2026-10-29-header-shared-control-recipes.md
+// records the decision that the current background replaces the shared
+// nav/text underline, so the Brutalist navigation row keeps its own underline.
+it('keeps the current navigation projection family-specific and fact-bound', () => {
+  const current = { ...idle, current: true };
+  const satisfiesCurrentProjection = (family: 'shadcn' | 'brutalist', facts: typeof idle) => {
+    const text = linkTextProps('nav', facts, family);
+    return (
+      text.weight === 'semibold' &&
+      text.decoration === (family === 'brutalist' ? 'underline' : 'none')
+    );
+  };
+  // Positive: each family satisfies exactly its own current contract.
+  expect(satisfiesCurrentProjection('shadcn', current)).toBe(true);
+  expect(satisfiesCurrentProjection('brutalist', current)).toBe(true);
+  expect(linkTextProps('nav', current, 'shadcn')).toMatchObject({
+    actionProfile: 'rhea',
+    weight: 'semibold',
+    decoration: 'none',
+  });
+  expect(linkTextProps('nav', current, 'brutalist')).toMatchObject({
+    weight: 'semibold',
+    decoration: 'underline',
+  });
+  // Negative control: removing the required current fact fails the same
+  // contract instead of leaving an unconditional selection cue behind.
+  expect(satisfiesCurrentProjection('shadcn', idle)).toBe(false);
+  expect(satisfiesCurrentProjection('brutalist', idle)).toBe(false);
+  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({
+    weight: 'medium',
+    decoration: 'none',
+  });
+  expect(linkTextProps('nav', idle, 'brutalist')).toMatchObject({
+    weight: 'medium',
+    decoration: 'none',
+  });
+  // Wrong-family control: neither family may satisfy the other's contract.
+  expect(linkTextProps('nav', current, 'shadcn').decoration).not.toBe(
+    linkTextProps('nav', current, 'brutalist').decoration
+  );
+});
+
 it('community opt-in leaves Brutalist raised and minimal icon recipes unchanged', () => {
   for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
     const raised = emphasis === 'primary' || emphasis === 'secondary';
