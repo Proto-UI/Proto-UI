@@ -271,6 +271,33 @@ describe('real Drawer semantic Scroll physical target', () => {
 // Diagnostic replay of the actual public nested demo. Its explicit-height pair is
 // a control, not a replacement for the intrinsic public page or a production fix.
 describe('public www Drawer cold-entry diagnostic', () => {
+  it('rejects the real scoped public demo when only its scope dependency is omitted', async () => {
+    const { buildPublicDrawerEntryProbe } = await import('./fixtures/drawer-entry-build');
+    const diagnosticScript = await buildPublicDrawerEntryProbe();
+    // A fresh page has a fresh registry: no earlier positive can supply the scope.
+    const page = await browser.newPage();
+    try {
+      await page.route('**/*', (route) => route.abort());
+      await page.setContent('<body></body>');
+      await page.addScriptTag({ content: diagnosticScript });
+      await expect(
+        page.evaluate(() => {
+          const fixture = (
+            window as Window & {
+              PublicDrawerEntry?: { createMissingScopeFixture: () => Promise<unknown> };
+            }
+          ).PublicDrawerEntry;
+          if (typeof fixture?.createMissingScopeFixture !== 'function') {
+            throw new Error('PublicDrawerEntry missing-scope probe is not installed');
+          }
+          return fixture.createMissingScopeFixture();
+        })
+      ).rejects.toThrow('未找到原型 "shadcn-style-scope"');
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each([false, true])(
     'animates the public cold entry with measured intrinsic geometry (fixed control=%s)',
     async (fixedControl) => {

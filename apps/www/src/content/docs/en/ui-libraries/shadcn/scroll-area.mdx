@@ -5,6 +5,8 @@ description: 'Draft shadcn chrome over the Base host-owned scrolling domain.'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 This draft family contains Root, Viewport, Scrollbar, and Thumb. Base owns the logical scroll surface, normalized position and extent facts, scroll requests, focus participation, system/composed negotiation, and bounded Thumb control leases. The shadcn layer adds only a clipped frame, full-size rounded Viewport, slim oriented tracks, and a flexible rounded Thumb.
 
 Viewport requests `composed` as a design-language preference through the privileged Scroll surface. It does not require that projection: a host without composed chrome may fall back to `system` under `D-SCROLL-PROJECTION-0001`. In either case, the host retains wheel, touch, keyboard, physics, inertia, and overscroll. The family exposes no DOM scrollbar, size, position callback, or other host-specific API.

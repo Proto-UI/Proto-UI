@@ -1,2 +1,3 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { createRangeReadoutDemo } from './range-readout-demo.shared';
-export default createRangeReadoutDemo('shadcn', 'meter');
+export default withShadcnRheaDemo(createRangeReadoutDemo('shadcn', 'meter'));

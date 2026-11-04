@@ -5,9 +5,15 @@ description: '用显式 Proto UI 关联分别表达可访问名称与控件激�
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 Label 当前仍是 **draft**。shadcn 投影复用独立的 Base Label 协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
 
-<PrototypePreviewer demoId="demo-shadcn-label" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} />
+<PrototypePreviewer
+  demoId="demo-shadcn-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 此例将当前 Label 投影与真实、视觉中性的 Base 控件配对，以隔离验证关联协议。On/Off 只订阅控件公开状态，没有第二套 value，也没有替 Label 转发 click 的页面监听器。Input 与 Textarea 是实际原生编辑器；此基准不声称已验证其他设计体系的控件投影。
 

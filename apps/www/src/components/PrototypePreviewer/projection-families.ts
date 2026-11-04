@@ -113,20 +113,25 @@ const SHADCN_MANIFEST = {
     surface: {
       baseFamilyId: 'P-BASE-SURFACE',
       recipeId: 'demo-shadcn-surface',
-      recipePrototypeIds: ['shadcn-surface-root'],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-surface-root'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: { root: { basePrototypeId: 'P-BASE-SURFACE', prototypeId: 'shadcn-surface-root' } },
     },
     card: {
       baseFamilyId: null,
       recipeId: 'demo-shadcn-card',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-card-root',
         'shadcn-card-header',
         'shadcn-card-content',
         'shadcn-card-footer',
         'shadcn-text-root',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-TEXT', prototypeId: 'shadcn-text-root' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'shadcn-text-root' },
+      ],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'shadcn-card-root' },
         header: { basePrototypeId: null, prototypeId: 'shadcn-card-header' },
@@ -138,6 +143,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-FIELD',
       recipeId: 'demo-shadcn-field',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-field-root',
         'shadcn-field-label',
         'shadcn-field-control',
@@ -160,6 +166,7 @@ const SHADCN_MANIFEST = {
         'shadcn-switch-thumb',
       ],
       auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
         { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'shadcn-select-root' },
         { basePrototypeId: 'P-BASE-SELECT-VALUE', prototypeId: 'shadcn-select-value' },
@@ -200,6 +207,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-ACCORDION',
       recipeId: 'demo-shadcn-accordion',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-accordion-root',
         'shadcn-accordion-item',
         'shadcn-accordion-heading',
@@ -207,7 +215,10 @@ const SHADCN_MANIFEST = {
         'shadcn-accordion-content',
         'shadcn-button',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-ACCORDION', prototypeId: 'shadcn-accordion-root' },
         item: { basePrototypeId: 'P-BASE-ACCORDION-ITEM', prototypeId: 'shadcn-accordion-item' },
@@ -229,12 +240,16 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-COLLAPSIBLE',
       recipeId: 'demo-shadcn-collapsible',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-collapsible-root',
         'shadcn-collapsible-trigger',
         'shadcn-collapsible-content',
         'shadcn-button',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-COLLAPSIBLE', prototypeId: 'shadcn-collapsible-root' },
         trigger: {
@@ -251,6 +266,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-LABEL',
       recipeId: 'demo-shadcn-label',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-label-root',
         'shadcn-checkbox-root',
         'shadcn-switch-root',
@@ -263,6 +279,7 @@ const SHADCN_MANIFEST = {
         'shadcn-radio-group-indicator',
       ],
       auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
         { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'shadcn-checkbox-root' },
         { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'shadcn-switch-root' },
         { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'shadcn-radio-group-root' },
@@ -290,8 +307,11 @@ const SHADCN_MANIFEST = {
     toggle: {
       baseFamilyId: 'P-BASE-TOGGLE',
       recipeId: 'demo-shadcn-toggle',
-      recipePrototypeIds: ['shadcn-toggle', 'lucide-icon'],
-      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'lucide-icon' }],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-toggle', 'lucide-icon'],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: null, prototypeId: 'lucide-icon' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'shadcn-toggle' },
       },
@@ -299,7 +319,8 @@ const SHADCN_MANIFEST = {
     switch: {
       baseFamilyId: 'P-BASE-SWITCH',
       recipeId: 'demo-shadcn-switch',
-      recipePrototypeIds: ['shadcn-switch-root', 'shadcn-switch-thumb'],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-switch-root', 'shadcn-switch-thumb'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'shadcn-switch-root' },
         thumb: {
@@ -312,12 +333,14 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-TABS',
       recipeId: 'demo-shadcn-tabs',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-tabs-root',
         'shadcn-tabs-list',
         'shadcn-tabs-trigger',
         'shadcn-tabs-content',
         'shadcn-tabs-indicator',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'shadcn-tabs-root' },
         list: { basePrototypeId: 'P-BASE-TABS-LIST', prototypeId: 'shadcn-tabs-list' },
@@ -339,10 +362,12 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-HOVER-CARD',
       recipeId: 'demo-shadcn-hover-card',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-hover-card-root',
         'shadcn-hover-card-trigger',
         'shadcn-hover-card-content',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-HOVER-CARD',
@@ -362,6 +387,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-DROPDOWN-MENU',
       recipeId: 'demo-shadcn-dropdown-menu',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-dropdown-root',
         'shadcn-dropdown-trigger',
         'shadcn-dropdown-content',
@@ -371,6 +397,7 @@ const SHADCN_MANIFEST = {
         'shadcn-dropdown-separator',
         'shadcn-dropdown-shortcut',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-DROPDOWN-MENU',
@@ -410,6 +437,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-SELECT',
       recipeId: 'demo-shadcn-select',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-select-root',
         'shadcn-select-trigger',
         'shadcn-select-value',
@@ -422,6 +450,7 @@ const SHADCN_MANIFEST = {
         'shadcn-select-separator',
         'shadcn-select-item',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'shadcn-select-root' },
         trigger: {
@@ -470,6 +499,7 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-DIALOG',
       recipeId: 'demo-shadcn-dialog',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-dialog-root',
         'shadcn-dialog-trigger',
         'shadcn-dialog-mask',
@@ -482,7 +512,10 @@ const SHADCN_MANIFEST = {
         'shadcn-dialog-footer',
         'shadcn-button',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-DIALOG', prototypeId: 'shadcn-dialog-root' },
         trigger: {
@@ -520,7 +553,8 @@ const SHADCN_MANIFEST = {
     separator: {
       baseFamilyId: 'P-BASE-SEPARATOR',
       recipeId: 'demo-shadcn-separator',
-      recipePrototypeIds: ['shadcn-separator-root'],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-separator-root'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-SEPARATOR',
@@ -531,7 +565,8 @@ const SHADCN_MANIFEST = {
     textarea: {
       baseFamilyId: 'P-BASE-TEXTAREA',
       recipeId: 'demo-shadcn-textarea',
-      recipePrototypeIds: ['shadcn-textarea-root'],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-textarea-root'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-TEXTAREA',
@@ -542,7 +577,8 @@ const SHADCN_MANIFEST = {
     input: {
       baseFamilyId: 'P-BASE-INPUT',
       recipeId: 'demo-shadcn-input',
-      recipePrototypeIds: ['shadcn-input-root'],
+      recipePrototypeIds: ['shadcn-style-scope', 'shadcn-input-root'],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-INPUT',
@@ -554,11 +590,15 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-CHECKBOX',
       recipeId: 'demo-shadcn-checkbox',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-checkbox-root',
         'shadcn-checkbox-indicator',
         'shadcn-label-root',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' },
+      ],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-CHECKBOX',
@@ -574,10 +614,12 @@ const SHADCN_MANIFEST = {
       baseFamilyId: 'P-BASE-RADIO-GROUP',
       recipeId: 'demo-shadcn-radio-group',
       recipePrototypeIds: [
+        'shadcn-style-scope',
         'shadcn-radio-group-root',
         'shadcn-radio-group-item',
         'shadcn-radio-group-indicator',
       ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-RADIO-GROUP',

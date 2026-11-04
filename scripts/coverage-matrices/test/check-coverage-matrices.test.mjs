@@ -22,6 +22,39 @@ import {
 
 const temporaryRoots = [];
 
+for (const scenario of ['literal', 'changed', 'missing', 'glob', 'traversal', 'duplicate']) {
+  test(`literal bracketed website source binding: ${scenario}`, () => {
+    const root = createRoot();
+    const source =
+      scenario === 'glob'
+        ? 'apps/www/src/pages/fixtures/*.astro'
+        : scenario === 'traversal'
+          ? 'apps/www/src/pages/fixtures/../[runtime].astro'
+          : 'apps/www/src/pages/fixtures/[runtime].astro';
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, '<script>document.addEventListener("click", () => {});</script>');
+    const binding = [source, ['www.demo.raw-adapter-runtimes']];
+    writeValidMatrices(
+      root,
+      {},
+      {},
+      {
+        websiteBindings: scenario === 'duplicate' ? [binding, binding] : [binding],
+      }
+    );
+    if (scenario === 'missing') fs.unlinkSync(target);
+    if (scenario === 'changed') fs.appendFileSync(target, '\n<!-- changed after review -->');
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'literal') assert.equal(message, '');
+    else if (scenario === 'changed') assert.match(message, /source fingerprint.*does not match/);
+    else if (scenario === 'missing')
+      assert.match(message, /source binding references missing path/);
+    else if (scenario === 'duplicate') assert.match(message, /duplicate source binding/);
+    else assert.match(message, /source binding must name exactly one/);
+  });
+}
+
 for (const mode of ['file', 'directory', 'ancestor-directory']) {
   test(`resource closure review: rejects retargeted ${mode} symlink assets`, () => {
     const root = createRoot();

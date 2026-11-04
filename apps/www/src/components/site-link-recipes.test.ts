@@ -7,6 +7,148 @@ import {
   readingTocTextSurfaceStyle,
 } from './site-link-recipes';
 const idle = { hovered: false, pressed: false, focusVisible: false, current: false, inView: false };
+
+// P-SHADCN-SURFACE-ACTION-APPEARANCE: explicit passive Rhea paint.
+// Literal expectations are independent of shadcnActionAppearance's output.
+for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
+  it(`Shadcn community ${emphasis} selects Rhea while retaining the 44px native target`, () => {
+    for (const facts of [
+      idle,
+      { ...idle, hovered: true },
+      { ...idle, focusVisible: true },
+      { ...idle, pressed: true },
+      { ...idle, current: true, inView: true },
+      idle,
+    ]) {
+      expect(linkSurfaceProps('shadcn', 'icon', emphasis, facts)).toEqual({
+        actionProfile: 'rhea',
+        variant:
+          emphasis === 'primary' ? 'solid' : emphasis === 'secondary' ? 'secondary' : 'transparent',
+        radius: 'none',
+        border: 'none',
+        elevation: 'none',
+        hovered: facts.hovered,
+        pressed: facts.pressed,
+        focusVisible: facts.focusVisible,
+        current: false,
+      });
+      expect(linkTextProps('icon', facts, 'shadcn')).toEqual({
+        actionProfile: 'rhea',
+        size: 'sm',
+        tone: 'inherit',
+        weight: 'medium',
+        font: 'body',
+        leading: 'normal',
+        decoration: 'none',
+      });
+      expect(linkSurfaceLayout('shadcn', 'icon', emphasis, facts)).toEqual({
+        pointerEvents: 'none',
+        display: 'inline-flex',
+        flexShrink: '0',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '0',
+        maxWidth: '100%',
+        marginBottom: '1px',
+        width: '2.75rem',
+        height: '2.75rem',
+        padding: '0',
+      });
+    }
+  });
+}
+
+it('community opt-in leaves existing Rhea nav, luma actions and ordinary Shadcn rows separate', () => {
+  expect(linkSurfaceProps('shadcn', 'nav', 'minimal')).toMatchObject({
+    actionProfile: 'rhea',
+    variant: 'transparent',
+  });
+  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({ actionProfile: 'rhea' });
+  expect(linkSurfaceProps('shadcn', 'action', 'primary')).toMatchObject({
+    actionProfile: 'luma',
+    variant: 'solid',
+  });
+  expect(linkTextProps('action', idle, 'shadcn')).toMatchObject({ actionProfile: 'luma' });
+  expect(linkSurfaceLayout('shadcn', 'action', 'primary').minHeight).toBe('2.25rem');
+  for (const appearance of [
+    'brand',
+    'text',
+    'nav-group',
+    'sidebar',
+    'toc',
+    'pagination',
+  ] as const) {
+    expect(linkSurfaceProps('shadcn', appearance, 'secondary')).not.toHaveProperty('actionProfile');
+    expect(linkTextProps(appearance, idle, 'shadcn')).not.toHaveProperty('actionProfile');
+  }
+});
+
+// The current navigation projection is family specific, not a shared underline.
+// P-SHADCN-SURFACE-ACTION-APPEARANCE keeps the Rhea minimal row on its public
+// ghost feedback, and site-header-control-recipes.test.ts owns that
+// definition: "uses public ghost feedback for navigation, not text-link
+// underline". internal/records/2026-10-29-header-shared-control-recipes.md
+// records the decision that the current background replaces the shared
+// nav/text underline, so the Brutalist navigation row keeps its own underline.
+it('keeps the current navigation projection family-specific and fact-bound', () => {
+  const current = { ...idle, current: true };
+  const satisfiesCurrentProjection = (family: 'shadcn' | 'brutalist', facts: typeof idle) => {
+    const text = linkTextProps('nav', facts, family);
+    return (
+      text.weight === 'semibold' &&
+      text.decoration === (family === 'brutalist' ? 'underline' : 'none')
+    );
+  };
+  // Positive: each family satisfies exactly its own current contract.
+  expect(satisfiesCurrentProjection('shadcn', current)).toBe(true);
+  expect(satisfiesCurrentProjection('brutalist', current)).toBe(true);
+  expect(linkTextProps('nav', current, 'shadcn')).toMatchObject({
+    actionProfile: 'rhea',
+    weight: 'semibold',
+    decoration: 'none',
+  });
+  expect(linkTextProps('nav', current, 'brutalist')).toMatchObject({
+    weight: 'semibold',
+    decoration: 'underline',
+  });
+  // Negative control: removing the required current fact fails the same
+  // contract instead of leaving an unconditional selection cue behind.
+  expect(satisfiesCurrentProjection('shadcn', idle)).toBe(false);
+  expect(satisfiesCurrentProjection('brutalist', idle)).toBe(false);
+  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({
+    weight: 'medium',
+    decoration: 'none',
+  });
+  expect(linkTextProps('nav', idle, 'brutalist')).toMatchObject({
+    weight: 'medium',
+    decoration: 'none',
+  });
+  // Wrong-family control: neither family may satisfy the other's contract.
+  expect(linkTextProps('nav', current, 'shadcn').decoration).not.toBe(
+    linkTextProps('nav', current, 'brutalist').decoration
+  );
+});
+
+it('community opt-in leaves Brutalist raised and minimal icon recipes unchanged', () => {
+  for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
+    const raised = emphasis === 'primary' || emphasis === 'secondary';
+    expect(linkSurfaceProps('brutalist', 'icon', emphasis)).toMatchObject({
+      variant: raised ? 'secondary' : 'transparent',
+      radius: raised ? 'default' : 'none',
+      border: raised ? 'all' : 'none',
+      elevation: raised ? 'raised' : 'none',
+    });
+    expect(linkSurfaceProps('brutalist', 'icon', emphasis)).not.toHaveProperty('actionProfile');
+    expect(linkTextProps('icon', idle, 'brutalist')).not.toHaveProperty('actionProfile');
+    expect(linkSurfaceLayout('brutalist', 'icon', emphasis)).toMatchObject({
+      width: '2.75rem',
+      height: '2.75rem',
+      padding: '0',
+      marginBottom: raised ? '0.25rem' : '1px',
+    });
+  }
+});
+
 describe('consumer navigation density preserves native selection and family identity', () => {
   for (const family of ['shadcn', 'brutalist'] as const)
     for (const appearance of ['sidebar', 'toc'] as const) {

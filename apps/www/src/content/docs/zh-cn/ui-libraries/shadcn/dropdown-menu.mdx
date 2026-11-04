@@ -5,6 +5,8 @@ description: '基于 Proto UI 重构的 Shadcn Dropdown Menu。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 当前页面展示 Proto UI 中 `shadcn` 风格的 `dropdown-menu` 条目。
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
@@ -23,7 +25,7 @@ Edit/Pencil、Share/Share、Archive/Archive、Delete/Trash 沿用固定上游 `D
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
 
-第一组沿用上游 Copy/Cut/Paste 动作组成：Copy 和 Cut 使用真实的 16px Lucide Copy、Scissors 图标，Paste 使用 `inset: true`。Actions Label 显式设置 `inset: false`。本地 **More actions** 分组使用 inset Label 和普通 Rename Item，展示 Label 的两种设置，不把普通动作冒充上游 Checkbox、Radio 或 Submenu 部件。Item 和 Label 的 inset 默认值均为 `false`，左右 padding 均为 0.5rem。[固定 New York 配方](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) 在 `true` 时使用物理左侧 2rem、右侧 0.5rem，RTL 也保持相同方向。Toggle inset 通过现有原型 props 切换 More actions Label、Paste 和 Rename；重新打开菜单即可比较。根字号为 16px 时，inset 的左右 padding 为 32px/8px。
+第一组沿用上游 Copy/Cut/Paste 动作组成：Copy 和 Cut 使用真实的 16px Lucide Copy、Scissors 图标，Paste 使用 `inset: true`。Actions Label 显式设置 `inset: false`。本地 **More actions** 分组使用 inset Label 和普通 Rename Item，展示 Label 的两种设置，不把普通动作冒充上游 Checkbox、Radio 或 Submenu 部件。Item 和 Label 的 inset 默认值均为 `false`，左右 padding 均为 0.5rem。作为独立比较的[New York 配方](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) 在 `true` 时使用物理左侧 2rem、右侧 0.5rem，RTL 也保持相同方向。Toggle inset 通过现有原型 props 切换 More actions Label、Paste 和 Rename；重新打开菜单即可比较。本页选择的Rhea在16px根字号下使用28px/8px的inset左右padding；inset=false时两侧均为8px。
 
 这两个示例只在 Base 行为上展示有界视觉 recipe。Root、Trigger、Content、Item、Group、Label、Separator 都是真实原型，示例没有增加 Web 专用事件逻辑。Group/Label 命名、动作选择、焦点导航和禁用行为仍归 Base 所有。上方现有 My Account 示例独立保留。
 

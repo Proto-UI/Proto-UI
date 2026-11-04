@@ -5,6 +5,8 @@ description: '基于 Proto UI Base Select 重构的 Shadcn Select。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 当前条目把 shadcn 风格与 API 表面组合在已经编目的 Base Select 协议之上，并在 Web Components、React、Vue 三种适配器中共享同一套选择、焦点和 ARIA 语义。
 
 <PrototypePreviewer demoId="demo-shadcn-select" initialRuntime="wc" />
@@ -14,14 +16,14 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 - `Root`、`Trigger`、`Value`、`Content`、`Item`、`Surface`、`Viewport`、`ItemText`、`Group`、`Label`、`Separator`
 - `defaultValue` / `value`、`defaultOpen` / `open` 与对应变更事件
 - `Trigger.size="sm | default"`
-- `Trigger.appearance="default | ghost"`
+- `Trigger.appearance="default"`（Rhea）；`ghost` 仅 New York 支持
 - `Content.position="item-aligned | popper"`，默认值与 shadcn/ui 一致为 `item-aligned`
 - 单选、禁用项、键盘导航、typeahead、浮层关闭与焦点恢复
 
-`Group` 是被动选项容器，`Label` 只命名所属分组。多个分组可与未分组选项混排，不改变选择顺序。`Separator` 是无子内容的装饰性分隔；上方示例直接使用这些真实 parts。视觉基线固定为 [shadcn/ui revision 02cad611](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx)。
+`Group` 是被动选项容器，`Label` 只命名所属分组，`Separator` 无内容且仅作装饰。它们与 Trigger、Content、Surface、Item 继承同一 Rhea scope，包含 Portal 的逻辑后代。现代外观参考是 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)；[02cad611 New York Select](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx) 保留为独立兼容/源码比较，不是本示例选择的皮肤。
 
 完整的 `Surface` → `Viewport` → `Item` → `ItemText` 组合为 item-aligned 定位提供显式结构；旧组合与显式 `popper` 继续支持。这不等于完整 Radix 定位一致性。滚动按钮、`ItemIndicator` 与表单提交仍未完成。GPUI peer 已验证分组命名关系的传输，但当前 wire 未携带 Separator 的 hidden-tree 事实；原生辅助技术验收仍待完成。
 
 ## Trigger 外观
 
-`appearance="default"` 保留上方示例的有框字段表面。`appearance="ghost"` 是显式 Proto UI 呈现扩展：静止边框与背景透明、无静止阴影；hover 与 press 使用 accent 表面，保留清晰键盘焦点 ring 与 disabled 行为。此 prop 设在 `shadcn-select-trigger`，不设在 Root 或 Content；移除时即使在交互中也恢复 `default`。它只改变 Base Select Trigger 之上的视觉投影，不改变选择、键盘导航或浮层行为。
+本页使用 `appearance="default"` 与 `styleProfile="rhea"`。可选 `ghost` 是仅 `new-york-v4`（别名 `new-york`）支持的 Proto UI 扩展；与 Rhea 或其他现代 profile 组合会拒绝，不静默转换。appearance 设在 Trigger，不设在 Root 或 Content。没有显式或继承 profile 时，Select 保留既有 New York 兼容默认值；Root 的 scope 为完整组合提供统一 profile，叶子的显式选择会覆盖继承，必须有意使用。外观切换不改变 Base 的选择、键盘或浮层协议。

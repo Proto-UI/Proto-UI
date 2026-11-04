@@ -5,6 +5,8 @@ description: 'An edge-attached modal panel with four placement choices.'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 An edge-attached modal panel with four placement choices.
 
 <PrototypePreviewer
@@ -14,9 +16,9 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
-Header and Footer now own their padding; Content uses a vertical flex layout without shared container padding, so custom body content must supply its own spacing. Header centers only for accepted top/bottom directions and otherwise inherits alignment; rejected direction updates keep the last accepted presentation. Title inherits font size and line height. Content has no shadow. Its uniform border and radius still differ from the pinned New York direction-specific edges. The bottom Handle now occupies normal flow with a 100px width, 0.5rem height, 1rem top margin and muted fill. Its drag/resize behavior is retained, including visible controls on other sides, so it is not yet the upstream bottom-only decorative indicator or whole-Content drag surface. Responsive Header rules, directional edges and upstream extent sizing remain unfinished.
+Rhea Content uses transparent outer padding (`p-4`) around its owned inset popover surface, whose radius is capped at 24px and whose shadow belongs to the public prototype. Header/Footer keep their profile-owned padding. The bottom Handle remains a real resize control: its shared 100px width and 1rem top margin pair with Rhea's 0.375rem height, rather than the old New York 0.5rem height. Non-bottom resize controls are retained. The handle is not yet the upstream bottom-only decorative indicator or full-Content drag surface; accepted extent/side semantics and those remaining interaction differences stay explicit.
 
-The short example uses the upstream demo’s centered full-width, max-w-sm interior column; this is consumer composition rather than a maximum width imposed on every Drawer. Trigger and Close use the fixed New York outline Button recipe with default 2.25rem height and 1rem inline padding. Set their optional wrap prop to true for the project’s minimum-height, multiline-label adaptation. Theme radius scaling, dark outline paint and complete Button equivalence remain separate gaps.
+The short example uses the upstream demo's centered full-width max-w-sm interior; this is consumer composition, not a width imposed on every Drawer. The historical New York Trigger/Close Button paint (2.25rem default height, 1rem inline padding, optional wrap) remains only in that compatibility profile. Modern Rhea Trigger/Close are headless semantic owners. A shared passive Rhea action body must be composed before this page can claim complete Rhea button presentation; no second Button hook or nested focus owner is added to hide that gap.
 
 Top/bottom Content fits its content by default. Its retained compatibility maximum is the available height minus 6 root-text units, always bounded by the safe available region. This does not implement New York’s viewport-relative max-h-80vh and separate mt-24/mb-24 spacing. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right retain the existing capped 20rem presentation in this vertical-only draft.
 

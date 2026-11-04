@@ -61,6 +61,7 @@ test('pointer contact is an actual router-owned leaf with no optical dependency'
 
 const RECONCILED_DEMO_FACADES = [
   'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',

@@ -1,2 +1,3 @@
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import { createSurfaceAtomDemo } from '../../../components/PrototypePreviewer/surface-atom-demo';
-export default createSurfaceAtomDemo('shadcn');
+export default withShadcnRheaDemo(createSurfaceAtomDemo('shadcn'));

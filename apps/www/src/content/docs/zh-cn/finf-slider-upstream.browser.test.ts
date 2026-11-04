@@ -24,8 +24,9 @@ const output =
 const revision = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
 const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}']).toString().trim();
 const upstream = {
-  url: 'https://ui.shadcn.com/r/styles/base-nova/slider.json',
-  sha256: '646bcd7913417b786bbf7578484f851bf89c81a62f70ef9c4f3522e2af80a951',
+  styleProfile: 'rhea',
+  url: 'https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css',
+  gitBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
 };
 let browser: Browser;
 let baseUrl = '';
@@ -160,28 +161,32 @@ for (const runtime of RUNTIMES)
           rail: await geometry(targetTrack.locator(':scope > div[data-pui-style]').first()),
         });
       };
-      await expect.poll(async () => (await geometry(rail)).height).toBe(4);
-      expect((await geometry(track)).height).toBe(12);
-      expect(await geometry(thumb)).toMatchObject({ width: 28, height: 28 });
+      const rem = await page.evaluate(() =>
+        Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+      );
+      await expect.poll(async () => (await geometry(rail)).height).toBe(rem / 4);
+      expect((await geometry(track)).height).toBe(rem);
+      expect(await geometry(thumb)).toMatchObject({ width: rem, height: rem });
       expect(await geometry(paint)).toMatchObject({
-        width: 12,
-        height: 12,
-        border: '1px',
+        width: rem,
+        height: rem,
+        border: '0px',
         background: 'rgb(255, 255, 255)',
       });
-      expect((await geometry(ref('horizontal-indicator'))).height).toBe(4);
+      expect((await geometry(ref('horizontal-indicator'))).height).toBe(rem / 4);
       interaction('pointer-move', 'outside-preview', '0,0');
       await page.mouse.move(0, 0);
       const rest = await geometry(paint);
+      expect(rest.shadow).not.toBe('none');
       await capture('rest');
       expect((await geometry(thumb)).radius).toBe('0px');
-      // Physical points inside all four 28px corners, outside the 12px paint
-      // and the 12px Track cross-axis: bounding boxes alone do not prove hits.
+      // Rhea has a 1rem rectangular hit owner and equally sized rounded ink.
+      // Track and Thumb share the 1rem cross-axis; probe corners, then exterior.
       for (const corner of [
         [0.5, 0.5],
-        [27.5, 0.5],
-        [0.5, 27.5],
-        [27.5, 27.5],
+        [rem - 0.5, 0.5],
+        [0.5, rem - 0.5],
+        [rem - 0.5, rem - 0.5],
       ]) {
         const hitBox = (await thumb.boundingBox())!;
         const point = { x: hitBox.x + corner[0], y: hitBox.y + corner[1] };
@@ -259,14 +264,14 @@ for (const runtime of RUNTIMES)
       expect((await geometry(ref('readonly-track'))).opacity).toBe('1');
       await capture('readonly', previewer.locator('[data-slider-case="readonly"]'));
       const vertical = ref('vertical-track');
-      expect((await geometry(vertical)).height).toBeGreaterThanOrEqual(160);
+      expect((await geometry(vertical)).height).toBeGreaterThanOrEqual(10 * rem);
       expect((await geometry(vertical.locator(':scope > div[data-pui-style]').first())).width).toBe(
-        4
+        rem / 4
       );
       await capture('vertical', previewer.locator('[data-slider-case="vertical"]'));
       expect(
         (await geometry(ref('field-thumb').locator(':scope > div[data-pui-style]').first())).width
-      ).toBe(12);
+      ).toBe(rem);
       interaction('click', 'field-thumb');
       await ref('field-thumb').click();
       interaction('keyboard-press', 'current-focus', 'End');
@@ -308,6 +313,10 @@ for (const runtime of RUNTIMES)
         lastInteraction,
         limitations: [
           'Source-derived geometry and state assertions, not a same-state upstream pixel diff.',
+          'Rhea is selected by this public demo; unscoped Slider retains the separately tested Nova compatibility recipe.',
+          'The Base-owned rectangular Thumb hit corners are retained; upstream rounded-element corner-hit equivalence is not established.',
+          'Vertical and RTL cases record geometry/screenshots only; native axis/direction editing is not established.',
+          'Keyboard evidence covers focus and Home/End, not arrow stepping; readonly evidence covers aria/paint, not input refusal.',
           'Thumb centers retain the existing full Track coordinate interval. Upstream edge alignment and matching axis inset contract remain open.',
           'Single-thumb only; multi-thumb/range constraints and full upstream API parity remain open.',
           'Web Chromium evidence does not establish native GPUI/Qt, assistive technology, packed consumer or Compiler fidelity.',

@@ -5,6 +5,8 @@ description: 'Shadcn dropdown menu reconstructed on Proto UI.'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 This entry shows the current `shadcn` dropdown-menu implementation in Proto UI.
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-menu" initialRuntime="wc" />
@@ -23,7 +25,7 @@ Edit/Pencil, Share/Share, Archive/Archive, and Delete/Trash follow the pinned up
 
 <PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
 
-The first group uses the upstream Copy/Cut/Paste action pattern: Copy and Cut have real 16px Lucide glyphs, while Paste uses `inset: true`. Actions explicitly uses `inset: false`. The local **More actions** group adds an inset Label and ordinary Rename Item to show both Label settings without substituting ordinary actions for upstream Checkbox, Radio, or Submenu parts. Item and Label inset default to `false`, with 0.5rem padding on both sides. Their [fixed New York recipe](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) uses physical-left padding of 2rem and right padding of 0.5rem when `true`, including in RTL. Toggle inset changes the More actions Label, Paste and Rename through the existing prototype props; reopen the menu to compare. At a 16px root font size, inset left/right padding is 32px/8px.
+The first group uses the upstream Copy/Cut/Paste action pattern: Copy and Cut have real 16px Lucide glyphs, while Paste uses `inset: true`. Actions explicitly uses `inset: false`. The local **More actions** group adds an inset Label and ordinary Rename Item to show both Label settings without substituting ordinary actions for upstream Checkbox, Radio, or Submenu parts. Item and Label inset default to `false`, with 0.5rem padding on both sides. For comparison, the separate [fixed New York recipe](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx) uses physical-left padding of 2rem and right padding of 0.5rem when `true`, including in RTL. Toggle inset changes the More actions Label, Paste and Rename through the existing prototype props; reopen the menu to compare. The selected Rhea recipe instead uses inset left/right padding of 28px/8px at a 16px root font, with 8px on either side when inset=false.
 
 These are bounded visual recipes over Base behavior. Root, Trigger, Content, Item, Group, Label, and Separator remain real prototypes; the demos add no Web-only event logic. Group/Label naming, item selection, focus navigation, and disabled behavior still belong to Base. The existing My Account example above remains separate.
 
