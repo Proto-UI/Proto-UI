@@ -577,16 +577,13 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     expect(workflow.jobs['representative-features']['timeout-minutes']).toBe(35);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
     const browserSource = readFileSync(cardFile, 'utf8');
-    const cardConsumerTriggers = [
-      'apps/www/src/pages/en/test/shadcn-card-compat/\\[runtime\\].astro',
-      'apps/www/test/fixtures/shadcn-card-new-york.ts',
-      'apps/www/src/components/UiLibraryGallery.astro',
-    ];
-    for (const trigger of cardConsumerTriggers) {
-      expect(
-        workflow.on.pull_request.paths.filter((pattern: string) => pattern === trigger)
-      ).toHaveLength(1);
-    }
+    // The heavy Card evidence lane runs from the single scheduled regression
+    // owner, so it carries no automatic pull_request trigger and no per-source
+    // path filter. Its Card consumer sources stay bound by the reviewed
+    // coverage-matrix Source-scan binding and by the exact imports below.
+    expect(workflow.on.pull_request).toBeUndefined();
+    expect(workflow.on.workflow_call).toBeDefined();
+    expect(browserSource).toContain('shadcn-card-compat/${runtime}/');
     expect(browserSource).toContain('`/en/test/shadcn-card-compat/${runtime}/`;');
     const compatibilityPage = readFileSync(
       'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro',
@@ -672,14 +669,16 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
 // The service behavior of already queued runs is observed separately by exact run/job ID.
 // These source contracts do not claim hosted FIFO or completed native acceptance.
 describe('Existing acceptance queue policy', () => {
-  function checkPolicy(workflowPath: string, group: string) {
+  function checkPolicy(workflowPath: string, group: string, cancelInProgress: unknown) {
     const actual = parse(readFileSync(workflowPath, 'utf8'));
     const check = (value: typeof actual) => {
       expect(value.concurrency).toEqual({
         group,
-        'cancel-in-progress': false,
-        queue: 'max',
+        'cancel-in-progress': cancelInProgress,
       });
+      // The retired `queue: max` concurrency key is not part of the approved
+      // cadence and must not be reintroduced by any lane.
+      expect(Object.hasOwn(value.concurrency, 'queue')).toBe(false);
       if (workflowPath === workflowFile) {
         expect(value.permissions).toEqual({ contents: 'read' });
         expect(value.jobs['representative-features'].strategy['max-parallel']).toBe(4);
@@ -690,13 +689,11 @@ describe('Existing acceptance queue policy', () => {
     check(actual);
     const faults = [
       (value: typeof actual) => {
-        delete value.concurrency.queue;
+        value.concurrency.queue = 'max';
       },
       (value: typeof actual) => {
-        value.concurrency.queue = 'single';
-      },
-      (value: typeof actual) => {
-        value.concurrency['cancel-in-progress'] = true;
+        value.concurrency['cancel-in-progress'] =
+          cancelInProgress === true ? false : true;
       },
       (value: typeof actual) => {
         value.concurrency.group = '${{ github.run_id }}';
@@ -717,18 +714,24 @@ describe('Existing acceptance queue policy', () => {
   it('retains Finf queued evidence without increasing simultaneous work', () => {
     checkPolicy(
       workflowFile,
-      'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}'
+      'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}',
+      false
     );
   });
 
   it('retains CI queued evidence without increasing simultaneous work', () => {
-    checkPolicy('.github/workflows/ci.yml', 'ci-${{ github.workflow }}-${{ github.ref }}');
+    checkPolicy(
+      '.github/workflows/ci.yml',
+      "ci-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || 'cycle' }}",
+      "${{ github.event_name == 'pull_request' }}"
+    );
   });
 
   it('retains contrast queued evidence without increasing simultaneous work', () => {
     checkPolicy(
       '.github/workflows/brutalist-contrast-evidence.yml',
-      'brutalist-contrast-${{ github.ref }}'
+      'brutalist-contrast-${{ github.ref }}',
+      true
     );
   });
 });
