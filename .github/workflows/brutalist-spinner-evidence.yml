@@ -1,19 +1,8 @@
 name: Brutalist Spinner evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/brutalist-spinner-evidence.yml'
-      - 'packages/prototypes/brutalist/src/spinner/**'
-      - 'packages/prototypes/brutalist/test/spinner.test.ts'
-      - 'apps/www/src/content/docs/**/spinner.mdx'
-      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner*'
-      - 'apps/www/test/evidence/brutalist-spinner.capture.mts'
-      - 'apps/www/test/evidence/brutalist-spinner.capture.test.ts'
-      - 'apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts'
-      - 'spec/prototypes/P-BRUTALIST-SPINNER.yaml'
-      - 'spec/tests/T-BRUTALIST-SPINNER-0001.yaml'
-      - 'spec/decisions/D-BRUTALIST-STYLED-ONLY-ADMISSION-0001.yaml'
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -29,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -44,9 +33,14 @@ jobs:
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Capture actual baseline components
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
+          # Manual dispatch has no event-supplied base; compare against the
+          # previous commit on the same source line.
+          if [[ -z "${BASE_SHA}" ]]; then
+            BASE_SHA="$(git rev-parse HEAD^1)"
+          fi
           BASE="$RUNNER_TEMP/spinner-base"
           git worktree add --detach "$BASE" "$BASE_SHA"
           mkdir -p "$BASE/apps/www/test/evidence"
@@ -74,7 +68,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: brutalist-spinner-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: brutalist-spinner-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/spinner-evidence
           if-no-files-found: warn
           retention-days: 30

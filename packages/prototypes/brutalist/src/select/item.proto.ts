@@ -64,6 +64,41 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
     });
 
+    // P-BRUTALIST-SELECT-ITEM-INCOMING-MOTION: explicit Proto extension;
+    // pinned upstream has no Item transition. Outgoing paint must not linger.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.state(disabled).eq(false),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true),
+            w.state(pressed).eq(true)
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-[border-color]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.not(
+          w.all(
+            w.meta('preference.reducedMotion').eq('no-preference'),
+            w.state(disabled).eq(false),
+            w.any(
+              w.state(active).eq(true),
+              w.state(hovered).eq(true),
+              w.state(focused).eq(true),
+              w.state(focusVisible).eq(true),
+              w.state(pressed).eq(true)
+            )
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+
     // P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT: selection owns only the check;
     // the pinned upstream applies the accent pair on highlight/hover/focus, not selection.
 

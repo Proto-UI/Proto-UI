@@ -66,24 +66,4 @@ describe('startup source invariants (not browser paint)', () => {
     expect(bind).toContain('cp "candidate/$PROBE" "subject/$PROBE"');
     expect(bind).toContain('sha256sum "subject/$PROBE" >>');
   });
-  it('schedules its production-only suite when a theme or underlying adapter changes', () => {
-    const workflow = YAML.parse(read('.github/workflows/site-startup-theme-evidence.yml'));
-    expect(workflow.on.pull_request.paths).toEqual(
-      expect.arrayContaining([
-        'apps/www/**',
-        'packages/adapters/**',
-        'packages/prototypes/**',
-        'packages/modules/**',
-        'packages/runtime/**',
-        'packages/cli/**',
-        'pnpm-lock.yaml',
-      ])
-    );
-    const probe = read('apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts');
-    expect(probe).toContain('/zh-cn/ui-libraries/brutalist/components/card/');
-    expect(probe).toContain('Page.captureScreenshot');
-    expect(probe).toContain('response?.status()).toBe(200)');
-    expect(probe).toContain("page.locator('[data-site-header-settings] .language-select-wrapper')");
-    expect(probe).toContain('expect(await locale.count()).toBe(1)');
-  });
 });

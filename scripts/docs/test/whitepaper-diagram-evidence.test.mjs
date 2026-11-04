@@ -10,11 +10,10 @@ test('diagram evidence PR capture keeps exact-head checkout read-only', async ()
       'utf8'
     )
   );
-  assert.deepEqual(Object.keys(workflow.on), ['pull_request']);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const job = workflow.jobs.capture;
   const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
-  assert.equal(job.env.CANDIDATE_SHA, '${{ github.event.pull_request.head.sha }}');
+  assert.equal(job.env.CANDIDATE_SHA, '${{ github.event.pull_request.head.sha || github.sha }}');
   assert.equal(checkout.with.ref, '${{ env.CANDIDATE_SHA }}');
   assert.equal(checkout.with['persist-credentials'], false);
 });

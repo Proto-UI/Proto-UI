@@ -223,6 +223,13 @@ export class PositioningModuleImpl extends ModuleBase {
       !this.terminal && version === this.connectionVersion && this.connection === connection;
     return {
       ...connection,
+      onSizeMatch: (status) => {
+        if (!current()) return;
+        const resolved = Object.freeze({ ...status });
+        this.dispatchCallback(() => {
+          if (current()) connection.onSizeMatch?.(resolved);
+        });
+      },
       onAlignment: (status) => {
         if (!current()) return;
         const resolved = Object.freeze({ ...status });
@@ -251,6 +258,13 @@ export class PositioningModuleImpl extends ModuleBase {
     if (this.terminal || version !== this.connectionVersion || this.connection !== connection)
       return;
     const host = this.getHost();
+    if (connection.sizeMatch && !host?.supportsSizeMatch) {
+      this.bridge(connection, version).onSizeMatch?.({
+        status: 'unavailable',
+        reason: 'unsupported-host',
+      });
+      return;
+    }
     if (connection.targetAlignment && !host?.supportsTargetAlignment) {
       this.bridge(connection, version).onAlignment?.({
         status: 'unavailable',
@@ -272,6 +286,7 @@ export class PositioningModuleImpl extends ModuleBase {
         this.connection &&
         Object.is(this.connection.anchor, connection.anchor) &&
         Object.is(this.connection.floating, connection.floating) &&
+        Boolean(this.connection.sizeMatch) === Boolean(connection.sizeMatch) &&
         Boolean(this.connection.targetAlignment) === Boolean(connection.targetAlignment);
       this.connection = connection;
       if (connection.targetAlignment) this.snapshot = null;

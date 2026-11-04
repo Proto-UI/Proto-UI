@@ -15,6 +15,27 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('admits only the finite border-color clock without text or background interpolation', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const token = 'transition-[border-color]';
+      const css = render([token]);
+      const block = css.split('}').find((part) => part.includes(`[data-pui-style~="${token}"]`));
+      expect(block).toBeDefined();
+      expect(block).toContain('transition-property: border-color;');
+      expect(block).toContain('transition-duration: 150ms;');
+      expect(block).toContain('transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);');
+      expect(block).not.toMatch(/transition-property: (?:all|color|background-color)/);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const unsupported of [
+        'transition-[border-color,color]',
+        'transition-[border-color,filter]',
+        'transition-[--custom]',
+      ]) {
+        expect(render([unsupported])).toContain('Unsupported Proto UI style tokens');
+      }
+    }
+  });
+
   it('lowers finite recovered radius and legacy shadow recipes without arbitrary CSS admission', () => {
     const renderers = [
       renderProtoStyleTokenCss,

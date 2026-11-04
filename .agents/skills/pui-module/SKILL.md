@@ -5,6 +5,8 @@ description: Implement or extend one governed Proto UI Module semantic slice. Us
 
 # Implement a Module slice
 
+Apply `pui-dev`'s bounded-completion loop and the [current release stages](../../../internal/governance/release-0.3-plan.md). Carry exact original criterion keys through implementation and validation; hand off completed development criteria separately from remaining acceptance, then continue the authorized review/integration/tracking path instead of stopping at source delivery.
+
 1. Require `pui-orient`, `pui-trace`, and current-user or standing authorization for the complete governed slice.
 2. Read the applicable knowledge, decision, contract, Module, Host Capability, Adapter, and test entities plus current Runtime and implementation.
 3. Preserve the separation between author-facing facade, privilege-bearing port, and host realization.

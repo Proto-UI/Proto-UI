@@ -159,7 +159,7 @@ test('toolbar setup preserves all current manifest families, bounded jobs and ex
     },
   ]);
   const checkout = audit.steps.find((step) => step.uses === 'actions/checkout@v4');
-  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha }}');
+  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha || github.sha }}');
   assert.equal(checkout.with['persist-credentials'], false);
   const calibration = audit.steps.find(
     (step) => step.name === 'Calibrate paint acceptance and bounded evidence storage'

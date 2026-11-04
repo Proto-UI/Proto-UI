@@ -1,14 +1,8 @@
 name: Browser suite repair evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/browser-suite-repair-evidence.yml'
-      - 'scripts/test/**'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts'
-      - 'apps/www/test/evidence/brutalist-spinner.capture*.test.ts'
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -24,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -55,7 +49,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/browser-suite-repair
           if-no-files-found: warn
           retention-days: 30

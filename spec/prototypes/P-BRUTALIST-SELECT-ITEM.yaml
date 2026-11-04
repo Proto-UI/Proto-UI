@@ -69,7 +69,19 @@ criteria:
         静止 Item 使用 font-sans font-medium text-sm、全宽 flex、rounded-base 5px、border-2 border-transparent、gap-2 与 select-none。交互色对增加 border-black，不改变行尺寸；单独 selected 保持静止表面，check 独立保留。
 
 
+  - id: P-BRUTALIST-SELECT-ITEM-INCOMING-MOTION
+    text:
+      en: >-
+        Explicit Proto extension, not pinned-upstream parity: while an enabled item has active, hovered, focused, focusVisible or pressed highlight and the live host preference is no-preference, only the existing border color receives the shared 150ms default transition-[border-color] timing; foreground and background remain the existing instantaneous pair. Leaving all highlight states, disabled, reduce and unknown use transition-none immediately. Existing paired paint, geometry, selected-only check and Base state ownership remain unchanged. No timer, movement or extra activation/focus owner is permitted. Native paired item frames must demonstrate immediate outgoing de-highlight, meaningful incoming interpolation, unchanged hit geometry and at least 4.5:1 text contrast on the actual composited background throughout every captured enabled-item frame.
+
+
+      zh-CN: >-
+        此为明确 Proto 扩展而非固定上游同款：启用项处于 active、hovered、focused、 focusVisible 或 pressed 高亮且宿主实时偏好为 no-preference 时，仅既有边框颜色 采用共享默认 150ms transition-[border-color]，文字和背景仍为原有即时色对。退出全部高亮、禁用、reduce 或 unknown 立即 transition-none；保持既有配对颜色、几何、selected 独立 check 与 Base owner。 不增加 timer、位移、激活或焦点 owner。真实双项逐帧需证明旧项即时撤色、新项有插值、 命中几何不变，且启用项每帧文字对实际合成背景的对比度至少 4.5:1。
+
+
 sources:
+  - path: https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html
+    label: Normal-sized enabled text contrast and actual user-agent foreground/background
   - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
     label: Current fixed Neo Select source; visual adaptation retains Base protocol ownership
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -82,7 +94,11 @@ dependsOn:
 inherits:
   prototypes:
     - id: P-BASE-SELECT-ITEM
-verifies: { tests: [T-BRUTALIST-SELECT-0001] }
+verifies:
+  tests:
+    - T-BRUTALIST-SELECT-0001
+    - id: T-BRUTALIST-SELECT-ITEM-MOTION-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised

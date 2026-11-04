@@ -1,15 +1,7 @@
 name: Shadcn Select shared style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/select/**'
-      - 'packages/prototypes/shadcn/src/field/select-trigger.proto.ts'
-      - 'packages/prototypes/shadcn/test/select*.test.ts'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/adapters/**/src/**'
-      - 'scripts/prototypes/shadcn-select-evidence*'
-      - '.github/workflows/shadcn-select-style.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
