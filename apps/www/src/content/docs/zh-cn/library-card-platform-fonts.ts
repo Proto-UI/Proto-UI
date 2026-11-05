@@ -4,7 +4,13 @@ import type { CDPSession, Page } from 'playwright-core';
  * family string. A failed read is retained separately from the original gate. */
 export async function readLibraryPlatformFonts(
   page: Page,
-  family: 'brutalist' | 'liquid-glass' = 'brutalist'
+  family:
+    | 'base'
+    | 'shadcn'
+    | 'lucide'
+    | 'brutalist'
+    | 'bootstrap-2-3-2'
+    | 'liquid-glass' = 'brutalist'
 ) {
   let session: CDPSession | undefined;
   let active = true;

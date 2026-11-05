@@ -1,5 +1,6 @@
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'proto',
@@ -414,8 +415,7 @@ export default {
         'props': {
           'side': 'bottom',
         },
-        'className':
-          'grid w-72 gap-2 rounded-lg border border-slate-300 bg-white p-3 text-slate-950',
+        'className': 'w-72',
       },
     ],
     'props': {
@@ -424,4 +424,4 @@ export default {
     },
     'className': 'inline-grid',
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

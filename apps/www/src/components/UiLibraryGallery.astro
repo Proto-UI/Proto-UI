@@ -52,8 +52,8 @@ const copy =
     ? {
         aria: '选择一个 UI 原型库',
         count: '6 个可选库',
-        componentCount: '5 个组件库',
-        iconCount: '1 个图标库',
+        componentCount: '0.3：3 个组件库',
+        iconCount: '1 个图标库 · 另有 2 个 WIP / 实验库',
         bestFor: '适合',
         prototypeAuthor: '原型实现',
         unstyledMark: '无样式',
@@ -126,8 +126,8 @@ const copy =
     : {
         aria: 'Choose a UI prototype library',
         count: '6 libraries',
-        componentCount: '5 component libraries',
-        iconCount: '1 icon library',
+        componentCount: '0.3: 3 component libraries',
+        iconCount: '1 icon library · 2 additional WIP / experimental libraries',
         bestFor: 'Best for',
         prototypeAuthor: 'Prototype implementation',
         unstyledMark: 'HEADLESS',
@@ -210,7 +210,7 @@ const cards: LibraryCard[] = [
     name: 'Bootstrap 2.3.2',
     mark: '2.3',
     type: isZh ? '风格组件库' : 'Styled components',
-    status: isZh ? '孵化中' : 'Incubating',
+    status: isZh ? 'WIP / 实验性 · 0.4' : 'WIP / Experimental · 0.4',
     description: isZh
       ? '经典渐变、输入框与分隔线，交互由 Base 拥有；Switch / Toggle 为设计语言扩展。'
       : 'Classic gradients, fields, and dividers over Base; Switch / Toggle are design-language extensions.',
@@ -228,7 +228,7 @@ const cards: LibraryCard[] = [
     name: 'Liquid Glass',
     mark: 'LG',
     type: isZh ? '风格组件库' : 'Styled components',
-    status: isZh ? '孵化中' : 'Incubating',
+    status: isZh ? 'WIP / 实验性 · 0.4' : 'WIP / Experimental · 0.4',
     description: isZh
       ? '功能层的材质与层次探索。此入口使用不透明 Surface 回退；光学材质仍在验证。'
       : 'An exploration of materials and functional layers. This entry uses the opaque Surface fallback; optical rendering remains under verification.',
@@ -268,7 +268,12 @@ const themeCss = Object.entries(familyThemes)
 ---
 
 <style is:inline set:html={themeCss}></style>
-<section class="library-gallery" aria-label={copy.aria}>
+<section
+  class="library-gallery"
+  aria-label={copy.aria}
+  data-site-font-scope
+  style={{ '--site-font-sans': 'var(--site-default-font-sans)' }}
+>
   <p class="library-gallery__summary">{copy.componentCount} · {copy.iconCount}</p>
   <div class="library-gallery__grid">
     {
@@ -413,19 +418,13 @@ const themeCss = Object.entries(familyThemes)
                     >
                       {shadcn ? (
                         <>
-                          <LibraryCardPart
-                            part={`${family}-text`}
-                            props={{ ...action.text }}
-                          >
+                          <LibraryCardPart part={`${family}-text`} props={{ ...action.text }}>
                             {library.cta}
                           </LibraryCardPart>
                           <StaticFamilyIcon family={library.id} name="arrow-right" size="1rem" />
                         </>
                       ) : (
-                        <LibraryCardPart
-                          part={`${family}-text`}
-                          props={{ ...action.text }}
-                        >
+                        <LibraryCardPart part={`${family}-text`} props={{ ...action.text }}>
                           {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
                         </LibraryCardPart>
                       )}

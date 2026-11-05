@@ -17,6 +17,11 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] 
       projectionFamilyId: family,
       generation: 1,
       componentId: 'button',
+      contentRecipe: {
+        id: 'button',
+        prototypeIds: [`${family}-button`],
+        rootPrototypeId: `${family}-button`,
+      },
       controlIds: ['runtime'],
       childDemo: {
         type: 'demo',

@@ -26,6 +26,9 @@ export function sameRgba(actual: Rgba, expected: Rgba): boolean {
   );
 }
 
+/** Pinned New York 02cad611 recipe only (accent hover). Explicit new-york
+ * compatibility factory consumers bind this oracle; Rhea and other modern
+ * profiles must use rheaGhostPaintFailures instead. */
 export function ghostPaintFailures(
   actual: GhostPaint,
   scheme: 'light' | 'dark',

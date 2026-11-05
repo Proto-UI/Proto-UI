@@ -5,6 +5,8 @@ description: Draft portable input atoms.
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 <PrototypePreviewer
   demoId="demo-shadcn-slider"
   initialRuntime="wc"
@@ -20,6 +22,6 @@ Parts: root, label, track, indicator, thumb, field-thumb, value. All four styled
 
 Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
 
-The current skin translates the inspected Base/Nova source into passive Proto Template paint: a 4px rail, 12px white thumb with a 1px ring-colored border, and a separate 28px thumb hit box at the default 16px rem. Hover, accepted pointer press and focus-visible use a 3px ring. The original Track remains the input and geometry owner; Thumb/FieldThumb remain the only focus target. Disabled dims the control; readOnly retains focus/hover while preventing edits.
+The selected Rhea scalar recipe uses a 4px rail and a 16px passive white Thumb with family radius-2xl, shadow and a 1px resting ring; hover/focus add a 4px ring. The real Thumb hit box is 16px at the default root font. The retained unscoped Nova recipe is separately 4px/12px paint with a 28px hit box. Paint remains passive Proto Template output: Track owns input and geometry; Thumb/FieldThumb remain the only focus targets. Disabled dims the control; readOnly preserves focus/hover but prevents editing. None of these source dimensions is a native screenshot result.
 
 This is not complete shadcn equivalence. The current pointer interval still places thumb centers at track endpoints; upstream `thumbAlignment="edge"` needs a shared paint/input geometry contract before either can be shifted. Range/multiple thumbs, exact upstream active behavior under all native capture paths, cross-theme pixel matching and native host fidelity remain open. The examples expose those boundaries rather than hiding them.

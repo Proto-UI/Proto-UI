@@ -1,27 +1,27 @@
-import { formatCode } from '@/utils/conversionUtils';
+import { formatCode } from '../../../../utils/conversionUtils';
 import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
 
 export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   wc: {
     'demo-button-default': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button>Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
 </div>
     `),
     'demo-button-destructive': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button variant="destructive">Destructive</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="destructive">Destructive</wc-shadcn-button>
 </div>
     `),
     'demo-button-disabled': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button disabled>Disabled</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" disabled>Disabled</wc-shadcn-button>
 </div>
     `),
     'demo-button-ghost': formatCode(`
 <div id="ghost-demo" class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button style-profile="new-york" variant="ghost">Ghost</wc-shadcn-button>
-  <wc-shadcn-button style-profile="new-york" variant="ghost" disabled>Disabled ghost</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="ghost">Ghost</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="ghost" disabled>Disabled ghost</wc-shadcn-button>
   <div role="status" aria-live="polite">Enabled activations: 0; disabled activations: 0</div>
 </div>
 <script>
@@ -38,57 +38,57 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
     `),
     'demo-button-outline': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button variant="outline">Outline</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="outline">Outline</wc-shadcn-button>
 </div>
     `),
     'demo-button-secondary': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button variant="secondary">Secondary</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="secondary">Secondary</wc-shadcn-button>
 </div>
     `),
     'demo-button-sizes': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
-  <wc-shadcn-button size="sm">Small</wc-shadcn-button>
-  <wc-shadcn-button>Default</wc-shadcn-button>
-  <wc-shadcn-button size="lg">Large</wc-shadcn-button>
-  <wc-shadcn-button size="icon" variant="outline">+</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" size="sm">Small</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" size="lg">Large</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" size="icon" variant="outline">+</wc-shadcn-button>
 </div>
     `),
     'demo-button-states': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
-  <wc-shadcn-button>Default</wc-shadcn-button>
-  <wc-shadcn-button disabled>Disabled</wc-shadcn-button>
-  <wc-shadcn-button variant="outline" disabled>Disabled outline</wc-shadcn-button>
-  <wc-shadcn-button variant="ghost" size="icon">+</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" disabled>Disabled</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="outline" disabled>Disabled outline</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="ghost" size="icon">+</wc-shadcn-button>
 </div>
     `),
     'demo-button-variants': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
-  <wc-shadcn-button>Default</wc-shadcn-button>
-  <wc-shadcn-button variant="secondary">Secondary</wc-shadcn-button>
-  <wc-shadcn-button variant="outline">Outline</wc-shadcn-button>
-  <wc-shadcn-button variant="ghost">Ghost</wc-shadcn-button>
-  <wc-shadcn-button variant="destructive">Destructive</wc-shadcn-button>
-  <wc-shadcn-button variant="link">Link</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="secondary">Secondary</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="outline">Outline</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="ghost">Ghost</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="destructive">Destructive</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="link">Link</wc-shadcn-button>
 </div>
     `),
     'demo-button': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
-  <wc-shadcn-button>Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
   <div>
-    <wc-shadcn-button>Default2</wc-shadcn-button>
+    <wc-shadcn-button style-profile="rhea">Default2</wc-shadcn-button>
   </div>
-  <wc-shadcn-button variant="outline">Outline</wc-shadcn-button>
-  <wc-shadcn-button variant="destructive">Destructive</wc-shadcn-button>
-  <wc-shadcn-button variant="ghost" size="icon">+</wc-shadcn-button>
-  <wc-shadcn-button disabled>Disabled</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="outline">Outline</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="destructive">Destructive</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="ghost" size="icon">+</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" disabled>Disabled</wc-shadcn-button>
 </div>
     `),
     'demo-button-secondary-example': formatCode(`
 <div class="flex flex-wrap items-center justify-center gap-3">
-  <wc-shadcn-button>Default</wc-shadcn-button>
-  <wc-shadcn-button variant="secondary">Secondary</wc-shadcn-button>
-  <wc-shadcn-button variant="outline">Outline</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea">Default</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="secondary">Secondary</wc-shadcn-button>
+  <wc-shadcn-button style-profile="rhea" variant="outline">Outline</wc-shadcn-button>
 </div>
     `),
   },
@@ -99,7 +99,7 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonDefaultDemo() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton>Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
     </div>
   );
 }
@@ -110,7 +110,7 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonDestructiveDemo() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton variant="destructive">Destructive</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
     </div>
   );
 }
@@ -121,7 +121,7 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonDisabledDemo() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton disabled>Disabled</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
     </div>
   );
 }
@@ -135,8 +135,8 @@ export function DemoButtonGhostDemo() {
   const [disabled, setDisabled] = useState(0);
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton styleProfile="new-york" variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
-      <ShadcnButton styleProfile="new-york" variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
       <div role="status" aria-live="polite">Enabled activations: {enabled}; disabled activations: {disabled}</div>
     </div>
   );
@@ -148,7 +148,7 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonOutlineDemo() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
     </div>
   );
 }
@@ -159,7 +159,7 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonSecondaryDemo() {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton variant="secondary">Secondary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
     </div>
   );
 }
@@ -170,10 +170,10 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonSizesDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton size="sm">Small</ShadcnButton>
-      <ShadcnButton>Default</ShadcnButton>
-      <ShadcnButton size="lg">Large</ShadcnButton>
-      <ShadcnButton size="icon" variant="outline">
+      <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon" variant="outline">
         +
       </ShadcnButton>
     </div>
@@ -186,12 +186,12 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonStatesDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton>Default</ShadcnButton>
-      <ShadcnButton disabled>Disabled</ShadcnButton>
-      <ShadcnButton variant="outline" disabled>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline" disabled>
         Disabled outline
       </ShadcnButton>
-      <ShadcnButton variant="ghost" size="icon">
+      <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">
         +
       </ShadcnButton>
     </div>
@@ -204,12 +204,12 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonVariantsDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton>Default</ShadcnButton>
-      <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-      <ShadcnButton variant="outline">Outline</ShadcnButton>
-      <ShadcnButton variant="ghost">Ghost</ShadcnButton>
-      <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-      <ShadcnButton variant="link">Link</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
     </div>
   );
 }
@@ -220,16 +220,16 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton>Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
       <div>
-        <ShadcnButton>Default2</ShadcnButton>
+        <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
       </div>
-      <ShadcnButton variant="outline">Outline</ShadcnButton>
-      <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-      <ShadcnButton variant="ghost" size="icon">
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">
         +
       </ShadcnButton>
-      <ShadcnButton disabled>Disabled</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
     </div>
   );
 }
@@ -240,9 +240,9 @@ import { ShadcnButton } from '../proto-ui/components/react';
 export function DemoButtonSecondaryExampleDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton>Default</ShadcnButton>
-      <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-      <ShadcnButton variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
     </div>
   );
 }
@@ -256,7 +256,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
   </div>
 </template>
     `),
@@ -267,7 +267,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
   </div>
 </template>
     `),
@@ -278,7 +278,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
   </div>
 </template>
     `),
@@ -292,8 +292,8 @@ const disabled = ref(0);
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton styleProfile="new-york" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
-    <ShadcnButton styleProfile="new-york" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
     <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>
@@ -305,7 +305,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
   </div>
 </template>
     `),
@@ -316,7 +316,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
   </div>
 </template>
     `),
@@ -327,10 +327,10 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton size="sm">Small</ShadcnButton>
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton size="lg">Large</ShadcnButton>
-    <ShadcnButton size="icon" variant="outline">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon" variant="outline">+</ShadcnButton>
   </div>
 </template>
     `),
@@ -341,10 +341,10 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton disabled>Disabled</ShadcnButton>
-    <ShadcnButton variant="outline" disabled>Disabled outline</ShadcnButton>
-    <ShadcnButton variant="ghost" size="icon">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" disabled>Disabled outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">+</ShadcnButton>
   </div>
 </template>
     `),
@@ -355,12 +355,12 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
-    <ShadcnButton variant="ghost">Ghost</ShadcnButton>
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton variant="link">Link</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
   </div>
 </template>
     `),
@@ -371,14 +371,14 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
     <div>
-      <ShadcnButton>Default2</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
     </div>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton variant="ghost" size="icon">+</ShadcnButton>
-    <ShadcnButton disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
   </div>
 </template>
     `),
@@ -389,9 +389,9 @@ import { ShadcnButton } from '../proto-ui/components/vue';
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
   </div>
 </template>
     `),
@@ -400,7 +400,7 @@ import { ShadcnButton } from '../proto-ui/components/vue';
     'demo-button-default': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
   </div>
 </template>
 
@@ -417,7 +417,7 @@ export default {
     'demo-button-destructive': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
   </div>
 </template>
 
@@ -434,7 +434,7 @@ export default {
     'demo-button-disabled': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
   </div>
 </template>
 
@@ -451,8 +451,8 @@ export default {
     'demo-button-ghost': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton styleProfile="new-york" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
-    <ShadcnButton styleProfile="new-york" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
     <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>
@@ -468,7 +468,7 @@ export default {
     'demo-button-outline': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
   </div>
 </template>
 
@@ -485,7 +485,7 @@ export default {
     'demo-button-secondary': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
   </div>
 </template>
 
@@ -502,10 +502,10 @@ export default {
     'demo-button-sizes': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton size="sm">Small</ShadcnButton>
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton size="lg">Large</ShadcnButton>
-    <ShadcnButton size="icon" variant="outline">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon" variant="outline">+</ShadcnButton>
   </div>
 </template>
 
@@ -522,10 +522,10 @@ export default {
     'demo-button-states': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton disabled>Disabled</ShadcnButton>
-    <ShadcnButton variant="outline" disabled>Disabled outline</ShadcnButton>
-    <ShadcnButton variant="ghost" size="icon">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" disabled>Disabled outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">+</ShadcnButton>
   </div>
 </template>
 
@@ -542,12 +542,12 @@ export default {
     'demo-button-variants': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
-    <ShadcnButton variant="ghost">Ghost</ShadcnButton>
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton variant="link">Link</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
   </div>
 </template>
 
@@ -564,14 +564,14 @@ export default {
     'demo-button': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
     <div>
-      <ShadcnButton>Default2</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
     </div>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
-    <ShadcnButton variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton variant="ghost" size="icon">+</ShadcnButton>
-    <ShadcnButton disabled>Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">+</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
   </div>
 </template>
 
@@ -588,9 +588,9 @@ export default {
     'demo-button-secondary-example': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton>Default</ShadcnButton>
-    <ShadcnButton variant="secondary">Secondary</ShadcnButton>
-    <ShadcnButton variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
   </div>
 </template>
 

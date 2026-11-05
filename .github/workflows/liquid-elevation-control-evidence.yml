@@ -1,28 +1,12 @@
 name: Liquid Surface elevation control evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/liquid-elevation-control-evidence.yml'
-      - 'experiments/liquid-elevation-control/**'
-      - 'experiments/material-initial-paint/media-session.ts'
-      - 'apps/www/src/components/**'
-      - 'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'scripts/test/run-runtime-tests.test.mjs'
-      - 'packages/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - '.npmrc'
-      - 'tsconfig*.json'
-      - 'vitest.config.ts'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
   group: liquid-elevation-control-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:

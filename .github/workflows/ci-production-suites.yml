@@ -1,0 +1,78 @@
+name: Production suites cycle
+
+# Aggregates the production-browser evidence lanes so the single scheduled
+# regression owner (ci.yml) can include them in its cycle without duplicating
+# their definitions. These lanes intentionally carry no automatic triggers:
+# every suite runs here per cycle and remains manually diagnosable via
+# workflow_dispatch on the individual workflows.
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  effect-graph-model:
+    uses: ./.github/workflows/effect-graph-model.yml
+  shadcn-style-source:
+    uses: ./.github/workflows/shadcn-style-source.yml
+  intranet-preview-checks:
+    uses: ./.github/workflows/intranet-preview-checks.yml
+  material-source-specializer:
+    uses: ./.github/workflows/material-source-specializer.yml
+  # Two independent evidence chains bound cross-workflow fan-out. Each
+  # successor still runs after a failed predecessor and retains its own result.
+  compiler-wc-native:
+    uses: ./.github/workflows/compiler-wc-native-evidence.yml
+  finf-button-ghost:
+    needs: compiler-wc-native
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/finf-button-ghost-evidence.yml
+  finf-button-ghost-component:
+    needs: finf-button-ghost
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/finf-button-ghost-component-evidence.yml
+  finf-representative-features:
+    needs: finf-button-ghost-component
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/finf-representative-features-evidence.yml
+  homepage-visual:
+    needs: finf-representative-features
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/homepage-visual-evidence.yml
+  language-select-navigation:
+    needs: homepage-visual
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/language-select-navigation-evidence.yml
+  liquid-card-candidate:
+    needs: liquid-elevation-control
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/liquid-card-candidate-evidence.yml
+  liquid-elevation-control:
+    needs: liquid-material
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/liquid-elevation-control-evidence.yml
+  liquid-material:
+    needs: material-source-specializer
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/liquid-material-evidence.yml
+  select-target-alignment:
+    needs: language-select-navigation
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/select-target-alignment-evidence.yml
+  site-startup-theme:
+    needs: select-target-alignment
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/site-startup-theme-evidence.yml
+
+  select-item-sizing:
+    needs: site-startup-theme
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/select-item-sizing-evidence.yml
+  library-card-font-boundary:
+    needs: select-item-sizing
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/library-card-evidence.yml
+    with:
+      supplemental-only: true

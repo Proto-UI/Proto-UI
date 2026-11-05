@@ -1,6 +1,7 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'box',
@@ -87,4 +88,4 @@ export default {
       },
     });
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

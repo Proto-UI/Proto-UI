@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { writeSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,6 +38,7 @@ const out = path.resolve(values.out);
 await mkdir(out, { recursive: true });
 const cases: Array<Record<string, unknown>> = [];
 const failures: string[] = [];
+const lifecycle: Array<{ stage: string; at: string; activeResources: string[] }> = [];
 const report = {
   quickPreview,
   revisionKind: kind,
@@ -54,8 +56,49 @@ const report = {
     '390/430 CSS-pixel mobile simulations, not a physical OnePlus 13T or complete assistive-technology/engine coverage. 320px/200% is stress-only.',
   cases,
   failures,
+  lifecycle,
 };
 const save = () => writeFile(path.join(out, 'metrics.json'), JSON.stringify(report, null, 2));
+const recordLifecycleFailure = (stage: string, error: unknown) => {
+  const failure = `lifecycle ${stage}: ${String(error)}`;
+  failures.push(failure);
+  process.exitCode = 1;
+  try {
+    writeSync(process.stderr.fd, `${failure}\n`);
+  } catch {
+    // The nonzero exit and in-memory failure remain even if stderr is unavailable.
+  }
+};
+const recordLifecycle = async (stage: string) => {
+  try {
+    const observation = {
+      stage,
+      at: new Date().toISOString(),
+      activeResources: process.getActiveResourcesInfo(),
+    };
+    lifecycle.push(observation);
+    writeSync(process.stdout.fd, `[mobile-evidence-lifecycle] ${JSON.stringify(observation)}\n`);
+    await save();
+  } catch (error) {
+    // Evidence failure must fail the job without skipping the original cleanup.
+    recordLifecycleFailure(stage, error);
+  }
+};
+// Observation only: no extra timer, forced exit, signal interception or timeout change.
+process.once('beforeExit', () => {
+  try {
+    writeSync(
+      process.stdout.fd,
+      `[mobile-evidence-lifecycle] ${JSON.stringify({
+        stage: 'process-before-exit',
+        at: new Date().toISOString(),
+        activeResources: process.getActiveResourcesInfo(),
+      })}\n`
+    );
+  } catch (error) {
+    recordLifecycleFailure('process-before-exit', error);
+  }
+});
 const homeMenu = (page: Page) =>
   page.locator(
     '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
@@ -65,8 +108,11 @@ const readyHome = (page: Page, runtime = 'wc') =>
     const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');
     return root?.dataset.runtimeState === 'ready' && root.dataset.runtime === runtime;
   }, runtime);
+await recordLifecycle('server-start-requested');
 const base = await startServer(['/zh-cn/', '/en/ui-libraries/base/transition/']);
+await recordLifecycle('server-ready');
 const browser = await launchBrowser();
+await recordLifecycle('browser-ready');
 try {
   for (const width of quickPreview ? [390] : [390, 430])
     for (const locale of quickPreview ? ['zh-cn'] : ['zh-cn', 'en'])
@@ -446,6 +492,189 @@ try {
           await context.close();
         }
       }
+  // Direct #856 route/viewport regression. Keep the eight homepage journeys and
+  // the two stress cases above/below unchanged; neither substitutes for Docs.
+  if (kind === 'candidate' && !quickPreview) {
+    const id = 'en-500x761-docs-header-escape';
+    const route = '/en/start-here/what-you-saw/';
+    const context = await browser.newContext({
+      viewport: { width: 500, height: 761 },
+      deviceScaleFactor: 1,
+      colorScheme: 'light',
+      locale: 'en-US',
+      isMobile: false,
+      hasTouch: false,
+      reducedMotion: 'no-preference',
+    });
+    const page = await context.newPage();
+    const errors: string[] = [];
+    const screenshots: string[] = [];
+    const observations: Array<Record<string, unknown>> = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    const entry: Record<string, unknown> = {
+      id,
+      route,
+      width: 500,
+      height: 761,
+      deviceScaleFactor: 1,
+      theme: 'light',
+      locale: 'en',
+      browserVersion: browser.version(),
+      sourceRevision: revision,
+      candidateOnly: true,
+      procedure:
+        'Native Menu click and keyboard Enter/Space/Escape on the actual Docs route; read-only DOM/ARIA observations only. No focus(), dispatchEvent(), state/aria writes or runtime handles. The retained CSS-closed Search shape must arise naturally.',
+      limits:
+        'Desktop-browser 500x761 CSS viewport simulation, not physical-device or complete assistive-technology coverage. ARIA snapshots are Playwright accessible-tree projections. The older mobile baseline is not the d850 parent and does not provide a new Docs red control.',
+      screenshots,
+      observations,
+      pageErrors: errors,
+    };
+    cases.push(entry);
+    const header = page.locator('[data-docs-site-header]');
+    const menu = header.locator('[data-site-menu-button]');
+    const panel = header.locator('[data-site-header-panel]');
+    const docs = header
+      .locator('[data-site-header-navigation]')
+      .getByRole('link', { name: 'Docs', exact: true, includeHidden: true });
+    const retainedSearch = () =>
+      header.evaluate((root) =>
+        [...root.querySelectorAll('[aria-expanded="true"][aria-controls]')].flatMap((trigger) =>
+          (trigger.getAttribute('aria-controls')?.split(/\s+/) ?? []).map((id) => {
+            const popup = document.getElementById(id);
+            const triggerDisplayNone: string[] = [];
+            const popupDisplayNone: string[] = [];
+            for (let node: Element | null = trigger; node; node = node.parentElement)
+              if (getComputedStyle(node).display === 'none')
+                triggerDisplayNone.push(`${node.localName}#${node.id}`);
+            for (let node: Element | null = popup; node; node = node.parentElement)
+              if (getComputedStyle(node).display === 'none')
+                popupDisplayNone.push(`${node.localName}#${node.id}`);
+            return {
+              triggerId: trigger.id,
+              triggerRole: trigger.getAttribute('role'),
+              searchComposition: !!trigger.closest('site-search'),
+              popupId: id,
+              popupRole: popup?.getAttribute('role'),
+              connected: trigger.isConnected && !!popup?.isConnected,
+              triggerHiddenOrInert: !!trigger.closest('[hidden], [inert]'),
+              popupHiddenOrInert: !!popup?.closest('[hidden], [inert]'),
+              triggerDisplayNone,
+              popupDisplayNone,
+            };
+          })
+        )
+      );
+    const capture = async (stage: string) => {
+      const filename = `${id}-${stage}.png`;
+      await page.screenshot({ path: path.join(out, filename) });
+      screenshots.push(filename);
+      observations.push({
+        stage,
+        at: new Date().toISOString(),
+        url: page.url(),
+        expanded: await menu.getAttribute('aria-expanded'),
+        panelVisible: await panel.isVisible(),
+        docsFocused: await docs.evaluate((element) => element === document.activeElement),
+        menuFocused: await menu.evaluate((element) => element === document.activeElement),
+        activeElement: await page.evaluate(() => ({
+          tag: document.activeElement?.localName,
+          id: document.activeElement?.id,
+          role: document.activeElement?.getAttribute('role'),
+          label: document.activeElement?.getAttribute('aria-label'),
+        })),
+        retainedSearch: await retainedSearch(),
+        headerAria: await header.ariaSnapshot(),
+      });
+      await save();
+    };
+    try {
+      await page.goto(`${base}${route}`, { waitUntil: 'networkidle' });
+      await header.locator('site-search[data-search-view="ready"]').waitFor();
+      await menu.click();
+      await docs.and(page.locator(':focus')).waitFor({ state: 'visible' });
+      const retained = await retainedSearch();
+      entry.initialRetainedSearch = retained;
+      assert.ok(
+        retained.some(
+          (owner) =>
+            owner.searchComposition &&
+            owner.triggerRole === 'combobox' &&
+            owner.popupRole === 'listbox' &&
+            owner.connected &&
+            !owner.triggerHiddenOrInert &&
+            !owner.popupHiddenOrInert &&
+            owner.triggerDisplayNone.length > 0 &&
+            owner.popupDisplayNone.length > 0
+        ),
+        'Exercise the naturally retained CSS-closed Search owner, not an easier absent/hidden fixture'
+      );
+      for (const reopenKey of ['initial', 'Enter', 'Space']) {
+        if (reopenKey !== 'initial') {
+          await menu.and(page.locator(':focus')).waitFor({ state: 'visible' });
+          await page.keyboard.press(reopenKey);
+          await docs.and(page.locator(':focus')).waitFor({ state: 'visible' });
+        }
+        assert.equal(await menu.getAttribute('aria-expanded'), 'true');
+        await capture(`${reopenKey}-before-escape`);
+        await page.keyboard.press('Escape');
+        await capture(`${reopenKey}-after-escape`);
+        assert.equal(await menu.getAttribute('aria-expanded'), 'false');
+        assert.equal(await panel.isVisible(), false);
+        assert.ok(await menu.evaluate((element) => element === document.activeElement));
+      }
+
+      // A genuinely open nested Select owns the first Escape, unlike Search's
+      // retained CSS-closed listbox. The next Escape belongs to Header.
+      await page.keyboard.press('Enter');
+      await docs.and(page.locator(':focus')).waitFor({ state: 'visible' });
+      const runtime = header.locator('[data-adapter-select-root] [role="combobox"]');
+      await runtime.click();
+      const runtimePopupId = await runtime.getAttribute('aria-controls');
+      assert.ok(runtimePopupId && !/\s/.test(runtimePopupId));
+      const runtimePopup = page.locator(`[id=${JSON.stringify(runtimePopupId)}]`);
+      await runtimePopup.waitFor({ state: 'visible' });
+      assert.equal(await runtime.getAttribute('aria-expanded'), 'true');
+      entry.nestedSelectOpenAria = await runtimePopup.ariaSnapshot();
+      await capture('nested-select-open');
+      await page.keyboard.press('Escape');
+      await runtimePopup.waitFor({ state: 'hidden' });
+      await capture('nested-select-first-escape');
+      assert.equal(await runtime.getAttribute('aria-expanded'), 'false');
+      assert.equal(await menu.getAttribute('aria-expanded'), 'true');
+      assert.ok(await runtime.evaluate((element) => element === document.activeElement));
+      await page.keyboard.press('Escape');
+      await capture('nested-select-second-escape');
+      assert.equal(await menu.getAttribute('aria-expanded'), 'false');
+      assert.equal(await panel.isVisible(), false);
+      assert.ok(await menu.evaluate((element) => element === document.activeElement));
+
+      // Separate positive control: Page contents uses a real Dialog owner.
+      const contents = header.locator('[data-site-contents-button]:visible');
+      await contents.click();
+      const dialog = page.getByRole('dialog');
+      await dialog.waitFor({ state: 'visible' });
+      assert.equal(await dialog.count(), 1);
+      entry.contentsOpenAria = await dialog.ariaSnapshot();
+      await capture('contents-dialog-open');
+      await page.keyboard.press('Escape');
+      await dialog.waitFor({ state: 'hidden' });
+      await capture('contents-dialog-escape');
+      assert.equal(await contents.getAttribute('aria-expanded'), 'false');
+      assert.ok(await contents.evaluate((element) => element === document.activeElement));
+      assert.equal(await menu.getAttribute('aria-expanded'), 'false');
+      assert.deepEqual(errors, []);
+      entry.outcome = 'passed';
+    } catch (error) {
+      entry.outcome = 'failed';
+      entry.error = error instanceof Error ? error.stack : String(error);
+      failures.push(`${id}: ${String(error)}`);
+      await capture('failure').catch(() => {});
+    } finally {
+      await save();
+      await context.close();
+    }
+  }
   // Explicit host text enlargement is stress-only, separate from normal-phone views.
   if (kind === 'candidate' && !quickPreview)
     for (const locale of ['zh-cn', 'en']) {
@@ -598,9 +827,14 @@ try {
         await save();
       }
     }
+  await recordLifecycle('cases-loop-finished');
 } finally {
+  await recordLifecycle('browser-close-started');
   await browser.close();
+  await recordLifecycle('browser-close-finished');
+  await recordLifecycle('server-stop-started');
   await stopServer();
+  await recordLifecycle('server-stop-finished');
   await save();
 }
 assert.deepEqual(
@@ -608,3 +842,4 @@ assert.deepEqual(
   [],
   'All mobile cases must pass; retain actual failure screenshots and measurements'
 );
+await recordLifecycle('assertions-complete');

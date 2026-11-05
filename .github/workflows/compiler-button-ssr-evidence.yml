@@ -1,21 +1,7 @@
 name: Experimental Compiler Button SSR evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/compiler-button-ssr-evidence.yml'
-      - 'packages/**'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/package.json'
-      - 'apps/www/scripts/runtime-retry-urls.mjs'
-      - 'scripts/test/server-readiness.mjs'
-      - '.npmrc'
-      - 'spec/**'
-      - 'vitest.config.ts'
-      - 'tsconfig*.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

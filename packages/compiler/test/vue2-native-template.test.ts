@@ -11,6 +11,7 @@ import { parsePrototype } from '../src/parser';
 import { emitVue2Source } from '../src/vue2-source';
 import { validateIR } from '../src/ir-validation';
 import { collectVue2IdentityOnlyFunctions } from '../src/vue2-native-template';
+import { editingInput, physicalRootInput as physical } from './vue2-native-editor-fixtures';
 import type { ExpressionIR, FunctionIR, GeneratedModule, PrototypeIR } from '../src/ir';
 
 // The original 12 commit/slot cases remain separate and unchanged. These are
@@ -52,7 +53,7 @@ function compile(
 ): GeneratedModule {
   let directory: string | undefined;
   if (evidenceRoot) {
-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 45)
+    if (!path.isAbsolute(evidenceRoot) || ++compilations > 50)
       throw new Error('Unexpected native evidence root or compilation count');
     mkdirSync(evidenceRoot, { recursive: true });
     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
@@ -1281,10 +1282,9 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     );
     const source = program.getSourceFile(path.join(directory, 'Component.js'));
     if (!source) throw new Error('Missing actual generated Component.js in strict program');
-    // All diagnostics above remain evidence, including unrelated helper debt.
-    // Only opaque-formal typing is asserted below; original full strict remains
-    // separate, unchanged, unfiltered and blocking.
-    return { program, source, evidence };
+    // All diagnostics remain evidence. The opaque-formal assertions and the
+    // complete graph assertion are independent; neither filters the other.
+    return { program, source, evidence, diagnostics };
   }
   function legacy(fn: FunctionIR) {
     fn.parameters[0].type = 'template';
@@ -1494,7 +1494,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     legacy(helper(ir, 'second'));
     const view = await mount(ir);
     expect(view.host.textContent).toBe('distinct');
-    const { program, source, evidence } = strictGraph(view.module);
+    const { program, source, evidence, diagnostics } = strictGraph(view.module);
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toEqual([]);
     const checker = program.getTypeChecker();
     const declarations: ts.VariableDeclaration[] = [];
     const formalTypes: Array<{ name: string; flags: number; type: string }> = [];
@@ -1549,32 +1550,12 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     const view = await mount(ir);
     expect(view.host.querySelector('b')?.textContent).toBe('called');
     expect(view.host.querySelector('i')).toBeNull();
-    strictGraph(view.module);
+    const { diagnostics } = strictGraph(view.module);
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toEqual([]);
   });
 });
 
 describe('Vue2 compile-time root-data demand', () => {
-  function physical(kind: 'image' | 'text'): PrototypeIR {
-    const declaration =
-      kind === 'image'
-        ? "declareImageView({source:'',alternativeText:'',a11yMode:'decorative',fit:'contain'})"
-        : "declareTextControl({content:'plain-text',lineMode:'multiline',engine:'host'})";
-    const setup =
-      kind === 'image'
-        ? 'asImageView();'
-        : "const editor=asTextControl();def.lifecycle.onCreated(()=>editor.sync({defaultValue:'seed',valueMode:'uncontrolled',rows:3,minLength:-1,placeholder:'hint',readOnly:true}));";
-    const parsed = parsePrototype(
-      `import {definePrototype} from '@proto.ui/core';
-      import {asImageView,asTextControl} from '@proto.ui/hooks';
-      import {declareImageView} from '@proto.ui/module-image-view';
-      import {declareTextControl} from '@proto.ui/module-text-control';
-      export default definePrototype({name:'root-data-${kind}',modules:[${declaration}],setup(def){${setup}return()=>null;}});`,
-      { fileName: `root-data-${kind}.proto.ts` }
-    );
-    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    return parsed.value;
-  }
-
   it('constructs fresh native root data directly when no root-property producer is reached', async () => {
     const view = await mount(prototype("return r=>r.el('b','direct-root');"));
     expect(view.host.textContent).toBe('direct-root');
@@ -1621,38 +1602,142 @@ describe('Vue2 compile-time root-data demand', () => {
     expect(view.child.$el.getAttribute('data-pui-root')).toBe('');
   });
 
-  it.each(['image', 'text'] as const)(
-    'preserves legal physical root attributes and style: %s',
-    async (kind) => {
-      const view = await mount(physical(kind), undefined, true);
-      const root = view.child.$el;
-      const data = nativeField(nativeField(view.child, '_vnode'), 'data');
-      expect(view.module.code).toContain('function __puiRootData(');
-      expect(root.getAttribute('data-pui-root')).toBe('');
-      if (kind === 'image') {
-        expect(root.tagName).toBe('IMG');
-        expect(nativeField(data, 'style')).toBe('object-fit:contain');
-        expect(nativeField(data, 'attrs')).toMatchObject({ src: null, alt: '' });
-        expect(nativeField(nativeField(root, 'style'), 'objectFit')).toBe('contain');
-        expect(root.getAttribute('src')).toBeNull();
-        expect(root.getAttribute('alt')).toBe('');
-      } else {
-        expect(root.tagName).toBe('TEXTAREA');
-        expect(nativeField(data, 'style')).toBeUndefined();
-        expect(nativeField(data, 'attrs')).toMatchObject({
-          rows: 3,
-          minLength: null,
-          placeholder: 'hint',
-          readOnly: '',
-        });
-        expect(nativeField(root, 'value')).toBe('seed');
-        expect(nativeField(root, 'rows')).toBe(3);
-        expect(nativeField(root, 'readOnly')).toBe(true);
-        expect(root.getAttribute('minlength')).toBeNull();
-        expect(root.getAttribute('placeholder')).toBe('hint');
-      }
+  // The original Text case, including seed and rows === 3, now runs against
+  // Chrome in vue2-native-editor.browser.test.ts. Locked Happy DOM 15 declares
+  // textarea.rows as string; its original failure remains in the R12 carrier.
+  it('preserves legal physical root attributes and style: image', async () => {
+    const view = await mount(physical('image'), undefined, true);
+    const root = view.child.$el;
+    const data = nativeField(nativeField(view.child, '_vnode'), 'data');
+    expect(view.module.code).toContain('function __puiRootData(');
+    expect(root.getAttribute('data-pui-root')).toBe('');
+    expect(root.tagName).toBe('IMG');
+    expect(nativeField(data, 'style')).toBe('object-fit:contain');
+    expect(nativeField(data, 'attrs')).toMatchObject({ src: null, alt: '' });
+    expect(nativeField(nativeField(root, 'style'), 'objectFit')).toBe('contain');
+    expect(root.getAttribute('src')).toBeNull();
+    expect(root.getAttribute('alt')).toBe('');
+  });
+
+  async function editingConsumer(
+    lineMode: 'single' | 'multiline',
+    controlled: boolean,
+    removeHandoff = false
+  ) {
+    const emitted = compile(editingInput(lineMode, controlled));
+    const handoff = 'if (commit.vnode.data?.domProps) delete commit.vnode.data.domProps.value;';
+    if (removeHandoff && !emitted.code.includes(handoff))
+      throw new Error('Native value handoff mutation did not match');
+    const module = removeHandoff
+      ? { ...emitted, code: emitted.code.replace(handoff, '') }
+      : emitted;
+    const native = options(module, true);
+    const props = Vue2.observable({ value: 'seed', seed: 'seed', hint: 'before', present: true });
+    const app = new Vue2({ render: (h) => h(native, { props: { ...props } }) });
+    const host = document.createElement('div');
+    document.body.append(host);
+    cleanup.push(() => {
+      app.$destroy();
+      host.remove();
+    });
+    app.$mount();
+    host.append(app.$el);
+    const settle = async () => {
+      await Vue2.nextTick();
+      await Vue2.nextTick();
+      await Promise.resolve();
+    };
+    await settle();
+    const child = app.$children[0];
+    const editor = () => {
+      const target = host.querySelector(lineMode === 'single' ? 'input' : 'textarea');
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement))
+        throw new Error('Native editor was not materialized');
+      return target;
+    };
+    return { props, child, host, editor, settle };
+  }
+
+  it.each(['single', 'multiline'] as const)(
+    'retains uncontrolled native editing through repaint, props and a new view lease: %s',
+    async (lineMode) => {
+      const view = await editingConsumer(lineMode, false);
+      const editor = view.editor();
+      expect(editor.value).toBe('seed');
+      editor.value = 'edited';
+      editor.dispatchEvent(
+        new InputEvent('input', { bubbles: true, data: 'edited', inputType: 'insertText' })
+      );
+      editor.setSelectionRange(1, 4);
+      view.child.$forceUpdate();
+      await view.settle();
+      expect(view.editor()).toBe(editor);
+      expect(editor.value).toBe('edited');
+      expect([editor.selectionStart, editor.selectionEnd]).toEqual([1, 4]);
+      view.props.seed = 'later-default';
+      view.props.hint = 'after';
+      await view.settle();
+      expect(editor.value).toBe('edited');
+      expect(editor.defaultValue).toBe('later-default');
+      expect(editor.placeholder).toBe('after');
+      view.props.present = false;
+      await view.settle();
+      expect(editor.isConnected).toBe(false);
+      editor.value = 'stale';
+      editor.dispatchEvent(new InputEvent('input', { bubbles: true }));
+      view.props.present = true;
+      await view.settle();
+      expect(view.editor()).not.toBe(editor);
+      expect(view.editor().value).toBe('edited');
     }
   );
+
+  it.each(['single', 'multiline'] as const)(
+    'preserves controlled sync and composition across host repaint and remount: %s',
+    async (lineMode) => {
+      const view = await editingConsumer(lineMode, true);
+      const editor = view.editor();
+      expect(editor.value).toBe('seed');
+      editor.value = 'proposal';
+      editor.dispatchEvent(
+        new InputEvent('input', { bubbles: true, data: 'proposal', inputType: 'insertText' })
+      );
+      await view.settle();
+      expect(editor.value).toBe('seed');
+      editor.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
+      editor.value = 'composing';
+      editor.dispatchEvent(
+        new InputEvent('input', { bubbles: true, data: 'composing', isComposing: true })
+      );
+      view.props.hint = 'during-ime';
+      view.child.$forceUpdate();
+      await view.settle();
+      expect(editor.value).toBe('composing');
+      expect(editor.placeholder).toBe('during-ime');
+      view.props.value = 'accepted';
+      await view.settle();
+      expect(editor.value).toBe('composing');
+      editor.dispatchEvent(
+        new CompositionEvent('compositionend', { bubbles: true, data: 'composing' })
+      );
+      await view.settle();
+      expect(editor.value).toBe('accepted');
+      view.props.present = false;
+      await view.settle();
+      expect(editor.isConnected).toBe(false);
+      view.props.present = true;
+      await view.settle();
+      expect(view.editor()).not.toBe(editor);
+      expect(view.editor().value).toBe('accepted');
+    }
+  );
+
+  it('detects removal of only the native value handoff using the real Vue2 patcher', async () => {
+    const view = await editingConsumer('multiline', false, true);
+    view.child.$forceUpdate();
+    await view.settle();
+    expect(view.editor().value).toBe('');
+  });
 
   it.each([false, true])(
     'retains the full SSR transport root-data path (interaction=%s)',

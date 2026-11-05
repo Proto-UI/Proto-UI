@@ -99,6 +99,8 @@ Native template 将 child style 与 Root feedback 分开，并支持 singular an
 
 State write 与 feedback projection 本身不会请求 template render。作者显式 update intent 与 host policy 分开：React/Vue 3 consumer 执行 authored update；Vue 2 的默认 props policy 与 Custom Element `setProps` 可以显式请求 semantic update。View detach 保留 instance state、exposed handle、Context 与 pending intent；terminal disposal 才关闭它们。Framework wrapper 使用 native ownership 组合 component，而不是在 template 内嵌入 Prototype node。
 
+私有 Vue 2 client profile 的普通 framework repaint 保留上次 authored commit，同时让 native slot 保持实时。已声明的 Text Control 在首次 mount 后拥有原生 editor value：非受控编辑不会被 framework repaint 或后续 defaultValue 变化重置；受控编辑仍只是 proposal，无关更新保留正在进行的 composition。重新创建 view 时，新的物理 editor 绑定到保留的 logical value。这些边界不代表浏览器 IME fidelity、内部 SSR/hydration 迁移、所有准入程序的完整生成类型、完整 reached-support 或 production cost 已通过验收；这些工作仍在 [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055) 分别追踪。
+
 ### 本地命令与 consumer ownership
 
 在安装了 development dependencies 的仓库 root 执行，并选择未使用的 output directory：

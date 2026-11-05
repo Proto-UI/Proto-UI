@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import ts from 'typescript';
-import type { Browser, Page, Response } from 'playwright-core';
+import type { Browser, Page, Response, Request as PlaywrightRequest } from 'playwright-core';
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 import {
@@ -90,6 +90,156 @@ async function boundedBody(read: () => Promise<Buffer>): Promise<Buffer> {
     if (timer) clearTimeout(timer);
   }
 }
+type ResponseCapture = {
+  id: number;
+  url: string;
+  method: string;
+  resourceType: string;
+  status: number;
+  statusText: string;
+  location: string | null;
+  contentType: string | null;
+  from: number | null;
+  to: number | null;
+  kind: 'pending' | 'redirect' | 'body' | 'http-error' | 'body-error';
+  bodyAttempted: boolean;
+  bodySHA256: string | null;
+  bodyBytes: number | null;
+  error?: string;
+};
+function createResponseCollector(directory: string, origin: string) {
+  const issues: unknown[] = [],
+    assets: unknown[] = [],
+    responses: ResponseCapture[] = [];
+  const pending: Promise<void>[] = [];
+  const ids = new Map<PlaywrightRequest, number>();
+  const records = new Map<PlaywrightRequest, ResponseCapture>();
+  let finalized = false;
+  const identify = (request: PlaywrightRequest): number => {
+    let id = ids.get(request);
+    if (id === undefined) {
+      id = ids.size + 1;
+      ids.set(request, id);
+    }
+    return id;
+  };
+  const sameOrigin = (url: string) => new URL(url).origin === origin;
+  const collectResponse = (response: Response) => {
+    if (!sameOrigin(response.url())) return;
+    const request = response.request(),
+      from = request.redirectedFrom();
+    const headers = response.headers();
+    const row: ResponseCapture = {
+      id: identify(request),
+      url: response.url(),
+      method: request.method(),
+      resourceType: request.resourceType(),
+      status: response.status(),
+      statusText: response.statusText(),
+      location: headers.location ?? null,
+      contentType: headers['content-type'] ?? null,
+      from: from ? identify(from) : null,
+      to: null,
+      kind: 'pending',
+      bodyAttempted: false,
+      bodySHA256: null,
+      bodyBytes: null,
+    };
+    // Persist response identity and headers before any body read can reject.
+    responses.push(row);
+    records.set(request, row);
+    pending.push(
+      (async () => {
+        try {
+          if ([301, 302, 303, 307, 308].includes(row.status)) {
+            const target = row.location ? new URL(row.location, row.url) : null;
+            if (!target || target.origin !== origin || target.username || target.password)
+              throw new Error('Redirect has no valid same-origin Location');
+            row.kind = 'redirect';
+            return; // Redirect responses have no readable Playwright body.
+          }
+          if (!response.ok()) {
+            row.kind = 'http-error';
+            issues.push({ operation: 'asset-http-status', response: row });
+            return;
+          }
+          row.bodyAttempted = true;
+          const bytes = await boundedBody(() => response.body()),
+            assetSha = digest(bytes);
+          await mkdir(path.join(directory, 'assets'), { recursive: true });
+          writeFileSync(path.join(directory, 'assets', assetSha + '.bin'), bytes);
+          row.kind = 'body';
+          row.bodySHA256 = assetSha;
+          row.bodyBytes = bytes.length;
+          assets.push({
+            url: new URL(row.url).pathname + new URL(row.url).search,
+            status: row.status,
+            type: row.contentType,
+            sha256: assetSha,
+            bytes: bytes.length,
+          });
+        } catch (error) {
+          row.kind = 'body-error';
+          row.error = String(error);
+          issues.push({
+            operation: row.bodyAttempted ? 'asset-body' : 'asset-redirect',
+            response: row,
+            error: String(error),
+          });
+        }
+      })()
+    );
+  };
+  const collectFailure = (request: PlaywrightRequest) => {
+    if (!sameOrigin(request.url())) return;
+    const from = request.redirectedFrom();
+    issues.push({
+      operation: 'asset-request-failed',
+      id: identify(request),
+      url: request.url(),
+      from: from ? identify(from) : null,
+      failure: request.failure(),
+    });
+  };
+  const finish = async () => {
+    await Promise.all(pending);
+    if (finalized) return;
+    finalized = true;
+    for (const [request, row] of records) {
+      const next = request.redirectedTo();
+      row.to = next ? identify(next) : null;
+      if (row.kind !== 'redirect') continue;
+      try {
+        let current = request;
+        const visited = new Set<PlaywrightRequest>();
+        for (;;) {
+          if (visited.has(current) || visited.size >= 20)
+            throw new Error('Unbounded redirect chain');
+          visited.add(current);
+          const observed = records.get(current);
+          if (!observed) throw new Error('Redirect successor has no observed response');
+          if (observed.kind !== 'redirect') {
+            if (observed.kind !== 'body')
+              throw new Error('Redirect did not finish with a captured successful body');
+            break;
+          }
+          const following = current.redirectedTo();
+          if (!following || following.redirectedFrom() !== current)
+            throw new Error('Missing reciprocal redirect Request identity');
+          const target = new URL(observed.location!, observed.url);
+          target.hash = '';
+          if (target.href !== following.url())
+            throw new Error('Location does not match the actual successor URL');
+          current = following;
+        }
+      } catch (error) {
+        issues.push({ operation: 'asset-redirect-chain', response: row, error: String(error) });
+      }
+    }
+  };
+  return { issues, assets, responses, collectResponse, collectFailure, finish };
+}
+
 beforeAll(async () => {
   sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
@@ -205,37 +355,11 @@ describe('actual complete Liquid Card optical producer', () => {
               (theme) => localStorage.setItem('starlight-theme', theme),
               theme
             );
-            const page = await context.newPage(),
-              issues: unknown[] = [],
-              assets: unknown[] = [],
-              pendingAssets: Promise<void>[] = [];
-            const collectResponse = (response: Response) => {
-              if (new URL(response.url()).origin !== new URL(baseUrl).origin) return;
-              pendingAssets.push(
-                (async () => {
-                  try {
-                    const bytes = await boundedBody(() => response.body()),
-                      assetSha = digest(bytes);
-                    await mkdir(path.join(output, 'assets'), { recursive: true });
-                    writeFileSync(path.join(output, 'assets', assetSha + '.bin'), bytes);
-                    assets.push({
-                      url: new URL(response.url()).pathname + new URL(response.url()).search,
-                      status: response.status(),
-                      type: response.headers()['content-type'],
-                      sha256: assetSha,
-                      bytes: bytes.length,
-                    });
-                  } catch (error) {
-                    issues.push({
-                      operation: 'asset-body',
-                      url: response.url(),
-                      error: String(error),
-                    });
-                  }
-                })()
-              );
-            };
+            const page = await context.newPage();
+            const collector = createResponseCollector(output, new URL(baseUrl).origin);
+            const { issues, assets, responses, collectResponse, collectFailure } = collector;
             page.on('response', collectResponse);
+            page.on('requestfailed', collectFailure);
             let failed = false,
               mediaSession: Awaited<ReturnType<typeof holdMediaEmulation>> | undefined;
             let media: Awaited<ReturnType<typeof readMediaObservation>> | undefined;
@@ -346,7 +470,8 @@ describe('actual complete Liquid Card optical producer', () => {
                 page.evaluate(collectLiquidCardObservation)
               );
               page.off('response', collectResponse);
-              await Promise.all(pendingAssets);
+              page.off('requestfailed', collectFailure);
+              await collector.finish();
               expect(
                 await page.evaluate(() =>
                   (window as CandidateWindow).libraryLiquidCardCandidate!.artifact()
@@ -370,6 +495,7 @@ describe('actual complete Liquid Card optical producer', () => {
                     viewportImage,
                     viewportObservation,
                     assets,
+                    responses,
                     readCardsSha,
                   },
                   null,
@@ -379,6 +505,9 @@ describe('actual complete Liquid Card optical producer', () => {
               results.push({ name, passed: true, image });
             } catch (error) {
               failed = true;
+              page.off('response', collectResponse);
+              page.off('requestfailed', collectFailure);
+              await collector.finish();
               const failureImage = await captureCurrentViewport(
                 page,
                 path.join(directory, 'failure.png')
@@ -401,13 +530,15 @@ describe('actual complete Liquid Card optical producer', () => {
                 media,
                 failureImage,
                 assets,
+                responses,
                 issues,
               });
               results.push({ name, passed: false, error: String(error) });
               throw error;
             } finally {
               page.off('response', collectResponse);
-              await Promise.all(pendingAssets);
+              page.off('requestfailed', collectFailure);
+              await collector.finish();
               await mediaSession?.close();
               await closeEvidenceContext(context, failed);
             }
@@ -651,4 +782,167 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         await closeEvidenceContext(context, failed);
       }
     }, 90_000);
+});
+
+// Real Chromium requests through owned routes, separate from the twelve Card cases.
+// These validate capture mechanics, not the still-unknown live redirect provenance.
+describe('same-origin response collector native controls', () => {
+  for (const arm of [
+    'success',
+    'http-error',
+    'request-abort',
+    'missing-location',
+    'invalid-location',
+    'unknown-status',
+  ] as const) {
+    it(
+      arm,
+      async () => {
+        const directory = path.join(output, 'response-controls', arm);
+        await mkdir(directory, { recursive: true });
+        const font = await readFile('apps/www/src/styles/assets/font/geist/Geist-Variable.ttf');
+        const origin = new URL(baseUrl).origin,
+          prefix = '/__pui_response_collector__';
+        const context = await browser.newContext();
+        let failed = false;
+        try {
+          await context.route('**/*', async (route) => {
+            const url = new URL(route.request().url());
+            if (url.origin !== origin || !url.pathname.startsWith(prefix + '/'))
+              return route.abort();
+            if (url.pathname === prefix + '/index')
+              return route.fulfill({
+                status: 200,
+                contentType: 'text/html',
+                body: '<!doctype html><link rel="icon" href="data:,"><title>Owned response control</title>',
+              });
+            if (url.pathname === prefix + '/redirect') {
+              if (arm === 'missing-location') return route.fulfill({ status: 302, body: '' });
+              if (arm === 'invalid-location')
+                return route.fulfill({ status: 302, headers: { location: 'http://[' }, body: '' });
+              if (arm === 'unknown-status')
+                return route.fulfill({
+                  status: 300,
+                  headers: { location: prefix + '/font' },
+                  body: '',
+                });
+              const step = Number(url.searchParams.get('step') ?? '0');
+              const statuses = [301, 302, 303, 307, 308];
+              const target =
+                step === statuses.length - 1
+                  ? prefix + '/font'
+                  : prefix + '/redirect?step=' + (step + 1);
+              return route.fulfill({
+                status: statuses[step],
+                headers: { location: target },
+                body: '',
+              });
+            }
+            if (url.pathname === prefix + '/font') {
+              if (arm === 'request-abort') return route.abort('failed');
+              if (arm === 'http-error')
+                return route.fulfill({
+                  status: 404,
+                  contentType: 'text/plain',
+                  body: 'Owned terminal error',
+                });
+              return route.fulfill({ status: 200, contentType: 'font/ttf', body: font });
+            }
+            return route.abort();
+          });
+          const page = await context.newPage();
+          await page.goto(origin + prefix + '/index', { waitUntil: 'networkidle' });
+          const collector = createResponseCollector(directory, origin);
+          page.on('response', collector.collectResponse);
+          page.on('requestfailed', collector.collectFailure);
+          let client;
+          try {
+            client = await page.evaluate(
+              async (url) => {
+                try {
+                  const response = await fetch(url);
+                  return {
+                    status: response.status,
+                    bytes: (await response.arrayBuffer()).byteLength,
+                  };
+                } catch (error) {
+                  return { error: String(error) };
+                }
+              },
+              origin + prefix + '/redirect'
+            );
+          } finally {
+            page.off('response', collector.collectResponse);
+            page.off('requestfailed', collector.collectFailure);
+            await collector.finish();
+          }
+          const record = {
+            sha,
+            tree,
+            arm,
+            client,
+            browser: browser.version(),
+            role: 'owned native redirect/response collector control; not optical acceptance or production-chain attribution',
+            expectedFont: { sha256: digest(font), bytes: font.length },
+            responses: collector.responses,
+            assets: collector.assets,
+            issues: collector.issues,
+          };
+          await writeFile(path.join(directory, 'control.json'), JSON.stringify(record, null, 2));
+          expect(collector.responses.length).toBeGreaterThan(0);
+          if (arm === 'success') {
+            expect(client).toEqual({ status: 200, bytes: font.length });
+            expect(collector.issues).toEqual([]);
+            expect(collector.responses.map((row) => row.status)).toEqual([
+              301, 302, 303, 307, 308, 200,
+            ]);
+            expect(
+              collector.responses
+                .slice(0, -1)
+                .every(
+                  (row) => row.kind === 'redirect' && !row.bodyAttempted && row.location !== null
+                )
+            ).toBe(true);
+            const terminal = collector.responses.at(-1)!;
+            expect(terminal.kind).toBe('body');
+            expect(terminal.bodySHA256).toBe(digest(font));
+            expect(terminal.bodyBytes).toBe(font.length);
+            expect(collector.assets).toHaveLength(1);
+            for (let i = 0; i < collector.responses.length - 1; i++) {
+              expect(collector.responses[i].to).toBe(collector.responses[i + 1].id);
+              expect(collector.responses[i + 1].from).toBe(collector.responses[i].id);
+            }
+          } else {
+            expect(collector.issues.length).toBeGreaterThan(0);
+            expect(collector.assets).toEqual([]);
+            const operation =
+              arm === 'http-error' || arm === 'unknown-status'
+                ? 'asset-http-status'
+                : arm === 'request-abort'
+                  ? 'asset-request-failed'
+                  : 'asset-redirect';
+            expect(collector.issues).toEqual(
+              expect.arrayContaining([expect.objectContaining({ operation })])
+            );
+            expect(collector.responses.every((row) => !row.bodyAttempted)).toBe(true);
+            if (arm === 'http-error') {
+              expect(client).toEqual({
+                status: 404,
+                bytes: Buffer.byteLength('Owned terminal error'),
+              });
+              expect(collector.responses.at(-1)?.status).toBe(404);
+            }
+          }
+          results.push({ name: 'response-control-' + arm, passed: true });
+        } catch (error) {
+          failed = true;
+          results.push({ name: 'response-control-' + arm, passed: false, error: String(error) });
+          throw error;
+        } finally {
+          await closeEvidenceContext(context, failed);
+        }
+      },
+      30_000
+    );
+  }
 });

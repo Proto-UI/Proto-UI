@@ -5,6 +5,8 @@ description: 'Shadcn Select reconstructed on the Proto UI Base Select protocol.'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 This entry composes the shadcn visual and API surface over the cataloged Base Select protocol. Web Components, React, and Vue share the same selection, focus, and ARIA semantics.
 
 <PrototypePreviewer demoId="demo-shadcn-select" initialRuntime="wc" />
@@ -14,14 +16,14 @@ This entry composes the shadcn visual and API surface over the cataloged Base Se
 - `Root`, `Trigger`, `Value`, `Content`, `Item`, `Surface`, `Viewport`, `ItemText`, `Group`, `Label`, and `Separator`
 - `defaultValue` / `value`, `defaultOpen` / `open`, and their change events
 - `Trigger.size="sm | default"`
-- `Trigger.appearance="default | ghost"`
+- `Trigger.appearance="default"` (Rhea); `ghost` is New York-only
 - `Content.position="item-aligned | popper"`, defaulting to shadcn/ui's `item-aligned`
 - single selection, disabled items, keyboard navigation, typeahead, popup dismissal, and focus restoration
 
-`Group` is a passive option container; its `Label` names only that group. Multiple groups and ungrouped items can coexist without changing selection order. `Separator` is decorative and contentless. The grouped demo uses these real parts. Their visual recipe is pinned to [shadcn/ui revision 02cad611](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx).
+`Group` is a passive option container; `Label` names only its group, and `Separator` is decorative and contentless. These parts inherit the same Rhea scope as Trigger, Content, Surface and Item, including logical portal descendants. The [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css) is the modern presentation reference. The [02cad611 New York Select](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx) remains a separate compatibility/source comparison, not this demo's selected skin.
 
 The full `Surface` → `Viewport` → `Item` → `ItemText` composition supplies explicit parts for item-aligned positioning; legacy compositions and explicit `popper` remain supported. This does not establish complete Radix positioning parity. Scroll buttons, `ItemIndicator`, and form submission remain open. GPUI peer group-name relationships have transport evidence, but its current wire format omits the Separator's hidden-tree contribution; native accessibility acceptance remains unverified.
 
 ## Trigger appearance
 
-`appearance="default"` keeps the bordered field surface shown above. `appearance="ghost"` is an opt-in Proto UI presentation extension with a transparent resting border/background and no resting shadow. Hover and press use the accent surface; the visible keyboard focus ring and disabled behavior remain. Set this prop on `shadcn-select-trigger`, not Root or Content. Removing it restores `default`, including during interaction. This changes only presentation over Base Select Trigger, not selection, keyboard navigation or popup behavior.
+This page uses `appearance="default"` with `styleProfile="rhea"`. The optional `ghost` appearance is a Proto UI extension supported only by `new-york-v4` (alias `new-york`); combining it with Rhea or another modern profile is rejected, not silently converted. Set appearance on Trigger, not Root or Content. Without any explicit or inherited profile, Select retains its existing New York compatibility default. A Root style scope supplies one profile to the complete composition; explicit leaf choices override inheritance and must be intentional. Changing presentation does not change the Base selection, keyboard or popup protocol.

@@ -1,5 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { collectOwnedDemoRefs, observeOwnedDemoRefs } from './demo-ref-observer';
+
+// Keep the pinned Happy DOM observer forwarding closures alive until disconnect.
+// Delivery, records, filters, assertions and wait budgets remain unchanged.
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks> | undefined;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper?.restore());
 
 const stops: Array<() => void> = [];
 const settle = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));

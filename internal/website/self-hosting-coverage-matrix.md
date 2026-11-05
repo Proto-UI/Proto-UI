@@ -247,7 +247,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
 | `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `31d46949e1ad738b7fb9b813a5bec13ae0fc88cdcc9a9d88a17ba08ff74b88d9` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `6ab5b4dc199f7a712d8058e621b3e91518cc2fa06fac25adfab1ab7b79dbace9` |
-| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `554aca05225ef6b099d29449979a25fd29b15cd35f6bf2c170e13d25328267fb` |
+| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `9403e6e3ed6909f9d416bf8fcc1626d4417da0de817c7993ee45f3f94615241f` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `605a9ab995189d4cc2675079b67df28e31d4bbd7068f9fbccef122affb11bbc2` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
 | `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure` | `ee497539db2dc7a8fcc3cf75c08239f15531694aa7a9c508e373ed3ab1b74d8b` |
@@ -275,7 +275,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `2dd09fc318f19b1fa34d46f0bec17cab0375da92b939113e6b1baf7760025b9d` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts` | `www.demo.brutalist-separator` | `58d963578d9f80a4d17db85d431838fee464ea653a59241c3167c66c95a230b6` |
-| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `c2f2d9b91205a15129c487dcf90549df1ef18fc9dfd772765f3a968805127fea` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `7a34a4f5babaff7d487b23247e0f2e985ae797fdec94dfe144f8c472893af5da` |
 | `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `e0853379e6d8a241101bc82e78f43f4dec9db1d14e522f8c4b72ee46ff05cdb3` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md` | `www.content.native-disclosures` | `a8d277d42f1a6df4196cc098ddc02bec4d891640d501bda337b509fac40de7e7` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md` | `www.content.native-disclosures`, `www.docs.whitepaper-diagram-viewer` | `0d454d776303bde8c20454560d595788eaabff0b1298e3392fd2febf1e7374ee` |
@@ -285,6 +285,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md` | `www.docs.whitepaper-diagram-viewer` | `f4bc3b3cb0d2791d03ef1b02199f83059c1de8f6561b0cd3d7ecdc97f65120ef` |
 | `apps/www/src/pages/en/test/liquid-glass-material.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `660e17ed48a165dac18f67d6699f088f273a5c14a0dd824af7cad6a33ee41387` |
 | `apps/www/src/pages/en/test/new-projection-families.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `2a0c1838bf6d3f8392af14befa51796b9bd598cf38615222b385838a0a140afa` |
+| `apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro` | `www.demo.demo-matrix` | `d33300f2f4fd5c0c32e583f92beeac7f6d96a00ac9b8a28f4f348da7966dccf4` |
 | `apps/www/src/pages/en/test/site-typography.astro` | `www.content.typography-presentation`, `www.demo.authored-controllers` | `deb9a55385b6db74a35e4653c0c3d9d09b8597fbfcc33dcf1f46c93f8095f096` |
 | `apps/www/src/pages/en/test/style-isolation.astro` | `www.demo.prototype-previewer`, `www.demo.raw-adapter-runtimes` | `8fb1136b0a7c267073ab1f2c52b135ef199e9109c449b0ef3aadd422ab429ca3` |
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |

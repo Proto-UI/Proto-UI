@@ -131,6 +131,11 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
     --header-height: 4.5rem;
     --sl-nav-height: var(--header-height);
   }
+  /* A closed Dialog Root has no height; do not give its inline surface a
+     surrounding text line in the application's panel mount. */
+  [data-site-contents-panel-mount] :global(.pui-projection-content) {
+    display: flex;
+  }
   @media (max-width: 68.749rem) {
     .site-page-frame {
       --header-height: 7.5rem;

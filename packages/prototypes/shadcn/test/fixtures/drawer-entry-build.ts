@@ -8,7 +8,7 @@ export async function buildPublicDrawerEntryProbe() {
     await build({
       stdin: {
         contents:
-          "import demo from './apps/www/src/content/docs/demo-shadcn-drawer.demo'; import {createPublicDrawerEntryFixture as create} from './packages/prototypes/shadcn/test/fixtures/drawer-www-entry'; export const createPublicDrawerEntryFixture = fixed => create(fixed, demo);",
+          "import demo from './apps/www/src/content/docs/demo-shadcn-drawer.demo'; import {createPublicDrawerEntryFixture as create} from './packages/prototypes/shadcn/test/fixtures/drawer-www-entry'; export const createPublicDrawerEntryFixture = fixed => create(fixed, demo); export const createMissingScopeFixture = () => create(false, demo, false);",
         resolveDir: process.cwd(),
         loader: 'ts',
       },

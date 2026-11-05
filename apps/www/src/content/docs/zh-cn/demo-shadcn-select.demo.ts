@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSetupContext, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
 function setup({ host }: DemoSetupContext) {
@@ -18,12 +19,13 @@ function setup({ host }: DemoSetupContext) {
   return () => observer.disconnect();
 }
 
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   setup,
   root: {
     kind: 'proto',
     prototypeId: 'shadcn-select-root',
+    props: { itemSizing: 'match-trigger' },
     children: [
       {
         kind: 'proto',
@@ -128,4 +130,4 @@ export default {
       },
     ],
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

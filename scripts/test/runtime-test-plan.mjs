@@ -79,6 +79,7 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'packages/compiler/test/vue2-native-editor.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
   'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
@@ -108,7 +109,6 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
@@ -175,6 +175,9 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
   'packages/compiler/test/web-component-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts',
@@ -190,6 +193,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts',
@@ -197,6 +201,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
   'packages/adapters/base/test/resident-motion.browser.test.ts',
@@ -208,6 +213,12 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts':
+    '.github/workflows/select-item-sizing-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
+    '.github/workflows/homepage-visual-evidence.yml',
   'packages/compiler/test/web-component-native.browser.test.ts':
     '.github/workflows/compiler-wc-native-evidence.yml',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':
@@ -238,6 +249,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts':
@@ -252,6 +265,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/liquid-elevation-control-evidence.yml',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
     '.github/workflows/liquid-card-candidate-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/library-card-font-boundary.browser.test.ts':
+    '.github/workflows/library-card-evidence.yml',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
     'apps/www/scripts/run-search-production-evidence.mjs',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':

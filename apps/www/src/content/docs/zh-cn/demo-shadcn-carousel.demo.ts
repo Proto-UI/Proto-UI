@@ -1,5 +1,6 @@
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'proto',
@@ -37,7 +38,7 @@ export default {
             'className': 'p-8',
           },
         ],
-        'className': 'min-h-36 border border-slate-300',
+        'className': 'min-h-36 border border-border',
       },
       {
         'kind': 'proto',
@@ -55,4 +56,4 @@ export default {
     },
     'className': 'grid max-w-lg gap-3',
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

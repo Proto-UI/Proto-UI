@@ -5,6 +5,8 @@ description: 'Shadcn radio presentation over the Base single-selection protocol.
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 Radio Group contains Root, Item, and Indicator. Base owns the selected value, item order, roving focus, selection requests, and the `radiogroup`/`radio` accessibility objects. This Shadcn projection adds the circular control, selected dot, focus ring, dark tint, and disabled presentation.
 
 <PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
@@ -33,6 +35,8 @@ Compare the initially empty group and the disabled group, then repeat in Web Com
 
 ## Comparison and scope
 
-The comparison source is the [base-nova RadioGroup registry](https://ui.shadcn.com/r/styles/base-nova/radio-group.json) snapshot retrieved on 2026-10-10 (SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7). The draft recipe uses grid/full-width/gap-2, a primary selected fill and an 8px primary-foreground dot. Indicator remains a separate public part with host-neutral flex centering instead of upstream internal absolute positioning. Field-label coordination, expanded hit-target selectors and current real-browser visual verification remain outstanding.
+The unscoped compatibility comparison is the [base-nova RadioGroup registry](https://ui.shadcn.com/r/styles/base-nova/radio-group.json) snapshot retrieved on 2026-10-10 (SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7). That Nova recipe uses grid/full-width/gap-2, a primary selected fill and an 8px primary-foreground dot. Indicator remains a separate public part with host-neutral flex centering instead of upstream internal absolute positioning. Field-label coordination, expanded hit-target selectors and current real-browser visual verification remain outstanding.
 
-The inherited API has no `asChild`, native form submission/validation, `required`, invalid state, public `orientation`/`loop`, or visual variants. Upstream `aria-invalid` styles are therefore outside this projection. Arrow wrapping is the fixed Base behavior, not a new configurable API. The three catalog entities remain `draft`; this page does not claim full Shadcn/Radix compatibility or stable admission.
+The inherited API has no `asChild`, native form submission/validation, `required`, invalid state, public `orientation`/`loop`, or a general visual-variant API; the shared styleProfile is a separate presentation selection. Upstream `aria-invalid` styles are therefore outside this projection. Arrow wrapping is the fixed Base behavior, not a new configurable API. The three catalog entities remain `draft`; this page does not claim full Shadcn/Radix compatibility or stable admission.
+
+The page explicitly selects Rhea: Root uses `gap-3`, Item uses `radius-2xl` and `bg-input/90`, with the same 16px control and 8px decorative dot at the default root font. The shared profile does not add another selection owner.

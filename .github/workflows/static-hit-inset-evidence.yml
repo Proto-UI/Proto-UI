@@ -1,29 +1,7 @@
 name: Static hit inset native evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/static-hit-inset-evidence.yml'
-      - 'scripts/analysis/static-hit-inset-browser.mjs'
-      - 'scripts/analysis/fixtures/static-hit-inset.ts'
-      - 'scripts/analysis/self-hit-region-browser.mjs'
-      - 'scripts/analysis/fixtures/self-hit-region.mjs'
-      - 'packages/core/**'
-      - 'packages/types/**'
-      - 'packages/hooks/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/base/src/switch/**'
-      - 'packages/prototypes/base/src/label/**'
-      - 'packages/prototypes/shadcn/src/switch/**'
-      - 'packages/cli/src/**'
-      - 'spec/contracts/C-HIT-PARTICIPATION-0001.yaml'
-      - 'spec/host-caps/HC-HIT-PARTICIPATION-0001.yaml'
-      - 'spec/modules/M-HIT-PARTICIPATION-0001.yaml'
-      - 'spec/tests/T-HIT-INSET-0001.yaml'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

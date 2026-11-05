@@ -114,6 +114,11 @@ export function emitVue2Source(
     reject('The Vue2 native rootTag must be a static lowercase DOM tag.');
   }
   const hostPropNames = new Map<string, string>();
+  const nullableDefaults = new Set<string>();
+  const propDefinitions = new Map<string, number>();
+  const constrainedProps = new Set<string>();
+  let unknownPropDeclarations = false;
+  let unknownDefaults = false;
   for (const prop of ir.props) {
     const hostName = prop.name.replace(/-(\w)/g, (_match, letter: string) => letter.toUpperCase());
     const prior = hostPropNames.get(hostName);
@@ -129,6 +134,28 @@ export function emitVue2Source(
   // Fail closed before emitting, including inside statically expanded authored hooks.
   function inspect(node: ExpressionIR): void {
     if (node.kind === 'operation') {
+      if (node.operation === 'props.define') {
+        const declarations = node.arguments[0];
+        if (declarations?.kind !== 'record') unknownPropDeclarations = true;
+        else
+          for (const entry of declarations.entries) {
+            propDefinitions.set(entry.key, (propDefinitions.get(entry.key) ?? 0) + 1);
+            if (
+              entry.value.kind !== 'record' ||
+              entry.value.entries.some((field) => field.key === 'range' || field.key === 'options')
+            )
+              constrainedProps.add(entry.key);
+          }
+      }
+      if (node.operation === 'props.setDefaults') {
+        const layer = node.arguments[0];
+        if (layer?.kind !== 'record') unknownDefaults = true;
+        else
+          for (const entry of layer.entries) {
+            if (entry.value.kind !== 'literal' || entry.value.value === null)
+              nullableDefaults.add(entry.key);
+          }
+      }
       if (node.operation === 'render.el') {
         const props = node.arguments[1];
         const record =
@@ -239,7 +266,13 @@ export function emitVue2Source(
   function typeName(type: ValueType): string {
     if (typeof type === 'object') return formatDataType(type);
     if (['boolean', 'number', 'string', 'null', 'void', 'unknown'].includes(type)) return type;
-    if (type === 'props') return 'GeneratedProps';
+    if (type === 'props') return `${prefix}ResolvedProps`;
+    if (type === 'def') return `${prefix}Owner['def']`;
+    if (type === 'run') return `${prefix}Run`;
+    if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
+    if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
+    if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
+    if (type === 'context-key') return 'object';
     if (type === 'focus') return `${prefix}NativeFocus`;
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
@@ -279,7 +312,16 @@ export function emitVue2Source(
       });
     }
     try {
-      return `(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      const annotations = value.parameters
+        .map((parameter) => {
+          const contextual =
+            parameter.type === 'unknown' || parameter.type === 'template'
+              ? nativeTemplate?.parameterType(parameter)
+              : undefined;
+          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
+        })
+        .join(' ');
+      return `${annotations ? `/** ${annotations} */ ` : ''}(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
     } finally {
       nativeScope = saved;
     }
@@ -390,6 +432,71 @@ export function emitVue2Source(
     .map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`)
     .join('\n')
     .replace(/\*\//g, '*\\/');
+  // A raw optional prop and a resolved value are different contracts. Prove
+  // non-null defaults only from a sole unconditional, unconstrained declaration.
+  // The existing whole-scope walk includes conditional, helper and hook bodies:
+  // any possible refinement or unknown declaration keeps the result nullable.
+  const nonNullProps = new Set<string>();
+  const guaranteedProps = new Set<string>();
+  const canReturn = (statements: readonly StatementIR[]): boolean =>
+    statements.some(
+      (statement) =>
+        statement.kind === 'return' ||
+        (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise)))
+    );
+  let opaqueDeclaration = false;
+  for (const statement of ir.setup.body) {
+    if (
+      statement.kind === 'return' ||
+      (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise)))
+    )
+      break;
+    if (
+      statement.kind !== 'effect' ||
+      statement.expression.kind !== 'operation' ||
+      statement.expression.operation !== 'props.define'
+    ) {
+      if (
+        statement.kind !== 'const' ||
+        !['literal', 'reference', 'function'].includes(statement.value.kind)
+      )
+        opaqueDeclaration = true;
+      continue;
+    }
+    const declarations = statement.expression.arguments[0];
+    if (declarations?.kind !== 'record') {
+      opaqueDeclaration = true;
+      continue;
+    }
+    for (const entry of declarations.entries) {
+      if (entry.value.kind !== 'record') continue;
+      guaranteedProps.add(entry.key);
+      const fields = new Map(entry.value.entries.map((field) => [field.key, field.value]));
+      const fallback = fields.get('default');
+      const empty = fields.get('empty');
+      const prop = ir.props.find((prop) => prop.name === entry.key);
+      if (
+        !opaqueDeclaration &&
+        !unknownPropDeclarations &&
+        propDefinitions.get(entry.key) === 1 &&
+        !constrainedProps.has(entry.key) &&
+        !unknownDefaults &&
+        !nullableDefaults.has(entry.key) &&
+        (!empty || (empty.kind === 'literal' && empty.value !== 'accept')) &&
+        fallback?.kind === 'literal' &&
+        fallback.value !== null &&
+        typeof fallback.value === prop?.type
+      )
+        nonNullProps.add(entry.key);
+    }
+  }
+  const resolvedPropsType = ir.props
+    .map(
+      (prop) =>
+        `  readonly ${JSON.stringify(prop.name)}${guaranteedProps.has(prop.name) ? '' : '?'}: ${typeName(prop.type)}${nonNullProps.has(prop.name) ? '' : ' | null'};`
+    )
+    .join('\n')
+    .replace(/\*\//g, '*\\/');
   const exposesType = ir.exposes
     .filter((entry) => entry.kind !== 'event')
     .map((entry) => {
@@ -445,8 +552,9 @@ ${
       : '');
   const contextCode = contextArtifacts
     ? `
+  /** @type {Map<object, (value: unknown) => boolean>} */
   const contextChecks = new Map([
-${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value)],`).join('\n')}
+${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {unknown} value */ (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value))],`).join('\n')}
   ]);
   const contextScope = ${prefix}CreateContextScope({
     getParent: () => vm[${JSON.stringify(`${prefix}ParentScope`)}] || null,
@@ -454,18 +562,21 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     invoke: (fn) => invoke(fn, false),
     validate: (key, value) => contextChecks.get(key)?.(value) === true,
   });
-  const contextRead = Object.freeze({ read: (key) => { alive(); return contextScope.read(key); }, tryRead: (key) => { alive(); return contextScope.tryRead(key); } });
+  const contextRead = Object.freeze({ read: (/** @param {object} key */ (key) => { alive(); return contextScope.read(key); }), tryRead: (/** @param {object} key */ (key) => { alive(); return contextScope.tryRead(key); }) });
 `
     : '';
   const helpers = nativeHelpers(
     {
       owner: contextCode,
       run: contextArtifacts
-        ? `context: { ...contextRead, update: (key, value) => { callback(); contextScope.update(key, value); }, tryUpdate: (key, value) => { callback(); return contextScope.tryUpdate(key, value); } },`
+        ? `context: { ...contextRead, update: (/** @param {object} key @param {unknown} value */ (key, value) => { callback(); contextScope.update(key, value); }), tryUpdate: (/** @param {object} key @param {unknown} value */ (key, value) => { callback(); return contextScope.tryUpdate(key, value); }) },`
         : '',
       read: contextArtifacts ? ', context: contextRead' : '',
       def: contextArtifacts
-        ? `context: { provide: (key, value) => { setupOnly(); contextScope.provide(key, value); }, subscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }, trySubscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); } },`
+        ? `context: { provide: (/** @param {object} key @param {unknown} value */ (key, value) => { setupOnly(); contextScope.provide(key, value); }), subscribe: (/** @param {object} key @param {(run: PUIRun, next: unknown, previous: unknown) => void} [fn] */ (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }), trySubscribe: (/** @param {object} key @param {(run: PUIRun, next: unknown, previous: unknown) => void} [fn] */ (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); }) },`.replace(
+            /\bPUI/g,
+            prefix
+          )
         : '',
       handle: contextArtifacts ? 'contextScope,' : '',
       dispose: contextArtifacts
@@ -495,6 +606,9 @@ ${staticImports}
 /** @typedef {{
 ${propsType}
 }} GeneratedProps */
+/** @typedef {Readonly<{
+${resolvedPropsType}
+} & Record<string, unknown>>} ${prefix}ResolvedProps */
 /** @typedef {{
 ${exposesType}
 }} GeneratedExposes */
@@ -505,7 +619,7 @@ ${
  * slot: () => ${prefix}NativePaint,
  * read: {
  *   props: {
- *     get: () => Readonly<GeneratedProps>,
+ *     get: () => ${prefix}ResolvedProps,
  *     getRaw: () => Readonly<Record<string, unknown>>,
  *     isProvided: (key: PropertyKey) => boolean
  *   }${
@@ -524,11 +638,13 @@ ${
 ${usesStyle ? `/** @typedef {import('./.proto-ui/style/native-v1').NativeStyleHandle} ${prefix}NativeStyleHandle */` : ''}
 ${helpers}
 
+/** @param {${prefix}Owner} ${prefix}Owner */
 function ${prefix}Setup(${prefix}Owner) {
 ${hooks}
   ${
     nativeTemplate
-      ? `const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
+      ? `/** @type {((renderer: ${prefix}NativeRenderer) => ${nativeTemplate.resultType}) | void} */
+  const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
   if (typeof ${prefix}AuthoredRenderer !== 'function') return ${prefix}AuthoredRenderer;
   return (/** @param {${prefix}NativeRenderer} ${prefix}Renderer */ (${prefix}Renderer) => ${nativeTemplate.publication(`${prefix}AuthoredRenderer(${prefix}Renderer)`)});`
       : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
@@ -644,6 +760,9 @@ function nativeHelpers(
       const event = rule.path.slice('lifecycle.on'.length);
       return event.slice(0, 1).toLowerCase() + event.slice(1);
     });
+  // Atomic Text/Image selection fixes the physical Root to input/textarea/img.
+  // Only its successful native commit narrows Vue2's otherwise generic Element;
+  // the ordinary owner instance and general rootTag path keep their real types.
   return String.raw`
 /**
  * @template T
@@ -657,7 +776,13 @@ ${
     : ''
 }/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
 /** @typedef {Readonly<Record<string, unknown>>} PUIRawProps */
-/** @typedef {Readonly<GeneratedProps & Record<string, unknown>>} PUIResolvedProps */
+/** @typedef {{ type: 'boolean' | 'number' | 'string' | 'object' | 'any' | 'enum', empty?: 'accept' | 'fallback' | 'error', default?: unknown, options?: readonly string[], range?: { min?: number, max?: number } }} PUIPropSpec */
+/** @typedef {{ options?: readonly (boolean | string | number)[], min?: unknown, max?: unknown, step?: unknown, clamp?: boolean } & Record<string, unknown>} PUIStateConfiguration */
+/** @typedef {'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range'} PUIStateKind */
+/** @typedef {ReturnType<typeof PUICreateOwner>} PUIOwner */
+/** @typedef {Parameters<Parameters<PUIOwner['def']['props']['watch']>[1]>[0]} PUIRun */
+/** @typedef {import('vue').default & { readonly PUIParentScope?: import('./.proto-ui/context/scope-v1').ContextScope | null }} PUIOwnerInstance */
+${ssr ? '' : '/** @typedef {(renderer: PUINativeRenderer) => PUINativePaint} PUIRenderFunction */'}
 /** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} PUIPropsWatchInfo */
 /** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: PUIPropsWatchInfo) => void} PUIPropsWatchCallback */
 /** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIRawProps> }} PUIPropsWatchRegistration */
@@ -668,6 +793,14 @@ ${
 /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} PUIRenderedCommit */
 /** @param {unknown} value @param {PropertyKey} key */
 const PUIOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+${
+  stateful
+    ? `// Keep native relational coercion in all three open-schema comparisons.
+/** @template T @param {T} left @param {T} right */
+const PUIBefore = (left, right) => left < right;
+`
+    : ''
+}
 /** @param {PUIDataType} type @param {unknown} value @returns {boolean} */
 function PUIAccepts(type, value) {
   if (typeof type === 'string') return type === 'null' ? value === null : typeof value === type && (type !== 'number' || Number.isFinite(value));
@@ -720,17 +853,20 @@ function PUIChildren(value, h, vm, slots) {
 }
 ${
   interactive || ssr
-    ? `function PUIRootData(properties, attrs, initial) {
+    ? `/** @param {Readonly<Record<string, string | number | boolean | null>>} properties @param {Record<string, string | null>} attrs @param {boolean} initial */
+function PUIRootData(properties, attrs, initial) {
+  /** @type {import('vue').VNodeData & { pre: true, attrs: Record<string, string | number | null> }} */
   const result = { pre: true, attrs: { ...attrs } };
   for (const [key, value] of Object.entries(properties)) {
     if (key === 'value') { if (initial) result.domProps = { value }; }
-    else if (key === 'style') result.style = value;
+    else if (key === 'style') { if (typeof value === 'string') result.style = value; }
     else result.attrs[key] = value === false ? null : value === true ? '' : value;
   }
   return result;
 }`
     : ''
 }
+/** @param {PUIOwnerInstance} vm @param {(owner: PUIOwner) => PUIRenderFunction | void} setup @param {Record<string, PUIDataType>} types @param {string} rootTag @param {boolean} autoUpdate */
 function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   ${
     ssr
@@ -757,22 +893,29 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let pending = null;
   /** @type {PUIRenderedCommit | null} */
   let renderedCommit = null;
-  ${styled || interactive ? 'let activeRoot = null;' : ''}
+  ${styled || interactive ? `/** @type {${atomicInteractive ? 'HTMLElement' : 'Element'} | null} */ let activeRoot = null;` : ''}
   ${interactive ? 'let activeEpoch = -1;' : ''}
+  ${ssr ? '' : '/** @type {PUINativePaint | null} */'}
   let template = null;
+  /** @type {PUIRenderFunction | null | void} */
   let renderFunction;
   /** @type {(() => void) | undefined} */
   let unwatch;
   /** @type {PUIRawProps} */
   let raw = Object.freeze({});
   /** @type {PUIResolvedProps} */
-  let resolved = Object.freeze({});
+  let resolved = /** @type {PUIResolvedProps} */ (Object.freeze({}));
+  /** @type {Record<string, unknown>} */
   let previousValid = Object.create(null);
+  /** @type {Record<string, PUIPropSpec>} */
   let specs = Object.create(null);
+  /** @type {PUIRawProps[]} */
   const defaults = [];
   /** @type {Array<PUIPropsWatcher<typeof run>>} */
   const watchers = [];
-${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = [];\n' : ''}  const exposed = Object.create(null);
+${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = [];\n' : ''}  /** @type {Record<string, unknown>} */
+  const exposed = Object.create(null);
+  /** @type {Record<string, unknown>} */
   const eventDeclarations = Object.create(null);
   /** @type {Record<PUILifecycleKind, Array<PUILifecycleCallback<typeof run>>>} */
   const lifecycle = { ${lifecycleKeys.map((key) => `${JSON.stringify(key)}: []`).join(', ')} };
@@ -840,12 +983,14 @@ ${
     // Full snapshots preserve omission and explicit undefined. Vue Boolean casting and
     // default materialization never participate in the semantic prop contract.
     const out = Object.create(null);
+    /** @type {Record<string, unknown>} */
     const input = { ...(vm.$attrs || {}), ...((vm.$options && vm.$options.propsData) || {}) };
-    const provided = (vm.$options && vm.$options.propsData) || {};
+    /** @type {Readonly<Record<string, unknown>>} */
+    const provided = /** @type {Readonly<Record<string, unknown>>} */ ((vm.$options && vm.$options.propsData) || {});
     for (const key of Object.keys(types)) {
       const hostKey = key.replace(/-(\w)/g, (_match, letter) => letter.toUpperCase());
       // Track native prop notifications, but keep values/presence from the raw snapshot.
-      if (vm.$props) void vm.$props[hostKey];
+      if (vm.$props) void (/** @type {Readonly<Record<string, unknown>>} */ (vm.$props))[hostKey];
       if (PUIOwn(provided, hostKey)) input[key] = provided[hostKey];
     }
     for (const key of Object.keys(input)) out[key] = input[key];
@@ -856,10 +1001,11 @@ ${
     const keys = Object.keys(a);
     return keys.length === Object.keys(b).length && keys.every((key) => PUIOwn(b, key) && Object.is(a[key], b[key]));
   };
+  /** @param {string} key @param {unknown} value */
   const validValue = (key, value) => {
     const spec = specs[key];
     if (!PUIJson(value) || !PUIAccepts(types[key], value)) return false;
-    if (spec.type === 'enum' && !spec.options.includes(value)) return false;
+    if (spec.type === 'enum' && (typeof value !== 'string' || !spec.options?.includes(value))) return false;
     return !spec.range || typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity);
   };
   /** @param {PUIRawProps} input @param {boolean} strict */
@@ -883,8 +1029,10 @@ ${
         if (empty === 'accept') { out[key] = null; meta.acceptedEmptyKeys.push(key); continue; }
       } else if (provided) meta.invalidKeys.push(key);
       let found = false;
+      /** @type {unknown} */
       let selected = null;
       let usedDefault = true;
+      /** @param {unknown} candidate @param {boolean} fromDefault */
       const take = (candidate, fromDefault) => {
         if (found || candidate === undefined || strict && empty === 'error' && candidate === null) return;
         if (candidate !== null && !validValue(key, candidate)) return;
@@ -900,9 +1048,10 @@ ${
     }
     previousValid = nextValid;
     /** @type {PUIResolvedProps} */
-    const snapshot = Object.freeze(out);
+    const snapshot = /** @type {PUIResolvedProps} */ (Object.freeze(out));
     return { snapshot, meta };
   };
+  /** @template T @param {() => T} fn @param {boolean} [sync] @returns {T} */
   const invoke = (fn, sync = true) => {
     alive();
     const previousPhase = phase;
@@ -910,6 +1059,7 @@ ${
     try { if (sync && !terminal ${ssr ? '&& !(firstContinuation && !bootRaw)' : ''}) syncHost(false); return fn(); }
     finally { phase = previousPhase; }
   };
+  /** @param {boolean} request */
   const syncHost = (request) => {
     if (terminal) return;
     const nextRaw = hostRaw();
@@ -950,6 +1100,7 @@ ${
     if (request && autoUpdate) update();
   };
   const renderSemantic = () => {
+    if (!renderFunction) throw new Error('[Vue2 native] renderer is unavailable outside the initialized instance lifetime.');
     const previousPhase = phase;
     phase = 'render';
     try { template = renderFunction(renderer); }
@@ -965,6 +1116,7 @@ ${
     pending = { epoch, revision: ++revision, kind: 'update' };
     force();
   };
+  /** @param {boolean} next */
   const setPresent = (next) => {
     callback();
     if (terminal) throw new Error('[Vue2 native] presence is locked for terminal disposal.');
@@ -995,17 +1147,17 @@ ${context.owner}
     props: {
       get: () => { alive(); return resolved; },
       getRaw: () => { alive(); return raw; },
-      isProvided: (key) => { alive(); return PUIOwn(raw, key); },
+      isProvided: (/** @param {PropertyKey} key */ (key) => { alive(); return PUIOwn(raw, key); }),
     },
     lifecycle: { setPresent },
-    expose: { emit: (key, payload, options) => {
+    expose: { emit: (/** @param {string} key @param {unknown} [payload] @param {unknown} [options] */ (key, payload, options) => {
       callback();
       if (!PUIOwn(eventDeclarations, key)) throw new Error('[Vue2 native] undeclared expose event: ' + key);
-      const listener = vm.$attrs && vm.$attrs['on' + key[0].toUpperCase() + key.slice(1)];
+      const listener = vm.$attrs && (/** @type {Readonly<Record<string, unknown>>} */ (vm.$attrs))['on' + key[0].toUpperCase() + key.slice(1)];
       // Host sink failures do not re-enter authored callbacks, matching the Vue2 sink.
       try { if (typeof listener === 'function') listener(payload, options); } catch {}
       try { vm.$emit(key, payload, options); } catch {}
-    } },
+    }) },
   };
   ${
     interactive
@@ -1093,7 +1245,7 @@ ${context.owner}
       return (scoped ? scoped({}) : nativeVm.$slots.default) || [];
     }),`
   }
-    read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (key) => { alive(); return PUIOwn(raw, key); } }) ${context.read} }) };
+    read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (/** @param {PropertyKey} key */ (key) => { alive(); return PUIOwn(raw, key); }) }) ${context.read} }) };
 ${
   stateful
     ? String.raw`  /**
@@ -1139,23 +1291,28 @@ ${
     states.push(handle);
     return handle;
   };
+  /** @template {boolean | string | number} T @param {PUIStateKind} kind @param {string} key @param {T} initial @param {PUIStateConfiguration} [configuration] @returns {PUIOwnedState<T>} */
   const createState = (kind, key, initial, configuration = {}) => {
     setupOnly();
     const spec = Object.freeze({ ...configuration, kind });
+    /** @param {T} value @param {boolean} [initialValue] @returns {T} */
     const check = (value, initialValue = false) => {
       const expected = kind === 'bool' ? 'boolean' : kind === 'string' || kind === 'enum' ? 'string' : 'number';
       if (typeof value !== expected || expected === 'number' && !Number.isFinite(value)) throw new TypeError('[Vue2 native] invalid state value: ' + key);
       if (spec.options && spec.options.length && !spec.options.includes(value)) throw new Error('[Vue2 native] state value not in options: ' + key);
-      if (kind === 'number.range' && initialValue && spec.clamp) value = Math.min(spec.max, Math.max(spec.min, value));
-      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && value < spec.min || spec.max !== undefined && value > spec.max)) throw new Error('[Vue2 native] state value out of range: ' + key);
-      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && spec.step > 0 && !Number.isInteger((value - (spec.min ?? 0)) / spec.step)) throw new Error('[Vue2 native] state value violates step: ' + key);
+      // Numeric-family schemas prove these numeric views. Other families keep
+      // their structurally admitted extra fields and native relational coercion.
+      if (kind === 'number.range' && initialValue && spec.clamp) value = /** @type {T} */ (Math.min(/** @type {number} */ (spec.max), Math.max(/** @type {number} */ (spec.min), /** @type {number} */ (value))));
+      if (!(kind === 'number.discrete' && spec.options && spec.options.length) && (spec.min !== undefined && PUIBefore(value, spec.min) || spec.max !== undefined && PUIBefore(spec.max, value))) throw new Error('[Vue2 native] state value out of range: ' + key);
+      if (kind === 'number.discrete' && !(spec.options && spec.options.length) && PUIBefore(0, spec.step) && !Number.isInteger((/** @type {number} */ (value) - /** @type {number} */ (spec.min ?? 0)) / /** @type {number} */ (spec.step))) throw new Error('[Vue2 native] state value violates step: ' + key);
       return value;
     };
     return createStateCell(initial, spec, check);
   };
 `
     : ''
-}  const defineProps = (input) => {
+}  /** @param {Record<string, PUIPropSpec>} input */
+  const defineProps = (input) => {
     setupOnly();
     const next = { ...specs };
     const rank = { accept: 0, fallback: 1, error: 2 };
@@ -1168,7 +1325,7 @@ ${
       if (PUIOwn(spec, 'default') && !PUIJson(spec.default)) throw new Error('[Vue2 native] non-JSON prop default: ' + key);
       const prior = next[key];
       if (prior) {
-        if (prior.type !== spec.type || PUIOwn(spec, 'empty') && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
+        if (prior.type !== spec.type || PUIOwn(spec, 'empty') && spec.empty !== undefined && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
         if (prior.options && !prior.options.every((value) => spec.options && spec.options.includes(value))) throw new Error('[Vue2 native] prop options cannot narrow: ' + key);
         if (prior.range && spec.range && ((spec.range.min ?? -Infinity) > (prior.range.min ?? -Infinity) || (spec.range.max ?? Infinity) < (prior.range.max ?? Infinity))) throw new Error('[Vue2 native] prop range cannot narrow: ' + key);
         next[key] = { ...prior, ...spec, empty: prior.empty ?? 'fallback', range: spec.range ?? prior.range };
@@ -1195,11 +1352,11 @@ ${
     ${interactive && !atomicInteractive ? 'event: interaction.event,' : ''}
     props: {
       define: defineProps,
-      setDefaults: (layer) => {
+      setDefaults: (/** @param {PUIRawProps} layer */ (layer) => {
         setupOnly();
         for (const key of Object.keys(layer)) if (!PUIOwn(specs, key) || !PUIJson(layer[key])) throw new Error('[Vue2 native] invalid prop default: ' + key);
         defaults.unshift({ ...layer }); resolved = resolveProps(raw, false).snapshot;
-      },
+      }),
       /** @param {readonly string[]} keys @param {PUIPropsWatchCallback<typeof run, PUIResolvedProps>} fn */
       watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn, active: true }),
       /** @param {PUIPropsWatchCallback<typeof run, PUIResolvedProps>} fn */
@@ -1212,18 +1369,27 @@ ${
 ${
   stateful
     ? String.raw`    state: {
+      /** @param {string} key @param {boolean} value */
       bool: (key, value) => createState('bool', key, value),
+      /** @param {string} key @param {string} value @param {PUIStateConfiguration} [spec] */
       string: (key, value, spec) => createState('string', key, value, spec),
+      /** @param {string} key @param {string} value @param {PUIStateConfiguration} [spec] */
       enum: (key, value, spec) => createState('enum', key, value, spec),
+      /** @param {string} key @param {number} value @param {PUIStateConfiguration} [spec] */
       numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),
+      /** @param {string} key @param {number} value @param {PUIStateConfiguration} spec */
       numberRange: (key, value, spec) => createState('number.range', key, value, spec),
     },
 `
     : ''
 }    expose: {
+      /** @param {string} key @param {unknown} value */
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
+      /** @template T @param {string} key @param {{ external: PUIExternalState<T> }} handle */
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'observedExternals.get(handle) ?? ' : ''}handle.external; },
-      method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
+      /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn */
+      method: (key, fn) => { setupOnly(); exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); return invoke(() => fn(...args)); }); },
+      /** @param {string} key @param {unknown} [spec] */
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },
     lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {
@@ -1260,12 +1426,16 @@ ${
       const kind = commit.kind;
       if (kind === 'mount' && !viewActive) {
         viewActive = true;
-        ${styled || interactive ? 'activeRoot = target;' : ''}
+        ${styled || interactive ? `activeRoot = ${atomicInteractive ? '/** @type {HTMLElement} */ (target)' : 'target'};` : ''}
         ${
           interactive
             ? `activeEpoch = epoch;
         ${ssr ? 'if (firstContinuation) interaction.adoptAttributes(initialProjection.attributes);' : ''}
-        interaction.mount();`
+        interaction.mount();
+        // The native editor now owns value and composition for this view lease.
+        // Vue clears an old domProp when the next VNode omits it; retire the
+        // initial transport property before any ordinary host repaint.
+        if (commit.vnode.data?.domProps) delete commit.vnode.data.domProps.value;`
             : ''
         }
         ${interactive ? 'if (terminal || commit.epoch !== epoch || !present || !hostActive) return;' : ''}
@@ -1276,7 +1446,7 @@ ${
         ${
           interactive
             ? `if (activeRoot !== target || activeEpoch !== epoch) {
-          activeRoot = target; activeEpoch = epoch;
+          activeRoot = ${atomicInteractive ? '/** @type {HTMLElement} */ (target)' : 'target'}; activeEpoch = epoch;
           interaction.mount();
         }
         if (terminal || commit.epoch !== epoch || !present || !hostActive) return;`
@@ -1414,6 +1584,7 @@ ${
     },
     update,
     getExposes() { if (terminal) return {}; return { ...exposed }; },
+    /** @template T @param {() => T} fn @returns {T} */
     invokePublic(fn) { publicAlive(); return invoke(fn); },
     deactivate() {
       if (terminal || !hostActive) return;
@@ -1453,7 +1624,7 @@ ${
       for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;
       for (const key of Object.keys(exposed)) delete exposed[key];
       for (const key of Object.keys(eventDeclarations)) delete eventDeclarations[key];
-      specs = Object.create(null); previousValid = Object.create(null); raw = resolved = Object.freeze({}); template = renderFunction = null;
+      specs = Object.create(null); previousValid = Object.create(null); raw = Object.freeze({}); resolved = /** @type {PUIResolvedProps} */ (Object.freeze({})); template = renderFunction = null;
       ${
         ssr
           ? `if (session && session.mode === 'client') {

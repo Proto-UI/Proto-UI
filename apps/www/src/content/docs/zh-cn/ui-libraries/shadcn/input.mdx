@@ -5,11 +5,13 @@ description: '在 Proto UI 上投射的 shadcn 风格单行 Input。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-本页面展示 Proto UI 的 draft Shadcn 风格 Base Input 投射。视觉参考为 2026-10-10 抓取的 [base-nova Input registry](https://ui.shadcn.com/r/styles/base-nova/input.json) snapshot（registry SHA256 bbad1bba130ac9750a61844eeb8f043e8a710846e07689fa85398b80a46c2741），替换该 draft 先前的 new-york 参考。这是 Proto UI 维护的非官方实现，不代表上游包或官方背书。
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+本页展示 Proto UI 的 draft Shadcn Base Input 投射，并显式选择 Rhea；现代外观参考为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。2026-10-10 的独立 [base-nova snapshot](https://ui.shadcn.com/r/styles/base-nova/input.json)（SHA256 `bbad1bba130ac9750a61844eeb8f043e8a710846e07689fa85398b80a46c2741`）仍是未选 profile 时的兼容参考，不是本页实际选择的外观。这是 Proto UI 的独立实现，不代表上游包或官方背书。
 
 单行文本值、controlled/uncontrolled 行为、归一化编辑与 IME 事件、native 文本属性、textbox 命名和描述、disabled/read-only 状态以及 focus/blur 均由 Base Input 所有。Shadcn 层消费这套协议，只增加有界的 field surface、focus-visible ring、disabled 呈现和 dark-scheme 底色。最终仍只有一个 host-owned `input[type="text"]`。
 
-限定 recipe 使用 32px 高、rounded-lg 圆角、10px 水平内边距、无静止阴影及源码 disabled/dark 配色；当前真实浏览器视觉验收仍待完成。既有静态 `selection:bg-primary selection:text-primary-foreground` 配色作为明确的 Proto UI 扩展保留，本 base-nova recipe 不含该配色；其他样式变体（如 `placeholder:*`、响应式 `md:*`）仍不支持。上游没有自定义文本光标或插入光标颜色，因此此处也仍采用浏览器原生行为。Base Input 没有 invalid state；本投射也不公开任意 `type`、调用者 `className` 或 `data-slot`。它不增加 form/validation workflow、selection API 或第二个编辑器。
+本页选择的 Rhea 配方使用 `h-8`、家族 `radius-2xl`、`bg-input/50`、静止透明边框与 `px-2.5 py-1`；16px 根字号下对应高32px、水平内边距10px。焦点为 `border-ring ring-3 ring-ring/30`，公开 viewport 规则在768逻辑像素起将 base 字号降为 small。这些是源码配方事实，不是原生几何验收。独立 Input 的 selection 配色仍是 Proto UI 扩展；Base Input 仍无 invalid state，Field Control 另提供自己的 invalid fact。本投射不增加任意输入类型、form workflow、selection API 或第二编辑器；placeholder 外观及完整上游/浏览器一致性仍待验。
 
 <PrototypePreviewer demoId="demo-shadcn-input" initialRuntime="wc" />
 

@@ -18,6 +18,9 @@ criteria:
   - id: P-SHADCN-TEXT-CONSUMPTION
     text:
       en: Public root and /text exports include textRoot, shadcnTextRoot, ShadcnTextRoot and TextRootProps/TextRootExposes with family aliases. CLI shadcn-text generates WC, React, Vue and Vue2 facades. Real four-Adapter DOM evidence does not imply browser visual acceptance or native parity. Web compiler owns these declarations; unsupported CLI hosts are rejected. GPUI currently reports unmapped inherit color, font-style, letter-spacing and text-decoration-line rather than claiming their realization.
+  - id: P-SHADCN-TEXT-THEME-PRESET
+    text:
+      en: The optional immutable SHADCN_TYPOGRAPHY public theme input supplies font-sans and font-heading with Geist followed by platform and CJK fallbacks. It performs no loading, DOM access or global mutation and does not alter passive Surface or other-family defaults. A consumer owns licensed same-origin font delivery and applies the selected theme to authored text and non-Text controls, including its explicitly owned escaped portal boundaries. Explicit authored surface font declarations retain precedence. Missing or failed font resources use the ordinary fallback chain. This draft input does not establish per-glyph fallback identity, layout stability, visual parity or native backend font realization.
 inherits:
   prototypes:
     - P-BASE-TEXT
@@ -29,9 +32,11 @@ dependsOn:
 verifies:
   tests:
     - T-TEXT-0001
+    - T-SHADCN-TYPOGRAPHY-THEME-0001
 sources:
   - path: packages/prototypes/shadcn/src/text/root.proto.ts
   - path: packages/prototypes/shadcn/src/text/index.ts
+  - path: packages/prototypes/shadcn/src/text/typography.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
@@ -39,6 +44,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added explicit size-owned line boxes and bounded tighter leading/tracking without changing existing defaults or native semantics.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added an opt-in shared family typography input with consumer-owned licensed font delivery, preserving ordinary defaults and explicit native and visual evidence gaps.
 tags:
   - prototype
   - shadcn

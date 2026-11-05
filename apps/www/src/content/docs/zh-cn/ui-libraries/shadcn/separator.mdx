@@ -5,6 +5,8 @@ description: '基于 Proto UI 重构的 Shadcn Separator。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 当前页面展示 Proto UI 中 `shadcn` 风格的 `separator` 条目。
 
 协议由 Base Separator 拥有：`orientation` 默认为 `horizontal`，`decorative` 默认为 `true`。decorative 分隔线隐藏于 accessibility tree 且不带 role，`decorative={false}` 则投影 `separator` role 与对应的 `aria-orientation`。shadcn 层只增加表现：border 颜色，以及跟随继承 orientation 的 1px 细线几何。

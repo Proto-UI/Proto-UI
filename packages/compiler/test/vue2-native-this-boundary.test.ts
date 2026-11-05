@@ -8,6 +8,12 @@ import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { emitVue2Source } from '../src/vue2-source';
+import { physicalRootInput } from './vue2-native-editor-fixtures';
+import {
+  nativeOwnerInput,
+  resolvedNullInputs,
+  skippedPropSetup,
+} from './vue2-prop-default-fixtures';
 import type { GeneratedModule } from '../src/ir';
 
 // Optional capture-only evidence for the fixed isolated diagnostic runner.
@@ -25,10 +31,14 @@ function evidenceDirectory() {
 }
 function evidence(directory: string | undefined, relative: string, contents: string) {
   if (!directory) return;
-  if (path.posix.isAbsolute(relative) || relative.includes('\\') ||
-      relative.split('/').some((part) => !part || part === '.' || part === '..'))
+  if (
+    path.posix.isAbsolute(relative) ||
+    relative.includes('\\') ||
+    relative.split('/').some((part) => !part || part === '.' || part === '..')
+  )
     throw new Error('Unsafe regression evidence path');
-  const bytes = Buffer.byteLength(contents); regressionBytes += bytes;
+  const bytes = Buffer.byteLength(contents);
+  regressionBytes += bytes;
   if (bytes > 8 * 1024 * 1024 || regressionBytes > 64 * 1024 * 1024)
     throw new Error('Regression evidence byte budget');
   const target = path.join(directory, relative);
@@ -42,20 +52,29 @@ function preserve(directory: string | undefined, module: GeneratedModule) {
   if (!directory) return;
   moduleEvidence.set(module, directory);
   evidenceJson(directory, 'module.json', module);
-  for (const file of [{ path: 'Component.js', contents: module.code }, ...(module.supportingFiles ?? [])])
+  for (const file of [
+    { path: 'Component.js', contents: module.code },
+    ...(module.supportingFiles ?? []),
+  ])
     evidence(directory, 'emitted/' + file.path, file.contents);
 }
 
-const vue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)));
-const positioning = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)));
-function compile(setup: string): GeneratedModule {
+const vue2 = createRequire(
+  fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url))
+);
+const positioning = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+);
+function compile(
+  setup: string,
+  files?: Readonly<Record<string, string>>,
+  imports = ''
+): GeneratedModule {
   const directory = evidenceDirectory();
-  const input = `import {definePrototype} from '@proto.ui/core';
-    import {asFocusable} from '@proto.ui/hooks';
-    export default definePrototype({name:'ordinary-native-owner',setup(def){${setup}}});`;
+  const input = nativeOwnerInput(setup, imports);
   evidence(directory, 'authored.proto.ts', input);
-  evidenceJson(directory, 'input.json', { test: expect.getState().currentTestName });
-  const parsed = parsePrototype(input);
+  evidenceJson(directory, 'input.json', { test: expect.getState().currentTestName, files });
+  const parsed = parsePrototype(input, { files });
   evidenceJson(directory, 'parse.json', parsed.ok ? { ok: true } : parsed);
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitVue2Source(parsed.value);
@@ -66,45 +85,102 @@ function compile(setup: string): GeneratedModule {
 }
 function check(module: GeneratedModule, extra = '') {
   const captured = moduleEvidence.get(module);
-  evidenceJson(captured, 'strict/mutation.json', { extra, note: 'Actual checked graph; appended nonexistent-owner negative preserved separately.' });
+  evidenceJson(captured, 'strict/mutation.json', {
+    extra,
+    note: 'Actual checked graph; appended nonexistent-owner negative preserved separately.',
+  });
   const root = mkdtempSync(path.join(tmpdir(), 'vue2-native-instance-'));
   try {
     mkdirSync(path.join(root, 'node_modules', '@floating-ui'), { recursive: true });
-    symlinkSync(path.dirname(vue2.resolve('vue/package.json')), path.join(root, 'node_modules/vue'), 'dir');
-    symlinkSync(path.dirname(positioning.resolve('@floating-ui/dom/package.json')), path.join(root, 'node_modules/@floating-ui/dom'), 'dir');
-    const files = [{path:'Component.js', contents:module.code + '\n' + extra}, ...(module.supportingFiles ?? [])];
+    symlinkSync(
+      path.dirname(vue2.resolve('vue/package.json')),
+      path.join(root, 'node_modules/vue'),
+      'dir'
+    );
+    symlinkSync(
+      path.dirname(positioning.resolve('@floating-ui/dom/package.json')),
+      path.join(root, 'node_modules/@floating-ui/dom'),
+      'dir'
+    );
+    const files = [
+      { path: 'Component.js', contents: module.code + '\n' + extra },
+      ...(module.supportingFiles ?? []),
+    ];
     for (const file of files) {
-      const target = path.join(root, file.path); mkdirSync(path.dirname(target), {recursive:true});
+      const target = path.join(root, file.path);
+      mkdirSync(path.dirname(target), { recursive: true });
       writeFileSync(target, file.contents);
       evidence(captured, 'strict/checked/' + file.path, file.contents);
     }
-    const program = ts.createProgram(files.map(f => path.join(root, f.path)), {
-      allowJs:true, checkJs:true, strict:true, noEmit:true, skipLibCheck:false,
-      target:ts.ScriptTarget.ES2022, module:ts.ModuleKind.ESNext,
-      moduleResolution:ts.ModuleResolutionKind.Bundler, types:[],
-      lib:['lib.es2022.d.ts','lib.dom.d.ts','lib.dom.iterable.d.ts'],
+    const program = ts.createProgram(
+      files.map((f) => path.join(root, f.path)),
+      {
+        allowJs: true,
+        checkJs: true,
+        strict: true,
+        noEmit: true,
+        skipLibCheck: false,
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.ESNext,
+        moduleResolution: ts.ModuleResolutionKind.Bundler,
+        types: [],
+        lib: ['lib.es2022.d.ts', 'lib.dom.d.ts', 'lib.dom.iterable.d.ts'],
+      }
+    );
+    evidenceJson(captured, 'strict/request.json', {
+      rootNames: program.getRootFileNames(),
+      options: program.getCompilerOptions(),
+      typescript: ts.version,
     });
-    evidenceJson(captured, 'strict/request.json', { rootNames: program.getRootFileNames(), options: program.getCompilerOptions(), typescript: ts.version });
-    evidenceJson(captured, 'strict/program.json', program.getSourceFiles().map(file => ({ file: file.fileName, sha256: createHash('sha256').update(file.text).digest('hex'), bytes: Buffer.byteLength(file.text), isDeclarationFile: file.isDeclarationFile })));
+    evidenceJson(
+      captured,
+      'strict/program.json',
+      program.getSourceFiles().map((file) => ({
+        file: file.fileName,
+        sha256: createHash('sha256').update(file.text).digest('hex'),
+        bytes: Buffer.byteLength(file.text),
+        isDeclarationFile: file.isDeclarationFile,
+      }))
+    );
     // A checker crash is a test failure, never evidence of valid generated JS.
-    const record = (d: ts.Diagnostic): unknown => ({ category: d.category, code: d.code, file: d.file?.fileName, start: d.start, length: d.length, messageText: d.messageText, message: ts.flattenDiagnosticMessageText(d.messageText, '\n'), relatedInformation: d.relatedInformation?.map(record) });
+    const record = (d: ts.Diagnostic): unknown => ({
+      category: d.category,
+      code: d.code,
+      file: d.file?.fileName,
+      start: d.start,
+      length: d.length,
+      messageText: d.messageText,
+      message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
+      relatedInformation: d.relatedInformation?.map(record),
+    });
     const syntax = program.getSyntacticDiagnostics();
     evidenceJson(captured, 'strict/syntax-diagnostics.json', syntax.map(record));
     // Syntax failures cannot be substituted for the original checker crash.
-    expect(syntax.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\n'))).toEqual([]);
+    expect(syntax.map((d) => ts.flattenDiagnosticMessageText(d.messageText, '\n'))).toEqual([]);
     const diagnostics = ts.getPreEmitDiagnostics(program);
     evidenceJson(captured, 'strict/diagnostics.json', diagnostics.map(record));
-    return diagnostics.map(d => ({code:d.code,
-      file:d.file?.fileName, start:d.start,
-      message:ts.flattenDiagnosticMessageText(d.messageText,'\n')}));
-  } finally { rmSync(root, {recursive:true, force:true}); }
+    return diagnostics.map((d) => ({
+      code: d.code,
+      file: d.file?.fileName,
+      start: d.start,
+      message: ts.flattenDiagnosticMessageText(d.messageText, '\n'),
+    }));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 }
 
 describe('Vue2 native instance checker stability (not full strict-consumer acceptance)', () => {
   it.each([
     ['empty', `return r=>r.el('span','native');`],
-    ['focus', `const focus=asFocusable();focus.configure({disabled:false});return r=>r.el('button','native');`],
-    ['state-and-slots', `const count=def.state.numberDiscrete('count',0);def.expose.state('count',count);return r=>r.el('output',[count.get(),r.slot()]);`],
+    [
+      'focus',
+      `const focus=asFocusable();focus.configure({disabled:false});return r=>r.el('button','native');`,
+    ],
+    [
+      'state-and-slots',
+      `const count=def.state.numberDiscrete('count',0);def.expose.state('count',count);return r=>r.el('output',[count.get(),r.slot()]);`,
+    ],
     ['renamed-prefix', `const __puiValue='native';return r=>r.el('span',__puiValue);`],
   ])('returns real diagnostics without crashing for %s', (_name, setup) => {
     // No catch/facade: RangeError from TypeScript fails this regression.
@@ -112,20 +188,167 @@ describe('Vue2 native instance checker stability (not full strict-consumer accep
     // consumer acceptance is separate and still red until all are corrected.
     const output = compile(setup);
     const diagnostics = check(output);
-    const nativeAnnotations = [...output.code.matchAll(/\/\*\*[\s\S]*?\*\//g)]
-      .filter(match => /NativeInstance|CreateElement/.test(match[0]));
+    const nativeAnnotations = [...output.code.matchAll(/\/\*\*[\s\S]*?\*\//g)].filter((match) =>
+      /NativeInstance|CreateElement/.test(match[0])
+    );
     expect(nativeAnnotations.length).toBeGreaterThan(1);
     // Check the exact new annotation ranges, including the typedef declaration
     // and every native @this use. Unknown types/names and invalid JSDoc here
     // remain failures; unrelated full-helper diagnostics are not discarded.
-    expect(diagnostics.filter(d => d.file?.endsWith('/Component.js') && d.start !== undefined
-      && nativeAnnotations.some(match => d.start! >= match.index!
-        && d.start! < match.index! + match[0].length))).toEqual([]);
+    expect(
+      diagnostics.filter(
+        (d) =>
+          d.file?.endsWith('/Component.js') &&
+          d.start !== undefined &&
+          nativeAnnotations.some(
+            (match) => d.start! >= match.index! && d.start! < match.index! + match[0].length
+          )
+      )
+    ).toEqual([]);
   });
 
   it('rejects a nonexistent native-owner property rather than turning the instance into any', () => {
-    const bad = check(compile(`return r=>r.el('span','native');`),
-      `/** @param {__puiNativeInstance} vm */\nfunction wrongOwner(vm) { return vm.__puiMissingOwner; }`);
-    expect(bad.some(d => d.code === 2339 && d.message.includes('__puiMissingOwner'))).toBe(true);
+    const bad = check(
+      compile(`return r=>r.el('span','native');`),
+      `/** @param {__puiNativeInstance} vm */\nfunction wrongOwner(vm) { return vm.__puiMissingOwner; }`
+    );
+    expect(bad.some((d) => d.code === 2339 && d.message.includes('__puiMissingOwner'))).toBe(true);
+  });
+
+  it.each(['text', 'image'] as const)(
+    'strict-checks every emitted %s physical-root source',
+    (kind) => {
+      const directory = evidenceDirectory();
+      const input = physicalRootInput(kind);
+      evidenceJson(directory, 'input.json', {
+        test: expect.getState().currentTestName,
+        checkedIR: input,
+      });
+      const emitted = emitVue2Source(input);
+      evidenceJson(directory, 'emit.json', emitted.ok ? { ok: true } : emitted);
+      if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
+      preserve(directory, emitted.value);
+      const diagnostics = check(emitted.value);
+      expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toEqual([]);
+    }
+  );
+
+  it('retains a proven unconditional non-null resolved default', () => {
+    const output = compile(
+      `def.props.define({flag:{type:'boolean',default:true}});return r=>r.el('span','native');`
+    );
+    const diagnostics = check(
+      output,
+      `/**
+ * @param {__puiOwner} owner
+ * @returns {boolean}
+ */
+function resolvedBoolean(owner) { return owner.resolvedProps.flag; }`
+    );
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toEqual([]);
+  });
+
+  it.each([
+    [
+      'retained nullable first default',
+      `def.props.define({flag:{type:'boolean',default:null}});def.props.define({flag:{type:'boolean',default:true}});`,
+    ],
+    [
+      'retained first accept policy',
+      `def.props.define({flag:{type:'boolean',empty:'accept',default:true}});def.props.define({flag:{type:'boolean',default:false}});`,
+    ],
+    [
+      'a possible earlier declaration',
+      `const choose=def.state.bool('choose',false);if(choose.get()){def.props.define({flag:{type:'boolean',default:null}});}def.props.define({flag:{type:'boolean',default:true}});`,
+    ],
+  ])('rejects a non-null claim after %s', (_name, setup) => {
+    const output = compile(`${setup}return r=>r.el('span','native');`);
+    const consumers = `/**
+ * @param {__puiOwner} owner
+ * @returns {boolean | null}
+ */
+function resolvedNullableBoolean(owner) { return owner.resolvedProps.flag; }
+/**
+ * @param {__puiOwner} owner
+ * @returns {boolean}
+ */
+function wrongResolvedBoolean(owner) { return owner.resolvedProps.flag; }`;
+    const diagnostics = check(output, consumers);
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ code: 2322 });
+    expect(diagnostics[0].file).toMatch(/\/Component\.js$/);
+    expect(diagnostics[0].message).toContain(
+      "Type 'boolean | null' is not assignable to type 'boolean'."
+    );
+    expect(diagnostics[0].start).toBeGreaterThanOrEqual(
+      output.code.length + 1 + consumers.lastIndexOf('return owner.resolvedProps.flag')
+    );
+    expect(diagnostics[0].start).toBeLessThan(output.code.length + 1 + consumers.length);
+  });
+
+  it.each(resolvedNullInputs)('rejects a non-null claim for $name', (input) => {
+    const output = compile(
+      `${input.setup}return r=>r.el('output',r.read.props.get().count ?? 'null');`,
+      input.files,
+      input.imports
+    );
+    const consumers = `/**
+ * @param {__puiOwner} owner
+ * @returns {number | null}
+ */
+function resolvedNullableNumber(owner) { return owner.resolvedProps.count; }
+/**
+ * @param {__puiOwner} owner
+ * @returns {number}
+ */
+function wrongResolvedNumber(owner) { return owner.resolvedProps.count; }`;
+    const diagnostics = check(output, consumers);
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ code: 2322 });
+    expect(diagnostics[0].file).toMatch(/\/Component\.js$/);
+    expect(diagnostics[0].message).toContain(
+      "Type 'number | null' is not assignable to type 'number'."
+    );
+    expect(diagnostics[0].start).toBeGreaterThanOrEqual(
+      output.code.length + 1 + consumers.lastIndexOf('return owner.resolvedProps.count')
+    );
+    expect(diagnostics[0].start).toBeLessThan(output.code.length + 1 + consumers.length);
+  });
+
+  it('keeps a skipped declaration absent in the actual generated owner type', () => {
+    const output = compile(skippedPropSetup);
+    const consumers = `/**
+ * @param {__puiOwner} owner
+ * @returns {number | null | undefined}
+ */
+function readPossiblyMissing(owner) { return owner.resolvedProps.count; }
+/**
+ * @param {__puiOwner} owner
+ * @returns {number | null}
+ */
+function wrongMissingRead(owner) { return owner.resolvedProps.count; }`;
+    const diagnostics = check(output, consumers);
+    expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ code: 2322 });
+    expect(diagnostics[0].file).toMatch(/\/Component\.js$/);
+    expect(diagnostics[0].message).toContain('undefined');
+    expect(diagnostics[0].start).toBeGreaterThanOrEqual(
+      output.code.length + 1 + consumers.lastIndexOf('return owner.resolvedProps.count')
+    );
+    expect(diagnostics[0].start).toBeLessThan(output.code.length + 1 + consumers.length);
+
+    const before = 'readonly "count"?: number | null;';
+    const after = 'readonly "count": number | null;';
+    expect(output.code.split(before)).toHaveLength(2);
+    const mutation = { ...output, code: output.code.replace(before, after) };
+    const directory = evidenceDirectory();
+    evidenceJson(directory, 'input.json', {
+      test: expect.getState().currentTestName,
+      mutation: { before, after },
+      note: 'Only the actual emitted optional-field marker is removed; no runtime/source/support change.',
+    });
+    preserve(directory, mutation);
+    // The old required annotation falsely accepts the same non-nullable read.
+    expect(check(mutation, consumers)).toEqual([]);
   });
 });

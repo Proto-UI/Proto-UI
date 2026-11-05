@@ -1,18 +1,8 @@
 name: Native typography evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/site-typography-evidence.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/cli/**'
-      - 'packages/prototypes/**'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'scripts/test/site-typography-browser-evidence.test.mjs'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Public authored routes only. No secrets, deployment, writes or privileged PR context.
 permissions:

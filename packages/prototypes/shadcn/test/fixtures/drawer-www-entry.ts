@@ -1,9 +1,17 @@
 /** Diagnostic fixture: the public demo tree and renderer, without panel size overrides. */
 import * as drawer from '@proto.ui/prototypes-shadcn/drawer';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import { registerPrototype } from '../../../../../apps/www/src/components/PrototypePreviewer/registry';
 import { renderDemo } from '../../../../../apps/www/src/components/PrototypePreviewer/demo-renderer';
 import type { DemoSpec } from '../../../../../apps/www/src/components/PrototypePreviewer/demo-types';
-export async function createPublicDrawerEntryFixture(fixedControl: boolean, demo: DemoSpec) {
+export async function createPublicDrawerEntryFixture(
+  fixedControl: boolean,
+  demo: DemoSpec,
+  includeStyleScope = true
+) {
+  // The ordinary public demo explicitly owns this dependency. False is only the
+  // fresh-page missing-dependency countercontrol; the real renderer still rejects it.
+  if (includeStyleScope) registerPrototype('shadcn-style-scope', styleScope);
   for (const value of Object.values(drawer)) {
     if (value && typeof value === 'object' && 'name' in value)
       registerPrototype(value.name, value as any);

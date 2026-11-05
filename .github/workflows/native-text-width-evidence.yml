@@ -1,15 +1,8 @@
 name: Native text width evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/native-text-width-evidence.yml'
-      - 'packages/adapters/web-component/src/**'
-      - 'packages/adapters/web-component/test/native-text*'
-      - 'packages/adapters/web-component/test/fixtures/native-width.mjs'
-      - 'packages/prototypes/shadcn/src/input/**'
-      - 'packages/prototypes/shadcn/src/textarea/**'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read

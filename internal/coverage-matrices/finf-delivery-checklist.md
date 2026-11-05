@@ -1,5 +1,7 @@
 # Finf complete-delivery checklist
 
+**2026-11-04 release split:** the owner's current [0.3 plan](../governance/release-0.3-plan.md), [delivery list](../governance/release-0.3-list.md) and [source ledger](../governance/release-0.3-source-ledger.json) partition the historical full-Finf scope below. Base/Shadcn/Brutalist/Lucide and necessary www/CLI/Web prerequisites remain 0.3; independent Bootstrap/Liquid Glass and native-target expansion are 0.4 WIP / Experimental. Preserve the original gates and checked history below. Check independently verified development children promptly; do not require a 0.4 family to finish before recording a completed 0.3 child. This partition neither claims acceptance nor automatically promotes an entity.
+
 Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Status: **work in progress, not merge-ready**. 68 initial unchecked items: 55 full delivery items and 13 existing-PR closeout/carry items.
 
 Current owner explicitly selects groups 1–6 and complete four-family projection coverage, including Bootstrap 2.3.2 and Liquid Glass, plus Overlay scrollbar coordinate repair. This is project-owned scope, not automatic adoption of comparison projects.

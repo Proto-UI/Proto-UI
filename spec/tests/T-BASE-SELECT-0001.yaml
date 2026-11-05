@@ -5,6 +5,13 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Root ownership, controlled open and value requests, selection invariants, text derivation, anatomy, and extension boundaries.
 cases:
+  - id: T-BASE-SELECT-0001-CASE-REPEATED-OPEN-BOUNDARIES
+    title: Repeated-open repair preserves genuine entry and controlled or disabled ownership
+    covers: [P-BASE-SELECT-REQUESTS, P-BASE-SELECT-SELECTION-INVARIANT]
+    expectation: genuine-open-keeps-selected-first-or-last-entry-and-controlled-refusal-or-acceptance-while-disabled-root-rejects-without-emitting
+    notes:
+      - 'Prepared against main d850c28a on 2026-11-02; source execution is pending. This is not a current-head passing result.'
+      - 'Execution addendum 2026-11-02: fixed tree 971100155b0fc67b05e85f136c6399b51b8de921 passed this module suite 34/34, including entry, controlled acceptance and disabled boundaries. The five-suite candidate aggregate remains 122/123 due to the same pre-existing Header ghost case as baseline; native browser and exact-head CI remain pending.'
   - id: T-BASE-SELECT-0001-CASE-ROOT-OWNERSHIP
     title: Root owns open, value, selected text, policies, collection, context, and anatomy
     covers:
@@ -29,6 +36,13 @@ cases:
     covers: [P-BASE-SELECT-DEFERRED-EXTENSIONS]
     expectation: select-current-scope-excludes-form-groups-search-and-virtualization
 implementations:
+  - id: prototypes-base-select-repeated-open-boundaries
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/select.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-0001-CASE-REPEATED-OPEN-BOUNDARIES]
+    exercises: [P-BASE-SELECT]
   - id: prototypes-base-select-root-contract
     kind: module-test
     status: passing

@@ -27,7 +27,11 @@ function fixture(family: 'shadcn' | 'brutalist', compact = true) {
     <div data-site-header-context><div data-site-header-preferences><div data-adapter-select>
       <wc-${family}-select-root data-site-select-root data-site-initial-value="wc">
         <wc-${family}-select-trigger data-appearance="elevated"><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
-        <wc-${family}-select-content data-site-select-content><wc-${family}-select-item data-value="wc" data-text-value="Web Components">Web Components</wc-${family}-select-item></wc-${family}-select-content>
+        <wc-${family}-select-content data-site-select-content>${
+          family === 'shadcn'
+            ? '<wc-shadcn-select-surface><wc-shadcn-select-viewport><wc-shadcn-select-item data-value="wc" data-text-value="Web Components"><wc-shadcn-select-item-text>Web Components</wc-shadcn-select-item-text></wc-shadcn-select-item></wc-shadcn-select-viewport></wc-shadcn-select-surface>'
+            : '<wc-brutalist-select-item data-value="wc" data-text-value="Web Components">Web Components</wc-brutalist-select-item>'
+        }</wc-${family}-select-content>
       </wc-${family}-select-root>
     </div></div></div><button data-menu>Menu</button>
   </header>`;
@@ -88,20 +92,22 @@ describe('Header keeps actual Select lifetime inside its visible owner', () => {
     }
   }
 
-  it('restores desktop ghost after a complete compact-to-desktop reparent', async () => {
+  it('preserves the public Rhea default through a complete compact-to-desktop reparent', async () => {
     const { header, trigger, query } = fixture('shadcn', false);
     await settle();
     expect(trigger.getAttribute('data-pui-style')).toContain('border-transparent');
+    expect(trigger.getAttribute('data-pui-style')).toContain('bg-input/50');
+    const desktop = trigger.getAttribute('data-pui-style');
     Object.defineProperty(query, 'matches', { configurable: true, value: true });
     query.dispatchEvent(new Event('change'));
     await settle();
     expect(trigger.closest('[data-site-header-panel]')).not.toBeNull();
-    expect(trigger.getAttribute('data-pui-style')).not.toContain('border-transparent');
+    expect(trigger.getAttribute('data-pui-style')).toBe(desktop);
     Object.defineProperty(query, 'matches', { configurable: true, value: false });
     query.dispatchEvent(new Event('change'));
     await settle();
     expect(trigger.closest('[data-site-header-panel]')).toBeNull();
     expect(header.querySelectorAll('[data-site-header-preferences]')).toHaveLength(1);
-    expect(trigger.getAttribute('data-pui-style')).toContain('border-transparent');
+    expect(trigger.getAttribute('data-pui-style')).toBe(desktop);
   });
 });

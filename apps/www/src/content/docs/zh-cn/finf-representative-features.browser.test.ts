@@ -830,8 +830,25 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
   expect(await month.textContent()).toContain(state.includes('focus') ? '11月' : '10月');
   const visibleDay = previewer.locator('[role="gridcell"]:visible').first();
   const dimensions = await visibleDay.boundingBox();
-  expect(Math.abs(dimensions!.width - 28)).toBeLessThanOrEqual(1);
-  expect(Math.abs(dimensions!.height - 28)).toBeLessThanOrEqual(1);
+  // The ordinary demo selects Rhea. Its pinned .cn-calendar recipe uses
+  // --cell-size: --spacing(8), or 2rem; the unscoped Nova recipe uses 1.75rem.
+  const rem = await page.evaluate(() =>
+    parseFloat(getComputedStyle(document.documentElement).fontSize)
+  );
+  expect(Math.abs(dimensions!.width - 2 * rem)).toBeLessThanOrEqual(1);
+  expect(Math.abs(dimensions!.height - 2 * rem)).toBeLessThanOrEqual(1);
+  await capture(
+    'rhea-cell-geometry',
+    {
+      styleProfile: 'rhea',
+      upstream: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
+      sourcePath: 'apps/v4/registry/styles/style-rhea.css',
+      sourceBlob: '94bbca2a7f78845e7cfbcff68fb8f535e3848a98',
+      dimensions,
+      rem,
+    },
+    previewer
+  );
 }
 
 async function drawerJourney({ page, previewer, capture }: Journey) {

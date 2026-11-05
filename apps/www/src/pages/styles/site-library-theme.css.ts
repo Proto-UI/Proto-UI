@@ -1,9 +1,15 @@
 import { renderBrutalistThemeCss } from '../../../../../packages/prototypes/brutalist/src/theme';
+import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
 
 export function GET() {
   // Keep the canonical Website Shadcn --pui-* input intact while another family
   // is active. Projection candidates can therefore prepare either family safely.
   const themeCss = [
+    // A separate bank survives a retained non-Shadcn ancestor while the next
+    // Shadcn generation stages. This does not paint the whole document.
+    `:root {\n${Object.entries(SHADCN_TYPOGRAPHY)
+      .map(([name, value]) => `  --site-shadcn-${name}: ${value};`)
+      .join('\n')}\n}`,
     renderBrutalistThemeCss({
       variablePrefix: 'site-brutalist-',
       includeSelection: false,

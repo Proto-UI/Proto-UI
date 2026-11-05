@@ -1,4 +1,4 @@
-import type { ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
+import type { ExpressionIR, FunctionIR, ParameterIR, PrototypeIR, StatementIR } from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
 import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
 
@@ -233,6 +233,7 @@ function elementArguments(node: Operation) {
  */
 export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   const facts = new Map<ExpressionIR, NativeShape[]>();
+  const parameterFacts = new Map<ParameterIR, NativeShape[] | null>();
   const active = new Set<FunctionIR>();
   const invoked = new Set<FunctionIR>();
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook.setup]));
@@ -427,6 +428,22 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   ) {
     if (active.has(fn)) throw new Error('Vue2 native context traversal encountered recursive IR.');
     const local = bind(fn, definition, args, caller);
+    for (const parameter of fn.parameters) {
+      const shape = nativeShape(
+        {
+          kind: 'reference',
+          name: parameter.name,
+          type: parameter.type,
+          span: fn.span,
+        },
+        local
+      );
+      const previous = parameterFacts.get(parameter);
+      // One unresolved call context prevents a narrower generated signature.
+      if (!shape || shape.kind === 'legacy-template' || previous === null)
+        parameterFacts.set(parameter, null);
+      else parameterFacts.set(parameter, [...(previous ?? []), shape]);
+    }
     invoked.add(fn);
     active.add(fn);
     try {
@@ -535,6 +552,13 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   return {
     invoked,
     identityOnly: collectVue2IdentityOnlyFunctions(ir, invoked).eligible,
+    parameterShape(parameter: ParameterIR): NativeShape | undefined {
+      const entries = parameterFacts.get(parameter);
+      return (
+        (entries && (entries.length === 1 ? entries[0] : { kind: 'union', items: entries })) ||
+        undefined
+      );
+    },
     childShape(value: ExpressionIR): NativeShape | undefined {
       const entries = facts.get(value);
       return entries && (entries.length === 1 ? entries[0] : { kind: 'union', items: entries });
@@ -555,6 +579,7 @@ export interface Vue2NativeTemplateHost {
   readonly resultShape: NativeShape;
   scope(): NativeLexicalScope;
   childShape(value: ExpressionIR): NativeShape | undefined;
+  parameterShape(parameter: ParameterIR): NativeShape | undefined;
   expression(value: ExpressionIR, depth: number): string;
 }
 
@@ -601,7 +626,7 @@ export function createVue2NativeTemplateEmitter(host: Vue2NativeTemplateHost) {
       case 'null':
         return 'null';
       case 'undefined':
-        return 'undefined';
+        return 'void';
       case 'invalid':
         // The generated branch always throws; unknown is never projected.
         return 'unknown';
@@ -774,6 +799,11 @@ export function createVue2NativeTemplateEmitter(host: Vue2NativeTemplateHost) {
     publication,
     element,
     slot,
+    resultType: type(host.resultShape),
+    parameterType(parameter: ParameterIR) {
+      const shape = host.parameterShape(parameter);
+      return shape && type(shape);
+    },
     declarations: `/** @typedef {Array<import('vue').VNode | string>} ${childrenType} */
 /** @typedef {{ used: boolean }} ${frameType} */
 /** @typedef {(h: import('vue').CreateElement, vm: import('vue').default, slots: ${frameType}) => ${childrenType}} ${paintType} */`,

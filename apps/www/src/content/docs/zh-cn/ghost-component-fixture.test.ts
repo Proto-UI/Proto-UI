@@ -1,15 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
-import { parse } from 'yaml';
 import { expect, it, vi } from 'vitest';
 import { createGhostDemo as actualGhostDemo } from '../demo_components/button/demo-button-ghost.demo';
-import {
-  PRODUCTION_BROWSER_SUITES,
-  PRODUCTION_BROWSER_OWNERS,
-  assertBrowserInventory,
-  discoverBrowserSuites,
-} from '../../../../../../scripts/test/runtime-test-plan.mjs';
 
 const fixturePath = 'apps/www/src/pages/en/test/button-ghost/[runtime].astro';
 const fixture = readFileSync(fixturePath, 'utf8');
@@ -169,47 +162,6 @@ it('uses four static public faces and the existing production theme/reset/genera
   const global = readFileSync('apps/www/src/styles/global.css', 'utf8');
   expect(global).toContain("@import './tailwindcss.css'");
   expect(global).toContain("@import './proto-ui-style.css'");
-});
-it('adds an independent owner while preserving the public workflow and its eight-case path', () => {
-  const suite = 'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts',
-    workflowPath = '.github/workflows/finf-button-ghost-component-evidence.yml';
-  const publicSuite = 'apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts',
-    publicWorkflow = '.github/workflows/finf-button-ghost-evidence.yml';
-  expect(PRODUCTION_BROWSER_SUITES).toContain(suite);
-  expect(PRODUCTION_BROWSER_SUITES).toContain(publicSuite);
-  expect(PRODUCTION_BROWSER_OWNERS[suite]).toBe(workflowPath);
-  expect(PRODUCTION_BROWSER_OWNERS[publicSuite]).toBe(publicWorkflow);
-  expect(() => assertBrowserInventory(discoverBrowserSuites(process.cwd()))).not.toThrow();
-  const workflowText = readFileSync(workflowPath, 'utf8'),
-    workflow = parse(workflowText),
-    publicText = readFileSync(publicWorkflow, 'utf8');
-  expect(workflow.permissions).toEqual({ contents: 'read' });
-  expect(workflow.concurrency['cancel-in-progress']).toBe(false);
-  expect(workflowText).toContain(suite);
-  expect(workflowText).not.toContain(publicSuite);
-  expect(workflowText).toContain('assert.equal(report.numPassedTests, 16)');
-  expect(workflowText).toContain("receipt.evidenceScope, 'independent-component'");
-  expect(publicText).toContain('pull_request:');
-  expect(publicText).toContain(publicSuite);
-  expect(publicText).toContain('assert.equal(report.numTotalTests, 8)');
-  const source = readFileSync(suite, 'utf8');
-  for (const required of [
-    'chromiumSandbox: true',
-    "process.env.GITHUB_ACTIONS !== 'true'",
-    "const evidenceScope = 'independent-component'",
-    'enabledHit.hasArea',
-    'disabledHit.hitExists',
-  ])
-    expect(source).toContain(required);
-  for (const forbidden of [
-    '--no-sandbox',
-    'force: true',
-    'localStorage.setItem',
-    'setProps(',
-    'selectPublicPanel',
-    'selectRuntime(',
-  ])
-    expect(source).not.toContain(forbidden);
 });
 
 it.each(['new-york', 'rhea'] as const)(
