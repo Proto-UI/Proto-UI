@@ -18,7 +18,7 @@ At each boundary record actual state. If the feature deadline is missed, pause f
 
 ## 0.3 commitment boundary
 
-The concrete [delivery list](release-0.3-list.md) and [source-bound ledger](release-0.3-source-ledger.json) retain exported identities and the original Finf criteria. Enumeration is not acceptance; current evidence and independently completed child criteria are tracked separately.
+The concrete [delivery list](release-0.3-list.md) and [source-bound ledger](release-0.3-source-ledger.json) retain exported identities and the original Finf criteria. The frozen snapshot stays authoritative history; bounded acquisition corrections live in the additive [source corrections](release-0.3-source-corrections.json) companion, and the single effective view for current criterion identities and denominators is `loadEffectiveLedger` in `scripts/ci/release-source-ledger.mjs`. Source bodies may use LF or CRLF line endings; acquisition must extract checkbox conditions identically under both. Enumeration is not acceptance; current evidence and independently completed child criteria are tracked separately.
 
 The committed Prototype libraries are **Base, Shadcn, Brutalist (the repository identity for neo-brutalism), and Lucide**. Include all their currently supported/exported prototypes and all additional support already promised for these areas in Finf V2. Include their authored combinations and the interaction, focus, keyboard, controlled-state, lifecycle, accessibility and styling repairs needed for real consumption.
 
