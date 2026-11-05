@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, sep } from 'node:path';
 import test from 'node:test';
+import { pathToFileURL } from 'node:url';
+import { extractCheckboxCriteria, loadEffectiveLedger } from '../release-source-ledger.mjs';
 
 const sourcePath = 'internal/governance/release-0.3-source-ledger.json';
 const sourceBytes = readFileSync(new URL('../../../' + sourcePath, import.meta.url));
@@ -11,6 +15,10 @@ const companion = JSON.parse(
     new URL('../../../internal/governance/release-0.3-evidence-checkpoints.json', import.meta.url),
     'utf8'
   )
+);
+const correctionsPath = 'internal/governance/release-0.3-source-corrections.json';
+const corrections = JSON.parse(
+  readFileSync(new URL('../../../' + correctionsPath, import.meta.url), 'utf8')
 );
 const sourceSha256 = createHash('sha256').update(sourceBytes).digest('hex');
 const sourceGitBlob = createHash('sha1')
@@ -49,6 +57,9 @@ const targetKeys = [
   'checkpoint.1191.20261104.navigation-scroll-diagnostic',
 ];
 const sourceIssues = new Map(ledger.issueSnapshot.issues.map((issue) => [issue.number, issue]));
+const currentSourceIssues = new Map(
+  loadEffectiveLedger().issueSnapshot.issues.map((issue) => [issue.number, issue])
+);
 
 // This validates additive live evidence without recasting the captured source
 // snapshot as a current acceptance result. New checkpoints may be appended.
@@ -60,7 +71,7 @@ function checkpointErrors(checkpoints) {
   for (const point of checkpoints) {
     if (!point.key || keys.has(point.key)) errors.push('checkpoint-key');
     keys.add(point.key);
-    const source = sourceIssues.get(point.issueNumber);
+    const source = currentSourceIssues.get(point.issueNumber);
     if (
       !source ||
       point.sourceIssue !== source.url ||
@@ -247,28 +258,165 @@ test('a companion cannot silently rebind the historical snapshot or replace its 
   invalid.kind = 'replacement-inventory';
   assert.ok(companionErrors(invalid).includes('companion-kind'));
 });
-test('the existing release list links the companion and its executable validation', () => {
-  const list = readFileSync(
-    new URL('../../../internal/governance/release-0.3-list.md', import.meta.url),
-    'utf8'
+// R03-GOV-01 regression: Issue #649's five original acceptance conditions were
+// lost at acquisition because its archived/live body lines 51-55 end with CRLF
+// while the extractor required LF. The frozen snapshot keeps the omission; the
+// additive correction restores the conditions and every current consumer reads
+// the corrected effective ledger.
+const issue649BodyExcerpt = [
+  '## Acceptance and boundaries',
+  '',
+  '- [ ] Record exception propagation, remaining-watcher fan-out, already-recorded nested events, and recovery semantics.',
+  '- [ ] Add deterministic tests for same-state and cross-state reentry, throw before/after nested mutation, later mutation after catch, and disposal during dispatch.',
+  '- [ ] Preserve actual transition order under the chosen policy; no silently stranded records or older events delivered after a newer accepted event.',
+  '- [ ] Verify Module/Runtime callback-scope restoration and borrowed/observed watcher paths, not only direct kernel subscribers.',
+  '- [ ] Preserve no-implicit-render behavior, same-value suppression, setup-only registration, and terminal invalidation; no value-validation/accessor migration scope creep.',
+];
+
+test('checkbox acquisition extracts identical criteria from LF and CRLF bodies', () => {
+  const lf = issue649BodyExcerpt.join('\n');
+  const crlf = issue649BodyExcerpt.join('\r\n');
+  const fromLf = extractCheckboxCriteria(lf);
+  const fromCrlf = extractCheckboxCriteria(crlf);
+  assert.equal(fromLf.length, 5);
+  assert.deepEqual(fromCrlf, fromLf);
+  assert.deepEqual(
+    fromCrlf.map((criterion) => criterion.sourceLine),
+    [3, 4, 5, 6, 7]
   );
-  assert.ok(list.includes('[evidence checkpoints](release-0.3-evidence-checkpoints.json)'));
-  assert.ok(
-    list.includes('node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs')
-  );
-  assert.ok(list.includes('do not override original criteria'));
+  assert.ok(fromCrlf.every((criterion) => criterion.section === '## Acceptance and boundaries'));
+  assert.ok(fromCrlf.every((criterion) => !criterion.original.includes('\r')));
 });
 
-test('the existing lightweight CI job executes the checkpoint guard once', () => {
-  const workflow = readFileSync(
-    new URL('../../../.github/workflows/ci.yml', import.meta.url),
-    'utf8'
+test('the source corrections companion is bound, schema-valid and restores the five lost conditions', () => {
+  const correction = corrections.corrections.find((entry) => entry.issueNumber === 649);
+  assert.ok(correction, 'the Issue #649 CRLF correction must exist');
+  assert.equal(
+    createHash('sha256').update(correction.sourceBody).digest('hex'),
+    sourceIssues.get(649).sourceBodySha256
   );
-  const command = 'node --test scripts/ci/test/release-source-ledger-checkpoints.test.mjs';
-  const job = workflow.match(
-    /^  ci-config-audit:\n[\s\S]*?(?=^  [a-zA-Z][\w-]*:|$(?![\s\S]))/m
-  )?.[0];
-  assert.ok(job, 'the existing ci-config-audit job must remain present');
-  assert.ok(job.includes(command), 'checkpoint validation must run in the lightweight job');
-  assert.equal(workflow.split(command).length - 1, 1, 'do not duplicate the checkpoint run');
+  assert.deepEqual(
+    extractCheckboxCriteria(correction.sourceBody),
+    correction.restoredCriteria.map(({ sourceLine, section, original, historicalChecked }) => ({
+      sourceLine,
+      section,
+      original,
+      historicalChecked,
+    }))
+  );
+  assert.equal(correction.restoredCriteria.length, 5);
+  assert.deepEqual(
+    correction.restoredCriteria.map((criterion) => criterion.key),
+    ['issue.649.001', 'issue.649.002', 'issue.649.003', 'issue.649.004', 'issue.649.005']
+  );
+  assert.deepEqual(
+    correction.restoredCriteria.map((criterion) => criterion.sourceLine),
+    [51, 52, 53, 54, 55]
+  );
+  assert.ok(
+    correction.restoredCriteria.every(
+      (criterion) =>
+        criterion.section === '## Acceptance and boundaries' &&
+        criterion.historicalChecked === false &&
+        criterion.release === 'criterion-split'
+    )
+  );
+});
+
+test('the effective ledger restores all five Issue #649 conditions with the frozen snapshot untouched', () => {
+  assert.equal(sourceIssues.get(649).criteria.length, 0);
+  const effective = loadEffectiveLedger();
+  const effective649 = effective.issueSnapshot.issues.find((issue) => issue.number === 649);
+  assert.equal(effective649.criteria.length, 5);
+  const total = effective.issueSnapshot.issues.reduce(
+    (sum, issue) => sum + issue.criteria.length,
+    0
+  );
+  assert.equal(total, 1238);
+  const keys = new Set(
+    effective.issueSnapshot.issues.flatMap((issue) =>
+      issue.criteria.map((criterion) => criterion.key)
+    )
+  );
+  assert.equal(keys.size, total);
+  assert.ok(
+    effective649.criteria.every(
+      (criterion) => criterion.correctionKey === 'correction.649.20261105.crlf-criteria-loss'
+    )
+  );
+});
+
+function correctionRoot(t, mutate) {
+  const directory = mkdtempSync(join(tmpdir(), 'release-source-correction-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const root = pathToFileURL(directory + sep);
+  mkdirSync(new URL('internal/governance/', root), { recursive: true });
+  writeFileSync(new URL(sourcePath, root), sourceBytes);
+  const changed = structuredClone(corrections);
+  mutate(changed);
+  writeFileSync(new URL(correctionsPath, root), JSON.stringify(changed));
+  return root;
+}
+
+test('the effective reader rejects rebound snapshot identities and altered source bodies', (t) => {
+  for (const field of ['path', 'gitBlob', 'sha256', 'sourceRevision']) {
+    const root = correctionRoot(t, (value) => {
+      value.sourceLedger[field] = 'wrong';
+    });
+    assert.throws(() => loadEffectiveLedger(root), /snapshot binding/i);
+  }
+  for (const field of ['sourceBody', 'sourceBodySha256', 'sourceIssue']) {
+    const root = correctionRoot(t, (value) => {
+      value.corrections[0][field] = 'wrong';
+    });
+    assert.throws(() => loadEffectiveLedger(root), /source binding/i);
+  }
+});
+
+test('the effective reader rejects valid-looking rewrites and false completion', (t) => {
+  const changes = {
+    original: '- [ ] A different, syntactically valid acceptance condition.',
+    sourceLine: 52,
+    section: '## A different source section',
+    historicalChecked: true,
+    source: 'https://github.com/Proto-UI/Proto-UI/issues/1191',
+    release: '0.4',
+    developmentState: 'main-integrated',
+    acceptanceState: 'complete',
+  };
+  for (const [field, replacement] of Object.entries(changes)) {
+    const root = correctionRoot(t, (value) => {
+      value.corrections[0].restoredCriteria[0][field] = replacement;
+    });
+    assert.throws(() => loadEffectiveLedger(root), /restored criterion/i, field);
+  }
+});
+
+test('the effective reader rejects duplicate identities and incomplete corrections', (t) => {
+  const duplicate = correctionRoot(t, (value) => {
+    value.corrections[0].restoredCriteria[0].key = sourceIssues.get(1191).criteria[0].key;
+  });
+  assert.throws(() => loadEffectiveLedger(duplicate), /duplicate criterion/i);
+  const renamedDuplicate = correctionRoot(t, (value) => {
+    value.corrections[0].restoredCriteria[1].sourceLine = 51;
+  });
+  assert.throws(() => loadEffectiveLedger(renamedDuplicate), /restored criterion/i);
+  for (const count of [0, 4]) {
+    const incomplete = correctionRoot(t, (value) => {
+      value.corrections[0].restoredCriteria.length = count;
+    });
+    assert.throws(() => loadEffectiveLedger(incomplete), /incomplete correction/i);
+  }
+});
+
+test('current checkpoints can bind restored criteria but still reject unrelated keys', () => {
+  const point = structuredClone(target[1]);
+  const issue = currentSourceIssues.get(649);
+  point.issueNumber = issue.number;
+  point.sourceIssue = issue.url;
+  point.sourceSnapshotBodySha256 = issue.sourceBodySha256;
+  point.sourceCriterionKeys = issue.criteria.map((criterion) => criterion.key);
+  assert.deepEqual(checkpointErrors([point]), []);
+  point.sourceCriterionKeys.push('issue.649.invented');
+  assert.ok(checkpointErrors([point]).includes('criterion-binding'));
 });

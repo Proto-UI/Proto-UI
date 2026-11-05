@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "kind": "additive-source-corrections",
+  "authority": "Bounded correction of acquisition omissions in release-0.3-source-ledger.json. The frozen source snapshot and its original fields stay byte-identical and authoritative; each entry restores source conditions the original acquisition lost, bound to the exact archived/live source body hash. Corrections never rewrite, reclassify or complete original criteria.",
+  "sourceLedger": {
+    "path": "internal/governance/release-0.3-source-ledger.json",
+    "gitBlob": "f97e4a44443666b40592e09ff5a74631c581b633",
+    "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+    "sourceRevision": "91f2fdb5e36cfac675d22d1e07e1c4e6b051147d"
+  },
+  "corrections": [
+    {
+      "key": "correction.649.20261105.crlf-criteria-loss",
+      "recordedAt": "2026-11-05",
+      "issueNumber": 649,
+      "sourceIssue": "https://github.com/Proto-UI/Proto-UI/issues/649",
+      "sourceBodySha256": "e1bd8c5b3463aaa312046203aa5c9a40f9e28d8482cfc1d20fe4f5e09c391f3f",
+      "sourceBody": "## Summary\r\n\r\nThe State event queue has a successful reentry path, but no coherent failure/recovery transition. If a watcher records a nested state change and then throws, the recorded event stays pending. A later unrelated mutation emits first and only then drains the older event.\r\n\r\nOn public main `8f2eba12c2c980d0f4d92713106e798891738106`, the observed sequence is **[1, 3, 2] while the current state is 3**. Without the later mutation, event 2 remains undelivered.\r\n\r\nThis is a bounded design/reliability issue: decide the exception propagation/fan-out policy before implementing it. Do not silently turn watcher errors into successful execution.\r\n\r\n## Authority and existing limits\r\n\r\n- [C-STATE-0011-E](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/spec/contracts/C-STATE-0011.yaml), **draft**, requires deterministic delivery of reentrant StateEvents without losing recorded transitions.\r\n- [M-STATE-0001](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/spec/modules/M-STATE-0001.yaml), **draft**, owns instance-lifetime slots and deterministic mutation records, independent of host rendering.\r\n- [T-STATE-0004-CASE-REENTRANT-ORDER](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/spec/tests/T-STATE-0004.yaml) maps to [kernel.v0.test.ts](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/packages/modules/state/test/kernel.v0.test.ts), which covers successful FIFO delivery but not a thrown callback with an already-recorded nested mutation.\r\n- Legacy [state-watch.v0.md](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/internal/contracts/state/state-watch.v0.md) deliberately leaves watcher ordering/batching broad. It cannot weaken the cataloged reentrant-record direction, but neither source settles exception aggregation or whether remaining watchers run after one fails. That is the bounded maintainer decision here.\r\n\r\n## Minimal reproduction\r\n\r\nPut this in a Vitest test alongside `packages/modules/state/test/kernel.v0.test.ts`:\r\n\r\n```ts\r\nconst kernel = new StateKernel();\r\nconst value = kernel.define('value', { kind: 'number.discrete' }, 0);\r\nconst seen: number[] = [];\r\nkernel.subscribe(value, event => {\r\n  if (event.type !== 'next') return;\r\n  seen.push(event.next);\r\n  if (event.next === 1) {\r\n    value.set(2);\r\n    throw new Error('consumer failure');\r\n  }\r\n});\r\n\r\nexpect(() => value.set(1)).toThrow('consumer failure');\r\nexpect(value.get()).toBe(2);\r\nexpect(seen).toEqual([1]); // transition 1 -> 2 already committed, event stranded\r\nvalue.set(3);\r\nexpect(value.get()).toBe(3);\r\nexpect(seen).toEqual([1, 3, 2]); // actual, undesirable recovery order\r\n```\r\n\r\nThe same reentrant sequence without the throw observes [1, 2, 3]. Executed under Node 22.22.1, pnpm 10.32.1, Vitest 2.1.9 on Windows; no timers. A second probe through an actual RuntimeSession's State port also observes [1, 3, 2], with callbacks correctly entering callback phase and restoring unknown/idle after the exception. [Module watcher forwarding](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/packages/modules/state/src/impl.ts#L87) does not contain or translate the watcher exception. This is distinct from #442's already-fixed callback-scope restoration.\r\n\r\n## Cause and design decision\r\n\r\n[StateKernel.setById](https://github.com/Proto-UI/Proto-UI/blob/8f2eba12c2c980d0f4d92713106e798891738106/packages/modules/state/src/kernel.ts#L109) commits `rec.value` before event dispatch. Reentrant emission is appended to `pending`; on throw, `finally` only clears `emitting`. The next top-level mutation directly emits its own event before flushing the retained queue.\r\n\r\nDefine the failed-dispatch state explicitly. Options to assess include completing already-committed FIFO delivery before rethrowing/aggregating consumer failures, or an explicit failed/terminal dispatch state that rejects further mutation until a governed recovery. Dropping committed transition records or replaying them after newer events is not a valid accidental fallback. Do not add setTimeout/microtask retry and call that recovery.\r\n\r\n## Acceptance and boundaries\r\n\r\n- [ ] Record exception propagation, remaining-watcher fan-out, already-recorded nested events, and recovery semantics.\r\n- [ ] Add deterministic tests for same-state and cross-state reentry, throw before/after nested mutation, later mutation after catch, and disposal during dispatch.\r\n- [ ] Preserve actual transition order under the chosen policy; no silently stranded records or older events delivered after a newer accepted event.\r\n- [ ] Verify Module/Runtime callback-scope restoration and borrowed/observed watcher paths, not only direct kernel subscribers.\r\n- [ ] Preserve no-implicit-render behavior, same-value suppression, setup-only registration, and terminal invalidation; no value-validation/accessor migration scope creep.\r\n\r\nImplementation should wait for the small exception-policy checkpoint; this issue does not authorize changing public error behavior or promoting draft semantics. Distinct from #637's deprecated-accessor retirement and #623's Scroll lease reentry. No product change, claim, review approval, or issue closure made. AI-assisted source audit and deterministic probes requested by the current user.\r\n\r\n\n## Executed evidence (backfilled 2026-09-17)\n\n![Executed trace and explanatory diagram for #649](https://raw.githubusercontent.com/Proto-UI/Proto-UI/da071c9e5622695498f444019aee5621627c26ff/evidence/2026-09-15/issue-649-2262c1c81002.png)\n\nRendered test transcript from the fresh Node 22.22.1 run described in the reproduction above: the observation tests assert the existing failure and paired controls, not a repair. Image pinned to evidence-only commit `da071c9e` on branch `codex/issue-visual-evidence-20260915` (never to be merged into main).\r\n",
+      "cause": "The frozen acquisition omitted all five CRLF-terminated checkbox conditions at source lines 51-55 under '## Acceptance and boundaries'. The archived and live body SHA-256 matches the frozen Issue identity. Retain that complete source body and restore its original conditions without rewriting the historical inventory.",
+      "release": "criterion-split",
+      "restoredCriteria": [
+        {
+          "key": "issue.649.001",
+          "source": "https://github.com/Proto-UI/Proto-UI/issues/649",
+          "sourceLine": 51,
+          "section": "## Acceptance and boundaries",
+          "original": "- [ ] Record exception propagation, remaining-watcher fan-out, already-recorded nested events, and recovery semantics.",
+          "historicalChecked": false,
+          "release": "criterion-split",
+          "developmentState": "reconcile-live-evidence",
+          "acceptanceState": "not-yet-reconciled",
+          "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox."
+        },
+        {
+          "key": "issue.649.002",
+          "source": "https://github.com/Proto-UI/Proto-UI/issues/649",
+          "sourceLine": 52,
+          "section": "## Acceptance and boundaries",
+          "original": "- [ ] Add deterministic tests for same-state and cross-state reentry, throw before/after nested mutation, later mutation after catch, and disposal during dispatch.",
+          "historicalChecked": false,
+          "release": "criterion-split",
+          "developmentState": "reconcile-live-evidence",
+          "acceptanceState": "not-yet-reconciled",
+          "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox."
+        },
+        {
+          "key": "issue.649.003",
+          "source": "https://github.com/Proto-UI/Proto-UI/issues/649",
+          "sourceLine": 53,
+          "section": "## Acceptance and boundaries",
+          "original": "- [ ] Preserve actual transition order under the chosen policy; no silently stranded records or older events delivered after a newer accepted event.",
+          "historicalChecked": false,
+          "release": "criterion-split",
+          "developmentState": "reconcile-live-evidence",
+          "acceptanceState": "not-yet-reconciled",
+          "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox."
+        },
+        {
+          "key": "issue.649.004",
+          "source": "https://github.com/Proto-UI/Proto-UI/issues/649",
+          "sourceLine": 54,
+          "section": "## Acceptance and boundaries",
+          "original": "- [ ] Verify Module/Runtime callback-scope restoration and borrowed/observed watcher paths, not only direct kernel subscribers.",
+          "historicalChecked": false,
+          "release": "criterion-split",
+          "developmentState": "reconcile-live-evidence",
+          "acceptanceState": "not-yet-reconciled",
+          "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox."
+        },
+        {
+          "key": "issue.649.005",
+          "source": "https://github.com/Proto-UI/Proto-UI/issues/649",
+          "sourceLine": 55,
+          "section": "## Acceptance and boundaries",
+          "original": "- [ ] Preserve no-implicit-render behavior, same-value suppression, setup-only registration, and terminal invalidation; no value-validation/accessor migration scope creep.",
+          "historicalChecked": false,
+          "release": "criterion-split",
+          "developmentState": "reconcile-live-evidence",
+          "acceptanceState": "not-yet-reconciled",
+          "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox."
+        }
+      ]
+    }
+  ]
+}

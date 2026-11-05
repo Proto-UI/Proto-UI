@@ -8,7 +8,7 @@
 
 | 工作流 | 文件 | 作用 |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | PR 的类型、测试、spec 和全局版本门禁，以及唯一的定时回归 cycle |
+| CI | `.github/workflows/ci.yml` | PR 的轻量计划与策略检查；定时或显式 dispatch 执行完整回归 |
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR intake/reconciliation lane |
@@ -31,7 +31,7 @@ CI 在 pull request、手动触发，以及每天三次针对默认分支 head �
 
 仓库政策要求合并前取得相关 CI 证据。GitHub ruleset 与 required check 配置属于外部控制，必须单独审计；约定上的绿色状态不等于平台强制的合并门禁。带日期的协作取证记录保存调查时观察到的配置和已知缺口。
 
-`public_package_plan` 会根据 pull request diff 推导受影响的公开 package 图。package 变化会选中改动 package、它的反向消费者，以及构建该集合所需的全部上游公开依赖；仓库级构建、release、预算、lockfile、manifest 或 workflow 变化则选中全部公开 package。后续 build job 会检查生成式 manifest、产出 JavaScript 与声明文件、执行原生 ESM import smoke，并检查代表性 gzip 预算。如果 PR 的受影响公开 package 图为空，release stage 与隔离 consumer job 可以跳过；`main` 与手动触发仍运行全量集合。
+`public_package_plan` 会根据 pull request diff 推导受影响的公开 package 图。package 变化会选中改动 package、它的反向消费者，以及构建该集合所需的全部上游公开依赖；仓库级构建、release、预算、lockfile、manifest 或 workflow 变化则选中全部公开 package。完整 cycle 的 build job 会检查生成式 manifest、产出 JavaScript 与声明文件、执行原生 ESM import smoke，并检查代表性 gzip 预算。定时与手动 cycle 运行全量集合；PR 的计划结果不代表实际执行了这些构建与 consumer 检查。
 
 `release-consumer-react` 会从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
 
@@ -55,7 +55,7 @@ GitHub cron 只能尽力调度，可能延迟或被跳过；cycle 不承诺精�
 
 `workflow_dispatch` 手动触发运行同一组完整 lane，用于定向诊断，并生成 `scheduledSlot: null` 的同类 receipt；它不会代替 schedule 产生 cycle。只有完整成功的 cycle 才构成 baseline；queued、未结束、cancelled 或失败的 cycle 一律计入非绿（包括当前 cycle 自身），slot/遗漏分析自策略生效时刻起算，早期历史不会伪造出遗漏 slot。
 
-`ci-production-suites.yml` 调用全部 29 个已注册 production browser suite 的专属 owner；production Search 由 `homepage-visual-evidence.yml` 实际运行，不因 shared-dev 分片排除而漏跑。两条独立依赖链限制重工作流扇出，保留各自 artifact；前项失败不阻止后项，取消整个 cycle 除外。四条原 push-only source-check lane 也每轮调用一次。Experimental 套件保留真实失败，执行它们不代表把其他家族准入 0.3。
+`ci-production-suites.yml` 调用 [runtime-test-plan.mjs](../../scripts/test/runtime-test-plan.mjs) 中完整 `PRODUCTION_BROWSER_SUITES` 清单的专属 owner；production Search 由 `homepage-visual-evidence.yml` 实际运行，不因 shared-dev 分片排除而漏跑。0.3 治理审查源 `4db52751` 注册了 **34 个套件**；原先 29 个的口径保留为 cadence 初始清单的历史记录。两条独立依赖链限制重工作流扇出，保留各自 artifact；前项失败不阻止后项，取消整个 cycle 除外。四条原 push-only source-check lane 也每轮调用一次。Experimental 套件保留真实失败，执行它们不代表把其他家族准入 0.3。
 
 策略生效时间从完整源码历史读取：沿 first-parent 找到首次引入 `scripts/ci/cycle-report.mjs` 的实际集成提交时间，不硬编码规划日期。当前完整绿色 cycle 重置连续红灯计数，另行统计连续两轮 scheduled green 供恢复判断；没有绿色 baseline 时，24 小时计时从实际生效开始。手动运行不能伪造定时恢复轮次。
 
@@ -77,7 +77,7 @@ GitHub cron 只能尽力调度，可能延迟或被跳过；cycle 不承诺精�
 | `agent-operations-shadow.yml` | `schedule`（`17 * * * *`）、`workflow_dispatch` | 只读 intake/reconciliation lane 的每小时定时；与回归执行无关 |
 | `release-cadence.yml` | `schedule`（`7 10 * * 4`）、`workflow_dispatch` | 仅每周发布提醒 |
 | `release-packages.yml`、`reposteward-portfolio-shadow.yml` | `workflow_dispatch` | 手动发布彩排/发布与只读 portfolio 实验；不变 |
-| `intranet-preview-build.yml` | `workflow_dispatch`（必填 `pr_number`/`expected_head_sha` inputs）、`workflow_call` | PR 预览构建改为按需手动：30 分钟 builder 不再随每次 synchronize 触发；dispatch 后仍如常把预览发布到指定 PR |
+| `intranet-preview-build.yml` | `workflow_dispatch`（必填 `pr_number`/`expected_head_sha` inputs）、`workflow_call` | 显式输入把构建绑定到指定开放 PR 与精确 head；30 分钟 builder 不持有自动 PR 触发器 |
 | 其余证据/诊断 lane | `workflow_dispatch`、`workflow_call`（带受保护 ref 绑定） | per-change 证据扇出已关闭：共享套件由 ci.yml cycle 覆盖，所有专用 lane 保留 exact-ref 诊断能力；重 lane 不持有任何自动触发 |
 
 上述 `pull_request` allowlist 由 `scripts/ci/check-ci-schedule.mjs`（`pull-request-not-allowed`）强制：给其他任何文件新增自动 PR 触发会使 `ci-config-audit` lane fail。manual/callable lane 中 `github.event.pull_request.*` 仅出现在 `|| github.sha` 一类回退之后，因此永远不会渲染出空 ref。
@@ -118,9 +118,9 @@ GitHub cron 只能尽力调度，可能延迟或被跳过；cycle 不承诺精�
 
 ## 内网贡献者预览工作流
 
-`intranet-preview-build.yml` 在 PR 变化或 exact-head 手动构建时运行。它仅有 `contents: read`，使用一次性的 hosted builder，不接收部署 secrets。执行贡献者 checkout 前先上传 Actions identity marker，随后上传 canonical 文档 ZIP；两份 artifact 都保留三天。
+`intranet-preview-build.yml` 仅通过手动 dispatch 或 reusable call 运行，输入指定 PR number 与精确 expected head SHA。它仅有 `contents: read`，使用一次性的 hosted builder，不接收部署 secrets。执行贡献者 checkout 前先上传 Actions identity marker，随后上传 canonical 文档 ZIP；两份 artifact 都保留三天。
 
-`intranet-preview-checks.yml` 在 PR 或 `main` 的 preview 文件变化时运行 native Node 准入、解压、sanitation、发布与静态服务 focused suite。两条 workflow 都不部署 Poppy、不调用 Cloudflare、不写 PR 评论，也不在持久 publisher 上执行贡献者代码。
+`intranet-preview-checks.yml` 在 PR 的 preview 文件变化、手动 dispatch 或 reusable call 时运行 native Node 准入、解压、sanitation、发布与静态服务 focused suite。主干检查由统一定时回归 cycle 调用，不持有 push 触发器。两条 workflow 都不部署 Poppy、不调用 Cloudflare、不写 PR 评论，也不在持久 publisher 上执行贡献者代码。
 
 唯一 publisher 是单独配置的受信内网进程。它下载 hostile artifact，复核 live PR/head/run/attempt 及 supersession，再将普通、不可执行文件发布到独立 generation origin。静态 server 没有 credential 或 control API。内网受众替代已经退役的 per-author/reviewer OAuth 策略；polling 与五分钟 catalog lease 提供有界收敛，不承诺即时撤销。配置、安全上限与运行验收见 `scripts/preview/README.md`。
 

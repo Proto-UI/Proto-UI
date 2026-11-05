@@ -8,7 +8,7 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 
 | Workflow | File | Purpose |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | Type, test, spec, and global-version gates for pull requests, plus the single scheduled regression cycle |
+| CI | `.github/workflows/ci.yml` | Lightweight PR planning and policy checks; full regression on schedule or explicit dispatch |
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request intake/reconciliation lane |
@@ -61,7 +61,7 @@ Scheduled runs publish their triggering cron in the native `display_title` as `r
 
 History collection filters the native workflow-runs endpoint to `event=schedule` and the exact source branch, paginates lazily through the post-activation interval, and preserves the native run metadata. It fails closed on incomplete acquisition instead of treating the latest 100 mixed PR/manual runs as complete scheduled history. The report therefore retains early missed slots even after more than 100 later cycles; a manual run never evicts or impersonates a scheduled cycle.
 
-`ci-production-suites.yml` includes the dedicated owners of all 29 registered production browser suites, including production Search through `homepage-visual-evidence.yml`; they are not silently excluded by the shared development shards. Two independent dependency chains bound heavyweight workflow fan-out, retain each lane's artifacts, and continue after predecessor failures unless the cycle is cancelled. The four former push-only source-check lanes are also called once per cycle. Experimental suites retain their real failures; their execution does not promote another family into 0.3.
+`ci-production-suites.yml` includes the dedicated owners of the complete `PRODUCTION_BROWSER_SUITES` inventory in [runtime-test-plan.mjs](../../scripts/test/runtime-test-plan.mjs), including production Search through `homepage-visual-evidence.yml`; they are not silently excluded by the shared development shards. The 0.3 governance review source `4db52751` registers **34 suites**; the original 29-suite count describes the initial cadence inventory. Two independent dependency chains bound heavyweight workflow fan-out, retain each lane's artifacts, and continue after predecessor failures unless the cycle is cancelled. The four former push-only source-check lanes are also called once per cycle. Experimental suites retain their real failures; their execution does not promote another family into 0.3.
 
 Activation is the first-parent integration timestamp that introduced `scripts/ci/cycle-report.mjs`, read from full source history, not the planning date. A successful current cycle resets the red chain; two successive scheduled green cycles are separately counted for recovery. With no green baseline, the 24-hour timer starts at activation. Manual runs cannot manufacture scheduled recovery cycles.
 
@@ -83,7 +83,7 @@ Every workflow's event triggers were audited under the no-push policy. Retained 
 | `agent-operations-shadow.yml` | `schedule` (`17 * * * *`), `workflow_dispatch` | Read-only intake/reconciliation lane on an hourly timer; unrelated to regression execution |
 | `release-cadence.yml` | `schedule` (`7 10 * * 4`), `workflow_dispatch` | Weekly release reminder only |
 | `release-packages.yml`, `reposteward-portfolio-shadow.yml` | `workflow_dispatch` | Manual-only publication rehearsal/publication and read-only portfolio experiment; unchanged |
-| `intranet-preview-build.yml` | `workflow_dispatch` (+ required `pr_number`/`expected_head_sha` inputs), `workflow_call` | PR preview builds are manual-on-demand now: the 30-minute builder no longer fires per synchronize. Dispatching posts the preview onto the stated PR exactly as before |
+| `intranet-preview-build.yml` | `workflow_dispatch` (+ required `pr_number`/`expected_head_sha` inputs), `workflow_call` | Explicit inputs bind the build to the stated open PR and exact head. The 30-minute builder has no automatic PR trigger |
 | All other evidence/diagnostic lanes | `workflow_dispatch`, `workflow_call` (+ guarded ref bindings) | Per-change evidence fan-out is off: shared suites are covered by the ci.yml cycle, and every dedicated lane stays callable for exact-ref diagnosis; no heavy lane owns an automatic trigger |
 
 The `pull_request` allowlist above is enforced by `scripts/ci/check-ci-schedule.mjs` (`pull-request-not-allowed`): adding an automatic PR trigger to any other file fails the `ci-config-audit` lane. The manual/callable lanes carry `github.event.pull_request.*` only behind `|| github.sha`-style fallbacks so they can never render empty refs.
