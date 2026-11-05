@@ -1,0 +1,13 @@
+{
+  "ancestorTitles": [
+    "Vue2 compiler-native child construction"
+  ],
+  "fullName": "Vue2 compiler-native child construction retains an uncalled identity-observed callable with a legacy template formal",
+  "status": "failed",
+  "title": "retains an uncalled identity-observed callable with a legacy template formal",
+  "duration": 6.49260299999969,
+  "failureMessages": [
+    "Error: Vue2 native lowering requires actual template parameter provenance.\n    at type (<repo>/packages/compiler/src/vue2-native-template.ts:342:15)\n    at Object.element (<repo>/packages/compiler/src/vue2-native-template.ts:451:119)\n    at expression (<repo>/packages/compiler/src/vue2-source.ts:306:33)\n    at body (<repo>/packages/compiler/src/vue2-source.ts:352:68)\n    at fn (<repo>/packages/compiler/src/vue2-source.ts:262:91)\n    at expression (<repo>/packages/compiler/src/vue2-source.ts:297:16)\n    at body (<repo>/packages/compiler/src/vue2-source.ts:347:66)\n    at fn (<repo>/packages/compiler/src/vue2-source.ts:262:91)\n    at expression (<repo>/packages/compiler/src/vue2-source.ts:297:16)\n    at body (<repo>/packages/compiler/src/vue2-source.ts:352:68)"
+  ],
+  "meta": {}
+}

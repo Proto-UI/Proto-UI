@@ -1,0 +1,61 @@
+// Native logical identity and physical-root ownership. No capability factory.
+export type NativeFocusRequest = { reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean; defer?: boolean };
+export type NativeAnatomyFamily = { debugName: string; roles: Readonly<Record<string, { cardinality: { min: number; max: number | '*' }; requires?: readonly { kind: string; name: string }[] }>>; relations?: readonly unknown[]; profiles?: Readonly<Record<string, unknown>> };
+export interface NativeAnatomyPart { readonly role: string; hasExpose(key: string): boolean; getExpose(key: string): unknown | null; hasHook(name: string): boolean }
+export type Claim = { family: NativeAnatomyFamily; role: string; profile?: string; part: NativeAnatomyPart };
+export type Owner = { identity: object; parent(): object | null; target(): HTMLElement | null; host(): HTMLElement | null; alive(): boolean; hooks: Set<string>; claims: Map<object, Claim>; exposes(): Readonly<Record<string, unknown>>; focusConfig: Record<string, unknown>; scopeConfig: Record<string, unknown>; rovingConfig: Record<string, unknown>; selected: boolean; active: boolean; scopeDeclared: boolean; rovingDeclared: boolean; focusDeclared: boolean; entryDeclared: boolean; scopeActive: boolean; focus(request?: NativeFocusRequest): void; changed(): void };
+export const owners = new Map<object, Owner>();
+export const activeScopes: Owner[] = [];
+export const parts = new WeakMap<NativeAnatomyPart, Owner>();
+export const targets = new WeakMap<HTMLElement, Owner>();
+export const hostIds = new WeakMap<object, string>();
+export function logicalRoot(owner: Owner): Owner {
+  let current = owner;
+  const visited = new Set<object>();
+  while (!visited.has(current.identity)) {
+    visited.add(current.identity);
+    const parent = current.parent(), candidate = parent ? owners.get(parent) : undefined;
+    if (!candidate) return current;
+    current = candidate;
+  }
+  throw new Error('[Modules] cyclic logical ancestry.');
+}
+export function ancestor(owner: Owner, predicate: (candidate: Owner) => boolean): Owner | null {
+  let current: Owner | undefined = owner;
+  const visited = new Set<object>();
+  while (current) {
+    if (visited.has(current.identity)) throw new Error('[Modules] cyclic logical ancestry.');
+    visited.add(current.identity);
+    if (!current.alive()) return null;
+    if (predicate(current)) return current;
+    const parent = current.parent(); current = parent ? owners.get(parent) : undefined;
+  }
+  return null;
+}
+export function descends(owner: Owner, parent: Owner): boolean { return !!ancestor(owner, candidate => candidate === parent); }
+export function hostOrder(a: Owner, b: Owner): number {
+  const left = a.host(), right = b.host();
+  if (!left || !right || left === right) return 0;
+  const order = left.compareDocumentPosition(right);
+  if (order & 1) return 0;
+  return order & 4 ? -1 : order & 2 ? 1 : 0;
+}
+export function isElement(value: unknown): value is HTMLElement { return !!value && typeof value === 'object' && typeof (value as HTMLElement).getBoundingClientRect === 'function' && (value as HTMLElement).nodeType === 1; }
+export function targetOf(value: unknown): HTMLElement | null { return isElement(value) ? value : value && typeof value === 'object' ? parts.get(value as NativeAnatomyPart)?.target() ?? null : null; }
+export function contains(container: Node, target: Node): boolean {
+  const visited = new Set<Node>();
+  let current: Node | null = target;
+  while (current && !visited.has(current)) {
+    if (current === container) return true;
+    visited.add(current);
+    const logical: Owner | undefined = isElement(current) ? targets.get(current) : undefined;
+    const parent: object | null | undefined = logical?.parent();
+    current = parent && owners.get(parent)?.target() || (current as ShadowRoot).host || current.parentNode;
+  }
+  return false;
+}
+export type RootOwner = { identity: object; parent(): object | null; trigger(): boolean; target: HTMLElement };
+export const rootOwners = new WeakMap<HTMLElement, RootOwner>();
+export const logicalOwners = new Map<object, RootOwner>();
+export const exposeSignals = new WeakSet<Event>();
+export const defaultPreventedSamples = new WeakSet<Event>();

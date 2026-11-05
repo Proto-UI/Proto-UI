@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "inputs": [
+    {
+      "id": "old-trigger",
+      "directory": "./old-trigger",
+      "provenanceSHA256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+    },
+    {
+      "id": "new-text",
+      "directory": "./new-text",
+      "provenanceSHA256": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c"
+    }
+  ]
+}

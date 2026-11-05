@@ -1,0 +1,22 @@
+[
+  {
+    "name": "text",
+    "flags": 2,
+    "type": "unknown"
+  },
+  {
+    "name": "extra",
+    "flags": 2,
+    "type": "unknown"
+  },
+  {
+    "name": "text",
+    "flags": 2,
+    "type": "unknown"
+  },
+  {
+    "name": "extra",
+    "flags": 2,
+    "type": "unknown"
+  }
+]

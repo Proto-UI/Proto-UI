@@ -1,0 +1,19 @@
+{
+  "cases": [
+    {
+      "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=false)",
+      "entireInputBytesEqual": true,
+      "entireGeneratedModuleJSONBytesEqual": true,
+      "inputSHA256": "18580d8cd006861454f01734dc5f7212083888197c443e978ae8d0f66541a146",
+      "resultSHA256": "5f4b5e1434983e48ba3d45c6d9d3bd5a02862dd484ab8e55f1b5bfa46e15f090"
+    },
+    {
+      "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=true)",
+      "entireInputBytesEqual": true,
+      "entireGeneratedModuleJSONBytesEqual": true,
+      "inputSHA256": "6c779367c58cba9cc66601c943565ce822ad134f70abc62f27a8b0b7dc0af0b9",
+      "resultSHA256": "3b41e6d2658b986d00fc11516253ca8ceaad90acc923b8f281b20b87380ab9cc"
+    }
+  ],
+  "scope": "Whole emitted-module bytes only for these two identical checked inputs. No SSR runtime or hydration execution."
+}

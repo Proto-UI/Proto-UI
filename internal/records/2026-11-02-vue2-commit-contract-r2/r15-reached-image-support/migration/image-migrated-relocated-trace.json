@@ -1,0 +1,136 @@
+{
+  "mode": "migrated",
+  "hostEvidence": "Controlled HappyDOM decode promises and synthetic load/error/click events; not browser network, cache or native event-bubbling proof.",
+  "files": [
+    "<project-temp-2>/moved/deeper/consumer/.proto-ui/shared/interaction/ownership-v1.ts",
+    "<locked-dependencies>/1129bc7bc38786d6/dist/floating-ui.utils.mjs",
+    "<locked-dependencies>/bbbce88e33f704e4/dist/floating-ui.core.esm.js",
+    "<locked-dependencies>/5f6c83603aa525d0/dist/floating-ui.dom.umd.js",
+    "<project-temp-2>/moved/deeper/consumer/.proto-ui/shared/interaction/adapter-modules-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/.proto-ui/shared/interaction/native-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/old-trigger/.proto-ui/interaction/native-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/.proto-ui/shared/context/scope-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/old-trigger/.proto-ui/context/scope-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/old-trigger/Component.js",
+    "<project-temp-2>/moved/deeper/consumer/.proto-ui/shared/interaction/image-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/new-image/.proto-ui/interaction/image-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/new-image/.proto-ui/context/scope-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/new-image/Component.js",
+    "<project-temp-2>/moved/deeper/consumer/new-image/.proto-ui/interaction/ownership-v1.ts",
+    "<project-temp-2>/moved/deeper/consumer/old-trigger/.proto-ui/interaction/ownership-v1.ts",
+    "<project-temp-1>/consumer.ts"
+  ],
+  "identity": {
+    "imageRegistered": true,
+    "outerVisibleToImage": true,
+    "sharedRegistry": true
+  },
+  "initial": {
+    "source": "image:a",
+    "alt": "Image",
+    "fit": "cover",
+    "snapshot": {
+      "source": "image:a",
+      "loadingStatus": "loading",
+      "fit": "cover"
+    },
+    "requests": 1
+  },
+  "syntheticBoundary": {
+    "propagated": 0,
+    "snapshot": {
+      "source": "image:a",
+      "loadingStatus": "loading",
+      "fit": "cover"
+    }
+  },
+  "afterImageClick": {
+    "activated": [],
+    "bubbledClicks": 1
+  },
+  "afterStale": {
+    "source": "image:b",
+    "loadingStatus": "loading",
+    "fit": "cover"
+  },
+  "afterCurrent": {
+    "source": "image:b",
+    "loadingStatus": "loaded",
+    "fit": "cover"
+  },
+  "detached": {
+    "physical": false,
+    "logical": false,
+    "module": true,
+    "target": null
+  },
+  "remounted": {
+    "differentTarget": true,
+    "sameIdentity": true,
+    "snapshot": {
+      "source": "image:b",
+      "loadingStatus": "loading",
+      "fit": "cover"
+    },
+    "requests": 3
+  },
+  "afterError": {
+    "source": "image:b",
+    "loadingStatus": "error",
+    "fit": "cover"
+  },
+  "disposed": {
+    "physical": false,
+    "logical": false,
+    "module": false,
+    "lateEvents": 0
+  },
+  "events": [
+    {
+      "status": "loading",
+      "previousStatus": "idle",
+      "source": "image:a"
+    },
+    {
+      "status": "loaded",
+      "previousStatus": "loading",
+      "source": "image:b"
+    },
+    {
+      "status": "loading",
+      "previousStatus": "loaded",
+      "source": "image:b"
+    },
+    {
+      "status": "error",
+      "previousStatus": "loading",
+      "source": "image:b"
+    },
+    {
+      "status": "idle",
+      "previousStatus": "error",
+      "source": ""
+    },
+    {
+      "status": "loading",
+      "previousStatus": "idle",
+      "source": "image:c"
+    }
+  ],
+  "requests": [
+    {
+      "source": "image:a"
+    },
+    {
+      "source": "image:b"
+    },
+    {
+      "source": "image:b"
+    },
+    {
+      "source": "image:c"
+    }
+  ],
+  "vueErrors": [],
+  "failuresBeforeCapture": []
+}

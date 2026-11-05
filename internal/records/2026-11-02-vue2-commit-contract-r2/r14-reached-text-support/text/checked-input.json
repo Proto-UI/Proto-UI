@@ -1,0 +1,447 @@
+{
+  "test": "Vue2 compile-time root-data demand > preserves legal physical root attributes and style: text",
+  "checkedIR": {
+    "schemaVersion": 5,
+    "name": "root-data-text",
+    "source": {
+      "file": "root-data-text.proto.ts",
+      "exportName": "default",
+      "sha256": "b2757273eef6300f26f2bf9ad1f002f46802f7c61cb9601eae811f45a16ba469"
+    },
+    "sourceFiles": [
+      {
+        "file": "root-data-text.proto.ts",
+        "content": "import {definePrototype} from '@proto.ui/core';\n      import {asImageView,asTextControl} from '@proto.ui/hooks';\n      import {declareImageView} from '@proto.ui/module-image-view';\n      import {declareTextControl} from '@proto.ui/module-text-control';\n      export default definePrototype({name:'root-data-text',modules:[declareTextControl({content:'plain-text',lineMode:'multiline',engine:'host'})],setup(def){const editor=asTextControl();def.lifecycle.onCreated(()=>editor.sync({defaultValue:'seed',valueMode:'uncontrolled',rows:3,minLength:-1,placeholder:'hint',readOnly:true}));return()=>null;}});",
+        "sha256": "6b69b984b084f60e57cd1a6702fa5613538a0927add9f109016712f71f8d19fe"
+      }
+    ],
+    "setup": {
+      "parameters": [
+        {
+          "name": "def",
+          "type": "def"
+        }
+      ],
+      "body": [
+        {
+          "kind": "const",
+          "name": "editor",
+          "value": {
+            "kind": "operation",
+            "operation": "hook.asTextControl",
+            "arguments": [],
+            "type": "text-control",
+            "span": {
+              "file": "root-data-text.proto.ts",
+              "start": 425,
+              "end": 440,
+              "line": 5,
+              "column": 173,
+              "endLine": 5,
+              "endColumn": 188
+            }
+          },
+          "span": {
+            "file": "root-data-text.proto.ts",
+            "start": 418,
+            "end": 440,
+            "line": 5,
+            "column": 166,
+            "endLine": 5,
+            "endColumn": 188
+          }
+        },
+        {
+          "kind": "effect",
+          "expression": {
+            "kind": "operation",
+            "operation": "lifecycle.onCreated",
+            "receiver": {
+              "kind": "reference",
+              "name": "def",
+              "type": "def",
+              "span": {
+                "file": "root-data-text.proto.ts",
+                "start": 441,
+                "end": 444,
+                "line": 5,
+                "column": 189,
+                "endLine": 5,
+                "endColumn": 192
+              }
+            },
+            "arguments": [
+              {
+                "kind": "function",
+                "type": "function",
+                "function": {
+                  "parameters": [],
+                  "body": [
+                    {
+                      "kind": "return",
+                      "value": {
+                        "kind": "operation",
+                        "operation": "textControl.sync",
+                        "receiver": {
+                          "kind": "reference",
+                          "name": "editor",
+                          "type": "text-control",
+                          "span": {
+                            "file": "root-data-text.proto.ts",
+                            "start": 469,
+                            "end": 475,
+                            "line": 5,
+                            "column": 217,
+                            "endLine": 5,
+                            "endColumn": 223
+                          }
+                        },
+                        "arguments": [
+                          {
+                            "kind": "record",
+                            "type": {
+                              "kind": "record",
+                              "fields": [
+                                {
+                                  "name": "defaultValue",
+                                  "type": "string"
+                                },
+                                {
+                                  "name": "valueMode",
+                                  "type": "string"
+                                },
+                                {
+                                  "name": "rows",
+                                  "type": "number"
+                                },
+                                {
+                                  "name": "minLength",
+                                  "type": "number"
+                                },
+                                {
+                                  "name": "placeholder",
+                                  "type": "string"
+                                },
+                                {
+                                  "name": "readOnly",
+                                  "type": "boolean"
+                                }
+                              ]
+                            },
+                            "entries": [
+                              {
+                                "key": "defaultValue",
+                                "value": {
+                                  "kind": "literal",
+                                  "value": "seed",
+                                  "type": "string",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 495,
+                                    "end": 501,
+                                    "line": 5,
+                                    "column": 243,
+                                    "endLine": 5,
+                                    "endColumn": 249
+                                  }
+                                }
+                              },
+                              {
+                                "key": "valueMode",
+                                "value": {
+                                  "kind": "literal",
+                                  "value": "uncontrolled",
+                                  "type": "string",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 512,
+                                    "end": 526,
+                                    "line": 5,
+                                    "column": 260,
+                                    "endLine": 5,
+                                    "endColumn": 274
+                                  }
+                                }
+                              },
+                              {
+                                "key": "rows",
+                                "value": {
+                                  "kind": "literal",
+                                  "value": 3,
+                                  "type": "number",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 532,
+                                    "end": 533,
+                                    "line": 5,
+                                    "column": 280,
+                                    "endLine": 5,
+                                    "endColumn": 281
+                                  }
+                                }
+                              },
+                              {
+                                "key": "minLength",
+                                "value": {
+                                  "kind": "unary",
+                                  "operator": "-",
+                                  "operand": {
+                                    "kind": "literal",
+                                    "value": 1,
+                                    "type": "number",
+                                    "span": {
+                                      "file": "root-data-text.proto.ts",
+                                      "start": 545,
+                                      "end": 546,
+                                      "line": 5,
+                                      "column": 293,
+                                      "endLine": 5,
+                                      "endColumn": 294
+                                    }
+                                  },
+                                  "type": "number",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 544,
+                                    "end": 546,
+                                    "line": 5,
+                                    "column": 292,
+                                    "endLine": 5,
+                                    "endColumn": 294
+                                  }
+                                }
+                              },
+                              {
+                                "key": "placeholder",
+                                "value": {
+                                  "kind": "literal",
+                                  "value": "hint",
+                                  "type": "string",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 559,
+                                    "end": 565,
+                                    "line": 5,
+                                    "column": 307,
+                                    "endLine": 5,
+                                    "endColumn": 313
+                                  }
+                                }
+                              },
+                              {
+                                "key": "readOnly",
+                                "value": {
+                                  "kind": "literal",
+                                  "value": true,
+                                  "type": "boolean",
+                                  "span": {
+                                    "file": "root-data-text.proto.ts",
+                                    "start": 575,
+                                    "end": 579,
+                                    "line": 5,
+                                    "column": 323,
+                                    "endLine": 5,
+                                    "endColumn": 327
+                                  }
+                                }
+                              }
+                            ],
+                            "span": {
+                              "file": "root-data-text.proto.ts",
+                              "start": 481,
+                              "end": 580,
+                              "line": 5,
+                              "column": 229,
+                              "endLine": 5,
+                              "endColumn": 328
+                            }
+                          }
+                        ],
+                        "type": "void",
+                        "span": {
+                          "file": "root-data-text.proto.ts",
+                          "start": 469,
+                          "end": 581,
+                          "line": 5,
+                          "column": 217,
+                          "endLine": 5,
+                          "endColumn": 329
+                        }
+                      },
+                      "span": {
+                        "file": "root-data-text.proto.ts",
+                        "start": 469,
+                        "end": 581,
+                        "line": 5,
+                        "column": 217,
+                        "endLine": 5,
+                        "endColumn": 329
+                      }
+                    }
+                  ],
+                  "phase": "callback",
+                  "context": "created",
+                  "returnType": "void",
+                  "span": {
+                    "file": "root-data-text.proto.ts",
+                    "start": 465,
+                    "end": 581,
+                    "line": 5,
+                    "column": 213,
+                    "endLine": 5,
+                    "endColumn": 329
+                  }
+                },
+                "span": {
+                  "file": "root-data-text.proto.ts",
+                  "start": 465,
+                  "end": 581,
+                  "line": 5,
+                  "column": 213,
+                  "endLine": 5,
+                  "endColumn": 329
+                }
+              }
+            ],
+            "type": "void",
+            "span": {
+              "file": "root-data-text.proto.ts",
+              "start": 441,
+              "end": 582,
+              "line": 5,
+              "column": 189,
+              "endLine": 5,
+              "endColumn": 330
+            }
+          },
+          "span": {
+            "file": "root-data-text.proto.ts",
+            "start": 441,
+            "end": 583,
+            "line": 5,
+            "column": 189,
+            "endLine": 5,
+            "endColumn": 331
+          }
+        },
+        {
+          "kind": "return",
+          "value": {
+            "kind": "function",
+            "type": "function",
+            "function": {
+              "parameters": [],
+              "body": [
+                {
+                  "kind": "return",
+                  "value": {
+                    "kind": "literal",
+                    "value": null,
+                    "type": "null",
+                    "span": {
+                      "file": "root-data-text.proto.ts",
+                      "start": 593,
+                      "end": 597,
+                      "line": 5,
+                      "column": 341,
+                      "endLine": 5,
+                      "endColumn": 345
+                    }
+                  },
+                  "span": {
+                    "file": "root-data-text.proto.ts",
+                    "start": 593,
+                    "end": 597,
+                    "line": 5,
+                    "column": 341,
+                    "endLine": 5,
+                    "endColumn": 345
+                  }
+                }
+              ],
+              "phase": "render",
+              "context": "render",
+              "returnType": "null",
+              "span": {
+                "file": "root-data-text.proto.ts",
+                "start": 589,
+                "end": 597,
+                "line": 5,
+                "column": 337,
+                "endLine": 5,
+                "endColumn": 345
+              }
+            },
+            "span": {
+              "file": "root-data-text.proto.ts",
+              "start": 589,
+              "end": 597,
+              "line": 5,
+              "column": 337,
+              "endLine": 5,
+              "endColumn": 345
+            }
+          },
+          "span": {
+            "file": "root-data-text.proto.ts",
+            "start": 583,
+            "end": 598,
+            "line": 5,
+            "column": 331,
+            "endLine": 5,
+            "endColumn": 346
+          }
+        }
+      ],
+      "phase": "setup",
+      "context": "setup",
+      "returnType": "function",
+      "span": {
+        "file": "root-data-text.proto.ts",
+        "start": 401,
+        "end": 599,
+        "line": 5,
+        "column": 149,
+        "endLine": 5,
+        "endColumn": 347
+      }
+    },
+    "hooks": [],
+    "contextKeys": [],
+    "staticDeclarations": [],
+    "moduleDeclarations": [
+      {
+        "id": "@proto.ui/text-control/declaration",
+        "config": {
+          "content": "plain-text",
+          "lineMode": "multiline",
+          "engine": "host"
+        },
+        "span": {
+          "file": "root-data-text.proto.ts",
+          "start": 322,
+          "end": 399,
+          "line": 5,
+          "column": 70,
+          "endLine": 5,
+          "endColumn": 147
+        }
+      }
+    ],
+    "props": [],
+    "exposes": [],
+    "requirements": [
+      "hook",
+      "lifecycle",
+      "textControl"
+    ]
+  },
+  "authoredGraph": [
+    {
+      "file": "root-data-text.proto.ts",
+      "content": "import {definePrototype} from '@proto.ui/core';\n      import {asImageView,asTextControl} from '@proto.ui/hooks';\n      import {declareImageView} from '@proto.ui/module-image-view';\n      import {declareTextControl} from '@proto.ui/module-text-control';\n      export default definePrototype({name:'root-data-text',modules:[declareTextControl({content:'plain-text',lineMode:'multiline',engine:'host'})],setup(def){const editor=asTextControl();def.lifecycle.onCreated(()=>editor.sync({defaultValue:'seed',valueMode:'uncontrolled',rows:3,minLength:-1,placeholder:'hint',readOnly:true}));return()=>null;}});",
+      "sha256": "6b69b984b084f60e57cd1a6702fa5613538a0927add9f109016712f71f8d19fe"
+    }
+  ],
+  "note": "Actual checked-IR emitter input; runtime transpilation is not strict validation."
+}

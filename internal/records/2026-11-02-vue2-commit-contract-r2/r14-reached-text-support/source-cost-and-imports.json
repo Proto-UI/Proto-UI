@@ -1,0 +1,724 @@
+{
+  "text": {
+    "control": {
+      "codeBytes": 38986,
+      "codeSHA256": "14a5335f1f7dd9697e8afb2aa6904f5d2dbc87314b38d9e3956a4728f5d89267",
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        },
+        {
+          "name": "@floating-ui/dom",
+          "version": "1.8.0",
+          "role": "target"
+        }
+      ],
+      "files": [
+        {
+          "path": "Component.js",
+          "bytes": 38986,
+          "sha256": "14a5335f1f7dd9697e8afb2aa6904f5d2dbc87314b38d9e3956a4728f5d89267",
+          "imports": [
+            "./.proto-ui/interaction/native-v1",
+            "./.proto-ui/context/scope-v1"
+          ]
+        },
+        {
+          "path": ".proto-ui/context/scope-v1.ts",
+          "bytes": 8797,
+          "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          "imports": []
+        },
+        {
+          "path": ".proto-ui/interaction/native-v1.ts",
+          "bytes": 39195,
+          "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+          "imports": [
+            "./adapter-modules-v1",
+            "./adapter-modules-v1"
+          ]
+        },
+        {
+          "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+          "bytes": 132532,
+          "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+          "imports": [
+            "@floating-ui/dom"
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "codeBytes": 31000,
+      "codeSHA256": "dd38eb4a5933586bc7153cea477d9fdab67359a3bc2ff0cbdd88364ffbeeb8b2",
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        }
+      ],
+      "files": [
+        {
+          "path": "Component.js",
+          "bytes": 31000,
+          "sha256": "dd38eb4a5933586bc7153cea477d9fdab67359a3bc2ff0cbdd88364ffbeeb8b2",
+          "imports": [
+            "./.proto-ui/interaction/text-multiline-v1",
+            "./.proto-ui/context/scope-v1"
+          ]
+        },
+        {
+          "path": ".proto-ui/context/scope-v1.ts",
+          "bytes": 8797,
+          "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+          "imports": []
+        },
+        {
+          "path": ".proto-ui/interaction/ownership-v1.ts",
+          "bytes": 4229,
+          "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+          "imports": []
+        },
+        {
+          "path": ".proto-ui/interaction/text-multiline-v1.ts",
+          "bytes": 15007,
+          "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+          "imports": [
+            "./ownership-v1"
+          ]
+        }
+      ]
+    }
+  },
+  "elevenAdditionalCases": [
+    {
+      "case": "dormant",
+      "inputSHA256": "e458ef747bb0390075b5c610f16d9741a4806aa00244c0ac0114af1a904f8e2c",
+      "resultSHA256": "b66a053411222dc943d548ddd7c1e9ad68adb5c735608bdae3d527f0e93cadca",
+      "module": {
+        "codeBytes": 31049,
+        "codeSHA256": "3ceeb29937465dac44e66120ab9ba3bbff1b780eab5f104b40da2601835df13d",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 31049,
+            "sha256": "3ceeb29937465dac44e66120ab9ba3bbff1b780eab5f104b40da2601835df13d",
+            "imports": [
+              "./.proto-ui/interaction/text-multiline-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-multiline-v1.ts",
+            "bytes": 15007,
+            "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "focus",
+      "inputSHA256": "010195fcf6d21be0c3047dd5a8821fb88b54b4f13d5df3ae655fdbe07c38b9e1",
+      "resultSHA256": "12c99f305c87c1b1de036e8fcf266e5b98ff8ef06a9deba4ec29169731a92bf6",
+      "module": {
+        "codeBytes": 38947,
+        "codeSHA256": "1b246c3ab9db56e7b50b064e9eba1fdfa1ed3fda2fe99d0659ea094eb55d265d",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          },
+          {
+            "name": "@floating-ui/dom",
+            "version": "1.8.0",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 38947,
+            "sha256": "1b246c3ab9db56e7b50b064e9eba1fdfa1ed3fda2fe99d0659ea094eb55d265d",
+            "imports": [
+              "./.proto-ui/interaction/native-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "bytes": 38998,
+            "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+            "imports": [
+              "./adapter-modules-v1",
+              "./adapter-modules-v1",
+              "./ownership-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "bytes": 129577,
+            "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+            "imports": [
+              "./ownership-v1",
+              "@floating-ui/dom"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "lifetime-outer",
+      "inputSHA256": "35b55f6c5c64d92a84efa47b08e03670c312c185a2f902c2884fd62950142bd5",
+      "resultSHA256": "c3dc1ba10aab2e33c921b84b8fa11f33f226c9e852ca96a491dfdddfcaec8239",
+      "module": {
+        "codeBytes": 40176,
+        "codeSHA256": "8751f07b56993c2a686679360241230f63f79f277987604a2db01638f801c167",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          },
+          {
+            "name": "@floating-ui/dom",
+            "version": "1.8.0",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 40176,
+            "sha256": "8751f07b56993c2a686679360241230f63f79f277987604a2db01638f801c167",
+            "imports": [
+              "./.proto-ui/interaction/native-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "bytes": 38998,
+            "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+            "imports": [
+              "./adapter-modules-v1",
+              "./adapter-modules-v1",
+              "./ownership-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "bytes": 129577,
+            "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+            "imports": [
+              "./ownership-v1",
+              "@floating-ui/dom"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "lifetime-text",
+      "inputSHA256": "fd9c07c29dfefc5dc124ef4d0b56dc615b185fcf48855bc4e9b069e7a3a76523",
+      "resultSHA256": "24b810ae13d2825dbee64bd333e6438602da27f76d4aa7e7abd7df86675bfe03",
+      "module": {
+        "codeBytes": 31538,
+        "codeSHA256": "65e702d5102ad8e2742a5754b22aa4b436aa1ea595688b99ea18c42aa3c1b2a9",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 31538,
+            "sha256": "65e702d5102ad8e2742a5754b22aa4b436aa1ea595688b99ea18c42aa3c1b2a9",
+            "imports": [
+              "./.proto-ui/interaction/text-multiline-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-multiline-v1.ts",
+            "bytes": 15007,
+            "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "mixed-reference",
+      "inputSHA256": "3471613f7559726fd4faf9f4351d9f0a05a4d48111ff36deda6beaaa9ead94ee",
+      "resultSHA256": "fb3d860955f19820950302ef94a5b7eae58f47c8e88c5e1d51c52532d584a43d",
+      "module": {
+        "codeBytes": 30923,
+        "codeSHA256": "f32e85cedf7e41be11b49080f848f558f9e5d7f78d0168b78bf256b2cffa2c15",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 30923,
+            "sha256": "f32e85cedf7e41be11b49080f848f558f9e5d7f78d0168b78bf256b2cffa2c15",
+            "imports": [
+              "./.proto-ui/interaction/text-single-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-single-v1.ts",
+            "bytes": 15190,
+            "sha256": "8d7c2e6b7568336e762fe5d99475470a57d85603fa530f73e10c1b5bf4e3f0de",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "overlay",
+      "inputSHA256": "0109f9f112f194bf87300e664d527f69b6845e3ca2c911977cd12648613b79d3",
+      "resultSHA256": "858e3bbc4c65b416ffabbdc3fd04e1cad0325fb68a43e6f32431838a2a35ef33",
+      "module": {
+        "codeBytes": 41080,
+        "codeSHA256": "c38b6be84bf2b2e83eabb6ffce632bcf5d3a764e9c1f23ee547e3268325003bc",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          },
+          {
+            "name": "@floating-ui/dom",
+            "version": "1.8.0",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 41080,
+            "sha256": "c38b6be84bf2b2e83eabb6ffce632bcf5d3a764e9c1f23ee547e3268325003bc",
+            "imports": [
+              "./.proto-ui/interaction/native-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "bytes": 38998,
+            "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+            "imports": [
+              "./adapter-modules-v1",
+              "./adapter-modules-v1",
+              "./ownership-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "bytes": 129577,
+            "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+            "imports": [
+              "./ownership-v1",
+              "@floating-ui/dom"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "plain",
+      "inputSHA256": "aca349ead653b1e3ad4188a71b9762e075a51ca9ce02d6a902ecd9a5c308df6c",
+      "resultSHA256": "00add7773534a9e70aa4af04ba406c9a0658ab68e03e0f89ad3526404b3b019a",
+      "module": {
+        "codeBytes": 31032,
+        "codeSHA256": "6374c181b51ea98ed729af45871a3d37d231689e2706569331af9d635d11b7fc",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 31032,
+            "sha256": "6374c181b51ea98ed729af45871a3d37d231689e2706569331af9d635d11b7fc",
+            "imports": [
+              "./.proto-ui/interaction/text-multiline-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-multiline-v1.ts",
+            "bytes": 15007,
+            "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "routing-fault-outer",
+      "inputSHA256": "6c3267720ac0328c7f6f7ac92ae07639d29e6c2ebaf1a745dc41ca52e67f3adc",
+      "resultSHA256": "e623b0e81cb521bce17418f844d521859bd808209a681ca3769b4dd058ea6743",
+      "module": {
+        "codeBytes": 40206,
+        "codeSHA256": "d5ae6bd9b2390b5a37079551a2b8acac8219b495cb1db1c2ca42ba06b86c331b",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          },
+          {
+            "name": "@floating-ui/dom",
+            "version": "1.8.0",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 40206,
+            "sha256": "d5ae6bd9b2390b5a37079551a2b8acac8219b495cb1db1c2ca42ba06b86c331b",
+            "imports": [
+              "./.proto-ui/interaction/native-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "bytes": 38998,
+            "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+            "imports": [
+              "./adapter-modules-v1",
+              "./adapter-modules-v1",
+              "./ownership-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "bytes": 129577,
+            "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+            "imports": [
+              "./ownership-v1",
+              "@floating-ui/dom"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "routing-fault-text",
+      "inputSHA256": "5c0251a3a787a2ba7310830371e3f9d8f37e5bbf2e1f7d6e9cf82847e9f47e8f",
+      "resultSHA256": "64dd0b56b570a9ee55b12fd0e7dc92281e60209261497e84e86752a55b31f6d6",
+      "module": {
+        "codeBytes": 31588,
+        "codeSHA256": "3b6507670dcf4315751c45e0a0e070222b035d950146280c4baca6ce7415de18",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 31588,
+            "sha256": "3b6507670dcf4315751c45e0a0e070222b035d950146280c4baca6ce7415de18",
+            "imports": [
+              "./.proto-ui/interaction/text-multiline-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-multiline-v1.ts",
+            "bytes": 15007,
+            "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "routing-outer",
+      "inputSHA256": "2f9b749f57ba0bf450df94c865116a2962c21b46e21e3459f8b86f61318186e0",
+      "resultSHA256": "6bdb39689e390fe5da0e2aff9918efb7dfb886e660bca6b549b2cca625122aa9",
+      "module": {
+        "codeBytes": 40170,
+        "codeSHA256": "10b4678f4c7dd7cec0f8c4b37d30ec98a0c17db6d19f85770c3138d94ab9e917",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          },
+          {
+            "name": "@floating-ui/dom",
+            "version": "1.8.0",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 40170,
+            "sha256": "10b4678f4c7dd7cec0f8c4b37d30ec98a0c17db6d19f85770c3138d94ab9e917",
+            "imports": [
+              "./.proto-ui/interaction/native-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "bytes": 38998,
+            "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07",
+            "imports": [
+              "./adapter-modules-v1",
+              "./adapter-modules-v1",
+              "./ownership-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "bytes": 129577,
+            "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08",
+            "imports": [
+              "./ownership-v1",
+              "@floating-ui/dom"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "case": "routing-text",
+      "inputSHA256": "75143bff028ed25fd9260031814b4458b18ad3365564f01b51a051c1be74faa9",
+      "resultSHA256": "00bff5bc2298eed23d1312520ede85bed4e21f5339b85358796573590c732acc",
+      "module": {
+        "codeBytes": 31528,
+        "codeSHA256": "a85c6757f9d123cc4f0c57e5364f87b4f10668e4f5e086e3a57ddcce267bfef9",
+        "dependencies": [
+          {
+            "name": "vue",
+            "version": "2.6.14",
+            "role": "target"
+          }
+        ],
+        "files": [
+          {
+            "path": "Component.js",
+            "bytes": 31528,
+            "sha256": "a85c6757f9d123cc4f0c57e5364f87b4f10668e4f5e086e3a57ddcce267bfef9",
+            "imports": [
+              "./.proto-ui/interaction/text-multiline-v1",
+              "./.proto-ui/context/scope-v1"
+            ]
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "bytes": 8797,
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/ownership-v1.ts",
+            "bytes": 4229,
+            "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44",
+            "imports": []
+          },
+          {
+            "path": ".proto-ui/interaction/text-multiline-v1.ts",
+            "bytes": 15007,
+            "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727",
+            "imports": [
+              "./ownership-v1"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "ssr": [
+    {
+      "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=false)",
+      "sameInput": true,
+      "inputSHA256": "18580d8cd006861454f01734dc5f7212083888197c443e978ae8d0f66541a146",
+      "wholeResultSHA256": "5f4b5e1434983e48ba3d45c6d9d3bd5a02862dd484ab8e55f1b5bfa46e15f090",
+      "wholeResultBytes": 52750,
+      "wholeModuleByteEqualToPreviousActualAndPublicR12": true,
+      "boundary": "Complete actual emitted module result, including code/profile/supportingFiles/dependencies/provenance. Not executed native SSR or hydration."
+    },
+    {
+      "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=true)",
+      "sameInput": true,
+      "inputSHA256": "6c779367c58cba9cc66601c943565ce822ad134f70abc62f27a8b0b7dc0af0b9",
+      "wholeResultSHA256": "3b41e6d2658b986d00fc11516253ca8ceaad90acc923b8f281b20b87380ab9cc",
+      "wholeResultBytes": 236831,
+      "wholeModuleByteEqualToPreviousActualAndPublicR12": true,
+      "boundary": "Complete actual emitted module result, including code/profile/supportingFiles/dependencies/provenance. Not executed native SSR or hydration."
+    }
+  ],
+  "remainingInitialization": "Shared ownership still constructs nine containers; parts, exposeSignals and defaultPreventedSamples are not needed by pure Text. This is recorded remaining cost, not proof that all initialization is demand-only.",
+  "measurementBoundary": "Generated source bytes/import graph only. Bundler metadata in migration observations is diagnostic, not optimized production-retained cost, timing, heap or initialization measurement.",
+  "fullFamilyCost": {
+    "oldUniversalInteractionSourcesBytes": 171727,
+    "newFullFamilyInteractionSourcesBytes": 172804,
+    "deltaBytes": 1077,
+    "meaning": "Final source-only adverse delta with stable original import ABI. Earlier R14 before ABI restoration measured172801; final actual full-family outputs are172804. No universal size saving."
+  },
+  "migrationCost": "New output retains all original component/map bytes, manifest/provenance records and explicit local export facades, with one reached shared support instance. Original directories are retained unchanged. This adds directory/provenance/facade bytes and is not a zero-cost migration."
+}

@@ -8,8 +8,17 @@ import {
 } from './ir';
 import { isAssignable } from './data-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
+import { nativeImageViewArtifact } from './native-image-view';
 import { NativeLexicalScope } from './template-shape';
 import { interactionValueAlternatives } from './interaction-value-shape';
+import type { TargetOperationAnalysis } from './targets';
+import {
+  nativeAdapterModulesWithOwnership,
+  nativeOwnershipArtifact,
+  nativeSourceSection,
+  nativeTextControlArtifact,
+  replaceNativeSource,
+} from './native-adapter-modules';
 
 const interactionFile = '.proto-ui/interaction/native-v1.ts';
 const semanticEvents = [
@@ -763,4 +772,77 @@ export function createNativeInteraction<Run>(options: {
   };
 }
 `;
+}
+
+/**
+ * Use only the canonical admitted call graph. This narrow implemented family
+ * closure is conservative: every other reached host family keeps its existing
+ * complete implementation until its own split and controls are supplied.
+ */
+export function selectNativeSupport(
+  ir: Pick<PrototypeIR, 'moduleDeclarations'>,
+  admitted: Pick<TargetOperationAnalysis, 'operations'>
+): 'text-single' | 'text-multiline' | 'image' | 'full' {
+  const imageOnly =
+    ir.moduleDeclarations.length === 1 &&
+    ir.moduleDeclarations[0].id === '@proto.ui/image-view/declaration';
+  if (
+    !imageOnly &&
+    (!ir.moduleDeclarations.length ||
+      ir.moduleDeclarations.some(
+        (declaration) =>
+          declaration.id !== 'text-control' &&
+          declaration.id !== '@proto.ui/text-control/declaration'
+      ))
+  )
+    return 'full';
+  for (const operation of admitted.operations) {
+    if (
+      imageOnly
+        ? operation === 'hook.asImageView' || operation.startsWith('imageView.')
+        : operation === 'hook.asTextControl' || operation.startsWith('textControl.')
+    )
+      continue;
+    // Existing owner/template/state/style/context operations have no additional
+    // interaction-host family. Unknown/new operations conservatively keep full.
+    if (
+      /^(props\.|render\.|lifecycle\.|state\.|expose\.|context\.|style\.|rule\.|feedback\.)/.test(
+        operation
+      )
+    )
+      continue;
+    if (operation === 'run.update' || (imageOnly && operation === 'subscription.release')) continue;
+    return 'full';
+  }
+  // validateIR has already checked the physical declaration and its literal config.
+  if (imageOnly) return 'image';
+  return ir.moduleDeclarations[0].config.lineMode === 'single' ? 'text-single' : 'text-multiline';
+}
+
+export function nativeInteractionArtifacts(
+  selection: 'text-single' | 'text-multiline' | 'image' | 'full'
+) {
+  const ownership = nativeOwnershipArtifact(nativeInteractionArtifact.contents);
+  if (selection === 'image') return [ownership, nativeImageViewArtifact];
+  if (selection !== 'full')
+    return [ownership, nativeTextControlArtifact(selection === 'text-single')];
+  let source = nativeInteractionArtifact.contents;
+  const roots = nativeSourceSection(source, 'type RootOwner =', '/** Mark ONLY');
+  source = replaceNativeSource(
+    source,
+    roots,
+    "import { rootOwners, logicalOwners, exposeSignals, defaultPreventedSamples, type RootOwner } from './ownership-v1';\n"
+  );
+  // Keep the established component import ABI. Explicit directory migration
+  // reassembles old/new artifacts into one actual helper instance; untouched
+  // legacy support is not silently overwritten or claimed compatible.
+  return [
+    ownership,
+    {
+      path: '.proto-ui/interaction/native-v1.ts',
+      kind: 'source' as const,
+      contents: source,
+    },
+    nativeAdapterModulesWithOwnership(),
+  ];
 }

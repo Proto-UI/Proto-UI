@@ -1,0 +1,23 @@
+import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:"commit-contract",setup(def){
+  def.props.define({present:{type:'boolean',default:true}});
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
+  const value=def.state.string('value','A');
+  const probe={value:'x'};
+  def.expose.value('probe',probe);
+  def.expose.method('write',(next:string)=>{value.set(next);});
+  def.expose.method('read',()=>value.get());
+  return r=>{
+    const read=()=>probe.value;
+    const alias=read;
+    const selected=()=>{if(true)return 'selected';return alias();};
+    
+    return r.el('commit-node',[
+      r.el('output',value.get()),
+      r.el('i',alias()),
+      r.el('b',alias()),
+      r.el('small',selected()),
+      r.slot()
+    ]);
+  };
+}});

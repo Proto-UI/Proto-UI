@@ -1,0 +1,27 @@
+{
+  "profile": "vue2-source-v1",
+  "dependencies": [
+    {
+      "name": "vue",
+      "version": "2.6.14",
+      "role": "target"
+    }
+  ],
+  "provenance": {
+    "source": {
+      "file": "commit-contract.proto.ts",
+      "exportName": "default",
+      "sha256": "e760cb8554887e1cfb29bee300334047473aa6dbdf49e05a59c1cebcf5926ca8"
+    },
+    "irVersion": 5,
+    "backend": "vue2-source-v1"
+  },
+  "supportingFiles": [
+    {
+      "path": ".proto-ui/context/scope-v1.ts",
+      "kind": "source"
+    }
+  ],
+  "originalModuleSHA256": "fc2d8d5b60a6f80cd06d0e90b048bc8f5f761bc98b84ef42fbc2b493359cea63",
+  "note": "Code/contents preserved byte-for-byte in graph/*.txt; no executable import path is changed in those original bytes."
+}

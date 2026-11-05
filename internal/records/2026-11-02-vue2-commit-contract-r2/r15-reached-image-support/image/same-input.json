@@ -1,0 +1,8 @@
+{
+  "inputSHA256": "9dfcfb9ca6e6e107e1f5d390cc1a2e32b025a0064639adc981f2c58744859203",
+  "controlModuleSHA256": "7620fc6984a9e953ca9c685a9acf16160cddb956ad1c4e927a3d965c83fe5bde",
+  "candidateModuleSHA256": "bf70e6d06ef19f8ad3279136b4b7086523677932bb200d8a5c80a2aa998fdae1",
+  "demandInputSHA256": "ec627001b2030d56d9c03848401b4f679d6b25c07931a25681905bbd6f78880c",
+  "completeInputsEqual": true,
+  "baseline54Program215Unchanged": true
+}

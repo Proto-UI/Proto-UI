@@ -1,0 +1,117 @@
+--- a/Component.js
++++ b/Component.js
+@@ -40,6 +40,11 @@
+ /** @template T @typedef {{ type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }} __puiStateEvent */
+ /** @template T @typedef {{ get: () => T, setDefault: (value: T) => void, set: (value: T, reason?: unknown) => void, external: __puiExternalState<T>, dispose: () => void }} __puiOwnedState */
+ /** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: __puiDataType } | { kind: 'union', members: readonly __puiDataType[] } | { kind: 'record', fields: readonly { name: string, type: __puiDataType, optional?: boolean }[] }} __puiDataType */
++/** @typedef {Readonly<Record<string, unknown>>} __puiRawProps */
++/** @typedef {Readonly<GeneratedProps & Record<string, unknown>>} __puiResolvedProps */
++/** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} __puiPropsWatchInfo */
++/** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: __puiPropsWatchInfo) => void} __puiPropsWatchCallback */
++/** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: __puiPropsWatchCallback<Run, __puiRawProps> }} __puiPropsWatchRegistration */
+ /** @typedef {{ epoch: number, revision: number, kind: 'update' }} __puiPendingCommit */
+ /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} __puiRenderedCommit */
+ /** @param {unknown} value @param {PropertyKey} key */
+@@ -102,11 +107,14 @@
+   let renderFunction;
+   /** @type {(() => void) | undefined} */
+   let unwatch;
++  /** @type {__puiRawProps} */
+   let raw = Object.freeze({});
++  /** @type {__puiResolvedProps} */
+   let resolved = Object.freeze({});
+   let previousValid = Object.create(null);
+   let specs = Object.create(null);
+   const defaults = [];
++  /** @type {Array<__puiPropsWatchRegistration<typeof run> & { active: boolean }>} */
+   const watchers = [];
+   /** @type {Array<{ dispose: () => void }>} */
+   const states = [];
+@@ -123,6 +131,7 @@
+   const callback = () => { alive(); if (phase !== 'callback') throw new Error('[Vue2 native] mutation requires callback scope.'); };
+   const setupOnly = () => { alive(); if (phase !== 'setup') throw new Error('[Vue2 native] declaration requires setup scope.'); };
+ 
++  /** @returns {__puiRawProps} */
+   const hostRaw = () => {
+     
+     // Full snapshots preserve omission and explicit undefined. Vue Boolean casting and
+@@ -139,6 +148,7 @@
+     for (const key of Object.keys(input)) out[key] = input[key];
+     return Object.freeze(out);
+   };
++  /** @param {__puiRawProps} a @param {__puiRawProps} b */
+   const same = (a, b) => {
+     const keys = Object.keys(a);
+     return keys.length === Object.keys(b).length && keys.every((key) => __puiOwn(b, key) && Object.is(a[key], b[key]));
+@@ -149,7 +159,9 @@
+     if (spec.type === 'enum' && !spec.options.includes(value)) return false;
+     return !spec.range || typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity);
+   };
++  /** @param {__puiRawProps} input @param {boolean} strict */
+   const resolveProps = (input, strict) => {
++    /** @type {Record<string, unknown>} */
+     const out = Object.create(null);
+     const nextValid = { ...previousValid };
+     /** @type {{ providedKeys: string[], emptyKeys: string[], invalidKeys: string[], usedFallbackKeys: string[], acceptedEmptyKeys: string[] }} */
+@@ -184,7 +196,9 @@
+       if (provided && selected !== null) nextValid[key] = selected;
+     }
+     previousValid = nextValid;
+-    return { snapshot: Object.freeze(out), meta };
++    /** @type {__puiResolvedProps} */
++    const snapshot = Object.freeze(out);
++    return { snapshot, meta };
+   };
+   const invoke = (fn, sync = true) => {
+     alive();
+@@ -218,8 +232,13 @@
+               const isRaw = group < 2;
+               const changedKeysAll = isRaw ? changedRawKeys : changedKeys;
+               const changedKeysMatched = watch.keys === null ? changedKeysAll : watch.keys.filter((key) => changedKeysAll.includes(key));
+-              if (changedKeysMatched.length) watch.fn(run, isRaw ? nextRaw : next.snapshot,
+-                isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });
++              if (changedKeysMatched.length) {
++                const info = { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] };
++                // The registration discriminant preserves the raw/resolved callback
++                // relation; the host group order and snapshot copies stay unchanged.
++                if (watch.kind === 'raw' || watch.kind === 'raw-all') watch.fn(run, nextRaw, previousRaw, info);
++                else watch.fn(run, next.snapshot, previous, info);
++              }
+             }
+           }
+         }, false);
+@@ -385,11 +404,13 @@
+     }
+     specs = next; resolved = resolveProps(raw, false).snapshot;
+   };
+-  const registerPropsWatch = (kind, keys, fn) => {
++  /** @param {__puiPropsWatchRegistration<typeof run>} registration */
++  const registerPropsWatch = (registration) => {
+     setupOnly();
++    const { kind, keys } = registration;
+     if (keys !== null && (!keys.length || keys.some((key) => typeof key !== 'string'
+       || kind === 'resolved' && !__puiOwn(specs, key)))) throw new Error('[Vue2 native] watch requires non-empty valid prop keys.');
+-    const watch = { kind, keys: keys === null ? null : [...keys], fn, active: true };
++    const watch = { ...registration, keys: keys === null ? null : [...keys], active: true };
+     watchers.push(watch);
+     return () => { watch.active = false; };
+   };
+@@ -404,10 +425,14 @@
+         for (const key of Object.keys(layer)) if (!__puiOwn(specs, key) || !__puiJson(layer[key])) throw new Error('[Vue2 native] invalid prop default: ' + key);
+         defaults.unshift({ ...layer }); resolved = resolveProps(raw, false).snapshot;
+       },
+-      watch: (keys, fn) => registerPropsWatch('resolved', keys, fn),
+-      watchAll: (fn) => registerPropsWatch('resolved-all', null, fn),
+-      watchRaw: (keys, fn) => registerPropsWatch('raw', keys, fn),
+-      watchRawAll: (fn) => registerPropsWatch('raw-all', null, fn),
++      /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */
++      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn }),
++      /** @param {__puiPropsWatchCallback<typeof run, __puiResolvedProps>} fn */
++      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn }),
++      /** @param {readonly string[]} keys @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */
++      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn }),
++      /** @param {__puiPropsWatchCallback<typeof run, __puiRawProps>} fn */
++      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn }),
+     },
+     state: {
+       bool: (key, value) => createState('bool', key, value),

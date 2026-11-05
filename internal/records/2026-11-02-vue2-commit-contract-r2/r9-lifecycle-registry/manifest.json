@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "record": "vue2-r9-lifecycle-registry-increment",
+  "status": "WIP_FULL_STRICT97_AND_LAWFUL_HELPER_REGRESSION_REMAIN",
+  "basePublicCommit": "a80effa78514ae7c5238dfc08bbd84715ccb6b82",
+  "basePublicRecord": "internal/records/2026-11-02-vue2-commit-contract-r2/r8-props-watch",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "2ffbe46c50d3d9769d77439fbd4d19128dd94cbd",
+  "candidateTree": "a90472e123d0933ef4396c16d222444f728796b0",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 70121,
+      "sha256": "bf794b1f1413632468c78904da19826b8881f941d48cac9307f5e574ffbcc9a6"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "bytes": 43843,
+      "sha256": "8be12d08282ac8d10f1e4d8a11f5d4236d3db2eba644d1c3a560865fa46ebd7f"
+    }
+  ],
+  "baseFiles": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 38054,
+      "sha256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 48421,
+      "sha256": "ac98094e9d6e9fa91406d821a5a8030fe29372e0dde6f404a05ded78d26384b2"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "67a5ebd924a954ed767c3d6b30ae319b46c20daa9a9a6996680d861e6bb6504a"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "component": {
+    "basePath": "graph/Component.js",
+    "baseSHA256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9",
+    "resultSHA256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579",
+    "edits": [
+      {
+        "byteOffset": 3206,
+        "delete": "",
+        "insert": "/** @typedef {\"created\" | \"mounted\" | \"updated\" | \"unmounted\" | \"beforeDispose\"} __puiLifecycleKind */\n/** @template Run @typedef {(run: Run) => void} __puiLifecycleCallback */\n"
+      },
+      {
+        "byteOffset": 6778,
+        "delete": "  const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };\n",
+        "insert": "  /** @type {Record<__puiLifecycleKind, Array<__puiLifecycleCallback<typeof run>>>} */\n  const lifecycle = { \"created\": [], \"mounted\": [], \"updated\": [], \"unmounted\": [], \"beforeDispose\": [] };\n"
+      },
+      {
+        "byteOffset": 22706,
+        "delete": "",
+        "insert": "  /** @type {readonly __puiLifecycleKind[]} */\n  const lifecycleKeys = [\"created\",\"mounted\",\"updated\",\"unmounted\",\"beforeDispose\"];\n"
+      },
+      {
+        "byteOffset": 25044,
+        "delete": "    lifecycle: Object.fromEntries(Object.keys(lifecycle).map((key) => ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }])),\n",
+        "insert": "    lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {\n      /** @type {[string, (fn: __puiLifecycleCallback<typeof run>) => void]} */\n      const entry = ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }];\n      return entry;\n    })),\n"
+      },
+      {
+        "byteOffset": 25218,
+        "delete": "",
+        "insert": "  /** @param {__puiLifecycleKind} kind */\n"
+      },
+      {
+        "byteOffset": 29446,
+        "delete": "      for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;\n",
+        "insert": "      for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;\n"
+      }
+    ],
+    "runtimeStatementChanges": "Finite canonical lifecycle key literal in original order and values-based cleanup of the same live arrays; callback identity and direct dispatch unchanged"
+  },
+  "moduleTransformation": "Only replace the exact JSON-quoted code string with the reconstructed actual Component; preserve every other byte and field.",
+  "programTransformation": {
+    "entries": 215,
+    "replacementCount": 1,
+    "oldComponentSHA256": "fb38cefb77a15ec6df0b70766fd3b7ebbe8b663db71701234923b49178ee10d9",
+    "newComponentSHA256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579",
+    "allOtherBytesUnchanged": true
+  },
+  "copiedFiles": [
+    {
+      "basePath": "graph/.proto-ui/context/scope-v1.ts",
+      "outputPath": "graph/.proto-ui/context/scope-v1.ts"
+    },
+    {
+      "basePath": "graph/Consumer.ts",
+      "outputPath": "graph/Consumer.ts"
+    },
+    {
+      "basePath": "authored.proto.ts.txt",
+      "outputPath": "authored.proto.ts.txt"
+    },
+    {
+      "basePath": "strict-request.portable.json",
+      "outputPath": "strict-request.portable.json"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 38625,
+      "sha256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 49032,
+      "sha256": "c2ebb3a983c58d3722b08e39de81d052bb9d1c976a816743d4b08a7c77ffab68"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "68b5ce62f2c0a426ed28844b84a49dcd85bb335e968ff2a90f24ae99c88c2aad"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "bytes": 26534,
+      "sha256": "14f5840886e54ae7c1f7b44d06df1e926daf03280195000d14603597835a0be1"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "rawStrictHashes": {
+    "diagnostics.json": "0b46e20a430593071843edd8c9c8f42e0a8ef07bcdb27bf81f230f4378ca07f8",
+    "program.json": "b18e748f4bc620e64d1e608c7adf096cbbe8674bc04018f9f7479cbfa846e46b",
+    "request.json": "8637e1982badbeeddfb97b7c6bd548c01e852962764dddeef7fa4ffecc8465a6"
+  },
+  "normalization": "Only four temporary prefix placeholders as the immutable R6 manifest; source/code/consumer/support not normalized. Every original diagnostic/program/request field and ordering is retained. Full inverse byte proof kept locally.",
+  "results": {
+    "coreEach": {
+      "collected": 49,
+      "passed": 47,
+      "failed": 2,
+      "skipped": 0
+    },
+    "regressionEach": {
+      "collected": 41,
+      "passed": 41
+    },
+    "sourceStrictEach": 0,
+    "generatedStrict": {
+      "control": 102,
+      "candidate": 97,
+      "common": 97,
+      "oldOnly": 5,
+      "newOnly": 0
+    },
+    "artifacts": 1230,
+    "artifactBytes": 23224101,
+    "allArtifactHashesVerified": true,
+    "newControlsPassedBoth": 2,
+    "originalR2Cases": 12,
+    "originalR2ExpectSites": 43,
+    "unsupportedRejectionControls": 3
+  },
+  "runnerSHA256": "15c79c5e38f67ad141f8eff23cc178822bbb743e7be4ff9e08f953a0e4b415f2",
+  "gateSHA256": "1aac7b7251644c81cfa8dcc38cabe75b58598df3287d52366a1dba2920f90438",
+  "publicationBoundary": "Two source/test files are the exact executed candidate bytes. A public continuation on a80 is not a separate run of its complete ancestry/current main. No ready/merge/close or independent approval.",
+  "formatStatus": "Actual Prettier3.8.1 data export and read-only recheck both0 before the first R9 project run; these exact final files were executed. Original pre-format inputs retained.",
+  "remaining": [
+    "97 full generated strict diagnostics, lawful legacy-template helper regression, native SSR/hydration old walker path",
+    "Statefactory35/props14/owner14/Context12/Expose12/rootVNode5/authoredEntry5",
+    "Ordinary production mixed consumers/browser, reachable capability cost and complete backend/operation acceptance"
+  ]
+}
