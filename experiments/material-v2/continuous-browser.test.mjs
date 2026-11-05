@@ -9,6 +9,7 @@ import {
   explicitCaptureEvidenceIssues,
   captureActivationEvidenceIssues,
 } from './capture-evidence.ts';
+import { readResizeGeometry, resizeGeometryStyles } from './resize-geometry.ts';
 const root = resolve(process.argv[2]),
   out = resolve(process.argv[3]);
 await mkdir(out, { recursive: true });
@@ -41,6 +42,7 @@ await new Promise((r) => server.listen(0, '127.0.0.1', r));
 const origin = `http://127.0.0.1:${server.address().port}`;
 let browser, context, page, failure;
 const results = [];
+let resizeCheckpoint = null;
 const errors = [];
 const recordingFrames = [];
 const frameWrites = [];
@@ -982,18 +984,32 @@ try {
           paintHeight: parseFloat(p.height),
           quality: e.dataset.materialQuality,
           sourceRevision: Number(e.dataset.materialSourceRevision),
+          materialFrame: e.dataset.materialFrame,
         };
       }),
     }),
     resizeBoundary.index
   );
+  resizeCheckpoint = {
+    before: beforeResize,
+    boundary: resizeBoundary,
+    releasedOldImages,
+    after: resizeResult,
+  };
   assert.deepEqual(resizeResult.counts, beforeResize.counts, 'resize never activates controls');
   assert.equal(
     resizeResult.staleOldImage,
     false,
     'old decoded PNG bytes must not replace the resized optical paint'
   );
-  for (const [i, surface] of resizeResult.surfaces.entries()) {
+  const resizeSnapshot = await cdp.send('DOMSnapshot.captureSnapshot', {
+    computedStyles: resizeGeometryStyles,
+  });
+  await writeFile(join(out, 'resize-layout-snapshot.json'), JSON.stringify(resizeSnapshot));
+  const resizeGeometry = readResizeGeometry(resizeSnapshot, resizeResult.surfaces, page.url());
+  resizeCheckpoint.geometry = resizeGeometry;
+  assert.equal(resizeGeometry.length, 4, 'resize measures all four live runtimes');
+  for (const [i, surface] of resizeGeometry.entries()) {
     assert.equal(surface.quality, 'self-optical');
     assert.equal(surface.sourceRevision, resizeBoundary.sources[i].revision);
     const outset = Math.ceil(Math.max(surface.width, surface.height) * 0.08 + 1);
@@ -1012,7 +1028,8 @@ try {
   results.push({
     flow: 'resize invalidates pending old decode and recovers new geometry',
     before: beforeResize,
-    after: resizeResult.surfaces,
+    after: resizeGeometry,
+    cssom: resizeResult.surfaces,
     observedFrames: resizeResult.frames.length,
   });
   await page.evaluate(() => {
@@ -1327,6 +1344,7 @@ try {
         source,
         browser: browser?.version(),
         results,
+        resizeCheckpoint,
         errors,
         failure,
         execution: failure ? 'failed' : 'passed',
