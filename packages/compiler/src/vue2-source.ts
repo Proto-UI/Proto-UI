@@ -866,7 +866,7 @@ function PUIRootData(properties, attrs, initial) {
 }`
     : ''
 }
-/** @param {PUIOwnerInstance} vm @param {(owner: PUIOwner) => PUIRenderFunction | void} setup @param {Record<string, PUIDataType>} types @param {string} rootTag @param {boolean} autoUpdate */
+${ssr ? '' : '/** @param {PUIOwnerInstance} vm @param {(owner: PUIOwner) => PUIRenderFunction | void} setup @param {Record<string, PUIDataType>} types @param {string} rootTag @param {boolean} autoUpdate */'}
 function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   ${
     ssr
@@ -897,7 +897,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   ${interactive ? 'let activeEpoch = -1;' : ''}
   ${ssr ? '' : '/** @type {PUINativePaint | null} */'}
   let template = null;
-  /** @type {PUIRenderFunction | null | void} */
+  ${ssr ? '' : '/** @type {PUIRenderFunction | null | void} */'}
   let renderFunction;
   /** @type {(() => void) | undefined} */
   let unwatch;

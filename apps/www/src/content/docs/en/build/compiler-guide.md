@@ -101,6 +101,8 @@ State writes and feedback projection do not themselves request a template render
 
 In the private Vue 2 client profile, ordinary framework repaints retain the last authored commit while native slots stay live. A declared Text Control owns its native editor value after the initial mount. Uncontrolled edits survive framework repaints and later default-value changes; controlled edits remain proposals, and unrelated updates preserve active composition. Recreating the view binds a new physical editor to the retained logical value. These boundaries do not establish browser IME fidelity, internal SSR/hydration migration, complete generated typing for every admitted program, or full reached-support and production-cost acceptance; those remain separately tracked in [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055).
 
+The private Vue 2 emitter keeps client render-call annotations inside the client branch. SSR output retains its separate renderer path; the bounded annotation regression checks preserve all other SSR diagnostics and do not establish complete SSR typing or hydration acceptance.
+
 ### Local commands and consumer ownership
 
 Run from the repository root with its development dependencies installed. Choose a fresh output directory:

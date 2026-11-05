@@ -1074,7 +1074,7 @@ describe('Vue2 compiler-native child construction', () => {
 // optimization. This does not implement general legacy-template callables.
 describe('Vue2 closed identity-only body proof', () => {
   let proofCaptures = 0;
-  let strictCaptures = 0;
+  const strictCaptures = { identity: 0, ssr: 0, 'ssr-annotation-mutant': 0 };
   function helper(ir: PrototypeIR, name = 'make'): FunctionIR {
     const statement = renderFunction(ir).body.find(
       (item) => item.kind === 'const' && item.name === name
@@ -1174,12 +1174,15 @@ describe('Vue2 closed identity-only body proof', () => {
     );
     return proof;
   }
-  function strictGraph(module: GeneratedModule) {
+  function strictGraph(
+    module: GeneratedModule,
+    captureKind: keyof typeof strictCaptures = 'identity'
+  ) {
     let evidence: string | undefined;
     if (evidenceRoot) {
-      if (!path.isAbsolute(evidenceRoot) || ++strictCaptures > 2)
-        throw new Error('Unexpected identity strict capture count');
-      evidence = mkdtempSync(path.join(evidenceRoot, 'strict-identity-'));
+      if (!path.isAbsolute(evidenceRoot) || ++strictCaptures[captureKind] > 2)
+        throw new Error(`Unexpected ${captureKind} strict capture count`);
+      evidence = mkdtempSync(path.join(evidenceRoot, `strict-${captureKind}-`));
     }
     const files = new Map<string, string>();
     for (const file of [
@@ -1256,7 +1259,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
           options,
           typescript: ts.version,
           vueDeclarationRoot: path.dirname(vue2.resolve('vue/package.json')),
-          note: 'Complete additional actual graph diagnostics, not the original 97-diagnostic fixture or full graph acceptance.',
+          captureKind,
+          note: 'Complete actual graph diagnostics. Client success and the bounded SSR annotation comparison are separate assertions, not full SSR/hydration acceptance.',
         },
         null,
         2
@@ -1553,6 +1557,89 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     const { diagnostics } = strictGraph(view.module);
     expect(diagnostics, JSON.stringify(diagnostics, null, 2)).toEqual([]);
   });
+
+  it.each([false, true])(
+    'checks complete SSR output without client renderer type references (interaction=%s)',
+    (interaction) => {
+      const input = prototype(
+        `${interaction ? "def.event.on('host:sample',()=>{});" : ''}return r=>r.el('b','ssr-root');`
+      );
+      const result = emitVue2Source(input, { ssr: true });
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      const module = result.value;
+      expect(module.code).not.toContain('RenderFunction');
+      const actual = strictGraph(module, 'ssr');
+      capture(
+        actual.evidence,
+        'input.json',
+        JSON.stringify({ test: expect.getState().currentTestName, input, options: { ssr: true } })
+      );
+      capture(actual.evidence, 'result.json', JSON.stringify(result, null, 2));
+      // Restore only the erroneous variable annotation. Its error type masks
+      // two untyped-variable diagnostics; account for that exact full delta.
+      const marker = '  let renderFunction;';
+      expect(module.code.split(marker)).toHaveLength(2);
+      const mutant = strictGraph(
+        {
+          ...module,
+          code: module.code.replace(
+            marker,
+            `  /** @type {__puiRenderFunction | null | void} */\n${marker}`
+          ),
+        },
+        'ssr-annotation-mutant'
+      );
+      // Retain every diagnostic and duplicate. Only temporary directory names
+      // and text offsets introduced by the annotation differ between Programs.
+      const normalized = (graph: ReturnType<typeof strictGraph>) =>
+        graph.diagnostics
+          .map((diagnostic) =>
+            JSON.stringify(diagnostic, (key, value: unknown) => {
+              if (key === 'start' || key === 'length') return undefined;
+              return typeof value === 'string'
+                ? value.replaceAll(path.dirname(graph.source.fileName), '<generated>')
+                : value;
+            })
+          )
+          .sort();
+      const record = (
+        code: number,
+        message: string,
+        category: ts.DiagnosticCategory = ts.DiagnosticCategory.Error
+      ) => ({
+        category,
+        code,
+        file: '<generated>/Component.js',
+        messageText: message,
+        message,
+      });
+      const implicitVariable = [
+        record(
+          7034,
+          "Variable 'renderFunction' implicitly has type 'any' in some locations where its type cannot be determined."
+        ),
+        record(7005, "Variable 'renderFunction' implicitly has an 'any' type."),
+      ];
+      expect(
+        [...normalized(mutant), ...implicitVariable.map((item) => JSON.stringify(item))].sort()
+      ).toEqual(
+        [
+          ...normalized(actual),
+          JSON.stringify({
+            ...record(
+              2552,
+              "Cannot find name '__puiRenderFunction'. Did you mean 'renderFunction'?"
+            ),
+            relatedInformation: [
+              record(2728, "'renderFunction' is declared here.", ts.DiagnosticCategory.Message),
+            ],
+          }),
+        ].sort()
+      );
+      // Remaining SSR diagnostics stay in the unfiltered capture; this does not
+      // claim strict-zero SSR output or a real SSR server/hydration journey.
+    }
+  );
 });
 
 describe('Vue2 compile-time root-data demand', () => {
