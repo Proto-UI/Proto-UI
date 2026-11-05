@@ -420,3 +420,25 @@ test('current checkpoints can bind restored criteria but still reject unrelated 
   point.sourceCriterionKeys.push('issue.649.invented');
   assert.ok(checkpointErrors([point]).includes('criterion-binding'));
 });
+
+// F1 regression: a companion with the correct frozen binding but no correction
+// entries used to load and return the historical ledger (1233 criteria, no
+// Issue #649 conditions). The frozen snapshot identity requires the recorded
+// correction ID as a subset; it never fixes the total or the entry count, so a
+// separately valid additive entry remains possible.
+test('the effective reader rejects a companion that omits the recorded correction entry', (t) => {
+  const omitted = correctionRoot(t, (value) => {
+    value.corrections.length = 0;
+  });
+  assert.throws(() => loadEffectiveLedger(omitted), /missing required source correction/i);
+
+  const renamed = correctionRoot(t, (value) => {
+    value.corrections[0].key = 'correction.649.20261105.renamed-entry';
+  });
+  assert.throws(() => loadEffectiveLedger(renamed), /missing required source correction/i);
+
+  // Control: the untouched companion still restores all five conditions, so
+  // the rejection is the omitted recorded entry, not a blanket refusal.
+  const restored = loadEffectiveLedger().issueSnapshot.issues.find((issue) => issue.number === 649);
+  assert.equal(restored.criteria.length, 5);
+});

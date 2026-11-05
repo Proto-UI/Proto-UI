@@ -5,6 +5,19 @@ const sourceLedgerPath = 'internal/governance/release-0.3-source-ledger.json';
 const sourceCorrectionsPath = 'internal/governance/release-0.3-source-corrections.json';
 const repositoryRoot = new URL('../../', import.meta.url);
 
+// The frozen snapshot's exact bytes are its immutable identity, and a companion
+// bound to them must retain every correction already recorded against them.
+// Dropping one would silently return the historical ledger (1233 criteria) and
+// lose restored obligations such as the five Issue #649 conditions. Membership
+// is a subset requirement, not exact equality: a companion may still append
+// further independently valid corrections.
+const requiredCorrectionsBySourceSha256 = new Map([
+  [
+    '7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e',
+    ['correction.649.20261105.crlf-criteria-loss'],
+  ],
+]);
+
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
 }
@@ -47,6 +60,7 @@ export function loadEffectiveLedger(root = repositoryRoot) {
     !Array.isArray(corrections.corrections)
   )
     throw new Error('invalid source corrections companion');
+  const sourceSha256 = sha256(sourceBytes);
   const sourceGitBlob = createHash('sha1')
     .update(`blob ${sourceBytes.length}\0`)
     .update(sourceBytes)
@@ -54,10 +68,18 @@ export function loadEffectiveLedger(root = repositoryRoot) {
   if (
     corrections.sourceLedger?.path !== sourceLedgerPath ||
     corrections.sourceLedger.gitBlob !== sourceGitBlob ||
-    corrections.sourceLedger.sha256 !== sha256(sourceBytes) ||
+    corrections.sourceLedger.sha256 !== sourceSha256 ||
     corrections.sourceLedger.sourceRevision !== ledger.sourceRevision
   )
     throw new Error('source corrections snapshot binding mismatch');
+
+  // A companion that binds this frozen snapshot may not silently drop the
+  // corrections already recorded against it; the reader would otherwise return
+  // the historical ledger with their restored obligations missing.
+  const suppliedCorrectionKeys = new Set(corrections.corrections.map((entry) => entry?.key));
+  for (const requiredKey of requiredCorrectionsBySourceSha256.get(sourceSha256) ?? [])
+    if (!suppliedCorrectionKeys.has(requiredKey))
+      throw new Error(`missing required source correction ${requiredKey}`);
 
   // Each call owns its parsed snapshot. Append only after checking the archived
   // body; neither the frozen file nor a shared in-memory snapshot is mutated.
