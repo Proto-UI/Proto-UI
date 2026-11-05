@@ -128,6 +128,16 @@ describe('source-bound overlay style owners', () => {
       expect(content.getAttribute('aria-labelledby')).toBe(title.id);
       expect(content.getAttribute('aria-describedby')).toBe(description.id);
       expect(tokens(content)).toEqual(expect.arrayContaining([radius, padding, distinctive]));
+      expect(tokens(content)).toEqual(
+        expect.arrayContaining([
+          'transition-opacity',
+          profile === 'new-york-v4' ? 'duration-200' : 'duration-100',
+          'data-[open]:animate-in',
+          'data-[open]:fade-in-0',
+          'data-[open]:zoom-in-95',
+        ])
+      );
+      expect(tokens(content)).not.toContain('transition-all');
       expect(trigger.getAttribute('data-pui-style')).toBeNull();
       expect(close.getAttribute('data-pui-style')).toBeNull();
 
