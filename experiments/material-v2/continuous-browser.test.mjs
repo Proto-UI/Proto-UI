@@ -1234,7 +1234,7 @@ try {
   const changedSource = await page.evaluate(() => {
     const scene = window.v2Material.scenes()[0];
     scene.lease.draw((ctx, w, h) => {
-      ctx.fillStyle = '#0735ce';
+      ctx.fillStyle = '#c3d5fc';
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = '#fcda32';
       for (let x = 0; x < w; x += 20) ctx.fillRect(x, 0, 8, h);
