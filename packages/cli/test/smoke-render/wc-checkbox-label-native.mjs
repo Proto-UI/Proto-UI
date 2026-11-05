@@ -28,10 +28,21 @@ assert.equal(esbuildPackage.version, '0.25.12', 'review tooling version changes 
 assert.equal(playwrightPackage.version, '1.58.2', 'review tooling version changes separately');
 const lock = readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8');
 const tooling = [
-  ['esbuild', esbuildPackage.version, 'sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg=='],
-  ['playwright-core', playwrightPackage.version, 'sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg=='],
+  [
+    'esbuild',
+    esbuildPackage.version,
+    'sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg==',
+  ],
+  [
+    'playwright-core',
+    playwrightPackage.version,
+    'sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==',
+  ],
 ].map(([name, version, integrity]) => {
-  assert(lock.includes(`${name}@${version}:`) && lock.includes(integrity), 'locked tool provenance drift');
+  assert(
+    lock.includes(`${name}@${version}:`) && lock.includes(integrity),
+    'locked tool provenance drift'
+  );
   return { name, version, lockIntegrity: integrity };
 });
 // Only the runner's existing standard executable locations; never install or
@@ -47,7 +58,10 @@ const chromeVersion = spawnSync(chrome, ['--version'], { encoding: 'utf8', timeo
 assert(!chromeVersion.error && chromeVersion.status === 0, 'cannot identify preinstalled Chrome');
 const binding = JSON.parse(readFileSync(join(consumer, 'checkbox-delivery-evidence.json'), 'utf8'));
 assert.equal(binding.lockSha256, digestFile(join(consumer, 'package-lock.json')));
-assert.equal(binding.generatedFacadeSha256, digestFile(join(consumer, 'proto-ui/components/wc/index.ts')));
+assert.equal(
+  binding.generatedFacadeSha256,
+  digestFile(join(consumer, 'proto-ui/components/wc/index.ts'))
+);
 
 // This entry resolves all business imports inside the already installed consumer.
 const entry = `
@@ -95,7 +109,31 @@ function mount(kind, { props = {}, indicator = kind === 'explicit' ? 'explicit' 
 }
 mount('default');
 mount('explicit');
-window.packedCheckboxSmoke = { order, pairs, mount, setLabelProps: setElementProps };
+// Association-failure recovery, not a new semantic: the control participant is
+// absent while the Label connects, so the existing Control Label binding reports
+// missing-binding and must recover through the same reference on later attach.
+function mountDeferred(kind) {
+  console.info('[packed-native] mount-deferred:' + kind);
+  const pair = createShadcnCheckboxLabelComposition();
+  const control = new facade.ShadcnCheckboxElement();
+  const label = new facade.ShadcnLabelRootElement();
+  const strong = document.createElement('strong');
+  strong.textContent = 'Receive ' + kind + ' updates';
+  label.append(strong);
+  setElementProps(control, {});
+  setElementProps(label, pair.label.props);
+  setElementAssociations(control, pair.control.instanceAssociations);
+  setElementAssociations(label, pair.label.instanceAssociations);
+  const container = document.createElement('div');
+  container.dataset.case = kind;
+  container.append(label);
+  const record = { pair, control, label, container, changes: 0 };
+  control.addEventListener('checkedChange', () => record.changes++);
+  document.body.append(container);
+  pairs.push(record);
+  return record;
+}
+window.packedCheckboxSmoke = { order, pairs, mount, mountDeferred, setLabelProps: setElementProps };
 `;
 writeFileSync(join(consumer, 'checkbox-native-entry.mjs'), entry);
 const bundled = await esbuild.build({
@@ -113,21 +151,36 @@ assert.equal(bundled.outputFiles.length, 1, 'unexpected additional bundle output
 const inputs = Object.entries(bundled.metafile.inputs).map(([name, metadata]) => {
   const path = realpathSync(resolve(consumer, name));
   assert(inside(consumer, path), `business source escaped packed consumer: ${name}`);
-  assert(metadata.imports.every((item) => !item.external), 'unexpected external input import');
+  assert(
+    metadata.imports.every((item) => !item.external),
+    'unexpected external input import'
+  );
   return { path: relative(consumer, path).replaceAll('\\', '/'), sha256: digestFile(path) };
 });
 for (const output of Object.values(bundled.metafile.outputs)) {
   assert.equal(output.imports.length, 0, 'browser bundle must be self-contained');
 }
 const resources = new Map([
-  ['/', { type: 'text/html', body: Buffer.from('<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles/proto-ui-style.css"></head><body><script type="module" src="/checkbox-native-bundle.js"></script></body></html>') }],
-  ['/checkbox-native-bundle.js', { type: 'text/javascript', body: Buffer.from(bundled.outputFiles[0].contents) }],
+  [
+    '/',
+    {
+      type: 'text/html',
+      body: Buffer.from(
+        '<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles/proto-ui-style.css"></head><body><script type="module" src="/checkbox-native-bundle.js"></script></body></html>'
+      ),
+    },
+  ],
+  [
+    '/checkbox-native-bundle.js',
+    { type: 'text/javascript', body: Buffer.from(bundled.outputFiles[0].contents) },
+  ],
 ]);
 // Existing adapter infrastructure creates two empty style elements and then
 // fills these fixed rules. Permit only their exact bytes, not arbitrary inline
 // styles, and independently check the actual installed adapter's DOM output.
 const infrastructureStyles = {
-  'proto-ui-view-visibility': '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
+  'proto-ui-view-visibility':
+    '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
   'proto-ui-wc-host-display': '\n:where(.pui-host-root) { display: block; }\n',
 };
 const infrastructureHashes = [
@@ -136,7 +189,9 @@ const infrastructureHashes = [
   'sha256-+IRPBUpbuxn0ME6GWUx2UPIkh/vCUT0KS1CXnXBjQAY=',
 ];
 assert.deepEqual(
-  ['', ...Object.values(infrastructureStyles)].map((text) => `sha256-${createHash('sha256').update(text).digest('base64')}`),
+  ['', ...Object.values(infrastructureStyles)].map(
+    (text) => `sha256-${createHash('sha256').update(text).digest('base64')}`
+  ),
   infrastructureHashes,
   'review fixed adapter stylesheet content/hash changes explicitly'
 );
@@ -149,23 +204,31 @@ for (const name of ['proto-ui-style.css', 'shadcn-theme.css', 'proto-ui-tokens.g
 const failures = [];
 let browser, context, server;
 let nativeEvidence;
-console.log(JSON.stringify({
-  kind: 'checkbox-label-packed-native-prepared',
-  testedCommit: binding.testedCommit,
-  packages: binding.packages,
-  lockSha256: binding.lockSha256,
-  generatedFacadeSha256: binding.generatedFacadeSha256,
-  fixtureSha256: digestFile(fileURLToPath(import.meta.url)),
-  repoLockSha256: digest(lock),
-  tooling,
-  infrastructureStyleHashes: infrastructureHashes,
-  contentSecurityPolicy,
-  browser: { command: chrome, executable: chromeBinary, launcherSha256: digestFile(realpathSync(chrome)), executableSha256: digestFile(chromeBinary), commandVersion: chromeVersion.stdout.trim() },
-  runnerImage: { os: process.env.ImageOS ?? null, version: process.env.ImageVersion ?? null },
-  inputs,
-  resources: [...resources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
-  outcome: 'prepared-not-yet-executed',
-}));
+console.log(
+  JSON.stringify({
+    kind: 'checkbox-label-packed-native-prepared',
+    testedCommit: binding.testedCommit,
+    packages: binding.packages,
+    lockSha256: binding.lockSha256,
+    generatedFacadeSha256: binding.generatedFacadeSha256,
+    fixtureSha256: digestFile(fileURLToPath(import.meta.url)),
+    repoLockSha256: digest(lock),
+    tooling,
+    infrastructureStyleHashes: infrastructureHashes,
+    contentSecurityPolicy,
+    browser: {
+      command: chrome,
+      executable: chromeBinary,
+      launcherSha256: digestFile(realpathSync(chrome)),
+      executableSha256: digestFile(chromeBinary),
+      commandVersion: chromeVersion.stdout.trim(),
+    },
+    runnerImage: { os: process.env.ImageOS ?? null, version: process.env.ImageVersion ?? null },
+    inputs,
+    resources: [...resources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
+    outcome: 'prepared-not-yet-executed',
+  })
+);
 try {
   server = createServer((request, response) => {
     const resource = request.method === 'GET' ? resources.get(request.url) : undefined;
@@ -197,7 +260,13 @@ try {
   context.setDefaultTimeout(10000);
   await context.route('**/*', async (route) => {
     const url = new URL(route.request().url());
-    if (url.origin === origin && resources.has(url.pathname) && !url.search && !url.hash && route.request().method() === 'GET') {
+    if (
+      url.origin === origin &&
+      resources.has(url.pathname) &&
+      !url.search &&
+      !url.hash &&
+      route.request().method() === 'GET'
+    ) {
       await route.continue();
     } else {
       failures.push(new Error('blocked non-test browser request'));
@@ -211,21 +280,28 @@ try {
   const page = await context.newPage();
   page.on('pageerror', (error) => failures.push(error));
   page.on('console', (message) => {
-    if (message.type() === 'info' && message.text().startsWith('[packed-native]')) console.log(message.text());
+    if (message.type() === 'info' && message.text().startsWith('[packed-native]'))
+      console.log(message.text());
     if (message.type() === 'error') failures.push(new Error(`browser console: ${message.text()}`));
   });
   const response = await page.goto(origin, { waitUntil: 'load' });
   assert.equal(response.status(), 200);
   await page.waitForFunction(() => window.packedCheckboxSmoke?.pairs.length === 2);
-  const installedStyles = await page.evaluate(() => [...document.querySelectorAll('style')]
-    .map((style) => [style.id, style.textContent]));
+  const installedStyles = await page.evaluate(() =>
+    [...document.querySelectorAll('style')].map((style) => [style.id, style.textContent])
+  );
   assert.equal(installedStyles.length, 2, 'only the two fixed adapter infrastructure styles');
-  assert.deepEqual(Object.fromEntries(installedStyles), infrastructureStyles,
-    'installed adapter styles must match the exact CSP-admitted text');
+  assert.deepEqual(
+    Object.fromEntries(installedStyles),
+    infrastructureStyles,
+    'installed adapter styles must match the exact CSP-admitted text'
+  );
   const initial = await page.evaluate(() => ({
     order: window.packedCheckboxSmoke.order,
     pairs: window.packedCheckboxSmoke.pairs.map(({ control, label }) => ({
-      indicators: [...control.children].filter((child) => child.localName === 'proto-ui-shadcn-checkbox-indicator').length,
+      indicators: [...control.children].filter(
+        (child) => child.localName === 'proto-ui-shadcn-checkbox-indicator'
+      ).length,
       labelledby: control.getAttribute('aria-labelledby'),
       labelId: label.id,
       ariaLabel: control.getAttribute('aria-label'),
@@ -245,40 +321,78 @@ try {
     assert.equal(pair.state, 'false');
     assert.equal(pair.ariaLabel, null, 'no duplicate hidden naming');
     assert.equal(pair.nestedLabels, 0, 'Label stays independent');
-    for (const token of ['size-4', 'shrink-0', 'border']) assert(pair.controlTokens.includes(token));
-    for (const token of ['flex', 'text-sm', 'font-medium', 'leading-none']) assert(pair.labelTokens.includes(token));
+    for (const token of ['size-4', 'shrink-0', 'border'])
+      assert(pair.controlTokens.includes(token));
+    for (const token of ['flex', 'text-sm', 'font-medium', 'leading-none'])
+      assert(pair.labelTokens.includes(token));
     assert.equal(pair.labelDisplay, 'flex', 'original generated Label CSS must apply');
     assert.equal(pair.controlShrink, '0', 'original generated Checkbox CSS must apply');
   }
   assert.notEqual(initial.pairs[0].labelId, initial.pairs[1].labelId);
-  assert.equal(await page.getByRole('checkbox', { name: 'Receive default updates', exact: true }).count(), 1);
-  assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].pair.control.instanceAssociations.controlLabel !== window.packedCheckboxSmoke.pairs[1].pair.control.instanceAssociations.controlLabel), true);
+  assert.equal(
+    await page.getByRole('checkbox', { name: 'Receive default updates', exact: true }).count(),
+    1
+  );
+  assert.equal(
+    await page.evaluate(
+      () =>
+        window.packedCheckboxSmoke.pairs[0].pair.control.instanceAssociations.controlLabel !==
+        window.packedCheckboxSmoke.pairs[1].pair.control.instanceAssociations.controlLabel
+    ),
+    true
+  );
   for (const [index, kind] of ['default', 'explicit'].entries()) {
     await page.locator(`[data-case="${kind}"] strong`).click();
-    await page.waitForFunction((index) => window.packedCheckboxSmoke.pairs[index].control.getAttribute('aria-checked') === 'true', index);
-    let states = await page.evaluate(() => window.packedCheckboxSmoke.pairs.map(({ control, changes }) => ({ state: control.getAttribute('aria-checked'), changes, focused: document.activeElement === control })));
+    await page.waitForFunction(
+      (index) =>
+        window.packedCheckboxSmoke.pairs[index].control.getAttribute('aria-checked') === 'true',
+      index
+    );
+    let states = await page.evaluate(() =>
+      window.packedCheckboxSmoke.pairs.map(({ control, changes }) => ({
+        state: control.getAttribute('aria-checked'),
+        changes,
+        focused: document.activeElement === control,
+      }))
+    );
     assert.equal(states[index].changes, 1, 'real Label pointer must activate once');
     assert.equal(states[index].focused, true);
     assert.equal(states[1 - index].state, 'false', 'other composition remains isolated');
     await page.keyboard.press('Space');
-    await page.waitForFunction((index) => window.packedCheckboxSmoke.pairs[index].control.getAttribute('aria-checked') === 'false', index);
-    states = await page.evaluate(() => window.packedCheckboxSmoke.pairs.map(({ changes }) => changes));
+    await page.waitForFunction(
+      (index) =>
+        window.packedCheckboxSmoke.pairs[index].control.getAttribute('aria-checked') === 'false',
+      index
+    );
+    states = await page.evaluate(() =>
+      window.packedCheckboxSmoke.pairs.map(({ changes }) => changes)
+    );
     assert.equal(states[index], 2, 'focused control keyboard must activate once');
   }
   console.log('[packed-native] direct-pointer-and-interactive-descendant');
   const neighborIdentity = await page.evaluate(() => {
     const smoke = window.packedCheckboxSmoke;
     const neighbor = smoke.mount('neighbor');
-    return smoke.pairs[0].pair.control.instanceAssociations.controlLabel !== neighbor.pair.control.instanceAssociations.controlLabel;
+    return (
+      smoke.pairs[0].pair.control.instanceAssociations.controlLabel !==
+      neighbor.pair.control.instanceAssociations.controlLabel
+    );
   });
   assert.equal(neighborIdentity, true, 'two default pairs have independent association identities');
   const defaultControl = page.locator('[data-case="default"] > :first-child');
   await page.locator('[data-case="default"] strong').click();
-  await page.waitForFunction(() => window.packedCheckboxSmoke.pairs[0].control.getAttribute('aria-checked') === 'true');
+  await page.waitForFunction(
+    () => window.packedCheckboxSmoke.pairs[0].control.getAttribute('aria-checked') === 'true'
+  );
   assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes), 3);
-  assert.equal(await page.locator('[data-case="neighbor"] > :first-child').getAttribute('aria-checked'), 'false');
+  assert.equal(
+    await page.locator('[data-case="neighbor"] > :first-child').getAttribute('aria-checked'),
+    'false'
+  );
   await defaultControl.click();
-  await page.waitForFunction(() => window.packedCheckboxSmoke.pairs[0].control.getAttribute('aria-checked') === 'false');
+  await page.waitForFunction(
+    () => window.packedCheckboxSmoke.pairs[0].control.getAttribute('aria-checked') === 'false'
+  );
   assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes), 4);
   await page.evaluate(() => {
     const action = document.createElement('button');
@@ -290,10 +404,16 @@ try {
   });
   await page.getByRole('button', { name: 'Separate action', exact: true }).click();
   await page.waitForTimeout(50);
-  assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.actionClicks), 1,
-    'interactive descendant must receive its own actual click exactly once');
-  assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes), 4,
-    'interactive Label descendant must not also activate control');
+  assert.equal(
+    await page.evaluate(() => window.packedCheckboxSmoke.actionClicks),
+    1,
+    'interactive descendant must receive its own actual click exactly once'
+  );
+  assert.equal(
+    await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes),
+    4,
+    'interactive Label descendant must not also activate control'
+  );
 
   console.log('[packed-native] omitted-raw-disabled-controlled-mixed');
   await page.evaluate(() => {
@@ -305,12 +425,19 @@ try {
     mount('mixed', { props: { defaultIndeterminate: true } });
   });
   await page.waitForTimeout(50);
-  const variants = await page.evaluate(() => Object.fromEntries(
-    window.packedCheckboxSmoke.pairs.map(({ control, container }) => [container.dataset.case, {
-      indicators: [...control.children].filter((child) => child.localName === 'proto-ui-shadcn-checkbox-indicator').length,
-      checked: control.getAttribute('aria-checked'),
-    }])
-  ));
+  const variants = await page.evaluate(() =>
+    Object.fromEntries(
+      window.packedCheckboxSmoke.pairs.map(({ control, container }) => [
+        container.dataset.case,
+        {
+          indicators: [...control.children].filter(
+            (child) => child.localName === 'proto-ui-shadcn-checkbox-indicator'
+          ).length,
+          checked: control.getAttribute('aria-checked'),
+        },
+      ])
+    )
+  );
   assert.equal(variants.explicit.indicators, 1, 'explicit Indicator still never duplicates');
   assert.equal(variants.omitted.indicators, 0, 'default Indicator omission stays supported');
   assert.equal(variants.raw.indicators, 0, 'raw Root stays raw');
@@ -321,15 +448,25 @@ try {
     await page.locator(`[data-case="${kind}"] strong`).click();
   }
   await page.waitForTimeout(50);
-  const afterRequests = await page.evaluate(() => Object.fromEntries(
-    window.packedCheckboxSmoke.pairs.map(({ control, container, changes }) => [container.dataset.case, {
-      changes, checked: control.getAttribute('aria-checked'),
-    }])
-  ));
+  const afterRequests = await page.evaluate(() =>
+    Object.fromEntries(
+      window.packedCheckboxSmoke.pairs.map(({ control, container, changes }) => [
+        container.dataset.case,
+        {
+          changes,
+          checked: control.getAttribute('aria-checked'),
+        },
+      ])
+    )
+  );
   assert.equal(afterRequests.disabled.changes, 0);
   assert.equal(afterRequests.disabled.checked, 'true');
   assert.equal(afterRequests.controlled.changes, 1);
-  assert.equal(afterRequests.controlled.checked, 'false', 'controlled acceptance stays consumer-owned');
+  assert.equal(
+    afterRequests.controlled.checked,
+    'false',
+    'controlled acceptance stays consumer-owned'
+  );
   assert.equal(afterRequests.mixed.checked, 'true');
 
   console.log('[packed-native] naming-only');
@@ -342,11 +479,77 @@ try {
   await page.locator('[data-case="controlled"] strong').click();
   await page.waitForTimeout(50);
   const namingOnly = await page.evaluate(() => {
-    const { control, label, changes } = window.packedCheckboxSmoke.pairs.find(({ container }) => container.dataset.case === 'controlled');
+    const { control, label, changes } = window.packedCheckboxSmoke.pairs.find(
+      ({ container }) => container.dataset.case === 'controlled'
+    );
     return { changes, labelledby: control.getAttribute('aria-labelledby'), labelId: label.id };
   });
   assert.equal(namingOnly.changes, 1, 'naming-only Label must not activate');
   assert.equal(namingOnly.labelledby, namingOnly.labelId);
+
+  console.log('[packed-native] association-failure-recovery');
+  // The Label connects while its only target participant is still detached, which
+  // is the existing Control Label `missing-binding` state rather than a new mode.
+  // Nothing may be published or activated until that same control attaches.
+  await page.evaluate(() => window.packedCheckboxSmoke.mountDeferred('label-first'));
+  const deferred = await page.evaluate(() => {
+    const record = window.packedCheckboxSmoke.pairs.find(
+      ({ container }) => container.dataset.case === 'label-first'
+    );
+    return {
+      controlConnected: record.control.isConnected,
+      labelConnected: record.label.isConnected,
+      labelledby: record.control.getAttribute('aria-labelledby'),
+    };
+  });
+  assert.equal(
+    deferred.controlConnected,
+    false,
+    'recovery case starts without an attached control'
+  );
+  assert.equal(deferred.labelConnected, true, 'the Label is the only attached participant');
+  assert.equal(deferred.labelledby, null, 'a missing target participant must not publish naming');
+  await page.locator('[data-case="label-first"] strong').click();
+  assert.equal(
+    await page.evaluate(
+      () =>
+        window.packedCheckboxSmoke.pairs.find(
+          ({ container }) => container.dataset.case === 'label-first'
+        ).changes
+    ),
+    0,
+    'a Label without its control must not fabricate activation'
+  );
+  // No rebinding: the same control and the same association must recover.
+  await page.evaluate(() => {
+    const record = window.packedCheckboxSmoke.pairs.find(
+      ({ container }) => container.dataset.case === 'label-first'
+    );
+    record.container.append(record.control);
+  });
+  await page.waitForFunction(() => {
+    const record = window.packedCheckboxSmoke.pairs.find(
+      ({ container }) => container.dataset.case === 'label-first'
+    );
+    return record.control.getAttribute('aria-labelledby') === record.label.id;
+  });
+  await page.locator('[data-case="label-first"] strong').click();
+  await page.waitForFunction(
+    () =>
+      window.packedCheckboxSmoke.pairs
+        .find(({ container }) => container.dataset.case === 'label-first')
+        .control.getAttribute('aria-checked') === 'true'
+  );
+  assert.equal(
+    await page.evaluate(
+      () =>
+        window.packedCheckboxSmoke.pairs.find(
+          ({ container }) => container.dataset.case === 'label-first'
+        ).changes
+    ),
+    1,
+    'the same association must activate exactly once after the control attaches'
+  );
 
   console.log('[packed-native] detached-label-programmatic-regression');
   await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].label.remove());
@@ -356,13 +559,22 @@ try {
   // native-pointer or full subscription/resource-release assertion.
   await page.evaluate(() => {
     const label = window.packedCheckboxSmoke.pairs[0].label;
-    label.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, composed: true, pointerId: 1, button: 0 }));
-    label.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, composed: true, pointerId: 1, button: 0 }));
-    label.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true, button: 0, detail: 1 }));
+    label.dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, composed: true, pointerId: 1, button: 0 })
+    );
+    label.dispatchEvent(
+      new PointerEvent('pointerup', { bubbles: true, composed: true, pointerId: 1, button: 0 })
+    );
+    label.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, composed: true, button: 0, detail: 1 })
+    );
   });
   await page.waitForTimeout(50);
-  assert.equal(await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes), 4,
-    'detached Label must not activate its former control');
+  assert.equal(
+    await page.evaluate(() => window.packedCheckboxSmoke.pairs[0].changes),
+    4,
+    'detached Label must not activate its former control'
+  );
   console.log('[packed-native] cleanup');
   await page.evaluate(() => {
     for (const { container } of window.packedCheckboxSmoke.pairs) container.remove();
@@ -380,30 +592,65 @@ try {
     fixtureSha256: digestFile(fileURLToPath(import.meta.url)),
     repoLockSha256: digest(lock),
     tooling,
-    browser: { executable: chromeBinary, executableSha256: digestFile(chromeBinary), commandVersion: chromeVersion.stdout.trim(), version: browser.version() },
+    browser: {
+      executable: chromeBinary,
+      executableSha256: digestFile(chromeBinary),
+      commandVersion: chromeVersion.stdout.trim(),
+      version: browser.version(),
+    },
     runnerImage: { os: process.env.ImageOS ?? null, version: process.env.ImageVersion ?? null },
     inputs,
     resources: [...resources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
     platformOrder: initial.order,
     infrastructureStyleHashes: infrastructureHashes,
     outcome: 'bounded-wc-composition-contract-cases-passed',
-    coveredCases: ['default', 'preassembled-explicit', 'rich-label-naming', 'label-pointer',
-      'direct-pointer', 'focused-space', 'interactive-descendant-exclusion', 'pair-isolation',
-      'omitted-indicator', 'raw-root', 'disabled', 'controlled-rejection', 'mixed',
-      'naming-only', 'detached-label-programmatic-regression', 'removal-without-observed-pageerror'],
+    coveredCases: [
+      'default',
+      'preassembled-explicit',
+      'rich-label-naming',
+      'label-pointer',
+      'direct-pointer',
+      'focused-space',
+      'interactive-descendant-exclusion',
+      'pair-isolation',
+      'omitted-indicator',
+      'raw-root',
+      'disabled',
+      'controlled-rejection',
+      'mixed',
+      'naming-only',
+      'association-failure-recovery',
+      'detached-label-programmatic-regression',
+      'removal-without-observed-pageerror',
+    ],
     syntheticAcceptance: 'separate-unmodified-fixture-still-required',
     registryPublication: 'not-performed',
   };
 } catch (error) {
   failures.push(error);
 } finally {
-  for (const close of [() => context?.close(), () => browser?.close(), () => server && new Promise((resolve, reject) => {
-    server.close((error) => error ? reject(error) : resolve());
-    server.closeAllConnections();
-  })]) {
-    try { await close(); } catch (error) { failures.push(error); }
+  for (const close of [
+    () => context?.close(),
+    () => browser?.close(),
+    () =>
+      server &&
+      new Promise((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+        server.closeAllConnections();
+      }),
+  ]) {
+    try {
+      await close();
+    } catch (error) {
+      failures.push(error);
+    }
   }
 }
 if (failures.length) throw new AggregateError(failures, 'packed native Checkbox+Label failed');
 
-console.log(JSON.stringify(nativeEvidence));
+// The receipt is written only after every case and both error lanes are empty.
+// One aggregate object for the whole fixture; coveredCases is that fixture's
+// declared scope, never a per-case pass claim.
+const receipt = JSON.stringify(nativeEvidence);
+writeFileSync(join(consumer, 'checkbox-native-evidence.json'), `${receipt}\n`);
+console.log(receipt);

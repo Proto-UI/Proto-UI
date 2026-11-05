@@ -20,6 +20,11 @@ cases:
         C-CHECKBOX-LABEL-COMPOSITION-0001-EVIDENCE,
       ]
     expectation: Rich visible label, direct input, disabled and mixed control, controlled rejection, raw naming-only content, nested action exclusion, rebind and detached input isolation; not native or assistive-technology acceptance.
+  - id: T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-NATIVE
+    title: Real-input delivery and association recovery stay separate from synthetic host results
+    covers:
+      [C-CHECKBOX-LABEL-COMPOSITION-0001-EVIDENCE, C-CHECKBOX-LABEL-COMPOSITION-0001-OWNERSHIP]
+    expectation: Genuine pointer, keyboard and focus input, real role-based accessible-name lookup, and a Label connected before the control of the same association must be read in a real browser; a synthetic host result, an existing fixture source or a receipt bound to another head cannot certify them.
 implementations:
   - id: checkbox-label-construction-and-host
     kind: adapter-test
@@ -34,6 +39,16 @@ implementations:
     notes:
       - Candidate test source exists; local runner result and inherited failures are recorded in the same repair PR diagnosis. Planned means no passing evidence is asserted.
       - Detach coverage is not terminal runtime disposal, native input, computed accessibility-tree name or packed/install proof.
+  - id: checkbox-label-packed-native-fixture
+    kind: fixture
+    status: planned
+    path: packages/cli/test/smoke-render/wc-checkbox-label-native.mjs
+    required: true
+    consumesCases: [T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-NATIVE]
+    notes:
+      - Candidate fixture source exists and carries its own platform-order canary and case list. Planned means this entity asserts no execution, no receipt and no head binding for it.
+      - Running it needs the packed installed consumer, a preinstalled Chromium and the dependent delivery record, so execution and its exact-head binding belong to the parent and the installation slice, not to this source record.
+      - Its role/label queries and its association-failure recovery case read real browser behavior; they still do not certify assistive-technology output, a complete accessibility tree or terminal disposal.
 verifies:
   contracts: [C-CHECKBOX-LABEL-COMPOSITION-0001]
 revisions:

@@ -55,15 +55,9 @@ npx proto-ui add wc shadcn-label --no-interactive
 
 ```ts
 import './src/styles/proto-ui-style.css';
-import {
-  ShadcnCheckboxElement,
-  ShadcnLabelRootElement,
-} from './proto-ui/components/wc/index.ts';
+import { ShadcnCheckboxElement, ShadcnLabelRootElement } from './proto-ui/components/wc/index.ts';
 import { createShadcnCheckboxLabelComposition } from '@proto.ui/prototypes-shadcn/checkbox';
-import {
-  setElementAssociations,
-  setElementProps,
-} from '@proto.ui/adapter-web-component';
+import { setElementAssociations, setElementProps } from '@proto.ui/adapter-web-component';
 
 // Called once for this mounted pair, not once per render and not globally.
 const pair = createShadcnCheckboxLabelComposition();
@@ -86,4 +80,4 @@ document.body.append(container);
 
 使用 `ShadcnCheckboxElement` 时不要再额外追加默认 Indicator；需要显式替换或关闭时沿用原 preset 规则。`ShadcnCheckboxRootElement` 仍是 raw Root，不会自动补 Indicator。Label 可以承载合法的非交互富名称，独立按钮/链接优先放相邻区域。不要另加隐藏重复名称、页面 `.click()` 转发或第二套 checked 状态。
 
-现有 PR CI 的 `cli-smoke` 会从真实 tarball 新建独立消费者，用已安装 CLI 生成这两个 facade，执行 public helper 导入、声明、缺失 Label 产物负控和 WC 合成行为。此证据不会自动证明浏览器原生输入、辅助技术名称计算、布局像素或正式 registry 发布；通过情况须查看对应精确提交的 CI，未运行不能标为通过。
+协调回归周期（以及手动 dispatch）中的 `cli-smoke` 会从真实 tarball 新建独立消费者，用已安装 CLI 生成这两个 facade，执行 public helper 导入、声明、缺失 Label 产物负控和 WC 合成行为；PR 事件按 job 级条件跳过这条路线，因此 PR 本身不提供该证据。此证据不会自动证明浏览器原生输入、辅助技术名称计算、布局像素或正式 registry 发布；当前 WC 合成行在非规范连接顺序的 synthetic host 上仍为失败，原生行单独通过，两者不能互相替代，通过情况须查看对应精确提交的 CI，未运行不能标为通过。
