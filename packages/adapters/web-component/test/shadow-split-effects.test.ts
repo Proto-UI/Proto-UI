@@ -93,6 +93,73 @@ describe('private Shadow split effects', () => {
     invalidReceipt.dispose();
   });
 
+  it.each(['foreground', 'muted-foreground', 'primary', 'destructive'])(
+    'admits placeholder:text-%s only on the actual surfaced editor',
+    (color) => {
+      const token = `placeholder:text-${color}`;
+      const tokens = ['bg-black', token];
+      const { host, surface, effects, options } = setup(tokens, 'input');
+      effects.queueStyle(effect(tokens));
+      effects.requestFlush();
+      expect(host.getAttribute(ROOT)).toBe(tokens.join(' '));
+      expect(surface.getAttribute('data-pui-style')).toBe(`consumer ${tokens.join(' ')}`);
+      effects.queueStyle(effect(['bg-black']));
+      effects.requestFlush();
+      expect(host.getAttribute(ROOT)).toBe('bg-black');
+      expect(surface.getAttribute('data-pui-style')).toBe('consumer bg-black');
+      effects.dispose();
+
+      const selector = `:host([${ROOT}~="${token}"]) > [${SURFACE}][data-pui-style~="${token}"]::placeholder`;
+      expect(options.artifact.cssText).toContain(`${selector} {`);
+      expect(options.artifact.cssText).not.toContain(`:host([${ROOT}~="${token}"]) {`);
+
+      const rejectAtomically = (cssText: string) => {
+        const rejected = createShadowSplitEffectsPort({
+          ...options,
+          artifact: { ...options.artifact, cssText },
+        });
+        rejected.queueStyle(effect(['bg-black']));
+        rejected.requestFlush();
+        const previous = [host.outerHTML, surface.outerHTML];
+        expect(() => rejected.queueStyle(effect(tokens))).toThrow(/missing token/);
+        rejected.requestFlush();
+        expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
+        rejected.dispose();
+      };
+      // Stale receipt on the exact inner-editor rule.
+      rejectAtomically(
+        rewriteSplitRuleDeclarations(
+          options.artifact.cssText,
+          selector,
+          (declarations) => `${declarations}--pui-split-compiled-receipt: stale;`
+        )
+      );
+      // Self-consistent but wrong target: a host pseudo paint is never admitted.
+      const hostSelector = `:host([${ROOT}~="${token}"])::placeholder`;
+      rejectAtomically(
+        rewriteSplitRuleDeclarations(
+          options.artifact.cssText.replace(selector, hostSelector),
+          hostSelector,
+          (declarations) => declarations
+        )
+      );
+      // A companion that never compiled this token cannot be silently widened.
+      rejectAtomically(renderProtoShadowSplitStyleArtifact(['bg-black']).cssText);
+    }
+  );
+
+  it.each(['placeholder:p-4', 'placeholder:text-primary/50', 'placeholder:text-[#fff]'])(
+    'rejects unsupported placeholder spelling %s before any split DOM write',
+    (token) => {
+      const { host, surface, effects } = setup(['bg-black'], 'input');
+      const before = [host.outerHTML, surface.outerHTML];
+      expect(() => effects.queueStyle(effect(['bg-black', token]))).toThrow(/author-origin/);
+      effects.requestFlush();
+      expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+      effects.dispose();
+    }
+  );
+
   it('rejects unimplemented animated border rounding but retains fixed-border sizing animation', () => {
     const { host, surface, effects } = setup([
       'block',

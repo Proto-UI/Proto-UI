@@ -213,7 +213,15 @@ function compiledReceiptSelector(token: string): string | null {
   const variants = splitReceiptVariants(token).slice(0, -1);
   for (const variant of variants) {
     if (variant === 'dark') dark = true;
-    else if (variant === 'selection' && variants.length === 1 && token.startsWith('selection:'))
+    // Static paint targets (selection and the finite admitted placeholder
+    // colors) keep their pseudo-element target. Author admission already
+    // bounded the payload, so this variant adds no host condition and is never
+    // a wrapper-box contribution.
+    else if (
+      variants.length === 1 &&
+      ((variant === 'selection' && token.startsWith('selection:')) ||
+        (variant === 'placeholder' && token.startsWith('placeholder:')))
+    )
       continue;
     else if (['hover', 'active', 'disabled', 'focus-visible'].includes(variant))
       selector += `:${variant}`;
@@ -283,15 +291,18 @@ function hasExactCompiledReceipt(
   if (!receipt) return false;
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const selection = token.startsWith('selection:');
+  const placeholder = token.startsWith('placeholder:');
   const allowed = new Set(
     selection
       ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
-      : [
-          receipt,
-          `${receipt}:host([data-pui-split-text-control])`,
-          `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
-          `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
-        ]
+      : placeholder
+        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
+        : [
+            receipt,
+            `${receipt}:host([data-pui-split-text-control])`,
+            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
+            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
+          ]
   );
   const candidates = rules.filter(({ selector }) => selector.replace(/\s/g, '').includes(receipt));
   const matching = candidates.filter(({ selector }) => {
@@ -301,7 +312,7 @@ function hasExactCompiledReceipt(
   return (
     matching.length === candidates.length &&
     matching.length > 0 &&
-    ((!selection && entry.roleSource === 'fallback') ||
+    ((!selection && !placeholder && entry.roleSource === 'fallback') ||
       matching.every(
         (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalSizingRecipe(rule, entry)
       ))
