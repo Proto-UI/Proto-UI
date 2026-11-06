@@ -130,7 +130,7 @@ function hasConflictingWrite(
   let addedAlias: boolean;
   do {
     addedAlias = false;
-    const collectAliases = (node: ts.Node): void => {
+    for (const node of syntaxFor(lexicalIndex, source).alias) {
       if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
         const origin = bindingOf(node.initializer);
         if (origin && aliases.has(origin) && !aliases.has(node)) {
@@ -148,9 +148,7 @@ function hasConflictingWrite(
           addedAlias = true;
         }
       }
-      ts.forEachChild(node, collectAliases);
-    };
-    collectAliases(source);
+    }
   } while (addedAlias);
   const root = (expression: ts.Expression): ts.Identifier | null => {
     let current = unwrap(expression);
@@ -167,116 +165,118 @@ function hasConflictingWrite(
       : ts.isStringLiteralLike(access.argumentExpression)
         ? access.argumentExpression.text
         : null;
-  const visit = (node: ts.Node): void => {
-    if (conflict) return;
-    if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-      let targetNode: ts.Node = node;
-      while (
-        targetNode.parent &&
-        (ts.isParenthesizedExpression(targetNode.parent) ||
-          ts.isAsExpression(targetNode.parent) ||
-          ts.isTypeAssertionExpression(targetNode.parent) ||
-          ts.isNonNullExpression(targetNode.parent))
-      )
-        targetNode = targetNode.parent;
-      const contains = (ancestor: ts.Node, descendant: ts.Node): boolean => {
-        let current: ts.Node | undefined = descendant;
-        while (current) {
-          if (current === ancestor) return true;
-          current = current.parent;
-        }
-        return false;
-      };
-      const writeOperation = (access: ts.Node): ts.Node | null => {
-        let current: ts.Node = access;
-        while (current.parent) {
-          const parent = current.parent;
-          if (ts.isBinaryExpression(parent)) {
-            return parent.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-              parent.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
-              contains(parent.left, access)
-              ? parent
-              : null;
+  const inspect = (candidate: ts.SourceFile): void => {
+    for (const node of syntaxFor(lexicalIndex, candidate).conflict) {
+      if (conflict) return;
+      if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+        let targetNode: ts.Node = node;
+        while (
+          targetNode.parent &&
+          (ts.isParenthesizedExpression(targetNode.parent) ||
+            ts.isAsExpression(targetNode.parent) ||
+            ts.isTypeAssertionExpression(targetNode.parent) ||
+            ts.isNonNullExpression(targetNode.parent))
+        )
+          targetNode = targetNode.parent;
+        const contains = (ancestor: ts.Node, descendant: ts.Node): boolean => {
+          let current: ts.Node | undefined = descendant;
+          while (current) {
+            if (current === ancestor) return true;
+            current = current.parent;
           }
-          if (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) {
-            return contains(parent.initializer, access) ? parent : null;
-          }
-          if (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) {
-            return parent.operand === current &&
-              (parent.operator === ts.SyntaxKind.PlusPlusToken ||
-                parent.operator === ts.SyntaxKind.MinusMinusToken)
-              ? parent
-              : null;
-          }
-          if (ts.isDeleteExpression(parent)) return parent.expression === current ? parent : null;
-          if (
-            ts.isParenthesizedExpression(parent) ||
-            ts.isAsExpression(parent) ||
-            ts.isTypeAssertionExpression(parent) ||
-            ts.isNonNullExpression(parent) ||
-            ts.isArrayLiteralExpression(parent) ||
-            ts.isObjectLiteralExpression(parent) ||
-            ts.isPropertyAssignment(parent) ||
-            ts.isShorthandPropertyAssignment(parent) ||
-            ts.isSpreadElement(parent) ||
-            ts.isSpreadAssignment(parent)
-          ) {
-            current = parent;
-            continue;
+          return false;
+        };
+        const writeOperation = (access: ts.Node): ts.Node | null => {
+          let current: ts.Node = access;
+          while (current.parent) {
+            const parent = current.parent;
+            if (ts.isBinaryExpression(parent)) {
+              return parent.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+                parent.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
+                contains(parent.left, access)
+                ? parent
+                : null;
+            }
+            if (ts.isForInStatement(parent) || ts.isForOfStatement(parent)) {
+              return contains(parent.initializer, access) ? parent : null;
+            }
+            if (ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) {
+              return parent.operand === current &&
+                (parent.operator === ts.SyntaxKind.PlusPlusToken ||
+                  parent.operator === ts.SyntaxKind.MinusMinusToken)
+                ? parent
+                : null;
+            }
+            if (ts.isDeleteExpression(parent)) return parent.expression === current ? parent : null;
+            if (
+              ts.isParenthesizedExpression(parent) ||
+              ts.isAsExpression(parent) ||
+              ts.isTypeAssertionExpression(parent) ||
+              ts.isNonNullExpression(parent) ||
+              ts.isArrayLiteralExpression(parent) ||
+              ts.isObjectLiteralExpression(parent) ||
+              ts.isPropertyAssignment(parent) ||
+              ts.isShorthandPropertyAssignment(parent) ||
+              ts.isSpreadElement(parent) ||
+              ts.isSpreadAssignment(parent)
+            ) {
+              current = parent;
+              continue;
+            }
+            return null;
           }
           return null;
+        };
+        const operation = writeOperation(targetNode);
+        if (operation) {
+          const rootName = root(node.expression);
+          const written = memberName(node);
+          const rootValue = unwrap(node.expression);
+          const binding = rootName ? findLexicalBinding(lexicalIndex, rootName) : null;
+          // A dynamic key can be any property, so it retires every candidate.
+          if (
+            (rootValue.kind === ts.SyntaxKind.ThisKeyword &&
+              hasHolderThis(node) &&
+              (written === null || written === name)) ||
+            (binding && aliases.has(binding) && (written === null || written === name))
+          )
+            conflict = true;
         }
-        return null;
-      };
-      const operation = writeOperation(targetNode);
-      if (operation) {
-        const rootName = root(node.expression);
-        const written = memberName(node);
-        const rootValue = unwrap(node.expression);
-        const binding = rootName ? findLexicalBinding(lexicalIndex, rootName) : null;
-        // A dynamic key can be any property, so it retires every candidate.
+      }
+      if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
+        // A holder passed to unknown code can be mutated without a visible write.
         if (
-          (rootValue.kind === ts.SyntaxKind.ThisKeyword &&
-            hasHolderThis(node) &&
-            (written === null || written === name)) ||
-          (binding && aliases.has(binding) && (written === null || written === name))
+          node.arguments?.some((argument) => {
+            const binding = bindingOf(argument);
+            return (
+              (binding !== null && aliases.has(binding)) ||
+              (unwrap(argument).kind === ts.SyntaxKind.ThisKeyword && hasHolderThis(node))
+            );
+          })
         )
           conflict = true;
+        const expression = node.expression;
+        if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) {
+          const receiver = expression.expression;
+          const receiverRoot = root(receiver);
+          const receiverBinding = receiverRoot
+            ? findLexicalBinding(lexicalIndex, receiverRoot)
+            : null;
+          const member = memberName(expression);
+          if (
+            (unwrap(receiver).kind === ts.SyntaxKind.ThisKeyword &&
+              hasHolderThis(node) &&
+              member !== name) ||
+            (receiverBinding && aliases.has(receiverBinding) && (member === null || member !== name))
+          )
+            conflict = true;
+        }
       }
     }
-    if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
-      // A holder passed to unknown code can be mutated without a visible write.
-      if (
-        node.arguments?.some((argument) => {
-          const binding = bindingOf(argument);
-          return (
-            (binding !== null && aliases.has(binding)) ||
-            (unwrap(argument).kind === ts.SyntaxKind.ThisKeyword && hasHolderThis(node))
-          );
-        })
-      )
-        conflict = true;
-      const expression = node.expression;
-      if (ts.isPropertyAccessExpression(expression) || ts.isElementAccessExpression(expression)) {
-        const receiver = expression.expression;
-        const receiverRoot = root(receiver);
-        const receiverBinding = receiverRoot
-          ? findLexicalBinding(lexicalIndex, receiverRoot)
-          : null;
-        const member = memberName(expression);
-        if (
-          (unwrap(receiver).kind === ts.SyntaxKind.ThisKeyword &&
-            hasHolderThis(node) &&
-            member !== name) ||
-          (receiverBinding && aliases.has(receiverBinding) && (member === null || member !== name))
-        )
-          conflict = true;
-      }
-    }
-    ts.forEachChild(node, visit);
   };
-  visit(source);
-  if (holderObject && holderObject.getSourceFile() !== source) visit(holderObject.getSourceFile());
+  inspect(source);
+  if (holderObject && holderObject.getSourceFile() !== source)
+    inspect(holderObject.getSourceFile());
   return conflict;
 }
 
@@ -346,7 +346,224 @@ type LexicalIndex = {
   references: WeakMap<ts.Identifier, ts.Node | null>;
   direct: WeakMap<readonly ts.Statement[], ReadonlyMap<string, ts.Node>>;
   vars: WeakMap<ts.Node, ReadonlyMap<string, ts.Node>>;
+  syntax: WeakMap<ts.SourceFile, SourceSyntax>;
 };
+
+type ImportedBinding = {
+  statement: ts.ImportDeclaration;
+  declaration: ts.Node;
+  imported: string | null;
+  kind: 'default' | 'named' | 'namespace';
+};
+
+/**
+ * One explicit-export contribution, resolved lazily so an index build never
+ * crosses a module boundary the original per-name scan would not have reached.
+ */
+type ExportEntry =
+  | { kind: 'declaration'; declaration: ts.Node }
+  | { kind: 'local'; name: string }
+  | {
+      kind: 'reexport';
+      specifier: string;
+      local: string;
+      element: ts.ExportSpecifier;
+    };
+
+/**
+ * Immutable syntax facts collected in a single preorder pass. SourceFile
+ * replacement produces a distinct key, so no fact can leak into a changed
+ * source's observation. The `writes`/`conflict`/`alias` lists share one
+ * traversal order, which every consumer's original in-order visit relied on.
+ */
+type SourceSyntax = {
+  imports: ReadonlyMap<string, ImportedBinding | null>;
+  exports: ReadonlyMap<string, readonly ExportEntry[]>;
+  stars: readonly { statement: ts.ExportDeclaration; specifier: string }[];
+  writes: readonly ts.Node[];
+  conflict: readonly ts.Node[];
+  alias: readonly ts.Node[];
+};
+
+function isAssignmentOperator(kind: ts.SyntaxKind): boolean {
+  return kind >= ts.SyntaxKind.FirstAssignment && kind <= ts.SyntaxKind.LastAssignment;
+}
+
+function isUpdateExpression(
+  node: ts.Node
+): node is ts.PrefixUnaryExpression | ts.PostfixUnaryExpression {
+  return (
+    (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+    (node.operator === ts.SyntaxKind.PlusPlusToken ||
+      node.operator === ts.SyntaxKind.MinusMinusToken)
+  );
+}
+
+function collectImportBinding(
+  bindings: Map<string, ImportedBinding | null>,
+  name: string,
+  binding: ImportedBinding
+): void {
+  if (bindings.has(name)) bindings.set(name, null);
+  else bindings.set(name, binding);
+}
+
+function sourceSyntax(source: ts.SourceFile): SourceSyntax {
+  const imports = new Map<string, ImportedBinding | null>();
+  const exports = new Map<string, ExportEntry[]>();
+  const stars: { statement: ts.ExportDeclaration; specifier: string }[] = [];
+  const writes: ts.Node[] = [];
+  const conflict: ts.Node[] = [];
+  const alias: ts.Node[] = [];
+  const explicit = (name: string, entry: ExportEntry): void => {
+    const entries = exports.get(name);
+    if (entries) entries.push(entry);
+    else exports.set(name, [entry]);
+  };
+
+  // Top-level statements own every import/export fact; the deeper pass below
+  // carries only the write/conflict/alias candidates.
+  for (const statement of source.statements) {
+    if (ts.isImportDeclaration(statement) && ts.isStringLiteralLike(statement.moduleSpecifier)) {
+      const clause = statement.importClause;
+      if (clause && !clause.isTypeOnly) {
+        if (clause.name) {
+          collectImportBinding(imports, clause.name.text, {
+            statement,
+            declaration: clause,
+            imported: 'default',
+            kind: 'default',
+          });
+        }
+        const named = clause.namedBindings;
+        if (named && ts.isNamespaceImport(named)) {
+          collectImportBinding(imports, named.name.text, {
+            statement,
+            declaration: named,
+            imported: null,
+            kind: 'namespace',
+          });
+        } else if (named && ts.isNamedImports(named)) {
+          for (const element of named.elements) {
+            if (element.isTypeOnly) continue;
+            collectImportBinding(imports, element.name.text, {
+              statement,
+              declaration: element,
+              imported: (element.propertyName ?? element.name).text,
+              kind: 'named',
+            });
+          }
+        }
+      }
+      continue;
+    }
+    if (
+      ts.isVariableStatement(statement) &&
+      hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+      !hasModifier(statement, ts.SyntaxKind.DefaultKeyword) &&
+      !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)
+    ) {
+      for (const declaration of statement.declarationList.declarations) {
+        for (const [bound, node] of bindingNames(declaration.name)) {
+          // Normalize to the enclosing declaration so a simple binding and the
+          // same name found through a local route are one symbol.
+          explicit(bound, {
+            kind: 'declaration',
+            declaration: ts.isIdentifier(declaration.name) ? declaration : node,
+          });
+        }
+      }
+      continue;
+    }
+    if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
+      if (statement.name && !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) {
+        if (
+          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+          !hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+        )
+          explicit(statement.name.text, { kind: 'declaration', declaration: statement });
+        if (
+          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+          hasModifier(statement, ts.SyntaxKind.DefaultKeyword)
+        )
+          explicit('default', { kind: 'declaration', declaration: statement });
+      }
+      continue;
+    }
+    if (
+      ts.isEnumDeclaration(statement) &&
+      hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
+      !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)
+    ) {
+      explicit(statement.name.text, { kind: 'declaration', declaration: statement });
+      continue;
+    }
+    if (ts.isExportAssignment(statement)) {
+      if (!statement.isExportEquals) {
+        const expression = unwrap(statement.expression);
+        if (ts.isIdentifier(expression)) explicit('default', { kind: 'local', name: expression.text });
+        else explicit('default', { kind: 'declaration', declaration: expression });
+      }
+      continue;
+    }
+    if (ts.isExportDeclaration(statement) && !statement.isTypeOnly) {
+      const clause = statement.exportClause;
+      if (!clause) {
+        if (statement.moduleSpecifier && ts.isStringLiteralLike(statement.moduleSpecifier))
+          stars.push({ statement, specifier: statement.moduleSpecifier.text });
+        continue;
+      }
+      if (ts.isNamespaceExport(clause)) {
+        explicit(clause.name.text, { kind: 'declaration', declaration: statement });
+        continue;
+      }
+      if (ts.isNamedExports(clause)) {
+        for (const element of clause.elements) {
+          if (element.isTypeOnly) continue;
+          const localName = (element.propertyName ?? element.name).text;
+          if (statement.moduleSpecifier && ts.isStringLiteralLike(statement.moduleSpecifier)) {
+            explicit(element.name.text, {
+              kind: 'reexport',
+              specifier: statement.moduleSpecifier.text,
+              local: localName,
+              element,
+            });
+          } else {
+            explicit(element.name.text, { kind: 'local', name: localName });
+          }
+        }
+      }
+    }
+  }
+
+  const visit = (node: ts.Node): void => {
+    if (
+      (ts.isBinaryExpression(node) && isAssignmentOperator(node.operatorToken.kind)) ||
+      ts.isForOfStatement(node) ||
+      ts.isForInStatement(node) ||
+      isUpdateExpression(node) ||
+      ts.isFunctionDeclaration(node) ||
+      (ts.isVariableDeclaration(node) && node.initializer)
+    )
+      writes.push(node);
+    if (
+      ts.isPropertyAccessExpression(node) ||
+      ts.isElementAccessExpression(node) ||
+      ts.isCallExpression(node) ||
+      ts.isNewExpression(node)
+    )
+      conflict.push(node);
+    if (
+      (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) ||
+      (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken)
+    )
+      alias.push(node);
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+
+  return { imports, exports, stars, writes, conflict, alias };
+}
 
 function directVariableBindings(
   lexicalIndex: LexicalIndex,
@@ -379,50 +596,20 @@ function directVariableBindings(
   return bindings.get(name) ?? null;
 }
 
+function syntaxFor(lexicalIndex: LexicalIndex, source: ts.SourceFile): SourceSyntax {
+  const cached = lexicalIndex.syntax.get(source);
+  if (cached) return cached;
+  const collected = sourceSyntax(source);
+  lexicalIndex.syntax.set(source, collected);
+  return collected;
+}
+
 function importBinding(
+  lexicalIndex: LexicalIndex,
   module: HookSourceModule,
   name: string
-): {
-  statement: ts.ImportDeclaration;
-  declaration: ts.Node;
-  imported: string | null;
-  kind: 'default' | 'named' | 'namespace';
-} | null {
-  let found: {
-    statement: ts.ImportDeclaration;
-    declaration: ts.Node;
-    imported: string | null;
-    kind: 'default' | 'named' | 'namespace';
-  } | null = null;
-  for (const statement of module.source.statements) {
-    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteralLike(statement.moduleSpecifier))
-      continue;
-    const clause = statement.importClause;
-    if (!clause || clause.isTypeOnly) continue;
-    if (clause.name?.text === name) {
-      if (found) return null;
-      found = { statement, declaration: clause, imported: 'default', kind: 'default' };
-    }
-    const bindings = clause.namedBindings;
-    if (!bindings) continue;
-    if (ts.isNamespaceImport(bindings)) {
-      if (bindings.name.text !== name) continue;
-      if (found) return null;
-      found = { statement, declaration: bindings, imported: null, kind: 'namespace' };
-      continue;
-    }
-    for (const element of bindings.elements) {
-      if (element.isTypeOnly || element.name.text !== name) continue;
-      if (found) return null;
-      found = {
-        statement,
-        declaration: element,
-        imported: (element.propertyName ?? element.name).text,
-        kind: 'named',
-      };
-    }
-  }
-  return found;
+): ImportedBinding | null {
+  return syntaxFor(lexicalIndex, module.source).imports.get(name) ?? null;
 }
 
 function sourceImportDeclaration(node: ts.Node): ts.ImportDeclaration | null {
@@ -829,7 +1016,7 @@ function findUncachedLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Identif
   let current: ts.Node | undefined = node;
   while (current) {
     if (ts.isSourceFile(current)) {
-      const imported = importBinding({ file: current.fileName, source: current }, name);
+      const imported = importBinding(lexicalIndex, { file: current.fileName, source: current }, name);
       if (imported) return imported.declaration;
       return directVariableBindings(lexicalIndex, current.statements, name);
     }
@@ -971,7 +1158,12 @@ function objectMember(object: ts.ObjectLiteralExpression, name: string): ts.Node
 export function createHookSourceModuleContext(): HookSourceModuleContext {
   // Immutable AST identity, scoped to one operation. A newly registered source
   // owns different nodes; no path-keyed/global index survives into its lookup.
-  const lexicalIndex: LexicalIndex = { direct: new WeakMap(), vars: new WeakMap(), references: new WeakMap() };
+  const lexicalIndex: LexicalIndex = {
+    direct: new WeakMap(),
+    vars: new WeakMap(),
+    references: new WeakMap(),
+    syntax: new WeakMap(),
+  };
   const modules = new Map<string, HookSourceModule>();
   const moduleFailures = new Set<string>();
   const configCache = new Map<string, ConfigRecord>();
@@ -1182,7 +1374,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   };
 
   const localDeclaration = (module: HookSourceModule, name: string): ts.Node | null => {
-    const imported = importBinding(module, name);
+    const imported = importBinding(lexicalIndex, module, name);
     if (imported) return imported.declaration;
     return directVariableBindings(lexicalIndex, module.source.statements, name);
   };
@@ -1200,101 +1392,25 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     const explicit: HookSourceSymbol[] = [];
     let explicitClaimed = false;
 
-    for (const statement of module.source.statements) {
-      if (
-        ts.isVariableStatement(statement) &&
-        hasModifier(statement, ts.SyntaxKind.ExportKeyword)
-      ) {
-        if (hasModifier(statement, ts.SyntaxKind.DefaultKeyword)) continue;
-        const names = new Map<string, ts.Node>();
-        for (const declaration of statement.declarationList.declarations) {
-          if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) {
-            // An erased declaration establishes no runtime value.
-            names.clear();
-            break;
-          }
-          // Normalize to the enclosing declaration so a simple binding and the
-          // same name found through a local route are one symbol.
-          for (const [bound, node] of bindingNames(declaration.name)) {
-            names.set(bound, ts.isIdentifier(declaration.name) ? declaration : node);
-          }
-        }
-        const declaration = names.get(name);
-        if (declaration) {
-          explicitClaimed = true;
-          addUnique(explicit, { module, declaration });
-        }
+    // Export candidates were collected once per immutable source in statement
+    // order; only the resolution work below can cross module boundaries.
+    for (const entry of syntaxFor(lexicalIndex, module.source).exports.get(name) ?? []) {
+      explicitClaimed = true;
+      if (entry.kind === 'declaration') {
+        addUnique(explicit, { module, declaration: entry.declaration });
         continue;
       }
-      if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
-        if (!statement.name || hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) continue;
-        if (
-          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
-          !hasModifier(statement, ts.SyntaxKind.DefaultKeyword) &&
-          statement.name.text === name
-        ) {
-          explicitClaimed = true;
-          addUnique(explicit, { module, declaration: statement });
-        }
-        if (
-          hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
-          hasModifier(statement, ts.SyntaxKind.DefaultKeyword) &&
-          name === 'default'
-        ) {
-          explicitClaimed = true;
-          addUnique(explicit, { module, declaration: statement });
-        }
+      if (entry.kind === 'local') {
+        addUnique(explicit, resolveLocalInternal(module, entry.name, nextStack));
         continue;
       }
-      if (
-        ts.isEnumDeclaration(statement) &&
-        hasModifier(statement, ts.SyntaxKind.ExportKeyword) &&
-        !hasModifier(statement, ts.SyntaxKind.DeclareKeyword) &&
-        statement.name.text === name
-      ) {
-        explicitClaimed = true;
-        addUnique(explicit, { module, declaration: statement });
+      if (entry.specifier === CORE_SPECIFIER) {
+        if (isCoreFactoryName(entry.local))
+          addUnique(explicit, { module, declaration: entry.element });
         continue;
       }
-      if (!ts.isExportAssignment(statement) && !ts.isExportDeclaration(statement)) continue;
-
-      if (ts.isExportAssignment(statement)) {
-        if (statement.isExportEquals || name !== 'default') continue;
-        explicitClaimed = true;
-        const expression = unwrap(statement.expression);
-        if (ts.isIdentifier(expression)) {
-          addUnique(explicit, resolveLocalInternal(module, expression.text, nextStack));
-        } else {
-          addUnique(explicit, { module, declaration: expression });
-        }
-        continue;
-      }
-
-      if (statement.isTypeOnly || !statement.exportClause) continue;
-      const clause = statement.exportClause;
-      if (ts.isNamespaceExport(clause)) {
-        if (clause.name.text !== name) continue;
-        explicitClaimed = true;
-        addUnique(explicit, { module, declaration: statement });
-        continue;
-      }
-      if (!ts.isNamedExports(clause)) continue;
-      for (const element of clause.elements) {
-        if (element.isTypeOnly || element.name.text !== name) continue;
-        explicitClaimed = true;
-        const localName = (element.propertyName ?? element.name).text;
-        if (statement.moduleSpecifier && ts.isStringLiteralLike(statement.moduleSpecifier)) {
-          const specifier = statement.moduleSpecifier.text;
-          if (specifier === CORE_SPECIFIER) {
-            if (isCoreFactoryName(localName)) addUnique(explicit, { module, declaration: element });
-            continue;
-          }
-          const target = resolveModule(module.file, specifier);
-          if (target) addUnique(explicit, resolveExportInternal(target, localName, nextStack));
-        } else {
-          addUnique(explicit, resolveLocalInternal(module, localName, nextStack));
-        }
-      }
+      const target = resolveModule(module.file, entry.specifier);
+      if (target) addUnique(explicit, resolveExportInternal(target, entry.local, nextStack));
     }
 
     if (explicit.length > 1) return null;
@@ -1309,18 +1425,14 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     if (name !== 'default') {
       const stars: HookSourceSymbol[] = [];
       let unresolvedStarTarget = false;
-      for (const statement of module.source.statements) {
-        if (!ts.isExportDeclaration(statement) || statement.isTypeOnly || statement.exportClause)
-          continue;
-        if (!statement.moduleSpecifier || !ts.isStringLiteralLike(statement.moduleSpecifier))
-          continue;
-        if (statement.moduleSpecifier.text === CORE_SPECIFIER && isCoreFactoryName(name)) {
+      for (const { statement, specifier } of syntaxFor(lexicalIndex, module.source).stars) {
+        if (specifier === CORE_SPECIFIER && isCoreFactoryName(name)) {
           const symbol = { module, declaration: statement };
           coreStarFactoryNames.set(symbol, name);
           addUnique(stars, symbol);
           continue;
         }
-        const target = resolveModule(module.file, statement.moduleSpecifier.text);
+        const target = resolveModule(module.file, specifier);
         if (!target) {
           unresolvedStarTarget = true;
           continue;
@@ -1341,7 +1453,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     name: string,
     stack: Set<string>
   ): HookSourceSymbol | null {
-    const imported = importBinding(module, name);
+    const imported = importBinding(lexicalIndex, module, name);
     if (imported) {
       const moduleSpecifier = imported.statement.moduleSpecifier;
       if (!ts.isStringLiteralLike(moduleSpecifier)) return null;
@@ -1414,8 +1526,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     if (!target) return true;
     const key = declarationKey(target);
     let changed = false;
-    const visit = (node: ts.Node): void => {
-      if (changed || node === bindingNode) return;
+    for (const node of syntaxFor(lexicalIndex, module.source).writes) {
+      if (changed) break;
       if (ts.isBinaryExpression(node)) {
         const operator = node.operatorToken.kind;
         if (
@@ -1436,9 +1548,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
           if (written && declarationKey(written) === key) changed = true;
         }
       }
-      ts.forEachChild(node, visit);
-    };
-    visit(module.source);
+    }
     return changed;
   };
 
@@ -1493,8 +1603,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
         ts.findAncestor(node, (scope) => ts.isFunctionLike(scope) || ts.isSourceFile(scope));
       const declaringScope = varScope(declaration.parent);
       let replaced = false;
-      const visit = (node: ts.Node): void => {
-        if (replaced) return;
+      for (const node of syntaxFor(lexicalIndex, symbol.module.source).writes) {
+        if (replaced) break;
         if (
           ts.isFunctionDeclaration(node) &&
           node !== declaration &&
@@ -1525,9 +1635,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
         ) {
           replaced = writesBinding(node.operand);
         }
-        if (!replaced) ts.forEachChild(node, visit);
-      };
-      visit(symbol.module.source);
+      }
       return replaced ? null : symbol;
     }
     if (ts.isFunctionExpression(symbol.declaration)) {
@@ -1710,8 +1818,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
       return null;
     };
     let conflict = false;
-    const visit = (node: ts.Node): void => {
-      if (conflict) return;
+    for (const node of syntaxFor(lexicalIndex, module.source).conflict) {
+      if (conflict) break;
       if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
         if (writeOperation(node)) {
           const root = unwrap(node.expression);
@@ -1752,9 +1860,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
             conflict = true;
         }
       }
-      ts.forEachChild(node, visit);
-    };
-    visit(module.source);
+    }
     return conflict;
   };
 
@@ -1816,7 +1922,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     if (ts.isIdentifier(value)) {
       const lexical = findLexicalBinding(lexicalIndex, value);
       if (lexical) {
-        const imported = importBinding(module, value.text);
+        const imported = importBinding(lexicalIndex, module, value.text);
         if (imported && imported.declaration === lexical) return resolveLocal(module, value.text);
         return { module, declaration: lexical };
       }

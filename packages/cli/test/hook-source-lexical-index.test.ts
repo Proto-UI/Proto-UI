@@ -297,3 +297,157 @@ describe('immutable AST lexical query identities', () => {
   });
 
 });
+
+describe('indexed import bindings', () => {
+  it('resolves default, named, namespace and renamed imports to their own declarations', () => {
+    const file = source(`import main from './a';
+      import * as ns from './b';
+      import { value, other as alias } from './c';
+      read(main); read(ns); read(value); read(alias);`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    const clauses = nodes(file, ts.isImportClause);
+    const namespace = nodes(file, ts.isNamespaceImport)[0];
+    const specifiers = nodes(file, ts.isImportSpecifier);
+    expect(reads(file).map(n => context.resolveReference(n, module)?.declaration))
+      .toEqual([clauses[0], namespace, specifiers[0], specifiers[1]]);
+    // Repeat queries must be stable, not re-scan or drift.
+    expect(reads(file).map(n => context.resolveReference(n, module)?.declaration))
+      .toEqual([clauses[0], namespace, specifiers[0], specifiers[1]]);
+  });
+
+  it('rejects an ambiguous duplicate local import name', () => {
+    const file = source(`import { value } from './a'; import { other as value } from './b'; read(value);`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    expect(context.resolveLocal(module, 'value')).toBeNull();
+  });
+
+  it('ignores type-only imports and import clauses', () => {
+    const file = source(`import type { value } from './a'; import type Default from './b';
+      const value = 1; read(value);`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    expect(context.resolveReference(reads(file)[0], module)?.declaration)
+      .toBe(nodes(file, ts.isVariableDeclaration)[0]);
+  });
+
+  it('does not carry import bindings into a replacement source', () => {
+    const context = createHookSourceModuleContext();
+    const before = source(`import { value } from './a'; read(value);`);
+    const first = context.moduleForSource(before);
+    const imported = nodes(before, ts.isImportSpecifier)[0];
+    expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(imported);
+    const after = source(`const value = 'local'; read(value);`);
+    const second = context.moduleForSource(after);
+    expect(context.resolveReference(reads(after)[0], second)?.declaration)
+      .toBe(nodes(after, ts.isVariableDeclaration)[0]);
+    // The old immutable source still resolves through its own import index.
+    expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(imported);
+  });
+});
+
+describe('indexed export declarations', () => {
+  it('resolves exported variables, functions, classes and enums', () => {
+    const file = source(`export const value = 1;
+      export function fn() {}
+      export class Cls {}
+      export enum Kind { a }
+      const hidden = 2;`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    const declarations = nodes(file, ts.isVariableDeclaration);
+    expect(context.resolveExport(module, 'value')?.declaration).toBe(declarations[0]);
+    expect(context.resolveExport(module, 'fn')?.declaration).toBe(nodes(file, ts.isFunctionDeclaration)[0]);
+    expect(context.resolveExport(module, 'Cls')?.declaration).toBe(nodes(file, ts.isClassDeclaration)[0]);
+    expect(context.resolveExport(module, 'Kind')?.declaration).toBe(nodes(file, ts.isEnumDeclaration)[0]);
+    expect(context.resolveExport(module, 'hidden')).toBeNull();
+  });
+
+  it('resolves local export specifiers and default expressions', () => {
+    const file = source(`const value = 1;
+      export { value };
+      export default value;`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    const declaration = nodes(file, ts.isVariableDeclaration)[0];
+    expect(context.resolveExport(module, 'value')?.declaration).toBe(declaration);
+    expect(context.resolveExport(module, 'default')?.declaration).toBe(declaration);
+  });
+
+  it('does not treat declare exports as runtime values', () => {
+    const file = source(`export declare const erased: number;
+      export declare function gone(): void;
+      export const kept = 1;`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    expect(context.resolveExport(module, 'erased')).toBeNull();
+    expect(context.resolveExport(module, 'gone')).toBeNull();
+    expect(context.resolveExport(module, 'kept')?.declaration)
+      .toBe(nodes(file, ts.isVariableDeclaration)[0]);
+  });
+
+  it('keeps conflicting same-name exports ambiguous and stable across repeats', () => {
+    const file = source(`export const value = 1; export const value = 2;`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    for (let i = 0; i < 3; i++) expect(context.resolveExport(module, 'value')).toBeNull();
+  });
+});
+
+describe('indexed member-write conflict scans', () => {
+  function memberResolution(text: string) {
+    const file = source(text);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    // The read(...) occurrence is always the final access in these fixtures.
+    const access = nodes(file, ts.isPropertyAccessExpression)
+      .filter(n => n.getText() === 'obj.member')
+      .at(-1);
+    return context.resolveReference(access!, module);
+  }
+
+  it('resolves a stable const object member and rejects it after a direct write', () => {
+    for (const write of ['', 'obj.member = 2;']) {
+      const resolved = memberResolution(`const obj = { member: 1 }; ${write} read(obj.member);`);
+      if (!write) expect(resolved?.declaration).toBeDefined();
+      else expect(resolved).toBeNull();
+    }
+  });
+
+  it('rejects writes through an alias, a dynamic key, delete and update operators', () => {
+    for (const write of [
+      'const alias = obj; alias.member = 2;',
+      'obj[key] = 2;',
+      'delete obj.member;',
+      '++obj.member;',
+    ]) {
+      expect(memberResolution(`const obj = { member: 1 }; declare const key: string; ${write} read(obj.member);`)).toBeNull();
+    }
+    // An unrelated member write does not retire the requested member.
+    expect(memberResolution(`const obj = { member: 1, other: 2 }; obj.other = 3; read(obj.member);`)?.declaration)
+      .toBeDefined();
+  });
+
+  it('rejects an escaped holder passed to an unknown call', () => {
+    expect(memberResolution(`const obj = { member: 1 }; consume(obj); read(obj.member);`)).toBeNull();
+    expect(memberResolution(`const obj = { member: 1, other: 2 }; obj.other(); read(obj.member);`)).toBeNull();
+    expect(memberResolution(`const obj = { member: 1 }; obj.member(); read(obj.member);`)?.declaration)
+      .toBeDefined();
+  });
+
+  it('does not confuse a shadowed same-name binding with the holder', () => {
+    const resolved = memberResolution(`const obj = { member: 1 };
+      function inner() { const obj = { member: 9 }; obj.member = 10; }
+      read(obj.member);`);
+    expect(resolved?.declaration).toBeDefined();
+  });
+
+  it('keeps conflict facts per immutable source on same-path replacement', () => {
+    const context = createHookSourceModuleContext();
+    const before = source(`const obj = { member: 1 }; read(obj.member);`);
+    const first = context.moduleForSource(before);
+    const access = nodes(before, ts.isPropertyAccessExpression).find(n => n.getText() === 'obj.member')!;
+    expect(context.resolveReference(access, first)?.declaration).toBeDefined();
+    const after = source(`const obj = { member: 1 }; obj.member = 2; read(obj.member);`);
+    const second = context.moduleForSource(after);
+    const replacement = nodes(after, ts.isPropertyAccessExpression)
+      .filter(n => n.getText() === 'obj.member')
+      .at(-1)!;
+    expect(context.resolveReference(replacement, second)).toBeNull();
+    // The unchanged old AST must not inherit the replacement's conflict facts.
+    expect(context.resolveReference(access, first)?.declaration).toBeDefined();
+  });
+});
