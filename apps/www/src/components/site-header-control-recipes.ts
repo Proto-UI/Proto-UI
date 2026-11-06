@@ -9,8 +9,11 @@ export function headerButtonProps(family: SiteLibraryFamily, size = 'icon') {
     : { variant: 'surface' as const, size };
 }
 
-export function headerSelectControlProps() {
+export function headerSelectControlProps(family: SiteLibraryFamily) {
   return {
+    // Shadcn has complete public sizing anatomy. Brutalist still uses legacy
+    // Content-owned chrome and must remain intrinsic until its family parts exist.
+    itemSizing: family === 'shadcn' ? ('match-trigger' as const) : ('intrinsic' as const),
     shadcnStyleProfile: 'rhea' as const,
     triggerAppearance: 'default' as const,
     compactTriggerAppearance: 'default' as const,

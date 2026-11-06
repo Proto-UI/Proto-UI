@@ -758,3 +758,32 @@ describe('stable local preview switching mask', () => {
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
   });
 });
+
+it.each(['shadcn', 'brutalist'] as const)(
+  'recomputes both Header control policies for the requested %s family, including return switches',
+  async (family) => {
+    const root = fixture();
+    handle = initHomepageRuntime(root);
+    await settle();
+    const latestHeader = () =>
+      fakes.materialize.mock.calls
+        .filter(
+          ([, options]) =>
+            options.ownerId === 'homepage-navigation' &&
+            options.controlIds.includes('runtime') &&
+            options.controlIds.includes('family')
+        )
+        .at(-1)!;
+    for (const selected of [family, family === 'shadcn' ? 'brutalist' : 'shadcn', family]) {
+      latestHeader()[1].controls.family.onValueChange(selected);
+      await settle();
+      const [request, options] = latestHeader();
+      expect(request.selection.projectionFamilyId).toBe(selected);
+      expect(request.generation).toBe(handle!.getSnapshot().generation);
+      expect(root.dataset.runtimeGeneration).toBe(String(request.generation));
+      for (const control of [options.controls.runtime, options.controls.family])
+        expect(control.itemSizing).toBe(selected === 'shadcn' ? 'match-trigger' : 'intrinsic');
+      expect(root.dataset.family).toBe(selected);
+    }
+  }
+);

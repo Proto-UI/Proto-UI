@@ -446,16 +446,16 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     if (status)
       status.textContent = `${LABELS[runtime]} · ${root.dataset[`status${state[0]!.toUpperCase()}${state.slice(1)}`] || state}`;
   };
-  const controls = (): ProjectionCompositionControls => ({
+  const controls = (family: SiteLibraryFamily): ProjectionCompositionControls => ({
     runtime: {
       label: root.dataset.runtimeLabel || 'Page runtime',
-      ...headerSelectControlProps(),
+      ...headerSelectControlProps(family),
       options: AdapterIds.map((value) => ({ value, label: LABELS[value] })),
       onValueChange: requestRuntime,
     },
     family: {
       label: root.dataset.familyLabel || demo?.root.dataset.familyLabel || 'Page library',
-      ...headerSelectControlProps(),
+      ...headerSelectControlProps(family),
       options: [
         { value: 'shadcn', label: 'Shadcn' },
         { value: 'brutalist', label: 'Brutalist' },
@@ -495,7 +495,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           mount: group.mount,
           ownerId: group.ownerId,
           componentId: 'button',
-          controls: controls(),
+          controls: controls(family),
           controlIds: group.runtime ? ['runtime', 'family'] : [],
           content: {
             demo: createHomepageContent(
@@ -517,7 +517,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
             mount: demo.mount,
             ownerId: demo.ownerId,
             componentId: component,
-            controls: controls(),
+            controls: controls(family),
             controlIds: [],
             content: demo.createContent(
               family,

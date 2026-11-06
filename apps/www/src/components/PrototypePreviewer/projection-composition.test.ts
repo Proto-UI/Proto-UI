@@ -31,7 +31,10 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       componentId: 'button',
       contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
-      controls: { ...config, runtime: { ...config.runtime, ...headerSelectControlProps() } },
+      controls: {
+        ...config,
+        runtime: { ...config.runtime, ...headerSelectControlProps('shadcn') },
+      },
       controlIds: ['runtime'],
     });
     const trigger = findNode(
@@ -46,7 +49,11 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       throw new Error('Expected real Select parts');
     expect(trigger.props).toMatchObject({ appearance: 'default', accessibleLabel: 'Runtime' });
     expect(trigger.props).not.toHaveProperty('aria-label');
-    expect(root.props).toMatchObject({ styleProfile: 'rhea', value: runtimeId });
+    expect(root.props).toMatchObject({
+      styleProfile: 'rhea',
+      value: runtimeId,
+      itemSizing: 'match-trigger',
+    });
     expect(trigger.surfaceStyle).toMatchObject({
       minHeight: 'var(--site-control-height, 2.75rem)',
     });
@@ -1133,4 +1140,84 @@ it('keeps full-value wrapping an explicit consumer opt-in rather than changing p
         'height'
       );
   }
+});
+
+describe('Header Select sizing policy is a consumer choice', () => {
+  for (const family of ['shadcn', 'brutalist'] as const)
+    it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+      `${family} %s passes the requested family policy to both Header Roots without item CSS`,
+      (runtimeId) => {
+        const config = controls();
+        const composition = createProjectionComposition({
+          ownerId: 'header-sizing',
+          runtimeId,
+          projectionFamilyId: family,
+          generation: 1,
+          componentId: 'button',
+          contentRecipe: buttonFixtureRecipe(family),
+          childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: `${family}-button` } },
+          controls: {
+            ...config,
+            runtime: { ...config.runtime, ...headerSelectControlProps(family) },
+            family: { ...config.family, ...headerSelectControlProps(family) },
+          },
+          controlIds: ['runtime', 'family'],
+        });
+        for (const controlId of ['runtime', 'family'] as const) {
+          const box = findNode(
+            composition.demo,
+            (node) => node.kind === 'box' && node.attrs?.['data-projection-control'] === controlId
+          );
+          const parts: Extract<DemoNode, { kind: 'proto' }>[] = [];
+          walk(box, (node) => {
+            if (node.kind === 'proto') parts.push(node);
+          });
+          const roots = parts.filter((node) => node.prototypeId === `${family}-select-root`);
+          expect(roots).toHaveLength(1);
+          expect(roots[0]!.props?.itemSizing).toBe(
+            family === 'shadcn' ? 'match-trigger' : 'intrinsic'
+          );
+          const items = parts.filter((node) => node.prototypeId === `${family}-select-item`);
+          expect(items.map((node) => node.props?.value)).toEqual(
+            config[controlId].options.map((option) => option.value)
+          );
+          for (const item of items) {
+            expect(item.props).not.toHaveProperty('itemSizing');
+            // The projection builder normalizes an absent style to an empty object.
+            expect(item.surfaceStyle).toEqual({});
+          }
+          const content = parts.filter((node) => node.prototypeId === `${family}-select-content`);
+          expect(content).toHaveLength(1);
+          expect(content[0]!.props?.position).toBe(family === 'shadcn' ? undefined : 'popper');
+        }
+      }
+    );
+
+  it.each([undefined, 'intrinsic', 'match-trigger'] as const)(
+    'retains the explicit %s policy without changing ordinary preview defaults',
+    (itemSizing) => {
+      const config = controls();
+      const composition = createProjectionComposition({
+        ownerId: 'preview-sizing',
+        runtimeId: 'wc',
+        projectionFamilyId: 'shadcn',
+        generation: 1,
+        componentId: 'button',
+        contentRecipe: buttonFixtureRecipe('shadcn'),
+        childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
+        controls: {
+          ...config,
+          runtime: { ...config.runtime, ...(itemSizing ? { itemSizing } : {}) },
+        },
+        controlIds: ['runtime'],
+      });
+      const root = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-root'
+      );
+      if (root.kind !== 'proto') throw new Error('Expected Select Root');
+      if (itemSizing) expect(root.props?.itemSizing).toBe(itemSizing);
+      else expect(root.props).not.toHaveProperty('itemSizing');
+    }
+  );
 });

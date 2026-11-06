@@ -1,0 +1,888 @@
+{
+  "schemaVersion": 1,
+  "baseline": "9e58834d167618216ed9b39278eb8dded2f2f596",
+  "candidatePatchSha256": "0ce4072884d9afe65839e069ecb1d1ff3458b81205bd380b7462e209c1f51889",
+  "subject": "Homepage Header Select consumer sizing opt-in",
+  "scope": "Logical recipe/Root policy, repeat family switching, unchanged public intrinsic defaults, no Item CSS; not physical browser geometry.",
+  "disposition": "partial",
+  "observedDateUTC": "2026-11-06",
+  "environment": {
+    "node": "24.22.1",
+    "vitest": "2.1.9",
+    "typescript": "5.9.3",
+    "prettier": "3.8.1",
+    "happyDom": "15.11.7",
+    "platform": "linux-x64",
+    "lockSha256": "3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422",
+    "dependencyScope": "105 existing fixed hash-verified packages; not a fresh full workspace installation",
+    "concurrency": "one heavy process, one Vitest worker",
+    "isolation": "read-only source, temporary work/output, cleared environment, no account mounts, network syscalls denied",
+    "timeoutSecondsPerPhase": 120
+  },
+  "candidateFiles": [
+    {
+      "path": "apps/www/src/components/site-header-control-recipes.ts",
+      "baselineSha256": "77b61b47997f79d3888c7a145985e69bf085fd6abbdce6845eef1e5196ee54c0",
+      "candidateSha256": "261b19e97bb32c0d397a8e27ca217b96043431e0ddebf013e584d978537023a4",
+      "changedFromV1": false
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "baselineSha256": "af80b9051a005169cde18de975e9e9dd0b18d5ba2d192b8b1f430a9040813fad",
+      "candidateSha256": "7b1e022168a2379df84709f38d7fca4099a089ff8620e82df5cbb382ef55f8ac",
+      "changedFromV1": false
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-locale-select.ts",
+      "baselineSha256": "6a4e4fd87e6f6ff16cae3ab44380cc1f11005b1472b73ade5e76a45e697bfa46",
+      "candidateSha256": "7ad6d7ea3a7fce986d581e2cc2d10a53653c248d6839f8da3a13e066b3b83faf",
+      "changedFromV1": true
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "baselineSha256": "099a4428b616ffbfbccf6e27de32ca8123fa67ed860a6b13d06ba208861f6b82",
+      "candidateSha256": "5a50c7b125e7123a3209378e651b87dde14536918884d1e53b886083e4ae3255",
+      "changedFromV1": false
+    },
+    {
+      "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+      "baselineSha256": "9c787c59c2acd127311f46966994639f8f1d844a325f2609308f581623fcd6b2",
+      "candidateSha256": "120a3180b4f4ad72661eb67c001a5940849ddd90e22f822aec41c79d32fcdc7c",
+      "changedFromV1": false
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+      "baselineSha256": "be8e86982b1b71dfec08fe68a9abccdc0ce438208d20859142c9ce70ea2a7d6e",
+      "candidateSha256": "926e9339257916494eb7cb1638db5a844e46822d2be730337f9c417ff2ac521e",
+      "changedFromV1": true
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+      "baselineSha256": "46652791890d4065c48960f15b47dc067dc5b736d2fcc6e3417705087560afd0",
+      "candidateSha256": "ab9775c1cd9623f4c7d37371107f602bb2b25b9cbb5e02c8eadfb9dc3c15eae2",
+      "changedFromV1": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "baselineSha256": "495c3366b07273fec3fa013e49e11c82dc7e2232f9bbbea72ee239e522d9071e",
+      "candidateSha256": "d8d394fedcdb78aae9cc10e82d9cac698a31d24077e5c4c1dbf6e3deb5d4c689",
+      "changedFromV1": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+      "baselineSha256": "c49cf95d0c91bb955ae839e38b5a1edb3a109eff5f1f8c2723ad2cbe903f8330",
+      "candidateSha256": "85902ac0e6ed3f7467abca7f2a59f1d082a330f1660583a5e12a1d6539c4310f",
+      "changedFromV1": true
+    }
+  ],
+  "unitResults": [
+    {
+      "phase": "baseline-unit-focused",
+      "subject": "baseline",
+      "candidateVersion": null,
+      "exit": 0,
+      "counts": {
+        "numTotalTests": 98,
+        "numPassedTests": 98,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 3,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 21,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 27,
+          "passed": 27,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 42,
+          "passed": 42,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 5,
+          "passed": 5,
+          "failures": []
+        }
+      ],
+      "rawReportSha256": "6795b827e3358eef8346e6e12ff236ce53a9688fb3187e10bdaefcd350d9753f",
+      "receiptSha256": "755c8b2c0d02a7c38a1a04f70bf00feaff04ad72ecb546f0f55a273dabe9656b",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "regression-baseline-v2",
+      "subject": "regression-baseline",
+      "candidateVersion": "v2",
+      "exit": 1,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 86,
+        "numFailedTests": 29,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 2,
+          "failures": [
+            {
+              "name": "selects native Rhea Button and Select recipes without redefining a library default",
+              "message": "AssertionError: expected { shadcnStyleProfile: 'rhea', …(7) } to match object { itemSizing: 'match-trigger', …(6) }\n(2 matching properties omitted from actual)"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 13,
+          "failures": [
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 27,
+          "failures": [
+            {
+              "name": "recomputes both Header control policies for the requested shadcn family, including return switches",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "recomputes both Header control policies for the requested brutalist family, including return switches",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 39,
+          "failures": [
+            {
+              "name": "provides a stable public Select author label and uses native profile in wc",
+              "message": "AssertionError: expected { value: 'wc', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in react",
+              "message": "AssertionError: expected { value: 'react', …(3) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue",
+              "message": "AssertionError: expected { value: 'vue', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue2",
+              "message": "AssertionError: expected { Object (value, disabled, ...) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit intrinsic policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit match-trigger policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 5,
+          "failures": [
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the wc homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the react homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue2 homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        }
+      ],
+      "rawReportSha256": "c933d2947a4e3c63a0dd468b3729fd3028deacb44234861ed01ea0e03da2cdfe",
+      "receiptSha256": "9c8456ebf3cb32c6070d7b6b5c8d19eed7d6a9e34730f58e97680d2e4ad1de7f",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "candidate-v2",
+      "subject": "candidate",
+      "candidateVersion": "v2",
+      "exit": 1,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 107,
+        "numFailedTests": 8,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 3,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 21,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 29,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 45,
+          "failures": [
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected {} to be undefined"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 9,
+          "failures": []
+        }
+      ],
+      "rawReportSha256": "1ad97e6aad965a28074c868caa14a5fd3955c7133a511a24d2864441a198e6da",
+      "receiptSha256": "ef1a458d50396d9077750d1cdf0e3533ccf3b11b398e3c9c7ca4cd59ef71c741",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "regression-baseline-v3",
+      "subject": "regression-baseline",
+      "candidateVersion": "v3",
+      "exit": 1,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 86,
+        "numFailedTests": 29,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 2,
+          "failures": [
+            {
+              "name": "selects native Rhea Button and Select recipes without redefining a library default",
+              "message": "AssertionError: expected { shadcnStyleProfile: 'rhea', …(7) } to match object { itemSizing: 'match-trigger', …(6) }\n(2 matching properties omitted from actual)"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 13,
+          "failures": [
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 27,
+          "failures": [
+            {
+              "name": "recomputes both Header control policies for the requested shadcn family, including return switches",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "recomputes both Header control policies for the requested brutalist family, including return switches",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 39,
+          "failures": [
+            {
+              "name": "provides a stable public Select author label and uses native profile in wc",
+              "message": "AssertionError: expected { value: 'wc', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in react",
+              "message": "AssertionError: expected { value: 'react', …(3) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue",
+              "message": "AssertionError: expected { value: 'vue', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue2",
+              "message": "AssertionError: expected { Object (value, disabled, ...) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit intrinsic policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit match-trigger policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 5,
+          "failures": [
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the wc homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the react homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue2 homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        }
+      ],
+      "rawReportSha256": "bd12dfc02c306ddbcb9ce1c2bb94b3e79382c5eaf48ba12e366331352dd6c5a4",
+      "receiptSha256": "a0db1dd41323c92b41434781192bfcc2c082e42f03c659c67c444a6153c2e089",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "candidate-v3",
+      "subject": "candidate",
+      "candidateVersion": "v3",
+      "exit": 0,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 115,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 3,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 21,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 29,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 53,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 9,
+          "failures": []
+        }
+      ],
+      "rawReportSha256": "2ee1d59790e18b9cec2a8a00a7da874c1e86de5f6834a8ae44b1f86c6ab3c3d2",
+      "receiptSha256": "81160a214f058214e7b91b5f66ca104f5c8b0ad15bdeee43f331ca63088d8c9e",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "projection-negative-v3",
+      "subject": "projection-control",
+      "candidateVersion": "v3",
+      "exit": 1,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 101,
+        "numFailedTests": 14,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 3,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 21,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 29,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 39,
+          "failures": [
+            {
+              "name": "provides a stable public Select author label and uses native profile in wc",
+              "message": "AssertionError: expected { value: 'wc', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in react",
+              "message": "AssertionError: expected { value: 'react', …(3) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue",
+              "message": "AssertionError: expected { value: 'vue', disabled: false, …(2) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "provides a stable public Select author label and uses native profile in vue2",
+              "message": "AssertionError: expected { Object (value, disabled, ...) } to match object { styleProfile: 'rhea', …(2) }\n(2 matching properties omitted from actual)"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice shadcn vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist wc passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist react passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice brutalist vue2 passes the requested family policy to both Header Roots without item CSS",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit intrinsic policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'intrinsic' // Object.is equality"
+            },
+            {
+              "name": "Header Select sizing policy is a consumer choice retains the explicit match-trigger policy without changing ordinary preview defaults",
+              "message": "AssertionError: expected undefined to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 9,
+          "failures": []
+        }
+      ],
+      "rawReportSha256": "6ae8e1b3e76bd558c38831af29c4966bc64ac516f312365b635012b80277885b",
+      "receiptSha256": "f9eaf0bf2526f856fc0a9317762089b02c9b7a282ca48f22e672df78f056b8b5",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    },
+    {
+      "phase": "locale-negative-v3",
+      "subject": "locale-control",
+      "candidateVersion": "v3",
+      "exit": 1,
+      "counts": {
+        "numTotalTests": 115,
+        "numPassedTests": 103,
+        "numFailedTests": 12,
+        "numPendingTests": 0
+      },
+      "files": [
+        {
+          "path": "apps/www/src/components/site-header-control-recipes.test.ts",
+          "tests": 3,
+          "passed": 3,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+          "tests": 21,
+          "passed": 13,
+          "failures": [
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition shadcn exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { Object (props) }\n(7 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe wc declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe react declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            },
+            {
+              "name": "homepage locale Select composition brutalist exact authored recipe vue2 declares only the actual locale Select anatomy",
+              "message": "AssertionError: expected { kind: 'proto', …(4) } to match object { props: { itemSizing: 'intrinsic' } }\n(6 matching properties omitted from actual)"
+            }
+          ]
+        },
+        {
+          "path": "apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+          "tests": 29,
+          "passed": 29,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+          "tests": 53,
+          "passed": 53,
+          "failures": []
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+          "tests": 9,
+          "passed": 5,
+          "failures": [
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the wc homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the react homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            },
+            {
+              "name": "public Shadcn Select sizing opt-in consumer passes the vue2 homepage locale recipe through the public Shadcn Root context",
+              "message": "AssertionError: expected 'intrinsic' to be 'match-trigger' // Object.is equality"
+            }
+          ]
+        }
+      ],
+      "rawReportSha256": "c32d326fc6bf6def2e57a48509dfd821bc1b3ad1502d2239cb232f1f14cfda02",
+      "receiptSha256": "ffe17a3fb39ed018c4a997735b37bf6dce347752d6c921a1144300327f430a6e",
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean"
+    }
+  ],
+  "additionalChecks": [
+    {
+      "phase": "types-baseline",
+      "subject": "baseline",
+      "exit": 0,
+      "command": ["node_modules/typescript/bin/tsc", "-p", "/work/config/tsconfig.header.json"],
+      "seconds": 15.824282032030169,
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "783342db703c0cecc4c3d20937587246b3286cbf1b26b09de88bd8aef547c5d9"
+    },
+    {
+      "phase": "types-candidate-v3",
+      "subject": "candidate",
+      "exit": 0,
+      "command": ["node_modules/typescript/bin/tsc", "-p", "/work/config/tsconfig.header.json"],
+      "seconds": 15.233666438027285,
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "dcf33e231ee34bde130b8e5362e885728af4cfdcd959038b0b268053aa767043"
+    },
+    {
+      "phase": "format-check-v3",
+      "subject": "candidate",
+      "exit": 0,
+      "command": ["/work/config/check-header-format.mjs"],
+      "seconds": 2.0221839899895713,
+      "sourceUnchanged": true,
+      "dependenciesUnchanged": "105 hash-bound packages clean",
+      "stdoutSha256": "3e54481cb4c1f71b134ff0336e643489ba135200b163a8e9f842c4178dfaaa8f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "6d2830d2c1b385352282536bf83815803314907cd03e40b62e8a9de959be7413"
+    }
+  ],
+  "configuration": {
+    "vitest": "import base from '/work/repo/vitest.config';\nexport default { ...base, root: '/work/repo', cacheDir: '/tmp/header-vite', test: { ...base.test, include: [\"apps/www/src/components/site-header-control-recipes.test.ts\", \"apps/www/src/components/Homepage/homepage-locale-select.test.ts\", \"apps/www/src/components/Homepage/homepage-runtime-client.test.ts\", \"apps/www/src/components/PrototypePreviewer/projection-composition.test.ts\", \"apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts\"], cache: false, pool: 'threads', maxWorkers: 1, minWorkers: 1 } };\n",
+    "types": {
+      "extends": "/work/repo/tsconfig.json",
+      "compilerOptions": {
+        "types": ["node", "vite/client"]
+      },
+      "include": [
+        "/work/repo/apps/www/src/components/site-header-control-recipes.ts",
+        "/work/repo/apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+        "/work/repo/apps/www/src/components/Homepage/homepage-locale-select.ts",
+        "/work/repo/apps/www/src/components/Homepage/homepage-runtime-client.ts",
+        "/work/repo/apps/www/src/components/site-header-control-recipes.test.ts",
+        "/work/repo/apps/www/src/components/Homepage/homepage-locale-select.test.ts",
+        "/work/repo/apps/www/src/components/Homepage/homepage-runtime-client.test.ts",
+        "/work/repo/apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+        "/work/repo/apps/www/src/components/PrototypePreviewer/select-item-sizing-consumer.test.ts",
+        "/work/repo/apps/www/src/env.d.ts"
+      ]
+    }
+  },
+  "historicalSetupFailure": {
+    "phase": "baseline-unit",
+    "exit": 1,
+    "classification": "Configuration error before cases executed: mergeConfig appended baseline include patterns and exhausted bounded file descriptors.",
+    "correction": "Replace includes with the exact five-file set and disable cache; no permissions or descriptor limit increase."
+  },
+  "fixtureCorrection": "Projection builder has always normalized absent surfaceStyle to an empty object. Require exactly {}, retaining the no-Item-CSS criterion. Products unchanged from v2.",
+  "negativeControls": [
+    {
+      "control": "projection-forwarding",
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "sourceSha256": "7e50a4a86071138be058b4aaacdd183f5f884b1a0f09b9f30236ae479f2ff3eb",
+      "patchSha256": "2bfe1bad4c357b5e319ab732b55e74812ca5a2987544b564f2e7903cc73042b2"
+    },
+    {
+      "control": "locale-policy",
+      "path": "apps/www/src/components/Homepage/homepage-locale-select.ts",
+      "sourceSha256": "31d8be7eebf7a92a366e1ab237fb32dc073618f8704215e6aecbd3edaaf0bdf1",
+      "patchSha256": "1a79f6eaaa224e442921fb46e445f274c5be982206b4b26db971ea00be751e72"
+    }
+  ],
+  "debt": [
+    "Actual Trigger and inheriting Item used border-box width and height on the final head",
+    "WC, React, Vue and Vue2 real rendering and interactions; runtime-labelled recipe tests are not four-host execution",
+    "Narrow, long text, RTL, text enlargement, resize, disabled, selection and reopen",
+    "New-head route/state/runtime/viewport/theme screenshots",
+    "Brutalist public Surface/Viewport/ItemText anatomy and sizing strategy; explicit intrinsic retention is not its equal-size fix",
+    "Full workspace tests, package/consumer acceptance, native CI/DCO, formal independent review and integration"
+  ],
+  "provenance": "AI-assisted original repair to existing Proto UI MIT source; no external implementation or private source copied.",
+  "metadataCorrection": "Pre-publication read-only review caught three stale changedFromV1 flags inherited from the unformatted version. Flags now reflect exact byte comparisons, including formatting-only changes; candidateSha256 and executed source bytes were already correct."
+}
