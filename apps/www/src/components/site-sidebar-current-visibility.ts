@@ -195,7 +195,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     }
     schedule();
   }
-  const mutations = new view.MutationObserver(() => {
+  const mutations = new view.MutationObserver((records) => {
     if (!alive) return;
     if (currentLink() !== current) {
       request();
@@ -208,13 +208,34 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       pending = true;
       stableFrames = 0;
     }
+    // The public Contents Dialog physically relocates this same native tree
+    // between its home rail and the dialog slot. The nearest actual scroll
+    // owner can change without another contents-open event, so re-measure the
+    // settled row against that new owner. Never reopen a collapsed group,
+    // move focus or scroll the document on this relocation.
+    if (
+      records.some(
+        (record) =>
+          record.type === 'attributes' &&
+          record.attributeName === 'data-site-contents-dialog-tree'
+      )
+    ) {
+      pending = true;
+      stableFrames = 0;
+    }
     schedule();
   });
   mutations.observe(boundary, {
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ['aria-current', 'open', 'data-site-link-enhanced', 'data-pui-style'],
+    attributeFilter: [
+      'aria-current',
+      'open',
+      'data-site-link-enhanced',
+      'data-pui-style',
+      'data-site-contents-dialog-tree',
+    ],
   });
   const resize =
     typeof view.ResizeObserver === 'function' ? new view.ResizeObserver(schedule) : null;
