@@ -613,6 +613,7 @@ jobs:
       max-parallel: 8
       matrix: ${{ fromJSON(needs.test-plan.outputs.matrix) }}
     env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       PROTO_UI_RUNTIME_PHASE: browser
       PROTO_UI_RUNTIME_SHARD: ${{ matrix.shard }}
       PROTO_UI_RUNTIME_SLOT: ${{ matrix.slot }}
@@ -648,6 +649,7 @@ jobs:
           set -euo pipefail
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
           export PROTO_UI_TYPOGRAPHY_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/typography"
+          export PROTO_UI_MATERIAL_EVIDENCE_DIR="$PROTO_UI_RUNTIME_EVIDENCE_DIR/material"
           mkdir -p "$PROTO_UI_RUNTIME_EVIDENCE_DIR"
           git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           # Each matrix job owns an independent checkout, server and Astro cache.
