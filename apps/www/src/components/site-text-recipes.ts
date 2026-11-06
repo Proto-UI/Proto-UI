@@ -25,6 +25,7 @@ export const SITE_TYPOGRAPHY_ROLES = [
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
 export type SiteHeroViewport = 'small' | 'medium' | 'wide';
+export type SiteHeroLanguage = 'default' | 'zh';
 
 /** App composition roles preserve their authored native typography.
  * The document-heading role is (h1, document): its retained semantic owner is
@@ -84,7 +85,8 @@ export function siteTextRecipe(
   family: SiteLibraryFamily,
   compact = false,
   context: 'site' | 'document' = 'site',
-  heroViewport: SiteHeroViewport = compact ? 'small' : 'medium'
+  heroViewport: SiteHeroViewport = compact ? 'small' : 'medium',
+  heroLanguage: SiteHeroLanguage = 'default'
 ): TextRootProps {
   if (role === 'reading-toc-title')
     return {
@@ -112,6 +114,9 @@ export function siteTextRecipe(
   // document reading. Homepage and notice/chrome owners keep their recipes.
   const reading = context === 'document' && family === 'shadcn';
   const shadcnHero = family === 'shadcn' && context === 'site';
+  // Chinese fallback glyphs have different ink density and spacing from Geist.
+  // Compose existing Text inputs for this one website role, not family defaults.
+  const chineseSlogan = shadcnHero && role === 'slogan' && heroLanguage === 'zh';
   const heading = role === 'slogan' || /^h[1-6]$/.test(role);
   const size: TextRootProps['size'] =
     role === 'slogan'
@@ -158,8 +163,9 @@ export function siteTextRecipe(
           : reading && role === 'body'
             ? 'inherit'
             : 'default',
-    weight:
-      role === 'notice-title' || role === 'table-head'
+    weight: chineseSlogan
+      ? 'medium'
+      : role === 'notice-title' || role === 'table-head'
         ? 'semibold'
         : heading
           ? family === 'brutalist'
@@ -169,8 +175,9 @@ export function siteTextRecipe(
             ? 'medium'
             : 'normal',
     font: heading && family === 'brutalist' ? 'heading' : 'body',
-    leading:
-      shadcnHero && role === 'slogan'
+    leading: chineseSlogan
+      ? 'tight'
+      : shadcnHero && role === 'slogan'
         ? 'tighter'
         : shadcnHero && role === 'tagline'
           ? 'size'
@@ -187,8 +194,9 @@ export function siteTextRecipe(
                 : role === 'table-head' || role === 'table-cell'
                   ? 'size'
                 : 'normal',
-    tracking:
-      shadcnHero && role === 'slogan' && heroViewport === 'wide'
+    tracking: chineseSlogan
+      ? 'normal'
+      : shadcnHero && role === 'slogan' && heroViewport === 'wide'
         ? 'tighter'
         : role === 'slogan' || role === 'h1' || role === 'h2'
           ? 'tight'

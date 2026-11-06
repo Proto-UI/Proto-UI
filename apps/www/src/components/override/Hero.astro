@@ -126,6 +126,16 @@ const whitepaperLabel =
       letter-spacing: -0.05em;
     }
   }
+  /* Local Chinese role adaptation, mirrored by the public Text recipe. Keep
+     the English upstream scale and every other family unchanged. This rule
+     applies only before enhancement, including no-JavaScript rendering. */
+  :global([data-site-library-family='shadcn'])
+    .homepage-hero
+    h1:lang(zh):not([data-typography-owner]) {
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
   @media (max-width: 767px) {
     .homepage-hero {
       padding-top: 0;

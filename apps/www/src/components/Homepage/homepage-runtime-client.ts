@@ -953,11 +953,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     if (!root.isConnected) void destroy();
     else onTypographyChange();
   });
-  observer.observe(document.body, {
+  // HTML language can be inherited from the document element as well as an
+  // authored subtree. Keep the passive Text recipe in step with native :lang.
+  observer.observe(document.documentElement, {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['data-site-typography'],
+    attributeFilter: ['data-site-typography', 'lang'],
   });
   document.addEventListener('astro:before-swap', onBeforeSwap);
   ownedRoot.__homepageRuntime__ = { destroy, getSnapshot: () => controller.getSnapshot() };
