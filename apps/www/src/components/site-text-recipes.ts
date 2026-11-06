@@ -15,6 +15,10 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'label',
   'notice-title',
   'caption',
+  'list-item',
+  'table-head',
+  'table-cell',
+  'quote',
   'overview-card-title',
   'overview-card-description',
   'reading-toc-title',
@@ -62,6 +66,10 @@ export function siteTextSurfaceStyle(
       fontFamily: 'inherit',
       letterSpacing: 'inherit',
     };
+  // Native list items own an authored 1.8 reading rhythm that differs from the
+  // paragraph recipe. Inherit it like the document-heading single scale; the
+  // Prototype still owns family/ink/weight through public Text inputs.
+  if (role === 'list-item') return { lineHeight: 'inherit' };
   return {};
 }
 
@@ -134,6 +142,10 @@ export function siteTextRecipe(
               label: 'sm',
               'notice-title': 'base',
               caption: 'sm',
+              'list-item': 'base',
+              'table-head': 'sm',
+              'table-cell': 'sm',
+              quote: 'base',
             } as const
           )[role];
   return {
@@ -147,7 +159,7 @@ export function siteTextRecipe(
             ? 'inherit'
             : 'default',
     weight:
-      role === 'notice-title'
+      role === 'notice-title' || role === 'table-head'
         ? 'semibold'
         : heading
           ? family === 'brutalist'
@@ -166,8 +178,14 @@ export function siteTextRecipe(
             ? 'tight'
             : role === 'h3' || role === 'h4' || role === 'h5'
               ? 'snug'
-              : role === 'body' || role === 'tagline' || role === 'notice-title'
+              : role === 'body' ||
+                  role === 'tagline' ||
+                  role === 'notice-title' ||
+                  role === 'list-item' ||
+                  role === 'quote'
                 ? 'relaxed'
+                : role === 'table-head' || role === 'table-cell'
+                  ? 'size'
                 : 'normal',
     tracking:
       shadcnHero && role === 'slogan' && heroViewport === 'wide'
@@ -175,7 +193,7 @@ export function siteTextRecipe(
         : role === 'slogan' || role === 'h1' || role === 'h2'
           ? 'tight'
           : 'normal',
-    emphasis: 'normal',
+    emphasis: role === 'quote' ? 'italic' : 'normal',
     decoration: 'none',
   };
 }

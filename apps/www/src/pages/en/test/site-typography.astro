@@ -52,6 +52,28 @@ import SiteLibraryStyle from '../../../components/SiteLibraryStyle.astro';
           /><label for="native-option">Keep source</label>
         </fieldset>
         <h3 id="native-target">Native destination</h3>
+        <ul>
+          <li id="native-item">Original list item <em>emphasis</em> 中文列表</li>
+          <li id="native-rich-item"><p id="native-rich-copy">Paragraph list owner</p></li>
+        </ul>
+        <dl>
+          <dt id="native-term">Original term</dt>
+          <dd id="native-definition">Original definition 中文定义</dd>
+        </dl>
+        <table id="native-table">
+          <caption id="native-caption">Original table caption</caption>
+          <thead>
+            <tr><th id="native-head">Original heading cell</th><th>Second head</th></tr>
+          </thead>
+          <tbody>
+            <tr><td id="native-cell">Original cell 中文单元格</td><td>Second cell</td></tr>
+          </tbody>
+        </table>
+        <blockquote id="native-quote">Original quote 中文引用</blockquote>
+        <details id="native-details">
+          <summary id="native-summary">Original summary 中文摘要</summary>
+          <p id="native-disclosure">Disclosed paragraph</p>
+        </details>
         <p>
           Evidence fixture only. These are original native elements using the website's real
           typography participant.
@@ -62,7 +84,7 @@ import SiteLibraryStyle from '../../../components/SiteLibraryStyle.astro';
       // Capture actual SSR source identities before any deferred module runs.
       window.__nativeTypographySources = Array.from(
         document.querySelectorAll(
-          '[data-doc-flow] h1,[data-doc-flow] h2,[data-doc-flow] h3,[data-doc-flow] p,[data-doc-flow] label,[data-doc-flow] legend'
+          '[data-doc-flow] h1,[data-doc-flow] h2,[data-doc-flow] h3,[data-doc-flow] p,[data-doc-flow] label,[data-doc-flow] legend,[data-doc-flow] li,[data-doc-flow] dt,[data-doc-flow] dd,[data-doc-flow] summary,[data-doc-flow] th,[data-doc-flow] td,[data-doc-flow] caption,[data-doc-flow] blockquote'
         )
       ).map((native) => {
         const walker = document.createTreeWalker(native, NodeFilter.SHOW_TEXT);

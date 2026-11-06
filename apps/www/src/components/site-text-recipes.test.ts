@@ -264,6 +264,68 @@ it('keeps authored Overview card roles compact without changing document or Hero
   }
 });
 
+it('projects document list/table/quote text through public Text without losing authored density', () => {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const context of ['site', 'document'] as const) {
+      expect(siteTextRecipe('table-head', family, false, context)).toEqual({
+        size: 'sm',
+        tone: 'default',
+        weight: 'semibold',
+        font: 'body',
+        leading: 'size',
+        tracking: 'normal',
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+      expect(siteTextRecipe('table-cell', family, false, context)).toEqual({
+        size: 'sm',
+        tone: 'default',
+        weight: family === 'brutalist' ? 'medium' : 'normal',
+        font: 'body',
+        leading: 'size',
+        tracking: 'normal',
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+      expect(siteTextRecipe('quote', family, false, context)).toEqual({
+        size: 'base',
+        tone: 'default',
+        weight: family === 'brutalist' ? 'medium' : 'normal',
+        font: 'body',
+        leading: 'relaxed',
+        tracking: 'normal',
+        emphasis: 'italic',
+        decoration: 'none',
+      });
+      expect(siteTextRecipe('list-item', family, false, context)).toEqual({
+        size: 'base',
+        tone: 'default',
+        weight: family === 'brutalist' ? 'medium' : 'normal',
+        font: 'body',
+        leading: 'relaxed',
+        tracking: 'normal',
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+    }
+  }
+  expect(siteTextSurfaceStyle('list-item')).toEqual({ lineHeight: 'inherit' });
+  expect(siteTextSurfaceStyle('list-item', 'document')).toEqual({ lineHeight: 'inherit' });
+  expect(siteTextSurfaceStyle('table-head')).toEqual({});
+  expect(siteTextSurfaceStyle('table-cell')).toEqual({});
+  expect(siteTextSurfaceStyle('quote')).toEqual({});
+  // Existing paragraph/label recipes are unchanged by these added roles.
+  expect(siteTextRecipe('body', 'shadcn', false, 'document')).toMatchObject({
+    size: 'base',
+    tone: 'inherit',
+    leading: 'relaxed',
+    emphasis: 'normal',
+  });
+  expect(siteTextRecipe('label', 'brutalist')).toMatchObject({ size: 'sm', weight: 'medium' });
+  const css = readFileSync('apps/www/src/styles/markdown.css', 'utf8');
+  expect(css).toMatch(/docs-content-flow > :is\(ul, ol\) li\s*\{\s*line-height: 1\.8;/);
+});
+
 it('preserves the native reading TOC title without changing generic labels', () => {
   const source = readFileSync(
     'apps/www/src/components/override/TableOfContents/TableOfContents.astro',
