@@ -28,6 +28,26 @@ export function collectMatrixInteractiveFacts(
   interactiveRoles: readonly string[]
 ): Record<string, InteractiveFact[][]> {
   const roles = new Set<string>(interactiveRoles);
+  // Map native elements to their implicit ARIA roles so that cross-adapter
+  // comparisons use the same role vocabulary. An <input type="text"> has the
+  // implicit role "textbox", not "input".
+  const implicitRole = (element: HTMLElement): string => {
+    const tag = element.tagName.toLowerCase();
+    if (tag === 'input') {
+      const type = (element as HTMLInputElement).type || 'text';
+      if (type === 'checkbox') return 'checkbox';
+      if (type === 'radio') return 'radio';
+      if (type === 'range') return 'slider';
+      if (type === 'number') return 'spinbutton';
+      if (type === 'search') return 'searchbox';
+      if (['button', 'submit', 'reset', 'image'].includes(type)) return 'button';
+      return 'textbox';
+    }
+    if (tag === 'textarea') return 'textbox';
+    if (tag === 'select') return (element as HTMLSelectElement).multiple ? 'listbox' : 'combobox';
+    if (tag === 'button') return 'button';
+    return tag;
+  };
   const accessibleName = (element: HTMLElement): string => {
     const labelledBy = element.getAttribute('aria-labelledby');
     const labelledText = labelledBy
@@ -36,9 +56,21 @@ export function collectMatrixInteractiveFacts(
           .map((id) => document.getElementById(id)?.textContent ?? '')
           .join(' ')
       : '';
+    // Resolve associated <label for="id"> or wrapping <label> for form controls.
+    const labelText = (() => {
+      const id = element.id;
+      if (id) {
+        const label = document.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(id)}"]`);
+        if (label) return label.textContent ?? '';
+      }
+      const wrapper = element.closest('label');
+      if (wrapper) return wrapper.textContent ?? '';
+      return '';
+    })();
     return (
       element.getAttribute('aria-label') ||
       labelledText ||
+      labelText ||
       element.getAttribute('title') ||
       element.textContent ||
       ''
@@ -75,7 +107,7 @@ export function collectMatrixInteractiveFacts(
             );
           })
           .map((element) => ({
-            role: element.getAttribute('role') || element.tagName.toLowerCase(),
+            role: element.getAttribute('role') || implicitRole(element),
             name: accessibleName(element),
           }))
       );

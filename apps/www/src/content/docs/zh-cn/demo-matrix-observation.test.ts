@@ -125,6 +125,56 @@ describe('Demo Matrix committed projection observations', () => {
     expect(signatureCount()).toBe(2);
   });
 
+  it('resolves accessible names from associated label elements', () => {
+    const candidates = Array.from({ length: 4 }, () => generation(cell('ready').host, 'active'));
+    // Replace the aria-label on the textarea with a <label for="..."> association.
+    for (const candidate of candidates) {
+      const textarea = candidate.querySelector('textarea')!;
+      textarea.removeAttribute('aria-label');
+      textarea.id = 'notes';
+      const label = document.createElement('label');
+      label.htmlFor = 'notes';
+      label.textContent = 'Protocol notes';
+      candidate.appendChild(label);
+    }
+    expect(matrixHostsReady()).toBe(true);
+    expect(signatureCount()).toBeLessThanOrEqual(1);
+  });
+
+  it('resolves accessible names from wrapping label elements', () => {
+    const candidates = Array.from({ length: 4 }, () => generation(cell('ready').host, 'active'));
+    // Replace the aria-label on the textarea with a wrapping <label>.
+    for (const candidate of candidates) {
+      const textarea = candidate.querySelector('textarea')!;
+      textarea.removeAttribute('aria-label');
+      const label = document.createElement('label');
+      label.textContent = 'Wrapped notes';
+      textarea.parentNode!.insertBefore(label, textarea);
+      label.appendChild(textarea);
+    }
+    expect(matrixHostsReady()).toBe(true);
+    expect(signatureCount()).toBeLessThanOrEqual(1);
+  });
+
+  it('maps native elements to their implicit ARIA roles for cross-adapter parity', () => {
+    const candidates = Array.from({ length: 4 }, () => generation(cell('ready').host, 'active'));
+    // Replace the textarea (explicit role="textbox") with a native input
+    // in one adapter. The implicit role should still be "textbox".
+    for (const candidate of candidates) {
+      const textarea = candidate.querySelector('textarea')!;
+      textarea.removeAttribute('role');
+      textarea.removeAttribute('aria-label');
+    }
+    // Change one adapter to use a native <input type="text"> instead.
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.setAttribute('aria-label', 'Notes');
+    candidates[1].querySelector('textarea')!.replaceWith(input);
+    expect(matrixHostsReady()).toBe(true);
+    // Both native <textarea> and <input type="text"> should map to "textbox".
+    expect(signatureCount()).toBeLessThanOrEqual(1);
+  });
+
   it('allows existing error assertions to observe a rendered failure and preserves legacy hosts', () => {
     const { root, host } = cell('error');
     host.innerHTML = '<pre>[Preview Error]\nmount failed</pre>';
