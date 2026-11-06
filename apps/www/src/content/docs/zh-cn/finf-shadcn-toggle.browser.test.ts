@@ -27,10 +27,24 @@ const styleProfile = 'rhea';
  * `.cn-toggle-variant-outline` is `border-input` + `hover:bg-muted` with no
  * shadow layer; size rules are `h-8/min-w-8`, `h-7/min-w-7`, `h-9/min-w-9`
  * with `px-2.5`. A byte-identical copy is retained under
- * internal/fixtures/shadcn-style-source (same Git blob and sha256). */
+ * internal/fixtures/shadcn-style-source (same Git blob and sha256).
+ * The muted hover surface on BOTH variants comes from the shared upstream
+ * base `apps/v4/registry/bases/base/ui/toggle.tsx` (Git blob
+ * `b058b4d0e74ccc7de2258b63a77f0136bb391b11`, same revision), whose CVA root
+ * declares `hover:bg-muted` unconditionally; `.cn-toggle-variant-outline`
+ * merely repeats it. The earlier "upstream defines no default-variant hover
+ * surface" attribution misread the style CSS alone and is corrected here. */
 const upstream = '3d98900e9b73c45f035f8109e9d41ba6a51685e7';
 const upstreamPath = 'apps/v4/registry/styles/style-rhea.css';
 const upstreamBlob = '94bbca2a7f78845e7cfbcff68fb8f535e3848a98';
+/** The shared base recipe pinned at the same upstream revision: its CVA root
+ * supplies `hover:bg-muted` for both variants, so the default-variant hover
+ * surface is source-defined, not a Proto addition. */
+const sharedBase = {
+  upstream: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
+  path: 'apps/v4/registry/bases/base/ui/toggle.tsx',
+  blob: 'b058b4d0e74ccc7de2258b63a77f0136bb391b11',
+};
 /** The retained New York compatibility recipe keeps its own pinned baseline and
  * module-test consumer; this native journey never measures it and does not
  * replace it with a fake Rhea compat. */
@@ -71,6 +85,7 @@ const source = {
   upstream,
   upstreamPath,
   upstreamBlob,
+  sharedBase,
   compatibilityBaseline,
   radiusContract,
   dirty: patch.length > 0,
@@ -244,51 +259,20 @@ for (const runtime of RUNTIMES) {
         for (const ref of ['default', 'outline'] as const) {
           const target = subject(ref);
           await target.hover();
-          if (ref === 'default') {
-            // Source-defined contract: `.cn-toggle` hover changes only the ink
-            // (hover:text-foreground). The current Proto rule also adds a
-            // bg-muted surface for every non-new-york-v4 variant — no
-            // governing entity accepts the default-variant hover surface, so
-            // it is recorded as a diagnostic, not asserted.
-            const hoverFacts = await observe(target);
-            receipt.push({
-              scheme,
-              ref,
-              state: 'hover-background-diagnostic',
-              diagnostic:
-                'UNGOVERNED: current Proto hover adds bg-muted on the default variant; upstream style-rhea.css defines no hover surface there. Actual background recorded only, explicitly unaccepted.',
-              facts: hoverFacts,
-            });
-            await expect
-              .poll(async () => {
-                const facts = await observe(target);
-                return JSON.stringify(facts.foreground) === JSON.stringify(facts.foregroundToken);
-              })
-              .toBe(true);
-          } else {
-            // `.cn-toggle-variant-outline` is source-defined
-            // `border-input hover:bg-muted` with the shared hover ink.
-            await expect
-              .poll(async () => {
-                const facts = await observe(target);
-                return (
-                  JSON.stringify(facts.background) === JSON.stringify(facts.muted) &&
-                  JSON.stringify(facts.foreground) === JSON.stringify(facts.foregroundToken)
-                );
-              })
-              .toBe(true);
-          }
+          // Source-defined contract: the shared base `toggle.tsx` CVA root
+          // declares `hover:bg-muted` for BOTH variants and `.cn-toggle` adds
+          // `hover:text-foreground`, so the muted surface + foreground ink is
+          // asserted on default and outline alike.
+          await expect
+            .poll(async () => {
+              const facts = await observe(target);
+              return (
+                JSON.stringify(facts.background) === JSON.stringify(facts.muted) &&
+                JSON.stringify(facts.foreground) === JSON.stringify(facts.foregroundToken)
+              );
+            })
+            .toBe(true);
           receipt.push({ scheme, ref, state: 'hover', facts: await observe(target) });
-          if (ref === 'default') {
-            receipt.push({
-              scheme,
-              ref,
-              state: 'hover-omitted-property',
-              unaccepted: 'background',
-              openDisposition:
-                'default-variant hover surface is ungoverned (Proto adds bg-muted; upstream defines none) — recorded, never a pass for that property',
-            });
-          }
           await capture(scheme, `${ref}-hover`);
           await target.click();
           await expect.poll(() => target.getAttribute('aria-pressed')).toBe('true');
