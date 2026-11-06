@@ -32,9 +32,9 @@ export default definePrototype<ShadcnSelectViewportProps>({
       when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(position).eq('popper')),
       intent: (i) =>
         i.feedback.style.use(
-          tw(
-            'h-[var(--proto-ui-anchor-height)] w-full min-w-[var(--proto-ui-anchor-width)] scroll-my-1'
-          )
+          // Upstream v4 has no viewport: the List is the popup's unpadded flex
+          // child, so the popup never derives its height from the anchor.
+          tw('w-full min-w-[var(--proto-ui-anchor-width)] scroll-my-1')
         ),
     });
     return inherited.render;

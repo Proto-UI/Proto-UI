@@ -186,13 +186,11 @@ export function createTargetAlignmentLease(
         return null;
       }
       const reference = targets.blockReference.getBoundingClientRect();
-      const value = targets.inlineReference.getBoundingClientRect();
       // Floating layout uses CSSOM offset precision, not the Surface's animated paint bounds.
-      // Keep the neutral Frame origin and reference/value viewport fractions.
+      // Keep the neutral Frame origin and reference viewport fractions.
       const origin = frame.getBoundingClientRect().left - layoutInlineStart(frame);
       const surfaceLeft = origin + layoutInlineStart(targets.surface);
       const surfaceWidth = targets.surface.offsetWidth;
-      const textLeft = origin + layoutInlineStart(targets.inlineTarget);
       if (targets.blockTarget.offsetHeight <= 0 || reference.height <= 0) {
         report({ status: 'pending-target', reason: 'missing-target' });
         return null;
@@ -220,8 +218,6 @@ export function createTargetAlignmentLease(
             top: reference.top,
             width: reference.width,
             height: reference.height,
-            valueLeft: value.left,
-            valueRight: value.right,
           },
           surface: {
             left: surfaceLeft,
@@ -234,8 +230,6 @@ export function createTargetAlignmentLease(
             paddingBottom: css(paint.paddingBottom),
           },
           target: {
-            textLeft,
-            textRight: textLeft + targets.inlineTarget.offsetWidth,
             offset: relativeTop(targets.blockTarget, targets.scrollport),
             height: targets.blockTarget.offsetHeight,
             atStart: descriptor.atStart,
@@ -278,6 +272,10 @@ export function createTargetAlignmentLease(
           display: 'flex',
           'flex-direction': 'column',
           ...(!applied ? { 'justify-content': 'normal' } : {}),
+          // Neutral reference facts, matching the edge host and native targets.
+          // Family recipes may bind popup chrome to the anchor without a size lease.
+          '--proto-ui-anchor-width': `${targets.blockReference.offsetWidth}px`,
+          '--proto-ui-anchor-height': `${targets.blockReference.offsetHeight}px`,
         }))
           if (!write(name, value)) return;
         if (sizeLease) {

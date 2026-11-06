@@ -109,7 +109,6 @@ export function createHomepageLocaleSelect(
     {
       value: locale.value,
       closeOnSelect: true,
-      itemSizing: control.itemSizing,
       ...(family === 'shadcn' ? { styleProfile: control.shadcnStyleProfile } : {}),
     },
     'home-locale-root'

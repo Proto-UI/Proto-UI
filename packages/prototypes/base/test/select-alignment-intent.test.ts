@@ -176,8 +176,6 @@ describe('initial Select semantic alignment intent (unwired S1)', () => {
           top: 300,
           width: 160,
           height: 40,
-          valueLeft: 112,
-          valueRight: 240,
         },
         surface: {
           left: 0,
@@ -189,7 +187,7 @@ describe('initial Select semantic alignment intent (unwired S1)', () => {
           paddingTop: 0,
           paddingBottom: 0,
         },
-        target: { textLeft: 8, textRight: 188, offset: 150, height: 30, ...intent.contentEdges },
+        target: { offset: 150, height: 30, ...intent.contentEdges },
         scrollport: {
           scrollHeight: 600,
           offsetTop: 0,
@@ -201,7 +199,10 @@ describe('initial Select semantic alignment intent (unwired S1)', () => {
       intent.constraints
     );
     expect(result.kind).toBe('plan');
-    if (result.kind === 'plan') expect(result.plan.inline.inset).toBe(104);
+    if (result.kind === 'plan') {
+      expect(result.plan.inline.inset).toBe(100);
+      expect(result.plan.inline.minimumSpan).toBe(160);
+    }
   });
 });
 

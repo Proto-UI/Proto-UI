@@ -54,8 +54,6 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   placeholder?: string;
   /** Consumer opt-in for full selected values under narrow/text-enlarged layout. */
   wrapValue?: boolean;
-  /** Explicit public Root policy; omission preserves the library's intrinsic default. */
-  itemSizing?: 'intrinsic' | 'match-trigger';
   /** Consumer-owned minimum target height. */
   minHeight?: string;
   /** Consumer-owned vertical spacing. */
@@ -644,7 +642,6 @@ function createSelectControl<Value extends string>(
       value: currentValue,
       disabled: locked,
       closeOnSelect: true,
-      ...(config.itemSizing ? { itemSizing: config.itemSizing } : {}),
       ...(selectParts.root === 'shadcn-select-root' && config.shadcnStyleProfile
         ? { styleProfile: config.shadcnStyleProfile }
         : {}),

@@ -5,10 +5,6 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers listbox semantics, asFocusRoving ownership, Transition-bound Overlay presence, anchored Portal positioning, keyboard navigation, typeahead, and dismissal.
 cases:
-  - id: T-BASE-SELECT-CONTENT-0001-CASE-POPPER-SIZE
-    title: Real Content gates popper sizing without changing edge policy or newer focus ownership
-    covers: [P-BASE-SELECT-CONTENT-POPPER-SIZE-ADMISSION]
-    expectation: popper-size-readiness-and-entry-rights-are-current-and-independent
   - id: T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
     title: One Content owner separates logical open from complete composition presentation
     covers:
@@ -44,15 +40,6 @@ cases:
     covers: [P-BASE-SELECT-CONTENT-DISMISS, P-BASE-SELECT-CONTENT-DEFERRED-SURFACES]
     expectation: select-dismiss-paths-close-once-without-accidental-selection
 implementations:
-  - id: prototypes-base-select-popper-size-owner
-    kind: module-test
-    status: needs-review
-    path: packages/prototypes/base/test/select-popper-size-owner.test.ts
-    required: true
-    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-POPPER-SIZE]
-    exercises: [P-BASE-SELECT-CONTENT]
-    notes:
-      - Real WC Content and Overlay composition with controlled used layout; the first full candidate had two newly authored oracle failures. A same-fixture old/new pair attributes them to Surface coordinate ownership and existing Root logical-active seeding before DOM focus. Corrected controlled-layout coverage passes all 251 scoped cases, with types, spec and format checks passing; native geometry remains required.
   - id: prototypes-base-select-current-request-lease
     kind: module-test
     status: passing
@@ -134,6 +121,9 @@ verifies:
         ]
 exercises: { prototypes: [P-BASE-SELECT-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: removed
+    summary: Removed the real-Content popper size gate case together with the retired match-trigger size policy; popper composition now completes on current semantics alone.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Content listbox, focus-roving, Overlay, Transition, positioning, keyboard, typeahead, dismissal, and scope coverage.

@@ -3,7 +3,6 @@ import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
 import {
   notifySelectItemSnapshotChanged,
-  normalizeSelectItemSizing,
   requestSelectOpen,
   requestSelectValue,
   SELECT_CONTEXT,
@@ -27,19 +26,17 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
         value: props.value ?? '',
         textValue: props.textValue ?? props.value ?? '',
         disabled: !!props.disabled,
-        itemSizing: normalizeSelectItemSizing(props.itemSizing),
       };
     },
   });
 
   def.props.define({
-    itemSizing: { type: 'string', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
     value: { type: 'string', empty: 'fallback' },
     textValue: { type: 'string', empty: 'fallback' },
     closeOnSelect: { type: 'boolean', empty: 'fallback' },
   });
-  def.props.setDefaults({ disabled: false, value: '', textValue: '', itemSizing: 'inherit' });
+  def.props.setDefaults({ disabled: false, value: '', textValue: '' });
 
   def.expose.state('active', active);
   def.expose.state('selected', selected);
@@ -97,11 +94,6 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     const ctx = readContext(run);
     if (ctx) sync(run, ctx);
     if (!nextOwnDisabled && !disposed) notifySelectItemSnapshotChanged(run);
-  });
-
-  // A size-policy change publishes metadata without resetting interaction or selection.
-  def.props.watch(['itemSizing'], (run) => {
-    if (!disposed) notifySelectItemSnapshotChanged(run);
   });
 
   const updateActiveValue = (run: any) => {

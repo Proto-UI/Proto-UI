@@ -792,8 +792,10 @@ it.each(['shadcn', 'brutalist'] as const)(
       expect(request.selection.projectionFamilyId).toBe(selected);
       expect(request.generation).toBe(handle!.getSnapshot().generation);
       expect(root.dataset.runtimeGeneration).toBe(String(request.generation));
-      for (const control of [options.controls.runtime, options.controls.family])
-        expect(control.itemSizing).toBe(selected === 'shadcn' ? 'match-trigger' : 'intrinsic');
+      for (const control of [options.controls.runtime, options.controls.family]) {
+        expect(control.shadcnStyleProfile).toBe('rhea');
+        expect(control).not.toHaveProperty('itemSizing');
+      }
       expect(root.dataset.family).toBe(selected);
     }
   }

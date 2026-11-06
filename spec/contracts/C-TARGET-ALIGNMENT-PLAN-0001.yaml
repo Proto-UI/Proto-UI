@@ -13,13 +13,13 @@ criteria:
       en: The pure mechanism receives immutable single-coordinate-space reference, painted-surface, frame and scrollport facts plus explicit constraints. It cannot measure or mutate a host, select values, focus, close, schedule work or create observers. No component, framework or platform name selects its algorithm. Facts and plans must never flow through portable prototype props, State or Context.
   - id: C-TARGET-ALIGNMENT-PLAN-0001-INITIAL
     text:
-      en: The initial plan follows the equations in the linked contract, including logical starting-edge inline clamping with permitted ending overflow, target-extent-based minimum block span, start/end pinned frame allocation and optional initial scroll. Constants belong to the consumer declaration. Output is requested constraints, not final used rectangles; initial content alignment is normal, never end. RTL retains its logical right inset until actual layout can resolve a physical coordinate.
+      en: The initial plan follows the equations in the linked contract, including logical starting-edge inline clamping with permitted ending overflow, target-extent-based minimum block span, start/end pinned frame allocation and optional initial scroll. The inline inset is the reference's own logical inline start and the inline minimum span is the reference's inline span, so the popup box follows the anchor box; reference content spans and row text insets never enter the inline equation. Constants belong to the consumer declaration. Output is requested constraints, not final used rectangles; initial content alignment is normal, never end. RTL retains its logical right inset until actual layout can resolve a physical coordinate.
   - id: C-TARGET-ALIGNMENT-PLAN-0001-EXPANSION
     text:
       en: The scroll reducer expands only when explicitly enabled, actual scroll changes and the previous requested/minimum span is below available span. It caps expansion at available span; only end pin requests overflow scroll correction and end content alignment. A requested scroll correction is not actual readback; the returned previous-scroll sample remains the supplied actual sample until the host supplies its corrected actual sample.
   - id: C-TARGET-ALIGNMENT-PLAN-0001-INVALID
     text:
-      en: Nonfinite facts, negative physical dimensions or insets, nonpositive viewport or target block extents and invalid constraints return a named invalid result without a plan. Zero inline text span is valid when its edges exist. Finite offscreen references and positive tiny viewports retain source plans, including minimum span greater than maximum span; neither is falsely called exact final placement. Nonfinite computed plans are rejected.
+      en: Nonfinite facts, negative physical dimensions or insets, nonpositive viewport or target block extents and invalid constraints return a named invalid result without a plan. Finite offscreen references and positive tiny viewports retain source plans, including minimum span greater than maximum span; neither is falsely called exact final placement. Nonfinite computed plans are rejected.
   - id: C-TARGET-ALIGNMENT-PLAN-0001-SCOPE
     text:
       en: S1 functions remain internal numerical mechanisms. Their separately gated cold host binding is specified by C-TARGET-ALIGNMENT-BINDING-0001; this numerical contract does not define missing-target popper fallback, disabled selection compatibility, lifecycle readiness, focus, animation, Adapter behavior or consumer migration. These remain explicitly owned next steps, not completed or waived capabilities.
@@ -31,6 +31,9 @@ sources:
   - path: packages/modules/positioning/src/geometry/target-alignment.ts
   - path: packages/modules/positioning/test/target-alignment.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Inline placement now aligns the popup inline start to the reference inline start with the reference span as its minimum, removing value-span and row-text metrics from the inline equation.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Admitted internal numerical initial-frame and scroll-expansion plans without runtime wiring or native parity claims.

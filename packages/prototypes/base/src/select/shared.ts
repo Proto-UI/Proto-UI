@@ -1,14 +1,5 @@
 import { createAnatomyFamily, createContextKey } from '@proto.ui/core';
 
-/** Normalize semantic policy, not dimensions. Invalid strings never retain an old request. */
-export function normalizeSelectRootItemSizing(value: unknown): 'intrinsic' | 'match-trigger' {
-  return value === 'match-trigger' ? 'match-trigger' : 'intrinsic';
-}
-
-export function normalizeSelectItemSizing(value: unknown): 'inherit' | 'intrinsic' {
-  return value === 'intrinsic' ? 'intrinsic' : 'inherit';
-}
-
 export type SelectFocusReason = 'programmatic' | 'keyboard' | 'pointer';
 export type SelectOpenEntry = 'selected-or-first' | 'selected-or-last';
 
@@ -29,8 +20,6 @@ export type SelectContextValue = {
   rootId: string;
   /** Internal scalar collection fact revision, not part identity or readiness. */
   collectionRevision?: number;
-  /** Normalized author policy only; geometry remains a host fact. */
-  itemSizing?: 'intrinsic' | 'match-trigger';
   open: boolean;
   controlledOpen: boolean;
   value: string;

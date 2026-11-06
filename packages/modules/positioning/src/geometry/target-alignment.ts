@@ -14,8 +14,6 @@ export type TargetAlignmentMetrics = Readonly<{
     top: number;
     width: number;
     height: number;
-    valueLeft: number;
-    valueRight: number;
   }>;
   surface: Readonly<{
     left: number;
@@ -28,8 +26,6 @@ export type TargetAlignmentMetrics = Readonly<{
     paddingBottom: number;
   }>;
   target: Readonly<{
-    textLeft: number;
-    textRight: number;
     offset: number;
     height: number;
     atStart: boolean;
@@ -80,8 +76,6 @@ export function solveTargetAlignment(
     ...Object.values(v),
     ...Object.values(a),
     ...Object.values(c),
-    t.textLeft,
-    t.textRight,
     t.offset,
     t.height,
     ...(t.minimumOuterInlineSpan === undefined ? [] : [t.minimumOuterInlineSpan]),
@@ -110,9 +104,7 @@ export function solveTargetAlignment(
       s.paddingBottom,
     ]) ||
     a.right < a.left ||
-    a.valueRight < a.valueLeft ||
-    c.right < c.left ||
-    t.textRight < t.textLeft
+    c.right < c.left
   )
     return invalid('invalid-extent');
   const { margin, minimumTargetSpanCount } = constraints;
@@ -128,16 +120,14 @@ export function solveTargetAlignment(
     return invalid('invalid-constraint');
 
   const rtl = metrics.direction === 'rtl';
-  const textInset = rtl ? c.right - t.textRight : t.textLeft - c.left;
-  const desiredInset = (rtl ? v.width - a.valueRight : a.valueLeft) - textInset;
+  // The popup's inline start edge aligns with the reference's inline start edge.
+  // Content metrics never decide placement: a trigger label edit or a row's own
+  // text inset must not shift the popup.
   const referenceInset = rtl ? v.width - a.right : a.left;
-  const minimumInlineSpan = Math.max(
-    a.width + referenceInset - desiredInset,
-    t.minimumOuterInlineSpan ?? 0
-  );
+  const minimumInlineSpan = Math.max(a.width, t.minimumOuterInlineSpan ?? 0);
   const widthForClamp = Math.max(minimumInlineSpan, c.width);
   const inlineInset = clamp(
-    desiredInset,
+    referenceInset,
     margin,
     Math.max(margin, v.width - margin - widthForClamp)
   );
