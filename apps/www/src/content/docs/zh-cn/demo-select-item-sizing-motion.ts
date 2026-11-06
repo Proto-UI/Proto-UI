@@ -51,7 +51,7 @@ export interface SizingMotionHandle {
 export type SizingMotionTrigger = HTMLElement & { __puiSizingMotion?: SizingMotionHandle };
 
 // All runtime dependencies are inside this function: Playwright serializes it into the page.
-export function installSizingMotionTrace(trigger: SizingMotionTrigger) {
+export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMotionHandle {
   trigger.__puiSizingMotion?.stop();
   const doc = trigger.ownerDocument;
   const win = doc.defaultView!;
@@ -104,7 +104,8 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger) {
       cleanup: { frame: frameClean, timer: timerClean },
     });
   };
-  trigger.__puiSizingMotion = { done, stop: () => stop('stopped') };
+  const handle: SizingMotionHandle = { done, stop: () => stop('stopped') };
+  trigger.__puiSizingMotion = handle;
   const box = (element: HTMLElement): SizingMotionBox => {
     const css = win.getComputedStyle(element);
     const rect = element.getBoundingClientRect();
@@ -263,6 +264,9 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger) {
   };
   timer = win.setTimeout(() => stop('deadline'), 1200);
   frame = win.requestAnimationFrame(tick);
+  // Callers retain this exact trace across DOM replacement. The trace itself
+  // still rejects a detached/replaced owner rather than following its successor.
+  return handle;
 }
 
 /** Independent checks on the retained whole trajectory, not a selected successful frame. */

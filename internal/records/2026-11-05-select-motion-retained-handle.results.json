@@ -1,0 +1,1018 @@
+{
+  "recordedAtUTC": "2026-11-05T11:07:00Z",
+  "base": "ec9ea70b8e1f1e2ff356091daf99221a605ad8c8",
+  "candidatePatchSHA256": "474b73cd2163f86e6367e6b76346b36f257cf24431c817f7453df107cb36aa33",
+  "phases": {
+    "baseline-collect": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "b61a366e4b993f3d4fce7758a909397311539ca3081cc42d6e2426dc57f39dd8",
+      "collectedCount": 27,
+      "collectedCaseSHA256": "4450c66efe7237fd36c5a76657797b9e18faf489cc7932d0e9dfe8343c3bcbc1",
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "list",
+        "--config",
+        "vitest.config.ts",
+        "--json=/work/results/cases.json",
+        "--disableConsoleIntercept"
+      ],
+      "elapsedSeconds": 1.7152783219935372,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "baseline-format": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "9c81a4f58d0fba468c863e58333cea3976d34e2fc88aa32b07a6f6a9567643bf",
+      "command": [
+        "node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts"
+      ],
+      "elapsedSeconds": 1.4016484349849634,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "baseline-types": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "d0585657e07e8781b42b0e4ea6fda54fb6274ac36c0e88656905d8c2bdd15f04",
+      "command": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.motion.json"
+      ],
+      "elapsedSeconds": 2.441558388993144,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "baseline-unit": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "a34db34994dacf2a3db322550d12fb8e122c1dc924ac0bf98469cb25f7c64757",
+      "actual": {
+        "numTotalTests": 27,
+        "numPassedTests": 27,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "tests": [
+        {
+          "name": "Select sizing animation prerequisite retains the early scale95 frame and accepts only actual finished motion plus two frames",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not accept layout214 simply because a later painted sample reaches224",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a finished animation frozen at scale95 without waiting for geometry to pass",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not substitute a matching painted frame while animation is still running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite fails a paused animation with a wall-clock deadline even if rAF never resumes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite resets the two-frame prerequisite if an animation restarts",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite handles genuine zero-duration motion without inventing an animation event",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects close then reopen as the original open-cycle trace, not a replacement success",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a replaced Surface even when its attributes copy the same owner",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a detached Trigger and removes all future work",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite retains capture failure and cleans both scheduling mechanisms",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite explicit stop preserves samples and cannot be relabeled settled",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite frame cancellation failure remains visible while timer cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite timer cancellation failure remains visible while frame cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers does not call cancellation a completed animation when the browser list becomes empty",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers retains an observed running object even if the current browser list omits it",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a trace whose retained owner identity changes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a non-finite frame timestamp rather than treating it as ordered",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects hidden Content between two finished samples instead of joining the samples",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects disappearing Content between finished samples even if the same node returns",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while content opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while viewport opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion rejects nonzero CSS entry motion that was cancelled before the first sampled frame",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion bounds an infinite running animation without pretending it finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "accepts a declared nonzero entry only when the matching CSS Animation was observed and finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "installs from its serialized function without an imported module closure",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "rejects a finished unit-scale Surface that remains fully transparent",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/work/results/vitest.json"
+      ],
+      "elapsedSeconds": 1.8376551059773192,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "8fe5f2407f8bfbbc1da73b41ee16cf236d387f13e5f32ea1e6956a99c23143d9",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "ac7b6bed520f2b80bb27a8608a4196e80c5ec0b94f5abb1d2d791837c8cd207f",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "803c417459cb8a4b397f9f59f4f460f4bdb0f4bea9151ebb66726775d4392bb2",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "candidate-collect": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "19a142f38b1338a420c1637d0b3a4bcccfa909da900bbc8dbddd85febdeeb556",
+      "collectedCount": 30,
+      "collectedCaseSHA256": "dbb4ecd70cfc68e698b2025b459e8a77628de7c8fc95f892deb79e2124ce3723",
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "list",
+        "--config",
+        "vitest.config.ts",
+        "--json=/work/results/cases.json",
+        "--disableConsoleIntercept"
+      ],
+      "elapsedSeconds": 1.81254167703446,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "candidate-format": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "6c0fd1caf702abdc1da50e9ba3c7eb07f73815386206ee2bd5244789c54d3d8b",
+      "command": [
+        "node_modules/prettier/bin/prettier.cjs",
+        "--check",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts"
+      ],
+      "elapsedSeconds": 1.4447793030412868,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "candidate-types": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "e27f5775203187aeb0860fd316707b970200dffac88aae4329116ccc3d2035d4",
+      "command": [
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.motion.json"
+      ],
+      "elapsedSeconds": 2.50385355995968,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "candidate-unit": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "2b108ef855f36e688714b6901242bdd8e9a511d4df55f282c0f5a635befbff54",
+      "actual": {
+        "numTotalTests": 30,
+        "numPassedTests": 30,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "tests": [
+        {
+          "name": "Select sizing animation prerequisite retains the early scale95 frame and accepts only actual finished motion plus two frames",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not accept layout214 simply because a later painted sample reaches224",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a finished animation frozen at scale95 without waiting for geometry to pass",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not substitute a matching painted frame while animation is still running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite fails a paused animation with a wall-clock deadline even if rAF never resumes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite resets the two-frame prerequisite if an animation restarts",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite handles genuine zero-duration motion without inventing an animation event",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects close then reopen as the original open-cycle trace, not a replacement success",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a replaced Surface even when its attributes copy the same owner",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a detached Trigger and removes all future work",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite retains capture failure and cleans both scheduling mechanisms",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite explicit stop preserves samples and cannot be relabeled settled",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite frame cancellation failure remains visible while timer cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite timer cancellation failure remains visible while frame cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers does not call cancellation a completed animation when the browser list becomes empty",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers retains an observed running object even if the current browser list omits it",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a trace whose retained owner identity changes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a non-finite frame timestamp rather than treating it as ordered",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects hidden Content between two finished samples instead of joining the samples",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects disappearing Content between finished samples even if the same node returns",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while content opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while viewport opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion rejects nonzero CSS entry motion that was cancelled before the first sampled frame",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion bounds an infinite running animation without pretending it finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "accepts a declared nonzero entry only when the matching CSS Animation was observed and finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "installs from its serialized function without an imported module closure",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "rejects a finished unit-scale Surface that remains fully transparent",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "exact trace handles survive later locator changes returns the exact installed handle and stops the previous trace before replacing it",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "exact trace handles survive later locator changes retains the original invalid-owner result when a new Trigger copies the locator attributes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "exact trace handles survive later locator changes does not let cleanup through an old handle stop a newer same-node trace",
+          "status": "passed",
+          "failures": []
+        }
+      ],
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/work/results/vitest.json"
+      ],
+      "elapsedSeconds": 1.7815937839914113,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "sole-return-collect": {
+      "exit": 0,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "3ce01087c71f653e6bd31e27bf6420301fba5af60b902c42276f5c63484bae26",
+      "collectedCount": 30,
+      "collectedCaseSHA256": "dbb4ecd70cfc68e698b2025b459e8a77628de7c8fc95f892deb79e2124ce3723",
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "list",
+        "--config",
+        "vitest.config.ts",
+        "--json=/work/results/cases.json",
+        "--disableConsoleIntercept"
+      ],
+      "elapsedSeconds": 1.6336622289963998,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "daa6156aba580a0c04362a3d931bcd0179976226a16487d635f03c2ff6d6cb82",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "daa6156aba580a0c04362a3d931bcd0179976226a16487d635f03c2ff6d6cb82",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    },
+    "sole-return-unit": {
+      "exit": 1,
+      "timedOut": false,
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "nativeBrowserExecuted": false,
+      "receiptSHA256": "bbaa7d5448b880f5d375ef54dd7c2d4d9687dede569ae3e75bc01294f1f04f95",
+      "actual": {
+        "numTotalTests": 30,
+        "numPassedTests": 26,
+        "numFailedTests": 4,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      "tests": [
+        {
+          "name": "Select sizing animation prerequisite retains the early scale95 frame and accepts only actual finished motion plus two frames",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not accept layout214 simply because a later painted sample reaches224",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a finished animation frozen at scale95 without waiting for geometry to pass",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite does not substitute a matching painted frame while animation is still running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite fails a paused animation with a wall-clock deadline even if rAF never resumes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite resets the two-frame prerequisite if an animation restarts",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite handles genuine zero-duration motion without inventing an animation event",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects close then reopen as the original open-cycle trace, not a replacement success",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a replaced Surface even when its attributes copy the same owner",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite rejects a detached Trigger and removes all future work",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite retains capture failure and cleans both scheduling mechanisms",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite explicit stop preserves samples and cannot be relabeled settled",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite frame cancellation failure remains visible while timer cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "Select sizing animation prerequisite timer cancellation failure remains visible while frame cleanup continues",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers does not call cancellation a completed animation when the browser list becomes empty",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers retains an observed running object even if the current browser list omits it",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a trace whose retained owner identity changes",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "retained animation identity and trajectory falsifiers rejects a non-finite frame timestamp rather than treating it as ordered",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects hidden Content between two finished samples instead of joining the samples",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "continuous visible open-cycle prerequisite rejects disappearing Content between finished samples even if the same node returns",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while content opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion does not settle while viewport opacity animation is running",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion rejects nonzero CSS entry motion that was cancelled before the first sampled frame",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "all measured nodes and unobserved entry motion bounds an infinite running animation without pretending it finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "accepts a declared nonzero entry only when the matching CSS Animation was observed and finished",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "installs from its serialized function without an imported module closure",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected undefined to be { done: Promise{…}, …(1) } // Object.is equality\n    at repo://apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts:439:18\n    at deps://a3bb0f4a2f544e80/dist/index.js:146:14\n    at deps://a3bb0f4a2f544e80/dist/index.js:533:11\n    at runWithTimeout (deps://a3bb0f4a2f544e80/dist/index.js:39:7)\n    at runTest (deps://a3bb0f4a2f544e80/dist/index.js:1056:17)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (deps://a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (deps://a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at deps://382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (deps://382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "rejects a finished unit-scale Surface that remains fully transparent",
+          "status": "passed",
+          "failures": []
+        },
+        {
+          "name": "exact trace handles survive later locator changes returns the exact installed handle and stops the previous trace before replacing it",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected undefined to be { done: Promise{…}, …(1) } // Object.is equality\n    at repo://apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts:460:20\n    at deps://a3bb0f4a2f544e80/dist/index.js:146:14\n    at deps://a3bb0f4a2f544e80/dist/index.js:533:11\n    at runWithTimeout (deps://a3bb0f4a2f544e80/dist/index.js:39:7)\n    at runTest (deps://a3bb0f4a2f544e80/dist/index.js:1056:17)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (deps://a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (deps://a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at deps://382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+          ]
+        },
+        {
+          "name": "exact trace handles survive later locator changes retains the original invalid-owner result when a new Trigger copies the locator attributes",
+          "status": "failed",
+          "failures": [
+            "TypeError: Cannot read properties of undefined (reading 'done')\n    at repo://apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts:475:33\n    at deps://a3bb0f4a2f544e80/dist/index.js:146:14\n    at deps://a3bb0f4a2f544e80/dist/index.js:533:11\n    at runWithTimeout (deps://a3bb0f4a2f544e80/dist/index.js:39:7)\n    at runTest (deps://a3bb0f4a2f544e80/dist/index.js:1056:17)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (deps://a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (deps://a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at deps://382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+          ]
+        },
+        {
+          "name": "exact trace handles survive later locator changes does not let cleanup through an old handle stop a newer same-node trace",
+          "status": "failed",
+          "failures": [
+            "TypeError: Cannot read properties of undefined (reading 'done')\n    at repo://apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts:489:29\n    at deps://a3bb0f4a2f544e80/dist/index.js:146:14\n    at deps://a3bb0f4a2f544e80/dist/index.js:533:11\n    at runWithTimeout (deps://a3bb0f4a2f544e80/dist/index.js:39:7)\n    at runTest (deps://a3bb0f4a2f544e80/dist/index.js:1056:17)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runSuite (deps://a3bb0f4a2f544e80/dist/index.js:1205:15)\n    at runFiles (deps://a3bb0f4a2f544e80/dist/index.js:1262:5)\n    at startTests (deps://a3bb0f4a2f544e80/dist/index.js:1271:3)\n    at deps://382980da1b9a4c46/dist/chunks/runBaseTests.3qpJUEJM.js:126:11"
+          ]
+        }
+      ],
+      "command": [
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--config",
+        "vitest.config.ts",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/work/results/vitest.json"
+      ],
+      "elapsedSeconds": 1.8365383049822412,
+      "sourceBefore": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "daa6156aba580a0c04362a3d931bcd0179976226a16487d635f03c2ff6d6cb82",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      },
+      "sourceAfter": {
+        "tsconfig.motion.json": "e4d0d67d4ca52717fb362f17f6a0670be6a763831918893e148d997b0e243198",
+        "package.json": "89c47db7851f89caec72da4f215ebc21cf1e294aeef3b45d2583562d846ab035",
+        ".prettierrc": "e7835f5220f445791624fb5542481bef2f0dad438eea2990a5911175cf30f995",
+        "vitest.config.ts": "881d27d55986a6fe3845fcc30a4777f5ed2fd2d8252fac969c3fa72b41660dde",
+        "scripts/test/server-readiness.mjs": "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda",
+        "scripts/test/server-readiness.d.mts": "08dff57d91a8df8c09ab738c8fe062dc0665f7181e764eee25e58a2bb3497693",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts": "daa6156aba580a0c04362a3d931bcd0179976226a16487d635f03c2ff6d6cb82",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+        "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+        "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6"
+      }
+    }
+  },
+  "nativeBrowserExecuted": false,
+  "externalWrites": 0,
+  "finalFrozenInputsUnchanged": true,
+  "originalCaseNamesPreserved": true,
+  "addedCaseNames": [
+    "exact trace handles survive later locator changes does not let cleanup through an old handle stop a newer same-node trace",
+    "exact trace handles survive later locator changes retains the original invalid-owner result when a new Trigger copies the locator attributes",
+    "exact trace handles survive later locator changes returns the exact installed handle and stops the previous trace before replacing it"
+  ],
+  "negativeControlFailedCaseNames": [
+    "installs from its serialized function without an imported module closure",
+    "exact trace handles survive later locator changes returns the exact installed handle and stops the previous trace before replacing it",
+    "exact trace handles survive later locator changes retains the original invalid-owner result when a new Trigger copies the locator attributes",
+    "exact trace handles survive later locator changes does not let cleanup through an old handle stop a newer same-node trace"
+  ],
+  "negativeControlFailedOnlyAddedAndStrengthenedSerializedCase": true,
+  "limits": [
+    "Helper tests use Happy DOM controlled fixtures; no real Playwright lifecycle or browser geometry validation",
+    "Original8native cases not executed; main4db52751 native0/8 retained",
+    "WC/Vue2 animation cancellation and Vue4px viewport overflow remain separate unresolved failures",
+    "Header probe not executed; original18cases and CSS/source-test mismatch remain unresolved",
+    "No repository-wide typecheck, formal independent acceptance, PR, commit, main integration or deployment"
+  ],
+  "executionSnapshotNote": "These results describe execution completed at 11:07 UTC, before later claim, record preparation or publication. They do not assert no later external writes.",
+  "rawSummarySHA256": "1fb62d06e132343b6706e87816ccd77a6f22bb4046f831f5c9ac64176c6039fc",
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts",
+      "baselineGitBlob": "3a0715aa952632a136edf669dc056197ed2ff867",
+      "candidateSHA256": "763beaa61a8ff0b4159ecd06559034cd08826cbfffacef8b037278d24eb142c0",
+      "candidateGitBlob": "8462b69bcba256f94edf2dd845277cce1743a4ce"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts",
+      "baselineGitBlob": "cf0f8b79eb8e8c6900b927c1c886a757b8bb22ef",
+      "candidateSHA256": "fa7ae00b3ec319ed7f0f0dd12f5cebfc77db00c757811f008879f92c7397e285",
+      "candidateGitBlob": "36888cd905375c7762790d21b84b628083d45e9d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts",
+      "baselineGitBlob": "3907f69044e2aac0e3d3aa0588ba530a61f1864e",
+      "candidateSHA256": "8cdb36c76b9f668593f41cb6be90e8100062046720051386c170014527266a67",
+      "candidateGitBlob": "bba4a0248910894df85e98178ebefc043af37c70"
+    }
+  ],
+  "typeConfiguration": {
+    "compilerOptions": {
+      "target": "ES2024",
+      "module": "ES2022",
+      "moduleResolution": "Bundler",
+      "strict": true,
+      "noEmit": true,
+      "skipLibCheck": true
+    },
+    "include": [
+      "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts",
+      "apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts",
+      "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts"
+    ]
+  },
+  "unitConfiguration": "import {defineConfig} from 'vitest/config';\nexport default defineConfig({test:{include:['apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.test.ts'],environment:'happy-dom',pool:'threads',maxWorkers:1,minWorkers:1}});\n",
+  "toolchain": {
+    "node": "24.22.1",
+    "prettier": "3.8.1",
+    "vitest": "2.1.9",
+    "happy-dom": "15.11.7",
+    "playwright-core": "1.58.2",
+    "typescript": "5.9.3"
+  },
+  "rawResultFiles": {
+    "baseline-collect": {
+      "cases.json": "4450c66efe7237fd36c5a76657797b9e18faf489cc7932d0e9dfe8343c3bcbc1",
+      "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt.json": "b61a366e4b993f3d4fce7758a909397311539ca3081cc42d6e2426dc57f39dd8",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-format": {
+      "stdout.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receipt.json": "9c81a4f58d0fba468c863e58333cea3976d34e2fc88aa32b07a6f6a9567643bf",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-types": {
+      "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt.json": "d0585657e07e8781b42b0e4ea6fda54fb6274ac36c0e88656905d8c2bdd15f04",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline-unit": {
+      "stdout.txt": "3eddf37c1100794a5341fc293667e9bce8e8a2684a956f0dc697342dbe355de9",
+      "receipt.json": "a34db34994dacf2a3db322550d12fb8e122c1dc924ac0bf98469cb25f7c64757",
+      "vitest.json": "a70fa78ae9a20e447792a5724f5483d29ea79c3f41f1098f6a64c6fc26ce75d5",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-collect": {
+      "cases.json": "dbb4ecd70cfc68e698b2025b459e8a77628de7c8fc95f892deb79e2124ce3723",
+      "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt.json": "19a142f38b1338a420c1637d0b3a4bcccfa909da900bbc8dbddd85febdeeb556",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-format": {
+      "stdout.txt": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receipt.json": "6c0fd1caf702abdc1da50e9ba3c7eb07f73815386206ee2bd5244789c54d3d8b",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-types": {
+      "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt.json": "e27f5775203187aeb0860fd316707b970200dffac88aae4329116ccc3d2035d4",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "candidate-unit": {
+      "stdout.txt": "bdf27fb9ef125f21f74997ed45124f2ed6bfd9fd1243e31cd2f83203c9b859c5",
+      "receipt.json": "2b108ef855f36e688714b6901242bdd8e9a511d4df55f282c0f5a635befbff54",
+      "vitest.json": "0610569f5c513af0decde8567f5e03043559578c425e21316d3d4fd0f7b5e180",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sole-return-collect": {
+      "cases.json": "dbb4ecd70cfc68e698b2025b459e8a77628de7c8fc95f892deb79e2124ce3723",
+      "stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receipt.json": "3ce01087c71f653e6bd31e27bf6420301fba5af60b902c42276f5c63484bae26",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "sole-return-unit": {
+      "stdout.txt": "e5c255c985e2e25b0e098a6144acd1527c7f9ac2465282d48ad9906639733929",
+      "receipt.json": "bbaa7d5448b880f5d375ef54dd7c2d4d9687dede569ae3e75bc01294f1f04f95",
+      "vitest.json": "9fa20d9873d493327440dac2f8cdccd22a10c1b89e675a377608018c827e12f7",
+      "stderr.txt": "d7cbd4d1d1e4022d7e0c4427de43a18aed3403f5165dada6de006b0a48e2d3b5"
+    }
+  }
+}

@@ -435,8 +435,9 @@ it('installs from its serialized function without an imported module closure', a
   const serialized = new Function(
     `return (${installSizingMotionTrace.toString()});`
   )() as typeof installSizingMotionTrace;
-  serialized(f.trigger);
-  const done = f.trigger.__puiSizingMotion!.done;
+  const handle = serialized(f.trigger);
+  expect(handle).toBe(f.trigger.__puiSizingMotion);
+  const done = handle.done;
   f.open();
   f.settle();
   expect(sizingMotionIssues(await done, 'wc')).toEqual([]);
@@ -450,4 +451,47 @@ it('rejects a finished unit-scale Surface that remains fully transparent', async
   const result = await f.done;
   expect(result.status).toBe('settled');
   expect(sizingMotionIssues(result, 'wc')).toContain('non-unit settled opacity');
+});
+
+describe('exact trace handles survive later locator changes', () => {
+  it('returns the exact installed handle and stops the previous trace before replacing it', async () => {
+    const f = fixture();
+    const handle = installSizingMotionTrace(f.trigger);
+    expect(handle).toBe(f.trigger.__puiSizingMotion);
+    expect((await f.done).status).toBe('stopped');
+    f.open();
+    f.settle();
+    expect(sizingMotionIssues(await handle.done, 'wc')).toEqual([]);
+  });
+
+  it('retains the original invalid-owner result when a new Trigger copies the locator attributes', async () => {
+    const f = fixture();
+    const handle = installSizingMotionTrace(f.trigger);
+    f.open();
+    const replacement = f.trigger.cloneNode(true) as SizingMotionTrigger;
+    f.trigger.replaceWith(replacement);
+    expect(replacement.__puiSizingMotion).toBeUndefined();
+    f.frame();
+    const result = await handle.done;
+    expect(result.status).toBe('invalid-owner');
+    expect(result.samples).toHaveLength(1);
+    expect(result.cleanup).toEqual({ frame: true, timer: true });
+    expect(sizingMotionIssues(result, 'wc').length).toBeGreaterThan(0);
+    expect(f.frames.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('does not let cleanup through an old handle stop a newer same-node trace', async () => {
+    const f = fixture();
+    const oldHandle = installSizingMotionTrace(f.trigger);
+    f.open();
+    const newHandle = installSizingMotionTrace(f.trigger);
+    expect((await oldHandle.done).status).toBe('stopped');
+    oldHandle.stop();
+    expect(f.trigger.__puiSizingMotion).toBe(newHandle);
+    f.settle();
+    expect(sizingMotionIssues(await newHandle.done, 'wc')).toEqual([]);
+    expect(f.frames.size).toBe(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });

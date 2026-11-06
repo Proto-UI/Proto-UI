@@ -205,14 +205,21 @@ export const SELECT_LABEL_STYLE: Record<SelectTranslucentStyle, string> = {
 /**
  * cn-select-separator spacing; translucent styles all use bg-foreground/5 per
  * cn-menu-translucent's separator override of cn-select-separator bg-border.
+ *
+ * Upstream's `-mx-1` exists to cancel the SelectViewport's `p-1` padding so the
+ * separator still reaches the padding edge. The translucent viewport renders
+ * `p-0` (only `new-york-v4` receives `p-1`), so a negative margin has no padding
+ * to cancel: it pushes the element box past the padding box, gets clipped
+ * anyway, and silently reports scrollable overflow. `mx-0` delivers the exact
+ * same edge-to-edge 1px line without scrollable overflow.
  */
 export const SELECT_SEPARATOR_STYLE: Record<SelectTranslucentStyle, string> = {
-  vega: 'pointer-events-none -mx-1 my-1 h-px bg-foreground/5',
-  nova: 'pointer-events-none -mx-1 my-1 h-px bg-foreground/5',
-  maia: 'pointer-events-none -mx-1 my-1 h-px bg-foreground/5',
-  lyra: 'pointer-events-none -mx-1 h-px bg-foreground/5',
-  mira: 'pointer-events-none -mx-1 my-1 h-px bg-foreground/5',
-  luma: 'pointer-events-none mx-[-0.375rem] my-1.5 h-px bg-foreground/5',
-  sera: 'pointer-events-none mx-[-0.375rem] my-1.5 h-px bg-foreground/5',
-  rhea: 'pointer-events-none -mx-1 my-1 h-px bg-foreground/5',
+  vega: 'pointer-events-none mx-0 my-1 h-px bg-foreground/5',
+  nova: 'pointer-events-none mx-0 my-1 h-px bg-foreground/5',
+  maia: 'pointer-events-none mx-0 my-1 h-px bg-foreground/5',
+  lyra: 'pointer-events-none mx-0 h-px bg-foreground/5',
+  mira: 'pointer-events-none mx-0 my-1 h-px bg-foreground/5',
+  luma: 'pointer-events-none mx-0 my-1.5 h-px bg-foreground/5',
+  sera: 'pointer-events-none mx-0 my-1.5 h-px bg-foreground/5',
+  rhea: 'pointer-events-none mx-0 my-1 h-px bg-foreground/5',
 };
