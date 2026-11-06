@@ -1217,3 +1217,122 @@ if (appearance === 'family') {
     }
   });
 }
+
+type EarlyHeaderPanelResize = {
+  targetWidth: number | null;
+  error: string | null;
+  samples: Array<{
+    event: string;
+    viewport: number;
+    left: number;
+    right: number;
+    visible: boolean;
+    headerScrollWidth: number;
+    leftVariable: string;
+  }>;
+};
+type EarlyHeaderPanelWindow = Window & { __earlyHeaderPanelResize: EarlyHeaderPanelResize };
+
+if (appearance === 'family') {
+  describe.sequential('Header panel before native resize placement delivery', () => {
+    for (const runtime of RUNTIMES) {
+      it(`${runtime}: keeps the open panel in the viewport through desktop and compact resizes`, async () => {
+        const context = await browser.newContext({
+          viewport: { width: 1920, height: 1000 },
+          colorScheme: 'light',
+        });
+        const page = await context.newPage();
+        const measurements: unknown[] = [];
+        try {
+          // Register before application scripts. Keep the earliest native event
+          // observation, before its placement handler can replace stale offsets.
+          await page.addInitScript(() => {
+            const state: EarlyHeaderPanelResize = {
+              targetWidth: null,
+              error: null,
+              samples: [],
+            };
+            (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize = state;
+            const observe = (event: Event) => {
+              if (innerWidth !== state.targetWidth) return;
+              if (state.samples.length >= 24) {
+                state.error = 'Resize observation limit exceeded';
+                return;
+              }
+              const header = document.querySelector<HTMLElement>('[data-site-header]');
+              const panel = header?.querySelector<HTMLElement>('[data-site-header-panel]');
+              if (!header || !panel) {
+                state.error = 'Open Header panel missing during resize';
+                return;
+              }
+              const bounds = panel.getBoundingClientRect();
+              state.samples.push({
+                event: event.type,
+                viewport: document.documentElement.clientWidth,
+                left: bounds.left,
+                right: bounds.right,
+                visible: bounds.width > 0 && getComputedStyle(panel).visibility !== 'hidden',
+                headerScrollWidth: header.scrollWidth,
+                leftVariable: panel.style.getPropertyValue('--site-header-panel-left'),
+              });
+            };
+            window.addEventListener('resize', observe, { capture: true });
+            visualViewport?.addEventListener('resize', observe);
+          });
+          await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
+          await ready(page, 'wc');
+          if (runtime !== 'wc') {
+            await choose(page, 'runtime', LABELS[runtime]);
+            await ready(page, runtime);
+          }
+          const menu = page.locator(
+            '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+          );
+          await menu.click();
+          const panel = page.locator('[data-site-header] [data-site-header-panel]');
+          await panel.waitFor({ state: 'visible' });
+          for (const width of [1200, 390, 240]) {
+            const previousLeft = await panel.evaluate((element) =>
+              element.style.getPropertyValue('--site-header-panel-left')
+            );
+            await page.evaluate((targetWidth) => {
+              const state = (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
+              state.samples = [];
+              state.error = null;
+              state.targetWidth = targetWidth;
+            }, width);
+            await page.setViewportSize({ width, height: 1000 });
+            await page.waitForFunction(() => {
+              const state = (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
+              return state.error !== null || state.samples.length > 0;
+            });
+            const observation = await page.evaluate(
+              () => (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize
+            );
+            measurements.push({ width, previousLeft, observation });
+            expect(observation.error).toBeNull();
+            expect(observation.samples[0].leftVariable).toBe(previousLeft);
+            for (const sample of observation.samples) {
+              expect(sample.visible).toBe(true);
+              expect(sample.left).toBeGreaterThanOrEqual(7);
+              expect(sample.right).toBeLessThanOrEqual(sample.viewport - 7);
+              expect(sample.headerScrollWidth).toBeLessThanOrEqual(sample.viewport + 1);
+            }
+            expect(await menu.getAttribute('aria-expanded')).toBe('true');
+            if (output)
+              await page.screenshot({
+                path: path.join(output, `panel-early-resize-${runtime}-${width}.png`),
+              });
+          }
+        } finally {
+          if (output)
+            await writeFile(
+              path.join(output, `panel-early-resize-${runtime}.json`),
+              JSON.stringify({ sourceSha, runtime, measurements }, null, 2)
+            );
+          await context.close();
+        }
+      }, 90_000);
+    }
+  });
+}
