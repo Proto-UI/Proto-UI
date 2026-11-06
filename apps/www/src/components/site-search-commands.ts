@@ -559,8 +559,14 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   let controller = create();
   const observe = (pending: Promise<unknown>, owner = controller) =>
     pending.catch((error) => {
-      if (!alive || owner !== controller) return;
-      root.dataset.searchView = controller.getSnapshot().generation ? 'retained' : 'unavailable';
+      if (!alive) return;
+      const dialogFailure = owner === dialogController;
+      if (!dialogFailure && owner !== controller) return;
+      root.dataset.searchView = dialogFailure
+        ? 'unavailable'
+        : controller.getSnapshot().generation
+          ? 'retained'
+          : 'unavailable';
       console.error('[SiteSearch] Search command projection failed.', error);
     });
   const refresh = () => {
