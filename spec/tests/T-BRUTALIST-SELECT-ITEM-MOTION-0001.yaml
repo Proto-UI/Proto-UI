@@ -37,6 +37,7 @@ verifies:
 sources:
   - path: packages/prototypes/brutalist/src/select/item.proto.ts
   - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+exercises: { prototypes: [P-BRUTALIST-SELECT-ITEM] }
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

@@ -50,6 +50,7 @@ implementations:
       - T-BASE-SELECT-SIZE-POLICY-0001-CASE-FOCUS
 verifies:
   prototypes: [P-BASE-SELECT, P-BASE-SELECT-ITEM, P-BASE-SELECT-CONTENT]
+exercises: { prototypes: [P-BASE-SELECT, P-BASE-SELECT-ITEM] }
 openQuestions:
   - id: T-BASE-SELECT-SIZE-POLICY-0001-Q-EDGE
     question:
