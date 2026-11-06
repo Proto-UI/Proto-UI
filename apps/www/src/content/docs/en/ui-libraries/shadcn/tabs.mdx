@@ -57,6 +57,150 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
 
 <AdapterPanelScript />
 
+## Style Profile preset exhibition
+
+The upstream Shadcn Registry defines multiple style profiles for Tabs (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, `new-york-v4`). Only `nova`, `rhea`, and `new-york-v4` currently have bounded text-default projection (see `internal/fixtures/shadcn-tabs-style/coverage.json`); unsupported profiles are rejected at runtime.
+
+The three examples below use **identical children, defaultValue, and disabled state**, changing only `styleProfile`, to demonstrate that preset switching does not reset value, focus, or children. Each example renders independently and does not share runtime instances.
+
+### Nova
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+### Rhea (current default exhibition)
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+### New York v4
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
 ## Content mount policy
 
 `TabsContent` uses a lazy L1 view by default:
