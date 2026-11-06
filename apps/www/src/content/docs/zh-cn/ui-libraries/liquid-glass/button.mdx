@@ -3,8 +3,9 @@ title: 'Liquid Glass Button'
 description: 'Real Base Button projection through four Web adapters.'
 ---
 
-import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
@@ -51,6 +52,201 @@ V2 Liquid Glass 意图已接入可选 Web 自实现光学 provider。Previewer �
 </div>
 
 <AdapterPanelScript />
+
+## 安装
+
+<div data-adapter-panel="wc">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add wc liquid-glass-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add react liquid-glass-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add vue liquid-glass-button" manager="npm" />
+</div>
+
+## 用法
+
+Liquid Glass Button 通过自实现 Web provider 投射 V2 光学意图。以下示例展示支持的 variant 与 disabled 状态。
+
+### 常规
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <wc-liquid-glass-button>Back</wc-liquid-glass-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { LiquidGlassButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+      <LiquidGlassButton>Back</LiquidGlassButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <LiquidGlassButton>Back</LiquidGlassButton>
+  </div>
+</template>
+
+<script setup>
+import { LiquidGlassButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 强调
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <wc-liquid-glass-button variant="prominent">Continue</wc-liquid-glass-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { LiquidGlassButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+      <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
+  </div>
+</template>
+
+<script setup>
+import { LiquidGlassButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 禁用
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+  <wc-liquid-glass-button disabled>Unavailable</wc-liquid-glass-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { LiquidGlassButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3 liquid-functional-demo">
+      <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3 liquid-functional-demo">
+    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
+  </div>
+</template>
+
+<script setup>
+import { LiquidGlassButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
 
 ## API
 

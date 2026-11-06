@@ -3,7 +3,10 @@ title: 'Brutalist Button'
 description: '基于 Base Button 的方角 Neo-Brutalist 投影'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
@@ -13,3 +16,367 @@ Button projection 继承 Base Button 语义，只增加 Neo-Brutalist 视觉差�
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-button" initialRuntime="wc" />
 </div>
+
+## 安装
+
+<div data-adapter-panel="wc">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add react brutalist-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add vue brutalist-button" manager="npm" />
+</div>
+
+## 用法
+
+Brutalist Button 携带 Neo-Brutalist 视觉语言：硬边框、偏移阴影与平涂填色。以下示例使用族系调色板（`mint`、`lavender`、`coral`、`sky`）展示支持的色域。
+
+### 实心
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-4">
+  <wc-brutalist-button>Solid main</wc-brutalist-button>
+  <wc-brutalist-button variant="solid" color="mint">Mint</wc-brutalist-button>
+  <wc-brutalist-button variant="solid" color="lavender">Lavender</wc-brutalist-button>
+  <wc-brutalist-button variant="solid" color="coral">Coral</wc-brutalist-button>
+  <wc-brutalist-button variant="solid" color="sky">Sky</wc-brutalist-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BrutalistButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <BrutalistButton>Solid main</BrutalistButton>
+      <BrutalistButton variant="solid" color="mint">Mint</BrutalistButton>
+      <BrutalistButton variant="solid" color="lavender">Lavender</BrutalistButton>
+      <BrutalistButton variant="solid" color="coral">Coral</BrutalistButton>
+      <BrutalistButton variant="solid" color="sky">Sky</BrutalistButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-4">
+    <BrutalistButton>Solid main</BrutalistButton>
+    <BrutalistButton variant="solid" color="mint">Mint</BrutalistButton>
+    <BrutalistButton variant="solid" color="lavender">Lavender</BrutalistButton>
+    <BrutalistButton variant="solid" color="coral">Coral</BrutalistButton>
+    <BrutalistButton variant="solid" color="sky">Sky</BrutalistButton>
+  </div>
+</template>
+
+<script setup>
+import { BrutalistButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 表面
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-4">
+  <wc-brutalist-button variant="surface">Surface</wc-brutalist-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BrutalistButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <BrutalistButton variant="surface">Surface</BrutalistButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-4">
+    <BrutalistButton variant="surface">Surface</BrutalistButton>
+  </div>
+</template>
+
+<script setup>
+import { BrutalistButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 危险
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-4">
+  <wc-brutalist-button variant="destructive">Destructive</wc-brutalist-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BrutalistButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <BrutalistButton variant="destructive">Destructive</BrutalistButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-4">
+    <BrutalistButton variant="destructive">Destructive</BrutalistButton>
+  </div>
+</template>
+
+<script setup>
+import { BrutalistButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 图标
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-4">
+  <wc-brutalist-button size="icon">!</wc-brutalist-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BrutalistButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <BrutalistButton size="icon">!</BrutalistButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-4">
+    <BrutalistButton size="icon">!</BrutalistButton>
+  </div>
+</template>
+
+<script setup>
+import { BrutalistButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 禁用
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-4">
+  <wc-brutalist-button disabled>Disabled</wc-brutalist-button>
+  <wc-brutalist-button variant="surface" disabled>Disabled surface</wc-brutalist-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BrutalistButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <BrutalistButton disabled>Disabled</BrutalistButton>
+      <BrutalistButton variant="surface" disabled>Disabled surface</BrutalistButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-brutalist-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-4">
+    <BrutalistButton disabled>Disabled</BrutalistButton>
+    <BrutalistButton variant="surface" disabled>Disabled surface</BrutalistButton>
+  </div>
+</template>
+
+<script setup>
+import { BrutalistButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+<AdapterPanelScript />
+
+## API 参考
+
+<ApiPropsTable
+  headers={{ name: '字段', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'solid' | 'surface' | 'destructive'",
+      default: 'solid',
+    },
+    {
+      name: 'color',
+      type: "'default' | 'mint' | 'lavender' | 'coral' | 'sky'",
+      default: 'default',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'icon'",
+      default: 'default',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
+
+## 参考
+
+- [P-BRUTALIST-BUTTON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-BUTTON.yaml)
+- [Base Button 协议](/zh-cn/ui-libraries/base/button/)
+- [Button 源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/button)
