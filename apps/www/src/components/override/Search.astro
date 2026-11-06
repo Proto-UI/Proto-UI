@@ -9,7 +9,7 @@ import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
 import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
 
 const documentationUrl = localizedUrl(
-  new URL('/ui-libraries/', Astro.url),
+  new URL('/ui-libraries/shadcn/button/', Astro.url),
   Astro.locals.starlightRoute.locale || 'en',
   project.trailingSlash
 ).pathname;
@@ -42,7 +42,7 @@ const copy = {
 const navigation = [
   { title: isChinese ? '首页' : 'Home', href: '/' },
   { title: isChinese ? '文档' : 'Docs', href: '/start-here/what-you-saw/' },
-  { title: isChinese ? '组件库' : 'Libraries', href: '/ui-libraries/' },
+  { title: isChinese ? '组件库' : 'Libraries', href: '/ui-libraries/shadcn/button/' },
   { title: isChinese ? '白皮书' : 'Whitepaper', href: '/whitepaper/0-preface/' },
 ].map((entry) => ({
   ...entry,

@@ -34,7 +34,7 @@ Demo 使用同一组 Prototype，由所选 Adapter 在相应环境中运行。�
 | 这是否值得我或团队投入？           | [为什么关注 Proto UI](/zh-cn/start-here/why-proto-ui/) |
 | 同一份定义如何变成可用组件？       | [它是怎么工作的？](/zh-cn/start-here/how-it-works/)    |
 | 我想在现有项目里试一个组件         | [快速开始](/zh-cn/start-here/quick-start/)             |
-| 目前有哪些组件可以查看？           | [UI Library](/zh-cn/ui-libraries/)                     |
+| 目前有哪些组件可以查看？           | [组件示例](/zh-cn/ui-libraries/shadcn/button/)         |
 | 这套方法的前提、推导和边界是什么？ | [白皮书：序章](/zh-cn/whitepaper/0-preface/)           |
 
 按顺序阅读本章，会从项目定位走到一次实际接入；白皮书则展开背后的论证。你也可以直接选择最接近当前问题的入口。

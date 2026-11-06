@@ -1237,17 +1237,17 @@ it('keeps a documentation link available without JavaScript', async () => {
     nativeHref = await link.getAttribute('href');
     expect(nativeHref).not.toBeNull();
     expect(new URL(nativeHref!, page.url()).origin).toBe(new URL(baseUrl).origin);
-    expect(new URL(nativeHref!, page.url()).pathname).toBe('/zh-cn/ui-libraries/');
+    expect(new URL(nativeHref!, page.url()).pathname).toBe('/zh-cn/ui-libraries/shadcn/button/');
     mark('click-native-link');
     const [destinationResponse] = await Promise.all([
       page.waitForResponse(
         (response) =>
           response.request().isNavigationRequest() &&
           response.request().frame() === page.mainFrame() &&
-          new URL(response.url()).pathname === '/zh-cn/ui-libraries/',
+          new URL(response.url()).pathname === '/zh-cn/ui-libraries/shadcn/button/',
         { timeout: 10_000 }
       ),
-      page.waitForURL('**/zh-cn/ui-libraries/', { timeout: 10_000 }),
+      page.waitForURL('**/zh-cn/ui-libraries/shadcn/button/', { timeout: 10_000 }),
       link.click({ timeout: 10_000 }),
     ]);
     expect(destinationResponse.ok()).toBe(true);
@@ -1255,8 +1255,8 @@ it('keeps a documentation link available without JavaScript', async () => {
     const heading = page.getByRole('heading', { level: 1, name: 'UI Libraries', exact: true });
     expect(await heading.isVisible()).toBe(true);
     headingText = await heading.innerText();
-    expect(headingText).toBe('UI Libraries');
-    expect(new URL(page.url()).pathname).toBe('/zh-cn/ui-libraries/');
+    expect(headingText).toBe('Button');
+    expect(new URL(page.url()).pathname).toBe('/zh-cn/ui-libraries/shadcn/button/');
     outcome = 'passed';
     mark('complete');
     await capture(page, 'no-js', 'destination');

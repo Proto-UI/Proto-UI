@@ -395,17 +395,18 @@ describe.sequential('native SiteTypography rendered evidence', () => {
               ['#native-summary', 'body'],
             ] as const) {
               const owner = page.locator(selector);
-              await expect(owner).toHaveAttribute('data-typography-runtime', runtime);
-              await expect(owner).toHaveAttribute('data-typography-family', family);
-              await expect(owner.locator('[data-typography-prototype]')).toHaveCount(1);
-              await expect(owner.locator('[data-typography-prototype]')).toHaveAttribute(
-                'data-typography-role',
-                role
-              );
+              expect(await owner.getAttribute('data-typography-runtime')).toBe(runtime);
+              expect(await owner.getAttribute('data-typography-family')).toBe(family);
+              expect(await owner.locator('[data-typography-prototype]').count()).toBe(1);
+              expect(
+                await owner
+                  .locator('[data-typography-prototype]')
+                  .getAttribute('data-typography-role')
+              ).toBe(role);
             }
-            await expect(page.locator('#native-rich-item [data-typography-prototype]')).toHaveCount(
-              0
-            );
+            expect(
+              await page.locator('#native-rich-item [data-typography-prototype]').count()
+            ).toBe(0);
             record.documentOwners = {
               listPaint: await typographyPaint(page, '#native-item'),
               tableHeadPaint: await typographyPaint(page, '#native-head'),

@@ -19,8 +19,6 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'table-head',
   'table-cell',
   'quote',
-  'overview-card-title',
-  'overview-card-description',
   'reading-toc-title',
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
@@ -53,20 +51,6 @@ export function siteTextSurfaceStyle(
       fontWeight: 'inherit',
       letterSpacing: 'inherit',
     };
-  if (role === 'overview-card-title')
-    return {
-      fontSize: '1rem',
-      lineHeight: '1.25rem',
-      fontFamily: 'inherit',
-      letterSpacing: 'inherit',
-    };
-  if (role === 'overview-card-description')
-    return {
-      fontSize: '0.76rem',
-      lineHeight: '1.14rem',
-      fontFamily: 'inherit',
-      letterSpacing: 'inherit',
-    };
   // Native list items own an authored 1.8 reading rhythm that differs from the
   // paragraph recipe. Inherit it like the document-heading single scale; the
   // Prototype still owns family/ink/weight through public Text inputs.
@@ -96,17 +80,6 @@ export function siteTextRecipe(
       font: 'body',
       leading: 'size',
       tracking: 'normal',
-      emphasis: 'normal',
-      decoration: 'none',
-    };
-  if (role === 'overview-card-title' || role === 'overview-card-description')
-    return {
-      size: role === 'overview-card-title' ? 'base' : 'xs',
-      tone: role === 'overview-card-title' ? 'inherit' : 'muted',
-      weight: role === 'overview-card-title' ? 'semibold' : 'normal',
-      font: 'body',
-      leading: 'size',
-      tracking: role === 'overview-card-title' ? 'tight' : 'normal',
       emphasis: 'normal',
       decoration: 'none',
     };
@@ -193,7 +166,7 @@ export function siteTextRecipe(
                 ? 'relaxed'
                 : role === 'table-head' || role === 'table-cell'
                   ? 'size'
-                : 'normal',
+                  : 'normal',
     tracking: chineseSlogan
       ? 'normal'
       : shadcnHero && role === 'slogan' && heroViewport === 'wide'

@@ -562,7 +562,7 @@ describe('no-script native input controls', () => {
     const page = await context.newPage();
     let failed = false;
     try {
-      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/`;
+      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/button/`;
       await page.setContent(
         `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:96px;background:#ddd;z-index:2}a{display:block;width:180px;height:80px;margin:0 auto}</style><header>Visible fixed header</header><aside id="wheel-trap" style="position:absolute;left:10%;top:264px;width:80%;height:540px;overflow:auto;overscroll-behavior:contain"><div style="height:22533px">Independent sidebar wheel owner</div></aside><div style="height:14000px"></div><a href="${destination}">Native destination</a><div style="height:1000px"></div><script>globalThis.__puiNoScriptControlRan=true</script>`
       );
@@ -633,7 +633,7 @@ describe('no-script native input controls', () => {
     const page = await context.newPage();
     let failed = false;
     try {
-      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/`;
+      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/button/`;
       await page.setContent(
         `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:180px;background:#ddd;z-index:2}a{position:absolute;top:40px;left:40px;width:180px;height:80px}</style><header>Blocking fixed header</header><a href="${destination}">Obstructed destination</a>`
       );
@@ -697,7 +697,7 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         expect(await page.locator('a a').count()).toBe(0);
         const card = page.locator('[data-library-liquid-candidate]');
         const link = card.locator('a[data-library-action]');
-        const destination = `${baseUrl}/${locale}/ui-libraries/liquid-glass/`;
+        const destination = `${baseUrl}/${locale}/ui-libraries/liquid-glass/button/`;
         expect(new URL(destination).origin).toBe(new URL(page.url()).origin);
         const input = noScriptInput(page, link, inputTrace);
         const scroll = await withLiquidCardFailureObservation(
@@ -729,7 +729,7 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
             .getAttribute('data-material-quality')
         ).toBeNull();
         const activation = await activateNoScriptLink(input, destination);
-        await page.waitForURL(`${baseUrl}/${locale}/ui-libraries/liquid-glass/`);
+        await page.waitForURL(`${baseUrl}/${locale}/ui-libraries/liquid-glass/button/`);
         await writeFile(
           path.join(directory, 'fallback.json'),
           JSON.stringify(

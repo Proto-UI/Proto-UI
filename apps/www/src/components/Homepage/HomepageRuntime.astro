@@ -19,7 +19,11 @@ const actions = [
     link: path('/start-here/what-you-saw/'),
     variant: 'minimal' as const,
   },
-  { text: zh ? '组件库' : 'Libraries', link: path('/ui-libraries/'), variant: 'minimal' as const },
+  {
+    text: zh ? '组件库' : 'Libraries',
+    link: path('/ui-libraries/shadcn/button/'),
+    variant: 'minimal' as const,
+  },
   {
     text: zh ? '白皮书' : 'Whitepaper',
     link: path('/whitepaper/0-preface/'),

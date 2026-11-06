@@ -242,10 +242,12 @@ describe('batched real typography adapters and stable native semantic owners', (
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
     it(`${runtime}: projects document list, table, definition, quote and summary owners with native rhythm`, async () => {
       const root = fixture();
-      root.querySelector('[data-doc-flow]')!.insertAdjacentHTML(
-        'beforeend',
-        `<ul><li id="item">Leaf item <em id="item-emphasis">emphasis</em> 中文</li><li id="container-item"><p id="item-copy">Paragraph item</p></li><li id="nested-item">Parent item<ul><li id="nested-leaf">Nested leaf</li></ul></li></ul><dl><dt id="term">Term</dt><dd id="definition">Definition</dd></dl><table><caption id="table-caption">Caption</caption><tr><th id="head">Head</th><td id="cell">Cell <code>source</code></td></tr></table><blockquote id="quote">Quote</blockquote><details id="details"><summary id="summary">Summary</summary><p id="disclosure">Disclosed</p></details><div id="preview-island" data-previewer-id><p id="inside-preview">Component owned</p></div>`
-      );
+      root
+        .querySelector('[data-doc-flow]')!
+        .insertAdjacentHTML(
+          'beforeend',
+          `<ul><li id="item">Leaf item <em id="item-emphasis">emphasis</em> 中文</li><li id="container-item"><p id="item-copy">Paragraph item</p></li><li id="nested-item">Parent item<ul><li id="nested-leaf">Nested leaf</li></ul></li></ul><dl><dt id="term">Term</dt><dd id="definition">Definition</dd></dl><table><caption id="table-caption">Caption</caption><tr><th id="head">Head</th><td id="cell">Cell <code>source</code></td></tr></table><blockquote id="quote">Quote</blockquote><details id="details"><summary id="summary">Summary</summary><p id="disclosure">Disclosed</p></details><div id="preview-island" data-previewer-id><p id="inside-preview">Component owned</p></div>`
+        );
       const original = root.innerHTML;
       const participant = siteTypographyParticipant(root, { docsOnly: true });
       const roles = collectSiteTypographyTargets(root, true).map(({ native, role }) => [
@@ -293,13 +295,11 @@ describe('batched real typography adapters and stable native semantic owners', (
       expect(root.querySelector('#cell code')).toBe(cellSource);
       // Native summary/list/table geometry keeps its authored line boxes.
       expect(
-        root
-          .querySelector('#summary [data-typography-prototype]')!
-          .classList.contains('block')
+        root.querySelector('#summary [data-typography-prototype]')!.classList.contains('block')
       ).toBe(false);
-      expect(
-        item.querySelector<HTMLElement>('[data-typography-prototype]')!.style.lineHeight
-      ).toBe('inherit');
+      expect(item.querySelector<HTMLElement>('[data-typography-prototype]')!.style.lineHeight).toBe(
+        'inherit'
+      );
       expect(
         root
           .querySelector<HTMLElement>('#head [data-typography-prototype]')!
@@ -1026,45 +1026,6 @@ describe('homepage typography media-query transaction integration', () => {
     });
   }
 });
-
-for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
-  it(`${runtime}: keeps compact Overview source owners and authored roles through family replacement`, async () => {
-    document.body.innerHTML = `<main data-site-family-scope data-pagefind-body><div data-doc-flow><article><header><span id="eyebrow">Basic demo</span><h2 id="card-title" data-site-typography="overview-card-title">Button</h2></header><p id="card-description" data-site-typography="overview-card-description">Original <em>description</em></p></article><h2 id="ordinary">Ordinary heading</h2></div></main>`;
-    const root = document.querySelector<HTMLElement>('main')!;
-    const title = root.querySelector<HTMLElement>('#card-title')!;
-    const description = root.querySelector<HTMLElement>('#card-description')!;
-    const titleSource = title.firstChild;
-    const descriptionSource = description.firstChild;
-    expect(
-      collectSiteTypographyTargets(root, true).find((target) => target.native === title)?.role
-    ).toBe('overview-card-title');
-    const participant = siteTypographyParticipant(root, { docsOnly: true });
-    for (const [index, family] of ['shadcn', 'brutalist', 'shadcn'].entries()) {
-      const candidate = await participant.materialize(
-        request(runtime, index + 1, family as 'shadcn' | 'brutalist')
-      );
-      candidates.push(candidate);
-      candidate.activate();
-      await settle();
-      for (const [native, size, line, original] of [
-        [title, '1rem', '1.25rem', titleSource],
-        [description, '0.76rem', '1.14rem', descriptionSource],
-      ] as const) {
-        const leaf = native.querySelector<HTMLElement>('[data-typography-prototype]')!;
-        expect(leaf.style.fontSize).toBe(size);
-        expect(leaf.style.lineHeight).toBe(line);
-        expect(leaf.style.fontFamily).toBe('inherit');
-        expect(leaf.style.letterSpacing).toBe('inherit');
-        expect(native.querySelector('[data-site-typography-slot]')!.firstChild).toBe(original);
-        expect(native.hasAttribute('role')).toBe(false);
-      }
-      expect(root.querySelector('#eyebrow [data-typography-prototype]')).toBeNull();
-      expect(
-        root.querySelector('#ordinary [data-typography-prototype]')!.getAttribute('data-pui-style')
-      ).toContain('text-2xl');
-    }
-  });
-}
 
 describe('document-heading public surface inherits its stable semantic owner', () => {
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)

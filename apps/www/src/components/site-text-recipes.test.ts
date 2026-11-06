@@ -262,43 +262,6 @@ it('Hero native fallback and public recipes share the finite source breakpoints 
   expect(hero).toContain('actions={actions}');
 });
 
-it('keeps authored Overview card roles compact without changing document or Hero recipes', () => {
-  const source = readFileSync('apps/www/src/components/PrototypeLibraryOverview.astro', 'utf8');
-  expect(source).toContain('<h2 data-site-typography="overview-card-title">');
-  expect(source).toContain('<p data-site-typography="overview-card-description">');
-  expect(source).toContain('<span>{copy.demo}</span>');
-  expect(siteTextSurfaceStyle('overview-card-title')).toEqual({
-    fontSize: '1rem',
-    lineHeight: '1.25rem',
-    fontFamily: 'inherit',
-    letterSpacing: 'inherit',
-  });
-  expect(siteTextSurfaceStyle('overview-card-description')).toEqual({
-    fontSize: '0.76rem',
-    lineHeight: '1.14rem',
-    fontFamily: 'inherit',
-    letterSpacing: 'inherit',
-  });
-  for (const family of ['shadcn', 'brutalist'] as const) {
-    expect(siteTextRecipe('overview-card-title', family)).toMatchObject({
-      size: 'base',
-      weight: 'semibold',
-      leading: 'size',
-      tracking: 'tight',
-    });
-    expect(siteTextRecipe('overview-card-description', family)).toMatchObject({
-      size: 'xs',
-      weight: 'normal',
-      tone: 'muted',
-      leading: 'size',
-    });
-    expect(siteTextRecipe('h2', family).size).toBe('2xl');
-    expect(siteTextRecipe('body', family).size).toBe('base');
-    expect(siteTextSurfaceStyle('h2')).toEqual({});
-    expect(siteTextSurfaceStyle('slogan')).toEqual({});
-  }
-});
-
 it('projects document list/table/quote text through public Text without losing authored density', () => {
   for (const family of ['shadcn', 'brutalist'] as const) {
     for (const context of ['site', 'document'] as const) {

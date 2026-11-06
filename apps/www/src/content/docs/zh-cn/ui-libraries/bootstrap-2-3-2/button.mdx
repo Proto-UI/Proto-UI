@@ -1,18 +1,17 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: 'Real Base Button projection through four Web adapters.'
+description: '在共享 Base Button 协议上使用 Bootstrap 2.3.2 按钮外观。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-固定 2.3.2 的经典渐变和内阴影，交互仍由 Base 协议统一拥有。
+Bootstrap 2.3.2 Button 保留归档版本的渐变、边框和内阴影；Base Button 负责激活、键盘输入、焦点和禁用行为。
 
-用页面顶部的运行时选择器切换同一真实原型。点击 Back 可观察事件计数。
+下面的示例包含当前支持的变体、四种尺寸和禁用状态。使用运行时选择器，可以在 Web Components、React、Vue 3 和 Vue 2 中运行同一个原型。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
@@ -22,240 +21,70 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
   codePanel={false}
 />
 
-在 default 尺寸下，所有 variant 使用固定上游尺寸：4px 12px 内边距、14px 字号、20px 行高、1px 边框与 4px 圆角。修改根字号不会放大这些像素值；这不代表浏览器缩放或原生目标已经验收。
-
 ## 安装
 
-<div data-adapter-panel="wc">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button" manager="npm" />
-</div>
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
+  manager="npm"
+/>
 
-<div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add react bootstrap-2-3-2-button" manager="npm" />
-</div>
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应框架的 facade。当前内容是 draft、私有且未发布的源码投影；该命令描述工作区交付路径，不代表这个组件族已经作为稳定包发布。
 
-<div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add vue bootstrap-2-3-2-button" manager="npm" />
-</div>
+## 使用
 
-## 用法
+Web Components：
 
-Bootstrap 2.3.2 Button 保留归档渐变语法。以下示例覆盖支持的 variant、size 与 disabled 状态。
+```html
+<wc-bootstrap-2-3-2-button variant="primary">继续</wc-bootstrap-2-3-2-button>
+<wc-bootstrap-2-3-2-button disabled>不可用</wc-bootstrap-2-3-2-button>
+```
 
-### 变体
+React：
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button>Back</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="primary">Continue</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="warning">Warning</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="danger">Danger</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="success">Success</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="info">Info</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="inverse">Inverse</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
+```tsx
 import { BootstrapButton } from '../proto-ui/components/react';
 
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton>Back</BootstrapButton>
-      <BootstrapButton variant="primary">Continue</BootstrapButton>
-      <BootstrapButton variant="warning">Warning</BootstrapButton>
-      <BootstrapButton variant="danger">Danger</BootstrapButton>
-      <BootstrapButton variant="success">Success</BootstrapButton>
-      <BootstrapButton variant="info">Info</BootstrapButton>
-      <BootstrapButton variant="inverse">Inverse</BootstrapButton>
-    </div>
-  );
+export function Example() {
+  return <BootstrapButton variant="primary">继续</BootstrapButton>;
 }
-    `}
-  />
-</div>
+```
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
+Vue 3：
+
+```vue
 <template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton>Back</BootstrapButton>
-    <BootstrapButton variant="primary">Continue</BootstrapButton>
-    <BootstrapButton variant="warning">Warning</BootstrapButton>
-    <BootstrapButton variant="danger">Danger</BootstrapButton>
-    <BootstrapButton variant="success">Success</BootstrapButton>
-    <BootstrapButton variant="info">Info</BootstrapButton>
-    <BootstrapButton variant="inverse">Inverse</BootstrapButton>
-  </div>
+  <BootstrapButton variant="primary">继续</BootstrapButton>
 </template>
 
 <script setup>
 import { BootstrapButton } from '../proto-ui/components/vue';
 </script>
-    `}
-  />
-</div>
+```
 
-### 尺寸
+Vue 2：
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button size="large">Large</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button>Default</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button size="small">Small</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button size="mini">Mini</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BootstrapButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton size="large">Large</BootstrapButton>
-      <BootstrapButton>Default</BootstrapButton>
-      <BootstrapButton size="small">Small</BootstrapButton>
-      <BootstrapButton size="mini">Mini</BootstrapButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
+```vue
 <template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton size="large">Large</BootstrapButton>
-    <BootstrapButton>Default</BootstrapButton>
-    <BootstrapButton size="small">Small</BootstrapButton>
-    <BootstrapButton size="mini">Mini</BootstrapButton>
-  </div>
+  <BootstrapButton variant="primary">继续</BootstrapButton>
 </template>
 
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
+<script>
+import { BootstrapButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: { BootstrapButton },
+};
 </script>
-    `}
-  />
-</div>
+```
 
-### 禁用
+## 变体与尺寸
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button disabled>Unavailable</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
+- `variant`：`default`、`primary`、`warning`、`danger`、`success`、`info` 或 `inverse`。
+- `size`：`default`、`large`、`small` 或 `mini`。
+- `disabled`：默认为 `false`。禁用按钮不会发出激活请求。
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BootstrapButton } from '../proto-ui/components/react';
+归档配方使用固定像素尺寸，不会随文档根字体大小缩放。这个 Web 示例不构成 GPUI、Flutter 或 Qt 的一致性证据。
 
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton disabled>Unavailable</BootstrapButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
+## 无障碍
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton disabled>Unavailable</BootstrapButton>
-  </div>
-</template>
-
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
-</script>
-    `}
-  />
-</div>
-
-<AdapterPanelScript />
-
-## API
-
-- variant: default / primary / warning / danger / success / info / inverse
-- size: default / large / small / mini，默认 default
-- 各尺寸保留 20px 行高与 1px 边框。large：11px 19px 内边距、17.5px 字号、6px 圆角（单行高 44px）；small：2px 10px、11.9px、3px（26px）；mini：0px 6px、10.5px、3px（22px）。
-- disabled: boolean, default false
-- 激活、焦点、键盘与禁用逻辑继承 Base Button，视觉层没有第二个状态拥有者。
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
-
-七种配色保留 v2.3.2 文字阴影与最终边框颜色。悬停或聚焦时保留上移后的渐变；按下或禁用时使用纯色终点，可见焦点环继续保留。原始 100ms 运动、对比度验收与完整目标证据仍待完成；静态状态终点不代表全部上游能力已对齐。
+按钮名称来自其内容。键盘激活、焦点和禁用输入抑制继承自 Base Button；Bootstrap 投影不建立第二套交互状态。

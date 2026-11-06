@@ -1,18 +1,17 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: 'Real Base Button projection through four Web adapters.'
+description: 'Bootstrap 2.3.2 button styling over the shared Base Button protocol.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-The archived 2.3.2 gradient and inset-shadow grammar, with interaction owned by Base.
+A Bootstrap 2.3.2 button uses the archived gradient, border and inset-shadow treatment while Base Button owns activation, keyboard input, focus and disabled behavior.
 
-Use the page runtime selector to compare the same real Prototype. Click Back to observe its activation count.
+The example below shows the supported variants, four sizes and a disabled button. Use the runtime selector to run the same prototype with Web Components, React, Vue 3 or Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
@@ -22,240 +21,70 @@ Use the page runtime selector to compare the same real Prototype. Click Back to 
   codePanel={false}
 />
 
-At default size, all variants use the fixed upstream dimensions: 4px 12px padding, 14px font size, 20px line height, 1px border and 4px corners. Changing the root font size does not rescale these pixel values. This does not establish browser-zoom or native-target acceptance.
-
 ## Install
 
-<div data-adapter-panel="wc">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button" manager="npm" />
-</div>
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
+  manager="npm"
+/>
 
-<div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add react bootstrap-2-3-2-button" manager="npm" />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add vue bootstrap-2-3-2-button" manager="npm" />
-</div>
+Replace `wc` with `react`, `vue` or `vue2` to generate the corresponding facade. This is a draft, private, unreleased source projection; the command describes the workspace delivery path, not a claim that this family is published as a stable package.
 
 ## Usage
 
-The Bootstrap 2.3.2 Button preserves the archived gradient grammar. The examples below cover the supported variants, sizes, and disabled states.
+Web Components:
 
-### Variants
+```html
+<wc-bootstrap-2-3-2-button variant="primary">Continue</wc-bootstrap-2-3-2-button>
+<wc-bootstrap-2-3-2-button disabled>Unavailable</wc-bootstrap-2-3-2-button>
+```
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button>Back</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="primary">Continue</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="warning">Warning</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="danger">Danger</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="success">Success</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="info">Info</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button variant="inverse">Inverse</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
+React:
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
+```tsx
 import { BootstrapButton } from '../proto-ui/components/react';
 
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton>Back</BootstrapButton>
-      <BootstrapButton variant="primary">Continue</BootstrapButton>
-      <BootstrapButton variant="warning">Warning</BootstrapButton>
-      <BootstrapButton variant="danger">Danger</BootstrapButton>
-      <BootstrapButton variant="success">Success</BootstrapButton>
-      <BootstrapButton variant="info">Info</BootstrapButton>
-      <BootstrapButton variant="inverse">Inverse</BootstrapButton>
-    </div>
-  );
+export function Example() {
+  return <BootstrapButton variant="primary">Continue</BootstrapButton>;
 }
-    `}
-  />
-</div>
+```
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
+Vue 3:
+
+```vue
 <template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton>Back</BootstrapButton>
-    <BootstrapButton variant="primary">Continue</BootstrapButton>
-    <BootstrapButton variant="warning">Warning</BootstrapButton>
-    <BootstrapButton variant="danger">Danger</BootstrapButton>
-    <BootstrapButton variant="success">Success</BootstrapButton>
-    <BootstrapButton variant="info">Info</BootstrapButton>
-    <BootstrapButton variant="inverse">Inverse</BootstrapButton>
-  </div>
+  <BootstrapButton variant="primary">Continue</BootstrapButton>
 </template>
 
 <script setup>
 import { BootstrapButton } from '../proto-ui/components/vue';
 </script>
-    `}
-  />
-</div>
+```
 
-### Sizes
+Vue 2:
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button size="large">Large</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button>Default</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button size="small">Small</wc-bootstrap-2-3-2-button>
-  <wc-bootstrap-2-3-2-button size="mini">Mini</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BootstrapButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton size="large">Large</BootstrapButton>
-      <BootstrapButton>Default</BootstrapButton>
-      <BootstrapButton size="small">Small</BootstrapButton>
-      <BootstrapButton size="mini">Mini</BootstrapButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
+```vue
 <template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton size="large">Large</BootstrapButton>
-    <BootstrapButton>Default</BootstrapButton>
-    <BootstrapButton size="small">Small</BootstrapButton>
-    <BootstrapButton size="mini">Mini</BootstrapButton>
-  </div>
+  <BootstrapButton variant="primary">Continue</BootstrapButton>
 </template>
 
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
+<script>
+import { BootstrapButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: { BootstrapButton },
+};
 </script>
-    `}
-  />
-</div>
+```
 
-### Disabled
+## Variants and sizes
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-bootstrap-2-3-2-button disabled>Unavailable</wc-bootstrap-2-3-2-button>
-</div>
-    `}
-  />
-</div>
+- `variant`: `default`, `primary`, `warning`, `danger`, `success`, `info` or `inverse`.
+- `size`: `default`, `large`, `small` or `mini`.
+- `disabled`: `false` by default. Disabled buttons do not emit activation requests.
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BootstrapButton } from '../proto-ui/components/react';
+The archived recipe uses fixed pixel dimensions. It does not rescale with the document's root font size, and this Web demo is not GPUI, Flutter or Qt conformance evidence.
 
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BootstrapButton disabled>Unavailable</BootstrapButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
+## Accessibility
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BootstrapButton disabled>Unavailable</BootstrapButton>
-  </div>
-</template>
-
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
-</script>
-    `}
-  />
-</div>
-
-<AdapterPanelScript />
-
-## API
-
-- variant: default / primary / warning / danger / success / info / inverse
-- size: default / large / small / mini, default default
-- All sizes keep 20px line height and 1px borders. Large: 11px 19px padding, 17.5px font, 6px corners (44px single-line height). Small: 2px 10px, 11.9px, 3px (26px). Mini: 0px 6px, 10.5px, 3px (22px).
-- disabled: boolean, default false
-- Activation, focus, keyboard and disabled behavior are inherited from Base Button; the visual layer owns no second interaction state.
-
-This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).
-
-The seven palettes retain v2.3.2 text shadows and final border colors. Hover/focus preserves the shifted gradient; pressed/disabled uses its flat endpoint. The focus-visible ring remains. The original 100ms motion, contrast acceptance and full target evidence are still pending; static endpoints are not complete upstream parity.
+Button naming comes from its content. Keyboard activation, focus and disabled suppression are inherited from Base Button; the Bootstrap projection adds no second interaction state.

@@ -34,7 +34,7 @@ As a component-library or design-system maintainer, you can evaluate which inter
 | Is this worth my or my team's time? | [Why Proto UI](/en/start-here/why-proto-ui/) |
 | How does one definition become a usable component? | [How It Works](/en/start-here/how-it-works/) |
 | I want to try a component in an existing project | [Quick Start](/en/start-here/quick-start/) |
-| Which components can I inspect today? | [UI Libraries](/en/ui-libraries/) |
+| Which components can I inspect today? | [Component demos](/en/ui-libraries/shadcn/button/) |
 | What are the premises, reasoning, and limits? | [Whitepaper: Preface](/en/whitepaper/0-preface/) |
 
 Reading this chapter in order takes you from the project's purpose to a first integration. The whitepaper develops the reasoning behind it. You can also go directly to the page closest to your current question.

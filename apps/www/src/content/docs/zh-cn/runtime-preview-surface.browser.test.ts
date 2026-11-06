@@ -23,7 +23,7 @@ beforeAll(async () => {
       encoding: 'utf8',
     }).trim(),
   };
-  baseUrl = await startServer('/zh-cn/ui-libraries/brutalist/');
+  baseUrl = await startServer('/zh-cn/ui-libraries/base/button/');
   browser = await launchBrowser();
 }, 150000);
 afterAll(async () => {
@@ -187,82 +187,6 @@ async function ready(root: Locator, runtime: string) {
 }
 
 describe('RuntimeBox single actual Prototype surface', () => {
-  for (const family of ['shadcn', 'brutalist'] as const) {
-    for (const runtime of RUNTIMES) {
-      it(`${family}/${runtime}: lazy overview has one family canvas in light/dark and at 390px`, async () => {
-        const page = await browser.newPage({
-          viewport: { width: 1440, height: 1000 },
-          colorScheme: 'light',
-        });
-        try {
-          await page.addInitScript((runtime) => {
-            localStorage.setItem('preferred-prototypes-adapter', runtime);
-            localStorage.setItem('starlight-theme', 'light');
-          }, runtime);
-          await page.goto(`${baseUrl}/zh-cn/ui-libraries/${family}/`, { waitUntil: 'networkidle' });
-          // The Shadcn overview reuses its real variants demo; it has never
-          // registered a demo named "demo-shadcn-button".
-          const demoId = family === 'shadcn' ? 'demo-button-variants' : 'demo-brutalist-button';
-          const root = page.locator(`.prototype-card [data-demo-id="${demoId}"]`);
-          await ready(root, runtime);
-          const light = await measure(root, family, [16, 16, 16, 16]);
-          await capture(page, root, `${family}-${runtime}-overview-light`, family, runtime, light);
-          expect(runtimePreviewEvidenceIssues(light)).toEqual([]);
-          // Explicit consumer color-mode input. The same committed demo keeps
-          // running while its actual surface theme changes.
-          await page.evaluate(() => {
-            document.documentElement.dataset.theme = 'dark';
-            document.documentElement.classList.remove('light');
-            document.documentElement.classList.add('dark');
-          });
-          await page.waitForFunction(
-            ({ id, background }) => {
-              const frame = document.querySelector(
-                `[data-previewer-id="${id}"] .pui-runtime-preview-surface[data-pui-style]`
-              );
-              return !!frame && getComputedStyle(frame).backgroundColor !== background;
-            },
-            { id: await root.getAttribute('data-previewer-id'), background: light.background }
-          );
-          await page.setViewportSize({ width: 390, height: 844 });
-          await root.scrollIntoViewIfNeeded();
-          const dark = await measure(root, family, [16, 16, 16, 16]);
-          await capture(
-            page,
-            root,
-            `${family}-${runtime}-overview-dark-narrow`,
-            family,
-            runtime,
-            dark
-          );
-          expect(runtimePreviewEvidenceIssues(dark)).toEqual([]);
-          expect(dark.background).not.toBe(light.background);
-          // Live negative control: reinstating the old wrapper border must be
-          // caught by the same computed-paint assertion, then fully restored.
-          const originalStyle = await root.evaluate((root) => {
-            const article = root.closest<HTMLElement>('.prototype-card')!;
-            const style = article.getAttribute('style');
-            article.style.border = '2px solid black';
-            return style;
-          });
-          try {
-            expect(
-              runtimePreviewEvidenceIssues(await measure(root, family, [16, 16, 16, 16]))
-            ).toContain('duplicate ancestor paint');
-          } finally {
-            await root.evaluate((root, previous) => {
-              const article = root.closest('.prototype-card')!;
-              if (previous === null) article.removeAttribute('style');
-              else article.setAttribute('style', previous);
-            }, originalStyle);
-          }
-        } finally {
-          await page.close();
-        }
-      }, 90000);
-    }
-  }
-
   it('keeps Runtime Tabs outside the canvas and the demonstrated Select popup usable at 390px', async () => {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     try {
@@ -364,28 +288,6 @@ describe('RuntimeBox single actual Prototype surface', () => {
         'brutalist',
         'react',
         await measure(root, 'brutalist', [20, 16, 20, 16])
-      );
-    } finally {
-      await page.close();
-    }
-  }, 90000);
-
-  it('resolves the current preference when a below-fold overview card first becomes visible', async () => {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
-    try {
-      await page.addInitScript(() => localStorage.setItem('preferred-prototypes-adapter', 'wc'));
-      await page.goto(`${baseUrl}/zh-cn/ui-libraries/shadcn/`, { waitUntil: 'networkidle' });
-      const root = page.locator('.prototype-card [data-previewer-id]').last();
-      expect(await root.getAttribute('data-inited')).toBeNull();
-      await page.evaluate(() => {
-        localStorage.setItem('preferred-prototypes-adapter', 'vue2');
-        document.dispatchEvent(
-          new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
-        );
-      });
-      await ready(root, 'vue2');
-      expect(runtimePreviewEvidenceIssues(await measure(root, 'shadcn', [16, 16, 16, 16]))).toEqual(
-        []
       );
     } finally {
       await page.close();
@@ -497,43 +399,4 @@ describe('RuntimeBox single actual Prototype surface', () => {
         await page.close();
       }
     }, 90000);
-
-  it('keeps overview titles, destinations and fallback readable without JavaScript', async () => {
-    const started = performance.now();
-    const phase = (name: string) =>
-      console.log(
-        '[runtime-preview-no-js]',
-        JSON.stringify({ phase: name, elapsedMs: performance.now() - started, source })
-      );
-    phase('context:start');
-    const context = await browser.newContext({
-      javaScriptEnabled: false,
-      viewport: { width: 390, height: 844 },
-    });
-    phase('context:ready');
-    try {
-      phase('page:start');
-      const page = await context.newPage();
-      phase('page:ready');
-      await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/`, {
-        waitUntil: 'domcontentloaded',
-      });
-      phase('navigation:ready');
-      const article = page.locator('#brutalist-button');
-      phase('assertions:start');
-      expect(await article.locator('h2').innerText()).toBe('Button');
-      expect(await article.locator('a').getAttribute('href')).toBe('./components/button/');
-      expect(await article.locator('noscript').innerText()).toContain('JavaScript');
-      expect(await article.locator('[role="button"]').count()).toBe(0);
-      await article.locator('a').focus();
-      expect(
-        await article.locator('a').evaluate((element) => document.activeElement === element)
-      ).toBe(true);
-      phase('assertions:passed');
-    } finally {
-      phase('context:closing');
-      await context.close();
-      phase('context:closed');
-    }
-  });
 });

@@ -378,19 +378,9 @@ export default defineConfig({
           translations: { en: 'UI Libraries', 'zh-CN': 'UI Libraries' },
           items: [
             {
-              label: 'Overview',
-              translations: { en: 'Overview', 'zh-CN': '概览' },
-              slug: 'ui-libraries',
-            },
-            {
               label: 'Base',
               translations: { en: 'Base', 'zh-CN': 'Base' },
               items: [
-                {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
-                  slug: 'ui-libraries/base',
-                },
                 {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
@@ -659,11 +649,6 @@ export default defineConfig({
               translations: { en: 'Shadcn', 'zh-CN': 'Shadcn' },
               items: [
                 {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
-                  slug: 'ui-libraries/shadcn',
-                },
-                {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/shadcn/button',
@@ -920,11 +905,6 @@ export default defineConfig({
               translations: { en: 'Brutalist', 'zh-CN': 'Brutalist' },
               items: [
                 {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
-                  slug: 'ui-libraries/brutalist',
-                },
-                {
                   label: 'Design Contract',
                   translations: { en: 'Design Contract', 'zh-CN': '设计合约' },
                   slug: 'ui-libraries/brutalist/design-contract',
@@ -1179,14 +1159,12 @@ export default defineConfig({
             },
             {
               label: 'Bootstrap 2.3.2',
-              badge: { text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }, class: 'docs-wip-badge' },
+              badge: {
+                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' },
+                class: 'docs-wip-badge',
+              },
               translations: { en: 'Bootstrap 2.3.2', 'zh-CN': 'Bootstrap 2.3.2' },
               items: [
-                {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
-                  slug: 'ui-libraries/bootstrap-2-3-2',
-                },
                 {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
@@ -1397,14 +1375,12 @@ export default defineConfig({
             },
             {
               label: 'Liquid Glass',
-              badge: { text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }, class: 'docs-wip-badge' },
+              badge: {
+                text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' },
+                class: 'docs-wip-badge',
+              },
               translations: { en: 'Liquid Glass', 'zh-CN': 'Liquid Glass' },
               items: [
-                {
-                  label: 'Overview',
-                  translations: { en: 'Overview', 'zh-CN': '概览' },
-                  slug: 'ui-libraries/liquid-glass',
-                },
                 {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },

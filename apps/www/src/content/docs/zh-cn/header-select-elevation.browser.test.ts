@@ -1252,7 +1252,7 @@ if (appearance === 'family') {
               error: null,
               samples: [],
             };
-            (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize = state;
+            (window as unknown as EarlyHeaderPanelWindow).__earlyHeaderPanelResize = state;
             const observe = (event: Event) => {
               if (innerWidth !== state.targetWidth) return;
               if (state.samples.length >= 24) {
@@ -1296,18 +1296,18 @@ if (appearance === 'family') {
               element.style.getPropertyValue('--site-header-panel-left')
             );
             await page.evaluate((targetWidth) => {
-              const state = (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
+              const state = (window as unknown as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
               state.samples = [];
               state.error = null;
               state.targetWidth = targetWidth;
             }, width);
             await page.setViewportSize({ width, height: 1000 });
             await page.waitForFunction(() => {
-              const state = (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
+              const state = (window as unknown as EarlyHeaderPanelWindow).__earlyHeaderPanelResize;
               return state.error !== null || state.samples.length > 0;
             });
             const observation = await page.evaluate(
-              () => (window as EarlyHeaderPanelWindow).__earlyHeaderPanelResize
+              () => (window as unknown as EarlyHeaderPanelWindow).__earlyHeaderPanelResize
             );
             measurements.push({ width, previousLeft, observation });
             expect(observation.error).toBeNull();

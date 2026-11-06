@@ -51,4 +51,4 @@ Base Button 继续拥有事件、disabled、focus 与 press。实验研究的是
 
 所选 shader 源码固定到 `naughtyduk/liquidGL` 3.0.0、提交 `88f681ab7035fd55b04f63edff1841e32c4199e9`。实验目录保留 MIT 许可证、源码 hash、区间、uniform 清单与修改说明；原演示素材的排除条款仍然有效。生成产物必须保留相关声明。详见[检查点源码与许可清单](https://github.com/Proto-UI/Proto-UI/tree/9ce6011b50c4ab6792bd1261142d03a87f5b9471/experiments/material-specializer)。
 
-本页记录实验，不修改 `P-LIQUID-GLASS-BUTTON` 生命周期，也不准入其后端。公开工作表面见[库概览](/zh-cn/ui-libraries/liquid-glass/)，其他仅在分支存在的新增项见[文档覆盖索引](/zh-cn/build/prototypes/documentation-coverage/)。
+本页记录实验，不修改 `P-LIQUID-GLASS-BUTTON` 生命周期，也不准入其后端。公开工作表面见 [Button 示例](/zh-cn/ui-libraries/liquid-glass/button/)，其他仅在分支存在的新增项见[文档覆盖索引](/zh-cn/build/prototypes/documentation-coverage/)。
