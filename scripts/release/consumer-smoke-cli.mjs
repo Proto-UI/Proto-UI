@@ -178,12 +178,18 @@ try {
   // existing synthetic explicit-Indicator failure (nor may native success erase it).
   const hostFailures = [];
   let nativeAcceptance = 'not-run';
+  let nativeAcceptanceReceipt = null;
   try {
     run(
       process.execPath,
       [join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs'), consumerDir, ROOT_DIR],
       { cwd: consumerDir, timeout: 120000 }
     );
+    nativeAcceptanceReceipt = readNativeAcceptanceReceipt({
+      testedCommit: readTestedCommit(),
+      releaseVersion,
+      staleNativeReceiptRemoved,
+    });
     nativeAcceptance = 'passed';
     console.log('packed WC native bounded cases: passed');
   } catch (error) {
@@ -201,30 +207,19 @@ try {
     console.error('packed WC synthetic cases: failed', error);
     hostFailures.push(error);
   }
-  // An exited-0 child is credited only through its own bound receipt; a missing
-  // or non-matching receipt is a failure and is aggregated with any other lane
-  // failure instead of replacing it.
-  let nativeAcceptanceReceipt = null;
-  if (nativeAcceptance === 'passed') {
-    try {
-      nativeAcceptanceReceipt = readNativeAcceptanceReceipt({
-        testedCommit: readTestedCommit(),
-        releaseVersion,
-        staleNativeReceiptRemoved,
-      });
-    } catch (error) {
-      nativeAcceptance = 'failed';
-      console.error('packed WC native receipt rejected', error);
-      hostFailures.push(error);
-    }
+  try {
+    logCheckboxDeliveryEvidence(packManifest, consumerPackageNames, {
+      phase: hostFailures.length
+        ? 'packed-types-synthetic-wc-or-native-failed'
+        : 'packed-types-synthetic-wc-and-bounded-native-passed',
+      nativeAcceptance,
+      nativeAcceptanceReceipt,
+    });
+  } catch (error) {
+    hostFailures.push(error);
   }
   if (hostFailures.length) throw new AggregateError(hostFailures, 'packed WC host checks failed');
 
-  logCheckboxDeliveryEvidence(packManifest, consumerPackageNames, {
-    phase: 'packed-types-synthetic-wc-and-bounded-native-passed',
-    nativeAcceptance,
-    nativeAcceptanceReceipt,
-  });
   runNoStylesConsumer({ consumerDir, cli, fixtureDir: join(ROOT_DIR, 'scripts', 'release'), run });
 
   runVue2Consumer({

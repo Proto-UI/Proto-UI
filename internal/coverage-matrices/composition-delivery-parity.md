@@ -908,3 +908,19 @@ packed tarball 的精确身份（同一 run 的 evidence JSON，`@proto.ui/*` `0
 §6.5 中旧的九个 tarball、generated facade 与 lock 指纹属于当时的实际源。当前主线已经变化，不能要求新的包字节仍等于这些历史指纹，也不能以旧指纹为当前准入替代。完整 `release:smoke:cli` 必须在固定的实际候选提交上运行，因为 producer/reader 使用 Git HEAD 绑定 receipt；每次实际包、安装闭包、lock、facade、native/synthetic fixture、宿主与浏览器身份必须以该次执行产物重新绑定。
 
 四处 `15.11.7` 声明仅属于隔离消费者清单，仓库 package/lock 不因本片修改。原生与合成行、宿主连接顺序 canary、全部实际断言及非零失败保持独立；不以 exit 0、声明的 case 名单或历史 canary 单独认证当前 native/packed 验收。相关定义仍为 draft，native fixture 映射仍是 planned；无 registry 发布或稳定能力提升。
+
+## 续记：2026-11-06 首轮真实执行与失败状态回执修复
+
+首轮完整 `corepack pnpm@10.32.1 -s release:smoke:cli` 运行在本地提交 `68a330ab3a4ef7fa4f154ca64ef57a7e5a149661`，该提交的 parent 是上述 `33fc7b9f…`。Node 24 被放入所有子进程的 PATH。本次实际退出 1，墙钟 300.66 秒；原始完整输出和失败后保留的 consumer 是本次证据，不能改读为完整通过。
+
+- 实际 public package 前置构建退出 0，共 staged 47 个包；主 consumer 的安装闭包为 44 个包，不能沿用旧九包记录。
+- 实际 exports、必需 Label payload、改名/未知项准入负控通过。consumer TSX 检查完成后进入执行阶段；这不等于四宿主 Checkbox+Label 组合验收。
+- 实际安装的 registrator、HappyDOM 本体、consumer 声明和 lock 都是 `15.11.7`；连接顺序 canary 观测 `parent → child`。WC synthetic fixture 实际报告 13 项通过，原有普通 React/Vue/WC renderer 也先行执行完成。
+- native Chromium 在创建页面前报告 `No usable sandbox`，当前环境的 `/usr/lib/chromium` 没有 `chrome-sandbox` helper。native 用例执行数为零，没有生成 native aggregate receipt；第 17 项恢复用例及其余 native 行均未验收。
+- `runNoStylesConsumer` 和后续 Vue2 consumer 位于 host 聚合错误之后，本次未执行。完整 packed、四宿主组合、AT、布局、CI、DCO、合入与关闭条件均不得据此勾选。
+
+本次执行还暴露了 reader 自身的真实记录缺口：native 子进程失败后，内存变量已经设为 `failed`，但 host `AggregateError` 在最终 evidence writer 之前抛出，保留文件仍写着 `prepared-not-yet-executed` / `nativeAcceptance: not-run`。原实现还会在退出 0 后、校验绑定 receipt 之前打印 native passed。
+
+本片在同一 reader 内修复顺序：只有 native 子进程退出 0 且新 receipt 的全部绑定校验通过，才设为并打印 `passed`；native 与 synthetic 继续独立执行；聚合错误抛出前先写入实际 terminal phase 和 native 的三态结果。写 evidence 自身失败也加入同一错误集合，保留原始 host 错误。当前 reader 字节 SHA-256 为 `dab3cb6568c8c280f1f8e4950cf444df76754dd892a7eb1196a58ebc2241b74f`，替代前一附记中属于首轮提交的 `c2aca569…`；native、synthetic 与公开构造断言没有调整。此处记录的是代码修复及首轮失败事实，修复后的完整执行仍待单独回读。
+
+`chromiumSandbox: true`、网络限制、CSP、实际输入、原有断言和超时均保持。PR 事件的 `cli-smoke` 仍被 job 级条件跳过；正常 sandbox 环境中的精确源证明须来自既有协调回归或明确 dispatch 的 `CI` / `cli-smoke`，不以关闭 sandbox 或历史 native 对照替代。
