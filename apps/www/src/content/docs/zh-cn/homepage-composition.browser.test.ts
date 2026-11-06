@@ -32,6 +32,7 @@ const GALLERY_IDS = [
   'workspace-help',
   'preferences',
   'workspace-progress',
+  'workspace-analytics',
   'editor',
   'overlays',
   'choices',
@@ -77,6 +78,7 @@ type GalleryFlowFacts = {
     id: string | null;
     visible: boolean;
     rect: GalleryRect;
+    rowGap: number;
     fragments: GalleryRect[];
   }>;
 };
@@ -84,7 +86,9 @@ type GalleryFlowFacts = {
 export function galleryFlowEvidence(facts: GalleryFlowFacts) {
   const issues: string[] = [];
   const epsilon = 1;
-  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1.25 : 1.5);
+  // Differentiated axes: columns breathe more than stacked rows; compact cards
+  // use a tighter authored rhythm. Only one CSS pixel of rounding is allowed.
+  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1.5 : 2);
   if (facts.containerCount !== 1 || !facts.container)
     issues.push('expected exactly one gallery container');
   if (
@@ -147,7 +151,9 @@ export function galleryFlowEvidence(facts: GalleryFlowFacts) {
         current = column.cards[index]!;
       const gap = current.rect.top - previous.rect.bottom;
       column.adjacentGaps.push({ before: previous.id, after: current.id, gap });
-      if (Math.abs(gap - expectedGap) > epsilon)
+      if (!Number.isFinite(previous.rowGap) || previous.rowGap <= 0)
+        issues.push(`${previous.id}: invalid gallery row gap`);
+      if (Math.abs(gap - previous.rowGap) > epsilon)
         issues.push(
           `${previous.id}/${current.id}: gallery gap differs from the responsive spacing contract`
         );
@@ -271,20 +277,21 @@ it('passive evidence rejects invalid generations and incomplete, split, reordere
     containerCount: 1,
     viewportWidth: 1180,
     rootFontSize: 16,
-    columnGap: 24,
-    container: { left: 0, right: 912, top: 0, bottom: 372, width: 912, height: 372 },
+    columnGap: 32,
+    container: { left: 0, right: 928, top: 0, bottom: 372, width: 928, height: 372 },
     cards: GALLERY_IDS.map((id, index) => {
-      const box = rect(Math.floor(index / 3) * 312, (index % 3) * 124);
-      return { id, visible: true, rect: box, fragments: [{ ...box }] };
+      const box = rect(Math.floor(index / 3) * 320, (index % 3) * 124);
+      return { id, visible: true, rect: box, rowGap: 24, fragments: [{ ...box }] };
     }),
   };
   expect(galleryFlowEvidence(gallery).issues).toEqual([]);
   const narrow = structuredClone(gallery);
   narrow.viewportWidth = 320;
-  narrow.columnGap = 20;
-  narrow.container = { left: 0, right: 288, top: 0, bottom: 1080, width: 288, height: 1080 };
+  narrow.columnGap = 24;
+  narrow.container = { left: 0, right: 288, top: 0, bottom: 1200, width: 288, height: 1200 };
   narrow.cards.forEach((card, index) => {
     card.rect = rect(0, index * 120);
+    card.rowGap = 20;
     card.fragments = [{ ...card.rect }];
   });
   expect(galleryFlowEvidence(narrow).issues).toEqual([]);
@@ -605,6 +612,7 @@ async function layoutFacts(page: Page) {
           id: card.getAttribute('data-gallery-demo'),
           visible: visible(card),
           rect: rect(card.getBoundingClientRect()),
+          rowGap: parseFloat(getComputedStyle(card).marginBlockEnd),
           // Count every physical fragment, not just the union bounding box.
           fragments: [...card.getClientRects()].map(rect),
         })

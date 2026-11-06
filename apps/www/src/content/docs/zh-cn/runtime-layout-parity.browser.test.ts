@@ -200,7 +200,7 @@ describe.sequential('Runtime-only vertical layout parity', () => {
             await capture(page, home, `home-${family}-${width}-${index}-${runtime}`, facts);
             expect(facts.theme).toBe('light');
             expect(facts.pageOverflow).toBeLessThanOrEqual(1);
-            expect(facts.authoredTextCount).toBe({ wc: 35, react: 33, vue: 33, vue2: 33 }[runtime]);
+            expect(facts.authoredTextCount).toBe({ wc: 37, react: 35, vue: 35, vue2: 35 }[runtime]);
             expect(facts.text.length).toBeGreaterThan(20);
             expect(new Set(facts.text.map((text) => text.key)).size).toBe(facts.text.length);
             for (const text of facts.text) expect(text.display, text.role).toBe('block');

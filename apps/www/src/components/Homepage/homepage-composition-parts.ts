@@ -1,5 +1,9 @@
 import type { DemoChild, DemoNode } from '../PrototypePreviewer/demo-types';
 import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
+import {
+  homepageGalleryIcon,
+  type GalleryCardOptions,
+} from './homepage-gallery-icons';
 
 type Builders = {
   p: (
@@ -14,7 +18,13 @@ type Builders = {
     ref?: string,
     attrs?: Record<string, string>
   ) => DemoNode;
-  card: (title: string, caption: string, children: DemoChild[], id: string) => DemoNode;
+  card: (
+    title: string,
+    caption: string,
+    children: DemoChild[],
+    id: string,
+    options?: GalleryCardOptions
+  ) => DemoNode;
   button: (label: string, ref?: string, variant?: string) => DemoNode;
   status: (value: string, ref: string) => DemoNode;
 };
@@ -101,7 +111,8 @@ export function createHomepageCompositionParts(
         'composition-command-status'
       ),
     ],
-    'workspace-command'
+    'workspace-command',
+    { emphasis: 'accent', icon: homepageGalleryIcon('workspace-command') }
   );
   const progress = card(
     zh ? '给想法留一点空间' : 'Make room for an idea',
@@ -139,7 +150,42 @@ export function createHomepageCompositionParts(
       ]),
       status(zh ? '计划进度 40%' : 'Plan progress: 40%', 'composition-progress-status'),
     ],
-    'workspace-progress'
+    'workspace-progress',
+    { icon: homepageGalleryIcon('workspace-progress') }
+  );
+  const analytics = card(
+    zh ? '计划节奏' : 'Plan rhythm',
+    zh
+      ? '示例数据 · 随本页进度变化，并非真实访问统计。'
+      : 'Sample data · follows this page’s plan, not live visitor statistics.',
+    [
+      box(
+        'home-gallery__chart',
+        [
+          box('home-gallery__chart-bars', [], 'gallery-rhythm-bars', {
+            'aria-hidden': 'true',
+          }),
+        ],
+        undefined,
+        zh
+          ? {
+              role: 'img',
+              'aria-label':
+                '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
+            }
+          : {
+              role: 'img',
+              'aria-label':
+                'Six sample bars scaled by the current plan progress. The actual value is shown by the example plan progress bar on this page.',
+            }
+      ),
+    ],
+    'workspace-analytics',
+    {
+      density: 'compact',
+      body: 'edge-media',
+      icon: homepageGalleryIcon('analytics'),
+    }
   );
   const helpItems = [
     {
@@ -188,13 +234,15 @@ export function createHomepageCompositionParts(
         'composition-help'
       ),
     ],
-    'workspace-help'
+    'workspace-help',
+    { density: 'compact', icon: homepageGalleryIcon('workspace-help') }
   );
 
   return {
     command,
     progress,
     help,
+    analytics,
     setup({ bind, write, feedback }: Bindings) {
       const update = (value: number) => {
         // This validates outward data; range stepping and keyboard semantics belong to Slider.

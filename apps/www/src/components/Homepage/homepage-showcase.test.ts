@@ -189,6 +189,64 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
+  it(`${family} composes ten staggered cards, a decorative fade and real source attribution`, () => {
+    const content = createHomepageShowcase(family, 'wc', 'en', () => true);
+    assertDemoSpec(content.demo);
+    const root = content.demo.root;
+    if (root.kind !== 'box') throw new Error('gallery root must be a box');
+    const cards: Array<{ id: string; density: string; emphasis: string; body?: string }> = [];
+    const icons: string[] = [];
+    let charts = 0;
+    let fades = 0;
+    const links: Array<{ href?: string; text?: string }> = [];
+    const visit = (node: DemoChild) => {
+      if (typeof node === 'string' || node.kind === 'text') return;
+      if (node.kind === 'box' && node.attrs?.['data-gallery-demo'])
+        cards.push({
+          id: node.attrs['data-gallery-demo'],
+          density: node.attrs['data-gallery-density']!,
+          emphasis: node.attrs['data-gallery-emphasis']!,
+          ...(node.attrs['data-gallery-body'] ? { body: node.attrs['data-gallery-body'] } : {}),
+        });
+      if (node.kind === 'box' && node.attrs?.['data-gallery-icon'])
+        icons.push(node.attrs['data-gallery-icon']);
+      if (node.kind === 'box' && node.ref === 'gallery-rhythm-bars') charts++;
+      if (node.kind === 'box' && node.attrs?.['data-gallery-fade'] !== undefined) {
+        fades++;
+        expect(node.attrs['aria-hidden']).toBe('true');
+      }
+      if (node.kind === 'box' && node.tag === 'a')
+        links.push({ href: node.attrs?.href, text: node.children?.[0] as string });
+      for (const child of node.children ?? []) visit(child);
+    };
+    visit(root);
+    expect(cards.map((card) => card.id)).toEqual([
+      'controls',
+      'hover',
+      'workspace-command',
+      'workspace-help',
+      'preferences',
+      'workspace-progress',
+      'workspace-analytics',
+      'editor',
+      'overlays',
+      'choices',
+    ]);
+    expect(new Set(cards.map((card) => card.density))).toEqual(new Set(['regular', 'compact']));
+    expect(new Set(cards.map((card) => card.emphasis))).toEqual(
+      new Set(['quiet', 'standard', 'accent'])
+    );
+    expect(cards.filter((card) => card.body === 'edge-media').map((card) => card.id)).toEqual([
+      'workspace-analytics',
+    ]);
+    expect(icons).toHaveLength(10);
+    expect(new Set(icons).size).toBe(10);
+    expect(charts).toBe(1);
+    expect(fades).toBe(1);
+    expect(links).toEqual([
+      { href: 'https://github.com/Proto-UI/Proto-UI', text: 'Source on GitHub' },
+    ]);
+  });
 }
 
 for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {

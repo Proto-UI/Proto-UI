@@ -46,9 +46,17 @@ describe('Homepage presentation source boundaries', () => {
     }
     expect(preview).toContain('columns: 18rem;');
     expect(preview).toContain('columns: 1;');
-    expect(preview).toContain('column-gap: var(--homepage-gallery-gap);');
+    expect(preview).toContain('column-gap: var(--homepage-gallery-column-gap);');
     expect(preview).toContain('break-inside: avoid;');
-    expect(preview).toContain('margin-block-end: var(--homepage-gallery-gap);');
+    expect(preview).toContain('margin-block-end: var(--homepage-gallery-row-gap);');
+    expect(preview).toContain('home-gallery__item--compact');
+    expect(preview).toContain('home-gallery__item--quiet');
+    expect(preview).toContain('home-gallery__item--accent');
+    expect(preview).toContain('home-gallery__media');
+    expect(preview).toContain('home-gallery__fade');
+    expect(preview).toContain('var(--pui-muted, var(--pui-background, transparent))');
+    expect(preview).toContain('home-gallery__attribution-link');
+    expect(preview).toContain('text-decoration: underline;');
     expect(preview).toContain('display: contents;');
     expect(preview).not.toContain('grid-template-columns: repeat(4,');
     expect(preview).toContain('grid-template-columns: minmax(0, 1fr);');

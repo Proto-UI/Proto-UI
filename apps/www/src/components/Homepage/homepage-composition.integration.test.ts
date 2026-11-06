@@ -99,6 +99,52 @@ async function mount(family: Family) {
 
 for (const family of ['shadcn', 'brutalist'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
+    it('mounts ten real cards, decorative icons, a labelled sample chart and attribution', async () => {
+      const view = await mount(family);
+      await settle();
+      const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
+      expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
+        'controls',
+        'hover',
+        'workspace-command',
+        'workspace-help',
+        'preferences',
+        'workspace-progress',
+        'workspace-analytics',
+        'editor',
+        'overlays',
+        'choices',
+      ]);
+      const analytics = cards.find((card) => card.dataset.galleryDemo === 'workspace-analytics')!;
+      expect(analytics.dataset.galleryBody).toBe('edge-media');
+      expect(analytics.querySelector('.home-gallery__media')).not.toBeNull();
+      const chart = analytics.querySelector<HTMLElement>('[role="img"]')!;
+      expect(chart.getAttribute('aria-label')).toContain('Sample data');
+      const bars = analytics.querySelectorAll<SVGRectElement>('rect[data-gallery-bar]');
+      expect(bars).toHaveLength(6);
+      const initialHeights = [...bars].map((bar) => bar.getAttribute('height'));
+      // The sample series follows the real shared plan, not a fabricated metric.
+      view.ref('composition-progress').setAttribute('aria-valuenow', '90');
+      await expect
+        .poll(() => [...bars].map((bar) => bar.getAttribute('height')).join(','))
+        .not.toBe(initialHeights.join(','));
+      const icons = view.host.querySelectorAll('[data-gallery-icon] svg');
+      expect(icons).toHaveLength(10);
+      for (const icon of icons) {
+        expect(icon.getAttribute('aria-hidden')).toBe('true');
+        expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');
+      }
+      const fade = view.host.querySelector<HTMLElement>('[data-gallery-fade]')!;
+      expect(fade.getAttribute('aria-hidden')).toBe('true');
+      expect(fade.querySelectorAll('a,button,input,[tabindex]')).toHaveLength(0);
+      // Reading order: every interactive card precedes the decorative tail and attribution.
+      const all = [...cards, fade];
+      expect(all.indexOf(fade)).toBe(all.length - 1);
+      const link = view.host.querySelector<HTMLAnchorElement>('.home-gallery__attribution-link')!;
+      expect(link.getAttribute('href')).toBe('https://github.com/Proto-UI/Proto-UI');
+      expect(link.textContent).toBe('Source on GitHub');
+      expect(view.errors).toEqual([]);
+    });
     it('filters Command, skips disabled results and accepts Arrow/Enter into Slider and Progress', async () => {
       const view = await mount(family);
       const root = view.ref('composition-command');

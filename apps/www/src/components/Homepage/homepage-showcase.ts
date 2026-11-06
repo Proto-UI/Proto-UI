@@ -1,5 +1,6 @@
 import { composeHomepageText, setHomepageText } from './homepage-text';
 import { createHomepageGalleryParts } from './homepage-gallery-parts';
+import { homepageGalleryIcon } from './homepage-gallery-icons';
 import {
   collectPrototypeIds,
   type DemoNode,
@@ -467,8 +468,21 @@ export function createHomepageShowcase(
         children: [fields!, footer!],
       },
     ],
-    'preferences'
+    'preferences',
+    { emphasis: 'accent', icon: homepageGalleryIcon('preferences') }
   );
+  const attribution =
+    locale === 'en'
+      ? {
+          label: 'Built by Proto UI contributors',
+          source: 'Source on GitHub',
+          href: 'https://github.com/Proto-UI/Proto-UI',
+        }
+      : {
+          label: '由 Proto UI 贡献者构建',
+          source: '在 GitHub 查看源码',
+          href: 'https://github.com/Proto-UI/Proto-UI',
+        };
   result.demo.root = {
     kind: 'box',
     className: 'home-gallery',
@@ -477,7 +491,33 @@ export function createHomepageShowcase(
       role: 'region',
       'aria-label': locale === 'en' ? 'Interactive component gallery' : '可交互的组件展示',
     },
-    children: gallery.columns(form),
+    children: [
+      ...gallery.columns(form, gallery.analytics),
+      {
+        kind: 'box',
+        className: 'home-gallery__fade',
+        attrs: { 'aria-hidden': 'true', 'data-gallery-fade': '' },
+      },
+      {
+        kind: 'box',
+        className: 'home-gallery__attribution',
+        children: [
+          {
+            kind: 'box',
+            tag: 'span',
+            className: 'home-gallery__attribution-label',
+            children: [attribution.label],
+          },
+          {
+            kind: 'box',
+            tag: 'a',
+            className: 'home-gallery__attribution-link',
+            attrs: { href: attribution.href },
+            children: [attribution.source],
+          },
+        ],
+      },
+    ],
   };
   result.demo.root = composeHomepageText(result.demo.root, family);
   const prototypeIds = new Set<string>();

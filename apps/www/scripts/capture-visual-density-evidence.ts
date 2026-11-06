@@ -26,7 +26,15 @@ export function expectedCandidateSloganFontSize(
 export function gallerySpacingIssues(
   facts: {
     columnGap: string;
-    cards: Array<{ id: string | null; x: number; y: number; right: number; bottom: number }>;
+    cards: Array<{
+      id: string | null;
+      x: number;
+      y: number;
+      right: number;
+      bottom: number;
+      /** Actual authored margin after this card; compact cards use a tighter rhythm. */
+      rowGap: number;
+    }>;
   },
   expectedGap: number
 ): string[] {
@@ -38,12 +46,13 @@ export function gallerySpacingIssues(
     'workspace-help',
     'preferences',
     'workspace-progress',
+    'workspace-analytics',
     'editor',
     'overlays',
     'choices',
   ];
   if (JSON.stringify(facts.cards.map((card) => card.id)) !== JSON.stringify(ids))
-    issues.push('exact nine-card inventory');
+    issues.push('exact ten-card inventory');
   if (facts.columnGap !== `${expectedGap}px`) issues.push('column spacing');
   const columns: (typeof facts.cards)[] = [];
   for (const card of facts.cards) {
@@ -63,9 +72,13 @@ export function gallerySpacingIssues(
   columns.sort((a, b) => a[0]!.x - b[0]!.x);
   for (const column of columns) {
     column.sort((a, b) => a.y - b.y);
-    for (let i = 1; i < column.length; i++)
-      if (Math.abs(column[i]!.y - column[i - 1]!.bottom - expectedGap) > 1)
+    for (let i = 1; i < column.length; i++) {
+      const previous = column[i - 1]!;
+      if (!Number.isFinite(previous.rowGap) || previous.rowGap <= 0)
+        issues.push('invalid card row gap');
+      if (Math.abs(column[i]!.y - previous.bottom - previous.rowGap) > 1)
         issues.push('vertical card spacing');
+    }
   }
   for (let i = 1; i < columns.length; i++)
     if (Math.abs(columns[i]![0]!.x - columns[i - 1]![0]!.right - expectedGap) > 1)
@@ -250,6 +263,7 @@ try {
                     y: rect.y,
                     right: rect.right,
                     bottom: rect.bottom,
+                    rowGap: parseFloat(getComputedStyle(card).marginBlockEnd),
                   };
                 }),
               },
@@ -278,7 +292,7 @@ try {
               assert.equal(facts.cardPadding, '20px');
             }
             assert.deepEqual(
-              gallerySpacingIssues(facts.gallerySpacing, v.width === 390 ? 20 : 24),
+              gallerySpacingIssues(facts.gallerySpacing, v.width === 390 ? 24 : 32),
               []
             );
             assert.equal(facts.title.fontSize, 16);
