@@ -36,7 +36,16 @@ criteria:
       en: When an accepted actionable label requests focus, the target uses its existing focus owner under the same disabled and lifecycle checks. Reentrant focus or outward callbacks that disable, detach or replace either participant invalidate subsequent work from the old request. Naming remains available for a disabled target while activation and focus are suppressed.
   - id: C-CONTROL-LABEL-0001-CONTENT
     text:
-      en: Passive naming-only labels remain selectable content. A short actionable label may explicitly suppress accidental selection under the content-selection affordance contract. Long descriptions remain independent selectable content rather than an enlarged action target or duplicated accessible name. Checkbox/Switch anatomy does not acquire a Label part.
+      en: >-
+        The label text-selection policy is explicit and bounded. Passive naming-only labels remain
+        selectable content; a short actionable label may suppress accidental selection under the
+        content-selection affordance contract. The admitted policy vocabulary is the shared
+        ControlLabelSelectionPolicy ('policy', 'auto', 'text', 'none'): 'policy' derives the declaration
+        from the label's actionable role, and the three explicit values lower only to the subject-local
+        select-auto, select-text and select-none affordances. The policy never owns a selection range,
+        editing or clipboard command, control state, focus or a second selection state machine. Long
+        descriptions remain independent selectable content rather than an enlarged action target or
+        duplicated accessible name. Checkbox/Switch anatomy does not acquire a Label part.
   - id: C-CONTROL-LABEL-0001-LOWERING
     text:
       en: Direct host integrations pass the opaque reference through the dedicated typed InstanceAssociations input, whose only admitted key in this slice is controlLabel. The Runtime delivers it through ControlLabelPort only to a Prototype that explicitly declared Label or target participation. It never enters raw or resolved Props; the active JSON Props contracts remain unchanged. This association channel cannot carry arbitrary data, callbacks, values, host objects or other reference families. Unknown keys and undeclared recipients are errors. Data-only demo input must declare an association key in a bounded render instance and materialize references through the public factory, preserving stable identity until that instance is disposed. Reusing the same key in another render instance never associates the two. Unsupported serialization or compiler lowering must report an explicit diagnostic rather than silently output an empty object or install an application listener that simulates protocol support.
@@ -78,6 +87,8 @@ references:
 sources:
   - path: packages/modules/control-label/src/anatomy-pair.ts
   - path: packages/modules/control-label/test/anatomy-pair.test.ts
+  - path: packages/core/src/control-label.ts
+  - path: packages/prototypes/base/src/label/root.proto.ts
   - path: packages/core/src/a11y.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
@@ -88,6 +99,9 @@ openQuestions:
       en: Does the completed slice satisfy paired real input, naming, reentrancy, duplicate binding and remount evidence across all four Web adapters?
     blocks: [activation:C-CONTROL-LABEL-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared the explicit bounded label text-selection policy vocabulary (ControlLabelSelectionPolicy) shared with the content-selection affordance, preserving the activation-derived default and selectable passive content.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded the bounded independent Label pairing direction, explicit domain, ownership and lowering requirements without stable admission.

@@ -24,7 +24,14 @@ criteria:
       en: Pure action labels and drag handles may declare select-none on their owning Prototype or part. Surface, document roots, passive Text, card copy, Dialog titles/descriptions, useful data/status/errors and editor content must not acquire blanket suppression merely because they occur near controls. Suppression on an ancestor must not prevent explicitly selectable nested content where the host supports restoration.
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-LABELS
     text:
-      en: A short actionable control label can use the control's policy only under an admitted semantic association and activation owner. A sibling visual label, accessible-name text copy or styling alias does not establish that association. Long descriptions remain content. This contract introduces no Label identity or association API and does not amend existing Checkbox anatomy omissions.
+      en: >-
+        A short actionable control label can use the control's policy only under an admitted semantic
+        association and activation owner. A sibling visual label, accessible-name text copy or styling alias
+        does not establish that association. The associated Label declares its subject policy through the
+        explicit bounded selection vocabulary defined by C-CONTROL-LABEL-0001, whose derived default still
+        suppresses only actionable labels; explicit auto, text and none values lower only to these three
+        tokens. Long descriptions remain content. This contract introduces no Label identity or association
+        API and does not amend existing Checkbox anatomy omissions.
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-BOUNDARY
     text:
       en: Selection affordance changes must not clear or programmatically select document text, intercept clipboard commands, cancel arbitrary pointer/keyboard default actions, mutate control state, replace labels or synthesize focus. Text Control retains the selection, cursor, IME and native editing-chrome requirements of C-TEXT-CONTROL-0001. Placeholder paint is not an editor value or proof of an editor selection defect.
@@ -60,7 +67,11 @@ sources:
 verifies:
   tests:
     - T-CONTENT-SELECTION-AFFORDANCE-0001
+    - T-CONTROL-LABEL-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the associated-label affordance to the explicit Label selection policy vocabulary while retaining association ownership and long-description selectability.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Admitted one explicit subject-local selection-affordance exception, restoration vocabulary and revised same-group semantics while retaining editing and Label boundaries.

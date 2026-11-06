@@ -92,6 +92,17 @@ cases:
     expectation: Nested scope isolation, missing/duplicate targets, moved ancestry and in-flight pointer turn,
       drag/cancel/modified/nested input, prevented click and text selection, reentrant disable and explicit
       association conflict are independently asserted.
+  - id: T-CONTROL-LABEL-0001-CASE-SELECTION
+    title: Explicit label text-selection policy defaults and overrides
+    covers:
+      - C-CONTROL-LABEL-0001-CONTENT
+      - C-CONTENT-SELECTION-AFFORDANCE-0001-LABELS
+      - P-BASE-LABEL-OPTIONS
+      - P-BASE-LABEL-ACTION
+    expectation: >-
+      The 'policy' default derives select-none only from actionable labels, explicit auto/text/none
+      override in both directions, removal restores the derived default, and no second selection state
+      machine appears.
 implementations:
   - id: control-label-view-discovery
     kind: module-test
@@ -212,6 +223,7 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-TARGETS
       - T-CONTROL-LABEL-0001-CASE-PROJECTIONS
+      - T-CONTROL-LABEL-0001-CASE-SELECTION
     exercises:
       - P-BASE-LABEL
       - P-SHADCN-LABEL
@@ -231,6 +243,7 @@ implementations:
 verifies:
   contracts:
     - C-CONTROL-LABEL-0001
+    - C-CONTENT-SELECTION-AFFORDANCE-0001
   modules:
     - M-CONTROL-LABEL-0001
   hostCaps:
@@ -252,6 +265,9 @@ verifies:
     - A-VUE-3-0001
     - A-VUE-2-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded the explicit selection-policy default and override assertions in the family projections implementation.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded real owner/Adapter/compiler tests while leaving native admission explicitly pending.

@@ -24,6 +24,29 @@ export function isControlLabelRef(value: unknown): value is ControlLabelRef {
 }
 
 export type ControlLabelOptions = Readonly<{ naming: boolean; activation: boolean }>;
+/**
+ * Explicit subject-local content-selection policy for an associated label.
+ *
+ * - 'policy' derives the declaration from the label's role: a short actionable
+ *   label suppresses accidental selection while a passive naming-only label
+ *   keeps the host default (C-CONTROL-LABEL-0001-CONTENT).
+ * - 'auto' delegates to the host default at the label subject; under a
+ *   suppressing ancestor that is not necessarily selectable.
+ * - 'text' explicitly restores text selection on the label subject.
+ * - 'none' suppresses accidental text selection starting on the label subject.
+ *
+ * The policy never owns a selection range, editing command, clipboard
+ * behavior, control state or focus; it lowers only to the bounded
+ * select-auto/select-text/select-none affordance tokens of
+ * C-CONTENT-SELECTION-AFFORDANCE-0001.
+ */
+export type ControlLabelSelectionPolicy = 'policy' | 'auto' | 'text' | 'none';
+export const CONTROL_LABEL_SELECTION_POLICIES: readonly ControlLabelSelectionPolicy[] = [
+  'policy',
+  'auto',
+  'text',
+  'none',
+];
 export type ControlLabelActivationSource = 'pointer' | 'accessibility';
 export type ControlLabelRequest = Readonly<{
   source: ControlLabelActivationSource;

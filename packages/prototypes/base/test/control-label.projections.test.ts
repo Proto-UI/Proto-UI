@@ -64,4 +64,58 @@ describe('Base Label and four real family projections', () => {
       expect(target.getAttribute('aria-labelledby')).toBe(label.id);
     }
   );
+
+  it.each(families)(
+    '$name applies the derived policy only to actionable labels by default',
+    async (proto) => {
+      const label = document.createElement(proto.name);
+      label.textContent = 'Selectable description';
+      document.body.append(label);
+      await flush();
+      const style = () => label.getAttribute('data-pui-style') ?? '';
+      expect(style()).not.toContain('select-none');
+      expect(style()).not.toContain('select-text');
+      expect(style()).not.toContain('select-auto');
+      setElementProps(label, { activation: true });
+      (label as HTMLElement & { update(): void }).update();
+      await flush();
+      expect(style()).toContain('select-none');
+      setElementProps(label, { activation: false });
+      (label as HTMLElement & { update(): void }).update();
+      await flush();
+      expect(style()).not.toContain('select-none');
+    }
+  );
+
+  it('honors explicit selection overrides while keeping activation ownership unchanged', async () => {
+    const label = document.createElement(base.name);
+    label.textContent = 'Policy-declared label';
+    document.body.append(label);
+    await flush();
+    const style = () => label.getAttribute('data-pui-style') ?? '';
+    // An explicitly actionable label can still declare selectable text.
+    setElementProps(label, { activation: true, selection: 'text' });
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    expect(style()).toContain('select-text');
+    expect(style()).not.toContain('select-none');
+    // Host-default restoration wins over the derived suppression.
+    setElementProps(label, { activation: true, selection: 'auto' });
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    expect(style()).toContain('select-auto');
+    expect(style()).not.toContain('select-none');
+    // A passive label can explicitly suppress accidental selection.
+    setElementProps(label, { activation: false, selection: 'none' });
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    expect(style()).toContain('select-none');
+    // Removing the declaration restores the derived policy and host default.
+    setElementProps(label, { activation: false });
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    expect(style()).not.toContain('select-none');
+    expect(style()).not.toContain('select-auto');
+    expect(style()).not.toContain('select-text');
+  });
 });

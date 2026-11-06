@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CONTROL_LABEL_SELECTION_POLICIES,
   createControlLabelRef,
   isControlLabelRef,
   validateInstanceAssociations,
 } from '../src/control-label';
 import { isJsonPropsValue } from '../../modules/props/src/kernel/json-value';
+
+describe('explicit label text-selection policy vocabulary', () => {
+  it('admits exactly the derived default plus the three bounded affordance values', () => {
+    expect(CONTROL_LABEL_SELECTION_POLICIES).toEqual(['policy', 'auto', 'text', 'none']);
+  });
+});
 
 describe('dedicated typed instance-association input', () => {
   it.each([undefined, {}])(
