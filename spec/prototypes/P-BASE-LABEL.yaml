@@ -14,13 +14,23 @@ criteria:
       en: Public /label and package-root entries expose labelRoot, asLabelRoot, LabelRootProps and LabelRootExposes. The direct Prototype and authored hook share one implementation.
   - id: P-BASE-LABEL-OPTIONS
     text:
-      en: JSON Props naming and activation default to true and false. Either can change independently; removal restores its default. Association identity is not a Prop and must use InstanceAssociations.controlLabel.
+      en: >-
+        JSON Props naming, activation and selection default to true, false and 'policy'. Any can change
+        independently; removal restores its default. selection is the explicit text-selection policy
+        ControlLabelSelectionPolicy: 'policy' derives the declaration from activation, while 'auto', 'text'
+        and 'none' are explicit subject overrides lowering to the bounded content-selection affordance
+        tokens. Association identity is not a Prop and must use InstanceAssociations.controlLabel.
   - id: P-BASE-LABEL-CONTENT
     text:
       en: The default slot preserves text and children, with no added role, Tab stop, keyboard action, checked value or outward value event. Long descriptions remain separate selectable content.
   - id: P-BASE-LABEL-ACTION
     text:
-      en: Only an explicitly actionable Label declares subject-local select-none. Pointer eligibility and target operation reuse follow C-CONTROL-LABEL-0001; no synthetic click or local value mutation is introduced.
+      en: >-
+        Only an explicitly actionable Label declares subject-local select-none under the default 'policy'
+        selection. An explicit selection Prop overrides that derivation in either direction: select-text or
+        select-auto on an actionable label, select-none on a passive label. Pointer eligibility and target
+        operation reuse follow C-CONTROL-LABEL-0001; no synthetic click, second selection state machine or
+        local value mutation is introduced.
 dependsOn:
   contracts:
     - C-CONTROL-LABEL-0001
@@ -34,6 +44,9 @@ sources:
   - path: packages/prototypes/base/src/label/types.ts
   - path: packages/prototypes/base/src/label/index.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admitted the explicit selection Prop vocabulary that makes the label text-selection policy overridable in both directions while retaining the activation-derived default.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added independent Label identity, separate naming/activation and typed association consumption without stable admission.
