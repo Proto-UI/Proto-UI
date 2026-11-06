@@ -113,9 +113,11 @@ export function setupMenuSurface<Props extends ShadcnStyleProps, Exposes = Recor
   kind: MenuKind
 ) {
   const style = setupMenuStyle(def, kind === 'dropdown' ? 'nova' : 'new-york-v4');
+  // Entry/exit use keyframes. duration-* also sets transition-duration, so
+  // explicitly exclude positioning geometry and surface paint from transitions.
   def.feedback.style.use(
     tw(
-      'z-50 bg-popover text-popover-foreground max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none'
+      'z-50 bg-popover text-popover-foreground max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none transition-none'
     )
   );
   for (const id of SHADCN_STYLE_IDS) {

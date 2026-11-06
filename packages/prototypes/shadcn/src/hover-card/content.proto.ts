@@ -21,7 +21,8 @@ const hoverCardContent = definePrototype<
     setupOverlayDarkRing(def, style);
 
     // P-SHADCN-HOVER-CARD-CONTENT-CURRENT-VISUAL-SURFACE
-    def.feedback.style.use(tw('z-50 outline-none'));
+    // All profiles use keyframes, not transitions of positioning or panel paint.
+    def.feedback.style.use(tw('z-50 outline-none transition-none'));
 
     setupPopupMotion(def, open);
   },
