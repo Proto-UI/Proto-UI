@@ -38,17 +38,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Restore the exact browser font package only
+        timeout-minutes: 1
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
       - name: Install the official Ubuntu CJK font package for both revisions
         timeout-minutes: 3
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/homepage-evidence"
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-          {
-            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
-            fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn'
-          } | tee "$RUNNER_TEMP/homepage-evidence/font-environment.txt"
+        env:
+          FONT_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence
+        run: bash candidate/apps/www/scripts/prepare-homepage-composition-fonts.sh
       - name: Install locked dependencies in both isolated worktrees
         id: install
         timeout-minutes: 5
