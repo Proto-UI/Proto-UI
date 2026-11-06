@@ -5,7 +5,10 @@ description: 'A Shadcn-styled button projected through Proto UI adapters.'
 ---
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
 import { getCode } from '@/utils/conversionUtils';
 
@@ -60,4 +63,376 @@ The Button prototype keeps one canonical demo per supported runtime. Use the ada
   />
 </div>
 
+## Install
+
+<div data-adapter-panel="wc">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add react shadcn-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add vue shadcn-button" manager="npm" />
+</div>
+
+## Usage
+
+### Default
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-default"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-default', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-default"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-default', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-default"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-default', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-default"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-default', codeMap)}
+  />
+</div>
+
+### Secondary
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-secondary"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-secondary', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-secondary"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-secondary', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-secondary"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-secondary', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-secondary"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-secondary', codeMap)}
+  />
+</div>
+
+### Outline
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-outline"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-outline', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-outline"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-outline', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-outline"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-outline', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-outline"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-outline', codeMap)}
+  />
+</div>
+
+### Ghost
+
+This ordinary demo explicitly selects `styleProfile="rhea"`, using the Rhea muted recipe. The legacy New York accent hover remains covered by the explicit legacy factory and its own regression suite, and is no longer the default page presentation.
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-ghost"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-ghost', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-ghost"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-ghost', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-ghost"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-ghost', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-ghost"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-ghost', codeMap)}
+  />
+</div>
+
+### Destructive
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-destructive"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-destructive', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-destructive"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-destructive', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-destructive"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-destructive', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-destructive"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-destructive', codeMap)}
+  />
+</div>
+
+### Sizes
+
+`icon-compact` is a Proto UI compact icon extension: a 1.75rem square that does not change when `wrap` is enabled. It maps the upstream Blocks toolbar’s `size-7` usage, not the upstream 2rem `icon-sm`; other sizes and defaults are unchanged.
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-sizes"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-sizes', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-sizes"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-sizes', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-sizes"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-sizes', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-sizes"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-sizes', codeMap)}
+  />
+</div>
+
+### Disabled
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-button-disabled"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-button-disabled', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-disabled"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-button-disabled', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-disabled"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-button-disabled', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-button-disabled"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-button-disabled', codeMap)}
+  />
+</div>
+
 <AdapterPanelScript />
+
+## API Reference
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
+      default: 'default',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'",
+      default: 'default',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-BUTTON.yaml', 'P-BASE-BUTTON.yaml']}
+/>

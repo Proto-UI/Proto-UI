@@ -3,7 +3,9 @@ title: 'Button'
 description: 'Base Button 的 command 语义、公开表面、证据与当前边界。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
 Base Button 是用于一次离散 action 的可聚焦 command control。它拥有 activation、disabled gate、focus、瞬时交互事实与 `click` outward signal；它刻意不拥有视觉语言。
 
@@ -28,6 +30,144 @@ Base Button 是用于一次离散 action 的可聚焦 command control。它拥�
 Button 通过官方 trigger route 处理指针与键盘 activation。Space 参与 press lifecycle 并阻止滚动默认行为；Enter activation 服从宿主 trigger path。disabled Button 拒绝 activation 和主动 focus 请求，不发出 `click`，并清理瞬时交互状态。
 
 Web profile 投射 command-control accessibility，并以 authored content 作为 accessible name。Form submission、`type`、`name`、command integration 与视觉 variant 不属于当前 Base guarantee。
+
+## 安装
+
+<div data-adapter-panel="wc">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add wc base-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add react base-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add vue base-button" manager="npm" />
+</div>
+
+## 用法
+
+Base Button 不携带视觉语言；外观由消费组合提供。以下示例使用最小化的边框与内边距布局，以便聚焦协议表面。
+
+### 默认
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3">
+  <wc-base-button class="rounded border px-3 py-2 text-sm font-medium">Run action</wc-base-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BaseButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <BaseButton className="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <BaseButton class="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
+  </div>
+</template>
+
+<script setup>
+import { BaseButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### 禁用
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3">
+  <wc-base-button class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</wc-base-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BaseButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <BaseButton className="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <BaseButton class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
+  </div>
+</template>
+
+<script setup>
+import { BaseButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+<AdapterPanelScript />
 
 ## 0.2 交付与证据
 

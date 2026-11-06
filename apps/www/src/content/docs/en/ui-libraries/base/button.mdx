@@ -3,7 +3,9 @@ title: 'Button'
 description: 'Base Button command semantics, public surface, evidence, and current boundaries.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
 Base Button is a focusable command control for one discrete action. It owns activation, disabled gating, focus, transient interaction facts, and the outward `click` signal; it deliberately does not own a visual language.
 
@@ -28,6 +30,144 @@ The public props surface currently contains only `disabled`. Exposed facts are `
 Button uses the official trigger route for pointer and keyboard activation. Space participates in the press lifecycle and prevents its scrolling default; Enter activation follows the host trigger path. A disabled Button rejects activation and active focus requests, emits no `click`, and clears transient interaction state.
 
 The Web profile projects command-control accessibility and takes the accessible name from authored content. Form submission, `type`, `name`, command integration, and visual variants are outside the current Base guarantee.
+
+## Install
+
+<div data-adapter-panel="wc">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add wc base-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add react base-button" manager="npm" />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <InstallCommandCard command="npx @proto.ui/cli@latest add vue base-button" manager="npm" />
+</div>
+
+## Usage
+
+Base Button carries no visual language of its own; the consumer composition supplies the theme. The examples below use a minimal border-and-padding layout to keep the focus on the protocol surface.
+
+### Default
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3">
+  <wc-base-button class="rounded border px-3 py-2 text-sm font-medium">Run action</wc-base-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BaseButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <BaseButton className="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <BaseButton class="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
+  </div>
+</template>
+
+<script setup>
+import { BaseButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+### Disabled
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={`
+<div class="flex flex-wrap items-center gap-3">
+  <wc-base-button class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</wc-base-button>
+</div>
+    `}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={`
+import { BaseButton } from '../proto-ui/components/react';
+
+export function Demo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <BaseButton className="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
+    </div>
+  );
+}
+    `}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-base-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <BaseButton class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
+  </div>
+</template>
+
+<script setup>
+import { BaseButton } from '../proto-ui/components/vue';
+</script>
+    `}
+  />
+</div>
+
+<AdapterPanelScript />
 
 ## 0.2 delivery and evidence
 
