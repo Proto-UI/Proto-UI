@@ -1,4 +1,9 @@
-import { siteTextRecipe, siteTextSurfaceStyle, type SiteHeroViewport } from './site-text-recipes';
+import {
+  siteTextRecipe,
+  siteTextSurfaceStyle,
+  type SiteHeroViewport,
+  type SiteHeroLanguage,
+} from './site-text-recipes';
 import { SITE_TYPOGRAPHY_ROLES, type SiteTypographyRole } from './site-text-recipes';
 import { prepareDemoRuntime, renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
@@ -26,7 +31,10 @@ const MARKERS = [
   'data-typography-generation',
 ] as const;
 type Target = { native: HTMLElement; role: SiteTypographyRole };
-type ScopedTarget = Target & { context: 'site' | 'document' };
+type ScopedTarget = Target & {
+  context: 'site' | 'document';
+  heroLanguage: SiteHeroLanguage;
+};
 type View = ScopedTarget & {
   carrier: HTMLElement;
   surface: HTMLElement;
@@ -208,6 +216,10 @@ export function siteTypographyParticipant(
   const targets = (): ScopedTarget[] =>
     collectSiteTypographyTargets(root, options.docsOnly).map((target) => ({
       ...target,
+      // Match the native fallback's inherited HTML language, not the operating
+      // system, detected font or text contents. An authored lang override wins.
+      heroLanguage:
+        target.role === 'slogan' && target.native.matches(':lang(zh)') ? 'zh' : 'default',
       context:
         options.docsOnly &&
         target.native.closest('main[data-pagefind-body]') &&
@@ -235,10 +247,11 @@ export function siteTypographyParticipant(
         previous.heroViewport !== heroScale ||
         next.length !== previous.targets.length ||
         next.some(
-          ({ native, role, context }, index) =>
+          ({ native, role, context, heroLanguage }, index) =>
             native !== previous.targets[index]!.native ||
             role !== previous.targets[index]!.role ||
             context !== previous.targets[index]!.context ||
+            heroLanguage !== previous.targets[index]!.heroLanguage ||
             nodes[index]!.length !== previous.nodes[index]!.length ||
             nodes[index]!.some((node, offset) => node !== previous.nodes[index]![offset])
         )
@@ -260,6 +273,7 @@ export function siteTypographyParticipant(
             target.native !== committed[index]?.native ||
             target.role !== committed[index]?.role ||
             target.context !== committed[index]?.context ||
+            target.heroLanguage !== committed[index]?.heroLanguage ||
             activeViews.get(target.native)?.carrier.parentElement !== target.native ||
             Array.from(target.native.childNodes).some(
               (node) => node !== activeViews.get(target.native)?.carrier
@@ -341,7 +355,7 @@ export function siteTypographyParticipant(
             kind: 'box',
             tag: 'span',
             ref: 'typography-batch',
-            children: selected.map(({ native, role, context }, index) => ({
+            children: selected.map(({ native, role, context, heroLanguage }, index) => ({
               kind: 'box',
               tag: 'span',
               ref: `carrier-${index}`,
@@ -356,7 +370,9 @@ export function siteTypographyParticipant(
                   // different line boxes; labels/legends remain legal inline.
                   className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
-                  props: { ...siteTextRecipe(role, family, isCompact, context, heroScale) },
+                  props: {
+                    ...siteTextRecipe(role, family, isCompact, context, heroScale, heroLanguage),
+                  },
                   surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role, context) },
                   children: [
                     {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { siteTextRecipe, siteTextSurfaceStyle } from './site-text-recipes';
+import { SITE_TYPOGRAPHY_ROLES, siteTextRecipe, siteTextSurfaceStyle } from './site-text-recipes';
 describe('documentation reading scale consumes public Text props', () => {
   for (const family of ['shadcn', 'brutalist'] as const) {
     it(`${family}: keeps body and family weight while reducing section hierarchy`, () => {
@@ -87,6 +87,41 @@ it('matches pre-module paragraph rhythm and document heading ink to public Text 
 // App-owned responsive composition. These are explicit input contracts, not a
 // live resize listener test or a new Base Text viewport API.
 describe('finite homepage Hero recipes', () => {
+  for (const bucket of ['small', 'medium', 'wide'] as const) {
+    it(`${bucket}: gives only the Chinese Shadcn slogan a bounded CJK recipe`, () => {
+      expect(siteTextRecipe('slogan', 'shadcn', false, 'site', bucket, 'zh')).toEqual({
+        size: bucket === 'wide' ? '5xl' : '3xl',
+        tone: 'default',
+        weight: 'medium',
+        font: 'body',
+        leading: 'tight',
+        tracking: 'normal',
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+      for (const family of ['shadcn', 'brutalist'] as const)
+        for (const context of ['site', 'document'] as const)
+          for (const compact of [false, true])
+            for (const role of SITE_TYPOGRAPHY_ROLES) {
+              if (family === 'shadcn' && context === 'site' && role === 'slogan') continue;
+              expect(siteTextRecipe(role, family, compact, context, bucket, 'zh')).toEqual(
+                siteTextRecipe(role, family, compact, context, bucket, 'default')
+              );
+            }
+    });
+  }
+  it('mirrors the Chinese role in native SSR fallback without repainting enhanced Text', () => {
+    const hero = readFileSync('apps/www/src/components/override/Hero.astro', 'utf8');
+    const rule = hero.match(
+      /:global\(\[data-site-library-family='shadcn'\]\)\s+\.homepage-hero\s+h1:lang\(zh\):not\(\[data-typography-owner\]\)\s*\{([^}]*)\}/
+    );
+    expect(rule).not.toBeNull();
+    expect(rule![1]).toContain('font-weight: 500;');
+    expect(rule![1]).toContain('line-height: 1.25;');
+    expect(rule![1]).toContain('letter-spacing: 0;');
+    expect(rule![1]).not.toMatch(/font-family|font-size/);
+    expect(hero.indexOf(rule![0])).toBeGreaterThan(hero.indexOf('@media (min-width: 1280px)'));
+  });
   const viewports = [
     { width: 320, bucket: 'small', heading: '3xl', tracking: 'tight', tagline: 'base' },
     { width: 639, bucket: 'small', heading: '3xl', tracking: 'tight', tagline: 'base' },
@@ -217,7 +252,7 @@ it('Hero native fallback and public recipes share the finite source breakpoints 
   const fallbackRules = [
     ...hero.matchAll(/([^{}]+)\{([^{}]*(?:font-size|font-weight|letter-spacing)[^{}]*)\}/g),
   ];
-  expect(fallbackRules).toHaveLength(4);
+  expect(fallbackRules).toHaveLength(5);
   for (const match of fallbackRules) {
     expect(match[1]).toContain(":global([data-site-library-family='shadcn'])");
     expect(match[1]).toContain(':not([data-typography-owner])');

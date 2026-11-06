@@ -1,0 +1,661 @@
+{
+  "baseline": "9e58834d167618216ed9b39278eb8dded2f2f596",
+  "candidateManifestSha256": "8d95d4c4b431b53194ca9f074761796f791ed911e835742887c425368c29801d",
+  "candidatePatchSha256": "26ebc006ecdba7f83bd46c5fa5827ad594efbbe9c871189e97880c864bc07fed",
+  "result": "partial",
+  "toolchain": {
+    "node": "24.22.1",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9",
+    "happyDOM": "15.11.7",
+    "prettier": "3.8.1",
+    "prettierAstro": "0.14.1"
+  },
+  "isolation": {
+    "readonlySource": true,
+    "clearedEnvironment": true,
+    "accountMounts": false,
+    "projectExternalNetwork": false,
+    "singleWorker": true,
+    "concurrency": "shared nonblocking process lock",
+    "lockedPackages": 105,
+    "nodeHeapMiB": 1024,
+    "phaseLimitSeconds": 120
+  },
+  "latest": {
+    "automaticLanguageAndDestroy": {
+      "passed": 7,
+      "total": 7,
+      "exit": 0,
+      "phase": "r8-observer"
+    },
+    "threeSuites": {
+      "passed": 80,
+      "failed": 1,
+      "total": 81,
+      "exit": 1,
+      "phase": "r8-three-suites",
+      "failure": "existing native-document fallback compile test cannot resolve missing tailwindcss in this locked dependency subset"
+    },
+    "ownerSuite": {
+      "passed": 36,
+      "total": 36,
+      "adapters": ["wc", "react", "vue", "vue2"],
+      "evidence": "host-unit public Text style plans/source ownership; not native paint"
+    },
+    "existingFourSuites": {
+      "baseline": "110/116,6 failures,62 unhandled errors,exit1",
+      "candidate": "110/116,6 identical failure headings,62 unhandled errors,exit1",
+      "phases": ["baseline-four-regressions", "r7-four-regressions"],
+      "reuse": "r8 changes only the new standalone language test; four old suites and product files are byte-identical to r7",
+      "failures": "five homepage size expectations and one semantic-role recipe size expectation; hit-layout host guards report missing positioned/single principal boxes"
+    },
+    "types": {
+      "baselineExit": 0,
+      "candidateExit": 0,
+      "phases": ["baseline-types-final", "r8-types"],
+      "scope": "six modified/new TypeScript roots, transitive dependencies, repository strict config and pinned Vite ambient types; no full Astro workspace type claim"
+    },
+    "format": {
+      "passedFiles": 7,
+      "exit": 0,
+      "phase": "r8-format"
+    }
+  },
+  "negativeControls": [
+    {
+      "phase": "r6-observer-control",
+      "change": "remove only lang from attributeFilter",
+      "failed": 5,
+      "passed": 1,
+      "selected": 6
+    },
+    {
+      "phase": "r6-role-scope-control",
+      "change": "remove only slogan role restriction",
+      "failed": 1,
+      "passed": 5,
+      "selected": 6
+    },
+    {
+      "phase": "r6-recipe-control",
+      "change": "disable only Chinese recipe predicate",
+      "failed": 7,
+      "passed": 0,
+      "selected": 7,
+      "filteredOut": 67
+    },
+    {
+      "phase": "r6-language-control",
+      "change": "force only internal language input to default",
+      "failed": 4,
+      "passed": 3,
+      "selected": 7,
+      "filteredOut": 67
+    }
+  ],
+  "negativeControlReuse": "r8 product control targets are byte-identical to r6; unchanged six observer cases and seven recipe/forwarding cases. Seventh destroy case added only in r8 and passed separately; no invented negative-control run for it.",
+  "observerLimits": [
+    "HappyDOM :lang query is an explicit missing-host fixture",
+    "Automatic observer suite uses real WC Text, not four adapters",
+    "Destroy test pauses after materialize completed but before return; earlier loading/root removal/navigation/other adapter teardown are not covered",
+    "Any family slogan language change may rebuild the passive batch; only Shadcn/site slogan style changes"
+  ],
+  "native": {
+    "attempted": true,
+    "browserReachedTestPage": false,
+    "chromiumSandbox": true,
+    "result": "ProcessSingleton socket() EPERM and SIGABRT before page; no native assertions or screenshots",
+    "phase": "native-safe-chromium-probe",
+    "notRelaxed": ["browser sandbox", "network or account access"]
+  },
+  "remaining": [
+    "Supply verified locked Tailwind dependency and run actual stylesheet compile",
+    "Native Astro SSR/noJS and hydration; real :lang inheritance; computed style and rendered glyph fonts",
+    "Exact-source before/after images; light/dark,320/390/desktop,200%,all four runtimes,multiple font environments",
+    "Resolve six pre-existing regression expectation failures and host-layout fixture debt separately",
+    "Run combined Header/CJK and nav-marker changes after authorized integration; independent review and actual remote checks"
+  ],
+  "agentEvidence": "partial; direct maintainer symptom paraphrase; no private reference upload or old screenshot substitution",
+  "staticReview": "Independent static review found no new blocker in bounded r8 scope; not formal GitHub approval or native acceptance",
+  "phases": [
+    {
+      "phase": "baseline-four-regressions",
+      "subjectLabel": "baseline",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 49.953,
+      "testSummary": [
+        "Test Files  2 failed | 2 passed (4)",
+        "Tests  6 failed | 110 passed (116)",
+        "Errors  62 errors"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "249e26b5af9117d77bb4ef7275b78f25a955b68bb1e4b2cfa0d7173e9919f0d5",
+      "stdoutSha256": "9c518a52a4e7c15f4781b34a548d7eab906142bda4918f7f568b96a9f7c742f0",
+      "stderrSha256": "dcfb534bd64a338a1f00128e5e6799d1058360ce43715947a2e876189abf72d1",
+      "candidateManifestSha256": null
+    },
+    {
+      "phase": "baseline-recipes-ownership",
+      "subjectLabel": "baseline",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 9.167,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "afd56649a8813b87191da94a3a7a9f8c3964bde3530b8d6ef11428da6eadb7d0",
+      "stdoutSha256": "c332d3fe26db936719aa0e1543222118db06cae3f7dfcb7972b0a4c92cb96b68",
+      "stderrSha256": "921cfef2827748e560a563303da03a18d80daa6d21c4c49fe33e1e02057a2a26"
+    },
+    {
+      "phase": "baseline-types-final",
+      "subjectLabel": "baseline",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 14.851,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "b72e5372a1e0c33a446ce9e078a831e6f28dcbbe8ce2f58bccb6673e9fac3748",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": null
+    },
+    {
+      "phase": "baseline-types-vite",
+      "subjectLabel": "baseline",
+      "exit": 2,
+      "timedOut": false,
+      "durationSeconds": 3.823,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "bce61da3a3e2fef9daaf4842996a506a17f9abb49c185bb24ab2bcaf97d0e849",
+      "stdoutSha256": "3b32d54f4d9599847feaf337ca33f29c4bdb31243163f2a82ddd08dc4cfeebc9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": null
+    },
+    {
+      "phase": "candidate-recipes-ownership",
+      "subjectLabel": "candidate",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 7.557,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "1458d1498d4296fea67c63c9cd115420ea74d48bb748fc72146511ae60ac53d7",
+      "stdoutSha256": "c332d3fe26db936719aa0e1543222118db06cae3f7dfcb7972b0a4c92cb96b68",
+      "stderrSha256": "6f98803ce54397af1b81769d5246dd86829b75e8bb74cbfeb2a23bcb1b706429"
+    },
+    {
+      "phase": "happy-dom-lang-probe",
+      "subjectLabel": "baseline",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 1.521,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "c8c5a3293f2e412bebc585ef71db51c5e6258cf84b104bb5b5f4f3199988db14",
+      "stdoutSha256": "36bd4c17bc5560481c54d4e679fd87d540d6f360501da4ab40affcf4fcaa8606",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "phase": "native-safe-chromium-probe",
+      "subjectLabel": "candidate-r4",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 1.738,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "3c9220bfb9372bb2aa4b8056956e7de92e566a122cf7b7da18ef99396e1f6d0c",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "58669421dc9cf4a67245e713fb29c482d6b3e3488892df0b80ebd501fb813317",
+      "candidateManifestSha256": "56e3ece3483328d764df1f7b3e7721f06dc9b3ebf9c70b85dd630ec1b765884a"
+    },
+    {
+      "phase": "r2-recipes-ownership",
+      "subjectLabel": "candidate-r2",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 7.613,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "d80c364552a2eb90ca3e6f0942816cbc2a35e02f45081aff9d954ab7fe51b1ee",
+      "stdoutSha256": "c332d3fe26db936719aa0e1543222118db06cae3f7dfcb7972b0a4c92cb96b68",
+      "stderrSha256": "1672ea7b48e3627630000d505cb71e4190c5aff79d83c94a3274ab709eaae23f"
+    },
+    {
+      "phase": "r4-new-observer",
+      "subjectLabel": "candidate-r4",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 15.127,
+      "testSummary": [
+        "Test Files  1 passed (1)",
+        "Tests  6 passed | 15 skipped (21)",
+        "Errors  18 errors"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "c18ab4b6b6c1c27760358f36dccf91ef820668206975461a1dd86801608b0c46",
+      "stdoutSha256": "c7e97dfa13506ad8e54cc1f90719083fd71f9ad8fe29f92043c9062f7dae3530",
+      "stderrSha256": "be4b840daccd4c7da907f05d4d2543984bf3d5cb224b7808ccbe84984d4811a4",
+      "candidateManifestSha256": "56e3ece3483328d764df1f7b3e7721f06dc9b3ebf9c70b85dd630ec1b765884a"
+    },
+    {
+      "phase": "r4-recipes-ownership",
+      "subjectLabel": "candidate-r4",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 6.695,
+      "testSummary": ["Test Files  1 failed | 1 passed (2)", "Tests  1 failed | 73 passed (74)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "3bb7c13b51673043c0464ce1681261e38066f4637d9a55f128efef6751daefa3",
+      "stdoutSha256": "da126261009f2a5cae47b3a8a73bf624384ccc577c3fcff27e18d06fcbd0c7e8",
+      "stderrSha256": "ff493b6418969b1a25cd6e4e04f2a02c65a4c36f60163a3d6197726c6fbb82cb",
+      "candidateManifestSha256": "56e3ece3483328d764df1f7b3e7721f06dc9b3ebf9c70b85dd630ec1b765884a"
+    },
+    {
+      "phase": "r4-three-suites",
+      "subjectLabel": "candidate-r4",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 35.784,
+      "testSummary": [
+        "Test Files  3 failed (3)",
+        "Tests  10 failed | 79 passed (89)",
+        "Errors  52 errors"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "a44d3c0be4cc691b3290404c4151a610126678b0a76d6d6b8195fa0bd2fcdcb1",
+      "stdoutSha256": "7d242dabed006680ae9ed880dc730bd28574ddb3cdb555b4b30b96c0d71c465f",
+      "stderrSha256": "0715d1ef54292e491c84f75c4e505836b44db8adaf55aa1e9f827e0ded86ec39",
+      "correction": "Mislabeled r4 by faulty harness dispatch; actual overlay hashes match r2. No r4 observer tests executed. Kept as r2 repeat, never counted as r4 evidence."
+    },
+    {
+      "phase": "r5-new-observer",
+      "subjectLabel": "candidate-r5",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 15.342,
+      "testSummary": [
+        "Test Files  1 passed (1)",
+        "Tests  6 passed | 15 skipped (21)",
+        "Errors  18 errors"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "e75e3cc5d493a47c1b585cde2d5c4e5920e5eed6916c7586ea03be340cfd0b76",
+      "stdoutSha256": "23e461c2f47d96ffb7641503ef00f71cbef311efaab296781f3f8291f93ed532",
+      "stderrSha256": "935afc0aec1dc8376b0fe30e929484b0e059ce2aab9c1a55645433b02dd7ce14",
+      "candidateManifestSha256": "53d5c1c68e729e0fe1913e7276a97af3f3fc70b40a3e49ceeb1404012540a8d8"
+    },
+    {
+      "phase": "r6-format",
+      "subjectLabel": "candidate-r6",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 1.281,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "e2a101bceff66915a99d95fcd6b1d7a856f0a0edb8b58f6e4dca232943e85f55",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "986266eb4f2ec2e153d70e5ace2026ba74cf3652cd6cbdfa70dd02ad786119b5",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-format-hero",
+      "subjectLabel": "candidate-r6",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 1.564,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "ab815d4862d8b8265f456ca15fdc7442eab562e4840be286d0d23628fb69f255",
+      "stdoutSha256": "4174c59defbc4bd3616ab0ffd7762c47536c70b8404c6ba89a64237a5e010c7f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-format-retry",
+      "subjectLabel": "candidate-r6",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 1.934,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "21f68456299c129dcb8640ef338969beb387c55ebfe8675d21382b48d63bf3c6",
+      "stdoutSha256": "490d181778e9271e8606d291d0422f4bdd621eab9d3760e938b720606d9a4c1f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-language-control",
+      "subjectLabel": "language-control",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 4.973,
+      "testSummary": [
+        "Test Files  1 failed | 1 passed (2)",
+        "Tests  4 failed | 3 passed | 67 skipped (74)"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "23667735207410dd250868c409a339f2995b7d819cdad7e269cc8b964c3f8c1c",
+      "stdoutSha256": "b2d57bb9465dd580be789567b4d907574373cb0251282a46290f048d278f4224",
+      "stderrSha256": "7560cfbf04e4b23bd17494b9a5b08d3272c238365058e5501a61223405d9020e",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-new-observer",
+      "subjectLabel": "candidate-r6",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 7.697,
+      "testSummary": ["Test Files  1 passed (1)", "Tests  6 passed (6)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "c85e023256532f049b263e918e408da0a54cc53b358cd34897d455a15e4b7158",
+      "stdoutSha256": "8c8a4258fe7923ebf30aaea990591434fff46a6b51931e836d17f124e4edc104",
+      "stderrSha256": "5b7e5c66f2a7053621990f197945b4f986ba003916347171b7a71b414564046e",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-observer-control",
+      "subjectLabel": "observer-control",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 15.846,
+      "testSummary": ["Test Files  1 failed (1)", "Tests  5 failed | 1 passed (6)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "1ff65ace5eb96c05c043fbd99de8bdd038fb4f0d981bc39611e3b4f901caa179",
+      "stdoutSha256": "0db2cdc659be77c4071b11a86b9a82f7ceb77ade78d57d64b48830132bb2b7cf",
+      "stderrSha256": "0218a607b869543a77d337ac9a9433930afebfbff3a2e8059102da73c07ff380",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-recipe-control",
+      "subjectLabel": "recipe-control",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 5.073,
+      "testSummary": ["Test Files  2 failed (2)", "Tests  7 failed | 67 skipped (74)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "f73252e6b3ce21b829de8422764ac4d383aa668b966f010e0371489895e4c6a6",
+      "stdoutSha256": "4186a604fa3b5db18c4a2b54a7b25b0157597affecfcb0005259585667939420",
+      "stderrSha256": "a6730937b800c428a4b7f685c0b962789f3d942ff89d325bb35af85d99880e64",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-role-scope-control",
+      "subjectLabel": "role-scope-control",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 7.851,
+      "testSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 5 passed (6)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "40018cf3f7c08e36bc7d4d95df64d471b7336f24cd49a6e796f061702edd4690",
+      "stdoutSha256": "662741c5c1fdddc1ece1ce97cb01168fc1b96aa525ff746d2837188ce5b186a3",
+      "stderrSha256": "d1234ae2fb7ec1d5899f407cac6f08a3ee082c9ed8df111423191125a7f80f74",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-types",
+      "subjectLabel": "candidate-r6",
+      "exit": 2,
+      "timedOut": false,
+      "durationSeconds": 14.635,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "db2bc349e6ebf6996ed8dccaf733ba1b5169e89737a88ace6c4fd212b10880af",
+      "stdoutSha256": "67d043f7132e965f259047bb23bb61a89d536e52c9782a025da40524fec8746e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-types-final",
+      "subjectLabel": "candidate-r6",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 14.517,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "fe47ca41d55d016d8b62dcb10a574e0a834998104ace8989d018ae37b377a0bf",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r6-types-vite",
+      "subjectLabel": "candidate-r6",
+      "exit": 2,
+      "timedOut": false,
+      "durationSeconds": 3.847,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "d61bad1fb7c5da8386698dbccad24661ac53df301196a6c9c63f96c0f16cab8b",
+      "stdoutSha256": "3b32d54f4d9599847feaf337ca33f29c4bdb31243163f2a82ddd08dc4cfeebc9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "49d159c32063f3e89eccb7b3df770a7970718f7dce09bea62c3b66b1f5a1dba1"
+    },
+    {
+      "phase": "r7-format",
+      "subjectLabel": "candidate-r7",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 1.835,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "fb545cf7c02c9e8e56908b52d30a750c50390171de66023b91f57055b189edf1",
+      "stdoutSha256": "93fe5fac44d03e8c30b446861e1c9316969127268a5d51e2a99928f876f1fa0b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "319f23fc1192e04f810abf4b592e23bc65fca72435b418c0239f0d67d60d2324"
+    },
+    {
+      "phase": "r7-four-regressions",
+      "subjectLabel": "candidate-r7",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 50.126,
+      "testSummary": [
+        "Test Files  2 failed | 2 passed (4)",
+        "Tests  6 failed | 110 passed (116)",
+        "Errors  62 errors"
+      ],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "e87d40bcd5877ac512e858fcefcffc8cbfc694bd6ae0a372f470f45937e325ee",
+      "stdoutSha256": "71863dc3359ea8eeda691186aed9f78c89d187848fe03776a4a779adfad346b1",
+      "stderrSha256": "bb2b06696732017d0f8f207715ea5f6b1e9b222a0c5635bed32b8f335a5f06a6",
+      "candidateManifestSha256": "319f23fc1192e04f810abf4b592e23bc65fca72435b418c0239f0d67d60d2324"
+    },
+    {
+      "phase": "r7-three-suites",
+      "subjectLabel": "candidate-r7",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 10.665,
+      "testSummary": ["Test Files  1 failed | 2 passed (3)", "Tests  1 failed | 79 passed (80)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "df9499fb9704da14daa836c4705fb6613e701ae20713aa00840af3aaa67375e9",
+      "stdoutSha256": "76d955371ced1a380fd2dae01edb490fb42073e4f59f65f142024e590127fe14",
+      "stderrSha256": "015c0c873689cbc73820727b2aa81534d45c6e4954e449a13391986211affbff",
+      "candidateManifestSha256": "319f23fc1192e04f810abf4b592e23bc65fca72435b418c0239f0d67d60d2324"
+    },
+    {
+      "phase": "r7-types",
+      "subjectLabel": "candidate-r7",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 13.716,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "06789b4695207fed5a9b66d55d919c6e0d9538f2899f4db75cbbee6cc5d7bf96",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "319f23fc1192e04f810abf4b592e23bc65fca72435b418c0239f0d67d60d2324"
+    },
+    {
+      "phase": "r8-format",
+      "subjectLabel": "candidate-r8",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 1.867,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "7be4934dc8e7e17fea9cc013a7a8ed567627d3092c8e999ad6aa9c22104b26cf",
+      "stdoutSha256": "93fe5fac44d03e8c30b446861e1c9316969127268a5d51e2a99928f876f1fa0b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "8d95d4c4b431b53194ca9f074761796f791ed911e835742887c425368c29801d"
+    },
+    {
+      "phase": "r8-observer",
+      "subjectLabel": "candidate-r8",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 8.311,
+      "testSummary": ["Test Files  1 passed (1)", "Tests  7 passed (7)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "70acdbf07d68400fecf4a58d648fb57b0adea9db967ac2dcc7a384257318f550",
+      "stdoutSha256": "5cf6445b8b0a2d714209b31010a0a5710aa08324d1fea4bfde0575aec2aed187",
+      "stderrSha256": "524b2814190e3d3fc026dea3a1cf8e5ef9a93df4389f2c8c9629f4a21b428a99",
+      "candidateManifestSha256": "8d95d4c4b431b53194ca9f074761796f791ed911e835742887c425368c29801d"
+    },
+    {
+      "phase": "r8-three-suites",
+      "subjectLabel": "candidate-r8",
+      "exit": 1,
+      "timedOut": false,
+      "durationSeconds": 10.697,
+      "testSummary": ["Test Files  1 failed | 2 passed (3)", "Tests  1 failed | 80 passed (81)"],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "b0c0d05ff234e6383bf1a861411f44075bac15e8319a68693eac250f2a132cb1",
+      "stdoutSha256": "835ab20aa070287fe843152819e8dce84009b7fe34abb259a878967f28e86c5f",
+      "stderrSha256": "4efa45c08914a85414d65dc95c4f485665e3f6ca92f42ebaa53f3ebf3820b28f",
+      "candidateManifestSha256": "8d95d4c4b431b53194ca9f074761796f791ed911e835742887c425368c29801d"
+    },
+    {
+      "phase": "r8-types",
+      "subjectLabel": "candidate-r8",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 14.514,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "977aa2fc3b84c123035b75bde4f34eb4e8126a825d4032adf448361ad4f3330a",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "candidateManifestSha256": "8d95d4c4b431b53194ca9f074761796f791ed911e835742887c425368c29801d"
+    },
+    {
+      "phase": "sandbox-preflight",
+      "subjectLabel": "baseline",
+      "exit": 0,
+      "timedOut": false,
+      "durationSeconds": 1.406,
+      "testSummary": [],
+      "sourceUnchanged": true,
+      "dependenciesPostcheck": "105 hash-bound packages clean",
+      "receiptSha256": "c1b0ab53e7ed22b058a9323b842fde799ccbdface2b451d106dce2bdc9f196b7",
+      "stdoutSha256": "5e2b7dd518c18f4bbcd9521669cc626eca5c173ac97a21a369a9df002f180c38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "baselineBlob": "71a9f278ef6bfeb288d959d4a00c5b9a03577706",
+      "candidateBlob": "cc8e2422cea39dcf93760e6da1f8b3a8d952afa5",
+      "sha256": "2a13c2de71602e6ac183e2b5b4def360644a31e81559abd2c0da210170d97ba6",
+      "bytes": 38337
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-typography-language.test.ts",
+      "baselineBlob": null,
+      "candidateBlob": "a7d34bb27302a7e3692408b1520f570a334f9a25",
+      "sha256": "4dc349df03953f1d77af47effa84d658adcf5ae29cefc7eee562c485832c41d8",
+      "bytes": 11496
+    },
+    {
+      "path": "apps/www/src/components/override/Hero.astro",
+      "baselineBlob": "33ee11356c4cd16db0cba60e5cb0cbb131efe0e8",
+      "candidateBlob": "54e1e3cd96ffec08650229d41bb8d41f9b69de8b",
+      "sha256": "79c9d8db7a3da1e47c92581c467357ab12736a7c574de50c52420f5e7b84fb5d",
+      "bytes": 4465
+    },
+    {
+      "path": "apps/www/src/components/site-text-recipes.test.ts",
+      "baselineBlob": "37b5c70c94768328ca3b0a5b2797f61156bcc43b",
+      "candidateBlob": "321aa7bc095c9b36e7df5f3f9b9d6ddb323683fd",
+      "sha256": "3ab2aaf23af089b1b323f788dd0059c76677155d3f61075a57d818458bca4253",
+      "bytes": 16709
+    },
+    {
+      "path": "apps/www/src/components/site-text-recipes.ts",
+      "baselineBlob": "a2ccb31c798b9a370fd9f00b7af024cedfa93255",
+      "candidateBlob": "bc915e3e215364718ebd222054afacf3bb4c05f8",
+      "sha256": "e628f69f9dd18f23e565ff836a9bda15018f709617beb61bfea5f4dee38276b3",
+      "bytes": 5906
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ownership.test.ts",
+      "baselineBlob": "98f0b57f7e7b313134d8892fc769bacaed5c0492",
+      "candidateBlob": "c939b49cc82d51b600c9bb4231a106b37631aa31",
+      "sha256": "84d1d16ce7ce3735645b32657e2c81a4039866220c37fac8a55504d38eded11d",
+      "bytes": 22402
+    },
+    {
+      "path": "apps/www/src/components/site-typography.ts",
+      "baselineBlob": "a7d6c8a746c3f70ff8fb512efaf7a6c608932ca9",
+      "candidateBlob": "d265f972be508a81ca4e50b3f956fd43d8f85ec0",
+      "sha256": "a0acd39a351afa5e6dc7995eab9a537aa419a356997770fbf7f2a6dda2076ad1",
+      "bytes": 19410
+    }
+  ],
+  "coordination": {
+    "claim": "https://github.com/Proto-UI/Proto-UI/issues/803#issuecomment-6677598105",
+    "scopeComment": "https://github.com/Proto-UI/Proto-UI/issues/803#issuecomment-6677171814",
+    "navCoordination": "https://github.com/Proto-UI/Proto-UI/pull/1285#issuecomment-6677175804",
+    "navPatchComposition": {
+      "intersection": ["apps/www/src/components/site-typography.ts"],
+      "bothPatchOrdersIdentical": true,
+      "mergedFileSha256": "a52d1278fe1153d7df74ccf68f11069df20c474934445be6108d9e87c253542c",
+      "primaryNavMarkerPreserved": true,
+      "otherEightPRPathsNotWritten": true,
+      "executedMergedSource": false
+    },
+    "headerPatchComposition": {
+      "headerCommit": "ae3ba5b1c6394819c3c328e40500ddfb3a509f5a",
+      "intersection": ["apps/www/src/components/Homepage/homepage-runtime-client.ts"],
+      "bothPatchOrdersIdentical": true,
+      "mergedFileSha256": "d1a7ea9c62fa3be373dff47ed76e8d13d53b48189047c5e3139379aecdd58b17",
+      "headerFamilyControlsAndCjkObserverPreserved": true,
+      "executedMergedSource": false
+    }
+  }
+}
