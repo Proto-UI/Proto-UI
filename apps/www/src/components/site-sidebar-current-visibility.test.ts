@@ -169,6 +169,58 @@ describe('current article nearest-edge layout', () => {
     document.body.style.overflowY = 'auto';
     expect(nearestSidebarScroller(link, root)).toBeNull();
   });
+  it('re-measures the actual owner when the public dialog relocates the same tree', async () => {
+    const { root, pane, owner, link } = fixture();
+    stop = initSidebarCurrentVisibility(root);
+    await flush();
+    expect(owner).toBe(root);
+    expect(root.scrollTop).toBe(544);
+
+    // The real Contents panel moves this exact nav into its public Dialog and
+    // marks it with data-site-contents-dialog-tree. The inner pane then becomes
+    // the scroll owner; no second contents-open event is dispatched.
+    const dialog = document.createElement('div');
+    document.body.append(dialog);
+    root.style.overflowY = 'visible';
+    Object.defineProperties(root, {
+      clientHeight: { configurable: true, value: 0 },
+      scrollHeight: { configurable: true, value: 0 },
+    });
+    pane.style.overflowY = 'auto';
+    Object.defineProperties(pane, {
+      clientHeight: { configurable: true, value: 300 },
+      clientTop: { configurable: true, value: 0 },
+      scrollHeight: { configurable: true, value: 1500 },
+    });
+    vi.spyOn(pane, 'getBoundingClientRect').mockImplementation(() => ({
+      x: 0,
+      y: 100,
+      top: 100,
+      bottom: 400,
+      left: 0,
+      right: 240,
+      width: 240,
+      height: 300,
+      toJSON() {},
+    }));
+    vi.mocked(link.getBoundingClientRect).mockImplementation(() => ({
+      x: 0,
+      y: 900 - pane.scrollTop,
+      top: 900 - pane.scrollTop,
+      bottom: 944 - pane.scrollTop,
+      left: 0,
+      right: 240,
+      width: 240,
+      height: 44,
+      toJSON() {},
+    }));
+    dialog.append(root);
+    root.setAttribute('data-site-contents-dialog-tree', '');
+    await flush();
+    expect(nearestSidebarScroller(link, root)).toBe(pane);
+    expect(pane.scrollTop).toBe(544);
+    expect(window.scrollY).toBe(0);
+  });
   it('keeps visible rows stable, clamps bounds and aligns an over-tall row start', () => {
     const input = {
       top: 120,
