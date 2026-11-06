@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
+import { PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import { initHomepageRuntime } from './homepage-runtime-client';
 import type { MaterializedProjectionCandidate } from '../PrototypePreviewer/projection-materializer';
 
@@ -7,6 +8,9 @@ type TypographyCandidate = MaterializedProjectionCandidate;
 const preparation = vi.hoisted(() => ({
   next: null as null | ((candidate: TypographyCandidate) => Promise<TypographyCandidate>),
   count: 0,
+}));
+const loading = vi.hoisted(() => ({
+  next: null as null | (() => Promise<void>),
 }));
 vi.mock('../site-typography', async (original) => {
   const actual = await original<typeof import('../site-typography')>();
@@ -25,6 +29,34 @@ vi.mock('../site-typography', async (original) => {
         },
       };
     },
+  };
+});
+// Pause at the earlier loading boundary, before the participant can finish
+// preparing a language-refresh batch. The hold applies to the typography
+// prototype load only, so no unrelated page participant is stalled.
+vi.mock('../PrototypePreviewer/prototype-modules', async (original) => {
+  const actual = await original<typeof import('../PrototypePreviewer/prototype-modules')>();
+  return {
+    ...actual,
+    async loadPrototypes(ids: string[]) {
+      const next = ids.some((id) => id.endsWith('-text-root')) ? loading.next : null;
+      loading.next = null;
+      await next?.();
+      await actual.loadPrototypes(ids);
+    },
+  };
+});
+// The installed React package replaces only CDN acquisition; the renderer and
+// adapter remain real. WC and Vue/Vue2 destroy coverage already exists in the
+// four-adapter ownership suite.
+vi.mock('../PrototypePreviewer/runtimes/react-runtime', async () => {
+  const { createRequire } = await import('node:module');
+  const require = createRequire(process.cwd() + '/packages/adapters/react/package.json');
+  return {
+    loadReact: async () => ({
+      React: require('react'),
+      ReactDOM: { ...require('react-dom'), ...require('react-dom/client') },
+    }),
   };
 });
 vi.mock('../PrototypePreviewer/projection-theme', async (original) => {
@@ -99,6 +131,7 @@ describe('homepage observes authored language changes without a page commit', ()
     localStorage.clear();
     preparation.next = null;
     preparation.count = 0;
+    loading.next = null;
     const media = Object.assign(new EventTarget(), {
       matches: false,
       media: '(max-width: 47.999rem)',
@@ -246,6 +279,139 @@ describe('homepage observes authored language changes without a page commit', ()
     await new Promise((resolve) => setTimeout(resolve, 100));
     expect(preparation.count).toBe(retired);
     expect(document.querySelectorAll('[data-typography-owner]')).toHaveLength(0);
+    expect(h1.firstChild).toBe(source);
+  });
+
+  it('destroy during prototype loading rejects the refresh before a candidate exists', async () => {
+    const before = await editPage();
+    const h1 = document.querySelector('h1')!;
+    const source = h1.querySelector('[data-site-typography-slot]')!.firstChild;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const baseline = preparation.count;
+    const loadEntered = deferred<void>();
+    const gate = deferred<void>();
+    loading.next = async () => {
+      loadEntered.resolve();
+      await gate.promise;
+    };
+    document.documentElement.lang = 'zh-CN';
+    await loadEntered.promise;
+    const destroyed = handle!.destroy();
+    gate.resolve();
+    await destroyed;
+    handle = undefined;
+    expect(preparation.count).toBe(baseline + 1);
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+    expect(h1.hasAttribute('data-typography-owner')).toBe(false);
+    expect(h1.firstChild).toBe(source);
+    expect(note()).toBe(before.input);
+    expect(note().value).toBe('Keep my unsaved note');
+    document.documentElement.lang = 'zh-TW';
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(preparation.count).toBe(baseline + 1);
+    expect(h1.firstChild).toBe(source);
+  });
+
+  it('destroy before observer delivery ignores the queued language change', async () => {
+    const before = await editPage();
+    const h1 = document.querySelector('h1')!;
+    const source = h1.querySelector('[data-site-typography-slot]')!.firstChild;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const baseline = preparation.count;
+    document.documentElement.lang = 'zh-CN';
+    await handle!.destroy();
+    handle = undefined;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(preparation.count).toBe(baseline);
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+    expect(h1.hasAttribute('data-typography-owner')).toBe(false);
+    expect(h1.firstChild).toBe(source);
+    expect(note()).toBe(before.input);
+  });
+
+  it('root removal during a pending language refresh retires the batch without reviving source', async () => {
+    const before = await editPage();
+    const h1 = document.querySelector('h1')!;
+    const source = h1.querySelector('[data-site-typography-slot]')!.firstChild;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const held = holdNext();
+    document.documentElement.lang = 'zh-CN';
+    const pending = await held.entered;
+    document.querySelector('[data-homepage-runtime]')!.remove();
+    const destroyed = handle!.destroy();
+    held.release();
+    await destroyed;
+    handle = undefined;
+    await expect.poll(() => pending.dispose).toHaveBeenCalledOnce();
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-projection-generation-host]')).toHaveLength(0);
+    expect(h1.hasAttribute('data-typography-owner')).toBe(false);
+    expect(h1.firstChild).toBe(source);
+    expect(note()).toBe(before.input);
+    expect(note().value).toBe('Keep my unsaved note');
+    const retired = preparation.count;
+    document.documentElement.lang = 'zh-TW';
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(preparation.count).toBe(retired);
+    expect(h1.firstChild).toBe(source);
+  });
+
+  it('a page swap during a pending language refresh retires the batch and preserves source', async () => {
+    const before = await editPage();
+    const h1 = document.querySelector('h1')!;
+    const source = h1.querySelector('[data-site-typography-slot]')!.firstChild;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const held = holdNext();
+    document.documentElement.lang = 'zh-CN';
+    const pending = await held.entered;
+    document.dispatchEvent(new Event('astro:before-swap'));
+    held.release();
+    await expect.poll(() => pending.dispose).toHaveBeenCalledOnce();
+    expect(pending.activate).not.toHaveBeenCalled();
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-projection-generation-host]')).toHaveLength(0);
+    expect(h1.hasAttribute('data-typography-owner')).toBe(false);
+    expect(h1.firstChild).toBe(source);
+    expect(note()).toBe(before.input);
+    expect(note().value).toBe('Keep my unsaved note');
+    handle = undefined;
+    const retired = preparation.count;
+    document.documentElement.lang = 'zh-TW';
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(preparation.count).toBe(retired);
+    expect(h1.firstChild).toBe(source);
+  });
+
+  it('destroy retires a pending React language refresh and preserves source', async () => {
+    localStorage.setItem(PREFERRED_ADAPTER_KEY, 'react');
+    const before = await editPage();
+    const h1 = document.querySelector('h1')!;
+    const source = h1.querySelector('[data-site-typography-slot]')!.firstChild;
+    await expect.poll(() => surface().getAttribute('data-typography-runtime')).toBe('react');
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    const held = holdNext();
+    document.documentElement.lang = 'zh-CN';
+    const pending = await held.entered;
+    const destroyed = handle!.destroy();
+    held.release();
+    await destroyed;
+    handle = undefined;
+    expect(pending.activate).not.toHaveBeenCalled();
+    expect(pending.dispose).toHaveBeenCalledOnce();
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+    expect(h1.hasAttribute('data-typography-owner')).toBe(false);
+    expect(h1.firstChild).toBe(source);
+    expect(note()).toBe(before.input);
+    expect(note().value).toBe('Keep my unsaved note');
+    const retired = preparation.count;
+    document.documentElement.lang = 'zh-TW';
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(preparation.count).toBe(retired);
     expect(h1.firstChild).toBe(source);
   });
 });
