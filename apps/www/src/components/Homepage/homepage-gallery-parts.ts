@@ -104,11 +104,17 @@ export function createHomepageGalleryParts(
               : variant === 'danger'
                 ? 'destructive'
                 : 'surface'
-            : variant === 'primary'
-              ? 'default'
-              : variant === 'danger'
-                ? 'destructive'
-                : 'outline',
+            : family === 'bootstrap-2-3-2'
+              ? variant === 'primary'
+                ? 'primary'
+                : variant === 'danger'
+                  ? 'danger'
+                  : 'default'
+              : variant === 'primary'
+                ? 'default'
+                : variant === 'danger'
+                  ? 'destructive'
+                  : 'outline',
         disabled,
         wrap: true,
       },
@@ -188,15 +194,10 @@ export function createHomepageGalleryParts(
         : p(
             PREVIEW_SURFACE_ID,
             [
-              box(
-                `home-gallery__card-body home-gallery__card-body--${body}`,
-                [
-                  box('home-gallery__card-heading', [titleNode, captionNode]),
-                  ...(body === 'edge-media'
-                    ? [box('home-gallery__media', children)]
-                    : children),
-                ]
-              ),
+              box(`home-gallery__card-body home-gallery__card-body--${body}`, [
+                box('home-gallery__card-heading', [titleNode, captionNode]),
+                ...(body === 'edge-media' ? [box('home-gallery__media', children)] : children),
+              ]),
             ],
             { ...panelSurfaceProps(id === 'editor' ? 'canvas' : 'card') }
           );

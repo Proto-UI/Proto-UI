@@ -53,7 +53,7 @@ export function headerSurfaceParticipant(header: HTMLElement) {
       request: ProjectionScopeMaterializeRequest
     ): Promise<MaterializedProjectionCandidate> {
       const family = request.selection.projectionFamilyId;
-      if (family !== 'shadcn' && family !== 'brutalist')
+      if (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
         throw new Error('Header surface family is unavailable');
       let ownedSlot: HTMLElement | undefined;
       const candidate = await materializeProjectionCandidate(request, {

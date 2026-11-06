@@ -1,0 +1,29 @@
+id: P-BOOTSTRAP-2-3-2-DIALOG-HEADER
+type: prototype
+title: Bootstrap 2.3.2 Dialog passive Header
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: New passive family anatomy is draft until the real homepage consumer, four-Web interaction and independent review establish the projection.
+summary: A passive modal-header wrapper with the pinned Bootstrap border and spacing recipe.
+statement:
+  en: Header claims the existing Dialog header anatomy role and projects its authored slot. It owns no title relationship, close behavior or second interaction state.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-HEADER-COMPOSITION
+    text:
+      en: Header claims the Dialog header role once, renders its slot and uses finite family feedback tokens; authored Title and Close keep their existing owners.
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-HEADER-BOUNDARY
+    text:
+      en: Exact-head four-Web visual, keyboard, AT and independent review remain acceptance gates; source presence is not stable admission.
+inherits:
+  prototypes: [P-BASE-DIALOG]
+verifies:
+  tests: [T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001]
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/dialog/header.proto.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/modals.less
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the passive Bootstrap modal-header projection.
+tags: [prototype, bootstrap-2-3-2, dialog, header, draft]

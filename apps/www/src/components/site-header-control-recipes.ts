@@ -6,7 +6,9 @@ import type { SiteLibraryFamily } from './site-library-family';
 export function headerButtonProps(family: SiteLibraryFamily, size = 'icon') {
   return family === 'shadcn'
     ? { styleProfile: 'rhea' as const, variant: 'secondary' as const, size }
-    : { variant: 'surface' as const, size };
+    : family === 'brutalist'
+      ? { variant: 'surface' as const, size }
+      : { variant: 'default' as const, size: 'default' as const };
 }
 
 export function headerSelectControlProps(family: SiteLibraryFamily) {

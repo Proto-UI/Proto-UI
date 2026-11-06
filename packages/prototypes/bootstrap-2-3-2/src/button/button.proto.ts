@@ -13,6 +13,8 @@ export interface ButtonProjectionProps {
   variant?: 'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse';
   size?: 'default' | 'large' | 'small' | 'mini';
   disabled?: boolean;
+  /** Allow long labels to grow vertically instead of forcing one clipped line. */
+  wrap?: boolean;
 }
 
 // Independently expressed Proto UI projection of Bootstrap v2.3.2 buttons.less.
@@ -31,8 +33,9 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
       },
       size: { type: 'enum', options: ['default', 'large', 'small', 'mini'], empty: 'fallback' },
       disabled: { type: 'boolean', empty: 'fallback' },
+      wrap: { type: 'boolean', empty: 'fallback' },
     });
-    def.props.setDefaults({ variant: 'default', size: 'default', disabled: false });
+    def.props.setDefaults({ variant: 'default', size: 'default', disabled: false, wrap: false });
     const inherited = asButton();
     const state = inherited.stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-button] Base Button states are required.');
@@ -40,9 +43,17 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
 
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center border font-normal leading-[20px] whitespace-nowrap select-none cursor-pointer'
+        'inline-flex shrink-0 items-center justify-center border font-normal leading-[20px] select-none cursor-pointer'
       )
     );
+    def.rule({
+      when: (w) => w.prop('wrap').eq(false),
+      intent: (i) => i.feedback.style.use(tw('whitespace-nowrap')),
+    });
+    def.rule({
+      when: (w) => w.prop('wrap').eq(true),
+      intent: (i) => i.feedback.style.use(tw('h-auto min-h-8 whitespace-normal')),
+    });
     // v2.3.2 keeps a 20px line height in every size. All size-dependent
     // dimensions are exclusive rules, including default, so no size competes.
     const sizes = {

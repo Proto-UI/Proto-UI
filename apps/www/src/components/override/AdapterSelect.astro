@@ -1,8 +1,16 @@
 ---
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
-const { SelectRoot, SelectTrigger, SelectValue, SelectContent, SelectItem } =
-  siteControlTags(family);
+const {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectSurface,
+  SelectViewport,
+  SelectItemText,
+} = siteControlTags(family);
 interface Props {
   id?: string;
   brutalistTriggerAppearance?: 'flat' | 'elevated';
@@ -45,16 +53,16 @@ const options = [
       data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {
-        family === 'shadcn' ? (
-          <wc-shadcn-select-surface>
-            <wc-shadcn-select-viewport>
+        family !== 'brutalist' ? (
+          <SelectSurface>
+            <SelectViewport>
               {options.map((opt) => (
                 <SelectItem data-value={opt.value} data-text-value={opt.label}>
-                  <wc-shadcn-select-item-text>{opt.label}</wc-shadcn-select-item-text>
+                  <SelectItemText>{opt.label}</SelectItemText>
                 </SelectItem>
               ))}
-            </wc-shadcn-select-viewport>
-          </wc-shadcn-select-surface>
+            </SelectViewport>
+          </SelectSurface>
         ) : (
           options.map((opt) => (
             <SelectItem data-value={opt.value} data-text-value={opt.label}>

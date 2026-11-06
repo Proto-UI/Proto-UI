@@ -1,8 +1,16 @@
 ---
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
-const { SelectRoot, SelectTrigger, SelectValue, SelectContent, SelectItem } =
-  siteControlTags(family);
+const {
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectSurface,
+  SelectViewport,
+  SelectItemText,
+} = siteControlTags(family);
 import context from 'virtual:starlight/project-context';
 import config from 'virtual:starlight/user-config';
 import { localizedUrl } from '../../utils/localizedUrl';
@@ -69,16 +77,16 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
       data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {
-        family === 'shadcn' ? (
-          <wc-shadcn-select-surface>
-            <wc-shadcn-select-viewport>
+        family !== 'brutalist' ? (
+          <SelectSurface>
+            <SelectViewport>
               {localeOptions.map((option) => (
                 <SelectItem data-value={option.value} data-text-value={option.label}>
-                  <wc-shadcn-select-item-text>{option.label}</wc-shadcn-select-item-text>
+                  <SelectItemText>{option.label}</SelectItemText>
                 </SelectItem>
               ))}
-            </wc-shadcn-select-viewport>
-          </wc-shadcn-select-surface>
+            </SelectViewport>
+          </SelectSurface>
         ) : (
           localeOptions.map((option) => (
             <SelectItem data-value={option.value} data-text-value={option.label}>

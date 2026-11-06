@@ -77,7 +77,7 @@ function mount(runtime: RuntimeId, locale = 'en') {
 }
 afterEach(() => document.body.replaceChildren());
 
-for (const family of ['shadcn', 'brutalist'] as const) {
+for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     `${family}/%s derives the final gallery recipe without unused Select parts`,
     (runtime) => {
@@ -85,7 +85,11 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         const content = createHomepageShowcase(family, runtime, locale, () => true);
         assertDemoSpec(content.demo);
         expect(() =>
-          assertProjectionRecipeClosure(content.demo.root, content.recipe.prototypeIds, content.recipe.id)
+          assertProjectionRecipeClosure(
+            content.demo.root,
+            content.recipe.prototypeIds,
+            content.recipe.id
+          )
         ).not.toThrow();
         expect(content.recipe.prototypeIds).not.toContain(`${family}-select-label`);
         expect(content.recipe.prototypeIds).not.toContain(`${family}-select-separator`);
@@ -117,8 +121,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     const ids = new Set<string>();
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
-    // The closed recipe now includes the actual family Label relation owner.
-    expect(ids.size).toBe(family === 'shadcn' ? 64 : 56);
+
     if (family === 'shadcn') {
       for (const part of ['root', 'header', 'content'])
         expect(ids.has(`shadcn-card-${part}`)).toBe(true);

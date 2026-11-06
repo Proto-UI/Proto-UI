@@ -1,0 +1,29 @@
+id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON
+type: prototype
+title: Bootstrap 2.3.2 Dialog icon-only Close
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The icon-only command is draft until exact-head four-Web interaction, accessible naming, visual evidence and independent review are complete.
+summary: An icon-only Dialog Close projection preserving Base dismissal and disabled behavior.
+statement:
+  en: Close Icon invokes asDialogClose once, keeps the inherited close request and exposes an accessible Close name while rendering a decorative X glyph.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON-BASE
+    text:
+      en: Invoke asDialogClose exactly once and preserve controlled dismissal, keyboard/pointer input, disabled suppression and lifecycle; the SVG is aria-hidden and owns no interaction.
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON-BOUNDARY
+    text:
+      en: Exact-head four-Web visual, keyboard, AT and independent review remain acceptance gates; source presence is not stable admission.
+inherits:
+  prototypes: [P-BASE-DIALOG-CLOSE]
+verifies:
+  tests: [T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001]
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/dialog/close-icon.proto.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/close.less
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the icon-only Bootstrap Dialog Close projection.
+tags: [prototype, bootstrap-2-3-2, dialog, close, draft]

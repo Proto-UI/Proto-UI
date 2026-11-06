@@ -13,7 +13,7 @@ criteria:
       en: The Prototype invokes asButton() once, preserves inherited interaction, focus, disabled and click ownership, and consumes only its exposed state handles for visual Rules.
   - id: P-BOOTSTRAP-2-3-2-BUTTON-API
     text:
-      en: variant is default | primary | warning | danger | success | info | inverse, default default; size is default | large | small | mini, default default; disabled is inherited and defaults false. Removing a prop restores its default. Size Rules are mutually exclusive and retain the same Base interaction owner.
+      en: variant is default | primary | warning | danger | success | info | inverse, default default; size is default | large | small | mini, default default; disabled is inherited and defaults false. wrap defaults false; false retains the upstream single-line nowrap recipe and true uses whitespace-normal with h-auto/min-h-8 so long labels grow instead of clipping. Removing a prop restores its default. Size Rules are mutually exclusive and retain the same Base interaction owner.
   - id: P-BOOTSTRAP-2-3-2-BUTTON-VISUAL
     text:
       en: Seven color variants use fixed v2.3.2 resting and state-endpoint paint, including text shadows and final modern-browser border colors. Hover/focus retain the gradient at 0px -15px with its endpoint background color; pressed/disabled flatten it. Four sizes retain upstream pixel units. A stronger focus-visible ring is preserved. The 100ms background-position motion, color-contrast acceptance, link/block recipes and complete target evidence remain open; static endpoint coverage is not full upstream parity. The legacy palette is retained in both host color schemes.
@@ -66,6 +66,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added seven source palettes and static state endpoints with text shadows and modern final borders through finite complete paint recipes; preserved focus, legacy consumers, draft lifecycle and explicit motion/contrast/target gaps.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added an explicit wrap prop for the real homepage consumer, preserving upstream nowrap by default and allowing bounded vertical growth on request.
 tags:
   - prototype
   - bootstrap-2-3-2
