@@ -157,9 +157,13 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     overflow-wrap: anywhere;
   }
   .home-demo-previewer :global(.home-gallery) {
-    --homepage-gallery-gap: 1.5rem;
+    /* App-owned rhythm only. Component paint, radii and elevation stay in Proto UI. */
+    --homepage-gallery-column-gap: 2rem;
+    --homepage-gallery-row-gap: 1.25rem;
+    --homepage-gallery-compact-row-gap: 0.875rem;
+    position: relative;
     columns: 18rem;
-    column-gap: var(--homepage-gallery-gap);
+    column-gap: var(--homepage-gallery-column-gap);
   }
   .home-demo-previewer :global(.home-gallery__card-body),
   .home-demo-previewer :global(.home-gallery__stack) {
@@ -177,7 +181,77 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   .home-demo-previewer :global(.home-gallery__item) {
     min-width: 0;
     break-inside: avoid;
-    margin-block-end: var(--homepage-gallery-gap);
+    margin-block-end: var(--homepage-gallery-row-gap);
+  }
+  .home-demo-previewer :global(.home-gallery__item--compact) {
+    margin-block-end: var(--homepage-gallery-compact-row-gap);
+  }
+  /* Finite density/emphasis vocabulary. Quiet cards only reduce authored body
+     spacing; accent cards reserve a slightly roomier stack. No per-card skins. */
+  .home-demo-previewer :global(.home-gallery__item--quiet .home-gallery__card-body),
+  .home-demo-previewer :global(.home-gallery__item--quiet .home-gallery__stack) {
+    gap: 0.75rem;
+  }
+  .home-demo-previewer :global(.home-gallery__item--accent .home-gallery__card-body),
+  .home-demo-previewer :global(.home-gallery__item--accent .home-gallery__stack) {
+    gap: 1.25rem;
+  }
+  .home-demo-previewer :global(.home-gallery__title-row) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__icon) {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    color: inherit;
+  }
+  /* Locally edge-to-edge media: only this authored wrapper leaves the Card
+     content padding. No public Card padding override is required. */
+  .home-demo-previewer :global(.home-gallery__media) {
+    width: calc(100% + 2.5rem);
+    margin-inline: -1.25rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__chart) {
+    display: block;
+    color: var(--pui-muted-foreground, currentColor);
+  }
+  .home-demo-previewer :global(.home-gallery__chart-bars svg) {
+    display: block;
+    width: 100%;
+  }
+  /* Noninteractive decorative tail; never over focusable controls or text. */
+  .home-demo-previewer :global(.home-gallery__fade) {
+    break-inside: avoid;
+    height: 2.5rem;
+    margin-block-end: var(--homepage-gallery-row-gap);
+    pointer-events: none;
+    user-select: none;
+    background-image: linear-gradient(
+      to bottom,
+      transparent,
+      var(--pui-muted, var(--pui-background, transparent))
+    );
+    mask-image: linear-gradient(to bottom, transparent, black);
+  }
+  .home-demo-previewer :global(.home-gallery__attribution) {
+    break-inside: avoid;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    min-width: 0;
+    font-size: var(--sl-text-sm, 0.875rem);
+    color: var(--sl-color-gray-3, inherit);
+  }
+  .home-demo-previewer :global(.home-gallery__attribution-link) {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
   .home-demo-previewer :global(.home-gallery__card-heading) {
     display: grid;
@@ -234,7 +308,9 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   @media (max-width: 767px) {
     .home-demo-previewer :global(.home-gallery) {
-      --homepage-gallery-gap: 1.25rem;
+      --homepage-gallery-column-gap: 1.5rem;
+      --homepage-gallery-row-gap: 1rem;
+      --homepage-gallery-compact-row-gap: 0.75rem;
     }
   }
   @media (max-width: 639px) {

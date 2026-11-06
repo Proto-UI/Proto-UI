@@ -62,8 +62,8 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     verify();
     const assertTextOwners = (owners: Element[]) => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
-      expect(owners).toHaveLength(35);
-      expect(new Set(owners).size).toBe(35);
+      expect(owners).toHaveLength(37);
+      expect(new Set(owners).size).toBe(37);
       expect(
         owners.filter((owner) => !owner.closest('[data-gallery-demo^="workspace-"]'))
       ).toHaveLength(24);
@@ -77,6 +77,10 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           'Make room for an idea',
           'Drag or use arrow keys to adjust your plan.',
           'Plan progress: 40%',
+        ],
+        'workspace-analytics': [
+          'Plan rhythm',
+          'Sample data · follows this page’s plan, not live visitor statistics.',
         ],
         'workspace-help': [
           'A little help along the way',

@@ -56,7 +56,7 @@ function fixture(family: (typeof families)[number], locale = 'en') {
     nodes.push(node);
     for (const child of node.children ?? []) visit(child);
   };
-  [result.command, result.progress, result.help].forEach(visit);
+  [result.command, result.progress, result.help, result.analytics].forEach(visit);
   return { result, ids, nodes, props, feedback, fire };
 }
 
@@ -146,5 +146,22 @@ describe('homepage workspace compositions', () => {
     );
     expect(headings).toHaveLength(3);
     expect(headings.every((node) => node.kind === 'proto' && node.props?.level === 3)).toBe(true);
+  });
+  it('labels the analytics chart as sample data with an edge-media slot', () => {
+    const { result, nodes } = fixture('shadcn');
+    const chart = nodes.find((node) => node.ref === 'gallery-rhythm-bars');
+    expect(chart).toBeDefined();
+    const labelled = nodes.filter(
+      (node) => node.kind === 'box' && node.attrs?.role === 'img'
+    );
+    expect(labelled).toHaveLength(1);
+    expect(labelled[0]!.attrs?.['aria-label']).toContain('Sample data');
+    expect(result.analytics).toBeDefined();
+    const zh = fixture('shadcn', 'zh-cn');
+    expect(
+      zh.nodes.find((node) => node.kind === 'box' && node.attrs?.role === 'img')?.attrs?.[
+        'aria-label'
+      ]
+    ).toContain('示例数据');
   });
 });

@@ -979,26 +979,35 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     'workspace-help',
     'preferences',
     'workspace-progress',
+    'workspace-analytics',
     'editor',
     'overlays',
     'choices',
   ];
   const facts = {
+    columnGap: '32px',
+    cards: ids.map((id, i) => ({
+      id,
+      x: Math.floor(i / 3) * 332,
+      right: Math.floor(i / 3) * 332 + 300,
+      y: (i % 3) * 124,
+      bottom: (i % 3) * 124 + 100,
+      rowGap: 24,
+    })),
+  };
+  assert.equal(observe(facts, 32).length, 0);
+  const narrow = {
     columnGap: '24px',
     cards: ids.map((id, i) => ({
       id,
-      x: Math.floor(i / 3) * 324,
-      right: Math.floor(i / 3) * 324 + 300,
-      y: (i % 3) * 124,
-      bottom: (i % 3) * 124 + 100,
+      x: 0,
+      right: 280,
+      y: i * 120,
+      bottom: i * 120 + 100,
+      rowGap: 20,
     })),
   };
-  assert.equal(observe(facts, 24).length, 0);
-  const narrow = {
-    columnGap: '20px',
-    cards: ids.map((id, i) => ({ id, x: 0, right: 280, y: i * 120, bottom: i * 120 + 100 })),
-  };
-  assert.equal(observe(narrow, 20).length, 0);
+  assert.equal(observe(narrow, 24).length, 0);
   for (const mutate of [
     (value: typeof facts) => {
       value.cards.pop();
@@ -1007,10 +1016,13 @@ test('density observer rejects missing cards and incorrect physical multicol spa
       value.cards[8]!.id = value.cards[0]!.id;
     },
     (value: typeof facts) => {
-      value.columnGap = 'normal 24px';
+      value.columnGap = 'normal 32px';
     },
     (value: typeof facts) => {
       value.cards[1]!.y += 10;
+    },
+    (value: typeof facts) => {
+      value.cards[0]!.rowGap = 14;
     },
     (value: typeof facts) => {
       for (const card of value.cards.slice(3, 6)) {
@@ -1024,7 +1036,7 @@ test('density observer rejects missing cards and incorrect physical multicol spa
   ]) {
     const broken = structuredClone(facts);
     mutate(broken);
-    assert.ok(observe(broken, 24).length > 0);
+    assert.ok(observe(broken, 32).length > 0);
   }
   assert.match(source, /assert\.deepEqual\(\s*gallerySpacingIssues\(facts\.gallerySpacing,/);
   const headerHeight = /select\.height\s*-\s*44\)\s*<=\s*1/;

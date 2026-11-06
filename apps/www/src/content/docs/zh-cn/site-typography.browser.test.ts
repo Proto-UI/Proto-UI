@@ -707,9 +707,9 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                       galleryLabels,
                     });
                     // WC retains the two closed authored Accordion bodies; the three
-                    // framework adapters withdraw them. All 35/33 owners remain exact.
+                    // framework adapters withdraw them. All 37/35 owners remain exact.
                     expect(galleryText).toHaveLength(
-                      { wc: 35, react: 33, vue: 33, vue2: 33 }[runtime]
+                      { wc: 37, react: 35, vue: 35, vue2: 35 }[runtime]
                     );
                     expect(galleryLabels).toHaveLength(4);
                     expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);

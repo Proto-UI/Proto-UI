@@ -1,4 +1,12 @@
 import { shadcnCheckboxDemoChildren } from '../PrototypePreviewer/shadcn-checkbox-composition';
+import {
+  appendHomepageGalleryGlyph,
+  appendHomepageGallerySampleBars,
+  HOMEPAGE_GALLERY_ICONS,
+  homepageGalleryIcon,
+  type HomepageGalleryIcon,
+  type GalleryCardOptions,
+} from './homepage-gallery-icons';
 import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
@@ -8,6 +16,13 @@ import {
 } from '../PrototypePreviewer/projection-families';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import { surfacePrototypeId, panelSurfaceProps, panelSurfaceLayout } from '../surface-recipes';
+
+export type {
+  GalleryCardBody,
+  GalleryCardDensity,
+  GalleryCardEmphasis,
+  GalleryCardOptions,
+} from './homepage-gallery-icons';
 
 export function createHomepageGalleryParts(
   family: ProjectionFamilyId,
@@ -136,41 +151,66 @@ export function createHomepageGalleryParts(
   const sample = zh
     ? '用同一份原型，组合你的界面。'
     : 'Compose your interface from the same prototypes.';
-  const card = (title: string, caption: string, children: DemoChild[], id: string): DemoNode => {
-    const titleNode: DemoNode = {
+  const card = (
+    title: string,
+    caption: string,
+    children: DemoChild[],
+    id: string,
+    options: GalleryCardOptions = {}
+  ): DemoNode => {
+    const { density = 'regular', emphasis = 'standard', body = 'inset', icon } = options;
+    const titleBox = (): DemoNode => ({
       kind: 'box',
       className: 'home-gallery__title',
       attrs: { role: 'heading', 'aria-level': '2' },
       children: [title],
-    };
+    });
+    const titleNode = icon
+      ? box('home-gallery__title-row', [box('home-gallery__icon', [icon]), titleBox()])
+      : titleBox();
     const captionNode = box('home-gallery__caption', [caption]);
     const surface =
       family === 'shadcn'
         ? p(
             'shadcn-card-root',
-            [
-              p('shadcn-card-header', [titleNode, captionNode]),
-              p('shadcn-card-content', [box('home-gallery__stack', children)]),
-            ],
+            body === 'edge-media'
+              ? [
+                  p('shadcn-card-header', [titleNode, captionNode]),
+                  p('shadcn-card-content'),
+                  box('home-gallery__media', children),
+                ]
+              : [
+                  p('shadcn-card-header', [titleNode, captionNode]),
+                  p('shadcn-card-content', [box('home-gallery__stack', children)]),
+                ],
             { styleProfile: 'rhea' }
           )
         : p(
             PREVIEW_SURFACE_ID,
             [
-              box('home-gallery__card-body', [
-                box('home-gallery__card-heading', [
-                  box('home-gallery__title', [title], undefined, {
-                    role: 'heading',
-                    'aria-level': '2',
-                  }),
-                  captionNode,
-                ]),
-                ...children,
-              ]),
+              box(
+                `home-gallery__card-body home-gallery__card-body--${body}`,
+                [
+                  box('home-gallery__card-heading', [titleNode, captionNode]),
+                  ...(body === 'edge-media'
+                    ? [box('home-gallery__media', children)]
+                    : children),
+                ]
+              ),
             ],
             { ...panelSurfaceProps(id === 'editor' ? 'canvas' : 'card') }
           );
-    return box('home-gallery__item', [surface], undefined, { 'data-gallery-demo': id });
+    return box(
+      `home-gallery__item home-gallery__item--${density} home-gallery__item--${emphasis}`,
+      [surface],
+      undefined,
+      {
+        'data-gallery-demo': id,
+        'data-gallery-density': density,
+        'data-gallery-emphasis': emphasis,
+        ...(body === 'edge-media' ? { 'data-gallery-body': body } : {}),
+      }
+    );
   };
   const controls = card(
     zh ? '按钮与选择' : 'Buttons & selection',
@@ -198,7 +238,8 @@ export function createHomepageGalleryParts(
       ]),
       status(zh ? '点击任意控件' : 'Try any control', 'gallery-controls-feedback'),
     ],
-    'controls'
+    'controls',
+    { emphasis: 'accent', icon: homepageGalleryIcon('controls') }
   );
   const editor = card(
     zh ? '文本编辑' : 'Text editor',
@@ -246,7 +287,8 @@ export function createHomepageGalleryParts(
         button(zh ? '重置文本' : 'Reset text', 'editor-reset', 'secondary'),
       ]),
     ],
-    'editor'
+    'editor',
+    { icon: homepageGalleryIcon('editor') }
   );
   const dialog = p(
     part('dialog'),
@@ -311,7 +353,8 @@ export function createHomepageGalleryParts(
       menu,
       status(zh ? '等待选择' : 'Ready for a choice', 'gallery-dialog-feedback'),
     ],
-    'overlays'
+    'overlays',
+    { icon: homepageGalleryIcon('overlays') }
   );
   const hover = card(
     zh ? '悬浮资料' : 'Profile preview',
@@ -341,7 +384,8 @@ export function createHomepageGalleryParts(
       ),
       box('home-gallery__copy', [zh ? '悬停或聚焦查看资料' : 'Hover or focus to reveal details']),
     ],
-    'hover'
+    'hover',
+    { density: 'compact', emphasis: 'quiet', icon: homepageGalleryIcon('hover') }
   );
   const choices = card(
     zh ? '通知选项' : 'Notification choices',
@@ -353,7 +397,8 @@ export function createHomepageGalleryParts(
       button(zh ? '应用选择' : 'Apply selection', 'choice-apply'),
       status(zh ? '已选择 2 项' : '2 selected', 'choice-feedback'),
     ],
-    'choices'
+    'choices',
+    { emphasis: 'quiet', icon: homepageGalleryIcon('choices') }
   );
   const composition = createHomepageCompositionParts(family, locale, {
     p,
@@ -365,12 +410,13 @@ export function createHomepageGalleryParts(
   return {
     ids,
     card,
-    columns(form: DemoNode): DemoNode[] {
+    analytics: composition.analytics,
+    columns(form: DemoNode, analytics: DemoNode = composition.analytics): DemoNode[] {
       return [
         box('home-gallery__column', [controls, hover]),
         box('home-gallery__column', [composition.command, composition.help]),
         box('home-gallery__column', [form]),
-        box('home-gallery__column', [composition.progress, editor]),
+        box('home-gallery__column', [composition.progress, analytics, editor]),
         box('home-gallery__column', [overlays, choices]),
       ];
     },
@@ -439,7 +485,48 @@ export function createHomepageGalleryParts(
       const feedback = (ref: string, value: string) => {
         setHomepageText(context.refs[ref]!, value);
       };
+      // Website-owned sample series. The public Progress root stays the only
+      // authored value owner; this observer never patches prototype geometry.
+      const updateGalleryRhythm = (value: number) => {
+        const chart = context.refs['gallery-rhythm-bars'];
+        if (chart && Number.isFinite(value) && value >= 0 && value <= 100) {
+          const factors = [0.32, 0.48, 0.56, 0.76, 0.68, 0.92];
+          const bars = chart.querySelectorAll<SVGRectElement>('rect[data-gallery-bar]');
+          bars.forEach((bar, index) => {
+            const height = Math.max(4, Math.round(value * factors[index % factors.length]!));
+            bar.setAttribute('y', String(104 - height));
+            bar.setAttribute('height', String(height));
+          });
+        }
+      };
+      for (const name of Object.keys(HOMEPAGE_GALLERY_ICONS) as HomepageGalleryIcon[]) {
+        const slot = context.refs[`gallery-icon-${name}`];
+        if (slot) appendHomepageGalleryGlyph(slot, name);
+      }
+      const chartSlot = context.refs['gallery-rhythm-bars'];
+      if (chartSlot) appendHomepageGallerySampleBars(chartSlot);
       composition.setup({ bind, write, feedback });
+      // The chart observes the same public Progress value that Command, Slider
+      // and Reset already share. No duplicated plan map or second write channel.
+      const planRoot = context.refs['composition-progress'];
+      const planDocument = planRoot?.ownerDocument;
+      const planWindow = planDocument?.defaultView;
+      if (planRoot && planWindow) {
+        let last = -1;
+        const readPlan = () => {
+          const raw = Number(planRoot.getAttribute('aria-valuenow'));
+          if (!Number.isFinite(raw) || raw === last) return;
+          last = raw;
+          updateGalleryRhythm(raw);
+        };
+        const observer = new planWindow.MutationObserver(readPlan);
+        observer.observe(planRoot, {
+          attributes: true,
+          attributeFilter: ['aria-valuenow'],
+        });
+        cleanups.push(() => observer.disconnect());
+        readPlan();
+      }
       for (const [ref, label] of [
         ['gallery-primary', zh ? '主要按钮' : 'Primary button'],
         ['gallery-secondary', zh ? '次要按钮' : 'Secondary button'],
