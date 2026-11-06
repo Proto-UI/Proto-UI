@@ -14,6 +14,73 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
+const SPLIT_RECEIPT_PREFIX = '--pui-split-compiled-receipt: ';
+
+type StyleCssLane = 'document' | 'shadow' | 'shadow-split';
+
+const STYLE_CSS_LANES: ReadonlyArray<{
+  target: StyleCssLane;
+  render: (tokens: string[]) => string;
+}> = [
+  { target: 'document', render: renderProtoStyleTokenCss },
+  { target: 'shadow', render: renderProtoShadowStyleTokenCss },
+  {
+    target: 'shadow-split',
+    render: (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+  },
+];
+
+function splitSurfaceSelector(token: string): string {
+  return `:host([data-pui-split-root-style~="${token}"]) > [data-pui-split-surface][data-pui-style~="${token}"]`;
+}
+
+// Complete selector set one lane must emit for a token. Split artifacts add the
+// ordinary section they append for the same token closure; flat lanes never do.
+function expectedStyleSelectors(lane: StyleCssLane, token: string): string[] {
+  const flat = `:where([data-pui-style~="${token}"])`;
+  return lane === 'shadow-split' ? [splitSurfaceSelector(token), flat] : [flat];
+}
+
+// Every rule block carrying the token attribute selector must use this lane's
+// exact selectors and declaration multiset. Authored declaration order is not
+// pinned; receipt metadata is exempt only on the compiled split surface rule.
+function expectExactStyleUtility(
+  css: string,
+  lane: StyleCssLane,
+  token: string,
+  declarations: string[]
+): void {
+  const blocks = css
+    .split('}')
+    .filter((entry) => entry.includes(`[data-pui-style~="${token}"]`))
+    .map((entry) => {
+      const open = entry.indexOf('{');
+      expect(open).toBeGreaterThanOrEqual(0);
+      const selector = entry.slice(0, open).trim().split(/\n/).at(-1)!.replace(/\s+/g, ' ').trim();
+      const lines = entry
+        .slice(open + 1)
+        .trim()
+        .split(/\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+      return {
+        selector,
+        receipts: lines.filter((line) => line.startsWith(SPLIT_RECEIPT_PREFIX)),
+        declared: lines.filter((line) => !line.startsWith(SPLIT_RECEIPT_PREFIX)),
+      };
+    });
+  expect(blocks.map((block) => block.selector).sort()).toEqual(
+    expectedStyleSelectors(lane, token).sort()
+  );
+  for (const block of blocks) {
+    if (block.receipts.length > 0) {
+      expect(lane).toBe('shadow-split');
+      expect(block.selector).toBe(splitSurfaceSelector(token));
+    }
+    expect([...block.declared].sort()).toEqual([...declarations].sort());
+  }
+}
+
 describe('proto style css renderer', () => {
   it('admits only the finite border-color clock without text or background interpolation', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
@@ -84,79 +151,57 @@ describe('proto style css renderer', () => {
     }
   });
 
-  it('lowers zero scroll padding in light and shadow CSS without accepting unknown scroll tokens', () => {
-    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+  it('lowers zero scroll padding in light, shadow and split CSS without accepting unknown scroll tokens', () => {
+    for (const { target, render } of STYLE_CSS_LANES) {
       const css = render(['scroll-py-0']);
-      const block = css
-        .split('}')
-        .find((entry) => entry.includes('[data-pui-style~="scroll-py-0"]'));
-      expect(block).toBeDefined();
-      expect(block).toMatch(/\{\s*scroll-padding-block: 0px;\s*$/);
+      expectExactStyleUtility(css, target, 'scroll-py-0', ['scroll-padding-block: 0px;']);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       for (const token of ['scroll-py-unknown', '-scroll-py-0', 'scroll-py-[0px;color:red]']) {
         const unsupported = render([token]);
         expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toContain(`[data-pui-style~="${token}"]`);
         expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
       }
     }
   });
 
-  it('lowers scroll-py-1 in light and shadow CSS without widening the token vocabulary', () => {
-    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+  it('lowers scroll-py and scroll-my utilities in light, shadow and split CSS without widening the token vocabulary', () => {
+    for (const { target, render } of STYLE_CSS_LANES) {
       const css = render(['scroll-py-1', 'scroll-my-1']);
       expect(css).toContain('[data-pui-style~="scroll-py-1"]');
       expect(css).toContain('scroll-padding-block: 0.25rem;');
       expect(css).toContain('scroll-margin-block: 0.25rem;');
       expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expectExactStyleUtility(css, target, 'scroll-py-1', ['scroll-padding-block: 0.25rem;']);
+      expectExactStyleUtility(css, target, 'scroll-my-1', ['scroll-margin-block: 0.25rem;']);
+      expectExactStyleUtility(render(['scroll-py-1.5']), target, 'scroll-py-1.5', [
+        'scroll-padding-block: 0.375rem;',
+      ]);
       for (const token of ['scroll-py-unknown', '-scroll-py-1', 'scroll-py-[1px;color:red]']) {
         const unsupported = render([token]);
         expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toContain(`[data-pui-style~="${token}"]`);
         expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
       }
     }
   });
 
-  it('lowers finite physical top and bottom scroll padding in document and shadow targets', () => {
-    for (const render of [
-      renderProtoStyleTokenCss,
-      renderProtoShadowStyleTokenCss,
-      (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
-    ]) {
+  it('lowers finite physical top and bottom scroll padding in document, shadow and split targets', () => {
+    for (const { target, render } of STYLE_CSS_LANES) {
       const tokens = ['scroll-pt-2', 'scroll-pb-1.5'];
       for (const input of [tokens, [...tokens].reverse()]) {
         const css = render(input);
-        for (const [token, declaration] of [
-          ['scroll-pt-2', 'scroll-padding-top: 0.5rem;'],
-          ['scroll-pb-1.5', 'scroll-padding-bottom: 0.375rem;'],
-        ]) {
-          const block = css
-            .split('}')
-            .find((entry) => entry.includes(`[data-pui-style~="${token}"]`));
-          expect(block).toBeDefined();
-          // Split output may add only its existing content-bound receipt.
-          const declarations = block!
-            .split('{')
-            .at(-1)!
-            .trim()
-            .split(/\n/)
-            .map((line) => line.trim());
-          expect(declarations[0]).toBe(declaration);
-          expect(
-            declarations
-              .slice(1)
-              .every((line) => /^--pui-split-compiled-receipt: [a-z0-9]+;$/.test(line))
-          ).toBe(true);
-        }
+        expectExactStyleUtility(css, target, 'scroll-pt-2', ['scroll-padding-top: 0.5rem;']);
+        expectExactStyleUtility(css, target, 'scroll-pb-1.5', ['scroll-padding-bottom: 0.375rem;']);
         expect(css).not.toContain('Unsupported Proto UI style tokens');
       }
       const unchanged = render(['scroll-py-0', 'scroll-py-1', 'scroll-py-1.5', 'scroll-my-1']);
-      for (const declaration of [
-        'scroll-padding-block: 0px;',
-        'scroll-padding-block: 0.25rem;',
+      expectExactStyleUtility(unchanged, target, 'scroll-py-0', ['scroll-padding-block: 0px;']);
+      expectExactStyleUtility(unchanged, target, 'scroll-py-1', ['scroll-padding-block: 0.25rem;']);
+      expectExactStyleUtility(unchanged, target, 'scroll-py-1.5', [
         'scroll-padding-block: 0.375rem;',
-        'scroll-margin-block: 0.25rem;',
-      ])
-        expect(unchanged).toContain(declaration);
+      ]);
+      expectExactStyleUtility(unchanged, target, 'scroll-my-1', ['scroll-margin-block: 0.25rem;']);
       expect(unchanged).not.toContain('Unsupported Proto UI style tokens');
     }
   });
@@ -181,6 +226,7 @@ describe('proto style css renderer', () => {
       ]) {
         const css = render([token]);
         expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toContain(`[data-pui-style~="${token}"]`);
         expect(css).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
         expect(css).not.toMatch(/(?:^|\n)\s*color:\s*red;/);
       }
