@@ -477,8 +477,14 @@ export function createShadowSplitEffectsPort({
     const widths = borderWidthCandidates(entries);
     const borderWidths = JSON.stringify(widths);
     const animated = entries.find((e) => e.authorToken === 'transition-all');
+    // The H1 base recipe already owns the compensating surface margins for
+    // border widths. Rest state, checked-state and invalid-state updates move
+    // those compensations continuously even while CSS rounds the animated
+    // border to device pixels, so a changing width set with that companion is
+    // not an unimplemented transition.
     if (
       animated &&
+      !hasRecipe('motion', 'h1') &&
       (widths.some((values) => values.length > 1) ||
         (applied && applied.borderWidths !== borderWidths))
     ) {
