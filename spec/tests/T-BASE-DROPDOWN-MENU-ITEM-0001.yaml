@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers collection snapshots, menuitem semantics, active navigation, select signaling, commit-close policy, disabled behavior, and absence of persistent selection.
 cases:
+  - id: T-BASE-DROPDOWN-MENU-ITEM-0001-CASE-POINTER-FOCUS
+    title: Admitted mouse movement transfers focus without selection or stale dual highlight
+    covers:
+      [
+        P-BASE-DROPDOWN-MENU-ITEM-POINTER-FOCUS,
+        P-BASE-DROPDOWN-MENU-ITEM-ACTIVE,
+        P-BASE-DROPDOWN-MENU-ITEM-DISABLED,
+      ]
+    expectation: single-observed-focus-owner-with-mouse-admission-and-keyboard-disabled-boundaries
   - id: T-BASE-DROPDOWN-MENU-ITEM-0001-CASE-TRANSIENT-CLEANUP
     title: Cancellation and view withdrawal clear transient state while preserving semantic owner facts
     covers: [P-BASE-DROPDOWN-MENU-ITEM-TRANSIENT-CLEANUP]
@@ -31,6 +40,15 @@ cases:
     covers: [P-BASE-DROPDOWN-MENU-ITEM-NO-SELECTION]
     expectation: dropdown-item-value-and-active-never-project-selected-or-checked
 implementations:
+  - id: prototypes-base-dropdown-pointer-focus
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/dropdown-pointer-focus.test.ts
+    required: true
+    consumesCases: [T-BASE-DROPDOWN-MENU-ITEM-0001-CASE-POINTER-FOCUS]
+    exercises: [P-BASE-DROPDOWN-MENU-ITEM]
+    notes:
+      - Source Runtime and WC router with synthetic host input; execution and native browser paint remain separately bound evidence.
   - id: prototypes-base-dropdown-menu-item-transient-cleanup
     kind: module-test
     status: passing
@@ -59,6 +77,7 @@ verifies:
     - id: P-BASE-DROPDOWN-MENU-ITEM
       anchors:
         [
+          P-BASE-DROPDOWN-MENU-ITEM-POINTER-FOCUS,
           P-BASE-DROPDOWN-MENU-ITEM-COLLECTION,
           P-BASE-DROPDOWN-MENU-ITEM-A11Y,
           P-BASE-DROPDOWN-MENU-ITEM-SELECT,

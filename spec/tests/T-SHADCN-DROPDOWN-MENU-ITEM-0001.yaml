@@ -5,6 +5,14 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Item identity, Base command inheritance, visual props and state styles, asChild omission, and bounded compatibility.
 cases:
+  - id: T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-POINTER-FOREGROUND
+    title: Nine profiles transfer default and destructive foreground with the real focus owner
+    covers:
+      [
+        P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES,
+        P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE,
+      ]
+    expectation: mouse-keyboard-handoff-updates-row-and-passive-shortcut-without-old-row-paint
   - id: T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-IDENTITY-AND-INHERITANCE
     title: Item is a named direct entry that inherits Base menu-command behavior
     covers:
@@ -32,6 +40,15 @@ cases:
     covers: [P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE]
     expectation: real-base-state-shadcn-destructive-recipe-and-complete-css-closure
 implementations:
+  - id: shadcn-dropdown-pointer-foreground
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/dropdown-pointer-foreground.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-POINTER-FOREGROUND]
+    exercises: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
+    notes:
+      - Real source-host focus and recipe transport across nine style profiles, not computed browser colors or compiled consumer acceptance.
   - id: www-shadcn-dropdown-item-native-browser
     kind: adapter-test
     status: planned

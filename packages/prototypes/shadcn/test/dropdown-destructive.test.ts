@@ -89,15 +89,22 @@ describe('Shadcn Dropdown destructive recipe over real Base states', () => {
     subject.focus();
     await flush();
     expect(subject.getExposes().focused.get()).toBe(true);
-    expect(subject.getExposes().active.get()).toBe(false);
+    expect(subject.getExposes().active.get()).toBe(true);
     expectDestructive(subject, 10);
     normal.focus();
-    subject.dispatchEvent(new PointerEvent('pointerenter'));
+    subject.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    subject.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse', buttons: 0 })
+    );
     await flush();
     expect(subject.getExposes().hovered.get()).toBe(true);
-    expect(subject.getExposes().active.get()).toBe(false);
+    expect(subject.getExposes().active.get()).toBe(true);
+    expect(subject.getExposes().focused.get()).toBe(true);
     expectDestructive(subject, 10);
     subject.dispatchEvent(new PointerEvent('pointerleave'));
+    await flush();
+    expectDestructive(subject, 10);
+    normal.focus();
     await flush();
     expect(styleContains(subject, 'bg-destructive/10')).toBe(false);
   });

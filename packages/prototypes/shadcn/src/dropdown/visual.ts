@@ -251,16 +251,18 @@ export function setupMenuItemPaint<
       ),
     intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
   });
-  // The already cataloged Dropdown New York active/hover/press extension is not
-  // silently promoted into every modern profile's source focus-only surface.
-  if (kind === 'dropdown' && states.active && states.hovered && states.pressed) {
-    const { active, hovered, pressed } = states;
+  // Preserve New York's active/press extension. Pointer navigation reaches
+  // active through Base; hovered alone must not retain a second painted row
+  // after the keyboard moves focus while the pointer remains stationary.
+  // Modern profiles retain their upstream focus-only surface.
+  if (kind === 'dropdown' && states.active && states.pressed) {
+    const { active, pressed } = states;
     cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
           w.prop('variant').eq('default'),
-          w.any(w.state(active).eq(true), w.state(hovered).eq(true))
+          w.state(active).eq(true)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
@@ -278,7 +280,7 @@ export function setupMenuItemPaint<
         w.all(
           w.state(style).eq('new-york-v4'),
           w.prop('variant').eq('destructive'),
-          w.any(w.state(active).eq(true), w.state(hovered).eq(true), w.state(pressed).eq(true))
+          w.any(w.state(active).eq(true), w.state(pressed).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/10 text-destructive')),
     });
@@ -288,7 +290,7 @@ export function setupMenuItemPaint<
           w.state(style).eq('new-york-v4'),
           w.prop('variant').eq('destructive'),
           w.meta('colorScheme').eq('dark'),
-          w.any(w.state(active).eq(true), w.state(hovered).eq(true), w.state(pressed).eq(true))
+          w.any(w.state(active).eq(true), w.state(pressed).eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
     });

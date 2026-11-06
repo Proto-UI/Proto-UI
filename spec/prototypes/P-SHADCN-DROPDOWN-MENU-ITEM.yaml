@@ -49,16 +49,16 @@ criteria:
       en: Item must provide the current full-width row, spacing, radius, typography, outline, selection, and transition tokens.
   - id: P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES
     text:
-      zh-CN: active/hover/focus、pressed 与 disabled visuals 必须从 inherited states 派生；styles 不得成为另一套 command truth。
-      en: Active, hover, focus, pressed, and disabled visuals must derive from inherited states; styles must not become another command source of truth.
+      zh-CN: active/hover/focus、pressed 与 disabled visuals 必须从 inherited states 派生；styles 不得成为另一套 command truth。鼠标导航由 Base Focus 交接；New York 的 active/press 扩展保留，但单独 hovered 不得在键盘已移走焦点后继续高亮旧行。
+      en: Active, hover, focus, pressed, and disabled visuals must derive from inherited states; styles must not become another command source of truth. Base Focus hands off mouse navigation. New York retains its active/press extension, but hovered alone must not keep the old row highlighted after keyboard focus moves.
   - id: P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE
     text:
       zh-CN: >-
-        destructive rest 保持透明背景和 destructive foreground；已有 active、hovered、focused、focusVisible 或 pressed 任一成立时，light 投射 destructive/10、dark 投射 destructive/20，foreground 保持 destructive。pressed 沿用同一交互色是本地反馈扩展，不得被 default accent press 分支覆盖；colorScheme 变化由共享元数据协议驱动，不新增状态或 Web 私有逻辑。
+        destructive rest 保持透明背景和 destructive foreground；focused 或 focusVisible 成立时，light 投射 destructive/10、dark 投射 destructive/20，foreground 保持 destructive。New York 的 active/pressed 也沿用同一交互色，是本地反馈扩展，不得被 default accent press 分支覆盖；colorScheme 变化由共享元数据协议驱动，不新增状态或 Web 私有逻辑。
 
 
       en: >-
-        Destructive rest retains a transparent background and destructive foreground. Existing active, hovered, focused, focusVisible or pressed state projects destructive/10 in light and destructive/20 in dark while retaining the destructive foreground. Keeping the same interaction palette during press is a local feedback extension and must not be overwritten by the default accent press branch. Color-scheme changes use shared metadata, without another state owner or Web-private logic.
+        Destructive rest retains a transparent background and destructive foreground. Focused or focusVisible state projects destructive/10 in light and destructive/20 in dark while retaining the destructive foreground. New York also keeps this palette for active/pressed as a local feedback extension and must not be overwritten by the default accent press branch. Color-scheme changes use shared metadata, without another state owner or Web-private logic.
 
 
   - id: P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET
@@ -88,15 +88,18 @@ openQuestions:
       en: How should Item focus mapping, SVG handling, and exact API or token parity converge?
     context:
       zh-CN: >-
-        intentional deviation 是省略 `asChild`。待核对项包括 className/native props、data-slot/data-inset/data-variant、onSelect mapping、upstream focus-only surface 相对当前 active/hover/focused/focusVisible 合并、pressed feedback 的本地扩展相对 upstream focus-only 的精确对应、dark destructive 的完整跨宿主绘制验收、nested SVG size/color rules，以及额外 w-full、text-left、transition-colors 与 outline-none。
+        intentional deviation 是省略 `asChild`。待核对项包括 className/native props、data-slot/data-inset/data-variant、onSelect mapping、upstream focus-only surface 相对 New York 的 active/focused/focusVisible 合并、pressed feedback 的本地扩展相对 upstream focus-only 的精确对应、dark destructive 的完整跨宿主绘制验收、nested SVG size/color rules，以及额外 w-full、text-left、transition-colors 与 outline-none。
 
 
       en: >-
-        The intentional deviation is omission of `asChild`. Review gaps include className and native props, data-slot, data-inset, data-variant, onSelect mapping, upstream focus-only surface versus current merged active, hover, focused, and focusVisible state, the local pressed extension versus upstream focus-only behavior, complete cross-host dark destructive rendering acceptance, nested-SVG size and color rules, and extra w-full, text-left, transition-colors, and outline-none.
+        The intentional deviation is omission of `asChild`. Review gaps include className and native props, data-slot, data-inset, data-variant, onSelect mapping, upstream focus-only surface versus New York merged active, focused, and focusVisible state, the local pressed extension versus upstream focus-only behavior, complete cross-host dark destructive rendering acceptance, nested-SVG size and color rules, and extra w-full, text-left, transition-colors, and outline-none.
 
 
     blocks: [activation:P-SHADCN-DROPDOWN-MENU-ITEM]
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+    label: Fixed modern focus-driven foreground recipe; no native pixel equivalence is implied.
+  - path: packages/prototypes/shadcn/test/dropdown-pointer-foreground.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx
     label: Selected fixed New York Label/Item source; physical-left inset in LTR and RTL.
   - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css
@@ -129,6 +132,9 @@ inherits:
       note: Default inherited menu-item protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-DROPDOWN-MENU-ITEM-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Separate modern focus paint from the retained New York active/press extension; mouse-to-keyboard handoff must not retain stale hovered foreground.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Align Label/Item paint and physical-left inset with fixed New York 02cad611; retain prior Nova history and pending exact-head browser acceptance.

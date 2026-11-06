@@ -1,5 +1,6 @@
 import type {
   DefHandle,
+  FocusRequestOptions,
   FocusRovingMemberStatus,
   ObservedStateHandle,
   OwnedStateHandle,
@@ -14,7 +15,7 @@ export type DropdownCommand = {
   focused: ObservedStateHandle<boolean, DropdownCommandProps>;
   focusVisible: ObservedStateHandle<boolean, DropdownCommandProps>;
   pressed: OwnedStateHandle<boolean>;
-  focusSelf(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer' }): void;
+  focusSelf(options?: FocusRequestOptions): void;
   setRovingStatus(status: FocusRovingMemberStatus): void;
   syncDisabled(disabled: boolean): void;
 };
@@ -45,7 +46,7 @@ export function setupDropdownCommand(
   def.expose.state('focusVisible', focusVisible);
   def.expose.state('pressed', pressed);
 
-  const focusSelf = (focusOptions?: { reason?: 'programmatic' | 'keyboard' | 'pointer' }) => {
+  const focusSelf = (focusOptions?: FocusRequestOptions) => {
     if (disabled.get() && !options?.focusableWhenDisabled) return;
     focusable.focusSelf(focusOptions);
   };
