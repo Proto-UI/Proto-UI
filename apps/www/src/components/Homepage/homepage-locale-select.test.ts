@@ -20,69 +20,72 @@ function nodes(node: DemoNode): DemoNode[] {
   ];
 }
 describe('homepage locale Select composition', () => {
-  describe.each(['shadcn', 'brutalist'] as const)('%s exact authored recipe', (family) => {
-    it.each(['wc', 'react', 'vue', 'vue2'] as const)(
-      '%s declares only the actual locale Select anatomy',
-      (runtime) => {
-        const { demo, prototypeIds } = createHomepageLocaleSelect(
-          locale,
-          family,
-          runtime,
-          () => true
-        );
-        const expected = ['root', 'trigger', 'value', 'content', 'item'].map(
-          (part) => `${family}-select-${part}`
-        );
-        if (family === 'shadcn')
-          expected.push(
-            'shadcn-select-surface',
-            'shadcn-select-viewport',
-            'shadcn-select-item-text'
+  describe.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
+    '%s exact authored recipe',
+    (family) => {
+      it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+        '%s declares only the actual locale Select anatomy',
+        (runtime) => {
+          const { demo, prototypeIds } = createHomepageLocaleSelect(
+            locale,
+            family,
+            runtime,
+            () => true
           );
-        expect([...prototypeIds].sort()).toEqual(expected.sort());
-        expect(new Set(prototypeIds).size).toBe(prototypeIds.length);
-        expect(() =>
-          assertProjectionRecipeClosure(demo.root, prototypeIds, 'homepage-home-language')
-        ).not.toThrow();
-        const all = nodes(demo.root);
-        const root = all.find((node) => node.kind === 'proto' && node.ref === 'home-locale-root');
-        expect(root).toMatchObject({
-          props: { itemSizing: family === 'shadcn' ? 'match-trigger' : 'intrinsic' },
-        });
-        for (const item of all.filter(
-          (node) => node.kind === 'proto' && node.prototypeId === `${family}-select-item`
-        )) {
-          if (item.kind !== 'proto') throw new Error('Expected Select Item');
-          expect(item.props).not.toHaveProperty('itemSizing');
-          expect(item.surfaceStyle).toBeUndefined();
+          const expected = ['root', 'trigger', 'value', 'content', 'item'].map(
+            (part) => `${family}-select-${part}`
+          );
+          if (family !== 'brutalist')
+            expected.push(
+              `${family}-select-surface`,
+              `${family}-select-viewport`,
+              `${family}-select-item-text`
+            );
+          expect([...prototypeIds].sort()).toEqual(expected.sort());
+          expect(new Set(prototypeIds).size).toBe(prototypeIds.length);
+          expect(() =>
+            assertProjectionRecipeClosure(demo.root, prototypeIds, 'homepage-home-language')
+          ).not.toThrow();
+          const all = nodes(demo.root);
+          const root = all.find((node) => node.kind === 'proto' && node.ref === 'home-locale-root');
+          expect(root).toMatchObject({
+            props: { itemSizing: family === 'shadcn' ? 'match-trigger' : 'intrinsic' },
+          });
+          for (const item of all.filter(
+            (node) => node.kind === 'proto' && node.prototypeId === `${family}-select-item`
+          )) {
+            if (item.kind !== 'proto') throw new Error('Expected Select Item');
+            expect(item.props).not.toHaveProperty('itemSizing');
+            expect(item.surfaceStyle).toBeUndefined();
+          }
+          const authored = nodes(demo.root)
+            .filter((node) => node.kind === 'proto')
+            .map((node) => node.prototypeId);
+          expect([...new Set(authored)].sort()).toEqual([...prototypeIds].sort());
         }
-        const authored = nodes(demo.root)
-          .filter((node) => node.kind === 'proto')
-          .map((node) => node.prototypeId);
-        expect([...new Set(authored)].sort()).toEqual([...prototypeIds].sort());
-      }
-    );
+      );
 
-    it('still rejects an undeclared trigger and an unused required part', () => {
-      const { demo, prototypeIds } = createHomepageLocaleSelect(locale, family, 'wc', () => true);
-      expect(() =>
-        assertProjectionRecipeClosure(
-          demo.root,
-          prototypeIds.filter((id) => id !== `${family}-select-trigger`),
-          'homepage-home-language'
-        )
-      ).toThrow(`uses undeclared Prototype(s): ${family}-select-trigger`);
-      expect(() =>
-        assertProjectionRecipeClosure(
-          demo.root,
-          [...prototypeIds, `${family}-select-group`],
-          'homepage-home-language'
-        )
-      ).toThrow(`missing required Prototype(s): ${family}-select-group`);
-    });
-  });
+      it('still rejects an undeclared trigger and an unused required part', () => {
+        const { demo, prototypeIds } = createHomepageLocaleSelect(locale, family, 'wc', () => true);
+        expect(() =>
+          assertProjectionRecipeClosure(
+            demo.root,
+            prototypeIds.filter((id) => id !== `${family}-select-trigger`),
+            'homepage-home-language'
+          )
+        ).toThrow(`uses undeclared Prototype(s): ${family}-select-trigger`);
+        expect(() =>
+          assertProjectionRecipeClosure(
+            demo.root,
+            [...prototypeIds, `${family}-select-group`],
+            'homepage-home-language'
+          )
+        ).toThrow(`missing required Prototype(s): ${family}-select-group`);
+      });
+    }
+  );
 
-  it.each(['shadcn', 'brutalist'] as const)(
+  it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
     '%s uses public Select anatomy and the current locale',
     (family) => {
       const { demo, prototypeIds } = createHomepageLocaleSelect(locale, family, 'wc', () => true);

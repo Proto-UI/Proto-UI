@@ -2,8 +2,10 @@ import { shadcnButton } from '@proto.ui/prototypes-shadcn/button';
 import { brutalistButton } from '@proto.ui/prototypes-brutalist/button';
 import { ShadcnSurfaceRoot } from '@proto.ui/prototypes-shadcn/surface';
 import { BrutalistSurfaceRoot } from '@proto.ui/prototypes-brutalist/surface';
+import { bootstrap232Button } from '@proto.ui/prototypes-bootstrap-2-3-2/button';
+import { Bootstrap232SurfaceRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/surface';
 import { createStyleSnapshotter, renderSnapshotTokenCss } from './snapshot-prototype-style';
-import type { SiteLibraryFamily } from './site-library-family';
+
 import { headerButtonProps } from './site-header-control-recipes';
 
 export const snapshotStartupStyle = createStyleSnapshotter(
@@ -12,8 +14,10 @@ export const snapshotStartupStyle = createStyleSnapshotter(
     'brutalist-button': brutalistButton,
     'shadcn-surface': ShadcnSurfaceRoot,
     'brutalist-surface': BrutalistSurfaceRoot,
+    'bootstrap-2-3-2-button': bootstrap232Button,
+    'bootstrap-2-3-2-surface': Bootstrap232SurfaceRoot,
   },
-  ['shadcn-button', 'brutalist-button']
+  ['shadcn-button', 'brutalist-button', 'bootstrap-2-3-2-button']
 );
 
 export const startupButtonProps = headerButtonProps;

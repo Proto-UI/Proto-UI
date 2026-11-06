@@ -21,7 +21,7 @@ afterEach(async () => {
   document.body.replaceChildren();
 });
 for (const runtime of ['wc', 'react'] as const)
-  for (const family of ['shadcn', 'brutalist'] as const)
+  for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)
     it(`${family}/${runtime} real gallery keeps every declared physical part in the owning generation`, async () => {
       const content = createHomepageShowcase(family, runtime, 'en', () => true);
       await loadPrototypes([...content.recipe.prototypeIds]);

@@ -459,6 +459,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       options: [
         { value: 'shadcn', label: 'Shadcn' },
         { value: 'brutalist', label: 'Brutalist' },
+        { value: 'bootstrap-2-3-2', label: 'Bootstrap 2.3.2 · WIP' },
       ],
       onValueChange: requestFamily,
     },
@@ -840,7 +841,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     );
   };
   document.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
-  const stopThemes = (['shadcn', 'brutalist'] as const).map((family) =>
+  const stopThemes = (['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const).map((family) =>
     watchProjectionThemeSurfaceStyle(family, root, () => {
       if (destroyed || family !== activeFamily) return;
       // All participants share the page's theme input. Nested language/social

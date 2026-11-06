@@ -9,7 +9,7 @@ afterEach(async () => {
   rendered = undefined;
   document.body.replaceChildren();
 });
-for (const family of ['shadcn', 'brutalist'] as const) {
+for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   it(`${family} retains full editor and preferences props through edits and resets`, async () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     await loadPrototypes([...content.recipe.prototypeIds]);
@@ -162,10 +162,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         for (const property of ['padding', 'borderRadius', 'background', 'boxShadow'] as const)
           expect((surface as HTMLElement).style[property]).toBe('');
       } else {
-        const appearance =
-          family === 'brutalist' && tile.getAttribute('data-gallery-demo') === 'editor'
-            ? 'canvas'
-            : 'card';
+        const appearance = tile.getAttribute('data-gallery-demo') === 'editor' ? 'canvas' : 'card';
         expect(getElementProps(surface as HTMLElement)).toMatchObject({
           variant: 'outline',
           elevation: appearance === 'card' ? 'raised' : 'none',

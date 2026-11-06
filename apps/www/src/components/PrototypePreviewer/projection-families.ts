@@ -1205,6 +1205,130 @@ const BOOTSTRAP_232_MANIFEST = {
         },
       },
     },
+    dialog: {
+      baseFamilyId: 'P-BASE-DIALOG',
+      recipeId: 'demo-bootstrap-2-3-2-dialog',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-dialog-root',
+        'bootstrap-2-3-2-dialog-trigger',
+        'bootstrap-2-3-2-dialog-mask',
+        'bootstrap-2-3-2-dialog-content',
+        'bootstrap-2-3-2-dialog-title',
+        'bootstrap-2-3-2-dialog-description',
+        'bootstrap-2-3-2-dialog-close',
+        'bootstrap-2-3-2-dialog-close-icon',
+        'bootstrap-2-3-2-dialog-header',
+        'bootstrap-2-3-2-dialog-footer',
+        'bootstrap-2-3-2-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-DIALOG', prototypeId: 'bootstrap-2-3-2-dialog-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-DIALOG-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-dialog-trigger',
+        },
+        mask: {
+          basePrototypeId: 'P-BASE-DIALOG-MASK',
+          prototypeId: 'bootstrap-2-3-2-dialog-mask',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-DIALOG-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-dialog-content',
+        },
+        title: {
+          basePrototypeId: 'P-BASE-DIALOG-TITLE',
+          prototypeId: 'bootstrap-2-3-2-dialog-title',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-DIALOG-DESCRIPTION',
+          prototypeId: 'bootstrap-2-3-2-dialog-description',
+        },
+        close: {
+          basePrototypeId: 'P-BASE-DIALOG-CLOSE',
+          prototypeId: 'bootstrap-2-3-2-dialog-close',
+        },
+        closeIcon: {
+          basePrototypeId: 'P-BASE-DIALOG-CLOSE',
+          prototypeId: 'bootstrap-2-3-2-dialog-close-icon',
+        },
+        header: { basePrototypeId: null, prototypeId: 'bootstrap-2-3-2-dialog-header' },
+        footer: { basePrototypeId: null, prototypeId: 'bootstrap-2-3-2-dialog-footer' },
+      },
+    },
+    'dropdown-menu': {
+      baseFamilyId: 'P-BASE-DROPDOWN-MENU',
+      recipeId: 'demo-bootstrap-2-3-2-dropdown-menu',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-dropdown-root',
+        'bootstrap-2-3-2-dropdown-trigger',
+        'bootstrap-2-3-2-dropdown-content',
+        'bootstrap-2-3-2-dropdown-item',
+        'bootstrap-2-3-2-dropdown-group',
+        'bootstrap-2-3-2-dropdown-label',
+        'bootstrap-2-3-2-dropdown-separator',
+        'bootstrap-2-3-2-dropdown-shortcut',
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU',
+          prototypeId: 'bootstrap-2-3-2-dropdown-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-dropdown-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-dropdown-content',
+        },
+        item: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-ITEM',
+          prototypeId: 'bootstrap-2-3-2-dropdown-item',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-GROUP',
+          prototypeId: 'bootstrap-2-3-2-dropdown-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-LABEL',
+          prototypeId: 'bootstrap-2-3-2-dropdown-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SEPARATOR',
+          prototypeId: 'bootstrap-2-3-2-dropdown-separator',
+        },
+        shortcut: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SHORTCUT',
+          prototypeId: 'bootstrap-2-3-2-dropdown-shortcut',
+        },
+      },
+    },
+    'hover-card': {
+      baseFamilyId: 'P-BASE-HOVER-CARD',
+      recipeId: 'demo-bootstrap-2-3-2-hover-card',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-hover-card-root',
+        'bootstrap-2-3-2-hover-card-trigger',
+        'bootstrap-2-3-2-hover-card-content',
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-HOVER-CARD',
+          prototypeId: 'bootstrap-2-3-2-hover-card-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-HOVER-CARD-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-hover-card-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-HOVER-CARD-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-hover-card-content',
+        },
+      },
+    },
     field: {
       baseFamilyId: 'P-BASE-FIELD',
       recipeId: 'demo-bootstrap-2-3-2-field',

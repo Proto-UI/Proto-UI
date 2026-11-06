@@ -156,6 +156,18 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
     registerExactPrototype('bootstrap-2-3-2-dialog-close', module.dialogClose);
   },
+  'bootstrap-2-3-2-dialog-close-icon': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-close-icon', module.dialogCloseIcon);
+  },
+  'bootstrap-2-3-2-dialog-header': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-header', module.dialogHeader);
+  },
+  'bootstrap-2-3-2-dialog-footer': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-footer', module.dialogFooter);
+  },
   'bootstrap-2-3-2-hover-card-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/hover-card');
     registerExactPrototype('bootstrap-2-3-2-hover-card-root', module.hoverCardRoot);

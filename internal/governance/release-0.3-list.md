@@ -58,6 +58,8 @@ Integration owner: the current authorized release coordinator. Existing topic cl
 
 Bootstrap 2.3.2 and Liquid Glass source, docs, optics/performance and independent family parity move to **0.4 WIP / Experimental**, including #1148/#1149 and the Liquid-specific source criteria 13/14/49. They must not be counted as stable 0.3 support. Keep their existing source/evidence and current PRs reviewable; do not delete valid work.
 
+The current user separately requested a real Bootstrap homepage demo. Its explicitly labelled **WIP** selector entry is an evaluation surface, not stable 0.3 support, complete Base parity, or acceptance of the older homepage-eligibility checklist. Liquid Glass remains excluded from that selector.
+
 Independent native-target expansion (GPUI, Qt, Flutter and additional SSR/backend matrices), Agent Harness applications and unrelated experiments belong to 0.4 when they are not required to deliver a committed 0.3 consumer. Mixed compiler/native Issues must retain separate 0.3 prerequisite children: an experimental target label never defers a shared Web-consumer defect. The ledger's `split` disposition retains both releases and the original condition rather than closing it.
 
 No draft entity is automatically promoted by inclusion here. Missing promised behavior is a blocker, not an implicit deferral. Publication, production deployment and lifecycle decisions retain their ordinary controls.

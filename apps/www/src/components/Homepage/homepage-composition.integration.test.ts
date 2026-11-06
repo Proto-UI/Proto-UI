@@ -7,7 +7,7 @@ import { createHomepageShowcase } from './homepage-showcase';
 
 // Real homepage recipe, loader, prototypes, renderer and WC Adapter in Happy DOM.
 // Synthetic input/keyboard events do not establish browser paint or pointer geometry.
-type Family = 'shadcn' | 'brutalist';
+type Family = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
 type ProtoElement = HTMLElement & {
   getExposes(): {
     value: { get(): number };
@@ -97,7 +97,7 @@ async function mount(family: Family) {
   return { host, ref, errors, writes, verifyPlan, stopSetup: () => cleanup?.() };
 }
 
-for (const family of ['shadcn', 'brutalist'] as const) {
+for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   describe(`${family} homepage scenes real WC integration`, () => {
     it('mounts ten real cards, decorative icons, a labelled sample chart and attribution', async () => {
       const view = await mount(family);
@@ -119,7 +119,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       expect(analytics.dataset.galleryBody).toBe('edge-media');
       expect(analytics.querySelector('.home-gallery__media')).not.toBeNull();
       const chart = analytics.querySelector<HTMLElement>('[role="img"]')!;
-      expect(chart.getAttribute('aria-label')).toContain('Sample data');
+      expect(chart.getAttribute('aria-label')).toMatch(/\bsample\b/i);
       const bars = analytics.querySelectorAll<SVGRectElement>('rect[data-gallery-bar]');
       expect(bars).toHaveLength(6);
       const initialHeights = [...bars].map((bar) => bar.getAttribute('height'));

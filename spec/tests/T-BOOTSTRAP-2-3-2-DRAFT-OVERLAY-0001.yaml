@@ -4,7 +4,7 @@ title: Bootstrap overlay projections coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Dialog, Hover Card, Tooltip and Drawer controlled/refusal, slot, disabled and recipe coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-PROTOCOL
@@ -23,6 +23,13 @@ cases:
       - P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-VISUAL
       - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER-VISUAL
     expectation: pinned-recipe-paint
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-STRUCTURAL-PARTS
+    title: Dialog header/footer slots and icon-only Close preserve anatomy and dismissal
+    covers:
+      - P-BOOTSTRAP-2-3-2-DIALOG-HEADER-COMPOSITION
+      - P-BOOTSTRAP-2-3-2-DIALOG-FOOTER-COMPOSITION
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON-BASE
+    expectation: passive-slots-and-accessible-close-dismissal
 implementations:
   - id: bootstrap-draft-overlay-projections
     kind: module-test
@@ -37,6 +44,9 @@ implementations:
       - P-BOOTSTRAP-2-3-2-DIALOG-TITLE
       - P-BOOTSTRAP-2-3-2-DIALOG-DESCRIPTION
       - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON
+      - P-BOOTSTRAP-2-3-2-DIALOG-HEADER
+      - P-BOOTSTRAP-2-3-2-DIALOG-FOOTER
       - P-BOOTSTRAP-2-3-2-HOVER-CARD
       - P-BOOTSTRAP-2-3-2-TOOLTIP
       - P-BOOTSTRAP-2-3-2-DRAWER
@@ -49,6 +59,9 @@ exercises:
   prototypes:
     - P-BOOTSTRAP-2-3-2-DIALOG
     - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE
+    - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON
+    - P-BOOTSTRAP-2-3-2-DIALOG-HEADER
+    - P-BOOTSTRAP-2-3-2-DIALOG-FOOTER
     - P-BOOTSTRAP-2-3-2-DIALOG-CONTENT
     - P-BOOTSTRAP-2-3-2-DIALOG-DESCRIPTION
     - P-BOOTSTRAP-2-3-2-DIALOG-MASK

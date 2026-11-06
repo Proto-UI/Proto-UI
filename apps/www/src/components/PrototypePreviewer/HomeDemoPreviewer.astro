@@ -223,22 +223,27 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     display: block;
     width: 100%;
   }
-  /* Noninteractive decorative tail; never over focusable controls or text. */
+  /* The reference shadcn tail is a viewport-width visual fade over the card
+     field, not another tiny in-flow column item. Keep it pointer-inert. */
   .home-demo-previewer :global(.home-gallery__fade) {
-    break-inside: avoid;
-    height: 2.5rem;
-    margin-block-end: var(--homepage-gallery-row-gap);
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 16rem;
+    max-height: 40%;
     pointer-events: none;
     user-select: none;
     background-image: linear-gradient(
-      to bottom,
-      transparent,
-      var(--pui-muted, var(--pui-background, transparent))
+      to top,
+      var(--pui-background, transparent) 0%,
+      color-mix(in oklab, var(--pui-muted, var(--pui-background, transparent)) 80%, transparent) 50%,
+      transparent 100%
     );
-    mask-image: linear-gradient(to bottom, transparent, black);
   }
   .home-demo-previewer :global(.home-gallery__attribution) {
-    break-inside: avoid;
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;

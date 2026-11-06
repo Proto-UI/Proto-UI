@@ -168,7 +168,7 @@ describe('Homepage page-owned runtime', () => {
     await settle();
     expect(initHomepageRuntime(root)).toBe(handle);
     await handle!.destroy();
-    expect(fakes.stopTheme).toHaveBeenCalledTimes(2);
+    expect(fakes.stopTheme).toHaveBeenCalledTimes(3);
     expect(document.querySelector<HTMLElement>('[data-homepage-fallback]')!.hidden).toBe(false);
     const count = fakes.materialize.mock.calls.length;
     document.dispatchEvent(new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue' } }));
@@ -218,14 +218,14 @@ describe('Homepage page-owned runtime', () => {
     expect(root.dataset.family).toBe('brutalist');
   });
 
-  it('rejects partial family requests before changing the committed homepage transaction', async () => {
+  it('rejects unsupported family requests before changing the committed homepage transaction', async () => {
     const root = fixture(true);
     handle = initHomepageRuntime(root);
     await settle();
     const generation = root.dataset.runtimeGeneration;
     const calls = fakes.materialize.mock.calls.length;
     const controls = fakes.materialize.mock.calls[0]![1].controls;
-    for (const family of ['bootstrap-2-3-2', 'liquid-glass', 'unknown']) {
+    for (const family of ['liquid-glass', 'unknown']) {
       expect(() => controls.family.onValueChange(family)).toThrow(/unsupported whole-site family/);
       await settle();
       expect(root.dataset.family).toBe('shadcn');
@@ -240,6 +240,17 @@ describe('Homepage page-owned runtime', () => {
     const retiredCalls = fakes.materialize.mock.calls.length;
     expect(() => controls.family.onValueChange('liquid-glass')).not.toThrow();
     expect(fakes.materialize.mock.calls).toHaveLength(retiredCalls);
+  });
+
+  it('runs the real Bootstrap homepage composition as a WIP family', async () => {
+    const root = fixture(true);
+    handle = initHomepageRuntime(root);
+    await settle();
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    controls.family.onValueChange('bootstrap-2-3-2');
+    await settle();
+    expect(root.dataset.family).toBe('bootstrap-2-3-2');
+    expect(root.dataset.runtimeState).toBe('ready');
   });
 
   it('a failed demo prevents the header and native action groups from committing', async () => {

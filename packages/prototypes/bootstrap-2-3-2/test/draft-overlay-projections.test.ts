@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
   dialogClose,
+  dialogCloseIcon,
+  dialogFooter,
+  dialogHeader,
   dialogContent,
   dialogDescription,
   dialogMask,
@@ -23,6 +26,9 @@ const protos = [
   dialogTitle,
   dialogDescription,
   dialogClose,
+  dialogCloseIcon,
+  dialogHeader,
+  dialogFooter,
   hoverCardRoot,
   hoverCardTrigger,
   hoverCardContent,
@@ -98,6 +104,28 @@ afterEach(async () => {
 });
 
 describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
+  it('preserves passive header/footer slots and dismisses through the icon-only Close', async () => {
+    const { root, mask, content } = appendDialog(document.body, { defaultOpen: true });
+    const header = document.createElement(dialogHeader.name) as Host;
+    const footer = document.createElement(dialogFooter.name) as Host;
+    const icon = document.createElement(dialogCloseIcon.name) as Host;
+    const heading = document.createTextNode('Preferences');
+    header.append(heading);
+    const authored = document.createTextNode('Confirm');
+    footer.append(authored);
+    content.append(header, footer, icon);
+    await flush();
+    expect(header.textContent).toBe('Preferences');
+    expect(footer.textContent).toBe('Confirm');
+    expect(icon.getAttribute('role')).toBe('button');
+    expect(icon.getAttribute('aria-label')).toBe('Close');
+    expect(icon.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    await completeTransitions(mask, content);
+    icon.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await flush();
+    expect(stateValue<boolean>(root, 'open')).toBe(false);
+  });
+
   it('inherits open/close ownership, presence, and title/description relations', async () => {
     const { root, trigger, mask, content, title, description, close } = appendDialog(
       document.body,

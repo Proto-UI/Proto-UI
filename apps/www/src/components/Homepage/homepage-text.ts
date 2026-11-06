@@ -42,12 +42,7 @@ export function homepageTextProps(
     ...(role.font === 'heading'
       ? {
           font: family === 'brutalist' ? 'heading' : 'body',
-          weight:
-            family === 'brutalist'
-              ? 'bold'
-              : className === 'home-gallery__title'
-                ? 'medium'
-                : 'semibold',
+          weight: family === 'brutalist' ? 'bold' : 'semibold',
         }
       : {}),
   };

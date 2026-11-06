@@ -23,7 +23,7 @@ const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
 const COMPONENT_OWNED =
   '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template';
 const PASSIVE_HEADER_FRAME =
-  '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"])';
+  '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"],[data-projection-prototype="bootstrap-2-3-2-surface-root"])';
 const MARKERS = [
   'data-typography-owner',
   'data-typography-runtime',
@@ -298,7 +298,10 @@ export function siteTypographyParticipant(
     ): Promise<MaterializedProjectionCandidate> {
       const runtime = request.selection.runtimeId;
       const family = request.selection.projectionFamilyId;
-      if (!isRuntimeId(runtime) || (family !== 'shadcn' && family !== 'brutalist'))
+      if (
+        !isRuntimeId(runtime) ||
+        (family !== 'shadcn' && family !== 'brutalist' && family !== 'bootstrap-2-3-2')
+      )
         throw new Error('[SiteTypography] Unsupported projection selection.');
       const selected = targets();
       const isCompact = compact();
@@ -380,7 +383,9 @@ export function siteTypographyParticipant(
                   // These native semantic owners are block reading units. WC
                   // host fallback and inline React/Vue spans must not choose
                   // different line boxes; labels/legends remain legal inline.
-                  className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption,li,dt,dd,th,td,caption,blockquote')
+                  className: native.matches(
+                    'h1,h2,h3,h4,h5,h6,p,figcaption,li,dt,dd,th,td,caption,blockquote'
+                  )
                     ? 'block'
                     : undefined,
                   ref: `surface-${index}`,

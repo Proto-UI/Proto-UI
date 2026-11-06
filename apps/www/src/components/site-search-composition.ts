@@ -26,7 +26,7 @@ export interface SiteSearchCopy {
 
 /** Public, reusable Dialog + Command composition. No DOM keyboard/dialog implementation. */
 export function createSiteSearchComposition(options: {
-  family: 'shadcn' | 'brutalist';
+  family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
   shadcnStyle: 'rhea' | 'new-york-v4';
   session: SiteSearchSession;
   copy: SiteSearchCopy;

@@ -23,6 +23,13 @@ describe('website library family scope', () => {
     expect(resolveSiteLibraryFamily(path)).toBe('brutalist');
   });
 
+  it.each(['/ui-libraries/bootstrap-2-3-2/', '/en/ui-libraries/bootstrap-2-3-2/button/'])(
+    'resolves the Bootstrap library route %s',
+    (path) => {
+      expect(resolveSiteLibraryFamily(path)).toBe('bootstrap-2-3-2');
+    }
+  );
+
   it.each([
     '/',
     '/en/',
@@ -91,9 +98,10 @@ describe('website library family scope', () => {
   });
 });
 
-it('does not promote a partial demo family into whole-site support', () => {
+it('admits only complete homepage family compositions', () => {
   expect(requireSiteLibraryFamily('shadcn')).toBe('shadcn');
   expect(requireSiteLibraryFamily('brutalist')).toBe('brutalist');
-  for (const family of ['bootstrap-2-3-2', 'liquid-glass', 'unknown', undefined, null])
+  expect(requireSiteLibraryFamily('bootstrap-2-3-2')).toBe('bootstrap-2-3-2');
+  for (const family of ['liquid-glass', 'unknown', undefined, null])
     expect(() => requireSiteLibraryFamily(family)).toThrow(/unsupported whole-site family/);
 });
