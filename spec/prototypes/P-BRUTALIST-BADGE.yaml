@@ -22,11 +22,13 @@ criteria:
   - id: P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     text:
       en: >-
-        Every tone retains 5px rounded-base corners, 2px black border and font-sans font-medium text-xs (12px/16px), with authored casing and no hard shadow. Tone fill/foreground pairs and passive semantics remain unchanged.
+        Every tone retains 5px rounded-base corners, 2px black border and font-sans font-medium text-xs (12px/16px), with authored casing and no hard shadow. Tone fill/foreground pairs and passive semantics remain unchanged. As a passive label under D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 it owns no hover or press motion.
 
 
       zh-CN: >-
-        每个 tone 保持 5px rounded-base 圆角、2px 黑边与 font-sans font-medium text-xs（12px/16px），保留作者大小写，无硬阴影；tone 色对与 passive 语义不变。
+        每个 tone 保持 5px rounded-base 圆角、2px 黑边与 font-sans font-medium text-xs（12px/16px），保留作者大小写，无硬阴影；tone 色对与 passive 语义不变。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 passive label，它不拥有 hover 或 press motion。
+    dependsOn:
+      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 
 
 sources:
@@ -43,7 +45,11 @@ dependsOn:
       C-FEEDBACK-STYLE-0003,
       C-RULE-INTENT-FEEDBACK-STYLE-0001,
     ]
+  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Named the passive-label category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 without changing the governed no-shadow visual grammar.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.

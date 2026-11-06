@@ -31,12 +31,23 @@ Rounded corners are part of this design language. Do not apply a blanket square-
 
 ## Depth and interaction
 
-| Surface | Rest | Hover / transient press |
+Depth and interaction motion follow the typed category grammar owned by `D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001`, not one universal shadow/lift/sink rule. Each row below names its category and traces to the owning P entity; exceptions are finite and listed in that decision.
+
+| Category (owning P entities) | Rest depth | Hover / transient press |
 | --- | --- | --- |
-| Button and Button-like triggers | 4px 4px zero-blur black shadow | +4px,+4px and no outer shadow |
-| Card / Dialog Content | 4px hard shadow | No invented control state |
-| Menus, Select, Hover Card, Tooltip, Badge, Textarea | No shadow | Existing paired states and reserved borders |
-| Tabs / Toggle / Switch | Flat | Existing state signals, no default Button displacement |
+| Elevated action control — Button, raised Surface, Dialog/Dropdown/Select/Collapsible Trigger, Accordion Item | 4px 4px zero-blur black shadow | +4px,+4px along the shadow axis and no outer shadow; no extra hover-only lift |
+| Raised panel — Card, Dialog/Alert Dialog/Command Dialog/Drawer Content, Calendar | 4px 4px hard black shadow | No invented control state or motion |
+| Anchored content panel — Dropdown/Context/Menubar/Navigation Menu Content, Autocomplete/Combobox/Select/Hover Card Content, Popover | 3px 3px zero-blur foreground shadow | No interaction motion; positioned by its prototype or Adapter |
+| Flat selection control — Toggle, Tabs Trigger | No shadow, no translation | Toggle hover/press keep `border-black`; only unselected, released Tabs Trigger gains hover fill/border; selected Trigger keeps its color pair without elevation; Toggle active 2px inset frame persists through press |
+| Binary capsule control — Switch | No shadow on Root or Thumb | No hover visual; press keeps fill and geometry; only the Thumb travels 20px with its 150ms transition |
+| Editable surface — Input, Textarea, Number Field, Input OTP | Input/Textarea: no shadow; Number Field/Input OTP small controls: 2px 2px border-colored shadow | No hover lift or press sink; existing focus ring and paired states |
+| Passive label — Badge, Text, Label, Kbd | No shadow | No interaction motion |
+| Loading placeholder — Skeleton | No shadow | Static; no imported pulse animation |
+| Scroll chrome and Separator — Scroll Area Root/Viewport/Scrollbar/Thumb, Separator | No shadow | No interaction motion; Root keeps its rounded overflow clip |
+| Flat overlay — Dialog Mask | No shadow | Only the governed 150ms open/close fade |
+| Flat interactive item — Dropdown/Context/Menubar/Select Item | No shadow | Background change only, no lift or press depth |
+
+Grouping surfaces (Toolbar Root, Toggle Group Root, Toast Root) keep a 3px 3px foreground shadow as passive containers without control displacement. No other rest-depth, hover-depth, or press-depth exception is admitted without revising the decision.
 
 The upstream reverse Button variant is separate; the current PUI API does not claim it. Toggle keeps a 2px inset active marker through press as a non-color PUI extension. Base continues to own active versus pressed, selection, keyboard behavior, ARIA and command wiring. Existing popup transitions and Spinner reduced-motion behavior remain intact; Skeleton remains static.
 
