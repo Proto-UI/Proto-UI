@@ -947,14 +947,35 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               expect(metrics.tree.width).toBeGreaterThan(120);
             }
             await page.keyboard.press('Escape');
+            const closeDeadline = performance.now() + 1000;
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('false');
             expect(await command.evaluate((element) => document.activeElement === element)).toBe(
               true
             );
+            // The website retains its native tree through the public leave barrier.
+            // Lease completion shares the original close budget, without a fixed sleep.
+            const remainingCloseMs = closeDeadline - performance.now();
+            expect(remainingCloseMs).toBeGreaterThan(0);
+            await expect
+              .poll(
+                () =>
+                  page.evaluate(() => {
+                    const state = window as typeof window & { __contentsOriginalTree?: Element };
+                    const tree = state.__contentsOriginalTree;
+                    return (
+                      !!tree?.isConnected &&
+                      tree === document.querySelector('nav.docs-sidebar') &&
+                      !tree.hasAttribute('data-site-contents-dialog-tree')
+                    );
+                  }),
+                { timeout: remainingCloseMs }
+              )
+              .toBe(true);
             expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
             expect(
               await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
             ).toBeNull();
+            expect(performance.now()).toBeLessThanOrEqual(closeDeadline);
           }
           // Real keyboard navigation selects the focus-visible state for the capture.
           await page.keyboard.press('Tab');
