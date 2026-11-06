@@ -23,7 +23,7 @@ Radio Group 包含 Root、Item 和 Indicator。Base 拥有选中值、Item 顺�
 | Item | 必填 `value`、可选 `disabled?` | 请求选值，派生 checked 与 effective-disabled。 |
 | Indicator | 无 | 反映最近 Item 的 checked 状态。 |
 
-为 Root 提供有意义的 `a11yLabel`，为每个 Item 提供同组内唯一、非空的 `value`。Item 的名称来自 authored content 或宿主标注。示例在每个 radio 内提供视觉隐藏文本，并在旁边显示标签；这些标签和行间布局由 App 拥有。
+为 Root 提供有意义的 `a11yLabel`，为每个 Item 提供同组内唯一、非空的 `value`。Item 的名称来自 authored content 或宿主标注。示例将每个 Item 与旁边真实的 `labelRoot` 配对，Label 从 `@proto.ui/prototypes-shadcn/label` 导入。双方通过 `InstanceAssociations.controlLabel` 接收同一个由 `createControlLabelRef()` 创建的稳定引用；可见 Label 就是可访问名称，不再放置隐藏副本。Base Label 默认激活配对的 Item，并遵守 Item/Group 的禁用状态。Label 设为 `activation={false}` 时只提供命名；组标题不会选择某个 Item。
 
 非受控 Root 接纳选值并发送 `valueChange`。提供 `value` 后，Root 发送请求，由 App 决定后续 value prop；投射不会制造中间 checked 值。空值或无法匹配的值会保留，选中的 Item 变为禁用后也可以继续 checked。
 

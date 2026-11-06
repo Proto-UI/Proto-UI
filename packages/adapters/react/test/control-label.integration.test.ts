@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { createControlLabelRef } from '@proto.ui/core';
 import { checkboxRoot } from '../../../prototypes/base/src/checkbox';
 import { switchRoot } from '../../../prototypes/base/src/switch';
+import { radioGroupRoot, radioGroupItem } from '../../../prototypes/base/src/radio-group';
 import labelRoot from '../../../prototypes/base/src/label';
-import { createMountedReactAdapter } from './utils/fake-react';
+import { createMountedReactAdapter, createMountedReactAdapterInto } from './utils/fake-react';
 function pointerClick(el: HTMLElement) {
   el.dispatchEvent(
     new PointerEvent('pointerdown', {
@@ -41,8 +42,6 @@ describe('react explicit instance-associated Label', () => {
       });
       const label = createMountedReactAdapter(labelRoot, {
         instanceAssociations,
-        naming: true,
-        activation: true,
       });
       try {
         for (let i = 0; i < 5; i++) await Promise.resolve();
@@ -198,3 +197,69 @@ it.each(['open', 'closed'] as const)(
     }
   }
 );
+
+it('default Radio Label forwards one valueChange/select callback and preserves controlled ownership', async () => {
+  const changes: unknown[] = [];
+  const selections: unknown[] = [];
+  const onValueChange = (event: unknown) => changes.push(event);
+  const instanceAssociations = { controlLabel: createControlLabelRef() };
+  const group = createMountedReactAdapter(radioGroupRoot, { defaultValue: 'a', onValueChange });
+  const host = () => {
+    const element = document.createElement('span');
+    group.root!.append(element);
+    return element;
+  };
+  const first = createMountedReactAdapterInto(radioGroupItem, host(), { value: 'a' });
+  const target = createMountedReactAdapterInto(radioGroupItem, host(), {
+    value: 'b',
+    instanceAssociations,
+    onSelect: (event: unknown) => selections.push(event),
+  });
+  const label = createMountedReactAdapter(labelRoot, { instanceAssociations });
+  const settle = async () => {
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  };
+  try {
+    label.root!.textContent = 'Option B';
+    await settle();
+    expect(target.root!.getAttribute('aria-labelledby')).toBe(label.root!.id);
+    pointerClick(label.root!);
+    await settle();
+    expect(group.ref.current.getExposes().value.get()).toBe('b');
+    expect(document.activeElement).toBe(target.root);
+    expect(changes).toEqual([{ value: 'b' }]);
+    expect(selections).toEqual([{ value: 'b' }]);
+    pointerClick(label.root!);
+    await settle();
+    expect(changes).toHaveLength(1);
+    expect(selections).toHaveLength(1);
+    group.update({ value: 'a', onValueChange });
+    label.update({ instanceAssociations, activation: false });
+    await settle();
+    first.root!.focus();
+    pointerClick(label.root!);
+    await settle();
+    expect(group.ref.current.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(first.root);
+    expect(changes).toHaveLength(1);
+    expect(selections).toHaveLength(1);
+    label.update({ instanceAssociations });
+    await settle();
+    pointerClick(label.root!);
+    await settle();
+    expect(group.ref.current.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(target.root);
+    expect(changes).toEqual([{ value: 'b' }, { value: 'b' }]);
+    expect(selections).toEqual([{ value: 'b' }, { value: 'b' }]);
+    group.update({ value: 'b', onValueChange });
+    await settle();
+    expect(group.ref.current.getExposes().value.get()).toBe('b');
+  } finally {
+    label.unmount();
+    target.unmount();
+    first.unmount();
+    group.unmount();
+    await settle();
+  }
+});

@@ -4,11 +4,8 @@ title: Control Label identity, ownership, lowering and Adapter evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable
-    admission remains blocked on independent review, complete native input/lifetime and assistive-technology
-    evidence.
-summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and
-  real browser admission.
+  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
+summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and real browser admission.
 cases:
   - id: T-CONTROL-LABEL-0001-CASE-IDENTITY
     title: Opaque identity and explicit channel preserve JSON Props
@@ -84,14 +81,12 @@ cases:
       - P-LIQUID-GLASS-LABEL-INHERITANCE
       - P-LIQUID-GLASS-LABEL-STYLE
       - P-LIQUID-GLASS-LABEL-CONSUMPTION
-    expectation: public-family-projection-of-one-independent-base-protocol
+    expectation: All five Label families inherit default-on activation; explicit false is naming-only, re-enabling and Prop removal restore activation, and unpaired labels never discover a target.
   - id: T-CONTROL-LABEL-0001-CASE-ANATOMY
     title: Module-owned nearest-root pairing uses the real Label input guard
     covers:
       - C-CONTROL-LABEL-0001-ANATOMY
-    expectation: Nested scope isolation, missing/duplicate targets, moved ancestry and in-flight pointer turn,
-      drag/cancel/modified/nested input, prevented click and text selection, reentrant disable and explicit
-      association conflict are independently asserted.
+    expectation: Nested scope isolation, missing/duplicate targets, moved ancestry and in-flight pointer turn, drag/cancel/modified/nested input, prevented click and text selection, reentrant disable and explicit association conflict are independently asserted.
   - id: T-CONTROL-LABEL-0001-CASE-SELECTION
     title: Explicit label text-selection policy defaults and overrides
     covers:
@@ -100,9 +95,9 @@ cases:
       - P-BASE-LABEL-OPTIONS
       - P-BASE-LABEL-ACTION
     expectation: >-
-      The 'policy' default derives select-none only from actionable labels, explicit auto/text/none
-      override in both directions, removal restores the derived default, and no second selection state
-      machine appears.
+      The 'policy' default derives select-none only from actionable labels, explicit auto/text/none override in both directions, removal restores the derived default, and no second selection state machine appears.
+
+
 implementations:
   - id: control-label-view-discovery
     kind: module-test
@@ -121,8 +116,7 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-PAIR
     notes:
-      - Injected host/projection failures exercise same-reference retry, partial-lease cleanup, original-error
-        preservation and newer reentrant association ownership; this is not native host evidence.
+      - Injected host/projection failures exercise same-reference retry, partial-lease cleanup, original-error preservation and newer reentrant association ownership; this is not native host evidence.
   - id: control-label-action-projection
     kind: module-test
     status: passing
@@ -213,8 +207,17 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-NATIVE
     notes:
-      - Native candidate execution and revision-bound captures remain pending; no synthetic fixture is
-        substituted.
+      - Native candidate execution and revision-bound captures remain pending; no synthetic fixture is substituted.
+  - id: control-label-shadcn-radio-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-NATIVE
+      - T-CONTROL-LABEL-0001-CASE-TARGETS
+    notes:
+      - Visible sibling Label mouse and touch activation, naming and disabled controls run through all four Web adapters; exact native DOM signal counts apply to WC, while framework callback counts are covered separately by Adapter tests. Fresh candidate execution remains required.
   - id: control-label-family-projections
     kind: adapter-test
     status: passing
@@ -238,8 +241,7 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-ANATOMY
     notes:
-      - Seven happy-dom module integration tests; native AT/browser event generation remains separately
-        required.
+      - Seven happy-dom module integration tests; native AT/browser event generation remains separately required.
 verifies:
   contracts:
     - C-CONTROL-LABEL-0001
@@ -265,6 +267,9 @@ verifies:
     - A-VUE-3-0001
     - A-VUE-2-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added default-on, opt-out and default-restoration coverage for all Label projections and associated targets, plus the real Shadcn Radio visible-label consumer.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Recorded the explicit selection-policy default and override assertions in the family projections implementation.

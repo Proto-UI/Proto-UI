@@ -59,7 +59,7 @@ async function pair(
   setElementAssociations(control, { controlLabel: ref });
   setElementAssociations(label, { controlLabel: ref });
   setElementProps(control, props);
-  setElementProps(label, { naming: true, activation: true, ...labelProps });
+  setElementProps(label, labelProps);
   document.body.append(control, label);
   await flush();
   return { ref, control, label, exposes: control.getExposes() };
@@ -135,7 +135,6 @@ describe('Web Component independent Control Label association', () => {
     setElementProps(second, { value: 'b' });
     const label = document.createElement('base-label-root');
     label.textContent = 'Option B';
-    setElementProps(label, { naming: true, activation: true });
     const ref = createControlLabelRef();
     setElementAssociations(second, { controlLabel: ref });
     setElementAssociations(label, { controlLabel: ref });
@@ -149,6 +148,32 @@ describe('Web Component independent Control Label association', () => {
     expect(group.getExposes().value.get()).toBe('b');
     expect(changes).toEqual([{ value: 'b' }]);
     expect(second.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(document.activeElement).toBe(second);
+    pointerClick(label);
+    expect(changes).toEqual([{ value: 'b' }]);
+    setElementProps(group, { value: 'a' });
+    (group as HTMLElement & { update(): void }).update();
+    setElementProps(label, { activation: false });
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    first.focus();
+    pointerClick(label);
+    expect(group.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(first);
+    expect(changes).toHaveLength(1);
+    expect(second.getAttribute('aria-labelledby')).toBe(label.id);
+    setElementProps(label, {});
+    (label as HTMLElement & { update(): void }).update();
+    await flush();
+    pointerClick(label);
+    // A controlled owner can refuse the proposal, while ordinary focus moves.
+    expect(group.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(second);
+    expect(changes).toEqual([{ value: 'b' }, { value: 'b' }]);
+    setElementProps(group, { value: 'b' });
+    (group as HTMLElement & { update(): void }).update();
+    await flush();
+    expect(group.getExposes().value.get()).toBe('b');
   });
   it.each(['base-checkbox-root', 'base-switch-root'])(
     'names and activates %s through the real independent Label',
@@ -243,14 +268,65 @@ describe('Web Component independent Control Label association', () => {
     expect(f.exposes.checked.get()).toBe(true);
     expect(f.exposes.indeterminate.get()).toBe(false);
   });
-  it('keeps a naming-only label passive', async () => {
-    const f = await pair('base-checkbox-root', {}, { activation: false });
-    pointerClick(f.label);
-    await new Promise<void>((resolve) => setTimeout(resolve, 0));
-    expect(f.exposes.checked.get()).toBe(false);
-    expect(f.label.getAttribute('data-pui-style') ?? '').not.toContain('select-none');
-    expect(f.control.getAttribute('aria-labelledby')).toBe(f.label.id);
-  });
+  it.each(['base-checkbox-root', 'base-switch-root'])(
+    'keeps a naming-only %s label passive',
+    async (target) => {
+      const f = await pair(target, {}, { activation: false });
+      pointerClick(f.label);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      expect(f.exposes.checked.get()).toBe(false);
+      expect(f.label.getAttribute('data-pui-style') ?? '').not.toContain('select-none');
+      expect(f.control.getAttribute('aria-labelledby')).toBe(f.label.id);
+    }
+  );
+  it.each(['base-input-root', 'base-textarea-root'])(
+    'keeps naming-only %s from requesting editor focus',
+    async (target) => {
+      const f = await pair(target, { defaultValue: 'Preserved' }, { activation: false });
+      const editor = f.control.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+        'input,textarea'
+      )!;
+      const focus = vi.spyOn(editor, 'focus');
+      try {
+        pointerClick(f.label);
+        expect(focus).not.toHaveBeenCalled();
+        expect(editor.getAttribute('aria-labelledby')).toBe(f.label.id);
+        expect(f.exposes.value.get()).toBe('Preserved');
+      } finally {
+        focus.mockRestore();
+      }
+    }
+  );
+  it.each(['item', 'group'])(
+    'keeps a default Label inert for a disabled Radio %s',
+    async (scope) => {
+      const group = document.createElement('base-radio-group-root') as HTMLElement & {
+        getExposes(): any;
+      };
+      setElementProps(group, { defaultValue: 'a', disabled: scope === 'group' });
+      const first = document.createElement('base-radio-group-item');
+      const second = document.createElement('base-radio-group-item');
+      setElementProps(first, { value: 'a' });
+      setElementProps(second, { value: 'b', disabled: scope === 'item' });
+      const label = document.createElement('base-label-root');
+      label.textContent = 'Unavailable option';
+      const ref = createControlLabelRef();
+      setElementAssociations(second, { controlLabel: ref });
+      setElementAssociations(label, { controlLabel: ref });
+      group.append(first, second, label);
+      const sentinel = document.createElement('button');
+      document.body.append(sentinel, group);
+      await flush();
+      sentinel.focus();
+      const changes: unknown[] = [];
+      group.addEventListener('valueChange', (event) => changes.push(event));
+      pointerClick(label);
+      expect(group.getExposes().value.get()).toBe('a');
+      expect(document.activeElement).toBe(sentinel);
+      expect(changes).toEqual([]);
+      expect(second.getAttribute('aria-labelledby')).toBe(label.id);
+    }
+  );
   it('withdraws naming on Label detach and restores the current association on remount', async () => {
     const f = await pair();
     f.label.remove();

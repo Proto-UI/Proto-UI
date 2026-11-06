@@ -95,7 +95,7 @@ async function waitForValueProjection(page: Page) {
 describe.sequential('Shadcn Radio Group public browser acceptance', () => {
   it.each(
     RUNTIMES.flatMap((runtime) =>
-      ['initial-entry', 'interaction'].map((scenario) => ({ runtime, scenario }))
+      ['initial-entry', 'interaction', 'labels'].map((scenario) => ({ runtime, scenario }))
     )
   )(
     '$runtime $scenario projects selection, focus, disabled and theme states through the real family',
@@ -103,6 +103,7 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
       const context = await browser.newContext({
         viewport: { width: 1280, height: 1000 },
         colorScheme: 'light',
+        hasTouch: scenario === 'labels',
       });
       const page = await context.newPage();
       const errors: string[] = [];
@@ -156,6 +157,91 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           await expect.poll(async () => (await itemState(selected)).focused).toBe(true);
           expect(await value.textContent()).toBe('Value: comfortable');
           observations.focus = await itemState(selected);
+          observations.errors = errors;
+          expect(errors).toEqual([]);
+          await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}.png`) });
+          await writeFile(
+            path.join(evidenceDir, `${evidenceKey}.json`),
+            JSON.stringify(observations, null, 2)
+          );
+          return;
+        }
+
+        if (scenario === 'labels') {
+          // The visible sibling Label is the sole name source and uses Base's
+          // default activation. WC exposes DOM CustomEvents; the framework
+          // adapters expose callbacks instead, covered by their integration tests.
+          const firstLabel = content.locator('[data-demo-ref="density-default-label"]');
+          const selectedLabel = content.locator('[data-demo-ref="density-comfortable-label"]');
+          const compactLabel = content.locator('[data-demo-ref="density-compact-label"]');
+          expect(await first.getAttribute('aria-labelledby')).toBe(
+            await firstLabel.getAttribute('id')
+          );
+          expect(await first.locator('.sr-only').count()).toBe(0);
+          expect(await firstLabel.getAttribute('tabindex')).toBeNull();
+          expect(await firstLabel.getAttribute('role')).toBeNull();
+          if (runtime === 'wc') {
+            await density.evaluate((element) => {
+              element.setAttribute('data-label-change-count', '0');
+              element.setAttribute('data-label-select-count', '0');
+              element.addEventListener('valueChange', () => {
+                element.setAttribute(
+                  'data-label-change-count',
+                  String(Number(element.getAttribute('data-label-change-count')) + 1)
+                );
+              });
+              element.addEventListener('select', () => {
+                element.setAttribute(
+                  'data-label-select-count',
+                  String(Number(element.getAttribute('data-label-select-count')) + 1)
+                );
+              });
+            });
+          }
+          const expectSignalCounts = async (count: number) => {
+            if (runtime !== 'wc') return;
+            expect(await density.getAttribute('data-label-change-count')).toBe(String(count));
+            expect(await density.getAttribute('data-label-select-count')).toBe(String(count));
+          };
+          await firstLabel.click();
+          await expect.poll(() => value.textContent()).toBe('Value: default');
+          await expect.poll(async () => (await itemState(first)).focused).toBe(true);
+          await expectSignalCounts(1);
+          await firstLabel.click();
+          await expectSignalCounts(1);
+          await selectedLabel.tap();
+          await expect.poll(() => value.textContent()).toBe('Value: comfortable');
+          await expect.poll(async () => (await itemState(selected)).focused).toBe(true);
+          await expectSignalCounts(2);
+          await compactLabel.click();
+          await content.locator('[data-demo-ref="disabled-default-label"]').click();
+          expect(await value.textContent()).toBe('Value: comfortable');
+          expect(
+            await disabled
+              .getByRole('radio', { name: 'Comfortable', exact: true })
+              .getAttribute('aria-checked')
+          ).toBe('true');
+          await expectSignalCounts(2);
+          observations.labels = {
+            signalCarrier:
+              runtime === 'wc' ? 'DOM CustomEvent' : 'callback; counted in adapter tests',
+            changes: await density.getAttribute('data-label-change-count'),
+            selections: await density.getAttribute('data-label-select-count'),
+            nameSource: await first.getAttribute('aria-labelledby'),
+          };
+          // Label does not create a keyboard path; the focused Item keeps it.
+          await selectedLabel.click();
+          await page.keyboard.press('ArrowRight');
+          await expect.poll(() => value.textContent()).toBe('Value: default');
+          await page.keyboard.press('End');
+          await expect.poll(() => value.textContent()).toBe('Value: comfortable');
+          expect(await density.locator('[role="radio"][tabindex="0"]').count()).toBe(1);
+          await page.keyboard.press('Tab');
+          const emptyFirst = empty.getByRole('radio', { name: 'Default', exact: true });
+          await expect.poll(async () => (await itemState(emptyFirst)).focused).toBe(true);
+          expect(await empty.locator('[role="radio"][aria-checked="true"]').count()).toBe(0);
+          await page.keyboard.press('Space');
+          await expect.poll(() => emptyFirst.getAttribute('aria-checked')).toBe('true');
           observations.errors = errors;
           expect(errors).toEqual([]);
           await preview.screenshot({ path: path.join(evidenceDir, `${evidenceKey}.png`) });

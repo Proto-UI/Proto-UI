@@ -618,8 +618,12 @@ const SHADCN_MANIFEST = {
         'shadcn-radio-group-root',
         'shadcn-radio-group-item',
         'shadcn-radio-group-indicator',
+        'shadcn-label-root',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: null, prototypeId: 'shadcn-style-scope' },
+        { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' },
+      ],
       parts: {
         root: {
           basePrototypeId: 'P-BASE-RADIO-GROUP',

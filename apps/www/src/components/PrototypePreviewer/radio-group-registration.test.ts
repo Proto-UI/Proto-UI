@@ -37,6 +37,44 @@ const RADIO_GROUP_FAMILIES = [
 ] as const;
 
 describe('Radio group actual DemoSpec registration', () => {
+  it('pairs every Shadcn visible option label without a duplicate hidden name', async () => {
+    const demo = await loadDemo('demo-shadcn-radio-group');
+    const nodes: Exclude<DemoChild, string>[] = [];
+    const visit = (node: DemoChild): void => {
+      if (typeof node === 'string') return;
+      nodes.push(node);
+      if (node.kind !== 'text') node.children?.forEach(visit);
+    };
+    visit(demo.root);
+    const items = nodes.filter(
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-radio-group-item'
+    );
+    const labels = nodes.filter(
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-label-root'
+    );
+    expect(items).toHaveLength(9);
+    expect(labels).toHaveLength(9);
+    const keys = new Set<string>();
+    for (const item of items) {
+      if (item.kind !== 'proto') throw new Error('Expected Radio Item');
+      const key = item.associations?.controlLabel;
+      expect(key).toBeTruthy();
+      keys.add(key!);
+      const paired = labels.filter(
+        (label) => label.kind === 'proto' && label.associations?.controlLabel === key
+      );
+      expect(paired).toHaveLength(1);
+      const label = paired[0];
+      if (label?.kind !== 'proto') throw new Error('Expected paired Label');
+      // Omission exercises the actual Base default rather than a demo override.
+      expect(label.props?.activation).toBeUndefined();
+      expect(item.children).toEqual([
+        { kind: 'proto', prototypeId: 'shadcn-radio-group-indicator' },
+      ]);
+    }
+    expect(keys.size).toBe(9);
+  });
+
   for (const { family, mdxPath, runtimes, slug, manifestBound } of RADIO_GROUP_FAMILIES) {
     it(`${family} loads only real family radio group atoms`, async () => {
       const recipeId = `demo-${family}-radio-group`;

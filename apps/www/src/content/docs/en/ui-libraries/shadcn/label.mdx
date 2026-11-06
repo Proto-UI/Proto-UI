@@ -20,11 +20,13 @@ The demo pairs this Label projection with real, visually neutral Base controls t
 ## Two independent effects
 
 - `naming` defaults to `true`. The target refers to the actual rendered Label using an accessibility relationship. Do not add a hidden copy of the same name.
-- `activation` defaults to `false`. With `true`, an eligible pointer or trusted non-pointer action requests the target's existing operation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
+- `activation` defaults to `true`. Once explicitly paired, an eligible pointer or trusted non-pointer action requests the target's existing operation. Set `activation={false}` for a naming-only label; setting it back to `true` or removing the Prop restores activation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
 - Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified pointer input, pointercancel and drag gestures are not forwarded.
 - Naming-only labels and long descriptions remain copyable. A short actionable Label declares its own selection affordance. The controlled example deliberately keeps its value off after proposals; this is the application's ownership decision.
 
 Activation stays in the originating click turn so editor focus is not delayed to a timer. Cancellation already observed by the host click listener is respected; a later listener cannot undo a committed operation. Cancelling pointerup alone is not click cancellation. This is a bounded custom Label protocol, not a claim to reproduce every native HTML label default-action detail. Actual assistive-technology behavior remains to be verified.
+
+Upgrade note: previously paired labels that omitted `activation` now activate by default. Declare `activation={false}` to retain passive naming. With `selection='policy'`, actionable labels suppress accidental text selection; use `selection='text'` when an actionable label must also be copyable. Unpaired labels never search for a parent or nearby control.
 
 ## Explicit association, outside JSON Props
 

@@ -14,10 +14,10 @@ function setupLabel(def: DefHandle<LabelRootProps, LabelRootExposes>): RenderFn 
     activation: { type: 'boolean', empty: 'fallback' },
     selection: { type: 'enum', options: [...CONTROL_LABEL_SELECTION_POLICIES], empty: 'fallback' },
   });
-  def.props.setDefaults({ naming: true, activation: false, selection: 'policy' });
+  def.props.setDefaults({ naming: true, activation: true, selection: 'policy' });
   const label = asControlLabel().label();
   const sync = (props: LabelRootProps) =>
-    label.sync({ naming: props.naming !== false, activation: props.activation === true });
+    label.sync({ naming: props.naming !== false, activation: props.activation !== false });
   def.lifecycle.onCreated((run) => sync(run.props.get()));
   def.props.watch(['naming', 'activation'], (_run, next) => sync(next));
   def.rule({
