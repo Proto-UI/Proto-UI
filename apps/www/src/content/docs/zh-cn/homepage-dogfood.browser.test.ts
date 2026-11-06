@@ -668,6 +668,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         await page.evaluate(() =>
           Object.assign(window, {
             __contentsOriginalTree: document.querySelector('nav.docs-sidebar'),
+            __contentsOriginalParent: document.querySelector('nav.docs-sidebar')?.parentNode,
+            __contentsOriginalNextSibling: document.querySelector('nav.docs-sidebar')?.nextSibling,
             __contentsOriginalDetails: [...document.querySelectorAll('nav.docs-sidebar details')],
             __contentsOriginalCurrent: document.querySelector(
               'nav.docs-sidebar [aria-current="page"]'
@@ -975,6 +977,21 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             expect(
               await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
             ).toBeNull();
+            expect(
+              await page.evaluate(() => {
+                const state = window as typeof window & {
+                  __contentsOriginalTree?: Element;
+                  __contentsOriginalParent?: Node | null;
+                  __contentsOriginalNextSibling?: Node | null;
+                };
+                const tree = state.__contentsOriginalTree;
+                return (
+                  !!tree &&
+                  tree.parentNode === state.__contentsOriginalParent &&
+                  tree.nextSibling === state.__contentsOriginalNextSibling
+                );
+              })
+            ).toBe(true);
             expect(performance.now()).toBeLessThanOrEqual(closeDeadline);
           }
           // Real keyboard navigation selects the focus-visible state for the capture.
