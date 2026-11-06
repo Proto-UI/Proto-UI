@@ -274,6 +274,10 @@ export function createRuntimePreviewSurface(
         prototypeId: (next) => surfacePrototypeId(next as ProjectionFamilyId),
         props: (next) => ({
           ...panelSurfaceProps('canvas'),
+          // Brutalist's canvas frame uses the family's hard-edge boundary;
+          // the default rounded-base token would introduce a Shadcn-like
+          // radius that conflicts with the outer family-owned frame.
+          ...(next === 'brutalist' ? { radius: 'none' } : {}),
           ...(next === 'liquid-glass' ? { variant: 'transparent' } : {}),
         }),
         layout: {
