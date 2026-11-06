@@ -11,6 +11,8 @@ Apply the current [0.3 delivery stages and bounded-completion policy](../../../i
 
 ## Close the actual criterion
 
+A checkbox update is itself a deliverable with the same rank as the code change, not optional bookkeeping. The bounded item is not complete until its earned checkbox, or an exposed independently addressable child checkbox, is checked with its PR, merge SHA and actual evidence and the write is read back. "A checkbox is not proof of completion" limits what a check proves to a reader; it never authorizes an Agent to leave earned progress unchecked, and it is never a substitute for performing reachable work. Record evidence debt beside the check with its concrete next action and owner, not instead of the check. An Agent that finishes the implementation but skips the tracking write has finished neither.
+
 1. At intake, bind each requested outcome to its original Issue checkbox or stable criterion key, expected consumer behavior, validation, owner and exclusions. Keep a short active TODO list; select a repair when the regression policy requires repair-only mode.
 2. Separate development completion from release acceptance. A reviewed, validated, integrated bounded change completes its own development criterion even if an unrelated family, host or umbrella criterion is still open. Mark that completed checkbox promptly with its PR, merge SHA and actual evidence.
 3. If one checkbox mixes several conditions, retain its complete original wording and source, expose independently addressable child checkboxes, and check the satisfied children. Give every remaining child a concrete next action and owner; do not repeatedly use the unfinished umbrella as a reason to withhold earned progress.
