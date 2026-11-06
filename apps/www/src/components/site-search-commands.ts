@@ -12,6 +12,7 @@ import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import {
   createProjectionScopeController,
   type ProjectionScopeCommit,
+  type ProjectionScopeController,
   type ProjectionScopeMaterializeRequest,
 } from './PrototypePreviewer/projection-scope';
 import {
@@ -38,12 +39,17 @@ export type SearchCommandParticipant = {
   bind(callbacks: SearchCallbacks): void;
   open(): void;
   toggle(): void;
+  onOpen?(listener: () => void): () => void;
   setRetryDisabled(value: boolean): void;
   focus(command: SearchCommand): void;
   materialize(
     request: ProjectionScopeMaterializeRequest,
     namespace?: string
   ): Promise<MaterializedProjectionCandidate[]>;
+  materializeDialog(
+    request: ProjectionScopeMaterializeRequest,
+    namespace?: string
+  ): Promise<MaterializedProjectionCandidate>;
   prepareCommit(commit: ProjectionScopeCommit): { publish(): void; rollback(): void };
   dispose(): void;
 };
@@ -279,6 +285,15 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       if (search) search.session.setOpen(!search.session.read().open);
       else callbacks?.open();
     },
+    onOpen(listener: () => void) {
+      if (!search) return () => {};
+      let wasOpen = search.session.read().open;
+      return search.session.subscribe(() => {
+        const isOpen = search.session.read().open;
+        if (isOpen && !wasOpen) listener();
+        wasOpen = isOpen;
+      });
+    },
     bind(next: SearchCallbacks) {
       callbacks = next;
       publishState();
@@ -303,51 +318,6 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         });
       const family = request.selection.projectionFamilyId as SiteLibraryFamily;
       const runtime = request.selection.runtimeId as RuntimeId;
-      const materializeDialog = async (): Promise<MaterializedProjectionCandidate> => {
-        if (!search || !dialogMount) throw new Error('Public Search owner is missing');
-        let candidate: MaterializedProjectionCandidate | undefined;
-        const current = () =>
-          !!candidate &&
-          candidate.host.dataset.projectionGenerationState === 'active' &&
-          !candidate.host.inert;
-        const composition = createSiteSearchComposition({
-          family,
-          shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
-          session: search.session,
-          copy: search.copy,
-          isCurrent: current,
-          onFailure: (error) => {
-            if (current()) search.fail(error);
-          },
-        });
-        const ids = new Set<string>();
-        collectPrototypeIds(composition.demo.root, ids);
-        const ownerId = `${owner}-${namespace}-dialog`;
-        dialogMount.dataset.projectionOwner = ownerId;
-        candidate = await materializeProjectionCandidate(request, {
-          mount: dialogMount,
-          ownerId,
-          componentId: 'dialog',
-          controls,
-          controlIds: [],
-          content: {
-            demo: composition.demo,
-            recipe: {
-              id: 'website-search-command-dialog',
-              prototypeIds: [...ids],
-              rootPrototypeId: `${family}-dialog-root`,
-            },
-          },
-        });
-        const prepared = candidate;
-        return {
-          ...prepared,
-          activate() {
-            prepared.activate();
-            composition.activate();
-          },
-        };
-      };
       const outcomes = await Promise.allSettled([
         ...commands.map(async (command, index) => {
           let candidate: MaterializedProjectionCandidate | undefined;
@@ -381,7 +351,6 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           });
           return candidate;
         }),
-        ...(search ? [materializeDialog()] : []),
       ]);
       const candidates = outcomes.flatMap((outcome) =>
         outcome.status === 'fulfilled' ? [outcome.value] : []
@@ -392,6 +361,52 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         throw failure.reason;
       }
       return candidates;
+    },
+    async materializeDialog(request: ProjectionScopeMaterializeRequest, namespace = 'homepage') {
+      if (!search || !dialogMount) throw new Error('Public Search owner is missing');
+      const family = request.selection.projectionFamilyId as SiteLibraryFamily;
+      let candidate: MaterializedProjectionCandidate | undefined;
+      const current = () =>
+        !!candidate &&
+        candidate.host.dataset.projectionGenerationState === 'active' &&
+        !candidate.host.inert;
+      const composition = createSiteSearchComposition({
+        family,
+        shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
+        session: search.session,
+        copy: search.copy,
+        isCurrent: current,
+        onFailure: (error) => {
+          if (current()) search.fail(error);
+        },
+      });
+      const ids = new Set<string>();
+      collectPrototypeIds(composition.demo.root, ids);
+      const ownerId = `${owner}-${namespace}-dialog`;
+      dialogMount.dataset.projectionOwner = ownerId;
+      candidate = await materializeProjectionCandidate(request, {
+        mount: dialogMount,
+        ownerId,
+        componentId: 'dialog',
+        controls,
+        controlIds: [],
+        content: {
+          demo: composition.demo,
+          recipe: {
+            id: 'website-search-command-dialog',
+            prototypeIds: [...ids],
+            rootPrototypeId: `${family}-dialog-root`,
+          },
+        },
+      });
+      const prepared = candidate;
+      return {
+        ...prepared,
+        activate() {
+          prepared.activate();
+          composition.activate();
+        },
+      };
     },
     prepareCommit(commit: ProjectionScopeCommit) {
       const names = [
@@ -464,6 +479,48 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   let alive = true;
   let attempt = 0;
   const retired = new Set<Promise<void>>();
+  // The public Dialog is only needed once the user opens Search. Defer its
+  // prototype loading and rendering so the open command can activate within
+  // the initial-ready budget instead of waiting for the full dialog tree.
+  let dialogController: ProjectionScopeController | null = null;
+  let dialogStarted = false;
+  const createDialog = () => {
+    const namespace = `docs-dialog-${++attempt}`;
+    return createProjectionScopeController({
+      initialSelection: { runtimeId: runtime, projectionFamilyId: family },
+      async materialize(request) {
+        const candidate = await participant.materializeDialog(request, namespace);
+        let stop: () => void;
+        try {
+          stop = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
+            candidate.setThemeSurfaceStyle(theme)
+          );
+        } catch (error) {
+          await candidate.dispose();
+          throw error;
+        }
+        return {
+          activate() {
+            candidate.activate();
+          },
+          setLocked(locked) {
+            candidate.setLocked?.(locked);
+          },
+          async dispose() {
+            stop();
+            await candidate.dispose();
+          },
+        };
+      },
+    });
+  };
+  const ensureDialog = () => {
+    if (!alive || dialogStarted) return;
+    dialogStarted = true;
+    dialogController = createDialog();
+    observe(dialogController.start(), dialogController);
+  };
+  const offDialogOpen = participant.onOpen?.(() => ensureDialog());
   const create = () => {
     const namespace = `docs-${++attempt}`;
     return createProjectionScopeController({
@@ -529,6 +586,12 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     if (isRuntimeId(next)) {
       runtime = next;
       void refresh();
+      if (dialogController) {
+        observe(
+          dialogController.request({ runtimeId: runtime, projectionFamilyId: family }),
+          dialogController
+        );
+      }
     }
   };
   document.addEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
@@ -538,9 +601,11 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     async destroy() {
       if (!alive) return;
       alive = false;
+      offDialogOpen?.();
       document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
       try {
         await controller.destroy();
+        if (dialogController) await dialogController.destroy();
       } finally {
         await Promise.allSettled([...retired]);
       }

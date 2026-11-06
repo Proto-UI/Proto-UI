@@ -203,11 +203,16 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
     const owner = root.querySelector<HTMLElement>('[data-search-dialog-mount]')!.dataset
       .projectionOwner;
     const gen = root.dataset.searchGeneration;
+    // The dialog lives in its own lazy scope whose generation differs from
+    // the opener's. Match by owner and ref; the active host is unique.
     return [...document.querySelectorAll<HTMLElement>('[data-demo-ref]')].find(
-      (node) =>
-        node.dataset.demoRef === name &&
-        node.dataset.projectionOwner === owner &&
-        node.dataset.projectionGeneration === gen
+      (node) => {
+        if (node.dataset.demoRef !== name || node.dataset.projectionOwner !== owner)
+          return false;
+        if (node.dataset.projectionGeneration === gen) return true;
+        const host = node.closest<HTMLElement>('[data-projection-generation-host]');
+        return host?.dataset.projectionGenerationState === 'active';
+      }
     );
   };
   cleanup.push(async () => {
@@ -243,7 +248,9 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
       // Only explicit owner retirement is absence, never infer a closed live
       // Dialog from a not-yet-mounted or already-detached Content view.
       if ((disposed || destroyCompleted()) && !dialog) return false;
-      if (!dialog) throw new Error('Live Search requires its current DialogRoot');
+      // The dialog is materialized lazily on first open; before that the
+      // closed state is the only observable value.
+      if (!dialog) return false;
       const context = compositionContexts.get(dialog);
       if (!context || context.refs.dialog !== dialog)
         throw new Error('Missing current DialogRoot context');

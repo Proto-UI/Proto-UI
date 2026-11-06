@@ -144,7 +144,9 @@ async function prepare(
 ) {
   const request = { selection: { runtimeId: runtime, projectionFamilyId: family }, generation };
   // This is the real participant/materializer path, including manifest and full registry lookup.
-  const prepared = await owner.materialize(request, 'public-test');
+  const commandCandidates = await owner.materialize(request, 'public-test');
+  const dialogCandidate = await owner.materializeDialog(request, 'public-test');
+  const prepared = [...commandCandidates, dialogCandidate];
   candidates.push(...prepared);
   expect(prepared).toHaveLength(2);
   for (const candidate of prepared) {
