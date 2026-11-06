@@ -1,8 +1,10 @@
 // Packed installed WC consumer. HappyDOM events are synthetic, not native or AT evidence.
 import { strict as assert } from 'node:assert';
+import { createRequire } from 'node:module';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import { loadConsumerStyles } from './consumer-smoke-css.mjs';
 
+const installedHostVersion = createRequire(import.meta.url)('happy-dom/package.json').version;
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'cli-wc-checkbox-label' });
 const facade = await import('./proto-ui/components/wc/index.ts');
@@ -11,6 +13,19 @@ const { createShadcnCheckboxLabelComposition } =
 const { setElementAssociations, setElementProps } = await import('@proto.ui/adapter-web-component');
 
 let stage = 'imports-complete';
+// Independent row receipt: which named contract cases this host actually ran,
+// and which of the shared case names remain native-only. Printed even on
+// failure so an interrupted row is never indistinguishable from a passing one.
+const attemptedCases = [];
+const nativeOnlyCases = [
+  'rich-label-naming',
+  'focused-space',
+  'removal-without-observed-pageerror',
+];
+let hostOrder = null;
+function attempt(name) {
+  attemptedCases.push(name);
+}
 // Observe fatal async failures without installing an exception/rejection handler
 // that would suppress Node's default nonzero exit.
 Error.stackTraceLimit = 40;
@@ -22,7 +37,12 @@ function checkpoint(next) {
   console.log(`packed WC Checkbox+Label stage: ${stage}`);
 }
 // Independent platform canary: no Proto definitions, adapter, context or timers.
-// Record the actual host order; do not repair it or replace the explicit case.
+// Record the actual host order from real connectedCallback invocations, then
+// require specification order. The required Checkbox context subscription runs
+// during the Indicator's own connect, so a host that connects the preassembled
+// child first cannot serve that subtree; that is a host prerequisite failure,
+// not a packed-delivery result. Nothing here reorders insertion, installs a
+// callback, or replaces the explicit case.
 function observePreassembledCustomElementOrder() {
   const order = [];
   class OrderingParent extends HTMLElement {
@@ -46,12 +66,19 @@ function observePreassembledCustomElementOrder() {
     JSON.stringify({
       kind: 'preassembled-custom-element-order',
       host: 'installed-happy-dom',
+      hostVersion: installedHostVersion,
       observed: order,
       specificationOrder: ['parent', 'child'],
       nativeAcceptance: 'not-run',
     })
   );
   wrapper.remove();
+  assert.deepEqual(
+    order,
+    ['parent', 'child'],
+    `installed-happy-dom ${installedHostVersion} connected the preassembled subtree out of specification order`
+  );
+  return order;
 }
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 50));
@@ -97,8 +124,9 @@ function hasTokens(element, tokens) {
 let primaryError;
 try {
   checkpoint('platform-order-canary');
-  observePreassembledCustomElementOrder();
+  hostOrder = observePreassembledCustomElementOrder();
   checkpoint('default-pairs');
+  attempt('default');
   const first = mount(),
     neighbor = mount();
   const strong = document.createElement('strong');
@@ -114,6 +142,7 @@ try {
     first.pair.control.instanceAssociations.controlLabel,
     neighbor.pair.control.instanceAssociations.controlLabel
   );
+  attempt('pair-isolation');
   assert.equal(indicators(first.control).length, 1, 'default facade must supply Indicator only');
   assert.equal(
     first.control.querySelector('proto-ui-shadcn-label'),
@@ -136,6 +165,7 @@ try {
     'delivered generated control CSS applies'
   );
   checkpoint('rich-label-activation');
+  attempt('label-pointer');
   press(strong);
   await settle();
   assert.equal(changes, 1);
@@ -143,11 +173,13 @@ try {
   assert.equal(neighbor.control.getAttribute('aria-checked'), 'false');
   assert.equal(document.activeElement, first.control);
   checkpoint('direct-control-activation');
+  attempt('direct-pointer');
   press(first.control);
   await settle();
   assert.equal(changes, 2);
   assert.equal(first.control.getAttribute('aria-checked'), 'false');
   checkpoint('interactive-descendant');
+  attempt('interactive-descendant-exclusion');
   const action = document.createElement('button');
   action.textContent = 'Separate action';
   first.label.append(action);
@@ -156,18 +188,38 @@ try {
   assert.equal(changes, 2, 'interactive descendant must not also activate control');
 
   checkpoint('explicit-and-state-cases');
-  const explicit = mount({ indicator: 'explicit' });
+  // The preassembled explicit Indicator is the known red case on this host: the
+  // installed host connects the child before its parent, so the composite mount
+  // throws before the remaining rows can be observed. Record that one failure
+  // and keep every following independent row executable. The insertion and its
+  // assertion stay unmodified, and the fixture still exits nonzero.
+  let explicitFailure;
+  let explicit;
+  attempt('preassembled-explicit');
+  try {
+    explicit = mount({ indicator: 'explicit' });
+  } catch (error) {
+    explicitFailure = error;
+    console.error(`packed WC Checkbox+Label independent case failure at ${stage}`, error);
+  }
   const omitted = mount({ indicator: 'none' });
   const raw = mount({ raw: true });
   const disabled = mount({ props: { disabled: true, defaultChecked: true } });
   const controlled = mount({ props: { checked: false } });
   const mixed = mount({ props: { defaultIndeterminate: true } });
+  attempt('omitted-indicator');
+  attempt('raw-root');
+  attempt('disabled');
+  attempt('controlled-rejection');
+  attempt('mixed');
   let disabledRequests = 0,
     controlledRequests = 0;
   disabled.control.addEventListener('checkedChange', () => disabledRequests++);
   controlled.control.addEventListener('checkedChange', () => controlledRequests++);
   await settle();
-  assert.equal(indicators(explicit.control).length, 1, 'explicit Indicator must not duplicate');
+  if (explicit) {
+    assert.equal(indicators(explicit.control).length, 1, 'explicit Indicator must not duplicate');
+  }
   assert.equal(indicators(omitted.control).length, 0, 'default Indicator omission stays supported');
   assert.equal(indicators(raw.control).length, 0, 'raw Root stays raw');
   assert.equal(mixed.control.getAttribute('aria-checked'), 'mixed');
@@ -186,6 +238,7 @@ try {
   );
   assert.equal(mixed.control.getAttribute('aria-checked'), 'true');
   checkpoint('naming-only');
+  attempt('naming-only');
   setElementProps(controlled.label, { naming: true, activation: false });
   await settle();
   press(controlled.label);
@@ -193,11 +246,18 @@ try {
   assert.equal(controlledRequests, 1, 'raw naming-only Label must not activate');
   assert.equal(controlled.control.getAttribute('aria-labelledby'), controlled.label.id);
   checkpoint('label-detach');
+  attempt('detached-label-programmatic-regression');
   first.label.remove();
   await settle();
   press(first.label);
   await settle();
   assert.equal(changes, 2, 'detached Label must not activate its former control');
+  if (explicitFailure) {
+    throw new AggregateError(
+      [explicitFailure],
+      'packed WC synthetic explicit preassembly failed; independent rows above were executed'
+    );
+  }
   console.log(
     'packed WC Checkbox+Label ok: actual public helper + generated facade + CSS; synthetic host only'
   );
@@ -207,6 +267,18 @@ try {
   throw error;
 } finally {
   checkpoint('cleanup');
+  console.log(
+    JSON.stringify({
+      kind: 'checkbox-label-packed-wc-synthetic-cases',
+      host: 'installed-happy-dom',
+      hostVersion: installedHostVersion,
+      hostOrder,
+      specificationOrder: ['parent', 'child'],
+      attemptedCases,
+      nativeOnlyCases,
+      syntheticAcceptance: 'synthetic-host-only-not-native-or-at',
+    })
+  );
   try {
     document.body.replaceChildren();
     await settle();

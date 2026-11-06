@@ -233,6 +233,84 @@ main Base `field/index.ts:11–16` 已导出 FieldTextarea，但 CLI Base Field 
 
 以上摘要保持红、绿及启动失败三类证据各自独立；#1001 已有精确 head CI 与 source-review 记录，但仍有未解决失败，不能称最终验收通过。
 
+### 6.4 第二片记录：Shadcn Checkbox + 独立 Label 推荐构造（#998）
+
+状态：**公开构造已存在于 main `c6483f85637d753a8a3e46649d86ba079bf2f42d`，lifecycle 仍为 draft；packed WC 合成阶段在一个连接顺序不符合规范的宿主上失败，native 输入、安装闭包与独立验收未完成。本节只记录实际观察与已存在的断言，不把“候选源码存在”或“父级历史运行”写成通过。本轮续作补齐 native `association-failure-recovery` 用例与 aggregate receipt 契约（源码就绪），执行、receipt 产出与 head 绑定仍为 UNRUN。**
+
+来源与边界：[#998](https://github.com/Proto-UI/Proto-UI/issues/998) 的九条 path 范围与 “API names and contract remain reviewable draft decisions” 措辞保持不变；owner 记录为 dot acting for cyjin-yl，旧 lease 到期不构成转移。claimed 独立 metadata 修复（`P-SHADCN-CHECKBOX` 的 `references.contracts` 与 `P-BASE-SWITCH` 的 criterion 级 `dependsOn.contracts` 改为 `id`/`since: 0.3.0-alpha.1` 对象）已在该 base 内，本片不重复修改，也不接管 `P-BASE-SWITCH` 的其他内容。
+
+记录分工：本节只占 6.4 的构造/证据范围；packed consumer 与宿主准入由 #1000 在 6.5 单独记录（其 script/manifest/delivery record 仍归 #1000，本片不改）。native fixture `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs` 经 Main 批准与 #1000 双向确认后由本片独占维护。#998 的九条 path 之外只新增这一条被明确授予的 fixture 路径，外加 `spec/tests/T-CHECKBOX-LABEL-COMPOSITION-0001.yaml` 的 native 证据映射。既有 §6.1–§6.3 不重编号、不改写，本轮也不因此改公开 MDX 或新增 workflow。
+
+候选身份（base blob，非新提交；提交后由父级绑定最终 head）：
+
+| 路径 | blob |
+| --- | --- |
+| `packages/prototypes/shadcn/src/checkbox/composition.ts` | `c238dd004c154e164a76bc51cb37becc979e1d65` |
+| `packages/prototypes/shadcn/src/checkbox/index.ts` | `5ee3915162e7c2a7439674faa5ea3beba471235c` |
+| `packages/prototypes/shadcn/src/index.ts`（仅常规聚合导出） | `ecc68db91cfc30084992dfa3c8a0cc37ad32744b` |
+| `packages/prototypes/shadcn/test/checkbox-label-composition.test.ts` | `9ae5510d5ee1bc6f0eb887e2b173dddba2f9c405` |
+| `spec/contracts/C-CHECKBOX-LABEL-COMPOSITION-0001.yaml` | `12b16fd35c1e3b2502bde6e6fbdfe5c170c0bc2b` |
+| `spec/prototypes/P-SHADCN-CHECKBOX.yaml` | `d189916ffe7c4044477ec215b0fb6a695fd72523` |
+| `spec/tests/T-CHECKBOX-LABEL-COMPOSITION-0001.yaml` | `d733f938431e7780ea8d08f4e59255f3e1cf9aa7` |
+| `apps/www/src/content/docs/zh-cn/checkbox-composition.mdx` | `c53a7eac7df53e22c9bcdc727e15820bd49389c9` |
+
+本轮续作增量（工作区未提交，父级绑定最终 head）：除下表三处外，本 Issue 触及的构造、测试、contract/prototype 与 MDX 文件在 `c6483f85` base 与当前真实 main `c8a006403f4dfc850ee3cec5633c17f394ccd308` 上逐字节一致（该区间内 main 只改了无关的 `packages/prototypes/shadcn/src/dialog/content.proto.ts` 与 `overlay-profiles-r91.test.ts`），因此本轮没有改 `composition.ts`、`checkbox/index.ts`、`packages/prototypes/shadcn/src/index.ts`、`checkbox-label-composition.test.ts`、`C-CHECKBOX-LABEL-COMPOSITION-0001.yaml`、`P-SHADCN-CHECKBOX.yaml`、`P-BASE-SWITCH.yaml` 或 `checkbox-composition.mdx`。本轮只改三处：
+
+| 路径 | base blob | 工作区 blob | 工作区 SHA-256 |
+| --- | --- | --- | --- |
+| `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs` | `d6c010f76fa7ebbfa35fc61a7cebab8338aeaf46` | `2ffff9183f75b4892064d8c3a93c300de2c80697` | `4a85e3468e46a9b68215bf41926fa24c95cac61a20f1412880e7582555eacde6` |
+| `spec/tests/T-CHECKBOX-LABEL-COMPOSITION-0001.yaml` | `d733f938431e7780ea8d08f4e59255f3e1cf9aa7` | `6355ed3a01081f7384ae62252cf1cf63225ab9d2` | `0cbab054d4a2203d68472edabbbcb06edb91168f0dcf770cd2bf07b9945c97a5` |
+| `internal/coverage-matrices/composition-delivery-parity.md`（本文） | `99bcefc09b2a15ddb34e45d3f23665fed9794b6e` | — | 由父级在提交后读取实际字节 |
+
+`spec/tests/T-CHECKBOX-LABEL-COMPOSITION-0001.yaml` 的增量仅为：新增 `T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-NATIVE`（covers `-EVIDENCE` 与 `-OWNERSHIP`）与 `checkbox-label-packed-native-fixture`（`kind: fixture`、`status: planned`、`required: true`、consumes `CASE-NATIVE`），并在 notes 明确不宣称执行；实体 `status: draft`、`since`、`revisions` 与既有 `planned` adapter-test 条目不变，`C-CHECKBOX-LABEL-COMPOSITION-0001` 仍为 draft，未提升任何 lifecycle。
+
+公开定义与唯一语义所有者：`@proto.ui/prototypes-shadcn/checkbox` 与包聚合导出 `shadcnCheckboxLabelComposition`、`createShadcnCheckboxLabelComposition()`、类型 `ShadcnCheckboxLabelCompositionInstance`；其余 raw 原子（`shadcnCheckboxRoot`、`shadcnCheckboxIndicator`、`componentPreset`、`shadcnCheckboxComponentPreset`）语义不变。构造本体只新增冻结的容器与 Label 默认 props，引用现有 atom 与共享 preset 的 identity；Indicator 的 required context 属于 Base family（`P-BASE-CHECKBOX-INDICATOR-CONTEXT-REQUIRED`），默认部件替换属于既有 Checkbox preset（`packages/prototypes/shadcn/src/checkbox/preset.ts` 与 CLI registry 生成物），checked/混合/disabled/controlled/focus/name 行为仍归 Checkbox 与 ControlLabel。官方固定基线保持 shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 New York Checkbox，本片不升级。
+
+最小复现与现象（packed WC consumer，父级提供的 scheduled run `41977517573`，head `4db5275154fbc80b393c27d6148b8403e7c61361`，日志 `/tmp/release03-run41977517573-cli-smoke-20261105.log`）：
+
+- 实际：真实 tarball 安装的消费者中，`platform-order-canary`、`default-pairs`、`rich-label-activation`、`direct-control-activation`、`interactive-descendant` 五个阶段先通过；第一个“把显式 Indicator 预先组装进 Root”的用例在 `mount:start:explicit` 抛出 `[Context] provider missing for key: base-checkbox`（`CONTEXT_PROVIDER_MISSING`）。栈落在 `@proto.ui/prototypes-base` 的 `setupCheckboxIndicator` → `def.context.subscribe(CHECKBOX_CONTEXT)`，cleanup 阶段再次出现同类致命 rejection 并导致进程非零退出。失败保留，未加捕获或抑制。
+- 期望：显式 Indicator 作为 Root 直接子元素时，既有 preset 不再追加第二个默认 Indicator；Root/Label 关联、disabled/mixed/controlled、raw naming-only、detach 行为与其余阶段一致。
+- 分类：同一进程内的独立 canary（不含 Proto 定义、adapter、context、timer）实测 `observed: ["child","parent"]`、`specificationOrder: ["parent","child"]`，即该宿主先运行后代的 `connectedCallback` 再运行祖先，违反 WHATWG 自定义元素反应顺序。仓库 devDependency 是 happy-dom 15.11.7，其 `Node[connectedToNode]` 先连接自身再遍历子节点（`node_modules/happy-dom/lib/nodes/node/Node.js:718-748`）；失败运行时的 packed 消费者按当时的 `scripts/release/consumer-smoke-cli.mjs` 安装 `@happy-dom/global-registrator` 20.11.0（#1000 报告解析为 happy-dom 20.14.6；该 pin 随后已由 #1000 在 6.5 处置中改为 15.11.7，此处只记录失败运行的实际 pin）。默认用例之所以通过，是因为生成 facade 先计算 `hasDirectDefaultPart`、连接 Root、再追加默认 Indicator（`packages/cli/src/services/codegen.ts:217-229`），子元素拿到已存在的 provider；只有预先组装会改变顺序。
+- 已排除的错误假设：不是模块双重身份 —— 栈中只有单一安装 `@proto.ui/*` 树，且同进程默认用例成功订阅 provider；也不是 Label payload 或负向准入回归（#1000 报告这些阶段通过）。
+- 归属与排除：本失败属于“宿主连接顺序 × Base 的 required context”，不是 #998 构造契约的偏差。把子会话推迟到祖先已 provide 之后属于新的跨族恢复语义，超出本 Issue promise 与本轮 repair-only 边界；#998 不改 adapter/runtime/core/Compiler，也不改 #1000 的 fixture 与既有断言。
+
+验收映射（#998 正文六项；实际证据、父级历史结果与未运行分开记录）：
+
+1. 公开子路径与类型暴露审查过的构造与既有 part 定义，raw 导出与默认 Indicator 替换不变：源码层面已满足（`composition.ts`、`checkbox/index.ts`、包 `exports["./checkbox"]`、包聚合）。安装后类型检查未由本片执行。
+2. 每个实例恰好共享一个 Root/Label 引用、两实例隔离、冻结默认值不可泄漏、无序列化或全局生命期声明：由 `checkbox-label-composition.test.ts` 的三个构造用例断言（同一引用、跨实例不同、`Object.isFrozen` 集合、`JSON.stringify` 抛错、`Object.keys` 形状）。
+3. 既有 adapter 路径的 plain/rich 可见名称单次激活、正确名称、disabled/mixed/controlled 拒绝、直接 control 动作、raw naming-only、交互后代排除、rebind 与 detach 隔离：由同文件的三个合成宿主用例断言。detach 不等于 terminal runtime disposal。
+4. Native pointer/keyboard/focus 与真实 accessible name：**未运行**；候选 fixture 的用例范围与新增 `association-failure-recovery` 见下节，receipt 契约亦见下节。
+5. 同一 PR 的诊断工作流、来源 pin、累计记录与实际验证/限制：§6.1/§6.2 步骤、packed fixture 与脚本、本节。本轮不新增 CI workflow、不扩大 Actions 权限；`cli-smoke` 在 PR 事件被 job 级 `if` 跳过，PR 不因此产生打包证据。
+6. 精确 head CI、DCO、依赖与独立 review：父级与集成门，未完成；本记录不提供、不代替。
+
+#### 父级 19/19 receipt 的真实绑定
+
+只绑定该 receipt 本身，不重标为当前 c8/packed/native 通过：`/tmp/release03-issue998-parent-focused-20261105.json` 是 vitest JSON，`numTotalTestSuites: 9`、`numTotalTests: 19`、`numPassedTests: 19`、`numFailedTests: 0`、`success: true`，`startTime: 1793812739670`。逐条来源（均在该 worktree 内运行）：
+
+| suite | 用例数 | 逐条用例 |
+| --- | --- | --- |
+| `packages/modules/control-label/test/activation-projection.test.ts` | 4 | activation false 挂载→toggle→旧 view lease 退役；activation true 同上；reentrantly installed association 不被旧 host-lease cleanup 撤销；target participant 即使 options 变化也永不取得 Label action |
+| `packages/modules/control-label/test/failure-recovery.test.ts` | 9 | host attach 抛错后同一 reference 重试；失败 name contribution 与 partial host 撤销后同一 pair 重试；failed-lease cleanup 安装的更新 association 被保留且保留首个错误；失败 attach callback 内安装的新 reference 不被清空；clearing failed naming projection 也抛错时保留原始错误；withdrawal 期间 reentrant 安装的 successor 保留；view presence 撤回原本健康 participant 的诊断；association intent 移除后清掉 stale foreign scope error；naming cleanup 安装的 successor 保留自己的 diagnostic |
+| `packages/prototypes/shadcn/test/checkbox-label-composition.test.ts` | 6 | 三个构造用例 + 三个合成宿主用例（rich naming/单次激活/直接 control/嵌套动作排除；disabled/mixed/controlled/raw naming-only；rebind/邻居隔离/detach） |
+
+该 receipt 证明的是其 `startTime` 时刻的候选源码；它不覆盖 c8 native、packed 或 install 结果。13 条 Control Label 用例属 module owner 的既有语义，本片只作为 #998 消费方的历史绑定，不宣称重新验收；本记录未重跑任何用例。
+
+#### Native fixture 范围与新增 recovery 用例
+
+候选 fixture `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs` 由本片独占维护（#1000 已确认不写该文件、不 pin 其静态 SHA），沿用既有 harness：预装 Chromium（无下载 fallback）、loopback server、固定 CSP、adapter 两条 infrastructure style 的精确 hash、自带 `pui-native-order-*` 平台顺序 canary（先断言 `['parent','child']` 再跑产品用例）；本轮不加 timer、阈值或跳过。其 `coveredCases` 声明范围现为 17 项：`default`、`preassembled-explicit`、`rich-label-naming`、`label-pointer`、`direct-pointer`、`focused-space`、`interactive-descendant-exclusion`、`pair-isolation`、`omitted-indicator`、`raw-root`、`disabled`、`controlled-rejection`、`mixed`、`naming-only`、`association-failure-recovery`、`detached-label-programmatic-regression`、`removal-without-observed-pageerror`。
+
+本轮新增的唯一 native 用例是 `association-failure-recovery`（源码就绪、执行未运行）：同一 pair 的 control 保持 detached，Label 先连接——这正是既有 Control Label registry 的 `missing-binding` 状态（`packages/modules/control-label/src/registry.ts:56-131`：无 target 时 `withdraw`，`requestActivation` 仅在 pair 为 current 时激活），不是新语义。断言顺序：detached 时 `aria-labelledby` 仍为 `null` → 真实点击 Label 后 `checkedChange` 精确 0 → 把**同一** control 接入**同一** container（不 rebind、不换 reference）→ 等 `aria-labelledby === label.id` → 真实点击 Label 后 `checkedChange` 精确 1 且 `aria-checked === 'true'`；pageerror、console error 与网络请求必须同时为空。该用例只证明既有失败绑定能通过同一 reference 恢复，不证明 terminal disposal、AT 输出或完整可访问性树。既有 `mount()`、CSP、样式 hash、顺序 canary 与其他 stage 未改动。
+
+#### CLI delivery 接收契约（本片准备，执行与接收方非本片）
+
+fixture 只有在全部真实 assert 通过且错误通道为空后，才把单个聚合对象写入 `<consumer>/checkbox-native-evidence.json`（UTF-8 + 末尾 `\n`，`kind: 'checkbox-label-packed-native-evidence'`，字段与既有 shape 一致：`testedCommit`、`releaseVersion`、`packages`、`lockSha256`、`generatedFacadeSha256`、`fixtureSha256`、`repoLockSha256`、`tooling`、`browser`、`runnerImage`、`inputs`、`resources`、`platformOrder`、`infrastructureStyleHashes`、`outcome`、`coveredCases`、`syntheticAcceptance`、`registryPublication`），随后把同一字符串作为最后一行 stdout 输出。失败时先抛 `AggregateError`，既不产生该文件也不产生 JSON 行，因此“exit 0 但没有 receipt”必须由读取方 fail-closed 判红。`coveredCases` 是整个 fixture 的 aggregate 声明范围，不写逐 case passed，也不虚构执行。该文件契约已与 #1000 双向确认（Main 选定方案 B：保持 stdio inherit、落盘读取）；其 `scripts/release/consumer-smoke-cli.mjs` 中由 `phase` 派生的 `nativeAcceptance` 字面量如何调整，由 #1000 审实际 schema/receipt producer 后交 Main 决定，本片不改 `scripts/release/*`、consumer manifest 或 delivery record。
+
+负向控制（必须保留，不能替换为源码字符串或 wiring 检查）：default-pairs 默认 Indicator 不重复；`data-pui-no-default-indicator` 关闭路径；`ShadcnCheckboxRootElement` 不自动补 Indicator；controlled rejection 后 `aria-checked` 保持 `false`；naming-only 不激活且保留 `aria-labelledby`；detach 后的旧 Label 不再激活其原 control；`association-failure-recovery` 中 detached control 时 `aria-labelledby` 仍为 `null` 且真实点击 `changes` 精确 0，接入同一 control 后单次真实点击只产生 1 次变化；native lane 以 exit 0 结束但 `<consumer>/checkbox-native-evidence.json` 缺失或不可解析时必须判红，不得回退为“通过”。
+
+未完成、失败与不得声称的事项：packed WC 阶段当前为红，不能记为通过；该 preassembled 用例只在“祖先先连接”的宿主上可验证，只能由符合规范顺序的真实浏览器/native 证据承担；本片无 UI 截图、无精确 head CI 结论、无独立 review 结论、无 terminal disposal 与安装闭包证据。本轮未执行任何 test/build/type/lint/format/browser/native/install/CI 命令；19/19 只是父级 receipt 的历史绑定，新增的 `association-failure-recovery` 与其 receipt 全为 **UNRUN**，不得写成通过。支持矩阵不变：构造仍为 draft、source-owned，不宣称其他族投影（其他族需各自源码绑定实现，不能复制 Shadcn 样式或身份）。父级裁定该观察属于 CI simulator/fixture 记录：本片不改公开 `checkbox-composition.mdx`，不把宿主编排写进正常消费者用法，也不新增 deferral 承诺；生产 Adapter 的顺序硬化（R1）未获批准，仍只是待 Adapter owner 评估的提案，不是本 Issue 的缺陷修复。
+
+后续状态（peer 记录，非本片执行）：#1000 在其 6.5 中已采取 fixture-only 处置 —— 两个 isolated consumer manifest 同时 pin `@happy-dom/global-registrator` 15.11.7 并显式声明 `happy-dom` 15.11.7（`scripts/release/consumer-smoke-cli.mjs:93-94`、`:234-235`，声明/安装/lock 一致性由 `readInstalledSyntheticHostEvidence` 硬断言），真实 `connectedCallback` 顺序 canary 升为硬前置（记录 `hostVersion` 与实测顺序，先断言 `['parent','child']` 再跑产品用例，见 `packages/cli/test/smoke-render/wc-checkbox-label.mjs:54-74`）。spec 顺序用例不再被跳过，本节仍保留 20.14.6 上的历史红与 #1000 报告的原生 Chrome 对照，均为已发生证据，不改写为当前通过；生产 Adapter 顺序硬化（R1）仍未获批。下一步：#998 继续只维护 6.4 的构造与证据，若实装需要变化再由新的 owner 方向授权；native 输入、安装闭包与独立 review 由父级及对应 owner 执行。
+
 ## 7. 可实施 Stacked Issues / PR 依赖图
 
 ```text
@@ -692,3 +770,157 @@ node --test --test-isolation=none \
 - 有界实际验证使用仓库原 `collectDependencyOwners`、`normalizeLiveIssue`、`normalizeLivePullRequest`、`reconcileGovernanceSnapshot`、`hasGovernanceDrift`，输入 exact-parent 两 matrix 与本次 authenticated API 读取的 28 个对象，在既有 Node 24 guard/只读白名单下执行。旧 snapshot `hasGovernanceDrift=true`；同源携带版本 `hasGovernanceDrift=false`；27 Issues/1 PR 全部保留，断言进程 exit 0。没有运行网络 CLI main，也不冒称 hosted `--check` 已通过。
 - 可复现流程：固定 head，读取上述两 matrix 和 retained snapshot；读取它们绑定的 Issues/PR，按 canonical normalize/reconcile 比较；保留变更字段与旧正文 hash 证据；只在 owner 协调后携带现有 canonical source；再运行最终 head 的 `node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check` 与正常 CI。不要因日志提示就自动 `--write` 或推断 owner。
 - 仅追加 README 的报告链接并校正此前“尚未发布”的时态，已发布的 bdeef/ee40 证据不冒充本片新测试。ee40 的 popup-boundaries 与 binary-and-buttons 两个目标 CI jobs 已真实通过完整 187/187 计划测试（含 exactly-once 与 toolbar），随后 native capture 在 rest 阶段因 authored materialized anatomy/current conditional subtree 缺失失败，不能称整 shard 通过；其余 shards 与最终新 head 仍需验收。日志与 raw artifacts 见 [popup job](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/job/121088651821)、[popup artifact](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/artifacts/12590005407)、[binary job](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/job/121088651814)、[binary artifact](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/artifacts/12589680225)。这里只读取 official CI 日志，未下载或视觉检查这些 artifacts。其他真实失败（private SSR PUI3301、material public-source/blur、原生视觉/几何和 preview artifact 预算）保持各自 owner 与原日志，不因治理修复获豁免。#1000 仅承担 Checkbox composition/install 闭包，不自动扩大为 Shadcn Field registry owner。
+
+## 续记：§6.5 — #1000 的 packed Checkbox+Label WC 交付与宿主准入（2026-11-05 UTC）
+
+状态：**实现已由 #1000 的交付分支进入 main；#1000 自身验收仍未通过。** 交付实现由 `dot/1000-checkbox-label-packed` 的 `a11b7daf8`、`5da8d1aa8`、`d2099b6ac` 合入（packed CLI consumer 的 Checkbox+Label 闭包、WC synthetic fixture、WC native fixture、公开 MDX）。本节追加 exact-main 的真实运行证据、根因与有界修复候选；不把 red 写成通过，也不改写 §6.3 与前两次「续记」的既有行。
+
+编号约定：本片是独立的 packed-consumer / host-admission addendum，编号 §6.5，与 #998 的 §6.4 construction/evidence addendum 并列，互不覆盖。为避免与 §6.4 争夺同一个 §6.3→§7 插入位，本节以文件末尾的追加记录形式存在，标题保留 §6.5 编号；整合时如需要可按编号机械移位，不得改动其中绑定的 SHA。本片只写 packed 交付与宿主准入事实，不重述或改写 #998 的构造语义结论。
+
+### 来源、范围与 owner
+
+- 来源 Issue [#1000](https://github.com/Proto-UI/Proto-UI/issues/1000)；上游公开构造 [#998](https://github.com/Proto-UI/Proto-UI/issues/998) / [#1003](https://github.com/Proto-UI/Proto-UI/pull/1003)，follow-through [#865](https://github.com/Proto-UI/Proto-UI/issues/865) / [#933](https://github.com/Proto-UI/Proto-UI/issues/933) 保持原 owner 与 OPEN 状态。本节不接管 #998 的公开构造，不改 #1001 的累积文本。
+- #1000 已声明的 bounded 路径：`scripts/release/consumer-smoke-cli.mjs`、`packages/cli/test/smoke-render/wc-checkbox-label.mjs`、`packages/cli/test/smoke-render/wc-checkbox-label-native.mjs`、`scripts/release/consumer-smoke/adapter-types.tsx`、`apps/www/src/content/docs/zh-cn/checkbox-composition.mdx` 与本文。上游固定基线仍是 §2.1 的 shadcn New York `f31ed81983653919dd4fe77aee4b4859f610f1dc`，未更改。
+- 观测对象：main `4db5275154fbc80b393c27d6148b8403e7c61361`，协调回归 run [41977517573](https://github.com/Proto-UI/Proto-UI/actions/runs/41977517573) 的 `cli-smoke` job `127079818626`，releaseVersion `0.3.0-alpha.1`。该 job 的 `if` 是 `github.event_name != 'pull_request'`，因此 PR 事件**不会**执行这条 packed 路线；public MDX 中「现有 PR CI 的 `cli-smoke`」的时态已按此更正为协调回归周期/手动 dispatch。
+
+### 实际产物与消费者绑定
+
+同一 consumer 的 lock 与生成产物（packed WC delivery evidence 记录的实际值）：
+
+| 材料 | 实际值 |
+| --- | --- |
+| testedCommit | `4db5275154fbc80b393c27d6148b8403e7c61361` |
+| consumer `package-lock.json` SHA-256 | `8c2bdca9390eff961288d534e34a2f763256e9a2b8232d5d188aba8953ad0399` |
+| 生成的 WC facade `proto-ui/components/wc/index.ts` SHA-256 | `989e5b9abbdc9c2d43c692224f34f06de73ee4dc990e2ae020f792ef6b729fcc` |
+| synthetic fixture（本次 red 运行的实际字节）SHA-256 | `dc1b5a9333b4bd8ba57816ba689579e37c16b044f2ef22e2f8c5b752e690a558` |
+| native fixture SHA-256 | `1ffdb39e7b72673d2c40a94c4a98475f1b32e3aea3174b19ccc72d7a9b0a327f` |
+| 仓库 lock SHA-256（native 证据） | `3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422` |
+| synthetic host（本次 red 运行） | registrator-pinned `@happy-dom/global-registrator` 20.11.0 resolving `happy-dom` 20.14.6。registrator manifest `c3ad7887eec80283ff6da4186538f831fa6726e6e31d9f8f44257dcc8a58792a`、entry `ef1908cde15d71893a35feddfdb2c3a0891b333e5a9d37275ee80edabb56ca43`；happy-dom manifest `d69d372e87f954da1e20c81f5daff6a29cb96e14b46120fa4d6c84c0e2e7db3e`、entry `ef24535de425ea58d8650fca46be1ad4ec33dc817524a500c097e5f4df1e0b00`。清单只 pin registrator（`scripts/release/consumer-smoke-cli.mjs:88` 主消费者、`:228` vue2 消费者），`happy-dom` 本体由 registrator 的 dependency range 解析，因此宿主实现不可复现地随 registry 漂移 |
+| synthetic host（已批准的对齐，candidate 未运行） | `@happy-dom/global-registrator` 15.11.7 + 显式 `happy-dom` 15.11.7；与 workspace 已声明基线同线（root `package.json:19` `happy-dom: ^15.0.0`，lock `happy-dom@15.11.7` integrity `sha512-KyrFvnl+J9US63TEzwoiJOQzZBJY7KgBushJA8X61DMbNsH+2ONkDuLDnCnwUiPTF42tLoEmrPyoqbenVA5zrg==`）。parent 的 host canary `/tmp/release03-happydom15-connection-canary-20261105.json` 用冻结的 15.11.7 观测到预组装插入 `[parent,child]`；这是 host canary，不是 packed 验收 |
+| native tooling | esbuild 0.25.12、playwright-core 1.58.2（lock integrity 见 native evidence）、Chrome `156.0.8078.79`（executable `/opt/google/chrome/chrome`，SHA-256 `da143614d917f346b02c1b29587cc13bf891d4b73faf2bea7b20cbd8fa61510f`）、runner image `ubuntu24 20261101.360.1` |
+
+packed tarball 的精确身份（同一 run 的 evidence JSON，`@proto.ui/*` `0.3.0-alpha.1`）：
+
+| 包 | shasum | integrity |
+| --- | --- | --- |
+| `@proto.ui/cli` | `0d6fd923bd93a75974db5cbcb37405547ee0355a` | `sha512-PjRloGvTGs3nGu1uqqJk9ABMpkPKJIToBBCATGC0D0dmIKDmmjDJmtd1uKvSb1VD6Y/GGC4rcDrDrZfF1Gk+Ag==` |
+| `@proto.ui/core` | `cec494b3cf6449434ebbd747d4800a4abc451974` | `sha512-4u8QoKfAcn/kcWc5rUZ4myblNB0ncLEi3dRKlmzOa13WDDnyLCa1JSdCgK/Qr5aw65EGQtaV1pasYiD95ApUkQ==` |
+| `@proto.ui/module-base` | `579fe98a9cb2ff75f119a9dcbd3d8aa366fb3c65` | `sha512-JTc5ctnsqyzl1/tepeiKgC++pzEGbg44xNPUEPmlaz30G9lLz4ICkZdu6O6jQezelhnNyi1gQXcLTrUJSGWKUA==` |
+| `@proto.ui/module-context` | `e3868681d0fc0fd2f00e9a5ca1078c006950a93c` | `sha512-RcwgJpZgG7tcSwQ18vqPym8lHb9EarhNyt3uzyaEEdaKVCRmIMS4OWVKtEZfY+NHIB6Q6hBVp59irv1aqZJuYg==` |
+| `@proto.ui/runtime` | `fdb484426f8ee8ddfc05f0af4c59c63fe87519a1` | `sha512-l1uUrUIVU6IPZMbJgY/wPX69nTcgAfv9Uph1g91wqmV/mAU20+hrWEL+rGRQ2+e7ZwkxLzztDlferR5v0Flk5Q==` |
+| `@proto.ui/adapter-base` | `4b2d5579efbee41440a4d616d919dff10c9287ff` | `sha512-Wj5Exm96m+NqyGNvgWoDwGynMetsOAv2eDIWQv2MEu7PQrVEOLI6NwuNMfGRqA6qTmUwfafbwgrOemZaUT7UgA==` |
+| `@proto.ui/adapter-web-component` | `7d4c65a1084785f7f7959bf105adbebfa3b9e847` | `sha512-daKhK2MT91RJQqJfHLu3ZSATYcu40AsrGmGFoBWj4sfYAtYPKD1WFfgAkeJL4NwXWZLOR+Ys9S9NorwKdqFdwQ==` |
+| `@proto.ui/prototypes-base` | `131a6efb3fd8104e47fd18381063a44f8f3888ff` | `sha512-UOKf2Q3WMW+zmvmAsGiFIpT4Hbe7ejLS7pt0Y3HSGf4yEF6WTgzyNQWSL1VLfVcGp4MmMWKdmIarTkAVQ/eLIA==` |
+| `@proto.ui/prototypes-shadcn` | `32a24c97efbb0e3a49a42287c304825e9b1a2803` | `sha512-Whuv9ssbrmM3gEUCJg18tuq+fe/UImViLeKjO+p18Bo49uNsj6Ls8jNzqFjFmFhRCqPc5QkuX3dzcAlT0gwFpw==` |
+
+源码逐字节绑定（`git rev-parse`/`git cat-file` 于 testedCommit `4db5275154fbc80b393c27d6148b8403e7c61361`；三个 SHA-256 与运行时证据里的 `fixtureSha256` 完全相同，说明证据绑定的就是这里的字节）：
+
+- `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs`：blob `d6c010f76fa7ebbfa35fc61a7cebab8338aeaf46`，SHA-256 `1ffdb39e7b72673d2c40a94c4a98475f1b32e3aea3174b19ccc72d7a9b0a327f`。
+- `packages/cli/test/smoke-render/wc-checkbox-label.mjs`：blob `ccc72b3f0976d6fc6c808be22303c65d65533ea5`，SHA-256 `dc1b5a9333b4bd8ba57816ba689579e37c16b044f2ef22e2f8c5b752e690a558`（本次 red 运行的实际字节）。
+- `scripts/release/consumer-smoke-cli.mjs`：blob `c3921c17edcd6256a67567ec3ef6e5da08f85b47`，SHA-256 `460b84bcacf42e360ac77407b7c4137eac530866ec0c801ed8954cf82fe56a77`。
+
+### 真实通过的行
+
+- 闭包 probe 在 fixture 之前执行并真实通过：`packed Checkbox composition: exports, required Label payload and negative admission verified`。它实际解析安装包，而不是比对生成文本：`createShadcnCheckboxLabelComposition`、`checkboxRoot`、`checkboxIndicator`、`labelRoot` 的 identity，`pair.control.instanceAssociations` 与 `pair.label.instanceAssociations` 等值；`@proto.ui/prototypes-shadcn/not-a-public-export` 必须 `ERR_PACKAGE_PATH_NOT_EXPORTED`；把 `dist/label` 改名为负控后同一 import 必须 `ERR_MODULE_NOT_FOUND`，恢复后再次成功；`add wc shadcn-field` 必须以 `workspace-source-only` 拒绝、`add wc not-a-component` 必须以 `unsupported component` 拒绝，且两者都不改变 consumer `proto-ui/config.json`。
+- default pair（HappyDOM，合成事件）：唯一 default Indicator、Label 保持独立兄弟、`aria-labelledby` 等于 Label 的 id、无重复 `aria-label`、`size-4`/`shrink-0`/`border` 与 `flex`/`text-sm`/`font-medium`/`leading-none` tokens 实际进入 `data-pui-style`、computed `display:flex` 与 `flex-shrink:0`（生成的 Label/control CSS 生效）、rich `strong` 激活一次、直接点击再激活一次、interactive descendant 不激活。
+- WC packed native（Chrome 156，真实浏览器）：`platformOrder: ["parent","child"]`；`outcome: bounded-wc-composition-contract-cases-passed`；coveredCases 含 `default`、`preassembled-explicit`、`rich-label-naming`、`label-pointer`、`direct-pointer`、`focused-space`、`interactive-descendant-exclusion`、`pair-isolation`、`omitted-indicator`、`raw-root`、`disabled`、`controlled-rejection`、`mixed`、`naming-only`、`detached-label-programmatic-regression`、`removal-without-observed-pageerror`；同证据记录 `syntheticAcceptance: separate-unmodified-fixture-still-required`。
+
+### 已保留的 exact-native 16-case 配方与 artifact 绑定
+
+配方来源为 `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs`（blob `d6c010f76fa7ebbfa35fc61a7cebab8338aeaf46`，SHA-256 `1ffdb39e7b72673d2c40a94c4a98475f1b32e3aea3174b19ccc72d7a9b0a327f`，与 evidence 的 `fixtureSha256` 逐字节相同），由 `scripts/release/consumer-smoke-cli.mjs` 在 synthetic 之前、同一 consumer 内以 `node wc-checkbox-label-native.mjs <consumerDir> <ROOT_DIR>` 运行；Chrome 缺失即失败，不做浏览器下载。
+
+- 编译：esbuild 0.25.12 把 consumer 内单个 entry（只 import consumer 解析出的生成 facade、公开 helper 与 `setElementProps`/`setElementAssociations`）打成自包含浏览器 ESM（`bundle:true`、`platform:'browser'`、`format:'esm'`）；metafile 逐 input 断言都在 consumer 内、无 external import、输出无 imports，并把每个 input 的 SHA-256 写入证据。
+- 承载：playwright-core 1.58.2 启动 runner 预装 Chrome（`executablePath`、headless、sandbox、`--no-proxy-server`、`--disable-background-networking`）；`127.0.0.1` 临时 server 只服务 allowlist 资源（`/`、`/checkbox-native-bundle.js` 与三份生成 CSS），并下发固定 CSP（`script-src 'self'`，两个 adapter 基础设施样式以精确 sha256 放行）；`context.route` 只放行同 origin 的无 query/fragment GET，其余 abort 并记失败；WebSocket 全阻断；`page.on('pageerror')` 与 console error 记失败。
+- 16 个具名 case 与断言：`default`／`preassembled-explicit`（唯一 Indicator、`aria-labelledby`==Label.id、无 `aria-label`、无嵌套 Label、control/label tokens、computed `display:flex` 与 `flex-shrink:0`）；`rich-label-naming`（`getByRole('checkbox',{name:'Receive default updates',exact:true})` 恰好 1）；`label-pointer`（真实点 rich `strong` → 一次变化 + 聚焦）；`focused-space`（真实 `keyboard.press('Space')` → 回到未选中）；`direct-pointer`；`interactive-descendant-exclusion`（嵌套 button 自己收到一次真实 click，control 不变）；`pair-isolation`（两对 association identity 不同、邻居挂载后另一端仍 false）；`omitted-indicator`；`raw-root`；`disabled`（label 点击 0 次请求、保持 true）；`controlled-rejection`（一次请求、保持 false）；`mixed`（先 `mixed`，label 点击后 true）；`naming-only`（`{naming:true,activation:false}` 后不激活、labelledby 保持）；`detached-label-programmatic-regression`（已 detach 的 Label 只做 programmatic pointer/click，明确不是 native pointer 断言）；`removal-without-observed-pageerror`（移除全部 container 后无 pageerror/console error、`[data-case]` 归零）。
+- 保留 artifact：`checkbox-label-packed-native-evidence` JSON（packages/lockSha256/generatedFacadeSha256/fixtureSha256/repoLockSha256/tooling/browser/platformOrder/infrastructureStyleHashes/inputs/resources/coveredCases/outcome）。资源 SHA-256：`/` `770d9fdd045985b64931c5a9491966064581a23d063083edd626006783e10e8e`、`/checkbox-native-bundle.js` `2da396cc3f17bfffa2c6c358368ccc61c7a8e069894ec972fdb35532afbe7940`、`proto-ui-style.css` `446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88`、`shadcn-theme.css` `3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96`、`proto-ui-tokens.generated.css` `6d10167b837f32f53dd6feb5cd1033731a28af6c03adcbcaa0915be78aa99095`。关键 input SHA-256：`adapter-web-component/dist/adapt.js` `2ddd0f54c20430f5deeb70f0f749162e4daf7dad4fb823b8ea1f361fb22c0c0b`、`adapter-base/dist/platform/instance-tree.js` `b7f1192d18ed6c91d5fde7eb43897ab30b20747c3c89a40d7e9938840385e592`、`prototypes-base/dist/checkbox/indicator.proto.js` `3c884ba31c9fd817fc931129d65611d5f62d1d273e12f08aa23c5f8f4efe20be`、`prototypes-shadcn/dist/checkbox/composition.js` `7a8b59ce05e768217fb92af94f4d6e476f25e27e21e4d7df4ebda686ff9eec98`、生成 facade `989e5b9abbdc9c2d43c692224f34f06de73ee4dc990e2ae020f792ef6b729fcc`。
+- 边界：这是 native 行的唯一来源；synthetic 行不得引用它的通过结论作为自身通过，反之亦然。
+
+### 真实失败的行（保留，不豁免）
+
+- `mount:start:explicit:{}` → `Error: [Context] provider missing for key: base-checkbox`（`code: CONTEXT_PROVIDER_MISSING`）。栈为 `prototypes-base/dist/checkbox/indicator.proto.js:28` 的 `subscribe` → `runtime/dist/kernel/handles/def.js:322` → `module-context/dist/create.js:17` → `module-context/dist/impl.js:90` → `connectedCallback`/`_connectOwner`。即「预组装的显式 Indicator 子元素」在安装的 HappyDOM 上先于父 Root 连接。
+- 同一 fixture 的独立 canary 在同一安装 consumer 内记录 `{"kind":"preassembled-custom-element-order","host":"installed-happy-dom","observed":["child","parent"],"specificationOrder":["parent","child"],"nativeAcceptance":"not-run"}`，与 [DOM insertion](https://dom.spec.whatwg.org/#concept-node-insert) 的 shadow-including tree order 相悖。
+- cleanup 阶段那条 `unhandledRejection` 的栈与 primary 完全相同（`mount` 的 `document.body.append` → `connectedCallback`），是宿主 reaction 栈对被拒 connect 的重放，不是第二个产品缺陷；fixture 只安装 `uncaughtExceptionMonitor` 观测，不安装抑制异常的 handler，Node 默认非零退出保留。
+
+### 根因：宿主连接顺序，不是 packed 身份或交付闭包
+
+- **不是 packed identity 重复**：同一批安装模块的 default pair 与 rich/direct/interactive 行全部通过，`base-checkbox` provider 在同一 `module-context` 实例内可被解析；若存在第二份 context 模块或第二份 prototype 定义，default pair 不会通过。
+- **不是缺少 Label payload、导出或准入放宽**：闭包 probe 在 fixture 之前真实通过，含改名与未知 subpath 的严格负控。
+- **是连接顺序**：安装的 `happy-dom` 在 `Node.ts` 的 `connectedToNode` 递归里先连子再连自身。子 Indicator 建 session 时，`packages/adapters/base/src/platform/instance-tree.ts` 的 `setProtoParent`（624–640）能通过 `parentNode` 找到父元素，但 `TOKEN_BY_INSTANCE.get(parentRoot)` 为空——父的 `markProtoInstance`（404–445）尚未运行——于是 Indicator 的逻辑父为 null；`packages/modules/context/src/impl.ts` 的 `resolveProvider` 返回 null，required 订阅按契约抛错。`markProtoInstance` 随后的 descendant 重新挂父无法回滚已经抛出的 setup（`connectedCallback` 捕获后 `retireOwner`，本次运行即终止）。
+- **原生对照**：同一 insertion 序列、同一 artifacts、同一生成 facade 在 Chrome 156 上按 `parent→child` 连接并通过全部 bounded case。因此这不是「packed 交付」缺陷，而是产品在**非规范宿主顺序**下不可恢复的初次连接；规范顺序下产品行为正确。
+- **版本错配是直接诱因**：packed 清单只 pin registrator（20.11.0，`scripts/release/consumer-smoke-cli.mjs:88` 与 `:228`），`happy-dom` 本体由 registrator 的 dependency range 解析成 20.14.6，canary 实测该版本子先父后。仓库自身声明的却是 `happy-dom: ^15.0.0`（root `package.json:19`，lock 固定 15.11.7），其 `node_modules/happy-dom/lib/nodes/node/Node.js:718–748` 的 `[connectedToNode]` 先对自身调用 `[connectedToDocument]()`、随后才遍历 `nodeArray` —— 父先子后。所以仓库内单元测试与 packed CI 看到的是两个不同的宿主实现，不能用前者为后者背书。
+- **既有契约测试不覆盖顺序无关**：`packages/adapters/web-component/test/context-ancestor.test.ts` 通过 `packages/modules/context/test/utils/ancestor-conformance.ts` 先离线组装 `el.append(...children)` 再把 host 接入 `document.body`，断言的是「祖先先连接时 required context 可解析」；仓库内没有测试或规范文本承诺顺序无关的 required-context 子元素。
+- **上游裁定（2026-11-05，#998 协调回复）**：`C-CHECKBOX-LABEL-COMPOSITION-0001` 与其 `-SOURCE` 条件明确 Root 与 Label 为兄弟、Indicator 仍是 Root 的子元素、既有 Checkbox/ControlLabel 与 adapter 生命周期保持不变；`P-BASE-CHECKBOX-INDICATOR-CONTEXT-REQUIRED`（由 `T-BASE-CHECKBOX-INDICATOR-0001-CASE-CONTEXT-CONSUMPTION` 映射）把祖先 Checkbox context 定为 setup 前置，`packages/prototypes/base/src/checkbox/indicator.proto.ts` 无条件 `def.context.subscribe(CHECKBOX_CONTEXT)`。因此「子先父后」宿主下抛错是**按契约**，规范顺序宿主才受支持；#998 不为该顺序背书，也不需要为本红修改公开构造。
+
+### 候选路线与责任（R2 已获 Main 批准；R1/R3 仍需 owner 决定；全部未运行）
+
+- **R1（共享 Adapter 加固；属新增的跨 family 恢复语义，不是缺陷修复）**：`packages/adapters/web-component/src/adapt.ts` 的 `ProtoElement.connectedCallback`（396–435）初次连接分支，在调用 `_connectOwner`（437）之前判断：若元素已连接、且最近的祖先 ProtoElement 也已连接但尚未完成 owner 初始化，则用文件内既有 `schedule`/`queueMicrotask` 重试模式（同 `retireOwner` 的 `releaseTerminal`，~1403–1406）延后初次 `_connectOwner`，而不是创建无父 session。约束：不改 Context required 订阅契约、不重排插入、不 mock、不改第三方版本、不触碰 portal/relocation 路径；重试必须复查 `isConnected`、`_mountedOnce`、`_terminalDisposing`；刷新后祖先仍未初始化时按今天的行为抛错（保留负控）；规范顺序下条件不成立，现有同步语义不变。因为会影响所有 required-context 子元素，#998 与 repair-only 边界都不能单方面采纳，须 Adapter owner 明确批准并单独立项验证。
+- **R2（已获 Main 批准，fixture-only；candidate 未运行）**：把 isolated consumer 的 synthetic host 对齐到已声明的 workspace 基线 —— registrator 与 `happy-dom` 都显式 pin `15.11.7`（`scripts/release/consumer-smoke-cli.mjs` 主消费者与 vue2 消费者两处清单），使 registrator 的传递 caret 不能改变被观测的宿主。真实 build/tarball/export 与全部具名 packed case 保持不变，explicit case 不跳过，不手排 callback 顺序，不改生产生命周期。依据是 parent 的 host canary `/tmp/release03-happydom15-connection-canary-20261105.json`（冻结 15.11.7，预组装插入观测 `[parent,child]`）与 registry 上 `@happy-dom/global-registrator` 15.11.7（Node>=18，依赖 `happy-dom ^15.11.7`）；该 canary 只是宿主行为，不是 packed 验收。旧的 registrator-20.11.0/resolved-20.14.6 红与 native 对照都完整保留。
+- **R3（owner 处置，不是通过）**：明确把「required-context 子元素要求规范连接顺序」写成公开前置条件（#998 已向 Main 提出在 composition MDX 声明），并把 synthetic 行按「不支持宿主顺序」保留为已知红。这仍不能勾选 #1000 的「Exact-head CI、DCO、独立 review 与相关 native evidence 后才能合并；不豁免继承失败」，因为 cli-smoke 会继续非零。
+- **明确不采用**：把 required 订阅改成可选、mock Context、跳过 synthetic 路线、用 native 结果替代 synthetic 行、为通过而重排插入或放宽断言。
+
+### 其余行与未运行
+
+| 行 | 状态 |
+| --- | --- |
+| WC packed synthetic：explicit 预组装 | **failed**（本次真实红，保留） |
+| WC packed synthetic：omitted/raw/disabled/controlled/mixed/naming-only/detach | 本次 **unrun**（被显式红中断）；见下一节的隔离修复，精确 head 复跑前仍记 unrun |
+| WC packed synthetic：default/rich/direct/interactive | 本次真实通过（HappyDOM，仅合成事件，不是 AT 或视觉证据） |
+| WC packed native（Chrome 156） | 本次真实通过；不等于 AT 名称计算、像素/布局或输入法 |
+| synthetic host 对齐到 15.11.7（R2，已批准） | **candidate，未运行**；旧 20.14.6 红与 native 对照均保留，不能因对齐而删除或改写 |
+| React/Vue/Vue2 packed Checkbox+Label 组合 | **unrun**——现有 packed consumer 只对 `wc` host 添加 `shadcn-checkbox` 与 `shadcn-label` |
+| AT/原生输入/布局像素 | **unrun** |
+| registry 或 npm 发布 | **not performed** |
+| 独立 review、DCO、精确 head 合并门 | **未完成** |
+
+### 本片对 fixture 的证据设计修复（candidate，未运行）
+
+`packages/cli/test/smoke-render/wc-checkbox-label.mjs`（candidate，未运行）：
+
+- 行隔离：只把已知红的 explicit 预组装 `mount` 与其唯一断言放进独立 try/catch，记录该 failure 后继续执行后续独立行，并在全部行结束后以 `AggregateError` 重新抛出。插入顺序、断言文本、其余行与 default 行完全保留，fixture 仍非零退出。目的：一个宿主差异不得再把其余独立行变成 failed/unrun 无法区分的黑洞。
+- 宿主前置条件：连接顺序 canary 仍用真实 `connectedCallback` 记录顺序，现在同时记录实际安装的 `happy-dom` 版本，并在记录之后断言 `['parent','child']`；顺序不符时明确失败为「宿主前置条件不满足」，而不是让 required Context 错误被误读成 packed 交付缺陷。没有重排插入、没有手工指定 callback 顺序、没有跳过 explicit case。
+- 行回执：新增结构化回执 `{"kind":"checkbox-label-packed-wc-synthetic-cases", host, hostVersion, hostOrder, attemptedCases, nativeOnlyCases}`，在成功与失败路径都打印；`nativeOnlyCases` 明确保留 `rich-label-naming`、`focused-space`、`removal-without-observed-pageerror` 为 native-only，不用合成事件冒充。
+- 已知 15.11.7 风险（parent 复跑判定，不预置补丁）：仓库已为 15.11.7 的 prematurely collected observer forwarding closures 维护修复 `scripts/test/happy-dom-mutation-keepalive.mjs`（`retainHappyDomMutationCallbacks`，只在版本严格等于 15.11.7 时生效，且不改通知/记录/调度）。若 packed 复跑在 15.11.7 上出现 props/MutationObserver 相关失真，应显式引用该既有修复并单独审查，而不是放宽断言；本片未把它导入 consumer。
+
+### 复跑与负控
+
+- 仓库支持的路线：`corepack pnpm@10.32.1 -s release:smoke:cli`（job `cli-smoke`）。PR 事件被 job 级 `if` 跳过，精确 head 的 packed 证明需要协调回归周期或手动 dispatch。
+- consumer 内单独复跑：`node --import tsx ./wc-checkbox-label.mjs`；native：`node wc-checkbox-label-native.mjs <consumerDir> <ROOT_DIR>`（Chrome 缺失时 fail closed）。
+- 负控：`dist/label` 改名后正 import 必须 `ERR_MODULE_NOT_FOUND`；`add wc shadcn-field` / `add wc not-a-component` 必须拒绝且 `proto-ui/config.json` 不变；未知 subpath 必须 `ERR_PACKAGE_PATH_NOT_EXPORTED`；若采用 R1，祖先永不初始化时不得变成静默通过。
+- 宿主准入（本片新增，candidate 未运行）：consumer 清单必须以精确版本声明 `@happy-dom/global-registrator` 与 `happy-dom`，`readInstalledSyntheticHostEvidence` 现在同时断言「声明是精确版本」且「声明版本 == 实际安装版本 == lock 版本」，否则直接失败；fixture 的连接顺序 canary 必须打印 `observed:["parent","child"]` 并作为前置条件断言通过，否则按宿主前置条件失败。这两条使「同一份证据对应哪个宿主」不再依赖 registry 当次解析。
+- 期望的可复核输出：`{"kind":"preassembled-custom-element-order","host":"installed-happy-dom","hostVersion":"15.11.7","observed":["parent","child"],"specificationOrder":["parent","child"]}` 与 `{"kind":"checkbox-label-packed-wc-synthetic-cases","hostVersion":"15.11.7","hostOrder":["parent","child"],...}`；packed delivery evidence 中 `syntheticHost.registrator.version` 与 `syntheticHost.implementation.version` 都应为 `15.11.7`。
+- 明确不做的替代：不因为宿主对齐而删除旧的 20.14.6 红记录或 native 对照，不把 canary 通过当作 packed 验收，不把 synthetic 通过当作 native 或 AT 证据。
+- 日志与证据：run [41977517573](https://github.com/Proto-UI/Proto-UI/actions/runs/41977517573) job `127079818626` 的完整保留日志，以及 consumer 内的 `checkbox-delivery-evidence.json`。本片只读取这些日志，未重跑、未下载 artifact。
+
+## 续记：2026-11-06 Main 汇合与当前候选来源
+
+本附记写入时，Main 的独立候选基于已回读的 `33fc7b9f2957e6d70f6a205bd6342e5ecd8f5380`，汇合 §6.4 的 native producer 与 §6.5 的真实 receipt reader、synthetic fixture 和既有文档修正。两个原工作区及其历史记录保留；本手写文档以同一主线 base 三方合并，保留两个片段。原 producer 的 `4a85e346…` 与 reader 的 `42d213e2…` 是原续作工作区的来源，后续 Main 排版产生了下面的当前字节；旧的 `5023c5c3…` 协调摘要不作为 reader 的执行目标。
+
+| 当前候选文件 | SHA-256 |
+| --- | --- |
+| `packages/cli/test/smoke-render/wc-checkbox-label-native.mjs` | `0c1d1855c1a6472432f9e27bc4095d2a5ae8f0c45b0b60171935125c9364239c` |
+| `spec/tests/T-CHECKBOX-LABEL-COMPOSITION-0001.yaml` | `c4617818ac3fad04a0615c34b99d7a143654f4568557b9e689f69ad522888fdb` |
+| `scripts/release/consumer-smoke-cli.mjs` | `c2aca569cc573314caeb778cb8612d6e8fee9d64e4944d83cf778a7456c57180` |
+| `packages/cli/test/smoke-render/wc-checkbox-label.mjs` | `0eefbcb158618d3c76733d61ee686669f4da1e0763dff71f921237e2f1a8fb8c` |
+| `apps/www/src/content/docs/zh-cn/checkbox-composition.mdx` | `4881aacdd832db86bf2ca421265b93c75cef9e7f498d9213d3264ffde3dd3a0b` |
+
+本次附记仍是**准备状态，尚未提交或运行完整 packed consumer**。三个外层 MJS 在排版前通过 Node 24 语法解析；这不证明排版后脚本、内嵌浏览器 entry、安装输出或 native 行已经通过。首轮六文件 Prettier 检查在五个文件报告排版问题，Main 已应用 Prettier 3.8.1 的实际输出，复验尚待执行。native producer 的计划范围包含新增的第 17 项 `association-failure-recovery`；既有 16 项原生历史结果与父级 19 项单元结果都保持各自的旧来源，不重标为本候选通过。
+
+§6.5 中旧的九个 tarball、generated facade 与 lock 指纹属于当时的实际源。当前主线已经变化，不能要求新的包字节仍等于这些历史指纹，也不能以旧指纹为当前准入替代。完整 `release:smoke:cli` 必须在固定的实际候选提交上运行，因为 producer/reader 使用 Git HEAD 绑定 receipt；每次实际包、安装闭包、lock、facade、native/synthetic fixture、宿主与浏览器身份必须以该次执行产物重新绑定。
+
+四处 `15.11.7` 声明仅属于隔离消费者清单，仓库 package/lock 不因本片修改。原生与合成行、宿主连接顺序 canary、全部实际断言及非零失败保持独立；不以 exit 0、声明的 case 名单或历史 canary 单独认证当前 native/packed 验收。相关定义仍为 draft，native fixture 映射仍是 planned；无 registry 发布或稳定能力提升。
+
+## 续记：2026-11-06 首轮真实执行与失败状态回执修复
+
+首轮完整 `corepack pnpm@10.32.1 -s release:smoke:cli` 运行在本地提交 `68a330ab3a4ef7fa4f154ca64ef57a7e5a149661`，该提交的 parent 是上述 `33fc7b9f…`。Node 24 被放入所有子进程的 PATH。本次实际退出 1，墙钟 300.66 秒；原始完整输出和失败后保留的 consumer 是本次证据，不能改读为完整通过。
+
+- 实际 public package 前置构建退出 0，共 staged 47 个包；主 consumer 的安装闭包为 44 个包，不能沿用旧九包记录。
+- 实际 exports、必需 Label payload、改名/未知项准入负控通过。consumer TSX 检查完成后进入执行阶段；这不等于四宿主 Checkbox+Label 组合验收。
+- 实际安装的 registrator、HappyDOM 本体、consumer 声明和 lock 都是 `15.11.7`；连接顺序 canary 观测 `parent → child`。WC synthetic fixture 实际报告 13 项通过，原有普通 React/Vue/WC renderer 也先行执行完成。
+- native Chromium 在创建页面前报告 `No usable sandbox`，当前环境的 `/usr/lib/chromium` 没有 `chrome-sandbox` helper。native 用例执行数为零，没有生成 native aggregate receipt；第 17 项恢复用例及其余 native 行均未验收。
+- `runNoStylesConsumer` 和后续 Vue2 consumer 位于 host 聚合错误之后，本次未执行。完整 packed、四宿主组合、AT、布局、CI、DCO、合入与关闭条件均不得据此勾选。
+
+本次执行还暴露了 reader 自身的真实记录缺口：native 子进程失败后，内存变量已经设为 `failed`，但 host `AggregateError` 在最终 evidence writer 之前抛出，保留文件仍写着 `prepared-not-yet-executed` / `nativeAcceptance: not-run`。原实现还会在退出 0 后、校验绑定 receipt 之前打印 native passed。
+
+本片在同一 reader 内修复顺序：只有 native 子进程退出 0 且新 receipt 的全部绑定校验通过，才设为并打印 `passed`；native 与 synthetic 继续独立执行；聚合错误抛出前先写入实际 terminal phase 和 native 的三态结果。写 evidence 自身失败也加入同一错误集合，保留原始 host 错误。当前 reader 字节 SHA-256 为 `dab3cb6568c8c280f1f8e4950cf444df76754dd892a7eb1196a58ebc2241b74f`，替代前一附记中属于首轮提交的 `c2aca569…`；native、synthetic 与公开构造断言没有调整。此处记录的是代码修复及首轮失败事实，修复后的完整执行仍待单独回读。
+
+`chromiumSandbox: true`、网络限制、CSP、实际输入、原有断言和超时均保持。PR 事件的 `cli-smoke` 仍被 job 级条件跳过；正常 sandbox 环境中的精确源证明须来自既有协调回归或明确 dispatch 的 `CI` / `cli-smoke`，不以关闭 sandbox 或历史 native 对照替代。

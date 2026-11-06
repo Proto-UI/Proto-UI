@@ -21,6 +21,11 @@ import { runNoStylesConsumer } from './consumer-smoke-no-styles.mjs';
 
 const RENDER_FIXTURE_DIR = join(ROOT_DIR, 'packages', 'cli', 'test', 'smoke-render');
 const CONSUMER_FIXTURE_DIR = join(ROOT_DIR, 'scripts', 'release', 'consumer-smoke');
+// Written by the packed native fixture, and only after its own assertions and
+// page/network checks pass. It is the sole thing that lets an exited-0 native
+// child be credited with native acceptance.
+const NATIVE_EVIDENCE_FILE = 'checkbox-native-evidence.json';
+const sha256File = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
 const RELEASE_ROOTS = [
   '@proto.ui/cli',
   '@proto.ui/adapter-react',
@@ -85,7 +90,13 @@ try {
         type: 'module',
         dependencies: {
           ...protoDependencies,
-          '@happy-dom/global-registrator': '20.11.0',
+          // Synthetic host aligned to the workspace-declared baseline. The
+          // registrator is pinned and `happy-dom` is declared explicitly so the
+          // registrator's transitive caret cannot change the observed host
+          // between runs. Parent-run behavioral canary proves the connection
+          // order; this pin only makes that observation reproducible.
+          '@happy-dom/global-registrator': '15.11.7',
+          'happy-dom': '15.11.7',
           '@types/react': '19.2.14',
           react: '19.2.6',
           'react-dom': '19.2.6',
@@ -151,18 +162,38 @@ try {
     join(ROOT_DIR, 'scripts', 'release', 'consumer-smoke-css.mjs'),
     join(consumerDir, 'consumer-smoke-css.mjs')
   );
-  logCheckboxDeliveryEvidence(packManifest, consumerPackageNames, 'prepared-not-yet-executed');
+  logCheckboxDeliveryEvidence(packManifest, consumerPackageNames, {
+    phase: 'prepared-not-yet-executed',
+    nativeAcceptance: 'not-run',
+    nativeAcceptanceReceipt: null,
+  });
+  const nativeReceiptPath = join(consumerDir, NATIVE_EVIDENCE_FILE);
+  // Exit 0 alone is not native acceptance: the child must leave a receipt of
+  // this run, so any receipt already present is removed first and a surviving
+  // old one can never be mistaken for this run's evidence.
+  const staleNativeReceiptRemoved = existsSync(nativeReceiptPath);
+  rmSync(nativeReceiptPath, { force: true });
+  assert(!existsSync(nativeReceiptPath), `cannot clear stale ${NATIVE_EVIDENCE_FILE}`);
   // Independent outcomes: a native setup/product failure must not hide the
   // existing synthetic explicit-Indicator failure (nor may native success erase it).
   const hostFailures = [];
+  let nativeAcceptance = 'not-run';
+  let nativeAcceptanceReceipt = null;
   try {
-    run(process.execPath, [
-      join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs'),
-      consumerDir,
-      ROOT_DIR,
-    ], { cwd: consumerDir, timeout: 120000 });
+    run(
+      process.execPath,
+      [join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs'), consumerDir, ROOT_DIR],
+      { cwd: consumerDir, timeout: 120000 }
+    );
+    nativeAcceptanceReceipt = readNativeAcceptanceReceipt({
+      testedCommit: readTestedCommit(),
+      releaseVersion,
+      staleNativeReceiptRemoved,
+    });
+    nativeAcceptance = 'passed';
     console.log('packed WC native bounded cases: passed');
   } catch (error) {
+    nativeAcceptance = 'failed';
     console.error('packed WC native bounded cases: failed', error);
     hostFailures.push(error);
   }
@@ -176,13 +207,19 @@ try {
     console.error('packed WC synthetic cases: failed', error);
     hostFailures.push(error);
   }
+  try {
+    logCheckboxDeliveryEvidence(packManifest, consumerPackageNames, {
+      phase: hostFailures.length
+        ? 'packed-types-synthetic-wc-or-native-failed'
+        : 'packed-types-synthetic-wc-and-bounded-native-passed',
+      nativeAcceptance,
+      nativeAcceptanceReceipt,
+    });
+  } catch (error) {
+    hostFailures.push(error);
+  }
   if (hostFailures.length) throw new AggregateError(hostFailures, 'packed WC host checks failed');
 
-  logCheckboxDeliveryEvidence(
-    packManifest,
-    consumerPackageNames,
-    'packed-types-synthetic-wc-and-bounded-native-passed'
-  );
   runNoStylesConsumer({ consumerDir, cli, fixtureDir: join(ROOT_DIR, 'scripts', 'release'), run });
 
   runVue2Consumer({
@@ -225,7 +262,8 @@ function runVue2Consumer({ consumerDir, expectedPackages, packageByName, release
         type: 'module',
         dependencies: {
           ...protoDependencies,
-          '@happy-dom/global-registrator': '20.11.0',
+          '@happy-dom/global-registrator': '15.11.7',
+          'happy-dom': '15.11.7',
           tsx: '4.21.0',
           vue: '2.6.14',
         },
@@ -529,10 +567,43 @@ function verifyCheckboxCompositionClosure(root, cli) {
   );
 }
 
-// Logs survive successful temporary-consumer cleanup. The tested commit may be
-// GitHub's PR merge commit, so record that actual checkout rather than calling it
-// the development head. Each run retains the real tarball integrities and lock.
-function logCheckboxDeliveryEvidence(packManifest, names, phase) {
+// Logs survive successful temporary-consumer cleanup. Each run retains the real
+// tarball integrities, lock and installed host, so a log line cannot be re-read
+// as a different dependency stack.
+//
+// `nativeAcceptance` is the three-state outcome of the actual native child:
+// 'not-run' when that lane was never entered, 'failed' when it failed or its
+// receipt does not bind to this delivery, and 'passed' only with a receipt.
+function logCheckboxDeliveryEvidence(
+  packManifest,
+  names,
+  { phase, nativeAcceptance, nativeAcceptanceReceipt }
+) {
+  const evidence = {
+    kind: 'checkbox-label-packed-wc-delivery',
+    phase,
+    testedCommit: readTestedCommit(),
+    releaseVersion: packManifest.releaseVersion,
+    packages: packManifest.packages
+      .filter((entry) => names.includes(entry.name))
+      .map(({ name, version, integrity, shasum }) => ({ name, version, integrity, shasum })),
+    syntheticHost: readInstalledSyntheticHostEvidence(),
+    lockSha256: sha256File(join(consumerDir, 'package-lock.json')),
+    generatedFacadeSha256: sha256File(
+      join(consumerDir, 'proto-ui', 'components', 'wc', 'index.ts')
+    ),
+    fixtureSha256: sha256File(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label.mjs')),
+    nativeAcceptance,
+    nativeAcceptanceReceipt,
+    registryPublication: 'not-performed',
+  };
+  console.log(JSON.stringify(evidence));
+  writeFileSync(join(consumerDir, 'checkbox-delivery-evidence.json'), JSON.stringify(evidence));
+}
+
+// The tested commit may be GitHub's PR merge commit, so record that actual
+// checkout rather than calling it the development head.
+function readTestedCommit() {
   const revision = spawnSync('git', ['rev-parse', 'HEAD'], {
     cwd: ROOT_DIR,
     encoding: 'utf8',
@@ -540,40 +611,129 @@ function logCheckboxDeliveryEvidence(packManifest, names, phase) {
   });
   if (revision.error) throw revision.error;
   assert(revision.status === 0, 'cannot bind packed evidence to actual checkout');
-  const digest = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
-  const evidence = {
-    kind: 'checkbox-label-packed-wc-delivery',
-    phase,
-    testedCommit: revision.stdout.trim(),
-    releaseVersion: packManifest.releaseVersion,
-    packages: packManifest.packages
-      .filter((entry) => names.includes(entry.name))
-      .map(({ name, version, integrity, shasum }) => ({ name, version, integrity, shasum })),
-    syntheticHost: readInstalledSyntheticHostEvidence(),
-    lockSha256: digest(join(consumerDir, 'package-lock.json')),
-    generatedFacadeSha256: digest(join(consumerDir, 'proto-ui', 'components', 'wc', 'index.ts')),
-    fixtureSha256: digest(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label.mjs')),
-    nativeAcceptance: phase === 'packed-types-synthetic-wc-and-bounded-native-passed'
-      ? 'bounded-default-and-preassembled-explicit-only' : 'not-run',
-    registryPublication: 'not-performed',
+  return revision.stdout.trim();
+}
+
+// The native lane is a separate process. What it proves about native acceptance
+// is exactly what it left behind, so every binding field must match this
+// delivery: the receipt bytes are digested as written, and the case list is
+// recorded as the fixture's aggregate declaration boundary rather than as
+// per-case provenance.
+function readNativeAcceptanceReceipt({ testedCommit, releaseVersion, staleNativeReceiptRemoved }) {
+  const receiptPath = join(consumerDir, NATIVE_EVIDENCE_FILE);
+  assert(
+    existsSync(receiptPath),
+    `native lane exited 0 without ${NATIVE_EVIDENCE_FILE}; its exit is not bound to a bounded case run`
+  );
+  const bytes = readFileSync(receiptPath);
+  let receipt;
+  try {
+    receipt = JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    throw new Error(`native receipt is not valid JSON: ${error.message}`);
+  }
+  assert(
+    receipt?.kind === 'checkbox-label-packed-native-evidence',
+    `native receipt kind drifted: ${receipt?.kind ?? '<missing>'}`
+  );
+  assert(
+    receipt.testedCommit === testedCommit,
+    `native receipt testedCommit ${receipt.testedCommit} is not this delivery commit ${testedCommit}`
+  );
+  assert(
+    receipt.releaseVersion === releaseVersion,
+    `native receipt releaseVersion ${receipt.releaseVersion} is not ${releaseVersion}`
+  );
+  assert(
+    receipt.lockSha256 === sha256File(join(consumerDir, 'package-lock.json')),
+    'native receipt lock is not the consumer lock this delivery installed'
+  );
+  assert(
+    receipt.generatedFacadeSha256 ===
+      sha256File(join(consumerDir, 'proto-ui', 'components', 'wc', 'index.ts')),
+    'native receipt generated facade is not the facade this delivery generated'
+  );
+  assert(
+    receipt.fixtureSha256 === sha256File(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs')),
+    'native receipt fixture bytes are not the fixture this delivery executed'
+  );
+  // Note: `fixtureSha256` names collide across the two records and are NOT the
+  // same file. The native receipt above is bound to wc-checkbox-label-native.mjs;
+  // the delivery record's own fixtureSha256 is wc-checkbox-label.mjs. Never
+  // cross-bind them.
+  assert(
+    receipt.outcome === 'bounded-wc-composition-contract-cases-passed',
+    `native receipt outcome ${receipt.outcome} is not a completed bounded case run`
+  );
+  assert(
+    JSON.stringify(receipt.platformOrder) === JSON.stringify(['parent', 'child']),
+    `native receipt platform order ${JSON.stringify(receipt.platformOrder)} is not specification order`
+  );
+  assert(
+    Array.isArray(receipt.coveredCases) &&
+      receipt.coveredCases.length > 0 &&
+      receipt.coveredCases.every((name) => typeof name === 'string' && name.length > 0),
+    'native receipt coveredCases is not a non-empty case-name list'
+  );
+  assert(
+    typeof receipt.syntheticAcceptance === 'string' && receipt.syntheticAcceptance.length > 0,
+    'native receipt must keep the synthetic row separate'
+  );
+  return {
+    receiptPath: NATIVE_EVIDENCE_FILE,
+    receiptSha256: createHash('sha256').update(bytes).digest('hex'),
+    staleNativeReceiptRemoved,
+    testedCommit: receipt.testedCommit,
+    releaseVersion: receipt.releaseVersion,
+    outcome: receipt.outcome,
+    platformOrder: receipt.platformOrder,
+    // Which native host produced this acceptance; the receipt carries further
+    // fields (packages, tooling, inputs, resources, style hashes) that are left
+    // in the child's own JSON line rather than duplicated here, and extra
+    // receipt fields are tolerated on purpose.
+    browser: receipt.browser ?? null,
+    // Aggregate boundary: the fixture emits this list only after every one of
+    // its own assertions and page/network checks passed, but the list itself is
+    // not evidence that each named case executed independently.
+    coveredCases: {
+      scope: 'aggregate-fixture-declared-boundary-not-per-case-provenance',
+      cases: receipt.coveredCases,
+    },
+    fixtureSha256: receipt.fixtureSha256,
+    lockSha256: receipt.lockSha256,
+    generatedFacadeSha256: receipt.generatedFacadeSha256,
+    syntheticAcceptance: receipt.syntheticAcceptance,
   };
-  console.log(JSON.stringify(evidence));
-  writeFileSync(join(consumerDir, 'checkbox-delivery-evidence.json'), JSON.stringify(evidence));
 }
 
 function readInstalledSyntheticHostEvidence() {
   const consumerRequire = createRequire(join(consumerDir, 'package.json'));
+  const consumerManifest = JSON.parse(readFileSync(join(consumerDir, 'package.json'), 'utf8'));
   const registratorEntry = consumerRequire.resolve('@happy-dom/global-registrator');
   const registratorRequire = createRequire(registratorEntry);
   const happyDomEntry = registratorRequire.resolve('happy-dom');
   const lock = JSON.parse(readFileSync(join(consumerDir, 'package-lock.json'), 'utf8'));
   const describe = (name, entry) => {
     let directory = dirname(entry);
-    while (directory !== consumerDir && relative(consumerDir, directory).startsWith('node_modules')) {
+    while (
+      directory !== consumerDir &&
+      relative(consumerDir, directory).startsWith('node_modules')
+    ) {
       const manifestPath = join(directory, 'package.json');
       if (existsSync(manifestPath)) {
         const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
         if (manifest.name === name) {
+          // The observation must be pinned by declaration, not by whatever the
+          // registry served for a transitive range on this run.
+          const declared = consumerManifest.dependencies?.[name];
+          assert(
+            typeof declared === 'string' && /^\d+\.\d+\.\d+$/.test(declared),
+            `${name} must be declared with an exact version, got ${declared}`
+          );
+          assert(
+            declared === manifest.version,
+            `${name} declared ${declared} but installed ${manifest.version}`
+          );
           const packagePath = relative(consumerDir, directory).replaceAll('\\', '/');
           const lockEntry = lock.packages?.[packagePath];
           assert(lockEntry?.version === manifest.version, `${name} runtime/lock version mismatch`);
@@ -595,7 +755,8 @@ function readInstalledSyntheticHostEvidence() {
   return {
     registrator: describe('@happy-dom/global-registrator', registratorEntry),
     implementation: describe('happy-dom', happyDomEntry),
-    resolution: 'happy-dom resolved from the installed registrator entry, not repository root',
+    resolution:
+      'happy-dom resolved from the installed registrator entry, not repository root; both declared exactly in the consumer manifest',
     nativeAcceptance: 'not-run',
   };
 }
