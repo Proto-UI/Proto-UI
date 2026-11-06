@@ -98,6 +98,56 @@ const request = (runtime: 'wc' | 'react' | 'vue' | 'vue2', generation = 1) => ({
 });
 
 describe('independent typography owner review', () => {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    it(`${runtime}: forwards language and preserves source with an explicit HappyDOM :lang fixture`, async () => {
+      document.body.innerHTML =
+        '<main lang="zh-CN"><h1 data-site-typography="slogan">组件可以独立于框架或设计体系</h1></main>';
+      const root = document.querySelector('main')!;
+      const heading = root.querySelector('h1')!;
+      const text = heading.firstChild;
+      // HappyDOM 15.11.7 does not implement :lang at all. Supply this one
+      // missing host query to test forwarding, refresh and source ownership.
+      // This is not native language-resolution or rendered-font evidence.
+      const nativeMatches = HTMLElement.prototype.matches;
+      vi.spyOn(HTMLElement.prototype, 'matches').mockImplementation(function (
+        this: HTMLElement,
+        selector
+      ) {
+        if (selector !== ':lang(zh)') return nativeMatches.call(this, selector);
+        const language = this.closest('[lang]')?.getAttribute('lang')?.toLowerCase() ?? '';
+        return language === 'zh' || language.startsWith('zh-');
+      });
+      const participant = siteTypographyParticipant(root);
+      const revision = participant.getSourceRevision();
+      const first = await participant.materialize(request(runtime, 1));
+      candidates.push(first);
+      first.activate();
+      const tokens = () =>
+        heading
+          .querySelector('[data-typography-prototype]')!
+          .getAttribute('data-pui-style')!
+          .split(/\s+/);
+      expect(tokens()).toEqual(
+        expect.arrayContaining(['font-medium', 'tracking-normal', 'leading-tight'])
+      );
+      expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(text);
+      expect(participant.needsRefresh()).toBe(false);
+      // An explicit local language beats the inherited Chinese language. This
+      // is a source-language test, not an inference from the glyph contents.
+      heading.lang = 'en';
+      expect(participant.needsRefresh()).toBe(true);
+      expect(participant.getSourceRevision()).toBeGreaterThan(revision);
+      const second = await participant.materialize(request(runtime, 2));
+      candidates.push(second);
+      second.activate();
+      expect(tokens()).toEqual(expect.arrayContaining(['font-semibold', 'leading-[1.1]']));
+      expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(text);
+      await first.dispose();
+      await second.dispose();
+      expect(heading.firstChild).toBe(text);
+      expect(heading.hasAttribute('data-typography-owner')).toBe(false);
+      participant.destroy();
+    });
   it('disposes when the documentation owner is detached, then admits the next owner', async () => {
     const root = fixture();
     const h = initDocumentationTypography(document)!;
