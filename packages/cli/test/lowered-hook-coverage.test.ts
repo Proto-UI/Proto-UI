@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createExposeStateWebNameMap } from '../../modules/expose-state-web/src/utils';
 import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
+import type { RuleStateScan } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 import type { HookSourceState } from '../src/services/hook-source-summary';
 import {
@@ -5058,6 +5059,324 @@ describe('lowered hook coverage', () => {
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
+  });
+
+  /**
+   * The scanner reads imported constant modules from disk, so every case needs
+   * real files even when the rows must stay unresolved. The extractor runs on
+   * the same tree, which is what keeps the two analyses comparable.
+   */
+  const withLoopFixture = async (
+    files: Record<string, string>,
+    consumer: string,
+    run: (scan: RuleStateScan, tokens: () => Promise<string[]>) => void | Promise<void>
+  ): Promise<void> => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'lowered-hook-imported-rows-'));
+    try {
+      for (const [name, text] of Object.entries(files)) {
+        await writeFile(path.join(dir, name), text);
+      }
+      const file = path.join(dir, 'consumer.proto.ts');
+      await writeFile(file, consumer);
+      const scan = scanRuleStateReads(consumer, file);
+      // The extractor walks the same tree only where agreement is asserted. A
+      // case about the scanner's own refusal must not depend on what the
+      // extractor does with a module it deliberately cannot read.
+      await run(scan, () => collectProtoStyleTokens(dir));
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  };
+
+  /** One comparison rule per row plus one hook read per row, for both proofs. */
+  const loopConsumer = (imports: string[], rows: string, before: string[] = []): string =>
+    [
+      ...imports,
+      "const direction = def.state.string('direction', 'center');",
+      'const { checked } = asCheckboxRoot().stateHandles;',
+      "def.expose.state('direction', direction);",
+      ...before,
+      `for (const row of ${rows}) {`,
+      "  def.rule({ when: (w) => w.state(direction).eq(row), intent: (i) => i.feedback.style.use(tw('bg-primary')) });",
+      "  def.rule({ when: (w) => w.state(checked).eq(true), intent: (i) => i.feedback.style.use(tw('underline')) });",
+      '}',
+    ].join('\n');
+
+  const rowUsages = [
+    { hook: 'asCheckboxRoot', state: 'checked' },
+    { hook: 'asCheckboxRoot', state: 'checked' },
+  ];
+
+  it('resolves a proven imported array through a named re-export', async () => {
+    await withLoopFixture(
+      {
+        'ids.ts': "export const NAMES = ['left', 'right'] as const;",
+        // `loadModuleBindings` applies a module's own named re-exports, so this
+        // is the chain the extractor can expand.
+        'bridge.ts': "export { NAMES as ROWS } from './ids';",
+      },
+      loopConsumer(["import { ROWS } from './bridge';"], 'ROWS'),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        // One usage per row is the scanner's own evidence that it expanded the
+        // imported list instead of reporting the body as blind.
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+        expect(extracted).toContain('data-[direction=right]:bg-primary');
+        expect(extracted).not.toContain('data-[direction=center]:bg-primary');
+      }
+    );
+  });
+
+  it('resolves a finite array declared as a local constant', async () => {
+    await withLoopFixture(
+      {},
+      [
+        "const direction = def.state.string('direction', 'center');",
+        'const { checked } = asCheckboxRoot().stateHandles;',
+        "def.expose.state('direction', direction);",
+        "const ROWS = ['left', 'right'] as const;",
+        'for (const row of ROWS) {',
+        "  def.rule({ when: (w) => w.state(direction).eq(row), intent: (i) => i.feedback.style.use(tw('bg-primary')) });",
+        "  def.rule({ when: (w) => w.state(checked).eq(true), intent: (i) => i.feedback.style.use(tw('underline')) });",
+        '}',
+      ].join('\n'),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+        expect(extracted).toContain('data-[direction=right]:bg-primary');
+      }
+    );
+  });
+
+  it('resolves an imported array through a local alias', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'LOCAL', ['const LOCAL = NAMES;']),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+        expect(extracted).toContain('data-[direction=right]:bg-primary');
+      }
+    );
+  });
+
+  it('expands a known spread of a proven array in order', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left'] as const;" },
+      loopConsumer(
+        ["import { NAMES } from './ids';"],
+        'ALL',
+        ["const ALL = [...NAMES, 'right'] as const;"]
+      ),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+        expect(extracted).toContain('data-[direction=right]:bg-primary');
+      }
+    );
+  });
+
+  it('keeps an inline literal row list working as the control', async () => {
+    await withLoopFixture(
+      {},
+      loopConsumer([], "['left', 'right'] as const"),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+        expect(extracted).toContain('data-[direction=right]:bg-primary');
+      }
+    );
+  });
+
+  it('runs no body for a proven empty row list', async () => {
+    // The complete iterable is empty, so the runtime registers no rule at all.
+    // The iterable is a name, not an inline literal, so this is the proven
+    // path: visiting the body once with the loop name unbound would report a
+    // read the runtime never performs.
+    await withLoopFixture(
+      {},
+      loopConsumer([], 'NAMES', ['const NAMES = [] as const;']),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
+        expect(scan.unresolved).toEqual([]);
+        expect(extracted).not.toContain('data-[direction=left]:bg-primary');
+      }
+    );
+  });
+
+  it('keeps a parameter that shadows the imported rows unresolved', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
+      [
+        "import { NAMES } from './ids';",
+        "const direction = def.state.string('direction', 'center');",
+        "def.expose.state('direction', direction);",
+        'function paint(NAMES) {',
+        '  for (const row of NAMES) {',
+        "    def.rule({ when: (w) => w.state(direction).eq(row), intent: (i) => i.feedback.style.use(tw('bg-primary')) });",
+        '  }',
+        '}',
+      ].join('\n'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('reports only the row whose value the extractor cannot lower', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left', 'two words'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      async (scan, tokens) => {
+        const extracted = await tokens();
+        // The legal row is still lowered; the row whose value is not a legal
+        // attribute value is the only one the scanner refuses.
+        expect(scan.usages).toEqual(rowUsages);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        expect(extracted).toContain('data-[direction=left]:bg-primary');
+      }
+    );
+  });
+
+  it('withholds the rows when the reading file hands the array to a caller', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES', ['mutate(NAMES);']),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows when the declaring module writes the array', async () => {
+    await withLoopFixture(
+      {
+        'ids.ts': [
+          "export const NAMES = ['left', 'right'] as const;",
+          "NAMES.push('center');",
+        ].join('\n'),
+      },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for a conditional member of an imported array', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = ['left', pick ? 'right' : 'center'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for an unknown spread of an imported array', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = [...external(), 'left'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows when the declaring module has unmodeled effects', async () => {
+    await withLoopFixture(
+      {
+        'ids.ts': [
+          "export const NAMES = ['left', 'right'] as const;",
+          'export const key = createKey();',
+        ].join('\n'),
+      },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for a mutable module binding', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export let NAMES = ['left', 'right'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for a cyclic re-export', async () => {
+    await withLoopFixture(
+      {
+        'one.ts': "export { NAMES } from './two';",
+        'two.ts': "export { NAMES } from './one';",
+      },
+      loopConsumer(["import { NAMES } from './one';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for an import the scanner cannot read', async () => {
+    await withLoopFixture(
+      {},
+      loopConsumer(["import { NAMES } from './absent';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for a wildcard re-export', async () => {
+    // `export *` does not name what it carries, and the extractor's constants
+    // loader skips wildcard re-exports, so the rows have no proven provenance.
+    await withLoopFixture(
+      {
+        'ids.ts': "export const NAMES = ['left', 'right'] as const;",
+        'bridge.ts': "export * from './ids';",
+      },
+      loopConsumer(["import { NAMES } from './bridge';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('withholds the rows for a default-exported array', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export default ['left', 'right'] as const;" },
+      loopConsumer(["import NAMES from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
   });
 
   it('resolves every hook state a shipped rule condition reads', async () => {

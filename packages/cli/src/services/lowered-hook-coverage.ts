@@ -2540,18 +2540,422 @@ export function scanRuleStateReads(
     return [];
   };
 
+  /**
+   * `x as const satisfies T` names the same value `x` already held, and the
+   * extractor reads it that way. Only the row paths go through this: the rest
+   * of the scanner keeps the shapes it was calibrated on.
+   */
+  const unwrapWritten = (node: ts.Node): ts.Node =>
+    unwrap(ts.isSatisfiesExpression(node) ? node.expression : node);
+
+  /**
+   * Whether a row carries its own value. A row reached through a binding is
+   * written in the module that declared it, so a literal that reads a name back
+   * would resolve in this file's scope instead of that one. Only a value that
+   * reads no name is bound here.
+   */
+  const selfContainedRow = (node: ts.Node): boolean => {
+    const value = unwrapWritten(node);
+    if (
+      ts.isStringLiteralLike(value) ||
+      ts.isNoSubstitutionTemplateLiteral(value) ||
+      ts.isNumericLiteral(value) ||
+      value.kind === ts.SyntaxKind.TrueKeyword ||
+      value.kind === ts.SyntaxKind.FalseKeyword ||
+      value.kind === ts.SyntaxKind.NullKeyword
+    )
+      return true;
+    if (ts.isPrefixUnaryExpression(value))
+      return (
+        (value.operator === ts.SyntaxKind.MinusToken ||
+          value.operator === ts.SyntaxKind.PlusToken) &&
+        ts.isNumericLiteral(value.operand)
+      );
+    if (ts.isArrayLiteralExpression(value))
+      return value.elements.every(
+        (element) =>
+          !ts.isSpreadElement(element) &&
+          !ts.isOmittedExpression(element) &&
+          selfContainedRow(element)
+      );
+    if (ts.isObjectLiteralExpression(value))
+      return value.properties.every(
+        (property) =>
+          ts.isPropertyAssignment(property) &&
+          !ts.isComputedPropertyName(property.name) &&
+          selfContainedRow(property.initializer)
+      );
+    return false;
+  };
+
+  /** Array members that replace what the array holds. Everything else reads. */
+  const MUTATING_ARRAY_MEMBERS: Readonly<Record<string, true>> = Object.freeze({
+    push: true,
+    pop: true,
+    shift: true,
+    unshift: true,
+    splice: true,
+    sort: true,
+    reverse: true,
+    fill: true,
+    copyWithin: true,
+  });
+
+  /**
+   * Every name an expression hands to code this scan cannot read. A spread
+   * inside a fresh array literal copies the array it reads, so that one
+   * reference does not reach the callee.
+   */
+  const collectEscapedNames = (node: ts.Node, names: Set<string>): void => {
+    const value = unwrapWritten(node);
+    if (ts.isIdentifier(value)) {
+      names.add(value.text);
+      return;
+    }
+    if (ts.isArrayLiteralExpression(value)) {
+      for (const element of value.elements) {
+        if (ts.isSpreadElement(element) || ts.isOmittedExpression(element)) continue;
+        collectEscapedNames(element, names);
+      }
+      return;
+    }
+    ts.forEachChild(value, (child) => collectEscapedNames(child, names));
+  };
+
+  /** The binding a write is rooted at, past any member or element access. */
+  const mutationRootOf = (expression: ts.Node): ts.Identifier | null => {
+    let current = unwrapWritten(expression);
+    while (ts.isPropertyAccessExpression(current) || ts.isElementAccessExpression(current))
+      current = unwrapWritten(current.expression);
+    return ts.isIdentifier(current) ? current : null;
+  };
+
+  /**
+   * The names one source writes, or hands to a caller that may write them. A
+   * member write replaces a row, and a caller that receives the array can
+   * mutate it, so either one withholds a loop's row proof. The position of the
+   * write is not modelled: a write after the loop also withdraws the proof,
+   * which can only keep a row unresolved.
+   */
+  const sourceMutationNames = new Map<ts.SourceFile, Set<string>>();
+  const writeNamesOf = (file: ts.SourceFile): Set<string> => {
+    const cached = sourceMutationNames.get(file);
+    if (cached) return cached;
+    const names = new Set<string>();
+    const collect = (node: ts.Node): void => {
+      if (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+      ) {
+        const root = mutationRootOf(node.left);
+        if (root) names.add(root.text);
+      } else if (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) {
+        if (
+          node.operator === ts.SyntaxKind.PlusPlusToken ||
+          node.operator === ts.SyntaxKind.MinusMinusToken
+        ) {
+          const root = mutationRootOf(node.operand);
+          if (root) names.add(root.text);
+        }
+      } else if (ts.isDeleteExpression(node)) {
+        const root = mutationRootOf(node.expression);
+        if (root) names.add(root.text);
+      } else if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
+        const callee = node.expression;
+        if (
+          ts.isPropertyAccessExpression(callee) &&
+          Object.hasOwn(MUTATING_ARRAY_MEMBERS, callee.name.text)
+        ) {
+          const root = mutationRootOf(callee.expression);
+          if (root) names.add(root.text);
+        }
+        for (const argument of node.arguments ?? []) collectEscapedNames(argument, names);
+      } else if (ts.isReturnStatement(node) && node.expression) {
+        collectEscapedNames(node.expression, names);
+      } else if (ts.isExportAssignment(node) && !node.isExportEquals) {
+        collectEscapedNames(node.expression, names);
+      }
+      ts.forEachChild(node, collect);
+    };
+    collect(file);
+    sourceMutationNames.set(file, names);
+    return names;
+  };
+
+  /**
+   * `prototype-style-tokens.ts` reads a constant module without running it, so
+   * any statement or initializer it cannot model taints every constant that
+   * module holds. A row this scan certifies has to pass that same admission, or
+   * the gate would vouch for a rule the extractor cannot lower.
+   */
+  const initializerHasEffects = (node: ts.Node): boolean => {
+    if (ts.isFunctionLike(node)) return false;
+    if (
+      ts.isCallExpression(node) ||
+      ts.isNewExpression(node) ||
+      ts.isTaggedTemplateExpression(node) ||
+      ts.isDeleteExpression(node) ||
+      ts.isAwaitExpression(node) ||
+      ts.isYieldExpression(node) ||
+      (ts.isBinaryExpression(node) &&
+        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+      ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+        (node.operator === ts.SyntaxKind.PlusPlusToken ||
+          node.operator === ts.SyntaxKind.MinusMinusToken))
+    )
+      return true;
+    let effects = false;
+    ts.forEachChild(node, (child) => {
+      if (!effects && initializerHasEffects(child)) effects = true;
+    });
+    return effects;
+  };
+
+  const constantsModulePurity = new Map<ts.SourceFile, boolean>();
+  const constantsModuleIsPure = (module: ts.SourceFile): boolean => {
+    const cached = constantsModulePurity.get(module);
+    if (cached !== undefined) return cached;
+    const pure = !module.statements.some((statement) =>
+      ts.isVariableStatement(statement)
+        ? statement.declarationList.declarations.some(
+            (declaration) =>
+              declaration.initializer !== undefined &&
+              initializerHasEffects(declaration.initializer)
+          )
+        : !(
+            ts.isImportDeclaration(statement) ||
+            ts.isExportDeclaration(statement) ||
+            ts.isInterfaceDeclaration(statement) ||
+            ts.isTypeAliasDeclaration(statement) ||
+            ts.isFunctionDeclaration(statement) ||
+            ts.isEmptyStatement(statement)
+          )
+    );
+    constantsModulePurity.set(module, pure);
+    return pure;
+  };
+
+  type FiniteArrayProvider = { module: ts.SourceFile; declaration: ts.VariableDeclaration };
+
+  const providerKey = (provider: FiniteArrayProvider): string =>
+    `${provider.module.fileName}\0${provider.declaration.pos}`;
+
+  /** Names in `module` that still hold the value `name`'s declaration installed. */
+  const aliasNamesOf = (module: ts.SourceFile, name: string): Set<string> => {
+    const names = new Set([name]);
+    let added = true;
+    while (added) {
+      added = false;
+      for (const statement of module.statements) {
+        if (!ts.isVariableStatement(statement)) continue;
+        for (const declaration of statement.declarationList.declarations) {
+          if (!ts.isIdentifier(declaration.name) || !declaration.initializer) continue;
+          if (names.has(declaration.name.text)) continue;
+          const initializer = unwrapWritten(declaration.initializer);
+          if (ts.isIdentifier(initializer) && names.has(initializer.text)) {
+            names.add(declaration.name.text);
+            added = true;
+          }
+        }
+      }
+    }
+    return names;
+  };
+
+  /**
+   * The single declaration a module's value export names. Only relative
+   * modules, plain declarations and named re-exports are followed, which is
+   * what the extractor's constants loader reads. A second route to the name,
+   * or a module with unmodeled effects, leaves the value unproven.
+   */
+  const moduleProvider = (
+    module: ts.SourceFile,
+    name: string,
+    seen: Set<string>
+  ): FiniteArrayProvider | null => {
+    const key = `provider\0${module.fileName}\0${name}`;
+    if (seen.has(key)) return null;
+    if (!constantsModuleIsPure(module)) return null;
+    const next = new Set(seen).add(key);
+    const providers: FiniteArrayProvider[] = [];
+    const add = (provider: FiniteArrayProvider | null): void => {
+      if (
+        provider &&
+        !providers.some((candidate) => providerKey(candidate) === providerKey(provider))
+      )
+        providers.push(provider);
+    };
+    for (const statement of module.statements) {
+      if (ts.isImportDeclaration(statement) && ts.isStringLiteralLike(statement.moduleSpecifier)) {
+        const clause = statement.importClause;
+        if (!clause) continue;
+        // A default import names the module's default export, which the
+        // constants loader binds without an initializer.
+        if (clause.name?.text === name) return null;
+        const named = clause.namedBindings;
+        if (!named || !ts.isNamedImports(named)) continue;
+        for (const element of named.elements) {
+          if (element.isTypeOnly || element.name.text !== name) continue;
+          const imported = (element.propertyName ?? element.name).text;
+          const target = loadRelativeModule(statement.moduleSpecifier.text, module.fileName);
+          // The importing module holds its own reference to the value, so a
+          // write inside one of its functions replaces the rows too.
+          if (!target || writeNamesOf(module).has(element.name.text)) return null;
+          add(moduleProvider(target, imported, next));
+        }
+        continue;
+      }
+      if (ts.isVariableStatement(statement)) {
+        for (const declaration of statement.declarationList.declarations) {
+          if (!ts.isIdentifier(declaration.name) || declaration.name.text !== name) continue;
+          add({ module, declaration });
+        }
+        continue;
+      }
+      if (!ts.isExportDeclaration(statement) || statement.isTypeOnly || !statement.exportClause)
+        continue;
+      if (!ts.isNamedExports(statement.exportClause)) continue;
+      for (const element of statement.exportClause.elements) {
+        if (element.isTypeOnly || element.name.text !== name) continue;
+        const localName = (element.propertyName ?? element.name).text;
+        if (statement.moduleSpecifier && ts.isStringLiteralLike(statement.moduleSpecifier)) {
+          const target = loadRelativeModule(statement.moduleSpecifier.text, module.fileName);
+          add(target ? moduleProvider(target, localName, next) : null);
+        } else {
+          add(moduleProvider(module, localName, next));
+        }
+      }
+    }
+    return providers.length === 1 ? providers[0] : null;
+  };
+
+  /** Rows of a complete literal array, with a proven spread expanded in order. */
+  const finiteArrayRows = (
+    literal: ts.ArrayLiteralExpression,
+    resolveSpread: (expression: ts.Expression) => ts.Expression[] | null
+  ): ts.Expression[] | null => {
+    const rows: ts.Expression[] = [];
+    for (const element of literal.elements) {
+      if (ts.isOmittedExpression(element)) return null;
+      if (ts.isSpreadElement(element)) {
+        const spread = resolveSpread(element.expression);
+        if (!spread) return null;
+        rows.push(...spread);
+        continue;
+      }
+      if (!selfContainedRow(element)) return null;
+      rows.push(element);
+    }
+    return rows;
+  };
+
+  const foreignValueRows = (
+    expression: ts.Expression,
+    module: ts.SourceFile,
+    seen: Set<string>
+  ): ts.Expression[] | null => {
+    const value = unwrapWritten(expression);
+    if (ts.isArrayLiteralExpression(value))
+      return finiteArrayRows(value, (spread) => foreignValueRows(spread, module, seen));
+    if (!ts.isIdentifier(value)) return null;
+    const provider = moduleProvider(module, value.text, seen);
+    if (!provider) return null;
+    return foreignDeclarationRows(provider, seen);
+  };
+
+  const foreignDeclarationRows = (
+    provider: FiniteArrayProvider,
+    seen: Set<string>
+  ): ts.Expression[] | null => {
+    const key = providerKey(provider);
+    // Two modules may re-export each other's names; the declaration itself is
+    // the cycle that has to terminate.
+    if (seen.has(key)) return null;
+    const declaration = provider.declaration;
+    const list = declaration.parent;
+    if (!ts.isVariableDeclarationList(list)) return null;
+    // `const` is the value's own promise: a `let` may be replaced, and the
+    // constants loader's admission does not prove that it is not.
+    if ((list.flags & ts.NodeFlags.Const) === 0) return null;
+    if (!ts.isIdentifier(declaration.name) || !declaration.initializer) return null;
+    const writes = writeNamesOf(provider.module);
+    for (const name of aliasNamesOf(provider.module, declaration.name.text)) {
+      if (writes.has(name)) return null;
+    }
+    return foreignValueRows(declaration.initializer, provider.module, new Set(seen).add(key));
+  };
+
+  const localBindingRows = (
+    name: string,
+    scope: Scope,
+    seen: Set<string>,
+    names: Set<string>
+  ): ts.Expression[] | null => {
+    const binding = lookup(scope, name);
+    if (!binding) return null;
+    if (binding.kind === 'tokenImport') {
+      const from = binding.from ?? fileName;
+      const key = `import\0${from}\0${binding.specifier}\0${binding.imported}`;
+      if (seen.has(key)) return null;
+      const module = loadRelativeModule(binding.specifier, from);
+      if (!module) return null;
+      names.add(name);
+      const provider = moduleProvider(module, binding.imported, new Set(seen).add(key));
+      return provider ? foreignDeclarationRows(provider, seen) : null;
+    }
+    if (binding.kind !== 'token') return null;
+    const declaration = binding.bindingNode;
+    if (!declaration || !ts.isVariableDeclaration(declaration)) return null;
+    const list = declaration.parent;
+    if (!ts.isVariableDeclarationList(list)) return null;
+    if ((list.flags & ts.NodeFlags.Const) === 0) return null;
+    // A conditional or opaque value is not one row list, and a member write
+    // replaced what the initializer installed.
+    if (binding.opaque || (binding.alternates?.length ?? 0) > 0) return null;
+    const key = `local\0${fileName}\0${declaration.pos}`;
+    if (seen.has(key)) return null;
+    names.add(name);
+    return localValueRows(binding.initializer, scope, new Set(seen).add(key), names);
+  };
+
+  const localValueRows = (
+    expression: ts.Expression,
+    scope: Scope,
+    seen: Set<string>,
+    names: Set<string>
+  ): ts.Expression[] | null => {
+    const value = unwrapWritten(expression);
+    if (ts.isArrayLiteralExpression(value))
+      return finiteArrayRows(value, (spread) => localValueRows(spread, scope, seen, names));
+    if (ts.isIdentifier(value)) return localBindingRows(value.text, scope, seen, names);
+    return null;
+  };
+
+  /**
+   * Rows of a loop whose iterable is a name rather than an inline literal.
+   * Every name the row list passes through has to be `const`, unmodified and
+   * free of writes in this file, and each row has to carry its own value.
+   * Anything else keeps the existing unresolved path.
+   */
+  const provenLoopRows = (expression: ts.Expression, scope: Scope): ts.Expression[] | null => {
+    const names = new Set<string>();
+    const rows = localValueRows(expression, scope, new Set(), names);
+    if (!rows) return null;
+    const writes = writeNamesOf(source);
+    for (const name of names) if (writes.has(name)) return null;
+    return rows;
+  };
+
   const declareLoopTokenBindings = (
     node: ts.ForOfStatement,
     scope: Scope,
-    row?: ts.Expression
+    row: ts.Expression
   ): void => {
     const initializer = node.initializer;
-    const iterable = unwrap(node.expression);
-    if (!ts.isVariableDeclarationList(initializer) || !ts.isArrayLiteralExpression(iterable))
-      return;
-    const elements = row
-      ? [row]
-      : iterable.elements.filter((element) => !ts.isOmittedExpression(element));
+    if (!ts.isVariableDeclarationList(initializer)) return;
+    const elements = [row];
     const assign = (name: ts.BindingName, expressions: ts.Expression[]): void => {
       if (!ts.isIdentifier(name) || expressions.length === 0) return;
       declare(scope, name.text, {
@@ -3576,9 +3980,15 @@ export function scanRuleStateReads(
 
     if (ts.isForOfStatement(node)) {
       const iterable = unwrap(node.expression);
-      if (ts.isArrayLiteralExpression(iterable)) {
+      const rows = ts.isArrayLiteralExpression(iterable)
+        ? iterable.elements
+        : provenLoopRows(node.expression, current);
+      // A proven row list is the whole iterable, so an empty one runs no body:
+      // visiting it with the loop name unbound would report a read the runtime
+      // never performs.
+      if (rows) {
         visit(node.expression, current);
-        for (const row of iterable.elements) {
+        for (const row of rows) {
           if (ts.isOmittedExpression(row)) continue;
           const rowScope: Scope = {
             parent: current,
