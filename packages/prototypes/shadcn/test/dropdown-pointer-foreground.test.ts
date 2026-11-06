@@ -72,8 +72,11 @@ it.each(SHADCN_STYLE_IDS)(
       expect(styleContains(items[0], token)).toBe(false);
       expect(styleContains(items[1], token)).toBe(true);
     }
-    expect(styleContains(shortcuts[0], 'text-accent-foreground')).toBe(false);
-    expect(styleContains(shortcuts[1], 'text-accent-foreground')).toBe(true);
+    // Shortcut foreground lowers to a data-[active] variant: the static token
+    // is wired once and the data-active attribute follows the observed state.
+    expect(styleContains(shortcuts[1], 'data-[active]:text-accent-foreground')).toBe(true);
+    expect(shortcuts[0].hasAttribute('data-active')).toBe(false);
+    expect(shortcuts[1].hasAttribute('data-active')).toBe(true);
     // Keep the mouse physically over Billing while the keyboard selects Home.
     // Injecting pointerleave here would hide New York's stale-hover regression.
     items[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
@@ -82,7 +85,7 @@ it.each(SHADCN_STYLE_IDS)(
     expect(document.activeElement).toBe(items[0]);
     expect(styleContains(items[0], 'text-accent-foreground')).toBe(true);
     expect(styleContains(items[1], 'text-accent-foreground')).toBe(false);
-    expect(styleContains(shortcuts[1], 'text-accent-foreground')).toBe(false);
+    expect(shortcuts[1].hasAttribute('data-active')).toBe(false);
     items[1].dispatchEvent(
       new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse', buttons: 0 })
     );
@@ -108,7 +111,10 @@ it.each(SHADCN_STYLE_IDS)(
     await move(3);
     expect(document.activeElement).toBe(items[1]);
     expect(styleContains(items[3], 'text-accent-foreground')).toBe(false);
-    expect(styleContains(items[3], 'opacity-50')).toBe(true);
+    // Disabled paint lowers to the data-[disabled] variant with the data-active
+    // hand-off asserted above; the token pair is wired, the attribute follows state.
+    expect(styleContains(items[3], 'data-[disabled]:opacity-50')).toBe(true);
+    expect(items[3].hasAttribute('data-disabled')).toBe(true);
     items[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
     await settle();
     expect(document.activeElement).toBe(items[0]);
