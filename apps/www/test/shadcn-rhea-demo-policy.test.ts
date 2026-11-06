@@ -230,6 +230,31 @@ describe('ordinary Shadcn documentation demo policy', () => {
     });
   }
 
+  it('demo-shadcn-tooltip: keeps both reported surfaces on the Shadcn Rhea projection', () => {
+    const prototypeIds: string[] = [];
+    const contentRefs: Array<string | undefined> = [];
+    const contentProps: unknown[] = [];
+    visit(demo60.root, (node) => {
+      if (node.kind !== 'proto') return;
+      prototypeIds.push(node.prototypeId);
+      if (node.prototypeId !== 'shadcn-tooltip-content') return;
+      contentRefs.push(node.ref);
+      contentProps.push(node.props);
+    });
+
+    expect(demo60.root.kind).toBe('proto');
+    if (demo60.root.kind !== 'proto') throw new Error('Tooltip demo lacks its style scope');
+    expect(demo60.root.props).toEqual({ styleProfile: 'rhea' });
+    expect(prototypeIds.filter((id) => id === 'shadcn-tooltip-root')).toHaveLength(2);
+    expect(prototypeIds.filter((id) => id === 'shadcn-tooltip-trigger')).toHaveLength(2);
+    expect(contentRefs).toEqual(['accountContent', 'notificationsContent']);
+    expect(contentProps).toEqual([
+      { side: 'top', align: 'center' },
+      { side: 'top', align: 'center' },
+    ]);
+    expect(prototypeIds.some((id) => id.startsWith('base-tooltip'))).toBe(false);
+  });
+
   it('keeps exact recipe dependency closure, including the public scope lineage', () => {
     const manifest: ProjectionFamilyManifest = PROJECTION_FAMILY_MANIFESTS.shadcn;
     validateProjectionFamilyManifest(manifest);

@@ -129,6 +129,9 @@ describe('prototypes/shadcn: tooltip', () => {
       'text-background',
     ];
     for (const token of surface) expect(styleContains(content, token), token).toBe(true);
+    for (const token of ['animate-in', 'fade-in-0', 'zoom-in-95', 'slide-in-from-bottom-2']) {
+      expect(styleContains(content, token), token).toBe(true);
+    }
     for (const token of [
       'overflow-hidden',
       'border',
@@ -230,11 +233,19 @@ describe('prototypes/shadcn: tooltip', () => {
     expect(first.root.getExposes().open.get()).toBe(true);
     await advance(1);
     expect(first.root.getExposes().open.get()).toBe(false);
+    expect(first.content.getExposes().transitionState.get()).toBe('leaving');
+    for (const token of ['animate-out', 'fade-out-0', 'zoom-out-95']) {
+      expect(styleContains(first.content, token), token).toBe(true);
+    }
 
     second.trigger.dispatchEvent(new Event('pointerenter'));
     await advance(0);
     expect(second.root.getExposes().open.get()).toBe(true);
     expect(first.root.getExposes().open.get()).toBe(false);
+    expect(second.content.getExposes().transitionState.get()).toBe('entering');
+    for (const token of ['animate-in', 'fade-in-0', 'zoom-in-95', 'slide-in-from-bottom-2']) {
+      expect(styleContains(second.content, token), token).toBe(true);
+    }
 
     second.trigger.dispatchEvent(new Event('pointerleave'));
     await advance(100);
