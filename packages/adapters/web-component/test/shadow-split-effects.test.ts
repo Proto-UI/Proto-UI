@@ -202,6 +202,47 @@ describe('private Shadow split effects', () => {
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.dispose();
   });
+  it('admits changing border widths when the H1 motion companion owns their compensation', () => {
+    // Public Shadcn Button/Switch rest and checked states carry transition-all
+    // with a moving border width; the H1 surface margins already compensate.
+    const { host, surface, effects, options } = setup([
+      'block',
+      'border',
+      'border-2',
+      'data-[checked]:border-2',
+      'transition-all',
+    ]);
+    effects.queueStyle(effect(['block', 'border', 'transition-all']));
+    effects.requestFlush();
+    expect(() =>
+      effects.queueStyle(
+        createRootStyleEffect([
+          ...effect(['block', 'border', 'transition-all']).entries,
+          ...lowerRootStyleTokens(['border-2'], 'data-[checked]').entries,
+        ])
+      )
+    ).not.toThrow();
+    effects.requestFlush();
+    expect(host.getAttribute(ROOT)).toContain('transition-all');
+    effects.dispose();
+
+    const withoutCompanion = createShadowSplitEffectsPort({
+      ...options,
+      artifact: {
+        ...options.artifact,
+        cssText: rewriteSplitBaseDeclarations(options.artifact.cssText, (declarations) =>
+          declarations.replace('--pui-split-motion-recipe: h1;', '')
+        ),
+      },
+    });
+    expect(() =>
+      withoutCompanion.queueStyle(
+        effect(['block', 'border', 'border-2', 'transition-all'])
+      )
+    ).toThrow(/H1 recipe/);
+    withoutCompanion.dispose();
+    expect(surface.outerHTML).not.toContain('border');
+  });
   it('admits logical padding without reading writing mode during atomic preflight', () => {
     const { host, surface, effects } = setup(['block', 'px-2']);
     host.style.writingMode = 'vertical-rl';

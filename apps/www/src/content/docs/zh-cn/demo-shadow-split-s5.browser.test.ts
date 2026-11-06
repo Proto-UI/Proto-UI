@@ -2,6 +2,7 @@
 import type { Browser } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
+import { matrixHostsReady } from './demo-matrix-observation';
 import { runS5Journey } from '../../../../../../scripts/analysis/shadow-s5-journey.mjs';
 
 let browser: Browser;
@@ -26,21 +27,9 @@ describe.sequential('S5 native editor acceptance paths', () => {
       page.on('pageerror', (e) => errors.push(e.message));
       try {
         await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#shadow-split-s5`);
-        await page.waitForFunction(
-          () => {
-            const previews = [...document.querySelectorAll('[data-previewer-id]')];
-            return (
-              previews.length > 0 &&
-              previews.every(
-                (el) =>
-                  el.getAttribute('data-inited') === '1' &&
-                  (el.querySelector('.host')?.childElementCount ?? 0) > 0
-              )
-            );
-          },
-          undefined,
-          { timeout: 60_000 }
-        );
+        // Share the matrix smoke's committed-host boundary: preview failures
+        // surface their own errors instead of an unexplained readiness timeout.
+        await page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 });
         page.on('framenavigated', (frame) => {
           if (frame === page.mainFrame()) errors.push(`Unexpected navigation: ${frame.url()}`);
         });
