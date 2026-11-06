@@ -5,6 +5,8 @@ type RootSpace = Readonly<{
   left: number;
   boxWidth: number;
   boxLeft: number;
+  bodyWidth: number;
+  bodyLeft: number;
 }>;
 type Tracker = { listeners: Set<() => void>; dispose(): void };
 const roots = new WeakMap<Document, Tracker>();
@@ -14,6 +16,11 @@ const read = (root: HTMLElement): RootSpace => ({
   left: root.clientLeft,
   boxWidth: root.getBoundingClientRect().width,
   boxLeft: root.getBoundingClientRect().left + (root.ownerDocument.defaultView?.scrollX ?? 0),
+  // When the propagated page scroller is body (root overflow hidden, body
+  // overflow scroll), a classic gutter belongs to body's box alone: the root
+  // box above stays identical, so without this half the drift is unobservable.
+  bodyWidth: root.ownerDocument.body?.clientWidth ?? 0,
+  bodyLeft: root.ownerDocument.body?.getBoundingClientRect().left ?? 0,
 });
 export function observeRootSpace(document: Document, listener: () => void): () => void {
   const root = document.documentElement,
@@ -32,7 +39,9 @@ export function observeRootSpace(document: Document, listener: () => void): () =
         next.height === previous.height &&
         next.left === previous.left &&
         next.boxWidth === previous.boxWidth &&
-        next.boxLeft === previous.boxLeft
+        next.boxLeft === previous.boxLeft &&
+        next.bodyWidth === previous.bodyWidth &&
+        next.bodyLeft === previous.bodyLeft
       )
         return;
       previous = next;
@@ -67,8 +76,19 @@ export function observeRootSpace(document: Document, listener: () => void): () =
     // Root width can change without anchor size or a window resize, and an
     // intersection observer need not report a same-size, fully visible anchor.
     resize?.observe(root);
+    // Body participates for the body-owned scroller case: its inline box can
+    // change while every root measurement above stays fixed. Observing the root
+    // alone leaves a fixed-position overlay stale by exactly the gutter width.
+    if (document.body) resize?.observe(document.body);
     // Direction/stable-gutter changes can move the origin without resizing.
     mutation?.observe(root, { attributes: true, attributeFilter: ['dir', 'style', 'class'] });
+    // A propagated body gutter can appear or disappear without touching any
+    // root attribute, so the body's own inline style is observed too.
+    if (document.body)
+      mutation?.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['dir', 'style', 'class'],
+      });
   }
   const owned = tracker;
   const ownedListener = () => listener();

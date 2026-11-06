@@ -9,14 +9,35 @@ afterEach(() => {
 });
 function fixture() {
   const root = document.documentElement,
+    body = document.body,
     view = document.defaultView!;
   let width = 390,
-    left = 0;
+    left = 0,
+    bodyWidth = 390,
+    bodyLeft = 0;
   const saved = ['clientWidth', 'clientLeft'].map(
     (key) => [key, Object.getOwnPropertyDescriptor(root, key)] as const
   );
+  const savedBody = ['clientWidth', 'getBoundingClientRect'].map(
+    (key) => [key, Object.getOwnPropertyDescriptor(body, key)] as const
+  );
   Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width });
   Object.defineProperty(root, 'clientLeft', { configurable: true, get: () => left });
+  Object.defineProperty(body, 'clientWidth', { configurable: true, get: () => bodyWidth });
+  Object.defineProperty(body, 'getBoundingClientRect', {
+    configurable: true,
+    value: () => ({
+      x: bodyLeft,
+      y: 0,
+      left: bodyLeft,
+      top: 0,
+      right: bodyLeft + bodyWidth,
+      bottom: 800,
+      width: bodyWidth,
+      height: 800,
+      toJSON() {},
+    }),
+  });
   const instances: {
     fire(): void;
     observe: ReturnType<typeof vi.fn>;
@@ -36,11 +57,16 @@ function fixture() {
       if (descriptor) Object.defineProperty(root, key, descriptor);
       else Reflect.deleteProperty(root, key);
     }
+    for (const [key, descriptor] of savedBody) {
+      if (descriptor) Object.defineProperty(body, key, descriptor);
+      else Reflect.deleteProperty(body, key);
+    }
     if (original) Object.defineProperty(view, 'ResizeObserver', original);
     else Reflect.deleteProperty(view, 'ResizeObserver');
   });
   return {
     root,
+    body,
     instances,
     resize: (next: number) => {
       width = next;
@@ -48,6 +74,11 @@ function fixture() {
     },
     origin: (next: number) => {
       left = next;
+    },
+    bodyGutter: (next: number, origin = bodyLeft) => {
+      bodyWidth = next;
+      bodyLeft = origin;
+      instances.forEach((i) => i.fire());
     },
   };
 }
@@ -153,5 +184,45 @@ it('notifies when retained root gutter changes its box while viewport clientWidt
   cleanup.push(observeRootSpace(document, update));
   width = 375;
   f.instances[0].fire();
+  expect(update).toHaveBeenCalledTimes(1);
+});
+
+it('observes the propagated body scroller alongside the root box', () => {
+  const f = fixture();
+  cleanup.push(observeRootSpace(document, vi.fn()));
+  expect(f.instances).toHaveLength(1);
+  expect(f.instances[0].observe).toHaveBeenCalledWith(f.root);
+  expect(f.instances[0].observe).toHaveBeenCalledWith(f.body);
+});
+
+it('notifies when a body-owned gutter changes while every root measurement stays fixed', () => {
+  const f = fixture(),
+    update = vi.fn();
+  cleanup.push(observeRootSpace(document, update));
+  f.instances[0].fire();
+  expect(update).not.toHaveBeenCalled();
+  f.bodyGutter(405);
+  expect(update).toHaveBeenCalledTimes(1);
+  f.instances[0].fire();
+  expect(update).toHaveBeenCalledTimes(1);
+});
+
+it('notifies when a body-owned gutter moves the page origin without changing width', () => {
+  const f = fixture(),
+    update = vi.fn();
+  cleanup.push(observeRootSpace(document, update));
+  f.bodyGutter(390, 15);
+  expect(update).toHaveBeenCalledTimes(1);
+});
+
+it('notifies when a propagated body gutter changes through an inline-style mutation', async () => {
+  const f = fixture(),
+    update = vi.fn();
+  cleanup.push(observeRootSpace(document, update));
+  f.body.style.overflowY = 'hidden';
+  f.bodyGutter(405);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(update).toHaveBeenCalledTimes(1);
+  await new Promise((resolve) => setTimeout(resolve, 0));
   expect(update).toHaveBeenCalledTimes(1);
 });
