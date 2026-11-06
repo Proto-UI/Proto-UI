@@ -199,7 +199,11 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
 
   {
     effectiveHasCode && (
-      <CodePanel code={effectiveCode} lang={codeLangForRuntime(effectiveInitialRuntime)} />
+      <CodePanel
+        code={effectiveCode}
+        lang={codeLangForRuntime(effectiveInitialRuntime)}
+        framed={false}
+      />
     )
   }
 
