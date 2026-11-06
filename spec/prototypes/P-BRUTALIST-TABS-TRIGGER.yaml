@@ -38,11 +38,13 @@ criteria:
   - id: P-BRUTALIST-TABS-TRIGGER-INTERACTION
     text:
       en: >-
-        With appearance=default, hover on an unselected, released Trigger applies bg-secondary-background and border-black. Press retains border-black without movement or shadow. Focus-visible and disabled retain their ring and gate rules.
+        With appearance=default, hover on an unselected, released Trigger applies bg-secondary-background and border-black. Press retains border-black without movement or shadow. Focus-visible and disabled retain their ring and gate rules. This is the flat selection control category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001; the selected state is its named hover-gated exception and never gains the Button displacement grammar.
 
 
       zh-CN: >-
-        appearance=default 时，未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。
+        appearance=default 时，未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。这属于 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 的 flat selection control category；selected 状态是其命名的 hover-gated exception，绝不获得 Button 位移语法。
+    dependsOn:
+      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 
 
   - id: P-BRUTALIST-TABS-TRIGGER-VISUAL-GRAMMAR
@@ -69,12 +71,16 @@ relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
   contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 inherits:
   prototypes:
     - id: P-BASE-TABS-TRIGGER
 verifies:
   { tests: [T-BRUTALIST-TABS-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Named the flat-selection category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 and its selected hover-gated exception without changing interaction behavior.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.

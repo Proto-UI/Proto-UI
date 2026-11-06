@@ -31,12 +31,23 @@ description: '对齐官方来源的新粗野主义字体、圆角、层级与交
 
 ## 层级与交互
 
-| 表面 | 静止 | hover / 瞬时 press |
+层级与交互 motion 遵循 `D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001` 拥有的 typed category grammar，而不是一条统一的阴影/lift/sink 规则。下表每行命名其 category 并可追溯到所属 P 实体；exception 有限并列于该 decision。
+
+| Category（所属 P 实体） | 静止层级 | hover / 瞬时 press |
 | --- | --- | --- |
-| Button 与 Button-like Trigger | 4px 4px 零模糊黑影 | +4px,+4px 下沉并移除外影 |
-| Card / Dialog Content | 4px 硬阴影 | 不虚构 control state |
-| Menu、Select、Hover Card、Tooltip、Badge、Textarea | 无阴影 | 保留现有色对与预留边框 |
-| Tabs / Toggle / Switch | 平面 | 保留状态信号，不套用 Button 位移 |
+| Elevated action control — Button、raised Surface、Dialog/Dropdown/Select/Collapsible Trigger、Accordion Item | 4px 4px 零模糊黑影 | 沿阴影轴 +4px,+4px 下沉并移除外影；不叠加额外 hover-only lift |
+| Raised panel — Card、Dialog/Alert Dialog/Command Dialog/Drawer Content、Calendar | 4px 4px 硬黑影 | 不虚构 control state 或 motion |
+| Anchored content panel — Dropdown/Context/Menubar/Navigation Menu Content、Autocomplete/Combobox/Select/Hover Card Content、Popover | 3px 3px 零模糊 foreground 阴影 | 无交互 motion；由所属 prototype 或 Adapter 定位 |
+| Flat selection control — Toggle、Tabs Trigger | 无阴影、无位移 | Toggle hover/press 保持 `border-black`；仅未选中且未 pressed 的 Tabs Trigger 获得 hover 填色与边框；selected Trigger 保留色对且无 elevation；Toggle active 的 2px inset frame 在 press 中持续 |
+| Binary capsule control — Switch | Root 与 Thumb 均无阴影 | 无 hover 视觉；press 保持填色与几何；只有 Thumb 以 150ms transition 移动 20px |
+| Editable surface — Input、Textarea、Number Field、Input OTP | Input/Textarea 无阴影；Number Field/Input OTP 小控件为 2px 2px border 色阴影 | 无 hover lift 或 press sink；保留现有 focus ring 与色对状态 |
+| Passive label — Badge、Text、Label、Kbd | 无阴影 | 无交互 motion |
+| Loading placeholder — Skeleton | 无阴影 | 保持静态；不引入 pulse animation |
+| Scroll chrome 与 Separator — Scroll Area Root/Viewport/Scrollbar/Thumb、Separator | 无阴影 | 无交互 motion；Root 保留圆角 overflow clip |
+| Flat overlay — Dialog Mask | 无阴影 | 仅有受治理的 150ms 打开/关闭 fade |
+| Flat interactive item — Dropdown/Context/Menubar/Select Item | 无阴影 | 仅背景变化，无 lift 或 press 层级 |
+
+分组 surface（Toolbar Root、Toggle Group Root、Toast Root）作为 passive 容器保留 3px 3px foreground 阴影，不套用控件位移。未经修订该 decision，不准入其他 rest-depth、hover-depth 或 press-depth exception。
 
 上游 reverse Button 是独立 variant，当前 PUI API 不声称提供它。Toggle 在 press 中保留 2px inset active marker，作为 PUI 的非颜色状态扩展。Base 继续拥有 active 与 pressed 的区分、selection、键盘、ARIA 与 command wiring。保留已有 popup transition 与 Spinner reduced-motion 行为；Skeleton 仍为静态。
 

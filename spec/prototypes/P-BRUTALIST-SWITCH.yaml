@@ -43,8 +43,10 @@ criteria:
 
   - id: P-BRUTALIST-SWITCH-INTERACTION
     text:
-      en: 'Press retains the current fill and geometry without coral flash, displacement or elevation. Focus-visible retains the offset ring; disabled retains its opacity and pointer gate. Base checked, press and keyboard ownership remain unchanged.'
-      zh-CN: 'press 保持当前 fill 与几何，不闪珊瑚色、不位移、不增加 elevation。focus-visible 保留 offset ring；disabled 保留 opacity 与 pointer gate；Base checked、press 与键盘 owner 不变。'
+      en: 'Press retains the current fill and geometry without coral flash, displacement or elevation, and hover consumes no visual state. Focus-visible retains the offset ring; disabled retains its opacity and pointer gate. Base checked, press and keyboard ownership remain unchanged. This is the binary capsule control category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, whose named exception assigns travel to the Thumb instead of Button displacement.'
+      zh-CN: 'press 保持当前 fill 与几何，不闪珊瑚色、不位移、不增加 elevation，hover 不消费视觉状态。focus-visible 保留 offset ring；disabled 保留 opacity 与 pointer gate；Base checked、press 与键盘 owner 不变。这属于 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 的 binary capsule control category，其命名 exception 将行程交给 Thumb，而不套用 Button 位移。'
+    dependsOn:
+      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 
   - id: P-BRUTALIST-SWITCH-DEMO-NAMING
     text:
@@ -72,11 +74,15 @@ relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
   contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 inherits:
   prototypes:
     - id: P-BASE-SWITCH
 verifies: { tests: [T-BRUTALIST-SWITCH-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Named the binary-capsule category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 and its Thumb-owned travel exception without changing interaction behavior.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Temporarily reject the inherited drag extension rather than normalize against an interval inconsistent with the pinned zero-padding painted endpoints.

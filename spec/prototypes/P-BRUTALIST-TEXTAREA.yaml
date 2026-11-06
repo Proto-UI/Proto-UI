@@ -21,8 +21,10 @@ criteria:
       en: Brutalist styling must project directly to the same contentless Base-backed native textarea without adding a wrapper control, child renderer, or second target.
   - id: P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
     text:
-      en: Root projects flex w-full min-h-[80px] resize-y, rounded-base 5px, border-2 border-border, bg-secondary-background text-foreground, px-3 py-2 and font-sans font-medium text-sm with no explicit leading-6 override or shadow. Native selection uses selection:bg-main selection:text-main-foreground. Existing focus-visible ring, disabled cursor/opacity and host-owned resize remain unchanged. Placeholder and invalid styling remain unimplemented differences under the existing style-syntax and Base ownership boundaries.
-      zh-CN: Root 投射 flex w-full min-h-[80px] resize-y、rounded-base 5px、border-2 border-border、bg-secondary-background text-foreground、px-3 py-2 与 font-sans font-medium text-sm，不加 leading-6 override 或阴影；原生选择使用 selection:bg-main selection:text-main-foreground。既有 focus-visible ring、disabled cursor/opacity 与 host-owned resize 保持不变。placeholder 与 invalid 样式仍是既有 style-syntax/Base ownership 边界下未实现的差异。
+      en: Root projects flex w-full min-h-[80px] resize-y, rounded-base 5px, border-2 border-border, bg-secondary-background text-foreground, px-3 py-2 and font-sans font-medium text-sm with no explicit leading-6 override or shadow. Native selection uses selection:bg-main selection:text-main-foreground. Existing focus-visible ring, disabled cursor/opacity and host-owned resize remain unchanged. Placeholder and invalid styling remain unimplemented differences under the existing style-syntax and Base ownership boundaries. As an editable surface under D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 it owns no hover lift or press sink.
+      zh-CN: Root 投射 flex w-full min-h-[80px] resize-y、rounded-base 5px、border-2 border-border、bg-secondary-background text-foreground、px-3 py-2 与 font-sans font-medium text-sm，不加 leading-6 override 或阴影；原生选择使用 selection:bg-main selection:text-main-foreground。既有 focus-visible ring、disabled cursor/opacity 与 host-owned resize 保持不变。placeholder 与 invalid 样式仍是既有 style-syntax/Base ownership 边界下未实现的差异。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 editable surface，它不拥有 hover lift 或 press sink。
+    dependsOn:
+      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 
   - id: P-BRUTALIST-TEXTAREA-NO-PROTOCOL-DELTA
     text:
@@ -42,6 +44,7 @@ dependsOn:
     - C-AS-HOOK-0001
     - C-HOST-SURFACE-PROJECTION-0001
     - C-RULE-INTENT-FEEDBACK-STYLE-0001
+  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
 inherits:
   prototypes:
     - id: P-BASE-TEXTAREA
@@ -49,6 +52,9 @@ verifies:
   tests:
     - T-BRUTALIST-TEXTAREA-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Named the editable-surface category of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 without changing the shadow-free visual grammar.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.

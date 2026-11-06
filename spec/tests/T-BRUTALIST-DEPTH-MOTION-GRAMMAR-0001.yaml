@@ -1,0 +1,94 @@
+id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001
+type: test
+title: Brutalist typed depth and motion category grammar tests
+status: draft
+since: 0.3.0-alpha.1
+summary: >-
+  Covers the typed depth/motion categories and finite exceptions of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 against the actual Brutalist prototypes in Light and Dark, including the no-shadow passive/loading/editable/scroll categories, flat selection and binary capsule controls, and the raised panel exception.
+
+
+cases:
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-PASSIVE-LABEL
+    title: Passive label Badge rests without shadow and owns no interaction motion in Light and Dark
+    covers: [P-BRUTALIST-BADGE-VISUAL-GRAMMAR]
+    expectation: brutalist-grammar-passive-label-no-shadow-light-dark
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-LOADING-PLACEHOLDER
+    title: Loading placeholder Skeleton rests without shadow and stays static in Light and Dark
+    covers: [P-BRUTALIST-SKELETON-VISUAL-GRAMMAR]
+    expectation: brutalist-grammar-loading-placeholder-static-light-dark
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-RAISED-PANEL
+    title: Raised panel Card rests at 4px 4px black shadow without interaction motion in Light and Dark
+    covers: [P-BRUTALIST-CARD-ROOT-VISUAL]
+    expectation: brutalist-grammar-raised-panel-4px-light-dark
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-EDITABLE-SURFACE
+    title: Editable Textarea rests without shadow and owns no hover lift or press sink in Light and Dark
+    covers: [P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR]
+    expectation: brutalist-grammar-editable-surface-no-motion-light-dark
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-SCROLL-CHROME
+    title: Scroll chrome Root rests without shadow and owns no interaction motion in Light and Dark
+    covers: [P-BRUTALIST-SCROLL-AREA-VISUAL-GRAMMAR]
+    expectation: brutalist-grammar-scroll-chrome-no-shadow-light-dark
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-FLAT-SELECTION
+    title: Flat selection Toggle keeps no translation or outer shadow through hover, press, and active states
+    covers: [P-BRUTALIST-TOGGLE-INTERACTION, P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL]
+    expectation: brutalist-grammar-flat-selection-toggle-hover-press-active
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-FLAT-TAB
+    title: Flat selection Tabs Trigger keeps selected state flat and gates hover to unselected released triggers
+    covers: [P-BRUTALIST-TABS-TRIGGER-INTERACTION, P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT]
+    expectation: brutalist-grammar-flat-selection-tabs-selected-and-unselected
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-BINARY-CAPSULE
+    title: Binary capsule Switch consumes no hover visual, keeps Root shadow-free on press, and leaves travel to the Thumb
+    covers: [P-BRUTALIST-SWITCH-INTERACTION, P-BRUTALIST-SWITCH-VISUAL-GRAMMAR, P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT]
+    expectation: brutalist-grammar-binary-capsule-no-hover-thumb-travel
+  - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-TOKEN-CLOSURE
+    title: Generated CLI Brutalist style-token closure still projects the governed hard-shadow vocabulary
+    covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B]
+    expectation: brutalist-grammar-cli-hard-shadow-token-closure
+implementations:
+  - id: brutalist-depth-motion-grammar-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/depth-motion-grammar.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-PASSIVE-LABEL
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-LOADING-PLACEHOLDER
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-RAISED-PANEL
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-EDITABLE-SURFACE
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-SCROLL-CHROME
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-FLAT-SELECTION
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-FLAT-TAB
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-BINARY-CAPSULE
+      - T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-TOKEN-CLOSURE
+    exercises:
+      - P-BRUTALIST-BADGE
+      - P-BRUTALIST-SKELETON
+      - P-BRUTALIST-CARD
+      - P-BRUTALIST-TEXTAREA
+      - P-BRUTALIST-SCROLL-AREA
+      - P-BRUTALIST-TOGGLE
+      - P-BRUTALIST-TABS-TRIGGER
+      - P-BRUTALIST-SWITCH
+      - P-BRUTALIST-SWITCH-THUMB
+    notes:
+      - Actual prototypes mounted through the Web Component adapter or executed with a real Runtime host. Token-level visual evidence in Light and Dark; physical browser frame progression remains owned by existing per-component evidence.
+verifies:
+  decisions:
+    - D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001
+exercises:
+  prototypes:
+    - P-BRUTALIST-BADGE
+    - P-BRUTALIST-SKELETON
+    - P-BRUTALIST-CARD
+    - P-BRUTALIST-TEXTAREA
+    - P-BRUTALIST-SCROLL-AREA
+    - P-BRUTALIST-TOGGLE
+    - P-BRUTALIST-TABS-TRIGGER
+    - P-BRUTALIST-SWITCH
+    - P-BRUTALIST-SWITCH-THUMB
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: >-
+      Introduced executable coverage for every typed depth/motion category named in Issue 398, with Light/Dark passive and panel cases plus state-gated Toggle, Tabs Trigger, and Switch exception cases.
+tags: [test, brutalist, depth, motion, typed-grammar]
