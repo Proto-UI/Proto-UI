@@ -97,6 +97,47 @@ describe('Search projection failure and lifetime boundaries (materializer fault 
     expect(made).toHaveLength(3);
     for (const item of made) expect(item.dispose).toHaveBeenCalledOnce();
   });
+  it('reports a deferred dialog materialization failure instead of swallowing it', async () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    document.body.innerHTML =
+      '<site-search data-search-composition="command-dialog" data-search-initial-family="shadcn"><div data-search-command-mount="open"></div><div data-search-dialog-mount></div></site-search>';
+    const root = document.querySelector<HTMLElement>('site-search')!;
+    root.dataset.searchCopy = JSON.stringify(
+      Object.fromEntries(
+        [
+          'count',
+          'title',
+          'description',
+          'placeholder',
+          'hint',
+          'loading',
+          'empty',
+          'error',
+          'retry',
+          'more',
+          'close',
+        ].map((key) => [key, key])
+      )
+    );
+    root.dataset.pagefindBundle = '/pagefind/';
+    const owner = searchCommandParticipant(root);
+    owners.push(owner);
+    const handle = initDocumentationSearchCommands(owner);
+    handles.push(handle);
+    await handle.ready;
+    expect(root.dataset.searchView).toBe('ready');
+    faults.materialize.mockImplementation(async (_request, options) => {
+      if (options.ownerId.includes('-dialog')) throw new Error('dialog unavailable');
+      return candidate();
+    });
+    owner.toggle();
+    await settle();
+    expect(root.dataset.searchView).toBe('unavailable');
+    expect(errors).toHaveBeenCalledWith(
+      '[SiteSearch] Search command projection failed.',
+      expect.objectContaining({ message: 'dialog unavailable' })
+    );
+  });
   it('revokes a pending generation on dispose, waits for its cleanup and ignores later preference changes', async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
