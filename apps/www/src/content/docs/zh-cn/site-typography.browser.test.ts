@@ -384,6 +384,33 @@ describe.sequential('native SiteTypography rendered evidence', () => {
             await fixtureReady(page, runtime, family);
             record.initial = await sourceIntegrity(page);
             assertSourceIntegrity(record.initial as Awaited<ReturnType<typeof sourceIntegrity>>);
+            for (const [selector, role] of [
+              ['#native-item', 'list-item'],
+              ['#native-term', 'body'],
+              ['#native-definition', 'body'],
+              ['#native-caption', 'caption'],
+              ['#native-head', 'table-head'],
+              ['#native-cell', 'table-cell'],
+              ['#native-quote', 'quote'],
+              ['#native-summary', 'body'],
+            ] as const) {
+              const owner = page.locator(selector);
+              await expect(owner).toHaveAttribute('data-typography-runtime', runtime);
+              await expect(owner).toHaveAttribute('data-typography-family', family);
+              await expect(owner.locator('[data-typography-prototype]')).toHaveCount(1);
+              await expect(owner.locator('[data-typography-prototype]')).toHaveAttribute(
+                'data-typography-role',
+                role
+              );
+            }
+            await expect(page.locator('#native-rich-item [data-typography-prototype]')).toHaveCount(
+              0
+            );
+            record.documentOwners = {
+              listPaint: await typographyPaint(page, '#native-item'),
+              tableHeadPaint: await typographyPaint(page, '#native-head'),
+              quotePaint: await typographyPaint(page, '#native-quote'),
+            };
             await page.locator('#native-label').click();
             expect(
               await page

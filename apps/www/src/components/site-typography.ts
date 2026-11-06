@@ -46,7 +46,7 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
   const candidates = Array.from(
     root.querySelectorAll<HTMLElement>(
       docsOnly
-        ? '[data-site-typography], [data-doc-flow] :is(h1,h2,h3,h4,h5,h6,p,label,legend,figcaption)'
+        ? '[data-site-typography], [data-doc-flow] :is(h1,h2,h3,h4,h5,h6,p,label,legend,figcaption,li,dt,dd,summary,th,td,caption,blockquote)'
         : `[data-site-typography],${SEMANTIC_TARGETS}`
     )
   );
@@ -82,13 +82,25 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
             ? 'label'
             : tag === 'label' || tag === 'legend'
               ? 'label'
-              : tag === 'figcaption'
+              : tag === 'figcaption' || tag === 'caption'
                 ? 'caption'
-                : 'body';
+                : tag === 'li'
+                  ? 'list-item'
+                  : tag === 'th'
+                    ? 'table-head'
+                    : tag === 'td'
+                      ? 'table-cell'
+                      : tag === 'blockquote'
+                        ? 'quote'
+                        : 'body';
     // Only phrasing content can pass through a span. Leaf paragraphs/headings
     // and authored label/legend keep native semantics; block compositions stay
     // with their separately inventoried owner instead of producing invalid DOM.
-    if (native.querySelector('p,h1,h2,h3,h4,h5,h6,div,section,article,ul,ol,li,table,fieldset,pre'))
+    if (
+      native.querySelector(
+        'p,h1,h2,h3,h4,h5,h6,div,section,article,ul,ol,li,table,fieldset,pre,dl,dt,dd,th,td,figure,details,blockquote,form,address,main,header,footer,nav,aside'
+      )
+    )
       return [];
     if (!native.textContent?.trim() && !activeViews.has(native)) return [];
     return [{ native, role }];
@@ -354,7 +366,9 @@ export function siteTypographyParticipant(
                   // These native semantic owners are block reading units. WC
                   // host fallback and inline React/Vue spans must not choose
                   // different line boxes; labels/legends remain legal inline.
-                  className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
+                  className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption,li,dt,dd,th,td,caption,blockquote')
+                    ? 'block'
+                    : undefined,
                   ref: `surface-${index}`,
                   props: { ...siteTextRecipe(role, family, isCompact, context, heroScale) },
                   surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role, context) },

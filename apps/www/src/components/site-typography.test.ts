@@ -239,6 +239,81 @@ describe('batched real typography adapters and stable native semantic owners', (
     expect(paragraph.textContent).toBe('Added native content');
     expect(paragraph.childElementCount).toBe(0);
   });
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    it(`${runtime}: projects document list, table, definition, quote and summary owners with native rhythm`, async () => {
+      const root = fixture();
+      root.querySelector('[data-doc-flow]')!.insertAdjacentHTML(
+        'beforeend',
+        `<ul><li id="item">Leaf item <em id="item-emphasis">emphasis</em> 中文</li><li id="container-item"><p id="item-copy">Paragraph item</p></li><li id="nested-item">Parent item<ul><li id="nested-leaf">Nested leaf</li></ul></li></ul><dl><dt id="term">Term</dt><dd id="definition">Definition</dd></dl><table><caption id="table-caption">Caption</caption><tr><th id="head">Head</th><td id="cell">Cell <code>source</code></td></tr></table><blockquote id="quote">Quote</blockquote><details id="details"><summary id="summary">Summary</summary><p id="disclosure">Disclosed</p></details><div id="preview-island" data-previewer-id><p id="inside-preview">Component owned</p></div>`
+      );
+      const original = root.innerHTML;
+      const participant = siteTypographyParticipant(root, { docsOnly: true });
+      const roles = collectSiteTypographyTargets(root, true).map(({ native, role }) => [
+        native.id,
+        role,
+      ]);
+      expect(roles).toContainEqual(['item', 'list-item']);
+      expect(roles).toContainEqual(['term', 'body']);
+      expect(roles).toContainEqual(['definition', 'body']);
+      expect(roles).toContainEqual(['table-caption', 'caption']);
+      expect(roles).toContainEqual(['head', 'table-head']);
+      expect(roles).toContainEqual(['cell', 'table-cell']);
+      expect(roles).toContainEqual(['quote', 'quote']);
+      expect(roles).toContainEqual(['summary', 'body']);
+      expect(roles).toContainEqual(['item-copy', 'body']);
+      expect(roles).toContainEqual(['nested-leaf', 'list-item']);
+      expect(roles).toContainEqual(['disclosure', 'body']);
+      // Composite containers stay with their native owner instead of wrapping
+      // another block, disclosure or table subtree into a phrasing span.
+      expect(roles.map(([id]) => id)).not.toEqual(
+        expect.arrayContaining(['container-item', 'nested-item', 'details', 'inside-preview'])
+      );
+      const item = root.querySelector<HTMLElement>('#item')!;
+      const emphasis = item.querySelector('em')!;
+      const cellSource = root.querySelector('#cell code')!;
+      const disclosure = root.querySelector<HTMLElement>('#disclosure')!;
+      const candidate = await participant.materialize(request(runtime, 1));
+      candidates.push(candidate);
+      candidate.activate();
+      await settle();
+      for (const [id, role] of [
+        ['item', 'list-item'],
+        ['head', 'table-head'],
+        ['cell', 'table-cell'],
+        ['quote', 'quote'],
+        ['summary', 'body'],
+      ] as const) {
+        const native = root.querySelector<HTMLElement>(`#${id}`)!;
+        const surface = native.querySelector<HTMLElement>('[data-typography-prototype]')!;
+        expect(surface.dataset.typographyRole).toBe(role);
+        expect(surface.dataset.typographyRuntime).toBe(runtime);
+        expect(native.querySelectorAll('[data-typography-prototype]')).toHaveLength(1);
+      }
+      expect(item.querySelector('em')).toBe(emphasis);
+      expect(root.querySelector('#cell code')).toBe(cellSource);
+      // Native summary/list/table geometry keeps its authored line boxes.
+      expect(
+        root
+          .querySelector('#summary [data-typography-prototype]')!
+          .classList.contains('block')
+      ).toBe(false);
+      expect(
+        item.querySelector<HTMLElement>('[data-typography-prototype]')!.style.lineHeight
+      ).toBe('inherit');
+      expect(
+        root
+          .querySelector<HTMLElement>('#head [data-typography-prototype]')!
+          .getAttribute('data-pui-style')
+      ).toContain('text-sm');
+      expect(
+        root
+          .querySelector<HTMLElement>('#quote [data-typography-prototype]')!
+          .getAttribute('data-pui-style')
+      ).toContain('italic');
+      await candidate.dispose();
+      expect(root.innerHTML).toBe(original);
+      expect(disclosure.textContent).toBe('Disclosed');
+    });
 });
 
 describe('typography scope transaction and bounded setup', () => {
