@@ -78,13 +78,23 @@ export function appendGallerySvg(
   svg.setAttribute('stroke-linecap', 'round');
   svg.setAttribute('stroke-linejoin', 'round');
   // Keep each factory node separate: a leading relative move starts at its own origin.
-  const paths = factory({
-    path: ({ d }: { d: string }) => d,
-  } as never) as unknown as Array<{ d: string } | string>;
-  for (const shape of paths) {
-    const path = slot.ownerDocument.createElementNS(svg.namespaceURI, 'path');
-    path.setAttribute('d', typeof shape === 'string' ? shape : shape.d);
-    svg.append(path);
+  type ShapeEntry = { tag: string; attrs: Record<string, string | number> };
+  const collect =
+    (tag: string) =>
+    (attrs: Record<string, string | number>): ShapeEntry => ({ tag, attrs });
+  const shapes = factory({
+    path: collect('path'),
+    circle: collect('circle'),
+    rect: collect('rect'),
+    line: collect('line'),
+    polyline: collect('polyline'),
+    polygon: collect('polygon'),
+    ellipse: collect('ellipse'),
+  } as never) as unknown as ShapeEntry[];
+  for (const shape of shapes) {
+    const el = slot.ownerDocument.createElementNS(svg.namespaceURI, shape.tag);
+    for (const [k, v] of Object.entries(shape.attrs)) el.setAttribute(k, String(v));
+    svg.append(el);
   }
   slot.append(svg);
 }
