@@ -93,26 +93,29 @@ function expectNoPropertyInterpolation(accepted: string[]) {
 
 describe('Shadcn positioned popup transition isolation', () => {
   for (const family of families) {
-    it.each(SHADCN_STYLE_IDS)(`${family.name} %s keeps keyframes without geometry transitions`, async (profile) => {
-      const { content } = await fixture(family, profile);
-      const accepted = tokens(content);
-      expectNoPropertyInterpolation(accepted);
-      const utilities = accepted.map((token) => token.split(':').at(-1));
-      for (const motion of ['animate-in', 'fade-in-0', 'zoom-in-95']) {
-        expect(utilities).toContain(motion);
+    it.each(SHADCN_STYLE_IDS)(
+      `${family.name} %s keeps keyframes without geometry transitions`,
+      async (profile) => {
+        const { content } = await fixture(family, profile);
+        const accepted = tokens(content);
+        expectNoPropertyInterpolation(accepted);
+        const utilities = accepted.map((token) => token.split(':').at(-1));
+        for (const motion of ['animate-in', 'fade-in-0', 'zoom-in-95']) {
+          expect(utilities).toContain(motion);
+        }
+        expect(utilities).not.toContain('animate-none');
+        const css = renderProtoStyleTokenCss(accepted);
+        expect(css).toContain('animation-name: pui-enter;');
+        expect(css).toContain('animation-duration: var(--pui-animation-duration, 150ms);');
+        if (profile !== 'new-york-v4') {
+          expect(accepted).toContain('duration-100');
+          expect(css).toContain('--pui-animation-duration: 100ms;');
+        } else if (family.name === 'hover-card') {
+          expect(accepted).toContain('duration-200');
+          expect(css).toContain('--pui-animation-duration: 200ms;');
+        }
       }
-      expect(utilities).not.toContain('animate-none');
-      const css = renderProtoStyleTokenCss(accepted);
-      expect(css).toContain('animation-name: pui-enter;');
-      expect(css).toContain('animation-duration: var(--pui-animation-duration, 150ms);');
-      if (profile !== 'new-york-v4') {
-        expect(accepted).toContain('duration-100');
-        expect(css).toContain('--pui-animation-duration: 100ms;');
-      } else if (family.name === 'hover-card') {
-        expect(accepted).toContain('duration-200');
-        expect(css).toContain('--pui-animation-duration: 200ms;');
-      }
-    });
+    );
   }
   it('preserves navigation Popover entry policy and the current surface across profile changes', async () => {
     const family = families.find((entry) => entry.name === 'popover')!;
