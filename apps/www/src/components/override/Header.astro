@@ -11,6 +11,7 @@ import ThemeToggle from './ThemeToggle.astro';
 import AdapterSelect from './AdapterSelect.astro';
 import HomepageRuntime from '../Homepage/HomepageRuntime.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+import { sitePrimaryNavigation, siteShellLabels } from '../site-navigation';
 import '../../styles/site-header.css';
 import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
 import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
@@ -26,11 +27,11 @@ const family = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(family);
 const menuTokens = await snapshotStartupStyle(`${family}-button`, startupButtonProps(family));
 const menuLabel = zh ? '导航与设置' : 'Navigation and settings';
-const navigation = [
-  { label: zh ? '文档' : 'Docs', href: localizedPath('/start-here/what-you-saw/') },
-  { label: zh ? '组件库' : 'Libraries', href: localizedPath('/ui-libraries/') },
-  { label: zh ? '白皮书' : 'Whitepaper', href: localizedPath('/whitepaper/0-preface/') },
-];
+const navigation = sitePrimaryNavigation(currentLocale).map(({ label, path: target }) => ({
+  label,
+  href: localizedPath(target),
+}));
+const navigationLabel = siteShellLabels(currentLocale).primaryNavigation;
 ---
 
 {
@@ -51,10 +52,10 @@ const navigation = [
       <nav
         class="site-header-navigation"
         data-site-header-desktop-navigation
-        aria-label={zh ? '主导航' : 'Primary navigation'}
+        aria-label={navigationLabel}
       >
         {navigation.map(({ label, href }) => (
-          <a data-site-native-button href={href}>
+          <a data-site-primary-nav-link href={href}>
             {label}
           </a>
         ))}
@@ -74,11 +75,11 @@ const navigation = [
             <nav
               class="site-header-navigation site-header-popup-navigation"
               data-site-header-navigation
-              aria-label={zh ? '主导航' : 'Primary navigation'}
+              aria-label={navigationLabel}
             >
               <span class="site-header-group-label">{zh ? '浏览' : 'Explore'}</span>
               {navigation.map(({ label, href }) => (
-                <a data-site-native-button href={href}>
+                <a data-site-primary-nav-link href={href}>
                   {label}
                 </a>
               ))}

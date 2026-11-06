@@ -90,13 +90,13 @@
 }
 
 /* Native links keep href, target, modified click and no-script navigation. */
-[data-site-native-button] {
+[data-site-primary-nav-link] {
   border-radius: var(--site-surface-radius);
 }
 
 [data-site-library-family='brutalist']
   :is(
-    a[data-site-native-button],
+    a[data-site-primary-nav-link],
     .mobile-primary-links a,
     .sidebar-pane .top-level a:not([data-site-link-enhanced]),
     .sidebar-pane .top-level summary,
@@ -105,12 +105,12 @@
   border-radius: 0;
 }
 
-[data-site-library-family='brutalist'] :is(a[data-site-native-button], .mobile-primary-links a) {
+[data-site-library-family='brutalist'] :is(a[data-site-primary-nav-link], .mobile-primary-links a) {
   border: 2px solid transparent;
 }
 
 [data-site-library-family='brutalist']
-  :is(a[data-site-native-button], .mobile-primary-links a):hover,
+  :is(a[data-site-primary-nav-link], .mobile-primary-links a):hover,
 [data-site-library-family='brutalist']
   .sidebar-pane
   .top-level

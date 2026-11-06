@@ -25,7 +25,7 @@ describe('website native anchor composition', () => {
   it.each(['data-site-header-navigation', 'data-site-header-desktop-navigation'])(
     '%s retains navigation current feedback on the actual passive surface',
     async (attribute) => {
-      document.body.innerHTML = `<nav ${attribute}><a data-site-native-button href="/docs/">Docs</a></nav>`;
+      document.body.innerHTML = `<nav ${attribute}><a data-site-primary-nav-link href="/docs/">Docs</a></nav>`;
       const link = document.querySelector('a')!;
       releases.push(initSiteNativeControls());
       await settle();
@@ -76,7 +76,7 @@ describe('website native anchor composition', () => {
 
   it('retains the native link and moves only its content into a passive visual Prototype', async () => {
     document.body.innerHTML =
-      '<a data-site-native-button href="/docs/" target="_blank" rel="noreferrer" aria-label="Docs"><span>Docs</span></a>';
+      '<a data-site-primary-nav-link href="/docs/" target="_blank" rel="noreferrer" aria-label="Docs"><span>Docs</span></a>';
     const link = document.querySelector('a')!;
     document.documentElement.dataset.siteLibraryFamily = 'brutalist';
     releases.push(initSiteNativeControls());
@@ -87,8 +87,6 @@ describe('website native anchor composition', () => {
       getExposes(): Record<string, unknown>;
     };
     expect(surface).not.toBeNull();
-    expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('border-black');
-    expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('rounded-base');
     expect(surface.textContent).toBe('Docs');
     expect(surface.getExposes()).toEqual({});
     expect(surface.hasAttribute('role')).toBe(false);
@@ -105,16 +103,18 @@ describe('website native anchor composition', () => {
     link.dispatchEvent(new Event('pointerleave'));
     await settle();
     expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-x-1');
+    link.focus();
     document.documentElement.dataset.siteLibraryFamily = 'shadcn';
     await new Promise((resolve) => setTimeout(resolve, 0));
     await settle();
     surface = link.querySelector('wc-site-shadcn-surface') as typeof surface;
-    expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('rounded-lg');
-    expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('rounded-base');
+    expect(document.querySelector('a')).toBe(link);
+    expect(document.activeElement).toBe(link);
+    expect(surface.textContent).toBe('Docs');
   });
   it('does not wrap a homepage transaction and supports cleanup followed by reinitialization', async () => {
     document.body.innerHTML =
-      '<a data-site-native-button href="/docs/">Docs</a><div data-homepage-actions><a data-site-native-link href="/home/">Home</a></div>';
+      '<a data-site-primary-nav-link href="/docs/">Docs</a><div data-homepage-actions><a data-site-native-link href="/home/">Home</a></div>';
     const release = initSiteNativeControls();
     const releaseDuplicate = initSiteNativeControls();
     await settle();

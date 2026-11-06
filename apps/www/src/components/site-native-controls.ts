@@ -122,7 +122,7 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
   );
   const links = [
     ...scope.querySelectorAll<HTMLElement>(
-      'a[data-site-native-link], a[data-site-native-button], .sidebar-pane .top-level a[href], .sidebar-pane .top-level summary, .pagination-links a[href], sl-toc a[href]'
+      'a[data-site-native-link], a[data-site-primary-nav-link], .sidebar-pane .top-level a[href], .sidebar-pane .top-level summary, .pagination-links a[href], sl-toc a[href]'
     ),
   ].filter((link) => !link.closest('[data-homepage-actions]') && !bindings.has(link));
   if (!links.length && !ranges.length) return () => {};
@@ -258,7 +258,7 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
     link.dataset.siteLinkAppearance = appearance;
     link.dataset.siteNativeLink = '';
     link.removeAttribute('data-slot');
-    link.removeAttribute('data-site-native-button');
+    link.removeAttribute('data-site-primary-nav-link');
     let facts = { hovered: false, pressed: false, focusVisible: false, current: false };
     let initialized = false;
     let propsRevision = 0;
