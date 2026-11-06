@@ -19,6 +19,8 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
     });
     def.props.setDefaults({ presentation: 'default' });
     const style = setupOverlayStyle(def, 'nova');
+    // Keep keyframe timing without interpolating host positioning or panel paint.
+    def.feedback.style.use(tw('transition-none'));
     for (const profile of SHADCN_STYLE_IDS) {
       def.rule({
         when: (w) => w.all(w.prop('presentation').eq('default'), w.state(style).eq(profile)),
