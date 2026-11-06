@@ -110,7 +110,20 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
     if (event.type !== 'next') return;
     if (event.next) {
       // Disabled items are intentionally included in menu focus navigation.
-      updateActiveValue(run);
+      // The shared Command observes only disabled props; this callback still
+      // runs on the Item owner whose props include the optional value.
+      const ownValue = (run.props.get() as Readonly<DropdownItemProps>).value ?? '';
+      if (ownValue) {
+        updateActiveValue(run);
+      } else {
+        // A value is optional. Clear the old valued navigation target and
+        // publish this observed focus to passive descendants without inventing
+        // a collection value or treating hover as a second focus owner.
+        run.context.update(DROPDOWN_CONTEXT, (prev) =>
+          prev.activeValue ? { ...prev, activeValue: '' } : prev
+        );
+        syncActive(run, run.context.read(DROPDOWN_CONTEXT), ownValue);
+      }
       return;
     }
     const currentRun = run as any;
@@ -124,6 +137,15 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
     if (command.disabled.get()) return;
     if (!run.context.read(DROPDOWN_CONTEXT).open) return;
     updateActiveValue(run);
+  });
+  def.event.on('pointer.move', (run, event) => {
+    const ctx = run.context.read(DROPDOWN_CONTEXT);
+    if (!ctx.open || ctx.disabled || run.props.get().disabled || command.disabled.get()) return;
+    // P-BASE-DROPDOWN-MENU-ITEM-POINTER-FOCUS: let the existing Focus owner
+    // hand off the old row, including its family paint and passive Shortcut.
+    // Repeated movement also restores pointer navigation after a keyboard move.
+    if (event.pointerType !== 'mouse' || event.pointerButtons !== 'none') return;
+    command.focusSelf({ reason: 'pointer', preventScroll: true });
   });
 }
 

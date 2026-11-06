@@ -30,6 +30,18 @@ criteria:
     text:
       zh-CN: focus 必须更新 active item；enabled pointer enter 可以更新 active；active 仅是本次打开期间的导航事实。
       en: Focus must update the active item, enabled pointer enter may update it, and active is only a navigation fact for the current open session.
+  - id: P-BASE-DROPDOWN-MENU-ITEM-POINTER-FOCUS
+    text:
+      zh-CN: >-
+        open 且 Root/Item enabled 时，已确认 mouse 且无按键的 pointer.move 必须通过现有 Focus owner 请求本 Item 焦点并保留 preventScroll。焦点观察负责旧行到新行的交接，家族 foreground/background 与被动 Shortcut 消费这些事实，不另造 highlight owner。重复 move 可在键盘导航后恢复鼠标行；touch、pen、unknown、按压移动、closed 或 disabled 不得请求该焦点或隐式激活。disabled Item 的既有键盘 focus participation 保持。value 省略时也须发布实际 focus 对应 active，并清除旧的有值 activeValue，让被动 Shortcut 跟随当前行。
+
+
+      en: >-
+        While open and Root/Item enabled, a confirmed mouse pointer.move with no buttons must request this Item through the existing Focus owner with preventScroll. Focus observation hands off the old row to the new row; family foreground/background and passive Shortcut consume these facts without another highlight owner. Repeated movement can restore the mouse row after keyboard navigation. Touch, pen, unknown, pressed movement, closed and disabled states must not request this focus or implicitly activate. Existing disabled-item keyboard focus participation is preserved. An omitted value still publishes active from observed focus and clears the old valued activeValue so passive Shortcut follows the current row.
+
+
+    dependsOn:
+      contracts: [C-AS-FOCUSABLE-0001]
   - id: P-BASE-DROPDOWN-MENU-ITEM-SELECT
     text:
       zh-CN: enabled activation 必须发出包含 value 与 reason 的 `select` signal，并按 `closeOnCommit` 或 Root `closeOnItemCommit` 请求 close。
@@ -43,6 +55,9 @@ criteria:
       zh-CN: Item 不得把 active/value 解释为 checked、selected 或 persistent selection；这些语义属于后续 Checkbox/Radio variants。
       en: Item must not interpret active or value as checked, selected, or persistent selection; those semantics belong to future Checkbox and Radio variants.
 sources:
+  - path: https://github.com/radix-ui/primitives/blob/eb3a2b7091293e27df8f9ba906632d8daa3d81a3/packages/react/menu/src/menu.tsx
+    label: Fixed reference MenuItemImpl requests enabled mouse-move focus with preventScroll; this slice does not claim complete submenu/grace-area parity.
+  - path: packages/prototypes/base/test/dropdown-pointer-focus.test.ts
   - path: packages/prototypes/base/src/dropdown/item.proto.ts
   - path: packages/prototypes/base/src/dropdown/command.ts
   - path: packages/prototypes/base/test/dropdown.test.ts
@@ -51,6 +66,9 @@ dependsOn:
   contracts: [C-A11Y-0001, C-AS-COLLECTION-ITEM-0001, C-AS-FOCUSABLE-0001, C-AS-TRIGGER-0001]
 verifies: { tests: [T-BASE-DROPDOWN-MENU-ITEM-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Bound Dropdown mouse-hover focus handoff to the shared Focus owner, retaining disabled keyboard navigation and separating source tests from native paint acceptance.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Item collection, active navigation, selection signal, close policy, and focusable-disabled behavior.
