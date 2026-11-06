@@ -471,7 +471,7 @@ const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.shell.pagination': Object.freeze(['apps/www/astro.config.mjs']),
   'www.shell.hero-actions': Object.freeze([
     'apps/www/src/components/override/Hero.astro',
-    'apps/www/src/components/override/pattern/LinkButton.astro',
+    'apps/www/src/components/Homepage/HomeActions.astro',
   ]),
   'www.docs.spec-contract-preview': Object.freeze([
     'apps/www/src/components/SpecContractPreview.astro',

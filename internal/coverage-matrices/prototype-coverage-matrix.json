@@ -7754,7 +7754,7 @@
     },
     {
       "ID": "www.shell.hero-actions",
-      "Path": "apps/www/src/components/override/Hero.astro`, `apps/www/src/components/override/pattern/LinkButton.astro`, `apps/www/src/components/Homepage/HomeActions.astro",
+      "Path": "apps/www/src/components/override/Hero.astro`, `apps/www/src/components/Homepage/HomeActions.astro",
       "User job": "Start reading or open a highlighted project destination",
       "Current owner": "Website landing page",
       "Target class": "site-composition",

@@ -1,13 +1,31 @@
 // @vitest-environment node
 import { revealHeaderPreferences } from './site-header-browser';
-import type { Browser, Locator, Page } from 'playwright-core';
+import { chromium, type Browser, type Locator, type Page } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
+import { createServer } from 'node:http';
+import type { Socket } from 'node:net';
 import os from 'node:os';
+import path from 'node:path';
+import { TLSSocket, createSecureContext } from 'node:tls';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
+import {
+  chromeExecutable,
+  launchBrowser,
+  RUNTIMES,
+  startServer,
+  stopServer,
+} from './browser-harness';
 import { nativeLinkEvidenceIssues } from './site-native-link-evidence';
+import {
+  localePairIssues,
+  localizedShellHref,
+  shellNavigationIssues,
+  type ShellLinkExpectation,
+  type ShellLinkFact,
+} from './site-native-links-locale';
+import { sitePrimaryNavigation, siteShellLabels } from '../../../components/site-navigation';
+import { SITE_LINK_ICONS, type SiteLinkIcon } from '../../../prototypes/site-link-icons';
 import socialDestinations from '../../../../../../shared/links.json';
 import { safeError, safeUrl } from '../../../../../../scripts/test/search-startup-profile.mjs';
 
@@ -225,15 +243,167 @@ async function saveNativeTrace(page: Page, id: string, detail: unknown = null) {
   return events;
 }
 
+const NATIVE_DESTINATION_FIXTURE_TITLE = 'External link fixture';
+const NATIVE_DESTINATION_FIXTURE_MARKER = 'admitted-native-destination';
+const NATIVE_DESTINATION_HOSTS = Object.freeze(['github.com']);
+const NATIVE_DESTINATION_HTML = `<!doctype html><html data-native-destination-fixture="${NATIVE_DESTINATION_FIXTURE_MARKER}"><head><meta charset="utf-8"><title>${NATIVE_DESTINATION_FIXTURE_TITLE}</title></head><body><h1>Admitted native destination</h1></body></html>`;
+/** Throwaway self-signed EC material for the admitted fixture host only. The
+ * proxy never forwards an admitted host, and only this cell's own browser
+ * instance ignores certificate errors; no site or shared harness path sees it. */
+const NATIVE_DESTINATION_TLS_KEY_BASE64 = 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgA/M06pocQzYu+O1aOfG4PrC3sK8upJ6ZGlEQZjGjGSChRANCAARRFF3SzmCtg5W4+Di0h/QrctYJlQKKgVbC83sCtetpTdvhX+DDC8ysvtGKwgP4VWP7WctIRs+F7HnSDfpzQJ9T';
+const NATIVE_DESTINATION_TLS_CERT_BASE64 =
+  'MIIBmTCCAT6gAwIBAgIUSDCWfn1/g2gZGDspDyiF48uk/nwwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKZ2l0aHViLmNvbTAgFw0yNjExMDYwMDU1MTVaGA8yMTI2MTAxMzAwNTUxNVowFTETMBEGA1UEAwwKZ2l0aHViLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABFEUXdLOYK2Dlbj4OLSH9Cty1gmVAoqBVsLzewK162lN2+Ff4MMLzKy+0YrCA/hVY/tZy0hGz4XsedIN+nNAn1OjajBoMB0GA1UdDgQWBBSz1Nd2ar6WOfQt/ZipatHrUNUfATAfBgNVHSMEGDAWgBSz1Nd2ar6WOfQt/ZipatHrUNUfATAPBgNVHRMBAf8EBTADAQH/MBUGA1UdEQQOMAyCCmdpdGh1Yi5jb20wCgYIKoZIzj0EAwIDSQAwRgIhALgt70QZ5mzzfhFoM4YiEPAZ5ZHkRxxuULVYu7SxmTCtAiEA9nkevilsC6Abh3M9btLA2H2xTxfGqZSOpEBDqZpju8o=';
+const nativeDestinationPem = (label: 'PRIVATE KEY' | 'CERTIFICATE', base64: string) =>
+  `-----BEGIN ${label}-----\n${base64.replace(/(.{64})/g, '$1\n').trimEnd()}\n-----END ${label}-----\n`;
+
+type NativeDestinationRecord = {
+  host: string;
+  method: string;
+  path: string;
+  destination: string | null;
+};
+
+type NativeDestinationIsolation = {
+  proxyServer: string;
+  documents: NativeDestinationRecord[];
+  refusedHosts: string[];
+  close: () => Promise<void>;
+};
+
+/**
+ * Trusted Ctrl/middle activation is issued by the browser before any
+ * Playwright target exists, so `context.route()` cannot serve its first
+ * document (microsoft/playwright#30229 records the same popup boundary). Such a
+ * popup therefore leaves the fixture's control and reaches whatever the
+ * ambient network provides. This cell instead owns the only network path to an
+ * admitted external host: a loopback CONNECT proxy that answers with the
+ * fixture document and refuses every other host, so the popup still commits a
+ * real DOMContentLoaded document at the exact product URL without contacting
+ * the admitted host.
+ */
+async function startNativeDestinationIsolation(): Promise<NativeDestinationIsolation> {
+  const documents: NativeDestinationRecord[] = [];
+  const refusedHosts: string[] = [];
+  const secureContext = createSecureContext({
+    key: nativeDestinationPem('PRIVATE KEY', NATIVE_DESTINATION_TLS_KEY_BASE64),
+    cert: nativeDestinationPem('CERTIFICATE', NATIVE_DESTINATION_TLS_CERT_BASE64),
+  });
+  const server = createServer((_request, response) => {
+    response.writeHead(405, { 'content-type': 'text/plain' });
+    response.end('CONNECT required');
+  });
+  // A leaked listener must never keep the test process alive.
+  server.unref();
+  const sockets = new Set<Socket>();
+  server.on('connection', (socket) => {
+    sockets.add(socket);
+    socket.unref();
+    socket.on('close', () => sockets.delete(socket));
+    socket.on('error', () => {});
+  });
+  server.on('connect', (request, socket, head) => {
+    const tunnel = socket as Socket;
+    tunnel.on('error', () => {});
+    const target = request.url ?? '';
+    const host = target.startsWith('[')
+      ? target.slice(1, target.indexOf(']'))
+      : (target.split(':')[0] ?? '');
+    if (!NATIVE_DESTINATION_HOSTS.includes(host)) {
+      refusedHosts.push(host);
+      tunnel.end('HTTP/1.1 403 Forbidden\r\nContent-Length: 0\r\nConnection: close\r\n\r\n');
+      return;
+    }
+    tunnel.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+    if (head.length) tunnel.unshift(head);
+    const secure = new TLSSocket(tunnel, {
+      isServer: true,
+      secureContext,
+      ALPNProtocols: ['http/1.1'],
+    });
+    secure.on('error', () => {});
+    let pending = '';
+    secure.on('data', (chunk) => {
+      pending += chunk.toString('latin1');
+      const headerEnd = pending.indexOf('\r\n\r\n');
+      if (headerEnd === -1) return;
+      const [requestLine = '', ...headerLines] = pending.slice(0, headerEnd).split('\r\n');
+      const [method = '', requestPath = ''] = requestLine.split(' ');
+      const destination =
+        headerLines
+          .find((line) => line.toLowerCase().startsWith('sec-fetch-dest:'))
+          ?.slice('sec-fetch-dest:'.length)
+          .trim() ?? null;
+      documents.push({ host, method, path: requestPath, destination });
+      secure.end(
+        [
+          'HTTP/1.1 200 OK',
+          'Content-Type: text/html; charset=utf-8',
+          `Content-Length: ${Buffer.byteLength(NATIVE_DESTINATION_HTML)}`,
+          'Cache-Control: no-store',
+          'Connection: close',
+          '',
+          NATIVE_DESTINATION_HTML,
+        ].join('\r\n')
+      );
+    });
+  });
+  const listening = Promise.withResolvers<number>();
+  server.once('error', listening.reject);
+  server.listen(0, '127.0.0.1', () => {
+    server.off('error', listening.reject);
+    const address = server.address();
+    if (!address || typeof address === 'string') {
+      listening.reject(new Error('Native destination isolation did not bind a loopback port'));
+      return;
+    }
+    listening.resolve(address.port);
+  });
+  const port = await listening.promise;
+  return {
+    proxyServer: `http://127.0.0.1:${port}`,
+    documents,
+    refusedHosts,
+    close: () => {
+      const closed = Promise.withResolvers<void>();
+      for (const socket of sockets) socket.destroy();
+      server.closeAllConnections();
+      server.close((error) => (error ? closed.reject(error) : closed.resolve()));
+      return closed.promise;
+    },
+  };
+}
+
+/**
+ * One cell only: the admitted native destination is served by the loopback
+ * proxy with fixture TLS material, so the destination document never depends
+ * on the ambient network. The documentation server keeps its direct loopback
+ * path through the bypass list.
+ */
+async function launchNativeDestinationBrowser(proxyServer: string): Promise<Browser> {
+  return chromium.launch({
+    executablePath: await chromeExecutable(),
+    headless: true,
+    args: [
+      '--disable-dev-shm-usage',
+      '--no-sandbox',
+      '--ignore-certificate-errors',
+      `--proxy-server=${proxyServer}`,
+      '--proxy-bypass-list=127.0.0.1;localhost',
+    ],
+  });
+}
+
 async function nativePopup(
   page: Page,
   link: Locator,
   action: 'modifier' | 'middle' | 'enter',
-  owner: string
+  owner: string,
+  isolation: NativeDestinationIsolation
 ) {
   const label = `${owner}:${action}`;
   const href = await link.getAttribute('href');
   console.info(`[native-link] ${label} begin href=${href}`);
+  const admittedBefore = isolation.documents.length;
   await nativeActionLabel(page, label);
   const outcome = page
     .context()
@@ -256,6 +426,26 @@ async function nativePopup(
     if (!href) throw new Error('Native navigation destination is missing');
     await result.popup.waitForURL(href, { waitUntil: 'domcontentloaded' });
     expect(result.popup.url(), label).toBe(href);
+    // The committed destination must be this fixture's document. A real
+    // external page, a certificate/error page or a refused host cannot pass.
+    expect(await result.popup.title(), `${label} destination document`).toBe(
+      NATIVE_DESTINATION_FIXTURE_TITLE
+    );
+    expect(
+      await result.popup.evaluate(
+        () => document.documentElement.dataset.nativeDestinationFixture ?? null
+      ),
+      `${label} destination marker`
+    ).toBe(NATIVE_DESTINATION_FIXTURE_MARKER);
+    expect(
+      isolation.documents
+        .slice(admittedBefore)
+        .filter(
+          (document) =>
+            document.destination === 'document' && document.path === new URL(href).pathname
+        ),
+      `${label} admitted destination request`
+    ).toHaveLength(1);
     await result.popup.close();
     console.info(`[native-link] ${label} passed`);
   } catch (error) {
@@ -343,6 +533,34 @@ async function linkPaint(link: Locator) {
   });
 }
 
+/** Bounded observation of a real emitted transition endpoint: wait for the
+ * painted value, then require it to hold across consecutive animation frames
+ * before it is asserted. This is not a fixed delay, a forced reduced-motion
+ * switch or a synthetic dispatch, so the emitted motion stays observable. */
+async function assertSettledTransform(link: Locator, endpoint: string, timeout = 1_000) {
+  await expect.poll(async () => (await linkPaint(link)).transform, { timeout }).toBe(endpoint);
+  return link.evaluate(
+    (anchor, expected) =>
+      new Promise<string>((resolve, reject) => {
+        const surface = anchor.querySelector<HTMLElement>('[data-pui-root]') ?? anchor;
+        let previous = '';
+        let stable = 0;
+        let frame = 0;
+        const step = () => {
+          const next = getComputedStyle(surface).transform;
+          stable = next === previous ? stable + 1 : 0;
+          previous = next;
+          if (stable >= 2 && next === expected) return resolve(next);
+          if (++frame > 240)
+            return reject(new Error(`native transition did not settle at ${expected}`));
+          requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }),
+    endpoint
+  );
+}
+
 async function assertSocialPaint(
   page: Page,
   links: Locator,
@@ -370,18 +588,23 @@ async function assertSocialPaint(
     await expect
       .poll(async () => (await linkPaint(first)).background)
       .not.toBe(baseline.background);
+  const hoverTransform =
+    family === 'brutalist'
+      ? await assertSettledTransform(first, 'matrix(1, 0, 0, 1, 4, 4)')
+      : null;
   const hovered = await linkPaint(first);
   if (family === 'brutalist') {
     // Accepted #800 Button-like role: settle +4/+4 into its 4px shadow.
     expect(baseline.shadow).toContain('4px 4px 0px');
     // SVG-only content has no typography subject. Text is verified on the
     // actual public Text owner by assertHostCurrentProjection below.
-    expect(hovered.transform).toBe('matrix(1, 0, 0, 1, 4, 4)');
+    expect(hoverTransform).toBe('matrix(1, 0, 0, 1, 4, 4)');
+    expect(hovered.transform, 'hover must keep the settled endpoint').toBe(hoverTransform);
     expect(hovered.tokens).toContain('shadow-none');
     expect(hovered.shadow).not.toBe(baseline.shadow);
     expect(hovered.background).toBe(baseline.background);
   }
-  await capture('hover', { baseline, observed: hovered });
+  await capture('hover', { baseline, observed: hovered, hoverTransform });
   for (const hit of hovered.edgeHits)
     expect(hit.hitIsAnchor, `${family} hovered ${hit.edge} paint must hit its native anchor`).toBe(
       true
@@ -912,15 +1135,34 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
   }, 150_000);
 
   it('keeps Enter/new-tab/modifier/middle/context-menu semantics native and does not activate on Space', async () => {
-    const context = await browser.newContext({
-      viewport: { width: 1440, height: 1000 },
-      colorScheme: 'light',
+    // Trusted Ctrl/middle activation is issued by the browser before any
+    // Playwright target exists, so `context.route` cannot serve its first
+    // document. This cell owns the only network path to an admitted external
+    // host instead; see startNativeDestinationIsolation.
+    const isolation = await startNativeDestinationIsolation();
+    let isolatedBrowser: Browser;
+    try {
+      isolatedBrowser = await launchNativeDestinationBrowser(isolation.proxyServer);
+    } catch (error) {
+      await isolation.close();
+      throw error;
+    }
+    const context = await isolatedBrowser
+      .newContext({
+        viewport: { width: 1440, height: 1000 },
+        colorScheme: 'light',
+      })
+      .catch(async (error: unknown) => {
+        await isolatedBrowser.close();
+        await isolation.close();
+        throw error;
+      });
+    const page = await context.newPage().catch(async (error: unknown) => {
+      await context.close();
+      await isolatedBrowser.close();
+      await isolation.close();
+      throw error;
     });
-    // Isolate browser navigation semantics from availability of the external site.
-    await context.route('https://github.com/**', (route) =>
-      route.fulfill({ contentType: 'text/html', body: '<title>External link fixture</title>' })
-    );
-    const page = await context.newPage();
     await installNativeTrace(page);
     try {
       await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
@@ -953,7 +1195,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         });
         expect(context.pages()).toHaveLength(count);
         for (const action of ['modifier', 'middle', 'enter'] as const)
-          await nativePopup(controlPage, control, action, 'plain-native');
+          await nativePopup(controlPage, control, action, 'plain-native', isolation);
         await saveNativeTrace(controlPage, 'plain-native-positive-controls');
       } finally {
         await controlPage.close();
@@ -964,7 +1206,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         // Successful native navigation intentionally dismisses its parent menu.
         await page.bringToFront();
         await openSettings(page);
-        await nativePopup(page, link, action, 'homepage-social');
+        await nativePopup(page, link, action, 'homepage-social', isolation);
       }
       await page.bringToFront();
       await openSettings(page);
@@ -1000,12 +1242,41 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         expect(observed.prevented).toBe(cancelAtTarget);
         expect(observed.trusted).toBe(true);
       }
+      // Negative control: an unadmitted external document must be refused, so a
+      // leaked popup can neither look green nor reach another host.
+      const leaked = await context.newPage();
+      const leakOutcome = await leaked
+        .goto('https://example.test/native-navigation-leak', {
+          waitUntil: 'domcontentloaded',
+          timeout: 10_000,
+        })
+        .then(
+          () => null,
+          (error: unknown) => String(error)
+        );
+      expect(leakOutcome, 'unadmitted external host must not resolve').not.toBeNull();
+      expect(isolation.refusedHosts, 'unadmitted probe is refused').toContain('example.test');
+      expect(
+        isolation.documents.filter((entry) => entry.destination === 'document'),
+        'one admitted document per trusted activation'
+      ).toHaveLength(6);
+      await leaked.close();
+      await captureLinks(
+        page,
+        'homepage-native-navigation-destinations',
+        'shadcn',
+        'wc',
+        'trusted-native-activation-through-loopback-destination-proxy',
+        { documents: isolation.documents, refusedHosts: isolation.refusedHosts }
+      );
       expect(page.url()).toBe(location);
       expect(context.pages()).toHaveLength(1);
       expect(await link.getAttribute('role')).toBeNull();
     } finally {
       await saveNativeTrace(page, 'homepage-native-navigation-final');
       await context.close();
+      await isolatedBrowser.close();
+      await isolation.close();
     }
   }, 90_000);
 
@@ -1621,10 +1892,43 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           '.site-header-docs-navigation [data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
         );
         const pane = page.locator('#starlight__sidebar');
+        const tree = page.locator('nav.docs-sidebar');
+        const treeOwnership = () =>
+          page.evaluate(() => {
+            const state = window as typeof window & {
+              __contentsHome?: Element | null;
+              __contentsNext?: Node | null;
+            };
+            const tree = document.querySelector('nav.docs-sidebar');
+            return {
+              dialogTree: tree?.getAttribute('data-site-contents-dialog-tree') ?? null,
+              parentRestored: !!tree && tree.parentElement === state.__contentsHome,
+              nextRestored: !!tree && tree.nextSibling === state.__contentsNext,
+            };
+          });
+        // Record the authored home of the one navigation tree before the public
+        // Dialog borrows it, so restoration is compared to real identities
+        // rather than to a selector guess.
+        await page.evaluate(() => {
+          const tree = document.querySelector('nav.docs-sidebar');
+          Object.assign(window, {
+            __contentsHome: tree?.parentElement ?? null,
+            __contentsNext: tree?.nextSibling ?? null,
+          });
+        });
         expect(await pane.isVisible()).toBe(false);
+        expect(await treeOwnership()).toEqual({
+          dialogTree: null,
+          parentRestored: true,
+          nextRestored: true,
+        });
         await contents.click();
         await expect.poll(() => contents.getAttribute('aria-expanded')).toBe('true');
         await pane.waitFor({ state: 'visible' });
+        await expect.poll(() => treeOwnership()).toMatchObject({
+          dialogTree: '',
+          parentRestored: false,
+        });
         const sidebar = pane
           .locator('a[data-site-link-enhanced]:not([aria-current="page"]):visible')
           .first();
@@ -1657,7 +1961,24 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         );
         await page.keyboard.press('Escape');
         await expect.poll(() => contents.getAttribute('aria-expanded')).toBe('false');
-        expect(await pane.isVisible()).toBe(false);
+        // Logical close is application-immediate: the disclosure command itself
+        // publishes aria-expanded=false. Physical exit then belongs to the public
+        // Dialog's governed leave transition, so the borrowed tree returns only
+        // once the Dialog publishes presence=false. Assert both boundaries
+        // condition-bound instead of at one instant or after a blind sleep.
+        await expect.poll(() => pane.isVisible(), { timeout: 5_000 }).toBe(false);
+        await expect
+          .poll(() => treeOwnership(), { timeout: 5_000 })
+          .toEqual({ dialogTree: null, parentRestored: true, nextRestored: true });
+        expect(await tree.count()).toBe(1);
+        // The public Dialog owns modal return focus for the enhanced path
+        // (site-header-disclosure.ts: Public Dialog owns modal close/restore);
+        // the returned tree must not become a second focus owner.
+        await expect
+          .poll(() => contents.evaluate((element) => element === document.activeElement), {
+            timeout: 5_000,
+          })
+          .toBe(true);
         // This site has a desktop-only TOC; do not force it visible or claim a
         // nonexistent mobile TOC interaction. The heading targets still exist.
         expect(await page.locator('sl-toc').count()).toBeGreaterThan(0);
@@ -1874,24 +2195,83 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
               }
               if (node === boundary) break;
             }
-            if (!owner) return { visible: false, reason: 'missing sidebar owner' };
+            const empty = {
+              visible: false,
+              reason: 'missing sidebar owner',
+              owner: null,
+              scrollTop: 0,
+              documentY: scrollY,
+              linkTop: 0,
+              linkBottom: 0,
+              viewportTop: 0,
+              viewportHeight: 0,
+              viewportBottom: 0,
+              ownerBottom: 0,
+              ownerScaleY: 1,
+              rowRect: { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 },
+              ownerRect: { top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 },
+              contentRect: { top: 0, bottom: 0, width: 0, height: 0 },
+              contentTransform: null,
+              scrollHeight: 0,
+              clientHeight: 0,
+              documentViewportHeight: innerHeight,
+              documentScrollHeight: document.documentElement.scrollHeight,
+              projected: link.getAttribute('data-site-link-enhanced'),
+              focus: document.activeElement?.outerHTML.slice(0, 300),
+            };
+            if (!owner) return empty;
             const row = link.getBoundingClientRect(),
               box = owner.getBoundingClientRect();
-            const top = box.top + owner.clientTop;
+            // The owner can sit under a transformed public surface (the narrow
+            // drawer's Dialog). Compare the real transformed row rect with the
+            // transformed scrollport band, scaling the border offset instead of
+            // mixing viewport-space rects with untransformed layout pixels.
+            const scaleY = owner.offsetHeight > 0 ? box.height / owner.offsetHeight : 1;
+            const top = box.top + owner.clientTop * scaleY;
+            const height = owner.clientHeight * scaleY;
+            const surface = link.querySelector<HTMLElement>('[data-site-link-content]');
+            const content = (surface ?? link).getBoundingClientRect();
             return {
               visible:
                 row.width > 0 &&
                 row.height > 0 &&
                 row.top >= top - 1 &&
-                row.bottom <= top + owner.clientHeight + 1,
+                row.bottom <= top + height + 1,
               owner: owner.className,
               scrollTop: owner.scrollTop,
               documentY: scrollY,
               linkTop: row.top,
               linkBottom: row.bottom,
               viewportTop: top,
-              viewportHeight: owner.clientHeight,
+              viewportHeight: height,
+              viewportBottom: top + height,
               ownerBottom: box.bottom,
+              ownerScaleY: scaleY,
+              rowRect: {
+                top: row.top,
+                bottom: row.bottom,
+                left: row.left,
+                right: row.right,
+                width: row.width,
+                height: row.height,
+              },
+              ownerRect: {
+                top: box.top,
+                bottom: box.bottom,
+                left: box.left,
+                right: box.right,
+                width: box.width,
+                height: box.height,
+              },
+              contentRect: {
+                top: content.top,
+                bottom: content.bottom,
+                width: content.width,
+                height: content.height,
+              },
+              contentTransform: surface ? getComputedStyle(surface).transform : null,
+              scrollHeight: owner.scrollHeight,
+              clientHeight: owner.clientHeight,
               documentViewportHeight: innerHeight,
               documentScrollHeight: document.documentElement.scrollHeight,
               projected: link.getAttribute('data-site-link-enhanced'),
@@ -1899,15 +2279,85 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             };
           });
         await expect.poll(async () => (await facts()).visible, { timeout: 10_000 }).toBe(true);
-        expect((await facts()).documentY).toBe(0);
-        const before = await facts();
+        const entered = await facts();
+        expect(entered.documentY).toBe(0);
+        // No-pointer control: the route-entry reveal owner keeps adjusting this
+        // same scroll owner until its row/owner geometry repeats. Establish that
+        // settled endpoint with no pointer input at all, bounded by real frames,
+        // so the pointer below cannot be credited with a reveal correction that
+        // was still in flight. A stable but clipped or hidden row never settles.
+        const settle = async () => {
+          let previous = '';
+          let stable = 0;
+          for (let frame = 0; frame < 120; frame++) {
+            const observed = await facts();
+            const key = [
+              observed.scrollTop,
+              observed.documentY,
+              observed.rowRect.top,
+              observed.rowRect.bottom,
+              observed.viewportTop,
+              observed.viewportHeight,
+              observed.scrollHeight,
+            ].join('/');
+            stable = key === previous ? stable + 1 : 0;
+            previous = key;
+            if (stable >= 3) {
+              if (
+                !observed.visible ||
+                observed.rowRect.top < observed.viewportTop - 0.5 ||
+                observed.rowRect.bottom > observed.viewportBottom + 0.5
+              )
+                throw new Error(
+                  'Sidebar current article is clipped by its scroll owner while settling'
+                );
+              return observed;
+            }
+            await page.evaluate(
+              () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+            );
+          }
+          throw new Error('Sidebar current-article reveal did not settle within 120 frames');
+        };
+        const before = await settle();
+        expect(before.owner, 'entry and settle keep the one sidebar scroll owner').toBe(
+          entered.owner
+        );
+        expect(before.documentY, 'entry and settle must not scroll the document').toBe(
+          entered.documentY
+        );
+        expect(before.visible, 'settled current article is fully inside its owner').toBe(true);
+        expect(
+          before.rowRect.top >= before.viewportTop - 0.5 &&
+            before.rowRect.bottom <= before.viewportBottom + 0.5,
+          'settled row is fully contained, never a stable but clipped row'
+        ).toBe(true);
+        expect(
+          before.contentRect.width,
+          'painted current-row content has real geometry'
+        ).toBeGreaterThan(0);
+        expect(
+          before.contentRect.top >= before.viewportTop - 1 &&
+            before.contentRect.bottom <= before.viewportBottom + 1,
+          'painted current-row content is inside the transformed scrollport'
+        ).toBe(true);
+        const nearestEdgeSlack = Math.min(
+          before.rowRect.top - before.viewportTop,
+          before.viewportBottom - before.rowRect.bottom
+        );
+        const ownerAtStart = before.scrollTop <= 0.5;
+        const ownerAtEnd = before.scrollTop >= before.scrollHeight - before.clientHeight - 0.5;
+        expect(
+          nearestEdgeSlack <= 1 || ownerAtStart || ownerAtEnd,
+          'reveal must stop at the nearest edge instead of overscrolling'
+        ).toBe(true);
         await captureLinks(
           page,
           `sidebar-current-${width}`,
           'shadcn',
           'wc',
-          'current-article-revealed',
-          before
+          'current-article-entered-and-settled',
+          { entered, settled: before, nearestEdgeSlack, ownerAtStart, ownerAtEnd }
         );
         expect(
           before.ownerBottom,
@@ -1946,6 +2396,9 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         );
         expect(beforeWheel.documentY, 'pointer must not move document scroll').toBe(
           before.documentY
+        );
+        expect(beforeWheel.visible, 'pointer keeps the current row fully inside its owner').toBe(
+          true
         );
         expect(beforeWheel.scrollTop, 'pointer must not move sidebar scroll').toBe(
           before.scrollTop
@@ -2123,6 +2576,19 @@ it('keeps compact Sidebar typography across root text, viewport and enhancement'
   }
 }, 150_000);
 
+// Authored expectation, not a reimplementation of the CSS guard. The right
+// reading rail needs BOTH the 80rem viewport media query (viewport rem uses the
+// initial font size) and more than the 66rem docs-canvas budget for the computed
+// root text, so 1280px at root20 (64rem) legitimately has no rail. The cells
+// mirror the reviewed scenario table in site-docs-columns.browser.test.ts.
+const READING_RAIL_EXPECTATION: Readonly<Record<string, 'visible' | 'hidden'>> = {
+  '1280x16': 'visible',
+  '1280x20': 'hidden',
+  '1280x24': 'hidden',
+  '1920x16': 'visible',
+  '1920x20': 'visible',
+  '1920x24': 'visible',
+};
 it('keeps reading TOC native row boxes, depth padding and multiline growth through enhancement', async () => {
   for (const [family, route] of [
     ['shadcn', '/zh-cn/ui-libraries/shadcn/button/'],
@@ -2174,8 +2640,51 @@ it('keeps reading TOC native row boxes, depth padding and multiline growth throu
                   };
                 })
             );
+            const expected = READING_RAIL_EXPECTATION[`${width}x${rootSize}`];
+            expect(
+              expected,
+              `missing reading-rail expectation for width${width}/root${rootSize}`
+            ).toBeDefined();
+            const rail = await page.evaluate(() => {
+              const container = document.querySelector<HTMLElement>(
+                '.docs-reading-columns > .right-sidebar-container'
+              );
+              const box = container?.getBoundingClientRect() ?? null;
+              const anchors = [
+                ...document.querySelectorAll<HTMLAnchorElement>('.right-sidebar sl-toc a[href]'),
+              ].map((anchor) => {
+                const href = anchor.getAttribute('href') ?? '';
+                const target = href.startsWith('#')
+                  ? document.getElementById(decodeURIComponent(href.slice(1)))
+                  : null;
+                return {
+                  href,
+                  target: target?.localName ?? null,
+                  inToc: !!anchor.closest('sl-toc'),
+                };
+              });
+              return {
+                display: container ? getComputedStyle(container).display : null,
+                width: box?.width ?? 0,
+                anchors,
+                overflow:
+                  document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              };
+            });
+            // Native destinations are authored whatever the visual budget does.
+            expect(rail.anchors.length).toBeGreaterThan(0);
+            for (const anchor of rail.anchors) {
+              expect(anchor.href.startsWith('#')).toBe(true);
+              expect(anchor.target, `${anchor.href} keeps a real destination`).toBeTruthy();
+              expect(anchor.inToc).toBe(true);
+            }
+            expect(
+              rail.overflow,
+              'reading rail must not overflow the document'
+            ).toBeLessThanOrEqual(1);
             const title = page.locator('.right-sidebar sl-toc h2#starlight__on-this-page');
-            if (javaScriptEnabled) await title.locator('[data-typography-prototype]').waitFor();
+            if (javaScriptEnabled && expected === 'visible')
+              await title.locator('[data-typography-prototype]').waitFor();
             const titlePaint = await title.evaluate((native) => {
               const surface =
                 native.querySelector<HTMLElement>('[data-typography-prototype]') ?? native;
@@ -2195,30 +2704,62 @@ it('keeps reading TOC native row boxes, depth padding and multiline growth throu
                 labelledBy: native.closest('nav')?.getAttribute('aria-labelledby'),
               };
             });
-            samples.push({ width, rootSize, rows, titlePaint });
-            expect(titlePaint.tag).toBe('H2');
-            expect(titlePaint.text).toBeTruthy();
-            expect(titlePaint.labelledBy).toBe('starlight__on-this-page');
-            expect(titlePaint.size).toBeCloseTo(rootSize * 0.75, 2);
-            expect(titlePaint.line).toBeCloseTo(rootSize, 2);
-            expect(titlePaint.font).toBe(titlePaint.nativeFont);
-            expect(titlePaint.weight).toBe(titlePaint.nativeWeight);
-            expect(titlePaint.tracking).toBe(titlePaint.nativeTracking);
-            expect(rows.length).toBeGreaterThan(0);
-            for (const row of rows) {
-              expect(row.size).toBeCloseTo(rootSize * 0.8, 2);
-              expect(row.line).toBeCloseTo(rootSize, 2);
-              expect(row.height).toBeGreaterThanOrEqual(rootSize * 1.5 - 0.1);
-              expect(row.left).toBeCloseTo(row.parentLeft, 0);
-              expect(row.width).toBeCloseTo(row.parentWidth, 0);
-              expect(row.paddingStart).toBeCloseTo(rootSize * (row.depth + 0.5), 2);
-              expect(row.margin).toBe(0);
+            samples.push({ width, rootSize, expected, rows, rail, titlePaint });
+            if (expected === 'visible') {
+              // Required-visible cell: prove the rail is displayed and every
+              // visible row keeps the governed native box, depth and density.
+              expect(rail.display, `${width}px/root${rootSize} shows the reading rail`).not.toBe(
+                'none'
+              );
+              expect(rail.width).toBeGreaterThan(0);
+              expect(rows.length).toBeGreaterThan(0);
+              expect(titlePaint.tag).toBe('H2');
+              expect(titlePaint.text).toBeTruthy();
+              expect(titlePaint.labelledBy).toBe('starlight__on-this-page');
+              expect(titlePaint.size).toBeCloseTo(rootSize * 0.75, 2);
+              expect(titlePaint.line).toBeCloseTo(rootSize, 2);
+              expect(titlePaint.font).toBe(titlePaint.nativeFont);
+              expect(titlePaint.weight).toBe(titlePaint.nativeWeight);
+              expect(titlePaint.tracking).toBe(titlePaint.nativeTracking);
+              for (const row of rows) {
+                expect(row.size).toBeCloseTo(rootSize * 0.8, 2);
+                expect(row.line).toBeCloseTo(rootSize, 2);
+                expect(row.height).toBeGreaterThanOrEqual(rootSize * 1.5 - 0.1);
+                expect(row.left).toBeCloseTo(row.parentLeft, 0);
+                expect(row.width).toBeCloseTo(row.parentWidth, 0);
+                expect(row.paddingStart).toBeCloseTo(rootSize * (row.depth + 0.5), 2);
+                expect(row.margin).toBe(0);
+              }
+            } else {
+              // Constrained-hidden cell: the 66rem docs-canvas budget removes the
+              // rail instead of shortening the article or relocating the TOC above
+              // the prose. Row boxes and passive-typography paint are unobservable
+              // here, so assert the authored hiding, the retained native
+              // destinations and the unclipped document instead.
+              expect(rail.display, `${width}px/root${rootSize} hides the reading rail`).toBe(
+                'none'
+              );
+              expect(rail.width).toBe(0);
+              expect(rows.length).toBe(0);
+              expect(titlePaint.tag).toBe('H2');
+              expect(titlePaint.text).toBeTruthy();
+              expect(titlePaint.labelledBy).toBe('starlight__on-this-page');
             }
             if (width === 1920 && rootSize === 16)
               await captureLinks(page, id, family, 'wc', 'reading-toc-native-density', { samples });
           }
         }
         const first = page.locator('.right-sidebar sl-toc a').first();
+        // Row growth, keyboard focus and the current-range highlight need a
+        // genuinely visible rail. Bind them to an explicit required-visible cell
+        // instead of inheriting whichever matrix cell ran last.
+        await page.setViewportSize({ width: 1920, height: 1000 });
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = '16px';
+        });
+        await expect
+          .poll(() => first.evaluate((link) => link.checkVisibility()), { timeout: 10_000 })
+          .toBe(true);
         await first.evaluate((link) => {
           const source =
             link.querySelector('[data-site-link-text]')?.firstElementChild ??
@@ -2270,3 +2811,375 @@ it('keeps reading TOC native row boxes, depth padding and multiline growth throu
     }
   }
 }, 150_000);
+
+const collectShellLinks = (page: Page, selector: string): Promise<ShellLinkFact[]> =>
+  page.locator(selector).evaluateAll((anchors) =>
+    anchors.map((anchor) => {
+      const box = anchor.getBoundingClientRect();
+      const role = anchor.getAttribute('role');
+      return {
+        tag: anchor.tagName,
+        name: anchor.getAttribute('aria-label') ?? anchor.textContent?.trim() ?? null,
+        href: anchor.getAttribute('href'),
+        target: anchor.getAttribute('target'),
+        rel: anchor.getAttribute('rel'),
+        role,
+        current: anchor.getAttribute('aria-current'),
+        buttonCommand:
+          anchor.getAttribute('data-slot') === 'button' ||
+          role === 'button' ||
+          anchor.hasAttribute('data-site-native-button'),
+        visualOwner: Boolean(anchor.querySelector('[data-pui-root]')),
+        nestedInteractive: anchor.querySelectorAll(
+          'a[href],button,input,select,textarea,[tabindex]'
+        ).length,
+        hitIsAnchor:
+          anchor === document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2),
+      };
+    })
+  );
+
+const HOMEPAGE_DESKTOP_NAVIGATION =
+  '#home-navigation-desktop [data-projection-generation-state="active"] a';
+const HOMEPAGE_POPUP_NAVIGATION =
+  '#home-navigation-mobile [data-projection-generation-state="active"] a';
+const HOMEPAGE_HERO_ACTIONS = [
+  '#homepage-whitepaper [data-projection-generation-state="active"] a',
+  '#homepage-hero-actions [data-projection-generation-state="active"] a',
+].join(', ');
+
+// #559 C6: the governed shell surfaces were previously recorded on /zh-cn
+// routes only. This case records the same native-anchor facts on the English
+// locale. Accessible names come from the shared navigation definition and the
+// site-owned social definitions; content-authored hero actions are checked
+// against the other locale's observed names and destinations, never against a
+// hand-written translation or an assertion about source text.
+it('records the English shell labels, destinations and native activation ownership', async () => {
+  const englishNavigation = sitePrimaryNavigation('en');
+  const englishExpectation: ShellLinkExpectation[] = englishNavigation.map(
+    ({ label, path: target }) => ({ name: label, href: localizedShellHref(target, 'en') })
+  );
+  const chineseExpectation: ShellLinkExpectation[] = sitePrimaryNavigation('zh-cn').map(
+    ({ label, path: target }) => ({ name: label, href: localizedShellHref(target, 'zh-cn') })
+  );
+  const navigationLabel = siteShellLabels('en').primaryNavigation;
+  const socialExpectation: ShellLinkExpectation[] = (
+    Object.keys(SITE_LINK_ICONS) as SiteLinkIcon[]
+  ).map((icon) => ({
+    name: SITE_LINK_ICONS[icon].label,
+    href: socialDestinations[icon],
+    target: '_blank',
+    rel: 'noreferrer',
+  }));
+  // Locale basis: the Chinese homepage supplies the observed words and
+  // destinations of the content-authored hero actions and proves the shared
+  // navigation definition on the other locale.
+  const zhContext = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    colorScheme: 'light',
+  });
+  let zhHero: ShellLinkFact[] = [];
+  try {
+    const page = await zhContext.newPage();
+    await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
+    await ready(page, 'wc', 'shadcn');
+    expect(
+      shellNavigationIssues(
+        await collectShellLinks(page, HOMEPAGE_DESKTOP_NAVIGATION),
+        chineseExpectation
+      )
+    ).toEqual([]);
+    zhHero = await collectShellLinks(page, HOMEPAGE_HERO_ACTIONS);
+    expect(zhHero).toHaveLength(3);
+  } finally {
+    await zhContext.close();
+  }
+  const enContext = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    colorScheme: 'light',
+  });
+  try {
+    const page = await enContext.newPage();
+    await page.goto(`${baseUrl}/en/`, { waitUntil: 'networkidle' });
+    await ready(page, 'wc', 'shadcn');
+    const desktopNavigation = await collectShellLinks(page, HOMEPAGE_DESKTOP_NAVIGATION);
+    expect(shellNavigationIssues(desktopNavigation, englishExpectation)).toEqual([]);
+    const homeNavigationLabels = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[data-homepage-runtime] nav[aria-label]')).map((nav) =>
+        nav.getAttribute('aria-label')
+      )
+    );
+    expect(new Set(homeNavigationLabels)).toEqual(new Set([navigationLabel]));
+    const hero = await collectShellLinks(page, HOMEPAGE_HERO_ACTIONS);
+    expect(localePairIssues(zhHero, hero)).toEqual([]);
+    // Pointer hover and keyboard focus-visible are observed on the English hero
+    // group through the existing native paint observer.
+    const heroLink = page
+      .locator('#homepage-hero-actions [data-projection-generation-state="active"] a')
+      .first();
+    const resting = await linkPaint(heroLink);
+    await heroLink.hover();
+    await expect
+      .poll(async () => (await linkPaint(heroLink)).tokens)
+      .not.toEqual(resting.tokens);
+    await page.mouse.move(0, 0);
+    await heroLink.focus();
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Shift+Tab');
+    const focused = await linkPaint(heroLink);
+    expect(focused.focused).toBe(true);
+    expect(focused.visibleTarget).toBe(true);
+    expect(focused.unclipped).toBe(true);
+    // The real homepage theme control flips the document theme; the English
+    // labels stay native, unclipped and hit-testable in dark.
+    const themeBefore = await page.evaluate(
+      () => document.documentElement.dataset.theme ?? null
+    );
+    await page
+      .locator(
+        '.site-header-theme [data-projection-generation-state="active"] [data-demo-ref="home-theme"]'
+      )
+      .click();
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dataset.theme ?? null))
+      .toBe('dark');
+    expect(themeBefore).not.toBe('dark');
+    const darkNavigation = await collectShellLinks(page, HOMEPAGE_DESKTOP_NAVIGATION);
+    expect(shellNavigationIssues(darkNavigation, englishExpectation)).toEqual([]);
+    // Reflow: the authored root text sizes and both documented wide viewports
+    // keep every English row unclipped and inside the page.
+    for (const width of [1280, 1920] as const) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const rootSize of [16, 24] as const) {
+        await page.evaluate((size) => {
+          document.documentElement.style.fontSize = `${size}px`;
+        }, rootSize);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+        ).toBeLessThanOrEqual(1);
+        for (const link of await page.locator(HOMEPAGE_DESKTOP_NAVIGATION).all()) {
+          const paint = await linkPaint(link);
+          expect(paint.visibleTarget).toBe(true);
+          expect(paint.unclipped).toBe(true);
+        }
+      }
+    }
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = '';
+    });
+    // The social entries live inside the header panel, so they are observed
+    // with the panel open; the governed navigation owns no current marker.
+    await openSettings(page);
+    const social = await collectShellLinks(
+      page,
+      '#home-social [data-projection-generation-state="active"] a'
+    );
+    expect(shellNavigationIssues(social, socialExpectation)).toEqual([]);
+    const popupNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);
+    expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.locator('[data-homepage-runtime] [data-site-header-desktop-navigation]').isVisible()
+    ).toBe(false);
+    await openSettings(page);
+    const narrowNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);
+    expect(shellNavigationIssues(narrowNavigation, englishExpectation)).toEqual([]);
+    for (const link of await page.locator(HOMEPAGE_POPUP_NAVIGATION).all()) {
+      const paint = await linkPaint(link);
+      expect(paint.visibleTarget).toBe(true);
+      expect(paint.unclipped).toBe(true);
+    }
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+    ).toBeLessThanOrEqual(1);
+    await captureLinks(
+      page,
+      'english-homepage-shell-labels',
+      'shadcn',
+      'wc',
+      'en; hero-keyboard-focus; native-theme-dark; 390px popup-navigation',
+      { desktopNavigation, popupNavigation, narrowNavigation, hero, social, focused, themeBefore }
+    );
+  } finally {
+    await enContext.close();
+  }
+  // English documentation route: the desktop and popup primary navigation, the
+  // four social destinations, native keyboard focus and hover, and the current
+  // truth remaining with the docs navigation.
+  const docsContext = await browser.newContext({
+    viewport: { width: 1440, height: 1000 },
+    colorScheme: 'light',
+  });
+  try {
+    const docs = await docsContext.newPage();
+    await docs.goto(`${baseUrl}/en/ui-libraries/shadcn/button/`, { waitUntil: 'networkidle' });
+    const desktopLinks = docs.locator('[data-site-header-desktop-navigation] a');
+    await docs
+      .locator('[data-site-header-desktop-navigation] a[data-site-link-enhanced]')
+      .nth(2)
+      .waitFor();
+    const desktopNavigation = await collectShellLinks(
+      docs,
+      '[data-site-header-desktop-navigation] a'
+    );
+    expect(shellNavigationIssues(desktopNavigation, englishExpectation)).toEqual([]);
+    expect(
+      await docs.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-site-header-desktop-navigation]')).map((nav) =>
+          nav.getAttribute('aria-label')
+        )
+      )
+    ).toEqual([navigationLabel]);
+    const navHover = desktopLinks.nth(1);
+    const navResting = await linkPaint(navHover);
+    await navHover.hover();
+    await expect
+      .poll(async () => (await linkPaint(navHover)).tokens)
+      .not.toEqual(navResting.tokens);
+    const navFocus = await assertNavigationFocus(docs, desktopLinks.first());
+    await captureLinks(
+      docs,
+      'english-docs-primary-navigation-focus',
+      'shadcn',
+      'wc',
+      'en; desktop-primary-navigation; keyboard-focus',
+      navFocus
+    );
+    expect(await docs.locator('.sidebar-pane a[aria-current="page"]').count()).toBe(1);
+    expect(
+      await docs.locator('[data-site-header-desktop-navigation] a[aria-current]').count()
+    ).toBe(0);
+    await openSettings(docs);
+    await assertHeaderPopupSurface(docs, 'shadcn', 'wc', false);
+    const popup = await collectShellLinks(docs, '[data-site-header-navigation] a');
+    expect(shellNavigationIssues(popup, englishExpectation)).toEqual([]);
+    expect(
+      await docs.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-site-header-navigation]')).map((nav) =>
+          nav.getAttribute('aria-label')
+        )
+      )
+    ).toEqual([navigationLabel]);
+    expect(await docs.locator('[data-site-header-navigation] a[aria-current]').count()).toBe(0);
+    const socialLinks = docs.locator('.site-social-links a[data-site-native-link]');
+    const socialFacts = await collectShellLinks(
+      docs,
+      '.site-social-links a[data-site-native-link]'
+    );
+    expect(shellNavigationIssues(socialFacts, socialExpectation)).toEqual([]);
+    await assertSocialPaint(docs, socialLinks, 'shadcn', async (state, evidence) => {
+      await captureLinks(
+        docs,
+        `english-docs-social-${state}`,
+        'shadcn',
+        'wc',
+        `en; docs-menu-open; first-social-${state}`,
+        evidence
+      );
+    });
+    // The panel owns the pointer while it is open, so the real activation
+    // control below runs after the native disclosure has closed again.
+    await docs.keyboard.press('Escape');
+    await expect
+      .poll(() =>
+        docs.evaluate(
+          () => (document.querySelector('[data-site-header-panel]') as HTMLDetailsElement).open
+        )
+      )
+      .toBe(false);
+    // Mutation controls: the shared observer must fail closed on the three
+    // shapes a translated snapshot or a Button-role regression would produce.
+    // Only the collected observation is mutated; the page is never rewritten to
+    // make an assertion pass.
+    expect(shellNavigationIssues(desktopNavigation.slice(1), englishExpectation)).toContain(
+      'anchor count'
+    );
+    const wrongLocale = desktopNavigation.map((fact, index) =>
+      index === 0 ? { ...fact, name: sitePrimaryNavigation('zh-cn')[0]!.label } : fact
+    );
+    expect(shellNavigationIssues(wrongLocale, englishExpectation)).toContain(
+      '0: accessible name mismatch'
+    );
+    const buttonCommand = desktopNavigation.map((fact, index) =>
+      index === 1 ? { ...fact, role: 'button', buttonCommand: true } : fact
+    );
+    expect(shellNavigationIssues(buttonCommand, englishExpectation)).toEqual(
+      expect.arrayContaining(['1: unexpected role', '1: Button command marker'])
+    );
+    // Real negative control: a target-phase cancel keeps the trusted native
+    // click prevented, the document where it was, and the same enhanced anchor
+    // as the owner. Space must not activate a native navigation anchor.
+    const location = docs.url();
+    const pageCount = docsContext.pages().length;
+    await installNativeTrace(docs, true);
+    await nativeActionLabel(docs, 'english-navigation-cancel');
+    await desktopLinks.first().evaluate((anchor) => {
+      anchor.addEventListener('click', (event) => event.preventDefault(), { once: true });
+    });
+    await desktopLinks.first().click();
+    const events = await saveNativeTrace(docs, 'english-navigation-cancel-negative-control', {
+      href: await desktopLinks.first().getAttribute('href'),
+    });
+    expect(events.filter((event) => event.type === 'click').at(-1)).toMatchObject({
+      trusted: true,
+      preventedAfterDispatch: true,
+      targetWasAnchor: true,
+    });
+    expect(docs.url()).toBe(location);
+    expect(docsContext.pages()).toHaveLength(pageCount);
+    expect(await desktopLinks.first().getAttribute('data-site-link-enhanced')).toBe('true');
+    await desktopLinks.first().focus();
+    await docs.keyboard.press('Space');
+    expect(docs.url()).toBe(location);
+    expect(docsContext.pages()).toHaveLength(pageCount);
+  } finally {
+    await docsContext.close();
+  }
+  // English narrow dark documentation route: the desktop navigation is not
+  // rendered, the popup navigation carries the same labels and destinations,
+  // and long English labels stay inside the page.
+  const narrowContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    colorScheme: 'dark',
+  });
+  try {
+    const narrow = await narrowContext.newPage();
+    await narrow.goto(`${baseUrl}/en/ui-libraries/brutalist/components/button/`, {
+      waitUntil: 'networkidle',
+    });
+    await narrow.locator('.site-social-links a[data-site-native-link]').first().waitFor();
+    expect(await narrow.locator('[data-site-header-desktop-navigation]').isVisible()).toBe(false);
+    await openSettings(narrow);
+    const popupNavigation = await collectShellLinks(narrow, '[data-site-header-navigation] a');
+    expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
+    for (const link of await narrow.locator('[data-site-header-navigation] a').all()) {
+      const paint = await linkPaint(link);
+      expect(paint.visibleTarget).toBe(true);
+      expect(paint.unclipped).toBe(true);
+    }
+    expect(
+      await narrow.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+    ).toBeLessThanOrEqual(1);
+    expect(
+      shellNavigationIssues(
+        await collectShellLinks(narrow, '.site-social-links a[data-site-native-link]'),
+        socialExpectation
+      )
+    ).toEqual([]);
+    const focus = await assertNavigationFocus(
+      narrow,
+      narrow.locator('[data-site-header-navigation] a').first()
+    );
+    await captureLinks(
+      narrow,
+      'english-narrow-docs-navigation',
+      'brutalist',
+      'wc',
+      'en; 390px; dark; popup-primary-navigation-focus',
+      { popupNavigation, focus }
+    );
+  } finally {
+    await narrowContext.close();
+  }
+}, 120_000);
