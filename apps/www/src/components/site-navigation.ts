@@ -11,7 +11,7 @@ export type SiteLocale = 'en' | 'zh-cn';
 
 export const SITE_PRIMARY_NAVIGATION = [
   { path: '/start-here/what-you-saw/', label: { en: 'Docs', 'zh-cn': '文档' } },
-  { path: '/ui-libraries/', label: { en: 'Libraries', 'zh-cn': '组件库' } },
+  { path: '/ui-libraries/shadcn/button/', label: { en: 'Libraries', 'zh-cn': '组件库' } },
   { path: '/whitepaper/0-preface/', label: { en: 'Whitepaper', 'zh-cn': '白皮书' } },
 ] as const;
 

@@ -15,6 +15,7 @@ describe('homepage gallery decorative artwork', () => {
     const slots = names.map((name) => homepageGalleryIcon(name));
     const refs: string[] = [];
     const visit = (node: DemoNode) => {
+      if (node.kind === 'text') return;
       if (node.ref) refs.push(node.ref);
       for (const child of node.children ?? []) if (typeof child !== 'string') visit(child);
     };

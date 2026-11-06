@@ -403,7 +403,7 @@ it('keeps library overview and long-prose routes bounded in both locales without
     );
     const page = await context.newPage();
     try {
-      for (const route of ['ui-libraries/', 'start-here/why-proto-ui/']) {
+      for (const route of ['ui-libraries/shadcn/button/', 'start-here/why-proto-ui/']) {
         await page.goto(`${baseUrl}/${locale}/${route}`, { waitUntil: 'networkidle' });
         const geometry = await page.evaluate(() => {
           const main = document.querySelector<HTMLElement>('.main-pane')!;

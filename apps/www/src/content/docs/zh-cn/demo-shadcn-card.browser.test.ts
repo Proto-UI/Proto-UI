@@ -11,7 +11,6 @@ import { captureCurrentViewport } from './library-card-capture';
 const route = '/en/ui-libraries/shadcn/card/';
 const compatibilityRoute = (runtime: (typeof RUNTIMES)[number]) =>
   `/en/test/shadcn-card-compat/${runtime}/`;
-const galleryRoute = '/zh-cn/ui-libraries/';
 const directory =
   process.env.PUI_SHADCN_CARD_EVIDENCE_DIR ?? path.join(os.tmpdir(), 'shadcn-card-evidence');
 let browser: Browser;
@@ -36,7 +35,7 @@ beforeAll(async () => {
     expect(binding.dirty).toBe(false);
   }
   await mkdir(directory, { recursive: true });
-  baseUrl = await startServer([route, galleryRoute, ...RUNTIMES.map(compatibilityRoute)]);
+  baseUrl = await startServer([route, ...RUNTIMES.map(compatibilityRoute)]);
   browser = await chromium.launch({
     executablePath: process.env.CHROME_PATH,
     headless: true,
@@ -315,48 +314,3 @@ describe.each(RUNTIMES)('Shadcn Card ordinary Rhea native %s', (runtime) => {
     }
   }, 60_000);
 });
-
-it.each([false, true])(
-  'gallery keeps distinct Card ink with JavaScript=%s',
-  async (javaScriptEnabled) => {
-    const context = await browser.newContext({
-      javaScriptEnabled,
-      viewport: { width: 1080, height: 900 },
-    });
-    try {
-      const page = await context.newPage();
-      await page.goto(baseUrl + galleryRoute, { waitUntil: 'networkidle' });
-      const root = page.locator('[data-library="shadcn"] [data-library-part="shadcn-card"]');
-      await root.evaluate((element, css) => element.setAttribute('style', css), colors);
-      const facts = await root.evaluate((element) => ({
-        background: getComputedStyle(element).backgroundColor,
-        color: getComputedStyle(element).color,
-        heading: getComputedStyle(element.querySelector('h2 [data-library-part="shadcn-text"]')!)
-          .color,
-        body: getComputedStyle(
-          element.querySelector('.library-card__content p [data-library-part="shadcn-text"]')!
-        ).color,
-        caption: getComputedStyle(element.querySelector('.library-card__kind')!).color,
-      }));
-      const capture = await captureCurrentViewport(
-        page,
-        path.join(directory, `gallery-js-${javaScriptEnabled}.png`)
-      );
-      await writeFile(
-        path.join(directory, `gallery-js-${javaScriptEnabled}.json`),
-        JSON.stringify({ ...binding, javaScriptEnabled, facts, capture }, null, 2)
-      );
-      expect(facts).toEqual({
-        background: 'rgb(212, 230, 250)',
-        color: 'rgb(82, 24, 71)',
-        heading: 'rgb(82, 24, 71)',
-        body: 'rgb(82, 24, 71)',
-        caption: 'rgb(93, 100, 107)',
-      });
-      expect(await root.locator('[data-library-action]').getAttribute('href')).toBeTruthy();
-    } finally {
-      await context.close();
-    }
-  },
-  60_000
-);

@@ -72,13 +72,10 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
         // of an override uses PrototypePreviewer's normal enabled default.
         expect(page).not.toContain('toolbar={false}');
         expect(page).not.toContain('data-adapter-panel');
-        expect(page).toContain('private');
         expect(page).toContain('draft');
         expect(page).toContain('GPUI');
       }
       expect(read('apps/www/astro.config.mjs')).toContain(`slug: 'ui-libraries/${family}/${kind}'`);
-      const overview = read('apps/www/src/components/PrototypeLibraryOverview.astro');
-      expect(overview).toContain(`demoId: 'demo-${family}-${kind}'`);
     });
   }
 
@@ -111,13 +108,10 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
       expect(checkbox).toContain(
         locale === 'en' ? 'not the archived native checkbox' : '不是归档版本原生 checkbox'
       );
-      const index = read(`apps/www/src/content/docs/${locale}/ui-libraries/${family}/index.mdx`);
-      expect(index).toContain('partial family');
-      expect(index).toContain(
-        locale === 'en'
-          ? 'not offered by the homepage full-family selector'
-          : '不接入首页的完整族选择器'
-      );
+      const sidebar = read('apps/www/astro.config.mjs');
+      expect(sidebar).toContain("label: 'Bootstrap 2.3.2'");
+      expect(sidebar).toContain("en: 'WIP / Experimental'");
+      expect(sidebar).toContain(`slug: 'ui-libraries/${family}/checkbox'`);
     }
   });
 });

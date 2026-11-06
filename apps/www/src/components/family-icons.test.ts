@@ -9,7 +9,6 @@ describe('family-aware decorative icons', () => {
     'StaticFamilyIcon.astro',
     'StaticLucideIcon.astro',
     'UiLibraryGallery.astro',
-    'PrototypeLibraryOverview.astro',
     'LucideIconGallery.astro',
     'Homepage/HomeActions.astro',
     'override/Hero.astro',
@@ -30,15 +29,10 @@ describe('family-aware decorative icons', () => {
     expect(family).not.toMatch(/on:|client:/);
   });
   it('replaces only decorative navigation symbols and preserves named links', () => {
-    for (const file of [
-      'UiLibraryGallery.astro',
-      'PrototypeLibraryOverview.astro',
-      'override/Hero.astro',
-    ]) {
+    for (const file of ['UiLibraryGallery.astro', 'override/Hero.astro']) {
       expect(source(file)).not.toMatch(/[↗→]/);
     }
-    expect(source('UiLibraryGallery.astro').match(/family=\{library.id\}/g)).toHaveLength(3);
-    expect(source('PrototypeLibraryOverview.astro')).toContain('family={library}');
+
     expect(source('LucideIconGallery.astro')).toContain('aria-label={copy.close}');
     expect(source('LucideIconGallery.astro')).toContain('<StaticLucideIcon name="x"');
   });

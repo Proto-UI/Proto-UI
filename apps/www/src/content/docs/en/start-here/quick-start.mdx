@@ -54,25 +54,29 @@ export const buttonHostCommands = /** @type {const} */ ({
 
 export const pendingButtonHosts = /** @type {const} */ ([
   {
-    "id": "vue2",
-    "label": "Vue 2",
-    "message": "WIP for this stable quick-start guide. The official Vue 2 Adapter targets Vue >=2.6.0 <2.7 and is available from the 0.3 prerelease line. The stable 0.2.0 CLI does not support vue2, so this tab does not provide an @latest install command."
+    'id': 'vue2',
+    'label': 'Vue 2',
+    'message':
+      'WIP for this stable quick-start guide. The official Vue 2 Adapter targets Vue >=2.6.0 <2.7 and is available from the 0.3 prerelease line. The stable 0.2.0 CLI does not support vue2, so this tab does not provide an @latest install command.',
   },
   {
-    "id": "gpui",
-    "label": "GPUI",
-    "message": "WIP for public quick-start integration. The repository has an implemented private GPUI source-compilation profile, not a published official Adapter or a stable CLI add workflow."
+    'id': 'gpui',
+    'label': 'GPUI',
+    'message':
+      'WIP for public quick-start integration. The repository has an implemented private GPUI source-compilation profile, not a published official Adapter or a stable CLI add workflow.',
   },
   {
-    "id": "qt",
-    "label": "Qt",
-    "message": "WIP. Qt is a declared compiler target, but its profile is unimplemented and currently rejects compilation. No stable CLI installation or import example is available."
+    'id': 'qt',
+    'label': 'Qt',
+    'message':
+      'WIP. Qt is a declared compiler target, but its profile is unimplemented and currently rejects compilation. No stable CLI installation or import example is available.',
   },
   {
-    "id": "flutter",
-    "label": "Flutter",
-    "message": "WIP. Flutter is a declared compiler target, but its profile is unimplemented and currently rejects compilation. No stable CLI installation or import example is available."
-  }
+    'id': 'flutter',
+    'label': 'Flutter',
+    'message':
+      'WIP. Flutter is a declared compiler target, but its profile is unimplemented and currently rejects compilation. No stable CLI installation or import example is available.',
+  },
 ]);
 
 <DocStageNotice
@@ -98,7 +102,14 @@ The CLI installs the selected Adapter and Prototype packages at its own exact ve
 
 You can invoke the CLI with `npx`; a global installation is not required:
 
-<StaticCodeBlock id="quick-start-cli-help" code={"npx @proto.ui/cli@latest --help"} title="Terminal" icon="terminal" lang="bash" copyLabel="Copy CLI help command" />
+<StaticCodeBlock
+  id="quick-start-cli-help"
+  code={'npx @proto.ui/cli@latest --help'}
+  title="Terminal"
+  icon="terminal"
+  lang="bash"
+  copyLabel="Copy CLI help command"
+/>
 
 Using the explicit `@latest` tag makes the stable channel policy visible. For a permanently reproducible installation or CI workflow, replace it with `@0.2.0`.
 
@@ -106,7 +117,14 @@ Using the explicit `@latest` tag makes the stable channel policy visible. For a 
 
 From the application root, run:
 
-<StaticCodeBlock id="quick-start-init-command" code="npx @proto.ui/cli@latest init" title="Terminal" icon="terminal" lang="bash" copyLabel="Copy initialization command" />
+<StaticCodeBlock
+  id="quick-start-init-command"
+  code="npx @proto.ui/cli@latest init"
+  title="Terminal"
+  icon="terminal"
+  lang="bash"
+  copyLabel="Copy initialization command"
+/>
 
 Accepting the defaults creates the local Proto UI workspace and the Shadcn style preset:
 
@@ -125,13 +143,27 @@ For the 0.3 source candidate in PR #872, `--no-styles` disables generation. The 
 
 Import the generated stylesheet from the application entry:
 
-<StaticCodeBlock code={"import './styles/proto-ui-style.css';"} title="Style import" icon="file-code" lang="typescript" copyLabel="Copy Style import" />
+<StaticCodeBlock
+  code={"import './styles/proto-ui-style.css';"}
+  title="Style import"
+  icon="file-code"
+  lang="typescript"
+  copyLabel="Copy Style import"
+/>
 
 Adjust the relative path if your entry file is elsewhere. When the application has not selected a theme, the generated Shadcn theme follows `prefers-color-scheme`. Set `data-theme="light"` / `data-theme="dark"` on the root element, or use the compatible `.light` / `.dark` classes, to override the system preference.
 
 If the application does not use named CSS cascade layers, keep the single import above. If it does, establish the complete order in one CSS entry before any reset, Proto UI, or consumer layer is first declared:
 
-<StaticCodeBlock code={"/* src/app.css */\n@layer theme, base, proto-ui, components, utilities;\n\n@import './reset.css' layer(base);\n@import './styles/proto-ui-style.css';\n@import './app-components.css' layer(components);\n@import './app-utilities.css' layer(utilities);"} title="src/app.css" icon="file-code" lang="css" copyLabel="Copy src/app.css" />
+<StaticCodeBlock
+  code={
+    "/* src/app.css */\n@layer theme, base, proto-ui, components, utilities;\n\n@import './reset.css' layer(base);\n@import './styles/proto-ui-style.css';\n@import './app-components.css' layer(components);\n@import './app-utilities.css' layer(utilities);"
+  }
+  title="src/app.css"
+  icon="file-code"
+  lang="css"
+  copyLabel="Copy src/app.css"
+/>
 
 Import `app.css` once from the application entry instead of importing those stylesheets separately. The generated entry places its theme defaults in the `theme` layer, so values declared by later named consumer layers—or by unlayered consumer CSS—remain authoritative. The complete relationship is `theme defaults < reset/base < proto-ui < explicit consumer layers`. For Tailwind, preserve its `theme < base < components < utilities` order while inserting `proto-ui` after `base` and before the application's component and utility layers in the earliest order statement.
 
@@ -147,8 +179,17 @@ Run the command from your project root, then add the example to the matching app
   files={buttonHostFiles}
   commands={buttonHostCommands}
   pendingHosts={pendingButtonHosts}
-  labels={{ files: 'Files', install: 'Install component', usage: 'Use in your app', copy: 'Copy', pending: 'WIP', overflow: 'Scroll to see all hosts →' }}
-  guidance={{ wc: 'For an existing TypeScript bundler app (such as Vite), not a standalone file:// page. Add the element to your existing HTML and the registration import to your module entry. Keep existing content and do not load the entry twice; adjust paths as needed.' }}
+  labels={{
+    files: 'Files',
+    install: 'Install component',
+    usage: 'Use in your app',
+    copy: 'Copy',
+    pending: 'WIP',
+    overflow: 'Scroll to see all hosts →',
+  }}
+  guidance={{
+    wc: 'For an existing TypeScript bundler app (such as Vite), not a standalone file:// page. Add the element to your existing HTML and the registration import to your module entry. Keep existing content and do not load the entry twice; adjust paths as needed.',
+  }}
   initialHost="react"
   label="Shadcn Button host examples and WIP availability"
 />
@@ -163,11 +204,27 @@ Once this works, use the component documentation to connect business state and e
 
 ## Continue one component at a time
 
-<StaticCodeBlock code={"npx @proto.ui/cli@latest add react shadcn-toggle\nnpx @proto.ui/cli@latest add react shadcn-dialog"} title="Terminal" icon="terminal" lang="bash" copyLabel="Copy component add commands" />
+<StaticCodeBlock
+  code={
+    'npx @proto.ui/cli@latest add react shadcn-toggle\nnpx @proto.ui/cli@latest add react shadcn-dialog'
+  }
+  title="Terminal"
+  icon="terminal"
+  lang="bash"
+  copyLabel="Copy component add commands"
+/>
 
 The generated host entry accumulates exports, so the application can keep importing from the same path:
 
-<StaticCodeBlock code={"import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';"} title="Component imports" icon="file-code" lang="tsx" copyLabel="Copy Component imports" />
+<StaticCodeBlock
+  code={
+    "import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';"
+  }
+  title="Component imports"
+  icon="file-code"
+  lang="tsx"
+  copyLabel="Copy Component imports"
+/>
 
 To generate without installing missing packages, add `--no-install`. The CLI will print exact install commands, but the generated entry will not build until those dependencies are present.
 
@@ -190,9 +247,8 @@ Once you have integrated your first component, choose where to go next:
 
 | What would you like to do next? | Continue here |
 | --- | --- |
-| Find more Shadcn-style components | [Shadcn Library](/en/ui-libraries/shadcn/) |
-| Explore base components without default styling | [Base Library](/en/ui-libraries/base/) |
-| Try a Neo-Brutalist visual style | [Brutalist Library](/en/ui-libraries/brutalist/) |
+| Find more Shadcn-style components | [Shadcn Button demo](/en/ui-libraries/shadcn/button/) |
+| Explore base components without default styling | [Base Button demo](/en/ui-libraries/base/button/) |
+| Try a Neo-Brutalist visual style | [Brutalist Button demo](/en/ui-libraries/brutalist/components/button/) |
 | Find and use icons | [Lucide Icons](/en/ui-libraries/lucide/) |
 | Explore Proto UI's ideas and design boundaries | [Whitepaper: Preface](/en/whitepaper/0-preface/) |
-

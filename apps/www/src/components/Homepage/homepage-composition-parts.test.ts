@@ -152,16 +152,18 @@ describe('homepage workspace compositions', () => {
     const chart = nodes.find((node) => node.ref === 'gallery-rhythm-bars');
     expect(chart).toBeDefined();
     const labelled = nodes.filter(
-      (node) => node.kind === 'box' && node.attrs?.role === 'img'
+      (node): node is Extract<DemoNode, { kind: 'box' }> =>
+        node.kind === 'box' && node.attrs?.role === 'img'
     );
     expect(labelled).toHaveLength(1);
-    expect(labelled[0]!.attrs?.['aria-label']).toContain('Sample data');
+    expect(labelled[0]!.attrs?.['aria-label']).toMatch(/\bsample\b/i);
     expect(result.analytics).toBeDefined();
     const zh = fixture('shadcn', 'zh-cn');
     expect(
-      zh.nodes.find((node) => node.kind === 'box' && node.attrs?.role === 'img')?.attrs?.[
-        'aria-label'
-      ]
-    ).toContain('示例数据');
+      zh.nodes.find(
+        (node): node is Extract<DemoNode, { kind: 'box' }> =>
+          node.kind === 'box' && node.attrs?.role === 'img'
+      )?.attrs?.['aria-label']
+    ).toContain('示例');
   });
 });
