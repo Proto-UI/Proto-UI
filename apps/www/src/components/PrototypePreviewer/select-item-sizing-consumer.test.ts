@@ -4,6 +4,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import { selectRoot as baseRoot, SELECT_CONTEXT } from '@proto.ui/prototypes-base/select';
 import { selectRoot as shadcnRoot } from '@proto.ui/prototypes-shadcn/select';
 import demo from '../../content/docs/zh-cn/demo-shadcn-select.demo';
+import { createHomepageLocaleSelect } from '../Homepage/homepage-locale-select';
 import { assertDemoSpec, type DemoChild, type DemoNode } from './demo-types';
 
 type ProtoNode = Extract<DemoNode, { kind: 'proto' }>;
@@ -46,6 +47,30 @@ async function observedPolicy(Root: typeof BaseRoot, props: Record<string, unkno
 afterEach(() => document.body.replaceChildren());
 
 describe('public Shadcn Select sizing opt-in consumer', () => {
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    'passes the %s homepage locale recipe through the public Shadcn Root context',
+    async (runtime) => {
+      const { demo: localeDemo } = createHomepageLocaleSelect(
+        {
+          value: 'en',
+          label: 'Language',
+          options: [{ value: 'en', label: 'English', path: '/en/' }],
+        },
+        'shadcn',
+        runtime,
+        () => true
+      );
+      const root = nodes(localeDemo.root).find(
+        (node): node is ProtoNode => node.kind === 'proto' && node.ref === 'home-locale-root'
+      );
+      expect(root).toBeDefined();
+      expect(await observedPolicy(ShadcnRoot, root!.props ?? {})).toBe('match-trigger');
+      const withoutOptIn = { ...root!.props };
+      delete withoutOptIn.itemSizing;
+      expect(await observedPolicy(ShadcnRoot, withoutOptIn)).toBe('intrinsic');
+    }
+  );
+
   it('authors only explicit Root sizing while retaining the existing positioning and anatomy', () => {
     assertDemoSpec(demo);
     expect(part('shadcn-select-root').props?.itemSizing).toBe('match-trigger');

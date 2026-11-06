@@ -13,7 +13,8 @@ it('selects native Rhea Button and Select recipes without redefining a library d
     variant: 'secondary',
     size: 'icon',
   });
-  expect(headerSelectControlProps()).toMatchObject({
+  expect(headerSelectControlProps('shadcn')).toMatchObject({
+    itemSizing: 'match-trigger',
     shadcnStyleProfile: 'rhea',
     triggerAppearance: 'default',
     compactTriggerAppearance: 'default',
@@ -21,6 +22,7 @@ it('selects native Rhea Button and Select recipes without redefining a library d
     wrapValue: true,
     minHeight: 'var(--site-control-height, 2.75rem)',
   });
+  expect(headerSelectControlProps('brutalist').itemSizing).toBe('intrinsic');
   expect(headerButtonProps('brutalist')).toEqual({ variant: 'surface', size: 'icon' });
 });
 it('uses public ghost feedback for navigation, not text-link underline', () => {

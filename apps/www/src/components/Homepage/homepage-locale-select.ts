@@ -1,4 +1,8 @@
-import { collectPrototypeIds, type DemoNode, type DemoSpec } from '../PrototypePreviewer/demo-types';
+import {
+  collectPrototypeIds,
+  type DemoNode,
+  type DemoSpec,
+} from '../PrototypePreviewer/demo-types';
 import { resolveProjectionSelectParts } from '../PrototypePreviewer/projection-families';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import type { SiteLibraryFamily } from '../site-library-family';
@@ -52,7 +56,7 @@ export function createHomepageLocaleSelect(
   isActive: () => boolean
 ): { demo: DemoSpec; prototypeIds: string[] } {
   const parts = resolveProjectionSelectParts(family);
-  const control = headerSelectControlProps();
+  const control = headerSelectControlProps(family);
   const proto = (
     prototypeId: string,
     children: (DemoNode | string)[] = [],
@@ -105,6 +109,7 @@ export function createHomepageLocaleSelect(
     {
       value: locale.value,
       closeOnSelect: true,
+      itemSizing: control.itemSizing,
       ...(family === 'shadcn' ? { styleProfile: control.shadcnStyleProfile } : {}),
     },
     'home-locale-root'
