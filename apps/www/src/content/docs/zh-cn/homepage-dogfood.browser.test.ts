@@ -587,6 +587,14 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
     }
   }, 180_000);
   it('uses real family Contents Buttons through all four Docs runtimes with keyboard and exact-source visual evidence', async () => {
+    type CloseObservation = {
+      initialMarker: string | null;
+      events: (
+        | { kind: 'home-inserted'; siblingMatches: boolean }
+        | { kind: 'marker-change'; oldValue: string | null }
+      )[];
+    };
+    const closeObservations: unknown[] = [];
     const directory = path.join(
       process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
         path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
@@ -615,6 +623,11 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         ])
       ),
     };
+    const saveCloseEvidence = () =>
+      writeFile(
+        path.join(directory, 'normal-close-mutations.json'),
+        JSON.stringify({ source, observations: closeObservations }, null, 2)
+      );
     for (const family of ['shadcn', 'brutalist'] as const) {
       const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
@@ -668,6 +681,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         await page.evaluate(() =>
           Object.assign(window, {
             __contentsOriginalTree: document.querySelector('nav.docs-sidebar'),
+            __contentsOriginalParent: document.querySelector('nav.docs-sidebar')?.parentNode,
+            __contentsOriginalNextSibling: document.querySelector('nav.docs-sidebar')?.nextSibling,
             __contentsOriginalDetails: [...document.querySelectorAll('nav.docs-sidebar details')],
             __contentsOriginalCurrent: document.querySelector(
               'nav.docs-sidebar [aria-current="page"]'
@@ -946,15 +961,105 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               expect(metrics.treePosition).toBe('static');
               expect(metrics.tree.width).toBeGreaterThan(120);
             }
+            await page.evaluate(() => {
+              const state = window as typeof window & {
+                __contentsOriginalTree?: Element;
+                __contentsOriginalParent?: Node | null;
+                __contentsOriginalNextSibling?: Node | null;
+                __contentsTakeCloseObservation?: () => CloseObservation;
+              };
+              const tree = state.__contentsOriginalTree!;
+              const home = state.__contentsOriginalParent!;
+              const observation: CloseObservation = {
+                initialMarker: tree.getAttribute('data-site-contents-dialog-tree'),
+                events: [],
+              };
+              const collect = (records: MutationRecord[]) => {
+                for (const record of records) {
+                  if (
+                    record.type === 'childList' &&
+                    record.target === home &&
+                    [...record.addedNodes].includes(tree)
+                  )
+                    observation.events.push({
+                      kind: 'home-inserted',
+                      siblingMatches: record.nextSibling === state.__contentsOriginalNextSibling,
+                    });
+                  if (record.type === 'attributes' && record.target === tree)
+                    observation.events.push({ kind: 'marker-change', oldValue: record.oldValue });
+                }
+              };
+              const observer = new MutationObserver(collect);
+              observer.observe(home, { childList: true });
+              observer.observe(tree, {
+                attributes: true,
+                attributeFilter: ['data-site-contents-dialog-tree'],
+                attributeOldValue: true,
+              });
+              state.__contentsTakeCloseObservation = () => {
+                collect(observer.takeRecords());
+                observer.disconnect();
+                delete state.__contentsTakeCloseObservation;
+                return observation;
+              };
+            });
             await page.keyboard.press('Escape');
+            const closeDeadline = performance.now() + 1000;
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('false');
             expect(await command.evaluate((element) => document.activeElement === element)).toBe(
               true
             );
+            // The website retains its native tree through the public leave barrier.
+            // Lease completion shares the original close budget, without a fixed sleep.
+            const remainingCloseMs = closeDeadline - performance.now();
+            expect(remainingCloseMs).toBeGreaterThan(0);
+            await expect
+              .poll(
+                () =>
+                  page.evaluate(() => {
+                    const state = window as typeof window & { __contentsOriginalTree?: Element };
+                    const tree = state.__contentsOriginalTree;
+                    return (
+                      !!tree?.isConnected &&
+                      tree === document.querySelector('nav.docs-sidebar') &&
+                      !tree.hasAttribute('data-site-contents-dialog-tree')
+                    );
+                  }),
+                { timeout: remainingCloseMs }
+              )
+              .toBe(true);
+            const closeObservation = await page.evaluate(() => {
+              const state = window as typeof window & {
+                __contentsTakeCloseObservation?: () => CloseObservation;
+              };
+              return state.__contentsTakeCloseObservation!();
+            });
+            closeObservations.push({ family, runtime, action, observation: closeObservation });
             expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
             expect(
               await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
             ).toBeNull();
+            expect(
+              await page.evaluate(() => {
+                const state = window as typeof window & {
+                  __contentsOriginalTree?: Element;
+                  __contentsOriginalParent?: Node | null;
+                  __contentsOriginalNextSibling?: Node | null;
+                };
+                const tree = state.__contentsOriginalTree;
+                return (
+                  !!tree &&
+                  tree.parentNode === state.__contentsOriginalParent &&
+                  tree.nextSibling === state.__contentsOriginalNextSibling
+                );
+              })
+            ).toBe(true);
+            expect(closeObservation.initialMarker).not.toBeNull();
+            expect(closeObservation.events).toEqual([
+              { kind: 'home-inserted', siblingMatches: true },
+              { kind: 'marker-change', oldValue: closeObservation.initialMarker },
+            ]);
+            expect(performance.now()).toBeLessThanOrEqual(closeDeadline);
           }
           // Real keyboard navigation selects the focus-visible state for the capture.
           await page.keyboard.press('Tab');
@@ -999,6 +1104,14 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             JSON.stringify({ ...record, screenshotComplete: true }, null, 2)
           );
         }
+        await saveCloseEvidence();
+      } catch (originalError) {
+        try {
+          await saveCloseEvidence();
+        } catch (evidenceError) {
+          console.error('[Contents close mutation evidence]', evidenceError);
+        }
+        throw originalError;
       } finally {
         await context.close();
       }

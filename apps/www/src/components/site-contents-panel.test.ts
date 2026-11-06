@@ -334,6 +334,41 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     // This proves app lease sequencing only, not native FocusScope behavior.
   });
 
+  it('retains the same marked lease when reopened before the previous leave completes', async () => {
+    const { tree, home, main, command } = fixture();
+    await publish();
+    navigation!.toggle();
+    const slot = tree.parentElement;
+    rendered.holdLeave = true;
+    navigation!.close();
+    await settle();
+    expect(tree.parentElement).toBe(slot);
+    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+
+    navigation!.toggle();
+    await settle();
+    // The synthetic public host ignores a stale leave finish while open.
+    // This is consumer lease coverage, not native Transition cancellation.
+    rendered.finishes[0]!();
+    await settle();
+    expect(command.getAttribute('aria-expanded')).toBe('true');
+    expect(tree.isConnected).toBe(true);
+    expect(tree.parentElement).toBe(slot);
+    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+    expect(document.querySelector('nav.docs-sidebar')).toBe(tree);
+    expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
+    expect(rendered.order).toEqual(['public-close-call-exited']);
+
+    navigation!.close();
+    await settle();
+    expect(tree.parentElement).toBe(slot);
+    rendered.finishes[0]!();
+    await settle();
+    expect(tree.parentElement).toBe(home);
+    expect(tree.nextSibling).toBe(main);
+    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(false);
+  });
+
   it('fails preparation without public facts without hiding or borrowing the only native tree', async () => {
     const { tree, home } = fixture();
     rendered.missingFacts = true;
