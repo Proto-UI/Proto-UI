@@ -581,11 +581,11 @@ describe('neutral target geometry host', () => {
         lease.update({ ...f.connection });
         expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
         expect(f.frame.style[edge]).toBe('10px');
-        expect(f.frame.style.minWidth).toBe(direction === 'ltr' ? '238px' : '254px');
+        expect(f.frame.style.minWidth).toBe('238px');
         width = 600;
         referenceLeft = 180.25;
         lease.requestUpdate();
-        expect(f.frame.style[edge]).toBe(direction === 'ltr' ? '180.25px' : '165.75px');
+        expect(f.frame.style[edge]).toBe(direction === 'ltr' ? '180.25px' : '181.75px');
         expect(f.onAlignment).not.toHaveBeenCalledWith({
           status: 'unavailable',
           reason: 'invalid-geometry',
@@ -609,7 +609,7 @@ describe('neutral target geometry host', () => {
         lease.update({ ...f.connection });
         expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
         expect(f.frame.style[direction === 'ltr' ? 'left' : 'right']).toBe(
-          direction === 'ltr' ? '185px' : `${window.innerWidth - 355}px`
+          direction === 'ltr' ? '180px' : `${window.innerWidth - 360}px`
         );
       } finally {
         lease.dispose();

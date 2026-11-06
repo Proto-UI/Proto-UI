@@ -1,11 +1,6 @@
 import type { AnatomyPartView, OverlayHandle, RunHandle } from '@proto.ui/core';
 import type { SelectContentProps } from './types';
-import {
-  SELECT_CONTEXT,
-  SELECT_FAMILY,
-  normalizeSelectRootItemSizing,
-  normalizeSelectItemSizing,
-} from './shared';
+import { SELECT_CONTEXT, SELECT_FAMILY } from './shared';
 import { resolveCurrentSelectAlignment, resolveInitialSelectAlignment } from './alignment-intent';
 
 type Run = RunHandle<SelectContentProps>;
@@ -21,7 +16,7 @@ export type SelectPresentationPhase =
 
 /** Private semantic controller; Content alone applies presence, gate and focus effects. */
 export function createSelectAlignmentController(options: {
-  overlay: Pick<OverlayHandle<SelectContentProps>, 'registerTargetAlignment' | 'registerSizeMatch'>;
+  overlay: Pick<OverlayHandle<SelectContentProps>, 'registerTargetAlignment'>;
   changed(run: Run): void;
   applied(
     run: Run,
@@ -44,7 +39,6 @@ export function createSelectAlignmentController(options: {
   let request = 0;
   let lastKey = '';
   let lastRevision = -1;
-  let lastSizing: 'intrinsic' | 'match-trigger' = 'intrinsic';
   let cycle = 0;
   let wasOpen = false;
   let initial = true;
@@ -85,7 +79,6 @@ export function createSelectAlignmentController(options: {
     const id = ++request;
     applied = null;
     options.overlay.registerTargetAlignment(null);
-    options.overlay.registerSizeMatch(null);
     return id;
   };
   let delivering = false;
@@ -131,7 +124,6 @@ export function createSelectAlignmentController(options: {
     lastObservedFocusValue = ctx.value;
     lastObservedFocusMode = mode;
     const revision = ctx.collectionRevision ?? 0;
-    const itemSizing = normalizeSelectRootItemSizing(ctx.itemSizing);
     if (
       initialFallback &&
       (mode !== 'item-aligned' ||
@@ -156,30 +148,20 @@ export function createSelectAlignmentController(options: {
       initial = true;
     }
     if (!settled) return;
-    const restoresIntrinsicLegacy =
-      diagnostic === 'select.structure.missing-size-parts' && itemSizing === 'intrinsic';
-    if (
-      phase === 'structure-invalid' &&
-      !structural &&
-      mode !== 'popper' &&
-      !restoresIntrinsicLegacy
-    )
-      return;
+    if (phase === 'structure-invalid' && !structural && mode !== 'popper') return;
     if (
       phase === 'geometry-unavailable' &&
       !(diagnostic === 'select.geometry.unsupported-size-mode' && mode === 'item-aligned') &&
       !structural &&
       !reopened &&
       revision === lastRevision &&
-      itemSizing === lastSizing &&
       mode !== 'popper'
     )
       return;
-    const key = `${cycle}:${structureVersion}:${revision}:${mode}:${itemSizing}:${ctx.value}`;
+    const key = `${cycle}:${structureVersion}:${revision}:${mode}:${ctx.value}`;
     if (key === lastKey) return;
     lastKey = key;
     lastRevision = revision;
-    lastSizing = itemSizing;
     const id = clear();
     const current = () => {
       if (disposed || id !== request) return false;
@@ -189,7 +171,6 @@ export function createSelectAlignmentController(options: {
         latest.open &&
         latest.value === ctx.value &&
         (latest.collectionRevision ?? 0) === revision &&
-        normalizeSelectRootItemSizing(latest.itemSizing) === itemSizing &&
         (run.props.get().position ?? 'popper') === mode
       );
     };
@@ -202,19 +183,11 @@ export function createSelectAlignmentController(options: {
       texts = role('item-text');
     surfacePaint = surfaces.length === 1;
     if (mode === 'popper' && (surfaces.length !== 1 || triggers.length !== 1)) {
-      notify(
-        run,
-        itemSizing === 'match-trigger' ? 'structure-invalid' : 'popper',
-        itemSizing === 'match-trigger' ? 'select.structure.missing-size-parts' : ''
-      );
+      notify(run, 'popper');
       return;
     }
     if (mode !== 'popper' && !surfaces.length && !viewports.length && !texts.length) {
-      if (itemSizing === 'match-trigger') {
-        notify(run, 'structure-invalid', 'select.structure.missing-size-parts');
-      } else {
-        notify(run, 'legacy');
-      }
+      notify(run, 'legacy');
       return;
     }
     const values = role('value');
@@ -232,7 +205,7 @@ export function createSelectAlignmentController(options: {
     const records = rows.map((row) => {
       const snapshot = (
         row.getExpose('getCollectionItem') as
-          | (() => { value: string; textValue?: unknown; disabled: boolean; itemSizing?: unknown })
+          | (() => { value: string; textValue?: unknown; disabled: boolean })
           | null
       )?.();
       const text = run.anatomy.descendantsOf(SELECT_FAMILY, row, 'item-text');
@@ -240,7 +213,6 @@ export function createSelectAlignmentController(options: {
         value: snapshot?.value ?? '',
         textValue: String(snapshot?.textValue ?? ''),
         disabled: snapshot?.disabled ?? true,
-        itemSizing: normalizeSelectItemSizing(snapshot?.itemSizing),
         row,
         text: text.length === 1 ? text[0] : null,
       };
@@ -270,38 +242,8 @@ export function createSelectAlignmentController(options: {
         applied = { id, run, row: null, fallback: null, focusShape, preserveFocus, current };
         deliver();
       };
-      const targets =
-        itemSizing === 'match-trigger'
-          ? records.filter((record) => record.itemSizing === 'inherit').map((record) => record.row)
-          : [];
-      notify(run, 'full-pending');
-      if (!current()) return;
-      if (!targets.length) {
-        // Semantic readiness only: no invented physical size result.
-        complete();
-        return;
-      }
-      options.overlay.registerSizeMatch({
-        family: SELECT_FAMILY,
-        surface: surfaces[0],
-        reference: triggers[0],
-        targets,
-        onSizeMatch(status) {
-          if (!current() || status.status === 'pending-target') return;
-          if (status.status === 'unavailable') {
-            clear();
-            notify(
-              run,
-              status.reason === 'invalid-association'
-                ? 'structure-invalid'
-                : 'geometry-unavailable',
-              `select.${status.reason === 'invalid-association' ? 'structure' : 'geometry'}.${status.reason}`
-            );
-            return;
-          }
-          complete();
-        },
-      });
+      // Semantic readiness only: a popper Select matches no physical size.
+      complete();
       return;
     }
     const retainedFallback =
@@ -357,24 +299,16 @@ export function createSelectAlignmentController(options: {
     const preserveFocus = !initial && lastAcceptedFocusShape === focusShape;
     notify(run, 'full-pending');
     if (!current()) return;
-    const sizeTargets =
-      itemSizing === 'match-trigger'
-        ? records.filter((record) => record.itemSizing === 'inherit').map((record) => record.row)
-        : [];
-    const selectedMatches = sizeTargets.includes(intent.floating.block);
     options.overlay.registerTargetAlignment({
       family: SELECT_FAMILY,
       surface: surfaces[0],
       scrollport: viewports[0],
       blockReference: intent.reference.block,
-      inlineReference: selectedMatches ? triggers[0] : intent.reference.inline,
+      inlineReference: intent.reference.inline,
       blockTarget: intent.floating.block,
-      inlineTarget: selectedMatches ? intent.floating.block : intent.floating.inline,
+      inlineTarget: intent.floating.inline,
       ...intent.contentEdges,
       constraints: intent.constraints,
-      ...(sizeTargets.length
-        ? { sizeMatch: { reference: triggers[0], targets: sizeTargets } }
-        : {}),
       onAlignment(status) {
         if (!current()) return;
         if (status.status === 'pending-target') return;

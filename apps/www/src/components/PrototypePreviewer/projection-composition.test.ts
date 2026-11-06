@@ -52,8 +52,8 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     expect(root.props).toMatchObject({
       styleProfile: 'rhea',
       value: runtimeId,
-      itemSizing: 'match-trigger',
     });
+    expect(root.props).not.toHaveProperty('itemSizing');
     expect(trigger.surfaceStyle).toMatchObject({
       minHeight: 'var(--site-control-height, 2.75rem)',
     });
@@ -1142,10 +1142,10 @@ it('keeps full-value wrapping an explicit consumer opt-in rather than changing p
   }
 });
 
-describe('Header Select sizing policy is a consumer choice', () => {
+describe('Header Select family projection', () => {
   for (const family of ['shadcn', 'brutalist'] as const)
     it.each(['wc', 'react', 'vue', 'vue2'] as const)(
-      `${family} %s passes the requested family policy to both Header Roots without item CSS`,
+      `${family} %s composes both Header Roots without a size policy or item CSS`,
       (runtimeId) => {
         const config = controls();
         const composition = createProjectionComposition({
@@ -1174,9 +1174,7 @@ describe('Header Select sizing policy is a consumer choice', () => {
           });
           const roots = parts.filter((node) => node.prototypeId === `${family}-select-root`);
           expect(roots).toHaveLength(1);
-          expect(roots[0]!.props?.itemSizing).toBe(
-            family === 'shadcn' ? 'match-trigger' : 'intrinsic'
-          );
+          expect(roots[0]!.props).not.toHaveProperty('itemSizing');
           const items = parts.filter((node) => node.prototypeId === `${family}-select-item`);
           expect(items.map((node) => node.props?.value)).toEqual(
             config[controlId].options.map((option) => option.value)
@@ -1193,31 +1191,4 @@ describe('Header Select sizing policy is a consumer choice', () => {
       }
     );
 
-  it.each([undefined, 'intrinsic', 'match-trigger'] as const)(
-    'retains the explicit %s policy without changing ordinary preview defaults',
-    (itemSizing) => {
-      const config = controls();
-      const composition = createProjectionComposition({
-        ownerId: 'preview-sizing',
-        runtimeId: 'wc',
-        projectionFamilyId: 'shadcn',
-        generation: 1,
-        componentId: 'button',
-        contentRecipe: buttonFixtureRecipe('shadcn'),
-        childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
-        controls: {
-          ...config,
-          runtime: { ...config.runtime, ...(itemSizing ? { itemSizing } : {}) },
-        },
-        controlIds: ['runtime'],
-      });
-      const root = findNode(
-        composition.demo,
-        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-root'
-      );
-      if (root.kind !== 'proto') throw new Error('Expected Select Root');
-      if (itemSizing) expect(root.props?.itemSizing).toBe(itemSizing);
-      else expect(root.props).not.toHaveProperty('itemSizing');
-    }
-  );
 });

@@ -4,8 +4,6 @@ import { asCollection } from '@proto.ui/hooks';
 import { useOpenState } from '../tools';
 import {
   createSelectRootId,
-  normalizeSelectRootItemSizing,
-  normalizeSelectItemSizing,
   SELECT_CONTEXT,
   SELECT_FAMILY,
   SELECT_GROUP_FAMILY,
@@ -41,7 +39,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   collection.configure({ family: SELECT_FAMILY });
 
   def.props.define({
-    itemSizing: { type: 'string', empty: 'fallback' },
     open: { type: 'boolean', empty: 'fallback' },
     defaultOpen: { type: 'boolean', empty: 'fallback' },
     value: { type: 'string', empty: 'fallback' },
@@ -51,7 +48,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     closeOnSelect: { type: 'boolean', empty: 'fallback' },
   });
   def.props.setDefaults({
-    itemSizing: 'intrinsic',
     defaultOpen: false,
     defaultValue: '',
     disabled: false,
@@ -62,7 +58,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   const initialContext: SelectContextValue = {
     rootId: '',
     collectionRevision: 0,
-    itemSizing: 'intrinsic',
     open: false,
     controlledOpen: false,
     value: '',
@@ -150,7 +145,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   const syncContext = (run: any) => {
     const next = {
       ...snapshot,
-      itemSizing: normalizeSelectRootItemSizing(run.props.get().itemSizing),
       controlDisabled: !!run.props.get().disabled,
       controlReadOnly: !!run.props.get().readOnly,
       disabled: !!run.props.get().disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
@@ -175,7 +169,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
       value: String(item.value ?? ''),
       textValue: String(item.textValue ?? ''),
       disabled: item.disabled === true,
-      itemSizing: normalizeSelectItemSizing(item.itemSizing),
     }));
     const nextSnapshot = JSON.stringify(records);
     if (nextSnapshot !== collectionSnapshot) {
@@ -392,9 +385,6 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     syncContext(run);
     flushControlledNotifications(run, epoch);
   });
-
-  // A sizing-only update does not participate in selection request arbitration.
-  def.props.watch(['itemSizing'], (run) => syncContext(run));
 
   open?.watch((run, event) => {
     if (event.type !== 'next') return;

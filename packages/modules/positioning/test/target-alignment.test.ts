@@ -26,8 +26,6 @@ function metrics(): TargetAlignmentMetrics {
       width: 160,
       top: 300,
       height: 40,
-      valueLeft: 112,
-      valueRight: 240,
     },
     surface: {
       left: 0,
@@ -39,7 +37,7 @@ function metrics(): TargetAlignmentMetrics {
       paddingTop: 0,
       paddingBottom: 0,
     },
-    target: { textLeft: 8, textRight: 188, offset: 150, height: 30, atStart: false, atEnd: false },
+    target: { offset: 150, height: 30, atStart: false, atEnd: false },
     scrollport: { scrollHeight: 600, offsetTop: 0, height: 600, paddingTop: 0, paddingBottom: 0 },
   };
 }
@@ -62,10 +60,10 @@ function expansion(overrides: Partial<Parameters<typeof reduceScrollExpansion>[0
 }
 
 describe('target alignment requested initial plans (fixed 2.2.6 source vectors)', () => {
-  it('keeps initial surface alignment normal, with LTR min width156/left104 and target center320', () => {
+  it('keeps initial surface alignment normal, with LTR min width160/left100 and target center320', () => {
     const p = plan();
     expect(p).toEqual({
-      inline: { edge: 'left', inset: 104, minimumSpan: 156 },
+      inline: { edge: 'left', inset: 100, minimumSpan: 160 },
       block: { pin: 'end', margin: 10, requestedSpan: 636, minimumSpan: 150, maximumSpan: 780 },
       contentAlignment: 'normal',
     });
@@ -76,11 +74,11 @@ describe('target alignment requested initial plans (fixed 2.2.6 source vectors)'
     expect(initialFrameTop + (636 - 602) + 166).toBe(354);
     expect(Object.hasOwn(p, 'requestedScroll')).toBe(false);
   });
-  it('retains logical right inset748 and min width152 for RTL', () => {
+  it('retains logical right inset740 and min width160 for RTL', () => {
     expect(plan({ ...metrics(), direction: 'rtl' }).inline).toEqual({
       edge: 'right',
-      inset: 748,
-      minimumSpan: 152,
+      inset: 740,
+      minimumSpan: 160,
     });
   });
   it('allows ending overflow for an oversized1200 surface', () => {
@@ -149,18 +147,18 @@ describe('target alignment requested initial plans (fixed 2.2.6 source vectors)'
       plan({ ...m, surface: { ...m.surface, borderTop: 1.9 } }).block.requestedSpan
     ).toBeCloseTo(636.9);
   });
-  it('accepts zero text extent and zero Value extent when their edges are measurable', () => {
+  it('aligns the popup inline start to the reference box whatever the surface width', () => {
     const m = metrics();
-    expect(
-      solveTargetAlignment(
-        {
-          ...m,
-          reference: { ...m.reference, valueRight: 112 },
-          target: { ...m.target, textRight: 8 },
-        },
-        constraints
-      ).kind
-    ).toBe('plan');
+    expect(plan({ ...m, surface: { ...m.surface, width: 80, right: 80 } }).inline).toEqual({
+      edge: 'left',
+      inset: 100,
+      minimumSpan: 160,
+    });
+    expect(plan({ ...m, surface: { ...m.surface, width: 400, right: 400 } }).inline).toEqual({
+      edge: 'left',
+      inset: 100,
+      minimumSpan: 160,
+    });
   });
   it('preserves tiny positive viewport min>max and finite offscreen plans', () => {
     const m = metrics();

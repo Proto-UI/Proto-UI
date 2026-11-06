@@ -25,7 +25,6 @@ export default withShadcnRheaDemo({
   root: {
     kind: 'proto',
     prototypeId: 'shadcn-select-root',
-    props: { itemSizing: 'match-trigger' },
     children: [
       {
         kind: 'proto',
@@ -108,17 +107,17 @@ export default withShadcnRheaDemo({
                           },
                         ],
                       },
-                    ],
-                  },
-                  {
-                    kind: 'proto',
-                    prototypeId: 'shadcn-select-item',
-                    props: { value: 'solid', textValue: 'Solid', disabled: true },
-                    children: [
                       {
                         kind: 'proto',
-                        prototypeId: 'shadcn-select-item-text',
-                        children: ['Solid (Soon)'],
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'solid', textValue: 'Solid', disabled: true },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['Solid (Soon)'],
+                          },
+                        ],
                       },
                     ],
                   },
