@@ -135,4 +135,45 @@ describe('Tabs actual DemoSpec registration', () => {
       });
     }
   }
+
+  const SHADCN_PRESET_DEMOS = [
+    { id: 'demo-shadcn-tabs-preset-nova', styleProfile: 'nova' },
+    { id: 'demo-shadcn-tabs-preset-rhea', styleProfile: 'rhea' },
+    { id: 'demo-shadcn-tabs-preset-new-york-v4', styleProfile: 'new-york-v4' },
+  ] as const;
+
+  for (const { id, styleProfile } of SHADCN_PRESET_DEMOS) {
+    it(`${id} loads only real shadcn tabs atoms with style scope`, async () => {
+      const demo = await loadDemo(id);
+      expect(() => assertDemoSpec(demo)).not.toThrow();
+      const ids = [...new Set(prototypes(demo.root))].sort();
+      expect(ids).toEqual([
+        'shadcn-style-scope',
+        'shadcn-tabs-content',
+        'shadcn-tabs-indicator',
+        'shadcn-tabs-list',
+        'shadcn-tabs-root',
+        'shadcn-tabs-trigger',
+      ]);
+      for (const atomId of ids) {
+        await loadPrototype(atomId);
+        expect(getPrototype(atomId)?.name).toBe(atomId);
+      }
+    }, 30000);
+
+    for (const locale of ['en', 'zh-cn'] as const) {
+      it(`${locale}/shadcn exposes ${id} with declared runtime`, () => {
+        const source = readFileSync(
+          `apps/www/src/content/docs/${locale}/ui-libraries/shadcn/tabs.mdx`,
+          'utf8'
+        );
+        expect(source).toContain(`demoId="${id}"`);
+        expect(source).toContain('initialRuntime="wc"');
+        expect(source).toContain("runtimes={['wc']}");
+        expect(source).toContain("runtimes={['react']}");
+        expect(source).toContain("runtimes={['vue']}");
+        expect(source).toContain("runtimes={['vue2']}");
+      });
+    }
+  }
 });

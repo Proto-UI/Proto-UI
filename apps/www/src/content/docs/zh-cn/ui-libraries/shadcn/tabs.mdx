@@ -61,6 +61,150 @@ import { getCode } from '@/utils/conversionUtils';
 
 <AdapterPanelScript />
 
+## Style Profile 预设展示
+
+上游 Shadcn Registry 为 Tabs 定义了多个 style profile（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`、`new-york-v4`）。当前仅 `nova`、`rhea`、`new-york-v4` 完成 bounded text-default 投影（见 `internal/fixtures/shadcn-tabs-style/coverage.json`），其余 profile 尚未支持，会在运行时拒绝。
+
+以下三个示例使用**完全相同的 children、defaultValue 和 disabled 状态**，仅切换 `styleProfile`，以证明预设切换不会重置 value、focus 或 children。每个示例独立渲染，不共享运行时实例。
+
+### Nova
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-nova"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-nova', codeMap)}
+  />
+</div>
+
+### Rhea（当前默认展示）
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-rhea"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-rhea', codeMap)}
+  />
+</div>
+
+### New York v4
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    hasCode={true}
+    code={getCode('wc', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    hasCode={true}
+    code={getCode('react', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    hasCode={true}
+    code={getCode('vue', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-shadcn-tabs-preset-new-york-v4"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    hasCode={true}
+    code={getCode('vue2', 'demo-shadcn-tabs-preset-new-york-v4', codeMap)}
+  />
+</div>
+
 ## Content mount 策略
 
 `TabsContent` 默认采用 lazy L1 view：
