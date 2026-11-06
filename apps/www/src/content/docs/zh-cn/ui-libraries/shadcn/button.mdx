@@ -1,430 +1,140 @@
 ---
-title: Button
+title: 'Button'
+desp: '原型：Button'
+description: '通过 Proto UI 适配器运行的 Shadcn 风格按钮。'
 ---
 
-import ApiPropsTable from '@/components/ApiPropsTable.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
 import { getCode } from '@/utils/conversionUtils';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+export const exampleFiles = (id) => ({
+  wc: [{ name: 'button.html', lang: 'html', code: getCode('wc', id, codeMap) }],
+  react: [{ name: 'button.tsx', lang: 'tsx', code: getCode('react', id, codeMap) }],
+  vue: [{ name: 'button.vue', lang: 'vue', code: getCode('vue', id, codeMap) }],
+  vue2: [{ name: 'button.vue', lang: 'vue', code: getCode('vue2', id, codeMap) }],
+});
 
-<div data-adapter-panel="wc">
+按钮用于触发操作。同一个原型可以在所有受支持的 Web 宿主中运行；使用运行时选择器切换实现，交互契约不变。
 
 <PrototypePreviewer
-    demoId="demo-button-variants"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-variants', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-variants"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-variants', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-variants"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-variants', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-variants"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-variants', codeMap)}
-  />
-</div>
+  demoId="demo-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
 
 ## 安装
 
-<div data-adapter-panel="wc">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-button" manager="npm" />
-</div>
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-button" manager="npm" />
 
-<div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add react shadcn-button" manager="npm" />
-</div>
+把 `wc` 换成 `react`、`vue` 或 `vue2`，生成对应宿主的 facade。
 
-<div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add vue shadcn-button" manager="npm" />
-</div>
+## 示例
 
-## 用法
+### 默认
 
-### default 默认
+<PrototypePreviewer
+  demoId="demo-button-default"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="默认按钮代码" files={exampleFiles('demo-button-default')} />
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-default"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-default', codeMap)}
-  />
-</div>
+### 次要
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-default"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-default', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-secondary"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="次要按钮代码" files={exampleFiles('demo-button-secondary')} />
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-default"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-default', codeMap)}
-  />
-</div>
+### 描边
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-default"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-default', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="描边按钮代码" files={exampleFiles('demo-button-outline')} />
 
-### secondary 次要
+### 幽灵
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-secondary"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-secondary', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-ghost"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="幽灵按钮代码" files={exampleFiles('demo-button-ghost')} />
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-secondary"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-secondary', codeMap)}
-  />
-</div>
+### 危险操作
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-secondary"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-secondary', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="危险按钮代码" files={exampleFiles('demo-button-destructive')} />
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-secondary"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-secondary', codeMap)}
-  />
-</div>
+### 尺寸
 
-### outline 轮廓
+可以使用 `sm`、`default`、`lg`、`icon` 或扩展的 `icon-compact`。`icon-compact` 固定为 1.75rem 正方形，启用 `wrap` 后也不会改变。
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-outline"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-outline', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="按钮尺寸代码" files={exampleFiles('demo-button-sizes')} />
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-outline"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-outline', codeMap)}
-  />
-</div>
+### 禁用
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-outline"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-outline', codeMap)}
-  />
-</div>
+禁用按钮会抑制激活，并在所有宿主中保留一致的禁用语义。
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-outline"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-outline', codeMap)}
-  />
-</div>
+<PrototypePreviewer
+  demoId="demo-button-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="禁用按钮代码" files={exampleFiles('demo-button-disabled')} />
 
-### ghost 虚化（Rhea）
-
-此常规示例显式选择 `styleProfile="rhea"`，使用 Rhea 的 muted 配方。旧版 New York 的 accent hover 仍由显式 legacy 工厂和独立回归覆盖，不再作为页面的默认展示。
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-ghost"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-ghost', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-ghost"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-ghost', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-ghost"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-ghost', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-ghost"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-ghost', codeMap)}
-  />
-</div>
-
-### destructive 危险
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-destructive"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-destructive', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-destructive"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-destructive', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-destructive"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-destructive', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-destructive"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-destructive', codeMap)}
-  />
-</div>
-
-### size 尺寸
-
-`icon-compact` 是 Proto UI 的紧凑图标扩展，使用 1.75rem 正方形，`wrap` 不改变其尺寸。它映射上游 Blocks 工具栏的 `size-7` 用法，不等同于上游 2rem 的 `icon-sm`；其余尺寸与默认值不变。
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-sizes"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-sizes', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-sizes"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-sizes', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-sizes"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-sizes', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-sizes"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-sizes', codeMap)}
-  />
-</div>
-
-### disabled 禁用
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-button-disabled"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={getCode('wc', 'demo-button-disabled', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-disabled"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={getCode('react', 'demo-button-disabled', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-disabled"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={getCode('vue', 'demo-button-disabled', codeMap)}
-  />
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-button-disabled"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={getCode('vue2', 'demo-button-disabled', codeMap)}
-  />
-</div>
-
-<AdapterPanelScript />
-
-## API 参考
+## API
 
 <ApiPropsTable
-  headers={{ name: '字段', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     {
       name: 'variant',
       type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
       default: 'default',
     },
-    {
-      name: 'size',
-      type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'",
-      default: 'default',
-    },
-    {
-      name: 'disabled',
-      type: 'boolean',
-      default: 'false',
-    },
+    { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'", default: 'default' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'wrap', type: 'boolean', default: 'false' },
   ]}
 />
 
-## 参考依据
+## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
