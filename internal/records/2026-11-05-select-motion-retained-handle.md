@@ -16,11 +16,11 @@ Authority: `internal/agent-operations/testing-method.md` requires discriminating
 
 The fixed three-file candidate ran in a cleared, credential-free environment with inherited syscall-level network denial and the existing 105 hash-bound packages. Node 24.22.1; dependency versions, commands, case identities, every failure and per-phase raw-file hashes are retained in the linked result record. No dependency was installed. One bounded execution slot was used; each phase had a 120-second limit and none timed out.
 
-| Subject | Collected | Actual unit result | Exit |
-| --- | ---: | ---: | ---: |
-| Exact baseline | 27 | 27 passed, 0 failed | 0 |
-| Exact candidate | 30 | 30 passed, 0 failed | 0 |
-| Candidate with only `return handle` removed | 30 | 26 passed, 4 failed | 1 |
+| Subject                                     | Collected |  Actual unit result | Exit |
+| ------------------------------------------- | --------: | ------------------: | ---: |
+| Exact baseline                              |        27 | 27 passed, 0 failed |    0 |
+| Exact candidate                             |        30 | 30 passed, 0 failed |    0 |
+| Candidate with only `return handle` removed |        30 | 26 passed, 4 failed |    1 |
 
 All three have zero skipped/pending/todo cases. Baseline and candidate scoped strict TypeScript checks both exited 0. The program uses ES2024, ES2022/Bundler, strict/noEmit and skipLibCheck; it includes the three files and their imports, not the whole workspace. Browser harness/server-readiness are type inputs only. Baseline and candidate three-file read-only Prettier checks both exited 0. All ten phase source-before/source-after comparisons and 105-package checks passed; frozen inputs remained unchanged after completion.
 
@@ -71,3 +71,13 @@ Agent's sanitized request paraphrase: advance the maintainer-requested Select re
 Evidence disposition: complete for the listed isolated controls, partial for browser integration. There is no product UI change or new screenshot to attach. The measured internal state/identity sequence above is the relevant logic evidence. Native captures remain explicit work, not replaced by old images.
 
 The preparation manifest and run plan remain historical pre-execution snapshots locally. The 11:07 UTC actual-result record supersedes their then-pending execution status without rewriting history.
+
+## 2026-11-06 carrier prerequisite correction
+
+Head `8a631b2e7a1f08b81590932f321aa44279bf8286` ran the original eight cases in [42195223357](https://github.com/Proto-UI/Proto-UI/actions/runs/42195223357): two passed and six failed. The separator margin repair cleared both Vue horizontal-overflow failures. The independent main baseline `0ba436431c875b848548504d5d96488158b80902` in [42196224085](https://github.com/Proto-UI/Proto-UI/actions/runs/42196224085) retained all eight failures. These failures remain part of the evidence; counts alone do not identify their causes.
+
+A local real-browser probe attached Playwright to the owned Chromium, used fresh contexts, the actual website and the same `Locator.press` operation. Diagnostic messages were added only to the in-memory sampler's existing rejection branches. React and Vue2 each returned `invalid-owner` before their first sample: the captured Trigger had `data-projection-runtime="wc"` and was disconnected when the requested runtime committed. The earlier inference that four options had not mounted was incorrect. The toolbar's ready scope was insufficient evidence that the demo had committed. The carrier now uses the existing `selectRuntime` helper, which checks the public controller, materialized content and actual framework root.
+
+The same tight keyboard sequence reproduced WC and Vue2 cancellation locally. Their Trigger box-shadow transition starts when the opening key establishes keyboard modality, then reverses as focus moves into the options. Earlier separated browser-tool calls left enough time to hide this sequence; their successful traces did not disprove the failure. A native Tab into the closed Trigger establishes the keyboard focus prerequisite. The carrier requires that focus and its existing animations finish, within 1,200 ms, before installing each open-cycle trace. No geometry is polled during preparation. Native Tab probes then settled on WC (13 samples) and Vue2 (14 samples).
+
+This correction preserves the sampler, its cancellation/owner rejection, 1,200 ms/96-frame bounds, early samples, two terminal frames and all existing geometry, focus, selection, disabled, reopen and narrow assertions. It measures opening from established keyboard focus; it does not claim acceptance of an immediate focus-and-open sequence, first-visible compositor timing, RTL/text scaling, compiled output or assistive technology. The local attached-browser probes do not prove normal-sandbox launch. Final-source execution of the complete eight-case hosted carrier remains required.

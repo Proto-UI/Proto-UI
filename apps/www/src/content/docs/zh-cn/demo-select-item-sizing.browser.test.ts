@@ -13,9 +13,9 @@ import {
 } from './demo-select-item-sizing-motion';
 import {
   RUNTIMES,
-  choosePreviewRuntime,
   chromeExecutable,
   openRoute,
+  selectRuntime,
   startServer,
   stopServer,
 } from './browser-harness';
@@ -207,22 +207,15 @@ function assertGeometry(value: Facts, runtime: string) {
   expect(value.items[3].disabled).toBe('true');
 }
 async function ready(previewer: Locator, runtime: (typeof RUNTIMES)[number]) {
-  await choosePreviewRuntime(previewer.page(), previewer, runtime);
-  await expect
-    .poll(() =>
-      previewer
-        .locator('[data-projection-scope]')
-        .evaluateAll(
-          (nodes, selected) =>
-            nodes.some(
-              (node) =>
-                node.getAttribute('data-projection-state') === 'ready' &&
-                node.getAttribute('data-projection-runtime') === selected
-            ),
-          runtime
-        )
-    )
-    .toBe(true);
+  // A toolbar scope can publish the new selection while the previous demo is
+  // still mounted. Observe the controller's commit and the actual demo root.
+  await selectRuntime(
+    previewer.page(),
+    previewer,
+    runtime,
+    '[role="combobox"][aria-label="Adapter selector"]',
+    1
+  );
 }
 
 for (const locale of ['en', 'zh-cn'])
@@ -238,6 +231,24 @@ for (const locale of ['en', 'zh-cn'])
         const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
         const startMotion = async (trigger: Locator) => {
           if (activeMotion.handle) throw new Error('Previous motion trace was not released');
+          // Begin the open-cycle trace from an established keyboard focus state.
+          // Otherwise the opening key also changes input modality, starts the
+          // focus ring and immediately reverses it as focus moves to an option.
+          await expect
+            .poll(
+              () =>
+                trigger.evaluate(
+                  (node) =>
+                    node.ownerDocument.activeElement === node &&
+                    node
+                      .getAnimations()
+                      .every(
+                        (animation) => !animation.pending && animation.playState === 'finished'
+                      )
+                ),
+              { timeout: 1200 }
+            )
+            .toBe(true);
           activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace);
         };
         const finishMotion = async (phase: string) => {
@@ -261,6 +272,7 @@ for (const locale of ['en', 'zh-cn'])
             exact: true,
           });
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+          await page.keyboard.press('Tab');
           await startMotion(trigger);
           await trigger.press('ArrowDown');
           await expect
