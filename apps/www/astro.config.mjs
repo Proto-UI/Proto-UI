@@ -1195,6 +1195,11 @@ export default defineConfig({
                   translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
                   slug: 'ui-libraries/brutalist/components/tooltip',
                 },
+                {
+                  label: 'Transition (Draft)',
+                  translations: { en: 'Transition (Draft)', 'zh-CN': 'Transition（草案）' },
+                  slug: 'ui-libraries/brutalist/components/transition',
+                },
               ],
             },
             {
