@@ -3,6 +3,8 @@ type: test
 title: Brutalist typed depth and motion category grammar tests
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft coverage for one family's typed depth and motion grammar. The cases name the category expectations they exercise, but a passing source-level or unit-level run is not native raster, portal compositing or public design-contract acceptance; no lifecycle promotion is claimed by this entity.
 summary: >-
   Covers the typed depth/motion categories and finite exceptions of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 against the actual Brutalist prototypes in Light and Dark, including the no-shadow passive/loading/editable/scroll categories, flat selection and binary capsule controls, and the raised panel exception.
 

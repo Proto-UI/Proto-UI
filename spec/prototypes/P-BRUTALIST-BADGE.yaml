@@ -28,7 +28,7 @@ criteria:
       zh-CN: >-
         每个 tone 保持 5px rounded-base 圆角、2px 黑边与 font-sans font-medium text-xs（12px/16px），保留作者大小写，无硬阴影；tone 色对与 passive 语义不变。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 passive label，它不拥有 hover 或 press motion。
     dependsOn:
-      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+      decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 
 
 sources:
@@ -45,7 +45,7 @@ dependsOn:
       C-FEEDBACK-STYLE-0003,
       C-RULE-INTENT-FEEDBACK-STYLE-0001,
     ]
-  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+  decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 revisions:
   - version: 0.3.0-alpha.1
     change: revised

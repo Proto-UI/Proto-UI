@@ -3,6 +3,8 @@ type: decision
 title: Brutalist depth and motion are a typed category grammar, not a strict universal invariant
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft typed grammar for one family category system. It admits the finite category catalog and its exception list as draft authority for the Brutalist family projection; public design-contract pages and per-category native or browser evidence are still required before any lifecycle promotion, and no established surface behavior is withdrawn by this decision.
 summary: >-
   The Brutalist family resolves the rest-depth and interaction-motion drift by admitting a finite typed category catalog. Each category owns explicit rest depth, hover depth, and press depth; component P entities name their category and keep only the listed exceptions. The unqualified family table is replaced by category-qualified projection.
 statement:
