@@ -1,0 +1,23 @@
+---
+title: 'Table'
+description: '草稿结构化表格部件，带上游 shadcn table 外观。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+草稿结构化表格部件，带上游 shadcn table 外观。底层 Base 协议见 [Table（Draft）](/zh-cn/ui-libraries/base/table/)。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+该 family 保留精确的 Base Table anatomy：Root 拥有独立的 Table 域，Caption 提供作者意图说明，Row 建立一个有序逻辑行，HeaderCell 声明 `headerKey` 与 `headerKind: 'column' | 'row'`，Cell 携带有序的 `headers` key 集合。`rowSpan` 与 `columnSpan` 为正整数，默认 1。shadcn 层只添加上游外观——折叠边框、单元格内边距、表头强调与弱化的 footer——外加 Row 上两个纯视觉 prop：`section: 'header' | 'body' | 'footer'`（默认 `body`）与 `lastInSection`（默认 `false`）驱动边框规则。两个 prop 都不声明 row-group，也不改变可访问性；外部滚动容器仍由消费方提供。Table 本身不添加排序、选择、编辑、数据操作或键盘网格行为。
+
+组成: Root, Caption, Row, HeaderCell, Cell.
+
+草稿源码。真实辅助技术证据、响应式/视觉验收以及完整的 native/GPUI、编译器与独立验收仍未完成。

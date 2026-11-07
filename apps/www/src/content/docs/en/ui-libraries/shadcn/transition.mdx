@@ -1,0 +1,23 @@
+---
+title: 'Transition'
+description: 'Transparent phase-machine presence over authored content, with no invented motion.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
+Transparent phase-machine presence over authored content, with no invented motion.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-transition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The projection is transparent: the authored slot's presence is governed by the exact Base phase machine (`closed → preparing → entering → entered → leaving`), phases are observable through the `transitionState` expose and `isPresent`, and `beforeEnter`/`afterEnter`/`beforeLeave`/`afterLeave` events mark the boundaries. `enter`/`leave`/`complete` commands (also reachable as `controls`) drive the machine; `complete` advances `entering → entered` or `leaving → closed`. `open` (controlled) or `defaultOpen: false` starts the presence; `appear` (default `false`) enables an entry on first mount; `enterDuration` (default 300), `leaveDuration` (default 200) and `interrupt: 'reverse' | 'wait' | 'immediate'` (default `reverse`) shape the attempt. The projection adds no host animation engine or Shadcn motion paint — visual motion stays an application concern.
+
+Parts: Transition.
+
+Draft source. Full real transition traces, reduced-motion behavior and complete native/GPUI, compiler and independent acceptance evidence remain open.

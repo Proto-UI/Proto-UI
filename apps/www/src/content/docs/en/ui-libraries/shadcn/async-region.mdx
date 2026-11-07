@@ -1,0 +1,23 @@
+---
+title: 'Async Region'
+description: 'Governed busy semantics over authored content, without invented loading UI.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
+Governed busy semantics over authored content, without invented loading UI.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The region owns one `busy` prop (default `false`) that projects `aria-busy` on the region element and exposes the same fact through `getExposes().busy`. Busy is a semantic fact, not a spinner: the projection adds no role, accessible name, loading timers, replacement state machine, announcement channel, or focus path. Authored descendants stay mounted and keep focus across prop-only transitions. For announcements, compose with Live Region at the application layer.
+
+Parts: Root.
+
+Draft source. Real assistive-technology behavior and complete native/GPUI, compiler and independent acceptance evidence remain open.

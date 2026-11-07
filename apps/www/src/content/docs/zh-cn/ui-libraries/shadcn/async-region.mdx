@@ -1,0 +1,23 @@
+---
+title: 'Async Region'
+description: '在作者内容之上投射受治忙碌语义，不发明加载 UI。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+在作者内容之上投射受治忙碌语义，不发明加载 UI。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+区域只拥有一个 `busy` prop（默认 `false`），在区域元素上投射 `aria-busy`，并通过 `getExposes().busy` 暴露同一事实。忙碌是语义事实，不是 spinner：该投射不添加 role、accessible name、加载计时器、替代状态机、公告通道或焦点路径。仅在 prop 变化时，作者后代保持挂载并保留焦点。需要公告时，在应用层与 Live Region 组合使用。
+
+组成: Root.
+
+草稿源码。真实辅助技术行为以及完整的 native/GPUI、编译器与独立验收证据仍未完成。

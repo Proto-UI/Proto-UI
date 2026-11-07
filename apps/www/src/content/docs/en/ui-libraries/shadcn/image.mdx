@@ -1,0 +1,23 @@
+---
+title: 'Image'
+description: 'Host-owned image presentation with explicit accessibility and loading status.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
+Host-owned image presentation with explicit accessibility and loading status.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root declares one host-owned image target. `source` points at the resource, `a11yMode` selects `informative` (default, consumes `alternativeText`) or `decorative` (text carries the meaning), and `fit` selects `contain` (default), `cover` or `fill`. The current loading status is exposed as `loadingStatus` (`idle`, `loading`, `loaded`, `error`) and announced through the `loadingStatusChange` event with the previous and next status. The demo loads, replaces, breaks and clears a real source to make those transitions observable; the controls and log belong to the demo, not the prototype. The Web projections render one physical `<img>` per instance.
+
+Parts: Root.
+
+Draft source. Image View is neutral — this is not Shadcn Avatar and adds no image loader. Native/GPUI, compiler and complete independent acceptance evidence remain open.

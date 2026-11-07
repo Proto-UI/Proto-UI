@@ -1,3 +1,4 @@
 import { createImageDemo } from './image-demo.shared';
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 
-export default createImageDemo('shadcn');
+export default withShadcnRheaDemo(createImageDemo('shadcn'));

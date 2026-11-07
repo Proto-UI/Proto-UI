@@ -1,0 +1,23 @@
+---
+title: 'Live Region'
+description: 'Governed ARIA live-region semantics without interaction.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
+Governed ARIA live-region semantics without interaction.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The region derives `role`, `aria-live` and `aria-atomic` from two props: `politeness: 'polite'` (default) projects `role=status` with `aria-live=polite`, and `politeness: 'assertive'` projects `role=alert` with `aria-live=assertive`; `atomic` (default `true`) projects `aria-atomic`. Authored child content is the announcement payload — mutating it is how updates are delivered. The region itself declares no focus, event, command, selection, or accessible-name override channel, and the exposes surface is empty; there is no implicit queue or notification transport.
+
+Parts: Root.
+
+Draft source. Real screen-reader delivery and complete native/GPUI, compiler and independent acceptance evidence remain open.
