@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { createControlLabelRef } from '@proto.ui/core';
 import { checkboxRoot } from '../../../prototypes/base/src/checkbox';
 import { switchRoot } from '../../../prototypes/base/src/switch';
+import { radioGroupRoot, radioGroupItem } from '../../../prototypes/base/src/radio-group';
 import labelRoot from '../../../prototypes/base/src/label';
-import { createMountedVueAdapter, flushVue } from './utils/vue';
+import { createMountedVueAdapter, flushVue, VueAny } from './utils/vue';
+import { createVueAdapter } from '../src/adapt';
 function pointerClick(el: HTMLElement) {
   el.dispatchEvent(
     new PointerEvent('pointerdown', {
@@ -41,8 +43,6 @@ describe('vue explicit instance-associated Label', () => {
       });
       const label = createMountedVueAdapter(labelRoot, {
         instanceAssociations,
-        naming: true,
-        activation: true,
       });
       try {
         await flushVue();
@@ -138,3 +138,107 @@ it.each(['open', 'closed'] as const)(
     }
   }
 );
+
+it('default Radio Label forwards one valueChange/select callback and preserves controlled ownership', async () => {
+  const changes: unknown[] = [];
+  const selections: unknown[] = [];
+  const instanceAssociations = { controlLabel: createControlLabelRef() };
+  const host = document.createElement('div');
+  document.body.append(host);
+  const state = VueAny.reactive({ controlledValue: null as string | null, passive: false });
+  const adapt = createVueAdapter(VueAny);
+  const Root = adapt(radioGroupRoot);
+  const Item = adapt(radioGroupItem);
+  const Label = adapt(labelRoot);
+  const refs: Record<string, any> = {};
+  const app = VueAny.createApp({
+    setup() {
+      return () =>
+        VueAny.h('div', {}, [
+          VueAny.h(
+            Root,
+            {
+              defaultValue: 'a',
+              ...(state.controlledValue === null ? {} : { value: state.controlledValue }),
+              onValueChange: (event: unknown) => changes.push(event),
+              ref: (vm: any) => {
+                refs.group = vm;
+              },
+            },
+            () => [
+              VueAny.h(Item, {
+                value: 'a',
+                ref: (vm: any) => {
+                  refs.first = vm;
+                },
+              }),
+              VueAny.h(Item, {
+                value: 'b',
+                instanceAssociations,
+                onSelect: (event: unknown) => selections.push(event),
+                ref: (vm: any) => {
+                  refs.target = vm;
+                },
+              }),
+            ]
+          ),
+          VueAny.h(
+            Label,
+            {
+              instanceAssociations,
+              ...(state.passive ? { activation: false } : {}),
+              ref: (vm: any) => {
+                refs.label = vm;
+              },
+            },
+            () => 'Option B'
+          ),
+        ]);
+    },
+  });
+  app.mount(host);
+  const settle = async () => {
+    await flushVue();
+    await flushVue();
+  };
+  const dispose = () => app.unmount();
+  try {
+    await settle();
+    expect(refs.target.$el.getAttribute('aria-labelledby')).toBe(refs.label.$el.id);
+    pointerClick(refs.label.$el);
+    await settle();
+    expect(refs.group.getExposes().value.get()).toBe('b');
+    expect(document.activeElement).toBe(refs.target.$el);
+    expect(changes).toEqual([{ value: 'b' }]);
+    expect(selections).toEqual([{ value: 'b' }]);
+    pointerClick(refs.label.$el);
+    await settle();
+    expect(changes).toHaveLength(1);
+    expect(selections).toHaveLength(1);
+    state.controlledValue = 'a';
+    state.passive = true;
+    await settle();
+    refs.first.$el.focus();
+    pointerClick(refs.label.$el);
+    await settle();
+    expect(refs.group.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(refs.first.$el);
+    expect(changes).toHaveLength(1);
+    expect(selections).toHaveLength(1);
+    state.passive = false;
+    await settle();
+    pointerClick(refs.label.$el);
+    await settle();
+    expect(refs.group.getExposes().value.get()).toBe('a');
+    expect(document.activeElement).toBe(refs.target.$el);
+    expect(changes).toEqual([{ value: 'b' }, { value: 'b' }]);
+    expect(selections).toEqual([{ value: 'b' }, { value: 'b' }]);
+    state.controlledValue = 'b';
+    await settle();
+    expect(refs.group.getExposes().value.get()).toBe('b');
+  } finally {
+    dispose();
+    host.remove();
+    await settle();
+  }
+});

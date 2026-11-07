@@ -242,6 +242,46 @@ describe('Control Label Web intent bridge', () => {
     expect(synchronous).toBe(true);
     expect(f.activate).toHaveBeenCalledOnce();
   });
+  it('keeps a released gesture borrowable when a compliant click arrives in a later task', async () => {
+    const f = fixture();
+    f.el.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+        pointerId: 2,
+        pointerType: 'touch',
+        button: 0,
+        clientX: 10,
+        clientY: 10,
+      })
+    );
+    f.el.dispatchEvent(
+      new PointerEvent('pointerup', {
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+        pointerId: 2,
+        pointerType: 'touch',
+        button: 0,
+        clientX: 10,
+        clientY: 10,
+      })
+    );
+    // Chromium can synthesize a touch tap's click in a task after the release.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    f.el.dispatchEvent(
+      new MouseEvent('click', {
+        bubbles: true,
+        composed: true,
+        cancelable: true,
+        button: 0,
+        detail: 1,
+      })
+    );
+    await mutations();
+    expect(f.activate).toHaveBeenCalledOnce();
+  });
   it('retired and detached views cannot send retained gestures', async () => {
     const f = fixture();
     f.lease.dispose();

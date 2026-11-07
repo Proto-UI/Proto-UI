@@ -23,7 +23,7 @@ Each Item belongs to its nearest Root. Put an Indicator inside each Item whose s
 | Item | `value` (required), `disabled?` | Requests selection and derives checked/effective-disabled state. |
 | Indicator | None | Reflects the nearest Item's checked state. |
 
-Give Root a meaningful `a11yLabel` and every Item a unique non-empty `value`. Item names come from authored content or host labeling. The demo supplies visually hidden text inside each radio and adjacent visible labels; these labels and row spacing belong to the App.
+Give Root a meaningful `a11yLabel` and every Item a unique non-empty `value`. Item names come from authored content or host labeling. The demo pairs each Item with an adjacent `labelRoot` from `@proto.ui/prototypes-shadcn/label`. Both receive the same stable `InstanceAssociations.controlLabel` reference from `createControlLabelRef()`; the visible Label is the accessible name, with no hidden duplicate. Base Label activates the paired Item by default and respects Item/Group disabled state. Set `activation={false}` on Label for naming only. The group title is not an Item activation target.
 
 An uncontrolled Root accepts selection and emits `valueChange`. With `value` supplied, it emits a request while the App owns the next value prop; the projection does not manufacture an intermediate checked value. Root retains empty or unmatched values, and a selected Item may remain checked when disabled.
 

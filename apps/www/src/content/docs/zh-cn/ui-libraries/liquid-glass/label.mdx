@@ -7,16 +7,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
 Label 当前仍是 **draft**。liquid-glass 投影复用独立的 Base Label 协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
 
-<PrototypePreviewer demoId="demo-liquid-glass-label" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} />
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 此例将当前 Label 投影与真实、视觉中性的 Base 控件配对，以隔离验证关联协议。On/Off 只订阅控件公开状态，没有第二套 value，也没有替 Label 转发 click 的页面监听器。Input 与 Textarea 是实际原生编辑器；此基准不声称已验证其他设计体系的控件投影。
 
 ## 分开声明名称和激活
 
 - `naming` 默认 `true`：目标通过可访问关系引用真实渲染的 Label，不再放置重复的隐藏名称。
-- `activation` 默认 `false`：设为 `true` 后，符合条件的指针动作或可信的非指针激活请求目标已有操作。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
+- `activation` 默认 `true`：显式配对后，符合条件的指针动作或可信的非指针激活请求目标已有操作。设为 `false` 可保留命名而关闭激活；重新设为 `true` 或移除该 Prop 会恢复默认激活。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
 - Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键的输入、pointercancel 与拖拽手势不转发。
 - 仅命名的 Label 与长说明仍可复制。短操作标签在自己的原型上表达选择策略。受控示例会拒绝接受切换提案，保持关闭，这是应用的值所有权决定。
+
+升级提示：已配对但省略 `activation` 的 Label 现在默认可激活；需要保留被动命名时，请显式设为 `false`。`selection='policy'` 会抑制操作标签上的误选文字；操作标签仍需可复制时可设 `selection='text'`。未配对的 Label 不会寻找父级或附近的控件。
 
 ## 关联不进入 JSON Props
 

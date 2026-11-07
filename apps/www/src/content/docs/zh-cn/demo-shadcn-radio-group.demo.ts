@@ -11,13 +11,15 @@ function option(group: string, value: string, label: string, disabled = false): 
         prototypeId: 'shadcn-radio-group-item',
         ref: `${group}-${value}`,
         props: { value, disabled },
-        children: [
-          { kind: 'proto', prototypeId: 'shadcn-radio-group-indicator' },
-          { kind: 'box', className: 'sr-only', children: [label] },
-        ],
+        associations: { controlLabel: `${group}-${value}` },
+        children: [{ kind: 'proto', prototypeId: 'shadcn-radio-group-indicator' }],
       },
       {
-        kind: 'box',
+        kind: 'proto',
+        prototypeId: 'shadcn-label-root',
+        ref: `${group}-${value}-label`,
+        associations: { controlLabel: `${group}-${value}` },
+        // Base owns the default activation; no page-local click forwarding.
         className: disabled ? 'text-sm leading-none opacity-50' : 'text-sm leading-none',
         children: [label],
       },

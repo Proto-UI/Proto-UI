@@ -7,7 +7,7 @@ lifecycleRationale:
   en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
 summary: Naming and activation are separate; the target retains its state and action ownership.
 statement:
-  en: Base Label preserves authored content and opts into C-CONTROL-LABEL-0001 through the separately typed instance-association channel. It is independent of Checkbox, Switch, Radio and Text Control anatomy. It does not turn passive descriptions into actions.
+  en: Base Label preserves authored content and opts into C-CONTROL-LABEL-0001 through the separately typed instance-association channel. It is independent of Checkbox, Switch, Radio and Text Control anatomy. Activation defaults on for a valid association; passive naming-only labels explicitly set activation to false. Unassociated content never discovers a target by ancestry or position.
 criteria:
   - id: P-BASE-LABEL-ENTRIES
     text:
@@ -15,22 +15,16 @@ criteria:
   - id: P-BASE-LABEL-OPTIONS
     text:
       en: >-
-        JSON Props naming, activation and selection default to true, false and 'policy'. Any can change
-        independently; removal restores its default. selection is the explicit text-selection policy
-        ControlLabelSelectionPolicy: 'policy' derives the declaration from activation, while 'auto', 'text'
-        and 'none' are explicit subject overrides lowering to the bounded content-selection affordance
-        tokens. Association identity is not a Prop and must use InstanceAssociations.controlLabel.
+        JSON Props naming, activation and selection default to true, true and 'policy'. Any can change independently; removal restores its default. selection is the explicit text-selection policy ControlLabelSelectionPolicy: 'policy' derives the declaration from activation, while 'auto', 'text' and 'none' are explicit subject overrides lowering to the bounded content-selection affordance tokens. Set activation=false for a naming-only label; this retains its accessible-name relationship and host-default text selection. Association identity is not a Prop and must use InstanceAssociations.controlLabel.
+
   - id: P-BASE-LABEL-CONTENT
     text:
       en: The default slot preserves text and children, with no added role, Tab stop, keyboard action, checked value or outward value event. Long descriptions remain separate selectable content.
   - id: P-BASE-LABEL-ACTION
     text:
       en: >-
-        Only an explicitly actionable Label declares subject-local select-none under the default 'policy'
-        selection. An explicit selection Prop overrides that derivation in either direction: select-text or
-        select-auto on an actionable label, select-none on a passive label. Pointer eligibility and target
-        operation reuse follow C-CONTROL-LABEL-0001; no synthetic click, second selection state machine or
-        local value mutation is introduced.
+        An actionable Label, including the default, declares subject-local select-none under the default 'policy' selection. An explicit selection Prop overrides that derivation in either direction: select-text or select-auto on an actionable label, select-none on a passive label. Pointer eligibility and target operation reuse follow C-CONTROL-LABEL-0001; no synthetic click, second selection state machine or local value mutation is introduced.
+
 dependsOn:
   contracts:
     - C-CONTROL-LABEL-0001
@@ -44,6 +38,9 @@ sources:
   - path: packages/prototypes/base/src/label/types.ts
   - path: packages/prototypes/base/src/label/index.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Defaulted Label activation to true for explicit associations, retained activation=false as a naming-only opt-out, and kept target discovery and value ownership unchanged.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Admitted the explicit selection Prop vocabulary that makes the label text-selection policy overridable in both directions while retaining the activation-derived default.
