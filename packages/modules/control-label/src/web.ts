@@ -163,6 +163,18 @@ export function createWebControlLabelHost(
   getTarget: () => HTMLElement | null,
   subscribeTargetChange?: (listener: () => void) => () => void
 ): ControlLabelHost {
+  // One document-wide click sequence number lets a gesture receipt verify that
+  // the click it is lent to is the first click after its release, without
+  // wall-clock expiry: a touch tap's synthesized click can legally land in a
+  // later task, while a synthetic click after an intercepted native one must
+  // stay rejected.
+  const clickCounts = new WeakMap<Document, { count: number; last: MouseEvent | null }>();
+  const documentClicks = (document: Document) => {
+    let entry = clickCounts.get(document);
+    if (!entry) clickCounts.set(document, (entry = { count: 0, last: null }));
+    return entry;
+  };
+  let clicks = 0;
   return {
     attach({ kind, activation, onActivate, onViewChange }) {
       let actionable = kind === 'label' && activation;
@@ -182,11 +194,12 @@ export function createWebControlLabelHost(
         down: PointerEvent;
         up: PointerEvent | null;
         released: boolean;
+        clicksAtRelease: number;
       };
       let pending: PointerReceipt | null = null;
-      let releaseExpiry: (() => void) | null = null;
       let capturedClick: {
         event: MouseEvent;
+        clicksBefore: number;
         gesture: PointerReceipt | null;
         cancel(): void;
       } | null = null;
@@ -196,8 +209,6 @@ export function createWebControlLabelHost(
       };
       const clearPending = () => {
         pending = null;
-        releaseExpiry?.();
-        releaseExpiry = null;
       };
       const view = () => {
         const current = getTarget();
@@ -284,7 +295,14 @@ export function createWebControlLabelHost(
               down: event,
               up: null,
               released: false,
+              clicksAtRelease: 0,
             };
+          };
+          const countClick = (event: MouseEvent) => {
+            const entry = documentClicks(document);
+            if (entry.last === event) return;
+            entry.last = event;
+            entry.count += 1;
           };
           const move = (event: PointerEvent) => {
             if (
@@ -304,21 +322,18 @@ export function createWebControlLabelHost(
             if (pending) {
               pending.up = event;
               pending.released = eligible(event);
-              // Native click follows this release in its activation turn. If an
-              // earlier listener swallows it, no later task may borrow the receipt.
-              releaseExpiry?.();
-              const released = pending;
-              const timer = setTimeout(() => {
-                if (pending === released) pending = null;
-                if (releaseExpiry === cancelExpiry) releaseExpiry = null;
-              }, 0);
-              const cancelExpiry = () => clearTimeout(timer);
-              releaseExpiry = cancelExpiry;
+              pending.clicksAtRelease = documentClicks(document).count;
             }
           };
           const captureClick = (event: MouseEvent) => {
+            countClick(event);
             clearCapturedClick();
-            const receipt = { event, gesture: pending, cancel: () => {} };
+            const receipt = {
+              event,
+              clicksBefore: documentClicks(document).count,
+              gesture: pending,
+              cancel: () => {},
+            };
             clearPending();
             capturedClick = receipt;
             // Use a task checkpoint: native listener boundaries may drain
@@ -353,9 +368,12 @@ export function createWebControlLabelHost(
                 : {}),
             });
             const pointer =
-              gesture?.released &&
+              receipt !== null &&
+              gesture != null &&
+              gesture.released &&
               event.isTrusted === gesture.down.isTrusted &&
-              event.isTrusted === gesture.up?.isTrusted;
+              event.isTrusted === gesture.up?.isTrusted &&
+              receipt.clicksBefore - gesture.clicksAtRelease === 1;
             if (!pointer && !nonPointer) return;
             const root = next.getRootNode();
             // Preserve the originating user-activation turn for native editor
@@ -379,6 +397,7 @@ export function createWebControlLabelHost(
             document.addEventListener('pointermove', move, true);
             document.addEventListener('pointerup', up, true);
             document.addEventListener('pointercancel', cancel, true);
+            document.addEventListener('click', countClick, true);
             next.addEventListener('click', captureClick, true);
             next.addEventListener('click', click);
             cleanListeners = () => {
@@ -387,6 +406,7 @@ export function createWebControlLabelHost(
               document.removeEventListener('pointermove', move, true);
               document.removeEventListener('pointerup', up, true);
               document.removeEventListener('pointercancel', cancel, true);
+              document.removeEventListener('click', countClick, true);
               next.removeEventListener('click', captureClick, true);
               next.removeEventListener('click', click);
             };

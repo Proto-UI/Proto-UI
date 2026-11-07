@@ -127,6 +127,7 @@ describe('Web Component independent Control Label association', () => {
   it('requests Radio selection once through the group owner', async () => {
     const group = document.createElement('base-radio-group-root') as HTMLElement & {
       getExposes(): any;
+      update(): void;
     };
     setElementProps(group, { defaultValue: 'a' });
     const first = document.createElement('base-radio-group-item');
@@ -152,7 +153,7 @@ describe('Web Component independent Control Label association', () => {
     pointerClick(label);
     expect(changes).toEqual([{ value: 'b' }]);
     setElementProps(group, { value: 'a' });
-    (group as HTMLElement & { update(): void }).update();
+    group.update();
     setElementProps(label, { activation: false });
     (label as HTMLElement & { update(): void }).update();
     await flush();
@@ -171,7 +172,7 @@ describe('Web Component independent Control Label association', () => {
     expect(document.activeElement).toBe(second);
     expect(changes).toEqual([{ value: 'b' }, { value: 'b' }]);
     setElementProps(group, { value: 'b' });
-    (group as HTMLElement & { update(): void }).update();
+    group.update();
     await flush();
     expect(group.getExposes().value.get()).toBe('b');
   });
