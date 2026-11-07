@@ -1,0 +1,70 @@
+id: T-BRUTALIST-IMAGE-0001
+type: test
+title: Brutalist Image public API and presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-IMAGE 准则一一映射；本条目只描述当前 synthetic DOM 测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-IMAGE criteria. This entity records the current synthetic-DOM tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Image public API, the pinned framed-photo surface grammar, consumer-owned sizing, and the Base/Image View ownership of source, a11y binary, fit, generation and loadingStatus transitions against the P-BRUTALIST-IMAGE criteria.
+
+
+cases:
+  - id: T-BRUTALIST-IMAGE-0001-CASE-1
+    title: Direct entry, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-IMAGE-ENTRY
+      - P-BRUTALIST-IMAGE-BASE-INHERITANCE
+      - P-BRUTALIST-IMAGE-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-image-entry-inheritance-and-package-boundary
+  - id: T-BRUTALIST-IMAGE-0001-CASE-2
+    title: Pinned framed-photo surface with consumer-owned dimensions
+    covers:
+      - P-BRUTALIST-IMAGE-VISUAL-GRAMMAR
+    expectation: p-brutalist-image-framed-surface-grammar
+  - id: T-BRUTALIST-IMAGE-0001-CASE-3
+    title: Source, a11y binary, fit, generation and loadingStatus stay Base/Image View owned
+    covers:
+      - P-BRUTALIST-IMAGE-BASE-INHERITANCE
+      - P-BASE-IMAGE-SOURCE
+      - P-BASE-IMAGE-ALT-TEXT
+      - P-BASE-IMAGE-FIT
+      - P-BASE-IMAGE-STATUS
+    expectation: p-brutalist-image-base-image-view-ownership
+implementations:
+  - id: prototypes-brutalist-image-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/image.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-IMAGE-0001-CASE-1
+      - T-BRUTALIST-IMAGE-0001-CASE-2
+      - T-BRUTALIST-IMAGE-0001-CASE-3
+    exercises:
+      - P-BASE-IMAGE
+      - P-BRUTALIST-IMAGE
+  - id: www-brutalist-image-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-image.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-IMAGE-0001-CASE-3
+    exercises:
+      - P-BASE-IMAGE
+      - P-BRUTALIST-IMAGE
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-IMAGE
+exercises:
+  prototypes:
+    - P-BASE-IMAGE
+    - P-BRUTALIST-IMAGE
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - image

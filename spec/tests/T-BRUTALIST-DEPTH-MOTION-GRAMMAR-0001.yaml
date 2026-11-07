@@ -3,6 +3,8 @@ type: test
 title: Brutalist typed depth and motion category grammar tests
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft coverage for one family's typed depth and motion grammar. The cases name the category expectations they exercise, but a passing source-level or unit-level run is not native raster, portal compositing or public design-contract acceptance; no lifecycle promotion is claimed by this entity.
 summary: >-
   Covers the typed depth/motion categories and finite exceptions of D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 against the actual Brutalist prototypes in Light and Dark, including the no-shadow passive/loading/editable/scroll categories, flat selection and binary capsule controls, and the raised panel exception.
 
@@ -38,7 +40,12 @@ cases:
     expectation: brutalist-grammar-flat-selection-tabs-selected-and-unselected
   - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-BINARY-CAPSULE
     title: Binary capsule Switch consumes no hover visual, keeps Root shadow-free on press, and leaves travel to the Thumb
-    covers: [P-BRUTALIST-SWITCH-INTERACTION, P-BRUTALIST-SWITCH-VISUAL-GRAMMAR, P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT]
+    covers:
+      [
+        P-BRUTALIST-SWITCH-INTERACTION,
+        P-BRUTALIST-SWITCH-VISUAL-GRAMMAR,
+        P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT,
+      ]
     expectation: brutalist-grammar-binary-capsule-no-hover-thumb-travel
   - id: T-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001-CASE-TOKEN-CLOSURE
     title: Generated CLI Brutalist style-token closure still projects the governed hard-shadow vocabulary
@@ -91,4 +98,5 @@ revisions:
     change: introduced
     summary: >-
       Introduced executable coverage for every typed depth/motion category named in Issue 398, with Light/Dark passive and panel cases plus state-gated Toggle, Tabs Trigger, and Switch exception cases.
+
 tags: [test, brutalist, depth, motion, typed-grammar]

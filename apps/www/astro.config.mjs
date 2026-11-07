@@ -959,6 +959,11 @@ export default defineConfig({
                   badge: inProgressBadge,
                 },
                 {
+                  label: 'Image (Draft)',
+                  translations: { en: 'Image (Draft)', 'zh-CN': 'Image（草案）' },
+                  slug: 'ui-libraries/brutalist/components/image',
+                },
+                {
                   label: 'Input',
                   translations: { en: 'Input', 'zh-CN': 'Input' },
                   slug: 'ui-libraries/brutalist/components/input',
