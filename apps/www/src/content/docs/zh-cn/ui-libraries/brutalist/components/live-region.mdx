@@ -1,0 +1,28 @@
+---
+title: 'Live Region'
+description: '覆盖在 Base Live Region 协议之上的 Brutalist Live Region 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 只包含一个 Root。受治理的 ARIA live-region 语义均由 Base Live Region 所有：`politeness: 'polite'`（默认）投射 `role=status` 与 `aria-live=polite`，`politeness: 'assertive'` 投射 `role=alert` 与 `aria-live=assertive`；`atomic`（默认 `true`）投射 `aria-atomic`。authored 子内容即播报载荷——更新通过变更子内容送达。该区域不声明 focus、event、command、selection 或 accessible-name override 通路，exposes surface 为空，也不存在隐式队列或通知传输。
+
+Brutalist 层只拥有呈现且语义优先：它一次性消费 `asLiveRegionRoot()`，保留全部继承 owner，仅追加克制的 family 表面 `min-w-0 max-w-full text-foreground`，使载荷文本可读且有界。上游 Neo 没有对应的 live-region 组件可固定；此层不引入任何边框、阴影或交互外观。
+
+Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/live-region` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-live-region` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-live-region" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 推送一条 polite 更新；确认 polite 区域保持 `role=status` 与 `aria-live=polite`，同时 authored 载荷文本发生变化。
+2. 推送一条 assertive 更新；确认 assertive 区域在反复切换中保持 `role=alert` 与 `aria-live=assertive`。
+3. 确认两个区域均保持 `aria-atomic="true"`、不进入 tab 序，且不暴露任何 interaction 或 command 通路。
+4. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Live Region guarantee。

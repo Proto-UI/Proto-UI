@@ -120,6 +120,11 @@
       "import": "./dist/radio-group/index.js",
       "default": "./dist/radio-group/index.js"
     },
+    "./live-region": {
+      "types": "./dist/live-region/index.d.ts",
+      "import": "./dist/live-region/index.js",
+      "default": "./dist/live-region/index.js"
+    },
     "./transition": {
       "types": "./dist/transition/index.d.ts",
       "import": "./dist/transition/index.js",

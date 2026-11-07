@@ -23,6 +23,7 @@ export type ProjectionComponentId =
   | 'checkbox'
   | 'input'
   | 'radio-group'
+  | 'live-region'
   | 'badge'
   | 'image'
   | 'card'
@@ -99,6 +100,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   input: ['root'],
   checkbox: ['root', 'indicator'],
   'radio-group': ['root', 'item', 'indicator'],
+  'live-region': ['root'],
   badge: ['root'],
   image: ['root'],
   card: ['root', 'header', 'content', 'footer'],
@@ -1020,6 +1022,18 @@ const BRUTALIST_MANIFEST = {
         indicator: {
           basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
           prototypeId: 'brutalist-radio-group-indicator',
+        },
+      },
+    },
+    'live-region': {
+      baseFamilyId: 'P-BASE-LIVE-REGION',
+      recipeId: 'demo-brutalist-live-region',
+      recipePrototypeIds: ['brutalist-live-region-root', 'brutalist-button'],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-LIVE-REGION',
+          prototypeId: 'brutalist-live-region-root',
         },
       },
     },

@@ -1,0 +1,81 @@
+id: T-BRUTALIST-LIVE-REGION-0001
+type: test
+title: Brutalist Live Region public API and presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-LIVE-REGION 准则一一映射；本条目只描述当前 synthetic DOM 测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-LIVE-REGION criteria. This entity records the current synthetic DOM tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Live Region public API, single Base semantic inheritance, polite/assertive/atomic ARIA projection, restrained family ink surface, empty interaction/exposes channel, and authored payload preservation against the P-BRUTALIST-LIVE-REGION criteria.
+
+
+cases:
+  - id: T-BRUTALIST-LIVE-REGION-0001-CASE-1
+    title: Direct entries, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-LIVE-REGION-ENTRY
+      - P-BRUTALIST-LIVE-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-LIVE-REGION-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-live-region-entries-inheritance-and-package-boundary
+  - id: T-BRUTALIST-LIVE-REGION-0001-CASE-2
+    title: Default polite status semantics with atomic true and no interaction
+    covers:
+      - P-BRUTALIST-LIVE-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-LIVE-REGION-NO-INTERACTION
+      - P-BRUTALIST-LIVE-REGION-VISUAL-GRAMMAR
+    expectation: p-brutalist-live-region-default-polite-atomic-surface
+  - id: T-BRUTALIST-LIVE-REGION-0001-CASE-3
+    title: Assertive role and aria-atomic false projections stay Base-owned
+    covers:
+      - P-BRUTALIST-LIVE-REGION-BASE-INHERITANCE
+    expectation: p-brutalist-live-region-assertive-and-atomic-false
+  - id: T-BRUTALIST-LIVE-REGION-0001-CASE-4
+    title: Mounted prop transitions synchronize role, aria-live and aria-atomic while preserving the authored payload
+    covers:
+      - P-BRUTALIST-LIVE-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-LIVE-REGION-NO-INTERACTION
+    expectation: p-brutalist-live-region-dynamic-semantics-preserve-payload
+  - id: T-BRUTALIST-LIVE-REGION-0001-CASE-5
+    title: Demo binds two real regions and mutates only authored payload text
+    covers:
+      - P-BRUTALIST-LIVE-REGION-NO-INTERACTION
+      - P-BRUTALIST-LIVE-REGION-VISUAL-GRAMMAR
+    expectation: p-brutalist-live-region-demo-authored-payload-updates
+implementations:
+  - id: prototypes-brutalist-live-region-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/live-region.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-LIVE-REGION-0001-CASE-1
+      - T-BRUTALIST-LIVE-REGION-0001-CASE-2
+      - T-BRUTALIST-LIVE-REGION-0001-CASE-3
+      - T-BRUTALIST-LIVE-REGION-0001-CASE-4
+    exercises:
+      - P-BASE-LIVE-REGION
+      - P-BRUTALIST-LIVE-REGION
+  - id: www-brutalist-live-region-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-live-region.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-LIVE-REGION-0001-CASE-5
+    exercises:
+      - P-BASE-LIVE-REGION
+      - P-BRUTALIST-LIVE-REGION
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-LIVE-REGION
+exercises:
+  prototypes:
+    - P-BASE-LIVE-REGION
+    - P-BRUTALIST-LIVE-REGION
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - live-region

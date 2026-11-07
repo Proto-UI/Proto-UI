@@ -1111,6 +1111,11 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/components/radio-group',
                 },
                 {
+                  label: 'Live Region (Draft)',
+                  translations: { en: 'Live Region (Draft)', 'zh-CN': 'Live Region（草案）' },
+                  slug: 'ui-libraries/brutalist/components/live-region',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/brutalist/progress',
