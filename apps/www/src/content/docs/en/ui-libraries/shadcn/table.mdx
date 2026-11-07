@@ -1,0 +1,23 @@
+---
+title: 'Table'
+description: 'Draft structural table parts with upstream shadcn table chrome.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
+Draft structural table parts with upstream shadcn table chrome. See [Table (Draft)](/en/ui-libraries/base/table/) for the underlying Base protocol.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The family keeps the exact Base Table anatomy: Root owns the independent Table domain, Caption supplies the authored purpose, Row establishes one ordered logical row, HeaderCell declares a `headerKey` and `headerKind: 'column' | 'row'`, and Cell carries an ordered set of `headers` keys. `rowSpan` and `columnSpan` are positive integers defaulting to one. The shadcn layer adds only upstream paint — collapsed borders, cell paddings, header emphasis and muted footer — plus two visual-only props on Row: `section: 'header' | 'body' | 'footer'` (default `body`) and `lastInSection` (default `false`) drive the border rules. Neither prop declares a row-group or changes accessibility; an external scrolling container stays consumer-owned. Table itself adds no sorting, selection, editing, data operations, or keyboard-grid behavior.
+
+Parts: Root, Caption, Row, HeaderCell, Cell.
+
+Draft source. Real assistive-technology evidence, responsive/visual acceptance and complete native/GPUI, compiler and independent acceptance remain open.

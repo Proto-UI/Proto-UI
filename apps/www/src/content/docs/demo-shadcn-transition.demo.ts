@@ -1,3 +1,4 @@
 import { createTransitionDemo } from './transition-demo.shared';
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 
-export default createTransitionDemo('shadcn');
+export default withShadcnRheaDemo(createTransitionDemo('shadcn'));

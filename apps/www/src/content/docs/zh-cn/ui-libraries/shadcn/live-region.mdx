@@ -1,0 +1,23 @@
+---
+title: 'Live Region'
+description: '无交互的受治 ARIA live region 语义。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+无交互的受治 ARIA live region 语义。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+区域由两个 prop 推导 `role`、`aria-live` 与 `aria-atomic`：`politeness: 'polite'`（默认）投射 `role=status` 与 `aria-live=polite`，`politeness: 'assertive'` 投射 `role=alert` 与 `aria-live=assertive`；`atomic`（默认 `true`）投射 `aria-atomic`。作者子内容即公告负载——修改它是投递更新的方式。区域本身不声明焦点、事件、命令、选择或 accessible name 覆盖通道，exposes 表面为空；也没有隐式队列或通知传输。
+
+组成: Root.
+
+草稿源码。真实读屏送达以及完整的 native/GPUI、编译器与独立验收证据仍未完成。

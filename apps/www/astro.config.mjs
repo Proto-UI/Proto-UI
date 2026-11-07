@@ -887,6 +887,31 @@ export default defineConfig({
                   translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
                   slug: 'ui-libraries/shadcn/toggle',
                 },
+                {
+                  label: 'Async Region (Draft)',
+                  translations: { en: 'Async Region (Draft)', 'zh-CN': 'Async Region（草案）' },
+                  slug: 'ui-libraries/shadcn/async-region',
+                },
+                {
+                  label: 'Image (Draft)',
+                  translations: { en: 'Image (Draft)', 'zh-CN': 'Image（草案）' },
+                  slug: 'ui-libraries/shadcn/image',
+                },
+                {
+                  label: 'Live Region (Draft)',
+                  translations: { en: 'Live Region (Draft)', 'zh-CN': 'Live Region（草案）' },
+                  slug: 'ui-libraries/shadcn/live-region',
+                },
+                {
+                  label: 'Table (Draft)',
+                  translations: { en: 'Table (Draft)', 'zh-CN': 'Table（草案）' },
+                  slug: 'ui-libraries/shadcn/table',
+                },
+                {
+                  label: 'Transition (Draft)',
+                  translations: { en: 'Transition (Draft)', 'zh-CN': 'Transition（草案）' },
+                  slug: 'ui-libraries/shadcn/transition',
+                },
               ],
             },
             {

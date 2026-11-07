@@ -1,0 +1,23 @@
+---
+title: 'Image'
+description: '宿主自有图片呈现，带显式无障碍语义与加载状态。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+宿主自有图片呈现，带显式无障碍语义与加载状态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 声明一个宿主自有图片目标。`source` 指向资源，`a11yMode` 选择 `informative`（默认，消费 `alternativeText`）或 `decorative`（含义由文本承载），`fit` 选择 `contain`（默认）、`cover` 或 `fill`。当前加载状态通过 `loadingStatus`（`idle`、`loading`、`loaded`、`error`）暴露，并经由 `loadingStatusChange` 事件携带前后状态。演示通过加载、替换、损坏和清除真实来源观察这些转换；控件与日志属于演示，不属于原型。Web 投射为每个实例渲染一个物理 `<img>`。
+
+组成: Root.
+
+草稿源码。Image View 保持中性——这不是 Shadcn Avatar，也不添加图片加载器。native/GPUI、编译器与完整独立验收证据仍未完成。

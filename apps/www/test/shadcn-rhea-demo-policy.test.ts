@@ -78,6 +78,11 @@ import demo59 from '../src/content/docs/demo-shadcn-toolbar.demo';
 import demo60 from '../src/content/docs/zh-cn/demo-shadcn-tooltip.demo';
 import demo61 from '../src/content/docs/zh-cn/demo-shadcn-tree.demo';
 import demo62 from '../src/content/docs/zh-cn/demo-shadcn-virtual-list.demo';
+import demo63 from '../src/content/docs/demo-shadcn-async-region.demo';
+import demo64 from '../src/content/docs/demo-shadcn-image.demo';
+import demo65 from '../src/content/docs/demo-shadcn-live-region.demo';
+import demo66 from '../src/content/docs/demo-shadcn-table.demo';
+import demo67 from '../src/content/docs/demo-shadcn-transition.demo';
 import { codeMap as codeMap0 } from '../src/content/docs/demo_components/button/buttonCode';
 import { codeMap as codeMap1 } from '../src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode';
 import { codeMap as codeMap2 } from '../src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode';
@@ -147,6 +152,11 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-tooltip', demo60],
   ['demo-shadcn-tree', demo61],
   ['demo-shadcn-virtual-list', demo62],
+  ['demo-shadcn-async-region', demo63],
+  ['demo-shadcn-image', demo64],
+  ['demo-shadcn-live-region', demo65],
+  ['demo-shadcn-table', demo66],
+  ['demo-shadcn-transition', demo67],
 ];
 
 function visit(node: DemoChild, action: (node: Exclude<DemoChild, string>) => void): void {
@@ -205,7 +215,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
       }
     }
     expect([...found].sort()).toEqual(demos.map(([id]) => id).sort());
-    expect(found.size).toBe(63);
+    expect(found.size).toBe(68);
   });
 
   for (const [id, demo] of demos) {

@@ -1,0 +1,23 @@
+---
+title: 'Transition'
+description: '覆盖作者内容的透明相位机 presence，不发明动效。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
+覆盖作者内容的透明相位机 presence，不发明动效。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-transition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+该投射是透明的：作者槽位的 presence 由精确的 Base 相位机（`closed → preparing → entering → entered → leaving`）治理，相位通过 `transitionState` expose 与 `isPresent` 可观察，`beforeEnter`/`afterEnter`/`beforeLeave`/`afterLeave` 事件标记边界。`enter`/`leave`/`complete` 命令（也可经 `controls` 到达）驱动状态机；`complete` 将 `entering → entered` 或 `leaving → closed` 推进。`open`（受控）或 `defaultOpen: false` 决定初始 presence；`appear`（默认 `false`）允许首次挂载即进入；`enterDuration`（默认 300）、`leaveDuration`（默认 200）与 `interrupt: 'reverse' | 'wait' | 'immediate'`（默认 `reverse`）塑造每次尝试。该投射不添加宿主动画引擎或 Shadcn 动效外观——视觉动效仍是应用关注点。
+
+组成: Transition.
+
+草稿源码。完整真实过渡轨迹、减弱运动行为以及完整的 native/GPUI、编译器与独立验收证据仍未完成。
