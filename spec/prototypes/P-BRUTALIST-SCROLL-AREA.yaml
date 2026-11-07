@@ -23,9 +23,9 @@ criteria:
 
       zh-CN: >-
         Root 投射 relative block overflow-hidden rounded-base border-2 border-foreground bg-background font-sans font-medium；装饰性 5px frame 是 Proto UI 组合扩展，overflow clip 约束 track paint，不重定义 scroll 几何。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 scroll chrome，它不拥有静止阴影，也不拥有 hover 或 press motion。
+
     dependsOn:
       decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
-
 
   - id: P-BRUTALIST-SCROLL-AREA-CONSUMER-SIZING
     text:

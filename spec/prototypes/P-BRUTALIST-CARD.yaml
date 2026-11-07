@@ -27,9 +27,9 @@ criteria:
 
       zh-CN: >-
         Root 投射 5px 圆角、2px 黑色 frame、paper fill、垂直分组、4px 4px 零模糊黑影与 font-sans font-medium，不隐含内容语义。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 raised panel，它不拥有 hover 或 press motion。
+
     dependsOn:
       decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
-
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md

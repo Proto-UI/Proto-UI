@@ -43,9 +43,9 @@ criteria:
 
       zh-CN: >-
         appearance=default 时，未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。这属于 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 的 flat selection control category；selected 状态是其命名的 hover-gated exception，绝不获得 Button 位移语法。
+
     dependsOn:
       decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
-
 
   - id: P-BRUTALIST-TABS-TRIGGER-VISUAL-GRAMMAR
     text:

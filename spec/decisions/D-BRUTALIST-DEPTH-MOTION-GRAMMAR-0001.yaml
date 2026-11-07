@@ -7,6 +7,7 @@ lifecycleRationale:
   en: Draft typed grammar for one family category system. It admits the finite category catalog and its exception list as draft authority for the Brutalist family projection; public design-contract pages and per-category native or browser evidence are still required before any lifecycle promotion, and no established surface behavior is withdrawn by this decision.
 summary: >-
   The Brutalist family resolves the rest-depth and interaction-motion drift by admitting a finite typed category catalog. Each category owns explicit rest depth, hover depth, and press depth; component P entities name their category and keep only the listed exceptions. The unqualified family table is replaced by category-qualified projection.
+
 statement:
   en: >-
     Brutalist depth and interaction motion follow the typed grammar in this decision, not a universal 3px/lift/sink rule applied to every surface. Category defaults and the finite exception list below are normative; a P entity may deviate only by naming its category and retaining its own listed exception. The public design-contract pages must project this typed grammar and must not present an unqualified family table that contradicts P entities.
@@ -99,4 +100,5 @@ revisions:
     change: introduced
     summary: >-
       Admitted the typed Brutalist depth/motion category catalog and finite exception list, superseding the unqualified family table while preserving every current P-entity-governed behavior.
+
 tags: [decision, brutalist, depth, motion, typed-grammar, design-contract]

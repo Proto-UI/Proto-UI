@@ -1,0 +1,29 @@
+---
+title: 'Transition'
+description: '覆盖在 Base Transition 协议之上的 Brutalist flat/fade presence 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft atom 是独立的 Brutalist Transition。精确的相位机（`closed → preparing → entering → entered → leaving`）、presence 与 ViewIntent 排序、`enter`/`leave`/`complete` controls、interrupt 策略、fallback completion 以及 reduced-motion 时长坍缩均由 Base 所有。
+
+Brutalist 层只拥有呈现并保持 family 的 flat/fade 边界：借来的 `transitionState` 只绑定端点 opacity（closed、preparing 或 leaving 时为 `opacity-0`；entering 或 entered 时为 `opacity-100`）。不允许 zoom、slide、translate、shadow 或自创编排，也不新增 timer、宿主动画引擎、语义或 native anchor owner。作者 slot 保持透明。
+
+Transition 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/transition` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-transition` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-transition" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 确认 demo 卡片初始 present，并通过真实暴露的 controls 驱动 Enter、Leave 与 Complete。
+2. 确认 `transitionState` 报告实时相位，`isPresent` 在 leaving 完成前保留作者内容。
+3. 确认宿主 style 只绑定端点 opacity，不携带任何 motion token。
+4. 在 `prefers-reduced-motion: reduce` 下重复，确认相位仍即时完成且无持续运动。
+5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Transition guarantee。

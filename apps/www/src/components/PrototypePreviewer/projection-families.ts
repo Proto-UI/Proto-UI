@@ -29,7 +29,8 @@ export type ProjectionComponentId =
   | 'skeleton'
   | 'spinner'
   | 'scroll-area'
-  | 'tooltip';
+  | 'tooltip'
+  | 'transition';
 export type ProjectionFamilyId = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
 export type ProjectionPartManifest = Readonly<{
@@ -105,6 +106,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   spinner: ['root'],
   'scroll-area': ['root', 'viewport', 'scrollbar', 'thumb'],
   tooltip: ['group', 'root', 'trigger', 'content'],
+  transition: ['root'],
 };
 
 const SHADCN_MANIFEST = {
@@ -1128,6 +1130,18 @@ const BRUTALIST_MANIFEST = {
         content: {
           basePrototypeId: 'P-BASE-TOOLTIP-CONTENT',
           prototypeId: 'brutalist-tooltip-content',
+        },
+      },
+    },
+    transition: {
+      baseFamilyId: 'P-BASE-TRANSITION',
+      recipeId: 'demo-brutalist-transition',
+      recipePrototypeIds: ['brutalist-transition', 'brutalist-button'],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-TRANSITION',
+          prototypeId: 'brutalist-transition',
         },
       },
     },

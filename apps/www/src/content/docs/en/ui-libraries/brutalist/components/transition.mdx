@@ -1,0 +1,29 @@
+---
+title: 'Transition'
+description: 'Draft Brutalist flat/fade presence over the Base Transition protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft atom is the standalone Brutalist Transition. Base owns the exact phase machine (`closed → preparing → entering → entered → leaving`), presence and ViewIntent sequencing, the `enter`/`leave`/`complete` controls, interruption policy, fallback completion and the reduced-motion duration collapse.
+
+The Brutalist layer is presentation-only and keeps the family flat/fade boundary: the borrowed `transitionState` binds endpoint opacity only (`opacity-0` while closed, preparing or leaving; `opacity-100` while entering or entered). No zoom, slide, translate, shadow or invented choreography is admitted, and no timer, host animation engine, semantic or native anchor owner is added. The authored slot stays transparent.
+
+Import Transition from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/transition` anatomy subpath. This family intentionally has no `proto-ui add brutalist-transition` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-transition" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Confirm the demo card starts present and drives Enter, Leave and Complete through the real exposed controls.
+2. Confirm `transitionState` reports the live phase and `isPresent` retains the authored content until leaving completes.
+3. Confirm the host style binds endpoint opacity only and carries no motion tokens.
+4. Repeat with `prefers-reduced-motion: reduce` and confirm phases still complete without sustained motion.
+5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Transition guarantee.

@@ -1,0 +1,48 @@
+id: P-BRUTALIST-TRANSITION
+type: prototype
+title: Brutalist Transition projection binds the borrowed phase to flat endpoint opacity
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the exact Base Transition phase machine with a flat/fade endpoint boundary.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Transition authoring entry，不安装另一相位机、presence 或 completion owner。
+  en: This Proto UI authored presentation consumes the Base Transition authoring entry unchanged. It does not install another phase machine, presence, or completion owner.
+criteria:
+  - id: P-BRUTALIST-TRANSITION-BASE-INHERITANCE
+    text:
+      zh-CN: 通过 asTransition() 一次性继承 P-BASE-TRANSITION，保留 Base 相位机、presence/ViewIntent 排序、controls、interrupt、fallback completion、reduced-motion 时长坍缩与 lifecycle，且不安装第二个相位机或 presence owner。
+      en: Inherit P-BASE-TRANSITION once through asTransition(), retaining the Base phase machine, presence/ViewIntent sequencing, controls, interrupts, fallback completion, the reduced-motion duration collapse and lifecycle, and install no second phase machine or presence owner.
+  - id: P-BRUTALIST-TRANSITION-ENTRY
+    text:
+      zh-CN: direct entry 为 brutalist-transition，且本层不提供 authored asHook；作者 slot 保持透明且不接管 native anchor ownership。
+      en: The direct entry is brutalist-transition and this layer provides no authored asHook; the authored slot stays transparent and no native anchor ownership is intercepted.
+  - id: P-BRUTALIST-TRANSITION-FLAT-FADE-BOUNDARY
+    text:
+      zh-CN: 借来的 transitionState 只绑定端点 opacity（closed/preparing/leaving 为 opacity-0，entering/entered 为 opacity-100）；不允许 zoom、slide、translate、shadow 或自创 choreography，也不新增 timer、宿主动画引擎或第二 semantic owner。
+      en: The borrowed transitionState binds endpoint opacity only (opacity-0 while closed, preparing or leaving; opacity-100 while entering or entered). No zoom, slide, translate, shadow or invented choreography is admitted, and no timer, host animation engine or second semantic owner is added.
+  - id: P-BRUTALIST-TRANSITION-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./transition anatomy subpath 导出 Transition。Transition 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export Transition from its package root and ./transition anatomy subpath. Transition must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/transition/transition.proto.ts
+  - path: packages/prototypes/brutalist/src/transition/index.ts
+  - path: packages/prototypes/brutalist/test/transition.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/transition.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/transition.mdx
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-AS-TRANSITION-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TRANSITION
+verifies:
+  tests:
+    - T-BRUTALIST-TRANSITION-0001
+tags: [prototype, brutalist, neo-brutalist, visual, delta, transition]
