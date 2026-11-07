@@ -1101,6 +1101,11 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/checkbox-group',
                 },
                 {
+                  label: 'Radio Group (Draft)',
+                  translations: { en: 'Radio Group (Draft)', 'zh-CN': 'Radio Group（草案）' },
+                  slug: 'ui-libraries/brutalist/components/radio-group',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/brutalist/progress',

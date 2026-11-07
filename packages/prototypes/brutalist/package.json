@@ -115,6 +115,11 @@
       "import": "./dist/checkbox/index.js",
       "default": "./dist/checkbox/index.js"
     },
+    "./radio-group": {
+      "types": "./dist/radio-group/index.d.ts",
+      "import": "./dist/radio-group/index.js",
+      "default": "./dist/radio-group/index.js"
+    },
     "./text": {
       "types": "./dist/text/index.d.ts",
       "import": "./dist/text/index.js",

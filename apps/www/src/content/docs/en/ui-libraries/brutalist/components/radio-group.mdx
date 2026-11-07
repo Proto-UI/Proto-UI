@@ -1,0 +1,29 @@
+---
+title: 'Radio Group'
+description: 'Draft Brutalist Radio Group presentation over the Base Radio Group protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains a Root, an Item, and an Indicator. Base Radio Group owns the single selected value, collection-ordered items, selected-or-first roving focus, effective disabled behavior, pointer and keyboard activation, and the accessible `radiogroup` object including each `radio` item's `aria-checked`.
+
+The Brutalist layer is presentation-only. Following the pinned Neo `radio-group.tsx@3306a802` source, the Root lays items out as a `grid gap-2` column, each Item is a 16px circular 2px-bordered control, and a checked Item paints exactly one `size-2` filled circular dot through its Indicator; the Item fill and border never change when checked. Focus retains the family offset ring, disabled keeps its opacity gate, and press changes no geometry or shadow. The Indicator is passive and derived: it owns no activation, focus, or checked semantics, and its SVG dot is `aria-hidden`.
+
+Import Root, Item, and Indicator from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/radio-group` anatomy subpath. This family intentionally has no `proto-ui add brutalist-radio-group` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Activate the Default and Comfortable options with pointer and arrow keys; confirm roving focus and single selection.
+2. Confirm the Compact (disabled) option in the first group cannot be selected or focused.
+3. Confirm the second group starts with zero checked items and does not silently select its first option.
+4. Confirm a checked Item paints exactly one dot inside the 16px circle and the circle itself keeps its resting surface.
+5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Radio Group guarantee.

@@ -1,0 +1,29 @@
+---
+title: 'Radio Group'
+description: '覆盖在 Base Radio Group 协议之上的 Brutalist Radio Group 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 包含 Root、Item 与 Indicator。唯一选中 value、按 Collection 排序的 Item、selected-or-first roving focus、生效的 disabled behavior、pointer 与键盘 activation，以及包含每个 `radio` item `aria-checked` 的可访问 `radiogroup` object 均由 Base Radio Group 所有。
+
+Brutalist 层只拥有呈现。按固定 Neo `radio-group.tsx@3306a802` 来源，Root 以 `grid gap-2` 列排布 Item；每个 Item 是 16px 圆形 2px 边框控件；checked 只通过 Indicator 绘制恰好一个 `size-2` 实心圆点，Item 本身的填色与边框不变。focus 保留 family offset ring，disabled 保留 opacity 门控，press 不改变几何或阴影。Indicator 是被动且派生的：不拥有 activation、focus 或 checked 语义，其 SVG 圆点为 `aria-hidden`。
+
+Root、Item 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/radio-group` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-radio-group` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 用 pointer 与方向键操作 Default 和 Comfortable；确认 roving focus 与单一选择。
+2. 确认第一组的 Compact（disabled）选项无法被选中或聚焦。
+3. 确认第二组初始没有任何 checked item，且不会静默选择第一项。
+4. 确认 checked Item 在 16px 圆内绘制恰好一个圆点，圆本身保持静止表面。
+5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Radio Group guarantee。

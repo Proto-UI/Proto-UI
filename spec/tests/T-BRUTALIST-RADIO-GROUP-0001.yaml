@@ -1,0 +1,99 @@
+id: T-BRUTALIST-RADIO-GROUP-0001
+type: test
+title: Brutalist Radio Group public API and presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-RADIO-GROUP* 准则一一映射；本条目只描述当前 synthetic DOM 测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-RADIO-GROUP* criteria. This entity records the current synthetic-DOM tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Radio Group public API, pinned Root column layout, Item circular resting surface with inherited focus and disabled projection, Indicator passive derived dot, and Base single-selection semantics against the P-BRUTALIST-RADIO-GROUP* criteria.
+
+
+cases:
+  - id: T-BRUTALIST-RADIO-GROUP-0001-CASE-1
+    title: Direct entries, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-RADIO-GROUP-ENTRY
+      - P-BRUTALIST-RADIO-GROUP-BASE-INHERITANCE
+      - P-BRUTALIST-RADIO-GROUP-ITEM-ENTRY
+      - P-BRUTALIST-RADIO-GROUP-ITEM-BASE-INHERITANCE
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR-ENTRY
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR-BASE-INHERITANCE
+      - P-BRUTALIST-RADIO-GROUP-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-radio-group-entries-inheritance-and-package-boundary
+  - id: T-BRUTALIST-RADIO-GROUP-0001-CASE-2
+    title: Root column layout without owned visual states
+    covers:
+      - P-BRUTALIST-RADIO-GROUP-VISUAL-GRAMMAR
+    expectation: p-brutalist-radio-group-root-grid-grammar
+  - id: T-BRUTALIST-RADIO-GROUP-0001-CASE-3
+    title: Single-selection semantics stay Base-owned with derived Item checked and accessible radio objects
+    covers:
+      - P-BRUTALIST-RADIO-GROUP-BASE-INHERITANCE
+      - P-BRUTALIST-RADIO-GROUP-ITEM-BASE-INHERITANCE
+    expectation: p-brutalist-radio-group-base-single-selection
+  - id: T-BRUTALIST-RADIO-GROUP-0001-CASE-4
+    title: Item surface stays unchanged when checked; focus and disabled projections
+    covers:
+      - P-BRUTALIST-RADIO-GROUP-ITEM-NO-CHECKED-VARIANT
+      - P-BRUTALIST-RADIO-GROUP-ITEM-VISUAL-GRAMMAR
+    expectation: p-brutalist-radio-group-item-visual-and-interaction
+  - id: T-BRUTALIST-RADIO-GROUP-0001-CASE-5
+    title: Indicator derives checked, paints exactly one passive dot, and never stacks glyphs
+    covers:
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR-PASSIVE-DERIVED
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR-VISUAL-GRAMMAR
+    expectation: p-brutalist-radio-group-indicator-passive-dot
+implementations:
+  - id: prototypes-brutalist-radio-group-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-1
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-2
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-3
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-4
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-5
+    exercises:
+      - P-BASE-RADIO-GROUP
+      - P-BASE-RADIO-GROUP-ITEM
+      - P-BASE-RADIO-GROUP-INDICATOR
+      - P-BRUTALIST-RADIO-GROUP
+      - P-BRUTALIST-RADIO-GROUP-ITEM
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR
+  - id: www-brutalist-radio-group-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-RADIO-GROUP-0001-CASE-3
+    exercises:
+      - P-BASE-RADIO-GROUP
+      - P-BASE-RADIO-GROUP-ITEM
+      - P-BASE-RADIO-GROUP-INDICATOR
+      - P-BRUTALIST-RADIO-GROUP
+      - P-BRUTALIST-RADIO-GROUP-ITEM
+      - P-BRUTALIST-RADIO-GROUP-INDICATOR
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-RADIO-GROUP
+    - id: P-BRUTALIST-RADIO-GROUP-ITEM
+    - id: P-BRUTALIST-RADIO-GROUP-INDICATOR
+exercises:
+  prototypes:
+    - P-BASE-RADIO-GROUP
+    - P-BASE-RADIO-GROUP-ITEM
+    - P-BASE-RADIO-GROUP-INDICATOR
+    - P-BRUTALIST-RADIO-GROUP
+    - P-BRUTALIST-RADIO-GROUP-ITEM
+    - P-BRUTALIST-RADIO-GROUP-INDICATOR
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - radio-group

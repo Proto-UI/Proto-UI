@@ -1,0 +1,47 @@
+id: P-BRUTALIST-RADIO-GROUP
+type: prototype
+title: Brutalist Radio Group Root inherits Base Radio Group and projects the pinned column layout
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the corresponding Base Radio Group atom.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费对应 Base authoring entry，不安装另一 value、selection、roving focus 或 disabled owner。
+  en: This Proto UI authored presentation consumes the matching Base authoring entry unchanged. It does not install another value, selection, roving focus, or disabled owner.
+criteria:
+  - id: P-BRUTALIST-RADIO-GROUP-BASE-INHERITANCE
+    text:
+      zh-CN: Root 通过 asRadioGroupRoot() 一次性继承 P-BASE-RADIO-GROUP，保留 Base value、Collection、Focus Roving、radiogroup 命名与 lifecycle，且不安装第二个 value 或 selection owner。
+      en: The Root inherits P-BASE-RADIO-GROUP once through asRadioGroupRoot(), retains Base value, Collection, Focus Roving, radiogroup naming and lifecycle, and installs no second value or selection owner.
+  - id: P-BRUTALIST-RADIO-GROUP-ENTRY
+    text:
+      zh-CN: Root direct entry 为 brutalist-radio-group-root，且本层不提供 authored asHook。
+      en: The Root direct entry is brutalist-radio-group-root and this layer provides no authored asHook.
+  - id: P-BRUTALIST-RADIO-GROUP-VISUAL-GRAMMAR
+    text:
+      zh-CN: Root 按 Neo radio-group.tsx@3306a802 投射 grid gap-2 列布局；无 checked、hover 或 press 视觉状态。
+      en: The Root projects the Neo radio-group.tsx@3306a802 grid gap-2 column layout and carries no checked, hover, or press visual state.
+  - id: P-BRUTALIST-RADIO-GROUP-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./radio-group anatomy subpath 导出 Root。Radio Group 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export the Root from its package root and ./radio-group anatomy subpath. Radio Group must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/radio-group/root.proto.ts
+  - path: packages/prototypes/brutalist/src/radio-group/types.ts
+  - path: packages/prototypes/brutalist/test/radio-group.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/radio-group.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/radio-group.mdx
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/radio-group.tsx
+    label: Pinned Neo source; SHA256 85e6e1cba2c09b21b8673d1c99b913995246b93ed933d9e6fd697de44f44e2c2
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP
+verifies: { tests: [T-BRUTALIST-RADIO-GROUP-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, radio-group]
