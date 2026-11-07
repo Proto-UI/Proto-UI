@@ -125,6 +125,11 @@
       "import": "./dist/live-region/index.js",
       "default": "./dist/live-region/index.js"
     },
+    "./image": {
+      "types": "./dist/image/index.d.ts",
+      "import": "./dist/image/index.js",
+      "default": "./dist/image/index.js"
+    },
     "./text": {
       "types": "./dist/text/index.d.ts",
       "import": "./dist/text/index.js",

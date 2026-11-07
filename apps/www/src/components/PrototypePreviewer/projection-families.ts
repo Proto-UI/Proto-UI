@@ -25,6 +25,7 @@ export type ProjectionComponentId =
   | 'radio-group'
   | 'live-region'
   | 'badge'
+  | 'image'
   | 'card'
   | 'skeleton'
   | 'spinner'
@@ -100,6 +101,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   'radio-group': ['root', 'item', 'indicator'],
   'live-region': ['root'],
   badge: ['root'],
+  image: ['root'],
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
   spinner: ['root'],
@@ -1039,6 +1041,14 @@ const BRUTALIST_MANIFEST = {
       recipePrototypeIds: ['brutalist-badge-root'],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'brutalist-badge-root' },
+      },
+    },
+    image: {
+      baseFamilyId: 'P-BASE-IMAGE',
+      recipeId: 'demo-brutalist-image',
+      recipePrototypeIds: ['brutalist-image-root'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-IMAGE', prototypeId: 'brutalist-image-root' },
       },
     },
     card: {

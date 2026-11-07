@@ -1,0 +1,29 @@
+---
+title: 'Image'
+description: 'Draft Brutalist Image presentation over the Base Image protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains a single Root. Base Image owns the portable image presentation protocol: the opaque `source` URI with a new generation per change, the informative/decorative `a11yMode` binary with `alternativeText`, `fit` (`contain | cover | fill`), and the `idle | loading | loaded | error` `loadingStatus` plus its `loadingStatusChange` event. The host-owned Image View target performs the actual loading, decoding, and rendering.
+
+The Brutalist layer is presentation-only. The pinned Neo collection has no standalone image component, so the frame follows its authored framed image surface — `image-card.tsx@3306a802`'s `rounded-base border-2 border-border shadow-shadow` — projected under the family's Card physical mapping as `rounded-base border-2 border-black` with the `4px/4px` solid offset shadow. `block max-w-full h-auto` keeps the framed target responsive while width, height, and fit remain consumer inputs; the Root paints no loading, error, or interaction chrome of its own, and it installs no second image owner or fabricated slot.
+
+Import the Root from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/image` anatomy subpath. This family intentionally has no `proto-ui add brutalist-image` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-image" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Load the three fit tiles and confirm `contain`, `cover`, and `fill` change only the image content inside the same frame.
+2. Confirm the decorative image stays silent to assistive technology while the neighboring text carries the meaning.
+3. Confirm the broken-source instance keeps its frame while `loadingStatus` reports `error`.
+4. Confirm a replaced `source` produces a fresh generation and a `loadingStatusChange` transition.
+5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Image guarantee.

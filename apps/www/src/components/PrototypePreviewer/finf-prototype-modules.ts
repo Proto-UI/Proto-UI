@@ -240,6 +240,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/image');
     registerExactPrototype('liquid-glass-image-root', module.imageRoot);
   },
+  'brutalist-image-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/image');
+    registerExactPrototype('brutalist-image-root', module.brutalistImageRoot);
+  },
   'liquid-glass-table-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/table');
     registerExactPrototype('liquid-glass-table-root', module.tableRoot);

@@ -166,6 +166,7 @@ export * from './tooltip';
 export * from './checkbox';
 export * from './radio-group';
 export * from './live-region';
+export * from './image';
 export type {
   BrutalistDialogRootProps,
   BrutalistDialogRootExposes,
