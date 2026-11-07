@@ -1,0 +1,49 @@
+id: P-BRUTALIST-LIVE-REGION
+type: prototype
+title: Brutalist Live Region Root inherits Base Live Region and adds restrained family ink only
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the corresponding Base Live Region atom.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费对应 Base authoring entry，保留 politeness、atomic 与播报载荷语义，不安装第二个语义 owner，也不引入交互、通知或辅助技术通路。
+  en: This Proto UI authored presentation consumes the matching Base authoring entry unchanged. It preserves politeness, atomic and announcement-payload semantics, installs no second semantic owner, and introduces no interaction, notification, or assistive-technology channel.
+criteria:
+  - id: P-BRUTALIST-LIVE-REGION-BASE-INHERITANCE
+    text:
+      zh-CN: Root 通过 asLiveRegionRoot() 一次性继承 P-BASE-LIVE-REGION，保留 role/aria-live/aria-atomic 投影、politeness 与 atomic props、authored 播报载荷及 lifecycle，且不安装第二个语义 owner。
+      en: The Root inherits P-BASE-LIVE-REGION once through asLiveRegionRoot(), retains the role/aria-live/aria-atomic projection, the politeness and atomic props, the authored announcement payload and lifecycle, and installs no second semantic owner.
+  - id: P-BRUTALIST-LIVE-REGION-ENTRY
+    text:
+      zh-CN: Root direct entry 为 brutalist-live-region-root，且本层不提供 authored asHook。
+      en: The Root direct entry is brutalist-live-region-root and this layer provides no authored asHook.
+  - id: P-BRUTALIST-LIVE-REGION-VISUAL-GRAMMAR
+    text:
+      zh-CN: Root 仅投射 min-w-0 max-w-full text-foreground 普通内容墨色与有界宽度；不新增边框、阴影、焦点环、checked/hover/press 视觉状态或任何通知外观。上游 Neo 无对应 live-region 组件可固定。
+      en: The Root projects only min-w-0 max-w-full text-foreground ordinary content ink and bounded width; it adds no border, shadow, focus ring, checked/hover/press visual state, or any notification chrome. There is no upstream Neo live-region component to pin.
+  - id: P-BRUTALIST-LIVE-REGION-NO-INTERACTION
+    text:
+      zh-CN: Live Region 不得声明 focus、tab stop、event、command、activation、selection 或 accessible-name override 通路；exposes surface 必须为空，载荷更新仅由 authored 子内容变更送达。
+      en: Live Region must declare no focus, tab-stop, event, command, activation, selection, or accessible-name override channel; the exposes surface must be empty and payload updates are delivered solely by authored child-content changes.
+  - id: P-BRUTALIST-LIVE-REGION-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./live-region anatomy subpath 导出 Root。Live Region 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export the Root from its package root and ./live-region anatomy subpath. Live Region must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/live-region/root.proto.ts
+  - path: packages/prototypes/brutalist/src/live-region/types.ts
+  - path: packages/prototypes/brutalist/test/live-region.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/live-region.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/live-region.mdx
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-LIVE-REGION
+verifies: { tests: [T-BRUTALIST-LIVE-REGION-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, live-region, a11y]

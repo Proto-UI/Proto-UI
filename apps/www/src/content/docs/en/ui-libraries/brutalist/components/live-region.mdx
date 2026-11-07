@@ -1,0 +1,28 @@
+---
+title: 'Live Region'
+description: 'Draft Brutalist Live Region presentation over the Base Live Region protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains a single Root. Base Live Region owns the governed ARIA live-region semantics: `politeness: 'polite'` (the default) projects `role=status` with `aria-live=polite`, and `politeness: 'assertive'` projects `role=alert` with `aria-live=assertive`; `atomic` (default `true`) projects `aria-atomic`. The authored child content is the announcement payload — mutating it is how updates are delivered. The region declares no focus, event, command, selection, or accessible-name override channel, its exposes surface is empty, and there is no implicit queue or notification transport.
+
+The Brutalist layer is presentation-only and semantic-first: it consumes `asLiveRegionRoot()` once, preserves every inherited owner, and adds only the restrained family surface `min-w-0 max-w-full text-foreground` so payload text stays readable and bounded. There is no upstream Neo live-region component to pin; no border, shadow, or interaction chrome is invented here.
+
+Import the Root from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/live-region` anatomy subpath. This family intentionally has no `proto-ui add brutalist-live-region` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-live-region" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Push a polite update and confirm the polite region keeps `role=status` and `aria-live=polite` while its authored payload text changes.
+2. Push an assertive update and confirm the assertive region keeps `role=alert` and `aria-live=assertive` across repeated toggles.
+3. Confirm both regions keep `aria-atomic="true"`, stay out of the tab order, and expose no interaction or command surface.
+4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Live Region guarantee.
