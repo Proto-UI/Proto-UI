@@ -16,12 +16,14 @@ import {
   type HookSourceValue,
 } from './hook-source-summary.js';
 
-export async function collectProtoStyleTokens(root) {
+export async function collectProtoStyleTokens(root: string): Promise<string[]> {
   return collectProtoStyleTokensFromFiles(await collectSourceFiles(root));
 }
 
 /** Explicit source graph entry for package preset generation; never executes prototype code. */
-export async function collectProtoStyleTokensFromFiles(files) {
+export async function collectProtoStyleTokensFromFiles(
+  files: readonly string[]
+): Promise<string[]> {
   const tokens = new Set();
   const moduleCache = new Map();
   const sourceSummary = createHookSourceSummaryContext();
@@ -157,8 +159,14 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
     for (const element of clause.namedBindings.elements) {
       const importedName = (element.propertyName ?? element.name).text;
       const value = bindings.get(importedName);
-      if (value) scope.bindings.set(element.name.text, { ...value,
-        tokenGraph: scope.tokenGraphTemplate ? value.tokenGraph : cloneTokenGraph(value.tokenGraph, scope.tokenGraphClones), importedBinding: true });
+      if (value)
+        scope.bindings.set(element.name.text, {
+          ...value,
+          tokenGraph: scope.tokenGraphTemplate
+            ? value.tokenGraph
+            : cloneTokenGraph(value.tokenGraph, scope.tokenGraphClones),
+          importedBinding: true,
+        });
     }
   }
 }
@@ -211,35 +219,63 @@ async function loadModuleBindings(file, moduleCache, stack) {
   // a cached pre-effect value as an exact semantic name or finite key list.
   const initializerHasEffects = (node) => {
     if (ts.isFunctionLike(node)) return false;
-    if (ts.isCallExpression(node) || ts.isNewExpression(node) || ts.isTaggedTemplateExpression(node) ||
-        ts.isDeleteExpression(node) || ts.isAwaitExpression(node) || ts.isYieldExpression(node) ||
-        ts.isBinaryExpression(node) && node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-          node.operatorToken.kind <= ts.SyntaxKind.LastAssignment ||
-        (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
-          (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)) return true;
+    if (
+      ts.isCallExpression(node) ||
+      ts.isNewExpression(node) ||
+      ts.isTaggedTemplateExpression(node) ||
+      ts.isDeleteExpression(node) ||
+      ts.isAwaitExpression(node) ||
+      ts.isYieldExpression(node) ||
+      (ts.isBinaryExpression(node) &&
+        node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+        node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+      ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+        (node.operator === ts.SyntaxKind.PlusPlusToken ||
+          node.operator === ts.SyntaxKind.MinusMinusToken))
+    )
+      return true;
     let effects = false;
-    ts.forEachChild(node, (child) => { effects ||= initializerHasEffects(child); });
+    ts.forEachChild(node, (child) => {
+      effects ||= initializerHasEffects(child);
+    });
     return effects;
   };
   const hasUnmodeledEffects = sourceFile.statements.some((stmt) =>
-    ts.isVariableStatement(stmt) ? stmt.declarationList.declarations.some((decl) =>
-      decl.initializer && initializerHasEffects(decl.initializer)) :
-    !ts.isImportDeclaration(stmt) &&
-    !ts.isExportDeclaration(stmt) && !ts.isInterfaceDeclaration(stmt) &&
-    !ts.isTypeAliasDeclaration(stmt) && !ts.isFunctionDeclaration(stmt) &&
-    !ts.isEmptyStatement(stmt));
+    ts.isVariableStatement(stmt)
+      ? stmt.declarationList.declarations.some(
+          (decl) => decl.initializer && initializerHasEffects(decl.initializer)
+        )
+      : !ts.isImportDeclaration(stmt) &&
+        !ts.isExportDeclaration(stmt) &&
+        !ts.isInterfaceDeclaration(stmt) &&
+        !ts.isTypeAliasDeclaration(stmt) &&
+        !ts.isFunctionDeclaration(stmt) &&
+        !ts.isEmptyStatement(stmt)
+  );
   for (const [name, value] of scope.bindings) {
     if (hasUnmodeledEffects && value.tokenGraph) {
       taintTokenGraph(value.tokenGraph);
-      bindings.set(name, withTokenGraph(value, tokenUnion([value.tokenGraph, {kind:'unknown'}])));
+      bindings.set(
+        name,
+        withTokenGraph(value, tokenUnion([value.tokenGraph, { kind: 'unknown' }]))
+      );
     } else bindings.set(name, value);
   }
   for (const stmt of sourceFile.statements) {
-    if (!ts.isExportDeclaration(stmt) || stmt.isTypeOnly ||
-        !stmt.exportClause || !ts.isNamedExports(stmt.exportClause)) continue;
+    if (
+      !ts.isExportDeclaration(stmt) ||
+      stmt.isTypeOnly ||
+      !stmt.exportClause ||
+      !ts.isNamedExports(stmt.exportClause)
+    )
+      continue;
     let exported = bindings;
     if (stmt.moduleSpecifier) {
-      if (!ts.isStringLiteralLike(stmt.moduleSpecifier) || !stmt.moduleSpecifier.text.startsWith('.')) continue;
+      if (
+        !ts.isStringLiteralLike(stmt.moduleSpecifier) ||
+        !stmt.moduleSpecifier.text.startsWith('.')
+      )
+        continue;
       const resolved = await resolveModuleFile(path.dirname(file), stmt.moduleSpecifier.text);
       if (!resolved || [...stack, file].includes(resolved)) continue;
       exported = await loadModuleBindings(resolved, moduleCache, [...stack, file]);
@@ -479,9 +515,14 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
   if (ts.isDeleteExpression(node)) {
     const target = unwrapTransparent(node.expression);
     if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
-      writeTokenMember(target, undefined, scope,
+      writeTokenMember(
+        target,
+        undefined,
+        scope,
         isConditionallyReached(node, scope.definitelyReachedLogicalAssignments) ||
-        isDeferredWrite(node, enclosingFunction(scope.node)), true);
+          isDeferredWrite(node, enclosingFunction(scope.node)),
+        true
+      );
     }
   }
   if (ts.isIfStatement(node)) {
@@ -684,9 +725,17 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     } finally {
       if (definitelyRunsRight) scope.definitelyReachedLogicalAssignments.delete(node);
     }
-    writeTokenMember(node.left, plainAssignment || logicalAssignment ? evaluateTokenGraph(node.right, scope) : undefined,
-      scope, !plainAssignment || isConditionallyReached(node, scope.definitelyReachedLogicalAssignments) ||
-      isDeferredWrite(node, enclosingFunction(scopeOwningValue(resolvedBefore, scope)?.node ?? null)));
+    writeTokenMember(
+      node.left,
+      plainAssignment || logicalAssignment ? evaluateTokenGraph(node.right, scope) : undefined,
+      scope,
+      !plainAssignment ||
+        isConditionallyReached(node, scope.definitelyReachedLogicalAssignments) ||
+        isDeferredWrite(
+          node,
+          enclosingFunction(scopeOwningValue(resolvedBefore, scope)?.node ?? null)
+        )
+    );
     if (resolvedBefore) {
       // `const alias = controls` names the same object, and both bindings hold
       // the one resolved value, so the member moves on that value rather than
@@ -1014,7 +1063,9 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     // name holds afterwards.
     const receiver = receiverContainerValues(node, scope);
     const tokenReceiverNode = memberOwner(node.expression);
-    const tokenReceiver = tokenReceiverNode ? evaluateTokenGraph(tokenReceiverNode, scope) : undefined;
+    const tokenReceiver = tokenReceiverNode
+      ? evaluateTokenGraph(tokenReceiverNode, scope)
+      : undefined;
     // The callee is evaluated before the arguments as well, so the proof that
     // it reads the receiver it is called on is captured before they are
     // walked: a later argument that rebinds a name cannot change what the
@@ -1043,7 +1094,13 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       walk(argument, scope, tokens, exposures, rootInventory);
     }
     applyCallSourceMutation(node, scope, captured, receiver, readsOnly);
-    applyTokenCallMutation(node, scope, captured.map((entry) => entry.tokenGraph), tokenReceiver, readsOnly || tokenJoinReadOnly);
+    applyTokenCallMutation(
+      node,
+      scope,
+      captured.map((entry) => entry.tokenGraph),
+      tokenReceiver,
+      readsOnly || tokenJoinReadOnly
+    );
     return;
   }
 
@@ -1362,7 +1419,11 @@ function joinLoopBindings(expressions, scope) {
   return {
     ...bindings[0],
     strings,
-    single: strings.length === 1 && bindings.every((value) => !value.unknownAlternative && value.single != null) ? strings[0] : null,
+    single:
+      strings.length === 1 &&
+      bindings.every((value) => !value.unknownAlternative && value.single != null)
+        ? strings[0]
+        : null,
     tokenGraph: tokenUnion(bindings.map((value) => value.tokenGraph)),
     ...(semantics.length > 0 ? { semantic: semantics[0], alternatives: semantics.slice(1) } : {}),
     ...(sourceValues.length > 0 ? { sourceValue: sourceValues[0], sourceValues } : {}),
@@ -3934,8 +3995,12 @@ function assignIdentifierBinding(node, scope, exposures) {
   }
   if (uncertain && previous) {
     const strings = [...new Set([...next.strings, ...previous.strings])];
-    next = { ...next, strings, single: strings.length === 1 && !next.unknownAlternative ? strings[0] : null,
-      tokenGraph: tokenUnion([next.tokenGraph, previous.tokenGraph]) };
+    next = {
+      ...next,
+      strings,
+      single: strings.length === 1 && !next.unknownAlternative ? strings[0] : null,
+      tokenGraph: tokenUnion([next.tokenGraph, previous.tokenGraph]),
+    };
   }
   if (uncertain && previous && (previous.semanticMap || previous.containers)) {
     const held = [...(next.containers ?? [next]), ...(previous.containers ?? [previous])];
@@ -4127,8 +4192,13 @@ export async function collectSourceFiles(dir) {
 // Token inventory is not a hook/state proof. Unknown alternatives keep known
 // CSS requirements, but never certify a singleton semantic name.
 function tokenUnion(values) {
-  const items = [...new Set(values.flatMap((value) =>
-    value?.kind === 'union' ? value.items : [value ?? { kind: 'unknown' }]))];
+  const items = [
+    ...new Set(
+      values.flatMap((value) =>
+        value?.kind === 'union' ? value.items : [value ?? { kind: 'unknown' }]
+      )
+    ),
+  ];
   return items.length === 1 ? items[0] : { kind: 'union', items };
 }
 
@@ -4139,7 +4209,9 @@ function tokenStrings(graph, seen = new Set()) {
   if (graph.kind === 'fragments') return fragmentInventory(graph.paths);
   if (graph.kind === 'union') return graph.items.flatMap((item) => tokenStrings(item, seen));
   if (graph.kind === 'object' || graph.kind === 'array')
-    return [...graph.members.values(), graph.unknownMember].flatMap((item) => tokenStrings(item, seen));
+    return [...graph.members.values(), graph.unknownMember].flatMap((item) =>
+      tokenStrings(item, seen)
+    );
   return [];
 }
 
@@ -4157,8 +4229,10 @@ function cloneTokenGraph(graph, copies) {
   if (copies.has(graph)) return copies.get(graph);
   const copy = { ...graph };
   copies.set(graph, copy);
-  if (graph.members) copy.members = new Map([...graph.members].map(([key, child]) =>
-    [key, cloneTokenGraph(child, copies)]));
+  if (graph.members)
+    copy.members = new Map(
+      [...graph.members].map(([key, child]) => [key, cloneTokenGraph(child, copies)])
+    );
   if (graph.items) copy.items = graph.items.map((child) => cloneTokenGraph(child, copies));
   if (graph.values) copy.values = [...graph.values];
   if (graph.paths) copy.paths = graph.paths.map((parts) => [...parts]);
@@ -4167,12 +4241,18 @@ function cloneTokenGraph(graph, copies) {
 }
 
 function tokenMember(graph, keys) {
-  if (graph?.kind === 'union') return tokenUnion(graph.items.map((item) => tokenMember(item, keys)));
+  if (graph?.kind === 'union')
+    return tokenUnion(graph.items.map((item) => tokenMember(item, keys)));
   if (graph?.kind !== 'object' && graph?.kind !== 'array') return { kind: 'unknown' };
   // Incomplete keys are not a finite proof: retain all known members plus the
   // unknown branch. This cannot become `.single`, even with one known member.
-  if (!keys) return tokenUnion([...graph.members.values(), graph.unknownMember, { kind: 'unknown' }]);
-  return tokenUnion(keys.map((key) => graph.members.get(key) ?? tokenUnion([graph.unknownMember, { kind: 'unknown' }])));
+  if (!keys)
+    return tokenUnion([...graph.members.values(), graph.unknownMember, { kind: 'unknown' }]);
+  return tokenUnion(
+    keys.map(
+      (key) => graph.members.get(key) ?? tokenUnion([graph.unknownMember, { kind: 'unknown' }])
+    )
+  );
 }
 
 function tokenIndexKeys(expression, scope) {
@@ -4184,8 +4264,7 @@ function tokenIndexKeys(expression, scope) {
 function tokenPropertyKeys(name, scope) {
   if (ts.isIdentifier(name) || ts.isStringLiteralLike(name) || ts.isNumericLiteral(name))
     return [name.text];
-  return ts.isComputedPropertyName(name)
-    ? tokenIndexKeys(name.expression, scope) : null;
+  return ts.isComputedPropertyName(name) ? tokenIndexKeys(name.expression, scope) : null;
 }
 
 // Compose possible string values separately from complete CSS-token islands.
@@ -4223,14 +4302,14 @@ function composeTokenStrings(parts) {
   }
   const known = paths.filter((path) => !path.includes(null)).map((path) => path.join(''));
   const opaque = paths.filter((path) => path.includes(null));
-  const result = [{kind:'string', values:[...new Set(known)]}];
-  if (opaque.length) result.push({kind:'fragments', paths:opaque});
+  const result = [{ kind: 'string', values: [...new Set(known)] }];
+  if (opaque.length) result.push({ kind: 'fragments', paths: opaque });
   return tokenUnion(result);
 }
 
 function tokenJoinSeparator(node, scope) {
   if (node.arguments.length > 1) return undefined;
-  if (node.arguments.length === 0) return {kind:'string', values:[',']};
+  if (node.arguments.length === 0) return { kind: 'string', values: [','] };
   const argument = unwrapTransparent(node.arguments[0]);
   // Do not pre-evaluate an argument that could mutate the captured receiver.
   if (!ts.isStringLiteralLike(argument) && !ts.isIdentifier(argument)) return undefined;
@@ -4239,14 +4318,23 @@ function tokenJoinSeparator(node, scope) {
 }
 
 function tokenJoinArray(array) {
-  return array?.kind === 'array' && array.complete && !array.members.has('join') &&
-    !array.unknownMember && [...array.members.keys()].every((key,index) => key === String(index));
+  return (
+    array?.kind === 'array' &&
+    array.complete &&
+    !array.members.has('join') &&
+    !array.unknownMember &&
+    [...array.members.keys()].every((key, index) => key === String(index))
+  );
 }
 
 function provenTokenJoin(node, scope, receiver) {
-  return ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'join' &&
-    tokenJoinArray(receiver) && !!tokenJoinSeparator(node, scope) &&
-    [...receiver.members.values()].every((value) => finiteTokenStrings(value) !== null);
+  return (
+    ts.isPropertyAccessExpression(node.expression) &&
+    node.expression.name.text === 'join' &&
+    tokenJoinArray(receiver) &&
+    !!tokenJoinSeparator(node, scope) &&
+    [...receiver.members.values()].every((value) => finiteTokenStrings(value) !== null)
+  );
 }
 
 function evaluateTokenGraph(expression, scope) {
@@ -4255,17 +4343,24 @@ function evaluateTokenGraph(expression, scope) {
   if (snapshot?.tokenGraph) return snapshot.tokenGraph;
   if (ts.isStringLiteralLike(node) || ts.isNoSubstitutionTemplateLiteral(node))
     return { kind: 'string', values: [node.text] };
-  if (node.kind === ts.SyntaxKind.NullKeyword || node.kind === ts.SyntaxKind.FalseKeyword ||
-      node.kind === ts.SyntaxKind.TrueKeyword || ts.isNumericLiteral(node))
+  if (
+    node.kind === ts.SyntaxKind.NullKeyword ||
+    node.kind === ts.SyntaxKind.FalseKeyword ||
+    node.kind === ts.SyntaxKind.TrueKeyword ||
+    ts.isNumericLiteral(node)
+  )
     return { kind: 'noop' };
   if (ts.isIdentifier(node)) return lookup(node.text, scope).tokenGraph;
   if (ts.isConditionalExpression(node))
-    return tokenUnion([evaluateTokenGraph(node.whenTrue, scope), evaluateTokenGraph(node.whenFalse, scope)]);
+    return tokenUnion([
+      evaluateTokenGraph(node.whenTrue, scope),
+      evaluateTokenGraph(node.whenFalse, scope),
+    ]);
   if (ts.isTemplateExpression(node)) {
-    const parts = [{kind:'string', values:[node.head.text]}];
+    const parts = [{ kind: 'string', values: [node.head.text] }];
     for (const span of node.templateSpans) {
       parts.push(evaluateTokenGraph(span.expression, scope));
-      parts.push({kind:'string', values:[span.literal.text]});
+      parts.push({ kind: 'string', values: [span.literal.text] });
     }
     return composeTokenStrings(parts);
   }
@@ -4282,11 +4377,17 @@ function evaluateTokenGraph(expression, scope) {
           complete = false;
           members.set(String(index++), spread ?? { kind: 'unknown' });
         }
-      } else members.set(String(index++), ts.isOmittedExpression(element)
-        ? { kind: 'unknown' } : evaluateTokenGraph(element, scope) ?? { kind: 'unknown' });
+      } else
+        members.set(
+          String(index++),
+          ts.isOmittedExpression(element)
+            ? { kind: 'unknown' }
+            : (evaluateTokenGraph(element, scope) ?? { kind: 'unknown' })
+        );
     }
     if (!complete) {
-      for (const [key, value] of members) members.set(key, tokenUnion([value, {kind:'unknown'}]));
+      for (const [key, value] of members)
+        members.set(key, tokenUnion([value, { kind: 'unknown' }]));
     }
     return { kind: 'array', members, complete };
   }
@@ -4298,8 +4399,8 @@ function evaluateTokenGraph(expression, scope) {
       if (graph?.kind === 'noop') return;
       if (graph?.kind === 'object') {
         if (!graph.complete) {
-          for (const [key, value] of members) members.set(key,
-            tokenUnion([value, graph.unknownMember, {kind:'unknown'}]));
+          for (const [key, value] of members)
+            members.set(key, tokenUnion([value, graph.unknownMember, { kind: 'unknown' }]));
         }
         for (const [key, value] of graph.members) members.set(key, value);
         complete &&= graph.complete;
@@ -4308,33 +4409,62 @@ function evaluateTokenGraph(expression, scope) {
       }
       if (graph?.kind === 'union') {
         const alternatives = graph.items;
-        const keys = new Set([...members.keys(), ...alternatives.flatMap((item) => [...(item.members?.keys() ?? [])])]);
+        const keys = new Set([
+          ...members.keys(),
+          ...alternatives.flatMap((item) => [...(item.members?.keys() ?? [])]),
+        ]);
         for (const key of keys) {
-          members.set(key, tokenUnion(alternatives.map((item) => item.members?.get(key) ??
-            (item?.kind === 'noop' || item?.complete ? members.get(key) ?? { kind: 'unknown' } : tokenUnion([members.get(key), item?.unknownMember, { kind: 'unknown' }])))));
+          members.set(
+            key,
+            tokenUnion(
+              alternatives.map(
+                (item) =>
+                  item.members?.get(key) ??
+                  (item?.kind === 'noop' || item?.complete
+                    ? (members.get(key) ?? { kind: 'unknown' })
+                    : tokenUnion([members.get(key), item?.unknownMember, { kind: 'unknown' }]))
+              )
+            )
+          );
         }
-        if (alternatives.every((item) => item?.kind === 'noop' || item?.kind === 'object' && item.complete)) return;
+        if (
+          alternatives.every(
+            (item) => item?.kind === 'noop' || (item?.kind === 'object' && item.complete)
+          )
+        )
+          return;
       }
       // An opaque spread may overwrite every existing key. Keep inventory but
       // invalidate exactness; later definite properties can restore one key.
       complete = false;
-      for (const [key, value] of members) members.set(key, tokenUnion([value, { kind: 'unknown' }]));
+      for (const [key, value] of members)
+        members.set(key, tokenUnion([value, { kind: 'unknown' }]));
     };
     for (const property of node.properties) {
-      if (ts.isSpreadAssignment(property)) { spreadInto(evaluateTokenGraph(property.expression, scope)); continue; }
-      if (ts.isMethodDeclaration(property) || ts.isGetAccessorDeclaration(property) || ts.isSetAccessorDeclaration(property)) {
+      if (ts.isSpreadAssignment(property)) {
+        spreadInto(evaluateTokenGraph(property.expression, scope));
+        continue;
+      }
+      if (
+        ts.isMethodDeclaration(property) ||
+        ts.isGetAccessorDeclaration(property) ||
+        ts.isSetAccessorDeclaration(property)
+      ) {
         const keys = tokenPropertyKeys(property.name, scope);
-        if (keys?.length === 1) members.set(keys[0], {kind:'unknown'});
+        if (keys?.length === 1) members.set(keys[0], { kind: 'unknown' });
         else {
           complete = false;
-          for (const key of keys ?? members.keys()) members.set(key, tokenUnion([members.get(key), {kind:'unknown'}]));
+          for (const key of keys ?? members.keys())
+            members.set(key, tokenUnion([members.get(key), { kind: 'unknown' }]));
         }
         continue;
       }
       if (ts.isPropertyAssignment(property) || ts.isShorthandPropertyAssignment(property)) {
         const keys = tokenPropertyKeys(property.name, scope);
-        const value = evaluateTokenGraph(ts.isPropertyAssignment(property) ? property.initializer : property.name, scope)
-          ?? { kind: 'unknown' };
+        const value = evaluateTokenGraph(
+          ts.isPropertyAssignment(property) ? property.initializer : property.name,
+          scope
+        ) ?? { kind: 'unknown' };
         if (keys?.length === 1) members.set(keys[0], value);
         else {
           complete = false;
@@ -4349,18 +4479,24 @@ function evaluateTokenGraph(expression, scope) {
   if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
     const graph = evaluateTokenGraph(node.expression, scope);
     if (!graph) return undefined;
-    const keys = ts.isPropertyAccessExpression(node) ? [node.name.text]
-      : node.argumentExpression ? tokenIndexKeys(node.argumentExpression, scope) : null;
+    const keys = ts.isPropertyAccessExpression(node)
+      ? [node.name.text]
+      : node.argumentExpression
+        ? tokenIndexKeys(node.argumentExpression, scope)
+        : null;
     return tokenMember(graph, keys);
   }
-  if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression) &&
-      node.expression.name.text === 'join') {
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    node.expression.name.text === 'join'
+  ) {
     const array = evaluateTokenGraph(node.expression.expression, scope);
     // Only model a proven array with its original join; an own member/write
     // can replace the method, and incomplete arrays have unknown positions.
-    if (!tokenJoinArray(array)) return {kind:'unknown'};
+    if (!tokenJoinArray(array)) return { kind: 'unknown' };
     const separator = tokenJoinSeparator(node, scope);
-    if (!separator) return {kind:'unknown'};
+    if (!separator) return { kind: 'unknown' };
     const parts = [];
     let index = 0;
     for (const value of array.members.values()) {
@@ -4369,7 +4505,11 @@ function evaluateTokenGraph(expression, scope) {
     }
     return composeTokenStrings(parts);
   }
-  if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === 'tw')
+  if (
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === 'tw'
+  )
     return tokenUnion(node.arguments.map((arg) => evaluateTokenGraph(arg, scope)));
   return undefined;
 }
@@ -4384,25 +4524,35 @@ function withTokenGraph(value, graph) {
   // the existing semantic member-write tracker installs maps/proofs on it.
   // Copying here would mutate only a temporary wrapper and lose later writes.
   if (graph.kind === 'array') return Object.assign(value, { tokenGraph: graph, single: null });
-  return Object.assign(value, { tokenGraph: graph, strings,
-    single: finite?.length === 1 && !value.unknownAlternative ? finite[0] : null });
+  return Object.assign(value, {
+    tokenGraph: graph,
+    strings,
+    single: finite?.length === 1 && !value.unknownAlternative ? finite[0] : null,
+  });
 }
 
 function writeTokenMember(target, right, scope, uncertain, remove = false) {
   const node = unwrapTransparent(target);
   const graph = evaluateTokenGraph(node.expression, scope);
-  const keys = ts.isPropertyAccessExpression(node) ? [node.name.text]
-    : node.argumentExpression ? tokenIndexKeys(node.argumentExpression, scope) : null;
+  const keys = ts.isPropertyAccessExpression(node)
+    ? [node.name.text]
+    : node.argumentExpression
+      ? tokenIndexKeys(node.argumentExpression, scope)
+      : null;
   const targets = graph?.kind === 'union' ? graph.items : [graph];
   for (const item of targets) {
     if (!item?.members) continue;
-    if (item.kind === 'array' && (remove || !keys || keys.some((key) =>
-      !/^(0|[1-9]\d*)$/.test(key) || !item.members.has(key)))) item.complete = false;
+    if (
+      item.kind === 'array' &&
+      (remove || !keys || keys.some((key) => !/^(0|[1-9]\d*)$/.test(key) || !item.members.has(key)))
+    )
+      item.complete = false;
     for (const key of keys ?? [...item.members.keys()]) {
       const prior = item.members.get(key);
       const next = right ?? { kind: 'unknown' };
       if (!uncertain && keys?.length === 1 && targets.length === 1) {
-        if (remove) item.members.delete(key); else item.members.set(key, next);
+        if (remove) item.members.delete(key);
+        else item.members.set(key, next);
       } else item.members.set(key, tokenUnion([prior, next]));
     }
     if (!keys) {
@@ -4412,13 +4562,13 @@ function writeTokenMember(target, right, scope, uncertain, remove = false) {
   }
 }
 
-
 function containsTokenGraph(graph, target, seen = new Set()) {
   if (!graph || seen.has(graph)) return false;
   if (graph === target) return true;
   seen.add(graph);
-  return [...(graph.members?.values() ?? []), ...(graph.items ?? []), graph.unknownMember]
-    .some((child) => containsTokenGraph(child, target, seen));
+  return [...(graph.members?.values() ?? []), ...(graph.items ?? []), graph.unknownMember].some(
+    (child) => containsTokenGraph(child, target, seen)
+  );
 }
 
 function taintTokenGraph(graph, seen = new Set()) {
@@ -4440,25 +4590,38 @@ function applyTokenCallMutation(node, scope, arguments_, receiver, readsOnly) {
   const mutation = hookSourceCallMutation(node);
   if (mutation.kind === 'copy') {
     const target = arguments_[mutation.target];
-    if (target?.kind !== 'object') { taintTokenGraph(target); return; }
-    const uncertain = isConditionallyReached(node, scope.definitelyReachedLogicalAssignments) ||
-      isDeferredWrite(node, enclosingFunction(scopeOwningValue({tokenGraph: target}, scope)?.node));
+    if (target?.kind !== 'object') {
+      taintTokenGraph(target);
+      return;
+    }
+    const uncertain =
+      isConditionallyReached(node, scope.definitelyReachedLogicalAssignments) ||
+      isDeferredWrite(
+        node,
+        enclosingFunction(scopeOwningValue({ tokenGraph: target }, scope)?.node)
+      );
     for (const index of mutation.sources) {
       const source = arguments_[index];
       if (source?.kind === 'noop') continue;
       const alternatives = source?.kind === 'union' ? source.items : [source];
       const sources = alternatives.filter((item) => item?.kind === 'object');
-      const proven = alternatives.every((item) => item?.kind === 'noop' || item?.kind === 'object' && item.complete);
+      const proven = alternatives.every(
+        (item) => item?.kind === 'noop' || (item?.kind === 'object' && item.complete)
+      );
       if (!proven) taintTokenGraph(target);
       const keys = new Set(sources.flatMap((item) => [...item.members.keys()]));
       for (const key of keys) {
-        const values = alternatives.map((item) => item?.members?.get(key) ??
-          (item?.kind === 'noop' || item?.complete ? target.members.get(key) : undefined));
+        const values = alternatives.map(
+          (item) =>
+            item?.members?.get(key) ??
+            (item?.kind === 'noop' || item?.complete ? target.members.get(key) : undefined)
+        );
         const value = tokenUnion(values);
         target.members.set(key, uncertain ? tokenUnion([target.members.get(key), value]) : value);
       }
       for (const item of sources) {
-        if (item.unknownMember) target.unknownMember = tokenUnion([target.unknownMember, item.unknownMember]);
+        if (item.unknownMember)
+          target.unknownMember = tokenUnion([target.unknownMember, item.unknownMember]);
       }
     }
     return;
@@ -4469,24 +4632,33 @@ function applyTokenCallMutation(node, scope, arguments_, receiver, readsOnly) {
 
 function bindTokenLoopPattern(name, graph, scope) {
   if (ts.isIdentifier(name)) {
-    scope.bindings.set(name.text, withTokenGraph(emptyValue(), graph ?? {kind: 'unknown'}));
+    scope.bindings.set(name.text, withTokenGraph(emptyValue(), graph ?? { kind: 'unknown' }));
     return;
   }
   const consumed = new Set();
   name.elements.forEach((element, index) => {
     if (!ts.isBindingElement(element)) return;
-    const keys = ts.isArrayBindingPattern(name) ? [String(index)]
+    const keys = ts.isArrayBindingPattern(name)
+      ? [String(index)]
       : tokenPropertyKeys(element.propertyName ?? element.name, scope);
     let selected;
     if (element.dotDotDotToken) {
       if (graph?.members) {
-        const entries = [...graph.members].filter(([key]) => ts.isArrayBindingPattern(name)
-          ? Number(key) >= index : !consumed.has(key));
-        selected = {...graph, members: new Map(ts.isArrayBindingPattern(name)
-          ? entries.map(([,value],i) => [String(i),value]) : entries)};
-      } else selected = {kind:'unknown'};
+        const entries = [...graph.members].filter(([key]) =>
+          ts.isArrayBindingPattern(name) ? Number(key) >= index : !consumed.has(key)
+        );
+        selected = {
+          ...graph,
+          members: new Map(
+            ts.isArrayBindingPattern(name)
+              ? entries.map(([, value], i) => [String(i), value])
+              : entries
+          ),
+        };
+      } else selected = { kind: 'unknown' };
     } else selected = tokenMember(graph, keys);
-    if (element.initializer) selected = tokenUnion([selected, evaluateTokenGraph(element.initializer, scope)]);
+    if (element.initializer)
+      selected = tokenUnion([selected, evaluateTokenGraph(element.initializer, scope)]);
     for (const key of keys ?? []) consumed.add(key);
     bindTokenLoopPattern(element.name, selected, scope);
   });
