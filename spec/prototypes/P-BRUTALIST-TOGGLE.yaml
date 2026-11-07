@@ -68,7 +68,7 @@ criteria:
       zh-CN: >-
         hover/press 保持 flat frame，无 translation 或外侧阴影；active inset 持续存在。focus-visible 保留 offset ring；disabled 保留 opacity-50/pointer-events-none 以及几何与 marker。这属于 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 的 flat selection control category，其命名 exception 对 active 状态设限，而不套用 Button 位移。
     dependsOn:
-      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+      decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 
 
   - id: P-BRUTALIST-TOGGLE-VISUAL-GRAMMAR
@@ -93,7 +93,7 @@ relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
   contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
-  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+  decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 inherits:
   prototypes:
     - id: P-BASE-TOGGLE

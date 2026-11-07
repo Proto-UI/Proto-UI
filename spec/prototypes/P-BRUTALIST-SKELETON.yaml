@@ -28,7 +28,7 @@ criteria:
       zh-CN: >-
         Skeleton 使用 rounded-base 5px、border-2 border-black 与 bg-secondary-background，无阴影；保留现有 Proto UI 静态 motion 合同，不隐式引入上游 pulse animation。作为 D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001 下的 loading placeholder，它不拥有 hover 或 press motion。
     dependsOn:
-      decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+      decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 
 
   - id: P-BRUTALIST-SKELETON-CONSUMER-SIZE
@@ -57,7 +57,7 @@ dependsOn:
     - C-CORE-SYNTAX-0003
     - C-A11Y-0001
     - C-RULE-INTENT-FEEDBACK-STYLE-0001
-  decisions: [D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001]
+  decisions: [{ id: D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001, since: 0.3.0-alpha.1 }]
 verifies:
   tests:
     - T-BRUTALIST-SKELETON-0001
