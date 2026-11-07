@@ -1,0 +1,46 @@
+id: P-BRUTALIST-RADIO-GROUP-INDICATOR
+type: prototype
+title: Brutalist Radio Group Indicator inherits Base state and paints the pinned filled dot
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Derived passive dot consumer painting one aria-hidden filled circle when its Item is checked.
+statement:
+  zh-CN: 此纯呈现 part 从最近 Base domain 派生 checked 与 disabled；16px 圆内的 size-2 实心圆点对应固定 Neo 的 Lucide Circle 处理，glyph 为 aria-hidden 且不创建交互 owner。
+  en: This presentation-only part derives checked and disabled from the nearest Base domain. The size-2 filled dot inside the 16px circle follows the pinned Neo Lucide Circle treatment; the glyph is aria-hidden and creates no interaction owner.
+criteria:
+  - id: P-BRUTALIST-RADIO-GROUP-INDICATOR-BASE-INHERITANCE
+    text:
+      zh-CN: Indicator 必须通过 asRadioGroupIndicator() 继承 P-BASE-RADIO-GROUP-INDICATOR，保留 same-domain context 派生，并且不得创建自治 checked 或 disabled state。
+      en: The Indicator must inherit P-BASE-RADIO-GROUP-INDICATOR through asRadioGroupIndicator(), retain same-domain context derivation, and create no autonomous checked or disabled state.
+  - id: P-BRUTALIST-RADIO-GROUP-INDICATOR-DIRECT-ENTRY
+    text:
+      zh-CN: Indicator direct entry 为 brutalist-radio-group-indicator，且本层不提供 authored asHook。
+      en: The Indicator direct entry is brutalist-radio-group-indicator and this layer provides no authored asHook.
+  - id: P-BRUTALIST-RADIO-GROUP-INDICATOR-PASSIVE-DERIVED
+    text:
+      zh-CN: Indicator 只能 expose 从 context 派生的 checked 与 disabled observation。它不得拥有 activation route、focus target、event target、form behavior、role 或 aria-checked；其 SVG 圆点必须 aria-hidden，重复更新不得叠加 SVG。
+      en: The Indicator may expose only context-derived checked and disabled observation. It must have no activation route, focus target, event target, form behavior, role, or aria-checked; its SVG dot must be aria-hidden, and repeated updates must not stack SVGs.
+  - id: P-BRUTALIST-RADIO-GROUP-INDICATOR-VISUAL-GRAMMAR
+    text:
+      zh-CN: Indicator 投射 flex size-2 items-center justify-center text-current，unchecked 为 opacity-0、checked 为 opacity-100；圆点为 fill-current 纯色圆且无 stroke，样式随所属 Item 的 text 颜色。unchecked 保持零渲染之外的同结构透明底。
+      en: The Indicator projects flex size-2 items-center justify-center text-current with opacity-0 unchecked and opacity-100 checked. The dot is a flat fill-current circle with no stroke whose color follows the containing Item text, and the unchecked state keeps the same transparent structure rather than removing the glyph.
+sources:
+  - path: packages/prototypes/brutalist/src/radio-group/indicator.proto.ts
+  - path: packages/prototypes/brutalist/src/radio-group/types.ts
+  - path: packages/prototypes/brutalist/test/radio-group.test.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/radio-group.tsx
+    label: Pinned Neo source; SHA256 85e6e1cba2c09b21b8673d1c99b913995246b93ed933d9e6fd697de44f44e2c2
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP-INDICATOR
+verifies: { tests: [T-BRUTALIST-RADIO-GROUP-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, radio-group]

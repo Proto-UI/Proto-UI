@@ -996,6 +996,29 @@ const BRUTALIST_MANIFEST = {
         },
       },
     },
+    'radio-group': {
+      baseFamilyId: 'P-BASE-RADIO-GROUP',
+      recipeId: 'demo-brutalist-radio-group',
+      recipePrototypeIds: [
+        'brutalist-radio-group-root',
+        'brutalist-radio-group-item',
+        'brutalist-radio-group-indicator',
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP',
+          prototypeId: 'brutalist-radio-group-root',
+        },
+        item: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM',
+          prototypeId: 'brutalist-radio-group-item',
+        },
+        indicator: {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'brutalist-radio-group-indicator',
+        },
+      },
+    },
     badge: {
       baseFamilyId: null,
       recipeId: 'demo-brutalist-badge',

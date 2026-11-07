@@ -1,0 +1,46 @@
+id: P-BRUTALIST-RADIO-GROUP-ITEM
+type: prototype
+title: Brutalist Radio Group Item inherits Base selection facts and projects the pinned circular control
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Presentation-only radio choice surface consuming the Base Item's derived checked, focus and disabled facts.
+statement:
+  zh-CN: 此纯呈现 Item 消费 Base 派生的 checked、focusVisible、hovered、pressed 与 effective-disabled facts；Base 保留 value 请求、activation、roving focus 与 aria owner。
+  en: This presentation-only Item consumes the Base-derived checked, focusVisible, hovered, pressed, and effective-disabled facts. Base retains value requests, activation, roving focus, and the aria owners.
+criteria:
+  - id: P-BRUTALIST-RADIO-GROUP-ITEM-BASE-INHERITANCE
+    text:
+      zh-CN: Item 必须通过 asRadioGroupItem() 一次性继承 P-BASE-RADIO-GROUP-ITEM，只为呈现消费投影出的 disabled 与 focusVisible handles，不得重定义 Base checked、activation 或 roving 语义。
+      en: The Item must inherit P-BASE-RADIO-GROUP-ITEM once through asRadioGroupItem() and may consume only the projected disabled and focusVisible handles for presentation; it must not redefine Base checked, activation, or roving semantics.
+  - id: P-BRUTALIST-RADIO-GROUP-ITEM-ENTRY
+    text:
+      zh-CN: Item direct entry 为 brutalist-radio-group-item，且本层不提供 authored asHook。
+      en: The Item direct entry is brutalist-radio-group-item and this layer provides no authored asHook.
+  - id: P-BRUTALIST-RADIO-GROUP-ITEM-NO-CHECKED-VARIANT
+    text:
+      zh-CN: checked 只改变 Indicator 圆点；Item surface 永远保持同一 16px 圆形 2px border-border 静止表面，不投射 checked fill、border 或 variant 变化。
+      en: Checking changes only the Indicator dot. The Item surface always keeps the same 16px circular 2px border-border resting surface and projects no checked fill, border, or variant change.
+  - id: P-BRUTALIST-RADIO-GROUP-ITEM-VISUAL-GRAMMAR
+    text:
+      zh-CN: Item 投射 inline-flex aspect-square size-4 items-center justify-center rounded-full border-2 border-border bg-transparent text-black，focus-visible 使用 family offset ring，disabled 保留 opacity 与 pointer gate 并加 cursor-not-allowed；press 不改变几何或阴影。因本层不新增 validation owner，不投射上游 invalid 样式。
+      en: The Item projects inline-flex aspect-square size-4 items-center justify-center rounded-full border-2 border-border bg-transparent text-black, uses the family offset ring for focus-visible, retains the disabled opacity and pointer gate with cursor-not-allowed, and press changes no geometry or shadow. Upstream invalid styles stay omitted because this layer adds no validation owner.
+sources:
+  - path: packages/prototypes/brutalist/src/radio-group/item.proto.ts
+  - path: packages/prototypes/brutalist/src/radio-group/types.ts
+  - path: packages/prototypes/brutalist/test/radio-group.test.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/radio-group.tsx
+    label: Pinned Neo source; SHA256 85e6e1cba2c09b21b8673d1c99b913995246b93ed933d9e6fd697de44f44e2c2
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts:
+    [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-RADIO-GROUP-ITEM
+verifies: { tests: [T-BRUTALIST-RADIO-GROUP-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, radio-group]

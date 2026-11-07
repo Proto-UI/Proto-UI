@@ -1348,6 +1348,19 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-brutalist/checkbox');
     registerPrototype('brutalist-checkbox-indicator', mod.brutalistCheckboxIndicator);
   },
+  // Runtime-selected preview registry keeps the real public family import lazy.
+  'brutalist-radio-group-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/radio-group');
+    registerPrototype('brutalist-radio-group-root', mod.brutalistRadioGroupRoot);
+  },
+  'brutalist-radio-group-item': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/radio-group');
+    registerPrototype('brutalist-radio-group-item', mod.brutalistRadioGroupItem);
+  },
+  'brutalist-radio-group-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/radio-group');
+    registerPrototype('brutalist-radio-group-indicator', mod.brutalistRadioGroupIndicator);
+  },
   // Runtime-selected preview registry keeps the public Tooltip package import lazy.
   'shadcn-tooltip-group': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/tooltip');

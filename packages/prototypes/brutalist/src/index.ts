@@ -164,6 +164,7 @@ export * from './scroll-area';
 export * from './spinner';
 export * from './tooltip';
 export * from './checkbox';
+export * from './radio-group';
 export type {
   BrutalistDialogRootProps,
   BrutalistDialogRootExposes,
