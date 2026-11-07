@@ -120,6 +120,11 @@
       "import": "./dist/radio-group/index.js",
       "default": "./dist/radio-group/index.js"
     },
+    "./transition": {
+      "types": "./dist/transition/index.d.ts",
+      "import": "./dist/transition/index.js",
+      "default": "./dist/transition/index.js"
+    },
     "./text": {
       "types": "./dist/text/index.d.ts",
       "import": "./dist/text/index.js",

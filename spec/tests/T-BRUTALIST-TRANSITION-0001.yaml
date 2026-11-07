@@ -1,0 +1,68 @@
+id: T-BRUTALIST-TRANSITION-0001
+type: test
+title: Brutalist Transition public API and flat/fade presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-TRANSITION 准则一一映射；本条目只描述当前 synthetic DOM 测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-TRANSITION criteria. This entity records the current synthetic-DOM tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Transition public export boundary, inherited Base phase-machine lifecycle and controls, the flat/fade endpoint opacity rule with its forbidden-motion closure, transparent slot preservation, and reduced-motion duration collapse against the P-BRUTALIST-TRANSITION criteria.
+
+
+cases:
+  - id: T-BRUTALIST-TRANSITION-0001-CASE-1
+    title: Direct entry, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-TRANSITION-ENTRY
+      - P-BRUTALIST-TRANSITION-BASE-INHERITANCE
+      - P-BRUTALIST-TRANSITION-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-transition-entry-inheritance-and-package-boundary
+  - id: T-BRUTALIST-TRANSITION-0001-CASE-2
+    title: Flat/fade endpoint opacity only through the real phase machine
+    covers:
+      - P-BRUTALIST-TRANSITION-FLAT-FADE-BOUNDARY
+      - P-BRUTALIST-TRANSITION-BASE-INHERITANCE
+    expectation: p-brutalist-transition-flat-fade-endpoint-grammar
+  - id: T-BRUTALIST-TRANSITION-0001-CASE-3
+    title: Transparent slot, events, and reduced-motion collapse stay Base-owned
+    covers:
+      - P-BRUTALIST-TRANSITION-ENTRY
+      - P-BRUTALIST-TRANSITION-BASE-INHERITANCE
+    expectation: p-brutalist-transition-transparent-slot-and-reduced-motion
+implementations:
+  - id: prototypes-brutalist-transition-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/transition.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TRANSITION-0001-CASE-1
+      - T-BRUTALIST-TRANSITION-0001-CASE-2
+      - T-BRUTALIST-TRANSITION-0001-CASE-3
+    exercises:
+      - P-BASE-TRANSITION
+      - P-BRUTALIST-TRANSITION
+  - id: www-brutalist-transition-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-transition.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TRANSITION-0001-CASE-2
+    exercises:
+      - P-BASE-TRANSITION
+      - P-BRUTALIST-TRANSITION
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-TRANSITION
+exercises:
+  prototypes:
+    - P-BASE-TRANSITION
+    - P-BRUTALIST-TRANSITION
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - transition

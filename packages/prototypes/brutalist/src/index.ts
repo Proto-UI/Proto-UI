@@ -258,5 +258,7 @@ export * from './date-picker';
 
 export * from './data-table';
 
+export * from './transition';
+
 export { default as inputRoot, default as brutalistInputRoot } from './input';
 export type { BrutalistInputRootProps, BrutalistInputRootExposes } from './input';

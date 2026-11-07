@@ -1361,6 +1361,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-brutalist/radio-group');
     registerPrototype('brutalist-radio-group-indicator', mod.brutalistRadioGroupIndicator);
   },
+  'brutalist-transition': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/transition');
+    registerPrototype('brutalist-transition', mod.transition);
+  },
   // Runtime-selected preview registry keeps the public Tooltip package import lazy.
   'shadcn-tooltip-group': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/tooltip');
