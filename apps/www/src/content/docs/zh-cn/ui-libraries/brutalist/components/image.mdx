@@ -1,0 +1,29 @@
+---
+title: 'Image'
+description: '覆盖在 Base Image 协议之上的 Brutalist Image 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 只包含一个 Root。portable image presentation protocol 由 Base Image 所有：opaque `source` URI 每次变更创建新 generation、informative/decorative `a11yMode` 二分输入与 `alternativeText`、`fit`（`contain | cover | fill`），以及 `idle | loading | loaded | error` 的 `loadingStatus` 与 `loadingStatusChange` event。实际的加载、解码与渲染由 host-owned Image View target 执行。
+
+Brutalist 层只拥有呈现。固定 Neo 来源没有独立 image 组件，因此外框沿用其已实现的带框图像表面 —— `image-card.tsx@3306a802` 的 `rounded-base border-2 border-border shadow-shadow` —— 按 family Card 的物理映射投射为 `rounded-base border-2 border-black` 与 `4px/4px` 实心 offset 阴影。`block max-w-full h-auto` 使带框 target 保持响应式，宽高与 fit 仍由 consumer 输入；Root 不绘制 loading、error 或交互 chrome，也不安装第二个 image owner 或伪造 slot。
+
+Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/image` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-image` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-image" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 查看三个 fit 示例，确认 `contain`、`cover`、`fill` 只改变同一外框内的图像内容。
+2. 确认 decorative 图像对辅助技术保持静默，含义由相邻文本承载。
+3. 确认 broken-source 实例在 `loadingStatus` 报告 `error` 时仍保留外框。
+4. 确认替换 `source` 产生新 generation 并触发 `loadingStatusChange` transition。
+5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Image guarantee。

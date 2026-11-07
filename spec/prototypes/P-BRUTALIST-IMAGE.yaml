@@ -1,0 +1,50 @@
+id: P-BRUTALIST-IMAGE
+type: prototype
+title: Brutalist Image Root inherits Base Image and projects the pinned framed-photo surface
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Image protocol while the host-owned Image View target keeps loading, decoding and rendering.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Image authoring entry 与冻结的 Image View module requirement，不安装另一 image、source、a11y、fit 或 loading owner。
+  en: This Proto UI authored presentation consumes the Base Image authoring entry and its frozen Image View module requirement unchanged. It does not install another image, source, a11y, fit, or loading owner.
+criteria:
+  - id: P-BRUTALIST-IMAGE-BASE-INHERITANCE
+    text:
+      zh-CN: Root 必须通过 asImageRoot() 一次性继承 P-BASE-IMAGE，原样转发其冻结 Image View module 与 contentless render；source generation、informative/decorative 二分输入、alternativeText、fit、loadingStatus 与 loadingStatusChange 保持 Base/Image View 事实。
+      en: The Root must inherit P-BASE-IMAGE once through asImageRoot(), forwarding its frozen Image View module and contentless render unchanged; source generation, the informative/decorative binary, alternativeText, fit, loadingStatus and loadingStatusChange remain Base/Image View facts.
+  - id: P-BRUTALIST-IMAGE-ENTRY
+    text:
+      zh-CN: Root direct entry 为 brutalist-image-root，且本层不提供 authored asHook。
+      en: The Root direct entry is brutalist-image-root and this layer provides no authored asHook.
+  - id: P-BRUTALIST-IMAGE-VISUAL-GRAMMAR
+    text:
+      zh-CN: 固定 Neo 无独立 image 组件，外框沿用 image-card.tsx@3306a802 已实现的带框图像表面，按 family 映射投射 block max-w-full h-auto rounded-base border-2 border-black 加 4px/4px 实心 offset 阴影；尺寸属于 consumer，Root 不绘制 loading/error 或交互 chrome。
+      en: With no standalone pinned Neo image component, the frame follows image-card.tsx@3306a802's authored framed image surface projected under the family mapping as block max-w-full h-auto rounded-base border-2 border-black plus the 4px/4px solid offset shadow; dimensions stay consumer-owned and the Root paints no loading, error, or interaction chrome.
+  - id: P-BRUTALIST-IMAGE-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./image anatomy subpath 导出 Root。Image 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export the Root from its package root and ./image anatomy subpath. Image must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/image/root.proto.ts
+  - path: packages/prototypes/brutalist/src/image/types.ts
+  - path: packages/prototypes/brutalist/test/image.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/image.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/image.mdx
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/image-card.tsx
+    label: Pinned Neo framed image surface; SHA256 c2e0890127ac0485839f8e3bda91ab0edc09927b72c6fd5ba3cde3cdcfff2098
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/avatar.tsx
+    label: Bounded pinned comparison only; the Avatar compound is not an interchangeable replacement
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-IMAGE-VIEW-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-IMAGE-VIEW-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-IMAGE
+verifies: { tests: [T-BRUTALIST-IMAGE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, image]
