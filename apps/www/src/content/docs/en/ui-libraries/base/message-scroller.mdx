@@ -4,6 +4,8 @@ description: 'message-scroller functional composition and current verification l
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
 
@@ -16,3 +18,21 @@ Set a11yLabel on Root to name the scrollable region; the default is Messages.
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Message Scroller is workspace source. There is no public `proto-ui add` target. Viewport has no props. Jump accepts the Button props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'newContentCount', type: 'number', default: '0' },
+    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-MESSAGE-SCROLLER.yaml']} />
