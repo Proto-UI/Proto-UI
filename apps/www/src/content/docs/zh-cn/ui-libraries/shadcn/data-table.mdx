@@ -4,6 +4,8 @@ description: 'data-table composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -17,4 +19,32 @@ Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过�
   demoId="demo-shadcn-data-table"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'defaultSortKey', type: 'string', default: "''" },
+    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    { name: 'filter', type: 'string', default: "''" },
+    { name: 'defaultPage', type: 'number', default: '0' },
+    { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Row 的 `index` 默认 `0`，`header` 默认 `false`。Cell 的 `columnKey` 默认 `''`。Header 的 `sortable` 默认 `true`。Previous 与 Next 接受 Button 的属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DATA-TABLE.yaml', 'P-BASE-DATA-TABLE.yaml']}
 />

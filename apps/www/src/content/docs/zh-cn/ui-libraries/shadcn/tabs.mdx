@@ -5,6 +5,9 @@ description: 标签页组件
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
 import { getCode } from '@/utils/conversionUtils';
 
@@ -214,3 +217,31 @@ import { getCode } from '@/utils/conversionUtils';
 - `keepMounted={true}` 是唯一的 view retention 选项，会让 inactive panel 继续保留完整 view。
 
 Web Component 会保留 custom element 作为 owner，并在 internal view detached 时隐藏该 owner；重新激活后，同一个 Proto instance 会在该 owner 内物化新的 view。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+  ]}
+/>
+
+这些属性属于 Root。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']}
+/>

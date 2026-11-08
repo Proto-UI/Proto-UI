@@ -5,6 +5,9 @@ description: 'Shadcn tabs reconstructed on Proto UI.'
 
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/tabs/tabsCode';
 import { getCode } from '@/utils/conversionUtils';
 
@@ -210,3 +213,31 @@ The three examples below use **identical children, defaultValue, and disabled st
 - `keepMounted={true}` is the only view-retention option and keeps the complete inactive view mounted.
 
 Web Component keeps the custom element as the owner and hides that owner while its internal view is detached. Reactivating the panel materializes a new view inside the same Proto instance owner.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tabs" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+  ]}
+/>
+
+These props belong to Root. List defaults `orientation` to `horizontal`, `loop` to `false`, and `a11yLabel` to `''`. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TABS.yaml', 'P-BASE-TABS.yaml']}
+/>
