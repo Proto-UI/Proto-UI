@@ -4,6 +4,9 @@ description: Draft passive Shadcn Card on Proto UI.
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 The ordinary demo on this page explicitly selects the **Shadcn Rhea** presentation profile. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -21,3 +24,33 @@ Shadcn Card is a draft, passive four-part styled surface. It has no Base Card co
 The New York comparison source is [shadcn/ui Card at f31ed819](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/card.tsx), under its [MIT notice](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/LICENSE.md). Proto UI is an independent implementation; the profile notes above describe its bounded Card subset, not complete Rhea source parity. Native screenshot, first-frame and cross-host acceptance remain separate gates; this draft is not stable or a completed Finf goal.
 
 <PrototypePreviewer demoId="demo-shadcn-card" initialRuntime="wc" />
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-card" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'size', type: "'default' | 'sm'", default: 'default' },
+    { name: 'divider', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`size` belongs to Root. `divider` belongs to Header and Footer. Content adds no props of its own. None of the four parts expose events.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-CARD.yaml',
+    'P-SHADCN-CARD-HEADER.yaml',
+    'P-SHADCN-CARD-CONTENT.yaml',
+    'P-SHADCN-CARD-FOOTER.yaml',
+  ]}
+/>

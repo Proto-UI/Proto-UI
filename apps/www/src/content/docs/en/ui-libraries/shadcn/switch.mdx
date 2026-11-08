@@ -4,6 +4,9 @@ description: 'Shadcn switch reconstructed on Proto UI.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -27,3 +30,34 @@ The upstream [Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 
 <div id="switch-composition-details">The label names the control; the description supplies help. Drag previews a position while held and requests a value only on release. The root remains the sole checked-value owner.</div>
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `checked` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'size', type: "'default' | 'sm'", default: 'default' },
+  ]}
+/>
+
+`size` is the Shadcn presentation prop. Thumb has no props. Root remains the only checked-value owner.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SWITCH.yaml', 'P-BASE-SWITCH.yaml']}
+/>
