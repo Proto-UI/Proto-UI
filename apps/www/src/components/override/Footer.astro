@@ -1,0 +1,9 @@
+---
+import Default from '@astrojs/starlight/components/Footer.astro';
+
+// The homepage ends where the gallery fade becomes solid. Starlight still
+// emits an empty footer (meta margin plus pagination shell) after that fade.
+const isHomepage = /^(?:\/(?:en|zh-cn))?\/?$/.test(Astro.url.pathname);
+---
+
+{isHomepage ? null : <Default />}

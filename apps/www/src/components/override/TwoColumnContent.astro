@@ -1,8 +1,11 @@
 ---
 const { hasSidebar, entry } = Astro.locals.starlightRoute;
 const isSplash = entry.data.template === 'splash';
+const isHomepage = /^(?:\/(?:en|zh-cn))?\/?$/.test(Astro.url.pathname);
 const mainPaneClass = isSplash
-  ? 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-8 px-1 py-6 text-foreground md:px-6 lg:gap-10 lg:py-10'
+  ? isHomepage
+    ? 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-8 px-1 pt-6 pb-0 text-foreground md:px-6 lg:gap-10 lg:pt-10 lg:pb-0'
+    : 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-8 px-1 py-6 text-foreground md:px-6 lg:gap-10 lg:py-10'
   : 'main-pane mx-auto flex w-full max-w-[var(--docs-reading-width,42rem)] min-w-0 flex-1 flex-col gap-8 px-0 [--docs-reading-inset:1.5rem] py-[var(--docs-reading-inset)] text-neutral-800 md:px-0 lg:[--docs-reading-inset:2rem] dark:text-neutral-200';
 ---
 

@@ -1903,6 +1903,7 @@ export default defineConfig({
         Hero: './src/components/override/Hero.astro',
         ContentPanel: './src/components/override/ContentPanel.astro',
         Header: './src/components/override/Header.astro',
+        Footer: './src/components/override/Footer.astro',
         Search: './src/components/override/Search.astro',
         PageFrame: './src/components/override/PageFrame.astro',
         Sidebar: './src/components/override/Sidebar.astro',
