@@ -1,0 +1,82 @@
+id: T-BRUTALIST-ASYNC-REGION-0001
+type: test
+title: Brutalist Async Region public API and presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-ASYNC-REGION 准则一一映射；本条目只描述当前 synthetic DOM 测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-ASYNC-REGION criteria. This entity records the current synthetic DOM tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Async Region public API, single Base semantic inheritance, busy/aria-busy projection, restrained family ink surface, absent interaction and loading chrome, and authored payload and focus preservation against the P-BRUTALIST-ASYNC-REGION criteria.
+
+
+cases:
+  - id: T-BRUTALIST-ASYNC-REGION-0001-CASE-1
+    title: Direct entries, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-ASYNC-REGION-ENTRY
+      - P-BRUTALIST-ASYNC-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-ASYNC-REGION-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-async-region-entries-inheritance-and-package-boundary
+  - id: T-BRUTALIST-ASYNC-REGION-0001-CASE-2
+    title: Default not-busy semantics with restrained ink and no interaction or loading chrome
+    covers:
+      - P-BRUTALIST-ASYNC-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-ASYNC-REGION-NO-INTERACTION
+      - P-BRUTALIST-ASYNC-REGION-VISUAL-GRAMMAR
+    expectation: p-brutalist-async-region-default-not-busy-surface
+  - id: T-BRUTALIST-ASYNC-REGION-0001-CASE-3
+    title: Busy prop transitions stay Base-owned and never materialize a loading widget
+    covers:
+      - P-BRUTALIST-ASYNC-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-ASYNC-REGION-VISUAL-GRAMMAR
+    expectation: p-brutalist-async-region-busy-transitions-preserve-payload
+  - id: T-BRUTALIST-ASYNC-REGION-0001-CASE-4
+    title: Mounted prop transitions preserve authored descendants and focus
+    covers:
+      - P-BRUTALIST-ASYNC-REGION-BASE-INHERITANCE
+      - P-BRUTALIST-ASYNC-REGION-NO-INTERACTION
+    expectation: p-brutalist-async-region-preserves-descendants-and-focus
+  - id: T-BRUTALIST-ASYNC-REGION-0001-CASE-5
+    title: Demo binds one real region and drives busy only through the real prop
+    covers:
+      - P-BRUTALIST-ASYNC-REGION-NO-INTERACTION
+      - P-BRUTALIST-ASYNC-REGION-VISUAL-GRAMMAR
+    expectation: p-brutalist-async-region-demo-real-busy-prop
+implementations:
+  - id: prototypes-brutalist-async-region-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/async-region.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-ASYNC-REGION-0001-CASE-1
+      - T-BRUTALIST-ASYNC-REGION-0001-CASE-2
+      - T-BRUTALIST-ASYNC-REGION-0001-CASE-3
+      - T-BRUTALIST-ASYNC-REGION-0001-CASE-4
+    exercises:
+      - P-BASE-ASYNC-REGION
+      - P-BRUTALIST-ASYNC-REGION
+  - id: www-brutalist-async-region-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-async-region.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-ASYNC-REGION-0001-CASE-5
+    exercises:
+      - P-BASE-ASYNC-REGION
+      - P-BRUTALIST-ASYNC-REGION
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-ASYNC-REGION
+exercises:
+  prototypes:
+    - P-BASE-ASYNC-REGION
+    - P-BRUTALIST-ASYNC-REGION
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - async-region

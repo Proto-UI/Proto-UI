@@ -1,0 +1,49 @@
+id: P-BRUTALIST-ASYNC-REGION
+type: prototype
+title: Brutalist Async Region Root inherits Base Async Region and adds restrained family ink only
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the corresponding Base Async Region atom.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费对应 Base authoring entry，保留 busy prop、aria-busy 投射与 authored 后代保持语义，不安装第二个语义 owner，也不引入加载组件、计时器、通知或辅助技术通路。
+  en: This Proto UI authored presentation consumes the matching Base authoring entry unchanged. It preserves the busy prop, the aria-busy projection and authored-descendant preservation semantics, installs no second semantic owner, and introduces no loading widget, timer, notification, or assistive-technology channel.
+criteria:
+  - id: P-BRUTALIST-ASYNC-REGION-BASE-INHERITANCE
+    text:
+      zh-CN: Root 通过 asAsyncRegionRoot() 一次性继承 P-BASE-ASYNC-REGION，保留 busy prop、aria-busy 投射、exposes.busy、authored 后代与 focus 保持以及 lifecycle，且不安装第二个语义 owner。
+      en: The Root inherits P-BASE-ASYNC-REGION once through asAsyncRegionRoot(), retains the busy prop, the aria-busy projection, the exposes.busy handle, authored-descendant and focus preservation, and lifecycle, and installs no second semantic owner.
+  - id: P-BRUTALIST-ASYNC-REGION-ENTRY
+    text:
+      zh-CN: Root direct entry 为 brutalist-async-region-root，且本层不提供 authored asHook。
+      en: The Root direct entry is brutalist-async-region-root and this layer provides no authored asHook.
+  - id: P-BRUTALIST-ASYNC-REGION-VISUAL-GRAMMAR
+    text:
+      zh-CN: Root 仅投射 min-w-0 max-w-full text-foreground 普通内容墨色与有界宽度；busy 是语义事实而非加载外观，本层不新增 spinner、skeleton、progress、toast、边框、阴影、焦点环、动效 token 或 checked/hover/press 视觉状态。上游 Neo 无对应 async-region 组件可固定。
+      en: The Root projects only min-w-0 max-w-full text-foreground ordinary content ink and bounded width; busy is a semantic fact, not loading chrome, so this layer adds no spinner, skeleton, progress, toast, border, shadow, focus ring, motion token, or checked/hover/press visual state. There is no upstream Neo async-region component to pin.
+  - id: P-BRUTALIST-ASYNC-REGION-NO-INTERACTION
+    text:
+      zh-CN: Async Region 不得声明 focus、tab stop、event、command、activation、selection、accessible-name override 或 announcement 通路；busy 与载荷更新仅由 authored props 与子内容变更送达。
+      en: Async Region must declare no focus, tab-stop, event, command, activation, selection, accessible-name override, or announcement channel; busy and payload updates are delivered solely by authored prop and child-content changes.
+  - id: P-BRUTALIST-ASYNC-REGION-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./async-region anatomy subpath 导出 Root。Async Region 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export the Root from its package root and ./async-region anatomy subpath. Async Region must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/async-region/root.proto.ts
+  - path: packages/prototypes/brutalist/src/async-region/types.ts
+  - path: packages/prototypes/brutalist/test/async-region.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/async-region.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/async-region.mdx
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-ASYNC-REGION
+verifies: { tests: [T-BRUTALIST-ASYNC-REGION-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, async-region, a11y]

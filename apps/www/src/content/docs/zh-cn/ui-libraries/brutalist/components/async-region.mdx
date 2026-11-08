@@ -1,0 +1,28 @@
+---
+title: 'Async Region'
+description: '覆盖在 Base Async Region 协议之上的 Brutalist Async Region 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 只包含一个 Root。受治理的 busy 语义均由 Base Async Region 所有：`busy` prop（默认 `false`）在区域元素上投射 `aria-busy`，并通过 `getExposes().busy` 暴露同一事实。busy 是语义事实而不是加载组件——本投影不添加 spinner、skeleton、progress、toast、计时器或第二个状态机。authored 后代在仅属性变化的切换中保持挂载与焦点；需要播报时，请在应用层与 Live Region 组合。该区域不声明 focus、event、command 或 accessible-name override 通路。
+
+Brutalist 层只拥有呈现且语义优先：它一次性消费 `asAsyncRegionRoot()`，保留全部继承 owner，仅追加克制的 family 表面 `min-w-0 max-w-full text-foreground`，使载荷内容可读且有界。上游 Neo 没有对应的 async-region 组件可固定；此层不引入任何边框、阴影、动效或交互外观。
+
+Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/async-region` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-async-region` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
+</div>
+
+## 建议验收路径
+
+1. 打开 `busy`，确认区域投射 `aria-busy="true"` 且 `getExposes().busy` 读出 `true`，同时 authored 载荷保持挂载。
+2. 关闭 `busy`，确认 `aria-busy` 回到 `"false"`，无重新挂载，也无任何视觉加载外观。
+3. 确认该区域不进入 tab 序，且不暴露任何 interaction 或 command 通路。
+4. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Async Region guarantee。
