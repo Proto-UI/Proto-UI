@@ -4,6 +4,9 @@ description: Atomic Field labeling, value reporting and controlled or consumer-v
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -75,3 +78,35 @@ GPUI peer 尚无物理 TextControl host；required/invalid/busy/readOnly 与 des
 [Base UI Field 比较](https://base-ui.com/react/components/field) · [shadcn Field 比较](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 表单参考](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple Text Fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
 
 这些仅是独立设计比较。Base UI 的 render/validate callback 和 Form submission 模式、shadcn 布局 API、Bootstrap DOM/classes、Apple 系统编辑 chrome 都不是继承 API 或 Proto UI 规范权威。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-field" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
+    { name: 'defaultErrors', type: 'string[]', default: '[]' },
+    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。`invalid` 与 `errors` 可选，Root 没有默认值。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-FIELD.yaml', 'P-BASE-FIELD.yaml']}
+/>

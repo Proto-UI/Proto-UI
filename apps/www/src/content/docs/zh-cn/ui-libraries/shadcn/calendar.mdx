@@ -4,6 +4,8 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -34,3 +36,33 @@ host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时�
 />
 
 Shadcn 示例年份恢复为当前年减 100 至当前年的 101 项；其他家族的 ±10 年仅是应用样例范围。月份 caption 默认使用宿主 Intl 短月份格式，`createCalendarDemo(family, {captionLocale})` 可独立于星期语言选择，因此可复现中文月份与英语星期。焦点环依据实际 focused，与 selected 独立叠加，覆盖 pointer focus；源配方依据显式profile选择，不按截图随意放大。本例使用本族 Select，上游弹层为原生 select，不声称两者原生弹层像素一致。101 项的实际 Happy DOM 打开成本仍偏高，未截断范围隐瞒该缺口。
+
+## API
+
+Calendar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。省略 `today` 表示没有今天标记。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: 'en-US' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-CALENDAR.yaml', 'P-BASE-CALENDAR.yaml']}
+/>

@@ -4,6 +4,9 @@ description: Atomic Field labeling, value reporting and controlled or consumer-v
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -79,3 +82,35 @@ The GPUI peer currently has no physical TextControl host. It also reports or omi
 [Base UI Field comparison](https://base-ui.com/react/components/field) · [shadcn Field comparison](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 forms reference](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple text-fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
 
 These are independent design comparisons. Base UI's render callbacks, validators and Form submission mode, shadcn's layout wrapper/API, Bootstrap's DOM/classes and Apple system editing chrome are not inherited APIs or Proto UI authority.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-field" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
+    { name: 'defaultErrors', type: 'string[]', default: '[]' },
+    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. `invalid` and `errors` are optional and have no Root default.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-FIELD.yaml', 'P-BASE-FIELD.yaml']}
+/>
