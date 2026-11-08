@@ -4,6 +4,8 @@ description: 'An inline searchable list of executable commands.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -23,3 +25,30 @@ The host owns the real single-line editor. Input retains focus during Arrow navi
 Parts: Root, Input, Content, Item, Empty.
 
 Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+
+## API
+
+Command is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact. It reuses the shared search-family props. Because the list is inline, `defaultOpen` is `true`. Command has no Trigger.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Input defaults `placeholder`, `a11yLabel`, and `name` to `''`. Content defaults to `side="bottom"`, `align="start"`, `sideOffset` `4`, and `collisionPadding` `8`. Item defaults `value`, `textValue`, and `keywords` to `''`, and `disabled` to `false`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>
