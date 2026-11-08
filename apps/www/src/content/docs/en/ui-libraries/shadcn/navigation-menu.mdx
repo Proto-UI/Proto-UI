@@ -4,6 +4,8 @@ description: 'Named navigation disclosures with native destination links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -25,3 +27,26 @@ Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/
 Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
 
 React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.
+
+## API
+
+Navigation Menu is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. It reuses the shared menu-family Root props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `sideOffset` to `4`. Item defaults `closeOnSelect` to `true`. Link defaults `href` and `rel` to `''`, `current` to `false`, and `target` to `_self`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>
