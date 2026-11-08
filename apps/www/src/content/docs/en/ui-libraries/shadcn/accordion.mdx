@@ -4,6 +4,9 @@ description: Five atomic Accordion parts with canonical group ownership, natural
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -63,3 +66,35 @@ Import accordionRoot, accordionItem, accordionHeading, accordionTrigger and acco
 Current-workspace CLI facade: proto-ui add react shadcn-accordion (also vue, vue2 and wc). Package publication/version availability is separate from this draft source.
 
 [APG design reference](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/shadcn/src/accordion)
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-accordion" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `openItems` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
+    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
+    { name: 'allowEmpty', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root. Item requires `value` and defaults `disabled` to `false`. Heading defaults `level` to `3`. Trigger has no props. Content defaults `keepMounted` and `region` to `false`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-ACCORDION.yaml', 'P-BASE-ACCORDION.yaml']}
+/>

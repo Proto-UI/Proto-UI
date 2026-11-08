@@ -4,6 +4,9 @@ description: 'Independent control naming and activation through an explicit Prot
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -45,3 +48,29 @@ The first target set is Checkbox, Switch, Radio Group Item, Input and Textarea. 
 - [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 - [P-SHADCN-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-LABEL.yaml)
 - [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-label" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'naming', type: 'boolean', default: 'true' },
+    { name: 'activation', type: 'boolean', default: 'true' },
+    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+  ]}
+/>
+
+These props belong to Root. `policy` suppresses accidental selection only while the label is actionable.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
