@@ -173,6 +173,7 @@ describe('@proto.ui/cli', () => {
       .sort();
     expect(brutalistIds).toEqual([
       'brutalist-accordion',
+      'brutalist-async-region',
       'brutalist-badge',
       'brutalist-button',
       'brutalist-card',
@@ -180,8 +181,11 @@ describe('@proto.ui/cli', () => {
       'brutalist-dialog',
       'brutalist-dropdown',
       'brutalist-hover-card',
+      'brutalist-image',
       'brutalist-input',
       'brutalist-label',
+      'brutalist-live-region',
+      'brutalist-radio-group',
       'brutalist-scroll-area',
       'brutalist-select',
       'brutalist-separator',
@@ -189,10 +193,12 @@ describe('@proto.ui/cli', () => {
       'brutalist-spinner',
       'brutalist-surface',
       'brutalist-switch',
+      'brutalist-table',
       'brutalist-tabs',
       'brutalist-text',
       'brutalist-textarea',
       'brutalist-toggle',
+      'brutalist-transition',
     ]);
     expect(COMPONENT_REGISTRY['brutalist-badge']).toMatchObject({
       packageName: '@proto.ui/prototypes-brutalist',

@@ -927,6 +927,74 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
     'brutalistTextareaRoot',
     'BrutalistTextareaRoot'
   ),
+  'brutalist-async-region': brutalist(
+    'brutalist-async-region',
+    'Brutalist Async Region',
+    'brutalistAsyncRegionRoot',
+    'BrutalistAsyncRegionRoot'
+  ),
+  'brutalist-image': brutalist(
+    'brutalist-image',
+    'Brutalist Image',
+    'brutalistImageRoot',
+    'BrutalistImageRoot'
+  ),
+  'brutalist-live-region': brutalist(
+    'brutalist-live-region',
+    'Brutalist Live Region',
+    'brutalistLiveRegionRoot',
+    'BrutalistLiveRegionRoot'
+  ),
+  'brutalist-transition': brutalist(
+    'brutalist-transition',
+    'Brutalist Transition',
+    'brutalistTransition',
+    'BrutalistTransition'
+  ),
+  'brutalist-radio-group': brutalistCompound('brutalist-radio-group', 'Brutalist Radio Group', [
+    {
+      prototypeImport: 'brutalistRadioGroupRoot',
+      exportBaseName: 'BrutalistRadioGroupRoot',
+      elementName: 'proto-ui-brutalist-radio-group-root',
+    },
+    {
+      prototypeImport: 'brutalistRadioGroupItem',
+      exportBaseName: 'BrutalistRadioGroupItem',
+      elementName: 'proto-ui-brutalist-radio-group-item',
+    },
+    {
+      prototypeImport: 'brutalistRadioGroupIndicator',
+      exportBaseName: 'BrutalistRadioGroupIndicator',
+      elementName: 'proto-ui-brutalist-radio-group-indicator',
+    },
+  ]),
+  'brutalist-table': brutalistCompound('brutalist-table', 'Brutalist Table', [
+    {
+      prototypeImport: 'brutalistTableRoot',
+      exportBaseName: 'BrutalistTableRoot',
+      elementName: 'proto-ui-brutalist-table-root',
+    },
+    {
+      prototypeImport: 'brutalistTableCaption',
+      exportBaseName: 'BrutalistTableCaption',
+      elementName: 'proto-ui-brutalist-table-caption',
+    },
+    {
+      prototypeImport: 'brutalistTableRow',
+      exportBaseName: 'BrutalistTableRow',
+      elementName: 'proto-ui-brutalist-table-row',
+    },
+    {
+      prototypeImport: 'brutalistTableHeaderCell',
+      exportBaseName: 'BrutalistTableHeaderCell',
+      elementName: 'proto-ui-brutalist-table-header-cell',
+    },
+    {
+      prototypeImport: 'brutalistTableCell',
+      exportBaseName: 'BrutalistTableCell',
+      elementName: 'proto-ui-brutalist-table-cell',
+    },
+  ]),
   'brutalist-card': brutalistCompound('brutalist-card', 'Brutalist Card', [
     {
       prototypeImport: 'brutalistCardRoot',
