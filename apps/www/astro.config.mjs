@@ -1116,6 +1116,11 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/components/live-region',
                 },
                 {
+                  label: 'Async Region (Draft)',
+                  translations: { en: 'Async Region (Draft)', 'zh-CN': 'Async Region（草案）' },
+                  slug: 'ui-libraries/brutalist/components/async-region',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/brutalist/progress',
