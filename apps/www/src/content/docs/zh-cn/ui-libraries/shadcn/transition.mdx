@@ -4,6 +4,8 @@ description: '覆盖作者内容的透明相位机 presence，不发明动效。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -21,3 +23,30 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 组成: Transition.
 
 草稿源码。完整真实过渡轨迹、减弱运动行为以及完整的 native/GPUI、编译器与独立验收证据仍未完成。
+
+本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+
+## API
+
+传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+相位机是 `closed → preparing → entering → entered → leaving`。`complete` 把 `entering` 推进到 `entered`，或把 `leaving` 推进到 `closed`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
+/>
