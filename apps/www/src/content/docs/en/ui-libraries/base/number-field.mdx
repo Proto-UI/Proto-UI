@@ -4,6 +4,8 @@ description: Draft portable input atoms.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-base-number-field"
@@ -19,3 +21,27 @@ Use Control instead of Input inside Field/FormField: FieldLabel names and activa
 Parts: root, label, input, control, increment, decrement. All four styled families inherit Base behavior.
 
 Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+
+## API
+
+Number Field is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Label, Input, Control, Increment, and Decrement add no props of their own.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-NUMBER-FIELD.yaml']} />
