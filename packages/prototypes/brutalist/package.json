@@ -125,6 +125,11 @@
       "import": "./dist/live-region/index.js",
       "default": "./dist/live-region/index.js"
     },
+    "./async-region": {
+      "types": "./dist/async-region/index.d.ts",
+      "import": "./dist/async-region/index.js",
+      "default": "./dist/async-region/index.js"
+    },
     "./transition": {
       "types": "./dist/transition/index.d.ts",
       "import": "./dist/transition/index.js",

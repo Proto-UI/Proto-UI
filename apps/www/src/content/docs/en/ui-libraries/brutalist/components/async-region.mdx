@@ -1,0 +1,28 @@
+---
+title: 'Async Region'
+description: 'Draft Brutalist Async Region presentation over the Base Async Region protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains a single Root. Base Async Region owns the governed busy semantics: the `busy` prop (default `false`) projects `aria-busy` on the region element and exposes the same fact through `getExposes().busy`. Busy is a semantic fact, not a loading widget — the projection adds no spinner, skeleton, progress, toast, timer, or replacement state machine. Authored descendants stay mounted and keep focus across prop-only transitions; for announcements, compose with Live Region at the application layer. The region declares no focus, event, command, or accessible-name override channel.
+
+The Brutalist layer is presentation-only and semantic-first: it consumes `asAsyncRegionRoot()` once, preserves every inherited owner, and adds only the restrained family surface `min-w-0 max-w-full text-foreground` so payload content stays readable and bounded. There is no upstream Neo async-region component to pin; no border, shadow, motion, or interaction chrome is invented here.
+
+Import the Root from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/async-region` anatomy subpath. This family intentionally has no `proto-ui add brutalist-async-region` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
+</div>
+
+## Suggested acceptance path
+
+1. Toggle `busy` on and confirm the region projects `aria-busy="true"` and `getExposes().busy` reads `true` while the authored payload stays mounted.
+2. Toggle `busy` off and confirm `aria-busy` returns to `"false"` with no remount and no visual loading chrome.
+3. Confirm the region stays out of the tab order and exposes no interaction or command surface.
+4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Async Region guarantee.

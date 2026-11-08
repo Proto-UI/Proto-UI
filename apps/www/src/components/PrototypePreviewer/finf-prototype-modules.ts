@@ -16,6 +16,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/live-region');
     registerExactPrototype('brutalist-live-region-root', module.liveRegionRoot);
   },
+  'brutalist-async-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/async-region');
+    registerExactPrototype('brutalist-async-region-root', module.asyncRegionRoot);
+  },
   'shadcn-image-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/image');
     registerExactPrototype('shadcn-image-root', module.imageRoot);

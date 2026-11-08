@@ -1121,6 +1121,11 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/components/live-region',
                 },
                 {
+                  label: 'Async Region (Draft)',
+                  translations: { en: 'Async Region (Draft)', 'zh-CN': 'Async Region（草案）' },
+                  slug: 'ui-libraries/brutalist/components/async-region',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/brutalist/progress',
@@ -1903,6 +1908,7 @@ export default defineConfig({
         Hero: './src/components/override/Hero.astro',
         ContentPanel: './src/components/override/ContentPanel.astro',
         Header: './src/components/override/Header.astro',
+        Footer: './src/components/override/Footer.astro',
         Search: './src/components/override/Search.astro',
         PageFrame: './src/components/override/PageFrame.astro',
         Sidebar: './src/components/override/Sidebar.astro',
