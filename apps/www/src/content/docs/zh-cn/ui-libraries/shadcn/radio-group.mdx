@@ -4,6 +4,9 @@ description: '在 Base 单选协议之上呈现 Shadcn Radio Group。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -40,3 +43,31 @@ Radio Group 包含 Root、Item 和 Indicator。Base 拥有选中值、Item 顺�
 继承的 API 不包含 `asChild`、原生表单提交或验证、`required`、invalid state、公开 `orientation` / `loop` 或通用视觉variant API；共享styleProfile是独立的外观选择，未因此引入upstream的`aria-invalid`样式。方向键循环是 Base 的固定行为，不是新增可配置 API。三个 catalog 实体保持 `draft`，此页面不声明完整 Shadcn / Radix 兼容性或稳定准入。
 
 本页显式选择Rhea：Root使用`gap-3`，Item使用`radius-2xl`和`bg-input/90`；默认根字号下仍为16px控件与8px装饰点。共享profile不会增加选择语义owner。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-radio-group" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `value` 进入受控模式。仍然没有公开的 `orientation` 或 `loop` 属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Item 必须提供 `value`，`disabled` 默认 `false`。Indicator 没有属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-RADIO-GROUP.yaml', 'P-BASE-RADIO-GROUP.yaml']}
+/>
