@@ -4,6 +4,8 @@ description: '可编辑搜索与独立选项值。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -23,3 +25,30 @@ Root.value 为选项标识，inputValue 为独立编辑文本。不匹配的输�
 组成: Root, Input, Content, Item, Empty, Trigger.
 
 草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+
+## API
+
+Combobox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。它复用共享搜索家族的属性。`defaultOpen` 为 `false`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Input 的 `placeholder`、`a11yLabel`、`name` 默认 `''`。Content 默认 `side="bottom"`、`align="start"`、`sideOffset` `4`、`collisionPadding` `8`。Item 的 `value`、`textValue`、`keywords` 默认 `''`，`disabled` 默认 `false`。Trigger 的 `disabled` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>
