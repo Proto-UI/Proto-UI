@@ -4,6 +4,8 @@ description: 'resizable functional composition and current verification limits.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -17,4 +19,32 @@ Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读�
   demoId="demo-shadcn-resizable"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+Resizable 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。结构要求两个 Panel 和一个 Handle。Handle 没有属性，无障碍名称是 `Resize panels`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+这些属性属于 Root。Panel 的 `index` 默认 `0`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-RESIZABLE.yaml', 'P-BASE-RESIZABLE.yaml']}
 />

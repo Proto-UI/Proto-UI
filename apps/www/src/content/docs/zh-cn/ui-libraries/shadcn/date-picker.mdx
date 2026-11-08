@@ -4,6 +4,8 @@ description: 'date-picker composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -15,4 +17,20 @@ Date Picker 组合真实 Popover 与 Calendar 原子。日期请求通过 Calend
   demoId="demo-shadcn-date-picker"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+Date Picker 是工作区源码，没有公开的 `proto-ui add` 目标。open、value、month 仍属于组合进来的 Popover 与 Calendar。Date Picker 自己只有 Value 上的一个属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DATE-PICKER.yaml', 'P-BASE-DATE-PICKER.yaml']}
 />
