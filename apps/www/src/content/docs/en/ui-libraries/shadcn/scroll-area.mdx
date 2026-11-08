@@ -4,6 +4,9 @@ description: 'Draft shadcn chrome over the Base host-owned scrolling domain.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -27,3 +30,33 @@ In the Web composed projection, the two tracks reserve a lower-right intersectio
 6. Repeat in Web Components, React, Vue, and Vue 2 at a 320px viewport with no page overflow.
 
 The related entities are `draft`; this page describes the current cataloged direction, not a stable compatibility guarantee.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-scroll-area" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Root has no props. Scrollbar is the only configured part.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
+  ]}
+/>
+
+`orientation` belongs to Scrollbar. Viewport and Thumb add no props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-SCROLL-AREA.yaml',
+    'P-SHADCN-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

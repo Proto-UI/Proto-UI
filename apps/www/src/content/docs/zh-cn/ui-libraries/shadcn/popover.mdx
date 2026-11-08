@@ -4,6 +4,8 @@ description: '用于少量交互内容的非模态锚定弹层。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -36,3 +38,31 @@ Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入
 />
 
 链接保留浏览器原生活动语义。本示例不实现网站目录的唯一树借用/归还，也不增加页面特有的焦点所有者。Trigger 样式仍待设计核对；新导航模式的四 runtime 原生证据尚待完成，普通 Popover 的结果不替代此模式验收。
+
+本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+
+## API
+
+传入 `open` 进入受控模式。Content 的位置默认值与 Root 分开。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'collisionPadding', type: 'number', default: '8' },
+    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+  ]}
+/>
+
+`side` 到 `collisionPadding` 属于 Content。`presentation` 是 Shadcn Trigger 与 Content 的呈现属性。Root 暴露 `open`、`openPopover`、`close`、`toggle` 和 `openChange`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-POPOVER.yaml', 'P-BASE-POPOVER.yaml']} />
