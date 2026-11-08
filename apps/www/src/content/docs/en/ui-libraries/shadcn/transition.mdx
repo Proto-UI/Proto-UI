@@ -4,6 +4,8 @@ description: 'Transparent phase-machine presence over authored content, with no 
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -21,3 +23,30 @@ The projection is transparent: the authored slot's presence is governed by the e
 Parts: Transition.
 
 Draft source. Full real transition traces, reduced-motion behavior and complete native/GPUI, compiler and independent acceptance evidence remain open.
+
+This entry is workspace source. It is not a public `proto-ui add` catalog id.
+
+## API
+
+Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+The phase machine is `closed → preparing → entering → entered → leaving`. `complete` advances `entering` to `entered`, or `leaving` to `closed`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
+/>

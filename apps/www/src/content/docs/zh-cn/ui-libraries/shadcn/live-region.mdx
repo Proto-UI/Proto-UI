@@ -4,6 +4,8 @@ description: '无交互的受治 ARIA live region 语义。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -21,3 +23,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 组成: Root.
 
 草稿源码。真实读屏送达以及完整的 native/GPUI、编译器与独立验收证据仍未完成。
+
+本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+`polite` 投射 `role="status"` 与 `aria-live="polite"`。`assertive` 投射 `role="alert"` 与 `aria-live="assertive"`。exposes 表面为空。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
+/>
