@@ -4,6 +4,8 @@ description: Draft portable input atoms.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-brutalist-input-otp"
@@ -19,3 +21,26 @@ Use Control instead of Input inside Field/FormField to bridge FieldLabel, canoni
 Parts: root, input, control, slot, separator. All four styled families inherit Base behavior.
 
 Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+
+## API
+
+Input OTP is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Input `placeholder` is optional and has no default.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+  ]}
+/>
+
+These props belong to Root. Slot defaults `index` to `0`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-INPUT-OTP.yaml']} />

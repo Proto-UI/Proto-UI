@@ -3,6 +3,9 @@ title: 'Brutalist 设计契约'
 description: '对齐官方来源的新粗野主义字体、圆角、层级与交互视觉'
 ---
 
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
 # Brutalist 设计契约
 
 当前 draft 视觉系统向 [neobrutalism.dev](https://www.neobrutalism.dev/) 对齐，参考固定为 [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4)。Proto UI 维护自己的实现与 Base 语义；这不意味着上游认证或组件 API 兼容承诺。
@@ -70,3 +73,16 @@ Select 蓝色 main fill 上的 placeholder 保留配对黑色 ink，不使用中
 本站字体产物同时提供完整 [DM Sans 版权与 OFL 许可](/fonts/dm-sans-OFL.txt)。Textarea 保留 theme-foreground 边框，使编辑区域边界与两侧相邻表面均至少有 3:1 对比，包括 Dark。
 
 Button-like 控件目前保留 PUI 的即时 snap，不声称已对齐参考站的 150ms transition-all；Switch 的 150ms Thumb transition 单独定义与验证。
+
+## API
+
+Brutalist 设计契约是 family 级文档，没有 `proto-ui add` 目标，也没有 Prototype 部件，不声明自身属性。
+
+<ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/decisions"
+  files={['D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001.yaml']}
+/>

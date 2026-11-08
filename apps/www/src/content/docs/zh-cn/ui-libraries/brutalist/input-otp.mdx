@@ -4,6 +4,8 @@ description: 可移植输入原子草稿。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-brutalist-input-otp"
@@ -19,3 +21,26 @@ Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanum
 部件: root, input, control, slot, separator. 四个视觉家族继承同一 Base 行为。
 
 当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+
+## API
+
+Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Input 的 `placeholder` 可选，没有默认值。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+  ]}
+/>
+
+这些属性属于 Root。Slot 的 `index` 默认 `0`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-INPUT-OTP.yaml']} />
