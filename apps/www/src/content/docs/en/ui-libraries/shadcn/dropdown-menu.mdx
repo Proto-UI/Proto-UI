@@ -4,6 +4,9 @@ description: 'Shadcn dropdown menu reconstructed on Proto UI.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -36,3 +39,37 @@ This is an unofficial Proto UI projection. The action arrangements reference the
 Recipe loading, structure checks, and source-host renderer checks do not establish rendered visual parity. Cross-runtime browser paint, light/dark contrast on the actual Dropdown surface, real input/accessibility, native/GPUI, compiler, packed consumers, and independent acceptance remain incomplete. No screenshot or token assertion from another component supplies that evidence.
 
 Readable recipes: [My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts), [destructive actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts), and [inset actions](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts).
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host. The registry id is `shadcn-dropdown`, not `shadcn-dropdown-menu`.
+
+## API
+
+Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: 'active-or-first',
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DROPDOWN-MENU.yaml', 'P-BASE-DROPDOWN-MENU.yaml']}
+/>

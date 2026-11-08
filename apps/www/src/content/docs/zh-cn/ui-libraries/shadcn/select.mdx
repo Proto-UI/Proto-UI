@@ -4,6 +4,9 @@ description: '基于 Proto UI Base Select 重构的 Shadcn Select。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -27,3 +30,33 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 ## Trigger 外观
 
 本页使用 `appearance="default"` 与 `styleProfile="rhea"`。可选 `ghost` 是仅 `new-york-v4`（别名 `new-york`）支持的 Proto UI 扩展；与 Rhea 或其他现代 profile 组合会拒绝，不静默转换。appearance 设在 Trigger，不设在 Root 或 Content。没有显式或继承 profile 时，Select 保留既有 New York 兼容默认值；Root 的 scope 为完整组合提供统一 profile，叶子的显式选择会覆盖继承，必须有意使用。外观切换不改变 Base 的选择、键盘或浮层协议。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-select" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `open` 或 `value` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+这些属性属于 Root。`appearance` 属于 Trigger。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SELECT.yaml', 'P-BASE-SELECT.yaml']}
+/>

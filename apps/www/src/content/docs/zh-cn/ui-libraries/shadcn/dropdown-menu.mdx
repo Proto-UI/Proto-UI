@@ -4,6 +4,9 @@ description: '基于 Proto UI 重构的 Shadcn Dropdown Menu。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -36,3 +39,37 @@ Edit/Pencil、Share/Share、Archive/Archive、Delete/Trash 沿用固定上游 `D
 Recipe 加载、结构检查和源码宿主 renderer 检查不代表真实渲染的视觉一致性。跨运行时浏览器绘制、实际 Dropdown surface 的明暗主题对比度、真实输入与辅助技术、native/GPUI、Compiler、打包消费者及独立验收仍未完成。其他组件的截图或 token 断言不能替代这些证据。
 
 可阅读的 recipe：[My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts)、[destructive 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts)、[inset 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts)。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。registry id 是 `shadcn-dropdown`，不是 `shadcn-dropdown-menu`。
+
+## API
+
+传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: 'active-or-first',
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DROPDOWN-MENU.yaml', 'P-BASE-DROPDOWN-MENU.yaml']}
+/>
