@@ -4,6 +4,9 @@ description: 'Shadcn Collapsible: Root, Trigger, Content and inherited Base disc
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -55,3 +58,30 @@ Four-adapter synthetic-DOM and compiler mappings are separate from registered br
 - [Implementation source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/shadcn/src/collapsible)
 - [shadcn/ui reference](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/collapsible.tsx)
 - [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-collapsible" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `keepMounted` to `false`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-COLLAPSIBLE.yaml', 'P-BASE-COLLAPSIBLE.yaml']}
+/>
