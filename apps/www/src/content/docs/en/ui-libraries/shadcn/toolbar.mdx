@@ -4,6 +4,8 @@ description: 'Keyboard-roving commands with an accessible toolbar name and separ
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -21,3 +23,26 @@ Root owns disabled, orientation, loop and a11yLabel. Button emits action with it
 Parts: Root, Button, Separator.
 
 Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+
+## API
+
+Toolbar is workspace source. There is no public `proto-ui add` target. Separator has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Button defaults `disabled` to `false` and `value` to `''`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

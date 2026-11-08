@@ -4,6 +4,9 @@ description: 'Shadcn radio presentation over the Base single-selection protocol.
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -40,3 +43,31 @@ The unscoped compatibility comparison is the [base-nova RadioGroup registry](htt
 The inherited API has no `asChild`, native form submission/validation, `required`, invalid state, public `orientation`/`loop`, or a general visual-variant API; the shared styleProfile is a separate presentation selection. Upstream `aria-invalid` styles are therefore outside this projection. Arrow wrapping is the fixed Base behavior, not a new configurable API. The three catalog entities remain `draft`; this page does not claim full Shadcn/Radix compatibility or stable admission.
 
 The page explicitly selects Rhea: Root uses `gap-3`, Item uses `radius-2xl` and `bg-input/90`, with the same 16px control and 8px decorative dot at the default root font. The shared profile does not add another selection owner.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-radio-group" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `value` selects controlled mode. There is still no public `orientation` or `loop` prop.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Item requires `value` and defaults `disabled` to `false`. Indicator has no props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-RADIO-GROUP.yaml', 'P-BASE-RADIO-GROUP.yaml']}
+/>
