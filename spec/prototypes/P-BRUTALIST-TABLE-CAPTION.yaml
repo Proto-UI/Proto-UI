@@ -1,0 +1,35 @@
+id: P-BRUTALIST-TABLE-CAPTION
+type: prototype
+title: Brutalist Table Caption inherits Base Table Caption and adds family ink only
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Table Caption protocol while Table Structure keeps the ordered caption relationship.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Table Caption authoring entry，不安装第二个 caption 或语义 owner。
+  en: This Proto UI authored presentation consumes the Base Table Caption authoring entry unchanged. It does not install a second caption or semantic owner.
+criteria:
+  - id: P-BRUTALIST-TABLE-CAPTION-BASE-INHERITANCE
+    text:
+      zh-CN: Caption 必须通过 asTableCaption()（as-brutalist-table-caption defineAsHook 包装）一次性继承 P-BASE-TABLE-CAPTION，保留 anatomy claim、a11y role 与 slot render，且不安装第二个语义 owner。
+      en: The Caption must inherit P-BASE-TABLE-CAPTION once through asTableCaption() (the as-brutalist-table-caption defineAsHook wrapper), retaining the anatomy claim, a11y role and slot render, and installs no second semantic owner.
+  - id: P-BRUTALIST-TABLE-CAPTION-VISUAL
+    text:
+      zh-CN: Caption 仅投射 table-caption mt-4 text-foreground 的 family 墨色与 caption-bottom 放置几何；文本仍为 authored 内容，不使用弱化填充。
+      en: The Caption projects only table-caption mt-4 text-foreground family ink and caption-bottom placement geometry; the text remains authored content and no muted fill is used.
+sources:
+  - path: packages/prototypes/brutalist/src/table/caption.proto.ts
+  - path: packages/prototypes/brutalist/src/table/index.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABLE-CAPTION
+verifies: { tests: [T-BRUTALIST-TABLE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, table]

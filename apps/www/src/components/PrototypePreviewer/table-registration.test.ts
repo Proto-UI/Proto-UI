@@ -52,4 +52,38 @@ describe('Table actual DemoSpec registration', () => {
     const config = readFileSync('apps/www/astro.config.mjs', 'utf8');
     expect(config).toContain("slug: 'ui-libraries/shadcn/table'");
   });
+
+  it('brutalist loads only real family table atoms', async () => {
+    const demo = await loadDemo('demo-brutalist-table');
+    expect(() => assertDemoSpec(demo)).not.toThrow();
+    const ids = [...new Set(prototypes(demo.root))].sort();
+    expect(ids).toEqual([
+      'brutalist-table-caption',
+      'brutalist-table-cell',
+      'brutalist-table-header-cell',
+      'brutalist-table-root',
+      'brutalist-table-row',
+    ]);
+    for (const id of ids) {
+      await loadPrototype(id);
+      expect(getPrototype(id)?.name).toBe(id);
+    }
+  }, 30000);
+
+  for (const locale of ['en', 'zh-cn'] as const) {
+    it(`${locale}/brutalist exposes the table demo with its declared runtime`, () => {
+      const source = readFileSync(
+        `apps/www/src/content/docs/${locale}/ui-libraries/brutalist/components/table.mdx`,
+        'utf8'
+      );
+      expect(source).toContain('demoId="demo-brutalist-table"');
+      expect(source).toContain('initialRuntime="wc"');
+      expect(source).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
+    });
+  }
+
+  it('lists brutalist table in the sidebar', () => {
+    const config = readFileSync('apps/www/astro.config.mjs', 'utf8');
+    expect(config).toContain("slug: 'ui-libraries/brutalist/components/table'");
+  });
 });

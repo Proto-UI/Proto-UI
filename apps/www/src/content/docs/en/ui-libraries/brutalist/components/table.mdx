@@ -1,0 +1,32 @@
+---
+title: 'Table'
+description: 'Draft Brutalist Table presentation over the Base Table protocol.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+This draft family contains five parts: Root, Caption, Row, HeaderCell, and Cell. Each part consumes the exact Base Table prototype once through `defineAsHook`, preserving Table Structure ownership — ordered row/column indexing, `headerKey`/`headerKind` header declarations, `headers` membership, and `rowSpan`/`columnSpan` spans — while adding only family paint. This is the passive structural Table, not the interactive [Data Table](/en/ui-libraries/brutalist/components/data-table/): there is no sorting, selection, pagination, filtering, editing, or keyboard-grid behavior.
+
+The pinned Neo collection ships no standalone table component, so the surface follows the family's authored container grammar: the Card/Image framed panel (`border-2 border-black` with the `4px/4px` solid offset shadow) on the Root, black border rules between rows instead of muted fills, semibold header cells, a doubled top rule plus semibold ink on the footer, and a passive `bg-main/20` row hover. The Row carries two visual-only props, `section: 'header' | 'body' | 'footer'` (default `body`) and `lastInSection` (default `false`); they drive paint rules only and declare no row-group or accessibility change. An external scrolling container stays consumer-owned.
+
+Import the parts from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/table` anatomy subpath. This family intentionally has no `proto-ui add brutalist-table` registry entry and creates no separate publication or release promise.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+## Suggested acceptance path
+
+1. Confirm the Root exposes `getStructure()` and the snapshot reports the demo's five rows and three columns with ordered header relationships.
+2. Confirm rows separate through black border rules and the footer keeps its doubled top rule and semibold ink without a muted fill.
+3. Confirm pointer hover over a body row paints the family accent and clears on leave, without adding focus, selection, or command surfaces.
+4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+
+The related catalog entities are `draft`; this page records the current direction rather than a stable Table guarantee.

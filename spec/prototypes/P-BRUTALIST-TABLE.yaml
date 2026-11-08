@@ -1,0 +1,51 @@
+id: P-BRUTALIST-TABLE
+type: prototype
+title: Brutalist Table Root inherits Base Table and projects the family's framed container surface
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Table protocol while Table Structure keeps topology, ordering and span ownership.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Table authoring entry 与 Table Structure module，不安装另一 table、row-group、sort、selection 或 focus owner。它是被动结构 Table，不是交互式 Data Table 的别名。
+  en: This Proto UI authored presentation consumes the Base Table authoring entry and its Table Structure module unchanged. It does not install another table, row-group, sort, selection, or focus owner. It is the passive structural Table, not an alias of the interactive Data Table.
+criteria:
+  - id: P-BRUTALIST-TABLE-BASE-INHERITANCE
+    text:
+      zh-CN: Root 必须通过 asTableRoot()（as-brutalist-table-root defineAsHook 包装）一次性继承 P-BASE-TABLE，原样转发其 module 与 slot render；role、rowCount、columnCount 与 getStructure expose 保持 Base/Table Structure 事实。
+      en: The Root must inherit P-BASE-TABLE once through asTableRoot() (the as-brutalist-table-root defineAsHook wrapper), forwarding its module and slot render unchanged; role, rowCount, columnCount and the getStructure expose remain Base/Table Structure facts.
+  - id: P-BRUTALIST-TABLE-ENTRY
+    text:
+      zh-CN: Root direct entry 为 brutalist-table-root，五个部件的 direct entry 为 brutalist-table-root|caption|row|header-cell|cell，且本层不提供 authored public asHook。
+      en: The Root direct entry is brutalist-table-root, the five-part direct entries are brutalist-table-root|caption|row|header-cell|cell, and this layer provides no authored public asHook.
+  - id: P-BRUTALIST-TABLE-VISUAL-GRAMMAR
+    text:
+      zh-CN: 固定 Neo 来源无独立 table 组件，Root 沿用 family Card/Image 容器语法投射 table w-full border-collapse caption-bottom rounded-none border-2 border-black bg-background text-foreground 加 4px/4px 实心 offset 阴影；宽度与滚动容器属于 consumer，不使用 grid/data-table 布局替身。
+      en: With no standalone pinned Neo table component, the Root projects the family's Card/Image container grammar as table w-full border-collapse caption-bottom rounded-none border-2 border-black bg-background text-foreground plus the 4px/4px solid offset shadow; width and the scrolling container stay consumer-owned with no grid/data-table layout substitute.
+  - id: P-BRUTALIST-TABLE-NO-INTERACTION
+    text:
+      zh-CN: Table 不声明 sort、selection、editing、data 操作、keyboard-grid 或 Trigger 通路；Row 上的 section/lastInSection 仅为外观 prop，不声明 row-group 或改变可访问性。
+      en: Table declares no sort, selection, editing, data-operation, keyboard-grid or Trigger channel; the Row section/lastInSection props are presentation-only and declare no row-group or accessibility change.
+  - id: P-BRUTALIST-TABLE-PUBLIC-PACKAGE-NO-CLI
+    text:
+      zh-CN: 已公开的 @proto.ui/prototypes-brutalist package 必须从 package root 与 ./table anatomy subpath 导出五个部件。Table 不得进入 proto-ui add registry，也不创建 package、publication channel 或独立 release commitment。
+      en: The already-public @proto.ui/prototypes-brutalist package must export the five parts from its package root and ./table anatomy subpath. Table must not enter the proto-ui add registry and creates no package, publication channel, or independent release commitment.
+sources:
+  - path: packages/prototypes/brutalist/src/table/root.proto.ts
+  - path: packages/prototypes/brutalist/src/table/types.ts
+  - path: packages/prototypes/brutalist/src/table/index.ts
+  - path: packages/prototypes/brutalist/test/table.test.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/table.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/table.mdx
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABLE
+verifies: { tests: [T-BRUTALIST-TABLE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, table]

@@ -1076,6 +1076,11 @@ export default defineConfig({
                   slug: 'ui-libraries/brutalist/components/data-table',
                 },
                 {
+                  label: 'Table (Draft)',
+                  translations: { en: 'Table (Draft)', 'zh-CN': 'Table（草案）' },
+                  slug: 'ui-libraries/brutalist/components/table',
+                },
+                {
                   label: 'Toggle Group (Draft)',
                   translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
                   slug: 'ui-libraries/brutalist/components/toggle-group',

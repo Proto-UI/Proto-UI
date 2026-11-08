@@ -310,6 +310,11 @@
       "import": "./dist/data-table/index.js",
       "default": "./dist/data-table/index.js"
     },
+    "./table": {
+      "types": "./dist/table/index.d.ts",
+      "import": "./dist/table/index.js",
+      "default": "./dist/table/index.js"
+    },
     "./input": {
       "types": "./dist/input/index.d.ts",
       "import": "./dist/input/index.js",

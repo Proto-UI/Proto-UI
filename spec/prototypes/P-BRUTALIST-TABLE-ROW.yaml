@@ -1,0 +1,35 @@
+id: P-BRUTALIST-TABLE-ROW
+type: prototype
+title: Brutalist Table Row inherits Base Table Row and paints black border separation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Table Row protocol with border-based section separation and a passive hover paint fact.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Table Row authoring entry，不安装第二个 row、row-group、selection 或 focus owner。
+  en: This Proto UI authored presentation consumes the Base Table Row authoring entry unchanged. It does not install a second row, row-group, selection, or focus owner.
+criteria:
+  - id: P-BRUTALIST-TABLE-ROW-BASE-INHERITANCE
+    text:
+      zh-CN: Row 必须通过 asTableRow()（as-brutalist-table-row defineAsHook 包装）一次性继承 P-BASE-TABLE-ROW，保留 anatomy claim、role 与 rowIndex 状态投影及 slot render。
+      en: The Row must inherit P-BASE-TABLE-ROW once through asTableRow() (the as-brutalist-table-row defineAsHook wrapper), retaining the anatomy claim, role and rowIndex state projection, and the slot render.
+  - id: P-BRUTALIST-TABLE-ROW-VISUAL
+    text:
+      zh-CN: Row 投射 table-row 与黑色 border-b 分隔（body/footer 末行撤回底边）、footer 的 border-t-2 加 font-semibold 强调，以及调用方维护的 presentation-only section 与 lastInSection 输入；被动 hover 涂 bg-main/20，这些均为 paint 事实而非 topology、ARIA 或 row-group 语义。
+      en: The Row projects table-row with black border-b separation (withdrawn on body/footer final rows), a border-t-2 font-semibold footer emphasis, caller-maintained presentation-only section and lastInSection inputs, and a passive bg-main/20 hover; these are paint facts, not topology, ARIA or row-group semantics.
+sources:
+  - path: packages/prototypes/brutalist/src/table/row.proto.ts
+  - path: packages/prototypes/brutalist/src/table/index.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABLE-ROW
+verifies: { tests: [T-BRUTALIST-TABLE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, table]
