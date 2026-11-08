@@ -4,6 +4,8 @@ description: Draft portable input atoms.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -25,3 +27,33 @@ Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, pac
 The selected Rhea scalar recipe uses a 4px rail and a 16px passive white Thumb with family radius-2xl, shadow and a 1px resting ring; hover/focus add a 4px ring. The real Thumb hit box is 16px at the default root font. The retained unscoped Nova recipe is separately 4px/12px paint with a 28px hit box. Paint remains passive Proto Template output: Track owns input and geometry; Thumb/FieldThumb remain the only focus targets. Disabled dims the control; readOnly preserves focus/hover but prevents editing. None of these source dimensions is a native screenshot result.
 
 This is not complete shadcn equivalence. The current pointer interval still places thumb centers at track endpoints; upstream `thumbAlignment="edge"` needs a shared paint/input geometry contract before either can be shifted. Range/multiple thumbs, exact upstream active behavior under all native capture paths, cross-theme pixel matching and native host fidelity remain open. The examples expose those boundaries rather than hiding them.
+
+This entry is workspace source. It is not a public `proto-ui add` catalog id.
+
+## API
+
+Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SLIDER.yaml', 'P-BASE-SLIDER.yaml']}
+/>
