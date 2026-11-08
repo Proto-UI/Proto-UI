@@ -4,6 +4,9 @@ description: 'Shadcn modal Dialog projected over the Proto UI Base Dialog protoc
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -89,3 +92,30 @@ Set `alert` on `ShadcnDialogRoot`, not Content, to request `role="alertdialog"`.
 ## Draft workspace inheritance
 
 The current workspace also inherits the bounded [Base Mask pointer-default behavior](/en/ui-libraries/base/dialog/): participating Mask prevents its root-scoped pointer default from stealing restored focus, while passthrough remains unprevented and Content retains dismissal ownership. This draft revision is separate from any previously published family version; it introduces no new styled Dialog props.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dialog" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `open` selects controlled mode. These are Base Root props; this page adds no styled Dialog props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

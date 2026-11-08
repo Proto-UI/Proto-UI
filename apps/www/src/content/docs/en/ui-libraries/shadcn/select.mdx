@@ -4,6 +4,9 @@ description: 'Shadcn Select reconstructed on the Proto UI Base Select protocol.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -27,3 +30,33 @@ The full `Surface` → `Viewport` → `Item` → `ItemText` composition supplies
 ## Trigger appearance
 
 This page uses `appearance="default"` with `styleProfile="rhea"`. The optional `ghost` appearance is a Proto UI extension supported only by `new-york-v4` (alias `new-york`); combining it with Rhea or another modern profile is rejected, not silently converted. Set appearance on Trigger, not Root or Content. Without any explicit or inherited profile, Select retains its existing New York compatibility default. A Root style scope supplies one profile to the complete composition; explicit leaf choices override inheritance and must be intentional. Changing presentation does not change the Base selection, keyboard or popup protocol.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-select" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `open` or `value` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root. `appearance` belongs to Trigger.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SELECT.yaml', 'P-BASE-SELECT.yaml']}
+/>
