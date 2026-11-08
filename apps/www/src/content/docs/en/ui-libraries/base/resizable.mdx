@@ -4,6 +4,8 @@ description: 'resizable functional composition and current verification limits.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Resizable composes two ratio-sized panels with one focusable separator. value is the first panel percentage; min/max, collapse, controlled updates, arrow keys, Home/End and Shift acceleration share one request path. Pointer input uses the shared dimensionless Axis Input host capability.
 
@@ -16,3 +18,28 @@ Panel exposes its dimensionless size through the existing exposed-state projecti
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Resizable is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. The anatomy requires two panels and one handle. Handle has no props; its accessible name is `Resize panels`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'number', default: '50' },
+    { name: 'min', type: 'number', default: '10' },
+    { name: 'max', type: 'number', default: '90' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'collapsible', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+These props belong to Root. Panel defaults `index` to `0`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RESIZABLE.yaml']} />
