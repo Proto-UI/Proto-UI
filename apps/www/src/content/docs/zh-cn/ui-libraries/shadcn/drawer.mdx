@@ -4,6 +4,8 @@ description: '可从四个边缘显示的模态面板。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -50,4 +52,26 @@ snapPoints 缺省、null 或空数组时按内容高度显示；非空有效数�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
+/>
+
+## API
+
+Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Content 的 `side` 默认 `bottom`。Trigger 与 Close 的 `disabled` 默认 `false`。Handle 的 `disabled` 默认 `false`，`a11yLabel` 默认 `Resize drawer`。Overlay 的 `passthrough` 默认 `false`。Title、Description、Header、Footer 没有属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml']}
 />

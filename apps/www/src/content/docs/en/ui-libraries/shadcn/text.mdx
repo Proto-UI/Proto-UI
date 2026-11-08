@@ -4,6 +4,9 @@ description: 'Shadcn passive text content and reusable typography inputs.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -71,3 +74,34 @@ The density values are checked against the [pinned shadcn page-header source](ht
 ## Authority
 
 `P-SHADCN-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/shadcn/src/text/`. Catalog lifecycle remains draft.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
+    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
+    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
+    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
+    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+  ]}
+/>
+
+These props belong to Root. Text does not synthesize a host role.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>

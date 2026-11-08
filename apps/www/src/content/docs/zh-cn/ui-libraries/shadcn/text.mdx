@@ -4,6 +4,9 @@ description: 'Shadcn 被动文本内容与可复用排版输入。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -71,3 +74,34 @@ CLI 拒绝不支持的 GPUI target。原生 GPUI 排版映射仍缺少 `font-sty
 ## 依据
 
 `P-SHADCN-TEXT`、`T-TEXT-0001`治理此 slice。源码为 `packages/prototypes/shadcn/src/text/`，编目生命周期仍为 draft。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
+    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
+    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
+    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
+    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+  ]}
+/>
+
+这些属性属于 Root。Text 不合成宿主角色。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>
