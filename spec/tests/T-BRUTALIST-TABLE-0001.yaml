@@ -1,0 +1,85 @@
+id: T-BRUTALIST-TABLE-0001
+type: test
+title: Brutalist Table public API and presentation tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 覆盖方向，与 P-BRUTALIST-TABLE 准则一一映射；本条目只描述当前 synthetic DOM 与 demo 契约测试，不声称 native 或完整九维证据。'
+  en: 'Draft coverage direction for Issue #1146, mapped one-to-one to the P-BRUTALIST-TABLE criteria. This entity records the current synthetic-DOM and demo-contract tests only and claims no native or nine-dimension evidence.'
+summary: >-
+  Covers the Brutalist Table public API, single Base inheritance per part, the framed family container surface, border-based row separation with a passive hover paint fact, empty interaction channel, and the Base/Table Structure ownership of topology, header relationships and spans against the P-BRUTALIST-TABLE* criteria.
+
+
+cases:
+  - id: T-BRUTALIST-TABLE-0001-CASE-1
+    title: Direct entries, Base inheritance, and package-export boundary
+    covers:
+      - P-BRUTALIST-TABLE-ENTRY
+      - P-BRUTALIST-TABLE-BASE-INHERITANCE
+      - P-BRUTALIST-TABLE-PUBLIC-PACKAGE-NO-CLI
+    expectation: p-brutalist-table-entries-inheritance-and-package-boundary
+  - id: T-BRUTALIST-TABLE-0001-CASE-2
+    title: Framed family container with native table geometry and Base-owned structure
+    covers:
+      - P-BRUTALIST-TABLE-VISUAL-GRAMMAR
+      - P-BRUTALIST-TABLE-BASE-INHERITANCE
+    expectation: p-brutalist-table-framed-surface-and-structure-snapshot
+  - id: T-BRUTALIST-TABLE-0001-CASE-3
+    title: Border-separated rows, footer emphasis, passive hover and no interaction channel
+    covers:
+      - P-BRUTALIST-TABLE-ROW-VISUAL
+      - P-BRUTALIST-TABLE-NO-INTERACTION
+      - P-BRUTALIST-TABLE-CAPTION-VISUAL
+      - P-BRUTALIST-TABLE-HEADER-CELL-VISUAL
+      - P-BRUTALIST-TABLE-CELL-VISUAL
+    expectation: p-brutalist-table-border-separation-and-passive-hover
+  - id: T-BRUTALIST-TABLE-0001-CASE-4
+    title: Demo composes the five native parts with section paint facts and no data-table prototypes
+    covers:
+      - P-BRUTALIST-TABLE-NO-INTERACTION
+      - P-BRUTALIST-TABLE-ROW-VISUAL
+    expectation: p-brutalist-table-demo-native-parts-composition
+implementations:
+  - id: prototypes-brutalist-table-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/table.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TABLE-0001-CASE-1
+      - T-BRUTALIST-TABLE-0001-CASE-2
+      - T-BRUTALIST-TABLE-0001-CASE-3
+    exercises:
+      - P-BASE-TABLE
+      - P-BRUTALIST-TABLE
+  - id: www-brutalist-table-demo-contract
+    kind: module-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-table.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-TABLE-0001-CASE-4
+    exercises:
+      - P-BASE-TABLE
+      - P-BRUTALIST-TABLE
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-TABLE
+    - id: P-BRUTALIST-TABLE-CAPTION
+    - id: P-BRUTALIST-TABLE-ROW
+    - id: P-BRUTALIST-TABLE-HEADER-CELL
+    - id: P-BRUTALIST-TABLE-CELL
+exercises:
+  prototypes:
+    - P-BASE-TABLE
+    - P-BRUTALIST-TABLE
+    - P-BRUTALIST-TABLE-CAPTION
+    - P-BRUTALIST-TABLE-ROW
+    - P-BRUTALIST-TABLE-HEADER-CELL
+    - P-BRUTALIST-TABLE-CELL
+tags:
+  - test
+  - brutalist
+  - neo-brutalist
+  - visual
+  - table

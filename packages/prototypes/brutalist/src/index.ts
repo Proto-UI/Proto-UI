@@ -260,6 +260,8 @@ export * from './date-picker';
 
 export * from './data-table';
 
+export * from './table';
+
 export * from './transition';
 
 export { default as inputRoot, default as brutalistInputRoot } from './input';

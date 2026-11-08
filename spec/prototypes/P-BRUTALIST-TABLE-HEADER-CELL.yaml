@@ -1,0 +1,35 @@
+id: P-BRUTALIST-TABLE-HEADER-CELL
+type: prototype
+title: Brutalist Table Header Cell inherits Base Table Header Cell and adds weight-based emphasis
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Table Header Cell protocol while Table Structure keeps header keys, kinds and spans.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Table Header Cell authoring entry，不安装第二个 header、span 或语义 owner。
+  en: This Proto UI authored presentation consumes the Base Table Header Cell authoring entry unchanged. It does not install a second header, span, or semantic owner.
+criteria:
+  - id: P-BRUTALIST-TABLE-HEADER-CELL-BASE-INHERITANCE
+    text:
+      zh-CN: HeaderCell 必须通过 asTableHeaderCell()（as-brutalist-table-header-cell defineAsHook 包装）一次性继承 P-BASE-TABLE-HEADER-CELL，保留 headerKey/headerKind/headers/rowSpan/columnSpan props、role 与行列索引状态投影及 slot render。
+      en: The HeaderCell must inherit P-BASE-TABLE-HEADER-CELL once through asTableHeaderCell() (the as-brutalist-table-header-cell defineAsHook wrapper), retaining the headerKey/headerKind/headers/rowSpan/columnSpan props, role and row/column index state projections, and the slot render.
+  - id: P-BRUTALIST-TABLE-HEADER-CELL-VISUAL
+    text:
+      zh-CN: HeaderCell 仅投射 table-cell text-left align-middle whitespace-nowrap px-4 py-3 text-sm font-semibold 的几何与字重强调；跨度与有序表头关系仍属 Table Structure，不使用弱化填充。
+      en: The HeaderCell projects only table-cell text-left align-middle whitespace-nowrap px-4 py-3 text-sm font-semibold geometry and weight emphasis; spans and ordered header relationships stay with Table Structure and no muted fill is used.
+sources:
+  - path: packages/prototypes/brutalist/src/table/header-cell.proto.ts
+  - path: packages/prototypes/brutalist/src/table/index.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABLE-HEADER-CELL
+verifies: { tests: [T-BRUTALIST-TABLE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, table]

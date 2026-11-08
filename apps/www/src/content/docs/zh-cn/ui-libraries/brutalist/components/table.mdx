@@ -1,0 +1,32 @@
+---
+title: 'Table'
+description: '覆盖在 Base Table 协议之上的 Brutalist Table 草案呈现。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+
+<BrutalistPageStyle />
+
+这个 draft family 包含五个部件：Root、Caption、Row、HeaderCell 与 Cell。每个部件通过 `defineAsHook` 一次性消费对应的精确 Base Table 原型，保留 Table Structure 的所有权 —— 有序行列索引、`headerKey`/`headerKind` 表头声明、`headers` 成员关系以及 `rowSpan`/`columnSpan` 跨度 —— 同时只添加 family 外观。这是被动的结构化 Table，而不是交互式 [Data Table](/zh-cn/ui-libraries/brutalist/components/data-table/)：没有排序、选择、分页、过滤、编辑或键盘网格行为。
+
+固定 Neo 来源没有独立的 table 组件，因此表面沿用 family 已实现的容器语法：Root 使用 Card/Image 式外框（`border-2 border-black` 加 `4px/4px` 实心 offset 阴影），行之间用黑色边框分隔而非弱化填充，表头单元格为 semibold，footer 使用加倍的上边框加粗体墨色，行 hover 为被动 `bg-main/20` 着色。Row 携带两个纯视觉 prop：`section: 'header' | 'body' | 'footer'`（默认 `body`）与 `lastInSection`（默认 `false`）；它们只驱动外观规则，不声明 row-group，也不改变可访问性。外部滚动容器仍由消费方提供。
+
+各部件可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/table` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-table` registry entry，也不产生单独的 publication 或 release 承诺。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+## 建议验收路径
+
+1. 确认 Root 暴露 `getStructure()`，快照报告 demo 的五行三列及有序表头关系。
+2. 确认行间通过黑色边框分隔，footer 保持加倍上边框与粗体墨色而非弱化填充。
+3. 确认指针悬停正文行时呈现 family 强调色并在移出后清除，不新增焦点、选择或命令入口。
+4. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+
+相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Table guarantee。

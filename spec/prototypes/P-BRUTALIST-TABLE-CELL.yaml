@@ -1,0 +1,35 @@
+id: P-BRUTALIST-TABLE-CELL
+type: prototype
+title: Brutalist Table Cell inherits Base Table Cell and adds family cell geometry
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Issue #1146 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native 与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Issue #1146. Stable admission requires independent review and current browser/native and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the Base Table Cell protocol while Table Structure keeps header membership and spans.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费 Base Table Cell authoring entry，不安装第二个 cell、span 或语义 owner。
+  en: This Proto UI authored presentation consumes the Base Table Cell authoring entry unchanged. It does not install a second cell, span, or semantic owner.
+criteria:
+  - id: P-BRUTALIST-TABLE-CELL-BASE-INHERITANCE
+    text:
+      zh-CN: Cell 必须通过 asTableCell()（as-brutalist-table-cell defineAsHook 包装）一次性继承 P-BASE-TABLE-CELL，保留 headers/rowSpan/columnSpan props、role 与行列索引状态投影及 slot render。
+      en: The Cell must inherit P-BASE-TABLE-CELL once through asTableCell() (the as-brutalist-table-cell defineAsHook wrapper), retaining the headers/rowSpan/columnSpan props, role and row/column index state projections, and the slot render.
+  - id: P-BRUTALIST-TABLE-CELL-VISUAL
+    text:
+      zh-CN: Cell 仅投射 table-cell align-middle whitespace-nowrap px-4 py-3 text-sm 的单元格几何；跨度与内容仍为 authored，不使用弱化填充。
+      en: The Cell projects only table-cell align-middle whitespace-nowrap px-4 py-3 text-sm cell geometry; spans and content remain authored and no muted fill is used.
+sources:
+  - path: packages/prototypes/brutalist/src/table/cell.proto.ts
+  - path: packages/prototypes/brutalist/src/table/index.ts
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+inherits:
+  prototypes:
+    - id: P-BASE-TABLE-CELL
+verifies: { tests: [T-BRUTALIST-TABLE-0001] }
+tags: [prototype, brutalist, neo-brutalist, visual, delta, table]

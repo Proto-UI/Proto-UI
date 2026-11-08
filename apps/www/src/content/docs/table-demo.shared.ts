@@ -21,8 +21,7 @@ const headerCell = (
   ref: string,
   label: string,
   headerKind: 'column' | 'row'
-): DemoNode =>
-  part(family, 'header-cell', ref, { headerKey: ref, headerKind }, [label]);
+): DemoNode => part(family, 'header-cell', ref, { headerKey: ref, headerKind }, [label]);
 
 const valueCell = (family: string, ref: string, label: string, headers: string[]): DemoNode =>
   part(family, 'cell', ref, { headers }, [label]);
@@ -52,7 +51,7 @@ function dataRow(
  */
 export function createTableDemo(family: string): DemoSpec {
   const sectionProps = (section: 'header' | 'body' | 'footer', lastInSection = false) =>
-    family === 'shadcn' ? { section, lastInSection } : {};
+    family === 'shadcn' || family === 'brutalist' ? { section, lastInSection } : {};
   return {
     type: 'demo',
     root: {
@@ -63,36 +62,28 @@ export function createTableDemo(family: string): DemoSpec {
           kind: 'box',
           className: 'min-w-[34rem]',
           children: [
-            part(
-              family,
-              'root',
-              'table',
-              {},
-              [
-                part(family, 'caption', 'caption', {}, [
-                  'Quarterly service overview · 季度服务概览',
-                ]),
-                part(family, 'row', 'header-row', sectionProps('header'), [
-                  headerCell(family, 'team', 'Team · 团队', 'column'),
-                  headerCell(family, 'team-q1', 'Q1', 'column'),
-                  headerCell(family, 'team-q2', 'Q2', 'column'),
-                ]),
-                dataRow(family, 'platform', 'Platform', '99.94%', '99.97%', sectionProps('body')),
-                dataRow(
-                  family,
-                  'support',
-                  'Support',
-                  '4.8 / 5',
-                  '4.9 / 5',
-                  sectionProps('body', true)
-                ),
-                part(family, 'row', 'summary-row', sectionProps('footer', true), [
-                  headerCell(family, 'total', 'Combined · 合计', 'row'),
-                  valueCell(family, 'total-q1', '2 services', ['team-q1', 'total']),
-                  valueCell(family, 'total-q2', 'stable', ['team-q2', 'total']),
-                ]),
-              ]
-            ),
+            part(family, 'root', 'table', {}, [
+              part(family, 'caption', 'caption', {}, ['Quarterly service overview · 季度服务概览']),
+              part(family, 'row', 'header-row', sectionProps('header'), [
+                headerCell(family, 'team', 'Team · 团队', 'column'),
+                headerCell(family, 'team-q1', 'Q1', 'column'),
+                headerCell(family, 'team-q2', 'Q2', 'column'),
+              ]),
+              dataRow(family, 'platform', 'Platform', '99.94%', '99.97%', sectionProps('body')),
+              dataRow(
+                family,
+                'support',
+                'Support',
+                '4.8 / 5',
+                '4.9 / 5',
+                sectionProps('body', true)
+              ),
+              part(family, 'row', 'summary-row', sectionProps('footer', true), [
+                headerCell(family, 'total', 'Combined · 合计', 'row'),
+                valueCell(family, 'total-q1', '2 services', ['team-q1', 'total']),
+                valueCell(family, 'total-q2', 'stable', ['team-q2', 'total']),
+              ]),
+            ]),
           ],
         },
       ],

@@ -40,6 +40,26 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/table');
     registerExactPrototype('shadcn-table-cell', module.tableCell);
   },
+  'brutalist-table-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/table');
+    registerExactPrototype('brutalist-table-root', module.brutalistTableRoot);
+  },
+  'brutalist-table-caption': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/table');
+    registerExactPrototype('brutalist-table-caption', module.brutalistTableCaption);
+  },
+  'brutalist-table-row': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/table');
+    registerExactPrototype('brutalist-table-row', module.brutalistTableRow);
+  },
+  'brutalist-table-header-cell': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/table');
+    registerExactPrototype('brutalist-table-header-cell', module.brutalistTableHeaderCell);
+  },
+  'brutalist-table-cell': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/table');
+    registerExactPrototype('brutalist-table-cell', module.brutalistTableCell);
+  },
   'shadcn-transition': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/transition');
     registerExactPrototype('shadcn-transition', module.transition);
