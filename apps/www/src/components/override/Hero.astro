@@ -68,6 +68,16 @@ const whitepaperLabel =
   .homepage-hero h1:lang(zh) {
     max-width: 18em;
   }
+  /* Wide Chinese slogan is one line. The 18em cap uses the h1's own em, which
+     collapses once Text enhancement moves the 5xl size onto a child, so the
+     same 14 glyphs wrap only on the wide viewport. */
+  @media (min-width: 80rem) {
+    .homepage-hero h1:lang(zh) {
+      max-width: none;
+      white-space: nowrap;
+      text-wrap: nowrap;
+    }
+  }
   .homepage-hero__tagline {
     max-width: 56rem;
     margin: 0.5rem 0 0;
