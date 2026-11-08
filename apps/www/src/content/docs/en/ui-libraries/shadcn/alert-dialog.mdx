@@ -4,6 +4,8 @@ description: 'A modal decision with a primary message, safe cancel target and ex
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -25,3 +27,25 @@ Parts: Root, Trigger, Content, Header, Footer, Title, Description, Cancel, Actio
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
 
 The page selects Rhea Content with p-6, gap-6, family radius-4xl capped at 24px, popover colors and its own ring/shadow. New York remains the unscoped compatibility default, not this page's chosen skin. Header/Footer are reusable passive groups. The modern Trigger is headless; its reusable passive Rhea action-body composition is still a named demo dependency rather than guessed page paint. Responsive layouts, small/media variants, native presence and full upstream equivalence remain unaccepted.
+
+## API
+
+Alert Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode. Unlike Dialog, this Root has no `alert` prop: the prototype context keeps alert behavior on.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-ALERT-DIALOG.yaml', 'P-BASE-ALERT-DIALOG.yaml']}
+/>
