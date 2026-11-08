@@ -4,6 +4,9 @@ description: '覆盖在 Base host-owned scrolling domain 之上的 shadcn 草案
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -27,3 +30,33 @@ Web composed projection 的两条 track 会避让右下交点，该区域不包�
 6. 在 Web Components、React、Vue 与 Vue 2 的 320px viewport 中重复检查，页面不得 overflow。
 
 相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-scroll-area" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+Root 没有属性。只有 Scrollbar 接受配置。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
+  ]}
+/>
+
+`orientation` 属于 Scrollbar。Viewport 与 Thumb 不增加属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-SCROLL-AREA.yaml',
+    'P-SHADCN-SCROLL-AREA-SCROLLBAR.yaml',
+    'P-BASE-SCROLL-AREA.yaml',
+  ]}
+/>

@@ -4,6 +4,9 @@ description: 'Draft shadcn presentation over the Base Tooltip family.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -27,3 +30,39 @@ Import the family from `@proto.ui/prototypes-shadcn/tooltip`, or generate its Re
 6. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related entities are `draft`; this page describes the current cataloged direction, not a stable compatibility guarantee.
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tooltip" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `open` on Root selects controlled mode. Group delays apply when Root does not set its own.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'top' },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+`openDelay`, `closeDelay`, and `skipDelay` belong to Group. `side` through `collisionPadding` belong to Content. Trigger only adds `disabled`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOOLTIP.yaml', 'P-BASE-TOOLTIP.yaml', 'P-BASE-TOOLTIP-CONTENT.yaml']}
+/>

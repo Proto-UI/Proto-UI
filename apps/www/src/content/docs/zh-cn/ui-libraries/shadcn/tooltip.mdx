@@ -4,6 +4,9 @@ description: '覆盖在 Base Tooltip family 之上的 shadcn 草案呈现。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -27,3 +30,39 @@ Content 选择 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e
 6. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
 
 相关 entities 仍为 `draft`；本页描述当前 cataloged direction，而不是稳定 compatibility guarantee。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tooltip" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+Root 传入 `open` 进入受控模式。Root 未自设延时时使用 Group 的延时。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'top' },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+`openDelay`、`closeDelay`、`skipDelay` 属于 Group。`side` 到 `collisionPadding` 属于 Content。Trigger 只增加 `disabled`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOOLTIP.yaml', 'P-BASE-TOOLTIP.yaml', 'P-BASE-TOOLTIP-CONTENT.yaml']}
+/>
