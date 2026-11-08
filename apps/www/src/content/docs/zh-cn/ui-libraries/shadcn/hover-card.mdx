@@ -1,12 +1,66 @@
 ---
 title: 'Hover Card'
-description: '基于 Proto UI 重构的 Shadcn Hover Card。'
+description: '从 Base Hover Card 协议投影出的 Shadcn Hover Card。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
-当前页面展示 Proto UI 中 `shadcn` 风格的 `hover-card` 条目。它兼容官方 Root 的 controlled/uncontrolled、`openDelay`、`closeDelay`，以及 Content 的 `side`/`align` 子集，并复刻官方 `w-64`、popover color、border、shadow 和方向感知动画。受 Base 能力边界影响，portal、碰撞检测、Arrow、forceMount 和数值 offset 尚未兼容。
+Base Hover Card 持有 open。Root 接受受控 `open` 或非受控 `defaultOpen`，以及 `openDelay` 与 `closeDelay`。Trigger 的 hover/focus 和 Content 的 hover 只提交请求，不能绕过这个 owner。Content 另有 `side`、`align` 和下表的数值偏移。Arrow 与 `forceMount` 不是这个 surface 的属性。
 
-<PrototypePreviewer demoId="demo-shadcn-hover-card" initialRuntime="wc" />
+演示在 150ms 后打开 `@proto-ui`，300ms 后关闭。Content 为 `side="bottom"`、`align="center"`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `open` 进入受控模式。延时必须是有限数且不小于 0，否则回落到默认值。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+`side` 到 `collisionPadding` 属于 Content。Trigger 只增加 `disabled`，默认 `false`。Root 暴露 `open`、`openHoverCard`、`close`、`toggle` 和 `openChange`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-HOVER-CARD.yaml',
+    'P-SHADCN-HOVER-CARD-TRIGGER.yaml',
+    'P-SHADCN-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>
