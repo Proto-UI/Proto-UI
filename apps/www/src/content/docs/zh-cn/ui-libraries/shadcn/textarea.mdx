@@ -1,9 +1,12 @@
 ---
 title: 'Textarea'
-description: '在 Proto UI 上重建的 shadcn textarea。'
+description: '从 Base Textarea 协议投影出的 Shadcn Textarea。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -13,4 +16,52 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 投射是 contentless 的。authored children 不会成为第二个编辑器，本切片也不引入 form workflow、validation message、auto-resize 或富文本行为。
 
-<PrototypePreviewer demoId="demo-shadcn-textarea" initialRuntime="wc" />
+演示是三个编辑器：一个非受控备注（`rows` 4、`maxLength` 240）、一个禁用编辑器，以及一个仍可聚焦的只读编辑器。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-textarea" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `value` 进入受控模式。未设置长度限制时，`minLength` 与 `maxLength` 为 `-1`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+Root 暴露 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`，以及 `valueChange`、`change` 和 composition 事件。作者写入的 children 不是第二个编辑器。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

@@ -1,9 +1,12 @@
 ---
 title: 'Separator'
-description: '基于 Proto UI 重构的 Shadcn Separator。'
+description: '从 Base Separator 协议投影出的 Shadcn Separator。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -13,4 +16,37 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 Separator 是 contentless 的，不声明 focus、tab stop 或 event 通路。长度由周围布局决定，间距由组合负责。
 
-<PrototypePreviewer demoId="demo-shadcn-separator" initialRuntime="wc" />
+演示是同一列：一条水平线、一行垂直线，然后一条非 decorative 的水平线，它会暴露 `separator`。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'decorative', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+Root 暴露 `orientation` 与 `decorative`。它不接受作为内容的 children，也没有 focus 或 event 属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>

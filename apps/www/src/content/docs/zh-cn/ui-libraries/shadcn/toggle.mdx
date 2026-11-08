@@ -1,9 +1,12 @@
 ---
 title: 'Toggle'
-description: '基于 Proto UI 重构的 Shadcn Toggle。'
+description: '从 Base Toggle 协议投影出的 Shadcn Toggle。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -13,4 +16,42 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 Toggle 的 active、disabled、键盘与 a11y 仍由 Base 所有。`asChild` 有意不提供；原生属性/pressed API 别名、invalid 与任意嵌套 SVG 样式仍属兼容性差异。本页和源码测试不等于四 runtime、双主题的原生像素验收。
 
-<PrototypePreviewer demoId="demo-shadcn-toggle" initialRuntime="wc" />
+演示依次是 Bold、已按下的 Italic outline、小号 Underline、禁用且已按下的 Strikethrough、大号文字，以及一个 outline toggle。图标按钮的名称是视觉隐藏的。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-toggle" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+传入 `active` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'active', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: 'default' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+  ]}
+/>
+
+Root 暴露 `active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，以及 `activeChange`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
+/>
