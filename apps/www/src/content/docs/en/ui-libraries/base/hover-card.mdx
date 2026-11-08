@@ -5,6 +5,8 @@ description: 'Hover Card base prototype'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Hover Card composes Root, Trigger, and Content. Root supports controlled or uncontrolled open state, `openDelay`, `closeDelay`, and `openChange`; Content uses `asOverlay` plus `asTransition` and detaches only after leave completes. Content uses a logical-owner-preserving Portal, fixed positioning, `side`/`align`, numeric offsets, and collision handling. Arrow, forceMount, custom collision boundaries, sticky positioning, and detached-anchor hiding remain extensions.
 
@@ -22,3 +24,23 @@ The draft Root exposes the typed cooperation method `releaseInteraction(part, co
     hasCode={true}
   />
 </div>
+
+## API
+
+Hover Card is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-HOVER-CARD.yaml']} />

@@ -5,6 +5,8 @@ description: '由宿主呈现图片，显式表达可访问性与加载状态'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-image-root` 是 `0.3.0-alpha.0` 包系列中的 draft Base 原型。它声明一个由宿主管理的图片目标，并公开 source、fit 和加载状态。目前 Web Components、React、Vue 3 与 Vue 2 都将每个实例投射为一个物理 `<img>`。这些预览验证的是有界 Web profile，不代表非 Web 宿主支持。
 
@@ -97,3 +99,23 @@ Base Image 不拥有 Avatar fallback、上传、裁剪、缩放、图库导航�
 - Web 投射：[D-IMAGE-VIEW-PROJECTION-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml)
 - 源码：[packages/prototypes/base/src/image](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/image)
 - 证据：[T-IMAGE-VIEW-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-IMAGE-VIEW-0001.yaml)
+
+## API
+
+Image 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-IMAGE.yaml']} />

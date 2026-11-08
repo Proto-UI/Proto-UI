@@ -5,6 +5,8 @@ description: 'Checkbox base prototype'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 The Checkbox base prototype provides checked, unchecked, disabled, and indeterminate interactions on top of Toggle semantics.
 
@@ -40,3 +42,22 @@ When an enabled indeterminate checkbox is pressed:
 4. If `indeterminate` is controlled, the external owner must handle `indeterminateChange` and pass `indeterminate={false}` back in.
 
 Disabled checkboxes do not change checked or indeterminate state on press.
+
+## API
+
+Checkbox is workspace source. There is no public `proto-ui add` target. Passing `checked` or `indeterminate` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Indicator has no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-CHECKBOX.yaml']} />

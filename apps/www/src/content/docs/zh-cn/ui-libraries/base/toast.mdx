@@ -4,6 +4,8 @@ description: '可暂停、关闭并发出明确操作意图的限时实时通知
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 可暂停、关闭并发出明确操作意图的限时实时通知。
 
@@ -19,3 +21,27 @@ Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/C
 组成: Root, Viewport, Title, Description, Action, Close.
 
 草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+
+## API
+
+Toast 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+  ]}
+/>
+
+这些属性属于 Root。Viewport 的 `a11yLabel` 默认 `Notifications`，`hotkey` 默认 `F8`。Title 与 Description 没有属性。Action 的 `disabled` 默认 `false`，`a11yLabel` 没有默认值。Close 的 `disabled` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TOAST.yaml']} />

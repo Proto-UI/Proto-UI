@@ -5,6 +5,8 @@ description: 'Tooltip and Tooltip Group base prototypes'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Tooltip consists of Root, Trigger, and Content. Tooltip Group is an adjacent protocol in the same family and shares delay defaults, the warm window, and active-owner coordination across Roots.
 
@@ -32,3 +34,23 @@ Portal is currently owned by Content's Overlay and renderer projection rather th
 3. Let both remain closed for more than 700ms, then hover again and confirm the 500ms delay returns.
 4. Use Tab to focus a Trigger and confirm immediate opening; Escape should close it while retaining Trigger focus.
 5. Switch among Web Components, React, and Vue in the toolbar and repeat the interaction.
+
+## API
+
+Tooltip is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `top`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`. Group defaults `openDelay` to `700`, `closeDelay` to `100` and `skipDelay` to `300`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TOOLTIP.yaml']} />

@@ -4,6 +4,8 @@ description: Atomic Field labeling, value reporting and controlled or consumer-v
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Draft workspace family。六个 atoms 共享一个 Base 协议；native/AT/material/GPUI 完成门槛尚未全部通过。
 
@@ -68,3 +70,28 @@ GPUI peer 尚无物理 TextControl host；required/invalid/busy/readOnly 与 des
 [Base UI Field 比较](https://base-ui.com/react/components/field) · [shadcn Field 比较](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 表单参考](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple Text Fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
 
 这些仅是独立设计比较。Base UI 的 render/validate callback 和 Form submission 模式、shadcn 布局 API、Bootstrap DOM/classes、Apple 系统编辑 chrome 都不是继承 API 或 Proto UI 规范权威。
+
+## API
+
+Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `invalid` 或 `errors` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
+    { name: 'defaultErrors', type: 'string[]', default: '[]' },
+    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Label 的 `activation` 默认 `true`。Control 接受 Input 属性：`defaultValue`、`placeholder`、`name`、`autoComplete` 与 `ariaLabel` 默认 `''`；`disabled`、`readOnly` 与 `required` 默认 `false`；`inputMode` 与 `enterKeyHint` 没有默认值。Description 与 Validity 没有属性。Error 的 `message` 默认 `''`，`keepMounted` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-FIELD.yaml']} />

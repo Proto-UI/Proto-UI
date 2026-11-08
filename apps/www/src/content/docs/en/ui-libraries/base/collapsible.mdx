@@ -4,6 +4,8 @@ description: 'Draft Base Collapsible ownership, keyboard activation, content pre
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Collapsible is one disclosure, not an Accordion. Root owns expansion, Trigger requests changes, and Content projects visibility and presence. It does not prescribe a visual language.
 
@@ -101,3 +103,21 @@ An owner may instead reject or defer `onOpenChange`; until it supplies a changed
 - [Mapped draft evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-COLLAPSIBLE-0001.yaml)
 - [Same-domain relationships](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml) and [L1 lifecycle](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-LIFECYCLE-0008.yaml)
 - [Implementation source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/collapsible)
+
+## API
+
+Collapsible is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `keepMounted` to `false`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-COLLAPSIBLE.yaml']} />

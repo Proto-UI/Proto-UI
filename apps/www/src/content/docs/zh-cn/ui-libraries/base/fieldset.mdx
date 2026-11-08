@@ -4,6 +4,8 @@ description: 可移植 fieldset 原子草稿。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-base-fieldset"
@@ -43,3 +45,21 @@ Base 与四个视觉 family 共享语义 atoms。synthetic WebComponent 测试�
 ## Family 外观
 
 Base 贡献可移植语义与插槽内容，不提供视觉 family 配方；通过视觉 family 添加外观。
+
+## API
+
+Fieldset 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Legend 与 Description 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-FIELDSET.yaml']} />

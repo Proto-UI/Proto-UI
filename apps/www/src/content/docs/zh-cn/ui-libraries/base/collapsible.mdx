@@ -4,6 +4,8 @@ description: 'Draft Base Collapsible 的状态所有权、键盘激活、Content
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Collapsible 表示一个 disclosure，不是 Accordion。Root 拥有展开状态，Trigger 请求变化，Content 投射 visibility 与 presence；它不规定视觉语言。
 
@@ -101,3 +103,21 @@ Owner 也可以拒绝或延后处理 `onOpenChange`；在提供改变后的 `ope
 - [映射的 draft evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-COLLAPSIBLE-0001.yaml)
 - [同域关系](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml) 与 [L1 lifecycle](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-LIFECYCLE-0008.yaml)
 - [实现来源](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/collapsible)
+
+## API
+
+Collapsible 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `keepMounted` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-COLLAPSIBLE.yaml']} />

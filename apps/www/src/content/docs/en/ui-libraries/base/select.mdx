@@ -5,6 +5,8 @@ description: 'Select base prototype'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-select` is a cataloged select-only compound prototype and the first Base family to formally define a value-class presentation part.
 
@@ -70,3 +72,24 @@ It does not yet include:
 - Contract: [select.v0.md](https://github.com/Proto-UI/Proto-UI/blob/main/internal/contracts/prototype-base/select.v0.md)
 - Source: [packages/prototypes/base/src/select](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/select)
 - Test: [select.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/select.test.ts)
+
+## API
+
+Select is workspace source. There is no public `proto-ui add` target. Passing `open` or `value` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `accessibleLabel` to `''`. Value defaults `placeholder` to `''`. Content accepts the Transition props and defaults `position` to `popper`, `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true` and `collisionPadding` to `10`. Item defaults `disabled` to `false` and `value` and `textValue` to `''`; `closeOnSelect` has no default and falls back to the Root policy. Group, Label, Surface, ItemText, Viewport and Separator have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECT.yaml']} />

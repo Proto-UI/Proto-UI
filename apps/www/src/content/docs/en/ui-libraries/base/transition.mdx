@@ -5,6 +5,8 @@ description: 'Transition base prototype'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import TransitionDemoStyles from '@/components/PrototypePreviewer/TransitionDemoStyles.astro';
 
 <TransitionDemoStyles />
@@ -166,3 +168,24 @@ Accessed via the `controls` expose:
 `base-transition` v0 only manages the presence lifecycle of a **single element** (`closed → entering → entered → leaving → closed`).
 
 Nested exit coordination (e.g., an outer Dialog waiting for an inner child to finish leaving before closing) belongs to a separate `transition-group` / `boundary` abstraction and is intentionally out of scope for v0.
+
+## API
+
+Transition is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TRANSITION.yaml']} />

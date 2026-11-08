@@ -5,6 +5,8 @@ description: 'Dialog base prototype'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import DialogDemoStyles from '@/components/PrototypePreviewer/DialogDemoStyles.astro';
 
 <DialogDemoStyles />
@@ -35,3 +37,23 @@ Pass `alert` to `dialog-root` to turn it into an alert dialog: it sets `role="al
 The workspace revision of `P-BASE-DIALOG-MASK-DEFAULT-ACTION` keeps Content as the independent focus/dismissal owner. A participating Mask requests default-action prevention for its root-scoped `pointer.down`, so the background pointer default cannot overwrite Content's close-time focus restoration. A Mask with `passthrough=true` does not request this prevention. Mask does not take over dismissal, propagation or keyboard handling, and does not promise to distinguish arbitrary native descendants that lack an independent interaction owner inside it.
 
 This is the draft workspace behavior introduced by [PR #777](https://github.com/Proto-UI/Proto-UI/pull/777), not a claim about the previously published 0.2 package. A decorative [Surface](/en/ui-libraries/base/surface/) can consume existing Transition facts for paint; it must not become another Dialog, focus or dismissal owner.
+
+## API
+
+Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `focusEntry` to `auto` and also accepts the Transition props. Trigger, Title, Description and Close have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-DIALOG.yaml']} />

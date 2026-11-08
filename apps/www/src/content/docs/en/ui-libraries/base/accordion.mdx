@@ -4,6 +4,8 @@ description: Five atomic Accordion parts with canonical group ownership, natural
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 This is a draft workspace family. The current source and synthetic-DOM tests do not establish browser/native, assistive-technology, material or GPUI completion.
 
@@ -61,3 +63,26 @@ Import accordionRoot, accordionItem, accordionHeading, accordionTrigger and acco
 Current-workspace CLI facade: proto-ui add react base-accordion (also vue, vue2 and wc). Package publication/version availability is separate from this draft source.
 
 [APG design reference](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/accordion)
+
+## API
+
+Accordion is workspace source. There is no public `proto-ui add` target. Passing `openItems` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
+    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
+    { name: 'allowEmpty', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root. Item requires a non-empty `value` and defaults `disabled` to `false`. Heading defaults `level` to `3`. Content defaults `keepMounted` and `region` to `false`. Trigger has no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-ACCORDION.yaml']} />

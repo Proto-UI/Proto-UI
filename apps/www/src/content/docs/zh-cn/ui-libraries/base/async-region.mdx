@@ -5,6 +5,8 @@ description: 'Async Region base prototype'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-async-region-root` 是一个窄异步无障碍原语，投射受治理的 `aria-busy` 状态并暴露 busy handle。
 
@@ -40,3 +42,20 @@ Authored 后代与焦点在 prop-only 转换中保留。原型不声明 role、a
 - 契约：[C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
 - 源码：[packages/prototypes/base/src/async-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/async-region)
 - 测试：[async-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/async-region.test.ts)
+
+## API
+
+Async Region 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'busy', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-ASYNC-REGION.yaml']} />

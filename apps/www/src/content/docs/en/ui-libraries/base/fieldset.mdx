@@ -4,6 +4,8 @@ description: Draft portable fieldset atoms.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-base-fieldset"
@@ -43,3 +45,21 @@ Base and the four visual families share the same semantic atoms. Synthetic WebCo
 ## Family presentation
 
 Base contributes portable semantics and slotted content without a visual-family recipe. Choose a visual family to add presentation.
+
+## API
+
+Fieldset is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Legend and Description have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-FIELDSET.yaml']} />

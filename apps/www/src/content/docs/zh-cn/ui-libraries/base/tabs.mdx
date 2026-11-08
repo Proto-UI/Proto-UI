@@ -4,6 +4,8 @@ description: 'Base Tabs 的 selection、anatomy、focus ownership、证据与当
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Tabs 是 compound single-selection protocol。Root 拥有 selected value；List 拥有 roving focus；Trigger 请求 selection；Content 投射当前 panel；Indicator 只反映 context，供下游添加视觉处理。
 
@@ -49,3 +51,22 @@ Web profile 投射 tablist、tab 与 tabpanel relations。disabled Trigger 不�
 - [Tabs source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/tabs)
 - [Tabs evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/tabs.test.ts)
 - 风格化投射：[Shadcn Tabs](/zh-cn/ui-libraries/shadcn/tabs/) 与 [Brutalist Tabs](/zh-cn/ui-libraries/brutalist/components/tabs/)
+
+## API
+
+Tabs 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+  ]}
+/>
+
+这些属性属于 Root。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。Indicator 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TABS.yaml']} />

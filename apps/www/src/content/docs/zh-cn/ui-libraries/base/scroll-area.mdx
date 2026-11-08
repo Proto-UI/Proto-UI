@@ -4,6 +4,8 @@ description: 'Base Scroll Area 的 host-projected scrolling domain、anatomy、�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Scroll Area 建模一个 logical scrolling domain，而不是包装 Web DOM scrollbar。Viewport 拥有 surface，并通过特权 capability 接入 host scrolling；Root 与 composed controls 只作为 layout/projection parts。
 
@@ -53,3 +55,20 @@ Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有�
 - [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
 - [End-follow contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) 与 [evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SCROLL-END-FOLLOW-0001.yaml)
 - 风格化投射：[Brutalist Scroll Area](/zh-cn/ui-libraries/brutalist/components/scroll-area/)
+
+## API
+
+Scroll Area 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' },
+  ]}
+/>
+
+这个属性属于 Scrollbar。Viewport 与 Thumb 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SCROLL-AREA.yaml']} />

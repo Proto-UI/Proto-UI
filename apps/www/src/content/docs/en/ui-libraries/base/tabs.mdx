@@ -4,6 +4,8 @@ description: 'Base Tabs selection, anatomy, focus ownership, evidence, and curre
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Tabs is a compound single-selection protocol. Root owns the selected value; List owns roving focus; Trigger requests selection; Content projects the current panel; Indicator only reflects context for downstream visual treatment.
 
@@ -49,3 +51,22 @@ The five `P-BASE-TABS*` entities are **draft**. Current implementation and evide
 - [Tabs source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/tabs)
 - [Tabs evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/tabs.test.ts)
 - Styled projections: [Shadcn Tabs](/en/ui-libraries/shadcn/tabs/) and [Brutalist Tabs](/en/ui-libraries/brutalist/components/tabs/)
+
+## API
+
+Tabs is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+  ]}
+/>
+
+These props belong to Root. List defaults `orientation` to `horizontal`, `loop` to `false` and `a11yLabel` to `''`. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`. Indicator has no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TABS.yaml']} />

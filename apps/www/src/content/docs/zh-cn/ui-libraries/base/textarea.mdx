@@ -5,6 +5,8 @@ description: '无内容渲染的宿主协同多行文本控件原型'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-textarea-root` 是一个无内容渲染的 Base 原型。它静态声明 `plain-text`、`multiline` 与 host-owned editing requirement，由 adapter 选择一个物理宿主 editor。当前 Web profile 将该 requirement 解析为原生 `<textarea>`；Web Component、React 与 Vue 的演示是同一 Web host 上的 cross-adapter evidence，不代表已经完成多宿主 conformance。
 
@@ -53,3 +55,33 @@ Base 不提供 child renderer，也不提供视觉样式。应用作者应在这
 - 契约：[C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
 - 源码：[packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
 - 测试：[textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)
+
+## API
+
+Textarea 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TEXTAREA.yaml']} />

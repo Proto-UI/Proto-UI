@@ -4,6 +4,8 @@ description: '带主要说明、安全取消焦点与明确操作意图的模态
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 带主要说明、安全取消焦点与明确操作意图的模态确认窗口。
 
@@ -21,3 +23,22 @@ Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入
 组成: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
 
 当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+
+## API
+
+Alert Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 也接受 Transition 属性。Trigger、Title、Description、Cancel 与 Action 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-ALERT-DIALOG.yaml']} />

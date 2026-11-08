@@ -4,6 +4,8 @@ description: '用显式 Proto UI 关联分别表达可访问名称与控件激�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Label 当前仍是 **draft**。Base Label 提供独立的命名与激活关联协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
 
@@ -43,3 +45,22 @@ WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, 
 - [测试映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
 
 Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。
+
+## API
+
+Label 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'naming', type: 'boolean', default: 'true' },
+    { name: 'activation', type: 'boolean', default: 'true' },
+    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-LABEL.yaml']} />

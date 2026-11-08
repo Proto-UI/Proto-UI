@@ -4,6 +4,8 @@ description: 'Base 被动文本内容与可复用排版输入。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-text-root` 是 draft 可复用 Text 原子。Base 拥有规范化的呈现输入和一个被动内容槽，保持视觉中立。排版选择经由 Shadcn 或 Brutalist 投射形成可见效果，不向 Base 引入默认设计语言。
 
@@ -65,3 +67,27 @@ CLI 拒绝不支持的 GPUI target。原生 GPUI 排版映射仍缺少 `font-sty
 ## 依据
 
 `P-BASE-TEXT`、`T-TEXT-0001`治理此 slice。源码为 `packages/prototypes/base/src/text/`，编目生命周期仍为 draft。
+
+## API
+
+Text 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
+    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
+    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
+    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
+    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TEXT.yaml']} />

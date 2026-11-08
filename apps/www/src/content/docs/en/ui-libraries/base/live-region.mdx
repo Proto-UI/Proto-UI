@@ -5,6 +5,8 @@ description: 'Live Region base prototype'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-live-region-root` is a narrow async accessibility primitive that projects governed ARIA live-region semantics without interaction.
 
@@ -40,3 +42,21 @@ It does not include:
 - Contract: [C-ASYNC-A11Y-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-ASYNC-A11Y-0001.yaml)
 - Source: [packages/prototypes/base/src/live-region](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/live-region)
 - Test: [live-region.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/live-region.test.ts)
+
+## API
+
+Live Region is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-LIVE-REGION.yaml']} />

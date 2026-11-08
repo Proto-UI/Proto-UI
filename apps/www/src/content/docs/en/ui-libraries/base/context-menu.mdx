@@ -4,6 +4,8 @@ description: 'A context-triggered command menu with keyboard access.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 A context-triggered command menu with keyboard access.
 
@@ -23,3 +25,24 @@ Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/
 A touch/pen contact must remain held for 600 ms within the host movement tolerance. Movement, release, cancellation, disabled state and disposal cancel a pending hold. Accepted keyboard/long-press input suppresses its duplicate native context menu; an accepted hold also suppresses its compatibility click. Ordinary clicks and scrolling are left to the host. Default placement is bottom/start with no gap.
 
 Controlled open requests remain requests: the native context menu is prevented when the enabled Root accepts delivery, while the owner may keep open=false. A later owner-open uses the latest live input anchor; programmatic openContextMenu uses the trigger fallback. Escape and selection restore the original trigger according to the existing focus policy. Shared source-runtime coverage does not establish compiler/native admission or real-device long-press acceptance.
+
+## API
+
+Context Menu is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Trigger has no props. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `start`, `sideOffset` and `alignOffset` to `0`, `avoidCollisions` to `true`, `collisionPadding` to `0` and `excludeAnchorTranslation` to `false`. Item defaults `disabled`, `value` and `textValue` to `false`, `''` and `''`; `closeOnCommit` has no default and falls back to the Root policy.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-CONTEXT-MENU.yaml']} />

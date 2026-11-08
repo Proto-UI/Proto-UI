@@ -4,6 +4,8 @@ description: 'Timed live notifications with pause, dismiss and explicit action i
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Timed live notifications with pause, dismiss and explicit action intent.
 
@@ -19,3 +21,27 @@ Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast
 Parts: Root, Viewport, Title, Description, Action, Close.
 
 Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+
+## API
+
+Toast is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+  ]}
+/>
+
+These props belong to Root. Viewport defaults `a11yLabel` to `Notifications` and `hotkey` to `F8`. Title and Description have no props. Action defaults `disabled` to `false`; `a11yLabel` has no default. Close defaults `disabled` to `false`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TOAST.yaml']} />

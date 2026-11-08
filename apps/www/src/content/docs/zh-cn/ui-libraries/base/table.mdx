@@ -4,6 +4,8 @@ description: 'Base Table draft structural protocol、有界 Web Adapter projecti
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Table 仍是**draft protocol**，不是稳定版功能或 assistive-technology certification。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。当前 workspace 已包含 Web Components、React 18/19、Vue 3 与 Vue 2 的有界 Web DOM projection 证据、`base-table` CLI facade，以及下方静态 preview。design-language 工作仍不属于这个切片。
 
@@ -110,3 +112,18 @@ React unit case 使用 synthetic hook runtime，上方 public preview 加载的�
 - [WAI-ARIA table role](https://w3c.github.io/aria/#table)
 - [UIKit accessibility data table](https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable)
 - [Windows UI Automation Table pattern](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/implementing-the-ui-automation-table-control-pattern)
+
+## API
+
+Table 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[]}
+/>
+
+Caption 与 Row 没有属性。Cell 的 `headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。Header Cell 的 `headerKey` 默认 `''`，`headerKind` 默认 `column`，`headers` 默认 `[]`，`rowSpan` 与 `columnSpan` 默认 `1`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TABLE.yaml']} />

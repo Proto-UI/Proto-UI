@@ -4,6 +4,8 @@ description: 'Base Dropdown Menu 的 action-menu ownership、anatomy、证据与
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Dropdown Menu 是由 Trigger 打开的 compound action-menu。Root 拥有 visibility、request arbitration、collection order、entry policy 与 shared facts；瞬时 active navigation 永远不会变成 persistent selection。
 
@@ -45,3 +47,24 @@ Content 组合 overlay、transition、collection navigation、typeahead 与 anch
 ## 分组动作组成（草稿）
 
 Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+
+## API
+
+Dropdown Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 没有属性。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`，`excludeAnchorTranslation` 默认 `false`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。Group 的 `a11yLabel` 默认 `''`。Label、Separator 与 Shortcut 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-DROPDOWN-MENU.yaml']} />

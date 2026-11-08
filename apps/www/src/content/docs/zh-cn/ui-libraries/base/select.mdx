@@ -5,6 +5,8 @@ description: 'Select 基础原型'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-select` 是一个已经编目的 select-only 复合原型，也是 base 原型库里首个正式定义 `value` 类呈现部件的 family。
 
@@ -69,3 +71,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 `select-surface`、`select-viewport`、`select-item-text` 提供显式对齐结构。`select-group` 是被动容器；`select-label` 保留子内容，仅命名所属 Group，不是 control label，也没有激活行为。`select-separator` 是隐藏于无障碍树、无子内容的装饰性分隔。
 
 它们提供 `asSelectGroup`、`asSelectLabel`、`asSelectSeparator`；asHook 继承语义声明，使用 `asSelectSeparator` 的作者必须显式返回空 renderer。标签缺失或重复时命名 fail closed，嵌套 Select 根之间不串名。选择、collection 与焦点仍由原 owner 持有。原生辅助技术验收仍待完成；GPUI peer 当前尚未传输 Separator 的 hidden-tree 事实。
+
+## API
+
+Select 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 或 `value` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `accessibleLabel` 默认 `''`。Value 的 `placeholder` 默认 `''`。Content 接受 Transition 属性，`position` 默认 `popper`，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。Item 的 `disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 没有默认值，回退到 Root 策略。Group、Label、Surface、ItemText、Viewport 与 Separator 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECT.yaml']} />

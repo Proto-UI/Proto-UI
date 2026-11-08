@@ -4,6 +4,8 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
 
@@ -30,3 +32,32 @@ Base 拥有民用日期行为、可用性、受控值所有权和无障碍语义
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Calendar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 或 `month` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: 'en-US' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+这些属性属于 Root。Day 的 `date` 默认 `''`，`offset` 默认 `0`，`disabled` 默认 `false`。Grid 与 Heading 没有属性。Row 的 `index` 没有默认值。Caption 的 `a11yLabel` 默认 `Calendar navigation`。Previous 与 Next 接受 Button 属性，`a11yLabel` 分别默认 `Previous month` 与 `Next month`。Weekdays 没有属性。Weekday 的 `offset` 默认 `0`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-CALENDAR.yaml']} />
