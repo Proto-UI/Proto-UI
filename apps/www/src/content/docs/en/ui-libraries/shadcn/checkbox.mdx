@@ -1,16 +1,60 @@
 ---
 title: 'Checkbox'
-description: 'Shadcn checkbox reconstructed on Proto UI.'
+description: 'A Shadcn checkbox projected from the Base checkbox protocol.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
-This entry shows the current `shadcn` checkbox implementation in Proto UI.
-
-Base Checkbox owns the protocol: controlled and uncontrolled `checked` and `indeterminate`, activation from pointer and Space, the effective disabled state, focus, and the `checkbox` role with its `mixed` accessible state. Root and Indicator are the whole anatomy, and the shadcn layer adds presentation only — the box, its fill, the focus ring, and the disabled treatment.
+Base Checkbox owns the protocol: controlled and uncontrolled `checked` and `indeterminate`, activation from pointer and Space, the effective disabled state, focus, and the `checkbox` role with its `mixed` accessible state. Root and Indicator are the whole anatomy. The Shadcn layer adds presentation only: the box, its fill, the focus ring, and the disabled treatment.
 
 The Indicator is derived. It reads `checked` and `indeterminate` from the nearest Base Checkbox, picks the tick or the dash, and owns no value, focus, or event of its own. Mixed reads before checked, so a checkbox that is both never paints a tick.
 
-<PrototypePreviewer demoId="demo-shadcn-checkbox" initialRuntime="wc" />
+The demo below is one composition: unchecked, checked, mixed, disabled-and-checked, and a focusable unchecked box.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-checkbox" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Omitted boolean props use the defaults below. Passing `checked` or `indeterminate` selects controlled mode for that fact; the other fact can stay uncontrolled.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Root exposes `checked`, `indeterminate`, `disabled`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`. There is no `label` prop; name the checkbox with composed content.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-CHECKBOX.yaml',
+    'P-SHADCN-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>
