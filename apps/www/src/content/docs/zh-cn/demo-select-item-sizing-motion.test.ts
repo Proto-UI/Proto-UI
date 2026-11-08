@@ -143,6 +143,13 @@ describe('Select sizing animation prerequisite', () => {
     f.settle();
     expect(sizingMotionIssues(await f.done, 'wc')).toContain('layout mismatch during motion');
   });
+  it('accepts the 8px group padding inset while the popup stays on the trigger', async () => {
+    const f = fixture();
+    f.itemWidth(216);
+    f.open();
+    f.settle();
+    expect(sizingMotionIssues(await f.done, 'wc')).toEqual([]);
+  });
   it('rejects a finished animation frozen at scale95 without waiting for geometry to pass', async () => {
     const f = fixture();
     f.open();

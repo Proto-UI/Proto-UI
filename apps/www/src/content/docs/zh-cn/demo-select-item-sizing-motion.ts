@@ -306,11 +306,16 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       )
     )
       issues.push('unexpected additional transform');
+    // #1330 retired the row border-box lease. The popup matches the Trigger;
+    // rows are full-width flow children inside group chrome (rhea p-1 is 8px).
+    if (
+      !near(sample.content.layoutWidth, sample.trigger.layoutWidth) ||
+      !near(sample.surface.layoutWidth, sample.trigger.layoutWidth)
+    )
+      issues.push('popup width is not the trigger');
     for (const item of sample.items) {
-      if (
-        !near(item.layoutWidth, sample.trigger.layoutWidth) ||
-        !near(item.layoutHeight, sample.trigger.layoutHeight)
-      )
+      const inset = sample.trigger.layoutWidth - item.layoutWidth;
+      if (!near(item.layoutHeight, sample.trigger.layoutHeight) || inset < -0.5 || inset > 8.5)
         issues.push('layout mismatch during motion');
       if (
         !near(item.width, item.layoutWidth * scale) ||
