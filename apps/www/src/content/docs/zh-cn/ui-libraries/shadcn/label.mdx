@@ -4,6 +4,9 @@ description: '用显式 Proto UI 关联分别表达可访问名称与控件激�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -45,3 +48,29 @@ WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, 
 - [测试映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
 
 Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-label" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'naming', type: 'boolean', default: 'true' },
+    { name: 'activation', type: 'boolean', default: 'true' },
+    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+  ]}
+/>
+
+这些属性属于 Root。`policy` 只在 Label 可激活时抑制误选文字。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
