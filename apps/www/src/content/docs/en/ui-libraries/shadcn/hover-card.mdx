@@ -1,12 +1,66 @@
 ---
 title: 'Hover Card'
-description: 'Shadcn hover-card reconstructed on Proto UI.'
+description: 'A Shadcn hover card projected from the Base hover-card protocol.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
-This entry shows the current `shadcn` hover-card implementation in Proto UI. It supports the official controlled/uncontrolled Root API, `openDelay`, `closeDelay`, and the Content `side`/`align` subset while matching the official width, popover colors, border, shadow, and direction-aware motion. Portal, collision handling, Arrow, forceMount, and numeric offsets are not yet supported by the Base layer.
+Base Hover Card owns open state. Root accepts controlled `open` or uncontrolled `defaultOpen`, plus `openDelay` and `closeDelay`. Trigger hover or focus, and Content hover, only submit a request; they do not bypass that owner. Content adds `side`, `align`, and the numeric offsets below. Arrow and `forceMount` are not props of this surface.
 
-<PrototypePreviewer demoId="demo-shadcn-hover-card" initialRuntime="wc" />
+The demo opens `@proto-ui` after 150ms and closes after 300ms. Content is `side="bottom"` and `align="center"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-hover-card" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `open` selects controlled mode. Delays must be finite and at least 0; any other number falls back to the default.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+`side` through `collisionPadding` belong to Content. Trigger only adds `disabled`, which defaults to false. Root exposes `open`, `openHoverCard`, `close`, `toggle`, and `openChange`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-HOVER-CARD.yaml',
+    'P-SHADCN-HOVER-CARD-TRIGGER.yaml',
+    'P-SHADCN-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>
