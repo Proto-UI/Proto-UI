@@ -171,15 +171,28 @@ function assertGeometry(value: Facts, runtime: string) {
   expect(value.runtime).toBe(runtime);
   expect(value.expanded).toBe('true');
   expect(value.trigger.rect.height).toBeGreaterThan(0);
+  // #1330: the popup matches the Trigger. Rows are full-width flow children
+  // inside group padding (rhea p-1 is 4px each side), not the retired row lease.
+  expect(
+    Math.abs(value.surface.rect.width - value.trigger.rect.width),
+    'surface width matches trigger'
+  ).toBeLessThanOrEqual(0.5);
+  expect(
+    Math.abs(value.surface.rect.left - value.trigger.rect.left),
+    'surface aligns to trigger'
+  ).toBeLessThanOrEqual(0.5);
   for (const item of value.items) {
     expect(
       Math.abs(item.rect.height - value.trigger.rect.height),
       `${item.text} border-box height`
     ).toBeLessThanOrEqual(0.5);
-    expect(
-      Math.abs(item.rect.width - value.trigger.rect.width),
-      `${item.text} border-box width`
-    ).toBeLessThanOrEqual(0.5);
+    const insetLeft = item.rect.left - value.trigger.rect.left;
+    const insetRight = value.trigger.rect.right - item.rect.right;
+    expect(Math.abs(insetLeft - insetRight), `${item.text} row inset symmetry`).toBeLessThanOrEqual(
+      0.5
+    );
+    expect(insetLeft, `${item.text} row inset`).toBeGreaterThanOrEqual(-0.5);
+    expect(insetLeft, `${item.text} row inset`).toBeLessThanOrEqual(4.5);
     expect(
       item.scrollWidth - item.clientWidth,
       `${item.text} horizontal text overflow`
@@ -192,8 +205,7 @@ function assertGeometry(value: Facts, runtime: string) {
     expect(box.scrollWidth - box.clientWidth, `${label} horizontal overflow`).toBeLessThanOrEqual(
       1
     );
-  // A popup may legitimately be wider than its Trigger to include chrome.
-  // Match the actual Item boxes, never substitute the decorative Surface box.
+  // The popup is the Trigger's width. Do not treat a wider decorative frame as success.
   expect(value.surface.rect.left).toBeGreaterThanOrEqual(-0.5);
   expect(value.surface.rect.right).toBeLessThanOrEqual(value.browser.width + 0.5);
   const focused = value.items.filter((item) => item.focused);
