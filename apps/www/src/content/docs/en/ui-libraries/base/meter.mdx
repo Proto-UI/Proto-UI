@@ -4,6 +4,8 @@ description: A bounded numerical measurement with shared Base semantics.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-base-meter"
@@ -19,3 +21,27 @@ Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to order
 Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
 
 Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+
+## API
+
+Meter is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number', default: 'undefined' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+    { name: 'low', type: 'number', default: 'undefined' },
+    { name: 'high', type: 'number', default: 'undefined' },
+    { name: 'optimum', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+These props belong to Root. Label, Track, Indicator and Value have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-METER.yaml']} />

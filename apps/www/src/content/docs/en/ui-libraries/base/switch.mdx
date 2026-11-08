@@ -4,6 +4,8 @@ description: 'Base Switch root-owned on/off semantics, anatomy, evidence, and bo
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Switch is an on/off value control. Root owns the persistent checked value and activation route; Thumb is an optional same-domain indicator and never becomes a second input target.
 
@@ -44,3 +46,23 @@ The stable 0.2.0 package exports the Switch family, and the CLI registry exposes
 - [Switch source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/switch)
 - [Switch evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/switch.test.ts)
 - Styled projections: [Shadcn Switch](/en/ui-libraries/shadcn/switch/) and [Brutalist Switch](/en/ui-libraries/brutalist/components/switch/)
+
+## API
+
+Switch is workspace source. There is no public `proto-ui add` target. Passing `checked` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+These props belong to Root. Thumb has no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SWITCH.yaml']} />

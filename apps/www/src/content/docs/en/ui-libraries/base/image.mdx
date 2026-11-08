@@ -5,6 +5,8 @@ description: 'Host-owned image presentation with explicit accessibility and load
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-image-root` is a draft Base prototype available in the `0.3.0-alpha.0` package line. It declares one host-owned image target and exposes its source, fit, and loading status. Web Components, React, Vue 3, and Vue 2 currently project it to one physical `<img>` per instance. These previews prove a bounded Web profile, not non-Web host support.
 
@@ -97,3 +99,23 @@ Base Image does not own Avatar fallback, upload, cropping, zoom, gallery navigat
 - Web projection: [D-IMAGE-VIEW-PROJECTION-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml)
 - Source: [packages/prototypes/base/src/image](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/image)
 - Evidence: [T-IMAGE-VIEW-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-IMAGE-VIEW-0001.yaml)
+
+## API
+
+Image is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-IMAGE.yaml']} />

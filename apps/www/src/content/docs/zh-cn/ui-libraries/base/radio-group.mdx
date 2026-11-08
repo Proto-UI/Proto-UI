@@ -5,6 +5,8 @@ description: '带 roving focus、可跨宿主投影的无样式单选组协议�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-radio-group` 是用于从一组可见选项中选择一个值的 draft Base 协议。Root 是唯一的选中值所有者；Item 从 Root 派生 `checked` 与有效 `disabled` 状态；Indicator 只负责呈现这些事实。
 
@@ -70,3 +72,22 @@ Root 投影 `role="radiogroup"`、动态 disabled 状态，并把 `a11yLabel` �
 - Catalog：[P-BASE-RADIO-GROUP](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-RADIO-GROUP.yaml)
 - 源码：[packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
 - 测试：[radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)
+
+## API
+
+Radio Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Item 的 `value` 默认 `''`，`disabled` 默认 `false`。Indicator 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RADIO-GROUP.yaml']} />

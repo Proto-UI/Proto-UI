@@ -4,6 +4,8 @@ description: 'Base Separator 的 orientation 与无交互 accessibility 语义�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Separator 是用于 horizontal/vertical separation 的 contentless、non-interactive boundary。它拥有 orientation 与 decorative 状态；layout、color、thickness 与 visual rhythm 属于设计语言。
 
@@ -41,3 +43,21 @@ Decorative mode 会从 accessibility tree 隐藏，既不输出 `separator` role
 - [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
 - [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
 - 风格化投射：[Brutalist Separator](/zh-cn/ui-libraries/brutalist/components/separator/)
+
+## API
+
+Separator 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'decorative', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SEPARATOR.yaml']} />

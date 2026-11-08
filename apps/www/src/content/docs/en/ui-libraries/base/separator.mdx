@@ -4,6 +4,8 @@ description: 'Base Separator orientation and accessibility semantics without int
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Separator is a contentless, non-interactive boundary for horizontal or vertical separation. It owns orientation and whether the separator is decorative; layout, color, thickness, and rhythm belong to the design language.
 
@@ -41,3 +43,21 @@ The stable 0.2.0 package exports the Separator subpath, and the CLI registry exp
 - [Separator source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/separator)
 - [Separator evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/separator.test.ts)
 - Styled projection: [Brutalist Separator](/en/ui-libraries/brutalist/components/separator/)
+
+## API
+
+Separator is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'decorative', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SEPARATOR.yaml']} />

@@ -4,6 +4,8 @@ description: '可从四个边缘显示的模态面板。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 可从四个边缘显示的模态面板。
 
@@ -45,3 +47,22 @@ snapPoints 缺省、null 或空数组时按内容高度显示；非空有效数�
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
+
+## API
+
+Drawer 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `side` 默认 `bottom`，同样接受 Transition 属性。Handle 的 `disabled` 默认 `false`，`a11yLabel` 默认 `Resize drawer`。Trigger、Title、Description、Header、Footer、Close 与 AcceptedSide 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-DRAWER.yaml']} />

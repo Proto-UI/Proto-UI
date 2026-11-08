@@ -4,6 +4,8 @@ description: 'A modal decision with a primary message, safe cancel target and ex
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 A modal decision with a primary message, safe cancel target and explicit action intent.
 
@@ -21,3 +23,22 @@ Root supports controlled open or uncontrolled defaultOpen. Disabled commands do 
 Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
 
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+
+## API
+
+Alert Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content also accepts the Transition props. Trigger, Title, Description, Cancel and Action have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-ALERT-DIALOG.yaml']} />

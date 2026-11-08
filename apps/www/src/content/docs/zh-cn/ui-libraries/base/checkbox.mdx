@@ -5,6 +5,8 @@ description: 'Checkbox 基础原型'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Checkbox 基础原型在 Toggle 语义之上提供 checked、unchecked、disabled 和 indeterminate 交互能力。
 
@@ -40,3 +42,22 @@ Checkbox 通过 anatomy 系统拆分为 root 和 indicator 两个部分。
 4. 如果 `indeterminate` 是受控状态，外部 owner 需要处理 `indeterminateChange`，并重新传入 `indeterminate={false}`。
 
 Disabled checkbox 在按下时不会改变 checked 或 indeterminate 状态。
+
+## API
+
+Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 或 `indeterminate` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Indicator 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-CHECKBOX.yaml']} />

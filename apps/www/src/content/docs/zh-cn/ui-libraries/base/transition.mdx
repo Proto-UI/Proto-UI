@@ -5,6 +5,8 @@ description: 'Transition 基础原型'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import TransitionDemoStyles from '@/components/PrototypePreviewer/TransitionDemoStyles.astro';
 
 <TransitionDemoStyles />
@@ -166,3 +168,24 @@ closed → entering → entered → leaving → closed
 `base-transition` v0 仅管理**单个元素自身**的存在状态生命周期（`closed → entering → entered → leaving → closed`）。
 
 若需要 parent/child 嵌套协调退出（例如外层 Dialog 等待内层某个子元素先完成离开动画后再关闭），这属于 `transition-group` / `boundary` 类的独立抽象，不在当前 v0 范围内。
+
+## API
+
+Transition 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TRANSITION.yaml']} />

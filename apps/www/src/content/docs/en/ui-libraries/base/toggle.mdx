@@ -4,6 +4,8 @@ description: 'Base Toggle persistent active-state semantics, evidence, and curre
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Toggle is a button-like control that owns a persistent binary `active` state. It is for modes such as pinning or text-format activation—not a one-shot Button action and not a Switch on/off value.
 
@@ -42,3 +44,21 @@ The stable 0.2.0 package exports `@proto.ui/prototypes-base/toggle`, and the CLI
 - [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
 - [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
 - Styled projections: [Shadcn Toggle](/en/ui-libraries/shadcn/toggle/) and [Brutalist Toggle](/en/ui-libraries/brutalist/components/toggle/)
+
+## API
+
+Toggle is workspace source. There is no public `proto-ui add` target. Passing `active` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TOGGLE.yaml']} />

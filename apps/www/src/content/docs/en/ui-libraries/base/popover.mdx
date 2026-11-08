@@ -4,6 +4,8 @@ description: 'An anchored non-modal dialog for small interactive content.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 An anchored non-modal dialog for small interactive content.
 
@@ -21,3 +23,22 @@ Root supports controlled open or uncontrolled defaultOpen. Disabled commands do 
 Parts: Root, Trigger, Content, Title, Description, Close.
 
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+
+## API
+
+Popover is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0` and `collisionPadding` to `8`. Trigger, Title, Description and Close have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-POPOVER.yaml']} />

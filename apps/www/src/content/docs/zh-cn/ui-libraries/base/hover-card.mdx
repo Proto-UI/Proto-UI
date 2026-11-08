@@ -5,6 +5,8 @@ description: 'Hover Card 基础原型'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Hover Card 由 Root、Trigger 与 Content 组成。Root 支持受控/非受控 open、`openDelay`、`closeDelay` 与 `openChange`；Content 使用 `asOverlay` 和 `asTransition`，离场完成后才 detach。Content 使用保留 logical owner 的 Portal、fixed positioning、`side`/`align`、数值 offset 与碰撞处理。Arrow、forceMount、自定义碰撞边界、sticky 与 detached-anchor hiding 仍属于扩展。
 
@@ -22,3 +24,23 @@ Draft Root 显式公开 typed 协作方法 `releaseInteraction(part, contributio
     hasCode={true}
   />
 </div>
+
+## API
+
+Hover Card 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-HOVER-CARD.yaml']} />

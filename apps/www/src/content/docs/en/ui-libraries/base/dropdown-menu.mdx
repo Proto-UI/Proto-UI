@@ -4,6 +4,8 @@ description: 'Base Dropdown Menu action-menu ownership, anatomy, evidence, and b
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Dropdown Menu is a compound action-menu opened by a Trigger. Root owns visibility, request arbitration, collection order, entry policy, and shared facts; transient active navigation never becomes persistent selection.
 
@@ -45,3 +47,24 @@ The stable 0.2.0 package exports `@proto.ui/prototypes-base/dropdown`. The CLI c
 ## Grouped action composition (draft)
 
 Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions and a disabled API action. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
+
+## API
+
+Dropdown Menu is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Trigger has no props. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0`, `avoidCollisions` to `true` and `excludeAnchorTranslation` to `false`. Item defaults `disabled`, `value` and `textValue` to `false`, `''` and `''`; `closeOnCommit` has no default and falls back to the Root policy. Group defaults `a11yLabel` to `''`. Label, Separator and Shortcut have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-DROPDOWN-MENU.yaml']} />

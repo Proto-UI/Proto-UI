@@ -4,6 +4,8 @@ description: 'Independent control naming and activation through an explicit Prot
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 This Label remains **draft**. Base Label provides the independent naming and activation-association protocol. Proto UI is an independent project; design references inform a deliberate projection rather than becoming project authority.
 
@@ -43,3 +45,22 @@ The first target set is Checkbox, Switch, Radio Group Item, Input and Textarea. 
 - [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 - [P-BASE-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-LABEL.yaml)
 - [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
+
+## API
+
+Label is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'naming', type: 'boolean', default: 'true' },
+    { name: 'activation', type: 'boolean', default: 'true' },
+    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-LABEL.yaml']} />

@@ -6,6 +6,8 @@ description: 'Base Button command semantics, public surface, evidence, and curre
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Button is a focusable command control for one discrete action. It owns activation, disabled gating, focus, transient interaction facts, and the outward `click` signal; it deliberately does not own a visual language.
 
@@ -183,3 +185,20 @@ The stable 0.2.0 package exports `@proto.ui/prototypes-base/button`, and the CLI
 - [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
 - [Button evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
 - Styled projections: [Shadcn Button](/en/ui-libraries/shadcn/button/) and [Brutalist Button](/en/ui-libraries/brutalist/components/button/)
+
+## API
+
+Button is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-BUTTON.yaml']} />

@@ -4,6 +4,8 @@ description: 'The draft Base Table structural protocol, bounded Web Adapter proj
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Table remains a **draft protocol**, not a stable release or assistive-technology certification. `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, `M-TABLE-STRUCTURE-0001`, the five `P-BASE-TABLE*` identities, and `T-TABLE-STRUCTURE-0001` govern its current slice. The workspace now includes bounded Web DOM projection evidence for Web Components, React 18/19, Vue 3, and Vue 2, a `base-table` CLI facade, and the static preview below. Design-language work remains outside this slice.
 
@@ -110,3 +112,18 @@ These passing DOM checks are not independent Checkpoint C acceptance or lifecycl
 - [WAI-ARIA table role](https://w3c.github.io/aria/#table)
 - [UIKit accessibility data table](https://developer.apple.com/documentation/uikit/uiaccessibilitycontainerdatatable)
 - [Windows UI Automation Table pattern](https://learn.microsoft.com/en-us/dotnet/framework/ui-automation/implementing-the-ui-automation-table-control-pattern)
+
+## API
+
+Table is workspace source. There is no public `proto-ui add` target. Root has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[]}
+/>
+
+Caption and Row have no props. Cell defaults `headers` to `[]` and `rowSpan` and `columnSpan` to `1`. Header Cell defaults `headerKey` to `''`, `headerKind` to `column`, `headers` to `[]` and `rowSpan` and `columnSpan` to `1`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TABLE.yaml']} />

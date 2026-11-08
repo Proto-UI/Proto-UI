@@ -4,6 +4,8 @@ description: 'Base Scroll Area host-projected scrolling domain, anatomy, evidenc
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Scroll Area models one logical scrolling domain rather than wrapping a Web DOM scrollbar. Viewport owns the surface and reaches host scrolling through a privileged capability; Root and composed controls stay layout and projection parts.
 
@@ -53,3 +55,20 @@ The Root, Viewport, Scrollbar, and Thumb entities are **draft**. Current evidenc
 - [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
 - [End-follow contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) and [evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SCROLL-END-FOLLOW-0001.yaml)
 - Styled projection: [Brutalist Scroll Area](/en/ui-libraries/brutalist/components/scroll-area/)
+
+## API
+
+Scroll Area is workspace source. There is no public `proto-ui add` target. Root has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' },
+  ]}
+/>
+
+This prop belongs to Scrollbar. Viewport and Thumb have no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SCROLL-AREA.yaml']} />

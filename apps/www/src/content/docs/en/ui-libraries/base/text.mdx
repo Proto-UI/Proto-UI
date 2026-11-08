@@ -4,6 +4,8 @@ description: 'Base passive text content and reusable typography inputs.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-text-root` is a draft reusable Text atom. Base owns normalized presentation inputs and one passive content slot. It remains visually neutral: the typography choices become visible through the Shadcn or Brutalist projection, rather than importing a default design language into Base.
 
@@ -65,3 +67,27 @@ The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping st
 ## Authority
 
 `P-BASE-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/base/src/text/`. Catalog lifecycle remains draft.
+
+## API
+
+Text is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
+    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
+    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
+    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
+    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TEXT.yaml']} />

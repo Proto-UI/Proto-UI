@@ -5,6 +5,8 @@ description: 'Contentless host-mediated multiline text-control prototype'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-textarea-root` is a contentless Base prototype. It statically declares a plain-text, multiline, host-owned editing requirement and lets the adapter select one physical host editor. The current Web profile resolves that requirement to a native `<textarea>`; the Web Component, React, and Vue demos are cross-adapter evidence on one Web host rather than completed multi-host conformance.
 
@@ -53,3 +55,33 @@ Base contributes no child renderer and no visual treatment. App authors style an
 - Contract: [C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
 - Source: [packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
 - Test: [textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)
+
+## API
+
+Textarea is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TEXTAREA.yaml']} />

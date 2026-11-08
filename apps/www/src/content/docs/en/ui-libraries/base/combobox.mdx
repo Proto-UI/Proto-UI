@@ -4,6 +4,8 @@ description: 'Editable search with committed option identity.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Editable search with committed option identity.
 
@@ -21,3 +23,27 @@ The host owns the real single-line editor. Input retains focus during Arrow navi
 Parts: Root, Input, Content, Item, Empty, Trigger.
 
 Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+
+## API
+
+Combobox is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Input defaults `placeholder`, `a11yLabel` and `name` to `''`. Content defaults `side` to `bottom`, `align` to `start`, `sideOffset` to `4` and `collisionPadding` to `8`. Item defaults `value`, `textValue` and `keywords` to `''` and `disabled` to `false`. Empty has no props. Trigger defaults `disabled` to `false`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-COMBOBOX.yaml']} />

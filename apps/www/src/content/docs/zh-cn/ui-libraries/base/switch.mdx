@@ -4,6 +4,8 @@ description: 'Base Switch 的 Root-owned on/off 语义、anatomy、证据与边�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Switch 是 on/off value control。Root 拥有持久 checked value 与 activation route；Thumb 是可选的 same-domain indicator，不会成为第二个 input target。
 
@@ -44,3 +46,23 @@ Root 在唯一可聚焦 control 上投射 `switch` role 与 checked state。Thum
 - [Switch source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/switch)
 - [Switch evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/switch.test.ts)
 - 风格化投射：[Shadcn Switch](/zh-cn/ui-libraries/shadcn/switch/) 与 [Brutalist Switch](/zh-cn/ui-libraries/brutalist/components/switch/)
+
+## API
+
+Switch 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+这些属性属于 Root。Thumb 没有属性。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SWITCH.yaml']} />

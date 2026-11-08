@@ -5,6 +5,8 @@ description: 'A host-neutral, accessible single-selection group with roving focu
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 `base-radio-group` is a draft Base protocol for choosing one value from a visible set. The Root is the sole selected-value owner; Items derive `checked` and effective `disabled` state from it, and Indicators only render those facts.
 
@@ -70,3 +72,22 @@ Those concerns require separate host or semantic contracts; they are not approxi
 - Catalog: [P-BASE-RADIO-GROUP](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-RADIO-GROUP.yaml)
 - Source: [packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
 - Tests: [radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)
+
+## API
+
+Radio Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`. Indicator has no props.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-RADIO-GROUP.yaml']} />

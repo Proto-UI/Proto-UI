@@ -4,6 +4,8 @@ description: 'Base Toggle 的持久 active-state 语义、证据与当前边界�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Toggle 是拥有持久二值 `active` 状态的 button-like control。它适合 pin、文字格式启用等 mode；它既不是一次性的 Button action，也不是 Switch 的 on/off value。
 
@@ -42,3 +44,21 @@ Form integration、group policy 与视觉 variant 仍由下游负责。
 - [Toggle source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/toggle)
 - [Toggle evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/toggle.test.ts)
 - 风格化投射：[Shadcn Toggle](/zh-cn/ui-libraries/shadcn/toggle/) 与 [Brutalist Toggle](/zh-cn/ui-libraries/brutalist/components/toggle/)
+
+## API
+
+Toggle 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `active` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-TOGGLE.yaml']} />

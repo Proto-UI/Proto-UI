@@ -6,6 +6,8 @@ description: 'Base Button 的 command 语义、公开表面、证据与当前边
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Base Button 是用于一次离散 action 的可聚焦 command control。它拥有 activation、disabled gate、focus、瞬时交互事实与 `click` outward signal；它刻意不拥有视觉语言。
 
@@ -183,3 +185,20 @@ import { BaseButton } from '../proto-ui/components/vue';
 - [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
 - [Button evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
 - 风格化投射：[Shadcn Button](/zh-cn/ui-libraries/shadcn/button/) 与 [Brutalist Button](/zh-cn/ui-libraries/brutalist/components/button/)
+
+## API
+
+Button 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-BUTTON.yaml']} />
