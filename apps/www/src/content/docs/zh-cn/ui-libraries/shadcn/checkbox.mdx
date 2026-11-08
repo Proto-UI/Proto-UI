@@ -1,16 +1,60 @@
 ---
 title: 'Checkbox'
-description: '在 Proto UI 上重建的 shadcn checkbox。'
+description: '从 Base Checkbox 协议投影出的 Shadcn Checkbox。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
-这个条目展示 Proto UI 中当前的 `shadcn` checkbox 实现。
-
-协议归 Base Checkbox 所有：controlled 与 uncontrolled 的 `checked` 与 `indeterminate`、指针与 Space 的 activation、生效的 disabled 状态、focus，以及带 `mixed` 可访问状态的 `checkbox` role。anatomy 只有 Root 与 Indicator，shadcn 层只增加呈现——方框、填充、focus ring 与 disabled 处理。
+协议归 Base Checkbox 所有：controlled 与 uncontrolled 的 `checked` 与 `indeterminate`、指针与 Space 的 activation、生效的 disabled 状态、focus，以及带 `mixed` 可访问状态的 `checkbox` role。anatomy 只有 Root 与 Indicator。Shadcn 层只增加呈现：方框、填充、focus ring 与 disabled 处理。
 
 Indicator 是派生的。它从最近的 Base Checkbox 读 `checked` 与 `indeterminate`，据此选择勾号或横线，自身不拥有任何 value、focus 或 event。mixed 先于 checked 读取，因此同时成立时不会画出勾号。
 
-<PrototypePreviewer demoId="demo-shadcn-checkbox" initialRuntime="wc" />
+下面这一组是同一个组合：未选、已选、mixed、禁用且已选，以及一个可聚焦的未选框。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-checkbox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## 安装
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-checkbox" manager="npm" />
+
+把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+## API
+
+未传入的布尔属性使用下表默认值。传入 `checked` 或 `indeterminate` 会使该事实进入受控模式，另一事实仍可以保持非受控。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Root 暴露 `checked`、`indeterminate`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`，以及 `checkedChange` 和 `indeterminateChange`。没有 `label` 属性；名称由组合进去的内容提供。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-CHECKBOX.yaml',
+    'P-SHADCN-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>
