@@ -4,6 +4,8 @@ description: '可暂停、关闭并发出明确操作意图的限时实时通知
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -21,3 +23,29 @@ Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/C
 组成: Root, Viewport, Title, Description, Action, Close.
 
 草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+
+本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'a11yLabel', type: 'string', default: 'Notifications' },
+    { name: 'hotkey', type: 'string', default: 'F8' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`defaultOpen`、`duration`、`paused`、`politeness` 属于 Root。`duration` 为 `0` 时保持打开。`a11yLabel` 与 `hotkey` 属于 Viewport。`disabled` 属于 Action 与 Close。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']}
+/>

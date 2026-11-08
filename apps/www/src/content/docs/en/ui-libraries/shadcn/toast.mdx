@@ -4,6 +4,8 @@ description: 'Timed live notifications with pause, dismiss and explicit action i
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -21,3 +23,29 @@ Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast
 Parts: Root, Viewport, Title, Description, Action, Close.
 
 Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+
+This entry is workspace source. It is not a public `proto-ui add` catalog id.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'paused', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'a11yLabel', type: 'string', default: 'Notifications' },
+    { name: 'hotkey', type: 'string', default: 'F8' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`defaultOpen`, `duration`, `paused`, and `politeness` belong to Root. `duration` `0` stays open. `a11yLabel` and `hotkey` belong to Viewport. `disabled` belongs to Action and Close.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']}
+/>
