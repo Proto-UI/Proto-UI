@@ -4,6 +4,8 @@ description: 可移植 fieldset 原子草稿。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-brutalist-fieldset"
@@ -47,3 +49,28 @@ Base 与四个视觉 family 共享语义 atoms。synthetic WebComponent 测试�
 - Description: 小号中等字重前景帮助文本可换行，不替换为弱化色。
 
 这些是 draft 外观标准，不是像素一致性声明。
+
+## API
+
+Fieldset 是工作区源码，没有公开的 `proto-ui add` 目标。Legend 与 Description 自身没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-FIELDSET.yaml',
+    'P-BRUTALIST-FIELDSET-LEGEND.yaml',
+    'P-BRUTALIST-FIELDSET-DESCRIPTION.yaml',
+  ]}
+/>

@@ -4,6 +4,8 @@ description: 五个原子组成的 Accordion，具备 canonical 组所有权、�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 这是 draft 工作区 family。当前源码与 synthetic-DOM 测试不代表浏览器/native、辅助技术、材质或 GPUI 已完整验收。
 
@@ -61,3 +63,36 @@ Heading 声明 heading/level；Trigger 声明 button、内容名称、expanded�
 当前工作区 CLI facade：proto-ui add react brutalist-accordion（也支持 vue、vue2、wc）。包发布及版本可用性与本 draft 源码分开判断。
 
 [APG 设计参考](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/accordion)
+
+## API
+
+Accordion 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `openItems` 进入受控模式。Trigger 自身没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'mode', type: "'single' | 'multiple'", default: 'single' },
+    { name: 'openItems', type: 'string[]', default: 'undefined' },
+    { name: 'defaultOpenItems', type: 'string[]', default: '[]' },
+    { name: 'allowEmpty', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: 'vertical' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+这些属性属于 Root。Item 要求非空 `value`，`disabled` 默认 `false`。Heading 的 `level` 默认 `3`。Content 的 `keepMounted` 与 `region` 默认 `false`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-ACCORDION.yaml',
+    'P-BRUTALIST-ACCORDION-ITEM.yaml',
+    'P-BRUTALIST-ACCORDION-HEADING.yaml',
+    'P-BRUTALIST-ACCORDION-TRIGGER.yaml',
+    'P-BRUTALIST-ACCORDION-CONTENT.yaml',
+  ]}
+/>

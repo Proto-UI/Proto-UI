@@ -4,6 +4,8 @@ description: Atomic Field labeling, value reporting and controlled or consumer-v
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Draft workspace family. All six atoms share one Base protocol; native/AT/material/GPUI completion is not yet established.
 
@@ -72,3 +74,67 @@ The GPUI peer currently has no physical TextControl host. It also reports or omi
 [Base UI Field comparison](https://base-ui.com/react/components/field) · [shadcn Field comparison](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 forms reference](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple text-fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
 
 These are independent design comparisons. Base UI's render callbacks, validators and Form submission mode, shadcn's layout wrapper/API, Bootstrap's DOM/classes and Apple system editing chrome are not inherited APIs or Proto UI authority.
+
+## API
+
+Field is workspace source. There is no public `proto-ui add` target. Passing `invalid` selects controlled validity; Control `value` selects controlled input. Description and Validity add no props of their own.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'invalid', type: 'boolean', default: 'undefined' },
+    { name: 'errors', type: 'string[]', default: 'undefined' },
+    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
+    { name: 'defaultErrors', type: 'string[]', default: '[]' },
+    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Control. Label defaults `activation` to `true`. Error defaults `message` to `''` and `keepMounted` to `false`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-FIELD.yaml',
+    'P-BRUTALIST-FIELD-LABEL.yaml',
+    'P-BRUTALIST-FIELD-CONTROL.yaml',
+    'P-BRUTALIST-FIELD-DESCRIPTION.yaml',
+    'P-BRUTALIST-FIELD-ERROR.yaml',
+    'P-BRUTALIST-FIELD-VALIDITY.yaml',
+  ]}
+/>

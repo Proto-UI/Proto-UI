@@ -4,6 +4,8 @@ description: Draft portable fieldset atoms.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer
   demoId="demo-brutalist-fieldset"
@@ -47,3 +49,28 @@ Base and the four visual families share the same semantic atoms. Synthetic WebCo
 - Description: Small medium-weight foreground help text with wrapping, not a muted-color substitution.
 
 These are draft presentation criteria, not a pixel-parity claim.
+
+## API
+
+Fieldset is workspace source. There is no public `proto-ui add` target. Legend and Description add no props of their own.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-FIELDSET.yaml',
+    'P-BRUTALIST-FIELDSET-LEGEND.yaml',
+    'P-BRUTALIST-FIELDSET-DESCRIPTION.yaml',
+  ]}
+/>

@@ -3,6 +3,9 @@ title: 'Brutalist Design Contract'
 description: 'Source-aligned Neo-Brutalist typography, geometry, surfaces and interaction'
 ---
 
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
 # Brutalist Design Contract
 
 The current draft visual system follows [neobrutalism.dev](https://www.neobrutalism.dev/), pinned to [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4). Proto UI maintains its own implementation and Base semantics; this is not an upstream certification or component API compatibility promise.
@@ -70,3 +73,16 @@ Select placeholders on the main blue fill retain paired black ink rather than ne
 The full [DM Sans copyright and OFL license](/fonts/dm-sans-OFL.txt) is served alongside this site's font assets. Textarea retains a theme-foreground border so its editable boundary has at least 3:1 contrast against both adjacent surfaces, including Dark.
 
 Button-like controls currently retain PUI's instant snap; the reference's 150ms transition-all is not claimed. Switch owns the measured 150ms Thumb transition separately.
+
+## API
+
+The Brutalist Design Contract is family-level documentation. There is no `proto-ui add` target and no Prototype part; it declares no props of its own.
+
+<ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+
+## References
+
+<SpecEntityLinks
+  directory="spec/decisions"
+  files={['D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001.yaml']}
+/>
