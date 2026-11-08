@@ -4,6 +4,8 @@ description: 'A keyboard-coordinated bar of independent command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -31,3 +33,26 @@ New York: [02cad611 menubar.tsx](https://github.com/shadcn-ui/ui/blob/02cad61166
 Existing Base expanded/focused/focus-visible/disabled facts drive paint. The shared Content/Item helpers also provide draft `inset` and `variant="destructive"` paint without introducing another behavior owner. This does **not** complete Menubar: Rhea hover still needs a neutral Base fact; group/checkbox/radio/submenu parts, exact alignment policy, translucent content and full placement/presence motion remain tracked in #907. Existing open-fact animation paint is not complete motion or native acceptance. Four-Web native input, AT, narrow/font-scaled geometry and independent exact-head evidence are still required. No DOM selector or page-only behavior substitutes for those missing capabilities.
 
 Rhea retains the existing keyboard focus ring while closed, plus a forced-colors outline. Exact upstream focus/hover and `outline-hidden` projection still require closure; expanded paint alone is not a focus affordance.
+
+## API
+
+Menubar is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Menubar reuses the shared menu-family Root props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `sideOffset` to `4`. Item defaults `closeOnSelect` to `true`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

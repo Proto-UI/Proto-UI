@@ -4,6 +4,8 @@ description: '具有键盘协调与独立命令面板的菜单栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -31,3 +33,26 @@ New York: [02cad611 menubar.tsx](https://github.com/shadcn-ui/ui/blob/02cad61166
 Existing Base expanded/focused/focus-visible/disabled facts drive paint. The shared Content/Item helpers also provide draft `inset` and `variant="destructive"` paint without introducing another behavior owner. This does **not** complete Menubar: Rhea hover still needs a neutral Base fact; group/checkbox/radio/submenu parts, exact alignment policy, translucent content and full placement/presence motion remain tracked in #907. Existing open-fact animation paint is not complete motion or native acceptance. Four-Web native input, AT, narrow/font-scaled geometry and independent exact-head evidence are still required. No DOM selector or page-only behavior substitutes for those missing capabilities.
 
 Rhea 在菜单关闭时仍保留既有键盘焦点环，并投射强制色模式轮廓。精确上游 focus/hover 与 `outline-hidden` 映射仍待闭环；展开背景不能替代焦点提示。
+
+## API
+
+Menubar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Menubar 复用共享菜单家族的 Root 属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `sideOffset` 默认 `4`。Item 的 `closeOnSelect` 默认 `true`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>
