@@ -4,6 +4,7 @@ description: '草稿结构化表格部件，带上游 shadcn table 外观。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
@@ -21,3 +22,14 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 组成: Root, Caption, Row, HeaderCell, Cell.
 
 草稿源码。真实辅助技术证据、响应式/视觉验收以及完整的 native/GPUI、编译器与独立验收仍未完成。
+
+## API
+
+Table 是工作区源码，没有公开的 `proto-ui add` 目标。`TableRootProps` 是空记录，Root 没有属性。组成是 Root、Caption、Row、HeaderCell、Cell。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TABLE.yaml', 'P-BASE-TABLE.yaml']}
+/>
