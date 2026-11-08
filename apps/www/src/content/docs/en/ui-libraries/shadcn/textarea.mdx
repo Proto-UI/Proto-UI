@@ -1,9 +1,12 @@
 ---
 title: 'Textarea'
-description: 'Shadcn textarea reconstructed on Proto UI.'
+description: 'A Shadcn textarea projected from the Base textarea protocol.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -13,4 +16,52 @@ Base Textarea owns the protocol: controlled and uncontrolled value, normalized i
 
 The projection is contentless. Authored children never become a second editor, and the slice adds no form workflow, validation message, auto-resize, or rich-text behavior.
 
-<PrototypePreviewer demoId="demo-shadcn-textarea" initialRuntime="wc" />
+The demo is three editors: an uncontrolled note (`rows` 4, `maxLength` 240), a disabled editor, and a read-only editor that remains focusable.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-textarea" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+Passing `value` selects controlled mode. `minLength` and `maxLength` use `-1` when the limit is omitted.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+Root exposes `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, and `composing`, plus `valueChange`, `change`, and the composition events. Authored children are not a second editor.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

@@ -1,9 +1,12 @@
 ---
 title: 'Separator'
-description: 'Shadcn separator reconstructed on Proto UI.'
+description: 'A Shadcn separator projected from the Base separator protocol.'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
@@ -13,4 +16,37 @@ Base Separator owns the protocol: `orientation` defaults to `horizontal`, and `d
 
 The separator is contentless and declares no focus, tab stop, or event channel. Length comes from the surrounding layout, and spacing stays with the composition.
 
-<PrototypePreviewer demoId="demo-shadcn-separator" initialRuntime="wc" />
+The demo is one column: a horizontal rule, a row of vertical rules, then a non-decorative horizontal rule that exposes `separator`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## Install
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
+
+Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'decorative', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+Root exposes `orientation` and `decorative`. It accepts no children as content and no focus or event props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>
