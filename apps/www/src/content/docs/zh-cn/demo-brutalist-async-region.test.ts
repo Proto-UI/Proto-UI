@@ -8,6 +8,8 @@ import type {
 } from '../../../components/PrototypePreviewer/demo-types';
 import asyncRegionDemoDefinition from './demo-brutalist-async-region.demo';
 
+type DemoRefNode = Extract<DemoNode, { kind: 'box' }> | Extract<DemoNode, { kind: 'proto' }>;
+
 const asyncRegionDemo = asyncRegionDemoDefinition as DemoSpec;
 
 function collectNodes(node: DemoChild, result: DemoNode[] = []): DemoNode[] {
@@ -48,11 +50,15 @@ describe('Brutalist Async Region demo contract', () => {
     // simulates a loading widget, timer, or second state machine.
     expect(region.props?.busy).toBe(false);
     const payloads = (region.children ?? []).filter(
-      (child) => typeof child !== 'string' && (child as DemoNode).ref === 'payload'
+      (child): child is DemoRefNode =>
+        typeof child !== 'string' && child.kind !== 'text' && child.ref === 'payload'
     );
     expect(payloads).toHaveLength(1);
 
-    const buttonRefs = buttons.map((node) => (node as DemoNode).ref).sort();
+    const buttonRefs = buttons
+      .map((node) => (node.kind === 'proto' ? node.ref : undefined))
+      .filter((ref): ref is string => typeof ref === 'string')
+      .sort();
     expect(buttonRefs).toEqual(['markBusy', 'markReady']);
   });
 
@@ -65,7 +71,7 @@ describe('Brutalist Async Region demo contract', () => {
     const busyState = document.createElement('div');
     const host = document.createElement('div');
     const propWrites: Array<{ ref: string; next: Record<string, unknown> }> = [];
-    const exposes: Record<string, unknown> = {
+    const exposes: Record<string, Record<string, unknown> | undefined> = {
       region: { busy: { get: () => true } },
     };
     const api: DemoRuntimeApi = {

@@ -6,6 +6,8 @@ import type {
 } from '../../../components/PrototypePreviewer/demo-types';
 import tableDemoDefinition from './demo-brutalist-table.demo';
 
+type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
+
 const tableDemo = tableDemoDefinition as DemoSpec;
 
 function collectNodes(node: DemoChild, result: DemoNode[] = []): DemoNode[] {
@@ -36,12 +38,16 @@ describe('Brutalist Table demo contract', () => {
     expect(ids.filter((id) => id === 'brutalist-table-root')).toHaveLength(1);
     expect(ids.filter((id) => id === 'brutalist-table-caption')).toHaveLength(1);
     expect(ids.filter((id) => id === 'brutalist-table-row')).toHaveLength(4);
-    expect(nodes.some((node) => node.prototypeId?.includes('data-table'))).toBe(false);
+    expect(
+      nodes.some((node) => node.kind === 'proto' && node.prototypeId.includes('data-table'))
+    ).toBe(false);
   });
 
   it('declares headerKind on header cells and ordered headers keys on cells', () => {
     // T-BRUTALIST-TABLE-0001-CASE-4
-    const nodes = collectNodes(tableDemo.root).filter((node) => node.kind === 'proto');
+    const nodes = collectNodes(tableDemo.root).filter(
+      (node): node is DemoProtoNode => node.kind === 'proto'
+    );
     for (const headerCell of nodes.filter(
       (node) => node.prototypeId === 'brutalist-table-header-cell'
     )) {
@@ -62,7 +68,8 @@ describe('Brutalist Table demo contract', () => {
     // T-BRUTALIST-TABLE-0001-CASE-4: section inputs are presentation-only;
     // the demo supplies them for header, body and footer rows.
     const rows = collectNodes(tableDemo.root).filter(
-      (node) => node.kind === 'proto' && node.prototypeId === 'brutalist-table-row'
+      (node): node is DemoProtoNode =>
+        node.kind === 'proto' && node.prototypeId === 'brutalist-table-row'
     );
     const sections = rows.map((row) => row.props?.section);
     expect(sections).toEqual(['header', 'body', 'body', 'footer']);

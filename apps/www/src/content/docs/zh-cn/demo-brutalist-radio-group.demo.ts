@@ -2,7 +2,7 @@ import type { DemoNode, DemoSpec } from '../../../components/PrototypePreviewer/
 
 // Visible captions stay inside each radio item so inherited Base
 // nameFromContent derives the same accessible name across the Web runtimes.
-function option(value: string, label: string, props: Record<string, unknown> = {}) {
+function option(value: string, label: string, props: Record<string, unknown> = {}): DemoNode {
   return {
     kind: 'box',
     className: 'flex items-center gap-3',
@@ -22,7 +22,7 @@ function option(value: string, label: string, props: Record<string, unknown> = {
   };
 }
 
-function group(title: string, defaultValue: string, options: DemoNode[]) {
+function group(title: string, defaultValue: string, options: DemoNode[]): DemoNode {
   return {
     kind: 'box',
     className: 'flex flex-col gap-2',
