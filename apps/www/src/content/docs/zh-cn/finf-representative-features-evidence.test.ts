@@ -1,5 +1,5 @@
 // @vitest-environment node
-// Harness/source checks only. Never imports the browser suite or launches a browser.
+// Harness/source checks only. Never executes the browser suite or launches a browser.
 import { existsSync, readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -7,10 +7,15 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import vm from 'node:vm';
 import { transformSync } from 'esbuild';
-import { Window } from 'happy-dom';
+import { Window, type HTMLDivElement } from 'happy-dom';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { describe, expect, it, vi } from 'vitest';
+import type {
+  PopoverCaptureObservation,
+  PopoverFrame,
+  PopoverMotionProbe,
+} from './finf-representative-features.browser.test';
 const { PRODUCTION_BROWSER_OWNERS } = createRequire(import.meta.url)(
   '../../../../../../scripts/test/runtime-test-plan.mjs'
 ) as { PRODUCTION_BROWSER_OWNERS: Record<string, string> };
@@ -59,12 +64,19 @@ const manifest = execute(
   routeFor: (family: string, component: string) => string;
 };
 
+type HarnessCapture = (state: string, observation?: unknown) => Promise<void>;
+type HarnessScreenshot = { path: string; animations: 'allow' | 'disabled'; timeout: number };
+
 function mockedCase(
   options: {
     failure?: Error;
     screenshotFailure?: boolean;
     navigationFailure?: Error;
     diagnosticFailure?: boolean;
+    component?: 'form' | 'popover';
+    journey?: (capture: HarnessCapture) => Promise<void>;
+    screenshotEffect?: (options: HarnessScreenshot) => void;
+    imageBytes?: (file: string) => Buffer;
   } = {}
 ) {
   const receipts = new Map<string, any>();
@@ -80,8 +92,9 @@ function mockedCase(
       if (options.diagnosticFailure) throw new Error('ARIA unavailable');
       return '- tab "React" [selected]';
     }),
-    screenshot: vi.fn(async () => {
+    screenshot: vi.fn(async (shot: HarnessScreenshot) => {
       if (options.screenshotFailure) throw new Error('capture unavailable');
+      options.screenshotEffect?.(shot);
     }),
   };
   const page = {
@@ -95,8 +108,9 @@ function mockedCase(
     locator: vi.fn(() => ({ first: () => previewer })),
     evaluate: vi.fn(async () => ({ locale: 'zh-CN', today: '2026-10-10T12:00:00.000Z' })),
     viewportSize: () => ({ width: 1365, height: 1000 }),
-    screenshot: vi.fn(async () => {
+    screenshot: vi.fn(async (shot: HarnessScreenshot) => {
       if (options.screenshotFailure) throw new Error('capture unavailable');
+      options.screenshotEffect?.(shot);
     }),
   };
   const context = { newPage: vi.fn(async () => page), route: vi.fn(), close: vi.fn() };
@@ -109,7 +123,8 @@ function mockedCase(
     writeFile: async (file: string, value: string) => {
       diagnosticFiles.set(file, value);
     },
-    readFile: async () => Buffer.from('not-a-real-screenshot'),
+    readFile: async (file: string) =>
+      options.imageBytes ? options.imageBytes(file) : Buffer.from('not-a-real-screenshot'),
     revision: 'a'.repeat(40),
     tree: 'b'.repeat(40),
     baseUrl: 'http://127.0.0.1:9999',
@@ -126,16 +141,13 @@ function mockedCase(
     Error,
   }) as (testCase: unknown) => Promise<void>;
   const testCase = {
-    id: 'shadcn-form',
-    group: 'forms',
+    id: `shadcn-${options.component ?? 'form'}`,
+    group: options.component === 'popover' ? 'disclosure-overlays' : 'forms',
     family: 'shadcn',
-    component: 'form',
-    run: async ({
-      capture,
-    }: {
-      capture: (state: string, observation: unknown) => Promise<void>;
-    }) => {
-      if (!options.screenshotFailure) await capture('rest', { observed: 'fixture-only' });
+    component: options.component ?? 'form',
+    run: async ({ capture }: { capture: HarnessCapture }) => {
+      if (options.journey) await options.journey(capture);
+      else if (!options.screenshotFailure) await capture('rest', { observed: 'fixture-only' });
       if (options.failure) throw options.failure;
     },
   };
@@ -334,6 +346,340 @@ describe('Finf representative evidence harness, no native browser', () => {
     expect(drawer).toContain(
       'Math.max(0, geometry.availableHeight - 6 * geometry.rootTextSize) * 0.5'
     );
+  });
+});
+
+// Deterministic DOM/Animation API fixtures exercise the actual page-side probe
+// and capture oracle. These are not native geometry, pixels or motion evidence.
+function popoverMotionFixture() {
+  const window = new Window();
+  const document = window.document;
+  document.documentElement.style.fontSize = '16px';
+  document.body.innerHTML =
+    '<button aria-expanded="true" aria-controls="panel">Open Popover</button><div id="panel" role="dialog" style="display:block;visibility:visible;opacity:1;transform:none;box-shadow:none"></div>';
+  const trigger = document.querySelector('button')!;
+  // This fixture declares #panel as an HTML div; Happy DOM's id query returns Element.
+  const panel = document.getElementById('panel') as HTMLDivElement;
+  let animations: Array<{ playState: string; pending: boolean; currentTime: number }> = [];
+  const animate = vi.fn(() => {
+    const animation = { playState: 'running', pending: false, currentTime: 0 };
+    animations = [animation];
+    return animation;
+  });
+  Object.assign(panel, {
+    getAnimations: () => animations,
+    animate,
+    getBoundingClientRect: () => {
+      const scale = Number(panel.style.transform.match(/^scale\(([\d.]+)\)$/)?.[1] ?? 1);
+      return {
+        x: 100,
+        y: 100,
+        width: Number.parseFloat(panel.style.width || '18rem') * 16 * scale,
+        height: 100 * scale,
+      };
+    },
+  });
+  Object.defineProperty(panel, 'clientWidth', {
+    get: () => Number.parseFloat(panel.style.width || '18rem') * 16,
+  });
+  let clock = 0;
+  let nextRaf = 0;
+  const pending = new Map<number, (at: number) => void>();
+  const cancelAnimationFrame = vi.fn((id: number) => pending.delete(id));
+  const clearTimeout = vi.fn();
+  // This is the known in-process probe extracted above, with simulated host APIs.
+  const probe = execute(
+    `${statements(['createPopoverMotionProbe'])}; createPopoverMotionProbe(trigger);`,
+    {
+      trigger,
+      document,
+      getComputedStyle: window.getComputedStyle.bind(window),
+      matchMedia: () => ({ matches: false }),
+      performance: { now: () => clock },
+      window: { setTimeout: vi.fn(() => 1) },
+      clearTimeout,
+      requestAnimationFrame: (callback: (at: number) => void) => {
+        pending.set(++nextRaf, callback);
+        return nextRaf;
+      },
+      cancelAnimationFrame,
+    }
+  ) as PopoverMotionProbe;
+  const frame = () => {
+    clock += 16;
+    const callbacks = [...pending.values()];
+    pending.clear();
+    for (const callback of callbacks) callback(clock);
+  };
+  const handle = {
+    evaluate: async <T>(collect: (value: PopoverMotionProbe) => T) => collect(probe),
+  };
+  const locator = {
+    getAttribute: async (name: string) => panel.getAttribute(name),
+    evaluate: async <T, Arg>(collect: (element: unknown, arg: Arg) => T, arg: Arg) =>
+      collect(panel, arg),
+  };
+  type Capture = (state: string, observation: PopoverCaptureObservation) => Promise<void>;
+  // These are the three known in-process helpers extracted from this exact source.
+  const helpers = execute(
+    `${statements(['waitForSettledPopover', 'captureSettledPopover', 'installPopoverNegativeControl'])}; ({waitForSettledPopover, captureSettledPopover, installPopoverNegativeControl});`,
+    { expect }
+  ) as {
+    waitForSettledPopover: (probe: typeof handle) => Promise<void>;
+    installPopoverNegativeControl: (panel: typeof locator, control: string) => Promise<void>;
+    captureSettledPopover: (
+      probe: typeof handle,
+      panel: typeof locator,
+      family: string,
+      capture: Capture,
+      state: string
+    ) => Promise<void>;
+  };
+  const shots: PopoverCaptureObservation[] = [];
+  const capture: Capture = async (_state, observation) => {
+    shots.push(observation);
+  };
+  return {
+    panel,
+    probe,
+    frame,
+    animate,
+    shots,
+    enter: () => {
+      animate();
+      panel.style.opacity = '0';
+      panel.style.transform = 'scale(0.95)';
+    },
+    finish: () => {
+      for (const animation of animations) {
+        animation.playState = 'finished';
+        animation.currentTime = 200;
+      }
+      panel.style.opacity = '1';
+      panel.style.transform = 'none';
+    },
+    settle: () => helpers.waitForSettledPopover(handle),
+    inject: (control: string) => helpers.installPopoverNegativeControl(locator, control),
+    capture: (duringCapture = capture) =>
+      helpers.captureSettledPopover(handle, locator, 'shadcn', duringCapture, 'opened'),
+    close: () => {
+      probe.stop();
+      window.happyDOM.abort();
+    },
+  };
+}
+
+type PopoverCaseReceipt = {
+  result: string;
+  error: { message: string } | null;
+  screenshots: Array<{ state: string; file: string; sha256: string; observation: unknown }>;
+};
+
+// Join the actual runCase capture callback to the actual probe/capture oracle.
+// The in-memory image payload encodes simulated paint, and screenshot mode has
+// observable phase/geometry effects. No payload is a native screenshot.
+function popoverCaptureCase(
+  options: { changePhaseDuringCapture?: boolean; forceFinal?: boolean; failure?: Error } = {}
+) {
+  const motion = popoverMotionFixture();
+  const images = new Map<string, { paint: PopoverFrame; bytes: Buffer }>();
+  const observations: PopoverCaptureObservation[] = [];
+  let changePending = options.changePhaseDuringCapture;
+  const image = (file: string) => {
+    const recorded = images.get(path.basename(file));
+    if (!recorded) throw new Error(`No simulated paint captured for ${file}`);
+    return recorded;
+  };
+  const fixture = mockedCase({
+    component: 'popover',
+    failure: options.failure,
+    journey: async (capture) => {
+      if (options.failure) {
+        motion.enter();
+        return;
+      }
+      motion.frame();
+      motion.frame();
+      await motion.capture(async (state, observation) => {
+        observations.push(observation);
+        await capture(state, observation);
+      });
+    },
+    screenshotEffect: (shot) => {
+      if (changePending) {
+        changePending = false;
+        motion.enter();
+      }
+      if (options.forceFinal || shot.animations === 'disabled') motion.finish();
+      const paint = motion.probe.read();
+      images.set(path.basename(shot.path), {
+        paint,
+        bytes: Buffer.from(
+          JSON.stringify({ simulation: 'Popover paint, not native pixels', paint })
+        ),
+      });
+    },
+    imageBytes: (file) => image(file).bytes,
+  });
+  return {
+    run: fixture.run,
+    image,
+    observations,
+    motion,
+    receipt: () => {
+      // This value was produced by the extracted in-process runCase above.
+      const receipt = fixture.receipts.get('shadcn-popover.json') as PopoverCaseReceipt | undefined;
+      if (!receipt) throw new Error('Actual runCase did not retain its Popover receipt');
+      return receipt;
+    },
+    close: motion.close,
+  };
+}
+
+describe('Popover same-phase capture and controls, no native browser', () => {
+  it('requires consecutive native-frame observations before binding both sides of a capture', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      expect(fixture.probe.settled).toBe(false);
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(false);
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(true);
+      await fixture.capture();
+      const binding = fixture.shots[0].captureBinding;
+      expect(binding.animations).toBe('allow');
+      expect(binding.before.signature).toBe(binding.after?.signature);
+      expect(binding.before.rect?.width).toBe(288);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it('rejects genuinely wrong settled width with the unchanged 1px oracle and retains its capture', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      await fixture.inject('wrong-width');
+      expect(fixture.panel.style.getPropertyPriority('width')).toBe('important');
+      fixture.frame();
+      fixture.frame();
+      expect(fixture.probe.settled).toBe(true);
+      await expect(fixture.capture()).rejects.toThrow(/less than or equal/);
+      expect(fixture.shots[0].captureBinding.before.rect?.width).toBe(320);
+      expect(fixture.shots[0].captureBinding.after?.rect?.width).toBe(320);
+      expect(fixture.shots[0].captureBinding.before.signature).toBe(
+        fixture.shots[0].captureBinding.after?.signature
+      );
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it('rejects nonsettling animation despite stable geometry within the actual bounded poll', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      await fixture.inject('nonsettling');
+      expect(fixture.animate).toHaveBeenCalledWith([{ opacity: 0.5 }, { opacity: 1 }], {
+        duration: 200,
+        iterations: Infinity,
+      });
+      fixture.frame();
+      fixture.frame();
+      expect(fixture.probe.read().rect?.width).toBe(288);
+      expect(fixture.probe.settled).toBe(false);
+      // The bounded poll's rejection is under test; native-frame time is simulated.
+      await expect(fixture.settle()).rejects.toThrow();
+      expect(fixture.probe.frames.some((sample) => sample.settled)).toBe(false);
+      expect(fixture.shots).toEqual([]);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it('rejects a screenshot-time geometry change even when it is within the width tolerance', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      fixture.frame();
+      fixture.frame();
+      await expect(
+        fixture.capture(async (_state, observation) => {
+          fixture.shots.push(observation);
+          fixture.panel.style.width = '18.01rem';
+        })
+      ).rejects.toThrow();
+      const binding = fixture.shots[0].captureBinding;
+      expect(Math.abs((binding.after?.rect?.width ?? NaN) - 288)).toBeLessThanOrEqual(1);
+      expect(binding.before.signature).not.toBe(binding.after?.signature);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it('binds actual runCase image payloads to the settled probe observation', async () => {
+    const fixture = popoverCaptureCase();
+    try {
+      await fixture.run();
+      const receipt = fixture.receipt();
+      expect(receipt.result).toBe('passed');
+      const opened = receipt.screenshots.find((shot) => shot.state === 'opened');
+      expect(opened).toBeDefined();
+      if (!opened) throw new Error('Missing actual opened capture');
+      const observation = fixture.observations[0];
+      const captured = fixture.image(opened.file);
+      expect(opened.observation).toEqual(observation);
+      expect(captured.paint.signature).toBe(observation.captureBinding.before.signature);
+      expect(captured.paint.signature).toBe(observation.captureBinding.after?.signature);
+      expect(opened.sha256).toBe(createHash('sha256').update(captured.bytes).digest('hex'));
+      expect(captured.paint.rect?.width).toBe(288);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it.each([false, true])(
+    'rejects a screenshot-time phase change through actual runCase, forced final=%s',
+    async (forceFinal) => {
+      const fixture = popoverCaptureCase({ changePhaseDuringCapture: true, forceFinal });
+      try {
+        await expect(fixture.run()).rejects.toThrow();
+        const receipt = fixture.receipt();
+        expect(receipt.result).toBe('failed');
+        const opened = receipt.screenshots.find((shot) => shot.state === 'opened');
+        expect(opened).toBeDefined();
+        if (!opened) throw new Error('Phase control failed before actual capture');
+        const binding = fixture.observations[0].captureBinding;
+        const captured = fixture.image(opened.file);
+        expect(binding.before.rect?.width).toBe(288);
+        expect(captured.paint.signature).toBe(binding.after?.signature);
+        expect(captured.paint.signature).not.toBe(binding.before.signature);
+        expect(captured.paint.rect?.width).toBe(forceFinal ? 288 : 288 * 0.95);
+        expect(captured.paint.animations[0]?.playState).toBe(forceFinal ? 'finished' : 'running');
+        expect(opened.sha256).toBe(createHash('sha256').update(captured.bytes).digest('hex'));
+      } finally {
+        fixture.close();
+      }
+    }
+  );
+
+  it('preserves active simulated paint and the original failure in actual failure captures', async () => {
+    const failure = new Error('original journey failure with active entry');
+    const fixture = popoverCaptureCase({ failure });
+    try {
+      await expect(fixture.run()).rejects.toBe(failure);
+      const receipt = fixture.receipt();
+      expect(receipt.result).toBe('failed');
+      expect(receipt.error?.message).toBe(failure.message);
+      expect(receipt.screenshots.map((shot) => shot.state)).toEqual(['failed', 'failed-previewer']);
+      for (const shot of receipt.screenshots) {
+        const captured = fixture.image(shot.file);
+        expect(captured.paint.rect?.width).toBe(288 * 0.95);
+        expect(captured.paint.opacity).toBe('0');
+        expect(captured.paint.animations[0]?.playState).toBe('running');
+        expect(captured.paint.signature).toBe(fixture.motion.probe.read().signature);
+        expect(shot.sha256).toBe(createHash('sha256').update(captured.bytes).digest('hex'));
+      }
+    } finally {
+      fixture.close();
+    }
   });
 });
 

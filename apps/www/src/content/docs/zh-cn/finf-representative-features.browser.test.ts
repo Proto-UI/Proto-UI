@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
+import { chromium, type Browser, type Page, type Locator, type JSHandle } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromeExecutable, startServer, stopServer, type RuntimeId } from './browser-harness';
 import {
@@ -184,6 +184,223 @@ async function paint(locator: Locator) {
       ariaChecked: element.getAttribute('aria-checked'),
     };
   });
+}
+
+export type PopoverFrame = {
+  contentId: string | null;
+  connected: boolean;
+  expanded: string | null;
+  role: string | null;
+  reducedMotion: boolean;
+  rect: { x: number; y: number; width: number; height: number } | null;
+  clientWidth: number | null;
+  rem: number;
+  display: string | null;
+  visibility: string | null;
+  opacity: string | null;
+  transform: string | null;
+  shadow: string | null;
+  animations: Array<{
+    kind: string;
+    name: string | null;
+    playState: string;
+    pending: boolean;
+    currentTime: string | null;
+  }>;
+  at: number;
+  phase: string;
+  signature: string;
+};
+type PopoverMotionSample = PopoverFrame & {
+  sampling: 'input-boundary' | 'animation-frame';
+  settled: boolean;
+};
+type PopoverMotionTrace = {
+  frames: PopoverMotionSample[];
+  error: string | null;
+  stopReason: string | null;
+};
+export type PopoverMotionProbe = {
+  read: () => PopoverFrame;
+  frames: PopoverMotionSample[];
+  readonly settled: boolean;
+  mark: (phase: string) => void;
+  stop: (reason?: string) => PopoverMotionTrace;
+};
+type PopoverProbe = JSHandle<PopoverMotionProbe>;
+export type PopoverCaptureObservation = {
+  panel: PopoverFrame;
+  captureBinding: { before: PopoverFrame; after: PopoverFrame | null; animations: 'allow' };
+};
+
+// Serialized into the page. Observe the current Trigger's real portal before
+// input, including missing/instant exit frames; never manufacture retained motion.
+function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
+  const started = performance.now();
+  let phase = 'entry';
+  let raf = 0;
+  let timer = 0;
+  let stopReason: string | null = null;
+  let error: string | null = null;
+  const read = (): PopoverFrame => {
+    const ids =
+      trigger
+        .getAttribute('aria-controls')
+        ?.split(/[\t\n\f\r ]+/)
+        .filter(Boolean) ?? [];
+    const panel = ids.length === 1 ? document.getElementById(ids[0]) : null;
+    const style = panel ? getComputedStyle(panel) : null;
+    const rect = panel?.getBoundingClientRect();
+    const state = {
+      contentId: panel?.id ?? null,
+      connected: panel?.isConnected ?? false,
+      expanded: trigger.getAttribute('aria-expanded'),
+      role: panel?.getAttribute('role') ?? null,
+      reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+      rect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+      clientWidth: panel?.clientWidth ?? null,
+      rem: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+      display: style?.display ?? null,
+      visibility: style?.visibility ?? null,
+      opacity: style?.opacity ?? null,
+      transform: style?.transform ?? null,
+      shadow: style?.boxShadow ?? null,
+      animations:
+        panel?.getAnimations().map((animation) => ({
+          kind: animation.constructor.name,
+          name: 'animationName' in animation ? String(animation.animationName) : null,
+          playState: animation.playState,
+          pending: animation.pending,
+          currentTime: animation.currentTime === null ? null : String(animation.currentTime),
+        })) ?? [],
+    };
+    // Finished timelines may retain a time beyond their visual endpoint. Keep
+    // native times in the trace; compare geometry, paint and animation status.
+    const signature = JSON.stringify({
+      ...state,
+      animations: state.animations.map(({ currentTime: _time, ...animation }) => animation),
+    });
+    return { ...state, at: performance.now() - started, phase, signature };
+  };
+  const frames: PopoverMotionSample[] = [{ ...read(), sampling: 'input-boundary', settled: false }];
+  let latest: PopoverMotionSample | null = null;
+  let previous: PopoverFrame | null = null;
+  let previousPanel: HTMLElement | null = null;
+  const stop = (reason = 'completed') => {
+    if (!stopReason) {
+      stopReason = reason;
+      cancelAnimationFrame(raf);
+      clearTimeout(timer);
+    }
+    return { frames, error, stopReason };
+  };
+  const sample = () => {
+    try {
+      const frame = read();
+      const panel = frame.contentId ? document.getElementById(frame.contentId) : null;
+      const ready =
+        frame.connected &&
+        frame.expanded === 'true' &&
+        frame.role === 'dialog' &&
+        frame.display !== 'none' &&
+        frame.visibility === 'visible' &&
+        frame.opacity === '1' &&
+        (frame.rect?.width ?? 0) > 0 &&
+        (frame.rect?.height ?? 0) > 0 &&
+        frame.animations.every(
+          (animation) => !animation.pending && ['finished', 'idle'].includes(animation.playState)
+        );
+      latest = {
+        ...frame,
+        sampling: 'animation-frame',
+        settled: ready && panel === previousPanel && previous?.signature === frame.signature,
+      };
+      frames.push(latest);
+      previous = ready ? frame : null;
+      previousPanel = panel;
+      raf = requestAnimationFrame(sample);
+    } catch (cause) {
+      error = String(cause);
+      stop('observer-error');
+    }
+  };
+  // Native animation frames require the real platform clock. This is only an
+  // observer deadline, bounded by the existing case, not a wait for guessed motion.
+  timer = window.setTimeout(() => stop('case-deadline'), 120_000);
+  raf = requestAnimationFrame(sample);
+  return {
+    read,
+    frames,
+    get settled() {
+      return !stopReason && latest?.settled === true;
+    },
+    mark(next: string) {
+      phase = next;
+      previous = null;
+      latest = null;
+      frames.push({ ...read(), sampling: 'input-boundary', settled: false });
+    },
+    stop,
+  };
+}
+
+async function waitForSettledPopover(probe: PopoverProbe) {
+  // Retain the existing expect.poll default bound explicitly, not a sleep or an
+  // animation.finish()/cancel() that changes the state being measured.
+  await expect
+    .poll(() => probe.evaluate((current) => current.settled), { timeout: 1_000 })
+    .toBe(true);
+}
+
+async function captureSettledPopover(
+  probe: PopoverProbe,
+  panel: Locator,
+  family: Family,
+  capture: Journey['capture'],
+  state: string
+) {
+  await waitForSettledPopover(probe);
+  const { before, settled } = await probe.evaluate((current) => {
+    const before = current.read();
+    return {
+      before,
+      settled: current.settled && before.signature === current.frames.at(-1)?.signature,
+    };
+  });
+  expect(settled).toBe(true);
+  expect(await panel.getAttribute('id')).toBe(before.contentId);
+  const binding: PopoverCaptureObservation['captureBinding'] = {
+    before,
+    after: null,
+    animations: 'allow',
+  };
+  // The receipt retains both sides of the actual screenshot. Popover captures
+  // allow animations, so screenshotting cannot turn an intermediate into an endpoint.
+  await capture(state, { panel: before, captureBinding: binding });
+  binding.after = await probe.evaluate((current) => current.read());
+  expect(binding.after.signature).toBe(before.signature);
+  expect(
+    before.animations.every(
+      (animation) => !animation.pending && ['finished', 'idle'].includes(animation.playState)
+    )
+  ).toBe(true);
+  if (family === 'shadcn' || family === 'brutalist') {
+    expect(Math.abs(before.rect!.width - 18 * before.rem)).toBeLessThanOrEqual(1);
+    if (family === 'brutalist') expect(before.shadow).toBe('none');
+  }
+}
+
+// Faults affect only this disposable browser context, and stay installed for the
+// ordinary failure capture. Closing that context retires the native animation.
+async function installPopoverNegativeControl(panel: Locator, control: string | undefined) {
+  if (control === undefined) return;
+  if (!['wrong-width', 'nonsettling'].includes(control))
+    throw new Error(`Unknown Popover negative control: ${control}`);
+  await panel.evaluate((element, fault) => {
+    if (fault === 'wrong-width') element.style.setProperty('width', '20rem', 'important');
+    else
+      element.animate([{ opacity: 0.5 }, { opacity: 1 }], { duration: 200, iterations: Infinity });
+  }, control);
 }
 
 async function hasFocus(locator: Locator) {
@@ -419,13 +636,13 @@ async function runCase(testCase: Case) {
     if (crop)
       await crop.screenshot({
         path: path.join(output, file),
-        animations: 'disabled',
+        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     else
       await page.screenshot({
         path: path.join(output, file),
-        animations: 'disabled',
+        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     let capturedObservation = observation;
@@ -531,6 +748,9 @@ async function runCase(testCase: Case) {
       group: testCase.group,
       family: testCase.family,
       component: testCase.component,
+      ...(testCase.component === 'popover'
+        ? { negativeControl: process.env.PUI_FINF_POPOVER_NEGATIVE_CONTROL ?? null }
+        : {}),
       route,
       viewport: page.viewportSize(),
       hostClock: HOST_CLOCK,
@@ -992,26 +1212,70 @@ async function accordionJourney({ page, previewer, capture, family }: Journey) {
 async function popoverJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="root"]', 1);
   const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
-  await trigger.click();
   const panel = page.getByRole('dialog', { name: 'Popover settings', exact: true });
-  await panel.waitFor({ state: 'visible' });
-  const actual = await paint(panel);
-  await capture('opened', { panel: actual });
-  await panel.getByRole('button', { name: 'Close', exact: true }).click();
-  await expect.poll(() => panel.isVisible()).toBe(false);
-  await capture('closed', { triggerFocused: await hasFocus(trigger) }, previewer);
-  await trigger.click();
-  await panel.waitFor({ state: 'visible' });
-  if (family === 'liquid-glass') await capture('reopened', { panel: await paint(panel) });
-  await page.keyboard.press('Escape');
-  await expect.poll(() => panel.isVisible()).toBe(false);
-  if (family === 'shadcn' || family === 'brutalist') {
-    const rem = await page.evaluate(() =>
-      Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-    );
-    expect(Math.abs(actual.rect.width - 18 * rem)).toBeLessThanOrEqual(1);
-    if (family === 'brutalist') expect(actual.shadow).toBe('none');
+  await page.evaluate(() => document.fonts.ready);
+  const probe = await trigger.evaluateHandle(createPopoverMotionProbe);
+  let failure: { error: unknown } | undefined;
+  try {
+    await trigger.click();
+    await panel.waitFor({ state: 'visible' });
+    await installPopoverNegativeControl(panel, process.env.PUI_FINF_POPOVER_NEGATIVE_CONTROL);
+    await probe.evaluate((current) => current.mark('entry-settlement'));
+    await captureSettledPopover(probe, panel, family, capture, 'opened');
+    await probe.evaluate((current) => current.mark('exit'));
+    await panel.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect.poll(() => panel.isVisible()).toBe(false);
+    await probe.evaluate((current) => current.mark('exit-closed'));
+    await capture('closed', { triggerFocused: await hasFocus(trigger) }, previewer);
+
+    await probe.evaluate((current) => current.mark('reversal-entry'));
+    await trigger.click();
+    await panel.waitFor({ state: 'visible' });
+    // Keep the existing Liquid reopen material capture, independently of the
+    // immediate-entry Escape observation for the committed families.
+    if (family === 'liquid-glass')
+      await captureSettledPopover(probe, panel, family, capture, 'reopened');
+    await probe.evaluate((current) => current.mark('reversal-exit'));
+    await page.keyboard.press('Escape');
+    await expect.poll(() => panel.isVisible()).toBe(false);
+    await probe.evaluate((current) => current.mark('reversal-closed'));
+    await capture('reopen-escape-closed', { triggerFocused: await hasFocus(trigger) }, previewer);
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await probe.evaluate((current) => current.mark('reduced-motion-entry'));
+    await trigger.click();
+    await panel.waitFor({ state: 'visible' });
+    await captureSettledPopover(probe, panel, family, capture, 'reduced-motion-opened');
+    await probe.evaluate((current) => current.mark('reduced-motion-exit'));
+    await page.keyboard.press('Escape');
+    await expect.poll(() => panel.isVisible()).toBe(false);
+    await probe.evaluate((current) => current.mark('reduced-motion-closed'));
+    await capture('reduced-motion-closed', { triggerFocused: await hasFocus(trigger) }, previewer);
+  } catch (error) {
+    failure = { error };
   }
+  try {
+    const motion = await probe.evaluate((current) => current.stop());
+    await writeJson(`${family}-popover-motion.json`, {
+      revision,
+      tree,
+      family,
+      negativeControl: process.env.PUI_FINF_POPOVER_NEGATIVE_CONTROL ?? null,
+      ...motion,
+      limitation:
+        'Native frames only. Missing retained exit/intermediate/reversal motion remains visible; action labels are not proof of such motion or complete family acceptance.',
+    });
+    expect(motion.error).toBeNull();
+    expect(motion.stopReason).toBe('completed');
+  } catch (error) {
+    if (!failure) failure = { error };
+  }
+  try {
+    await probe.dispose();
+  } catch (error) {
+    if (!failure) failure = { error };
+  }
+  if (failure) throw failure.error;
 }
 
 async function alertDialogJourney({ page, previewer, capture }: Journey) {
