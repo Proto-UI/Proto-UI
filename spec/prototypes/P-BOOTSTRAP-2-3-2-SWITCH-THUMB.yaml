@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
 summary: A genuine asSwitchThumb projection; Base retains switch semantics and this part contributes only appearance.
 statement:
-  en: The authored Prototype invokes asSwitchThumb once. A 20px raised thumb with 4px corners. It is pointer-transparent; placement is owned by the root layout. This is part of the Switch design-language extension, not a historical Bootstrap component.
+  en: The authored Prototype invokes asSwitchThumb once. A 20px raised thumb with 4px corners. It is pointer-transparent; its placement is owned by the inherited percentage channel, so it travels within the root track and mirrors an explicit RTL direction. This is part of the Switch design-language extension, not a historical Bootstrap component.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-SWITCH-THUMB-BASE
     text:

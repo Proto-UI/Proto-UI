@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
 summary: A genuine asSwitchRoot projection; Base retains switch semantics and this part contributes only appearance.
 statement:
-  en: The authored Prototype invokes asSwitchRoot once. Design-language extension, not an original Bootstrap 2.3.2 component. A 44 by 24px inset track with 4px corners uses the archived palette; root alignment changes with checked, without a second state owner.
+  en: The authored Prototype invokes asSwitchRoot once. Design-language extension, not an original Bootstrap 2.3.2 component. A 44 by 24px inset track with 4px corners uses the archived palette; the checked fill changes with the inherited checked state, without a second state owner. The Thumb owns its own travel.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-SWITCH-BASE
     text:

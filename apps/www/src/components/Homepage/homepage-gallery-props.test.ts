@@ -4,6 +4,21 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
 import { homepageButtonVariant } from './homepage-button-variants';
+import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
+
+/**
+ * Each family's declared Button `variant` enum, transcribed from that
+ * family's own `def.props.define` options. Keeping this independent of the
+ * shared mapping table lets the assertion below catch a mapping entry that
+ * names a variant the family does not declare.
+ */
+const BUTTON_VARIANT_OPTIONS: Readonly<Record<ProjectionFamilyId, readonly string[]>> = {
+  shadcn: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
+  brutalist: ['solid', 'surface', 'destructive'],
+  'bootstrap-2-3-2': ['default', 'primary', 'warning', 'danger', 'success', 'info', 'inverse'],
+  'liquid-glass': ['regular', 'prominent'],
+};
+
 let rendered: Awaited<ReturnType<typeof renderDemo>> | undefined;
 afterEach(async () => {
   await rendered?.destroy();
@@ -58,6 +73,9 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       expect(getElementProps(ref('settings-reset'))).toMatchObject({
         variant: homepageButtonVariant(family, 'secondary'),
       });
+      // The authored variant must be a name this family actually declares, so
+      // an unknown entry cannot silently fall back to the family default.
+      expect(BUTTON_VARIANT_OPTIONS[family]).toContain(homepageButtonVariant(family, 'secondary'));
     };
     await settle();
     verify();

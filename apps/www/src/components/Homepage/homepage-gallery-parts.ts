@@ -93,12 +93,17 @@ export function createHomepageGalleryParts(
   };
   const part = (kind: Parameters<typeof resolveProjectionPart>[1], name = 'root') =>
     resolveProjectionPart(family, kind, name).prototypeId;
-  const button = (label: string, ref?: string, variant = 'primary', disabled = false) =>
+  const button = (
+    label: string,
+    ref?: string,
+    variant: HomepageButtonIntent = 'primary',
+    disabled = false
+  ) =>
     p(
       part('button'),
       [label],
       {
-        variant: homepageButtonVariant(family, variant as HomepageButtonIntent),
+        variant: homepageButtonVariant(family, variant),
         disabled,
         wrap: true,
       },
