@@ -48,6 +48,41 @@ afterEach(async () => {
 });
 
 describe('WC live focus-entry resolver inputs', () => {
+  it('resamples when inline styles hide a checked radio outside the entry', async () => {
+    const form = document.createElement('form');
+    const peerContainer = document.createElement('div');
+    const peer = document.createElement('input');
+    const inside = document.createElement('input');
+    for (const radio of [inside, peer]) {
+      radio.type = 'radio';
+      radio.name = 'entry-external-peer';
+      radio.tabIndex = 0;
+    }
+    peer.checked = true;
+    const host = panel(false);
+    host.append(inside);
+    peerContainer.append(peer);
+    form.append(host, peerContainer);
+    document.body.append(form);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    peer.style.setProperty('display', 'none');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    peer.style.removeProperty('display');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    peerContainer.style.cssText = 'visibility: hidden';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    peerContainer.style.cssText = '';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('uses current rendered eligibility for a Light DOM descendant entry', async () => {
     const host = panel(false);
     const button = document.createElement('button');
@@ -1034,6 +1069,126 @@ describe('WC live focus-entry resolver inputs', () => {
     ).toBe(true);
   });
 
+  it('keeps unrelated styles local until CSSOM adds an eligibility declaration', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+    const matches = Element.prototype.matches;
+    vi.spyOn(Element.prototype, 'matches').mockImplementation(function (this: Element, selector) {
+      // Happy DOM tolerates the extra closing parenthesis that Chromium rejects.
+      if (selector === '.entry-unused:where(*))') throw new DOMException('Invalid selector');
+      return matches.call(this, selector);
+    });
+    const style = document.createElement('style');
+    style.textContent = `
+      html:has(.entry-flag) { scroll-padding-top: 3rem; }
+      .entry-paint:has(.entry-flag) { background-color: red; }
+      .entry-unused:has(:is(.entry-flag)) { visibility: hidden; }
+    `;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'entry-paint';
+    const outside = document.createElement('div');
+    document.body.append(style, wrapper, outside);
+    const host = panel(false);
+    const button = document.createElement('button');
+    wrapper.append(host);
+    host.append(button);
+    await settle();
+
+    const observesExternalSubtree = (target: Element) =>
+      observe.mock.calls.some(
+        ([node, options]) =>
+          node === target && options?.subtree && options.attributes && !options.attributeFilter
+      );
+    expect(observesExternalSubtree(document.documentElement)).toBe(false);
+    expect(observesExternalSubtree(wrapper)).toBe(false);
+
+    // A native inline write produces a local style record, whereas a CSSOM
+    // rule write must notify every entry to reconsider its selector dependencies.
+    const sheet = style.sheet!;
+    const rules = sheet.cssRules;
+    const readRules = vi.fn(() => rules);
+    Object.defineProperty(sheet, 'cssRules', { configurable: true, get: readRules });
+    outside.style.setProperty('background-color', 'blue');
+    outside.style.removeProperty('background-color');
+    outside.style.cssText = 'background-color: green';
+    await settle();
+    expect(readRules).not.toHaveBeenCalled();
+
+    button.style.setProperty('visibility', 'hidden');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+    button.style.removeProperty('visibility');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    readRules.mockClear();
+    outside.style.setProperty('color', 'red');
+    (rules[1] as CSSStyleRule).style.setProperty('visibility', 'hidden');
+    await settle();
+    expect(readRules).toHaveBeenCalled();
+    expect(observesExternalSubtree(wrapper)).toBe(true);
+
+    (rules[0] as CSSStyleRule).style.cssText = 'scroll-padding-top: 3rem; display: none';
+    await settle();
+    expect(observesExternalSubtree(document.documentElement)).toBe(true);
+  });
+
+  it.each(['ancestor', 'document'] as const)(
+    'observes a negated nested :has condition on the %s',
+    async (boundary) => {
+      const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+      const outer = document.createElement('div');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'entry-negated';
+      const style = document.createElement('style');
+      const selector =
+        boundary === 'document'
+          ? 'html:not(:has(:is(.entry-reveal))) .entry-negated'
+          : '.entry-negated:not(:has(:is(.entry-reveal)))';
+      style.textContent = `${selector} button { visibility: hidden; }`;
+      outer.append(wrapper);
+      document.body.append(style, outer);
+      const host = panel(false);
+      const button = document.createElement('button');
+      wrapper.append(host);
+      host.append(button);
+      const flag = document.createElement('span');
+      flag.className = 'entry-reveal';
+      flag.hidden = true;
+      const flagOwner = boundary === 'document' ? document.body : wrapper;
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        // Happy DOM does not implement this relational cascade. Preserve the
+        // actual observer delivery and vary only the computed visibility.
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'visibility') return flag.isConnected ? 'visible' : 'hidden';
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
+      await settle();
+      expect(host.tabIndex).toBe(0);
+      if (boundary === 'ancestor') {
+        const watchesSubtree = (target: Element) =>
+          observe.mock.calls.some(
+            ([node, options]) => node === target && options?.childList && options.subtree
+          );
+        expect(watchesSubtree(wrapper)).toBe(true);
+        expect(watchesSubtree(outer)).toBe(false);
+      }
+
+      flagOwner.append(flag);
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+
+      flag.remove();
+      await settle();
+      expect(host.tabIndex).toBe(0);
+    }
+  );
+
   it('reprojects for a body-level relational selector without observing unrelated selectors', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const style = document.createElement('style');
@@ -1167,6 +1322,7 @@ describe('WC live focus-entry resolver inputs', () => {
   });
 
   it('reprojects when an external container ancestor alone crosses a query threshold', async () => {
+    const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const originalResizeObserver = Object.getOwnPropertyDescriptor(window, 'ResizeObserver');
     const observers: ControlledResizeObserver[] = [];
     class ControlledResizeObserver {
@@ -1197,6 +1353,7 @@ describe('WC live focus-entry resolver inputs', () => {
     const style = document.createElement('style');
     style.textContent = `
       .entry-container-query { container-type: inline-size; }
+      .entry-container-query:has(.entry-flag) { grid-template-columns: 1fr 18rem; }
       @container (width < 20rem) {
         .entry-container-query button { visibility: hidden; }
       }
@@ -1224,6 +1381,12 @@ describe('WC live focus-entry resolver inputs', () => {
     try {
       await settle();
       expect(host.hasAttribute('tabindex')).toBe(false);
+      expect(
+        observe.mock.calls.some(
+          ([node, options]) =>
+            node === container && options?.childList && options.subtree && options.attributes
+        )
+      ).toBe(false);
 
       belowThreshold = true;
       expect(observers.some((observer) => observer.trigger(container))).toBe(true);

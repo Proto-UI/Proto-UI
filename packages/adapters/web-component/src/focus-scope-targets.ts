@@ -47,6 +47,7 @@ export function composedParentElement(el: Element): Element | null {
 }
 
 function isPrunedByExternalAncestor(el: Element): boolean {
+  const ancestors: Element[] = [];
   let branch = el;
   let ancestor = composedParentElement(el);
   while (ancestor) {
@@ -55,12 +56,16 @@ function isPrunedByExternalAncestor(el: Element): boolean {
       const summary = [...ancestor.children].find((child) => isHtmlTag(child, 'summary'));
       if (branch !== summary) return true;
     }
-    const style = getOwnedComputedStyle(ancestor);
-    if (style?.display === 'none' || style?.contentVisibility === 'hidden') return true;
+    ancestors.push(ancestor);
     branch = ancestor;
     ancestor = composedParentElement(ancestor);
   }
-  return false;
+  // A retained or staging view can sit below an inert ancestor. Find that
+  // boundary before reading style and forcing a layout of the inner tree.
+  return ancestors.some((parent) => {
+    const style = getOwnedComputedStyle(parent);
+    return style?.display === 'none' || style?.contentVisibility === 'hidden';
+  });
 }
 
 function getOwnedComputedStyle(el: Element): CSSStyleDeclaration | null {
@@ -118,6 +123,9 @@ export function sampleWebComponentScopeTargets(
   const recentTarget = recentFocusTarget?.() ?? null;
   type Entry = { element: HTMLElement; target: boolean; priority: number; children?: Entry[] };
   const scope: Entry[] = [];
+  if (container.hidden || container.hasAttribute('inert')) {
+    return { targets: [], activeTarget, recentTarget };
+  }
   if (isPrunedByExternalAncestor(container)) {
     return { targets: [], activeTarget, recentTarget: recentFocusTarget?.() ?? null };
   }

@@ -259,7 +259,7 @@ type EntryStyleSetterPatch = {
 const entryStyleWatches = new WeakMap<
   Window,
   {
-    subscribers: Set<() => void>;
+    subscribers: Set<(inlineOnly: boolean) => void>;
     methodPatches: EntryStyleMethodPatch[];
     setterPatches: EntryStyleSetterPatch[];
     observer: MutationObserver;
@@ -525,6 +525,14 @@ function hasDocumentRootRelationalSubject(selector: string): boolean {
       )
         return true;
     }
+    // A relational condition inside a negative or positional predicate may
+    // govern a root compound outside that predicate's argument.
+    if (
+      character === ':' &&
+      nonMonotonicEntryHasEnd(selector, index) >= 0 &&
+      containsDocumentRootCompound(selector)
+    )
+      return true;
     if (character === '(') {
       depth += 1;
       compoundStarts[depth] = index + 1;
@@ -618,16 +626,94 @@ function styleRuleCanAffectEntryEligibility(rule: CSSStyleRule): boolean {
   return false;
 }
 
+function canSkipEntryRelationalRule(rule: CSSStyleRule, observesResize: boolean): boolean {
+  const style = rule.style;
+  if (!style?.length || rule.cssRules?.length) return false;
+  for (let index = 0; index < style.length; index += 1) {
+    const property = style.item(index);
+    if (
+      property !== 'background-color' &&
+      !/^scroll-(?:margin|padding)(?:-|$)/.test(property) &&
+      !(observesResize && property === 'grid-template-columns')
+    )
+      return false;
+  }
+  return true;
+}
+
+function nonMonotonicEntryHasEnd(selector: string, index: number): number {
+  const predicate = /^:(?:not|nth-child|nth-last-child)\(/.exec(selector.slice(index));
+  if (!predicate) return -1;
+  const open = index + predicate[0].length - 1;
+  const close = matchingSelectorParen(selector, open);
+  return close >= 0 && selector.slice(open + 1, close).includes(':has(') ? close : -1;
+}
+
+function relaxEntryHasConditions(selector: string): string {
+  let result = '';
+  let start = 0;
+  for (let index = 0; index < selector.length; index += 1) {
+    const literalEnd = skipSelectorLiteral(selector, index, selector[index]!);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    if (selector[index] !== ':') continue;
+    const isHas = selector.startsWith(':has(', index);
+    const close = isHas
+      ? matchingSelectorParen(selector, index + 4)
+      : nonMonotonicEntryHasEnd(selector, index);
+    if (close < 0) {
+      if (isHas) return selector;
+      continue;
+    }
+    // Relax the enclosing predicate, not an inner :has. An always-true
+    // argument would otherwise make :not(:has(...)) reject every candidate.
+    result += selector.slice(start, index) + ':where(*)';
+    start = close + 1;
+    index = close;
+  }
+  return result + selector.slice(start);
+}
+
+function scopedNegatedEntrySubject(selector: string): string | null {
+  const start = selector.indexOf(':not(:has(');
+  // Only scope a single, top-level condition whose relative selector cannot
+  // reach siblings. Complex branches retain the conservative ancestor watch.
+  if (
+    start < 0 ||
+    /[,+~]/.test(selector) ||
+    selector.indexOf(':has(') !== start + 5 ||
+    selector.indexOf(':has(', start + 6) !== -1
+  )
+    return null;
+  const close = matchingSelectorParen(selector, start + 4);
+  if (close < 0 || matchingSelectorParen(selector, start + 9) !== close - 1) return null;
+  let depth = 0;
+  for (let index = 0; index < start; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      if (literalEnd >= start) return null;
+      index = literalEnd;
+    } else if (character === '(') depth += 1;
+    else if (character === ')') depth -= 1;
+  }
+  return depth === 0 ? selector.slice(0, start) + ':where(*)' : null;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
   target: HTMLElement,
-  ancestors: readonly Element[]
+  ancestors: readonly Element[],
+  observesResize: boolean
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
   const siblingSubjects = new Set<Element>();
+  const relationalSubjects = new Set<Element>();
   const candidates = [target, ...ancestors, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
@@ -654,12 +740,26 @@ function collectEntryStyleDependencies(
           candidates
         ))
           siblingSubjects.add(subject);
-      if (relational !== 2 && selector.includes(':has(')) {
+      // Paint and anchor offsets do not change eligibility. Grid track sizes
+      // are covered by the entry's resize observer, including container-query
+      // changes. Keep watching mixed declarations and nested rules.
+      if (
+        relational !== 2 &&
+        selector.includes(':has(') &&
+        !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
+      ) {
         if (hasDocumentRootRelationalSubject(selector)) relational = 2;
         if (!relational) {
           try {
-            const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
-            relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
+            const probe = relaxEntryHasConditions(selector);
+            if (candidates.some((candidate) => candidate.matches(probe))) {
+              const subject = scopedNegatedEntrySubject(selector);
+              const matches = subject
+                ? candidates.filter((candidate) => candidate.matches(subject))
+                : [];
+              if (!matches.length) relational = 1;
+              else for (const candidate of matches) relationalSubjects.add(candidate);
+            }
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded
             // external-chain fallback rather than silently missing a change.
@@ -689,12 +789,13 @@ function collectEntryStyleDependencies(
     Array.from(queries, (query) => view.matchMedia(query)),
     relational,
     siblingSubjects,
+    relationalSubjects,
   ] as const;
 }
 
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
-  onInvalidate: () => void
+  onInvalidate: (inlineOnly: boolean) => void
 ): (() => void) | null {
   const Sheet = view?.CSSStyleSheet;
   const StyleSheetCtor = view?.StyleSheet;
@@ -711,24 +812,35 @@ function watchEntryStyleInvalidation(
   if (!view || !Sheet || !Declaration || !Observer || !doc?.documentElement) return null;
   let watch = entryStyleWatches.get(view as Window);
   if (!watch) {
-    const subscribers = new Set<() => void>();
-    let pending = false;
-    const notify = () => {
-      if (pending) return;
-      pending = true;
+    const subscribers = new Set<(inlineOnly: boolean) => void>();
+    let pending: 'inline' | 'stylesheet' | null = null;
+    const schedule = (inlineOnly: boolean) => {
+      if (pending) {
+        if (!inlineOnly) pending = 'stylesheet';
+        return;
+      }
+      pending = inlineOnly ? 'inline' : 'stylesheet';
       queueMicrotask(() => {
-        pending = false;
-        for (const subscriber of subscribers) subscriber();
+        const inlineOnly = pending === 'inline';
+        pending = null;
+        for (const subscriber of subscribers) subscriber(inlineOnly);
       });
     };
+    const notify = () => schedule(false);
     const methodPatches: EntryStyleMethodPatch[] = [];
+    // Inline declarations already deliver style-attribute records to the
+    // entry's DOM observers. Only rule declarations need the window-wide
+    // stylesheet invalidation, which rebuilds every entry's dependencies.
+    const isInlineDeclaration = (target: object, receiver: unknown) =>
+      target === Declaration.prototype && (receiver as CSSStyleDeclaration).parentRule === null;
     const patchMethods = (target: Record<string, unknown>, keys: readonly string[]) => {
       for (const key of keys) {
         const original = target[key];
         if (typeof original !== 'function') continue;
         const patched = function (this: unknown, ...args: unknown[]) {
           const result = Reflect.apply(original, this, args);
-          if (
+          if (isInlineDeclaration(target, this)) schedule(true);
+          else if (
             key === 'replace' &&
             result &&
             typeof (result as PromiseLike<unknown>).then === 'function'
@@ -787,7 +899,7 @@ function watchEntryStyleInvalidation(
       const patched = function (this: unknown, value: unknown) {
         if (original?.set) original.set.call(this, value);
         else (this as CSSStyleDeclaration).setProperty(cssName!, String(value));
-        notify();
+        schedule(isInlineDeclaration(target, this));
       };
       Object.defineProperty(target, key, {
         configurable: true,
@@ -1506,6 +1618,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
+            let entryRelationalSubjects = new Set<Element>();
+            let hasExternalStyleInputs = false;
             const belongsToObservedEntryTree = (node: Node) => {
               for (const root of observedRoots) {
                 if (root === node || root.contains(node)) return true;
@@ -1645,13 +1759,22 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
+              // Named radio peers and image-map images can depend on inline
+              // style outside the entry's observed DOM, including ancestors.
+              hasExternalStyleInputs = hasArea || radioTrees.size > 0;
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
                 if (
-                  records.some(
-                    (record) =>
-                      !belongsToObservedEntryTree(record.target) || invalidatesEntryStyles(record)
-                  )
+                  records.some((record) => {
+                    if (
+                      !belongsToObservedEntryTree(record.target) ||
+                      invalidatesEntryStyles(record)
+                    )
+                      return true;
+                    for (const subject of entryRelationalSubjects)
+                      if (subject.contains(record.target)) return true;
+                    return false;
+                  })
                 )
                   projectEntry();
               });
@@ -1703,8 +1826,22 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
-              const [mediaQueries, relationalDependency, siblingSubjects] =
-                collectEntryStyleDependencies(view!, mediaRoots, target, externalAncestors);
+              const [mediaQueries, relationalDependency, siblingSubjects, relationalSubjects] =
+                collectEntryStyleDependencies(
+                  view!,
+                  mediaRoots,
+                  target,
+                  externalAncestors,
+                  !!entryResizeObserver && !hasExternalStyleInputs
+                );
+              entryRelationalSubjects = relationalSubjects;
+              for (const subject of entryRelationalSubjects) {
+                entryExternalStyleObserver.observe(subject, {
+                  childList: true,
+                  subtree: true,
+                  attributes: true,
+                });
+              }
               const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
                 if (subject.parentNode)
@@ -2064,7 +2201,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 refreshTree();
               }
             });
-            if (view) stopEntryStyleWatch = watchEntryStyleInvalidation(view, refreshTree);
+            if (view)
+              stopEntryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
+                if (!inlineOnly) refreshTree();
+                else if (hasExternalStyleInputs) projectCurrent();
+              });
             observeTree();
           }
         },

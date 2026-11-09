@@ -37,7 +37,11 @@ vi.mock('./PrototypePreviewer/runtimes/vue2-runtime', async (original) => {
   const require = createRequire(process.cwd() + '/packages/adapters/vue2/package.json');
   return { ...current, loadVue2: async () => require('vue') };
 });
-const faults = vi.hoisted(() => ({ reject: '', delay: null as null | (() => Promise<void>) }));
+const faults = vi.hoisted(() => ({
+  reject: '',
+  delay: null as null | (() => Promise<void>),
+  onPrepare: null as null | (() => void),
+}));
 vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
   const actual = await original<typeof import('./PrototypePreviewer/projection-materializer')>();
   return {
@@ -45,7 +49,8 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
     materializeProjectionCandidate: async (
       ...args: Parameters<typeof actual.materializeProjectionCandidate>
     ) => {
-      await faults.delay?.();
+      if (faults.delay) await faults.delay();
+      faults.onPrepare?.();
       if (args[0].selection.runtimeId === faults.reject)
         throw Error('fixture materialization failure');
       return actual.materializeProjectionCandidate(...args);
@@ -65,6 +70,7 @@ afterEach(async () => {
   delete document.documentElement.dataset.theme;
   faults.reject = '';
   faults.delay = null;
+  faults.onPrepare = null;
   vi.restoreAllMocks();
 });
 function fixture() {
@@ -91,6 +97,29 @@ function fixture() {
   };
 }
 describe('actual passive CodeSurface projection', () => {
+  it('publishes its owner before the first preparation and keeps that generation themed', async () => {
+    const { root } = fixture();
+    document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+    let observedOwner: CodeSurfaceHandle | undefined;
+    faults.onPrepare = () => {
+      faults.onPrepare = null;
+      observedOwner = initCodeSurface(root);
+      handles.push(observedOwner);
+    };
+    const handle = initCodeSurface(root);
+    handles.push(handle);
+    await handle.ready;
+    expect(observedOwner).toBe(handle);
+
+    const paint = root.querySelector<HTMLElement>('[data-pui-style]')!;
+    expect(paint.style.getPropertyValue('--pui-background')).toBe(BRUTALIST_THEME.light.background);
+    document.documentElement.dataset.theme = 'dark';
+    await vi.waitFor(() =>
+      expect(paint.style.getPropertyValue('--pui-background')).toBe(BRUTALIST_THEME.dark.background)
+    );
+    expect(root.querySelector('[data-pui-style]')).toBe(paint);
+  });
+
   it.each(['wc', 'react', 'vue', 'vue2'])(
     '%s projects native information notes through public family Surfaces without replacing content',
     async (runtime) => {
