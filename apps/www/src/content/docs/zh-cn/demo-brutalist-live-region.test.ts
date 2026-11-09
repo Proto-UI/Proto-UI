@@ -8,6 +8,8 @@ import type {
 } from '../../../components/PrototypePreviewer/demo-types';
 import liveRegionDemoDefinition from './demo-brutalist-live-region.demo';
 
+type DemoRefNode = Extract<DemoNode, { kind: 'box' }> | Extract<DemoNode, { kind: 'proto' }>;
+
 const liveRegionDemo = liveRegionDemoDefinition as DemoSpec;
 
 function collectNodes(node: DemoChild, result: DemoNode[] = []): DemoNode[] {
@@ -41,7 +43,8 @@ describe('Brutalist Live Region demo contract', () => {
       // content; nothing simulates an announcement engine or event channel.
       expect(region.props?.atomic).toBe(true);
       const payloads = (region.children ?? []).filter(
-        (child) => typeof child !== 'string' && (child as DemoNode).ref === `${region.ref}Payload`
+        (child): child is DemoRefNode =>
+          typeof child !== 'string' && child.kind !== 'text' && child.ref === `${region.ref}Payload`
       );
       expect(payloads).toHaveLength(1);
     }

@@ -1,9 +1,7 @@
 import type { DemoChild, DemoNode } from '../PrototypePreviewer/demo-types';
 import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
-import {
-  homepageGalleryIcon,
-  type GalleryCardOptions,
-} from './homepage-gallery-icons';
+import { homepageGalleryIcon, type GalleryCardOptions } from './homepage-gallery-icons';
+import type { HomepageButtonIntent } from './homepage-button-variants';
 
 type Builders = {
   p: (
@@ -25,7 +23,8 @@ type Builders = {
     id: string,
     options?: GalleryCardOptions
   ) => DemoNode;
-  button: (label: string, ref?: string, variant?: string) => DemoNode;
+  /** The variant is a website intent; each family maps it to its own name. */
+  button: (label: string, ref?: string, variant?: HomepageButtonIntent) => DemoNode;
   status: (value: string, ref: string) => DemoNode;
 };
 
@@ -170,8 +169,7 @@ export function createHomepageCompositionParts(
         zh
           ? {
               role: 'img',
-              'aria-label':
-                '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
+              'aria-label': '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
             }
           : {
               role: 'img',

@@ -6,6 +6,9 @@ import type {
 } from '../../../components/PrototypePreviewer/demo-types';
 import radioGroupDemoDefinition from './demo-brutalist-radio-group.demo';
 
+type DemoBoxNode = Extract<DemoNode, { kind: 'box' }>;
+type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
+
 const radioGroupDemo = radioGroupDemoDefinition as DemoSpec;
 
 function collectNodes(node: DemoChild, result: DemoNode[] = []): DemoNode[] {
@@ -49,15 +52,19 @@ describe('Brutalist Radio Group demo contract', () => {
       if (item.kind !== 'proto') throw new Error('Expected Radio Item');
       // Visible caption text stays inside the item so Base nameFromContent
       // derives the accessible name; the sr-only copy is decorative backup.
-      const visible = (item.children ?? []).find((child) =>
-        (child as DemoNode).className?.includes('sr-only')
+      const visible = (item.children ?? []).find(
+        (child): child is DemoBoxNode =>
+          typeof child !== 'string' &&
+          child.kind === 'box' &&
+          child.className?.includes('sr-only') === true
       );
       expect(visible).toBeTruthy();
       expect(textContent(item)).toContain(textContent(visible!));
       const itemIndicators = (item.children ?? []).filter(
-        (child) =>
-          (child as DemoNode).kind === 'proto' &&
-          (child as DemoNode).prototypeId === 'brutalist-radio-group-indicator'
+        (child): child is DemoProtoNode =>
+          typeof child !== 'string' &&
+          child.kind === 'proto' &&
+          child.prototypeId === 'brutalist-radio-group-indicator'
       );
       expect(itemIndicators).toHaveLength(1);
     }
