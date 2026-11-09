@@ -475,7 +475,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
 /** The application retains one directory-disclosure owner across replaceable
  * command views. The legacy host branch remains compatible with old consumers;
  * the Docs Header uses an ordinary app-owned host, with no upstream listener. */
-/** A replaceable public Dialog view, not another open/focus/scroll owner. */
+/** A replaceable public Popover view, not another open/focus/scroll owner. */
 export interface SiteContentsPresentation {
   available(): boolean;
   setOpen(open: boolean): void;
@@ -549,7 +549,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.body.removeAttribute('data-mobile-menu-expanded');
     syncExpandedState();
     if (alreadyClosed) presentation?.setOpen(false);
-    // Public Dialog owns modal close/restore. The in-flow fallback retains its
+    // Public Popover owns close/restore. The in-flow fallback retains its
     // old application command return, without a second modal focus policy.
     if (restoreFocus && !presentation) focus();
   };

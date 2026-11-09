@@ -63,7 +63,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
   const restoreTree = (lease: NativeTreeLease) => {
     if (treeOwner !== lease) return;
     treeOwner = undefined;
-    // Invoked only after the public Dialog has closed. Its focus owner has
+    // Invoked only after the public Popover has closed. Its focus owner has
     // already returned focus; the shared move lease preserves native Selection.
     withNativeContentLease(tree, () => {
       home.insertBefore(tree, nextSibling?.parentNode === home ? nextSibling : null);
@@ -124,7 +124,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
           published = false;
           if (retirementFailure)
             console.error(
-              '[Contents] Public Dialog retired before close completion.',
+              '[Contents] Public Popover retired before close completion.',
               retirementFailure
             );
         });
@@ -204,7 +204,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
       const openPublicView = () => {
         if (!isCurrent() || !requestedOpen) return;
         if (activeLease && activeLease !== lease) {
-          // Serialize only the retained native-tree lease. Each public Dialog
+          // Serialize only the retained native-tree lease. Each public Popover
           // remains the sole owner of its own presence, focus and scroll effects.
           void activeLease.close().then(() => openPublicView());
           return;

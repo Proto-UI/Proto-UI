@@ -820,7 +820,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             expect(await command.getAttribute('aria-controls')).toBe('starlight__sidebar');
             const dialog = page.getByRole('dialog');
             expect(await dialog.count()).toBe(1);
-            expect(await dialog.getAttribute('aria-modal')).toBe('true');
+            // The mobile contents shell is a nonmodal public Popover, so it
+            // keeps the dialog role without the modal state.
+            expect(await dialog.getAttribute('aria-modal')).toBe('false');
             expect(
               await dialog.evaluate((surface) => {
                 let node: Node | null = document.querySelector('nav.docs-sidebar');

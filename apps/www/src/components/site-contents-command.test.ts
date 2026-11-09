@@ -424,7 +424,7 @@ it.each(
     )
   )
 )(
-  '$runtime/$family initially-closed public Dialog retains facts and the one native tree ($motion)',
+  '$runtime/$family initially-closed public Popover retains facts and the one native tree ($motion)',
   async ({ runtime, family, motion }) => {
     const originalMatchMedia = window.matchMedia.bind(window);
     vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
