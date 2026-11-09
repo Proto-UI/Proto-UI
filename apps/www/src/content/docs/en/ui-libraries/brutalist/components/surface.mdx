@@ -4,6 +4,7 @@ description: 'Brutalist passive visual surface with consumer-owned semantic and 
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 `brutalist-surface-root` is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Brutalist inherits the [Base Surface](/en/ui-libraries/base/surface/) contract through `asSurfaceRoot()` and realizes it with family feedback rules.
 
@@ -21,7 +22,6 @@ The demo passes explicit passive states into real package prototypes. The focus 
 import * as React from 'react';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import { surfaceRoot } from '@proto.ui/prototypes-brutalist/surface';
-import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 const Surface = createReactAdapter(React)(surfaceRoot);
 
@@ -78,11 +78,23 @@ Surface is workspace source. There is no public `proto-ui add` target.
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'variant', type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'", default: 'outline' },
-    { name: 'radius', type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'", default: 'default' },
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
     { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
     { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
-    { name: 'transitionState', type: "'closed' | 'entering' | 'entered' | 'leaving'", default: 'entered' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
     { name: 'fade', type: 'boolean', default: 'false' },
     { name: 'hovered', type: 'boolean', default: 'false' },
     { name: 'focusVisible', type: 'boolean', default: 'false' },
@@ -92,4 +104,3 @@ Surface is workspace source. There is no public `proto-ui add` target.
 />
 
 These props belong to Root.
-

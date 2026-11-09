@@ -4,6 +4,7 @@ description: 'Brutalist 被动文本内容与可复用排版输入。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 `brutalist-text-root` 是 draft 可复用 Text 原子。它通过 `asTextRoot()` 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的输入词汇和内容槽，由 Brutalist 主题拥有排版与文字颜色。这是 Proto UI 自己的 Text 投射，不承诺与上游同名文本组件 API 等价。
 
@@ -21,7 +22,6 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import * as React from 'react';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import { brutalistTextRoot } from '@proto.ui/prototypes-brutalist/text';
-import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 const Text = createReactAdapter(React)(brutalistTextRoot, { rootTag: 'span' });
 
@@ -74,11 +74,19 @@ Text 是工作区源码，没有公开的 `proto-ui add` 目标。
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+    },
     { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
     { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
     { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
-    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+    },
     { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
     { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
     { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
@@ -86,4 +94,3 @@ Text 是工作区源码，没有公开的 `proto-ui add` 目标。
 />
 
 这些属性属于 Root。
-
