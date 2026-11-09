@@ -9,7 +9,6 @@ import {
   type ProjectionScopeSelection,
 } from './PrototypePreviewer/projection-scope';
 import { materializeProjectionCandidate } from './PrototypePreviewer/projection-materializer';
-import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 
 const NO_CONTROLS: ProjectionCompositionControls = {
@@ -87,8 +86,9 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
       async materialize(request) {
         const family =
           request.selection.projectionFamilyId === 'brutalist' ? 'brutalist' : 'shadcn';
-        const candidate = await materializeProjectionCandidate(request, {
+        return materializeProjectionCandidate(request, {
           mount,
+          themeSource: { scope: root, family, isCurrent: isCurrentOwner },
           ownerId,
           componentId: 'button',
           controls: NO_CONTROLS,
@@ -133,27 +133,6 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
             },
           },
         });
-        // A removed root can already have a new handle. The old controller
-        // disposes this late candidate in its own detached mount; it must not
-        // acquire a new theme watcher or publish into the reacquired root.
-        if (!isCurrentOwner()) return candidate;
-        let stopTheme: () => void;
-        try {
-          stopTheme = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
-            candidate.setThemeSurfaceStyle(theme)
-          );
-        } catch (error) {
-          await candidate.dispose();
-          throw error;
-        }
-        return {
-          activate: () => candidate.activate(),
-          setLocked: (locked: boolean) => candidate.setLocked?.(locked),
-          async dispose() {
-            stopTheme();
-            await candidate.dispose();
-          },
-        };
       },
       prepareCommit(commit) {
         const old = { ...root.dataset };

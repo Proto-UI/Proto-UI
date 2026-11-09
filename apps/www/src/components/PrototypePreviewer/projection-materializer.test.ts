@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { DemoSpec } from './demo-types';
+import type { ProjectionThemeSurfaceStyle } from './projection-theme';
 
 const fakes = vi.hoisted(() => ({
   applyTheme: vi.fn(),
@@ -13,6 +14,7 @@ const fakes = vi.hoisted(() => ({
   releaseHostMount: vi.fn(),
   renderDemo: vi.fn(),
   resolveTheme: vi.fn(),
+  watchTheme: vi.fn(),
 }));
 
 vi.mock('./demo-modules', () => ({ loadDemo: fakes.loadDemo }));
@@ -32,6 +34,7 @@ vi.mock('./projection-composition', () => ({
 vi.mock('./projection-theme', () => ({
   applyProjectionThemeSurfaceStyle: fakes.applyTheme,
   resolveProjectionThemeSurfaceStyle: fakes.resolveTheme,
+  watchProjectionThemeSurfaceStyle: fakes.watchTheme,
 }));
 vi.mock('./prototype-modules', () => ({ loadPrototypes: fakes.loadPrototypes }));
 vi.mock('./runtimes/host-mount', () => ({ releaseHostMount: fakes.releaseHostMount }));
@@ -87,6 +90,57 @@ describe('Website projection materializer', () => {
     fakes.prepareRuntime.mockReset().mockResolvedValue(undefined);
     fakes.releaseHostMount.mockReset();
     fakes.resolveTheme.mockReset().mockReturnValue({ '--pui-background': '#fff' });
+    fakes.watchTheme.mockReset();
+  });
+
+  it('prepares from the watched theme and applies a pending change before returning the candidate', async () => {
+    const mount = document.createElement('div');
+    document.body.append(mount);
+    const initial = { '--pui-background': '#fff' };
+    const changed = { '--pui-background': '#111' };
+    const stopTheme = vi.fn();
+    const setThemeSurfaceStyle = vi.fn();
+    let emit!: (theme: ProjectionThemeSurfaceStyle) => void;
+    let current = true;
+    fakes.watchTheme.mockImplementation((_family, _scope, onChange) => {
+      emit = onChange;
+      emit(initial);
+      return stopTheme;
+    });
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle,
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'themed-owner';
+      host.append(scope);
+      emit(changed);
+      return { destroy: fakes.destroyRender };
+    });
+    const candidate = await materializeProjectionCandidate(
+      { generation: 1, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+      {
+        mount,
+        ownerId: 'themed-owner',
+        componentId: 'button',
+        controls: controls(),
+        themeSource: { scope: mount, family: 'shadcn', isCurrent: () => current },
+      }
+    );
+    expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    expect(fakes.createComposition).toHaveBeenCalledWith(
+      expect.objectContaining({ themeSurfaceStyle: initial })
+    );
+    expect(setThemeSurfaceStyle).toHaveBeenCalledTimes(1);
+    expect(setThemeSurfaceStyle).toHaveBeenCalledWith(changed);
+    current = false;
+    emit(initial);
+    expect(setThemeSurfaceStyle).toHaveBeenCalledTimes(1);
+    await candidate.dispose();
+    expect(stopTheme).toHaveBeenCalledTimes(1);
   });
 
   it('seals staging portals and atomically swaps exact owner generations on activation', async () => {

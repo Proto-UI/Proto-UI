@@ -618,11 +618,46 @@ function styleRuleCanAffectEntryEligibility(rule: CSSStyleRule): boolean {
   return false;
 }
 
+function canSkipEntryRelationalRule(rule: CSSStyleRule, observesResize: boolean): boolean {
+  const style = rule.style;
+  if (!style?.length || rule.cssRules?.length) return false;
+  for (let index = 0; index < style.length; index += 1) {
+    const property = style.item(index);
+    if (
+      property !== 'background-color' &&
+      !/^scroll-(?:margin|padding)(?:-|$)/.test(property) &&
+      !(observesResize && property === 'grid-template-columns')
+    )
+      return false;
+  }
+  return true;
+}
+
+function relaxEntryHasConditions(selector: string): string {
+  let result = '';
+  let start = 0;
+  for (let index = 0; index < selector.length; index += 1) {
+    const literalEnd = skipSelectorLiteral(selector, index, selector[index]!);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    if (!selector.startsWith(':has(', index)) continue;
+    const close = matchingSelectorParen(selector, index + 4);
+    if (close < 0) return selector;
+    result += selector.slice(start, index) + ':where(*)';
+    start = close + 1;
+    index = close;
+  }
+  return result + selector.slice(start);
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
   target: HTMLElement,
-  ancestors: readonly Element[]
+  ancestors: readonly Element[],
+  observesResize: boolean
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
@@ -654,11 +689,18 @@ function collectEntryStyleDependencies(
           candidates
         ))
           siblingSubjects.add(subject);
-      if (relational !== 2 && selector.includes(':has(')) {
+      // Paint and anchor offsets do not change eligibility. Grid track sizes
+      // are covered by the entry's resize observer, including container-query
+      // changes. Keep watching mixed declarations and nested rules.
+      if (
+        relational !== 2 &&
+        selector.includes(':has(') &&
+        !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
+      ) {
         if (hasDocumentRootRelationalSubject(selector)) relational = 2;
         if (!relational) {
           try {
-            const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
+            const probe = relaxEntryHasConditions(selector);
             relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded
@@ -722,12 +764,18 @@ function watchEntryStyleInvalidation(
       });
     };
     const methodPatches: EntryStyleMethodPatch[] = [];
+    // Inline declarations already deliver style-attribute records to the
+    // entry's DOM observers. Only rule declarations need the window-wide
+    // stylesheet invalidation, which rebuilds every entry's dependencies.
+    const isInlineDeclaration = (target: object, receiver: unknown) =>
+      target === Declaration.prototype && (receiver as CSSStyleDeclaration).parentRule === null;
     const patchMethods = (target: Record<string, unknown>, keys: readonly string[]) => {
       for (const key of keys) {
         const original = target[key];
         if (typeof original !== 'function') continue;
         const patched = function (this: unknown, ...args: unknown[]) {
           const result = Reflect.apply(original, this, args);
+          if (isInlineDeclaration(target, this)) return result;
           if (
             key === 'replace' &&
             result &&
@@ -787,7 +835,7 @@ function watchEntryStyleInvalidation(
       const patched = function (this: unknown, value: unknown) {
         if (original?.set) original.set.call(this, value);
         else (this as CSSStyleDeclaration).setProperty(cssName!, String(value));
-        notify();
+        if (!isInlineDeclaration(target, this)) notify();
       };
       Object.defineProperty(target, key, {
         configurable: true,
@@ -1704,7 +1752,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 externalAncestor = composedParentElement(externalAncestor);
               }
               const [mediaQueries, relationalDependency, siblingSubjects] =
-                collectEntryStyleDependencies(view!, mediaRoots, target, externalAncestors);
+                collectEntryStyleDependencies(
+                  view!,
+                  mediaRoots,
+                  target,
+                  externalAncestors,
+                  !!entryResizeObserver && !hasArea
+                );
               const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
                 if (subject.parentNode)

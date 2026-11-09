@@ -453,7 +453,10 @@ export function createWebA11yProjectionRegistry(
   ) => {
     const reservation = reservedIdsByDocument.get(document)?.get(id);
     if (reservation && reservation.objectRef !== objectRef) return false;
-    for (const element of document.querySelectorAll<HTMLElement>('[id]')) {
+    // Use the document's ID selector index for simple IDs. Keep the exact
+    // comparison and scan arbitrary authored IDs without CSS serialization.
+    const selector = /^[a-zA-Z_][\w-]*$/.test(id) ? `#${id}` : '[id]';
+    for (const element of document.querySelectorAll<HTMLElement>(selector)) {
       if (element.id === id && element !== target) return false;
     }
     return true;

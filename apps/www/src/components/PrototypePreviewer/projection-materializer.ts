@@ -22,6 +22,7 @@ import type {
 import {
   applyProjectionThemeSurfaceStyle,
   resolveProjectionThemeSurfaceStyle,
+  watchProjectionThemeSurfaceStyle,
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { loadPrototypes } from './prototype-modules';
@@ -30,6 +31,12 @@ import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 
 export type ProjectionMaterializerOptions = Readonly<{
   mount: HTMLElement;
+  /** Use this owner's theme for preparation and subsequent color-mode changes. */
+  themeSource?: Readonly<{
+    scope: Element;
+    family: ProjectionFamilyId;
+    isCurrent(): boolean;
+  }>;
   ownerId: string;
   componentId: ProjectionComponentId;
   controls: ProjectionCompositionControls;
@@ -336,6 +343,47 @@ export async function materializeProjectionCandidate(
   request: ProjectionScopeMaterializeRequest,
   options: ProjectionMaterializerOptions
 ): Promise<MaterializedProjectionCandidate> {
+  const source = options.themeSource;
+  if (!source?.isCurrent()) return prepareProjectionCandidate(request, options);
+
+  let theme!: ProjectionThemeSurfaceStyle;
+  let candidate: MaterializedProjectionCandidate | undefined;
+  const stopTheme = watchProjectionThemeSurfaceStyle(source.family, source.scope, (next) => {
+    theme = next;
+    if (source.isCurrent()) candidate?.setThemeSurfaceStyle(next);
+  });
+  const initialTheme = theme;
+  try {
+    const prepared = await prepareProjectionCandidate(request, options, initialTheme);
+    candidate = prepared;
+    if (!source.isCurrent()) {
+      stopTheme();
+      return prepared;
+    }
+    if (theme !== initialTheme) prepared.setThemeSurfaceStyle(theme);
+    return {
+      ...prepared,
+      async dispose() {
+        stopTheme();
+        await prepared.dispose();
+      },
+    };
+  } catch (error) {
+    stopTheme();
+    try {
+      await candidate?.dispose();
+    } catch (cleanupError) {
+      console.error('[PrototypePreviewer] Failed to dispose a themed candidate.', cleanupError);
+    }
+    throw error;
+  }
+}
+
+async function prepareProjectionCandidate(
+  request: ProjectionScopeMaterializeRequest,
+  options: ProjectionMaterializerOptions,
+  initialTheme?: ProjectionThemeSurfaceStyle
+): Promise<MaterializedProjectionCandidate> {
   if (!isRuntimeId(request.selection.runtimeId)) {
     throw new Error(
       `[PrototypePreviewer] projection Runtime "${request.selection.runtimeId}" is not registered.`
@@ -358,7 +406,8 @@ export async function materializeProjectionCandidate(
     );
   }
 
-  const themeSurfaceStyle = resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
+  const themeSurfaceStyle =
+    initialTheme ?? resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
   const childDemo = options.content?.demo ?? (await loadDemo(componentManifest.recipeId));
   const composition = createProjectionComposition({
     ownerId: options.ownerId,

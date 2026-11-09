@@ -312,6 +312,31 @@ describe('Web A11y opaque semantic-object references', () => {
     expect(source.getAttribute('aria-labelledby')).toBe('host-label');
   });
 
+  it.each(['author-target', 'author:target[0]'])(
+    'preserves the native relation when another element already owns %s',
+    (id) => {
+      const doc = document.implementation.createHTMLDocument('duplicate author IDs');
+      const source = doc.createElement('button');
+      const target = doc.createElement('span');
+      const duplicate = doc.createElement('span');
+      target.id = duplicate.id = id;
+      source.setAttribute('aria-labelledby', 'host-label');
+      doc.body.append(source, target, duplicate);
+      const registry = createWebA11yProjectionRegistry();
+      const targetRef = createA11ySemanticObjectRef();
+      const targetProjector = createWebA11yProjector(target, undefined, registry);
+      const sourceProjector = createWebA11yProjector(source, undefined, registry);
+      targetProjector(semanticSnapshot(targetRef));
+      sourceProjector(semanticSnapshot(createA11ySemanticObjectRef(), { labelledBy: [targetRef] }));
+
+      expect(source.getAttribute('aria-labelledby')).toBe('host-label');
+      expect(target.id).toBe(id);
+      expect(duplicate.id).toBe(id);
+      sourceProjector.dispose?.();
+      targetProjector.dispose?.();
+    }
+  );
+
   it('3967157821: preserves the survivor reservation after releasing the reserved duplicate', () => {
     // C-A11Y-0001-N/O/P; T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION.
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-surviving-reservation' });

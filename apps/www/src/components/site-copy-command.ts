@@ -15,7 +15,6 @@ import {
   materializeProjectionCandidate,
   type MaterializedProjectionCandidate,
 } from './PrototypePreviewer/projection-materializer';
-import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
@@ -53,7 +52,9 @@ export function createCopyCommandDemo(
   isActive: () => boolean
 ): DemoSpec {
   const labels = copyLabels(root);
-  const codeExample = Boolean(root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]'));
+  const codeExample = Boolean(
+    root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]')
+  );
   const buttonProps = {
     variant: family === 'brutalist' ? 'surface' : codeExample ? 'ghost' : 'outline',
     size: codeExample && family === 'shadcn' ? 'icon-compact' : 'icon',
@@ -236,7 +237,9 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         const family = request.selection.projectionFamilyId as SiteLibraryFamily;
         const hasBackplate =
           family === 'shadcn' &&
-          !root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]');
+          !root.closest(
+            '[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]'
+          );
         let candidate: MaterializedProjectionCandidate | null = null;
         const demo = createCopyCommandDemo(
           root,
@@ -250,6 +253,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         );
         candidate = await materializeProjectionCandidate(request, {
           mount,
+          themeSource: { scope: root, family, isCurrent: () => alive },
           ownerId,
           componentId: 'button',
           controls: NO_CONTROLS,
@@ -269,15 +273,6 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
           },
         });
         const mounted = candidate;
-        let stopTheme: () => void;
-        try {
-          stopTheme = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
-            mounted.setThemeSurfaceStyle(theme)
-          );
-        } catch (error) {
-          await mounted.dispose();
-          throw error;
-        }
         return {
           activate() {
             mounted.activate();
@@ -287,7 +282,6 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
             mounted.setLocked?.(locked);
           },
           async dispose() {
-            stopTheme();
             if (activeCandidate === mounted) activeCandidate = null;
             await mounted.dispose();
           },
