@@ -78,6 +78,21 @@ export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
           tw(`${bootstrapButtonFlatFill.default} opacity-65 cursor-default shadow-none`)
         ),
     });
-    return behavior.render;
+    // BS2 `.dropdown-toggle` requires a caret glyph; reuse the Select recipe.
+    return (renderer) => [
+      renderer.r.slot(),
+      renderer.el(
+        'span',
+        {
+          style: tw(
+            'pointer-events-none inline-flex w-[8px] h-[4px] shrink-0 items-center justify-center text-black'
+          ),
+        },
+        renderer.svg.root(
+          { viewBox: '0 0 8 4', 'aria-hidden': 'true', width: 8, height: 4, fill: 'currentColor' },
+          renderer.svg.path({ d: 'M0 0h8L4 4z' })
+        )
+      ),
+    ];
   },
 });

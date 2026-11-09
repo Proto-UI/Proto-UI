@@ -7,7 +7,7 @@ const dialogHeader = definePrototype({
   setup(def) {
     def.anatomy.claim(DIALOG_FAMILY, { role: 'header' });
     def.feedback.style.use(
-      tw('flex min-w-0 items-start justify-between gap-3 border-b border-[#e5e5e5] p-4')
+      tw('flex min-w-0 items-start justify-between gap-3 border-b border-[#eee] px-[15px] py-[9px]')
     );
     return (renderer) => renderer.r.slot();
   },

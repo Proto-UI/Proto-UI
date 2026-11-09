@@ -9,12 +9,12 @@ export function setupSwitchRootVisual(
 ) {
   def.feedback.style.use(
     tw(
-      'inline-flex h-6 w-11 shrink-0 items-center justify-start border border-border px-0.5 bg-muted select-none cursor-pointer rounded-[4px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+      'relative inline-flex h-6 w-11 shrink-0 items-center justify-start border border-border px-0.5 bg-muted select-none cursor-pointer rounded-[4px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
     )
   );
   def.rule({
     when: (w) => w.state(state.checked).eq(true),
-    intent: (i) => i.feedback.style.use(tw('bg-primary border-primary justify-end')),
+    intent: (i) => i.feedback.style.use(tw('bg-primary border-primary')),
   });
   def.rule({
     when: (w) =>

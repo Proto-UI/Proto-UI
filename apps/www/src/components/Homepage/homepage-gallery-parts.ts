@@ -9,6 +9,7 @@ import {
 } from './homepage-gallery-icons';
 import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
+import { homepageButtonVariant, type HomepageButtonIntent } from './homepage-button-variants';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import {
   resolveProjectionPart,
@@ -92,29 +93,17 @@ export function createHomepageGalleryParts(
   };
   const part = (kind: Parameters<typeof resolveProjectionPart>[1], name = 'root') =>
     resolveProjectionPart(family, kind, name).prototypeId;
-  const button = (label: string, ref?: string, variant = 'primary', disabled = false) =>
+  const button = (
+    label: string,
+    ref?: string,
+    variant: HomepageButtonIntent = 'primary',
+    disabled = false
+  ) =>
     p(
       part('button'),
       [label],
       {
-        variant:
-          family === 'brutalist'
-            ? variant === 'primary'
-              ? 'solid'
-              : variant === 'danger'
-                ? 'destructive'
-                : 'surface'
-            : family === 'bootstrap-2-3-2'
-              ? variant === 'primary'
-                ? 'primary'
-                : variant === 'danger'
-                  ? 'danger'
-                  : 'default'
-              : variant === 'primary'
-                ? 'default'
-                : variant === 'danger'
-                  ? 'destructive'
-                  : 'outline',
+        variant: homepageButtonVariant(family, variant),
         disabled,
         wrap: true,
       },
@@ -295,11 +284,11 @@ export function createHomepageGalleryParts(
     part('dialog'),
     [
       p(part('dialog', 'trigger'), [
-        family === 'brutalist'
-          ? zh
+        family === 'shadcn'
+          ? button(zh ? '打开对话框' : 'Open dialog')
+          : zh
             ? '打开对话框'
-            : 'Open dialog'
-          : button(zh ? '打开对话框' : 'Open dialog'),
+            : 'Open dialog',
       ]),
       p(part('dialog', 'mask'), [], {}, 'gallery-dialog-mask'),
       p(part('dialog', 'content'), [
