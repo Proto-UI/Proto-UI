@@ -67,7 +67,7 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
         args[1].ownerId.startsWith('site-contents-')
       )
         throw new Error('renderer unavailable');
-      if (args[1].content?.demo && args[1].componentId === 'dialog') {
+      if (args[1].content?.demo && args[1].componentId === 'popover') {
         const options = args[1],
           content = options.content!;
         const originalSetup = content.demo.setup;

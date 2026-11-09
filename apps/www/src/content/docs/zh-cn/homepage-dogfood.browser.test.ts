@@ -814,7 +814,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('true');
             await expect
               .poll(() =>
-                page.locator('nav.docs-sidebar[data-site-contents-dialog-tree]').isVisible()
+                page.locator('nav.docs-sidebar[data-site-contents-popover-tree]').isVisible()
               )
               .toBe(true);
             expect(await command.getAttribute('aria-controls')).toBe('starlight__sidebar');
@@ -971,7 +971,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               const tree = state.__contentsOriginalTree!;
               const home = state.__contentsOriginalParent!;
               const observation: CloseObservation = {
-                initialMarker: tree.getAttribute('data-site-contents-dialog-tree'),
+                initialMarker: tree.getAttribute('data-site-contents-popover-tree'),
                 events: [],
               };
               const collect = (records: MutationRecord[]) => {
@@ -993,7 +993,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               observer.observe(home, { childList: true });
               observer.observe(tree, {
                 attributes: true,
-                attributeFilter: ['data-site-contents-dialog-tree'],
+                attributeFilter: ['data-site-contents-popover-tree'],
                 attributeOldValue: true,
               });
               state.__contentsTakeCloseObservation = () => {
@@ -1022,7 +1022,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                     return (
                       !!tree?.isConnected &&
                       tree === document.querySelector('nav.docs-sidebar') &&
-                      !tree.hasAttribute('data-site-contents-dialog-tree')
+                      !tree.hasAttribute('data-site-contents-popover-tree')
                     );
                   }),
                 { timeout: remainingCloseMs }
@@ -1037,7 +1037,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             closeObservations.push({ family, runtime, action, observation: closeObservation });
             expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
             expect(
-              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
+              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree')
             ).toBeNull();
             expect(
               await page.evaluate(() => {

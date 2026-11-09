@@ -250,7 +250,8 @@ const NATIVE_DESTINATION_HTML = `<!doctype html><html data-native-destination-fi
 /** Throwaway self-signed EC material for the admitted fixture host only. The
  * proxy never forwards an admitted host, and only this cell's own browser
  * instance ignores certificate errors; no site or shared harness path sees it. */
-const NATIVE_DESTINATION_TLS_KEY_BASE64 = 'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgA/M06pocQzYu+O1aOfG4PrC3sK8upJ6ZGlEQZjGjGSChRANCAARRFF3SzmCtg5W4+Di0h/QrctYJlQKKgVbC83sCtetpTdvhX+DDC8ysvtGKwgP4VWP7WctIRs+F7HnSDfpzQJ9T';
+const NATIVE_DESTINATION_TLS_KEY_BASE64 =
+  'MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgA/M06pocQzYu+O1aOfG4PrC3sK8upJ6ZGlEQZjGjGSChRANCAARRFF3SzmCtg5W4+Di0h/QrctYJlQKKgVbC83sCtetpTdvhX+DDC8ysvtGKwgP4VWP7WctIRs+F7HnSDfpzQJ9T';
 const NATIVE_DESTINATION_TLS_CERT_BASE64 =
   'MIIBmTCCAT6gAwIBAgIUSDCWfn1/g2gZGDspDyiF48uk/nwwCgYIKoZIzj0EAwIwFTETMBEGA1UEAwwKZ2l0aHViLmNvbTAgFw0yNjExMDYwMDU1MTVaGA8yMTI2MTAxMzAwNTUxNVowFTETMBEGA1UEAwwKZ2l0aHViLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABFEUXdLOYK2Dlbj4OLSH9Cty1gmVAoqBVsLzewK162lN2+Ff4MMLzKy+0YrCA/hVY/tZy0hGz4XsedIN+nNAn1OjajBoMB0GA1UdDgQWBBSz1Nd2ar6WOfQt/ZipatHrUNUfATAfBgNVHSMEGDAWgBSz1Nd2ar6WOfQt/ZipatHrUNUfATAPBgNVHRMBAf8EBTADAQH/MBUGA1UdEQQOMAyCCmdpdGh1Yi5jb20wCgYIKoZIzj0EAwIDSQAwRgIhALgt70QZ5mzzfhFoM4YiEPAZ5ZHkRxxuULVYu7SxmTCtAiEA9nkevilsC6Abh3M9btLA2H2xTxfGqZSOpEBDqZpju8o=';
 const nativeDestinationPem = (label: 'PRIVATE KEY' | 'CERTIFICATE', base64: string) =>
@@ -589,9 +590,7 @@ async function assertSocialPaint(
       .poll(async () => (await linkPaint(first)).background)
       .not.toBe(baseline.background);
   const hoverTransform =
-    family === 'brutalist'
-      ? await assertSettledTransform(first, 'matrix(1, 0, 0, 1, 4, 4)')
-      : null;
+    family === 'brutalist' ? await assertSettledTransform(first, 'matrix(1, 0, 0, 1, 4, 4)') : null;
   const hovered = await linkPaint(first);
   if (family === 'brutalist') {
     // Accepted #800 Button-like role: settle +4/+4 into its 4px shadow.
@@ -1901,7 +1900,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             };
             const tree = document.querySelector('nav.docs-sidebar');
             return {
-              dialogTree: tree?.getAttribute('data-site-contents-dialog-tree') ?? null,
+              dialogTree: tree?.getAttribute('data-site-contents-popover-tree') ?? null,
               parentRestored: !!tree && tree.parentElement === state.__contentsHome,
               nextRestored: !!tree && tree.nextSibling === state.__contentsNext,
             };
@@ -1925,10 +1924,12 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         await contents.click();
         await expect.poll(() => contents.getAttribute('aria-expanded')).toBe('true');
         await pane.waitFor({ state: 'visible' });
-        await expect.poll(() => treeOwnership()).toMatchObject({
-          dialogTree: '',
-          parentRestored: false,
-        });
+        await expect
+          .poll(() => treeOwnership())
+          .toMatchObject({
+            dialogTree: '',
+            parentRestored: false,
+          });
         const sidebar = pane
           .locator('a[data-site-link-enhanced]:not([aria-current="page"]):visible')
           .first();
@@ -2919,9 +2920,7 @@ it('records the English shell labels, destinations and native activation ownersh
       .first();
     const resting = await linkPaint(heroLink);
     await heroLink.hover();
-    await expect
-      .poll(async () => (await linkPaint(heroLink)).tokens)
-      .not.toEqual(resting.tokens);
+    await expect.poll(async () => (await linkPaint(heroLink)).tokens).not.toEqual(resting.tokens);
     await page.mouse.move(0, 0);
     await heroLink.focus();
     await page.keyboard.press('Tab');
@@ -2932,9 +2931,7 @@ it('records the English shell labels, destinations and native activation ownersh
     expect(focused.unclipped).toBe(true);
     // The real homepage theme control flips the document theme; the English
     // labels stay native, unclipped and hit-testable in dark.
-    const themeBefore = await page.evaluate(
-      () => document.documentElement.dataset.theme ?? null
-    );
+    const themeBefore = await page.evaluate(() => document.documentElement.dataset.theme ?? null);
     await page
       .locator(
         '.site-header-theme [data-projection-generation-state="active"] [data-demo-ref="home-theme"]'
@@ -2980,7 +2977,9 @@ it('records the English shell labels, destinations and native activation ownersh
     expect(shellNavigationIssues(popupNavigation, englishExpectation)).toEqual([]);
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
-      await page.locator('[data-homepage-runtime] [data-site-header-desktop-navigation]').isVisible()
+      await page
+        .locator('[data-homepage-runtime] [data-site-header-desktop-navigation]')
+        .isVisible()
     ).toBe(false);
     await openSettings(page);
     const narrowNavigation = await collectShellLinks(page, HOMEPAGE_POPUP_NAVIGATION);

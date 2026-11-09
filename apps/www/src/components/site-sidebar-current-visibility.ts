@@ -208,7 +208,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       pending = true;
       stableFrames = 0;
     }
-    // The public Contents Dialog physically relocates this same native tree
+    // The public Contents Popover physically relocates this same native tree
     // between its home rail and the dialog slot. The nearest actual scroll
     // owner can change without another contents-open event, so re-measure the
     // settled row against that new owner. Never reopen a collapsed group,
@@ -216,8 +216,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     if (
       records.some(
         (record) =>
-          record.type === 'attributes' &&
-          record.attributeName === 'data-site-contents-dialog-tree'
+          record.type === 'attributes' && record.attributeName === 'data-site-contents-popover-tree'
       )
     ) {
       pending = true;
@@ -234,7 +233,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       'open',
       'data-site-link-enhanced',
       'data-pui-style',
-      'data-site-contents-dialog-tree',
+      'data-site-contents-popover-tree',
     ],
   });
   const resize =

@@ -538,7 +538,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     const changed = next !== expanded;
     expanded = next;
     document.body.toggleAttribute('data-mobile-menu-expanded', next);
-    document.body.toggleAttribute('data-site-contents-dialog', !!presentation);
+    document.body.toggleAttribute('data-site-contents-popover', !!presentation);
     if (changed) presentation?.setOpen(next);
     if (newlyOpened) document.dispatchEvent(new view.CustomEvent(SITE_CONTENTS_OPEN_EVENT));
   };
@@ -619,7 +619,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.removeEventListener('astro:before-swap', destroy);
     document.removeEventListener('focusin', onFocus, true);
     presentation = undefined;
-    document.body.removeAttribute('data-site-contents-dialog');
+    document.body.removeAttribute('data-site-contents-popover');
     bindings.clear();
     contentsNavigations.delete(menuHost);
   };

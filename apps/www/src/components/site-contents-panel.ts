@@ -18,7 +18,7 @@ const controls = {
 };
 let serial = 0;
 
-/** Website composition only: public Dialog owns modal behavior and family
+/** Website composition only: public Popover owns nonmodal behavior and family
  * paint. The application lends one existing native navigation subtree, never
  * regenerates links/details or installs a second focus/scroll state machine. */
 export function contentsPanelParticipant(header: HTMLElement) {
@@ -67,7 +67,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
     // already returned focus; the shared move lease preserves native Selection.
     withNativeContentLease(tree, () => {
       home.insertBefore(tree, nextSibling?.parentNode === home ? nextSibling : null);
-      tree.removeAttribute('data-site-contents-dialog-tree');
+      tree.removeAttribute('data-site-contents-popover-tree');
     });
     restoreHomeScroll();
   };
@@ -78,7 +78,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
     async materialize(request: ProjectionScopeMaterializeRequest, namespace = 'docs') {
       const family = request.selection.projectionFamilyId;
       if (family !== 'shadcn' && family !== 'brutalist')
-        throw new Error('Contents Dialog family is unavailable');
+        throw new Error('Contents Popover family is unavailable');
       const lease: NativeTreeLease = { close: () => closePublicView() };
       const slotId = `${owner}-${namespace}-${request.generation}`;
       const style = family === 'shadcn' ? { styleProfile: 'rhea' } : {};
@@ -158,7 +158,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
         observer.disconnect();
         observing = false;
         if (activeLease !== lease && treeOwner !== lease) {
-          api?.setProps('contents-dialog', { open: false });
+          api?.setProps('contents-popover', { open: false });
           restoreHomeScroll();
           return Promise.resolve();
         }
@@ -168,7 +168,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
         const closing = closeBarrier;
         // A framework prop commit may be asynchronous. Public open/presence,
         // not setProps returning or a guessed animation timeout, releases the tree.
-        api?.setProps('contents-dialog', { open: false });
+        api?.setProps('contents-popover', { open: false });
         afterPublicUpdate();
         return closing;
       };
@@ -191,7 +191,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
           if (!treeOwner && !homeScroll)
             homeScroll = { root: tree.scrollTop, pane: pane?.scrollTop ?? 0 };
           withNativeContentLease(tree, () => {
-            tree.setAttribute('data-site-contents-dialog-tree', '');
+            tree.setAttribute('data-site-contents-popover-tree', '');
             slot.append(tree);
           });
           treeOwner = lease;
@@ -216,7 +216,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
           observer.observe(document.body, { childList: true, subtree: true });
           observing = true;
         }
-        api?.setProps('contents-dialog', { open: true });
+        api?.setProps('contents-popover', { open: true });
         placeTree();
       };
       const presentation: SiteContentsPresentation = {
@@ -233,57 +233,45 @@ export function contentsPanelParticipant(header: HTMLElement) {
       candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId: `${owner}-${namespace}`,
-        componentId: 'dialog',
+        componentId: 'popover',
         controls,
         controlIds: [],
         content: {
           recipe: {
-            id: 'website-contents-dialog',
-            rootPrototypeId: `${family}-dialog-root`,
-            prototypeIds: ['root', 'mask', 'content', 'title', 'close'].map(
-              (part) => `${family}-dialog-${part}`
-            ),
+            id: 'website-contents-popover',
+            rootPrototypeId: `${family}-popover-root`,
+            prototypeIds: ['root', 'content', 'title'].map((part) => `${family}-popover-${part}`),
           },
           demo: {
             type: 'demo',
-            root: proto('dialog-root', {
-              ref: 'contents-dialog',
+            root: proto('popover-root', {
+              ref: 'contents-popover',
               props: { ...style, open: false, a11yLabel: title },
               children: [
-                proto('dialog-mask', { ref: 'contents-mask', previewTheme: 'portal' }),
-                proto('dialog-content', {
+                proto('popover-content', {
                   ref: 'contents-panel',
                   previewTheme: 'portal',
+                  props: { presentation: 'navigation' },
                   children: [
-                    proto('dialog-title', { children: [title] }),
+                    proto('popover-title', { children: [title] }),
                     {
                       kind: 'box',
                       attrs: { 'data-site-contents-slot': slotId },
                       className: 'min-w-0 min-h-0',
                     },
-                    proto('dialog-close', {
-                      surfaceStyle: {
-                        minHeight: '2.75rem',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        paddingInline: '0.75rem',
-                      },
-                      children: [closeLabel],
-                    }),
                   ],
                 }),
               ],
             }),
             setup(context) {
               api = context.api;
-              api.setProps('contents-dialog', {
+              api.setProps('contents-popover', {
                 onOpenChange(detail: { open: boolean }) {
                   if (isCurrent() && !detail.open) navigation.close();
                 },
               });
               if (!api.subscribePublicInstances)
-                throw new Error('Contents Dialog requires public instance subscriptions');
+                throw new Error('Contents Popover requires public instance subscriptions');
               releaseInstances = api.subscribePublicInstances(['contents-panel'], (snapshot) => {
                 releaseFacts?.();
                 releaseFacts = undefined;
@@ -296,7 +284,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
                   if (activeLease === lease || treeOwner === lease)
                     retireNativeLease(
                       new Error(
-                        'Contents Dialog public instance disappeared while owning the navigation'
+                        'Contents Popover public instance disappeared while owning the navigation'
                       )
                     );
                   return;
@@ -327,7 +315,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
                 // tree after unmount instead of leaving a pending close forever.
                 if (activeLease === lease || treeOwner === lease)
                   retireNativeLease(
-                    new Error('Contents Dialog renderer ended before navigation handback')
+                    new Error('Contents Popover renderer ended before navigation handback')
                   );
                 api = undefined;
               };
@@ -337,7 +325,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
       });
       if (!openFact || !presentFact) {
         await candidate.dispose();
-        throw new Error('Contents Dialog public open/presence facts are unavailable');
+        throw new Error('Contents Popover public open/presence facts are unavailable');
       }
       views.set(request.generation, {
         presentation,
@@ -368,7 +356,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
     },
     prepareCommit(commit: ProjectionScopeCommit) {
       const candidate = views.get(commit.generation);
-      if (!candidate) throw new Error('Contents Dialog has no prepared view');
+      if (!candidate) throw new Error('Contents Popover has no prepared view');
       const previous = names.map((name) => [name, mount.getAttribute(name)] as const);
       let rollbackView: (() => void) | undefined;
       return {

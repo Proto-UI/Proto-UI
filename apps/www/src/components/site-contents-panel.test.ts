@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// App composition/lease tests with a deliberately synthetic Dialog host.
+// App composition/lease tests with a deliberately synthetic Popover host.
 // Real public focus, scroll lock, portal and paint require the browser journey.
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -92,14 +92,14 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
         };
       },
       setProps(ref, props) {
-        if (ref !== 'contents-dialog') return;
+        if (ref !== 'contents-popover') return;
         if (props.onOpenChange) onOpenChange = props.onOpenChange as typeof onOpenChange;
         if (!Object.hasOwn(props, 'open')) return;
         if (props.open && !panel) {
           open.set(true);
           isPresent.set(true);
           panel = document.createElement('div');
-          // Synthetic shadow-boundary counterexample, NOT a real WC Dialog.
+          // Synthetic shadow-boundary counterexample, NOT a real WC Popover.
           // A light-DOM slot cannot closest() the role surface in its shadow.
           const surface = document.createElement('div');
           surface.id = `owned-test-dialog-${request.generation}`;
@@ -157,7 +157,7 @@ afterEach(async () => {
   for (const candidate of candidates.splice(0)) await candidate.dispose();
   document.body.replaceChildren();
   document.body.removeAttribute('data-mobile-menu-expanded');
-  document.body.removeAttribute('data-site-contents-dialog');
+  document.body.removeAttribute('data-site-contents-popover');
   rendered.fail = false;
   rendered.missingFacts = false;
   rendered.retire.length = 0;
@@ -197,18 +197,21 @@ async function publish(generation = 1) {
   return { candidate, publication };
 }
 
-describe('Contents single native tree/public Dialog composition boundary', () => {
+describe('Contents single native tree/public Popover composition boundary', () => {
   it('declares public family Dialog parts and Rhea scope without private Transition/focus props', async () => {
     fixture();
     await publish();
     const demo = rendered.demos[0]!;
     expect(demo.root).toMatchObject({
-      prototypeId: 'shadcn-dialog-root',
+      prototypeId: 'shadcn-popover-root',
       props: { styleProfile: 'rhea', open: false },
     });
     const serialized = JSON.stringify(demo.root);
-    for (const part of ['mask', 'content', 'title', 'close'])
-      expect(serialized).toContain(`shadcn-dialog-${part}`);
+    for (const part of ['content', 'title']) expect(serialized).toContain(`shadcn-popover-${part}`);
+    // The rejected Dialog mask and bottom Close are gone.
+    expect(serialized).not.toContain('shadcn-dialog');
+    expect(serialized).not.toContain('popover-close');
+    expect(serialized).not.toContain('popover-mask');
     expect(serialized).not.toMatch(/focusEntry|enterDuration|leaveDuration|tabindex|aria-modal/);
     expect(readFileSync('apps/www/src/components/site-contents-panel.ts', 'utf8')).not.toContain(
       'onAfterLeave'
@@ -235,7 +238,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await settle();
     expect(tree.parentElement).toBe(home);
     expect(tree.nextSibling).toBe(main);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(false);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(false);
     expect(details.open).toBe(true);
     expect(trustedPolicyCount).toBe(1); // Listener retained, not a native-toggle claim.
   });
@@ -249,7 +252,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     expect(escape.defaultPrevented).toBe(false);
     expect(command.getAttribute('aria-expanded')).toBe('true');
-    // This unit deliberately does not emulate public Dialog dismissal.
+    // This unit deliberately does not emulate public Popover dismissal.
     navigation!.close();
     expect(command.getAttribute('aria-expanded')).toBe('false');
   });
@@ -278,7 +281,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     );
     expect(tree.parentElement).toBe(home);
     navigation!.toggle();
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
     rendered.fail = false;
     rendered.missingFacts = false;
     rendered.retire.length = 0;
@@ -343,7 +346,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     navigation!.close();
     await settle();
     expect(tree.parentElement).toBe(slot);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(true);
 
     navigation!.toggle();
     await settle();
@@ -354,7 +357,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     expect(command.getAttribute('aria-expanded')).toBe('true');
     expect(tree.isConnected).toBe(true);
     expect(tree.parentElement).toBe(slot);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(true);
     expect(document.querySelector('nav.docs-sidebar')).toBe(tree);
     expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
     expect(rendered.order).toEqual(['public-close-call-exited']);
@@ -366,7 +369,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await settle();
     expect(tree.parentElement).toBe(home);
     expect(tree.nextSibling).toBe(main);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(false);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(false);
   });
 
   it('fails preparation without public facts without hiding or borrowing the only native tree', async () => {
@@ -376,7 +379,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
       'public open/presence facts are unavailable'
     );
     expect(tree.parentElement).toBe(home);
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
   });
 
   it('returns a stranded lease after public instance retirement and rejects disposal instead of hanging', async () => {
@@ -392,7 +395,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await expect(candidate.dispose()).rejects.toThrow('public instance disappeared');
     candidates.splice(candidates.indexOf(candidate), 1);
     expect(tree.parentElement).toBe(home);
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
     expect(error).toHaveBeenCalled();
   });
 
@@ -409,7 +412,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     expect(frame).toMatch(
       /<noscript>[\s\S]*?\.mobile-sidebar-pane[\s\S]*?display: flex !important/
     );
-    expect(frame).toContain('.docs-sidebar[data-site-contents-dialog-tree]');
+    expect(frame).toContain('.docs-sidebar[data-site-contents-popover-tree]');
     expect(frame).not.toMatch(/body\[data-mobile-menu-expanded\][\s\S]{0,40}overflow: hidden/);
     expect(sidebar).not.toContain('MobileMenuFooter');
     expect(sidebar.match(/<SidebarSublist /g)).toHaveLength(1);

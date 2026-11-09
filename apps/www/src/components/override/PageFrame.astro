@@ -131,7 +131,7 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
     --header-height: 4.5rem;
     --sl-nav-height: var(--header-height);
   }
-  /* A closed Dialog Root has no height; do not give its inline surface a
+  /* A closed Popover Root has no height; do not give its inline surface a
      surrounding text line in the application's panel mount. */
   [data-site-contents-panel-mount] :global(.pui-projection-content) {
     display: flex;
@@ -199,7 +199,7 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
     }
   }
 
-  /* Before public Dialog preparation, retain a reachable in-flow disclosure.
+  /* Before public Popover preparation, retain a reachable in-flow disclosure.
      This is not the retired fixed full-screen mobile menu. */
   .mobile-sidebar-pane {
     position: static;
@@ -212,7 +212,7 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
     background: var(--color-background);
   }
 
-  :global(body[data-mobile-menu-expanded]:not([data-site-contents-dialog])) .mobile-sidebar-pane {
+  :global(body[data-mobile-menu-expanded]:not([data-site-contents-popover])) .mobile-sidebar-pane {
     display: flex;
   }
 
@@ -255,9 +255,9 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
   }
 
   /* The very same nav retains its logical/native owners while physically
-     placed in the public Dialog. Only composition geometry changes; family
-     Dialog and Sidebar primitives continue to own all paint and behavior. */
-  .docs-sidebar[data-site-contents-dialog-tree] {
+     placed in the public Popover. Only composition geometry changes; family
+     Popover and Sidebar primitives continue to own all paint and behavior. */
+  .docs-sidebar[data-site-contents-popover-tree] {
     position: static;
     z-index: auto;
     top: auto;
@@ -267,15 +267,15 @@ const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
     min-width: 0;
     overflow: visible;
   }
-  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-pane {
+  .docs-sidebar[data-site-contents-popover-tree] .mobile-sidebar-pane {
     position: static;
     display: flex;
     width: 100%;
-    max-height: min(60svh, 32rem);
+    max-height: none;
     padding: 0;
-    overflow-y: auto;
+    overflow: visible;
   }
-  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-content {
+  .docs-sidebar[data-site-contents-popover-tree] .mobile-sidebar-content {
     padding: 0;
   }
 </style>

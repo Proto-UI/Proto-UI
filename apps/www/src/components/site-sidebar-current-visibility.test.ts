@@ -177,7 +177,7 @@ describe('current article nearest-edge layout', () => {
     expect(root.scrollTop).toBe(544);
 
     // The real Contents panel moves this exact nav into its public Dialog and
-    // marks it with data-site-contents-dialog-tree. The inner pane then becomes
+    // marks it with data-site-contents-popover-tree. The inner pane then becomes
     // the scroll owner; no second contents-open event is dispatched.
     const dialog = document.createElement('div');
     document.body.append(dialog);
@@ -215,7 +215,7 @@ describe('current article nearest-edge layout', () => {
       toJSON() {},
     }));
     dialog.append(root);
-    root.setAttribute('data-site-contents-dialog-tree', '');
+    root.setAttribute('data-site-contents-popover-tree', '');
     await flush();
     expect(nearestSidebarScroller(link, root)).toBe(pane);
     expect(pane.scrollTop).toBe(544);

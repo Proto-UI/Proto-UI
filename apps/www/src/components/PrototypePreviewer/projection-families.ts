@@ -32,7 +32,8 @@ export type ProjectionComponentId =
   | 'spinner'
   | 'scroll-area'
   | 'tooltip'
-  | 'transition';
+  | 'transition'
+  | 'popover';
 export type ProjectionFamilyId = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
 export type ProjectionPartManifest = Readonly<{
@@ -96,6 +97,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
     'header',
     'footer',
   ],
+  popover: ['root', 'trigger', 'content', 'title', 'description', 'close'],
   separator: ['root'],
   textarea: ['root'],
   input: ['root'],
@@ -558,6 +560,43 @@ const SHADCN_MANIFEST = {
         footer: { basePrototypeId: null, prototypeId: 'shadcn-dialog-footer' },
       },
     },
+    popover: {
+      baseFamilyId: 'P-BASE-POPOVER',
+      recipeId: 'demo-shadcn-popover',
+      recipePrototypeIds: [
+        'shadcn-style-scope',
+        'shadcn-popover-root',
+        'shadcn-popover-trigger',
+        'shadcn-popover-content',
+        'shadcn-popover-title',
+        'shadcn-popover-description',
+        'shadcn-popover-close',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: null, prototypeId: 'shadcn-style-scope' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'shadcn-popover-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-POPOVER-TRIGGER',
+          prototypeId: 'shadcn-popover-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-POPOVER-CONTENT',
+          prototypeId: 'shadcn-popover-content',
+        },
+        title: {
+          basePrototypeId: 'P-BASE-POPOVER-TITLE',
+          prototypeId: 'shadcn-popover-title',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-POPOVER-DESCRIPTION',
+          prototypeId: 'shadcn-popover-description',
+        },
+        close: {
+          basePrototypeId: 'P-BASE-POPOVER-CLOSE',
+          prototypeId: 'shadcn-popover-close',
+        },
+      },
+    },
     separator: {
       baseFamilyId: 'P-BASE-SEPARATOR',
       recipeId: 'demo-shadcn-separator',
@@ -961,6 +1000,41 @@ const BRUTALIST_MANIFEST = {
         footer: { basePrototypeId: null, prototypeId: 'brutalist-dialog-footer' },
       },
     },
+    popover: {
+      baseFamilyId: 'P-BASE-POPOVER',
+      recipeId: 'demo-brutalist-popover',
+      recipePrototypeIds: [
+        'brutalist-popover-root',
+        'brutalist-popover-trigger',
+        'brutalist-popover-content',
+        'brutalist-popover-title',
+        'brutalist-popover-description',
+        'brutalist-popover-close',
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'brutalist-popover-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-POPOVER-TRIGGER',
+          prototypeId: 'brutalist-popover-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-POPOVER-CONTENT',
+          prototypeId: 'brutalist-popover-content',
+        },
+        title: {
+          basePrototypeId: 'P-BASE-POPOVER-TITLE',
+          prototypeId: 'brutalist-popover-title',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-POPOVER-DESCRIPTION',
+          prototypeId: 'brutalist-popover-description',
+        },
+        close: {
+          basePrototypeId: 'P-BASE-POPOVER-CLOSE',
+          prototypeId: 'brutalist-popover-close',
+        },
+      },
+    },
     separator: {
       baseFamilyId: 'P-BASE-SEPARATOR',
       recipeId: 'demo-brutalist-separator',
@@ -1335,6 +1409,41 @@ const BOOTSTRAP_232_MANIFEST = {
         },
         header: { basePrototypeId: null, prototypeId: 'bootstrap-2-3-2-dialog-header' },
         footer: { basePrototypeId: null, prototypeId: 'bootstrap-2-3-2-dialog-footer' },
+      },
+    },
+    popover: {
+      baseFamilyId: 'P-BASE-POPOVER',
+      recipeId: 'demo-bootstrap-2-3-2-popover',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-popover-root',
+        'bootstrap-2-3-2-popover-trigger',
+        'bootstrap-2-3-2-popover-content',
+        'bootstrap-2-3-2-popover-title',
+        'bootstrap-2-3-2-popover-description',
+        'bootstrap-2-3-2-popover-close',
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-POPOVER', prototypeId: 'bootstrap-2-3-2-popover-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-POPOVER-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-popover-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-POPOVER-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-popover-content',
+        },
+        title: {
+          basePrototypeId: 'P-BASE-POPOVER-TITLE',
+          prototypeId: 'bootstrap-2-3-2-popover-title',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-POPOVER-DESCRIPTION',
+          prototypeId: 'bootstrap-2-3-2-popover-description',
+        },
+        close: {
+          basePrototypeId: 'P-BASE-POPOVER-CLOSE',
+          prototypeId: 'bootstrap-2-3-2-popover-close',
+        },
       },
     },
     'dropdown-menu': {
