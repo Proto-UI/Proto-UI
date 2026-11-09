@@ -33,7 +33,11 @@ describe('app-private semantic typography style closure', () => {
           expect(props.font).toBeTruthy();
           expect(props.weight).toBeTruthy();
           expect(props.tone).toBeTruthy();
-          if (role === 'slogan') expect(props.size).toBe(compact ? '2xl' : '4xl');
+          // The Shadcn site hero keeps the source-aligned medium slogan at
+          // every viewport; only the Brutalist family scales it down when the
+          // viewport is compact.
+          if (role === 'slogan')
+            expect(props.size).toBe(family === 'shadcn' ? '3xl' : compact ? '2xl' : '4xl');
         }
   });
 });
