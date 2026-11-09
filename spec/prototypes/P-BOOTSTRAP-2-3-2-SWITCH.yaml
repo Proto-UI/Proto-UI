@@ -16,7 +16,7 @@ criteria:
       en: The root owns checked, checkedChange, controlled or uncontrolled ownership, disabled suppression, focus and the inherited Switch anatomy domain.
   - id: P-BOOTSTRAP-2-3-2-SWITCH-VISUAL
     text:
-      en: Design-language extension, not an original Bootstrap 2.3.2 component. A 44 by 24px inset track with 4px corners uses the archived palette; root alignment changes with checked, without a second state owner.
+      en: Design-language extension, not an original Bootstrap 2.3.2 component. A 44 by 24px inset track with 4px corners uses the archived palette; the checked fill changes with the inherited checked state, without a second state owner. The Thumb owns its own travel.
   - id: P-BOOTSTRAP-2-3-2-SWITCH-CLOSURE
     text:
       en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.

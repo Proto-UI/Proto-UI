@@ -1,6 +1,7 @@
 import { composeHomepageText, setHomepageText } from './homepage-text';
 import { createHomepageGalleryParts } from './homepage-gallery-parts';
 import { homepageGalleryIcon } from './homepage-gallery-icons';
+import { homepageButtonVariant } from './homepage-button-variants';
 import {
   collectPrototypeIds,
   type DemoNode,
@@ -275,7 +276,7 @@ export function createHomepageShowcase(
                     props: {
                       disabled: true,
                       wrap: true,
-                      variant: family === 'shadcn' ? 'outline' : 'default',
+                      variant: homepageButtonVariant(family, 'secondary'),
                     },
                     children: [copy.reset],
                   },

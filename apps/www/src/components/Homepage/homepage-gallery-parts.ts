@@ -9,6 +9,7 @@ import {
 } from './homepage-gallery-icons';
 import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
+import { homepageButtonVariant, type HomepageButtonIntent } from './homepage-button-variants';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import {
   resolveProjectionPart,
@@ -97,24 +98,7 @@ export function createHomepageGalleryParts(
       part('button'),
       [label],
       {
-        variant:
-          family === 'brutalist'
-            ? variant === 'primary'
-              ? 'solid'
-              : variant === 'danger'
-                ? 'destructive'
-                : 'surface'
-            : family === 'bootstrap-2-3-2'
-              ? variant === 'primary'
-                ? 'primary'
-                : variant === 'danger'
-                  ? 'danger'
-                  : 'default'
-              : variant === 'primary'
-                ? 'default'
-                : variant === 'danger'
-                  ? 'destructive'
-                  : 'outline',
+        variant: homepageButtonVariant(family, variant as HomepageButtonIntent),
         disabled,
         wrap: true,
       },

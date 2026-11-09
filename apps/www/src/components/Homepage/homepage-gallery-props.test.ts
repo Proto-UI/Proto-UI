@@ -3,6 +3,7 @@ import { getElementProps, setElementProps } from '@proto.ui/adapter-web-componen
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
+import { homepageButtonVariant } from './homepage-button-variants';
 let rendered: Awaited<ReturnType<typeof renderDemo>> | undefined;
 afterEach(async () => {
   await rendered?.destroy();
@@ -55,7 +56,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       expect(input('settings-note').getAttribute('aria-label')).toBe('Additional note');
       expect(getElementProps(ref('settings-view'))).toMatchObject({ closeOnSelect: true });
       expect(getElementProps(ref('settings-reset'))).toMatchObject({
-        variant: family === 'shadcn' ? 'outline' : 'default',
+        variant: homepageButtonVariant(family, 'secondary'),
       });
     };
     await settle();

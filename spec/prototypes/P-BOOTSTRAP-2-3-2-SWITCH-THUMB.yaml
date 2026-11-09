@@ -16,7 +16,7 @@ criteria:
       en: The thumb derives checked from the nearest same-domain Switch root; it owns no checked prop, activation, change signal or focus target.
   - id: P-BOOTSTRAP-2-3-2-SWITCH-THUMB-VISUAL
     text:
-      en: A 20px raised thumb with 4px corners. It is pointer-transparent; placement is owned by the root layout. This is part of the Switch design-language extension, not a historical Bootstrap component.
+      en: A 20px raised thumb with 4px corners. It is pointer-transparent; its placement is owned by the inherited percentage channel, so it travels within the root track and mirrors an explicit RTL direction. This is part of the Switch design-language extension, not a historical Bootstrap component.
   - id: P-BOOTSTRAP-2-3-2-SWITCH-THUMB-CLOSURE
     text:
       en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.
