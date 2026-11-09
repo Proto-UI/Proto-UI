@@ -2,6 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 
 // Use the same installed React18 pair as the production website. These are
 // actual frameworks/portals/Transition, but input and a bounded initial native
@@ -16,6 +17,9 @@ vi.mock('../PrototypePreviewer/runtimes/react-runtime', async () => {
   return { loadReact: async () => ({ React, ReactDOM }) };
 });
 let rendered: Awaited<ReturnType<typeof renderDemo>> | undefined;
+// The published page loads the generated token sheet; a host that only
+// declares `relative` becomes a positioned padding box through that rule.
+installGeneratedProtoUiStylesheet();
 afterEach(async () => {
   try {
     await rendered?.destroy();

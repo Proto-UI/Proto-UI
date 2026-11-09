@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 
 // Real website renderer, real PUI parts and real WC Adapter in Happy DOM.
 // DOM keyboard/edit events are synthetic; paint and native-browser behavior
@@ -9,6 +10,9 @@ import { createHomepageShowcase } from './homepage-showcase';
 type ProtoElement = HTMLElement & { getExposes(): { open: { get(): boolean } } };
 let rendered: Awaited<ReturnType<typeof renderDemo>> | undefined;
 let stopErrorWatch: (() => void) | undefined;
+// The published page loads the generated token sheet; a host that only
+// declares `relative` becomes a positioned padding box through that rule.
+installGeneratedProtoUiStylesheet();
 afterEach(async () => {
   try {
     await rendered?.destroy();

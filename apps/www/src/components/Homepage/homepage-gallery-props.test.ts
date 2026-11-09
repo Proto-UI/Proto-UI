@@ -4,6 +4,7 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
 import { homepageButtonVariant } from './homepage-button-variants';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 import type { ProjectionFamilyId } from '../PrototypePreviewer/projection-families';
 
 /**
@@ -25,6 +26,9 @@ afterEach(async () => {
   rendered = undefined;
   document.body.replaceChildren();
 });
+// The published page loads the generated token sheet, and a host that only
+// declares `relative` becomes a positioned padding box through that rule.
+installGeneratedProtoUiStylesheet();
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
   it(`${family} retains full editor and preferences props through edits and resets`, async () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);

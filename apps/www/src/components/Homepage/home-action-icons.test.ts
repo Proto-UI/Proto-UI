@@ -31,10 +31,45 @@ describe('bounded hero decorative icon mapping', () => {
       const frontmatter = YAML.parse(source.match(/^---\n([\s\S]*?)\n---/)![1]!);
       const parsed = schema.parse(frontmatter);
       const action = parsed.hero!.actions.find(({ link }) => link === '#home-demo-previewer')!;
-      expect(action.icon).toEqual({ type: 'icon', name: 'external' });
-      expect(homeActionIcon(action.icon)).toBe('external');
+      // The Demo CTA targets an in-page anchor and paints as the family's
+      // gray secondary button, so it carries no configured decorative glyph.
+      expect(action.icon).toBeUndefined();
       expect(action.text).toBe(locale === 'zh-cn' ? '试试 Demo' : 'Try the components');
     }
+  });
+  it('maps a configured named icon through the installed Starlight schema normalization', () => {
+    // Starlight normalizes a named frontmatter icon to an object before the
+    // page renders it, so the bounded mapper has to accept that shape.
+    const schema = docsSchema()({
+      image: () =>
+        z.object({
+          src: z.string(),
+          width: z.number(),
+          height: z.number(),
+          format: z.union([
+            z.literal('png'),
+            z.literal('jpg'),
+            z.literal('jpeg'),
+            z.literal('tiff'),
+            z.literal('webp'),
+            z.literal('gif'),
+            z.literal('svg'),
+            z.literal('avif'),
+          ]),
+        }),
+    });
+    const parsed = schema.parse({
+      title: 'T',
+      description: 'D',
+      template: 'splash',
+      hero: {
+        tagline: 'T',
+        actions: [{ text: 'Try the components', link: '#home-demo-previewer', icon: 'external' }],
+      },
+    });
+    const action = parsed.hero!.actions[0]!;
+    expect(action.icon).toEqual({ type: 'icon', name: 'external' });
+    expect(homeActionIcon(action.icon)).toBe('external');
   });
   it('accepts the configured external icon without interpreting arbitrary inputs', () => {
     expect(homeActionIcon('external')).toBe('external');
