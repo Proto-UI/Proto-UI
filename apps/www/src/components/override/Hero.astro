@@ -53,9 +53,34 @@ const whitepaperLabel =
   .homepage-hero :global(.homepage-hero__eyebrow) {
     margin-bottom: 0.5rem;
   }
+  /* shadcn-style announcement badge: muted pill, not a bare text link. */
+  .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link),
+  .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.625rem;
+    border-radius: 9999px;
+    background-color: var(--color-muted);
+    color: var(--color-secondary-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+    white-space: nowrap;
+    transition: background-color 120ms ease;
+  }
+  .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link svg),
+  .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a svg) {
+    width: 0.75rem;
+    height: 0.75rem;
+    flex-shrink: 0;
+  }
+  .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-link:hover),
+  .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a:hover) {
+    background-color: color-mix(in srgb, var(--color-muted) 80%, var(--color-foreground) 8%);
+  }
   .homepage-hero :global(.homepage-hero__eyebrow .home-runtime-anchor),
   .homepage-hero :global(.homepage-hero__eyebrow .home-actions-fallback a) {
-    padding: 0;
     min-height: 1.5rem;
     white-space: normal;
     text-wrap: balance;
