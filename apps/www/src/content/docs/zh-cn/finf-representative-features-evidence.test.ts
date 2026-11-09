@@ -351,7 +351,10 @@ describe('Finf representative evidence harness, no native browser', () => {
 
 // Deterministic DOM/Animation API fixtures exercise the actual page-side probe
 // and capture oracle. These are not native geometry, pixels or motion evidence.
-function popoverMotionFixture() {
+function popoverMotionFixture(
+  expectedEntryAnimation: string | null = 'pui-enter',
+  reducedMotion = false
+) {
   const window = new Window();
   const document = window.document;
   document.documentElement.style.fontSize = '16px';
@@ -360,10 +363,24 @@ function popoverMotionFixture() {
   const trigger = document.querySelector('button')!;
   // This fixture declares #panel as an HTML div; Happy DOM's id query returns Element.
   const panel = document.getElementById('panel') as HTMLDivElement;
-  let animations: Array<{ playState: string; pending: boolean; currentTime: number }> = [];
+  let animations: Array<{
+    animationName?: string;
+    playState: string;
+    pending: boolean;
+    currentTime: number;
+  }> = expectedEntryAnimation
+    ? [
+        {
+          animationName: expectedEntryAnimation,
+          playState: 'finished',
+          pending: false,
+          currentTime: 100,
+        },
+      ]
+    : [];
   const animate = vi.fn(() => {
     const animation = { playState: 'running', pending: false, currentTime: 0 };
-    animations = [animation];
+    animations.push(animation);
     return animation;
   });
   Object.assign(panel, {
@@ -389,12 +406,13 @@ function popoverMotionFixture() {
   const clearTimeout = vi.fn();
   // This is the known in-process probe extracted above, with simulated host APIs.
   const probe = execute(
-    `${statements(['createPopoverMotionProbe'])}; createPopoverMotionProbe(trigger);`,
+    `${statements(['createPopoverMotionProbe'])}; createPopoverMotionProbe(trigger, expectedEntryAnimation);`,
     {
       trigger,
+      expectedEntryAnimation,
       document,
       getComputedStyle: window.getComputedStyle.bind(window),
-      matchMedia: () => ({ matches: false }),
+      matchMedia: () => ({ matches: reducedMotion }),
       performance: { now: () => clock },
       window: { setTimeout: vi.fn(() => 1) },
       clearTimeout,
@@ -441,12 +459,27 @@ function popoverMotionFixture() {
   };
   return {
     panel,
+    trigger,
     probe,
     frame,
     animate,
     shots,
+    deferEntry: () => {
+      animations = [];
+    },
+    replacePanel: () => {
+      const replacement = panel.cloneNode(true) as HTMLDivElement;
+      Object.assign(replacement, {
+        getAnimations: () => animations,
+        getBoundingClientRect: () => panel.getBoundingClientRect(),
+      });
+      Object.defineProperty(replacement, 'clientWidth', { get: () => panel.clientWidth });
+      panel.replaceWith(replacement);
+    },
     enter: () => {
-      animate();
+      animations = [
+        { animationName: 'pui-enter', playState: 'running', pending: false, currentTime: 0 },
+      ];
       panel.style.opacity = '0';
       panel.style.transform = 'scale(0.95)';
     },
@@ -461,7 +494,13 @@ function popoverMotionFixture() {
     settle: () => helpers.waitForSettledPopover(handle),
     inject: (control: string) => helpers.installPopoverNegativeControl(locator, control),
     capture: (duringCapture = capture) =>
-      helpers.captureSettledPopover(handle, locator, 'shadcn', duringCapture, 'opened'),
+      helpers.captureSettledPopover(
+        handle,
+        locator,
+        expectedEntryAnimation === null ? 'brutalist' : 'shadcn',
+        duringCapture,
+        'opened'
+      ),
     close: () => {
       probe.stop();
       window.happyDOM.abort();
@@ -537,9 +576,14 @@ function popoverCaptureCase(
 }
 
 describe('Popover same-phase capture and controls, no native browser', () => {
-  it('requires consecutive native-frame observations before binding both sides of a capture', async () => {
+  it('observes an already finished current entry and still requires consecutive frames before capture', async () => {
     const fixture = popoverMotionFixture();
     try {
+      expect(fixture.probe.read().animations[0]).toMatchObject({
+        name: 'pui-enter',
+        currentOpen: true,
+        playState: 'finished',
+      });
       expect(fixture.probe.settled).toBe(false);
       fixture.frame();
       expect(fixture.probe.settled).toBe(false);
@@ -550,6 +594,110 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       expect(binding.animations).toBe('allow');
       expect(binding.before.signature).toBe(binding.after?.signature);
       expect(binding.before.rect?.width).toBe(288);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it.each([false, true])(
+    'waits through the empty pre-animation gap and genuine entry endpoint, reducedMotion=%s',
+    async (reducedMotion) => {
+      const fixture = popoverMotionFixture('pui-enter', reducedMotion);
+      try {
+        fixture.deferEntry();
+        fixture.probe.mark('reduced-or-normal-entry');
+        fixture.frame();
+        fixture.frame();
+        expect(fixture.probe.read().animations).toEqual([]);
+        expect(fixture.probe.read().reducedMotion).toBe(reducedMotion);
+        expect(fixture.probe.settled).toBe(false);
+        fixture.enter();
+        fixture.frame();
+        fixture.frame();
+        expect(fixture.probe.settled).toBe(false);
+        fixture.finish();
+        fixture.frame();
+        expect(fixture.probe.settled).toBe(false);
+        fixture.frame();
+        await fixture.capture();
+        const binding = fixture.shots[0].captureBinding;
+        expect(binding.before.animations[0]).toMatchObject({
+          name: 'pui-enter',
+          currentOpen: true,
+          playState: 'finished',
+        });
+        expect(binding.before.signature).toBe(binding.after?.signature);
+      } finally {
+        fixture.close();
+      }
+    }
+  );
+
+  it.each(['reopen', 'replace'] as const)(
+    'rejects an earlier finished animation after panel %s, even with the same content ID',
+    async (boundary) => {
+      const fixture = popoverMotionFixture();
+      try {
+        fixture.frame();
+        fixture.frame();
+        expect(fixture.probe.settled).toBe(true);
+        const previous = fixture.probe.read();
+        if (boundary === 'reopen') {
+          fixture.trigger.setAttribute('aria-expanded', 'false');
+          fixture.probe.mark('closed');
+          fixture.trigger.setAttribute('aria-expanded', 'true');
+        } else {
+          // Adversarial simulated native-object reuse across a replaced panel.
+          fixture.replacePanel();
+        }
+        fixture.probe.mark('reentry');
+        fixture.frame();
+        fixture.frame();
+        expect(fixture.probe.read().contentId).toBe(previous.contentId);
+        expect(fixture.probe.read().openSequence).toBeGreaterThan(previous.openSequence);
+        expect(fixture.probe.read().animations[0]).toMatchObject({
+          name: 'pui-enter',
+          currentOpen: false,
+          playState: 'finished',
+        });
+        expect(fixture.probe.settled).toBe(false);
+        fixture.enter();
+        fixture.finish();
+        fixture.frame();
+        fixture.frame();
+        await fixture.capture();
+        expect(fixture.shots[0].captureBinding.before.animations[0].sequence).not.toBe(
+          previous.animations[0].sequence
+        );
+      } finally {
+        fixture.close();
+      }
+    }
+  );
+
+  it('keeps a genuinely animation-free family observable without inventing an entry animation', async () => {
+    const fixture = popoverMotionFixture(null);
+    try {
+      fixture.frame();
+      fixture.frame();
+      await fixture.capture();
+      const binding = fixture.shots[0].captureBinding;
+      expect(binding.before.animations).toEqual([]);
+      expect(binding.before.signature).toBe(binding.after?.signature);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it('rejects a missing authored entry within the original bounded poll without capturing', async () => {
+    const fixture = popoverMotionFixture();
+    try {
+      fixture.deferEntry();
+      fixture.frame();
+      fixture.frame();
+      await expect(fixture.settle()).rejects.toThrow();
+      expect(fixture.probe.frames.some((sample) => sample.settled)).toBe(false);
+      expect(fixture.shots).toEqual([]);
     } finally {
       fixture.close();
     }
@@ -584,7 +732,14 @@ describe('Popover same-phase capture and controls, no native browser', () => {
       });
       fixture.frame();
       fixture.frame();
-      expect(fixture.probe.read().rect?.width).toBe(288);
+      const frame = fixture.probe.read();
+      expect(frame.rect?.width).toBe(288);
+      expect(frame.animations[0]).toMatchObject({
+        name: 'pui-enter',
+        currentOpen: true,
+        playState: 'finished',
+      });
+      expect(frame.animations[1].playState).toBe('running');
       expect(fixture.probe.settled).toBe(false);
       // The bounded poll's rejection is under test; native-frame time is simulated.
       await expect(fixture.settle()).rejects.toThrow();

@@ -188,6 +188,7 @@ async function paint(locator: Locator) {
 
 export type PopoverFrame = {
   contentId: string | null;
+  openSequence: number;
   connected: boolean;
   expanded: string | null;
   role: string | null;
@@ -201,6 +202,8 @@ export type PopoverFrame = {
   transform: string | null;
   shadow: string | null;
   animations: Array<{
+    sequence: number;
+    currentOpen: boolean;
     kind: string;
     name: string | null;
     playState: string;
@@ -216,6 +219,7 @@ type PopoverMotionSample = PopoverFrame & {
   settled: boolean;
 };
 type PopoverMotionTrace = {
+  expectedEntryAnimation: string | null;
   frames: PopoverMotionSample[];
   error: string | null;
   stopReason: string | null;
@@ -235,13 +239,23 @@ export type PopoverCaptureObservation = {
 
 // Serialized into the page. Observe the current Trigger's real portal before
 // input, including missing/instant exit frames; never manufacture retained motion.
-function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
+function createPopoverMotionProbe(
+  trigger: HTMLElement,
+  expectedEntryAnimation: string | null
+): PopoverMotionProbe {
   const started = performance.now();
   let phase = 'entry';
   let raf = 0;
   let timer = 0;
   let stopReason: string | null = null;
   let error: string | null = null;
+  let openPanel: HTMLElement | null = null;
+  let openSequence = 0;
+  let animationSequence = 0;
+  const animationObservations = new WeakMap<
+    Animation,
+    { sequence: number; openSequence: number }
+  >();
   const read = (): PopoverFrame => {
     const ids =
       trigger
@@ -249,12 +263,19 @@ function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
         ?.split(/[\t\n\f\r ]+/)
         .filter(Boolean) ?? [];
     const panel = ids.length === 1 ? document.getElementById(ids[0]) : null;
+    const expanded = trigger.getAttribute('aria-expanded');
+    const nextOpenPanel = panel?.isConnected && expanded === 'true' ? panel : null;
+    if (nextOpenPanel !== openPanel) {
+      openPanel = nextOpenPanel;
+      if (openPanel) openSequence += 1;
+    }
     const style = panel ? getComputedStyle(panel) : null;
     const rect = panel?.getBoundingClientRect();
     const state = {
       contentId: panel?.id ?? null,
+      openSequence,
       connected: panel?.isConnected ?? false,
-      expanded: trigger.getAttribute('aria-expanded'),
+      expanded,
       role: panel?.getAttribute('role') ?? null,
       reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
       rect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
@@ -266,13 +287,25 @@ function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
       transform: style?.transform ?? null,
       shadow: style?.boxShadow ?? null,
       animations:
-        panel?.getAnimations().map((animation) => ({
-          kind: animation.constructor.name,
-          name: 'animationName' in animation ? String(animation.animationName) : null,
-          playState: animation.playState,
-          pending: animation.pending,
-          currentTime: animation.currentTime === null ? null : String(animation.currentTime),
-        })) ?? [],
+        panel?.getAnimations().map((animation) => {
+          let observation = animationObservations.get(animation);
+          if (!observation) {
+            observation = {
+              sequence: ++animationSequence,
+              openSequence: openPanel ? openSequence : 0,
+            };
+            animationObservations.set(animation, observation);
+          }
+          return {
+            sequence: observation.sequence,
+            currentOpen: openPanel !== null && observation.openSequence === openSequence,
+            kind: animation.constructor.name,
+            name: 'animationName' in animation ? String(animation.animationName) : null,
+            playState: animation.playState,
+            pending: animation.pending,
+            currentTime: animation.currentTime === null ? null : String(animation.currentTime),
+          };
+        }) ?? [],
     };
     // Finished timelines may retain a time beyond their visual endpoint. Keep
     // native times in the trace; compare geometry, paint and animation status.
@@ -292,7 +325,7 @@ function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
       cancelAnimationFrame(raf);
       clearTimeout(timer);
     }
-    return { frames, error, stopReason };
+    return { expectedEntryAnimation, frames, error, stopReason };
   };
   const sample = () => {
     try {
@@ -307,6 +340,17 @@ function createPopoverMotionProbe(trigger: HTMLElement): PopoverMotionProbe {
         frame.opacity === '1' &&
         (frame.rect?.width ?? 0) > 0 &&
         (frame.rect?.height ?? 0) > 0 &&
+        // Two frames can precede the authored native animation. Require its
+        // actual native endpoint, not the vacuous every([]) before it starts.
+        // fill:both keeps a finished entry observable even to a late probe;
+        // an animation retained from an older panel/open is not a new entry.
+        (expectedEntryAnimation === null ||
+          frame.animations.some(
+            (animation) =>
+              animation.currentOpen &&
+              animation.name === expectedEntryAnimation &&
+              animation.playState === 'finished'
+          )) &&
         frame.animations.every(
           (animation) => !animation.pending && ['finished', 'idle'].includes(animation.playState)
         );
@@ -1214,7 +1258,12 @@ async function popoverJourney({ page, previewer, family, capture }: Journey) {
   const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
   const panel = page.getByRole('dialog', { name: 'Popover settings', exact: true });
   await page.evaluate(() => document.fonts.ready);
-  const probe = await trigger.evaluateHandle(createPopoverMotionProbe);
+  // Default Shadcn Content authors animate-in (motion.ts), emitted as retained
+  // pui-enter by proto-style-css.ts. Other families keep their own motion policy.
+  const probe = await trigger.evaluateHandle(
+    createPopoverMotionProbe,
+    family === 'shadcn' ? 'pui-enter' : null
+  );
   let failure: { error: unknown } | undefined;
   try {
     await trigger.click();
