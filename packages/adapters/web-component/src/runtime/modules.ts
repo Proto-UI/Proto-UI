@@ -676,6 +676,32 @@ function relaxEntryHasConditions(selector: string): string {
   return result + selector.slice(start);
 }
 
+function scopedNegatedEntrySubject(selector: string): string | null {
+  const start = selector.indexOf(':not(:has(');
+  // Only scope a single, top-level condition whose relative selector cannot
+  // reach siblings. Complex branches retain the conservative ancestor watch.
+  if (
+    start < 0 ||
+    /[,+~]/.test(selector) ||
+    selector.indexOf(':has(') !== start + 5 ||
+    selector.indexOf(':has(', start + 6) !== -1
+  )
+    return null;
+  const close = matchingSelectorParen(selector, start + 4);
+  if (close < 0 || matchingSelectorParen(selector, start + 9) !== close - 1) return null;
+  let depth = 0;
+  for (let index = 0; index < start; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      if (literalEnd >= start) return null;
+      index = literalEnd;
+    } else if (character === '(') depth += 1;
+    else if (character === ')') depth -= 1;
+  }
+  return depth === 0 ? selector.slice(0, start) + ':where(*)' : null;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -687,6 +713,7 @@ function collectEntryStyleDependencies(
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
   const siblingSubjects = new Set<Element>();
+  const relationalSubjects = new Set<Element>();
   const candidates = [target, ...ancestors, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
@@ -725,7 +752,14 @@ function collectEntryStyleDependencies(
         if (!relational) {
           try {
             const probe = relaxEntryHasConditions(selector);
-            relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
+            if (candidates.some((candidate) => candidate.matches(probe))) {
+              const subject = scopedNegatedEntrySubject(selector);
+              const matches = subject
+                ? candidates.filter((candidate) => candidate.matches(subject))
+                : [];
+              if (!matches.length) relational = 1;
+              else for (const candidate of matches) relationalSubjects.add(candidate);
+            }
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded
             // external-chain fallback rather than silently missing a change.
@@ -755,6 +789,7 @@ function collectEntryStyleDependencies(
     Array.from(queries, (query) => view.matchMedia(query)),
     relational,
     siblingSubjects,
+    relationalSubjects,
   ] as const;
 }
 
@@ -1583,6 +1618,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
+            let entryRelationalSubjects = new Set<Element>();
             let hasExternalStyleInputs = false;
             const belongsToObservedEntryTree = (node: Node) => {
               for (const root of observedRoots) {
@@ -1729,10 +1765,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
                 if (
-                  records.some(
-                    (record) =>
-                      !belongsToObservedEntryTree(record.target) || invalidatesEntryStyles(record)
-                  )
+                  records.some((record) => {
+                    if (
+                      !belongsToObservedEntryTree(record.target) ||
+                      invalidatesEntryStyles(record)
+                    )
+                      return true;
+                    for (const subject of entryRelationalSubjects)
+                      if (subject.contains(record.target)) return true;
+                    return false;
+                  })
                 )
                   projectEntry();
               });
@@ -1784,7 +1826,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
-              const [mediaQueries, relationalDependency, siblingSubjects] =
+              const [mediaQueries, relationalDependency, siblingSubjects, relationalSubjects] =
                 collectEntryStyleDependencies(
                   view!,
                   mediaRoots,
@@ -1792,6 +1834,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalAncestors,
                   !!entryResizeObserver && !hasExternalStyleInputs
                 );
+              entryRelationalSubjects = relationalSubjects;
+              for (const subject of entryRelationalSubjects) {
+                entryExternalStyleObserver.observe(subject, {
+                  childList: true,
+                  subtree: true,
+                  attributes: true,
+                });
+              }
               const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
                 if (subject.parentNode)

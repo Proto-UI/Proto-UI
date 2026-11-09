@@ -1135,6 +1135,8 @@ describe('WC live focus-entry resolver inputs', () => {
   it.each(['ancestor', 'document'] as const)(
     'observes a negated nested :has condition on the %s',
     async (boundary) => {
+      const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+      const outer = document.createElement('div');
       const wrapper = document.createElement('div');
       wrapper.className = 'entry-negated';
       const style = document.createElement('style');
@@ -1143,7 +1145,8 @@ describe('WC live focus-entry resolver inputs', () => {
           ? 'html:not(:has(:is(.entry-reveal))) .entry-negated'
           : '.entry-negated:not(:has(:is(.entry-reveal)))';
       style.textContent = `${selector} button { visibility: hidden; }`;
-      document.body.append(style, wrapper);
+      outer.append(wrapper);
+      document.body.append(style, outer);
       const host = panel(false);
       const button = document.createElement('button');
       wrapper.append(host);
@@ -1167,6 +1170,14 @@ describe('WC live focus-entry resolver inputs', () => {
       });
       await settle();
       expect(host.tabIndex).toBe(0);
+      if (boundary === 'ancestor') {
+        const watchesSubtree = (target: Element) =>
+          observe.mock.calls.some(
+            ([node, options]) => node === target && options?.childList && options.subtree
+          );
+        expect(watchesSubtree(wrapper)).toBe(true);
+        expect(watchesSubtree(outer)).toBe(false);
+      }
 
       flagOwner.append(flag);
       await settle();
