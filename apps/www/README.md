@@ -38,3 +38,13 @@ Run commands from the repository root:
 Popover [browser evidence](src/content/docs/zh-cn/finf-representative-features.browser.test.ts) waits for stable native geometry, paint and animation status within the original 1,000 ms settlement bound, then checks measurements immediately before and after each settled capture. Screenshots allow animations without forcing completion. Failure handling preserves the original error, available captures and DOM/ARIA diagnostics.
 
 In official clean-head native CI, `PUI_FINF_POPOVER_NEGATIVE_CONTROL=wrong-width` and `PUI_FINF_POPOVER_NEGATIVE_CONTROL=nonsettling` select real width and native-animation faults. The [companion helper suite](src/content/docs/zh-cn/finf-representative-features-evidence.test.ts) explicitly simulates DOM, animations and image payloads; helper results alone do not establish native acceptance.
+
+On a published candidate ref containing the manual runner, select `popover_evidence` when dispatching [the existing workflow](../../.github/workflows/finf-representative-features-evidence.yml):
+
+```sh
+gh workflow run finf-representative-features-evidence.yml --repo Proto-UI/Proto-UI --ref "$CANDIDATE_REF" -f popover_evidence=normal
+```
+
+`all` is the default and preserves the full matrix; reusable calls also retain it when their Popover input is undefined. `normal` selects only the Shadcn and Brutalist Popover cases. `wrong-width` and `nonsettling` each select only Shadcn Popover, set the corresponding real fault and intentionally leave the test/job failing with retained artifacts. Unknown choices fail before setup. Fault variables are unset for `all` and `normal`.
+
+The original `0607c6c5c386b8a932ab850e92a8873b2121dc45` baseline has no dispatch inputs. Dispatch a published ref bound to that commit without `popover_evidence` to retain its unmodified full-matrix run; this manual runner does not override the source SHA or relax clean-head admission.
