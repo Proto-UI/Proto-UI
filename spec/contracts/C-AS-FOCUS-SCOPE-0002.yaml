@@ -1,17 +1,17 @@
 id: C-AS-FOCUS-SCOPE-0002
 type: contract
-title: Focus scope activation gates focus and restores the previous owner
+title: Focus scope activation gates focus and applies configured restoration
 status: draft
 since: 0.1.0
 lifecycleRationale: Draft scope policy; per-activation entry override requires focused execution, independent review and separate compiler admission and consumer conformance.
-summary: A focus scope may exist inactive in the logical tree; activation captures previous focus, moves focus into the scope, gates outside focus requests, and deactivation restores the captured owner.
+summary: A focus scope may exist inactive in the logical tree; activation captures previous focus, moves focus into the scope and gates outside focus requests. Deactivation restores the captured owner by default, while restore none opts out of automatic handback.
 statement:
   zh-CN: >-
-    `asFocusScope()` 声明的 scope 不得因为存在于逻辑树中就自动生效。scope activation 必须是显式动作：激活时记录当前 scope 外部的 previous focus owner，将 scope 标记为 active，并在非 manual entry 策略下把焦点移交给 scope 内第一个合格的 logical focusable child；取消激活时清除 active，并把焦点归还给激活前捕获的 previous owner。scope active 期间，scope 外部的普通 focus request 必须被忽略并产生诊断警告；scope 自身及其 logical descendants 的 focus request 继续允许。
+    `asFocusScope()` 声明的 scope 不得因为存在于逻辑树中就自动生效。scope activation 必须是显式动作：激活时记录当前 scope 外部的 previous focus owner，将 scope 标记为 active，并在非 manual entry 策略下把焦点移交给 scope 内第一个合格的 logical focusable child；取消激活时清除 active，默认将焦点归还给激活前捕获的 previous owner，显式 restore: none 则不自动移交焦点。scope active 期间，scope 外部的普通 focus request 必须被忽略并产生诊断警告；scope 自身及其 logical descendants 的 focus request 继续允许。
 
 
   en: >-
-    A scope declared by `asFocusScope()` must not become effective merely because it exists in the logical tree. Scope activation must be an explicit action: activation captures the previous focus owner outside the scope, marks the scope active, and transfers focus to the first eligible logical focusable child inside the scope for non-manual entry policies; deactivation clears active and restores focus to the previous owner captured before activation. While the scope is active, ordinary focus requests from outside the scope must be ignored with a diagnostic warning; focus requests from the scope itself or its logical descendants remain allowed.
+    A scope declared by `asFocusScope()` must not become effective merely because it exists in the logical tree. Scope activation must be an explicit action: activation captures the previous focus owner outside the scope, marks the scope active, and transfers focus to the first eligible logical focusable child inside the scope for non-manual entry policies. Deactivation clears active and restores the captured previous owner by default; explicit restore: none performs no automatic focus transfer. While the scope is active, ordinary focus requests from outside the scope must be ignored with a diagnostic warning; focus requests from the scope itself or its logical descendants remain allowed.
 
 
 criteria:
@@ -29,8 +29,8 @@ criteria:
       en: '`activate()` must capture the previous focus owner when it is outside the activating scope.'
   - id: C-AS-FOCUS-SCOPE-0002-D
     text:
-      zh-CN: '`deactivate()` 必须清除 active，并在 previous owner 仍存在时把焦点归还给该 owner。'
-      en: '`deactivate()` must clear active and restore focus to the previous owner when that owner still exists.'
+      zh-CN: '`deactivate()` 必须清除 active。默认或 restore: previous 时，在捕获的 previous owner 仍存在时请求将焦点归还给该 owner；显式 restore: none 不得自动移交焦点，包括不得覆盖 scope 外部已聚焦的目标。消费者显式发起的 handback 与 scope 的自动恢复策略相互独立。'
+      en: '`deactivate()` must clear active. By default or with restore: previous, it requests focus for the captured previous owner when that owner still exists. Explicit restore: none must perform no automatic focus transfer, including no replacement of an already focused outside destination. Explicit consumer handback remains independent of the automatic scope restore policy.'
   - id: C-AS-FOCUS-SCOPE-0002-E
     text:
       zh-CN: active scope 外部的普通 focus request 必须被忽略，并产生可诊断 warning。
@@ -60,11 +60,11 @@ criteria:
     since: 0.3.0-alpha.1
     text:
       zh-CN: >-
-        activate(options) 可通过 entry: manual 仅抑制本次激活的自动入场；省略 entry 或 entry: configured 必须遵循原 setup 配置，而不能强制覆盖已配置的 manual。在非类型化 Runtime 边界仅字面量 manual 抑制入场，其他值遵循 configured 分支；这不扩展静态或 Compiler 接受的枚举。该选项不修改持久配置；后续激活独立选择。manual 仍激活相同的 scope 边界并保留 trap、loop、previous owner 捕获与停用恢复，允许作者随后显式请求内部焦点。该选项不得作为新的 Host Focus 请求字段下发，不提供目标选择、ready 保证或取消既有 pending 请求的能力。调用 activate 仍是显式激活；此选项本身不提供运行中 props watcher 或自动重新激活。
+        activate(options) 可通过 entry: manual 仅抑制本次激活的自动入场；省略 entry 或 entry: configured 必须遵循原 setup 配置，而不能强制覆盖已配置的 manual。在非类型化 Runtime 边界仅字面量 manual 抑制入场，其他值遵循 configured 分支；这不扩展静态或 Compiler 接受的枚举。该选项不修改持久配置；后续激活独立选择。manual 仍激活相同的 scope 边界并保留 trap、loop、previous owner 捕获与配置的停用恢复策略，允许作者随后显式请求内部焦点。该选项不得作为新的 Host Focus 请求字段下发，不提供目标选择、ready 保证或取消既有 pending 请求的能力。调用 activate 仍是显式激活；此选项本身不提供运行中 props watcher 或自动重新激活。
 
 
       en: >-
-        activate(options) may suppress only this activation's automatic entry using entry: manual. Omitted entry or entry: configured follows the original setup policy and cannot force automatic entry over configured manual. At the untyped Runtime boundary only the literal manual suppresses entry; other values follow the configured branch, without extending the statically or compiler-admitted enum. This option does not mutate persistent configuration; later activations choose independently. Manual still activates the same scope boundary with trapping, looping, previous-owner capture and deactivation restoration, and allows subsequent explicit inside-focus requests. The option must not be forwarded as a new Host Focus request field. It provides neither target selection, readiness nor cancellation of existing pending requests. Calling activate remains an explicit activation; the option does not itself install a runtime props watcher or automatically reactivate a scope.
+        activate(options) may suppress only this activation's automatic entry using entry: manual. Omitted entry or entry: configured follows the original setup policy and cannot force automatic entry over configured manual. At the untyped Runtime boundary only the literal manual suppresses entry; other values follow the configured branch, without extending the statically or compiler-admitted enum. This option does not mutate persistent configuration; later activations choose independently. Manual still activates the same scope boundary with trapping, looping, previous-owner capture and configured deactivation restoration, and allows subsequent explicit inside-focus requests. The option must not be forwarded as a new Host Focus request field. It provides neither target selection, readiness nor cancellation of existing pending requests. Calling activate remains an explicit activation; the option does not itself install a runtime props watcher or automatically reactivate a scope.
 
 
 sources:
@@ -88,6 +88,7 @@ sources:
     sections:
       - FOCUS-0800
       - FOCUS-0810
+      - FOCUS-0815
       - FOCUS-0820
       - FOCUS-0830
   - path: packages/adapters/web-component/test/dialog-overlay.test.ts
@@ -104,6 +105,9 @@ verifies:
   tests:
     - T-FOCUS-SCOPE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Clarify the existing restore-none opt-out and ordinary previous-owner default without changing explicit consumer handback or promoting the draft lifecycle.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Define a per-activation manual entry override without mutating setup policy, host request semantics or pending focus ownership.

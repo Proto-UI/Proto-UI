@@ -70,6 +70,8 @@ export interface NativeAdapterModuleOptions<Run> {
   declarations: readonly { id: string; config: NativeConfig }[]; getLogicalParent(): object | null; identity: object;
   registerObservedState?<T extends boolean | string | number>(state: NativeObserved<T>): void;
   getExposes?(): Readonly<Record<string, unknown>>; setPresent?(value: boolean): void; requestHostUpdate?(): void; baseFocus?(): NativeFocusBase; getAccessibleRole?(): string | null;
+  /** Internal focus bridge cleanup; never blurs the physical target. */
+  cancelPendingFocus?(): void;
   emit?(key: string): void;
   createOwnedState?<T extends boolean | string | number>(name: string, initial: T, spec?: NativeOwnedStateSpec): NativeOwnedState<T>;
   watchState?<T>(state: { get(): T }, callback: (run: Run, event: NativeStateEvent<T>) => void): () => void;
@@ -83,11 +85,15 @@ export interface NativeAdapterModuleOptions<Run> {
   subscribeState?(state: { get(): unknown }, callback: () => void): () => void;
 }
 type Claim = { family: NativeAnatomyFamily; role: string; profile?: string; part: NativeAnatomyPart };
-type Owner = { identity: object; parent(): object | null; target(): HTMLElement | null; host(): HTMLElement | null; alive(): boolean; hooks: Set<string>; claims: Map<object, Claim>; exposes(): Readonly<Record<string, unknown>>; focusConfig: Record<string, unknown>; scopeConfig: Record<string, unknown>; rovingConfig: Record<string, unknown>; selected: boolean; active: boolean; scopeDeclared: boolean; rovingDeclared: boolean; focusDeclared: boolean; entryDeclared: boolean; scopeActive: boolean; focus(request?: NativeFocusRequest): void; changed(): void };
+type Owner = { identity: object; parent(): object | null; target(): HTMLElement | null; host(): HTMLElement | null; alive(): boolean; hooks: Set<string>; claims: Map<object, Claim>; exposes(): Readonly<Record<string, unknown>>; focusConfig: Record<string, unknown>; scopeConfig: Record<string, unknown>; rovingConfig: Record<string, unknown>; selected: boolean; active: boolean; scopeDeclared: boolean; rovingDeclared: boolean; focusDeclared: boolean; entryDeclared: boolean; scopeActive: boolean; focus(request?: NativeFocusRequest): void; cancelPendingFocus(): void; changed(): void };
 type NativeTableRecord = { role: string; config: NativeConfig; snapshot: NativeTableSnapshot | null; family?: NativeAnatomyFamily; ready(): boolean; refresh(logical: boolean): void; clear(): void; apply(role: string, row?: number, cell?: NativeTableCell, snapshot?: NativeTableSnapshot): void };
 const tableRecords = new WeakMap<Owner, NativeTableRecord>();
 const owners = new Map<object, Owner>();
 const activeScopes: Owner[] = [];
+let scopeRevision = 0;
+let focusRequestEpoch = 0;
+/** Internal request bookkeeping shared with the native-only Focus bridge. */
+export function noteNativeFocusRequest() { focusRequestEpoch += 1; }
 const parts = new WeakMap<NativeAnatomyPart, Owner>();
 const targets = new WeakMap<HTMLElement, Owner>();
 const boundaryStacks = new WeakMap<Document, Owner[]>();
@@ -255,6 +261,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   const rovingConfig: Record<string, unknown> = { loop: false, navigation: 'arrow', orientation: 'both', entry: 'active', selectOnFocus: false };
   let pendingFocus: NativeFocusRequest | null = null, pendingNavigation: { operation: string; options?: NativeFocusRequest } | null = null;
   let restoreTarget: HTMLElement | null = null;
+  let restoreOwner: Owner | undefined;
+  let scopeActivation = 0;
   const observed = <T extends boolean | string | number>(initial: T) => {
     let value = initial;
     const listeners = new Set<(event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void>();
@@ -267,7 +275,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     return { handle, set(next: T) { if (Object.is(value, next)) return; const prev = value; value = next; const epoch = generation; for (const callback of [...listeners]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (listeners.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-module' })); } } };
   };
   const scopeActive = observed<boolean>(false), hasFocused = observed<boolean>(false), rovingActive = observed<boolean>(false), rovingHasFocused = observed<boolean>(false);
-  const owner: Owner = { identity: options.identity, parent: options.getLogicalParent, target: () => root, host: () => root ? options.getHost?.() ?? root : null, alive: () => !disposed && options.isAlive(), hooks, claims, exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig, selected: false, active: false, scopeDeclared: false, rovingDeclared: false, focusDeclared: false, entryDeclared: false, scopeActive: false, focus: request => requestFocus(request), changed: () => { const epoch = generation; for (const callback of [...topologySubscribers]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (topologySubscribers.has(callback)) options.invoke(callback); } refresh(); } };
+  const owner: Owner = { identity: options.identity, parent: options.getLogicalParent, target: () => root, host: () => root ? options.getHost?.() ?? root : null, alive: () => !disposed && options.isAlive(), hooks, claims, exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig, selected: false, active: false, scopeDeclared: false, rovingDeclared: false, focusDeclared: false, entryDeclared: false, scopeActive: false, focus: request => requestFocus(request), cancelPendingFocus() { pendingFocus = null; options.cancelPendingFocus?.(); }, changed: () => { const epoch = generation; for (const callback of [...topologySubscribers]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (topologySubscribers.has(callback)) options.invoke(callback); } refresh(); } };
   if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
   function alive() { if (disposed || !options.isAlive()) throw new Error('[Modules] owner is terminally disposed.'); }
   function setup(operation: string) { alive(); options.ensureSetup(operation); }
@@ -316,9 +324,9 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function requestFocus(request?: NativeFocusRequest) {
     alive();
     if (focusConfig.disabled || !canFocus()) return;
-    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request ?? {}; return; }
+    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { noteNativeFocusRequest(); pendingFocus = request ?? {}; return; }
     if (options.baseFocus) options.invoke(() => options.baseFocus!().focusSelf(request));
-    else root!.focus({ preventScroll: request?.preventScroll });
+    else { noteNativeFocusRequest(); root!.focus({ preventScroll: request?.preventScroll }); }
   }
   function canFocus(): boolean {
     alive();
@@ -384,20 +392,42 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     focusPrev() { runtime('focusScope.focusPrev'); navigate('prev', undefined, false); },
     activate(request) {
       runtime('focusScope.activate');
-      if (ready()) { const current = root!.ownerDocument.activeElement; if (current && !contains(root!, current)) restoreTarget = current as HTMLElement; }
+      const activation = ++scopeActivation, epoch = generation;
+      restoreTarget = null; restoreOwner = undefined;
+      if (ready()) { const current = root!.ownerDocument.activeElement; if (current && !contains(root!, current)) { restoreTarget = current as HTMLElement; restoreOwner = targets.get(restoreTarget); } }
       const index = activeScopes.indexOf(owner); if (index >= 0) activeScopes.splice(index, 1); activeScopes.push(owner);
+      const revision = ++scopeRevision;
       owner.scopeActive = true; scopeActive.set(true);
+      if (activation !== scopeActivation || epoch !== generation || !owner.alive() || !owner.scopeActive) return;
       if (request?.entry !== 'manual' && scopeConfig.entry !== 'manual') {
         const candidates = focusCandidates(owner.rovingDeclared);
+        if (activation !== scopeActivation || epoch !== generation || !owner.alive() || !owner.scopeActive) return;
         // Strip only activation policy; omitted requests retain the old default.
         let focusRequest: NativeFocusRequest = request ?? { reason: 'programmatic' };
         if (request && Object.hasOwn(request, 'entry')) { const { entry: _entry, ...nativeRequest } = request; focusRequest = nativeRequest; }
-        if (candidates.length) candidates[0].focus(focusRequest);
-        else if (scopeConfig.emptyPolicy !== 'container') { activeScopes.pop(); owner.scopeActive = false; scopeActive.set(false); }
+        if (candidates.length) { if (revision === scopeRevision) candidates[0].focus(focusRequest); }
+        else if (scopeConfig.emptyPolicy !== 'container') { const current = activeScopes.indexOf(owner); if (current >= 0) { activeScopes.splice(current, 1); ++scopeRevision; } owner.scopeActive = false; scopeActive.set(false); }
       }
     },
-    deactivate(request) { runtime('focusScope.deactivate'); const index = activeScopes.indexOf(owner); if (index >= 0) activeScopes.splice(index, 1); owner.scopeActive = false; scopeActive.set(false); if (ready() && restoreTarget?.isConnected && !restoreTarget.closest('[hidden],[inert],[data-pui-view-detached]')) restoreTarget.focus({ preventScroll: request?.preventScroll }); },
-    restoreFocus() { runtime('focusScope.restoreFocus'); if (ready() && restoreTarget?.isConnected) restoreTarget.focus(); },
+    deactivate(request) {
+      runtime('focusScope.deactivate');
+      const index = activeScopes.indexOf(owner);
+      if (index < 0) return;
+      const target = restoreTarget, previous = restoreOwner, activation = ++scopeActivation, epoch = generation;
+      const doc = root?.ownerDocument, focused = doc?.activeElement, requestEpoch = focusRequestEpoch;
+      activeScopes.splice(index, 1); const revision = ++scopeRevision; owner.scopeActive = false;
+      // Retire old queued requests before active-state observers can remount a
+      // child or create new work. Logical membership survives view detachment.
+      for (const participant of owners.values()) {
+        if (participant === owner || descends(participant, owner)) participant.cancelPendingFocus();
+      }
+      if (activation !== scopeActivation || epoch !== generation || !owner.alive()) return;
+      scopeActive.set(false);
+      // A newer pending request owns the next transfer even without a DOM focus change.
+      if (activation !== scopeActivation || epoch !== generation || !owner.alive() || revision !== scopeRevision || requestEpoch !== focusRequestEpoch || doc?.activeElement !== focused) return;
+      if (scopeConfig.restore !== 'none' && ready() && target?.isConnected && (!previous || previous.alive() && previous.target() === target) && !target.closest('[hidden],[inert],[data-pui-view-detached]')) target.focus({ preventScroll: request?.preventScroll });
+    },
+    restoreFocus() { runtime('focusScope.restoreFocus'); if (ready() && restoreTarget?.isConnected && (!restoreOwner || restoreOwner.alive() && restoreOwner.target() === restoreTarget)) restoreTarget.focus(); },
     isActive() { alive(); return owner.scopeActive; },
     getRoving() { alive(); owner.rovingDeclared = true; registerFacts(roving.active); registerFacts(roving.hasFocused); return roving; },
   };
@@ -1433,7 +1463,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       const failures: unknown[] = [];
       try { unmount(); } catch (error) { failures.push(error); }
       disposed = true; owners.delete(options.identity); tableRecords.delete(owner); claims.clear(); hooks.clear(); topologySubscribers.clear(); outsideListeners.clear(); boundaryRegions.clear(); hitRegions.clear(); textListeners.clear(); imageListeners.clear();
-      const scopeIndex = activeScopes.indexOf(owner); if (scopeIndex >= 0) activeScopes.splice(scopeIndex, 1);
+      const scopeIndex = activeScopes.indexOf(owner); if (scopeIndex >= 0) { activeScopes.splice(scopeIndex, 1); ++scopeRevision; }
       for (const off of accessibleSubscriptions.values()) try { off(); } catch (error) { failures.push(error); }
       accessibleSubscriptions.clear();
       for (const cleanup of terminalCleanups.splice(0)) try { cleanup(); } catch (error) { failures.push(error); }
@@ -1644,7 +1674,7 @@ export function createNativeInteraction<Run>(options: NativeTextOptions<Run>): N
     exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig,
     selected: false, active: false, scopeDeclared: false, rovingDeclared: false,
     focusDeclared: false, entryDeclared: false, scopeActive: false,
-    focus: request => requestFocus(request), changed: () => refresh(),
+    focus: request => requestFocus(request), cancelPendingFocus() { pendingFocus = null; }, changed: () => refresh(),
   };
   if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
   function alive() { if (disposed || !options.isAlive()) throw new Error('[Modules] owner is terminally disposed.'); }

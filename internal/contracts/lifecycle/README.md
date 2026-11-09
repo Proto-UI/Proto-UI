@@ -11,6 +11,8 @@ See also:
 - [`module-resource-ownership.md`](./module-resource-ownership.md) for the audited instance/view ownership matrix used by runtime modules.
 - [`view-intent-l1.md`](./view-intent-l1.md) for the planned L1 desired-view and adapter reconciliation model governed by `C-LIFECYCLE-0008`.
 
+Generated Web Components retry desired-view reconciliation after a native connection when a preconfigured logical owner has no mounted view. The retry runs after the current native slot commit and retains the owner, State and setup result. Already mounted views retain their rendered nodes, and terminal disposal prevents queued materialization. This implements the active `C-LIFECYCLE-0008` default view intent; the related `C-LIFECYCLE-0002` and `C-LIFECYCLE-0006` contracts remain draft.
+
 > It defines:
 >
 > - the canonical lifecycle timeline

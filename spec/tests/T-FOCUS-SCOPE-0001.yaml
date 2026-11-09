@@ -3,7 +3,7 @@ type: test
 title: Focus scope activation runtime contract tests
 status: draft
 since: 0.1.0
-lifecycleRationale: Existing scope evidence is retained; new per-activation Module policy cases are planned until their exact source executes, and do not prove native Dialog or Search continuity.
+lifecycleRationale: Existing scope evidence is retained; new per-activation and restore-policy cases are planned until their exact source executes, and do not prove native Dialog or Search continuity.
 summary: Runtime contract tests for explicit focus scope activation, previous focus restoration, and outside focus request gating.
 cases:
   - id: T-FOCUS-SCOPE-0001-CASE-ACTIVATION-ENTRY-OVERRIDE
@@ -39,6 +39,18 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-C
       - C-AS-FOCUS-SCOPE-0002-D
     expectation: scope-deactivate-restores-previous-focus
+  - id: T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE
+    title: Explicit restore none preserves an outside destination while ordinary scopes still restore
+    covers: [C-AS-FOCUS-SCOPE-0002-C, C-AS-FOCUS-SCOPE-0002-D]
+    expectation: none-no-automatic-handback-default-previous-and-explicit-consumer-handback-independent
+  - id: T-FOCUS-SCOPE-0001-CASE-RESTORE-OWNERSHIP
+    title: Nested scopes and removed previous owners retain the live boundary and close ownership
+    covers: [C-AS-FOCUS-SCOPE-0002-C, C-AS-FOCUS-SCOPE-0002-D, C-AS-FOCUS-SCOPE-0002-E]
+    expectation: nested-none-preserves-destination-parent-restores-and-stale-previous-does-not-end-boundary
+  - id: T-FOCUS-SCOPE-0001-CASE-RESTORE-CLEANUP
+    title: Scope cleanup and synchronous notifications preserve newer focus and activation ownership
+    covers: [C-AS-FOCUS-SCOPE-0002-A, C-AS-FOCUS-SCOPE-0002-D]
+    expectation: none-releases-module-target-facts-and-pending-work-without-overwriting-newer-notification-effects
   - id: T-FOCUS-SCOPE-0001-CASE-OUTSIDE-GATE
     title: Active scope ignores outside focus requests and records a warning
     covers:
@@ -51,6 +63,47 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: module-scope-restore-policy
+    kind: module-test
+    status: planned
+    path: packages/modules/focus/test/scope-restore-mode.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-OWNERSHIP
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-CLEANUP
+    notes:
+      - Real FocusCenter with DOM effects and explicitly reported host facts; covers pending-target cancellation, nested none, removed previous owners, cross-owner notification activation and synchronous newer-owner notifications. A close notification can retain a newer pending target request without a scope-stack change, while a later successful owner still clears it. This is not native-input evidence.
+      - The distinct-old/new pending case requires a closed scope's old C request to be retired even when its inactive observer queues unavailable D outside that scope. C becomes ready before D is delivered so a later owner transfer cannot hide missed retirement; a subsequent ordinary close still restores its previous owner. The current pending-only repair requires execution.
+  - id: emitted-native-scope-restore-policy
+    kind: fixture
+    status: planned
+    path: packages/compiler/src/native-focus-scope-restore.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-OWNERSHIP
+      - T-FOCUS-SCOPE-0001-CASE-RESTORE-CLEANUP
+    notes:
+      - Executes actual emitted Vue2 split support/shared ownership and the WC monolithic helper in Happy DOM. Covers restore policy, nested boundaries, stale captures, cross-owner notifications and view retirement.
+      - Actual createNativeInteraction owners exercise ordinary focus and focusSelf requests through the separate adapter and interaction queues, with active-scope remount controls. Scope closure retires pending work without physical blur. These are controlled helper fixtures, not ordinary-framework or browser-input acceptance.
+      - Planned close-notification cases use both real target-request queues with default previous restoration and no new scope or DOM focus change; the newer request survives to remount, and a subsequent ordinary activation still restores its captured owner. These cases have no executed before-result.
+  - id: runtime-scope-restore-none
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/focus.v0.contract.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE]
+    notes:
+      - FOCUS-0815 supplies the explicit-none control beside retained ordinary-default FOCUS-0810. The current repair still requires its source-bound validation; earlier execution does not certify this later delta.
+  - id: wc-popover-scope-restore-policy
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/base/test/navigation-overlays/popover-focus-restore.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-RESTORE-NONE]
+    notes:
+      - Real Base Popover and WC Adapter with a focused pre-open Trigger; synthetic outside/Escape inputs and controlled acceptance discriminate scope none from explicit Popover handback. Native/browser input remains separate.
   - id: module-scope-activation-entry-policy
     kind: module-test
     status: planned
@@ -119,6 +172,9 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-J
         - C-AS-FOCUS-SCOPE-0002-K
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Map planned restore-none/default, nested, stale-owner and cleanup controls without reclassifying prior evidence or claiming execution of the new source.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Add planned discriminating per-activation entry policy controls while retaining all existing scope evidence.

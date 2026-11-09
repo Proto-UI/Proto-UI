@@ -66,7 +66,7 @@ export function createNativeInteraction<Run>(options: NativeImageOptions<Run>): 
     focusConfig: { disabled: false, navParticipation: 'auto' }, scopeConfig: {}, rovingConfig: {},
     selected: false, active: false, scopeDeclared: false, rovingDeclared: false,
     focusDeclared: false, entryDeclared: false, scopeActive: false,
-    focus: requestFocus, changed: refresh,
+    focus: requestFocus, cancelPendingFocus() { pendingFocus = null; }, changed: refresh,
   };
   if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
   function announceTopology(rootOwner = logicalRoot(owner)) {
