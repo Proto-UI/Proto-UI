@@ -5,6 +5,7 @@ description: 'Rounded, flat-by-default Select over Base Select'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -19,3 +20,23 @@ Select keeps Base value-class presentation parts and selection semantics under a
 The default Trigger follows the upstream Select: a flat 5px-rounded, 2px black frame with DM Sans 500. `appearance="elevated"` is an explicit Proto UI extension for a Trigger grouped with raised commands, such as the Header Runtime and Style controls. Its hard black shadow is 4px right/down at rest; hover or press moves the Trigger 4px right/down and removes that shadow. Press does not add another offset.
 
 Set the prop on `brutalist-select-trigger`, not Root or Content. `appearance="flat"`, omission, or removing the prop restores the flat default. `size="sm" | "default"`, the paired fill/ink, focus ring, keyboard selection and disabled behavior are unchanged. Content stays flat in either appearance. Page CSS must not add a replacement shadow.
+
+## API
+
+Select is workspace source. There is no public `proto-ui add` target. Passing `open` or `value` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'size', type: "'sm' | 'default'", default: 'default' },
+    { name: 'appearance', type: "'flat' | 'elevated'", default: 'flat' },
+  ]}
+/>
+
+The first five props belong to Root. `size` and `appearance` belong to Trigger, which also defaults `accessibleLabel` to `''`. Value defaults `placeholder` to `''`. Content accepts the Transition props and defaults `position` to `popper`, `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0`, `avoidCollisions` to `true` and `collisionPadding` to `10`. Item defaults `disabled` to `false` and `value` and `textValue` to `''`; `closeOnSelect` has no default and falls back to the Root policy. Group, Label, Surface, ItemText, Viewport and Separator have no props.
+

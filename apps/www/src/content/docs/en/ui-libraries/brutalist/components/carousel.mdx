@@ -4,6 +4,7 @@ description: 'carousel functional composition and current verification limits.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Carousel composes a current slide, viewport and bounded Previous/Next controls. index can be controlled; loop is optional. Keyboard navigation and thresholded swipe use the same selection requests. This slice never starts autoplay or invents a timer.
 
@@ -14,3 +15,22 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Carousel is workspace source. There is no public `proto-ui add` target. Passing `index` selects controlled mode. Viewport has no props. Slide `index` defaults to `0`.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+These props belong to Root.
+

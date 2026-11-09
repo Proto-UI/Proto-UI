@@ -4,6 +4,7 @@ description: 'An anchored non-modal dialog for small interactive content.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 An anchored non-modal dialog for small interactive content.
 
@@ -34,3 +35,20 @@ This separate example explicitly selects `presentation="navigation"` on Trigger 
 />
 
 The native links keep normal browser activation. This example does not implement the website directory’s unique-tree handback or a page-specific focus owner. Trigger styling remains provisional pending design review. New navigation-mode four-runtime native evidence is still pending; ordinary Popover results do not certify this mode.
+
+## API
+
+Popover is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+  ]}
+/>
+
+The first four props belong to Root. `presentation` belongs to Content and Trigger. Content also accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0` and `collisionPadding` to `8`. Title, Description and Close have no props.
+

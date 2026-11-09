@@ -5,6 +5,7 @@ description: '基于 Base Toggle 的 Neo-Brutalist 持续状态投射'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -13,3 +14,19 @@ Toggle 保留 Base 的 activation 与 `aria-pressed` 所有权。锁存 active s
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>
+
+## API
+
+Toggle 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `active` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+  ]}
+/>
+
+这些属性属于 Root。
+

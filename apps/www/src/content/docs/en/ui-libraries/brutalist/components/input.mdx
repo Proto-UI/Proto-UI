@@ -4,6 +4,7 @@ description: 'Standalone Neobrutalist single-line text input.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 This draft standalone Input inherits Base Input. It is independent of FieldControl: Base owns the one plain-text editor, controlled/uncontrolled value, normalized editing and composition events, disabled/read-only state, accessible naming and physical focus.
 
@@ -14,3 +15,30 @@ Its visual reference is [Neo input.tsx at 3306a802](https://github.com/ekmas/neo
 Import `brutalistInputRoot` from `@proto.ui/prototypes-brutalist/input` or the package root. The CLI key is `brutalist-input`. This is workspace draft source, not a claim that a published npm version includes it.
 
 This is an unofficial, bounded projection. Upstream arbitrary input types, file controls, caller className/DOM prop forwarding, placeholder color and forced-color outline parity remain open. It does not add form submission, validation or a second editor. Real four-runtime browser evidence, operating-system IME, Compiler and native-target acceptance remain separate and pending; source and simulated-DOM tests are not visual acceptance.
+
+## API
+
+Input is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'inputMode', type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'", default: 'undefined' },
+    { name: 'enterKeyHint', type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'", default: 'undefined' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+

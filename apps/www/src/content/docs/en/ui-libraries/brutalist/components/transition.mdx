@@ -5,6 +5,7 @@ description: 'Draft Brutalist flat/fade presence over the Base Transition protoc
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -27,3 +28,21 @@ Import Transition from the already-public `@proto.ui/prototypes-brutalist` packa
 5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Transition guarantee.
+
+## API
+
+Transition is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+These props belong to Root.
+

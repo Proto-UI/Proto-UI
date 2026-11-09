@@ -4,6 +4,7 @@ description: 'date-picker composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Date Picker 组合真实 Popover 与 Calendar 原子。日期请求通过 Calendar 选择，并请求关闭 Popover。open、value 与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
 
@@ -14,3 +15,13 @@ Date Picker 组合真实 Popover 与 Calendar 原子。日期请求通过 Calend
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Date Picker 是工作区源码，没有公开的 `proto-ui add` 目标。open、value、month 仍属于组合进来的 Popover 与 Calendar。Date Picker 自己只有 Value 上的一个属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+/>
+

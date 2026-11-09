@@ -4,6 +4,7 @@ description: 'Neobrutalist Collapsible: Root, Trigger, Content and inherited Bas
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Neobrutalist Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
 
@@ -53,3 +54,17 @@ import {
 - [实现源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/collapsible)
 - [neobrutalism-components reference](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx)
 - [可执行证据映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+
+## API
+
+Collapsible 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `keepMounted` 默认 `false`。

@@ -5,6 +5,7 @@ description: '基于 Base Dropdown 的硬表面下拉菜单投影'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -17,3 +18,27 @@ Dropdown Menu 继承 Base 的 trigger/content/item 语义，并使用圆角平�
 ## 分组动作组成（草稿）
 
 Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+
+## API
+
+Dropdown Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: 'default' },
+    { name: 'indicator', type: 'boolean', default: 'false' },
+    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: 'chevron-down' },
+    { name: 'indicatorSize', type: 'number', default: '16' },
+    { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
+  ]}
+/>
+
+前五个属性属于 Root。`inset` 与 `variant` 属于 Item；`indicator`、`indicatorIcon`、`indicatorSize` 与 `indicatorStrokeWidth` 属于 Trigger。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`，`excludeAnchorTranslation` 默认 `true`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。Group 的 `a11yLabel` 默认 `''`。Label、Separator 与 Shortcut 没有属性。
+

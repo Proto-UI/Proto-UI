@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -23,3 +24,14 @@ Badge 用于角色、环境等被动标签。动态 status 由 live-region owner
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
 </div>
+
+## API
+
+Badge 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'tone', type: "'accent' | 'info' | 'danger'", default: 'accent' }]}
+/>
+
+这个属性属于 Root。

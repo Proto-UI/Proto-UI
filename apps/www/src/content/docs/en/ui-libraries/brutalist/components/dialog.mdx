@@ -5,6 +5,7 @@ description: 'Industrial Neo-Brutalist dialog and dismissal controls'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -26,3 +27,20 @@ The panel keeps Base Dialog semantics and command wiring while using an industri
 ## Draft workspace inheritance
 
 The current workspace also inherits the bounded [Base Mask pointer-default behavior](/en/ui-libraries/base/dialog/): participating Mask prevents its root-scoped pointer default from stealing restored focus, while passthrough remains unprevented and Content retains dismissal ownership. This draft revision is separate from any previously published family version; it introduces no new styled Dialog props.
+
+## API
+
+Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `focusEntry` to `auto` and also accepts the Transition props. Trigger, Title, Description and Close have no props.
+

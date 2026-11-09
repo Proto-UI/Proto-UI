@@ -5,6 +5,7 @@ description: '机械式 Switch 状态与交互合约'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -25,3 +26,20 @@ Prototype 使用物理 left/right 定位，确保 RTL 父级下同样的几何�
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
 </div>
+
+## API
+
+Switch 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'draggable', type: 'boolean', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+这些属性属于 Root。Thumb 没有属性。
+

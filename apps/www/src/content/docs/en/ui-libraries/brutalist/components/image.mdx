@@ -5,6 +5,7 @@ description: 'Draft Brutalist Image presentation over the Base Image protocol.'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -27,3 +28,20 @@ Import the Root from the already-public `@proto.ui/prototypes-brutalist` package
 5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Image guarantee.
+
+## API
+
+Image is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+  ]}
+/>
+
+These props belong to Root.
+

@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -23,3 +24,14 @@ Use Card for passive visual grouping. Selection, disclosure, navigation, and act
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
 </div>
+
+## API
+
+Card is workspace source. There is no public `proto-ui add` target. Root has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[]}
+/>
+
+Header, Content and Footer accept children only and add no props.

@@ -4,6 +4,7 @@ description: 'Neobrutalist Collapsible: Root, Trigger, Content and inherited Bas
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Neobrutalist Collapsible contains three real Proto UI prototypes: Root, Trigger and Content. Each consumes its matching Base Collapsible hook. Root remains the sole expansion owner; this family changes presentation only. This is a draft, independently maintained design projection.
 
@@ -53,3 +54,17 @@ Four-adapter synthetic-DOM and compiler mappings are separate from registered br
 - [Implementation source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/collapsible)
 - [neobrutalism-components reference](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx)
 - [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+
+## API
+
+Collapsible is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `keepMounted` to `false`.

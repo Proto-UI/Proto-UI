@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 > Availability: Spinner is a workspace-only draft. The npm artifacts for `@proto.ui/prototypes-brutalist@0.2.0` and `@proto.ui/prototypes-brutalist@0.3.0-alpha.1` do not export `./spinner`. The ecosystem release train [V-PROTO-UI-0010](https://github.com/Proto-UI/Proto-UI/blob/main/spec/versions/V-PROTO-UI-0010.yaml) remains `draft`; a package in npm does not establish train activation or immutable snapshot evidence. Lifecycle: [P-BRUTALIST-SPINNER](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SPINNER.yaml) remains `draft`; this page describes the in-repository implementation, not an active protocol guarantee.
@@ -21,3 +22,14 @@ Compose it inline inside a parent Button or beside authored loading text in a pa
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-spinner" initialRuntime="wc" />
 </div>
+
+## API
+
+Spinner is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'size', type: "'sm' | 'md' | 'lg'", default: 'md' }]}
+/>
+
+This prop belongs to Root.

@@ -5,6 +5,7 @@ description: 'Source-aligned draft Neo Textarea projection over Base Textarea'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -35,6 +36,33 @@ The entire delta is visual:
 - DM Sans 500 text without an outer shadow
 
 These styles are applied directly to the Base-backed native textarea. They do not create another protocol layer or change the normalized event payloads.
+
+## API
+
+Textarea is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root.
+
 
 ## References
 

@@ -4,6 +4,7 @@ description: 'Keyboard-roving commands with an accessible toolbar name and separ
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Keyboard-roving commands with an accessible toolbar name and separator.
 
@@ -19,3 +20,20 @@ Root owns disabled, orientation, loop and a11yLabel. Button emits action with it
 Parts: Root, Button, Separator.
 
 Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+
+## API
+
+Toolbar is workspace source. There is no public `proto-ui add` target. Separator has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Button defaults `disabled` to `false` and `value` to `''`.
+

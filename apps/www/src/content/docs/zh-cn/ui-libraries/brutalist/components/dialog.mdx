@@ -5,6 +5,7 @@ description: '工业风 Dialog 与关闭控件合约'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -25,3 +26,20 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 ## Draft 工作区继承
 
 当前工作区还继承有界的 [Base Mask 指针默认行为](/zh-cn/ui-libraries/base/dialog/)：participating Mask 阻止自身 root-scoped 指针默认动作夺走已恢复焦点，passthrough 不阻止，关闭策略仍归 Content。这项 draft 修订与先前发布的家族版本分开，不新增风格化 Dialog props。
+
+## API
+
+Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `focusEntry` 默认 `auto`，同样接受 Transition 属性。Trigger、Title、Description 与 Close 没有属性。
+

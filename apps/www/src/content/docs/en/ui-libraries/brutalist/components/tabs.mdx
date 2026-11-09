@@ -5,6 +5,7 @@ description: 'Hard-edged Tabs projection over Base Tabs'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -13,3 +14,20 @@ Tabs inherit Base selection, activation, and descendant-first panel focus-entry 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>
+
+## API
+
+Tabs is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+    { name: 'appearance', type: "'default' | 'underline'", default: 'default' },
+  ]}
+/>
+
+The first three props belong to Root. `appearance` belongs to List and Trigger. List also defaults `orientation` to `horizontal`, `loop` to `false` and `a11yLabel` to `''`. Trigger also defaults `value` to `''` and `disabled` to `false`. Content defaults `value` to `''` and `keepMounted` to `false`. Indicator has no props.
+

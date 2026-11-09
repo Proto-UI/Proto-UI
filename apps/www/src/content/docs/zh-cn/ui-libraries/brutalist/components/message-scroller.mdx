@@ -4,6 +4,7 @@ description: 'message-scroller functional composition and current verification l
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
 
@@ -16,3 +17,18 @@ Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 没有属性。Jump 接受 Button 的属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'newContentCount', type: 'number', default: '0' },
+    { name: 'a11yLabel', type: 'string', default: 'Messages' },
+  ]}
+/>
+
+这些属性属于 Root。
+

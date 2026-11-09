@@ -4,6 +4,7 @@ description: 'Brutalist 被动视觉表面，语义与交互事实由消费者�
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 `brutalist-surface-root` 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Brutalist 通过 `asSurfaceRoot()` 继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 契约，再由家族反馈 Rule 实现呈现。
 
@@ -69,3 +70,37 @@ Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符
 ## 依据
 
 `P-BRUTALIST-SURFACE`与 `T-SURFACE-0001` 治理此 draft slice。源码：`packages/prototypes/brutalist/src/surface/`.
+
+## API
+
+Surface 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。

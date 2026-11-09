@@ -5,6 +5,7 @@ description: 'Draft Brutalist Checkbox presentation over the Base Checkbox proto
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -27,3 +28,19 @@ Import Root and Indicator from the already-public `@proto.ui/prototypes-brutalis
 5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Checkbox guarantee.
+
+## API
+
+Checkbox is workspace source. There is no public `proto-ui add` target. Passing `checked` or `indeterminate` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Indicator has no props.
+

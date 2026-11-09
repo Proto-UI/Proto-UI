@@ -4,6 +4,7 @@ description: 'virtual-list composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Virtual List separates a complete stable logical key sequence from physical views. Item-count overscan, maximum materialized count, revisions and generation-bound commits live in a host-neutral model. The explicit virtual-list/web entry measures variable item extents, owns spacers and Web nodes, preserves keyed views, scrolls to a key and disposes listeners. This demo uses that Web host boundary; it is not native GPUI or Compiler conformance. App-owned content is created only for the bounded visible range.
 
@@ -14,3 +15,20 @@ WIP functional source. Full runtime/Compiler/native, packaging, browser and visu
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Virtual List is workspace source. There is no public `proto-ui add` target. Viewport and Content have no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'itemKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'overscanItems', type: 'number', default: '2' },
+    { name: 'maxMaterializedItems', type: 'number', default: '100' },
+    { name: 'a11yLabel', type: 'string', default: 'Virtual list' },
+  ]}
+/>
+
+These props belong to Root.
+

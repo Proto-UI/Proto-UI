@@ -4,6 +4,7 @@ description: '具有键盘协调与独立命令面板的菜单栏。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 具有键盘协调与独立命令面板的菜单栏。
 
@@ -19,3 +20,20 @@ Root.value 标识一个打开的面板；Trigger.value 与 Content.value 配对�
 组成: Root, Trigger, Content, Item.
 
 草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+
+## API
+
+Menubar 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。Item 的 `value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。
+

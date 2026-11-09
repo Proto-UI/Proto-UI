@@ -4,6 +4,7 @@ description: 'data-table composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Data Table composes passive Table topology with stable record IDs, stable sorting, global filtering, pagination and row selection. Rows are authored presentation slots indexed within the current page; cells render their columnKey from the current record, so sort changes update actual content without pretending CSS order changed Table structure. App-owned rows must have unique id values. The composition does not own fetching, editing or column reordering.
 
@@ -16,3 +17,25 @@ Sorting headers belong inside the static `DataTableHeaderRow` composition. It in
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Data Table is workspace source. There is no public `proto-ui add` target. Passing `sortKey`, `sortDirection`, `page`, or `selectedKeys` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'rows', type: 'readonly DataRecord[]', default: '[]' },
+    { name: 'defaultSortKey', type: 'string', default: "''" },
+    { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
+    { name: 'filter', type: 'string', default: "''" },
+    { name: 'defaultPage', type: 'number', default: '0' },
+    { name: 'pageSize', type: 'number', default: '10' },
+    { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root. Row defaults `index` to `0` and `header` to `false`. Cell defaults `columnKey` to `''`. Header defaults `sortable` to `true`. Previous and Next accept the Button props.
+

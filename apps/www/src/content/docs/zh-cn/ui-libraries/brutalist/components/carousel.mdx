@@ -4,6 +4,7 @@ description: 'carousel functional composition and current verification limits.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Carousel 组合当前幻灯片、视口与有界前后控制。index 支持受控，loop 可选。键盘与达到阈值的滑动共用选择请求。本切片不自动播放，也不启动定时器。
 
@@ -14,3 +15,22 @@ Carousel 组合当前幻灯片、视口与有界前后控制。index 支持受�
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Carousel 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `index` 进入受控模式。Viewport 没有属性。Slide 的 `index` 默认 `0`。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultIndex', type: 'number', default: '0' },
+    { name: 'loop', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'a11yLabel', type: 'string', default: 'Carousel' },
+  ]}
+/>
+
+这些属性属于 Root。
+

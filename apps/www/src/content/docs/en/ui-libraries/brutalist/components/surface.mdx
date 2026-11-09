@@ -4,6 +4,7 @@ description: 'Brutalist passive visual surface with consumer-owned semantic and 
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 `brutalist-surface-root` is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Brutalist inherits the [Base Surface](/en/ui-libraries/base/surface/) contract through `asSurfaceRoot()` and realizes it with family feedback rules.
 
@@ -69,3 +70,37 @@ Surface uses the ordinary public Prototype, Props and Feedback paths. The bounde
 ## Authority
 
 `P-BRUTALIST-SURFACE` and `T-SURFACE-0001` govern this draft slice. Source: `packages/prototypes/brutalist/src/surface/`.
+
+## API
+
+Surface is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+These props belong to Root.

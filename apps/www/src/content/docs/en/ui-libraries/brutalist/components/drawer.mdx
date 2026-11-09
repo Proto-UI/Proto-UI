@@ -4,6 +4,7 @@ description: 'An edge-attached modal panel with four placement choices.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 An edge-attached modal panel with four placement choices.
 
@@ -45,3 +46,19 @@ This example retains the explicit resizing interaction and announces committed c
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
+
+## API
+
+Drawer is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `side` to `bottom` and also accepts the Transition props. Handle defaults `disabled` to `false` and `a11yLabel` to `Resize drawer`. Trigger, Title, Description, Header, Footer, Close and AcceptedSide have no props.
+
