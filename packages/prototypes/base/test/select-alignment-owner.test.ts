@@ -83,6 +83,7 @@ afterEach(async () => {
   document.body.replaceChildren();
   await flush();
   vi.restoreAllMocks();
+  Reflect.deleteProperty(HTMLElement.prototype, 'offsetParent');
   vi.useRealTimers();
 });
 
@@ -114,26 +115,70 @@ function facts() {
     if (this.tagName === 'BASE-SELECT-TRIGGER') return 180;
     if (this.tagName === 'BASE-SELECT-VALUE') return 193;
     if (this.tagName === 'BASE-SELECT-ITEM-TEXT') return 13;
+    if (this.tagName === 'BASE-SELECT-ITEM') return 4;
     return 0;
+  });
+  // Inject used layout for the existing host size lease, rather than reporting
+  // fixed boxes that cannot respond to actual sizing writes. This is not CSS QA.
+  Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+    configurable: true,
+    get(this: HTMLElement) {
+      return this.parentElement;
+    },
+  });
+  vi.spyOn(HTMLElement.prototype, 'clientLeft', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.tagName === 'BASE-SELECT-SURFACE' ? 1 : 0;
+  });
+  vi.spyOn(HTMLElement.prototype, 'clientTop', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.tagName === 'BASE-SELECT-SURFACE' ? 1 : 0;
   });
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this.tagName === 'BASE-SELECT-SURFACE')
+      return Number.parseFloat(this.parentElement?.style.minWidth ?? '') || 180;
+    if (this.tagName === 'BASE-SELECT-VIEWPORT') return this.parentElement!.offsetWidth - 2;
+    if (this.tagName === 'BASE-SELECT-ITEM')
+      return Number.parseFloat(this.style.width) || this.parentElement!.offsetWidth - 8;
     return this.tagName === 'BASE-SELECT-VALUE' || this.tagName === 'BASE-SELECT-ITEM-TEXT'
       ? 50
       : 180;
   });
+  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.offsetWidth - (this.tagName === 'BASE-SELECT-SURFACE' ? 2 : 0);
+  });
+  vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.clientWidth;
+  });
   vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
+    if (this.tagName === 'BASE-SELECT-ITEM') return Number.parseFloat(this.style.height) || 32;
+    if (this.tagName === 'BASE-SELECT-TRIGGER') return 36;
     return this.tagName === 'BASE-SELECT-VIEWPORT'
-      ? 104
+      ? 108
       : this.tagName === 'BASE-SELECT-SURFACE'
-        ? 106
+        ? 110
         : 32;
   });
-  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(104);
-  vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(104);
+  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.tagName === 'BASE-SELECT-ITEM' ? this.offsetHeight : 108;
+  });
+  vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (
+    this: HTMLElement
+  ) {
+    return this.clientHeight;
+  });
   vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (
     this: HTMLElement
   ) {
@@ -151,9 +196,10 @@ function full(
   });
   const surface = document.createElement('base-select-surface'),
     viewport = document.createElement('base-select-viewport');
-  surface.style.cssText = 'border:1px solid black;padding:0px;';
-  viewport.style.cssText = 'padding:4px;';
+  surface.style.cssText = 'border:1px solid black;padding:0px;margin:0px;';
+  viewport.style.cssText = 'padding:4px;border:0px;margin:0px;';
   for (const [index, item] of f.items.entries()) {
+    item.style.cssText = 'margin:0px;padding:0px;border:0px;';
     item.textContent = '';
     if (!(options.missingText && index === 1)) {
       const text = document.createElement('base-select-item-text');
@@ -179,7 +225,7 @@ describe('Select alignment presentation owner', () => {
     await settle();
     expect(f.content.getExposes().alignmentDiagnostic.get()).toBe('');
     expect(f.content.getExposes().transitionState.get()).toBe('entered');
-    expect(f.content.style.left).toBe('180px');
+    expect(f.content.style.left).toBe('175px');
     expect(document.activeElement).toBe(f.items[1]);
   });
   it('replaces a current represented value without letting unrelated context reset scroll', async () => {

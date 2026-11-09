@@ -103,6 +103,8 @@ it('rejects an old applied callback after scalar collection revision changes but
   document.body.append(root);
   await flush();
   expect(bindings.length).toBeGreaterThan(0);
+  expect(bindings.at(-1)?.sizeMatch?.reference).toBe(bindings.at(-1)?.blockReference);
+  expect(bindings.at(-1)?.sizeMatch?.targets).toEqual([bindings.at(-1)?.blockTarget]);
   setElementProps(item, { value: 'beta', textValue: 'Renamed Beta' });
   await flush();
   expect(bindings.length).toBeGreaterThan(1);

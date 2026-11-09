@@ -167,6 +167,7 @@ export function createTargetAlignmentLease(
     let applied = false;
     let writing = false;
     let ownershipLost = false;
+    let referenceBox: readonly number[] | null = null;
     const write = (name: string, value: string) => {
       if (!live() || ownershipLost) return false;
       if (!owned.write(name, value)) {
@@ -208,9 +209,17 @@ export function createTargetAlignmentLease(
       const minimumOuterInlineSpan = sizeTargets.length
         ? (sizing?.reference as HTMLElement).offsetWidth + Math.max(...(gutters as number[]))
         : undefined;
+      const direction = view.getComputedStyle(frame).direction === 'rtl' ? 'rtl' : 'ltr';
+      const matchedTarget = sizeTargets.includes(targets.blockTarget);
+      const targetLeft = origin + layoutInlineStart(targets.blockTarget);
+      const inlineStartInset = matchedTarget
+        ? direction === 'rtl'
+          ? surfaceLeft + surfaceWidth - targetLeft - targets.blockTarget.offsetWidth
+          : targetLeft - surfaceLeft
+        : undefined;
       const result = solveTargetAlignment(
         {
-          direction: view.getComputedStyle(frame).direction === 'rtl' ? 'rtl' : 'ltr',
+          direction,
           viewport: { width: view.innerWidth, height: view.innerHeight },
           reference: {
             left: reference.left,
@@ -235,6 +244,7 @@ export function createTargetAlignmentLease(
             atStart: descriptor.atStart,
             atEnd: descriptor.atEnd,
             ...(minimumOuterInlineSpan === undefined ? {} : { minimumOuterInlineSpan }),
+            ...(inlineStartInset === undefined ? {} : { inlineStartInset }),
           },
           scrollport: {
             scrollHeight: targets.scrollport.scrollHeight,
@@ -266,7 +276,12 @@ export function createTargetAlignmentLease(
       if (!live() || writing || ownershipLost) return;
       writing = true;
       let stable = false;
+      let nextReferenceBox: readonly number[] = [];
       try {
+        const reference = targets.blockReference.getBoundingClientRect();
+        nextReferenceBox = [reference.left, reference.top, reference.width, reference.height];
+        const referenceChanged =
+          !!referenceBox && nextReferenceBox.some((value, index) => value !== referenceBox![index]);
         for (const [name, value] of Object.entries({
           position: 'fixed',
           display: 'flex',
@@ -295,6 +310,7 @@ export function createTargetAlignmentLease(
         for (let pass = 0; pass < 4; pass++) {
           for (const [name, value] of Object.entries({
             'min-width': `${candidate.inline.minimumSpan}px`,
+            ...(sizeLease ? { width: `${candidate.inline.minimumSpan}px` } : {}),
             [candidate.inline.edge]: `${candidate.inline.inset}px`,
             [candidate.inline.edge === 'left' ? 'right' : 'left']: '',
           }))
@@ -313,9 +329,10 @@ export function createTargetAlignmentLease(
           const constrained = readPlan();
           if (!constrained) return;
           plan = constrained;
-          const nextSpan = applied
-            ? Math.min(Math.max(requestedSpan, plan.block.requestedSpan), plan.block.maximumSpan)
-            : plan.block.requestedSpan;
+          const nextSpan =
+            applied && !referenceChanged
+              ? Math.min(Math.max(requestedSpan, plan.block.requestedSpan), plan.block.maximumSpan)
+              : plan.block.requestedSpan;
           const styles: Record<string, string> = {
             top: plan.block.pin === 'start' ? '0px' : '',
             bottom: plan.block.pin === 'end' ? '0px' : '',
@@ -326,8 +343,9 @@ export function createTargetAlignmentLease(
           };
           for (const [name, value] of Object.entries(styles)) if (!write(name, value)) return;
           requestedSpan = nextSpan;
-          if (!applied && plan.requestedScroll !== undefined && live())
+          if ((!applied || referenceChanged) && plan.requestedScroll !== undefined && live())
             targets.scrollport.scrollTop = plan.requestedScroll;
+          else if (referenceChanged && live()) targets.scrollport.scrollTop = 0;
           previousScroll = targets.scrollport.scrollTop;
           const settled = readPlan();
           if (!settled) return;
@@ -380,6 +398,7 @@ export function createTargetAlignmentLease(
         return;
       }
       const firstApply = !applied;
+      referenceBox = nextReferenceBox;
       if (firstApply || lastStatus?.status !== 'applied') {
         applied = true;
         report({ status: 'applied' });

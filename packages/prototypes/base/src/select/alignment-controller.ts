@@ -307,6 +307,9 @@ export function createSelectAlignmentController(options: {
       inlineReference: intent.reference.inline,
       blockTarget: intent.floating.block,
       inlineTarget: intent.floating.inline,
+      // In-place means the selected row replaces the Trigger's border box.
+      // Other rows retain their intrinsic content height, including wrapped labels.
+      sizeMatch: { reference: intent.reference.block, targets: [intent.floating.block] },
       ...intent.contentEdges,
       constraints: intent.constraints,
       onAlignment(status) {

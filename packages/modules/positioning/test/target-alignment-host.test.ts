@@ -157,6 +157,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('neutral target geometry host', () => {
+  it('moves the sized row with its reference after outer scroll and restores the frame width lease', () => {
+    const f = sizingFixture();
+    dimensions(f.blockTarget, { offsetLeft: 4 });
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    let top = 240;
+    reference.getBoundingClientRect = () => rect(180, top, 340, 44);
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect(f.frame.style.left).toBe('175px');
+    expect(f.frame.style.width).toBe('350px');
+    const before = Number.parseFloat(f.frame.style.height);
+    top += 40;
+    document.dispatchEvent(new Event('scroll'));
+    expect(Number.parseFloat(f.frame.style.height)).toBe(before - 40);
+    top -= 40;
+    window.dispatchEvent(new Event('resize'));
+    expect(Number.parseFloat(f.frame.style.height)).toBe(before);
+    lease.dispose();
+    expect(f.frame.style.width).toBe('');
+  });
   it('rejects a matched row clipped by an independently constrained viewport', () => {
     const f = sizingFixture();
     f.resize(180);
@@ -332,6 +352,10 @@ describe('neutral target geometry host', () => {
     f.resize(208);
     lease.requestUpdate();
     expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+    f.resize(132);
+    lease.requestUpdate();
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([132, 44]);
+    expect(f.frame.style.width).toBe('142px');
     expect(f.onAlignment.mock.calls.every(([status]) => status.status !== 'unavailable')).toBe(
       true
     );

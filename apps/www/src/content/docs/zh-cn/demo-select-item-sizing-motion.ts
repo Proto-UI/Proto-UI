@@ -18,6 +18,7 @@ export interface SizingMotionSample {
   surface: SizingMotionBox;
   viewport: SizingMotionBox;
   items: SizingMotionBox[];
+  alignedIndex: number;
   animations: Array<{
     target: string;
     name: string | null;
@@ -244,6 +245,7 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
         surface: box(surface),
         viewport: box(viewport),
         items: items.map(box),
+        alignedIndex: items.findIndex((item) => item.getAttribute('aria-selected') === 'true'),
         animations,
         focused,
       });
@@ -306,17 +308,20 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       )
     )
       issues.push('unexpected additional transform');
-    // #1330 retired the row border-box lease. The popup matches the Trigger;
-    // rows are full-width flow children inside group chrome (rhea p-1 is 8px).
+    // In-place certifies the selected row, not a wider popup or an inset row.
+    const aligned = sample.items[sample.alignedIndex];
     if (
-      !near(sample.content.layoutWidth, sample.trigger.layoutWidth) ||
-      !near(sample.surface.layoutWidth, sample.trigger.layoutWidth)
+      !aligned ||
+      !near(aligned.layoutWidth, sample.trigger.layoutWidth) ||
+      !near(aligned.layoutHeight, sample.trigger.layoutHeight)
     )
-      issues.push('popup width is not the trigger');
+      issues.push('layout mismatch during motion');
+    if (
+      !near(sample.content.layoutWidth, sample.surface.layoutWidth) ||
+      sample.surface.layoutWidth < sample.trigger.layoutWidth - 0.5
+    )
+      issues.push('popup cannot contain the matched row');
     for (const item of sample.items) {
-      const inset = sample.trigger.layoutWidth - item.layoutWidth;
-      if (!near(item.layoutHeight, sample.trigger.layoutHeight) || inset < -0.5 || inset > 8.5)
-        issues.push('layout mismatch during motion');
       if (
         !near(item.width, item.layoutWidth * scale) ||
         !near(item.height, item.layoutHeight * scale)

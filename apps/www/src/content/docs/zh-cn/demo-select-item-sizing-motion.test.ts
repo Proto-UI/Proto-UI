@@ -31,6 +31,7 @@ function fixture() {
   const surface = content.firstElementChild as HTMLElement;
   const viewport = surface.firstElementChild as HTMLElement;
   const items = [...viewport.children] as HTMLElement[];
+  items[0].setAttribute('aria-selected', 'true');
   let scale = 0.95;
   let running = true;
   let pending = false;
@@ -143,12 +144,12 @@ describe('Select sizing animation prerequisite', () => {
     f.settle();
     expect(sizingMotionIssues(await f.done, 'wc')).toContain('layout mismatch during motion');
   });
-  it('accepts the 8px group padding inset while the popup stays on the trigger', async () => {
+  it('rejects the former 8px row inset even when the popup stays on the trigger', async () => {
     const f = fixture();
     f.itemWidth(216);
     f.open();
     f.settle();
-    expect(sizingMotionIssues(await f.done, 'wc')).toEqual([]);
+    expect(sizingMotionIssues(await f.done, 'wc')).toContain('layout mismatch during motion');
   });
   it('rejects a finished animation frozen at scale95 without waiting for geometry to pass', async () => {
     const f = fixture();
