@@ -682,13 +682,18 @@ function scopedNegatedEntrySubject(selector: string) {
   // reach siblings. Complex branches retain the conservative ancestor watch.
   if (
     start < 0 ||
-    /[,+~]/.test(selector) ||
     selector.indexOf(':has(') !== start + 5 ||
     selector.indexOf(':has(', start + 6) !== -1
   )
     return null;
   const close = matchingSelectorParen(selector, start + 4);
-  if (close < 0 || matchingSelectorParen(selector, start + 9) !== close - 1) return null;
+  const relativeOpen = start + 9;
+  if (
+    close < 0 ||
+    matchingSelectorParen(selector, relativeOpen) !== close - 1 ||
+    /[,+~]/.test(selector.slice(relativeOpen + 1, close - 1))
+  )
+    return null;
   let depth = 0;
   let prefix = '';
   let prefixStart = 0;
@@ -732,9 +737,10 @@ function scopedNegatedEntrySubject(selector: string) {
       index = end - 1;
     }
   }
-  return subject === null
-    ? null
-    : { subject, probe: prefix + selector.slice(prefixStart), positionSubjects };
+  const probe = prefix + selector.slice(prefixStart);
+  // Simple nth formulas have already been removed. A sibling combinator or
+  // selector list elsewhere still needs the conservative ancestor watch.
+  return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
 }
 
 function collectEntryStyleDependencies(

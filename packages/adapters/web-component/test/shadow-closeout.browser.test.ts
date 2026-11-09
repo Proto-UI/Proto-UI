@@ -2425,20 +2425,23 @@ describe('Shadow closeout native boundaries', () => {
   });
 
   it.each([
-    { initialSibling: false, atBody: false },
-    { initialSibling: true, atBody: false },
-    { initialSibling: false, atBody: true },
-    { initialSibling: true, atBody: true },
+    { initialSibling: false, bodyPosition: null },
+    { initialSibling: true, bodyPosition: null },
+    { initialSibling: false, bodyPosition: '1' },
+    { initialSibling: true, bodyPosition: '1' },
+    { initialSibling: false, bodyPosition: '2n+1' },
+    { initialSibling: true, bodyPosition: '2n+1' },
   ])(
-    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body: $atBody)',
-    async ({ initialSibling, atBody }) => {
+    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
+    async ({ initialSibling, bodyPosition }) => {
       const page = await browser.newPage();
+      const atBody = bodyPosition !== null;
       try {
         await page.addScriptTag({ content: script });
         await page.addStyleTag({
           content: `
             ${atBody ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
-            .positional-entry${atBody ? ':not(:has(.flag)):nth-child(1)' : ':first-child:not(:has(.flag))'}
+            .positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'}
               button { visibility: hidden; }
           `,
         });
