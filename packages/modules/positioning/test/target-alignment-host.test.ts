@@ -157,6 +157,106 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('neutral target geometry host', () => {
+  for (const change of ['outer scroll', 'reference resize'] as const) {
+    it(`retires expanded end alignment before a new reference plan after ${change}`, () => {
+      const f = sizingFixture();
+      const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+      let referenceTop = 240;
+      let naturalContentHeight = 600;
+      reference.getBoundingClientRect = () => rect(180, referenceTop, reference.offsetWidth, 44);
+      let frameCallback: FrameRequestCallback | null = null;
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+        frameCallback = callback;
+        return 1;
+      });
+      // Explicit one-child flex layout simulation, not browser rendering.
+      // Initially the Frame constrains a taller Surface, making inner scroll
+      // possible. Moving the reference or reflowing content later leaves free
+      // space. Derive the row's top from host writes, not expected alignment.
+      const frameHeight = () =>
+        Math.max(
+          Number.parseFloat(f.frame.style.minHeight) || 0,
+          Math.min(
+            Number.parseFloat(f.frame.style.height) || naturalContentHeight + 2,
+            Number.parseFloat(f.frame.style.maxHeight) || Infinity
+          )
+        );
+      const get = (node: HTMLElement, key: string, read: () => number) =>
+        Object.defineProperty(node, key, { configurable: true, get: read });
+      get(f.surface, 'offsetHeight', () => Math.min(naturalContentHeight + 2, frameHeight()));
+      get(f.surface, 'clientHeight', () => f.surface.offsetHeight - 2);
+      get(f.scrollport, 'offsetHeight', () => f.surface.clientHeight);
+      get(f.scrollport, 'clientHeight', () => f.scrollport.offsetHeight);
+      get(f.scrollport, 'scrollHeight', () => naturalContentHeight);
+      let actualScroll = 0;
+      Object.defineProperty(f.scrollport, 'scrollTop', {
+        configurable: true,
+        get: () => actualScroll,
+        set: (value: number) => {
+          actualScroll = Math.max(
+            0,
+            Math.min(value, f.scrollport.scrollHeight - f.scrollport.clientHeight)
+          );
+        },
+      });
+      const rowTop = () => {
+        const margin = Number.parseFloat(f.frame.style.marginTop);
+        const usedHeight = frameHeight();
+        const frameTop = f.frame.style.bottom ? window.innerHeight - margin - usedHeight : margin;
+        const surfaceTop =
+          f.frame.style.justifyContent === 'flex-end'
+            ? Math.max(0, usedHeight - f.surface.offsetHeight)
+            : 0;
+        return (
+          frameTop +
+          surfaceTop +
+          f.surface.clientTop +
+          f.blockTarget.offsetTop -
+          f.scrollport.scrollTop
+        );
+      };
+      f.frame.style.justifyContent = 'flex-start';
+      const lease = createTargetAlignmentLease(f.connection);
+      try {
+        expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+        expect(rowTop()).toBe(referenceTop);
+        const ready = frameCallback as FrameRequestCallback | null;
+        if (!ready) throw new Error('Missing first-frame readiness');
+        ready(0);
+        expect(f.scrollport.scrollHeight - f.scrollport.clientHeight).toBeGreaterThanOrEqual(25);
+        f.scrollport.scrollTop = 25;
+        expect(f.scrollport.scrollTop).toBe(25);
+        f.scrollport.dispatchEvent(new Event('scroll'));
+        expect(f.frame.style.justifyContent).toBe('flex-end');
+        const expandedHeight = f.frame.style.height;
+        const expandedRowTop = rowTop();
+        // Same-reference refresh is not a new plan: preserve expansion.
+        lease.update({ ...f.connection });
+        expect(f.frame.style.height).toBe(expandedHeight);
+        expect(f.frame.style.justifyContent).toBe('flex-end');
+        expect(rowTop()).toBe(expandedRowTop);
+        if (change === 'outer scroll') {
+          referenceTop -= 180;
+          document.dispatchEvent(new Event('scroll'));
+        } else {
+          // A wider reference also reflows the ordinary unsized rows.
+          f.resize(500);
+          naturalContentHeight = 400;
+          window.dispatchEvent(new Event('resize'));
+        }
+        expect(frameHeight()).toBeGreaterThan(f.surface.offsetHeight);
+        expect(rowTop()).toBe(referenceTop);
+        expect(f.frame.style.justifyContent).toBe('normal');
+        expect(f.scrollport.scrollTop).toBe(0);
+        // A follow-up notification must not restore stale expansion state.
+        lease.requestUpdate();
+        expect(rowTop()).toBe(referenceTop);
+      } finally {
+        lease.dispose();
+      }
+      expect(f.frame.style.justifyContent).toBe('flex-start');
+    });
+  }
   it('moves the sized row with its reference after outer scroll and restores the frame width lease', () => {
     const f = sizingFixture();
     dimensions(f.blockTarget, { offsetLeft: 4 });

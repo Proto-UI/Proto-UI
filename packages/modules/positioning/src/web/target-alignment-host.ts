@@ -286,7 +286,10 @@ export function createTargetAlignmentLease(
           position: 'fixed',
           display: 'flex',
           'flex-direction': 'column',
-          ...(!applied ? { 'justify-content': 'normal' } : {}),
+          // Scroll expansion owns end alignment only while its reference
+          // geometry is current. A new reference plan resets that alignment
+          // with its span/scroll; a same-reference refresh retains expansion.
+          ...(!applied || referenceChanged ? { 'justify-content': 'normal' } : {}),
           // Neutral reference facts, matching the edge host and native targets.
           // Family recipes may bind popup chrome to the anchor without a size lease.
           '--proto-ui-anchor-width': `${targets.blockReference.offsetWidth}px`,
