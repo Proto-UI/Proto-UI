@@ -2424,6 +2424,94 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it.each([
+    { initialSibling: false, atBody: false },
+    { initialSibling: true, atBody: false },
+    { initialSibling: false, atBody: true },
+    { initialSibling: true, atBody: true },
+  ])(
+    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body: $atBody)',
+    async ({ initialSibling, atBody }) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        await page.addStyleTag({
+          content: `
+            ${atBody ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
+            .positional-entry${atBody ? ':not(:has(.flag)):nth-child(1)' : ':first-child:not(:has(.flag))'}
+              button { visibility: hidden; }
+          `,
+        });
+        await page.evaluate(
+          ({ initialSibling, atBody }) => {
+            const p = (window as any).Closeout;
+            const C = p.adapt(
+              p.define({
+                name: 'closeout-positional-entry',
+                setup() {
+                  p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                  return (r: any) => r.slot();
+                },
+              }),
+              { shadow: true }
+            );
+            const parent = atBody ? document.body : document.createElement('div');
+            parent.id = 'positional-entry-parent';
+            const sibling = document.createElement('span');
+            sibling.id = 'positional-entry-sibling';
+            sibling.hidden = true;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'positional-entry';
+            const host = new C();
+            host.innerHTML = '<button>Inside</button>';
+            wrapper.append(host);
+            if (initialSibling) parent.append(sibling);
+            parent.append(wrapper);
+            if (!atBody) document.body.append(parent);
+          },
+          { initialSibling, atBody }
+        );
+        const snapshot = () =>
+          page.evaluate(
+            () =>
+              new Promise<{ visibility: string; tabIndex: string | null }>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => {
+                    const host = document.querySelector('closeout-positional-entry')!;
+                    resolve({
+                      visibility: getComputedStyle(host.querySelector('button')!).visibility,
+                      tabIndex: host.getAttribute('tabindex'),
+                    });
+                  })
+                )
+              )
+          );
+        const withSibling = { visibility: 'visible', tabIndex: null };
+        const withoutSibling = { visibility: 'hidden', tabIndex: '0' };
+        expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+
+        const toggleSibling = () =>
+          page.evaluate(() => {
+            const sibling = document.querySelector('#positional-entry-sibling');
+            if (sibling) {
+              sibling.remove();
+              return;
+            }
+            const added = document.createElement('span');
+            added.id = 'positional-entry-sibling';
+            added.hidden = true;
+            document.querySelector('#positional-entry-parent')!.prepend(added);
+          });
+        await toggleSibling();
+        expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
+        await toggleSibling();
+        expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('reprojects descendant entry after a preceding sibling selector changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];

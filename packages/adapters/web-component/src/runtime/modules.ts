@@ -676,7 +676,7 @@ function relaxEntryHasConditions(selector: string): string {
   return result + selector.slice(start);
 }
 
-function scopedNegatedEntrySubject(selector: string): string | null {
+function scopedNegatedEntrySubject(selector: string) {
   const start = selector.indexOf(':not(:has(');
   // Only scope a single, top-level condition whose relative selector cannot
   // reach siblings. Complex branches retain the conservative ancestor watch.
@@ -690,16 +690,51 @@ function scopedNegatedEntrySubject(selector: string): string | null {
   const close = matchingSelectorParen(selector, start + 4);
   if (close < 0 || matchingSelectorParen(selector, start + 9) !== close - 1) return null;
   let depth = 0;
-  for (let index = 0; index < start; index += 1) {
+  let prefix = '';
+  let prefixStart = 0;
+  let subject: string | null = null;
+  const positionSubjects: string[] = [];
+  for (let index = 0; index < selector.length; index += 1) {
+    if (index === start) {
+      if (depth !== 0) return null;
+      subject = prefix + selector.slice(prefixStart, start) + ':where(*)';
+      prefix = subject;
+      prefixStart = close + 1;
+      index = close;
+      continue;
+    }
     const character = selector[index]!;
     const literalEnd = skipSelectorLiteral(selector, index, character);
     if (literalEnd !== null) {
-      if (literalEnd >= start) return null;
+      if (subject === null && literalEnd >= start) return null;
       index = literalEnd;
     } else if (character === '(') depth += 1;
     else if (character === ')') depth -= 1;
+    else if (subject !== null && depth === 0 && /[>\s]/.test(character)) break;
+    else if (character === ':') {
+      const position =
+        /^:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i.exec(
+          selector.slice(index)
+        );
+      if (!position) continue;
+      if (depth !== 0) return null;
+      let end = index + position[0].length;
+      if (position[0].endsWith('(')) {
+        const close = matchingSelectorParen(selector, end - 1);
+        // A selector-filtered sibling list can also depend on sibling state.
+        if (close < 0 || /\bof\b/i.test(selector.slice(end, close))) return null;
+        end = close + 1;
+      }
+      // Register the dependency even when the subject starts out of position.
+      prefix += selector.slice(prefixStart, index) + ':where(*)';
+      positionSubjects.push(prefix);
+      prefixStart = end;
+      index = end - 1;
+    }
   }
-  return depth === 0 ? selector.slice(0, start) + ':where(*)' : null;
+  return subject === null
+    ? null
+    : { subject, probe: prefix + selector.slice(prefixStart), positionSubjects };
 }
 
 function collectEntryStyleDependencies(
@@ -714,7 +749,9 @@ function collectEntryStyleDependencies(
   let relational = 0;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
-  const candidates = [target, ...ancestors, ...target.querySelectorAll('*')];
+  const positionParents = new Set<Node>();
+  const externalSubjects = [target, ...ancestors];
+  const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
     if (query) queries.add(query);
@@ -736,7 +773,7 @@ function collectEntryStyleDependencies(
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
-          [target, ...ancestors],
+          externalSubjects,
           candidates
         ))
           siblingSubjects.add(subject);
@@ -749,16 +786,25 @@ function collectEntryStyleDependencies(
         !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
       ) {
         if (hasDocumentRootRelationalSubject(selector)) relational = 2;
-        if (!relational) {
+        else {
           try {
-            const probe = relaxEntryHasConditions(selector);
-            if (candidates.some((candidate) => candidate.matches(probe))) {
-              const subject = scopedNegatedEntrySubject(selector);
-              const matches = subject
-                ? candidates.filter((candidate) => candidate.matches(subject))
+            const scoped = scopedNegatedEntrySubject(selector);
+            const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
+            // The bounded ancestor fallback skips body and html. A known
+            // sibling-position dependency still needs its direct parent.
+            if (
+              (!relational || scoped?.positionSubjects.length) &&
+              candidates.some((candidate) => candidate.matches(probe))
+            ) {
+              const matches = scoped
+                ? candidates.filter((candidate) => candidate.matches(scoped.subject))
                 : [];
               if (!matches.length) relational = 1;
               else for (const candidate of matches) relationalSubjects.add(candidate);
+              for (const subject of scoped?.positionSubjects ?? [])
+                for (const candidate of externalSubjects)
+                  if (candidate.parentNode && candidate.matches(subject))
+                    positionParents.add(candidate.parentNode);
             }
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded
@@ -790,6 +836,7 @@ function collectEntryStyleDependencies(
     relational,
     siblingSubjects,
     relationalSubjects,
+    positionParents,
   ] as const;
 }
 
@@ -1826,15 +1873,23 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   externalSlots.add(externalAncestor as HTMLSlotElement);
                 externalAncestor = composedParentElement(externalAncestor);
               }
-              const [mediaQueries, relationalDependency, siblingSubjects, relationalSubjects] =
-                collectEntryStyleDependencies(
-                  view!,
-                  mediaRoots,
-                  target,
-                  externalAncestors,
-                  !!entryResizeObserver && !hasExternalStyleInputs
-                );
+              const [
+                mediaQueries,
+                relationalDependency,
+                siblingSubjects,
+                relationalSubjects,
+                positionParents,
+              ] = collectEntryStyleDependencies(
+                view!,
+                mediaRoots,
+                target,
+                externalAncestors,
+                !!entryResizeObserver && !hasExternalStyleInputs
+              );
               entryRelationalSubjects = relationalSubjects;
+              for (const parent of positionParents)
+                if (!belongsToObservedEntryTree(parent))
+                  entryObserver?.observe(parent, { childList: true, attributes: true });
               for (const subject of entryRelationalSubjects) {
                 entryExternalStyleObserver.observe(subject, {
                   childList: true,
@@ -1844,7 +1899,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               }
               const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
-                if (subject.parentNode)
+                if (subject.parentNode && !positionParents.has(subject.parentNode))
                   entryObserver?.observe(subject.parentNode, {
                     childList: true,
                   });
