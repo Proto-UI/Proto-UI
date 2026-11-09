@@ -1,4 +1,4 @@
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, expect, it, vi } from 'vitest';
 vi.mock('../PrototypePreviewer/runtimes/react-runtime', async () => {
   const { createRequire } = await import('node:module');
   const { resolve } = await import('node:path');
@@ -14,6 +14,12 @@ import { createHomepageShowcase } from './homepage-showcase';
 import { createProjectionComposition } from '../PrototypePreviewer/projection-composition';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+
+beforeAll(() => {
+  installGeneratedProtoUiStylesheet();
+});
+
 let destroy: (() => Promise<void> | void) | undefined;
 afterEach(async () => {
   await destroy?.();
