@@ -85,6 +85,20 @@ describe('Bootstrap readable page adaptation', () => {
     );
     expect(contrast(THEME.dark.foreground, THEME.dark.background)).toBeGreaterThanOrEqual(4.5);
   });
+  it('keeps transparent numeric copy and OTP separators readable on both themes', () => {
+    for (const path of ['slider/value.proto.ts', 'input-otp/separator.proto.ts']) {
+      const source = readFileSync(`packages/prototypes/bootstrap-2-3-2/src/${path}`, 'utf8');
+      expect(source).toContain('text-muted-foreground');
+      expect(source).not.toContain('text-[#555]');
+    }
+    // Negative control: the old literal ink fails on the actual dark page palette.
+    expect(contrast('#555555', THEME.dark.background)).toBeLessThan(4.5);
+    for (const palette of Object.values(THEME)) {
+      for (const background of [palette.background, palette.secondary, palette.muted]) {
+        expect(contrast(palette['muted-foreground'], background)).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
   it('keeps white control ink paired instead of inheriting dark page text', () => {
     for (const path of [
       'checkbox/root.proto.ts',

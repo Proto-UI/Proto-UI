@@ -12,6 +12,28 @@ import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 import { DRAFT_FAMILY_STYLE_TOKENS } from '../src/generated/draft-family-style-tokens';
 
+describe('Bootstrap invalid-control entry closure', () => {
+  for (const entry of ['field', 'number-field', 'input-otp']) {
+    it(`${entry} delivers the actual invalid ink selector without a full-family fallback`, async () => {
+      // These are the supported grouped Prototype entries used by CLI generation.
+      // This does not certify single-file extraction of optional Field bindings.
+      const tokens = await collectProtoStyleTokens(
+        path.resolve('packages/prototypes/bootstrap-2-3-2/src', entry)
+      );
+      for (const token of ['data-[invalid]:text-[#953b39]', 'data-[invalid]:border-[#953b39]']) {
+        expect(tokens).toContain(token);
+        expect(DRAFT_FAMILY_STYLE_TOKENS['bootstrap-2-3-2']).toContain(token);
+      }
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render(tokens);
+        expect(css).toContain('[data-pui-style~="data-[invalid]:text-[#953b39]"]');
+        expect(css).toContain('color: #953b39;');
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+    }, 30_000);
+  }
+});
+
 it('follows static Base value dependencies while excluding unrelated and type-only families', async () => {
   const root = await fs.mkdtemp(path.join(tmpdir(), 'pui-family-closure-'));
   const family = path.join(root, 'family');

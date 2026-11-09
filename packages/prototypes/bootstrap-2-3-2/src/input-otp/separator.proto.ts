@@ -5,7 +5,7 @@ export default definePrototype<{}, InputOtpSeparatorExposes>({
   name: 'bootstrap-2-3-2-input-otp-separator',
   setup(def) {
     const inherited = asInputOtpSeparator();
-    def.feedback.style.use(tw('px-[5px] text-[14px] leading-[20px] text-[#555]'));
+    def.feedback.style.use(tw('px-[5px] text-[14px] leading-[20px] text-muted-foreground'));
     return inherited.render;
   },
 });

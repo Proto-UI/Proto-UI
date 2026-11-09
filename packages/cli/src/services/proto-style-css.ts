@@ -284,6 +284,7 @@ const staticUtilities: Record<string, string[]> = {
   'text-[#08c]': ['color: #08c;'],
   'text-[#005580]': ['color: #005580;'],
   'text-[#555]': ['color: #555;'],
+  'text-[#953b39]': ['color: #953b39;'],
   'text-[#999]': ['color: #999;'],
   'text-[#000]': ['color: #000;'],
   'text-paint-[#000_0_1px_0_rgb(255_255_255/100%)]': [
