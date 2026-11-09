@@ -275,7 +275,7 @@ export function createHomepageShowcase(
                     props: {
                       disabled: true,
                       wrap: true,
-                      variant: family === 'shadcn' ? 'outline' : 'surface',
+                      variant: family === 'shadcn' ? 'outline' : 'default',
                     },
                     children: [copy.reset],
                   },

@@ -15,7 +15,7 @@ export default definePrototype<SwitchThumbProps, SwitchThumbExposes>({
     if (!state) throw new Error('[bootstrap-2-3-2-switch-thumb] Base state handles required.');
     def.feedback.style.use(
       tw(
-        'block size-5 shrink-0 bg-secondary border border-border pointer-events-none rounded-[4px] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]'
+        'block size-5 shrink-0 bg-secondary border border-border pointer-events-none rounded-[4px] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] transition-transform duration-150 ease-in-out translate-x-[calc(100%_*_var(--pui-percentage)/100)]'
       )
     );
   },

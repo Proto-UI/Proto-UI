@@ -55,7 +55,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       expect(input('settings-note').getAttribute('aria-label')).toBe('Additional note');
       expect(getElementProps(ref('settings-view'))).toMatchObject({ closeOnSelect: true });
       expect(getElementProps(ref('settings-reset'))).toMatchObject({
-        variant: family === 'shadcn' ? 'outline' : 'surface',
+        variant: family === 'shadcn' ? 'outline' : 'default',
       });
     };
     await settle();

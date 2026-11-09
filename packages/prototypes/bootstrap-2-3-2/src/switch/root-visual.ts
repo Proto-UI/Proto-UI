@@ -14,7 +14,7 @@ export function setupSwitchRootVisual(
   );
   def.rule({
     when: (w) => w.state(state.checked).eq(true),
-    intent: (i) => i.feedback.style.use(tw('bg-primary border-primary justify-end')),
+    intent: (i) => i.feedback.style.use(tw('bg-primary border-primary')),
   });
   def.rule({
     when: (w) =>

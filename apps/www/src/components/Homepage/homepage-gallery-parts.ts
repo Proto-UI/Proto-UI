@@ -295,11 +295,11 @@ export function createHomepageGalleryParts(
     part('dialog'),
     [
       p(part('dialog', 'trigger'), [
-        family === 'brutalist'
-          ? zh
+        family === 'shadcn'
+          ? button(zh ? '打开对话框' : 'Open dialog')
+          : zh
             ? '打开对话框'
-            : 'Open dialog'
-          : button(zh ? '打开对话框' : 'Open dialog'),
+            : 'Open dialog',
       ]),
       p(part('dialog', 'mask'), [], {}, 'gallery-dialog-mask'),
       p(part('dialog', 'content'), [
