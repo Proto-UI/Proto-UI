@@ -1132,6 +1132,52 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(observesExternalSubtree(document.documentElement)).toBe(true);
   });
 
+  it.each(['ancestor', 'document'] as const)(
+    'observes a negated nested :has condition on the %s',
+    async (boundary) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'entry-negated';
+      const style = document.createElement('style');
+      const selector =
+        boundary === 'document'
+          ? 'html:not(:has(:is(.entry-reveal))) .entry-negated'
+          : '.entry-negated:not(:has(:is(.entry-reveal)))';
+      style.textContent = `${selector} button { visibility: hidden; }`;
+      document.body.append(style, wrapper);
+      const host = panel(false);
+      const button = document.createElement('button');
+      wrapper.append(host);
+      host.append(button);
+      const flag = document.createElement('span');
+      flag.className = 'entry-reveal';
+      flag.hidden = true;
+      const flagOwner = boundary === 'document' ? document.body : wrapper;
+      const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudoElement) => {
+        const computed = nativeGetComputedStyle(element, pseudoElement);
+        if (element !== button) return computed;
+        // Happy DOM does not implement this relational cascade. Preserve the
+        // actual observer delivery and vary only the computed visibility.
+        return new Proxy(computed, {
+          get(target, property) {
+            if (property === 'visibility') return flag.isConnected ? 'visible' : 'hidden';
+            return Reflect.get(target, property, target);
+          },
+        });
+      });
+      await settle();
+      expect(host.tabIndex).toBe(0);
+
+      flagOwner.append(flag);
+      await settle();
+      expect(host.hasAttribute('tabindex')).toBe(false);
+
+      flag.remove();
+      await settle();
+      expect(host.tabIndex).toBe(0);
+    }
+  );
+
   it('reprojects for a body-level relational selector without observing unrelated selectors', async () => {
     const observe = vi.spyOn(MutationObserver.prototype, 'observe');
     const style = document.createElement('style');

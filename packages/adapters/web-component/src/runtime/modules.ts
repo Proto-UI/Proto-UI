@@ -525,6 +525,14 @@ function hasDocumentRootRelationalSubject(selector: string): boolean {
       )
         return true;
     }
+    // A relational condition inside a negative or positional predicate may
+    // govern a root compound outside that predicate's argument.
+    if (
+      character === ':' &&
+      nonMonotonicEntryHasEnd(selector, index) >= 0 &&
+      containsDocumentRootCompound(selector)
+    )
+      return true;
     if (character === '(') {
       depth += 1;
       compoundStarts[depth] = index + 1;
@@ -633,6 +641,14 @@ function canSkipEntryRelationalRule(rule: CSSStyleRule, observesResize: boolean)
   return true;
 }
 
+function nonMonotonicEntryHasEnd(selector: string, index: number): number {
+  const predicate = /^:(?:not|nth-child|nth-last-child)\(/.exec(selector.slice(index));
+  if (!predicate) return -1;
+  const open = index + predicate[0].length - 1;
+  const close = matchingSelectorParen(selector, open);
+  return close >= 0 && selector.slice(open + 1, close).includes(':has(') ? close : -1;
+}
+
 function relaxEntryHasConditions(selector: string): string {
   let result = '';
   let start = 0;
@@ -642,9 +658,17 @@ function relaxEntryHasConditions(selector: string): string {
       index = literalEnd;
       continue;
     }
-    if (!selector.startsWith(':has(', index)) continue;
-    const close = matchingSelectorParen(selector, index + 4);
-    if (close < 0) return selector;
+    if (selector[index] !== ':') continue;
+    const isHas = selector.startsWith(':has(', index);
+    const close = isHas
+      ? matchingSelectorParen(selector, index + 4)
+      : nonMonotonicEntryHasEnd(selector, index);
+    if (close < 0) {
+      if (isHas) return selector;
+      continue;
+    }
+    // Relax the enclosing predicate, not an inner :has. An always-true
+    // argument would otherwise make :not(:has(...)) reject every candidate.
     result += selector.slice(start, index) + ':where(*)';
     start = close + 1;
     index = close;
