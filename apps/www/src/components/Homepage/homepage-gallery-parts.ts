@@ -204,7 +204,7 @@ export function createHomepageGalleryParts(
   };
   const controls = card(
     zh ? '按钮与选择' : 'Buttons & selection',
-    'Button · Toggle · Checkbox · Switch',
+    zh ? '从一个按钮，开始组合。' : 'Small details. Endless possibilities.',
     [
       box('home-gallery__row', [
         button(zh ? '主要' : 'Primary', 'gallery-primary'),
@@ -233,7 +233,7 @@ export function createHomepageGalleryParts(
   );
   const editor = card(
     zh ? '文本编辑' : 'Text editor',
-    'Tabs · Textarea · Toggle',
+    zh ? '写下来，再换个角度看。' : 'Write it down. See it take shape.',
     [
       p(
         part('tabs'),
@@ -358,10 +358,30 @@ export function createHomepageGalleryParts(
     'overlays',
     { icon: homepageGalleryIcon('overlays') }
   );
+  const profileMark = p(PREVIEW_SURFACE_ID, [box('home-gallery__metric', ['P'])], {
+    variant: 'muted',
+    radius: 'xl',
+    border: 'none',
+    elevation: 'none',
+  });
+  if (profileMark.kind === 'proto')
+    profileMark.surfaceStyle = {
+      width: '4rem',
+      height: '4rem',
+      padding: '0',
+      display: 'grid',
+      placeItems: 'center',
+    };
   const hover = card(
     zh ? '悬浮资料' : 'Profile preview',
-    'HoverCard',
+    zh ? '为开源而相聚' : 'Built in the open',
     [
+      box('home-gallery__profile', [
+        profileMark,
+        box('home-gallery__copy', [
+          zh ? '同一份定义，更多可能。' : 'One definition. More possibilities.',
+        ]),
+      ]),
       p(
         part('hover-card'),
         [
@@ -391,7 +411,7 @@ export function createHomepageGalleryParts(
   );
   const choices = card(
     zh ? '通知选项' : 'Notification choices',
-    'Checkbox · Button',
+    zh ? '只关注对你重要的事。' : 'Make space for what matters.',
     [
       checkbox(zh ? '产品更新' : 'Product updates', 'choice-product', true),
       checkbox(zh ? '新组件' : 'New components', 'choice-components', true),
@@ -415,10 +435,10 @@ export function createHomepageGalleryParts(
     analytics: composition.analytics,
     columns(form: DemoNode, analytics: DemoNode = composition.analytics): DemoNode[] {
       return [
-        box('home-gallery__column', [controls, hover]),
-        box('home-gallery__column', [composition.command, composition.help]),
-        box('home-gallery__column', [form]),
-        box('home-gallery__column', [composition.progress, analytics, editor]),
+        box('home-gallery__column', [controls, composition.command]),
+        box('home-gallery__column', [analytics, composition.progress]),
+        box('home-gallery__column', [form, composition.help]),
+        box('home-gallery__column', [editor, hover]),
         box('home-gallery__column', [overlays, choices]),
       ];
     },
@@ -492,11 +512,32 @@ export function createHomepageGalleryParts(
       const updateGalleryRhythm = (value: number) => {
         const chart = context.refs['gallery-rhythm-bars'];
         if (chart && Number.isFinite(value) && value >= 0 && value <= 100) {
+          feedback('gallery-rhythm-value', `${value}%`);
+          feedback('gallery-rhythm-remaining', `${100 - value}%`);
+          feedback(
+            'gallery-rhythm-next',
+            value < 25
+              ? zh
+                ? '整理提纲'
+                : 'Outline an idea'
+              : value < 60
+                ? zh
+                  ? '制作原型'
+                  : 'Build a prototype'
+                : value < 100
+                  ? zh
+                    ? '复查细节'
+                    : 'Review the details'
+                  : zh
+                    ? '计划完成'
+                    : 'Plan complete'
+          );
+
           const factors = [0.32, 0.48, 0.56, 0.76, 0.68, 0.92];
           const bars = chart.querySelectorAll<SVGRectElement>('rect[data-gallery-bar]');
           bars.forEach((bar, index) => {
-            const height = Math.max(4, Math.round(value * factors[index % factors.length]!));
-            bar.setAttribute('y', String(104 - height));
+            const height = Math.max(4, Math.round(value * 1.6 * factors[index % factors.length]!));
+            bar.setAttribute('y', String(166 - height));
             bar.setAttribute('height', String(height));
           });
         }

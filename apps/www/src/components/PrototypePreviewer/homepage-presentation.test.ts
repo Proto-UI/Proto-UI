@@ -53,8 +53,14 @@ describe('Homepage presentation source boundaries', () => {
     expect(preview).toContain('home-gallery__item--quiet');
     expect(preview).toContain('home-gallery__item--accent');
     expect(preview).toContain('home-gallery__media');
-    expect(preview).toContain('home-gallery__fade');
-    expect(preview).toContain('var(--pui-muted, var(--pui-background, transparent))');
+    expect(preview).not.toContain('home-gallery__fade');
+    expect(preview).toContain('home-demo-previewer__backdrop');
+    expect(preview).toContain('aria-hidden="true" inert');
+    expect(preview).toContain('grid-template-columns: repeat(5, minmax(0, 1fr));');
+    expect(preview).toContain('width: min(100%, 104rem);');
+    expect(preview).not.toContain('margin-inline: -1.25rem;');
+    expect(preview).toContain('padding-inline: 1.25rem;');
+    expect(preview).toContain('box-sizing: border-box;');
     expect(preview).toContain('home-gallery__attribution-link');
     expect(preview).toContain('text-decoration: underline;');
     expect(preview).toContain('display: contents;');

@@ -125,7 +125,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     if (family === 'shadcn') {
       for (const part of ['root', 'header', 'content'])
         expect(ids.has(`shadcn-card-${part}`)).toBe(true);
-      expect(ids.has('shadcn-surface-root')).toBe(false);
+      expect(ids.has('shadcn-surface-root')).toBe(true); // the passive profile mark
       expect(ids.has('shadcn-select-group')).toBe(true);
     }
     const sceneIds = [
@@ -192,7 +192,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     );
     expect(JSON.stringify(composition.demo.root)).not.toContain('"data-projection-id":"button"');
   });
-  it(`${family} composes ten staggered cards, a decorative fade and real source attribution`, () => {
+  it(`${family} composes ten task cards without a veil over live controls and with real source attribution`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const root = content.demo.root;
@@ -225,13 +225,13 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     visit(root);
     expect(cards.map((card) => card.id)).toEqual([
       'controls',
-      'hover',
       'workspace-command',
-      'workspace-help',
-      'preferences',
-      'workspace-progress',
       'workspace-analytics',
+      'workspace-progress',
+      'preferences',
+      'workspace-help',
       'editor',
+      'hover',
       'overlays',
       'choices',
     ]);
@@ -245,7 +245,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     expect(icons).toHaveLength(10);
     expect(new Set(icons).size).toBe(10);
     expect(charts).toBe(1);
-    expect(fades).toBe(1);
+    expect(fades).toBe(0);
     expect(links).toEqual([
       { href: 'https://github.com/Proto-UI/Proto-UI', text: 'Source on GitHub' },
     ]);

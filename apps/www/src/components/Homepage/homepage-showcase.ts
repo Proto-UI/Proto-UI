@@ -459,7 +459,7 @@ export function createHomepageShowcase(
   const [, fields, footer] = result.demo.root.children!;
   const form: DemoNode = gallery.card(
     copy.title,
-    'Select · Switch · Textarea · Button',
+    locale === 'en' ? 'A calmer inbox, on your terms.' : '让每一条通知，都恰到好处。',
     [
       {
         kind: 'box',
@@ -494,11 +494,6 @@ export function createHomepageShowcase(
     },
     children: [
       ...gallery.columns(form, gallery.analytics),
-      {
-        kind: 'box',
-        className: 'home-gallery__fade',
-        attrs: { 'aria-hidden': 'true', 'data-gallery-fade': '' },
-      },
       {
         kind: 'box',
         className: 'home-gallery__attribution',

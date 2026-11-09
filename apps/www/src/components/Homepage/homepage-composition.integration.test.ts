@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getElementProps } from '@proto.ui/adapter-web-component';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
@@ -6,9 +6,8 @@ import type { DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import { createHomepageShowcase } from './homepage-showcase';
 import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 
-beforeAll(() => {
-  installGeneratedProtoUiStylesheet();
-});
+// Real prototypes require the same generated host layout rules as the website.
+installGeneratedProtoUiStylesheet();
 
 // Real homepage recipe, loader, prototypes, renderer and WC Adapter in Happy DOM.
 // Synthetic input/keyboard events do not establish browser paint or pointer geometry.
@@ -110,13 +109,13 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
       const cards = [...view.host.querySelectorAll<HTMLElement>('[data-gallery-demo]')];
       expect(cards.map((card) => card.dataset.galleryDemo)).toEqual([
         'controls',
-        'hover',
         'workspace-command',
-        'workspace-help',
-        'preferences',
-        'workspace-progress',
         'workspace-analytics',
+        'workspace-progress',
+        'preferences',
+        'workspace-help',
         'editor',
+        'hover',
         'overlays',
         'choices',
       ]);
@@ -139,12 +138,10 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         expect(icon.getAttribute('aria-hidden')).toBe('true');
         expect(icon.closest('[data-gallery-icon]')?.getAttribute('aria-hidden')).toBe('true');
       }
-      const fade = view.host.querySelector<HTMLElement>('[data-gallery-fade]')!;
-      expect(fade.getAttribute('aria-hidden')).toBe('true');
-      expect(fade.querySelectorAll('a,button,input,[tabindex]')).toHaveLength(0);
-      // Reading order: every interactive card precedes the decorative tail and attribution.
-      const all = [...cards, fade];
-      expect(all.indexOf(fade)).toBe(all.length - 1);
+      expect(view.host.querySelector('[data-gallery-fade]')).toBeNull();
+      expect(view.ref('gallery-rhythm-value').textContent).toBe('90%');
+      expect(view.ref('gallery-rhythm-remaining').textContent).toBe('10%');
+      expect(view.ref('gallery-rhythm-next').textContent).toBe('Review the details');
       const link = view.host.querySelector<HTMLAnchorElement>('.home-gallery__attribution-link')!;
       expect(link.getAttribute('href')).toBe('https://github.com/Proto-UI/Proto-UI');
       expect(link.textContent).toBe('Source on GitHub');

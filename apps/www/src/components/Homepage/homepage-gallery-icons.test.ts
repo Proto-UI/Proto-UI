@@ -56,14 +56,25 @@ describe('homepage gallery decorative artwork', () => {
       const bars = [...host.querySelectorAll('rect[data-gallery-bar]')];
       expect(bars).toHaveLength(6);
       expect(bars.map((bar) => bar.getAttribute('height'))).toEqual([
-        '13',
-        '19',
-        '22',
-        '30',
-        '27',
-        '37',
+        '20',
+        '31',
+        '36',
+        '49',
+        '44',
+        '59',
       ]);
-      for (const bar of bars) expect(bar.getAttribute('fill')).toBe('currentColor');
+      expect(svg.getAttribute('viewBox')).toBe('0 0 320 176');
+      for (const bar of bars) {
+        expect(bar.getAttribute('fill')).toBe('currentColor');
+        const x = Number(bar.getAttribute('x')),
+          width = Number(bar.getAttribute('width'));
+        const y = Number(bar.getAttribute('y')),
+          height = Number(bar.getAttribute('height'));
+        expect(x).toBeGreaterThanOrEqual(0);
+        expect(x + width).toBeLessThanOrEqual(320);
+        expect(y).toBeGreaterThanOrEqual(0);
+        expect(y + height).toBeLessThanOrEqual(176);
+      }
     } finally {
       host.remove();
     }
