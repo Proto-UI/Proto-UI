@@ -14,7 +14,7 @@ criteria:
             en: Invoke asDialogClose() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-VISUAL
     text:
-            en: 'Close uses the pinned close recipe: black/white text-shadow, float-right, 20px/20px typography, .2 rest opacity and .4 hover/focus opacity; it requests close only.'
+            en: 'Close is an unstyled command wrapper for an authored family Button and requests close only. The separate CloseIcon owns the icon presentation; wrapping an action must not reduce its opacity or override its typography.'
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-CLOSURE
     text:
             en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.

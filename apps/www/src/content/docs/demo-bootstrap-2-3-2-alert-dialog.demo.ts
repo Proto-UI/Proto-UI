@@ -37,14 +37,20 @@ export default {
               },
               {
                 'kind': 'proto',
-                'prototypeId': 'bootstrap-2-3-2-alert-dialog-cancel',
-                'children': ['Cancel'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'bootstrap-2-3-2-alert-dialog-action',
-                'children': ['Confirm'],
-                'ref': 'action',
+                'prototypeId': 'bootstrap-2-3-2-alert-dialog-footer',
+                'children': [
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'bootstrap-2-3-2-alert-dialog-cancel',
+                    'children': ['Cancel'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'bootstrap-2-3-2-alert-dialog-action',
+                    'children': ['Confirm'],
+                    'ref': 'action',
+                  },
+                ],
               },
             ],
             'props': {

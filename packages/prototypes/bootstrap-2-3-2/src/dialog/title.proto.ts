@@ -11,6 +11,8 @@ export default definePrototype<DialogTitleProps, DialogTitleExposes>({
   name: 'bootstrap-2-3-2-dialog-title',
   setup(def) {
     asDialogTitle();
-    def.feedback.style.use(tw('m-0 text-[24.5px] font-bold leading-[30px]'));
+    def.feedback.style.use(
+      tw('text-foreground block min-w-0 m-0 text-[24.5px] font-bold leading-[30px]')
+    );
   },
 });

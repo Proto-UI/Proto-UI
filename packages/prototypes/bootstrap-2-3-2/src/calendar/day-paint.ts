@@ -53,7 +53,7 @@ export function applyBootstrapCalendarDayPaint(
           w.all(w.state(state.hovered).eq(false), w.state(state.pressed).eq(false))
         )
       ),
-    intent: (i) => i.feedback.style.use(tw('bg-[#eee] border-border')),
+    intent: (i) => i.feedback.style.use(tw('bg-muted border-border')),
   });
   def.rule({
     when: (w) =>
@@ -63,7 +63,7 @@ export function applyBootstrapCalendarDayPaint(
         w.state(state.hovered).eq(true),
         w.state(state.pressed).eq(false)
       ),
-    intent: (i) => i.feedback.style.use(tw('bg-[#f5f5f5]')),
+    intent: (i) => i.feedback.style.use(tw('bg-secondary')),
   });
   def.rule({
     when: (w) =>
@@ -72,8 +72,7 @@ export function applyBootstrapCalendarDayPaint(
         w.state(state.disabled).eq(false),
         w.state(state.pressed).eq(true)
       ),
-    intent: (i) =>
-      i.feedback.style.use(tw(bootstrapButtonFlatFill.default, bootstrapButtonPressed)),
+    intent: (i) => i.feedback.style.use(tw('bg-muted', bootstrapButtonPressed)),
   });
   def.rule({
     when: (w) => w.state(state.selected).eq(true),

@@ -259,7 +259,7 @@ describe('Website projection theme inputs', () => {
 });
 
 describe('source-owned partial family themes', () => {
-  it('preserves Bootstrap historical palette and distinct Liquid dark values', () => {
+  it('preserves historical Bootstrap light paint and explicit accessible dark adaptations', () => {
     document.documentElement.dataset.theme = 'light';
     const bootstrap = resolveProjectionThemeSurfaceStyle(
       'bootstrap-2-3-2',
@@ -269,9 +269,14 @@ describe('source-owned partial family themes', () => {
     expect(bootstrap['--pui-primary']).toBe('#0044cc');
     expect(glass['--pui-secondary']).toBe('#ffffff');
     document.documentElement.dataset.theme = 'dark';
-    expect(resolveProjectionThemeSurfaceStyle('bootstrap-2-3-2', document.documentElement)).toEqual(
-      bootstrap
+    const bootstrapDark = resolveProjectionThemeSurfaceStyle(
+      'bootstrap-2-3-2',
+      document.documentElement
     );
+    expect(bootstrapDark['--pui-foreground']).toBe('#eeeeee');
+    expect(bootstrapDark['--pui-background']).toBe('#161616');
+    expect(bootstrapDark['--pui-primary']).toBe(bootstrap['--pui-primary']);
+    expect(Object.keys(bootstrapDark).sort()).toEqual(Object.keys(bootstrap).sort());
     const dark = resolveProjectionThemeSurfaceStyle('liquid-glass', document.documentElement);
     expect(dark['--pui-secondary']).toBe('#2c2c2e');
     expect(Object.keys(dark).sort()).toEqual(Object.keys(glass).sort());

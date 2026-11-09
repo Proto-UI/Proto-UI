@@ -294,10 +294,22 @@ export function createHomepageGalleryParts(
       p(part('dialog', 'content'), [
         p(part('dialog', 'header'), [
           p(part('dialog', 'title'), [zh ? '确认这次选择？' : 'Confirm this choice?']),
-          p(part('dialog', 'description'), [
-            zh ? '这是一个可操作的对话框示例。' : 'An interactive confirmation example.',
-          ]),
+          ...(family === 'bootstrap-2-3-2'
+            ? []
+            : [
+                p(part('dialog', 'description'), [
+                  zh ? '这是一个可操作的对话框示例。' : 'An interactive confirmation example.',
+                ]),
+              ]),
         ]),
+        // Bootstrap has a distinct modal-body between its title bar and footer.
+        ...(family === 'bootstrap-2-3-2'
+          ? [
+              p(part('dialog', 'description'), [
+                zh ? '这是一个可操作的对话框示例。' : 'An interactive confirmation example.',
+              ]),
+            ]
+          : []),
         p(part('dialog', 'footer'), [
           p(part('dialog', 'close'), [button(zh ? '取消' : 'Cancel', undefined, 'secondary')]),
           p(part('dialog', 'close'), [button(zh ? '确认' : 'Confirm', 'gallery-confirm')]),

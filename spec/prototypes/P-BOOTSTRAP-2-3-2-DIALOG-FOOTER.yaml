@@ -7,7 +7,7 @@ lifecycleRationale:
   en: New passive family anatomy is draft until the real homepage consumer, four-Web interaction and independent review establish the projection.
 summary: A passive modal-footer wrapper with the pinned Bootstrap border, spacing and action grouping.
 statement:
-  en: Footer claims the existing Dialog footer anatomy role and projects its authored slot. Each action retains its own command owner; Footer owns no confirm or cancel semantics.
+  en: Footer claims the existing Dialog footer anatomy role and projects its authored slot. Each action retains its own command owner; Footer owns no confirm or cancel semantics. Modal surfaces and footer colors use paired semantic palette tokens so nested public components remain readable. Dark appearance is a Proto adaptation; fixed white footer highlights are omitted.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-FOOTER-COMPOSITION
     text:

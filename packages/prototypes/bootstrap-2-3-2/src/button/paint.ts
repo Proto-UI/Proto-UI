@@ -42,3 +42,23 @@ export const bootstrapButtonPressedFill = {
   info: 'bg-[#2f96b4_none_0_-15px_repeat-x]',
   inverse: 'bg-[#222_none_0_-15px_repeat-x]',
 };
+
+/** Fixed v2.3.2 default Button geometry, also used by passive action surfaces.
+ * Tokens own paint/size; layout below only describes the same slot envelope. */
+export const bootstrapButtonDefaultSurfaceSize = 'px-[12px] py-[4px] rounded-[4px]';
+export const bootstrapButtonDefaultSize = `${bootstrapButtonDefaultSurfaceSize} text-[14px]`;
+export const bootstrapButtonDefaultLayout = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  boxSizing: 'border-box',
+  minHeight: '30px',
+  padding: '4px 12px',
+  gap: '4px',
+  minWidth: '0',
+  maxWidth: '100%',
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+} as const;

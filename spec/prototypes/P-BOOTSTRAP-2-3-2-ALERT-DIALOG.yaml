@@ -7,7 +7,7 @@ lifecycleRationale:
     en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Alert Dialog family over P-BASE-ALERT-DIALOG with pinned vocabulary.
 statement:
-    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured.
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured. Modal surfaces and footer colors use paired semantic palette tokens so nested public components remain readable. Dark appearance is a Proto adaptation; fixed white footer highlights are omitted.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG-BASE
     text:

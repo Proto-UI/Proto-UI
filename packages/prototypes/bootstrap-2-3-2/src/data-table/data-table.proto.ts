@@ -59,10 +59,10 @@ export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExpos
     const behavior = asDataTableRow();
     const state = behavior.stateHandles!;
     def.feedback.style.use(tw('table-row'));
-    // Selection is a Proto extension, using the source .info row palette.
+    // Selection is a Proto extension, using the family accent pair; the light value is the source .info palette.
     def.rule({
       when: (w) => w.state(state.selected).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-[#d9edf7]')),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),

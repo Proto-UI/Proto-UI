@@ -6,7 +6,8 @@ import {
 } from '@proto.ui/prototypes-base/hover-card';
 
 // HoverCard is a Proto link-preview extension. Its passive link paint follows
-// @linkColor #08c/no underline, then @linkColorHover #005580/underline on hover/focus.
+// @linkColor #08c/no underline; hover/focus uses readable semantic ink plus underline.
+// This light/dark adaptation avoids the historical #005580 becoming illegible on dark pages.
 // Base Trigger authors no activation; the app anchor keeps navigation ownership.
 // https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/scaffolding.less
 // https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/variables.less
@@ -20,11 +21,11 @@ export default definePrototype<HoverCardTriggerProps, HoverCardTriggerExposes>({
     );
     def.rule({
       when: (w) => w.state(state('hovered')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
+      intent: (i) => i.feedback.style.use(tw('text-foreground underline')),
     });
     def.rule({
       when: (w) => w.state(state('focused')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
+      intent: (i) => i.feedback.style.use(tw('text-foreground underline')),
     });
     def.rule({
       when: (w) => w.state(state('focusVisible')!).eq(true),

@@ -2,6 +2,7 @@ import type { SurfaceRootProps } from '@proto.ui/prototypes-base/surface';
 import type { TextRootProps } from '@proto.ui/prototypes-base/text';
 import { shadcnActionAppearance } from '@proto.ui/prototypes-shadcn/surface';
 import { brutalistActionAppearance } from '@proto.ui/prototypes-brutalist/surface';
+import { bootstrap232ActionAppearance } from '@proto.ui/prototypes-bootstrap-2-3-2/surface';
 import type { NativeLinkFacts } from './site-native-link-facts';
 import type { SiteLibraryFamily } from './site-library-family';
 import { SITE_LINK_ICONS, type SiteLinkIcon } from '../prototypes/site-link-icons';
@@ -49,7 +50,9 @@ export function linkActionAppearance(
   const options = { ...facts, emphasis: emphasis === 'link' ? ('minimal' as const) : emphasis };
   return family === 'brutalist'
     ? brutalistActionAppearance(options)
-    : shadcnActionAppearance({ ...options, styleProfile: 'luma' });
+    : family === 'bootstrap-2-3-2'
+      ? bootstrap232ActionAppearance(options)
+      : shadcnActionAppearance({ ...options, styleProfile: 'luma' });
 }
 export function linkSurfaceProps(
   family: SiteLibraryFamily,

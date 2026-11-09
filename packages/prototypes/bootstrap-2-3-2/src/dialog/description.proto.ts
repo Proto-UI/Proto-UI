@@ -11,6 +11,10 @@ export default definePrototype<DialogDescriptionProps, DialogDescriptionExposes>
   name: 'bootstrap-2-3-2-dialog-description',
   setup(def) {
     asDialogDescription();
-    def.feedback.style.use(tw('text-[14px] leading-[20px] text-foreground'));
+    def.feedback.style.use(
+      tw(
+        'block min-w-0 relative overflow-y-auto max-h-[400px] p-[15px] text-[14px] leading-[20px] text-foreground'
+      )
+    );
   },
 });

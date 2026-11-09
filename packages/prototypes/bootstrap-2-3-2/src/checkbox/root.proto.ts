@@ -16,7 +16,7 @@ export default definePrototype<CheckboxRootProps, CheckboxRootExposes>({
     if (!state) throw new Error('[bootstrap-2-3-2-checkbox-root] Base state handles required.');
     def.feedback.style.use(
       tw(
-        'inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-foreground select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-[#333] select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
       )
     );
     def.rule({

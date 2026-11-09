@@ -126,6 +126,21 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(stateValue<boolean>(root, 'open')).toBe(false);
   });
 
+  it('keeps footer command children opaque and dismisses after an authored action', async () => {
+    const { root, mask, content, close } = appendDialog(document.body, { defaultOpen: true });
+    const action = document.createElement('button');
+    action.textContent = 'Cancel';
+    close.append(action);
+    await flush();
+    await completeTransitions(mask, content);
+    // Close is a semantic wrapper, not the separate translucent .close glyph.
+    expect(close.classList.contains('opacity-20')).toBe(false);
+    expect(close.style.opacity).not.toBe('0.2');
+    action.click();
+    await flush();
+    expect(stateValue<boolean>(root, 'open')).toBe(false);
+  });
+
   it('inherits open/close ownership, presence, and title/description relations', async () => {
     const { root, trigger, mask, content, title, description, close } = appendDialog(
       document.body,

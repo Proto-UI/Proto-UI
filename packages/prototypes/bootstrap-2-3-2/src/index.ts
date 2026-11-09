@@ -8,9 +8,18 @@ export * from './input';
 export * from './textarea';
 export * from './separator';
 
-export { default as Bootstrap232SurfaceRoot, surfaceRoot } from './surface';
+export {
+  default as Bootstrap232SurfaceRoot,
+  surfaceRoot,
+  bootstrap232ActionAppearance,
+} from './surface';
 
-export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
+export type {
+  SurfaceRootProps,
+  SurfaceRootExposes,
+  Bootstrap232SurfaceRootProps,
+  Bootstrap232ActionAppearanceOptions,
+} from './surface';
 
 export * from './label';
 

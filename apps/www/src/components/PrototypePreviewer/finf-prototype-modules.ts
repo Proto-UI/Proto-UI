@@ -664,6 +664,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/alert-dialog');
     registerExactPrototype('bootstrap-2-3-2-alert-dialog-trigger', module.alertDialogTrigger);
   },
+  'bootstrap-2-3-2-alert-dialog-footer': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/alert-dialog');
+    registerExactPrototype('bootstrap-2-3-2-alert-dialog-footer', module.alertDialogFooter);
+  },
   'bootstrap-2-3-2-alert-dialog-content': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/alert-dialog');
     registerExactPrototype('bootstrap-2-3-2-alert-dialog-content', module.alertDialogContent);
