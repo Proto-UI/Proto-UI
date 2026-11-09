@@ -5,6 +5,7 @@ description: 'Draft Brutalist Table presentation over the Base Table protocol.'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -30,3 +31,15 @@ Import the parts from the already-public `@proto.ui/prototypes-brutalist` packag
 4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Table guarantee.
+
+## API
+
+Table is workspace source. There is no public `proto-ui add` target. Root has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[]}
+/>
+
+Caption has no props. Row defaults `section` to `body` and `lastInSection` to `false`. Cell defaults `headers` to `[]` and `rowSpan` and `columnSpan` to `1`. Header Cell defaults `headerKey` to `''`, `headerKind` to `column`, `headers` to `[]` and `rowSpan` and `columnSpan` to `1`.
+

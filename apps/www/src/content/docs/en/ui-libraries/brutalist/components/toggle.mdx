@@ -5,6 +5,7 @@ description: 'Persistent-state Neo-Brutalist Toggle projection over Base Toggle'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -13,3 +14,19 @@ Toggle keeps Base activation and `aria-pressed` ownership. Its latched active st
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
 </div>
+
+## API
+
+Toggle is workspace source. There is no public `proto-ui add` target. Passing `active` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+  ]}
+/>
+
+These props belong to Root.
+

@@ -5,6 +5,7 @@ description: '基于 Base Textarea 的圆角中性表面投影'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -35,6 +36,33 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 - DM Sans 500 文本，无外侧阴影
 
 这些样式直接应用到由 Base 支撑的原生 textarea，不会建立新的协议层，也不会改变归一化事件载荷。
+
+## API
+
+Textarea 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。
+
 
 ## 参考
 

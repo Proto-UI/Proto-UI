@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -20,3 +21,20 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 Brutalist Tooltip publishes four Base Tooltip projection entries: Group inherits same-domain delay defaults, warm-window behavior, and active Tooltip coordination; Root owns controlled or uncontrolled open state; Trigger owns hover/focus routing and accessible-description linkage; Content owns presence, anchored portal positioning, Escape dismissal, and `role="tooltip"`.
 
 Group, Root, and Trigger are current draft transparent projections with cataloged Brutalist package identities; they add no second props, state, timing, event, accessibility, or visual owner. Only Content adds the 5px rounded neutral surface. The interactive demo uses one real Group to compose two uncontrolled sibling Tooltips and can switch among Web Components, React, and Vue. While Content stays mounted through its renderer-owned portal, changing the documentation host from Light to Dark repaints the same surface through `--pui-foreground` and `--pui-secondary-background`.
+
+## API
+
+Tooltip is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `top`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`. Group defaults `openDelay` to `700`, `closeDelay` to `100` and `skipDelay` to `300`.
+

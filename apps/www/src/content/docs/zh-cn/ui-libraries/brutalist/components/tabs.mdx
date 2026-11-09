@@ -5,6 +5,7 @@ description: '基于 Base Tabs 的硬边 Tabs 投影'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -13,3 +14,20 @@ Tabs 继承 Base 的选择、激活与 descendant-first panel focus-entry 语义
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>
+
+## API
+
+Tabs 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'activationMode', type: "'automatic' | 'manual'", default: 'automatic' },
+    { name: 'appearance', type: "'default' | 'underline'", default: 'default' },
+  ]}
+/>
+
+前三个属性属于 Root。`appearance` 属于 List 与 Trigger。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。Indicator 没有属性。
+

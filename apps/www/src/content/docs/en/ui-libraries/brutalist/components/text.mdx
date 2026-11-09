@@ -21,6 +21,7 @@ The examples are actual package prototypes. Their outer stack supplies only demo
 import * as React from 'react';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import { brutalistTextRoot } from '@proto.ui/prototypes-brutalist/text';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 const Text = createReactAdapter(React)(brutalistTextRoot, { rootTag: 'span' });
 
@@ -65,3 +66,24 @@ The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping st
 ## Authority
 
 `P-BRUTALIST-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/brutalist/src/text/`. Catalog lifecycle remains draft.
+
+## API
+
+Text is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
+    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
+    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
+    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
+    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+  ]}
+/>
+
+These props belong to Root.
+

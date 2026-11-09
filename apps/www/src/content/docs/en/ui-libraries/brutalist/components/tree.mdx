@@ -4,6 +4,7 @@ description: 'tree functional composition and current verification limits.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
 
@@ -14,3 +15,21 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Tree is workspace source. There is no public `proto-ui add` target. Passing `value` or `expandedKeys` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Tree' },
+  ]}
+/>
+
+These props belong to Root. Item defaults `nodeKey`, `parentKey`, and `textValue` to `''`, and `disabled` to `false`. Group accepts `nodeKey`. Toggle adds the Button props.
+
