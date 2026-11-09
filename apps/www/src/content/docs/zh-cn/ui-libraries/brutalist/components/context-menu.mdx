@@ -4,6 +4,7 @@ description: '支持键盘访问的上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 支持键盘访问的上下文命令菜单。
 
@@ -23,3 +24,21 @@ Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 contex
 触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
 
 受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。
+
+## API
+
+Context Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Trigger 没有属性。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 与 `alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `0`，`excludeAnchorTranslation` 默认 `false`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。
+

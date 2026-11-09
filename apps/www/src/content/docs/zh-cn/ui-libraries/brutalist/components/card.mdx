@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -23,3 +24,14 @@ Card 用于被动视觉分组。Selection、disclosure、navigation 与 activati
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-card" initialRuntime="wc" />
 </div>
+
+## API
+
+Card 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[]}
+/>
+
+Header、Content 与 Footer 仅接受 children，不增加属性。

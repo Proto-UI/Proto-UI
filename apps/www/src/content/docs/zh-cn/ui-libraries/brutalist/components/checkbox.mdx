@@ -5,6 +5,7 @@ description: '覆盖在 Base Checkbox 协议之上的 Brutalist Checkbox 草案�
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -27,3 +28,19 @@ Root 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` packag
 5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
 
 相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Checkbox guarantee。
+
+## API
+
+Checkbox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `checked` 或 `indeterminate` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+这些属性属于 Root。Indicator 没有属性。
+

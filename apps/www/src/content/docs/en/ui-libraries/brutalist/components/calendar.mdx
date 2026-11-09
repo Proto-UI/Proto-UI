@@ -4,6 +4,7 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Calendar is a single-date Gregorian control. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
 
@@ -28,3 +29,29 @@ This remains WIP. Calendar behavior has focused actual-host tests including WC, 
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Calendar is workspace source. There is no public `proto-ui add` target. Passing `value` or `month` selects controlled mode for that fact.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultMonth', type: 'string', default: 'undefined' },
+    { name: 'min', type: 'string', default: "''" },
+    { name: 'max', type: 'string', default: "''" },
+    { name: 'unavailable', type: 'string[]', default: '[]' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'weekStartsOn', type: 'number', default: '0' },
+    { name: 'fixedWeeks', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: 'Calendar' },
+    { name: 'today', type: 'string', default: "''" },
+    { name: 'locale', type: 'string', default: 'en-US' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+  ]}
+/>
+
+These props belong to Root. Day defaults `date` to `''`, `offset` to `0` and `disabled` to `false`. Grid and Heading have no props. Row `index` has no default. Caption defaults `a11yLabel` to `Calendar navigation`. Previous and Next accept the Button props and default `a11yLabel` to `Previous month` and `Next month`. Weekdays has no props. Weekday defaults `offset` to `0`.
+

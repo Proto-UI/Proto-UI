@@ -4,6 +4,7 @@ description: '可搜索并发出操作意图的内联命令列表。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 可搜索并发出操作意图的内联命令列表。
 
@@ -21,3 +22,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 组成: Root, Input, Content, Item, Empty.
 
 草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+
+## API
+
+Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+这些属性属于 Root。Input 的 `placeholder`、`a11yLabel` 与 `name` 默认 `''`。Content 的 `side` 默认 `bottom`，`align` 默认 `start`，`sideOffset` 默认 `4`，`collisionPadding` 默认 `8`。Item 的 `value`、`textValue` 与 `keywords` 默认 `''`，`disabled` 默认 `false`。Empty 没有属性。
+

@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -23,3 +24,14 @@ Use Badge for passive labels such as roles or environments. Dynamic status belon
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
 </div>
+
+## API
+
+Badge is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'tone', type: "'accent' | 'info' | 'danger'", default: 'accent' }]}
+/>
+
+This prop belongs to Root.
