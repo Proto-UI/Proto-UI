@@ -5,6 +5,7 @@ description: 'Poster-like Hover Card projection over Base Hover Card'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -13,3 +14,20 @@ Hover Card keeps Base open/close timing and positioning contracts while using pa
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-hover-card" initialRuntime="wc" />
 </div>
+
+## API
+
+Hover Card is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`.
+

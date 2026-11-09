@@ -5,6 +5,7 @@ description: '覆盖在 Base Image 协议之上的 Brutalist Image 草案呈现�
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -27,3 +28,20 @@ Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@p
 5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
 
 相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Image guarantee。
+
+## API
+
+Image 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+  ]}
+/>
+
+这些属性属于 Root。
+

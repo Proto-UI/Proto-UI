@@ -5,6 +5,7 @@ description: 'Draft Brutalist Live Region presentation over the Base Live Region
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -26,3 +27,18 @@ Import the Root from the already-public `@proto.ui/prototypes-brutalist` package
 4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Live Region guarantee.
+
+## API
+
+Live Region is workspace source. There is no public `proto-ui add` target.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+These props belong to Root.
+

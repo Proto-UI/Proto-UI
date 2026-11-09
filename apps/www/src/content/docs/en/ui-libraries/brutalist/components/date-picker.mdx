@@ -4,6 +4,7 @@ description: 'date-picker composition and explicit implementation boundary.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Date Picker is a composition of the real Popover and Calendar atoms. A date request selects through Calendar and requests Popover closure. open, value and month retain their original controlled/uncontrolled boundaries. Calendar grid, row, heading and navigation atoms can be used inside the content.
 
@@ -14,3 +15,13 @@ WIP functional source. Full runtime/Compiler/native, packaging, browser and visu
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## API
+
+Date Picker is workspace source. There is no public `proto-ui add` target. Open, value, and month stay on the composed Popover and Calendar. The only Date Picker prop is on Value.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'placeholder', type: 'string', default: 'Pick a date' }]}
+/>
+

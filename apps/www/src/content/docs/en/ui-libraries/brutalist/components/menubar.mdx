@@ -4,6 +4,7 @@ description: 'A keyboard-coordinated bar of independent command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 A keyboard-coordinated bar of independent command panels.
 
@@ -19,3 +20,20 @@ Root.value identifies one open panel. Trigger.value and Content.value pair a pan
 Parts: Root, Trigger, Content, Item.
 
 Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+
+## API
+
+Menubar is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+These props belong to Root. Trigger defaults `value` to `''` and `disabled` to `false`. Content defaults `value` and `a11yLabel` to `''` and `sideOffset` to `4`. Item defaults `value` and `textValue` to `''`, `disabled` to `false` and `closeOnSelect` to `true`.
+
