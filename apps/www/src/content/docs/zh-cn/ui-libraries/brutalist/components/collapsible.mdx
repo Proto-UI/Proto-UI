@@ -3,8 +3,8 @@ title: 'Collapsible'
 description: 'Neobrutalist Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
 ---
 
-import {
-import ApiPropsTable from '@/components/ApiPropsTable.astro'; PrototypePreviewer } from '@/components/PrototypePreviewer';
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 Neobrutalist Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
 
@@ -68,4 +68,3 @@ Collapsible 是工作区源码，没有公开的 `proto-ui add` 目标。传入 
 />
 
 这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `keepMounted` 默认 `false`。
-
