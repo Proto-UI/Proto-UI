@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 > 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-SKELETON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SKELETON.yaml) 仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
@@ -17,3 +18,14 @@ Brutalist Skeleton 是一个直接定义的 styled-only 视觉占位原型：静
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
 </div>
+
+## API
+
+Skeleton 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[]}
+/>
+
+Skeleton 渲染单个样式化 surface，不声明属性。

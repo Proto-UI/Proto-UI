@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -18,3 +19,17 @@ In the Web composed projection, the two tracks reserve a lower-right intersectio
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>
+
+## API
+
+Scroll Area is workspace source. There is no public `proto-ui add` target. Root has no props.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' },
+  ]}
+/>
+
+This prop belongs to Scrollbar. Viewport and Thumb have no props.
+

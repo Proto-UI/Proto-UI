@@ -5,6 +5,7 @@ description: '基于 Base Select 的默认扁平圆角选择器投影'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
@@ -19,3 +20,23 @@ Select 在 Neo-Brutalist 表面语言下保留 Base 的 value-class presentation
 默认 Trigger 遵循上游 Select：5px 圆角、2px 黑边、DM Sans 500，保持扁平。`appearance="elevated"` 是显式 Proto UI 扩展，供与有硬影命令同组的 Trigger 使用，例如 Header 的 Runtime 与 Style 控件。静止态为向右/下 4px 黑色硬影；hover 或 press 将 Trigger 向右/下移动 4px 并去除硬影，press 不叠加第二次位移。
 
 此 prop 设置在 `brutalist-select-trigger`，不设在 Root 或 Content。`appearance="flat"`、缺省或移除 prop 都恢复扁平默认值。`size="sm" | "default"`、配对 fill/ink、焦点 ring、键盘选择及 disabled 行为不变；两种外观的 Content 都保持扁平。页面 CSS 不应另外补影。
+
+## API
+
+Select 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 或 `value` 会使对应事实进入受控模式。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'size', type: "'sm' | 'default'", default: 'default' },
+    { name: 'appearance', type: "'flat' | 'elevated'", default: 'flat' },
+  ]}
+/>
+
+前五个属性属于 Root。`size` 与 `appearance` 属于 Trigger，Trigger 的 `accessibleLabel` 默认 `''`。Value 的 `placeholder` 默认 `''`。Content 接受 Transition 属性，`position` 默认 `popper`，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。Item 的 `disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 没有默认值，回退到 Root 策略。Group、Label、Surface、ItemText、Viewport 与 Separator 没有属性。
+

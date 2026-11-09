@@ -6,6 +6,7 @@ sidebar:
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 > 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-SEPARATOR](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SEPARATOR.yaml) 及其继承的 Base 协议仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
@@ -17,3 +18,18 @@ Brutalist Separator 保留 Base orientation 与 decorative accessibility 语义�
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-separator" initialRuntime="wc" />
 </div>
+
+## API
+
+Separator 是工作区源码，没有公开的 `proto-ui add` 目标。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'decorative', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+这些属性属于 Root。
+
