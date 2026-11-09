@@ -68,7 +68,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   }
   let alive = true;
   let handle: CodeSurfaceHandle;
-  const ownsRoot = () => handles.get(root) === handle;
+  const ownsRoot = () => handle !== undefined && handles.get(root) === handle;
   const isCurrentOwner = () => alive && ownsRoot();
   let attempt = 0;
   const retired = new Set<Promise<void>>();
@@ -200,7 +200,11 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   }
   handle = {
     refresh,
-    ready: observe(controller.start(), controller),
+    // Preparation can enter the materializer synchronously. Publish the
+    // source owner before the materializer tests the theme watch's ownership.
+    ready: Promise.resolve().then(() => {
+      if (isCurrentOwner()) return observe(controller.start(), controller);
+    }),
     async destroy() {
       if (!alive) return;
       alive = false;

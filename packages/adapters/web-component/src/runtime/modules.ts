@@ -259,7 +259,7 @@ type EntryStyleSetterPatch = {
 const entryStyleWatches = new WeakMap<
   Window,
   {
-    subscribers: Set<() => void>;
+    subscribers: Set<(inlineOnly: boolean) => void>;
     methodPatches: EntryStyleMethodPatch[];
     setterPatches: EntryStyleSetterPatch[];
     observer: MutationObserver;
@@ -736,7 +736,7 @@ function collectEntryStyleDependencies(
 
 function watchEntryStyleInvalidation(
   view: (Window & typeof globalThis) | null,
-  onInvalidate: () => void
+  onInvalidate: (inlineOnly: boolean) => void
 ): (() => void) | null {
   const Sheet = view?.CSSStyleSheet;
   const StyleSheetCtor = view?.StyleSheet;
@@ -753,16 +753,21 @@ function watchEntryStyleInvalidation(
   if (!view || !Sheet || !Declaration || !Observer || !doc?.documentElement) return null;
   let watch = entryStyleWatches.get(view as Window);
   if (!watch) {
-    const subscribers = new Set<() => void>();
-    let pending = false;
-    const notify = () => {
-      if (pending) return;
-      pending = true;
+    const subscribers = new Set<(inlineOnly: boolean) => void>();
+    let pending: 'inline' | 'stylesheet' | null = null;
+    const schedule = (inlineOnly: boolean) => {
+      if (pending) {
+        if (!inlineOnly) pending = 'stylesheet';
+        return;
+      }
+      pending = inlineOnly ? 'inline' : 'stylesheet';
       queueMicrotask(() => {
-        pending = false;
-        for (const subscriber of subscribers) subscriber();
+        const inlineOnly = pending === 'inline';
+        pending = null;
+        for (const subscriber of subscribers) subscriber(inlineOnly);
       });
     };
+    const notify = () => schedule(false);
     const methodPatches: EntryStyleMethodPatch[] = [];
     // Inline declarations already deliver style-attribute records to the
     // entry's DOM observers. Only rule declarations need the window-wide
@@ -775,8 +780,8 @@ function watchEntryStyleInvalidation(
         if (typeof original !== 'function') continue;
         const patched = function (this: unknown, ...args: unknown[]) {
           const result = Reflect.apply(original, this, args);
-          if (isInlineDeclaration(target, this)) return result;
-          if (
+          if (isInlineDeclaration(target, this)) schedule(true);
+          else if (
             key === 'replace' &&
             result &&
             typeof (result as PromiseLike<unknown>).then === 'function'
@@ -835,7 +840,7 @@ function watchEntryStyleInvalidation(
       const patched = function (this: unknown, value: unknown) {
         if (original?.set) original.set.call(this, value);
         else (this as CSSStyleDeclaration).setProperty(cssName!, String(value));
-        if (!isInlineDeclaration(target, this)) notify();
+        schedule(isInlineDeclaration(target, this));
       };
       Object.defineProperty(target, key, {
         configurable: true,
@@ -1554,6 +1559,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
+            let hasExternalStyleInputs = false;
             const belongsToObservedEntryTree = (node: Node) => {
               for (const root of observedRoots) {
                 if (root === node || root.contains(node)) return true;
@@ -1693,6 +1699,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
+              // Named radio peers and image-map images can depend on inline
+              // style outside the entry's observed DOM, including ancestors.
+              hasExternalStyleInputs = hasArea || radioTrees.size > 0;
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
                 if (
@@ -1757,7 +1766,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   mediaRoots,
                   target,
                   externalAncestors,
-                  !!entryResizeObserver && !hasArea
+                  !!entryResizeObserver && !hasExternalStyleInputs
                 );
               const siblingStateTargets = new Set<EventTarget>();
               for (const subject of siblingSubjects) {
@@ -2118,7 +2127,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 refreshTree();
               }
             });
-            if (view) stopEntryStyleWatch = watchEntryStyleInvalidation(view, refreshTree);
+            if (view)
+              stopEntryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
+                if (!inlineOnly) refreshTree();
+                else if (hasExternalStyleInputs) projectCurrent();
+              });
             observeTree();
           }
         },

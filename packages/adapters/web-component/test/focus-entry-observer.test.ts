@@ -48,6 +48,41 @@ afterEach(async () => {
 });
 
 describe('WC live focus-entry resolver inputs', () => {
+  it('resamples when inline styles hide a checked radio outside the entry', async () => {
+    const form = document.createElement('form');
+    const peerContainer = document.createElement('div');
+    const peer = document.createElement('input');
+    const inside = document.createElement('input');
+    for (const radio of [inside, peer]) {
+      radio.type = 'radio';
+      radio.name = 'entry-external-peer';
+      radio.tabIndex = 0;
+    }
+    peer.checked = true;
+    const host = panel(false);
+    host.append(inside);
+    peerContainer.append(peer);
+    form.append(host, peerContainer);
+    document.body.append(form);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    peer.style.setProperty('display', 'none');
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+
+    peer.style.removeProperty('display');
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    peerContainer.style.cssText = 'visibility: hidden';
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    peerContainer.style.cssText = '';
+    await settle();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('uses current rendered eligibility for a Light DOM descendant entry', async () => {
     const host = panel(false);
     const button = document.createElement('button');
@@ -1086,6 +1121,7 @@ describe('WC live focus-entry resolver inputs', () => {
     expect(host.hasAttribute('tabindex')).toBe(false);
 
     readRules.mockClear();
+    outside.style.setProperty('color', 'red');
     (rules[1] as CSSStyleRule).style.setProperty('visibility', 'hidden');
     await settle();
     expect(readRules).toHaveBeenCalled();
