@@ -13,6 +13,7 @@ import {
   renderPlan,
   inheritedPrototypeIds,
   refreshCandidateSource,
+  refreshSourceInventory,
   captureGitObjectProof,
 } from '../prototype-coverage.mjs';
 const baseline = JSON.parse(fs.readFileSync(path.join(root, dataPath), 'utf8'));
@@ -1151,19 +1152,106 @@ for (const project of ['shadcn/ui', 'Base UI']) {
   });
 }
 
-test('source-only projections do not invent a comparison catalog lifecycle', () => {
+test('cataloged compositions retain real entries without inventing P identities', () => {
   const d = sameSourceCandidate();
   const families = ['autocomplete', 'combobox', 'command', 'menubar', 'navigation-menu'];
   for (const family of families) {
-    assert.equal(d.candidateSource.prototypeInventory.base[family], undefined);
-    for (const library of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+    const baseId = `P-BASE-${family.toUpperCase()}`;
+    const base = d.candidateSource.prototypeInventory.base[family];
+    assert.deepEqual(base.entityIds, [baseId]);
+    assert(base.sourceFiles.includes(`packages/prototypes/base/src/${family}/index.ts`));
+    for (const library of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
       const projection = d.candidateSource.prototypeInventory[library][family];
       assert(projection.sourceFiles.length > 0);
-      assert.deepEqual(projection.entityIds, []);
-      assert.equal(projection.lifecycle, 'none');
+      assert.deepEqual(projection.entityIds, [`P-${library.toUpperCase()}-${family.toUpperCase()}`]);
+      assert.equal(projection.lifecycle, 'draft');
+      assert.equal(projection.freshRuntimeResult, 'not-run');
     }
+    const mapping = d.candidateSource.atomicProjectionMapping.find((row) => row.baseIdentity === baseId);
+    assert.deepEqual(mapping.projectionCells.shadcn.mappedCurrentIdentities, [
+      `P-SHADCN-${family.toUpperCase()}`,
+    ]);
+    assert.equal(mapping.projectionCells.shadcn.acceptance, 'unverified');
   }
   assert.deepEqual(validate(d), []);
   assert.deepEqual(d.comparisonRows, baseline.comparisonRows);
   assert.deepEqual(d.deliveryPlan, baseline.deliveryPlan);
+});
+
+test('Shadcn style cells cover every candidate Base identity and preserve separate New York', () => {
+  const d = sameSourceCandidate();
+  const coverage = d.candidateSource.shadcnStyleCoverage;
+  assert.deepEqual(coverage.styles, [
+    'vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea', 'new-york-v4',
+  ]);
+  assert.deepEqual(
+    coverage.rows.map((row) => row.baseIdentity),
+    d.candidateSource.atomicProjectionMapping.map((row) => row.baseIdentity)
+  );
+  for (const row of coverage.rows) {
+    const inherited = d.candidateSource.atomicProjectionMapping.find(
+      (mapping) => mapping.baseIdentity === row.baseIdentity
+    ).projectionCells.shadcn.mappedCurrentIdentities;
+    assert.deepEqual(row.projectionIdentities, inherited);
+    assert.deepEqual(Object.keys(row.styleCells), coverage.styles);
+    for (const cell of Object.values(row.styleCells)) {
+      assert.equal(cell.status, inherited.length ? 'required-unassessed' : 'required-missing');
+      assert.equal(cell.acceptance, 'unverified');
+      assert.deepEqual(cell.evidence, []);
+    }
+  }
+  assert(d.candidateSource.sourceBindings.some((binding) => binding.path === coverage.reference.path));
+  assert.deepEqual(validate(d), []);
+});
+
+test('Shadcn style source, missing cells and fabricated acceptance fail closed', () => {
+  const current = sameSourceCandidate();
+  for (const mutate of [
+    (coverage) => { delete coverage.rows[0].styleCells.vega; },
+    (coverage) => { delete coverage.rows[0].styleCells['new-york-v4']; },
+    (coverage) => { coverage.reference.revision = '1'.repeat(40); },
+    (coverage) => { coverage.rows[0].projectionIdentities = ['P-SHADCN-BUTTON']; },
+    (coverage) => { coverage.rows[0].styleCells.vega.acceptance = 'passed'; },
+    (coverage) => { coverage.rows[0].styleCells.vega.status = 'not-applicable'; },
+  ]) {
+    const d = structuredClone(current);
+    mutate(d.candidateSource.shadcnStyleCoverage);
+    assert(validateActual(d).some((error) => /Shadcn atomic\/style/.test(error)));
+  }
+});
+
+test('source inventory refresh derives consumer fields while preserving original criteria', () => {
+  const data = copy({ currentSource: true });
+  const consumer = data.consumerRows[0];
+  consumer['Current owner'] = 'Injected stale copied owner';
+  consumer.State = 'injected-stale-state';
+  const preimage = structuredClone(data);
+  const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim();
+  const refreshed = refreshSourceInventory(data, root, { revision });
+  const canonical = consumerLedgerRows(fs.readFileSync(path.join(root, consumer.source), 'utf8'))
+    .rows.get(consumer.ID);
+  for (const [field, value] of Object.entries(canonical))
+    assert.equal(refreshed.consumerRows[0][field], value);
+  assert.deepEqual(data, preimage);
+  for (const field of [
+    'protoMain', 'observedAt', 'mainSourceEvidence', 'comparisonRows', 'migrationLedger',
+    'deliveryPlan', 'atomicProjectionMapping', 'gpuiCoverageRows', 'referenceSnapshots',
+  ]) assert.deepEqual(refreshed[field], preimage[field], field);
+  for (const program of ['website', 'harness']) {
+    const rows = refreshed.consumerRows.filter((row) => row.program === program);
+    const actual = {};
+    for (const row of rows) actual[row.State] = (actual[row.State] ?? 0) + 1;
+    assert.equal(refreshed.counts.consumerPrograms[program].rows, rows.length);
+    assert.deepEqual(refreshed.counts.consumerPrograms[program].states, actual);
+  }
+  assert.deepEqual(validateActual(refreshed), []);
+});
+
+test('consumer ID changes require explicit migration instead of silent row loss', () => {
+  const data = copy({ currentSource: true });
+  data.consumerRows.shift();
+  assert.throws(
+    () => refreshSourceInventory(data, root, { revision: baseline.protoMain }),
+    /Consumer ID migration requires explicit reconciliation: website/
+  );
 });
