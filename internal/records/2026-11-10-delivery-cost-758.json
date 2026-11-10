@@ -1,0 +1,329 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.issue-758-delivery-cost-candidate",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "issue": 758,
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "owner": "SolThirty758DeliveryCost",
+  "headSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "branch": "fix/release03-thirty-issue-758-sol-20261110",
+  "worktree": "/workspace/worktrees/release03-thirty-issue-758-sol-20261110",
+  "status": "source-ready-unrun",
+  "originalIssue": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/758",
+    "state": "OPEN",
+    "body": "## Context\n\nCorrectness, semantic reuse, deterministic projection, Agent maintenance, and consumer demand are covered by the current experiment set. One narrower adoption question remains mostly implicit: **does using Proto UI impose, remove, or materially change runtime and delivery cost compared with equivalent host-native implementations?**\n\nThis is a staged measurement Issue, not a claim that Proto UI is faster and not a reason to optimize before correctness. It should begin only when #732 (or a reviewed successor) provides a real generated consumer path for a fair common scope.\n\n## Research question / hypothesis\n\nFor the same supported primitive semantics and host, how do these paths compare in delivery and runtime cost?\n\n1. Proto UI Runtime + Adapter;\n2. deterministic generated target, where a real Compiler path exists;\n3. a host-native reference implementation satisfying the same measured semantic requirements.\n\nThe result may show no meaningful difference, a Proto UI tax, a generated-target benefit, or mixed tradeoffs. Performance alone is not treated as proof of protocol value.\n\n## Experimental boundary\n\nStart with the smallest scope that has:\n\n- a real Runtime+Adapter implementation;\n- a real generated consumer output from #732 or successor;\n- a credible host-native reference implementation;\n- an independently reviewed common behavior subset.\n\nButton may establish the harness, but add at least one interaction/lifecycle-relevant primitive before generalizing beyond trivial rendering if the required paths become available.\n\nPin host/framework/browser/toolchain versions, build mode, dependency graph, machine/runtime environment, and benchmark source revisions. Do not compare development builds with production builds or unmatched feature sets.\n\n## Compared costs\n\n### Delivery/build\n\nRecord:\n\n- production JS/CSS/assets attributable to the measured path;\n- helper/runtime dependencies and duplicate dependency cost;\n- build/compile time attributable to Proto UI or target generation;\n- emitted code size before and after minification/compression;\n- source-map/debugging implications where measurable.\n\n### Startup/materialization\n\nRecord where the host permits reliable measurement:\n\n- module/load/initialization work;\n- first component materialization/mount;\n- incremental mount cost for repeated instances;\n- memory retained after stable mount and after disposal.\n\n### Interaction/runtime\n\nUse real browser input and representative supported journeys. Record only metrics that can be measured reproducibly, such as:\n\n- input-to-observable-state / input-to-paint latency;\n- update cost for controlled prop/state changes;\n- focus/event/lifecycle transition overhead;\n- layout/style/paint work for behavior actually owned by the selected primitive;\n- detach/rebind/disposal cost where relevant.\n\nFor animated or frame-sensitive behavior, report frame budget/jank only when the selected primitive genuinely exercises it; do not add artificial animation solely to produce a benchmark.\n\n## Fairness rules\n\n- All paths must satisfy the same declared semantic subset before their performance numbers are compared.\n- A faster path that omits keyboard, accessibility, lifecycle, cleanup, or controlled behavior is not a valid performance win.\n- Matching a known Proto UI or reference bug is not sufficient; unresolved correctness differences remain visible beside the timing result.\n- Avoid synthetic microbenchmarks as the only evidence. Include a clean consumer/browser journey.\n- Separate one-time shared runtime cost from marginal per-component/per-instance cost.\n- Report variance and environment noise; do not present a single best run.\n\n## Expected artifacts\n\n- frozen common semantic scope and versions;\n- production build manifests and attributable dependency accounting;\n- reproducible benchmark/consumer fixtures;\n- raw measurements with repetitions and variance;\n- correctness/conformance status for every compared path;\n- bundle/startup/update/interaction/memory table where applicable;\n- limitations/confounders and any measurement instability;\n- supported / weakened / inconclusive / falsified interpretation for concrete performance claims.\n\n## Completion criteria\n\n- [ ] #732 or equivalent provides a real generated consumer path; otherwise this Issue remains blocked rather than using mock generated output.\n- [ ] Runtime+Adapter, generated, and reference paths are compared only on a genuinely common semantic subset; unavailable paths are reported explicitly.\n- [ ] Production delivery cost and at least one real browser runtime journey are measured with reproducible environment details.\n- [ ] Correctness differences are reported next to performance results and never normalized away.\n- [ ] Shared fixed cost and marginal per-instance cost are distinguished.\n- [ ] Variance/noise and unsuccessful or unstable measurements are retained.\n- [ ] No favorable performance direction is required; a measurable Proto UI overhead is a valid result.\n\n## Relationship to existing work\n\n- #732 owns the first real Compiler/Adapter differential path and correctness harness; reuse its supported scope rather than duplicating parity logic.\n- #733 may later supply lifecycle/native-mixing journeys but is not required for an initial narrow benchmark.\n- #749 compares deterministic projection and generative implementation primarily for correctness/variance; this Issue isolates delivery/runtime cost.\n- #751 deliberately assumes AI implementation/testing cost collapses; do not use current token/Agent cost as the main performance argument here.\n- #750 owns consumer usability/demand; a faster artifact does not establish demand.\n\n## Non-goals\n\n- Optimizing the Runtime/Adapter/Compiler before the first neutral baseline exists.\n- Establishing a universal framework benchmark.\n- Treating bundle size alone as user-perceived performance.\n- Comparing paths with different semantic guarantees.\n- Marketing claims from one primitive, one machine, or one browser.\n\n## Interpretation rule\n\nPerformance should answer a bounded adoption question:\n\n> Given equivalent supported semantics, what concrete delivery/runtime tax or benefit does each Proto UI path introduce?\n\nIf the difference is negligible, record that and keep Proto UI's value proposition focused on semantics, correctness, consistency, validation, or maintenance rather than inventing a speed claim.",
+    "bodySha256": "b25b9afedd3d815cab785177dc39eac01981dcee970a4aa366ea7a655024dac3",
+    "observedUpdatedAt": "2026-11-06T12:46:33Z",
+    "commentsObserved": 2,
+    "commentsCountReadFromLiveREST": 2,
+    "discussionComplete": true,
+    "releaseDisposition": "0.4",
+    "commentUrls": [
+      "https://github.com/Proto-UI/Proto-UI/issues/758#issuecomment-6684439981",
+      "https://github.com/Proto-UI/Proto-UI/issues/758#issuecomment-6684468297"
+    ]
+  },
+  "ownership": {
+    "paths": [
+      "scripts/analysis/delivery-cost.mjs",
+      "scripts/analysis/test/delivery-cost.test.mjs",
+      "internal/records/2026-11-10-delivery-cost-758.md",
+      "internal/records/2026-11-10-delivery-cost-758.json"
+    ],
+    "sharedChanges": [],
+    "approval": "Main explicitly admitted these new analysis/test/dated-record paths; no assigned conflict.",
+    "compilerRuntimeAdapterChanges": false
+  },
+  "sourceBindings": [
+    {
+      "path": "scripts/compiler/native-consumer-smoke.mjs",
+      "sha256": "79dc52c8bc96d83e44c029bc6c5f89197c7e3934cc8c835469e6b12ddb20d0f0",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "packages/compiler/test/fixtures/differential-browser/vite.config.ts",
+      "sha256": "49e41992c1bb7333f39cb26f0ba9179d53eee753016d1f4eac05a795a9207bd9",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "packages/compiler/test/browser-differential.test.ts",
+      "sha256": "54f80e2ffbd7f85999ed73065e6cea7e7cde272024917385aa4bd3705ab00de1",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "sha256": "9df0df241be66f18c733dda2ea1cfc6bbf53aa40ecc4c5d80190148a4de52521",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "spec/prototypes/P-BASE-BUTTON.yaml",
+      "sha256": "52f00d60c230df5c42dcbbe876ca0c253c27ec1f47fe7ba2ab8563ed9415dac1",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "spec/adapters/A-REACT-18-19-0001.yaml",
+      "sha256": "e21ccb0d0d1b9019af5735cdf5a292ce9df86d604e567c6cf2b6c3fe2c7d42f2",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0001.yaml",
+      "sha256": "9cf5d433d9923e56073ffd74124b01846653fc13e7da6217c72210a874588ad4",
+      "modifiedByThisSlice": false
+    },
+    {
+      "path": "spec/tests/T-BASE-BUTTON-0001.yaml",
+      "sha256": "8c737b9689a9030dfa2164c22cb59427c9e4accd3b156737e6fa88d10379035f",
+      "modifiedByThisSlice": false
+    }
+  ],
+  "candidateFileBindings": [
+    {
+      "path": "scripts/analysis/delivery-cost.mjs",
+      "before": {
+        "exists": false,
+        "sha256": null
+      },
+      "after": {
+        "exists": true,
+        "sha256": "3a23ba0e498585a1ab6f55a33e2cf9ce94cb7d2e6c8d4fe64a457d1a79d68a30"
+      }
+    },
+    {
+      "path": "scripts/analysis/test/delivery-cost.test.mjs",
+      "before": {
+        "exists": false,
+        "sha256": null
+      },
+      "after": {
+        "exists": true,
+        "sha256": "8831a35363e46f004d2c4449bb7f8033b4d0626b44b813266ddc4c64393e344f"
+      }
+    },
+    {
+      "path": "internal/records/2026-11-10-delivery-cost-758.md",
+      "before": {
+        "exists": false,
+        "sha256": null
+      },
+      "after": {
+        "exists": true,
+        "sha256": "5b5f9170daba460e0d4635f9dc22c460140a5bc5623374a5db47337b2c7d6f85"
+      }
+    }
+  ],
+  "originalCriteria": [
+    {
+      "key": "issue.758.001",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 85,
+      "section": "## Completion criteria",
+      "original": "- [ ] #732 or equivalent provides a real generated consumer path; otherwise this Issue remains blocked rather than using mock generated output.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Immutable artifact/profile/source provenance admission; reviewed common generated path still absent.",
+      "remaining": "Provide the actual reviewed #732 successor and genuinely common semantic scope before a three-path performance comparison."
+    },
+    {
+      "key": "issue.758.002",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 86,
+      "section": "## Completion criteria",
+      "original": "- [ ] Runtime+Adapter, generated, and reference paths are compared only on a genuinely common semantic subset; unavailable paths are reported explicitly.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Explicitly unavailable paths, matched portable source hashes, adjacent declared correctness; no equivalence comparison.",
+      "remaining": "Build and independently validate Runtime+Adapter, source-generated and host-native implementations with matched controlled/input/accessibility/lifecycle/cleanup behavior."
+    },
+    {
+      "key": "issue.758.003",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 87,
+      "section": "## Completion criteria",
+      "original": "- [ ] Production delivery cost and at least one real browser runtime journey are measured with reproducible environment details.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Actual production producer and eleven controls authored; all execution and browser timing remain unrun.",
+      "remaining": "Execute pinned production delivery and real browser runtime consumer journeys; current prepared source is not an executed measurement."
+    },
+    {
+      "key": "issue.758.004",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 88,
+      "section": "## Completion criteria",
+      "original": "- [ ] Correctness differences are reported next to performance results and never normalized away.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Correctness status/differences and byte-bound receipts accompany each available arm.",
+      "remaining": "Keep correctness differences beside metrics; no matching-bug or omitted-capability speed win."
+    },
+    {
+      "key": "issue.758.005",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 89,
+      "section": "## Completion criteria",
+      "original": "- [ ] Shared fixed cost and marginal per-instance cost are distinguished.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Reached shared build chunks are counted once; per-instance runtime cost remains null.",
+      "remaining": "Measure shared runtime initialization separately from real marginal mount/update/disposal/memory; build shared chunks alone do not complete this."
+    },
+    {
+      "key": "issue.758.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 90,
+      "section": "## Completion criteria",
+      "original": "- [ ] Variance/noise and unsuccessful or unstable measurements are retained.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Raw build repetitions/errors and sample variance are implemented; no actual measurements yet.",
+      "remaining": "Retain repetitions, variance, unsuccessful/unstable attempts and environment noise; no best-only selection."
+    },
+    {
+      "key": "issue.758.007",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/758",
+      "sourceLine": 91,
+      "section": "## Completion criteria",
+      "original": "- [ ] No favorable performance direction is required; a measurable Proto UI overhead is a valid result.",
+      "historicalChecked": false,
+      "release": "0.4",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "candidateContribution": "Comparison is withheld and no favorable direction is required.",
+      "remaining": "Interpret neutral/adverse/favorable outcomes without requiring a favorable performance direction."
+    }
+  ],
+  "carriedParentCriteria": [
+    {
+      "key": "issue.1061.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1061",
+      "sourceLine": 22,
+      "section": "## Complete acceptance / safe delivery order",
+      "original": "- [ ] Keep source bytes, retained production bundle and initialization/allocation/registration measurements separate under #758. New fixed-source local execution requires the applicable approval; normal authorized Draft CI must retain failures and cannot bypass gates.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "remaining": "Original owner retains full native/lifecycle/initialization/allocation/registration/linked-artifact acceptance. This DOM artifact slice completes none of that compound condition."
+    },
+    {
+      "key": "issue.1056.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1056",
+      "sourceLine": 23,
+      "section": "## Final acceptance and delivery order",
+      "original": "- [ ] Preserve native owner identity, detach/rebind/dispose/reentrancy/cleanup tests and negative controls; generated source/clean consumer/optimized linked artifact and initialization costs are separately reported under #758.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "remaining": "Original owner retains full native/lifecycle/initialization/allocation/registration/linked-artifact acceptance. This DOM artifact slice completes none of that compound condition."
+    },
+    {
+      "key": "issue.1055.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1055",
+      "sourceLine": 24,
+      "section": "## Final acceptance (not a temporary center interpreter)",
+      "original": "- [ ] Source bytes, final production bundle/link retained bytes, and initialization work are measured separately; no unsupported percentage or tree-shaking assumption. Reuse #758 measurement governance.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentStatus": "not-completed",
+      "remaining": "Original owner retains full native/lifecycle/initialization/allocation/registration/linked-artifact acceptance. This DOM artifact slice completes none of that compound condition."
+    }
+  ],
+  "expectedArtifacts": {
+    "frozenCommonScope": "missing independent review; no public/common generated support claimed",
+    "productionManifests": "producer authored; no product execution",
+    "consumerFixtures": "reuse actual existing native-consumer-smoke; no new interpreter or copied primitive protocol",
+    "rawRepetitionsVariance": "producer authored; no actual run",
+    "correctness": "explicit supplied declarations and byte-bound original evidence; no new native/browser conformance",
+    "tables": "raw per-arm report separates source, output, debug, dependency and shared fields; runtime metrics null",
+    "limitations": "one-sided export-bundle path and external dependencies remain explicit",
+    "interpretation": "withheld; no relative performance or demand claim"
+  },
+  "verification": {
+    "metadata": "orientation and trace handoffs admitted by actual resolver; final candidate handoff pending",
+    "productChecksExecuted": false,
+    "testsExecuted": false,
+    "formatExecuted": false,
+    "buildExecuted": false,
+    "importsExecuted": false,
+    "nativeBrowserExecuted": false,
+    "expectedToolControlTests": 11,
+    "expectedProductionSamplesForPreparedNativePlan": 6,
+    "expectedExistingBrowserCases": 3
+  },
+  "remainingOriginalWork": [
+    "Provide the actual reviewed #732 successor and genuinely common semantic scope before a three-path performance comparison.",
+    "Build and independently validate Runtime+Adapter, source-generated and host-native implementations with matched controlled/input/accessibility/lifecycle/cleanup behavior.",
+    "Execute pinned production delivery and real browser runtime consumer journeys; current prepared source is not an executed measurement.",
+    "Keep correctness differences beside metrics; no matching-bug or omitted-capability speed win.",
+    "Measure shared runtime initialization separately from real marginal mount/update/disposal/memory; build shared chunks alone do not complete this.",
+    "Retain repetitions, variance, unsuccessful/unstable attempts and environment noise; no best-only selection.",
+    "Interpret neutral/adverse/favorable outcomes without requiring a favorable performance direction."
+  ],
+  "additionalOriginalBounds": [
+    "At least one interaction/lifecycle-relevant primitive before generalizing beyond Button if paths become available.",
+    "Pin host/framework/browser/toolchain/build/dependency/machine/source inputs; do not compare development and production.",
+    "Input-to-state/paint, controlled updates, focus/events/lifecycle, owned style/layout/paint and detach/rebind/disposal require actual supported browser journeys.",
+    "No artificial animation for frame/jank metrics, universal benchmark, premature optimization, bundle-only user-performance conclusion, token/Agent-cost argument, or demand inference.",
+    "A successful source-only artifact report does not close Issue 758 or any carried parent condition."
+  ],
+  "platform": {
+    "actor": {
+      "login": "cyjin-yl",
+      "id": 19223209
+    },
+    "permission": {
+      "maintain": true,
+      "push": true,
+      "pull": true,
+      "triage": true,
+      "admin": false
+    },
+    "writesPerformed": false,
+    "rulesets": "Not collected: Main must re-read current actor/rulesets/target/CI/DCO/independent review at the actual publication/integration boundary."
+  },
+  "pr": {
+    "title": "Add source-bound production delivery accounting",
+    "body": "Add a production artifact producer and hash-bound analyzer for the bounded #758 measurement slice. Reuse authenticated original source-generated consumer artifacts, retain minified/unminified output, reached assets, maps, dependency instances, repetitions and failures, and keep correctness and unavailable paths explicit.\n\nValidation: authored eleven real-esbuild accounting controls and exact serial Main consumer/browser commands; product execution is pending. The three-path/common-scope browser experiment and all seven original criteria remain open. Relates to #758."
+  }
+}
