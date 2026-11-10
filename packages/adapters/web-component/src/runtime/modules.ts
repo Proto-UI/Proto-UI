@@ -802,7 +802,8 @@ function collectEntryStyleDependencies(
   roots: Iterable<Document | ShadowRoot>,
   target: HTMLElement,
   ancestors: readonly Element[],
-  observesResize: boolean
+  observesResize: boolean,
+  observedRoots: ReadonlySet<Node>
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
@@ -813,6 +814,17 @@ function collectEntryStyleDependencies(
   const filteredPositionParents = new Set<Element | ShadowRoot>();
   const externalSubjects = [target, ...ancestors];
   const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
+  let positionalCandidates: Element[] | undefined;
+  const getPositionalCandidates = () =>
+    (positionalCandidates ??= [
+      ...candidates,
+      ...Array.from(observedRoots)
+        .filter((root) => root !== target)
+        .flatMap((root) => [
+          ...(root.nodeType === 1 ? [root as Element] : []),
+          ...(root as HTMLElement | ShadowRoot).querySelectorAll('*'),
+        ]),
+    ]);
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
     if (query) queries.add(query);
@@ -841,17 +853,19 @@ function collectEntryStyleDependencies(
       // Paint and anchor offsets do not change eligibility. Grid track sizes
       // are covered by the entry's resize observer, including container-query
       // changes. Keep watching mixed declarations and nested rules.
+      const relationalSelector = selector.includes(':has(');
+      const positional = relationalSelector && entryPositionCondition.test(selector);
       if (
-        relational !== 2 &&
-        selector.includes(':has(') &&
+        (relational !== 2 || positional) &&
+        relationalSelector &&
         !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
       ) {
-        if (hasDocumentRootRelationalSubject(selector)) relational = 2;
-        else {
-          try {
+        try {
+          let foundPositionParent = false;
+          if (relational !== 2 && hasDocumentRootRelationalSubject(selector)) relational = 2;
+          if (relational !== 2) {
             const scoped = scopedNegatedEntrySubject(selector);
             const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
-            let foundPositionParent = false;
             // The bounded ancestor fallback skips body and html. A known
             // sibling-position dependency still needs its direct parent.
             if (
@@ -870,34 +884,42 @@ function collectEntryStyleDependencies(
                     foundPositionParent = true;
                   }
             }
-            if (!foundPositionParent && entryPositionCondition.test(selector)) {
-              for (const { probe: subject, filtered } of potentialEntryPositionSubjects(
-                selector,
-                candidates
-              )) {
-                relational = 1;
-                for (const candidate of externalSubjects) {
-                  const parent = candidate.parentNode;
-                  if (!parent || !candidate.matches(subject)) continue;
-                  // Ordinary ancestors already have the conservative subtree
-                  // watch. A filtered shadow list must also rebind its peers
-                  // when the root's direct children change.
-                  if (
-                    parent === target.ownerDocument.body ||
-                    parent === target.ownerDocument.documentElement ||
-                    (filtered && parent.nodeType === 11 && !!(parent as ShadowRoot).host)
-                  ) {
-                    positionParents.add(parent);
-                    if (filtered) filteredPositionParents.add(parent as Element | ShadowRoot);
-                  }
+          }
+          // A document-wide observer cannot cover a separate shadow tree,
+          // and local attribute filters cannot observe arbitrary peer state.
+          if (
+            positional &&
+            (!foundPositionParent || filteredEntryPositionCondition.test(selector))
+          ) {
+            const possible = getPositionalCandidates();
+            for (const { probe: subject, filtered } of potentialEntryPositionSubjects(
+              selector,
+              possible
+            )) {
+              relational ||= 1;
+              for (const candidate of filtered ? possible : externalSubjects) {
+                const parent = candidate.parentNode;
+                if (!parent || !candidate.matches(subject)) continue;
+                if (
+                  filtered &&
+                  (parent.nodeType === 1 ||
+                    (parent.nodeType === 11 && !!(parent as ShadowRoot).host))
+                ) {
+                  positionParents.add(parent);
+                  filteredPositionParents.add(parent as Element | ShadowRoot);
+                } else if (
+                  parent === target.ownerDocument.body ||
+                  parent === target.ownerDocument.documentElement
+                ) {
+                  positionParents.add(parent);
                 }
               }
             }
-          } catch {
-            // Unknown selector syntax is correctness-sensitive: retain a bounded
-            // external-chain fallback rather than silently missing a change.
-            relational = 1;
           }
+        } catch {
+          // Unknown selector syntax is correctness-sensitive: retain a bounded
+          // external-chain fallback rather than silently missing a change.
+          relational ||= 1;
         }
       }
     }
@@ -1990,7 +2012,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 mediaRoots,
                 target,
                 externalAncestors,
-                !!entryResizeObserver && !hasExternalStyleInputs
+                !!entryResizeObserver && !hasExternalStyleInputs,
+                observedRoots
               );
               entryRelationalSubjects = relationalSubjects;
               for (const parent of positionParents)
