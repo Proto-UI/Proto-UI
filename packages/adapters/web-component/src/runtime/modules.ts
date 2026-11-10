@@ -149,6 +149,7 @@ import { type PropsBaseType } from '@proto.ui/types';
 import {
   createWebComponentPortalMount,
   getWebComponentPortalProjectionForOrigin,
+  isWebComponentPortaled,
 } from '../portal-mount';
 import {
   composedParentElement,
@@ -743,27 +744,61 @@ function scopedNegatedEntrySubject(selector: string) {
   return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
 }
 
-function hasEntryPositionDependency(selector: string): boolean {
+const entryPositionCondition =
+  /:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i;
+const filteredEntryPositionCondition = /:nth-(?:last-)?child\([^)]*\bof\b/i;
+
+function potentialEntryPositionSubjects(selector: string, candidates: readonly Element[]) {
+  type PositionSubject = { probe: string; filtered: boolean; watchesDefinition: boolean };
+  const subjects: PositionSubject[] = [];
+  const branchSubjects: PositionSubject[] = [];
+  let copyFrom = 0;
+  let probe = '';
+  const collect = (end: number) => {
+    if (!branchSubjects.length) return;
+    const relaxed = probe + selector.slice(copyFrom, end);
+    if (candidates.some((candidate) => candidate.matches(relaxed)))
+      subjects.push(...branchSubjects);
+  };
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
     const literalEnd = skipSelectorLiteral(selector, index, character);
     if (literalEnd !== null) {
+      if (character === '[') {
+        // A filtered position can start outside the entry attribute allowlist.
+        probe += selector.slice(copyFrom, index) + ':where(*)';
+        copyFrom = literalEnd + 1;
+      }
       index = literalEnd;
-      continue;
+    } else if (character === ',') {
+      collect(index);
+      copyFrom = index + 1;
+      probe = '';
+      branchSubjects.length = 0;
+    } else if (character === ':') {
+      let end = index + (selector[index + 1] === ':' ? 2 : 1);
+      while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+      if (selector[end] === '(') {
+        const close = matchingSelectorParen(selector, end);
+        if (close < 0) break;
+        end = close + 1;
+      }
+      // Dependency discovery must include currently inactive states, including
+      // position tests nested in a functional pseudo such as :not().
+      probe += selector.slice(copyFrom, index) + ':where(*)';
+      const predicate = selector.slice(index, end);
+      if (entryPositionCondition.test(predicate))
+        branchSubjects.push({
+          probe,
+          filtered: filteredEntryPositionCondition.test(predicate),
+          watchesDefinition: /:defined\b/i.test(predicate),
+        });
+      copyFrom = end;
+      index = end - 1;
     }
-    if (character !== ':') continue;
-    const position =
-      /^:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i.exec(
-        selector.slice(index)
-      );
-    if (
-      position &&
-      (!position[0].endsWith('(') ||
-        matchingSelectorParen(selector, index + position[0].length - 1) >= 0)
-    )
-      return true;
   }
-  return false;
+  collect(selector.length);
+  return subjects;
 }
 
 function collectEntryStyleDependencies(
@@ -771,7 +806,8 @@ function collectEntryStyleDependencies(
   roots: Iterable<Document | ShadowRoot>,
   target: HTMLElement,
   ancestors: readonly Element[],
-  observesResize: boolean
+  observesResize: boolean,
+  observedRoots: ReadonlySet<Node>
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
@@ -779,8 +815,21 @@ function collectEntryStyleDependencies(
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
+  const filteredPositionParents = new Map<Element | ShadowRoot, boolean>();
   const externalSubjects = [target, ...ancestors];
   const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
+  let positionalCandidates: Element[] | undefined;
+  let unfilteredPositionCandidates: Element[] | undefined;
+  const getPositionalCandidates = () =>
+    (positionalCandidates ??= [
+      ...candidates,
+      ...Array.from(observedRoots)
+        .filter((root) => root !== target)
+        .flatMap((root) => [
+          ...(root.nodeType === 1 ? [root as Element] : []),
+          ...(root as HTMLElement | ShadowRoot).querySelectorAll('*'),
+        ]),
+    ]);
   const collectMedia = (media: MediaList | null | undefined) => {
     const query = media?.mediaText;
     if (query) queries.add(query);
@@ -809,27 +858,21 @@ function collectEntryStyleDependencies(
       // Paint and anchor offsets do not change eligibility. Grid track sizes
       // are covered by the entry's resize observer, including container-query
       // changes. Keep watching mixed declarations and nested rules.
+      const relationalSelector = selector.includes(':has(');
+      const positional = relationalSelector && entryPositionCondition.test(selector);
       if (
-        relational !== 2 &&
-        selector.includes(':has(') &&
+        (relational !== 2 || positional) &&
+        relationalSelector &&
         !canSkipEntryRelationalRule(rule as CSSStyleRule, observesResize)
       ) {
-        if (hasDocumentRootRelationalSubject(selector)) relational = 2;
-        else {
-          try {
+        try {
+          let foundPositionParent = false;
+          if (relational !== 2 && hasDocumentRootRelationalSubject(selector)) relational = 2;
+          if (relational !== 2) {
             const scoped = scopedNegatedEntrySubject(selector);
-            // Position can change before a selector list or its subject matches.
-            // Retain only direct parents of the existing bounded external chain.
-            if (scoped) {
-              for (const subject of scoped.positionSubjects)
-                for (const candidate of externalSubjects)
-                  if (candidate.parentNode && candidate.matches(subject))
-                    positionParents.add(candidate.parentNode);
-            } else if (hasEntryPositionDependency(selector)) {
-              for (const candidate of externalSubjects)
-                if (candidate.parentNode) positionParents.add(candidate.parentNode);
-            }
             const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
+            // The bounded ancestor fallback skips body and html. A known
+            // sibling-position dependency still needs its direct parent.
             if (
               (!relational || scoped?.positionSubjects.length) &&
               candidates.some((candidate) => candidate.matches(probe))
@@ -839,12 +882,62 @@ function collectEntryStyleDependencies(
                 : [];
               if (!matches.length) relational = 1;
               else for (const candidate of matches) relationalSubjects.add(candidate);
+              for (const subject of scoped?.positionSubjects ?? [])
+                for (const candidate of externalSubjects)
+                  if (candidate.parentNode && candidate.matches(subject)) {
+                    positionParents.add(candidate.parentNode);
+                    foundPositionParent = true;
+                  }
             }
-          } catch {
-            // Unknown selector syntax is correctness-sensitive: retain a bounded
-            // external-chain fallback rather than silently missing a change.
-            relational = 1;
           }
+          // A document-wide observer cannot cover a separate shadow tree,
+          // and local attribute filters cannot observe arbitrary peer state.
+          if (
+            positional &&
+            (!foundPositionParent || filteredEntryPositionCondition.test(selector))
+          ) {
+            const possible = getPositionalCandidates();
+            for (const {
+              probe: subject,
+              filtered,
+              watchesDefinition,
+            } of potentialEntryPositionSubjects(selector, possible)) {
+              relational ||= 1;
+              for (const candidate of filtered
+                ? possible
+                : (unfilteredPositionCandidates ??= [
+                    ...externalSubjects,
+                    ...Array.from(observedRoots).filter(
+                      (root): root is Element => root.nodeType === 1 && root !== target
+                    ),
+                  ])) {
+                const parent = candidate.parentNode;
+                if (!parent || !candidate.matches(subject)) continue;
+                if (
+                  filtered &&
+                  (parent.nodeType === 1 ||
+                    (parent.nodeType === 11 && !!(parent as ShadowRoot).host))
+                ) {
+                  positionParents.add(parent);
+                  const root = parent as Element | ShadowRoot;
+                  filteredPositionParents.set(
+                    root,
+                    watchesDefinition || filteredPositionParents.get(root) === true
+                  );
+                } else if (
+                  parent === target.ownerDocument.body ||
+                  parent === target.ownerDocument.documentElement ||
+                  observedRoots.has(candidate)
+                ) {
+                  positionParents.add(parent);
+                }
+              }
+            }
+          }
+        } catch {
+          // Unknown selector syntax is correctness-sensitive: retain a bounded
+          // external-chain fallback rather than silently missing a change.
+          relational ||= 1;
         }
       }
     }
@@ -871,6 +964,7 @@ function collectEntryStyleDependencies(
     siblingSubjects,
     relationalSubjects,
     positionParents,
+    filteredPositionParents,
   ] as const;
 }
 
@@ -888,6 +982,11 @@ function watchEntryStyleInvalidation(
       CSSGroupingRule?: { prototype: Record<string, unknown> };
     }
   )?.CSSGroupingRule;
+  const CustomStateSetCtor = (
+    view as unknown as {
+      CustomStateSet?: { prototype: Record<string, unknown> };
+    }
+  )?.CustomStateSet;
   const Observer = view?.MutationObserver;
   const doc = view?.document;
   if (!view || !Sheet || !Declaration || !Observer || !doc?.documentElement) return null;
@@ -909,6 +1008,19 @@ function watchEntryStyleInvalidation(
     };
     const notify = () => schedule(false);
     const methodPatches: EntryStyleMethodPatch[] = [];
+    const customStateSize = CustomStateSetCtor
+      ? Object.getOwnPropertyDescriptor(CustomStateSetCtor.prototype, 'size')?.get
+      : undefined;
+    const readCustomStateSize = (receiver: unknown) => {
+      if (!customStateSize) return undefined;
+      try {
+        const size: unknown = customStateSize.call(receiver);
+        return typeof size === 'number' ? size : undefined;
+      } catch {
+        // The mutator below must report its own native receiver/argument error.
+        return undefined;
+      }
+    };
     // Inline declarations already deliver style-attribute records to the
     // entry's DOM observers. Only rule declarations need the window-wide
     // stylesheet invalidation, which rebuilds every entry's dependencies.
@@ -918,8 +1030,24 @@ function watchEntryStyleInvalidation(
       for (const key of keys) {
         const original = target[key];
         if (typeof original !== 'function') continue;
+        const customState = target === CustomStateSetCtor?.prototype;
+        const readsCustomStateSize = customState && key !== 'delete';
         const patched = function (this: unknown, ...args: unknown[]) {
+          const previousSize =
+            readsCustomStateSize && subscribers.size > 0 ? readCustomStateSize(this) : undefined;
           const result = Reflect.apply(original, this, args);
+          if (customState && subscribers.size === 0) return result;
+          // Native set mutators preserve membership on a repeated add, missing
+          // delete or empty clear. Do not turn those no-ops into refresh loops.
+          if (
+            customState &&
+            ((key === 'delete' && result === false) ||
+              (key === 'clear' && previousSize === 0) ||
+              (key === 'add' &&
+                previousSize !== undefined &&
+                readCustomStateSize(this) === previousSize))
+          )
+            return result;
           if (isInlineDeclaration(target, this)) schedule(true);
           else if (
             key === 'replace' &&
@@ -944,6 +1072,7 @@ function watchEntryStyleInvalidation(
       [Grouping, ['insertRule', 'deleteRule']],
       [Declaration.prototype, ['setProperty', 'removeProperty']],
       [view.MediaList?.prototype, ['appendMedium', 'deleteMedium']],
+      [CustomStateSetCtor?.prototype, ['add', 'delete', 'clear']],
     ] as const) {
       if (target) patchMethods(target as unknown as Record<string, unknown>, keys);
     }
@@ -1701,6 +1830,23 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
             let hasExternalStyleInputs = false;
+            let pendingEntryRefresh: boolean | undefined;
+            const scheduleEntrySample = (refresh: boolean) => {
+              if (pendingEntryRefresh !== undefined) {
+                pendingEntryRefresh ||= refresh;
+                return;
+              }
+              pendingEntryRefresh = refresh;
+              // Other observers can still write in this delivery. Sample
+              // their final DOM together before the next rendering step.
+              queueMicrotask(() => {
+                const rebuild = pendingEntryRefresh;
+                pendingEntryRefresh = undefined;
+                if (!isCurrentEntryObservation()) return;
+                if (rebuild) refreshTree();
+                else projectEntry();
+              });
+            };
             const belongsToObservedEntryTree = (node: Node) => {
               for (const root of observedRoots) {
                 if (root === node || root.contains(node)) return true;
@@ -1782,6 +1928,31 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // fallback forever. Upgrade notifications are the bounded
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
+              const watchUpgrade = (element: Element, includeBuiltIn = false) => {
+                const name = element.localName.includes('-')
+                  ? element.localName
+                  : includeBuiltIn
+                    ? element.getAttribute('is')
+                    : null;
+                if (
+                  !registry ||
+                  !name?.includes('-') ||
+                  pendingUpgrades.has(name) ||
+                  registry.get(name)
+                )
+                  return;
+                const subscription: [() => void] = [
+                  () => {
+                    pendingUpgrades.delete(name);
+                    refreshTree();
+                  },
+                ];
+                pendingUpgrades.set(name, subscription);
+                registry.whenDefined(name).then(
+                  () => subscription.pop()?.(),
+                  () => subscription.pop()
+                );
+              };
               observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 if (observedRoots.has(root)) return;
@@ -1821,22 +1992,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
                   entryResizeObserver?.observe(descendant);
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
-                  else if (registry) {
-                    const name = descendant.localName;
-                    if (!name.includes('-') || pendingUpgrades.has(name) || registry.get(name))
-                      continue;
-                    const subscription: [() => void] = [
-                      () => {
-                        pendingUpgrades.delete(name);
-                        refreshTree();
-                      },
-                    ];
-                    pendingUpgrades.set(name, subscription);
-                    registry.whenDefined(name).then(
-                      () => subscription.pop()?.(),
-                      () => subscription.pop()
-                    );
-                  }
+                  else watchUpgrade(descendant);
                 }
               };
               observe(target);
@@ -1857,7 +2013,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     return false;
                   })
                 )
-                  projectEntry();
+                  scheduleEntrySample(false);
               });
               // The entry region can itself be slotted or nested below
               // selector-bearing ancestors outside its owned subtree. Their
@@ -1872,14 +2028,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               const shadowAnimationTargets = new Set<EventTarget>(
                 [...observedRoots].filter((root) => root.nodeType === 11)
               );
-              const targetRoot = target.getRootNode();
-              if (
-                targetRoot.nodeType === 11 &&
-                !!(targetRoot as ShadowRoot).host &&
-                !observedRoots.has(targetRoot)
-              ) {
-                externalStyleRoots.add(targetRoot as ShadowRoot);
-                mediaRoots.add(targetRoot as ShadowRoot);
+              // Owned portals retain logical ancestry while their stylesheet
+              // scope follows the physical projection's containing root.
+              for (const root of observedRoots) {
+                const physicalRoot = root.getRootNode();
+                if (
+                  physicalRoot.nodeType === 11 &&
+                  !!(physicalRoot as ShadowRoot).host &&
+                  !observedRoots.has(physicalRoot)
+                ) {
+                  externalStyleRoots.add(physicalRoot as ShadowRoot);
+                  mediaRoots.add(physicalRoot as ShadowRoot);
+                }
               }
               while (externalAncestor) {
                 externalAncestors.push(externalAncestor);
@@ -1913,17 +2073,49 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 siblingSubjects,
                 relationalSubjects,
                 positionParents,
+                filteredPositionParents,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
                 target,
                 externalAncestors,
-                !!entryResizeObserver && !hasExternalStyleInputs
+                !!entryResizeObserver && !hasExternalStyleInputs,
+                observedRoots
               );
               entryRelationalSubjects = relationalSubjects;
-              for (const parent of positionParents)
-                if (!belongsToObservedEntryTree(parent))
-                  entryObserver?.observe(parent, { childList: true, attributes: true });
+              for (const parent of positionParents) {
+                const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);
+                if (filtered || !belongsToObservedEntryTree(parent))
+                  entryObserver?.observe(
+                    parent,
+                    filtered && observedRoots.has(parent)
+                      ? { ...options, attributeFilter: undefined }
+                      : { childList: true, attributes: true }
+                  );
+              }
+              // A filtered position can be gated by selectors above its
+              // parent, including the physical chain of an owned portal.
+              const filteredPositionAncestors = new Set<Element>();
+              for (const parent of filteredPositionParents.keys()) {
+                let followsPortal =
+                  parent.nodeType === 1 && isWebComponentPortaled(parent as HTMLElement);
+                for (
+                  let ancestor = parent.parentElement;
+                  ancestor && (followsPortal || belongsToObservedEntryTree(ancestor));
+                  ancestor = ancestor.parentElement
+                ) {
+                  if (filteredPositionAncestors.has(ancestor)) break;
+                  filteredPositionAncestors.add(ancestor);
+                  followsPortal ||= isWebComponentPortaled(ancestor as HTMLElement);
+                  if (!filteredPositionParents.has(ancestor))
+                    entryObserver?.observe(
+                      ancestor,
+                      observedRoots.has(ancestor)
+                        ? { ...options, attributeFilter: undefined }
+                        : { attributes: true }
+                    );
+                }
+              }
               for (const subject of entryRelationalSubjects) {
                 entryExternalStyleObserver.observe(subject, {
                   childList: true,
@@ -1932,6 +2124,27 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 });
               }
               const siblingStateTargets = new Set<EventTarget>();
+              const observeSibling = (sibling: Element) => {
+                if (siblingStateTargets.has(sibling)) return;
+                siblingStateTargets.add(sibling);
+                entryObserver?.observe(sibling, {
+                  childList: true,
+                  subtree: true,
+                  characterData: true,
+                  attributes: true,
+                });
+              };
+              // The positional subject can also change its own membership,
+              // including through attributes outside the entry allowlist.
+              for (const [parent, watchesDefinition] of filteredPositionParents) {
+                for (const sibling of parent.children) {
+                  observeSibling(sibling);
+                  if (!watchesDefinition) continue;
+                  watchUpgrade(sibling, true);
+                  for (const descendant of sibling.querySelectorAll('*'))
+                    watchUpgrade(descendant, true);
+                }
+              }
               for (const subject of siblingSubjects) {
                 if (subject.parentNode && !positionParents.has(subject.parentNode))
                   entryObserver?.observe(subject.parentNode, {
@@ -1939,13 +2152,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   });
                 let sibling = subject.previousElementSibling;
                 while (sibling) {
-                  siblingStateTargets.add(sibling);
-                  entryObserver?.observe(sibling, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
-                    attributes: true,
-                  });
+                  observeSibling(sibling);
                   sibling = sibling.previousElementSibling;
                 }
               }
@@ -1977,9 +2184,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               );
               const onFormReset = (event: Event) => {
                 const form = event.composedPath()[0];
+                if (!(form instanceof view!.HTMLFormElement)) return;
+                const filteredParents = [...filteredPositionParents.keys()];
                 if (
-                  form instanceof view!.HTMLFormElement &&
-                  [...form.elements].some((control) => belongsToObservedEntryTree(control))
+                  [...form.elements].some(
+                    (control) =>
+                      belongsToObservedEntryTree(control) ||
+                      filteredParents.some((parent) => parent.contains(control))
+                  )
                 )
                   queueMicrotask(projectCurrent);
               };
@@ -2287,7 +2499,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 // a different value must be resampled and restored exactly once.
                 // New native descendants can own open roots. A single DOM
                 // subtree observation never crosses those boundaries.
-                refreshTree();
+                scheduleEntrySample(true);
               }
             });
             if (view)
