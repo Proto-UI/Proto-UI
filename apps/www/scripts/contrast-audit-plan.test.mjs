@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { deflateSync } from 'node:zlib';
 import { parse } from 'yaml';
 import {
   parseContrastRuntimeOptions,
@@ -291,7 +293,56 @@ test('an unsettled authored entry fails before native focus or input is attempte
 // Controlled receipt inputs exercise the exact narrow classification policy;
 // native paint/geometry evidence remains the source-bound browser artifact.
 const knownDomain = await import('./contrast-known-unsupported.mjs');
+const receiptDigest = (value) => `sha256:${createHash('sha256').update(value).digest('hex')}`;
+// Controlled valid raster bytes; these are receipt-policy inputs, not native
+// paint evidence. PNG dimensions match the injected 128x128 CSS viewport.
+const roundedReceiptPng = (() => {
+  const chunk = (type, data) => {
+    const body = Buffer.concat([Buffer.from(type), data]);
+    let crc = 0xffffffff;
+    for (const byte of body) {
+      crc ^= byte;
+      for (let bit = 0; bit < 8; bit++)
+        crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+    const result = Buffer.alloc(data.length + 12);
+    result.writeUInt32BE(data.length, 0);
+    body.copy(result, 4);
+    result.writeUInt32BE((crc ^ 0xffffffff) >>> 0, result.length - 4);
+    return result;
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(128, 0);
+  header.writeUInt32BE(128, 4);
+  header[8] = 8;
+  header[9] = 2;
+  return Buffer.concat([
+    Buffer.from('89504e470d0a1a0a', 'hex'),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(Buffer.alloc(128 * (1 + 128 * 3)))),
+    chunk('IEND', Buffer.alloc(0)),
+  ]);
+})();
+function sealRoundedReceipt({ frame, raw, fingerprints }) {
+  raw.facts = `${JSON.stringify(frame.facts, null, 2)}\n`;
+  raw.fingerprints = `${JSON.stringify(fingerprints, null, 2)}\n`;
+  frame.factsFile.digest = receiptDigest(raw.facts);
+  frame.fingerprintsFile.digest = receiptDigest(raw.fingerprints);
+}
+function setRoundedMeasuredRect({ frame, fingerprints }, rect) {
+  frame.primaryPaint.rect = { ...rect };
+  frame.facts.surfaces[1].rect = { ...rect };
+  for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+    visibility.roundedOverflowClips[0].targetBoxes = [{ ...rect }];
+  const snapshot = JSON.parse(fingerprints.before);
+  snapshot.surfaces[1].target[0].rect = [rect.x, rect.y, rect.width, rect.height];
+  fingerprints.before = fingerprints.facts = fingerprints.after = JSON.stringify(snapshot);
+  frame.beforeFingerprintDigest = frame.afterFingerprintDigest = frame.facts.stateFingerprintDigest =
+    receiptDigest(fingerprints.before);
+}
 function roundedFrameFixture() {
+  const rootRect = { x: 10, y: 10, width: 100, height: 100 };
+  const viewportRect = { x: 12, y: 12, width: 96, height: 96 };
   const visibility = {
     visible: true,
     classification: 'unsupported',
@@ -301,7 +352,12 @@ function roundedFrameFixture() {
         prototype: 'brutalist-scroll-area-root',
         owner: 'owner',
         generation: '1',
+        physicalNodeId: 1,
         radii: ['5px', '5px', '5px', '5px'],
+        borderWidths: ['2px', '2px', '2px', '2px'],
+        borderBox: { ...rootRect },
+        clientBox: { ...viewportRect },
+        targetBoxes: [{ ...viewportRect }],
         overflowX: 'hidden',
         overflowY: 'hidden',
         fixedPx: true,
@@ -334,38 +390,86 @@ function roundedFrameFixture() {
     targetObservation: { achieved: true },
     sameProjectionLease: true,
     sameMeasurementLease: true,
-    primaryPaint: { prototype: 'brutalist-scroll-area-viewport', achieved: false, visibility },
-    beforeFingerprintDigest: 'sha256:fixture',
-    afterFingerprintDigest: 'sha256:fixture',
-    image: { path: 'rest.png', digest: 'sha256:image' },
-    factsFile: { path: 'rest.facts.json', digest: 'sha256:facts' },
+    primaryPaint: {
+      prototype: 'brutalist-scroll-area-viewport', achieved: false, visibility,
+      owner: 'owner', generation: '1', physicalNodeId: 2, rect: { ...viewportRect },
+    },
+    image: { path: 'scroll-area-react-light-rest.png', digest: receiptDigest(roundedReceiptPng) },
+    factsFile: { path: 'scroll-area-react-light-rest.facts.json' },
+    fingerprintsFile: { path: 'scroll-area-react-light-rest.fingerprints.json' },
     facts: {
+      family: item.family,
+      theme: item.theme,
       owner: 'owner',
       generation: '1',
-      stateFingerprintDigest: 'sha256:fixture',
+      imageDigest: receiptDigest(roundedReceiptPng),
+      devicePixelRatio: 1,
+      raster: { width: 128, height: 128 },
       surfaces: [
         {
           prototype: 'brutalist-scroll-area-root',
+          hostNodeId: 1, physicalNodeId: 1, owner: 'owner', generation: '1', rect: rootRect,
           visible: true,
           visibility: { classification: 'source-model-visible', limits: [] },
         },
         {
           prototype: 'brutalist-scroll-area-viewport',
+          hostNodeId: 2, physicalNodeId: 2, owner: 'owner', generation: '1', rect: viewportRect,
           visible: true,
-          visibility: structuredClone(visibility),
+          visibility: {
+            classification: visibility.classification,
+            limits: [...visibility.limits],
+            roundedOverflowClips: structuredClone(visibility.roundedOverflowClips),
+          },
         },
       ],
     },
   };
-  return { item, frame };
+  const state = JSON.stringify({
+    owner: 'owner', generation: '1', viewport: [128, 128, 1, 0, 0],
+    scope: { attributes: [
+      ['data-projection-owner', 'owner'], ['data-projection-generation', '1'],
+      ['data-projection-family', 'brutalist'], ['data-projection-runtime', item.runtime],
+    ] },
+    theme: { attributes: [['data-theme', item.theme]] },
+    surfaces: frame.facts.surfaces.map((surface) => ({
+      host: {
+        id: surface.hostNodeId,
+        attributes: [
+          ['data-projection-prototype', surface.prototype],
+          ['data-projection-owner', surface.owner],
+          ['data-projection-generation', surface.generation],
+        ],
+      },
+      target: [{
+        id: surface.physicalNodeId,
+        rect: [surface.rect.x, surface.rect.y, surface.rect.width, surface.rect.height],
+      }, []],
+    })),
+  });
+  frame.beforeFingerprintDigest = receiptDigest(state);
+  frame.afterFingerprintDigest = receiptDigest(state);
+  frame.facts.stateFingerprintDigest = receiptDigest(state);
+  const fixture = {
+    item, frame,
+    raw: { image: Buffer.from(roundedReceiptPng) },
+    fingerprints: { before: state, facts: state, after: state },
+  };
+  sealRoundedReceipt(fixture);
+  return fixture;
 }
 test('declared rounded ScrollArea is retained as unmeasured, never achieved or hidden', () => {
-  const { item, frame } = roundedFrameFixture();
-  const result = knownDomain.classifyKnownUnsupportedContrastFrame(item, frame);
+  const { item, frame, raw } = roundedFrameFixture();
+  const result = knownDomain.classifyKnownUnsupportedContrastFrame(item, frame, raw);
   assert.equal(result.achieved, false);
   assert.equal(result.numericAcceptance, 'not-evaluated');
   assert.equal(result.followup, 'https://github.com/Proto-UI/Proto-UI/issues/853');
   assert.deepEqual(result.unexecutedTargets, item.plannedStates);
+  assert.deepEqual(result.declaredProfile, {
+    radiusPx: 5, borderPx: 2, overflowX: 'hidden', overflowY: 'hidden',
+  });
+  assert.deepEqual(result.fingerprintsFile, frame.fingerprintsFile);
+  assert.equal(result.physicalNodeId, frame.primaryPaint.physicalNodeId);
   item.status = 'known-unsupported';
   item.knownUnsupported = result;
   assert.equal(knownDomain.isUnresolvedContrastCase(item), false);
@@ -510,12 +614,67 @@ for (const [name, damage] of [
       frame.factsFile = null;
     },
   ],
+  ['undeclared fixed radius', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].radii = ['10px', '10px', '10px', '10px'];
+  }],
+  ['elliptical radius', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].radii = ['5px 10px', '5px', '5px', '5px'];
+  }],
+  ['zero radius despite fixed-px flag', ({ frame }) => {
+    frame.primaryPaint.visibility.roundedOverflowClips[0].radii = ['0px', '0px', '0px', '0px'];
+  }],
+  ['undeclared border geometry', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].borderWidths[0] = '0px';
+  }],
+  ['forged safe rectangle', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].safeRect.left = 12;
+  }],
+  ['unpaired target geometry', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].targetBoxes[0].width = 95;
+  }],
+  ['replaced primary node', ({ frame }) => { frame.primaryPaint.physicalNodeId = 3; }],
+  ['foreign primary owner', ({ frame }) => { frame.primaryPaint.owner = 'other'; }],
+  ['replaced clip node', ({ frame }) => {
+    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+      visibility.roundedOverflowClips[0].physicalNodeId = 3;
+  }],
+  ['replaced measured node', ({ frame }) => { frame.facts.surfaces[1].physicalNodeId = 3; }],
+  ['foreign physical part', ({ frame }) => { frame.facts.surfaces[0].owner = 'other'; }],
+  ['unpaired image digest', ({ frame }) => { frame.facts.imageDigest = receiptDigest('different PNG'); }],
+  ['unpaired image dimensions', ({ frame }) => { frame.facts.raster.width = 127; }],
+  ['unpaired fingerprint bytes', ({ fingerprints }) => { fingerprints.after += ' '; }],
+  ['missing complete fingerprints', ({ raw }) => { raw.fingerprints = null; }],
+  ['tampered raw PNG', ({ raw }) => { raw.image[raw.image.length - 1] ^= 1; }],
+  ['wrong runtime artifact name', ({ frame }) => { frame.image.path = 'scroll-area-vue-light-rest.png'; }],
+  ['foreign anatomy owner', ({ frame }) => { frame.anatomyBefore.owner = 'other'; }],
+  ['unpaired facts family', ({ frame }) => { frame.facts.family = 'tooltip'; }],
+  ['unpaired facts theme', ({ frame }) => { frame.facts.theme = 'dark'; }],
+  ['rounded-corner geometry despite safe-interior flag', (fixture) => {
+    setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 1, height: 1 });
+  }],
+  ['offscreen measured geometry', (fixture) => {
+    setRoundedMeasuredRect(fixture, { x: -1, y: 12, width: 96, height: 96 });
+  }],
+  ['fully central box despite unsupported flag', (fixture) => {
+    setRoundedMeasuredRect(fixture, { x: 20, y: 20, width: 20, height: 20 });
+  }],
+  ['partially clipped measured geometry', (fixture) => {
+    setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 97, height: 96 });
+  }],
 ])
   test(`known-unsupported policy rejects ${name}`, () => {
     const fixture = roundedFrameFixture();
     damage(fixture);
+    // Keep the facts receipt valid after fact mutations so geometry/identity
+    // controls cannot pass merely because the old facts digest became stale.
+    if (fixture.frame.factsFile && fixture.raw.fingerprints !== null) sealRoundedReceipt(fixture);
     assert.equal(
-      knownDomain.classifyKnownUnsupportedContrastFrame(fixture.item, fixture.frame),
+      knownDomain.classifyKnownUnsupportedContrastFrame(fixture.item, fixture.frame, fixture.raw),
       null
     );
     fixture.item.status = 'failed';
@@ -531,14 +690,15 @@ test('actual capture preserves paired raw evidence for known domain and still fa
   const compiled = (await transform(source.slice(start, end), { loader: 'ts', target: 'es2022' }))
     .code;
   for (const fault of ['none', 'hidden', 'identity', 'source-drift']) {
-    const { item, frame: receipt } = roundedFrameFixture();
+    const { item, frame: receipt, raw, fingerprints } = roundedFrameFixture();
     const writes = [];
+    const written = new Map();
     let stored;
-    const state = JSON.stringify({ owner: 'owner', generation: '1' });
-    const digest = (value) => (value === state ? 'sha256:fixture' : 'sha256:artifact');
+    const state = fingerprints.before;
+    const digest = receiptDigest;
     const facts = { ...receipt.facts, stateFingerprint: state };
     const page = {
-      screenshot: async () => Buffer.from('controlled PNG transport'),
+      screenshot: async () => raw.image,
       url: () => '/fixture',
       evaluate: async () => facts,
     };
@@ -556,8 +716,9 @@ test('actual capture preserves paired raw evidence for known domain and still fa
       anatomyObservation: async () => receipt.anatomyBefore,
       output: '/fixture',
       digest,
-      writeFile: async (path) => {
+      writeFile: async (path, bytes) => {
         writes.push(path);
+        written.set(path, bytes);
       },
       join: (a, b) => `${a}/${b}`,
       primary: () => ({}),
@@ -646,6 +807,14 @@ test('actual capture preserves paired raw evidence for known domain and still fa
     } else assert.equal(item.status, 'failed');
     assert.ok(writes.some((path) => path.endsWith('.png')));
     assert.ok(writes.some((path) => path.endsWith('.facts.json')));
+    assert.ok(writes.some((path) => path.endsWith('.fingerprints.json')));
+    for (const receipt of [stored.image, stored.factsFile, stored.fingerprintsFile]) {
+      assert.equal(receipt.digest, receiptDigest(written.get(`/fixture/${receipt.path}`)));
+    }
+    const savedPair = JSON.parse(written.get(`/fixture/${stored.fingerprintsFile.path}`));
+    assert.equal(savedPair.before, state);
+    assert.equal(savedPair.facts, state);
+    assert.equal(savedPair.after === state, fault !== 'identity');
     assert.deepEqual(item.achievedTargets, []);
     assert.equal(captures.length, 0);
     if (fault === 'none' || fault === 'source-drift') {
