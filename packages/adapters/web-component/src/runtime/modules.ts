@@ -748,7 +748,7 @@ const entryPositionCondition =
 const filteredEntryPositionCondition = /:nth-(?:last-)?child\([^)]*\bof\b/i;
 
 function potentialEntryPositionSubjects(selector: string, candidates: readonly Element[]) {
-  type PositionSubject = { probe: string; filtered: boolean };
+  type PositionSubject = { probe: string; filtered: boolean; watchesDefinition: boolean };
   const subjects: PositionSubject[] = [];
   const branchSubjects: PositionSubject[] = [];
   let branchStart = 0;
@@ -788,7 +788,11 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
       probe += selector.slice(copyFrom, index) + ':where(*)';
       const predicate = selector.slice(index, end);
       if (entryPositionCondition.test(predicate))
-        branchSubjects.push({ probe, filtered: filteredEntryPositionCondition.test(predicate) });
+        branchSubjects.push({
+          probe,
+          filtered: filteredEntryPositionCondition.test(predicate),
+          watchesDefinition: /:defined\b/i.test(predicate),
+        });
       copyFrom = end;
       index = end - 1;
     }
@@ -811,7 +815,7 @@ function collectEntryStyleDependencies(
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
-  const filteredPositionParents = new Set<Element | ShadowRoot>();
+  const filteredPositionParents = new Map<Element | ShadowRoot, boolean>();
   const externalSubjects = [target, ...ancestors];
   const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
   let positionalCandidates: Element[] | undefined;
@@ -892,10 +896,11 @@ function collectEntryStyleDependencies(
             (!foundPositionParent || filteredEntryPositionCondition.test(selector))
           ) {
             const possible = getPositionalCandidates();
-            for (const { probe: subject, filtered } of potentialEntryPositionSubjects(
-              selector,
-              possible
-            )) {
+            for (const {
+              probe: subject,
+              filtered,
+              watchesDefinition,
+            } of potentialEntryPositionSubjects(selector, possible)) {
               relational ||= 1;
               for (const candidate of filtered ? possible : externalSubjects) {
                 const parent = candidate.parentNode;
@@ -906,7 +911,11 @@ function collectEntryStyleDependencies(
                     (parent.nodeType === 11 && !!(parent as ShadowRoot).host))
                 ) {
                   positionParents.add(parent);
-                  filteredPositionParents.add(parent as Element | ShadowRoot);
+                  const root = parent as Element | ShadowRoot;
+                  filteredPositionParents.set(
+                    root,
+                    watchesDefinition || filteredPositionParents.get(root) === true
+                  );
                 } else if (
                   parent === target.ownerDocument.body ||
                   parent === target.ownerDocument.documentElement
@@ -1875,6 +1884,27 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // fallback forever. Upgrade notifications are the bounded
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
+              const watchUpgrade = (element: Element) => {
+                const name = element.localName;
+                if (
+                  !registry ||
+                  !name.includes('-') ||
+                  pendingUpgrades.has(name) ||
+                  registry.get(name)
+                )
+                  return;
+                const subscription: [() => void] = [
+                  () => {
+                    pendingUpgrades.delete(name);
+                    refreshTree();
+                  },
+                ];
+                pendingUpgrades.set(name, subscription);
+                registry.whenDefined(name).then(
+                  () => subscription.pop()?.(),
+                  () => subscription.pop()
+                );
+              };
               observedRoots.clear();
               const observe = (root: HTMLElement | ShadowRoot) => {
                 if (observedRoots.has(root)) return;
@@ -1914,22 +1944,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 for (const descendant of root.querySelectorAll<HTMLElement>('*')) {
                   entryResizeObserver?.observe(descendant);
                   if (descendant.shadowRoot) observe(descendant.shadowRoot);
-                  else if (registry) {
-                    const name = descendant.localName;
-                    if (!name.includes('-') || pendingUpgrades.has(name) || registry.get(name))
-                      continue;
-                    const subscription: [() => void] = [
-                      () => {
-                        pendingUpgrades.delete(name);
-                        refreshTree();
-                      },
-                    ];
-                    pendingUpgrades.set(name, subscription);
-                    registry.whenDefined(name).then(
-                      () => subscription.pop()?.(),
-                      () => subscription.pop()
-                    );
-                  }
+                  else watchUpgrade(descendant);
                 }
               };
               observe(target);
@@ -2039,8 +2054,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               };
               // The positional subject can also change its own membership,
               // including through attributes outside the entry allowlist.
-              for (const parent of filteredPositionParents)
-                for (const sibling of parent.children) observeSibling(sibling);
+              for (const [parent, watchesDefinition] of filteredPositionParents) {
+                for (const sibling of parent.children) {
+                  observeSibling(sibling);
+                  if (!watchesDefinition) continue;
+                  watchUpgrade(sibling);
+                  for (const descendant of sibling.querySelectorAll('*')) watchUpgrade(descendant);
+                }
+              }
               for (const subject of siblingSubjects) {
                 if (subject.parentNode && !positionParents.has(subject.parentNode))
                   entryObserver?.observe(subject.parentNode, {

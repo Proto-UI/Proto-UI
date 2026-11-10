@@ -2504,6 +2504,8 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: true, bodyPosition: 'filtered-internal' },
     { initialSibling: false, bodyPosition: 'filtered-after-document-relation-shadow' },
     { initialSibling: true, bodyPosition: 'filtered-after-document-relation-shadow' },
+    { initialSibling: false, bodyPosition: 'filtered-defined' },
+    { initialSibling: false, bodyPosition: 'filtered-defined-shadow' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
@@ -2513,6 +2515,7 @@ describe('Shadow closeout native boundaries', () => {
       const atBody = shape !== null && !inShadow;
       const filteredTarget = shape === 'filtered-target';
       const filteredInternal = shape === 'filtered-internal';
+      const filteredDefined = shape === 'filtered-defined';
       const afterDocumentRelation = shape === 'filtered-after-document-relation';
       const filtered = shape === 'filtered' || afterDocumentRelation;
       const selectors: Record<string, string> = {
@@ -2523,6 +2526,8 @@ describe('Shadow closeout native boundaries', () => {
           '.positional-entry[data-eligible]:not(:has(.flag)):nth-child(1 of [data-eligible]) button',
         'filtered-internal':
           '.positional-entry:not(:has(.flag)) > .row:nth-child(1 of .row, [data-eligible]) button',
+        'filtered-defined':
+          '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible:defined) button',
       };
       const selector = filtered
         ? '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible) button'
@@ -2531,6 +2536,7 @@ describe('Shadow closeout native boundaries', () => {
       const css = `
         ${shape ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
         ${filteredInternal ? '.positional-entry > [data-eligible] ~ .row button { color: red; }' : ''}
+        ${filteredDefined ? '.eligible:defined ~ .positional-entry button { color: red; }' : ''}
         ${selector} { visibility: hidden; }
       `;
       try {
@@ -2549,6 +2555,7 @@ describe('Shadow closeout native boundaries', () => {
             filtered,
             filteredTarget,
             filteredInternal,
+            filteredDefined,
             css,
           }) => {
             const p = (window as any).Closeout;
@@ -2574,24 +2581,37 @@ describe('Shadow closeout native boundaries', () => {
               sheet.replaceSync(css);
               parent.adoptedStyleSheets = [sheet];
             } else parent.id = 'positional-entry-parent';
-            const sibling = document.createElement('span');
+            const sibling = document.createElement(
+              filteredDefined ? 'closeout-filtered-peer' : 'span'
+            );
             sibling.id = 'positional-entry-sibling';
             sibling.hidden = true;
             const wrapper = document.createElement('div');
-            wrapper.className = filtered ? 'positional-entry eligible' : 'positional-entry';
+            wrapper.className =
+              filtered || filteredDefined ? 'positional-entry eligible' : 'positional-entry';
             const host = new C();
             host.innerHTML = filteredInternal
               ? '<span hidden data-eligible></span><div class="row"><button>Inside</button></div>'
               : '<button>Inside</button>';
             if (filteredTarget || filteredInternal) host.className = 'positional-entry';
             wrapper.append(host);
-            if (initialSibling) sibling.className = 'eligible';
-            if ((initialSibling || filtered) && !filteredInternal) parent.append(sibling);
+            if (initialSibling || filteredDefined) sibling.className = 'eligible';
+            if ((initialSibling || filtered || filteredDefined) && !filteredInternal)
+              parent.append(sibling);
             parent.append(filteredTarget || filteredInternal ? host : wrapper);
             if (inShadow) document.body.append(boundary);
             else if (!atBody) document.body.append(parent);
           },
-          { initialSibling, atBody, inShadow, filtered, filteredTarget, filteredInternal, css }
+          {
+            initialSibling,
+            atBody,
+            inShadow,
+            filtered,
+            filteredTarget,
+            filteredInternal,
+            filteredDefined,
+            css,
+          }
         );
         const snapshot = () =>
           page.evaluate(
@@ -2613,6 +2633,14 @@ describe('Shadow closeout native boundaries', () => {
           );
         const visible = { visibility: 'visible', tabIndex: null };
         const hidden = { visibility: 'hidden', tabIndex: '0' };
+        if (filteredDefined) {
+          expect(await snapshot()).toEqual(hidden);
+          await page.evaluate(() =>
+            customElements.define('closeout-filtered-peer', class extends HTMLElement {})
+          );
+          expect(await snapshot()).toEqual(visible);
+          return;
+        }
         if (filteredInternal) {
           const peer = page.locator('closeout-positional-entry > span');
           expect(await snapshot()).toEqual(visible);
