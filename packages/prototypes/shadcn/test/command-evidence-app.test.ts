@@ -24,13 +24,20 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
       app.set({ style });
       await vi.waitFor(() => {
         for (const [i, record] of app.records.entries()) {
-          // Locate the actual shell owner above the editor's own Root, not a
-          // transition token that New York Command does not author.
-          const control = record.editor().closest('[data-pui-root]');
-          const shell = control?.parentElement?.closest('[data-pui-root]');
+          const { shell, control, input } = record.elements();
           expect(shell, `${record.kind}/${record.type}`).not.toBeNull();
-          expect(shell?.getAttribute('data-pui-style'), `${record.kind}/${record.type}`).toContain(
+          expect(control.parentElement.closest('[data-pui-root]')).toBe(shell);
+          expect(input).toBe(editors[i]);
+          expect(shell.getAttribute('data-pui-style'), `${record.kind}/${record.type}`).toContain(
             style === 'new-york-v4' && record.type === 'command' ? 'rounded-none' : radius
+          );
+          const legacy = record.host.querySelector(
+            '[data-pui-style~="transition-[color,box-shadow]"]'
+          );
+          // A real, ready New York Command is the original selector's
+          // negative control. Ordinary Input and Rhea retain its positive.
+          expect(legacy, `${record.kind}/${record.type}/${style}`).toBe(
+            style === 'new-york-v4' && record.type === 'command' ? null : shell
           );
           expect(record.editor()).toBe(editors[i]);
           expect(record.editor().getAttribute('data-pui-style')).toContain('border-0');
@@ -58,6 +65,49 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
     await vi.waitFor(() => {
       for (const r of app.records) expect(r.editor().disabled, `${r.kind}/${r.type}`).toBe(false);
     });
+    for (const r of app.records) {
+      const { shell, input } = r.elements();
+      shell.removeAttribute('data-demo-ref');
+      try {
+        expect(() => r.elements()).toThrow(`${r.kind}/${r.type}: expected one shell, found 0`);
+      } finally {
+        shell.setAttribute('data-demo-ref', 'shell');
+      }
+      const decoy = document.createElement('div');
+      decoy.setAttribute('data-demo-ref', 'shell');
+      r.host.append(decoy);
+      try {
+        expect(() => r.elements()).toThrow(`${r.kind}/${r.type}: expected one shell, found 2`);
+        shell.removeAttribute('data-demo-ref');
+        expect(() => r.elements()).toThrow('shell/control marker is not a Prototype Root');
+        decoy.setAttribute('data-pui-root', '');
+        expect(() => r.elements()).toThrow('incorrect shell/control ownership');
+      } finally {
+        decoy.remove();
+        shell.setAttribute('data-demo-ref', 'shell');
+      }
+      const replacement = input.cloneNode(true);
+      input.replaceWith(replacement);
+      try {
+        expect(() => r.elements()).toThrow('replaced physical shell/control/editor');
+      } finally {
+        replacement.replaceWith(input);
+      }
+      expect(r.elements().input).toBe(input);
+    }
+    // Changing only the public instance cannot authorize an old physical
+    // target. WC exposes the actual instances directly in this fixture.
+    const wc = app.records[0];
+    const shellInstance = wc.refs.shell;
+    wc.refs.shell = wc.refs.control;
+    try {
+      expect(() => wc.elements()).toThrow('replaced public shell/control instance');
+    } finally {
+      wc.refs.shell = shellInstance;
+    }
+    app.dispose();
+    for (const r of app.records)
+      expect(() => r.elements()).toThrow(`${r.kind}/${r.type}: retired owner`);
     expect(errors).toEqual([]);
   } finally {
     (window as any).commandEvidence?.dispose();

@@ -33,7 +33,12 @@ const protos = {
 };
 const records = [];
 function tree(type, state) {
-  const n = (part, props = {}, children = [], ref) => ({ part, props, children, ref });
+  const n = (part, props = {}, children = [], ref) => ({
+    part,
+    props: ref ? { ...props, 'data-demo-ref': ref } : props,
+    children,
+    ref,
+  });
   const shell = n(
     'shell',
     { focusIndicator: type === 'command' ? 'none' : 'ring', ...state.facts },
@@ -88,6 +93,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2'])
     const refs = {};
     let current = true,
       cleanup = () => {},
+      boundElements,
       render,
       destroy;
     const executions = [];
@@ -107,7 +113,10 @@ for (const kind of ['wc', 'react', 'vue', 'vue2'])
         if (typeof node === 'string') return document.createTextNode(node);
         const e = document.createElement(protos[node.part].name);
         setElementProps(e, node.props);
-        if (node.ref) refs[node.ref] = e;
+        if (node.ref) {
+          refs[node.ref] = e;
+          e.setAttribute('data-demo-ref', node.ref);
+        }
         nodes.push([e, node.part, node.ref]);
         node.children.forEach((child) => e.append(build(child)));
         return e;
@@ -231,7 +240,44 @@ for (const kind of ['wc', 'react', 'vue', 'vue2'])
         Object.assign(state, next);
         render();
       },
-      editor: () => host.querySelector('input'),
+      elements() {
+        const fail = (message) => {
+          throw new Error(`[command-evidence] ${kind}/${type}: ${message}`);
+        };
+        if (!current) fail('retired owner');
+        if (!host.isConnected) fail('detached host');
+        if (!refs.shell || !refs.control) fail('missing public shell/control instance');
+        if (
+          boundElements &&
+          (refs.shell !== boundElements.shellInstance ||
+            refs.control !== boundElements.controlInstance)
+        )
+          fail('replaced public shell/control instance');
+        const unique = (selector, part) => {
+          const matches = host.querySelectorAll(selector);
+          if (matches.length !== 1) fail(`expected one ${part}, found ${matches.length}`);
+          return matches[0];
+        };
+        const shell = unique('[data-demo-ref="shell"]', 'shell'),
+          control = unique('[data-demo-ref="control"]', 'control'),
+          input = unique('input', 'editor');
+        if (!shell.hasAttribute('data-pui-root') || !control.hasAttribute('data-pui-root'))
+          fail('shell/control marker is not a Prototype Root');
+        if (
+          input.closest('[data-pui-root]') !== control ||
+          control.parentElement?.closest('[data-pui-root]') !== shell
+        )
+          fail('incorrect shell/control ownership');
+        if (
+          boundElements &&
+          (shell !== boundElements.shell ||
+            control !== boundElements.control ||
+            input !== boundElements.input)
+        )
+          fail('replaced physical shell/control/editor');
+        return { shell, control, input };
+      },
+      editor: () => record.elements().input,
       dispose() {
         if (!current) return;
         current = false;
@@ -240,8 +286,13 @@ for (const kind of ['wc', 'react', 'vue', 'vue2'])
       },
     };
     records.push(record);
-    record.bind = () =>
-      bindInputShellControl(
+    record.bind = () => {
+      boundElements = {
+        ...record.elements(),
+        shellInstance: refs.shell,
+        controlInstance: refs.control,
+      };
+      return bindInputShellControl(
         {
           isCurrent: () => current,
           onDispose(fn) {
@@ -260,6 +311,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2'])
         },
         refs.control
       );
+    };
   }
 window.commandEvidence = {
   records,
@@ -269,7 +321,9 @@ window.commandEvidence = {
 window.addEventListener('pagehide', () => window.commandEvidence.dispose(), { once: true });
 const deadline = performance.now() + 3000;
 const bindWhenReady = () => {
-  if (records.every((r) => r.refs.shell && r.refs.control?.getExposes && r.editor())) {
+  if (
+    records.every((r) => r.refs.shell && r.refs.control?.getExposes && r.host.querySelector('input'))
+  ) {
     records.forEach((r) => (r.binding = r.bind()));
     document.documentElement.dataset.ready = 'true';
     return;
