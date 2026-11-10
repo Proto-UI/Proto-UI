@@ -19,8 +19,8 @@ criteria:
       zh-CN: 'logical ancestry 决定最近 roving owner 与 scope membership。Roving 拥有方向键/Home/End 移动与 default-action cancellation；navParticipation none 仅退出顺序 Tab 参与，保留合格程序化 target。Collection、A11y 不是必需 Module 依赖。'
   - id: M-FOCUS-0001-D
     text:
-      en: 'Entry delegates target resolution to the host without declaring target facts or roving membership. Scope activation, outside-request gating, previous-owner restore and active-scope Tab trap are separate from entry-region and roving roles.'
-      zh-CN: 'Entry 委派宿主解析 target，不声明 target facts 或 roving membership。Scope activation、外部请求拦截、previous-owner restore、active-scope Tab trap 与 entry-region、roving roles 分离。'
+      en: 'Entry delegates target resolution to the host without declaring target facts or roving membership. Scope activation, outside-request gating, configured restoration and active-scope Tab trap are separate from entry-region and roving roles. Ordinary deactivation restores the captured previous owner by default; explicit restore none suppresses only automatic handback, while closing-scope target-fact and pending-request cleanup remains owned by Focus.'
+      zh-CN: 'Entry 委派宿主解析 target，不声明 target facts 或 roving membership。Scope activation、外部请求拦截、配置的恢复策略、active-scope Tab trap 与 entry-region、roving roles 分离。普通停用默认恢复捕获的 previous owner；显式 restore none 仅抑制自动 handback，关闭 scope 的 target facts 与 pending request 清理仍由 Focus 持有。'
   - id: M-FOCUS-0001-E
     text:
       en: 'Repeatable view detachment retains pending logical focus and deferred roving entry while removing the live view participation. New readiness retries the current intent. Terminal disposal removes the FocusCenter entry, clears pending requests and releases readiness subscription.'
@@ -98,6 +98,9 @@ openQuestions:
       en: The implementation exports one shared center, and this bounded Web catalog does not admit a cross-document focus-domain policy. The ordering half of this question moved to HC-FOCUS-ORDER-0001 and criterion M-FOCUS-0001-F in 0.3.0-alpha.1.
       zh-CN: 实现导出一个共享 center，本有界 Web 编目不接纳跨 document 的 focus-domain policy。本问题的排序部分已在 0.3.0-alpha.1 移至 HC-FOCUS-ORDER-0001 与 criterion M-FOCUS-0001-F。
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Project the scope contract's existing restore-none opt-out and ordinary previous-owner default without moving cleanup or explicit consumer focus into host policy.
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Linked criterion G's retained-entry realization to its governing C-AS-FOCUS-ENTRY-0001-H criterion without changing semantics or lifecycle.

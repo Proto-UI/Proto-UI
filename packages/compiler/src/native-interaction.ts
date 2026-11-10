@@ -274,7 +274,7 @@ export const nativeInteractionArtifact = {
 
 function nativeInteractionSource(): string {
   return `// Native DOM interaction v1. No Proto package, interpreter or template rendering dependency.
-import { createNativeAdapterModules, type NativeAccessibleExtension, type NativeModuleCapabilities, type NativeAdapterModuleOptions, type NativeStateEvent, type NativeOwnedState, type NativeOwnedStateSpec, type NativeTransitionHooks } from './adapter-modules-v1';
+import { createNativeAdapterModules, noteNativeFocusRequest, type NativeAccessibleExtension, type NativeModuleCapabilities, type NativeAdapterModuleOptions, type NativeStateEvent, type NativeOwnedState, type NativeOwnedStateSpec, type NativeTransitionHooks } from './adapter-modules-v1';
 export type { NativeModuleCapability, NativeAnatomy, NativeAnatomyFamily, NativeAnatomyPart, NativeAnatomyOrder, NativeAnatomy as NativeAnatomyChannel } from './adapter-modules-v1';
 export type NativeState<T = unknown> = { get(): T };
 export type NativeObservedState<T> = NativeState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
@@ -510,6 +510,7 @@ export function createNativeInteraction<Run>(options: {
     focusSelf(request) {
       alive(); options.ensureRuntime('focus.focusSelf');
       if (disabled || !modules.canFocus()) return;
+      noteNativeFocusRequest();
       if (request?.reason === 'keyboard') keyboard = true;
       else if (request?.reason === 'pointer') keyboard = false;
       if (!deliverable() || !root!.isConnected || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request; hasPendingFocus = true; return; }
@@ -725,6 +726,7 @@ export function createNativeInteraction<Run>(options: {
     getMeta: options.getMeta,
     registerExpose: options.registerExpose,
     baseFocus: () => focus,
+    cancelPendingFocus() { pendingFocus = undefined; hasPendingFocus = false; },
     getAccessibleRole: () => role === undefined ? null : read(role) || null,
     requestAttributeRefresh: refresh,
     getAttributeBaseline: (name) => attributes.has(name) ? attributes.get(name)!.baseline : root?.getAttribute(name) ?? null,

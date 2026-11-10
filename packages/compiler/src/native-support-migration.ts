@@ -220,7 +220,9 @@ function verifyManifest(id: string, anchor: string, snapshot: Snapshot): Verifie
   );
   return { id, anchor, snapshot, manifest: value, artifacts, dependencies };
 }
-function normalizeInteraction(artifacts: readonly OutputArtifact[]): OutputArtifact[] {
+async function normalizeInteraction(
+  artifacts: readonly OutputArtifact[]
+): Promise<OutputArtifact[]> {
   const selected = artifacts.filter((file) => file.path.startsWith('.proto-ui/interaction/'));
   if (!selected.length) return [...artifacts];
   const legacy =
@@ -231,10 +233,17 @@ function normalizeInteraction(artifacts: readonly OutputArtifact[]): OutputArtif
   if (legacy) {
     // The historical ABI is recognized by its complete source hashes, not by a
     // claimed compiler version, component name, edited manifest or path alone.
+    // Anchor it to retained historical bytes; the current helper may evolve.
+    // The explicit migration below emits current support and records both hashes.
+    // Loading only this recognized migration branch keeps historical literals
+    // out of normal compiler/CLI initialization.
+    const { legacyNativeInteractionArtifact, legacyNativeAdapterModulesArtifact } =
+      await import('./native-support-legacy');
     required(
-      hash(nativeInteractionArtifact.contents) === LEGACY.get(nativeInteractionArtifact.path) &&
-        hash(nativeAdapterModulesArtifact.contents) ===
-          LEGACY.get(nativeAdapterModulesArtifact.path),
+      hash(legacyNativeInteractionArtifact.contents) ===
+        LEGACY.get(legacyNativeInteractionArtifact.path) &&
+        hash(legacyNativeAdapterModulesArtifact.contents) ===
+          LEGACY.get(legacyNativeAdapterModulesArtifact.path),
       'Legacy migration source anchor changed'
     );
     return [
@@ -370,7 +379,7 @@ function facade(localPath: string, target: string): string {
     ';\n'
   );
 }
-function assemble(inputs: VerifiedInput[]): OutputArtifact[] {
+async function assemble(inputs: VerifiedInput[]): Promise<OutputArtifact[]> {
   const shared = new Map<string, OutputArtifact>();
   const dependencies = new Map<string, { name: string; version: string; role: string }>();
   for (const input of inputs)
@@ -382,10 +391,12 @@ function assemble(inputs: VerifiedInput[]): OutputArtifact[] {
       );
       dependencies.set(dependency.name, dependency);
     }
-  const normalized = inputs.map((input) => {
-    validateContext(input.artifacts);
-    return { input, artifacts: normalizeInteraction(input.artifacts) };
-  });
+  const normalized = await Promise.all(
+    inputs.map(async (input) => {
+      validateContext(input.artifacts);
+      return { input, artifacts: await normalizeInteraction(input.artifacts) };
+    })
+  );
   for (const { artifacts } of normalized)
     for (const file of artifacts)
       if (sharedSource(file)) {
@@ -536,7 +547,7 @@ export async function migrateNativeSupport(
       required(total <= MAX_TOTAL_BYTES, 'Combined migration input byte budget exceeded');
       inputs.push(verifyManifest(entry.id, entry.provenanceSHA256, snapshot));
     }
-    const artifacts = assemble(inputs);
+    const artifacts = await assemble(inputs);
     // The input set stays unchanged throughout planning; do not reserve output
     // after any observed input race or only partially verified directory.
     for (const input of inputs) await verifySnapshot(input.snapshot);

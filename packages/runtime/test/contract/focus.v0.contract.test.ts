@@ -168,7 +168,7 @@ describe('runtime contract: focus (v0)', () => {
         scope.configure({ key: first });
         scope.configure({
           emptyPolicy: 'container',
-          restore: 'previous',
+          restore: 'none',
           entry: 'manual',
           orientation: 'horizontal',
           navigation: 'arrow',
@@ -196,7 +196,7 @@ describe('runtime contract: focus (v0)', () => {
       '[Focus] scope.navigation overridden: tab -> arrow',
       '[Focus] scope.orientation overridden: vertical -> horizontal',
       '[Focus] scope.entry overridden: first -> manual',
-      '[Focus] scope.restore overridden: none -> previous',
+      '[Focus] scope.restore overridden: previous -> none',
       '[Focus] scope.emptyPolicy overridden: none -> container',
     ]);
     expect(port.getFocusableConfig().meta).toEqual({ retained: true, changed: true });
@@ -267,7 +267,7 @@ describe('runtime contract: focus (v0)', () => {
       loop: true,
       orientation: 'vertical',
       entry: 'first',
-      restore: 'none',
+      restore: 'previous',
       emptyPolicy: 'none',
       trap: false,
     });
@@ -1210,6 +1210,75 @@ describe('runtime contract: focus (v0)', () => {
     scope.deactivate();
 
     expect(focused).toEqual(['outside', 'item', 'outside']);
+    expect(scope.isActive()).toBe(false);
+  });
+
+  it('FOCUS-0815: restore none preserves the host-observed outside owner', () => {
+    let outside!: FocusableHandle<PropsBaseType>;
+    let scope!: FocusScopeHandle<PropsBaseType>;
+
+    const Outside = definePrototype({
+      name: 'x-focus-0815-outside',
+      setup() {
+        outside = asFocusable<PropsBaseType>();
+        return (r) => r.el('button', 'outside');
+      },
+    });
+    const Scope = definePrototype({
+      name: 'x-focus-0815-scope',
+      setup() {
+        scope = asFocusScope<PropsBaseType>();
+        scope.configure({ restore: 'none' });
+        return (r) => r.el('div', 'scope');
+      },
+    });
+    const Item = definePrototype({
+      name: 'x-focus-0815-item',
+      setup() {
+        asFocusable<PropsBaseType>();
+        return (r) => r.el('button', 'item');
+      },
+    });
+
+    const order = new Map<string, number>([
+      ['outside', 0],
+      ['scope', 1],
+      ['item', 2],
+      ['destination', 3],
+    ]);
+    const globalTarget = new FocusTarget('global', new Map());
+    const targets = {
+      outside: new FocusTarget('outside', order),
+      scope: new FocusTarget('scope', order),
+      item: new FocusTarget('item', order),
+      destination: new FocusTarget('destination', order),
+    };
+    const parents = new Map<unknown, unknown | null>([
+      [targets.outside, null],
+      [targets.scope, null],
+      [targets.item, targets.scope],
+      [targets.destination, null],
+    ]);
+    const focused: string[] = [];
+    const hostOptions = { globalTarget, parents, focused };
+
+    executeWithHost(Outside, createTreeHost(Outside.name, targets.outside, hostOptions));
+    executeWithHost(Scope, createTreeHost(Scope.name, targets.scope, hostOptions));
+    executeWithHost(Item, createTreeHost(Item.name, targets.item, hostOptions));
+    const destination = executeWithHost(
+      Item,
+      createTreeHost('x-focus-0815-destination', targets.destination, hostOptions)
+    );
+
+    outside.focus({ reason: 'programmatic' });
+    scope.activate();
+    targets.destination.dispatchEvent(new Event('host:focus'));
+    scope.deactivate();
+
+    // The host independently reports the outside move; deactivation must not
+    // replace it with an automatic request for the captured owner.
+    expect(focused).toEqual(['outside', 'item']);
+    expect(destination.caps.getPort<FocusPort>('focus')?.getFacts().focused).toBe(true);
     expect(scope.isActive()).toBe(false);
   });
 

@@ -42,6 +42,8 @@ export type FocusCenterEntry = {
     finish(failed?: boolean): void;
   };
   hasPendingFocus(): boolean;
+  /** Retire retained requests without publishing focus facts or blurring. */
+  cancelPendingFocus(): void;
   clearFocus(reason: unknown): void;
   setScopeActive(active: boolean): void;
   pushWarning(message: string): void;
@@ -55,6 +57,7 @@ type ActiveScopeRecord = {
 export class FocusCenter {
   private readonly entries = new Map<FocusInstanceToken, FocusCenterEntry>();
   private readonly activeScopes: ActiveScopeRecord[] = [];
+  private scopeRevision = 0;
   private readonly lastFocusedByScope = new Map<FocusInstanceToken, FocusInstanceToken>();
   private currentFocused: FocusInstanceToken | null = null;
   private ownerEpoch = 0;
@@ -86,9 +89,11 @@ export class FocusCenter {
       if (focused === instance) this.lastFocusedByScope.delete(scope);
     }
     for (let i = this.activeScopes.length - 1; i >= 0; i--) {
-      if (this.activeScopes[i]?.scope === instance || this.activeScopes[i]?.previous === instance) {
+      const record = this.activeScopes[i]!;
+      if (record.scope === instance) {
         this.activeScopes.splice(i, 1);
-      }
+        this.scopeRevision += 1;
+      } else if (record.previous === instance) record.previous = null;
     }
   }
 
@@ -178,6 +183,7 @@ export class FocusCenter {
       if (entry?.isScopeProvider()) return entry;
       if (this.pendingRovingEntries.has(this.activeScopes[i]!.scope)) return null;
       this.activeScopes.splice(i, 1);
+      this.scopeRevision += 1;
     }
     return null;
   }
@@ -327,23 +333,28 @@ export class FocusCenter {
 
     const focused = this.getFocusedEntry();
     const previous = focused && !this.isDescendantOf(focused, scope) ? focused.instance : null;
-    this.activeScopes.push({ scope: scope.instance, previous });
+    const record = { scope: scope.instance, previous };
+    this.activeScopes.push(record);
+    const revision = ++this.scopeRevision;
     scope.setScopeActive(true);
+    if (!this.activeScopes.includes(record)) return this.isScopeActive(scope);
 
     if (options?.entry === 'manual' || scope.getScopeConfig().entry === 'manual') return true;
 
     const target = scope.isRovingProvider()
       ? (this.getRovingMembers(scope)[0] ?? null)
       : (this.getScopeMembers(scope)[0] ?? null);
+    if (!this.activeScopes.includes(record)) return this.isScopeActive(scope);
     if (target) {
       // Entry is a scope policy, not a new Host Focus request field.
       const { entry: _entry, ...request } = options ?? { reason: 'programmatic' as const };
-      this.requestFocus(target, request, { syncFacts: true });
+      if (revision === this.scopeRevision) this.requestFocus(target, request, { syncFacts: true });
       return true;
     }
 
     if (scope.getScopeConfig().emptyPolicy === 'container') return true;
-    this.activeScopes.pop();
+    this.activeScopes.splice(this.activeScopes.indexOf(record), 1);
+    this.scopeRevision += 1;
     scope.setScopeActive(false);
     return false;
   }
@@ -362,9 +373,30 @@ export class FocusCenter {
     }
 
     const [{ previous }] = this.activeScopes.splice(index, 1);
+    const revision = ++this.scopeRevision;
+    const epoch = this.ownerEpoch;
+    const requestEpoch = this.requestEpoch;
+    const current = () =>
+      revision === this.scopeRevision &&
+      epoch === this.ownerEpoch &&
+      requestEpoch === this.requestEpoch &&
+      this.entries.has(scope.instance) &&
+      !this.isScopeActive(scope);
+
+    // Retire the closing scope's old requests before observers can replace
+    // them. Fact cleanup stays after the notification under its owner guard.
+    for (const entry of this.entries.values()) {
+      if (entry.instance === scope.instance || !entry.isFocusable()) continue;
+      if (this.isDescendantOf(entry, scope) && entry.hasPendingFocus()) {
+        entry.cancelPendingFocus();
+      }
+    }
     scope.setScopeActive(false);
 
     for (const entry of this.entries.values()) {
+      // A newer request can still be pending without changing focus ownership
+      // or the scope stack. Old cleanup and restoration must leave it intact.
+      if (!current()) return true;
       if (entry.instance === scope.instance || !entry.isFocusable()) continue;
       if (!this.isDescendantOf(entry, scope)) continue;
       const facts = entry.getFacts();
@@ -372,9 +404,12 @@ export class FocusCenter {
         continue;
       }
       entry.clearFocus(options?.reason ?? 'focus.scope.deactivate');
+      if (!current()) return true;
       if (this.currentFocused === entry.instance) this.currentFocused = null;
     }
 
+    // Restore policy controls the automatic transfer, independently of cleanup.
+    if (!current() || scope.getScopeConfig().restore === 'none') return true;
     const previousEntry = previous ? (this.entries.get(previous) ?? null) : null;
     if (previousEntry) {
       this.requestFocus(previousEntry, options ?? { reason: 'programmatic' }, {

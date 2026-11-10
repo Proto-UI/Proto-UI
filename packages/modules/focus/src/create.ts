@@ -72,7 +72,8 @@ const DEFAULT_SCOPE_CONFIG: FocusScopeConfig = Object.freeze({
   navigation: 'tab',
   orientation: 'vertical',
   entry: 'first',
-  restore: 'none',
+  // Preserve ordinary previous-owner restoration; none is an explicit opt-out.
+  restore: 'previous',
   emptyPolicy: 'none',
 });
 
@@ -583,6 +584,7 @@ class FocusModuleImpl extends ModuleBase {
         };
       },
       hasPendingFocus: () => !!this.pendingFocusRequest || !!this.focusOperation?.inFlight,
+      cancelPendingFocus: () => this.cancelPendingFocus(),
       clearFocus: (reason: unknown) => {
         this.runInCallbackScope(() => this.clearFocus(reason));
       },
@@ -1129,9 +1131,13 @@ class FocusModuleImpl extends ModuleBase {
     }
   }
 
-  private clearFocus(reason: unknown): void {
+  private cancelPendingFocus(): void {
     this.cancelFocusOperation();
     this.clearPendingFocus();
+  }
+
+  private clearFocus(reason: unknown): void {
+    this.cancelPendingFocus();
     this.clearFocusFacts(reason);
   }
 
@@ -1238,8 +1244,7 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   blur(): void {
-    this.cancelFocusOperation();
-    this.clearPendingFocus();
+    this.cancelPendingFocus();
     this.blurTarget();
   }
 
