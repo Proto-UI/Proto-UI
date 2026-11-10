@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   installSizingMotionTrace,
   sizingMotionIssues,
+  type SizingMotionSelection,
   type SizingMotionTrigger,
 } from './demo-select-item-sizing-motion';
 
@@ -11,7 +12,7 @@ afterEach(() => {
   vi.useRealTimers();
   document.body.replaceChildren();
 });
-function fixture() {
+function fixture(selection: SizingMotionSelection = 'selected') {
   vi.useFakeTimers();
   const frames = new Map<number, FrameRequestCallback>();
   let next = 0;
@@ -31,7 +32,8 @@ function fixture() {
   const surface = content.firstElementChild as HTMLElement;
   const viewport = surface.firstElementChild as HTMLElement;
   const items = [...viewport.children] as HTMLElement[];
-  items[0].setAttribute('aria-selected', 'true');
+  for (const item of items) item.setAttribute('aria-selected', 'false');
+  if (selection === 'selected') items[0].setAttribute('aria-selected', 'true');
   let scale = 0.95;
   let running = true;
   let pending = false;
@@ -66,7 +68,7 @@ function fixture() {
     surface.style.transform = `matrix(${scale}, 0, 0, ${scale}, 0, 0)`;
   };
   update();
-  installSizingMotionTrace(trigger);
+  installSizingMotionTrace(trigger, selection);
   const frame = () => {
     const callbacks = [...frames];
     frames.clear();
@@ -137,13 +139,16 @@ describe('Select sizing animation prerequisite', () => {
     expect(f.frames.size).toBe(0);
     expect(vi.getTimerCount()).toBe(0);
   });
-  it('does not accept layout214 simply because a later painted sample reaches224', async () => {
-    const f = fixture();
-    f.itemWidth(214);
-    f.open();
-    f.settle();
-    expect(sizingMotionIssues(await f.done, 'wc')).toContain('layout mismatch during motion');
-  });
+  it.each(['unset', 'selected'] as const)(
+    '%s: does not accept layout214 simply because a later painted sample reaches224',
+    async (selection) => {
+      const f = fixture(selection);
+      f.itemWidth(214);
+      f.open();
+      f.settle();
+      expect(sizingMotionIssues(await f.done, 'wc')).toContain('layout mismatch during motion');
+    }
+  );
   it('rejects the former 8px row inset even when the popup stays on the trigger', async () => {
     const f = fixture();
     f.itemWidth(216);
@@ -299,6 +304,54 @@ describe('Select sizing animation prerequisite', () => {
   });
 });
 
+describe('initial alignment and committed selection remain distinct', () => {
+  it('retains the unset first-enabled trajectory before and after deferred entry focus', async () => {
+    const f = fixture('unset');
+    f.items[0].setAttribute('aria-disabled', 'true');
+    f.trigger.setAttribute('aria-expanded', 'true');
+    f.frame();
+    f.items[1].focus();
+    f.settle();
+    const result = await f.done;
+    expect(result.selection).toBe('unset');
+    expect(result.samples.map((sample) => sample.alignedIndex)).toEqual([1, 1, 1]);
+    expect(result.samples.map((sample) => sample.selectedIndices)).toEqual([[], [], []]);
+    expect(result.samples.map((sample) => sample.focused)).toEqual([false, true, true]);
+    expect(result.samples.map((sample) => sample.surface.transform[0])).toEqual([0.95, 1, 1]);
+    expect(sizingMotionIssues(result, 'wc')).toEqual([]);
+  });
+
+  it('rejects a transient selection commit in an explicitly unset trajectory', async () => {
+    const f = fixture('unset');
+    f.open();
+    f.items[0].setAttribute('aria-selected', 'true');
+    f.frame();
+    f.items[0].setAttribute('aria-selected', 'false');
+    f.settle();
+    const result = await f.done;
+    expect(result.samples.map((sample) => sample.selectedIndices)).toEqual([[], [0], [], []]);
+    expect(sizingMotionIssues(result, 'wc')).toContain(
+      'selection/alignment mismatch during motion'
+    );
+  });
+
+  it.each([
+    { label: 'missing', selected: [] },
+    { label: 'ambiguous', selected: [0, 2] },
+  ])('does not fallback for a $label committed selection', async ({ selected }) => {
+    const f = fixture('selected');
+    for (const [index, item] of f.items.entries())
+      item.setAttribute('aria-selected', selected.includes(index) ? 'true' : 'false');
+    f.open();
+    f.settle();
+    const result = await f.done;
+    expect(result.samples.every((sample) => sample.alignedIndex === -1)).toBe(true);
+    expect(sizingMotionIssues(result, 'wc')).toContain(
+      'selection/alignment mismatch during motion'
+    );
+  });
+});
+
 describe('retained animation identity and trajectory falsifiers', () => {
   it('does not call cancellation a completed animation when the browser list becomes empty', async () => {
     const f = fixture();
@@ -443,7 +496,7 @@ it('installs from its serialized function without an imported module closure', a
   const serialized = new Function(
     `return (${installSizingMotionTrace.toString()});`
   )() as typeof installSizingMotionTrace;
-  const handle = serialized(f.trigger);
+  const handle = serialized(f.trigger, 'selected');
   expect(handle).toBe(f.trigger.__puiSizingMotion);
   const done = handle.done;
   f.open();
@@ -464,7 +517,7 @@ it('rejects a finished unit-scale Surface that remains fully transparent', async
 describe('exact trace handles survive later locator changes', () => {
   it('returns the exact installed handle and stops the previous trace before replacing it', async () => {
     const f = fixture();
-    const handle = installSizingMotionTrace(f.trigger);
+    const handle = installSizingMotionTrace(f.trigger, 'selected');
     expect(handle).toBe(f.trigger.__puiSizingMotion);
     expect((await f.done).status).toBe('stopped');
     f.open();
@@ -474,7 +527,7 @@ describe('exact trace handles survive later locator changes', () => {
 
   it('retains the original invalid-owner result when a new Trigger copies the locator attributes', async () => {
     const f = fixture();
-    const handle = installSizingMotionTrace(f.trigger);
+    const handle = installSizingMotionTrace(f.trigger, 'selected');
     f.open();
     const replacement = f.trigger.cloneNode(true) as SizingMotionTrigger;
     f.trigger.replaceWith(replacement);
@@ -491,9 +544,9 @@ describe('exact trace handles survive later locator changes', () => {
 
   it('does not let cleanup through an old handle stop a newer same-node trace', async () => {
     const f = fixture();
-    const oldHandle = installSizingMotionTrace(f.trigger);
+    const oldHandle = installSizingMotionTrace(f.trigger, 'selected');
     f.open();
-    const newHandle = installSizingMotionTrace(f.trigger);
+    const newHandle = installSizingMotionTrace(f.trigger, 'selected');
     expect((await oldHandle.done).status).toBe('stopped');
     oldHandle.stop();
     expect(f.trigger.__puiSizingMotion).toBe(newHandle);

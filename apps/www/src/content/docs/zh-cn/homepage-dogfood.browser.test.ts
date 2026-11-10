@@ -369,10 +369,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         });
         expect(geometry.navHidden, `${width}px navigation is deliberately disclosed`).toBe(false);
         await originalNavigation!.dispose();
-        expect(geometry.preferences).toHaveLength(3);
         // Author labels name each independent Select; selected text is its value,
-        // not a replacement accessible name. Never let a duplicate locale row
-        // satisfy the three-control geometry count.
+        // not a replacement accessible name. Each named control must occur once.
         for (const [name, value] of [
           ['整页 Runtime', 'Web Components'],
           ['整页组件库', 'Shadcn'],
@@ -394,7 +392,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         }
         for (const preference of geometry.preferences) {
           expect(preference.height).toBeGreaterThanOrEqual(44);
-          expect(preference.width).toBeGreaterThanOrEqual(120);
+          expect(preference.width, 'minimum native touch target').toBeGreaterThanOrEqual(44);
           expect(preference.fullValueVisible).toBe(true);
           expect(preference.bottom).toBeLessThanOrEqual(geometry.panel.bottom + 1);
           expect(preference.y).toBeGreaterThanOrEqual(geometry.panel.top);

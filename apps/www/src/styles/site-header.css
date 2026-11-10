@@ -446,7 +446,9 @@
   line-height: 1rem;
   color: var(--color-muted-foreground);
 }
-@media (max-width: 79.999rem) {
+/* PageFrame's existing Header container measures available space at the
+   current text size; viewport media rems keep their initial font size. */
+@container docs-page (max-width: 79.999rem) {
   .home-runtime-header {
     --site-header-search-width: 2.75rem;
     --site-header-search-padding: 0;
@@ -683,13 +685,20 @@
     }
   }
   @container docs-page (max-width: 42rem) {
-    .site-header[data-docs-site-header] {
+    .site-header[data-docs-site-header],
+    .home-runtime-header {
       grid-template-columns: minmax(0, 1fr) repeat(3, 2.75rem);
       grid-template-areas: 'brand search theme menu' 'navigation navigation navigation navigation' 'context context context context';
     }
-    .site-header[data-docs-site-header] [data-site-header-desktop-navigation] {
+    .site-header[data-docs-site-header] [data-site-header-desktop-navigation],
+    .home-runtime-header [data-site-header-desktop-navigation] {
       flex-wrap: wrap;
       margin-inline-start: 0;
+    }
+    .home-runtime-header
+      [data-site-header-desktop-navigation]
+      :is(.home-actions-fallback, .home-runtime-actions) {
+      flex-wrap: wrap;
     }
   }
 }
@@ -761,7 +770,7 @@
 }
 /* The complete family name and status stay on one line at ordinary desktop
    scale. Small screens and enlarged text still use the existing reflow. */
-@media (min-width: 80rem) {
+@container docs-page (min-width: 80rem) {
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-header {
     grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 2.75rem 2.75rem;
   }

@@ -323,8 +323,8 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
             );
             expect(
               await checkbox.evaluate((element) => getComputedStyle(element).boxShadow),
-              `${label}/pressed-shadow`
-            ).not.toBe(beforeShadow);
+              `${label}/press preserves shadow`
+            ).toBe(beforeShadow);
             await row.screenshot({
               path: evidencePath(runtime, colorScheme, 'pressed'),
               animations: 'disabled',

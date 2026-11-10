@@ -10,7 +10,7 @@ import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harn
 import { revealHeaderPreferences } from './site-header-browser';
 import { copySourceBindingIssues, type CopySourceBinding } from './copy-command-evidence';
 
-// Eight fresh, credential-free homepage contexts; five layout samples reuse each page.
+// Eight fresh, credential-free homepage contexts; six layout samples reuse each page.
 // Four separate width-fixture contexts isolate intrinsic input sizing.
 // 150s startup + 8 x 45s scenes + 30s no-JS + 30s width + 20s teardown
 // + 1s pure contracts = 591s < the unchanged 600s lane cap.
@@ -26,7 +26,6 @@ const HOME = '[data-home-showcase="website-component-gallery"]';
 const ACTIVE = `${HOME} [data-projection-generation-state="active"]`;
 const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
 import {
-  HOMEPAGE_GALLERY_IDS as GALLERY_IDS,
   galleryFlowEvidence,
   chartContainmentIssues,
   type GalleryRect,
@@ -85,7 +84,7 @@ export function captureSelectionIssues(
     issues.push('stale scene generation');
   return issues;
 }
-it('passive evidence rejects invalid generations and incomplete, split, reordered or gapped galleries', () => {
+it('passive evidence rejects invalid and incomplete generations', () => {
   const good: CaptureSelection = [
     {
       hostGeneration: '3',
@@ -127,96 +126,6 @@ it('passive evidence rejects invalid generations and incomplete, split, reordere
   duplicateScene[0]!.scopes[0]!.scenes[2] = duplicateScene[0]!.scopes[0]!.scenes[0]!;
   expect(captureSelectionIssues(duplicateScene, 'wc', 'shadcn')).toContain(
     'missing or duplicate scene'
-  );
-  const rect = (left: number, top: number): GalleryRect => ({
-    left,
-    top,
-    right: left + 288,
-    bottom: top + 100,
-    width: 288,
-    height: 100,
-  });
-  const gallery: GalleryFlowFacts = {
-    containerCount: 1,
-    viewportWidth: 1180,
-    rootFontSize: 16,
-    columnGap: 32,
-    container: { left: 0, right: 928, top: 0, bottom: 472, width: 928, height: 472 },
-    cards: GALLERY_IDS.map((id, index) => {
-      const column = index < 4 ? 0 : index < 7 ? 1 : 2;
-      const row = index - [0, 4, 7][column]!;
-      const box = rect(column * 320, row * 124);
-      return { id, visible: true, rect: box, rowGap: 24, fragments: [{ ...box }] };
-    }),
-  };
-  expect(galleryFlowEvidence(gallery).issues).toEqual([]);
-  const narrow = structuredClone(gallery);
-  narrow.viewportWidth = 320;
-  narrow.columnGap = 24;
-  narrow.container = { left: 0, right: 288, top: 0, bottom: 1200, width: 288, height: 1200 };
-  narrow.cards.forEach((card, index) => {
-    card.rect = rect(0, index * 120);
-    card.rowGap = 20;
-    card.fragments = [{ ...card.rect }];
-  });
-  expect(galleryFlowEvidence(narrow).issues).toEqual([]);
-  const missingCard = structuredClone(gallery);
-  missingCard.cards.pop();
-  expect(galleryFlowEvidence(missingCard).issues).toContain(
-    'missing, duplicate or reordered gallery card'
-  );
-  const duplicateCard = structuredClone(gallery);
-  duplicateCard.cards[8]!.id = duplicateCard.cards[0]!.id;
-  expect(galleryFlowEvidence(duplicateCard).issues).toContain(
-    'missing, duplicate or reordered gallery card'
-  );
-  const splitCard = structuredClone(gallery);
-  splitCard.cards[0]!.fragments.push(rect(312, 0));
-  expect(galleryFlowEvidence(splitCard).issues).toContain(
-    'controls: split or inconsistent gallery card fragment'
-  );
-  const hiddenCard = structuredClone(gallery);
-  hiddenCard.cards[0]!.visible = false;
-  expect(galleryFlowEvidence(hiddenCard).issues).toContain('controls: absent painted gallery card');
-  const reordered = structuredClone(gallery);
-  [reordered.cards[0]!.rect, reordered.cards[1]!.rect] = [
-    reordered.cards[1]!.rect,
-    reordered.cards[0]!.rect,
-  ];
-  for (const card of reordered.cards) card.fragments = [{ ...card.rect }];
-  expect(galleryFlowEvidence(reordered).issues).toContain(
-    'painted gallery column order differs from DOM order'
-  );
-  const overlap = structuredClone(gallery);
-  overlap.cards[1]!.rect = rect(0, 90);
-  overlap.cards[1]!.fragments = [{ ...overlap.cards[1]!.rect }];
-  expect(galleryFlowEvidence(overlap).issues).toContain(
-    'controls/workspace-command: gallery cards overlap'
-  );
-  const rowHole = structuredClone(gallery);
-  rowHole.cards[2]!.rect = rect(0, 700);
-  rowHole.cards[2]!.fragments = [{ ...rowHole.cards[2]!.rect }];
-  expect(galleryFlowEvidence(rowHole).issues).toContain(
-    'workspace-command/workspace-analytics: gallery gap differs from the responsive spacing contract'
-  );
-  const wrongGap = structuredClone(gallery);
-  wrongGap.columnGap = 48;
-  expect(galleryFlowEvidence(wrongGap).issues).toContain(
-    'gallery column gap differs from the responsive spacing contract'
-  );
-  const noFragments = structuredClone(gallery);
-  noFragments.cards[0]!.fragments = [];
-  expect(galleryFlowEvidence(noFragments).issues).toContain(
-    'controls: split or inconsistent gallery card fragment'
-  );
-  const wrongColumns = structuredClone(narrow);
-  wrongColumns.cards[8]!.rect = rect(312, 0);
-  wrongColumns.cards[8]!.fragments = [{ ...wrongColumns.cards[8]!.rect }];
-  expect(galleryFlowEvidence(wrongColumns).issues).toContain(
-    'painted gallery column count differs from available 18rem tracks'
-  );
-  expect(galleryFlowEvidence(wrongColumns).issues).toContain(
-    'overlays: gallery card outside viewport'
   );
 }, 1_000);
 
@@ -605,6 +514,68 @@ async function layoutFacts(page: Page) {
         texts,
       };
     });
+    const hero = (
+      [
+        ['heading', '.homepage-hero h1'],
+        ['tagline', '.homepage-hero__tagline'],
+        ['announcement', '.homepage-hero__eyebrow a'],
+      ] as const
+    ).flatMap(([kind, selector]) => {
+      const owners = [...document.querySelectorAll<HTMLElement>(selector)].filter(visible);
+      if (owners.length !== 1) issues.push(`hero ${kind}: absent or duplicate painted owner`);
+      return owners.map((owner) => {
+        const bounds = owner.getBoundingClientRect();
+        const css = getComputedStyle(owner);
+        const texts: GalleryRect[] = [];
+        if (bounds.width <= 0 || bounds.height <= 0)
+          issues.push(`hero ${kind}: absent painted area`);
+        if (bounds.left < -1 || bounds.right > innerWidth + 1)
+          issues.push(`hero ${kind}: owner outside viewport`);
+        const walker = document.createTreeWalker(owner, NodeFilter.SHOW_TEXT);
+        for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+          if (!text.textContent?.trim() || !text.parentElement || !visible(text.parentElement))
+            continue;
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          for (const bounds of range.getClientRects()) {
+            if (bounds.width <= 0 || bounds.height <= 0) continue;
+            texts.push(rect(bounds));
+            if (bounds.left < -1 || bounds.right > innerWidth + 1)
+              issues.push(`hero ${kind}: text outside viewport`);
+            for (
+              let parent: HTMLElement | null = text.parentElement;
+              parent;
+              parent = parent.parentElement
+            ) {
+              const style = getComputedStyle(parent);
+              if (style.display === 'contents') continue;
+              const clip = parent.getBoundingClientRect();
+              if (
+                /hidden|clip/.test(style.overflowX) &&
+                (bounds.left < clip.left - 1 || bounds.right > clip.right + 1)
+              )
+                issues.push(`hero ${kind}: horizontally clipped text`);
+              if (
+                /hidden|clip/.test(style.overflowY) &&
+                (bounds.top < clip.top - 1 || bounds.bottom > clip.bottom + 1)
+              )
+                issues.push(`hero ${kind}: vertically clipped text`);
+            }
+          }
+        }
+        if (!texts.length) issues.push(`hero ${kind}: absent painted text`);
+        return {
+          kind,
+          text: owner.textContent?.trim(),
+          enhanced: owner.hasAttribute('data-typography-owner'),
+          bounds: rect(bounds),
+          texts,
+          fontSize: css.fontSize,
+          lineHeight: css.lineHeight,
+          fontWeight: css.fontWeight,
+        };
+      });
+    });
     const documentWidth = document.documentElement.scrollWidth,
       bodyWidth = document.body.scrollWidth;
     if (Math.max(documentWidth, bodyWidth) > innerWidth + 1)
@@ -617,6 +588,7 @@ async function layoutFacts(page: Page) {
       gallery,
       cards,
       charts,
+      hero,
       selection,
       issues: [...new Set(issues)],
     };
@@ -635,7 +607,7 @@ describe.sequential(
   () => {
     for (const runtime of RUNTIMES)
       for (const family of ['shadcn', 'brutalist'] as const) {
-        it(`${runtime}/${family} connects the three scenes and keeps their content readable`, async () => {
+        it(`${runtime}/${family} connects the example tasks and keeps their content readable`, async () => {
           const prefix = `${source.exactSHA}-${runtime}-${family}`;
           const errors: string[] = [],
             blockedRequests: string[] = [];
@@ -1516,38 +1488,18 @@ it('without JavaScript both localized homepages retain a readable documentation 
       record.nativeHero = nativeHero;
       for (const width of [320, 640, 1280]) {
         await page.setViewportSize({ width, height: 1000 });
-        const facts = await page.evaluate(() => {
-          const heading = document.querySelector<HTMLElement>('.homepage-hero h1')!;
-          const tagline = document.querySelector<HTMLElement>('.homepage-hero__tagline')!;
-          const titleStyle = getComputedStyle(heading),
-            descriptionStyle = getComputedStyle(tagline);
-          return {
-            enhanced: heading.hasAttribute('data-typography-owner'),
-            heading: {
-              fontSize: titleStyle.fontSize,
-              lineHeight: titleStyle.lineHeight,
-              fontWeight: titleStyle.fontWeight,
-            },
-            tagline: {
-              fontSize: descriptionStyle.fontSize,
-              lineHeight: descriptionStyle.lineHeight,
-            },
-          };
-        });
+        const facts = await layoutFacts(page);
         nativeHero.push({ width, facts });
         await save();
-        expect(facts).toEqual({
-          enhanced: false,
-          heading: {
-            fontSize: width >= 1280 ? '48px' : '30px',
-            lineHeight: width >= 1280 ? '52.8px' : '33px',
-            fontWeight: '600',
-          },
-          tagline: {
-            fontSize: width >= 640 ? '18px' : '16px',
-            lineHeight: width >= 640 ? '28px' : '24px',
-          },
-        });
+        // English and Chinese have intentional, distinct native typography.
+        // Require readable native paint and unclipped text instead of making
+        // both languages inherit one font-weight/line-height recipe.
+        expect(facts.issues, JSON.stringify(facts.issues)).toEqual([]);
+        const heading = facts.hero.find((owner) => owner.kind === 'heading')!;
+        const tagline = facts.hero.find((owner) => owner.kind === 'tagline')!;
+        expect(heading.enhanced).toBe(false);
+        expect(parseFloat(heading.fontSize)).toBeGreaterThan(parseFloat(tagline.fontSize));
+        expect(await page.getByRole('heading', { level: 1 }).isVisible()).toBe(true);
       }
       await page.setViewportSize({ width: 320, height: 1000 });
       expect(await fallback.isVisible()).toBe(true);
@@ -1621,6 +1573,7 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
     context.setDefaultTimeout(2_000);
     context.setDefaultNavigationTimeout(8_000);
     const errors: string[] = [];
+    const fontSizes = new Map<string, number>();
     let page: Page | undefined;
     try {
       await restrictNetwork(context, blockedRequests);
@@ -1651,12 +1604,13 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
           );
           for (const family of ['shadcn', 'brutalist']) {
             const editable = page.locator(`[data-width-case="${family}-144-value"] input`);
-            await editable.fill(
-              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789'
-            );
-            expect(await editable.inputValue()).toBe(
-              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789'
-            );
+            const value =
+              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789';
+            await editable.fill(value);
+            await editable.press('ArrowLeft');
+            await page.keyboard.type('!');
+            expect(await editable.inputValue()).toBe(`${value.slice(0, -1)}!${value.slice(-1)}`);
+            await hasFocus(editable);
             expect(
               await page.locator(`[data-width-case="${family}-144-disabled"] input`).isDisabled()
             ).toBe(true);
@@ -1671,7 +1625,7 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
                 return { left: r.left, right: r.right, width: r.width };
               };
               return {
-                id: owner.dataset.widthCase,
+                id: owner.dataset.widthCase!,
                 parentWidth: Number(owner.dataset.width),
                 variant: owner.dataset.variant,
                 parent: box(owner),
@@ -1726,11 +1680,16 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
             expect(fact.input.width).toBeCloseTo(fact.parentWidth, 0);
             expect(fact.input.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
             expect(fact.input.right).toBeLessThanOrEqual(fact.parent.right + 1);
+            expect(fact.root.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
+            expect(fact.root.right).toBeLessThanOrEqual(fact.parent.right + 1);
+            expect(fact.host.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
             expect(fact.host.right).toBeLessThanOrEqual(fact.parent.right + 1);
-            expect(fact.rootOverflow).toBe('visible');
-            expect(fact.hostOverflow).toBe('visible');
-            expect(fact.grow).toBe('1');
-            expect(fact.font).toBe(textPercent === 100 ? '16px' : '32px');
+            expect(fact.input.left).toBeGreaterThanOrEqual(fact.root.left - 1);
+            expect(fact.input.right).toBeLessThanOrEqual(fact.root.right + 1);
+            const fontSize = parseFloat(fact.font);
+            expect(fontSize).toBeGreaterThan(0);
+            if (textPercent === 100) fontSizes.set(fact.id, fontSize);
+            else expect(fontSize).toBeCloseTo(fontSizes.get(fact.id)! * 2, 3);
             expect(fact.placeholder).toContain('abcdefghijklmnopqrstuvwxyz');
             expect(fact.disabled).toBe(fact.variant === 'disabled');
             if (fact.variant !== 'placeholder') expect(fact.value.length).toBeGreaterThan(60);

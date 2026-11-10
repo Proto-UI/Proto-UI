@@ -36,6 +36,14 @@ Subpath export patterns follow Node's selection rules: the longest prefix before
 
 Type-only `satisfies` wrappers and stable shorthand configuration names preserve producer identity. Setup literals follow their lexical bindings, including successive synchronous helper calls with different arguments. Object destructuring in `projectHandle` and numeric tuple reads retain declaration provenance; numeric record keys alone do not prove iterable destructuring.
 
+Style-token collection follows reached synchronous source helpers through local aliases and relative imports/re-exports. Each call binds its evaluated arguments to the helper's parameters, including forwarded state bags and function arguments, while captured names retain the helper's defining lexical scope. Rule variants therefore use the State declaration reached through the argument, rather than a parameter name or type. Root occurrences retain the helper source path and position.
+
+Unknown arguments, overwritten helpers, spread argument lists and unproved container members do not establish selectors. Helper traversal retains the existing conservative withdrawal of container provenance at call boundaries; it does not certify unknown calls, change Rule lowering eligibility or execute authored code.
+
+Only a proven synchronous helper call creates parameter bindings; ordinary calls retain their receiver and argument mutation analysis without resolving an unused helper environment. Arguments and captured lexical bindings are read afresh for each call, including effects from later arguments. Producer admission is resolved when a helper or a captured mutable container needs it; calls carrying only scalar values cannot alter those containers.
+
+Token-inventory unions combine immutable string alternatives by value and retain one equivalent no-op, unknown or opaque-path alternative. Repeated helper assignments and container escapes therefore do not multiply equivalent string-composition branches. Mutable object and array graphs retain distinct identities, and uncertainty still prevents finite-value or State provenance. These unions are recomputed from the current arguments rather than cached across calls.
+
 This is a bounded static analysis, not a JavaScript interpreter. Unproved setup captures remain open, so the coverage scanner reports unresolved reads instead of discarding optional Rules as unreachable. Bodyless declarations do not prove executable setup or helper captures. Async/generator factories cannot prove a returned holder, and mutations or escapes invalidate provider-member proofs. Finite literal loops preserve captured token values and row pairing; consumed style handles follow sequential assignments while retaining conditional alternatives.
 
 Loop-assigned literal bindings, parameter initialization with unproved effects, and possible computed configuration overwrites remain unresolved. Unproved hook names are not indexed as named child captures.

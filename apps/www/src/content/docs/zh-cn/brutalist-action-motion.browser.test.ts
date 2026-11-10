@@ -1261,6 +1261,7 @@ for (const theme of ['light', 'dark'] as const) {
     const secondaryErrors: string[] = [];
     let failed: string | null = null;
     let native: unknown = null;
+    let opener: unknown = null;
     const handles: Array<Awaited<ReturnType<Locator['elementHandle']>>> = [];
     try {
       await itemBounded(
@@ -1325,11 +1326,59 @@ for (const theme of ['light', 'dark'] as const) {
           }))
         )
       );
+      const activePage = page;
+      let releaseCompletedAt: number | null = null;
+      // Trigger owns elevated release motion; the anchored Content follows it.
+      // Retain that phase separately before measuring the Item-only geometry
+      // invariant in P-BRUTALIST-SELECT-ITEM-INCOMING-MOTION.
+      const released = await captureItemPair(activePage, items, null, async () => {
+        await activePage.mouse.move(1400, 950);
+        await expect
+          .poll(() =>
+            trigger.evaluate(
+              (node) =>
+                !node.matches(':hover, :active') &&
+                node.getAnimations({ subtree: true }).every(
+                  (animation) =>
+                    !animation.pending &&
+                    (animation.playState === 'finished' || animation.playState === 'idle')
+                )
+            )
+          )
+          .toBe(true);
+        await expect
+          .poll(() =>
+            content.evaluate((node) =>
+              node.getAnimations({ subtree: true }).every(
+                (animation) =>
+                  !animation.pending &&
+                  (animation.playState === 'finished' || animation.playState === 'idle')
+              )
+            )
+          )
+          .toBe(true);
+        releaseCompletedAt = await activePage.evaluate(
+          () => performance.now() - window.__brutalistItemPair!.started
+        );
+      });
+      opener = { phase: 'opener-release', ...released, releaseCompletedAt };
+      await itemBounded(
+        'Item opener raw trace write',
+        writeFile(
+          path.join(output, `items-${theme}.json`),
+          JSON.stringify({ source, native, opener, traces, external }, null, 2)
+        )
+      );
+      if (released.actionError || released.measurementError)
+        throw new Error(released.actionError ?? released.measurementError!);
+      expect(released.cleanupErrors).toEqual([]);
+      expect(released.cleanup).toEqual({ raf: 0, deadline: 0, listeners: 0 });
+      expect(releaseCompletedAt).not.toBeNull();
+      expect(await trigger.getAttribute('aria-expanded')).toBe('true');
       let originalRects: number[][] | null = null;
       let expectedRest: ItemPaint | undefined;
       let expectedHighlighted: ItemPaint | undefined;
       const paintKey = (paint: ItemPaint) => JSON.stringify([paint.background, paint.foreground]);
-      const activePage = page;
       for (const preference of ['no-preference', 'reduce', 'no-preference'] as const) {
         for (const incoming of [1, 0]) {
           const captured = await captureItemPair(activePage, items, originalRects, async () => {
@@ -1341,7 +1390,7 @@ for (const theme of ['light', 'dark'] as const) {
             'Item raw trace write',
             writeFile(
               path.join(output, `items-${theme}.json`),
-              JSON.stringify({ source, native, traces, external }, null, 2)
+              JSON.stringify({ source, native, opener, traces, external }, null, 2)
             )
           );
           if (captured.actionError || captured.measurementError)
@@ -1474,7 +1523,7 @@ for (const theme of ['light', 'dark'] as const) {
           writeFile(
             path.join(output, `items-${theme}-final.json`),
             JSON.stringify(
-              { source, theme, native, traces, external, failed, secondaryErrors, contextClosed },
+              { source, theme, native, opener, traces, external, failed, secondaryErrors, contextClosed },
               null,
               2
             )

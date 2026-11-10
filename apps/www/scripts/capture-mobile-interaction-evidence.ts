@@ -523,7 +523,7 @@ try {
       sourceRevision: revision,
       candidateOnly: true,
       procedure:
-        'Native Menu click and keyboard Enter/Space/Escape on the actual Docs route; read-only DOM/ARIA observations only. No focus(), dispatchEvent(), state/aria writes or runtime handles. The retained CSS-closed Search shape must arise naturally.',
+        'Open and close the current public Search Dialog, then use native Menu click and keyboard Enter/Space/Escape on the actual Docs route. Read-only DOM/ARIA observations; no focus(), dispatchEvent(), state/aria writes or runtime handles.',
       limits:
         'Desktop-browser 500x761 CSS viewport simulation, not physical-device or complete assistive-technology coverage. ARIA snapshots are Playwright accessible-tree projections. The older mobile baseline is not the d850 parent and does not provide a new Docs red control.',
       screenshots,
@@ -537,34 +537,36 @@ try {
     const docs = header
       .locator('[data-site-header-navigation]')
       .getByRole('link', { name: 'Docs', exact: true, includeHidden: true });
-    const retainedSearch = () =>
-      header.evaluate((root) =>
-        [...root.querySelectorAll('[aria-expanded="true"][aria-controls]')].flatMap((trigger) =>
-          (trigger.getAttribute('aria-controls')?.split(/\s+/) ?? []).map((id) => {
-            const popup = document.getElementById(id);
-            const triggerDisplayNone: string[] = [];
-            const popupDisplayNone: string[] = [];
-            for (let node: Element | null = trigger; node; node = node.parentElement)
-              if (getComputedStyle(node).display === 'none')
-                triggerDisplayNone.push(`${node.localName}#${node.id}`);
-            for (let node: Element | null = popup; node; node = node.parentElement)
-              if (getComputedStyle(node).display === 'none')
-                popupDisplayNone.push(`${node.localName}#${node.id}`);
-            return {
-              triggerId: trigger.id,
-              triggerRole: trigger.getAttribute('role'),
-              searchComposition: !!trigger.closest('site-search'),
-              popupId: id,
-              popupRole: popup?.getAttribute('role'),
-              connected: trigger.isConnected && !!popup?.isConnected,
-              triggerHiddenOrInert: !!trigger.closest('[hidden], [inert]'),
-              popupHiddenOrInert: !!popup?.closest('[hidden], [inert]'),
-              triggerDisplayNone,
-              popupDisplayNone,
-            };
-          })
-        )
-      );
+    const closedSearch = () =>
+      header.evaluate((root) => {
+        const search = root.querySelector('site-search');
+        const commands = search?.querySelectorAll('[data-search-command="open"]');
+        const command = commands?.[0];
+        const owner = search
+          ?.querySelector('[data-search-dialog-mount]')
+          ?.getAttribute('data-projection-owner');
+        const ownedPopups = [
+          ...document.querySelectorAll<HTMLElement>('[role="dialog"], [role="listbox"]'),
+        ].filter((popup) => owner && popup.getAttribute('data-projection-owner') === owner);
+        return {
+          composition: search?.getAttribute('data-search-composition'),
+          connected: !!search?.isConnected && !!command?.isConnected,
+          commandCount: commands?.length ?? 0,
+          commandRole: command?.getAttribute('role'),
+          commandExpanded: command?.getAttribute('aria-expanded'),
+          commandDisabled: command?.getAttribute('aria-disabled'),
+          owner,
+          popups: ownedPopups.map((popup) => ({
+            role: popup.getAttribute('role'),
+            connected: popup.isConnected,
+            visible:
+              popup.checkVisibility() &&
+              popup.getBoundingClientRect().width > 0 &&
+              popup.getBoundingClientRect().height > 0 &&
+              !popup.closest('[hidden], [inert], [aria-hidden="true"]'),
+          })),
+        };
+      });
     const capture = async (stage: string) => {
       const filename = `${id}-${stage}.png`;
       await page.screenshot({ path: path.join(out, filename) });
@@ -583,7 +585,7 @@ try {
           role: document.activeElement?.getAttribute('role'),
           label: document.activeElement?.getAttribute('aria-label'),
         })),
-        retainedSearch: await retainedSearch(),
+        closedSearch: await closedSearch(),
         headerAria: await header.ariaSnapshot(),
       });
       await save();
@@ -591,23 +593,32 @@ try {
     try {
       await page.goto(`${base}${route}`, { waitUntil: 'networkidle' });
       await header.locator('site-search[data-search-view="ready"]').waitFor();
+      const searchCommand = header.locator('site-search [data-search-command="open"]');
+      await searchCommand.click();
+      const searchDialog = page.getByRole('dialog');
+      await searchDialog.waitFor({ state: 'visible' });
+      assert.equal(await searchDialog.count(), 1, 'The current Search opens one real Dialog');
+      await capture('search-dialog-open');
+      await page.keyboard.press('Escape');
+      await searchDialog.waitFor({ state: 'hidden' });
+      assert.ok(
+        await searchCommand.evaluate((element) => element === document.activeElement),
+        'Search returns native focus before the Header journey'
+      );
+      await capture('search-dialog-closed');
       await menu.click();
       await docs.and(page.locator(':focus')).waitFor({ state: 'visible' });
-      const retained = await retainedSearch();
-      entry.initialRetainedSearch = retained;
+      const search = await closedSearch();
+      entry.initialClosedSearch = search;
+      assert.equal(search.composition, 'command-dialog');
+      assert.equal(search.commandCount, 1, 'One current public Search opener');
+      assert.equal(search.commandRole, 'button');
+      assert.ok(search.connected && search.commandDisabled !== 'true');
+      assert.ok(search.owner, 'Closed Search retains its actual Dialog owner');
+      assert.notEqual(search.commandExpanded, 'true');
       assert.ok(
-        retained.some(
-          (owner) =>
-            owner.searchComposition &&
-            owner.triggerRole === 'combobox' &&
-            owner.popupRole === 'listbox' &&
-            owner.connected &&
-            !owner.triggerHiddenOrInert &&
-            !owner.popupHiddenOrInert &&
-            owner.triggerDisplayNone.length > 0 &&
-            owner.popupDisplayNone.length > 0
-        ),
-        'Exercise the naturally retained CSS-closed Search owner, not an easier absent/hidden fixture'
+        search.popups.every((popup) => !popup.visible),
+        'Closed Search presentation cannot reserve Header Escape'
       );
       for (const reopenKey of ['initial', 'Enter', 'Space']) {
         if (reopenKey !== 'initial') {
@@ -624,8 +635,8 @@ try {
         assert.ok(await menu.evaluate((element) => element === document.activeElement));
       }
 
-      // A genuinely open nested Select owns the first Escape, unlike Search's
-      // retained CSS-closed listbox. The next Escape belongs to Header.
+      // A genuinely open nested Select owns the first Escape; the already
+      // closed Search Dialog does not. The next Escape belongs to Header.
       await page.keyboard.press('Enter');
       await docs.and(page.locator(':focus')).waitFor({ state: 'visible' });
       const runtime = header.locator('[data-adapter-select-root] [role="combobox"]');
@@ -686,25 +697,69 @@ try {
       });
       const page = await context.newPage();
       const entry: Record<string, unknown> = { id, stressOnly: true, width: 320, textPercent: 200 };
+      const observations: Array<Record<string, unknown>> = [];
+      entry.observations = observations;
+      const observe = async (stage: string) => {
+        entry.stage = stage;
+        const facts = await page.evaluate(() => ({
+          viewport: { width: innerWidth, height: innerHeight },
+          rootFont: getComputedStyle(document.documentElement).fontSize,
+          documentOverflow: document.documentElement.scrollWidth - innerWidth,
+          scroll: { x: scrollX, y: scrollY },
+          activeElement: {
+            tag: document.activeElement?.localName,
+            role: document.activeElement?.getAttribute('role'),
+            ref: document.activeElement?.getAttribute('data-demo-ref'),
+          },
+          boxes: [
+            '[data-homepage-runtime]',
+            '[data-site-header-panel]',
+            '.site-header-native-slot',
+            '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]',
+            '[data-site-header-settings]',
+            '[data-code-shell]',
+            '[data-code-shell] pre',
+          ].flatMap((selector) =>
+            [...document.querySelectorAll<HTMLElement>(selector)].map((node) => ({
+              selector,
+              rect: node.getBoundingClientRect().toJSON(),
+              visible: node.checkVisibility(),
+              expanded: node.getAttribute('aria-expanded'),
+              scrollTop: node.scrollTop,
+              clientHeight: node.clientHeight,
+              scrollHeight: node.scrollHeight,
+              overflowX: getComputedStyle(node).overflowX,
+              overflowY: getComputedStyle(node).overflowY,
+            }))
+          ),
+        }));
+        observations.push({ stage, at: new Date().toISOString(), ...facts });
+        await save();
+      };
       cases.push(entry);
       try {
+        entry.stage = 'home-navigation';
         await page.goto(`${base}/${locale}/`, { waitUntil: 'networkidle' });
+        entry.stage = 'home-readiness';
         await readyHome(page);
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '200%';
         });
+        entry.stage = 'home-native-menu-open';
         await homeMenu(page).click();
+        await observe('enlarged-header-open');
         const body = page.locator('.site-header-native-slot');
         const close = homeMenu(page);
         const before = await close.boundingBox();
         const bounds = await body.boundingBox();
-        assert.ok(bounds && before);
+        assert.ok(bounds && before, 'The enlarged panel and its native close toggle have layout boxes');
         const initialScroll = await body.evaluate((e) => e.scrollTop);
         assert.ok(
           await body.evaluate((e) => e.scrollHeight > e.clientHeight),
           'Stress case genuinely requires menu scrolling'
         );
         await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+        await observe('before-native-menu-scroll');
         await page.mouse.wheel(0, 1000);
         await page.waitForFunction(
           (previous) =>
@@ -712,6 +767,7 @@ try {
           initialScroll
         );
         const after = await close.boundingBox();
+        await observe('after-native-menu-scroll');
         assert.ok(
           after && Math.abs(before.y - after.y) <= 1,
           'The single Header close toggle stays reachable while menu content scrolls'
@@ -723,12 +779,15 @@ try {
         await page.screenshot({ path: path.join(out, `${id}-scrolled.png`) });
         entry.screenshots = [`${id}-scrolled.png`];
         await close.click();
+        await observe('enlarged-header-closed');
         assert.ok(await homeMenu(page).evaluate((e) => e === document.activeElement));
         for (const [sourceKind, route] of [
           ['long', 'ui-libraries/base/transition/'],
           ['short', 'start-here/quick-start/'],
         ] as const) {
+          entry.stage = `code-${sourceKind}-navigation`;
           await page.goto(`${base}/${locale}/${route}`, { waitUntil: 'networkidle' });
+          entry.stage = `code-${sourceKind}-readiness`;
           await page.waitForSelector('[data-code-panel-init="1"]:visible');
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
@@ -743,6 +802,7 @@ try {
                 | null;
               return !!previewer?.__previewer__?.getCurrentRuntime();
             });
+          entry.stage = `code-${sourceKind}-controls`;
           const shell = page.locator('[data-code-shell]:visible').first();
           const toggle = shell.locator('[data-code-toggle]');
           if (await toggle.isVisible()) await toggle.click();
@@ -775,7 +835,7 @@ try {
                 overflowX: getComputedStyle(e).overflowX,
               })),
           }));
-          await save();
+          await observe(`code-${sourceKind}-layout`);
           assert.ok(
             facts.documentOverflow <= 1 && facts.height > 0 && facts.height <= 417,
             'Enlarged source fits its independent viewport'
@@ -785,6 +845,7 @@ try {
               facts.height <= facts.lineHeight + 1,
               'Enlarged short source still has natural one-line height'
             );
+          entry.stage = `code-${sourceKind}-keyboard-scroll`;
           await source.focus();
           if (facts.fullHeight > facts.height + 1) {
             await page.keyboard.press('PageDown');
@@ -802,6 +863,7 @@ try {
           await page.screenshot({ path: path.join(out, filename) });
           (entry.screenshots as string[]).push(filename);
           assert.equal(await copy.getAttribute('data-copy-state'), 'idle');
+          entry.stage = `code-${sourceKind}-copy`;
           await copy.click();
           await page.waitForFunction(
             () =>
@@ -815,12 +877,15 @@ try {
             ...facts,
             copy: 'Exact source copied after enlarged keyboard scroll',
           };
+          await observe(`code-${sourceKind}-complete`);
         }
         entry.outcome = 'passed';
       } catch (error) {
         entry.outcome = 'failed';
-        entry.error = String(error);
+        entry.failedStage = entry.stage;
+        entry.error = error instanceof Error ? error.stack : String(error);
         failures.push(`${id}: ${String(error)}`);
+        await observe('failure').catch(() => {});
         await page.screenshot({ path: path.join(out, `${id}-failure.png`) }).catch(() => {});
       } finally {
         await context.close();

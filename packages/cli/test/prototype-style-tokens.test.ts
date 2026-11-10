@@ -12,6 +12,7 @@ import {
   collectProtoRootStyleTokenOccurrences,
   collectProtoRootStyleTokens,
   collectProtoStyleTokens,
+  collectProtoStyleTokensFromFiles,
 } from '../src/services/prototype-style-tokens';
 
 describe('collectProtoStyleTokens', () => {
@@ -47,6 +48,136 @@ describe('collectProtoStyleTokens', () => {
 
   afterEach(async () => {
     await rm(dir, { recursive: true, force: true });
+  });
+
+  it('collects lowered state styles through imported helper parameters and forwarding aliases', async () => {
+    await writeFile(
+      path.join(dir, 'facts.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+       export const asFacts = defineAsHook({ name: 'facts',
+         setup(def) { def.state.bool('isCurrent', false); },
+         projectHandle(result) { return { state: { engaged: result.stateHandles.isCurrent } }; }
+       });`
+    );
+    await writeFile(
+      path.join(dir, 'paint.ts'),
+      `import { tw } from '@proto.ui/core';
+       const fills = { quiet: 'bg-muted', strong: 'bg-accent' };
+       export function paint(def, facts: { engaged?: unknown }, fill = 'quiet') {
+         if (facts.engaged) def.rule({
+           when: w => w.state(facts.engaged!).eq(true),
+           intent: i => i.feedback.style.use(tw(fills[fill], 'shadow-sm'))
+         });
+       }`
+    );
+    await writeFile(path.join(dir, 'barrel.ts'), `export { paint as decorate } from './paint';`);
+    await writeFile(
+      path.join(dir, 'forward.ts'),
+      `import { decorate } from './barrel';
+       export default function forward(def, facts) { decorate(def, facts, 'strong'); }`
+    );
+    await writeFile(
+      path.join(dir, 'unreached.ts'),
+      `export function unrelated(def) { def.feedback.style.use(tw('outline-4')); }`
+    );
+    const entry = path.join(dir, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      `import { definePrototype } from '@proto.ui/core';
+       import { asFacts } from './facts';
+       import forward from './forward';
+       import { paint } from './paint';
+       export default definePrototype({ name: 'consumer', setup(def) {
+         const inherited = asFacts();
+         const facts = inherited.state;
+         forward(def, facts);
+         const second = def.state.bool('secondFlag', false);
+         def.expose.state('publicName', second);
+         const alias = paint;
+         alias(def, { engaged: second });
+       }});`
+    );
+
+    const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    expect(tokens).toEqual([
+      'bg-accent',
+      'bg-muted',
+      'data-[is-current]:bg-accent',
+      'data-[is-current]:shadow-sm',
+      'data-[second-flag]:bg-muted',
+      'data-[second-flag]:shadow-sm',
+      'shadow-sm',
+    ]);
+    const occurrences = await collectProtoRootStyleTokenOccurrences(dir);
+    expect(occurrences).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: 'paint.ts', context: 'rule', token: 'bg-accent' }),
+      ])
+    );
+  });
+
+  it('keeps helper defining scopes and higher-order argument bindings separate', async () => {
+    const entry = path.join(dir, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      `import { definePrototype, tw } from '@proto.ui/core';
+       export default definePrototype({ name: 'lexical-consumer', setup(def) {
+         const captured = def.state.bool('outerFlag', false);
+         def.expose.state('outerPublic', captured);
+         {
+           const captured = def.state.bool('callerFlag', false);
+           def.expose.state('callerPublic', captured);
+           forward(paint, { ready: captured });
+         }
+         forward(paint, { ready: captured });
+         function forward(writer, facts) { const alias = writer; alias(def, facts); }
+         function paint(target, { ready }) {
+           target.rule({ when: w => w.state(ready).eq(true),
+             intent: i => i.feedback.style.use(tw('opacity-50')) });
+           target.rule({ when: w => w.state(captured).eq(true),
+             intent: i => i.feedback.style.use(tw('bg-primary')) });
+         }
+       }});`
+    );
+    const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    expect(tokens).toContain('data-[caller-flag]:opacity-50');
+    expect(tokens).toContain('data-[outer-flag]:opacity-50');
+    expect(tokens).toContain('data-[outer-flag]:bg-primary');
+    expect(tokens).not.toContain('data-[caller-flag]:bg-primary');
+  });
+
+  it.each([
+    ['unknown argument', 'paint(def, external());'],
+    ['missing argument', 'paint(def);'],
+    ['partial argument', 'paint(def, choose ? facts : external());'],
+    ['escaped container', 'external(facts); paint(def, facts);'],
+    ['later argument effect', 'paint(def, facts, external(facts));'],
+    ['shadowed helper', '{ const paint = external(); paint(def, facts); }'],
+    ['lexical shadow before declaration', '{ paint(def, facts); const paint = external(); }'],
+    ['reassigned helper alias', 'let alias = paint; alias = external(); alias(def, facts);'],
+    ['spread arguments', 'paint(...external());'],
+  ])('does not invent helper state selectors from a %s', async (_label, call) => {
+    await writeFile(
+      path.join(dir, 'helpers.ts'),
+      `import { defineAsHook, tw } from '@proto.ui/core';
+       export const asFacts = defineAsHook({ name: 'facts',
+         setup(def) { def.state.bool('internalFlag', false); },
+         projectHandle(result) { return { ready: result.stateHandles.internalFlag }; }
+       });
+       export function paint(def, facts: { ready: unknown }) {
+         def.rule({ when: w => w.state(facts.ready).eq(true),
+           intent: i => i.feedback.style.use(tw('opacity-50')) });
+       }`
+    );
+    const entry = path.join(dir, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      `import { asFacts, paint } from './helpers';
+       const facts = asFacts();
+       ${call}`
+    );
+    const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    expect(tokens.filter((token) => token.endsWith(':opacity-50'))).toEqual([]);
   });
 
   it.each([

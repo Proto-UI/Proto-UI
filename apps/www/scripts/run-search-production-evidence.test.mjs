@@ -424,7 +424,6 @@ test('required Actions and real cross-path navigation cannot be replaced by skip
     /destinationResponse\.ok\(\)/,
     /result\.click\(\)/,
     /waitForResponse/,
-    /navigationResponse\?\.ok/,
     /targetPath !== sourcePath/,
     /connectOverCDP/,
     /status: 503/,

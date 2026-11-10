@@ -39,11 +39,22 @@ export function headerSurfaceParticipant(header: HTMLElement) {
     'data-header-surface-generation',
   ];
   const moveContent = (parent: HTMLElement, before: ChildNode | null = null) => {
+    if (content.parentNode === parent && content.nextSibling === before) return;
     const focused = document.activeElement as HTMLElement | null;
     const restoreFocus = !!focused && content.contains(focused);
     // The same native subtree, link destinations and control state survive.
-    parent.insertBefore(content, before);
-    if (restoreFocus && focused?.isConnected && !focused.closest('[hidden], [inert]'))
+    const move = (
+      parent as HTMLElement & { moveBefore?: (node: Node, before: Node | null) => void }
+    ).moveBefore;
+    if (typeof move === 'function' && content.isConnected && parent.isConnected)
+      move.call(parent, content, before);
+    else parent.insertBefore(content, before);
+    if (
+      restoreFocus &&
+      document.activeElement !== focused &&
+      focused?.isConnected &&
+      !focused.closest('[hidden], [inert]')
+    )
       focused.focus();
   };
   return {

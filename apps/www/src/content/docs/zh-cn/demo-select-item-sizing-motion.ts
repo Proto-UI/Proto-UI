@@ -19,6 +19,8 @@ export interface SizingMotionSample {
   viewport: SizingMotionBox;
   items: SizingMotionBox[];
   alignedIndex: number;
+  selectedIndices: number[];
+  disabledIndices: number[];
   animations: Array<{
     target: string;
     name: string | null;
@@ -29,6 +31,7 @@ export interface SizingMotionSample {
   }>;
   focused: boolean;
 }
+export type SizingMotionSelection = 'unset' | 'selected';
 export interface SizingMotionResult {
   status:
     | 'settled'
@@ -39,6 +42,7 @@ export interface SizingMotionResult {
     | 'stopped'
     | 'frame-cap'
     | 'error';
+  selection: SizingMotionSelection;
   startedAt: number;
   endedAt: number;
   samples: SizingMotionSample[];
@@ -52,7 +56,10 @@ export interface SizingMotionHandle {
 export type SizingMotionTrigger = HTMLElement & { __puiSizingMotion?: SizingMotionHandle };
 
 // All runtime dependencies are inside this function: Playwright serializes it into the page.
-export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMotionHandle {
+export function installSizingMotionTrace(
+  trigger: SizingMotionTrigger,
+  selection: SizingMotionSelection
+): SizingMotionHandle {
   trigger.__puiSizingMotion?.stop();
   const doc = trigger.ownerDocument;
   const win = doc.defaultView!;
@@ -98,6 +105,7 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
     timer = null;
     resolve({
       status: status === 'settled' && (!frameClean || !timerClean) ? 'error' : status,
+      selection,
       startedAt,
       endedAt: win.performance.now(),
       samples,
@@ -235,6 +243,22 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
         endTime: Number(animation.effect?.getComputedTiming().endTime ?? NaN),
       }));
       const focused = items.includes(doc.activeElement as HTMLElement);
+      const selectedIndices: number[] = [];
+      const disabledIndices: number[] = [];
+      for (const [index, item] of items.entries()) {
+        if (item.getAttribute('aria-selected') === 'true') selectedIndices.push(index);
+        if (item.getAttribute('aria-disabled') === 'true') disabledIndices.push(index);
+      }
+      // P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT permits an unset value
+      // to align the first enabled row. Navigation must leave selection unset.
+      // The caller declares that initial state; a missing selected row in a
+      // committed-value phase must never acquire this fallback.
+      const alignedIndex =
+        selection === 'unset'
+          ? items.findIndex((_, index) => !disabledIndices.includes(index))
+          : selectedIndices.length === 1
+            ? selectedIndices[0]
+            : -1;
       // Every box and animation is read in the same callback, with one timestamp.
       samples.push({
         at: win.performance.now(),
@@ -245,7 +269,9 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
         surface: box(surface),
         viewport: box(viewport),
         items: items.map(box),
-        alignedIndex: items.findIndex((item) => item.getAttribute('aria-selected') === 'true'),
+        alignedIndex,
+        selectedIndices,
+        disabledIndices,
         animations,
         focused,
       });
@@ -308,7 +334,18 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       )
     )
       issues.push('unexpected additional transform');
-    // In-place certifies the selected row, not a wider popup or an inset row.
+    if (
+      sample.selectedIndices.length !== (result.selection === 'unset' ? 0 : 1) ||
+      sample.alignedIndex !== result.samples[0].alignedIndex ||
+      sample.disabledIndices.includes(sample.alignedIndex) ||
+      (result.selection === 'unset' &&
+        sample.alignedIndex !==
+          sample.items.findIndex((_, index) => !sample.disabledIndices.includes(index))) ||
+      (result.selection === 'selected' && sample.selectedIndices[0] !== sample.alignedIndex)
+    )
+      issues.push('selection/alignment mismatch during motion');
+    // In-place certifies the semantic alignment row, including the initial
+    // first-enabled candidate, while preserving the committed selection census.
     const aligned = sample.items[sample.alignedIndex];
     if (
       !aligned ||
