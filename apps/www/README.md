@@ -32,5 +32,6 @@ Run commands from the repository root:
 - English docs live under `src/content/docs/en/`.
 - Chinese docs live under `src/content/docs/zh-cn/`.
 - Prototype demos are registered through `src/components/PrototypePreviewer/`.
+- Contrast audit anatomy and numeric surfaces use the selected lease's retained consumer content and owned detached parts. Inline runtime Tabs panels surround that content; the picker, its enclosing Roots and its detached control popups are reader chrome. This scope check preserves missing, duplicate and foreign-content failures and does not establish component conformance, cue necessity or accessibility acceptance.
 - Generated CSS token files in `src/styles/` should be regenerated through package scripts instead of edited by hand.
 - Build-time style snapshots use finite reviewed recipe registries. Each Runtime session owns a detached Context root with no logical parent, so setup-phase providers and subscriptions can resolve within that snapshot. A created session is disposed after mount/evaluation failures, including mounted-hook failures; this is not a rollback guarantee for construction exceptions before `createRuntimeSession` returns. This is style projection, not an interactive SSR host or a substitute for Adapter-owned child topology.
