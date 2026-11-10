@@ -384,8 +384,15 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   };
   createDialog();
   scan();
-  const contentObserver = new MutationObserver(() => {
-    scan();
+  const contentObserver = new MutationObserver((records) => {
+    // HTML inline paint can move the active origin but does not change
+    // admission. Inline SVG still validates every authored attribute.
+    if (
+      records.some(
+        (record) => record.attributeName !== 'style' || (record.target as Element).closest('svg')
+      )
+    )
+      scan();
     geometry();
   });
   for (const body of doc.querySelectorAll('[data-doc-flow]'))

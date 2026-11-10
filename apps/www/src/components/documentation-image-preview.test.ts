@@ -100,6 +100,42 @@ describe('documentation image viewer PUI integration', () => {
     expect(document.querySelector('figure > img')).not.toBeNull();
     expect(document.querySelector('[data-docs-image-trigger]')).toBeNull();
   });
+  it('keeps HTML style changes out of the media inventory scan', async () => {
+    const { trigger } = await fixture();
+    await (
+      window as unknown as {
+        happyDOM: { waitUntilComplete(): Promise<void> };
+      }
+    ).happyDOM.waitUntilComplete();
+    const figure = document.querySelector('figure')!;
+    const queries = vi.spyOn(document, 'querySelectorAll');
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(figure, { attributes: true, attributeFilter: ['style'] });
+    });
+    figure.setAttribute('style', 'margin-block: 2rem');
+    await delivered;
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith('[data-doc-flow]');
+    expect(figure.querySelector('[data-docs-image-trigger]')).toBe(trigger);
+  });
+  it('revalidates SVG admission when a descendant gains inline style', async () => {
+    await fixture();
+    const diagram = document.createElement('figure');
+    diagram.innerHTML =
+      '<svg viewBox="0 0 20 20" aria-label="Diagram"><path d="M0 0L20 20"/></svg>';
+    document.querySelector('[data-doc-flow]')!.append(diagram);
+    await vi.waitFor(() =>
+      expect(diagram.querySelector('[data-docs-image-trigger]')).not.toBeNull()
+    );
+    const path = diagram.querySelector('path')!;
+    path.setAttribute('style', 'stroke: red');
+    await vi.waitFor(() => expect(diagram.querySelector('[data-docs-image-trigger]')).toBeNull());
+    expect(diagram.querySelector('path')).toBe(path);
+  });
   it('provides the preview action name through PUI-owned content naming', async () => {
     const { trigger } = await fixture();
     expect(trigger.textContent).toContain('Enlarge image:');
