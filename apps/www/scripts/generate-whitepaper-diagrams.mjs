@@ -227,8 +227,16 @@ text{font-family:"Proto Diagram Hand Latin","Proto Diagram Hand CJK",sans-serif;
 }
 
 function consistency() {
+  parts.push(
+    `<desc id="description">${esc(
+      tr(
+        'Prototype 与适用 profile 的必要义务构成共同底线：身份、信息通路、State transition、Lifecycle order 与必需 Feedback。共享且受控的输入媒介、viewport、单位与字体允许更细地比较输入行为与 Feedback。同属 Web family，且适用 profile 共享受治理的结构、事件、样式基础与 projection policy 时，可以在排除必要且已声明的 wrapper 与标记后比较 normalized DOM。进一步控制 device metrics、单位比例、字体 shaping、色彩与 rasterization 等条件时，可以比较像素表现。tolerance 与 exclusion 必须事先约定理由与范围。这些是条件到比较对象的映射，不是自动晋级的等级，也不代表已经具备完整的跨 Host 证据。',
+        'Prototype and applicable profile obligations form the shared baseline: identity, information channels, State transitions, Lifecycle order, and required Feedback. Shared, controlled input medium, viewport, units, and fonts permit finer comparison of input behavior and Feedback. The same Web family and applicable profiles sharing governed structure, events, style foundations, and projection policy permit comparison of normalized DOM after necessary declared wrappers and markers are excluded. Further control of device metrics, unit scale, font shaping, color, and rasterization permits pixel comparison. Agree the reasons and scope of tolerances and exclusions in advance. These are condition-to-comparison mappings, not automatic tiers, and do not imply complete evidence across Hosts.'
+      )
+    )}</desc>`
+  );
   heading(
-    '07',
+    '06',
     tr('共同条件决定比较精度', 'Shared conditions determine comparison detail'),
     tr(
       '先明确必要义务，再明确两个 realization context',

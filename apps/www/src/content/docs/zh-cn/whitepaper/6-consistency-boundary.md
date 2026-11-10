@@ -97,10 +97,10 @@ realization context 至少要说明 Prototype revision 与输入、交互媒介�
 这既不要求所有平台无条件一模一样，也不允许把“语义一致”降成“功能大致可用”。两个实现之所以仍是同一个 Component，是因为它们保留了同一 Prototype 的身份和必要义务；共享条件越多，剩余差异越需要被解释。
 
 <figure class="whitepaper-figure">
-  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图">
-    <img src="/diagrams/whitepaper-conditional-consistency.zh-cn.svg" alt="Prototype 与 profile 定义必要义务，共享的输入、投影与渲染条件决定可以进一步比较到什么细度。" width="960" height="862" class="whitepaper-diagram" loading="lazy" />
+  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图" aria-describedby="conditional-consistency-description">
+    <img src="/diagrams/whitepaper-conditional-consistency.zh-cn.svg" alt="Prototype 与 profile 定义必要义务，共享的输入、投影与渲染条件决定可以进一步比较到什么细度。" aria-describedby="conditional-consistency-description" width="960" height="862" class="whitepaper-diagram" loading="lazy" />
   </button>
-  <figcaption>点击查看大图</figcaption>
+  <figcaption id="conditional-consistency-description"><span class="sr-only">Prototype 与适用 profile 的必要义务构成共同底线：身份、信息通路、State transition、Lifecycle order 与必需 Feedback。共享且受控的输入媒介、viewport、单位与字体允许更细地比较输入行为与 Feedback。同属 Web family，且适用 profile 共享受治理的结构、事件、样式基础与 projection policy 时，可以在排除必要且已声明的 wrapper 与标记后比较 normalized DOM。进一步控制 device metrics、单位比例、字体 shaping、色彩与 rasterization 等条件时，可以比较像素表现。tolerance 与 exclusion 必须事先约定理由与范围。这些是条件到比较对象的映射，不是自动晋级的等级，也不代表已经具备完整的跨 Host 证据。</span>点击查看大图</figcaption>
 </figure>
 
 这里描述的是比较原则，不代表当前所有 Adapter 或 Host 都已经具备相应的 comparison profile 与证据。当前可靠证据仍然主要来自 Web family，comparison profile、normalized DOM 与 image evidence 也尚未形成完整的治理身份；未 catalog 或未经验证的目标不能自动继承一致性结论。
