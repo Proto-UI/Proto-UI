@@ -1,0 +1,1777 @@
+{
+  "schemaVersion": 1,
+  "kind": "finf.pr884-foundation-verification-reconciliation",
+  "date": "2026-11-10",
+  "observedAt": "2026-11-10T12:58:01.960Z",
+  "issue": 1153,
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "owner": "SolThirty1153Pr884",
+  "state": "source-ready-evidence-record; original verification incomplete",
+  "binding": {
+    "repositoryId": "github.com:Proto-UI/Proto-UI",
+    "scopeId": "1153",
+    "baseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "baseTree": "6dfeee464d3e4b73ffa3b1c311dca573390fbef9",
+    "branch": "fix/release03-thirty-issue-1153-sol-20261110",
+    "candidateHeadSha": null
+  },
+  "originalCondition": {
+    "criterionKey": "issue.1153.001",
+    "parentCriterionKey": "issue.1092.003",
+    "sourceKey": "owner-conversation:884:6095679394",
+    "originalChecklist": "- [ ] 提升 PR884 版本并完成验证（PR884 与672 加速闭环）— 历史状态 pending",
+    "sourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1153",
+    "parentUrl": "https://github.com/Proto-UI/Proto-UI/issues/1092",
+    "carrierUrl": "https://github.com/Proto-UI/Proto-UI/pull/887",
+    "carrierSection": "相邻中断会话：完整剩余工作 / PR884 与672 加速闭环",
+    "publicSourceCarrier": "https://github.com/Proto-UI/Proto-UI/pull/887#issuecomment-6164204577",
+    "coordinationUrl": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6095679394",
+    "coordinationText": "## Coordination: bump onto the #872 foundation\n\nPlease bump/synchronize this PR onto the current head of #872 as the next shared baseline, preserving this PR's own changes.\n\n- Foundation: #872 — `codex/finf-prototype-coverage-20261006` in `Proto-UI/Proto-UI`.\n- Exact head observed for this notice: `14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92`.\n- Maintainer direction: #872 is expected to be integrated soon and to become the foundation of the **0.3.0 rc mainline**. This is a forward plan, not a statement that it is already merged or released.\n\nPlease reconcile your branch with that head without dropping existing work, resolve the resulting conflicts, and rerun the relevant CI at the new exact head. Refresh independent review evidence after the bump. When #872 lands or advances, verify the actual resulting `main`/latest #872 ref and reconcile again rather than treating this observed SHA as a permanently frozen branch.\n\nThis is a coordination notice only: no branch rewrite, review approval, CI waiver, merge or release is performed by this comment.\n\n<!-- proto-ui-872-baseline-notice:14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92 -->",
+    "coordinationCompleteBodySha256": "37b2270ab5d6e2a82e6b7d48bc3201488c13b50b6c7b0f87815e98388931e697",
+    "historicalSourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+    "frozenSourceLedger": "internal/governance/release-0.3-source-ledger.json",
+    "frozenSourceRevision": "91f2fdb5e36cfac675d22d1e07e1c4e6b051147d",
+    "frozenIssueBodySha256": "6966c55e5a0345e4a7f585297b06c9dd2dce71175f923dcc877db195e0944087",
+    "frozenParentBodySha256": "48acff60b4d833e0d10c39468ccb0d7c30250693aa55cf7d53b00fe8a013a1fb",
+    "liveIssueBodySha256": "6966c55e5a0345e4a7f585297b06c9dd2dce71175f923dcc877db195e0944087",
+    "frozenReleaseDisposition": "criterion-split",
+    "releaseDispositionChanged": false
+  },
+  "interpretation": {
+    "versionMeans": "Reconcile the PR with the evolving #872/main foundation while preserving its contribution.",
+    "packageVersionSelection": false,
+    "releaseOrPublication": false,
+    "independentApprovalInferred": false,
+    "originalConditionComplete": false
+  },
+  "liveState": {
+    "issue": "open",
+    "issueComments": 1,
+    "issueAssignees": [],
+    "parent1092": "open",
+    "parent1092Comments": 5,
+    "parent887Comments": 77,
+    "pr884Comments": 24,
+    "pr884Reviews": 0,
+    "pr884ReviewComments": 0,
+    "pr672Comments": 8,
+    "pr672Reviews": 3,
+    "pr672ReviewComments": 0,
+    "discussionPagination": "GitHub --paginate followed API Link pagination for PR comments/reviews/review-comments; item counts match parent objects. Issue1153 and parent1092 have1/5 comments respectively within their100-item pages.",
+    "actor": {
+      "login": "cyjin-yl",
+      "id": 19223209,
+      "permissions": {
+        "admin": false,
+        "maintain": true,
+        "push": true,
+        "triage": true,
+        "pull": true
+      }
+    },
+    "workerExternalWritesAllowed": false,
+    "mainMustRefreshPermissionAtMutation": true,
+    "triageHistory": [
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1153#issuecomment-6684405438",
+        "at": "2026-11-06T12:05:16Z",
+        "claim": "Deferred to0.4; substantively moot because PR884 andPR672 merged.",
+        "disposition": "Retained dated triage. It does not satisfy or delete the original verification/review clauses."
+      }
+    ]
+  },
+  "authorities": [
+    {
+      "path": "AGENTS.md",
+      "role": "governance, source preservation and lifecycle limits"
+    },
+    {
+      "path": "spec/README.md",
+      "role": "spec lifecycle and historical evidence separation"
+    },
+    {
+      "path": "internal/agent-operations/contributor-agents.md",
+      "role": "original Finf deferral is not technical acceptance"
+    },
+    {
+      "path": "internal/governance/release-0.3-plan.md",
+      "role": "compound-condition retention; release scope remains distinct"
+    },
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "status": "draft",
+      "anchors": [
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J",
+        "C-LIFECYCLE-0002-K"
+      ],
+      "role": "failed-created cleanup vs ordinary authored disposal remain distinct"
+    },
+    {
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "status": "draft",
+      "role": "case and consuming test/fixture relations"
+    },
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0008.yaml",
+      "status": "active",
+      "activeSince": null,
+      "role": "instance/view epoch separation; legacy activation provenance not invented"
+    },
+    {
+      "path": "spec/contracts/C-DELAY-0001.yaml",
+      "status": "draft",
+      "role": "lifecycle-bound cancellation"
+    },
+    {
+      "path": "spec/modules/M-ANATOMY-0001.yaml",
+      "status": "draft",
+      "role": "nearest-root domain and retained-claim ownership; Expose dependency and host structure/order ports"
+    },
+    {
+      "path": "spec/contracts/C-ANATOMY-0005.yaml",
+      "status": "draft",
+      "role": "nearest-root domain and terminal boundary"
+    },
+    {
+      "path": "spec/contracts/C-EXPOSE-0004.yaml",
+      "status": "draft",
+      "role": "PR672 cited existing Expose identity mapping"
+    },
+    {
+      "path": "spec/tests/T-SHADCN-RADIO-GROUP-0001.yaml",
+      "status": "draft",
+      "role": "PR672 historical coverage citation; no lifecycle admission"
+    }
+  ],
+  "pr884": {
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/884",
+    "merged": true,
+    "mergedAt": "2026-10-14T06:26:31Z",
+    "archivedSourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+    "archivedSourceTree": "3c15075908e74a19e848194c7a77aa23ec37edd4",
+    "archiveRef": "refs/heads/archive/finf-200/pr884-136e16b5",
+    "archiveRefLiveReadback": "136e16b57c19de961532fa17cef51961f926bd7e",
+    "integratedHead": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+    "integratedTree": "77fe6e55cc35f32ff155939ebe30f4ae1d44d2ac",
+    "mergeSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+    "commitCountAtArchivedHead": 557,
+    "commitCountAtIntegratedHead": 1,
+    "changedFilesAtIntegratedHead": 39,
+    "sourcePreservation": {
+      "archivedExistingPaths": 38,
+      "equalArchiveToIntegrated": 38,
+      "additionalIntegratedPath": "internal/records/2026-10-14-finf-source-closure.json",
+      "behavioralCompletenessProved": false
+    },
+    "nativeDco": {
+      "appId": 1861,
+      "id": 115708661470,
+      "headSha": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+      "conclusion": "success",
+      "url": "https://github.com/Proto-UI/Proto-UI/runs/115708661470"
+    },
+    "archivedDco": {
+      "appId": 1861,
+      "id": 115129941912,
+      "headSha": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "conclusion": "failure",
+      "verdict": "unknown; complete PR commit list unavailable after REST250 / incomplete GraphQL fallback",
+      "missingSignoffFinding": false,
+      "url": "https://github.com/Proto-UI/Proto-UI/runs/115129941912"
+    },
+    "archivedChecks": {
+      "count": 98,
+      "conclusions": {
+        "failure": 48,
+        "skipped": 1,
+        "success": 49
+      }
+    },
+    "integratedChecks": {
+      "count": 81,
+      "conclusions": {
+        "failure": 40,
+        "success": 41
+      },
+      "canonicalRun": {
+        "id": 38520441828,
+        "headSha": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+        "attempt": 1,
+        "conclusion": "failure",
+        "jobCount": 22,
+        "successes": 12,
+        "failures": 10,
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828",
+        "generalCheckoutSha": "972d100efbe025ea35c06a337707ad72ec38b3b6",
+        "generalCheckoutTree": "77fe6e55cc35f32ff155939ebe30f4ae1d44d2ac",
+        "generalFailure": "78 public-docs drift findings; exit1 before Vitest",
+        "generalJobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017062"
+      },
+      "checks": [
+        {
+          "id": 115716236270,
+          "name": "test",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115716236270"
+        },
+        {
+          "id": 115709017102,
+          "name": "test-browser (3/8, browser-3-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017102"
+        },
+        {
+          "id": 115709017075,
+          "name": "test-browser (4/8, browser-4-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017075"
+        },
+        {
+          "id": 115709017070,
+          "name": "test-browser (2/8, browser-2-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017070"
+        },
+        {
+          "id": 115709017062,
+          "name": "test-general",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017062"
+        },
+        {
+          "id": 115709017057,
+          "name": "test-browser (8/8, browser-8-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709017057"
+        },
+        {
+          "id": 115709016993,
+          "name": "test-browser (7/8, browser-7-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709016993"
+        },
+        {
+          "id": 115709016977,
+          "name": "test-browser (6/8, browser-6-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709016977"
+        },
+        {
+          "id": 115709016939,
+          "name": "test-browser (5/8, browser-5-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709016939"
+        },
+        {
+          "id": 115709016934,
+          "name": "test-browser (1/8, browser-1-of-8)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115709016934"
+        },
+        {
+          "id": 115708842880,
+          "name": "public_package_build",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708842880"
+        },
+        {
+          "id": 115708842874,
+          "name": "release-consumer-react",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708842874"
+        },
+        {
+          "id": 115708842859,
+          "name": "release-stage",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708842859"
+        },
+        {
+          "id": 115708842791,
+          "name": "cli-smoke",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708842791"
+        },
+        {
+          "id": 115708677270,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441873/job/115708677270"
+        },
+        {
+          "id": 115708677233,
+          "name": "representative-features (shadcn-drawer-presence)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708677233"
+        },
+        {
+          "id": 115708677191,
+          "name": "representative-features (brutalist-switch-consumer)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708677191"
+        },
+        {
+          "id": 115708677178,
+          "name": "isolated-controls (code-surfaces, code-surfaces)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677178"
+        },
+        {
+          "id": 115708677158,
+          "name": "isolated-controls (code-surface-grammar, code-surface-grammar)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677158"
+        },
+        {
+          "id": 115708677133,
+          "name": "isolated-controls (search-commands, site-search-commands)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677133"
+        },
+        {
+          "id": 115708677126,
+          "name": "visual-density",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677126"
+        },
+        {
+          "id": 115708677113,
+          "name": "public-button-ghost",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441966/job/115708677113"
+        },
+        {
+          "id": 115708677109,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441934/job/115708677109"
+        },
+        {
+          "id": 115708677073,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441898/job/115708677073"
+        },
+        {
+          "id": 115708677064,
+          "name": "capture (baseline)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441886/job/115708677064"
+        },
+        {
+          "id": 115708677054,
+          "name": "isolated-controls (copy-commands, site-copy-commands)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677054"
+        },
+        {
+          "id": 115708677049,
+          "name": "isolated-controls (runtime-box, runtime-preview-surface, runtime-preview-evidence)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677049"
+        },
+        {
+          "id": 115708677028,
+          "name": "isolated-controls (native-links, site-native-links)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708677028"
+        },
+        {
+          "id": 115708677014,
+          "name": "public-atom-previews",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441986/job/115708677014"
+        },
+        {
+          "id": 115708676935,
+          "name": "mobile-navigation-reading",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708676935"
+        },
+        {
+          "id": 115708676832,
+          "name": "capture (candidate)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441886/job/115708676832"
+        },
+        {
+          "id": 115708676742,
+          "name": "capture",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441865/job/115708676742"
+        },
+        {
+          "id": 115708676573,
+          "name": "family-audit-evidence (passive-and-editors, badge,card,skeleton,separator,spinner,textarea,scroll...",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441941/job/115708676573"
+        },
+        {
+          "id": 115708676546,
+          "name": "family-audit-evidence (intent-and-tabs, tooltip,hover-card,tabs)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441941/job/115708676546"
+        },
+        {
+          "id": 115708676540,
+          "name": "family-audit-evidence (naming-and-disclosures, label,collapsible,accordion,field)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441941/job/115708676540"
+        },
+        {
+          "id": 115708676486,
+          "name": "family-audit-evidence (popup-boundaries, dropdown-menu,select,dialog)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441941/job/115708676486"
+        },
+        {
+          "id": 115708676408,
+          "name": "source-and-host",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441981/job/115708676408"
+        },
+        {
+          "id": 115708676399,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441956/job/115708676399"
+        },
+        {
+          "id": 115708676288,
+          "name": "controlled-surface",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441869/job/115708676288"
+        },
+        {
+          "id": 115708676242,
+          "name": "family-audit-evidence (binary-and-buttons, button,toggle,switch,checkbox)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441941/job/115708676242"
+        },
+        {
+          "id": 115708676221,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441971/job/115708676221"
+        },
+        {
+          "id": 115708676201,
+          "name": "finite-rest-source",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441948/job/115708676201"
+        },
+        {
+          "id": 115708676147,
+          "name": "actual-card-producer",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441853/job/115708676147"
+        },
+        {
+          "id": 115708676120,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441884/job/115708676120"
+        },
+        {
+          "id": 115708676103,
+          "name": "native-typography",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441944/job/115708676103"
+        },
+        {
+          "id": 115708676072,
+          "name": "actual-frames (switch-default)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441899/job/115708676072"
+        },
+        {
+          "id": 115708676060,
+          "name": "actual-frames (switch-sm)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441899/job/115708676060"
+        },
+        {
+          "id": 115708676019,
+          "name": "actual-frames (drawer)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441899/job/115708676019"
+        },
+        {
+          "id": 115708675969,
+          "name": "four-web-source-and-artifact",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441906/job/115708675969"
+        },
+        {
+          "id": 115708675946,
+          "name": "representative-features (calendar)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675946"
+        },
+        {
+          "id": 115708675933,
+          "name": "actual-frames (select)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441899/job/115708675933"
+        },
+        {
+          "id": 115708675925,
+          "name": "representative-features (resident-motion-capability)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675925"
+        },
+        {
+          "id": 115708675906,
+          "name": "representative-features (slider)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675906"
+        },
+        {
+          "id": 115708675869,
+          "name": "representative-features (runtime-tabs)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675869"
+        },
+        {
+          "id": 115708675851,
+          "name": "representative-features (drawer-command-density)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675851"
+        },
+        {
+          "id": 115708675847,
+          "name": "representative-features (disclosure-overlays)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675847"
+        },
+        {
+          "id": 115708675841,
+          "name": "representative-features (popover-title)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675841"
+        },
+        {
+          "id": 115708675819,
+          "name": "representative-features (neo-popover-title)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675819"
+        },
+        {
+          "id": 115708675805,
+          "name": "representative-features (shadcn-switch-consumer)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675805"
+        },
+        {
+          "id": 115708675784,
+          "name": "representative-features (popover-command-density)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675784"
+        },
+        {
+          "id": 115708675777,
+          "name": "matched-browser (baseline)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441901/job/115708675777"
+        },
+        {
+          "id": 115708675767,
+          "name": "representative-features (forms)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675767"
+        },
+        {
+          "id": 115708675748,
+          "name": "representative-features (dropdown)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675748"
+        },
+        {
+          "id": 115708675742,
+          "name": "representative-features (modal-overlays)",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675742"
+        },
+        {
+          "id": 115708675687,
+          "name": "representative-features (drawer-intrinsic)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441823/job/115708675687"
+        },
+        {
+          "id": 115708675583,
+          "name": "source-and-browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441903/job/115708675583"
+        },
+        {
+          "id": 115708675354,
+          "name": "component-button-ghost",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441902/job/115708675354"
+        },
+        {
+          "id": 115708675350,
+          "name": "matched-browser (candidate)",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441901/job/115708675350"
+        },
+        {
+          "id": 115708675219,
+          "name": "rust-macos",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675219"
+        },
+        {
+          "id": 115708675089,
+          "name": "rust",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675089"
+        },
+        {
+          "id": 115708675086,
+          "name": "lockstep-check",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675086"
+        },
+        {
+          "id": 115708675058,
+          "name": "rust-interop",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675058"
+        },
+        {
+          "id": 115708675055,
+          "name": "public_package_plan",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675055"
+        },
+        {
+          "id": 115708675043,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441836/job/115708675043"
+        },
+        {
+          "id": 115708675029,
+          "name": "type-check",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708675029"
+        },
+        {
+          "id": 115708674990,
+          "name": "test-plan",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708674990"
+        },
+        {
+          "id": 115708674883,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441883/job/115708674883"
+        },
+        {
+          "id": 115708674731,
+          "name": "release-scan",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441828/job/115708674731"
+        },
+        {
+          "id": 115708674709,
+          "name": "browser",
+          "appId": 15368,
+          "conclusion": "success",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441829/job/115708674709"
+        },
+        {
+          "id": 115708674681,
+          "name": "browser-evidence",
+          "appId": 15368,
+          "conclusion": "failure",
+          "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441810/job/115708674681"
+        },
+        {
+          "id": 115708661470,
+          "name": "DCO",
+          "appId": 1861,
+          "conclusion": "success",
+          "url": "https://probot.github.io/apps/dco/"
+        }
+      ]
+    },
+    "independentReviews": {
+      "count": 0,
+      "approval": false,
+      "deferralForOtherPRsApplied": false
+    },
+    "historicalNative": [
+      {
+        "headSha": "136e16b57c19de961532fa17cef51961f926bd7e",
+        "runId": 38346784865,
+        "jobId": 115129940991,
+        "workflow": "Collapsible projection evidence",
+        "checkoutConfirmed": true,
+        "filesPassed": 1,
+        "testsPassed": 36,
+        "testsFailed": 0,
+        "artifactIdReportedByLog": 11789911549,
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38346784865/job/115129940991"
+      },
+      {
+        "headSha": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+        "runId": 38520441934,
+        "jobId": 115708677109,
+        "workflow": "Collapsible projection evidence",
+        "checkoutConfirmed": true,
+        "filesPassed": 1,
+        "testsPassed": 36,
+        "testsFailed": 0,
+        "artifactIdReportedByLog": 11874172239,
+        "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38520441934/job/115708677109"
+      }
+    ],
+    "historicalNativeLimits": "Recovered terminal job logs with exact checkout SHA. Artifacts/images not downloaded or visually inspected in this run. Neither36-case result is current-source validation."
+  },
+  "pr672": {
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/672",
+    "merged": true,
+    "mergedAt": "2026-09-21T12:01:29Z",
+    "headSha": "6b4a6c7f21cc6018b2412b5c0f4a1467ed3b6e82",
+    "mergeSha": "8abb627b0950b8eaa9743be10e67eb18a9c65b29",
+    "changedFiles": 1,
+    "path": "packages/cli/test/lowered-hook-coverage.test.ts",
+    "retainedCorrection": "path.relative(REPO_ROOT, absolute).split(path.sep).join('/')",
+    "review": {
+      "id": 5266342044,
+      "state": "APPROVED",
+      "headSha": "6b4a6c7f21cc6018b2412b5c0f4a1467ed3b6e82",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/672#pullrequestreview-5266342044"
+    },
+    "ci": {
+      "id": 35591135538,
+      "conclusion": "success",
+      "headSha": "6b4a6c7f21cc6018b2412b5c0f4a1467ed3b6e82",
+      "repositoryJobs": 9,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/35591135538"
+    },
+    "checks": {
+      "count": 11,
+      "conclusions": {
+        "success": 11
+      },
+      "nativeDcoAppId": 1861,
+      "nativeDcoId": 106305535215
+    },
+    "historicalWindows": {
+      "source": "PR672 body; not a newly executed or log-verified Windows run in this task",
+      "baselineRun": 35514218383,
+      "candidateRun": 35591179151,
+      "reportedBaseline": {
+        "passed": 74,
+        "failed": 1
+      },
+      "reportedCandidate": {
+        "passed": 75,
+        "failed": 0
+      },
+      "currentSourceWindowsValidation": "not-run"
+    }
+  },
+  "currentDelivery": {
+    "mainRefObserved": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "currentProductChecksExecuted": false,
+    "productFailureInferred": false,
+    "mergeAncestry": [
+      {
+        "label": "pr884-merge-in-assigned-base",
+        "ancestor": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+        "descendant": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "",
+        "meaning": "not-ancestor"
+      },
+      {
+        "label": "pr672-merge-in-assigned-base",
+        "ancestor": "8abb627b0950b8eaa9743be10e67eb18a9c65b29",
+        "descendant": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "",
+        "meaning": "not-ancestor"
+      },
+      {
+        "label": "foundation-notice-in-original884",
+        "ancestor": "14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92",
+        "descendant": "136e16b57c19de961532fa17cef51961f926bd7e",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "",
+        "meaning": "ancestor"
+      }
+    ],
+    "ancestryLimit": "Both historical merge SHAs return not-ancestor for the assigned base. This is not a source-loss finding. No old source restored from ancestry alone.",
+    "unionPaths": 40,
+    "unionPathsMatchingIntegratedBytes": 22,
+    "unionPathsWithLaterBytes": 18,
+    "allUnionPathsPresentAndMatchAssignedBase": true,
+    "currentSourceSemanticPreservation": "requires consumer verification on evolved paths; old byte equality and merge status are insufficient"
+  },
+  "conditionLedger": [
+    {
+      "id": "1153-foundation-sync",
+      "sourceKeys": [
+        "issue.1153.001",
+        "issue.1092.003",
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "Synchronize PR884 to the evolving #872/main foundation.",
+      "state": "historically-performed; current source rebound",
+      "evidence": [
+        "The notice foundation14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92 is an ancestor of archived136e16b5.",
+        "Compact source was genuinely merged as a247ae2c; live main is the assigned0607c6c5."
+      ],
+      "remaining": "Maintain current-head composition evidence rather than repeat a merge of an already merged PR."
+    },
+    {
+      "id": "1153-preserve-own-work",
+      "sourceKeys": [
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "Preserve the PR contribution and resolve conflicts without losing existing work.",
+      "state": "38-path historical byte preservation observed; current semantics not yet verified",
+      "evidence": [
+        "All38 archived contribution paths byte-match integrated1e8df39f.",
+        "All40 union source paths exist at assigned base;18 differ from integrated bytes."
+      ],
+      "remaining": "Review evolved paths and run current consumers; do not replace later source with the old archive."
+    },
+    {
+      "id": "1153-exact-head-ci",
+      "sourceKeys": [
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "Rerun relevant CI at the new exact synchronized head.",
+      "state": "historical run completed with failures; original acceptance remains",
+      "evidence": [
+        "Canonical38520441828 completed12success/10failure; exact general merge tree equals integrated product tree.",
+        "Current worker executed no product checks."
+      ],
+      "remaining": "Main executes proportional current-source checks and reconciles all applicable retained CI failures through their existing owners and scheduled integration evidence."
+    },
+    {
+      "id": "1153-independent-review",
+      "sourceKeys": [
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "Refresh independent review evidence after synchronization.",
+      "state": "remaining",
+      "evidence": [
+        "PR884 has0reviews in complete live collection."
+      ],
+      "remaining": "Obtain current-source independent technical acceptance and satisfy actual platform gates. Never backdate approval or apply review deferral for1380–1387 to884."
+    },
+    {
+      "id": "1153-follow-foundation-advances",
+      "sourceKeys": [
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "After #872 lands or advances, verify actual main/latest ref and reconcile again.",
+      "state": "live ref/source inventory recovered; current consumer acceptance remains",
+      "evidence": [
+        "Live heads/main equals assigned0607c6c5.",
+        "Per-path digests are bound separately from historical ancestry."
+      ],
+      "remaining": "Refresh main/head/source identities at Main validation and integration; review source changes before evidence reuse."
+    },
+    {
+      "id": "1153-pr672-closeout",
+      "sourceKeys": [
+        "issue.1153.001",
+        "issue.1092.003"
+      ],
+      "condition": "Retain the distinct PR672 acceleration/verification result.",
+      "state": "historically accepted and merged; path correction retained",
+      "evidence": [
+        "Exact6b4a6c7f APPROVED review5266342044 and successfulCI35591135538.",
+        "Current shipped coverage assertion retains path separator normalization."
+      ],
+      "remaining": "Use the Windows-specific current consumer when a current portability claim is made; historical75pass is not a new run."
+    },
+    {
+      "id": "1153-version-boundary",
+      "sourceKeys": [
+        "owner-conversation:884:6095679394"
+      ],
+      "condition": "Treat the0.3.0rc mainline mention as a forward foundation plan, not a release result or authorization.",
+      "state": "scope respected",
+      "evidence": [
+        "No VERSION, package manifest, release selection or publication changed."
+      ],
+      "remaining": "No release operation belongs to this repair."
+    }
+  ],
+  "preservedSourceRecords": [
+    {
+      "key": "owner-conversation:884:6093427703",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6093427703",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "333d4fa481ad29fd36d118b2371a33bd1c2b747c80613a9bed1abd53b4f91205",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6093444939",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6093444939",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "b8626f14b828184eebfaeec7eb8f0803e77336ec7a7883ea4fb9826e0efdd163",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6095679394",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6095679394",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "37b2270ab5d6e2a82e6b7d48bc3201488c13b50b6c7b0f87815e98388931e697",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6106941292",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6106941292",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "ad8c9cc7b2a665e8bad715dbb8ec276736a13a563a36ae7c8981c64bbc400d2f",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6107090609",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6107090609",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "a4ad832c4386dc2e648f1622ff56bcfd1ccebef64d1dcc8b763343b32f255f55",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108077179",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108077179",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "55b13424f8690c09b01a686c6131be69999469676b211bf6ebdff073b155a6b2",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108078369",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108078369",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "8148f2d009e308b3b3c9cd80b5e005f2a8c6398371f55ab697847ac8240ea1ca",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108079594",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108079594",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "92e212cfc0b6167e51ea0966419e355a915a4c753ed2387ac439ffbd8cd785aa",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108139408",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108139408",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "eddbf280b233b271d4d91c9909ac20b0733803a3a2ec7afa54746d79188812c8",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108638935",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108638935",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "e4c73bc2a7a0b2be9934ab1aaad053e2c64af0e803df8de10f634f466133b4f2",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6108994844",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6108994844",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "bfa767924818b97bc9dfabaeef923b94336a0f1864d5d77bfd17a23f2a428007",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6122878028",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6122878028",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "59921b9b926829444c0d4d22438fa2aac9ede4eba15ba4b8fd81e3804f53811b",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6122880595",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6122880595",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "40ae485f4acf4d622bf432b2369c1dbf0132577933ecbc36e25f496b747dd205",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6122883355",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6122883355",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "95b7ab3d2d56f6633e89f931cdf5736758d7eac84be6d40583c7a7a570af885d",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6122886108",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6122886108",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "01ef057811db97aa108ad0544890551a58af9f0c42914226760c7032dd73c3a8",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6123655019",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6123655019",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "0ba8d1c873557368221d35dce7ae5898fe9cd9249d74631f52fa0442841967aa",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137833526",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137833526",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "be851531471b611440dfc3fef1c74cb4a24094a478ee72e3a39adffb88ecede4",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137836246",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137836246",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "84b7d7e9b0c262f2f7af7364ed05fc9e02ed4d6b5414d098b8cef05947558da4",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137838955",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137838955",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "277d208b73107494825f7b9a2980120e4613dc8e3c9c02952bf5110a4774ea18",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137841920",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137841920",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "c8393f8ed718f0e757d67a448094365cacff05ecea2d9e0880a1bd3718f62805",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137844650",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137844650",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "a5a1b98ea1b8e7d6e1ef9f585de89276218f59c5f573e15aeaf0f549cd00663b",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    },
+    {
+      "key": "owner-conversation:884:6137847296",
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884#issuecomment-6137847296",
+      "sourceHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+      "completeOriginalBodySha256": "6669dbaa7e1ad1378178fd068d046eca30a41cb15c96ff48652876d973f9982e",
+      "originalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+      "requiresFollowupCheckbox": true
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.test.ts",
+      "pr": 884,
+      "archivedSha256": "5f992a726c929b1afebe831a16f7ac83e9b1418e0549be5225d54b0911e55751",
+      "integratedSha256": "5f992a726c929b1afebe831a16f7ac83e9b1418e0549be5225d54b0911e55751",
+      "assignedBaseSha256": "46f8b74cdfdc35b6b5ab41376f9f788b0dcf26524396ae86296bdd215cf1e26b",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/collapsible-focus-observation.ts",
+      "pr": 884,
+      "archivedSha256": "198be0148815d9a887bae04bbde2e9ea083e2267df9ee29caaa110b14562be13",
+      "integratedSha256": "198be0148815d9a887bae04bbde2e9ea083e2267df9ee29caaa110b14562be13",
+      "assignedBaseSha256": "1f5da8914c8ee50470bf0492199ec93b90752fbbaa2d6c4856a33223dd692dfc",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts",
+      "pr": 884,
+      "archivedSha256": "8862007026aa573250dc7be82711f3c3bbe5fa56366dc3e7cf251f42a798dcee",
+      "integratedSha256": "8862007026aa573250dc7be82711f3c3bbe5fa56366dc3e7cf251f42a798dcee",
+      "assignedBaseSha256": "0142b9bdfd5baeb605ae8f17852ad7ae9c5ce9bde603eb5b527ddc9de5bca02a",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "internal/contracts/lifecycle/component-lifecycle.v0.md",
+      "pr": 884,
+      "archivedSha256": "ad13d303e4435ffc8607dde8614d3742e29f90ce4777ec676aaf5eecb8cb8c60",
+      "integratedSha256": "ad13d303e4435ffc8607dde8614d3742e29f90ce4777ec676aaf5eecb8cb8c60",
+      "assignedBaseSha256": "262f4345920fcfa5b4829ace01ca1b5933d07a6047b92fab54d1650f0ef68033",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "internal/contracts/prototype-base/form-completion.v0.md",
+      "pr": 884,
+      "archivedSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc",
+      "integratedSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc",
+      "assignedBaseSha256": "8cadb32b9e22bf6e228908823019965750c0f61aee66720b6360324194da75bc",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "internal/contracts/prototype-base/notification-completion.v0.md",
+      "pr": 884,
+      "archivedSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426",
+      "integratedSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426",
+      "assignedBaseSha256": "52940a389fb77a891205aff7ee26de795e78df033190ece9d26faeed47a27426",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "internal/contracts/prototype-base/search-selection-completion.v0.md",
+      "pr": 884,
+      "archivedSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382",
+      "integratedSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382",
+      "assignedBaseSha256": "5af4599dfb5d10187805bb690bad3d973ead6a84f48ec73d3f171da261efc382",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "internal/records/2026-10-10-anatomy-runtime-lifecycle-budget.json",
+      "pr": 884,
+      "archivedSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd",
+      "integratedSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd",
+      "assignedBaseSha256": "cdf4bbed30eb0d039858d56eff5bf5a1961bbc2afe572c0978ab4f402b3371bd",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-source-closure.json",
+      "pr": 884,
+      "archivedSha256": null,
+      "integratedSha256": "159398757bffb901f98b31881538838a7f41ffcab105edc5e4fab6ace675e67b",
+      "assignedBaseSha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": null,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/accordion/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+      "integratedSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+      "assignedBaseSha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/calendar/index.ts",
+      "pr": 884,
+      "archivedSha256": "e759154d231b9615b0290e4162505c3dc8fb9eb893d8bbc749fdc5385bfbda5f",
+      "integratedSha256": "e759154d231b9615b0290e4162505c3dc8fb9eb893d8bbc749fdc5385bfbda5f",
+      "assignedBaseSha256": "5f17db886e2279c4fedabb7b01ae97c885afd919c25acbf1257cc7b2df1270f0",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/carousel/index.ts",
+      "pr": 884,
+      "archivedSha256": "f3717c3125f64db2353c9dd5d6c98dfa386f7eb71081f7fe5c362613c7c7940c",
+      "integratedSha256": "f3717c3125f64db2353c9dd5d6c98dfa386f7eb71081f7fe5c362613c7c7940c",
+      "assignedBaseSha256": "edf2646674c981baeccdcdd3e4aa2f13b6e440528eb925307aec28d47c35d090",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/checkbox-group/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+      "integratedSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+      "assignedBaseSha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/context-menu/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+      "integratedSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+      "assignedBaseSha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/data-table/index.ts",
+      "pr": 884,
+      "archivedSha256": "736586503ba4f741f7e2a7e0e1d4c44733f59470b065abab308cbb1c6a8d3bc6",
+      "integratedSha256": "736586503ba4f741f7e2a7e0e1d4c44733f59470b065abab308cbb1c6a8d3bc6",
+      "assignedBaseSha256": "8646c96e39a939eef92a5716abfa63760bb517b7cf95c8a5e9817fe6cfe5d03a",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/field/control.proto.ts",
+      "pr": 884,
+      "archivedSha256": "a39428853bb52207bf3b4c5fae681b9bda1524713e553ba75f8b793901c84c1b",
+      "integratedSha256": "a39428853bb52207bf3b4c5fae681b9bda1524713e553ba75f8b793901c84c1b",
+      "assignedBaseSha256": "a39428853bb52207bf3b4c5fae681b9bda1524713e553ba75f8b793901c84c1b",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/form/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+      "integratedSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+      "assignedBaseSha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/input-otp/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+      "integratedSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+      "assignedBaseSha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/menu-primitives/family.ts",
+      "pr": 884,
+      "archivedSha256": "04e700b6dc562bd544f47c2a305b4debfcd3eacf3c9b9575d636f4621ea92583",
+      "integratedSha256": "04e700b6dc562bd544f47c2a305b4debfcd3eacf3c9b9575d636f4621ea92583",
+      "assignedBaseSha256": "958dc8517d38b6fcd4497f35fb1a8fa7a550c468fbb63abb8633763c9658fcd7",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/number-field/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+      "integratedSha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+      "assignedBaseSha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/search-primitives/family.ts",
+      "pr": 884,
+      "archivedSha256": "e077dd47cadc5907c261f49ea816c7a01ea82476d3c7017c8630b75c2955b2c5",
+      "integratedSha256": "e077dd47cadc5907c261f49ea816c7a01ea82476d3c7017c8630b75c2955b2c5",
+      "assignedBaseSha256": "e077dd47cadc5907c261f49ea816c7a01ea82476d3c7017c8630b75c2955b2c5",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "16599d46bf693784f8fba11368672619125da100d8279c4586aca0e3a1b36272",
+      "integratedSha256": "16599d46bf693784f8fba11368672619125da100d8279c4586aca0e3a1b36272",
+      "assignedBaseSha256": "9e00bc93d71e0a05af1e72ded8f25c9c3fb2f1d8bf38c5636f8ccd103dbf4b0e",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+      "integratedSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+      "assignedBaseSha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/toast/root.proto.ts",
+      "pr": 884,
+      "archivedSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+      "integratedSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+      "assignedBaseSha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/toolbar/separator.proto.ts",
+      "pr": 884,
+      "archivedSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+      "integratedSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+      "assignedBaseSha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/src/tree/index.ts",
+      "pr": 884,
+      "archivedSha256": "97cdede5f2ff0d8c2c056b3f0d62a1c024dd3d5b2267b5ec165e0b9677663bec",
+      "integratedSha256": "97cdede5f2ff0d8c2c056b3f0d62a1c024dd3d5b2267b5ec165e0b9677663bec",
+      "assignedBaseSha256": "7d885efd494ca8c3745d0a96163fc500ee0637810a70991742e03b002be07cfd",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/test/navigation-overlays/search.test.ts",
+      "pr": 884,
+      "archivedSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9",
+      "integratedSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9",
+      "assignedBaseSha256": "0050ac5ff305fd1be521df6e1e913a517bd63c6a8b042092121d7bff827cf5e9",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+      "pr": 884,
+      "archivedSha256": "7ceec4043473629668db3fe9185f08fb931cba09798efbd8bf5f39aadef84665",
+      "integratedSha256": "7ceec4043473629668db3fe9185f08fb931cba09798efbd8bf5f39aadef84665",
+      "assignedBaseSha256": "9819d01406180b70b93ceba0222cf0096ad1e8399bb970a818574211a1c2912b",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/prototypes/base/test/popup-snap-validation-lifecycle.test.ts",
+      "pr": 884,
+      "archivedSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86",
+      "integratedSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86",
+      "assignedBaseSha256": "b43edcf14cb048ecbf76541fb18d969734c5b89bd762fd43b564beb201d58f86",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/test/selection-reset-lifecycle.test.ts",
+      "pr": 884,
+      "archivedSha256": "887fe8880dc636004519c85a5599febfaa7bed4bf43bd26ad88cd8db7c5fccf7",
+      "integratedSha256": "887fe8880dc636004519c85a5599febfaa7bed4bf43bd26ad88cd8db7c5fccf7",
+      "assignedBaseSha256": "887fe8880dc636004519c85a5599febfaa7bed4bf43bd26ad88cd8db7c5fccf7",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-root-lifecycle.test.ts",
+      "pr": 884,
+      "archivedSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9",
+      "integratedSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9",
+      "assignedBaseSha256": "724d3b854c248868fb4cbd38d7eb864db41229ea1b8f72a37e9be3b0080445a9",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-publication.test.ts",
+      "pr": 884,
+      "archivedSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05",
+      "integratedSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05",
+      "assignedBaseSha256": "180ac79650683a9e64aa46dccd80f0a2cee4f228a850068e5e51416fb12d1c05",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/prototypes/base/test/toolbar-separator-lifecycle.test.ts",
+      "pr": 884,
+      "archivedSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff",
+      "integratedSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff",
+      "assignedBaseSha256": "b72e41357dd600117aef7d3fb0740c50014e5b6056b859790d9dd06b9aa904ff",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/runtime/src/instance/session.ts",
+      "pr": 884,
+      "archivedSha256": "3bdad28a03dd369ea0cf65f7d1fea618e3ffc2eab5ce0228a008c9089891128e",
+      "integratedSha256": "3bdad28a03dd369ea0cf65f7d1fea618e3ffc2eab5ce0228a008c9089891128e",
+      "assignedBaseSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/runtime/test/contract/delay.v0.contract.test.ts",
+      "pr": 884,
+      "archivedSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d",
+      "integratedSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d",
+      "assignedBaseSha256": "eb9355f22fad6fc0f9c1af94aaa156efcd2a551e0761de06ab9a8ee07a406a9d",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": true
+    },
+    {
+      "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+      "pr": 884,
+      "archivedSha256": "8ee4365ef0b6421aba031267994307e05226712d3608ab360fc1eae89cae8a23",
+      "integratedSha256": "8ee4365ef0b6421aba031267994307e05226712d3608ab360fc1eae89cae8a23",
+      "assignedBaseSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/spec/fixtures/src/lifecycle/callback-order.ts",
+      "pr": 884,
+      "archivedSha256": "a2f4d244adabc61423eeca377567640a30b446c58f291cfce9788c6e504be1bf",
+      "integratedSha256": "a2f4d244adabc61423eeca377567640a30b446c58f291cfce9788c6e504be1bf",
+      "assignedBaseSha256": "c0bd14632f89c39b172f1184c10f48ae777e6297761a506e95c64296196375d6",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "pr": 884,
+      "archivedSha256": "24cb2c28e6b99b4063440639530852c218ce3aa18d06264f317f795d6a66be97",
+      "integratedSha256": "24cb2c28e6b99b4063440639530852c218ce3aa18d06264f317f795d6a66be97",
+      "assignedBaseSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "pr": 884,
+      "archivedSha256": "b5441ba6b47044d353a9a6b1b10bc70b3af937f274aa8088ad0259a10f0f2494",
+      "integratedSha256": "b5441ba6b47044d353a9a6b1b10bc70b3af937f274aa8088ad0259a10f0f2494",
+      "assignedBaseSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": true,
+      "integratedEqualsAssignedBase": false
+    },
+    {
+      "path": "packages/cli/test/lowered-hook-coverage.test.ts",
+      "pr": 672,
+      "archivedSha256": null,
+      "integratedSha256": "74a87de6737853aa8fac9fb9e660753a1fa1172a3439c8e6f2ed00f94bbd1047",
+      "assignedBaseSha256": "4f88a87ef96250899605b5ccfc823df47e968eef0f812b87da9a443a6b97bafa",
+      "workingTreeEqualsAssignedBase": true,
+      "archiveEqualsIntegrated": null,
+      "integratedEqualsAssignedBase": false
+    }
+  ],
+  "readOnlyEvidence": {
+    "privateManifestSha256": "aa6a8f9816b4d5b31e51ac5a0d2103db5912b3df24bedd52df402762f00c5608",
+    "materials": [
+      {
+        "file": "issue1153.json",
+        "sha256": "bc6b97a91f8385d6b23bc94d4efa417ae7c0a9508e965a7ef83a1cdd3aa8838c",
+        "bytes": 2950
+      },
+      {
+        "file": "issue1153-comments.json",
+        "sha256": "6d2bdc73dd17db650bb804b4019892e5eaead2b055975d678b82d5b1d7268ac9",
+        "bytes": 1948
+      },
+      {
+        "file": "parent1092.json",
+        "sha256": "5c01dda08d2c4f93495a32545b35042f3014e01e875298bc4a5ef6706c149407",
+        "bytes": 3395
+      },
+      {
+        "file": "parent1092-comments.json",
+        "sha256": "a32a45426bf51c2693ec48c6378530d070d59b0824126237dbaead0028222c02",
+        "bytes": 28699
+      },
+      {
+        "file": "parent887.json",
+        "sha256": "ae068991ad4c7575975d647e24263874c19596c8a2bef8761f682086654bb8aa",
+        "bytes": 71810
+      },
+      {
+        "file": "pr887-comments.json",
+        "sha256": "eebebf5d1c8741659f22d70c65287e5f95d96de9768b98dce47a0538e29e1cbb",
+        "bytes": 930751
+      },
+      {
+        "file": "pr884.json",
+        "sha256": "62ebdf9d46e979305310deb2d2cda159661bce10ddf5474e006d6b8840672f5d",
+        "bytes": 32580
+      },
+      {
+        "file": "pr884-comments.json",
+        "sha256": "bf0d388a556ad360ad40ac3b49032ea789b429d50f1c69e63febd8831aa6af6f",
+        "bytes": 161160
+      },
+      {
+        "file": "pr884-reviews.json",
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "bytes": 3
+      },
+      {
+        "file": "pr884-review-comments.json",
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "bytes": 3
+      },
+      {
+        "file": "pr884-files.json",
+        "sha256": "c7ed254a7204182c8079cffc11743c821f1f7e41ee53d45e3b1011de2f943c08",
+        "bytes": 190486
+      },
+      {
+        "file": "pr884-final-checks.json",
+        "sha256": "3a918e444fb42b43c2ae9fc9dee13bbfc579496e18e1cd9baf092082622561c9",
+        "bytes": 36497
+      },
+      {
+        "file": "pr884-archived-checks.json",
+        "sha256": "53eadbbf7394a7e3696b3b428abbacea3c3a60a90dc6c92eb3b0798589933839",
+        "bytes": 43826
+      },
+      {
+        "file": "pr884-final-runs.json",
+        "sha256": "b9fe5c36a4c65d036c901c10ec7ad62a1579fc160f0f68d5218f4b8225918b17",
+        "bytes": 9847
+      },
+      {
+        "file": "pr672.json",
+        "sha256": "2e4878fb4276a4ad036e331c068d541f0977f3a369d76db450448026892ab663",
+        "bytes": 22086
+      },
+      {
+        "file": "pr672-comments.json",
+        "sha256": "3bcd7012846e48b5a89fc87ac3aa5622cb54be7206e0bcf4d1b121c6888774fc",
+        "bytes": 27894
+      },
+      {
+        "file": "pr672-reviews.json",
+        "sha256": "773d7ce12973a99a2081e8a1f1fee7af5b023fae4d783950548df3332bc83b99",
+        "bytes": 9836
+      },
+      {
+        "file": "pr672-review-comments.json",
+        "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "bytes": 3
+      },
+      {
+        "file": "pr672-files.json",
+        "sha256": "bfd4f5fdce0ccd110df6635774d55136372121f156577514012a287a31b8d9d0",
+        "bytes": 1066
+      },
+      {
+        "file": "pr672-final-checks.json",
+        "sha256": "1d48686a5c596f8fc7a77d6c0ea3850003dbaea677b9e53c261713164e2a14b7",
+        "bytes": 4722
+      },
+      {
+        "file": "dco884.json",
+        "sha256": "220961ad80f15aa3596f60185ab98c6e496cd382fa5073b22df0823ed1e4042b",
+        "bytes": 4509
+      },
+      {
+        "file": "dco884-archived.json",
+        "sha256": "5eba7de02d124589e2ae86923deaf91a7201580713a4aa90138865225efd840e",
+        "bytes": 4921
+      },
+      {
+        "file": "pr884-final-ci-run.json",
+        "sha256": "fd54fe152b79d9ddc6df3ec560d7db5ce25b5013a517a8ccc21cc635219a3039",
+        "bytes": 12996
+      },
+      {
+        "file": "pr884-archived-collapsible-run.json",
+        "sha256": "446bce57e6c82d9d48366ca1983748d6f4133b765bc725207f8a40d5d674bb29",
+        "bytes": 14672
+      },
+      {
+        "file": "pr672-final-ci-run.json",
+        "sha256": "c495732babc9b84083dbdc24ba435a969cde06509360bc33d50380ace3af4150",
+        "bytes": 12259
+      },
+      {
+        "file": "pr884-final-collapsible.log",
+        "sha256": "685bc06a18fdc0a690cdc34956635430c7ee0dec627719925325038e64bd0e96",
+        "bytes": 44719
+      },
+      {
+        "file": "pr884-archived-collapsible.log",
+        "sha256": "082f81e62969fef46b1c53b325506d0b74df10f7be33592b051bb9f75c337fe1",
+        "bytes": 44390
+      },
+      {
+        "file": "pr884-final-general.log",
+        "sha256": "0a51caeb9fbf6dc8b84983ff27fbf73d7cf746d001b92d53ae2fd54b5dca4ca8",
+        "bytes": 147063
+      },
+      {
+        "file": "main-ref.json",
+        "sha256": "66816e006fd8ec1636bc25e5339cdc005593b0ed4f6d08f73db7526a266d559b",
+        "bytes": 332
+      },
+      {
+        "file": "archive884-ref.json",
+        "sha256": "307696cdb85177be20d9b0ffc0c5e2bfc42765c6d1c06f23cb765cf7de30fb5f",
+        "bytes": 425
+      },
+      {
+        "file": "lineage.json",
+        "sha256": "ce653dcfacc40a482a3395a8cad7450e9441ab427bf7027ad4de58b6be6950ed",
+        "bytes": 786
+      },
+      {
+        "file": "tree-facts.json",
+        "sha256": "9c6976135983844ece1187dbd65d07062bdf797ff08bbab507554c6d5a573753",
+        "bytes": 560
+      }
+    ]
+  },
+  "candidate": {
+    "paths": [
+      "internal/records/2026-11-10-pr884-foundation-verification.json",
+      "internal/records/2026-11-10-pr884-foundation-verification.md"
+    ],
+    "preimages": [
+      {
+        "path": "internal/records/2026-11-10-pr884-foundation-verification.json",
+        "baseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "preimageSha256": null,
+        "reason": "new additive file; absent at clean assigned base before preparation"
+      },
+      {
+        "path": "internal/records/2026-11-10-pr884-foundation-verification.md",
+        "baseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "preimageSha256": null,
+        "reason": "new additive file; absent at clean assigned base before preparation"
+      }
+    ],
+    "productSourcesChanged": false,
+    "sharedLedgersChanged": false,
+    "historicalEvidenceRewritten": false,
+    "productChecksExecuted": false,
+    "formatChecksExecuted": false,
+    "metadataRoutingAdmitted": true,
+    "metadataAdmissionMeaning": "Orientation/trace routing only; final documentation candidate has its own handoff and is not a product pass."
+  },
+  "remainingOriginalWork": [
+    "Main validates the two new record files and immutable-source claims, retaining this candidate as evidence-only.",
+    "Main reuses or obtains exact-current-source13-file lifecycle/notification controls and the actual public36-case Collapsible consumer with existing owners.",
+    "Reconcile the current18 evolved paths and applicable historical CI/native failures; source-only conclusions are not runtime acceptance.",
+    "Refresh independent current-source review, genuine DCO and actual platform-required gates for the prepared PR.",
+    "Main publishes/integrates only under current authorization and earns criterion-bound closure after original conditions are satisfied or explicitly dispositioned."
+  ],
+  "prPreparation": {
+    "title": "docs: reconcile PR884 foundation verification evidence",
+    "body": "Refs #1153. Recover the original foundation-sync requirement, preserve issue.1153.001 / issue.1092.003 / owner-conversation:884:6095679394, and bind all40 historical/current source paths. Record PR672 exact-head approval separately from PR884 native DCO, historical36-case Collapsible passes, failed CI and absent independent review.\n\nThis adds two non-normative evidence records. Product verification, formatting, independent review and integration remain Main-owned and unrun for this candidate. No version/release selection or Issue completion is claimed."
+  }
+}
