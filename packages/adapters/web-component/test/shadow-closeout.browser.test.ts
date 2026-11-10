@@ -2493,29 +2493,39 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: true, bodyPosition: 'functional' },
     { initialSibling: false, bodyPosition: 'hover' },
     { initialSibling: true, bodyPosition: 'hover' },
+    { initialSibling: false, bodyPosition: 'grouped-shadow' },
+    { initialSibling: true, bodyPosition: 'grouped-shadow' },
+    { initialSibling: false, bodyPosition: 'filtered' },
+    { initialSibling: true, bodyPosition: 'filtered' },
+    { initialSibling: false, bodyPosition: 'filtered-shadow' },
+    { initialSibling: true, bodyPosition: 'filtered-shadow' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
       const page = await browser.newPage();
-      const atBody = bodyPosition !== null;
+      const inShadow = bodyPosition?.endsWith('-shadow') ?? false;
+      const shape = bodyPosition?.replace(/-shadow$/, '') ?? null;
+      const atBody = shape !== null && !inShadow;
+      const filtered = shape === 'filtered';
       const selector =
-        bodyPosition === 'grouped'
+        shape === 'grouped'
           ? '.positional-entry:not(:has(.flag)):nth-child(2n+1) button, .unrelated'
-          : bodyPosition === 'functional'
+          : shape === 'functional'
             ? '.positional-entry:not(:has(.flag)):not(:first-child) button'
-            : bodyPosition === 'hover'
+            : shape === 'hover'
               ? '.positional-entry:not(:has(.flag)):hover:first-child button'
-              : `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`;
+              : filtered
+                ? '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible) button'
+                : `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`;
+      const css = `
+        ${shape ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
+        ${selector} { visibility: hidden; }
+      `;
       try {
         await page.addScriptTag({ content: script });
-        await page.addStyleTag({
-          content: `
-            ${atBody ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
-            ${selector} { visibility: hidden; }
-          `,
-        });
+        if (!inShadow) await page.addStyleTag({ content: css });
         await page.evaluate(
-          ({ initialSibling, atBody }) => {
+          ({ initialSibling, atBody, inShadow, filtered, css }) => {
             const p = (window as any).Closeout;
             const C = p.adapt(
               p.define({
@@ -2527,21 +2537,33 @@ describe('Shadow closeout native boundaries', () => {
               }),
               { shadow: true }
             );
-            const parent = atBody ? document.body : document.createElement('div');
-            parent.id = 'positional-entry-parent';
+            const boundary = document.createElement('div');
+            boundary.id = 'positional-entry-shadow-host';
+            const parent = inShadow
+              ? boundary.attachShadow({ mode: 'open' })
+              : atBody
+                ? document.body
+                : document.createElement('div');
+            if (parent instanceof ShadowRoot) {
+              const sheet = new CSSStyleSheet();
+              sheet.replaceSync(css);
+              parent.adoptedStyleSheets = [sheet];
+            } else parent.id = 'positional-entry-parent';
             const sibling = document.createElement('span');
             sibling.id = 'positional-entry-sibling';
             sibling.hidden = true;
             const wrapper = document.createElement('div');
-            wrapper.className = 'positional-entry';
+            wrapper.className = filtered ? 'positional-entry eligible' : 'positional-entry';
             const host = new C();
             host.innerHTML = '<button>Inside</button>';
             wrapper.append(host);
-            if (initialSibling) parent.append(sibling);
+            if (initialSibling) sibling.className = 'eligible';
+            if (initialSibling || filtered) parent.append(sibling);
             parent.append(wrapper);
-            if (!atBody) document.body.append(parent);
+            if (inShadow) document.body.append(boundary);
+            else if (!atBody) document.body.append(parent);
           },
-          { initialSibling, atBody }
+          { initialSibling, atBody, inShadow, filtered, css }
         );
         const snapshot = () =>
           page.evaluate(
@@ -2549,7 +2571,10 @@ describe('Shadow closeout native boundaries', () => {
               new Promise<{ visibility: string; tabIndex: string | null }>((resolve) =>
                 requestAnimationFrame(() =>
                   requestAnimationFrame(() => {
-                    const host = document.querySelector('closeout-positional-entry')!;
+                    const root =
+                      document.querySelector('#positional-entry-shadow-host')?.shadowRoot ??
+                      document;
+                    const host = root.querySelector('closeout-positional-entry')!;
                     resolve({
                       visibility: getComputedStyle(host.querySelector('button')!).visibility,
                       tabIndex: host.getAttribute('tabindex'),
@@ -2569,8 +2594,13 @@ describe('Shadow closeout native boundaries', () => {
         expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
 
         const toggleSibling = () =>
-          page.evaluate(() => {
-            const sibling = document.querySelector('#positional-entry-sibling');
+          page.evaluate((filtered) => {
+            const root = document.querySelector('#positional-entry-shadow-host')?.shadowRoot;
+            const sibling = (root ?? document).querySelector('#positional-entry-sibling');
+            if (filtered) {
+              sibling!.classList.toggle('eligible');
+              return;
+            }
             if (sibling) {
               sibling.remove();
               return;
@@ -2578,12 +2608,25 @@ describe('Shadow closeout native boundaries', () => {
             const added = document.createElement('span');
             added.id = 'positional-entry-sibling';
             added.hidden = true;
-            document.querySelector('#positional-entry-parent')!.prepend(added);
-          });
+            (root ?? document.querySelector('#positional-entry-parent')!).prepend(added);
+          }, filtered);
         await toggleSibling();
         expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
         await toggleSibling();
         expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+        if (filtered) {
+          await page.evaluate(() => {
+            const root = document.querySelector('#positional-entry-shadow-host')?.shadowRoot;
+            const peer = (root ?? document).querySelector('#positional-entry-sibling')!;
+            const replacement = document.createElement('span');
+            replacement.id = peer.id;
+            replacement.hidden = true;
+            peer.replaceWith(replacement);
+          });
+          expect(await snapshot()).toEqual(withoutSibling);
+          await toggleSibling();
+          expect(await snapshot()).toEqual(withSibling);
+        }
       } finally {
         await page.close();
       }

@@ -745,41 +745,50 @@ function scopedNegatedEntrySubject(selector: string) {
 
 const entryPositionCondition =
   /:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i;
+const filteredEntryPositionCondition = /:nth-(?:last-)?child\([^)]*\bof\b/i;
 
-function mayReachPositionalEntry(selector: string, candidates: readonly Element[]): boolean {
+function potentialEntryPositionSubjects(selector: string, candidates: readonly Element[]) {
+  type PositionSubject = { probe: string; filtered: boolean };
+  const subjects: PositionSubject[] = [];
+  const branchSubjects: PositionSubject[] = [];
   let branchStart = 0;
   let copyFrom = 0;
   let probe = '';
-  const reaches = (end: number) => {
-    const branch = selector.slice(branchStart, end);
-    if (!branch.includes(':has(') || !entryPositionCondition.test(branch)) return false;
+  const collect = (end: number) => {
+    if (!branchSubjects.length || !selector.slice(branchStart, end).includes(':has(')) return;
     const relaxed = probe + selector.slice(copyFrom, end);
-    return candidates.some((candidate) => candidate.matches(relaxed));
+    if (candidates.some((candidate) => candidate.matches(relaxed)))
+      subjects.push(...branchSubjects);
   };
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
     const literalEnd = skipSelectorLiteral(selector, index, character);
     if (literalEnd !== null) index = literalEnd;
     else if (character === ',') {
-      if (reaches(index)) return true;
+      collect(index);
       branchStart = copyFrom = index + 1;
       probe = '';
+      branchSubjects.length = 0;
     } else if (character === ':') {
       let end = index + (selector[index + 1] === ':' ? 2 : 1);
       while (/[\w-]/.test(selector[end] ?? '')) end += 1;
       if (selector[end] === '(') {
         const close = matchingSelectorParen(selector, end);
-        if (close < 0) return true;
+        if (close < 0) break;
         end = close + 1;
       }
       // Dependency discovery must include currently inactive states, including
       // position tests nested in a functional pseudo such as :not().
       probe += selector.slice(copyFrom, index) + ':where(*)';
+      const predicate = selector.slice(index, end);
+      if (entryPositionCondition.test(predicate))
+        branchSubjects.push({ probe, filtered: filteredEntryPositionCondition.test(predicate) });
       copyFrom = end;
       index = end - 1;
     }
   }
-  return reaches(selector.length);
+  collect(selector.length);
+  return subjects;
 }
 
 function collectEntryStyleDependencies(
@@ -795,6 +804,7 @@ function collectEntryStyleDependencies(
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
+  const filteredPositionParents = new Set<Element | ShadowRoot>();
   const externalSubjects = [target, ...ancestors];
   const candidates = [...externalSubjects, ...target.querySelectorAll('*')];
   const collectMedia = (media: MediaList | null | undefined) => {
@@ -854,22 +864,27 @@ function collectEntryStyleDependencies(
                     foundPositionParent = true;
                   }
             }
-            if (
-              !foundPositionParent &&
-              entryPositionCondition.test(selector) &&
-              mayReachPositionalEntry(selector, candidates)
-            ) {
-              relational = 1;
-              // The conservative subtree watch already covers ordinary
-              // ancestors. At the document boundary watch only child lists.
-              for (const candidate of externalSubjects) {
-                const parent = candidate.parentNode;
-                if (
-                  parent &&
-                  (parent === target.ownerDocument.body ||
-                    parent === target.ownerDocument.documentElement)
-                )
-                  positionParents.add(parent);
+            if (!foundPositionParent && entryPositionCondition.test(selector)) {
+              for (const { probe: subject, filtered } of potentialEntryPositionSubjects(
+                selector,
+                candidates
+              )) {
+                relational = 1;
+                for (const candidate of externalSubjects) {
+                  const parent = candidate.parentNode;
+                  if (!parent || !candidate.matches(subject)) continue;
+                  // Ordinary ancestors already have the conservative subtree
+                  // watch. A filtered shadow list must also rebind its peers
+                  // when the root's direct children change.
+                  if (
+                    parent === target.ownerDocument.body ||
+                    parent === target.ownerDocument.documentElement ||
+                    (filtered && parent.nodeType === 11 && !!(parent as ShadowRoot).host)
+                  ) {
+                    positionParents.add(parent);
+                    if (filtered) filteredPositionParents.add(parent as Element | ShadowRoot);
+                  }
+                }
               }
             }
           } catch {
@@ -903,6 +918,7 @@ function collectEntryStyleDependencies(
     siblingSubjects,
     relationalSubjects,
     positionParents,
+    filteredPositionParents,
   ] as const;
 }
 
@@ -1962,6 +1978,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 siblingSubjects,
                 relationalSubjects,
                 positionParents,
+                filteredPositionParents,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
@@ -1981,6 +1998,19 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 });
               }
               const siblingStateTargets = new Set<EventTarget>();
+              const observeSibling = (sibling: Element) => {
+                if (siblingStateTargets.has(sibling)) return;
+                siblingStateTargets.add(sibling);
+                entryObserver?.observe(sibling, {
+                  childList: true,
+                  subtree: true,
+                  characterData: true,
+                  attributes: true,
+                });
+              };
+              for (const parent of filteredPositionParents)
+                for (const sibling of parent.children)
+                  if (!sibling.contains(target)) observeSibling(sibling);
               for (const subject of siblingSubjects) {
                 if (subject.parentNode && !positionParents.has(subject.parentNode))
                   entryObserver?.observe(subject.parentNode, {
@@ -1988,13 +2018,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   });
                 let sibling = subject.previousElementSibling;
                 while (sibling) {
-                  siblingStateTargets.add(sibling);
-                  entryObserver?.observe(sibling, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true,
-                    attributes: true,
-                  });
+                  observeSibling(sibling);
                   sibling = sibling.previousElementSibling;
                 }
               }
