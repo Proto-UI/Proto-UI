@@ -1,0 +1,78 @@
+id: T-BRUTALIST-PASSIVE-CONSUMERS-0001
+type: test
+title: Brutalist Image, Separator and Surface public Web consumer evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Issue #1146 adds a bounded evidence candidate for existing draft passive projections. The browser implementation is planned and unexecuted; native results, visual review and independent acceptance remain required. This does not activate a Prototype or replace the original all-component condition.'
+summary: Exercises the actual public Brutalist recipes through all four Web renderers, complementary desktop/compact/font-pressure observations and meaningful passive boundaries.
+statement:
+  en: 'The suite uses the existing public Image, Separator and Surface pages and their real Runtime controls. Root-font pressure is an explicit author-style injection, not browser zoom. Separator orientation reversal uses the existing demo prop-update event and is not native input evidence. Image decoding, real pointer hover and native word selection are browser observations. Computed colors and timing policy do not prove rendered-adjacency contrast, a motion trajectory, assistive-technology delivery, complete family parity or non-Web support.'
+cases:
+  - id: T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-IMAGE
+    title: Public Image fit frames keep informative and decorative boundaries on valid and invalid resources
+    covers:
+      - P-BRUTALIST-IMAGE-BASE-INHERITANCE
+      - P-BRUTALIST-IMAGE-VISUAL-GRAMMAR
+      - P-BASE-IMAGE-ALT-TEXT
+      - P-BASE-IMAGE-FIT
+    expectation: 'Across WC, React, Vue and Vue 2 in light/dark, the three decoded fit examples keep their authored 112px boxes, equal positive widths, fixed 2px black frame, 5px radius and 4px hard shadow. Real hover adds no interaction displacement. The informative browser names survive the negative broken-resource case; the decoded decorative image has empty alt and is absent from the browser role query. Dynamic source generations and portable loadingStatus callbacks are not covered by this fixed recipe.'
+  - id: T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SEPARATOR
+    title: Consumer-owned horizontal and vertical extent survives root-font pressure and orientation reversal
+    covers:
+      - P-BRUTALIST-SEPARATOR-BASE-INHERITANCE
+      - P-BRUTALIST-SEPARATOR-VISUAL-GRAMMAR
+      - P-BRUTALIST-SEPARATOR-DYNAMIC-GEOMETRY
+      - P-BASE-SEPARATOR-DECORATIVE
+      - P-BASE-SEPARATOR-CONTENTLESS
+      - P-BASE-SEPARATOR-NO-INTERACTION
+    expectation: 'At desktop, compact and compact 200-percent root-font profiles, the contentless decorative rules have 2 CSS-pixel thickness and actual parent-owned length. The injected orientation update reaches horizontal then returns vertical while keeping adjacent consumer text and two rule instances. Neither decorative rule acquires a separator role, aria-orientation or a tab stop. Semantic decorative=false coverage remains separate.'
+  - id: T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SURFACE
+    title: Four existing public Surface states remain passive under real pointer and selection input
+    covers:
+      - P-BRUTALIST-SURFACE-PASSIVE
+      - P-BRUTALIST-SURFACE-PROJECTION
+      - P-BRUTALIST-SURFACE-RAISED-MOTION
+      - P-BASE-SURFACE-PASSIVE
+    expectation: 'The existing outline, borderless muted, supplied-focus solid and supplied-press raised shells remain roleless with no tab stop or aria-pressed semantics. Real hovering does not invent observed props; native double-click still selects the authored label word. Raised timing follows live no-preference to reduce to no-preference, preserves its supplied endpoint and does not claim an animated path. Other variants, withdrawal/fade timing and native link/button actions remain outside this public recipe.'
+implementations:
+  - id: www-brutalist-passive-public-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-IMAGE
+      - T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SEPARATOR
+      - T-BRUTALIST-PASSIVE-CONSUMERS-0001-CASE-SURFACE
+    exercises:
+      - P-BRUTALIST-IMAGE
+      - P-BASE-IMAGE
+      - P-BRUTALIST-SEPARATOR
+      - P-BASE-SEPARATOR
+      - P-BRUTALIST-SURFACE
+      - P-BASE-SURFACE
+    notes:
+      - 'Authored only; expected Vitest scope is 12 tests, each with both color schemes and three viewport/root-font profiles. No browser, types, collection or formatting command was run by this owner.'
+      - 'Main must register the new path in the canonical BROWSER_SUITES inventory before hosted test-plan acceptance; the worker does not edit central runtime routing.'
+      - 'Optional source-bound observations and PNGs are written beneath PROTO_UI_RUNTIME_EVIDENCE_DIR/brutalist-passive-consumers. Selected input hashes identify current bytes and do not constitute a complete source freeze or historical calibration.'
+verifies:
+  prototypes:
+    - P-BRUTALIST-IMAGE
+    - P-BRUTALIST-SEPARATOR
+    - P-BRUTALIST-SURFACE
+exercises:
+  prototypes:
+    - P-BASE-IMAGE
+    - P-BASE-SEPARATOR
+    - P-BASE-SURFACE
+sources:
+  - path: apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts
+  - path: internal/records/2026-11-10-brutalist-passive-consumer-evidence.md
+  - path: https://github.com/Proto-UI/Proto-UI/issues/1146
+  - path: https://github.com/Proto-UI/Proto-UI/issues/1161
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added planned current-public-consumer browser evidence without changing production, historical evidence or draft lifecycle.
+tags: [test, brutalist, image, separator, surface, browser, consumer]

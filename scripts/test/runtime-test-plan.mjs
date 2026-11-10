@@ -114,6 +114,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
