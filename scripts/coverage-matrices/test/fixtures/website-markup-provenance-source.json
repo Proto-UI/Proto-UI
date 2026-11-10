@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue834.bounded-source-reference",
+  "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "scope": "Direct producer, input, receiver and replacement-copy source inventory; transitive/runtime and served-source proof remain unobserved.",
+  "sourceAdmission": "unverified",
+  "sources": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+      "sha256": "2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
+      "sha256": "1f3da9d3b811eaeeef624541cec3523827b2265bb2d30a175e0d1e9a57f70497"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
+      "sha256": "34eaea1715c148b12d9fcae18358463ad74eb0fc74f9cf75b419a11f4544f142"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-themes.mjs",
+      "sha256": "0ed06f21952d00ee1e956182ba47e30a38f8a8f7c6d02bbcc790a52ff28220da"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "sha256": "76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
+      "sha256": "a9d57ca9d09ef6c73160bdad92cfddb5a449432d657ad4df549ad894fdf37913"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "sha256": "f9e18f47c7711d553647fc0bf4aed7c5b52788c9191276822dec6c50b184571a"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
+      "sha256": "a313d5a363ec493b3ccd8284a5b3533367de344374148e781896b8916477411f"
+    },
+    {
+      "path": "apps/www/src/components/InstallCommandCard.astro",
+      "sha256": "549885c121d579a41e0a5d28aa3a6bfc9032f73f004fc94d7431648e96f3e23d"
+    },
+    {
+      "path": "apps/www/src/components/SiteCopyBootstrap.astro",
+      "sha256": "25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-client.ts",
+      "sha256": "b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-command.ts",
+      "sha256": "50669f42365fbe60e0956f7ad65d87ae6b399ac34e833461b074d0ef441a2a61"
+    },
+    {
+      "path": "apps/www/src/components/site-copy-controller.ts",
+      "sha256": "1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba"
+    },
+    {
+      "path": "apps/www/src/components/hidden-first-activation.ts",
+      "sha256": "be46b5e43f8604df479dcf59c4f10fc3d75301efc8fb48674ede91765e59de58"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/base-transition/baseTransitionCode.ts",
+      "sha256": "bbfa4916d6715c0070750d7638e71cf69254727f8b078a5b941bc2f288e7abd5"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/button/buttonCode.ts",
+      "sha256": "30fc0c3e645da0e954f9af96e2634f736d78d03f10d5e5c8c58730b364c75b1d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
+      "sha256": "0974f64b4854fe51bb9b4e8c1c575a995d597d76b4d925a154ee280e685b2364"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
+      "sha256": "7127e1c55c17ee8821a7c09ac1d6bb14a1340da3dcd44c7fbc64c07e09251209"
+    },
+    {
+      "path": "apps/www/astro.config.mjs",
+      "sha256": "5c1ef3d2863f551f21de183891187138768e841a873a0c52f3b939ae6b10462b"
+    },
+    {
+      "path": "apps/www/package.json",
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode.ts",
+      "sha256": "57975c6ead3d8d850ccedbe47192a7f8914beea23f626de60169162ca5e32375"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dialog.mdx",
+      "sha256": "0651680190b40b18a93e09103a26474b62df5d587ddad08366af720e759fee13"
+    },
+    {
+      "path": "apps/www/src/utils/conversionUtils.ts",
+      "sha256": "de79eb0937b97e8da41c1646df77787fa8bddabe956f0f3a5d1ed47a4df5ef80"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
+      "sha256": "ae03a09d916e2d04a92886326c8b59311eedf40c75f84439fc4a49795e3fc715"
+    }
+  ]
+}
