@@ -51,8 +51,10 @@ jobs:
         id: build
         run: |
           set -o pipefail
-          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagram-evidence.test.mjs scripts/docs/test/whitepaper-diagram-evidence-profiles.test.mjs
+          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagram-evidence.test.mjs scripts/docs/test/whitepaper-diagram-evidence-profiles.test.mjs scripts/docs/test/whitepaper-diagram-evidence-receipts.test.mjs scripts/docs/test/whitepaper-diagram-build.test.mjs
+          node apps/www/scripts/whitepaper-diagram-build.mjs begin-build
           corepack pnpm@10.32.1 --filter apps-www build 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/build.log"
+          node apps/www/scripts/whitepaper-diagram-build.mjs finish-build
       - name: Capture bilingual article and embedded-font evidence
         run: |
           set -o pipefail
@@ -62,6 +64,26 @@ jobs:
         run: |
           set -o pipefail
           DIAGRAM_EVIDENCE_FIGURE=evolution-feedback node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/evolution-browser.log"
+      - name: Capture conditional comparison article and full-size evidence
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          DIAGRAM_EVIDENCE_FIGURE=conditional-consistency node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/conditional-browser.log"
+      - name: Capture component anatomy article and full-size evidence
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          DIAGRAM_EVIDENCE_FIGURE=component-anatomy node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/anatomy-browser.log"
+      - name: Capture retained information-flow comparison in canonical articles
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          DIAGRAM_EVIDENCE_FIGURE=information-flow-model node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/information-flow-browser.log"
+      - name: Reconcile all candidate source and capture receipts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          node apps/www/scripts/check-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/receipt.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
