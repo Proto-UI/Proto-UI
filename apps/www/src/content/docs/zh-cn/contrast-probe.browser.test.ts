@@ -5,16 +5,21 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
-import type { Browser, BrowserContext, Page } from 'playwright-core';
+import type { Browser, BrowserContext, JSHandle, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type {
+  ContrastAuditSubject,
   ContrastFrame,
+  ContrastProjectionExpectation,
   collectContrastFrame,
+  collectSubjectContrastFrame,
   readContrastState,
+  readSubjectContrastState,
   readContrastPaintedVisibility,
   readContrastPointerPair,
   readContrastTargetObservation,
   readContrastAnatomy,
+  readSubjectContrastAnatomy,
 } from '../../../../scripts/contrast-probe.browser';
 import { launchBrowser } from './browser-harness';
 import {
@@ -24,16 +29,20 @@ import {
 import { PROJECTION_FAMILY_MANIFESTS } from '../../../components/PrototypePreviewer/projection-families';
 import switchDemo from './demo-brutalist-switch.demo';
 import checkboxDemo from './demo-brutalist-checkbox.demo';
+import textareaDemo from './demo-brutalist-textarea.demo';
 
 declare global {
   interface Window {
     puiContrastProbe: {
       collectContrastFrame: typeof collectContrastFrame;
+      collectSubjectContrastFrame: typeof collectSubjectContrastFrame;
       readContrastState: typeof readContrastState;
+      readSubjectContrastState: typeof readSubjectContrastState;
       readContrastPaintedVisibility: typeof readContrastPaintedVisibility;
       readContrastPointerPair: typeof readContrastPointerPair;
       readContrastTargetObservation: typeof readContrastTargetObservation;
       readContrastAnatomy: typeof readContrastAnatomy;
+      readSubjectContrastAnatomy: typeof readSubjectContrastAnatomy;
     };
   }
 }
@@ -221,6 +230,121 @@ const surface = (frame: ContrastFrame, ref: string) => {
   const found = frame.surfaces.find((candidate) => candidate.ref === ref);
   if (!found) throw new Error(`Calibration surface missing: ${ref}`);
   return found;
+};
+
+// Instrument DOM models the published reader/RuntimeBox/retained-child boundary,
+// including inline controlled panels. It does not render a shipped component.
+const readerSubjectFixture = (
+  markup: string,
+  expected: ContrastProjectionExpectation,
+  portals = ''
+) => {
+  const lease = 'data-projection-owner="selected-calibration" data-projection-generation="1"';
+  const coordinates = `${lease} data-projection-family="brutalist" data-projection-runtime="wc"`;
+  return fixture(`
+    <article id="selected" data-previewer-id="selected-calibration"
+      data-demo-id="${expected.recipeId}" data-runtimes='${expected.serializedRuntimes}'
+      data-projection-component="${expected.family}" data-projection-state="ready" ${coordinates}>
+      <section data-projection-scope="selected-calibration" data-projection-state="ready" ${coordinates}>
+        <div data-pui-root data-projection-prototype="instrument-reader-root" data-demo-ref="reader-root" ${lease}>
+          <div data-projection-control="runtime">
+            <div data-pui-root role="tablist" data-projection-prototype="instrument-reader-list" ${lease}>
+              <button data-pui-root role="tab" aria-selected="true" aria-controls="inline-current" ${lease}>Current</button>
+              <button data-pui-root role="tab" aria-selected="false" aria-controls="inline-inactive" ${lease}>Inactive</button>
+            </div>
+            <button aria-controls="reader-popup">Reader popup</button>
+          </div>
+          <section id="inline-current" data-pui-root role="tabpanel"
+            data-projection-prototype="instrument-reader-panel" data-demo-ref="reader-panel" ${lease}>
+            <div data-pui-root data-demo-ref="reader-sibling" ${lease}>Reader sibling</div>
+            <div data-projection-content data-projection-id="${expected.contentRecipeId}"
+              data-projection-prototype="${expected.rootPrototypeId}" ${coordinates}>
+              <div data-passive-shell-mount data-demo-ref="__website_runtime_preview_surface__-mount" ${coordinates}>
+                <div>
+                  <div data-pui-root class="pui-runtime-preview-surface"
+                    data-demo-ref="__website_runtime_preview_surface__" data-projection-prototype="${expected.shellPrototypeId}"
+                    data-projection-family="brutalist" data-projection-runtime="wc" data-projection-generation="3">
+                    <div data-passive-shell-slot>
+                      <div data-demo-ref="__website_runtime_preview_surface__-content" ${coordinates}>${markup}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section id="inline-inactive" data-pui-root role="tabpanel" hidden
+            data-projection-prototype="instrument-reader-panel" ${lease}></section>
+        </div>
+      </section>
+    </article>
+    <div id="reader-popup" data-demo-ref="reader-popup" ${lease}>
+      <div data-pui-root data-demo-ref="reader-popup-child" ${lease}>Reader portal child</div>
+    </div>
+    <aside data-projection-scope="foreign" data-projection-owner="foreign" data-projection-generation="1">
+      <div data-pui-root data-demo-ref="foreign-root" data-projection-prototype="${expected.rootPrototypeId}"
+        data-projection-owner="foreign" data-projection-generation="1">Foreign preview</div>
+    </aside>
+    <div data-pui-root data-demo-ref="stale-root" data-projection-prototype="${expected.rootPrototypeId}"
+      data-projection-owner="selected-calibration" data-projection-generation="0">Stale portal</div>
+    ${portals}
+  `);
+};
+
+const captureReaderSubject = async (
+  page: Page,
+  subject: JSHandle<ContrastAuditSubject>,
+  name: string
+) => {
+  const before = await page.evaluate(
+    (subject) => window.puiContrastProbe.readSubjectContrastState(subject),
+    subject
+  );
+  const png = await page.screenshot({ type: 'png', caret: 'initial' });
+  const frame = await page.evaluate(
+    ({ subject, image }) =>
+      window.puiContrastProbe.collectSubjectContrastFrame({
+        subject,
+        image,
+        family: 'instrument-calibration',
+      }),
+    { subject, image: png.toString('base64') }
+  );
+  const anatomy = await page.evaluate(
+    (subject) =>
+      window.puiContrastProbe.readSubjectContrastAnatomy(
+        subject.previewer.querySelector('#authored-root'),
+        subject
+      ),
+    subject
+  );
+  const after = await page.evaluate(
+    (subject) => window.puiContrastProbe.readSubjectContrastState(subject),
+    subject
+  );
+  const html = await page.content();
+  const hash = (bytes: string | Buffer) => createHash('sha256').update(bytes).digest('hex');
+  await recordCalibrationFile(`${name}.png`, png);
+  await recordCalibrationFile(`${name}.html`, html);
+  await recordCalibrationFile(
+    `${name}.json`,
+    JSON.stringify(
+      {
+        observedAt: new Date().toISOString(),
+        fixtureSha256: hash(html),
+        probeBundleSha256: hash(bundle),
+        pngSha256: hash(png),
+        beforeFingerprintSha256: hash(before),
+        afterFingerprintSha256: hash(after),
+        frame,
+        anatomy,
+      },
+      null,
+      2
+    )
+  );
+  expect(frame.stateFingerprint).toBe(before);
+  expect(after).toBe(before);
+  return { frame, anatomy };
 };
 
 describe('contrast probe / real Chromium instrument calibration', () => {
@@ -477,6 +601,307 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       } finally {
         await context.close();
       }
+    }
+  });
+
+  it('includes the retained consumer under inline reader Tabs in anatomy and numeric facts', async () => {
+    const plan = compileContrastAnatomy(
+      textareaDemo,
+      PROJECTION_FAMILY_MANIFESTS.brutalist.families.textarea
+    );
+    const expected: ContrastProjectionExpectation = {
+      recipeId: plan.recipeId,
+      contentRecipeId: `website-runtime-preview:${plan.recipeId}`,
+      shellPrototypeId: 'instrument-shell',
+      serializedRuntimes: '["wc","react","vue","vue2"]',
+      family: 'textarea',
+      runtime: 'wc',
+      rootPrototypeId: plan.rootPrototypeId,
+      prototypeIds: [plan.rootPrototypeId],
+    };
+    const context = await browser.newContext({ viewport: { width: 800, height: 1200 } });
+    try {
+      const page = await context.newPage();
+      await page.setContent(
+        readerSubjectFixture(
+          `<textarea id="authored-root" data-pui-root data-demo-ref="textarea"
+            data-projection-prototype="${plan.rootPrototypeId}" data-projection-owner="selected-calibration"
+            data-projection-generation="1">Inline consumer</textarea>`,
+          expected
+        )
+      );
+      await page.locator('#reader-popup').evaluate((popup) => document.body.append(popup));
+      await page.addScriptTag({ content: bundle });
+      const subject = await page.locator('#selected').evaluateHandle(
+        (previewer, expected) => ({
+          previewer: previewer as HTMLElement,
+          previewerId: 'selected-calibration',
+          expected,
+        }),
+        expected
+      );
+      const { frame, anatomy } = await captureReaderSubject(
+        page,
+        subject,
+        'inline-reader-consumer'
+      );
+      expect(anatomy.currentLease).toBe(true);
+      expect(anatomy.primary).toBe(0);
+      expect(anatomy.surfaces).toEqual([
+        expect.objectContaining({
+          prototypeId: plan.rootPrototypeId,
+          ref: 'textarea',
+          parent: null,
+          withinContent: true,
+          currentLease: true,
+          painted: true,
+        }),
+      ]);
+      expect(compareContrastAnatomy(plan, anatomy).achieved).toBe(true);
+      expect(frame.surfaces.map(({ prototype, ref }) => ({ prototype, ref }))).toEqual([
+        { prototype: plan.rootPrototypeId, ref: 'textarea' },
+      ]);
+      expect(surface(frame, 'textarea').textContrast?.ratio).toBeCloseTo(21, 8);
+
+      const observe = () =>
+        page.evaluate(
+          (subject) =>
+            window.puiContrastProbe.readSubjectContrastAnatomy(
+              subject.previewer.querySelector('#authored-root'),
+              subject
+            ),
+          subject
+        );
+      const fingerprint = () =>
+        page.evaluate(
+          (subject) => window.puiContrastProbe.readSubjectContrastState(subject),
+          subject
+        );
+      const editor = (await page.locator('#authored-root').elementHandle())!;
+      for (const [attribute, value, restored] of [
+        ['data-projection-owner', 'foreign', 'selected-calibration'],
+        ['data-projection-generation', '0', '1'],
+      ] as const) {
+        await editor.evaluate(
+          (element, input) => element.setAttribute(input.attribute, input.value),
+          {
+            attribute,
+            value,
+          }
+        );
+        expect(compareContrastAnatomy(plan, await observe()).achieved).toBe(false);
+        await expect(fingerprint()).rejects.toThrow('current subject lease is invalid');
+        await editor.evaluate(
+          (element, input) => element.setAttribute(input.attribute, input.value),
+          {
+            attribute,
+            value: restored,
+          }
+        );
+      }
+      await editor.evaluate((element) => {
+        const duplicate = element.cloneNode(true) as HTMLElement;
+        duplicate.id = 'duplicate-root';
+        element.after(duplicate);
+      });
+      const duplicate = compareContrastAnatomy(plan, await observe());
+      expect(duplicate.achieved).toBe(false);
+      expect(duplicate.extras).toHaveLength(1);
+      await page.locator('#duplicate-root').evaluate((element) => element.remove());
+      // An external same-lease copy cannot replace the required retained Root.
+      await editor.evaluate((element) => document.body.append(element));
+      const missing = compareContrastAnatomy(plan, await observe());
+      expect(missing.achieved).toBe(false);
+      expect(missing.failures).toContainEqual(
+        expect.objectContaining({ reason: 'Missing authored materialized instance.' })
+      );
+      await expect(fingerprint()).rejects.toThrow('current subject lease is invalid');
+      await editor.evaluate((element) =>
+        document
+          .querySelector('[data-demo-ref="__website_runtime_preview_surface__-content"]')!
+          .append(element)
+      );
+      const beforeReplacement = await fingerprint();
+      await editor.evaluate((element) => element.replaceWith(element.cloneNode(true)));
+      expect(await fingerprint()).not.toBe(beforeReplacement);
+
+      await subject.evaluate(({ previewer }) => {
+        const duplicate = previewer.cloneNode(true) as HTMLElement;
+        duplicate.id = 'duplicate-previewer';
+        previewer.after(duplicate);
+      });
+      expect((await observe()).currentLease).toBe(false);
+      await expect(fingerprint()).rejects.toThrow('current subject lease is invalid');
+      await page.locator('#duplicate-previewer').evaluate((element) => element.remove());
+      expect(compareContrastAnatomy(plan, await observe()).achieved).toBe(true);
+      await subject.evaluate(({ previewer }) => previewer.replaceWith(previewer.cloneNode(true)));
+      expect((await observe()).currentLease).toBe(false);
+      await expect(fingerprint()).rejects.toThrow('current subject lease is invalid');
+    } finally {
+      await context.close();
+    }
+  });
+
+  it('keeps authored portals while excluding detached reader portals and foreign leases', async () => {
+    const plan = compileContrastAnatomy(
+      {
+        root: {
+          kind: 'proto',
+          prototypeId: 'instrument-consumer',
+          ref: 'consumer',
+          children: [
+            { kind: 'proto', prototypeId: 'instrument-trigger', ref: 'trigger' },
+            {
+              kind: 'proto',
+              prototypeId: 'instrument-popup',
+              ref: 'popup',
+              children: [{ kind: 'proto', prototypeId: 'instrument-item', ref: 'item' }],
+            },
+          ],
+        },
+      },
+      {
+        recipeId: 'instrument-reader-portals',
+        recipePrototypeIds: [
+          'instrument-consumer',
+          'instrument-trigger',
+          'instrument-popup',
+          'instrument-item',
+        ],
+        parts: {
+          root: { prototypeId: 'instrument-consumer', basePrototypeId: 'P-BASE-DROPDOWN-MENU' },
+          trigger: {
+            prototypeId: 'instrument-trigger',
+            basePrototypeId: 'P-BASE-DROPDOWN-MENU-TRIGGER',
+          },
+          content: {
+            prototypeId: 'instrument-popup',
+            basePrototypeId: 'P-BASE-DROPDOWN-MENU-CONTENT',
+          },
+          item: { prototypeId: 'instrument-item', basePrototypeId: 'P-BASE-DROPDOWN-MENU-ITEM' },
+        },
+      }
+    );
+    const expected: ContrastProjectionExpectation = {
+      recipeId: plan.recipeId,
+      contentRecipeId: `website-runtime-preview:${plan.recipeId}`,
+      shellPrototypeId: 'instrument-shell',
+      serializedRuntimes: '["wc","react","vue","vue2"]',
+      family: 'instrument-calibration',
+      runtime: 'wc',
+      rootPrototypeId: plan.rootPrototypeId,
+      prototypeIds: plan.instances.map((instance) => instance.prototypeId),
+    };
+    const lease = 'data-projection-owner="selected-calibration" data-projection-generation="1"';
+    const context = await browser.newContext({ viewport: { width: 800, height: 1200 } });
+    try {
+      const page = await context.newPage();
+      await page.setContent(
+        readerSubjectFixture(
+          `<div id="authored-root" data-pui-root data-demo-ref="consumer" data-projection-prototype="instrument-consumer" ${lease}>
+            <button data-pui-root data-demo-ref="trigger" data-projection-prototype="instrument-trigger"
+              aria-expanded="true" aria-controls="authored-popup" ${lease}>Open</button>
+          </div>`,
+          expected,
+          `<div id="authored-popup" data-pui-root data-demo-ref="popup" data-projection-prototype="instrument-popup" ${lease}>
+            <button data-pui-root data-demo-ref="item" data-projection-prototype="instrument-item" ${lease}>Owned item</button>
+          </div>`
+        )
+      );
+      await page.locator('#reader-popup, #authored-popup').evaluateAll((popups) => {
+        for (const popup of popups) document.body.append(popup);
+      });
+      await page.addScriptTag({ content: bundle });
+      const subject = await page.locator('#selected').evaluateHandle(
+        (previewer, expected) => ({
+          previewer: previewer as HTMLElement,
+          previewerId: 'selected-calibration',
+          expected,
+        }),
+        expected
+      );
+      const { frame, anatomy } = await captureReaderSubject(page, subject, 'inline-reader-portals');
+      expect(compareContrastAnatomy(plan, anatomy).achieved).toBe(true);
+      expect(
+        anatomy.surfaces.map(({ ref, parent, withinContent, currentLease }) => ({
+          ref,
+          parent,
+          withinContent,
+          currentLease,
+        }))
+      ).toEqual([
+        { ref: 'consumer', parent: null, withinContent: true, currentLease: true },
+        { ref: 'trigger', parent: 0, withinContent: true, currentLease: true },
+        { ref: 'popup', parent: null, withinContent: false, currentLease: true },
+        { ref: 'item', parent: 2, withinContent: false, currentLease: true },
+      ]);
+      expect(frame.surfaces.map(({ ref }) => ref)).toEqual([
+        'consumer',
+        'trigger',
+        'popup',
+        'item',
+      ]);
+      const observe = () =>
+        page.evaluate(
+          (subject) => window.puiContrastProbe.readSubjectContrastAnatomy(null, subject),
+          subject
+        );
+      const popup = (await page.locator('#authored-popup').elementHandle())!;
+      for (const [attribute, value, restored] of [
+        ['data-projection-owner', 'foreign', 'selected-calibration'],
+        ['data-projection-generation', '0', '1'],
+      ] as const) {
+        await popup.evaluate(
+          (element, input) => element.setAttribute(input.attribute, input.value),
+          {
+            attribute,
+            value,
+          }
+        );
+        expect(compareContrastAnatomy(plan, await observe()).achieved).toBe(false);
+        await popup.evaluate(
+          (element, input) => element.setAttribute(input.attribute, input.value),
+          {
+            attribute,
+            value: restored,
+          }
+        );
+      }
+      await popup.evaluate((element) => element.after(element.cloneNode(true)));
+      const duplicated = compareContrastAnatomy(plan, await observe());
+      expect(duplicated.achieved).toBe(false);
+      expect(duplicated.failures).toContainEqual(
+        expect.objectContaining({ reason: 'Ambiguous or duplicate materialized conditional part.' })
+      );
+      await page
+        .locator('[id="authored-popup"]')
+        .nth(1)
+        .evaluate((element) => element.remove());
+      await popup.evaluate((element) => element.remove());
+      expect(compareContrastAnatomy(plan, await observe()).achieved).toBe(false);
+      await page.locator('[data-demo-ref="trigger"]').evaluate((trigger) => {
+        // P-BASE-DROPDOWN-MENU-TRIGGER-A11Y keeps the Content identity relation
+        // independent of open state; this is the legacy literal-ID popup
+        // protocol, not Tabs' materialized-target relationship lease.
+        trigger.setAttribute('aria-expanded', 'false');
+      });
+      const closedAnatomy = await observe();
+      expect(closedAnatomy.surfaces.map(({ ref }) => ref)).toEqual(['consumer', 'trigger']);
+      const closed = compareContrastAnatomy(plan, closedAnatomy);
+      expect(closed.achieved).toBe(true);
+      expect(closed.omitted).toEqual(['root.children.1', 'root.children.1.children.0']);
+      await page.locator('[data-demo-ref="trigger"]').evaluate((trigger) => {
+        trigger.removeAttribute('aria-controls');
+      });
+      const missingRelation = compareContrastAnatomy(plan, await observe());
+      expect(missingRelation.achieved).toBe(false);
+      expect(missingRelation.failures).toContainEqual(
+        expect.objectContaining({
+          reason: 'Presence relation must name one exact controlled target.',
+        })
+      );
+    } finally {
+      await context.close();
     }
   });
 
