@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "issue-750-button-consumption-v1",
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/750",
+  "sourceKeys": ["issue.750.001", "issue.750.002", "issue.750.003", "issue.750.004", "issue.750.005"],
+  "status": "prepared-unmeasured",
+  "profile": "react-dom-source-v1",
+  "target": {"framework": "react", "version": "19.2.6"},
+  "stages": ["discover-install", "use", "customize", "debug", "ship"],
+  "timeWindowMs": 3600000,
+  "clock": "monotonic-ms-from-task-release",
+  "task": {"path": "task.md", "sha256": "15658434c09c6a6470c691a2f07d92704d236c29f98d846f4febb112530b9fc3"},
+  "starter": [
+    {"path": "starter/index.html", "sha256": "4c139eefc7c2a605c23ba1f2aca0526396286ea1806f1e10e5db2de6eeec04ba"},
+    {"path": "starter/package.json", "sha256": "4b348afb82b3c1e63e98514b2825decb576eff8e04b418d1eadd6249d52c9afd"},
+    {"path": "starter/src/App.tsx", "sha256": "f4e77e16cc6699035e7f3c9d8a844aa1781fa6361da622b717c3126ad841daad"},
+    {"path": "starter/src/main.tsx", "sha256": "c9b21695417842045f07a894953ca6660c86d9c51a89d0f3f47364301e3b0306"},
+    {"path": "starter/src/storage.ts", "sha256": "1f8511f39b5a5becf5fdc2e78e50a1287e0dcde96c0fd536d6269b802b38154c"},
+    {"path": "starter/src/style.css", "sha256": "3ed2198eae83c9a539d632a461116ff71e6af69abb577e6dd3d7bd9bba98664a"},
+    {"path": "starter/tsconfig.json", "sha256": "5f238c85d225fddcdd2c89750a8bc4f283df5f98f905aa7d41d745aff6adcb9f"}
+  ],
+  "environmentPolicy": "Node24; exact Node/npm/OS/browser and the one actual artifact dependency lock are captured before releasing the task and reused across all primary sessions. Initial starter bytes remain exact; artifact installation is part of discover-install. No source-tree dependency links or hidden internal instructions.",
+  "calibration": "No reference package selected. A later optional reference run needs its own artifact manifest and separate report, with the matched task subset explicit; it is never pooled into primary rates.",
+  "interpretation": "An operator supplies supported/weakened/inconclusive/falsified with limitations. No automatic benefit, preference, demand, maintenance-economics or general-library claim."
+}
