@@ -763,8 +763,14 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
     const literalEnd = skipSelectorLiteral(selector, index, character);
-    if (literalEnd !== null) index = literalEnd;
-    else if (character === ',') {
+    if (literalEnd !== null) {
+      if (character === '[') {
+        // A filtered position can start outside the entry attribute allowlist.
+        probe += selector.slice(copyFrom, index) + ':where(*)';
+        copyFrom = literalEnd + 1;
+      }
+      index = literalEnd;
+    } else if (character === ',') {
       collect(index);
       branchStart = copyFrom = index + 1;
       probe = '';
@@ -2008,9 +2014,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributes: true,
                 });
               };
+              // The positional subject can also change its own membership,
+              // including through attributes outside the entry allowlist.
               for (const parent of filteredPositionParents)
-                for (const sibling of parent.children)
-                  if (!sibling.contains(target)) observeSibling(sibling);
+                for (const sibling of parent.children) observeSibling(sibling);
               for (const subject of siblingSubjects) {
                 if (subject.parentNode && !positionParents.has(subject.parentNode))
                   entryObserver?.observe(subject.parentNode, {

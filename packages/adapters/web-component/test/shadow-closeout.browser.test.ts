@@ -2499,6 +2499,8 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: true, bodyPosition: 'filtered' },
     { initialSibling: false, bodyPosition: 'filtered-shadow' },
     { initialSibling: true, bodyPosition: 'filtered-shadow' },
+    { initialSibling: false, bodyPosition: 'filtered-target' },
+    { initialSibling: false, bodyPosition: 'filtered-target-shadow' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
@@ -2506,6 +2508,7 @@ describe('Shadow closeout native boundaries', () => {
       const inShadow = bodyPosition?.endsWith('-shadow') ?? false;
       const shape = bodyPosition?.replace(/-shadow$/, '') ?? null;
       const atBody = shape !== null && !inShadow;
+      const filteredTarget = shape === 'filtered-target';
       const filtered = shape === 'filtered';
       const selector =
         shape === 'grouped'
@@ -2514,9 +2517,11 @@ describe('Shadow closeout native boundaries', () => {
             ? '.positional-entry:not(:has(.flag)):not(:first-child) button'
             : shape === 'hover'
               ? '.positional-entry:not(:has(.flag)):hover:first-child button'
-              : filtered
-                ? '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible) button'
-                : `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`;
+              : filteredTarget
+                ? '.positional-entry[data-eligible]:not(:has(.flag)):nth-child(1 of [data-eligible]) button'
+                : filtered
+                  ? '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible) button'
+                  : `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`;
       const css = `
         ${shape ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
         ${selector} { visibility: hidden; }
@@ -2525,7 +2530,7 @@ describe('Shadow closeout native boundaries', () => {
         await page.addScriptTag({ content: script });
         if (!inShadow) await page.addStyleTag({ content: css });
         await page.evaluate(
-          ({ initialSibling, atBody, inShadow, filtered, css }) => {
+          ({ initialSibling, atBody, inShadow, filtered, filteredTarget, css }) => {
             const p = (window as any).Closeout;
             const C = p.adapt(
               p.define({
@@ -2556,14 +2561,15 @@ describe('Shadow closeout native boundaries', () => {
             wrapper.className = filtered ? 'positional-entry eligible' : 'positional-entry';
             const host = new C();
             host.innerHTML = '<button>Inside</button>';
+            if (filteredTarget) host.className = 'positional-entry';
             wrapper.append(host);
             if (initialSibling) sibling.className = 'eligible';
             if (initialSibling || filtered) parent.append(sibling);
-            parent.append(wrapper);
+            parent.append(filteredTarget ? host : wrapper);
             if (inShadow) document.body.append(boundary);
             else if (!atBody) document.body.append(parent);
           },
-          { initialSibling, atBody, inShadow, filtered, css }
+          { initialSibling, atBody, inShadow, filtered, filteredTarget, css }
         );
         const snapshot = () =>
           page.evaluate(
@@ -2585,6 +2591,15 @@ describe('Shadow closeout native boundaries', () => {
           );
         const visible = { visibility: 'visible', tabIndex: null };
         const hidden = { visibility: 'hidden', tabIndex: '0' };
+        if (filteredTarget) {
+          const host = page.locator('closeout-positional-entry');
+          expect(await snapshot()).toEqual(visible);
+          await host.evaluate((element) => element.setAttribute('data-eligible', ''));
+          expect(await snapshot()).toEqual(hidden);
+          await host.evaluate((element) => element.removeAttribute('data-eligible'));
+          expect(await snapshot()).toEqual(visible);
+          return;
+        }
         if (bodyPosition === 'hover') {
           expect(await snapshot()).toEqual(visible);
           await page.locator('.positional-entry').hover({ position: { x: 1, y: 1 } });
