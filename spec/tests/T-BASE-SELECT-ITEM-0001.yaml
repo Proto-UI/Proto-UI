@@ -67,6 +67,23 @@ cases:
     covers: [P-BASE-SELECT-ITEM-DISABLED]
     expectation: disabled-select-item-never-focuses-selects-or-closes
 implementations:
+  - id: website-shadcn-select-native-disabled-input
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-SELECT-ITEM-0001-CASE-DISABLED,
+        T-BASE-SELECT-ITEM-0001-CASE-STATE-SEPARATION,
+        T-BASE-SELECT-ITEM-0001-CASE-COMMIT,
+      ]
+    exercises: [P-BASE-SELECT-ITEM]
+    notes:
+      - 'Prepared on 0607c6c5c386b8a932ab850e92a8873b2121dc45 for Issue 1159. Native execution is pending; this mapping is not a new passing result.'
+      - 'The existing bilingual four-runtime journey retains its original geometry and motion bounds. Default, RTL and reduced-motion environments separately exercise Home/End disabled skipping, real mouse movement/click over the disabled row, unchanged committed selection and open state, enabled sibling hover/commit, and selected reentry.'
+      - 'Disabled pointer-events:none is legitimate family behavior. The carrier records the actual hit target within the current popup and uses an enabled sibling as a positive native-input comparator; it does not force a disabled Locator click or synthesize an Item event.'
+      - 'This is the styled Shadcn Rhea website consumer, not all Base/family consumers, dynamic disabled updates, event-request counts, assistive technology, independently compiled output or a new reduced-motion presentation guarantee.'
   - id: prototypes-base-select-repeated-open-owner
     kind: module-test
     status: planned
@@ -146,6 +163,9 @@ verifies:
         ]
 exercises: { prototypes: [P-BASE-SELECT-ITEM] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Map planned native disabled input and enabled commit evidence in the existing bilingual four-runtime styled website carrier without reclassifying historical results or promoting draft semantics.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Prepare two current-canonical disabled reentry cases and a new dependency-bound 23-case composition without reclassifying historical union81c failure or transferring separate producer acceptance.
