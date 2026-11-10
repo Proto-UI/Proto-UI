@@ -1,0 +1,43 @@
+WC whole-entry 预算独立提案
+
+结论
+仅提议将 adapter-web-component root 上限从 117,850 调整为 119,059 gzip 字节。其它 8 个上限、测量算法、公开入口、external 边界和阻断性 CI 门禁不变。当前没有修改预算文件或源修复，也没有发布、批准或合入此提案。
+
+数值依据
+- 已恢复的可信仓库基线：main@ea19727838d85c05af5e4bca8d5fc235cb44e288，public_package_build SUCCESS，WC 117,706 / 117,850，余量 144 字节。
+- 作业：https://github.com/Proto-UI/Proto-UI/actions/runs/37953108222/job/113896790334
+- 整体 CI run 的其它测试失败；不把该 package 作业成功说成整体 CI 成功。
+- 当前整合源候选：WC 118,915 / 117,850，真实失败 1,065 字节；相对可信基线增长 1,209 字节。
+- 提议上限 = 117,850 + (118,915 - 117,706) = 119,059。
+- 已测候选的提议余量 = 119,059 - 118,915 = 144 字节，恰好恢复原基线余量，不额外预支未来能力的空间。
+- 如果只把上限补到 118,915，余量为零；不推荐把红线刚好变绿。
+- 独立数值 PR 在尚未包含能力源修复的 main 上会显出 1,353 字节余量；其中 1,209 字节已归属于本能力成本，不能当作任意新增额度。真实组合余量只有 144 字节。
+
+能力与归因
+能力范围是已治理的真实 WC Focus readiness、acquired/released target 边界、逻辑/物理 owner 完整性、Shadow view 身份保留、terminal Portal retirement 与显式 undo 的区分，以及 acquired failed-created Runtime 清理保留原始错误。Draft Lifecycle I 不等于解决开放的 broad Q，也不提升任何 lifecycle。
+
+同配置 source metafile 的 289 个 WC 输入集合与基线完全相同；没有 checkout 外输入或 node_modules 源文件进入 bundle。主要保留源码增量为 WC adapt.ts +1,682 minified 字节及现有 logical-tree 模块额外保留 +1,238；logical-tree 文件本身与基线字节相同，不是新增一份 Runtime 或 Main 修改该文件。WC modules、WC session、Focus、CallbackScope、Feedback 的有界共享已减少部分原始输出。模块贡献不能相加成 gzip 归因，也不能把未修改模块的 linker retention 说成源文件修改。
+
+证据边界
+可信基线与当前本地测量使用相同 Linux x64、Node 24.21.0、zlib 1.3.2.1-motley-8002e91、esbuild 0.25.12。保留 source ESM/browser/es2020、minify/tree-shaking、原 external 边界和 gzip level 9。
+
+基线 WC minified SHA-256：6c0bc106413987ae9b8d2722b1189656532f05cfb45ccaebfcfacf31ac25639f
+候选 WC minified SHA-256：ee4e1794de483e972f0d1ba30aa086f7dbf665a948a154f20695f83a54820b79
+
+当前候选仍未发布：ea197278 是父提交，不是包含源修复的公开 head。候选以 exact 26-path source hashes 绑定。当前本地 canonical-command 输出不冒充候选的 GitHub-hosted canonical CI；后者必须在正常 DCO source publication 后实际取得。
+
+验证已完成
+当前格式后的 focused 153、原生 Shadow 111、workspace/docs types、26-path formatting 通过；9 个 canonical bundle SHA/size/gzip 与格式前全部相同。格式前完整 affected graph 1,723、44 public builds/manifests、已安装 CLI TS/JS 多宿主与独立 React packed consumers、实际 native paint/Tab/reconnect 证据保留为原执行范围，不改名重算到新候选。
+
+预算策略文件作为 global build input 的实际 selector 已执行，经过 public-package 过滤选中 44/44。初次低层实验传入未过滤的全部 55 包，不能作为 public44 证据；该区别已保留。
+
+治理与后续
+当前目标工作树 .agents/skills/pui-dev/SKILL.md 已将已接受能力的有界数字工程决定委托给 Agent，不需要虚构另一次人工数值审批。遵守已接受的 #654 决策：https://github.com/Proto-UI/Proto-UI/issues/654#issuecomment-5677625733
+
+本提案不自行批准数字或能力。数值事务仍须独立 commit/集中 PR，不混进源修复；由 pui-package-budget owning leaf 处理，仅允许该 WC literal、说明注释和对应证据记录。数值改动之后必须重新 pui-validate，再进入独立 review；旧测量不算改数后的通过结果。消费者 diagnostics 不替代 whole-entry gate。
+
+下一步：取得源修复 exact public head 与真实候选 canonical CI；据该实际组合核对提议余量，再推进独立数值事务的 final-head CI/DCO、独立评审和合法集成。没有 rerun、self-approval、保护规则绕过、测量配置修改或 Issue 提前关闭。
+
+机器可复核包：/tmp/native-source-ci-wc-budget-independent-proposal-178.json
+当前源证据：/tmp/native-source-ci-current-proof-177.json
+当前增长归因：/tmp/native-source-ci-wc-budget-current-attribution-proof-178.json

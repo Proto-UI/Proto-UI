@@ -1,0 +1,1184 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.issue1140-wc-baseline-recovery",
+  "recordedOn": "2026-11-10",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "scopeId": "issue:1140",
+  "currentBaseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "currentBranch": "fix/release03-thirty-issue-1140-sol-20261110",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "owner": "SolThirty1140WcBaseline",
+  "summary": "Recover the original117850→119059WCproposal and immutable source/failure provenance. The178proposal was unreviewed/unimplemented; current132000 remains unchanged. This record does not close1140.",
+  "originalCriterion": {
+    "key": "issue.1140.001",
+    "parentKey": "issue.1088.014",
+    "wording": "Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/1140",
+    "parent": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+    "parentSource": {
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+      "section": "Source PR 886 gate followup",
+      "exactTask": "Deliver independently reviewed WC numerical baseline transaction",
+      "initialRetainedPendingResult": {
+        "eventId": "4996bc63",
+        "timestamp": "2026-10-10T08:18:06.445Z"
+      }
+    },
+    "historicalChecked": false,
+    "currentComplete": false
+  },
+  "liveIssue": {
+    "bodySha256": "ec0b0762a377c7ec3a1a252848aea84adffd3ea851cdc0eee06130cfe28489bb",
+    "state": "OPEN",
+    "assignees": [],
+    "comments": 1,
+    "discussionPages": 1,
+    "parentComments": 3,
+    "parentDiscussionPages": 1,
+    "sourcePR887Comments": 77,
+    "sourcePR887DiscussionPages": 1,
+    "sourcePR886": {
+      "number": 886,
+      "title": "fix: preserve native owner readiness and terminal resource cleanup",
+      "bodySha256": "c23818939a40b444b5bef0de6cc3ae0682672e933bff598095ec3530925c3941",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:41:52Z",
+      "mergeCommitSha": "9f360300ff25e69793d6f029470a759bda1298b0",
+      "headSha": "9d64fb08d82e12550285eb8681c9aa182b8f7522",
+      "baseSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "reviewPages": 1,
+      "reviews": [
+        {
+          "id": 5478271695,
+          "actor": "copilot-pull-request-reviewer[bot]",
+          "state": "COMMENTED",
+          "commitSha": "caef71a43310d11fdd3f314f8706d62b57071a70",
+          "submittedAt": "2026-10-10T08:09:08Z",
+          "body": "Copilot was unable to review this pull request because the user who requested the review has reached their quota limit."
+        },
+        {
+          "id": 5478295532,
+          "actor": "chatgpt-codex-connector[bot]",
+          "state": "COMMENTED",
+          "commitSha": "caef71a43310d11fdd3f314f8706d62b57071a70",
+          "submittedAt": "2026-10-10T08:19:08Z",
+          "body": "\n### 💡 Codex Review\n\nHere are some automated review suggestions for this pull request.\n\n**Reviewed commit:** `caef71a433`\n    \n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\".\n\nIf Codex has suggestions, it will comment; otherwise it will react with 👍.\n\n\n\n\nCodex can also answer questions or update the PR. Try commenting \"@codex address that feedback\".\n            \n</details>"
+        }
+      ]
+    }
+  },
+  "authority": [
+    {
+      "id": "C-LIFECYCLE-0002",
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "status": "draft",
+      "since": "0.1.0",
+      "anchors": [
+        "C-LIFECYCLE-0002-J",
+        "C-LIFECYCLE-0002-K",
+        "C-LIFECYCLE-0002-Q-CALLBACK-ERRORS"
+      ],
+      "boundary": "Historical caef used criterion I for failed-created. Current J governs that boundary; current I is FIFO and K governs ordinary authored beforeDispose fail-fast. Preserve the old binding as historical, never silently substitute current anchors."
+    },
+    {
+      "id": "T-LIFECYCLE-0001",
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP",
+        "T-LIFECYCLE-0001-CASE-ORDINARY-DISPOSAL-FAILFAST"
+      ],
+      "implementation": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+      "boundary": "Recorded passing implementation metadata is not a fresh execution."
+    },
+    {
+      "id": "HC-FOCUS-TARGET-0001",
+      "path": "spec/host-caps/HC-FOCUS-TARGET-0001.yaml",
+      "status": "draft",
+      "since": "0.3.0-alpha.0",
+      "anchors": [
+        "HC-FOCUS-TARGET-0001-A",
+        "HC-FOCUS-TARGET-0001-B",
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "boundary": "Actual current owner/target, request kind/options, physical application and observation readiness remain distinct; no fabricated facts."
+    },
+    {
+      "id": "C-AS-FOCUS-ENTRY-0001",
+      "path": "spec/contracts/C-AS-FOCUS-ENTRY-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "C-AS-FOCUS-ENTRY-0001-E",
+        "C-AS-FOCUS-ENTRY-0001-G",
+        "C-AS-FOCUS-ENTRY-0001-H"
+      ]
+    },
+    {
+      "id": "C-AS-FOCUS-SCOPE-0002",
+      "path": "spec/contracts/C-AS-FOCUS-SCOPE-0002.yaml",
+      "status": "draft",
+      "boundary": "Trapped traversal and retained intent remain separately meaningful obligations; original caef thread4237011673 remains historical debt, not numerically resolved."
+    },
+    {
+      "id": "A-WEB-COMPONENT-0001",
+      "path": "spec/adapters/A-WEB-COMPONENT-0001.yaml",
+      "status": "active",
+      "anchors": [
+        "A-WEB-COMPONENT-0001-SHADOW-MODES",
+        "A-WEB-COMPONENT-0001-FOCUS",
+        "A-WEB-COMPONENT-0001-G",
+        "A-WEB-COMPONENT-0001-I"
+      ],
+      "boundary": "Active official Custom Elements identity does not activate every draft profile or establish non-Web conformance."
+    },
+    {
+      "id": "D-WEB-COMPONENT-SHADOW-PROFILE-0001",
+      "path": "spec/decisions/D-WEB-COMPONENT-SHADOW-PROFILE-0001.yaml",
+      "status": "draft",
+      "since": "0.3.0-alpha.0",
+      "anchors": [
+        "D-WEB-COMPONENT-SHADOW-PROFILE-0001-B",
+        "D-WEB-COMPONENT-SHADOW-PROFILE-0001-F",
+        "D-WEB-COMPONENT-SHADOW-PROFILE-0001-J",
+        "D-WEB-COMPONENT-SHADOW-PROFILE-0001-K",
+        "D-WEB-COMPONENT-SHADOW-PROFILE-0001-L"
+      ],
+      "boundary": "Light/direct retained; explicit split synchronous artifact and one native text editor; Image View and unsupported recipes refuse."
+    },
+    {
+      "id": "D-WEB-COMPONENT-SHADOW-STYLE-0001",
+      "path": "spec/decisions/D-WEB-COMPONENT-SHADOW-STYLE-0001.yaml",
+      "status": "draft",
+      "since": "0.3.0-alpha.0",
+      "anchors": [
+        "D-WEB-COMPONENT-SHADOW-STYLE-0001-A",
+        "D-WEB-COMPONENT-SHADOW-STYLE-0001-B",
+        "D-WEB-COMPONENT-SHADOW-STYLE-0001-F",
+        "D-WEB-COMPONENT-SHADOW-STYLE-0001-G"
+      ]
+    }
+  ],
+  "governanceSources": [
+    {
+      "path": "AGENTS.md",
+      "kind": "current contribution authority"
+    },
+    {
+      "path": ".agents/skills/pui-dev/SKILL.md",
+      "anchors": [
+        "Decide package-budget ceilings"
+      ],
+      "rule": "Separately reviewable numeric transaction, canonical same-environment before/after, closure attribution, post-mutation evidence and independent review; no numeric mutation in this recovery."
+    },
+    {
+      "path": "internal/governance/finf-package-budgets.md",
+      "kind": "current temporary policy",
+      "rule": "Retain strict baselines and actual pass=false under explicit advisory; all other gates and final strict restoration remain."
+    },
+    {
+      "path": "scripts/analysis/package-budgets.mjs",
+      "kind": "current implementation evidence",
+      "wcCeiling": 132000,
+      "sha256": "01e4987b4552c2284741a5d9945d990f8798ca7a601b170ded968f3a2feb9c31"
+    },
+    {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "anchors": [
+        "issue.1140.001",
+        "issue.1088.014"
+      ],
+      "rule": "Preserve original unchecked condition and per-source keys; record is not current acceptance."
+    }
+  ],
+  "originalProposal": {
+    "originalTarget": "/tmp/native-source-ci-wc-budget-independent-proposal-178.txt",
+    "carrier": "/home/ezra/.omp/agent/sessions/--workspace-repo--/2026-10-30T02-10-46-923Z_01a18a92-ec0b-77d7-a5e9-01919cbf77d2.jsonl",
+    "eventId": "cfcaaac1",
+    "eventTimestamp": "2026-10-10T07:37:49.543Z",
+    "toolCallId": "call_bac143da814249aba0502ffa8a83f6f7|fc_097c644b4d3b6423016ac9eb2212ac8199906bf74db682ebb0",
+    "sha256": "dbd4b347185f2ffc86e762caf9d8ee779d969b8b416d48cd16b37cce2f9cb88f",
+    "bytes": 4779,
+    "recovery": "Exact .arguments.content of the unique original write tool call; UTF-8 bytes preserved without substituting a current source hash.",
+    "machineProposal": {
+      "originalPath": "/tmp/native-source-ci-wc-budget-independent-proposal-178.json",
+      "status": "Original serialized file not recovered; original construction program and successful write summary recovered, without executing it or inventing dynamic fields.",
+      "constructionEventId": "291c02be",
+      "constructionTimestamp": "2026-10-10T07:36:13.982Z",
+      "constructionArtifact": "original-proposal-construction.json",
+      "constructionSha256": "6b3c0de7566b8705c0b3768129c01e6cd0d6a6806188e6fe4daf38c6830e0c40"
+    },
+    "repositoryCopy": "internal/records/2026-11-10-issue1140-wc-baseline-proposal-178.txt",
+    "status": "historical proposal-only, unreviewed; no implemented numerical transaction recovered"
+  },
+  "originalSource": {
+    "beforeRef": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+    "sourceRef": "caef71a43310d11fdd3f314f8706d62b57071a70",
+    "sourcePathCount": 26,
+    "archivedPreimages": 52,
+    "currentBaseComparison": {
+      "equalPaths": 7,
+      "differentPaths": 19,
+      "meaning": "Byte comparison only; current19differences are not findings or lost-source claims."
+    },
+    "files": [
+      {
+        "path": "internal/contracts/lifecycle/component-lifecycle.v0.md",
+        "beforeSha256": "fe08ac098c076c4d27746fd0a9a1e6a449c35851965f44a320596c476095750d",
+        "afterSha256": "4036307cf51b921fe98828a634314ba35d2ea94c535135eb8eb50afb8ff325f0",
+        "currentBaseSha256": "262f4345920fcfa5b4829ace01ca1b5933d07a6047b92fab54d1650f0ef68033",
+        "beforeGitBlobSha1": "aee68e826e7387f808aa9a140250fd13d4dfb61d",
+        "afterGitBlobSha1": "b1d4b3eaee6dc9e16fc20cfaf5238adca8802160",
+        "currentBaseGitBlobSha1": "ca2874511245251db5f6ccc5ce058a88178cfda8",
+        "beforeBytes": 3637,
+        "afterBytes": 4569,
+        "currentBaseBytes": 5178,
+        "archiveBefore": "original-source/before/internal/contracts/lifecycle/component-lifecycle.v0.md",
+        "archiveAfter": "original-source/after/internal/contracts/lifecycle/component-lifecycle.v0.md"
+      },
+      {
+        "path": "packages/adapters/base/test/fixtures/focus-intent-native.ts",
+        "beforeSha256": "8619edef69e69edea350c76463586ea0875d0da3c0823f3220b22a8f2d776c0c",
+        "afterSha256": "85e8a7a5bfa92bbf07d5764c41dd71aeffa7047fd34955dde3a0096eb5b105df",
+        "currentBaseSha256": "85e8a7a5bfa92bbf07d5764c41dd71aeffa7047fd34955dde3a0096eb5b105df",
+        "beforeGitBlobSha1": "2b17fa2ee2d6de17ca26ab50820b500b65ac9bf3",
+        "afterGitBlobSha1": "237d8e7782ee9283192f92f925d07ec97505b751",
+        "currentBaseGitBlobSha1": "237d8e7782ee9283192f92f925d07ec97505b751",
+        "beforeBytes": 21928,
+        "afterBytes": 21864,
+        "currentBaseBytes": 21864,
+        "archiveBefore": "original-source/before/packages/adapters/base/test/fixtures/focus-intent-native.ts",
+        "archiveAfter": "original-source/after/packages/adapters/base/test/fixtures/focus-intent-native.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "beforeSha256": "18f4357de2a16c6f235b46c524bc786dae01f471f0eb490a2b611e384ab64d5e",
+        "afterSha256": "ca3f6879f13a87e4bd4b58c1e75e66ffe608b7958ee7cf550d96df76f34f3547",
+        "currentBaseSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "beforeGitBlobSha1": "eea325f4abac0b952ab41c292fc6dab0d9d72a34",
+        "afterGitBlobSha1": "6e1d4ef694242ca933abe7c53d7d44816f2eaaed",
+        "currentBaseGitBlobSha1": "528b084121c92805b1b213e67cf050007923b493",
+        "beforeBytes": 34713,
+        "afterBytes": 42670,
+        "currentBaseBytes": 60209,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/src/adapt.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/src/adapt.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/src/portal-mount.ts",
+        "beforeSha256": "a16a84eb8c6d880d40529b5347b4cfe39a00d061b0008aad219c6748e52edf6b",
+        "afterSha256": "a0dc49ff4a60e2e48b1e089452b6e2851c41c7749e625bf5e72e7e56aebd4e21",
+        "currentBaseSha256": "6a5c0599b0f5c168d7f2cc9158a325b3c8b3eb60c4a1dfcce012d4d01b4ebc22",
+        "beforeGitBlobSha1": "b30d037e3e76a0aa49e0da4b8d4eec431d952240",
+        "afterGitBlobSha1": "3fe6f8d36048751d7e4fd74dcf22f967af72ea07",
+        "currentBaseGitBlobSha1": "45516d96694d94b13eb30f43f7f69156be932488",
+        "beforeBytes": 7122,
+        "afterBytes": 7514,
+        "currentBaseBytes": 17088,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/src/portal-mount.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/src/portal-mount.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "beforeSha256": "5e32f4dcb69e282001502ebb45ad357ef901a7a1d22cf7e4a826b2809b551b11",
+        "afterSha256": "e4da4e572f3e5a0cf1dc27fa50427be72c7a6ccf30944ebd43206a8349249556",
+        "currentBaseSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "beforeGitBlobSha1": "0212231e40a3efe135d070459a8530869ad49fe1",
+        "afterGitBlobSha1": "1e73dbb138b525233ae4630770f302bb744b4d34",
+        "currentBaseGitBlobSha1": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "beforeBytes": 80373,
+        "afterBytes": 78390,
+        "currentBaseBytes": 93399,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/src/runtime/modules.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/src/runtime/modules.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/src/runtime/session.ts",
+        "beforeSha256": "7274912b4f74e39cc05eaf2d8096f6a2c2e7b2fc5118c4b00974d02a7cec749f",
+        "afterSha256": "e23b6a6967c9c9f4e5d019e3fa58244f3384d1ec6136d3c929d038c3e90fff19",
+        "currentBaseSha256": "499a41b18e1dadcc6033b2e3fdeea86a84383d5c96e7a885b30a94abfc289246",
+        "beforeGitBlobSha1": "546992c81c4c6b6f425da3765e28858943889cb3",
+        "afterGitBlobSha1": "e02807fee2b976f4b6f26b45f5aa7eb12dea2ac6",
+        "currentBaseGitBlobSha1": "df139b5b6794645212d0a411f72d40788c810331",
+        "beforeBytes": 6375,
+        "afterBytes": 6090,
+        "currentBaseBytes": 12152,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/src/runtime/session.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/src/runtime/session.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/src/shadow-inner-surface.ts",
+        "beforeSha256": "b4f8b0ec10b8e47e474c30d9b8b38d2e46f2ef92c2162189427a24e04012edf6",
+        "afterSha256": "fda6f183d9564d984f9854ebb37276febc35a0084c7d3439bd352fc66e7dc197",
+        "currentBaseSha256": "fda6f183d9564d984f9854ebb37276febc35a0084c7d3439bd352fc66e7dc197",
+        "beforeGitBlobSha1": "9c3d5d7dce9633a371a9878e709b5f5457b4fe2d",
+        "afterGitBlobSha1": "e7d58d9092c2c3224cf7a5123e75af26d14f4ebb",
+        "currentBaseGitBlobSha1": "e7d58d9092c2c3224cf7a5123e75af26d14f4ebb",
+        "beforeBytes": 2788,
+        "afterBytes": 2841,
+        "currentBaseBytes": 2841,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/src/shadow-inner-surface.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/src/shadow-inner-surface.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts",
+        "beforeSha256": "0020a986738acc7b77efc21b09811ceef8c41708b3b2af4be42c2a78b05cb813",
+        "afterSha256": "77372d358f8cee44f138bb0f4073dcf80fbfac8b7b934e85bedce4096e15a688",
+        "currentBaseSha256": "77372d358f8cee44f138bb0f4073dcf80fbfac8b7b934e85bedce4096e15a688",
+        "beforeGitBlobSha1": "6d09f7ee8490c88776444196ecbecd03863d9ed3",
+        "afterGitBlobSha1": "23c9e5dc791d0ed90b87779287d19af3912b4081",
+        "currentBaseGitBlobSha1": "23c9e5dc791d0ed90b87779287d19af3912b4081",
+        "beforeBytes": 24930,
+        "afterBytes": 25015,
+        "currentBaseBytes": 25015,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/fixtures/shadow-split-runtime.ts",
+        "beforeSha256": "440d1b2a19833a595c390b2d8ed9123b69b5ea1d2198e8ff398807f2b19580d2",
+        "afterSha256": "07fd2151bee22c64aba3608c3431b65bcc8bb6a4d6385441d15ec6d0f2526f4e",
+        "currentBaseSha256": "07fd2151bee22c64aba3608c3431b65bcc8bb6a4d6385441d15ec6d0f2526f4e",
+        "beforeGitBlobSha1": "2154f1ec4791e8e49b14b918a6cca7437d11da95",
+        "afterGitBlobSha1": "072743cdc679a3df8940da2412ac686242c737b6",
+        "currentBaseGitBlobSha1": "072743cdc679a3df8940da2412ac686242c737b6",
+        "beforeBytes": 6624,
+        "afterBytes": 6719,
+        "currentBaseBytes": 6719,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/fixtures/shadow-split-runtime.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/fixtures/shadow-split-runtime.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-entry-observer.test.ts",
+        "beforeSha256": "80cb37ebe3610b5126d7cf167c429ef55a710fb7c4342689c6a7dc9c57118086",
+        "afterSha256": "9ec92f26e6c9eb7d5c697455212bba373dbab3830e697e44e48d7d2cc1f31821",
+        "currentBaseSha256": "cbe6ee87c9c8f9136371af754ed8d23012b18db4d2e2ef1606125a99125bf9e2",
+        "beforeGitBlobSha1": "2ecfedd24a3c86c72b7aca36e30ac6ae20e551ff",
+        "afterGitBlobSha1": "6d4e5a9569f4f4f2884302931a7ce8427677ec09",
+        "currentBaseGitBlobSha1": "89a094706131ee1ef240e334484c06ed37629e64",
+        "beforeBytes": 51726,
+        "afterBytes": 51865,
+        "currentBaseBytes": 58499,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/focus-entry-observer.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/focus-entry-observer.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "beforeSha256": "1ab370c8bd4f2c1054f7fe3e0f5aae210b76807b55569c4f4da59d1851edaa0d",
+        "afterSha256": "65dd31d964a9b382fc5a727f8d91126717150398424ae68ab1e5d6ba1490bf2b",
+        "currentBaseSha256": "313e0daccb49fc311395801a75bd5f5c72159272c38e40fc4c584d25a80785df",
+        "beforeGitBlobSha1": "b0a9480f52fd2eeeacb406ca815daa8aa8c44433",
+        "afterGitBlobSha1": "f02fb3763a198fdca0bce65a59b38a005ec3e057",
+        "currentBaseGitBlobSha1": "7516adbba943fead7e5d981b2e2140e6b67f6701",
+        "beforeBytes": 5193,
+        "afterBytes": 5734,
+        "currentBaseBytes": 5946,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "beforeSha256": "92d04e6e8056571fafaffbe053831b4b67f811e3ef2c1aaace054415c7c99d0b",
+        "afterSha256": "0b4354bac93bfd1645d028105a6f4d27308193c35e6ad3149ca52575be13da4c",
+        "currentBaseSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "beforeGitBlobSha1": "653f8240fece79856ac813ec11ee758be0353695",
+        "afterGitBlobSha1": "84794dfd8f572a8a4487c6035abf5634d8a9fe60",
+        "currentBaseGitBlobSha1": "6df40189224410bc2e516b89df88074c109b68ff",
+        "beforeBytes": 15796,
+        "afterBytes": 17237,
+        "currentBaseBytes": 22380,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+        "beforeSha256": "489b75bb6d9687ff10f9ae209afc201bc6fbf668c89abd92d4e9ab80c2bca62e",
+        "afterSha256": "b9e778c0e8a7c32647429b52a7a5ef0998f42ae762e9c0da90aee21ffe490230",
+        "currentBaseSha256": "6e15209e0401423c72ed1f9b01732084be522e0167ef45cc7d9d7b20bd4682c1",
+        "beforeGitBlobSha1": "1f7507621a24799b3b030e89489fb180578d2c36",
+        "afterGitBlobSha1": "3a00534d0c9ea90716a0ca278cafd0bb0f9db682",
+        "currentBaseGitBlobSha1": "2f05e9e279bf6ea7009e5a65e1641987bc03ec96",
+        "beforeBytes": 13182,
+        "afterBytes": 13647,
+        "currentBaseBytes": 13995,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "beforeSha256": "e5ed90d8a2710d5b5de43e3f524ac16868a6531aa8513474939ae0b7e27fdd26",
+        "afterSha256": "8ba4f28a9ede4fc822c0bc443a3db4ded5ebc7a9f2384f6b29a90a50fffccd58",
+        "currentBaseSha256": "6c5f228e04a90e6c03bf2074973936bc6dba73bcbe73523a68bb3e6f060877a6",
+        "beforeGitBlobSha1": "dccc850f9ca430250910e18a15dd6cfc74716052",
+        "afterGitBlobSha1": "5d82cd37499c1426b0b5a02284204c9592d16cfb",
+        "currentBaseGitBlobSha1": "c03bd8694d9d6ada2385a1d60b137e19be449221",
+        "beforeBytes": 3328,
+        "afterBytes": 2924,
+        "currentBaseBytes": 2925,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/root-role-compatibility.test.ts"
+      },
+      {
+        "path": "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+        "beforeSha256": "203c79f8b319c79759d30a449e908c2e97d63e3511e642648c0046eb706652fe",
+        "afterSha256": "bc7b5204a3bc8e6540c975763413c7e20294d88a2abccc6ea1ba57615ab02531",
+        "currentBaseSha256": "bc7b5204a3bc8e6540c975763413c7e20294d88a2abccc6ea1ba57615ab02531",
+        "beforeGitBlobSha1": "407cb0b651d3cfc62209df17f392e8d1644f7bee",
+        "afterGitBlobSha1": "46c8545c7671b2849821a5e9b995fc06604118e5",
+        "currentBaseGitBlobSha1": "46c8545c7671b2849821a5e9b995fc06604118e5",
+        "beforeBytes": 2020,
+        "afterBytes": 3628,
+        "currentBaseBytes": 3628,
+        "archiveBefore": "original-source/before/packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+        "archiveAfter": "original-source/after/packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts"
+      },
+      {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "beforeSha256": "c7e567b1ac653f1556fb2cc11ff069fa626a69fcdaae237a9b6041963f676d8e",
+        "afterSha256": "a1a4c2b77410c764fa95e90c9ba5d8993e59f25e0b4a991b9d5137189d8f7918",
+        "currentBaseSha256": "cdeec0200cce086e2938ad7d6e5e060f935c847e92ea9107a639bf06582391c4",
+        "beforeGitBlobSha1": "dbdce4e595aa07d32ec6737290514c8fbc9c5006",
+        "afterGitBlobSha1": "06e6424f85f90d9a9e77baebbbea34ca226d2868",
+        "currentBaseGitBlobSha1": "981a109dc8a0358aa9e993433faa1f8662d49e3f",
+        "beforeBytes": 19260,
+        "afterBytes": 21422,
+        "currentBaseBytes": 20732,
+        "archiveBefore": "original-source/before/packages/compiler/test/browser-source-presentation.test.ts",
+        "archiveAfter": "original-source/after/packages/compiler/test/browser-source-presentation.test.ts"
+      },
+      {
+        "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+        "beforeSha256": "fb232e581cdd6ae0f203b76ff276bb67dd94abe26e45728dd80c7d9843dfb036",
+        "afterSha256": "0a43ba692b1470cffaeff4756d419e601da528be8f9eda53b0402d06d85c6bd4",
+        "currentBaseSha256": "5e45d7d1f00233806319e4c64acdabc678f0cfe3d2673f588d9cdc665c1c2b51",
+        "beforeGitBlobSha1": "23ef05d9a9082a4f26276ae05f5d765dc6981d6e",
+        "afterGitBlobSha1": "75c8afe546330e8d74597ca368877c39adb5c30f",
+        "currentBaseGitBlobSha1": "d6d929702eed546fa90a1baad4276582ebcf194e",
+        "beforeBytes": 5603,
+        "afterBytes": 5970,
+        "currentBaseBytes": 5601,
+        "archiveBefore": "original-source/before/packages/compiler/test/fixtures/source-presentation/main.ts",
+        "archiveAfter": "original-source/after/packages/compiler/test/fixtures/source-presentation/main.ts"
+      },
+      {
+        "path": "packages/compiler/test/fixtures/source-presentation/presentation.css",
+        "beforeSha256": "a55db88199966754beca35021e7f35ea46218f2846cd56ef0be2db101a6cc64b",
+        "afterSha256": "1cb0db2c147814165ecf7e0b9211457040cb5930a82143f652c40738417731e4",
+        "currentBaseSha256": "1cb0db2c147814165ecf7e0b9211457040cb5930a82143f652c40738417731e4",
+        "beforeGitBlobSha1": "574b4472d33ac9525fa8d2506be1ab384dffec13",
+        "afterGitBlobSha1": "bd0f1064c247f5143e55924abf7c0da71536f660",
+        "currentBaseGitBlobSha1": "bd0f1064c247f5143e55924abf7c0da71536f660",
+        "beforeBytes": 1503,
+        "afterBytes": 1554,
+        "currentBaseBytes": 1554,
+        "archiveBefore": "original-source/before/packages/compiler/test/fixtures/source-presentation/presentation.css",
+        "archiveAfter": "original-source/after/packages/compiler/test/fixtures/source-presentation/presentation.css"
+      },
+      {
+        "path": "packages/modules/feedback/src/create.ts",
+        "beforeSha256": "1fc5827bd5448dd4a48f764d4040433ad1fb80db332153909472408062df9bec",
+        "afterSha256": "4c9234f46117d3c77004b3e6d493be35c60dd0800ff02d3c677c6da7c27e44c0",
+        "currentBaseSha256": "50d31202484cba1ff28c45fcafbc2cce36dea8fd33f3c0674b2fd08456fc3103",
+        "beforeGitBlobSha1": "ef5622a359bae3f4b95b4dcd1ddfca963e881393",
+        "afterGitBlobSha1": "acb3f50a9ad4fbfff669c16dbd7f68eec9036ec7",
+        "currentBaseGitBlobSha1": "bc86f929abec1d902fca8b78613886db5566702d",
+        "beforeBytes": 15631,
+        "afterBytes": 15483,
+        "currentBaseBytes": 34448,
+        "archiveBefore": "original-source/before/packages/modules/feedback/src/create.ts",
+        "archiveAfter": "original-source/after/packages/modules/feedback/src/create.ts"
+      },
+      {
+        "path": "packages/modules/focus/src/create.ts",
+        "beforeSha256": "9770f19c9033a6ce70b93294c53e0a82e98c75afc3f3f7188248191438cd088b",
+        "afterSha256": "84798cab8c1504adafc1b30f9fd45de3e98ed7426c44a35147671f570714e86f",
+        "currentBaseSha256": "4aa93faf9476b94b981c267191b2d1f1946fadaeff92472a37b880a5f248dca0",
+        "beforeGitBlobSha1": "1230a68b4dc5d0c0846766fb8e403c6a2022df11",
+        "afterGitBlobSha1": "e607176738f51e446c51a62ea905b5f3dd440d66",
+        "currentBaseGitBlobSha1": "b58dfeaa792ed2a96ac9ef57b6bb6934c064ff8d",
+        "beforeBytes": 56311,
+        "afterBytes": 55702,
+        "currentBaseBytes": 56602,
+        "archiveBefore": "original-source/before/packages/modules/focus/src/create.ts",
+        "archiveAfter": "original-source/after/packages/modules/focus/src/create.ts"
+      },
+      {
+        "path": "packages/runtime/src/instance/execute/callback-scope.ts",
+        "beforeSha256": "21a83305e38eb0fbdc9da27ba36d27f13c155d1af28e3e312cf9cea661c9db1c",
+        "afterSha256": "aee82651cc5b2d773ab6260b7ccc081d09927e4a5aaec8d30fed135a35605c77",
+        "currentBaseSha256": "aee82651cc5b2d773ab6260b7ccc081d09927e4a5aaec8d30fed135a35605c77",
+        "beforeGitBlobSha1": "17ecc7710ab69524fd0ea192385b912ed4bc778b",
+        "afterGitBlobSha1": "ca8a7777d723edfeb8226131950268d57b3b533f",
+        "currentBaseGitBlobSha1": "ca8a7777d723edfeb8226131950268d57b3b533f",
+        "beforeBytes": 3759,
+        "afterBytes": 3758,
+        "currentBaseBytes": 3758,
+        "archiveBefore": "original-source/before/packages/runtime/src/instance/execute/callback-scope.ts",
+        "archiveAfter": "original-source/after/packages/runtime/src/instance/execute/callback-scope.ts"
+      },
+      {
+        "path": "packages/runtime/src/instance/session.ts",
+        "beforeSha256": "018eab62d3cf516145794807d8329bb51b0092a407ae2d71d985b57f80abd805",
+        "afterSha256": "9c4e6aef86bb152abe244462a3a3060a843781658c22e7de3c57a6b4715c1281",
+        "currentBaseSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "beforeGitBlobSha1": "a76bd401a40da583d8124041c6bb0864cd92004b",
+        "afterGitBlobSha1": "7419d23fcfe85170004c2ed1d1d6c3fe96c798ba",
+        "currentBaseGitBlobSha1": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "beforeBytes": 18636,
+        "afterBytes": 20077,
+        "currentBaseBytes": 22957,
+        "archiveBefore": "original-source/before/packages/runtime/src/instance/session.ts",
+        "archiveAfter": "original-source/after/packages/runtime/src/instance/session.ts"
+      },
+      {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "beforeSha256": "9f8793f77b365e446991e2f7ee84912b7274d31bc1d14d318fd0c5fe7c6bd30c",
+        "afterSha256": "cbc5cb544ecdae1ae72c58388a13cbda53afb3fc3713bcb3d4ded80ee3b36a6f",
+        "currentBaseSha256": "878517e29f5a19ec73cd716a838553503cd95b45aee5e413750cc9d9d0fd288d",
+        "beforeGitBlobSha1": "efa66e6983c56e832f3a063d9eb0523cfc8eaa55",
+        "afterGitBlobSha1": "f825fc7089810fa21fdae40f6eaf3ad5cb74416e",
+        "currentBaseGitBlobSha1": "ac4eed0a6073a8e2a20d827285e556a03bc1f86d",
+        "beforeBytes": 42784,
+        "afterBytes": 43011,
+        "currentBaseBytes": 43094,
+        "archiveBefore": "original-source/before/packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "archiveAfter": "original-source/after/packages/runtime/test/contract/focus.v0.contract.test.ts"
+      },
+      {
+        "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "beforeSha256": "3d02094d053dfc5c13b26aafd34d13620a6a9914bc03b8706fa311e2c3844299",
+        "afterSha256": "bfe1658927779ffca05916d147f2f6e06558ea2ca038e6fcb01d92480080e5d5",
+        "currentBaseSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+        "beforeGitBlobSha1": "6e5c8addc1514e3e54b05d9c0c9d31460a9e12ab",
+        "afterGitBlobSha1": "a6f60d0c55027c97f1fd292cceac1963b6abc06b",
+        "currentBaseGitBlobSha1": "004826f639ad52b6430f019a18161b36ad31ffe7",
+        "beforeBytes": 10824,
+        "afterBytes": 12430,
+        "currentBaseBytes": 20730,
+        "archiveBefore": "original-source/before/packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "archiveAfter": "original-source/after/packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts"
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "beforeSha256": "3b10c5e72815705012269318bd2d8ff3efe5add20df9fb5525567e3a5e897787",
+        "afterSha256": "7fad0b4f7f0280f3cb9969e217b6966cdd0c9524baa3ed5b913d8b6126b97726",
+        "currentBaseSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "beforeGitBlobSha1": "3c9163a88f4245a7c975c93378ff3478583a8faa",
+        "afterGitBlobSha1": "a3f8e9a294d4d4e8179c4f4babda0b6ff1689afb",
+        "currentBaseGitBlobSha1": "7ab6da8317f2037ff8dae183a13b4b12cf8d2868",
+        "beforeBytes": 6096,
+        "afterBytes": 7719,
+        "currentBaseBytes": 10656,
+        "archiveBefore": "original-source/before/spec/contracts/C-LIFECYCLE-0002.yaml",
+        "archiveAfter": "original-source/after/spec/contracts/C-LIFECYCLE-0002.yaml"
+      },
+      {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "beforeSha256": "279ad0bfb2aa5bbc211aef8796736e2c0f9a839fcc08016050f56bf212e7e63c",
+        "afterSha256": "5405b075c811b0789b3ceec11bae0c98f731fa9e62c698b5dd4a082a35d9073c",
+        "currentBaseSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "beforeGitBlobSha1": "37bed5220b2e040903d428ff84ff54bc19171245",
+        "afterGitBlobSha1": "d28c16baba1fd6d90556bf0aedce492388a9af47",
+        "currentBaseGitBlobSha1": "1956b1f24cf1fa1d337f64ea311b849cf05e754a",
+        "beforeBytes": 6426,
+        "afterBytes": 7997,
+        "currentBaseBytes": 9886,
+        "archiveBefore": "original-source/before/spec/tests/T-LIFECYCLE-0001.yaml",
+        "archiveAfter": "original-source/after/spec/tests/T-LIFECYCLE-0001.yaml"
+      }
+    ],
+    "contributionProvenance": {
+      "sourceSha": "caef71a43310d11fdd3f314f8706d62b57071a70",
+      "rawCommitSha256": "89d8ee668f7b8876a9a255518c2ea3792d8ec112b043d6fecbb65b88bfae9160",
+      "artifact": "original-caef-commit-object.txt",
+      "authorHeader": "author cyjin-yl <cyjin.yl@gmail.com> 1791619466 +0800",
+      "committerHeader": "committer cyjin-yl <cyjin.yl@gmail.com> 1791619466 +0800",
+      "signOffLines": [
+        "Signed-off-by: cyjin-yl <cyjin.yl@gmail.com>"
+      ],
+      "meaning": "Observed original bytes; not a new certification of another contribution or a substitute for native App/DCO acceptance at the eventual candidate."
+    }
+  },
+  "budgetSource": {
+    "path": "scripts/analysis/package-budgets.mjs",
+    "historicalRef": "caef71a43310d11fdd3f314f8706d62b57071a70",
+    "historicalBeforeSha256": "f41959490bf0c00b4b303be72c2467ec9f8dd4f082c3990a93a4017a95fcd4b7",
+    "historicalProposedAfterSha256": "a72c1fc2ab79eb95163fc3191d964f5d1942dce4b487bec0de42c8f6e44275c6",
+    "currentBaseRef": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "currentBaseSha256": "01e4987b4552c2284741a5d9945d990f8798ca7a601b170ded968f3a2feb9c31",
+    "currentWcCeiling": 132000,
+    "historicalOldWcCeiling": 117850,
+    "historicalProposedWcCeiling": 119059,
+    "patchSha256": "64a39152cedc20b6a1d346b67597aeb36b2a3d65c31f13c801fdc12061a35936",
+    "patchApplied": false,
+    "proposalAfterAuthoredNow": true,
+    "warning": "Unapplied reconstruction of the one numeric literal proposed in original178. It is not an original historical file, executed result or appropriate patch to the current132000 baseline."
+  },
+  "measurements": {
+    "canonicalBefore": {
+      "headSha": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+      "runId": 37953108222,
+      "packageJobId": 113896790334,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/37953108222/job/113896790334",
+      "packageJobConclusion": "success",
+      "overallRunConclusion": "failure in separate tests",
+      "wc": {
+        "gzipBytes": 117706,
+        "budget": 117850,
+        "headroom": 144,
+        "minifiedBytes": 418847,
+        "minifiedSha256": "6c0bc106413987ae9b8d2722b1189656532f05cfb45ccaebfcfacf31ac25639f"
+      },
+      "environment": {
+        "node": "v24.21.0",
+        "zlib": "1.3.2.1-motley-8002e91",
+        "esbuild": "0.25.12",
+        "platform": "linux",
+        "arch": "x64"
+      },
+      "recoveredReceipt": {
+        "carrier": "/home/ezra/.omp/agent/sessions/--workspace-repo--/2026-10-30T02-10-46-923Z_01a18a92-ec0b-77d7-a5e9-01919cbf77d2.jsonl",
+        "eventId": "7dcb8513",
+        "eventTimestamp": "2026-10-10T07:34:25.420Z",
+        "artifact": "original-ea-baseline-observation.log",
+        "sha256": "c2603664359cd884c6807906072c00c138c54e78a4a789dcb20de97d13e02938",
+        "scope": "Original retained tool result contains environment and4 package measurement lines, not the complete baseline log. Missing original full-log bytes/hash are not synthesized."
+      }
+    },
+    "canonicalSourceAfter": {
+      "sourceHeadSha": "caef71a43310d11fdd3f314f8706d62b57071a70",
+      "baseSha": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+      "executedMergeSha": "f62672dedd406ceccd5683d79f0fb2b6022c59af",
+      "runId": 38036882685,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38036882685",
+      "overallConclusion": "failure",
+      "packageBudgetExitCode": 1,
+      "environment": {
+        "node": "v24.21.0",
+        "zlib": "1.3.2.1-motley-8002e91",
+        "esbuild": "0.25.12",
+        "platform": "linux",
+        "arch": "x64"
+      },
+      "wholeEntryPassed": 8,
+      "wholeEntryFailed": 1,
+      "diagnostics": 2,
+      "rows": [
+        {
+          "name": "lucide/icons/x",
+          "status": "PASS",
+          "gzipBytes": 1737,
+          "budget": 3000,
+          "minifiedBytes": 4670,
+          "minifiedSha256": "48d7f79983beca000fd0cbbfa4e84101cb4bce326f3440bbb37db2d401d51e5d"
+        },
+        {
+          "name": "lucide root",
+          "status": "PASS",
+          "gzipBytes": 635866,
+          "budget": 700000,
+          "minifiedBytes": 4082945,
+          "minifiedSha256": "b4f53a871d51032bcb0b8937e51863888eedc167fa92d51d9652efc197820baa"
+        },
+        {
+          "name": "core root",
+          "status": "PASS",
+          "gzipBytes": 6373,
+          "budget": 6600,
+          "minifiedBytes": 19647,
+          "minifiedSha256": "5e266465eb5e23c69989f43ae2c440d1f17f9c2f1cf921d5165708a50491f6e5"
+        },
+        {
+          "name": "runtime root",
+          "status": "PASS",
+          "gzipBytes": 71429,
+          "budget": 71500,
+          "minifiedBytes": 276386,
+          "minifiedSha256": "1f7caad814779ab515da8365ba1fea97265d8a53393a900925f62183760c5f42"
+        },
+        {
+          "name": "adapter-react root",
+          "status": "PASS",
+          "gzipBytes": 94509,
+          "budget": 94550,
+          "minifiedBytes": 347728,
+          "minifiedSha256": "d591a409611274912d144c05daa526dddb7daed6a68400819a03610dc8d45114"
+        },
+        {
+          "name": "adapter-vue root",
+          "status": "PASS",
+          "gzipBytes": 94282,
+          "budget": 94350,
+          "minifiedBytes": 346540,
+          "minifiedSha256": "0f2486f4ebf5457a773c282c79757f6fc2fc4def113115e0859d5415c883bd6a"
+        },
+        {
+          "name": "adapter-web-component root",
+          "status": "FAIL",
+          "gzipBytes": 118915,
+          "budget": 117850,
+          "minifiedBytes": 420388,
+          "minifiedSha256": "ee4e1794de483e972f0d1ba30aa086f7dbf665a948a154f20695f83a54820b79"
+        },
+        {
+          "name": "prototypes-base/button",
+          "status": "PASS",
+          "gzipBytes": 3783,
+          "budget": 6000,
+          "minifiedBytes": 12788,
+          "minifiedSha256": "8f9e45fe51a5dcfe61e1ea39ecbcaa07cce6c0cfcb2269108f8d8c2a7cf462d6"
+        },
+        {
+          "name": "prototypes-shadcn/button",
+          "status": "PASS",
+          "gzipBytes": 4625,
+          "budget": 7000,
+          "minifiedBytes": 16420,
+          "minifiedSha256": "ec7e426e45df705075a9af31627181a05c2b01584b508f1f90fa23c7787ade1f"
+        },
+        {
+          "name": "consumer light-dom button",
+          "status": "DIAGNOSTIC",
+          "gzipBytes": 123013,
+          "budget": null,
+          "minifiedBytes": 436538,
+          "minifiedSha256": "2724aae199af422bb90f346240689b87b18f8691c360a07371386b38d05f6a93"
+        },
+        {
+          "name": "consumer direct-shadow button",
+          "status": "DIAGNOSTIC",
+          "gzipBytes": 123016,
+          "budget": null,
+          "minifiedBytes": 436549,
+          "minifiedSha256": "1ee7922d5163263ab02403d5bf1c334a9cdab86562bc4dddcf4ffaefee0d5aac"
+        }
+      ],
+      "excerpts": [
+        {
+          "artifact": "original-caef-budget-measurements.log",
+          "sourceArtifact": "artifact://5241:568-580",
+          "sha256": "e825eeadad7c60d9fdd5d0d157d306c6abd7733d9abcd26577532eecbf277568"
+        },
+        {
+          "artifact": "original-caef-checkout.log",
+          "sourceArtifact": "artifact://5241:421-424",
+          "sha256": "5f1f251ead28e4494ad4f305ed17f2b7d048e81dc3d75a14f20550f0d2720503"
+        }
+      ],
+      "packageJobId": 114169535553,
+      "packageJobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/38036882685/job/114169535553",
+      "packageJobConclusion": "failure"
+    },
+    "historicalProposalAfter": {
+      "status": "authored now as unapplied reconstruction; not executed or reviewed",
+      "oldWcCeiling": 117850,
+      "proposedWcCeiling": 119059,
+      "growth": 1209,
+      "oldFailureExcess": 1065,
+      "headroomAtOriginalSource": 144,
+      "standaloneHeadroomOnOldMain": 1353,
+      "reservedCapabilityBytes": 1209,
+      "formula": "117850 + (118915 - 117706) = 119059"
+    },
+    "historicalLaterSource": {
+      "source": "Original continuation-exact-index-183 observation event80437c3a",
+      "reportedWcGzipBytes": 118931,
+      "marginUnderUnchanged178Proposal": 128,
+      "status": "Historical later Props source report; not the118915 source and not current-head evidence."
+    },
+    "currentCandidate": {
+      "headSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "wcCeiling": 132000,
+      "measuredGzipBytes": null,
+      "checks": "not-run",
+      "warning": "Current132000 and19/26 changed source paths invalidate using119059/144 as current quota/headroom evidence."
+    }
+  },
+  "originalConditions": [
+    {
+      "id": "original-wording-and-source-keys",
+      "requirement": "Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）",
+      "status": "preserved",
+      "evidence": [
+        "issue.1140.001",
+        "issue.1088.014",
+        "PR887 / Source PR 886 gate followup",
+        "Original todo result4996bc63 at2026-10-10T08:18:06.445Z retained the exact task pending."
+      ],
+      "remaining": "Do not check the compound criterion until all applicable delivery conditions below are earned."
+    },
+    {
+      "id": "exact-original-source",
+      "requirement": "Exact original baseline/candidate/source path and before-after hashes with contribution provenance.",
+      "status": "recovered published source",
+      "evidence": [
+        "ea197278→caef71a:26 paths with SHA256 and Git blob SHA1;52 exact archived preimages.",
+        "Original commit raw bytes/sign-off retained without new certification.",
+        "178readable proposal exact4779bytes preserved; original serialized machine proposal unavailable, construction event recovered."
+      ],
+      "remaining": "Do not claim these published preimages are the missing immediate preoptimization snapshot or substitute current-source hashes for historical evidence."
+    },
+    {
+      "id": "authority-and-lifecycle",
+      "requirement": "Applicable definitions, lifecycle, allowed changes and exclusions.",
+      "status": "traced",
+      "evidence": [
+        "ActiveA-WEB-COMPONENT identity; draft lifecycle/Focus/Shadow definitions.",
+        "Historical failed-createdI remains dated; currentJ/K/FIFO-I distinguished.",
+        "Current quota132000 remains unchanged."
+      ],
+      "remaining": "Any future numeric edit must use current accepted capability and canonical integrated measurements under the owning leaf; no lifecycle promotion or semantic broadening."
+    },
+    {
+      "id": "canonical-before",
+      "requirement": "Trustworthy pinned-toolchain baseline with artifact identity and old ceiling/headroom.",
+      "status": "historical evidence recovered",
+      "evidence": [
+        "EAjob113896790334 success:WC117706/117850;minified418847;6c0bc106...;144headroom.",
+        "Original retained environment and4package rows; complete baseline log not recovered."
+      ],
+      "remaining": "Retain full-log absence explicitly; do not invent its byte hash. Current baseline must be measured separately if a current numeric transaction is needed."
+    },
+    {
+      "id": "canonical-source-after",
+      "requirement": "Actual source candidate cost and failure retained.",
+      "status": "historical failure recovered",
+      "evidence": [
+        "Run38036882685/job114169535553:actual checkoutf62672merge(caefintoEA),8/9whole-entry pass,WC118915/117850fail1065,11total measured rows.",
+        "Node24.21.0/zlib1.3.2.1-motley-8002e91/esbuild0.25.12/linuxx64."
+      ],
+      "remaining": "This old source CI failure cannot be relabeled as passing under a proposal, later132000 ceiling or current user review deferral."
+    },
+    {
+      "id": "closure-growth-attribution",
+      "requirement": "Investigate duplicate/dead/eager closure and attribute dominant retained growth without adding module bytes into gzip.",
+      "status": "original reported findings retained",
+      "evidence": [
+        "Original178 reports identical289WCinputs, no outside/node_modules inputs,adapt+1682 and unchanged logical-tree retention+1238minified.",
+        "These are quoted historical observations; raw original attribution/metafile JSON has not been recovered."
+      ],
+      "remaining": "For a future current number, Main must collect actual current closure evidence and whole integrated cost; this record does not claim a newly executed289-input scan."
+    },
+    {
+      "id": "isolated-numeric-transaction",
+      "requirement": "Separately reviewable WC-only numerical transaction; other8limits/entries/algorithm/external/level9gzip unchanged.",
+      "status": "proposal only, unimplemented",
+      "evidence": [
+        "117850+(118915-117706)=119059;144combined headroom;1353standalone includes1209reserved capability bytes.",
+        "Unapplied one-literal candidate with exact historical preimage SHA, authored now and labeled counterfactual."
+      ],
+      "remaining": "No numeric commit or post-mutation canonical pass recovered. Do not apply historical119059 to current132000. Any current restoration transaction needs fresh evidence and a separately approved exact scope."
+    },
+    {
+      "id": "post-numeric-validation",
+      "requirement": "Final numeric candidate and actual integrated combination validated after mutation; prior red runs retained.",
+      "status": "not-run",
+      "evidence": [
+        "Original178 explicitly required freshpui-validate before independent review.",
+        "Later183Props source reported118931 leaves128, demonstrating why144is source-specific."
+      ],
+      "remaining": "Main executes the exact final-candidate and combination gates under a content-bound handoff if a numeric transaction proceeds; planned measurements are not results."
+    },
+    {
+      "id": "independent-numeric-review",
+      "requirement": "Real independent exact-head numerical transaction review.",
+      "status": "not recovered / not satisfied",
+      "evidence": [
+        "Original178 states proposed/notaccepted; WCBudgetAudit172 concerns source optimization, not the numeric transaction.",
+        "LivePR886 has2COMMENTED reviews atcaef and noAPPROVED review among those records."
+      ],
+      "remaining": "Obtain honest independent acceptance of the exact prepared transaction/record. Current review deferral cannot create a historical approval. Do not synthesize a review-input digest or review packet."
+    },
+    {
+      "id": "ci-dco-and-rights",
+      "requirement": "Real exact-head CI/DCO, original contributor rights and current actor/rules.",
+      "status": "historical provenance retained; current acceptance unrun",
+      "evidence": [
+        "Observed originalcaefauthor/committer/sign-off bytes.",
+        "Current actorcyjin-yl/19223209 hasmaintain/push,adminfalse; no write executed.",
+        "SourcePR886 actually merged as9f360300 with finalhead9d64, independently of the pending numeric proposal."
+      ],
+      "remaining": "Main re-reads current rulesets, actor, exact head and native DCOApp result before publication/integration. Old source merge and observed sign-off are not numeric acceptance or new author certification."
+    },
+    {
+      "id": "packed-native-and-visual",
+      "requirement": "Real package consumers and source-bound native/visual evidence; diagnostics do not replace whole-entry admission.",
+      "status": "historical reports retained; current checks not-run",
+      "evidence": [
+        "Original178 reports153focused/native111 plus preformat1723/44builds with bounded CLI/React/Vue2closures; original scope remains unchanged.",
+        "OriginalPR886 reports four local captures, no uploaded attachment; this recovery adds no screenshots."
+      ],
+      "remaining": "Main validates the real consumer/transition outcomes under the exact commands and records current collected counts, source hashes, image inspection and authorized attachment readback when needed."
+    },
+    {
+      "id": "owned-delivery-and-closure",
+      "requirement": "Current owner/claim, PR delivery, lawful integration and criterion-bound actual Issue closure.",
+      "status": "owned preparation; integration pending",
+      "evidence": [
+        "Current user assignedSolThirty1140WcBaseline; Issue1140OPEN/noassignees/1discussioncomment; parent1088OPEN/3comments.",
+        "Main approved Issue1140-specific recovery records and owns GitHub writes/serial validation."
+      ],
+      "remaining": "Prepare a related1140PR, repair review findings, integrate under live rules and read back actual state. Do not useCloses1140 for this recovery-only PR; parent1088 waits for all child conditions. Preserve Nov6 deferral as historical discussion."
+    }
+  ],
+  "validationPlan": {
+    "status": "planned/not-run",
+    "executor": "Main only, one heavyweight slot",
+    "prerequisites": [
+      "Main supplies a disposable validation checkout at0607c6c5c386b8a932ab850e92a8873b2121dc45 under the stated baseline path and real product dependencies; this worker created neither.",
+      "Use installed Node24 and pnpm10.32.1; retain actual node/zlib/esbuild/platform/arch per measurement, not assumed historical equality.",
+      "Historical failure is already established. Preserve the recovered logs; do not rerun oldcaef simply to confirm the failure.",
+      "The recovery record changes no product source. Proportional record validation is formatting/reference/JSON review; heavier commands are the exact continuation plan if Main pursues the original numerical acceptance.",
+      "A later numeric transaction requires fresh accepted-capability evidence and its registered pui-package-budget→pui-validate→independent pui-review route. This recovery does not choose a new current ceiling."
+    ],
+    "serialCommands": [
+      {
+        "id": "record-format",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--check",
+          "internal/records/2026-11-10-issue1140-wc-baseline-recovery.json",
+          "internal/records/2026-11-10-issue1140-wc-baseline-recovery.md"
+        ],
+        "scope": "Record formatting only. Never format the verbatim178txt or archived old sources.",
+        "expected": "Both current authored records parse/render without changing historical bytes; status unrun."
+      },
+      {
+        "id": "current-before-strict",
+        "cwd": "/workspace/worktrees/release03-issue1140-validation-base-20261110",
+        "argv": [
+          "node",
+          "scripts/analysis/package-budgets.mjs",
+          "--json"
+        ],
+        "scope": "Exact0607current source; nine whole-entry and two diagnostic entries. Record actual strict status and outputs, including all failures.",
+        "expected": "Unmeasured; no numeric result predicted."
+      },
+      {
+        "id": "record-candidate-after-strict",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "node",
+          "scripts/analysis/package-budgets.mjs",
+          "--json"
+        ],
+        "scope": "Same current product source with recovery records. Compare all11 minified hashes/byte/gzip values to the immediate current-before report, not to historicalcaef.",
+        "expected": "Source-only inference: product inputs are unchanged, so same-environment artifact identities should agree. This is an expected invariant, not an observed pass."
+      },
+      {
+        "id": "current-advisory-policy",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "node",
+          "scripts/analysis/package-budgets.mjs",
+          "--finf-development",
+          "--json"
+        ],
+        "scope": "Only if Main needs the actual current project-stage report. Keep every pass=false/overBudgetBytes and strict failure beside the advisory exit.",
+        "expected": "No numerical success predicted; build/measurement errors remain failures."
+      },
+      {
+        "id": "focused-existing-consumers",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--pool=forks",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+          "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+          "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+          "packages/adapters/web-component/test/shadow-split-profile.test.ts",
+          "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+          "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+          "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts"
+        ],
+        "executedFiles": [
+          "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+          "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+          "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+          "packages/adapters/web-component/test/shadow-split-profile.test.ts",
+          "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+          "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+          "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts"
+        ],
+        "scope": "All cases in these seven existing suites, without name filtering or assertion/tolerance changes.",
+        "expected": "Readiness acquisition/release, Error/undefined initiating value, cleanup tails, ordinary-disposal fail-fast, retained profile/editor identity, terminal Portal retirement vs explicit undo, Root compatibility and unsupported split rejection."
+      },
+      {
+        "id": "current-native-shadow",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "--pool=forks",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "packages/adapters/web-component/test/shadow-closeout.browser.test.ts"
+        ],
+        "executedFiles": [
+          "packages/adapters/web-component/test/shadow-closeout.browser.test.ts"
+        ],
+        "scope": "Real installed Chromium via launchBrowser; execute the full file. Original111 was an old-source count and is not a current inventory or result.",
+        "expected": "Actual native Tab/Shift+Tab focus, released/hidden owner exclusion, remount/adoption, native input/textarea identity, real computed style and unsupported profile controls. The current execution supplies its real collected/executed/skipped counts."
+      },
+      {
+        "id": "packed-cli-consumers",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "-s",
+          "release:smoke:cli"
+        ],
+        "scope": "Canonical exact-tarball multi-host CLI consumers; generated root/Vue2 JavaScript plus installed TypeScript facades. Preserve actual closure counts.",
+        "expected": "Real declared exports/generated consumers work without workspace-source fallback; no45/45 or all-host success inferred from old44/44 builds."
+      },
+      {
+        "id": "packed-react-consumer",
+        "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "-s",
+          "release:smoke:react"
+        ],
+        "scope": "Canonical isolated React+Vite tarball consumer; full script, not a copied inline equivalent.",
+        "expected": "Actual package boundary and Button/Switch/Select/Dialog state/remount outcomes; retain any real failure and exact consumed closure."
+      }
+    ],
+    "negativeControls": [
+      "Compare current strict and advisory reports without rewriting false comparisons as passes.",
+      "Fail historical-patch admission on current132000: its exact117850 preimage differs; never apply the old119059 literal to current source.",
+      "In existing consumers, rejected/unready native targets must not fabricate focus; released or hidden owners must not reacquire, stale predecessor callbacks must not modify a replacement.",
+      "Retain Error and undefined cleanup/rejection cases and ordinary authored beforeDispose fail-fast separately.",
+      "Preserve explicit generic Portal undo/origin restoration and distinct confirmed terminal retirement; neither test substitutes for the other.",
+      "Split Image View, unresolved/composite styles and old/invalid companion inputs retain explicit rejection; numeric acceptance cannot remove these guards."
+    ],
+    "visualAcceptance": {
+      "status": "not-run/no attachments",
+      "surface": "Actual public AdaptToWebComponent consumer scenes, not a fabricated website route",
+      "exactCommands": [
+        {
+          "id": "actual-native-focus",
+          "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+          "argv": [
+            "env",
+            "PUI_CHROME_EXECUTABLE=/usr/bin/chromium",
+            "node",
+            "--import",
+            "tsx",
+            "scripts/analysis/shadow-split-focus-browser.mjs"
+          ],
+          "expected": "Real Tab and outline/ring transitions in Light/split, normal and Chromium forced-colors; no complete AT/high-contrast guarantee."
+        },
+        {
+          "id": "public-dist-dialog",
+          "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+          "argv": [
+            "env",
+            "PUI_CHROME_EXECUTABLE=/usr/bin/chromium",
+            "node",
+            "scripts/analysis/shadow-s4-public-browser.mjs"
+          ],
+          "expected": "Existing public-dist Shadcn Dialog journey; producer requires built dist and rejects workspace-source imports."
+        },
+        {
+          "id": "public-dist-editor",
+          "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+          "argv": [
+            "env",
+            "PUI_CHROME_EXECUTABLE=/usr/bin/chromium",
+            "node",
+            "scripts/analysis/shadow-s5-public-browser.mjs"
+          ],
+          "expected": "Existing public-dist/CLI input/textarea journey, preserving actual native editor identity and refusal controls."
+        },
+        {
+          "id": "owned-visual-server",
+          "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+          "argv": [
+            "corepack",
+            "pnpm@10.32.1",
+            "--filter",
+            "apps-www",
+            "dev",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "43140"
+          ],
+          "expected": "Main alone starts its uniquely owned finite observation server after product dependencies/dist are prepared; stop it after capture. No server was started by this worker."
+        },
+        {
+          "id": "public-continuous-paint",
+          "cwd": "/workspace/worktrees/release03-thirty-issue-1140-sol-20261110",
+          "argv": [
+            "env",
+            "PUI_CHROME_EXECUTABLE=/usr/bin/chromium",
+            "PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:43140",
+            "S4_PAINT_OUTPUT=/tmp/i1140paint",
+            "node",
+            "scripts/analysis/shadow-s4-paint-browser.mjs"
+          ],
+          "route": "/zh-cn/internal/demo-matrix/#shadow-split-s4",
+          "expected": "Actual compositor frames over open→exit→conceal/retirement for Light/split/mixed,2rounds×4control settings. Existing helper writes results.json and failed-path PNGs; a passing result supplies no success-frame PNG archive or screenshot upload. Main must retain/inspect successful adjacent-state images separately before closing visual debt."
+        }
+      ],
+      "profiles": [
+        "Light (shadow omitted/false)",
+        "Direct Shadow (true)",
+        "Explicit open split with synchronous generated artifact"
+      ],
+      "sequence": [
+        "Render the real flex p-2 bg-primary Root with slot content; inspect actual computed foreground/background, inherited--pui-primary, geometry and unclipped content.",
+        "Use trusted Tab then Shift+Tab and actual composed activeElement; inspect the visible unclipped focus outline and editor selection/value.",
+        "Hide/detach the view, inspect the intermediate hidden frame, remount, then inspect renewed slot/editor/style identity and focus after reacquisition. Do not compare only first/last frames.",
+        "Move/adopt the owner and exercise explicit Portal undo separately from terminal removal; inspect the actual current target and absence of stale paint/input."
+      ],
+      "captureBinding": "Main retains original frames/PNG plus adjacent state facts, exact source/head, profile, viewport, device scale, browser/version, theme and fonts. The original local800×500/DPR1.25/Chrome150 captures are historical only and not published attachments.",
+      "nativeSuiteLimit": "The listed native file supplies executable consumer behavior; it currently does not constitute a screenshot-upload receipt. Main must capture/inspect actual images under its evidence harness, preserve unavailable states, and obtain an authorized upload/readback before closing visual debt.",
+      "notCovered": [
+        "All palette/Mask positives",
+        "Full four-family acceptance",
+        "AT or non-Web/GPUI conformance",
+        "A current website navigation journey"
+      ]
+    }
+  },
+  "currentExecution": {
+    "productChecks": "not-run",
+    "builds": "not-run",
+    "formatting": "not-run",
+    "imports": "not-run",
+    "installs": "not-run",
+    "nativeBrowser": "not-run",
+    "gitMutations": "none",
+    "externalWrites": "none",
+    "nestedAgents": "none",
+    "metadata": "Orientation and trace v2 handoffs admitted by the current-worktree resolver; read-only Git/API identities and actual source/artifact SHA256 obtained."
+  },
+  "publication": {
+    "preparedPR": true,
+    "title": "docs: recover the original WC budget proposal",
+    "closesIssue": false,
+    "merge": null,
+    "review": null,
+    "currentHeadCI": null,
+    "currentHeadDCO": null,
+    "remainingOwner": "Main plus SolThirty1140WcBaseline for validation/review repair"
+  }
+}
