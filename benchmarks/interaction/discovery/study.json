@@ -1,0 +1,1873 @@
+{
+  "schemaVersion": 1,
+  "id": "issue748-primitive-discovery-v1",
+  "datasetId": "interaction-benchmark-v0",
+  "datasetVersion": "0.0.0-calibration.3",
+  "scoringVersion": "calibration-v1",
+  "sourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "purpose": "Round 1 public-development primitive interaction-property discovery cost measurement; semantic crosswalk/reducer only",
+  "split": "public-development",
+  "formalExecution": "disabled",
+  "heldOut": "absent-do-not-publish-here",
+  "minimumIndependentRepeats": 3,
+  "sourceFiles": [
+    {
+      "path": "benchmarks/interaction/dataset.json",
+      "sha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46",
+      "role": "benchmark"
+    },
+    {
+      "path": "benchmarks/interaction/scoring.json",
+      "sha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1",
+      "role": "benchmark"
+    },
+    {
+      "path": "benchmarks/interaction/README.md",
+      "sha256": "d1a99abfd16e772f2d3adf862ec62afebef153ae94b75ad51ed56d4dc3a28a69",
+      "role": "benchmark"
+    },
+    {
+      "path": "internal/records/2026-09-25-meeting-follow-up-and-compiler-plan.md",
+      "sha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29",
+      "role": "benchmark"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+      "sha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+      "sha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+      "sha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+      "sha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+      "sha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+      "sha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+      "sha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/tests/T-BASE-DIALOG-0001.yaml",
+      "sha256": "e4cba10f44ce3e4c8595bf0d575824fed29a9a05ceef31ddcb8f3954b6feed72",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS.yaml",
+      "sha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+      "sha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+      "sha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+      "sha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+      "sha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/tests/T-BASE-TABS-0001.yaml",
+      "sha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT.yaml",
+      "sha256": "bf65675dbaa40ec17a3e09f13b00e00804abde7fe09313a4a7608c2c385456bc",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+      "sha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+      "sha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+      "sha256": "19143fe7cd4d05ad58cdf091fb83fa9e63b698383a6fd6a37ab680384ccebb72",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+      "sha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+      "sha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+      "sha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46",
+      "role": "catalog"
+    },
+    {
+      "path": "spec/tests/T-BASE-SELECT-0001.yaml",
+      "sha256": "6dea41ad507a33316eef146ab1cd66cb1a8d8aee03fc66b958b27375137363da",
+      "role": "catalog"
+    },
+    {
+      "path": "packages/prototypes/base/test/dialog.test.ts",
+      "sha256": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+      "role": "test"
+    },
+    {
+      "path": "packages/prototypes/base/test/tabs.test.ts",
+      "sha256": "610b9f1c7cf2f6055165d7a5e15d99d817fa1b42149f64a7ad1d79678444819d",
+      "role": "test"
+    },
+    {
+      "path": "packages/prototypes/base/test/select.test.ts",
+      "sha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+      "role": "test"
+    },
+    {
+      "path": "benchmarks/interaction/cases/dialog-open-close.json",
+      "sha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81",
+      "role": "benchmark"
+    },
+    {
+      "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+      "sha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6",
+      "role": "benchmark"
+    },
+    {
+      "path": "benchmarks/interaction/cases/select-keyboard.json",
+      "sha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0",
+      "role": "benchmark"
+    }
+  ],
+  "primitives": [
+    {
+      "caseId": "dialog-open-close",
+      "taskVariant": "public-development-prompt-only",
+      "prompt": {
+        "path": "benchmarks/interaction/discovery/prompts/dialog-open-close.txt",
+        "sha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8"
+      },
+      "parentCase": {
+        "path": "benchmarks/interaction/cases/dialog-open-close.json",
+        "sha256": "ef0c1bcc25e7ac60d27e5a06843057ac06d460087e51c388e878f3d75f784d81"
+      },
+      "rootEntity": "P-BASE-DIALOG",
+      "lifecycle": "draft",
+      "rationale": "Public development case exercises modal open/dismiss/focus/cleanup; bounded Dialog family has complete root/part criteria and mapped draft test metadata.",
+      "limits": [
+        "Root implementation source contains criterion-ID comments and is excluded from participant material.",
+        "Draft lifecycle and public development case do not supply a stable or held-out Proto oracle."
+      ],
+      "references": [
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-ROLE-MODAL-WINDOW",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-ROLE-MODAL-WINDOW"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-PROTOCOL-INDEPENDENCE",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-PROTOCOL-INDEPENDENCE"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-ROOT-OWNER",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-ROOT-OWNER"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-PROPS",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-PROPS"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-OPEN-EXPOSE",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-OPEN-EXPOSE"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-OPEN-CHANGE",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-OPEN-CHANGE"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-CONTROLLED-OWNER",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTROLLED-OWNER"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-CONTEXT",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTEXT"
+        },
+        {
+          "id": "P-BASE-DIALOG#P-BASE-DIALOG-ANATOMY",
+          "entityId": "P-BASE-DIALOG",
+          "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-ANATOMY"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-NO-BUTTON-DEPENDENCY",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-NO-BUTTON-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-COMMAND",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-COMMAND"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-DISABLED",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-DISABLED"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-REQUEST",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-REQUEST"
+        },
+        {
+          "id": "P-BASE-DIALOG-TRIGGER#P-BASE-DIALOG-TRIGGER-A11Y",
+          "entityId": "P-BASE-DIALOG-TRIGGER",
+          "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TRIGGER-A11Y"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-MODAL",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-MODAL"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-PRESENCE",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-PRESENCE"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-PASSTHROUGH",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-PASSTHROUGH"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-NO-DISMISS",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-NO-DISMISS"
+        },
+        {
+          "id": "P-BASE-DIALOG-MASK#P-BASE-DIALOG-MASK-DEFAULT-ACTION",
+          "entityId": "P-BASE-DIALOG-MASK",
+          "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-MASK-DEFAULT-ACTION"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-ENTRY-POLICY",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-ENTRY-POLICY"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-AVAILABLE",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-AVAILABLE"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-PRESENCE",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-PRESENCE"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-FOCUS",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-FOCUS"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-DISMISS",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-DISMISS"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-CONTROLLED",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-CONTROLLED"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-A11Y-ROLE",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-A11Y-ROLE"
+        },
+        {
+          "id": "P-BASE-DIALOG-CONTENT#P-BASE-DIALOG-CONTENT-A11Y-RELATIONS",
+          "entityId": "P-BASE-DIALOG-CONTENT",
+          "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CONTENT-A11Y-RELATIONS"
+        },
+        {
+          "id": "P-BASE-DIALOG-TITLE#P-BASE-DIALOG-TITLE-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-TITLE",
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TITLE-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-TITLE#P-BASE-DIALOG-TITLE-LABEL",
+          "entityId": "P-BASE-DIALOG-TITLE",
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TITLE-LABEL"
+        },
+        {
+          "id": "P-BASE-DIALOG-TITLE#P-BASE-DIALOG-TITLE-NO-BEHAVIOR",
+          "entityId": "P-BASE-DIALOG-TITLE",
+          "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-TITLE-NO-BEHAVIOR"
+        },
+        {
+          "id": "P-BASE-DIALOG-DESCRIPTION#P-BASE-DIALOG-DESCRIPTION-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-DESCRIPTION",
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-DESCRIPTION-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-DESCRIPTION#P-BASE-DIALOG-DESCRIPTION-RELATION",
+          "entityId": "P-BASE-DIALOG-DESCRIPTION",
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-DESCRIPTION-RELATION"
+        },
+        {
+          "id": "P-BASE-DIALOG-DESCRIPTION#P-BASE-DIALOG-DESCRIPTION-ALERT",
+          "entityId": "P-BASE-DIALOG-DESCRIPTION",
+          "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-DESCRIPTION-ALERT"
+        },
+        {
+          "id": "P-BASE-DIALOG-CLOSE#P-BASE-DIALOG-CLOSE-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-DIALOG-CLOSE",
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CLOSE-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-DIALOG-CLOSE#P-BASE-DIALOG-CLOSE-NO-BUTTON-DEPENDENCY",
+          "entityId": "P-BASE-DIALOG-CLOSE",
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CLOSE-NO-BUTTON-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-DIALOG-CLOSE#P-BASE-DIALOG-CLOSE-COMMAND",
+          "entityId": "P-BASE-DIALOG-CLOSE",
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CLOSE-COMMAND"
+        },
+        {
+          "id": "P-BASE-DIALOG-CLOSE#P-BASE-DIALOG-CLOSE-REQUEST",
+          "entityId": "P-BASE-DIALOG-CLOSE",
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CLOSE-REQUEST"
+        },
+        {
+          "id": "P-BASE-DIALOG-CLOSE#P-BASE-DIALOG-CLOSE-DISABLED",
+          "entityId": "P-BASE-DIALOG-CLOSE",
+          "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-DIALOG-CLOSE-DISABLED"
+        }
+      ]
+    },
+    {
+      "caseId": "tabs-manual-activation",
+      "taskVariant": "public-development-prompt-only",
+      "prompt": {
+        "path": "benchmarks/interaction/discovery/prompts/tabs-manual-activation.txt",
+        "sha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605"
+      },
+      "parentCase": {
+        "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+        "sha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6"
+      },
+      "rootEntity": "P-BASE-TABS",
+      "lifecycle": "draft",
+      "rationale": "Public case explicitly selects manual activation and traversal; bounded Tabs family covers selection, active value, a11y relations and default detach semantics.",
+      "limits": [
+        "Prompt fixes only ordinary manual activation and disabled availability; it does not disclose roving-focus/accessibility criteria.",
+        "Draft lifecycle and public development case do not supply a stable or held-out Proto oracle."
+      ],
+      "references": [
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROLE-SINGLE-SELECTION",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROLE-SINGLE-SELECTION"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROTOCOL-INDEPENDENCE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROTOCOL-INDEPENDENCE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROOT-SEMANTIC-OWNER",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROOT-SEMANTIC-OWNER"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ANATOMY-FAMILY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ANATOMY-FAMILY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-FAMILY-ROLES",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-FAMILY-ROLES"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROOT-CARDINALITY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROOT-CARDINALITY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-LIST-CARDINALITY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-CARDINALITY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-TRIGGER-CARDINALITY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-CARDINALITY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTENT-CARDINALITY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-CARDINALITY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-INDICATOR-CARDINALITY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-CARDINALITY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROOT-CONTAINS-LIST",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROOT-CONTAINS-LIST"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-LIST-CONTAINS-TRIGGER",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-CONTAINS-TRIGGER"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROOT-CONTAINS-CONTENT",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROOT-CONTAINS-CONTENT"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ROOT-CONTAINS-INDICATOR",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ROOT-CONTAINS-INDICATOR"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROP-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROP-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROP-DEFAULT-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROP-DEFAULT-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROP-ORIENTATION",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROP-ORIENTATION"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROP-ACTIVATION-MODE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROP-ACTIVATION-MODE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PROP-NO-EVENT-CALLBACK",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PROP-NO-EVENT-CALLBACK"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-VALUE-EXPOSE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-VALUE-EXPOSE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-VALUE-CHANGE-SIGNAL",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-VALUE-CHANGE-SIGNAL"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTROLLED-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTROLLED-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-UNCONTROLLED-UPDATES-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-UNCONTROLLED-UPDATES-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTROLLED-EMITS-NEXT",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTROLLED-EMITS-NEXT"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTEXT-KEY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTEXT-KEY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTEXT-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTEXT-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-CONTEXT-SYNC",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTEXT-SYNC"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-VALUE-MATCHING",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-VALUE-MATCHING"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-VALID-VALUE-REQUIRED",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-VALID-VALUE-REQUIRED"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-ACTIVE-VALUE",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-ACTIVE-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-A11Y-ROLE-TARGETS",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-A11Y-ROLE-TARGETS"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-A11Y-RELATIONSHIP-TARGET",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-A11Y-RELATIONSHIP-TARGET"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-DEFAULT-L1-DETACH",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-DEFAULT-L1-DETACH"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-PRESENCE-POLICY",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-PRESENCE-POLICY"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-INDICATOR-MEASUREMENT-DEFERRED",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-MEASUREMENT-DEFERRED"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-SELECTION-FALLBACK",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-SELECTION-FALLBACK"
+        },
+        {
+          "id": "P-BASE-TABS#P-BASE-TABS-DUPLICATE-VALUE-FALLBACK-DEFERRED",
+          "entityId": "P-BASE-TABS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-DUPLICATE-VALUE-FALLBACK-DEFERRED"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-ROLE-COLLECTION",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-ROLE-COLLECTION"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-PROTOCOL-DEPENDENCY",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-PROTOCOL-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-CLAIM-ROLE",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-CLAIM-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-SAME-DOMAIN",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-SAME-DOMAIN"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-CONTEXT-CONSUME",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-CONTEXT-CONSUME"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-FOCUS-ROVING",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-FOCUS-ROVING"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-FOCUS-METHODS",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-FOCUS-METHODS"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-SKIP-DISABLED",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-SKIP-DISABLED"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-ORIENTATION-KEYS",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-ORIENTATION-KEYS"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-HOME-END",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-HOME-END"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-PROP-LOOP",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-PROP-LOOP"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-A11Y-ROLE",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-A11Y-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-A11Y-ORIENTATION",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-A11Y-ORIENTATION"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-PROP-A11Y-LABEL",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-PROP-A11Y-LABEL"
+        },
+        {
+          "id": "P-BASE-TABS-LIST#P-BASE-TABS-LIST-A11Y-LABEL",
+          "entityId": "P-BASE-TABS-LIST",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-LIST-A11Y-LABEL"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-ROLE-TAB",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-ROLE-TAB"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-PROTOCOL-DEPENDENCY",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-PROTOCOL-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-NO-BUTTON-DEPENDENCY",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-NO-BUTTON-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-CLAIM-ROLE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-CLAIM-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-SAME-DOMAIN",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-SAME-DOMAIN"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-PROP-VALUE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-PROP-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-PROP-DISABLED",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-PROP-DISABLED"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-CONTEXT-CONSUME",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-CONTEXT-CONSUME"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-SELECTED-DERIVED",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-SELECTED-DERIVED"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-SELECTED-EXPOSE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-SELECTED-EXPOSE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-NO-ACTIVE-EXPOSE-FIRST-PASS",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-NO-ACTIVE-EXPOSE-FIRST-PASS"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-DISABLED-EXPOSE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-DISABLED-EXPOSE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-INTERACTION-STATES",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-INTERACTION-STATES"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-FOCUSABLE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-FOCUSABLE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-COLLECTION-ITEM",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-COLLECTION-ITEM"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-KEYBOARD-ACTIVATION",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-KEYBOARD-ACTIVATION"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-DISABLED-SUPPRESS-ACTIVATION",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-DISABLED-SUPPRESS-ACTIVATION"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-AUTOMATIC-FOCUS-SELECTION",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-AUTOMATIC-FOCUS-SELECTION"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-MANUAL-FOCUS-STABLE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-MANUAL-FOCUS-STABLE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-CLICK-SIGNAL",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-CLICK-SIGNAL"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-A11Y-ROLE",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-A11Y-SELECTED",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-SELECTED"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-A11Y-DISABLED",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-DISABLED"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-A11Y-CONTROLS-TARGET",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-CONTROLS-TARGET"
+        },
+        {
+          "id": "P-BASE-TABS-TRIGGER#P-BASE-TABS-TRIGGER-ACCESSIBLE-NAME",
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-TRIGGER-ACCESSIBLE-NAME"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-ROLE-PANEL",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-ROLE-PANEL"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-PROTOCOL-DEPENDENCY",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-PROTOCOL-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-CLAIM-ROLE",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-CLAIM-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-SAME-DOMAIN",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-SAME-DOMAIN"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-PROP-VALUE",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-PROP-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-CONTEXT-CONSUME",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-CONTEXT-CONSUME"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-CURRENT-DERIVED",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-CURRENT-DERIVED"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-CURRENT-EXPOSE",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-CURRENT-EXPOSE"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-DEFAULT-L1-DETACH",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-DEFAULT-L1-DETACH"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-PRESENCE-POLICY",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-PRESENCE-POLICY"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-A11Y-ROLE",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-A11Y-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-A11Y-HIDDEN",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-A11Y-HIDDEN"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-TABINDEX-DEFERRED",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-TABINDEX-DEFERRED"
+        },
+        {
+          "id": "P-BASE-TABS-CONTENT#P-BASE-TABS-CONTENT-FOCUS-ENTRY",
+          "entityId": "P-BASE-TABS-CONTENT",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-CONTENT-FOCUS-ENTRY"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-ROLE-INDICATOR",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-ROLE-INDICATOR"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-PROTOCOL-DEPENDENCY",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-PROTOCOL-DEPENDENCY"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-CLAIM-ROLE",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-CLAIM-ROLE"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-SAME-DOMAIN",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-SAME-DOMAIN"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-CONTEXT-CONSUME",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-CONTEXT-CONSUME"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-DERIVED-VALUE",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-DERIVED-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-DERIVED-ACTIVE-VALUE",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-DERIVED-ACTIVE-VALUE"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-DERIVED-ORIENTATION",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-DERIVED-ORIENTATION"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-SELECTION-OWNER",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-SELECTION-OWNER"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-EVENT-TARGET",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-EVENT-TARGET"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-FOCUS-TARGET",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-FOCUS-TARGET"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-PRESENTATIONAL-A11Y",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-PRESENTATIONAL-A11Y"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-LAYOUT-MEASUREMENT",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-LAYOUT-MEASUREMENT"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-AUTO-POSITIONING",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-AUTO-POSITIONING"
+        },
+        {
+          "id": "P-BASE-TABS-INDICATOR#P-BASE-TABS-INDICATOR-NO-VISUAL-VARIANT-CORE",
+          "entityId": "P-BASE-TABS-INDICATOR",
+          "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-TABS-INDICATOR-NO-VISUAL-VARIANT-CORE"
+        }
+      ]
+    },
+    {
+      "caseId": "select-keyboard",
+      "taskVariant": "public-development-prompt-only",
+      "prompt": {
+        "path": "benchmarks/interaction/discovery/prompts/select-keyboard.txt",
+        "sha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589"
+      },
+      "parentCase": {
+        "path": "benchmarks/interaction/cases/select-keyboard.json",
+        "sha256": "07f82b11d5c0885a796c43d73f186b7cf03602d56d7384582a7f6f93df98f7e0"
+      },
+      "rootEntity": "P-BASE-SELECT",
+      "lifecycle": "draft",
+      "rationale": "Public case supplies finite options/keyboard labels while prompt reorients discovery to popup navigation/commit; bounded Select family covers request arbitration, selection and structural scope.",
+      "limits": [
+        "Native select keyboard commit is explicitly not a Proto popup parity oracle.",
+        "Prompt says the application may accept/refuse requests; it does not reveal transient navigation/commit invariant wording.",
+        "Draft lifecycle and public development case do not supply a stable or held-out Proto oracle."
+      ],
+      "references": [
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-OPTIONAL-FIELD-COMPOSITION",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-OPTIONAL-FIELD-COMPOSITION"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-ROLE-SELECT-ONLY",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ROLE-SELECT-ONLY"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-ROOT-OWNER",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ROOT-OWNER"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-PROPS",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-PROPS"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-REQUESTS",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-REQUESTS"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-SELECTION-INVARIANT",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-SELECTION-INVARIANT"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-TEXT-DERIVATION",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TEXT-DERIVATION"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-CONTEXT",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTEXT"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-ANATOMY",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ANATOMY"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-DEFERRED-EXTENSIONS",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-DEFERRED-EXTENSIONS"
+        },
+        {
+          "id": "P-BASE-SELECT#P-BASE-SELECT-STRUCTURAL-SCOPE",
+          "entityId": "P-BASE-SELECT",
+          "path": "spec/prototypes/P-BASE-SELECT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-SCOPE"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-AUTHOR-NAME",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-AUTHOR-NAME"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-OPTIONAL-FIELD-COMPOSITION",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-OPTIONAL-FIELD-COMPOSITION"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-TRANSIENT-CLEANUP",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-TRANSIENT-CLEANUP"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-COLD-TAB",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-COLD-TAB"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-COMMAND",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-COMMAND"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-A11Y",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-A11Y"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-REQUEST",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-REQUEST"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-DISABLED",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-DISABLED"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-NO-SELECTION",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-NO-SELECTION"
+        },
+        {
+          "id": "P-BASE-SELECT-TRIGGER#P-BASE-SELECT-TRIGGER-VIEW-LIFETIME",
+          "entityId": "P-BASE-SELECT-TRIGGER",
+          "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-TRIGGER-VIEW-LIFETIME"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-ROLE",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-ROLE"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-CONTEXT",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-CONTEXT"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-FALLBACK",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-FALLBACK"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-RENDER-REFRESH",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-RENDER-REFRESH"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-DERIVED-EXPOSE",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-DERIVED-EXPOSE"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-NO-INTERACTION",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-NO-INTERACTION"
+        },
+        {
+          "id": "P-BASE-SELECT-VALUE#P-BASE-SELECT-VALUE-VALUE-CLASS-PRECEDENT",
+          "entityId": "P-BASE-SELECT-VALUE",
+          "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-VALUE-VALUE-CLASS-PRECEDENT"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-A11Y",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-A11Y"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-FOCUS-ROVING",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-FOCUS-ROVING"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-POSITION",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-POSITION"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-KEYBOARD",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-KEYBOARD"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-DISMISS",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-DISMISS"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-PRESENTATION-ADMISSION",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-PRESENTATION-ADMISSION"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT"
+        },
+        {
+          "id": "P-BASE-SELECT-CONTENT#P-BASE-SELECT-CONTENT-DEFERRED-SURFACES",
+          "entityId": "P-BASE-SELECT-CONTENT",
+          "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-CONTENT-DEFERRED-SURFACES"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-LOCAL-TAB",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-LOCAL-TAB"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-AUTHORING-ENTRIES",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-AUTHORING-ENTRIES"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-COLLECTION",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-COLLECTION"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-METADATA-FOCUS-ORDER",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-METADATA-FOCUS-ORDER"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-A11Y",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-A11Y"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-STATE-SEPARATION",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-STATE-SEPARATION"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-COMMIT",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-COMMIT"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-CONTROLLED",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-CONTROLLED"
+        },
+        {
+          "id": "P-BASE-SELECT-ITEM#P-BASE-SELECT-ITEM-DISABLED",
+          "entityId": "P-BASE-SELECT-ITEM",
+          "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ITEM-DISABLED"
+        },
+        {
+          "id": "P-BASE-SELECT-ALIGNMENT-PARTS#P-BASE-SELECT-ALIGNMENT-PARTS-STRUCTURE",
+          "entityId": "P-BASE-SELECT-ALIGNMENT-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ALIGNMENT-PARTS-STRUCTURE"
+        },
+        {
+          "id": "P-BASE-SELECT-ALIGNMENT-PARTS#P-BASE-SELECT-ALIGNMENT-PARTS-PROFILE",
+          "entityId": "P-BASE-SELECT-ALIGNMENT-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ALIGNMENT-PARTS-PROFILE"
+        },
+        {
+          "id": "P-BASE-SELECT-ALIGNMENT-PARTS#P-BASE-SELECT-ALIGNMENT-PARTS-OWNERSHIP",
+          "entityId": "P-BASE-SELECT-ALIGNMENT-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ALIGNMENT-PARTS-OWNERSHIP"
+        },
+        {
+          "id": "P-BASE-SELECT-ALIGNMENT-PARTS#P-BASE-SELECT-ALIGNMENT-PARTS-COMPOSITION",
+          "entityId": "P-BASE-SELECT-ALIGNMENT-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-ALIGNMENT-PARTS-COMPOSITION"
+        },
+        {
+          "id": "P-BASE-SELECT-STRUCTURAL-PARTS#P-BASE-SELECT-STRUCTURAL-PARTS-OWNERSHIP",
+          "entityId": "P-BASE-SELECT-STRUCTURAL-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-PARTS-OWNERSHIP"
+        },
+        {
+          "id": "P-BASE-SELECT-STRUCTURAL-PARTS#P-BASE-SELECT-STRUCTURAL-PARTS-SCOPE",
+          "entityId": "P-BASE-SELECT-STRUCTURAL-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-PARTS-SCOPE"
+        },
+        {
+          "id": "P-BASE-SELECT-STRUCTURAL-PARTS#P-BASE-SELECT-STRUCTURAL-PARTS-NAME",
+          "entityId": "P-BASE-SELECT-STRUCTURAL-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-PARTS-NAME"
+        },
+        {
+          "id": "P-BASE-SELECT-STRUCTURAL-PARTS#P-BASE-SELECT-STRUCTURAL-PARTS-SEPARATOR",
+          "entityId": "P-BASE-SELECT-STRUCTURAL-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-PARTS-SEPARATOR"
+        },
+        {
+          "id": "P-BASE-SELECT-STRUCTURAL-PARTS#P-BASE-SELECT-STRUCTURAL-PARTS-ENTRIES",
+          "entityId": "P-BASE-SELECT-STRUCTURAL-PARTS",
+          "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+          "lifecycle": "draft",
+          "criterionId": "P-BASE-SELECT-STRUCTURAL-PARTS-ENTRIES"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "No actual participant run, measured cost, semantic equivalence, independent review or formal benchmark result exists in this source change.",
+    "Local packet projection does not provide filesystem, Git, network, history/context or tool isolation.",
+    "All selected reference/test entities are draft; public case language may leak knowledge.",
+    "Catalog completeness is non-uniform and part-level criteria may be unavailable to an ordinary participant by design.",
+    "Study analysis validates records/citations/accounting, not semantic truth, natural-language extraction completeness or external independence."
+  ],
+  "parentSourceKeys": [
+    "dialog-open-close",
+    "tabs-manual-activation",
+    "select-keyboard",
+    "interaction-benchmark-v0",
+    "benchmarks/interaction/scoring.json:discoveryCategories"
+  ],
+  "participantPrompts": [
+    {
+      "path": "benchmarks/interaction/discovery/prompts/dialog-open-close.txt",
+      "sha256": "b721285201ae00377fdb3fe0916c6c35cf1e3f91bfba6c0eb8d4202c3407acf8"
+    },
+    {
+      "path": "benchmarks/interaction/discovery/prompts/tabs-manual-activation.txt",
+      "sha256": "3c4bb54275c1187c052d562d7fdd81b9c4c7b993f31a58a0d33a576f4f697605"
+    },
+    {
+      "path": "benchmarks/interaction/discovery/prompts/select-keyboard.txt",
+      "sha256": "176d76ce654e3c0ea002c4200994a8ec856601def69c4e1b88bb393415b77589"
+    }
+  ],
+  "referenceDocuments": [
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-CLOSE.yaml",
+      "sha256": "e91c9c730d3d5370f34664fd43a4d7f97896410bfa9af762e4fc966879ed148c"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
+      "sha256": "06fcb00c932c1c605af7a485235cb530e1923374e1a17fedd7bee471570cc22a"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
+      "sha256": "87016a8c4ca4d76b1c4c81bcceff6f369c6452d3ca7ba4804170ea7f91ecc0d3"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-MASK.yaml",
+      "sha256": "8b51450ffc8a3027f530333446949f17ccf4507ee8d560ad3afe4936fd0d9d0f"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-TITLE.yaml",
+      "sha256": "ea06a1f500b7fe0194c8bd58cbddd061eae143ade5ca031e162e75092bc561bc"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG-TRIGGER.yaml",
+      "sha256": "5075f0962ca4afaba0a8d25a0233ec85e30ec5dca90b6e82c2d91a4270283adb"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-DIALOG.yaml",
+      "sha256": "fe82a77861fd2fb0d01dc6ecf317f05d9023169ff8633777226c85d4abc0d83b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-ALIGNMENT-PARTS.yaml",
+      "sha256": "6a5949b6808cb345a367139b36a520ab22506e0c021570bf614f097ec112f83e"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+      "sha256": "19143fe7cd4d05ad58cdf091fb83fa9e63b698383a6fd6a37ab680384ccebb72"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+      "sha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-STRUCTURAL-PARTS.yaml",
+      "sha256": "516b132f1cd190e7077e0afaa2d15fb33cef4b4f92d16af1e948760b47577c46"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-TRIGGER.yaml",
+      "sha256": "263f5b3d425eb1b1a603196907d0cad33a5507ddb7e7ee1a646061ed8c9175e7"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+      "sha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT.yaml",
+      "sha256": "bf65675dbaa40ec17a3e09f13b00e00804abde7fe09313a4a7608c2c385456bc"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+      "sha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-INDICATOR.yaml",
+      "sha256": "6050ecce12177c653c245f80f24be58a95fb94fa7a58d64a21c9f94b119e421b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+      "sha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+      "sha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS.yaml",
+      "sha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420"
+    }
+  ]
+}
