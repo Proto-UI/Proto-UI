@@ -21,6 +21,8 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Authored 后代与焦点在 prop-only 转换中保留。原型不声明 role、accessible name、loading 定时器、替换状态机、announcement、action、event、command 或聊天语义。
 
+例如刷新收件箱时，保留同一个 Async Region 内的草稿输入框与 Retry 按钮，只更新它的 `busy` prop。Busy 不会禁用这些控件，也不会将区域设为 inert；是否另行禁用某个操作由应用决定。更新消息由组合的 Live Region 承载，应用完成内容更新后再清除 `busy`；Async Region 不增加播报队列或送达定时器。
+
 ## 当前 v0 边界
 
 `base-async-region-root` 目前包含：
@@ -36,6 +38,12 @@ Authored 后代与焦点在 prop-only 转换中保留。原型不声明 role、a
 - loading 定时器或替换状态机
 - announcement 行为（在应用层组合 Live Region 实现）
 - action、event、command 或聊天语义
+
+## 原生消费者证据
+
+新编写的[原生消费者测试](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/async-region.browser.test.ts)检查 busy 变更与 prop 移除期间的键盘编辑、文本选区、Retry 激活，以及输入框和 Live Region 载荷身份保持。默认范围为既有 Base、Shadcn 与 Brutalist 的 Web Component 投影。Bootstrap 与 Liquid Glass 仅作为另行启用的 0.4/WIP 源码样本；包含它们不代表稳定家族支持。
+
+该新测试尚待执行。运行后会保留实际浏览器 fixture、bundle、观察值和截图，供同一消费者在受支持宿主上继续进行读屏验证。ARIA 投射和原生键盘观察不能证明语音送达；真实辅助技术行为、其他 Adapter、non-Web 宿主及家族视觉验收仍需各自证据。相关原型定义保持 draft。
 
 ## 参考
 

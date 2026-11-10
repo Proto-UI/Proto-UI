@@ -21,6 +21,8 @@ It owns a single `busy` prop (default `false`) that projects `aria-busy` and is 
 
 Authored descendants and focus are preserved on prop-only transitions. The prototype declares no role, accessible name, loading timers, replacement state machine, announcements, action, event, command, or chat semantics.
 
+For an inbox refresh, keep the draft input and Retry button inside the same Async Region and update its `busy` prop. Busy does not disable those controls or make the region inert. The application owns any separate decision to disable an action. Compose a Live Region for the authored update message, and clear `busy` when the application has finished updating that content; Async Region adds no announcement queue or delivery timer.
+
 ## Current v0 Boundary
 
 `base-async-region-root` currently includes:
@@ -36,6 +38,12 @@ It does not include:
 - loading timers or replacement state machines
 - announcement behavior (compose with Live Region at the application layer)
 - action, event, command, or chat semantics
+
+## Native consumer evidence
+
+The authored [native consumer suite](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/async-region.browser.test.ts) checks keyboard editing, text selection, Retry activation, and retained input and Live Region payload identity through busy changes and prop removal. Its default scope is the existing Base, Shadcn, and Brutalist Web Component projections. Bootstrap and Liquid Glass are optional 0.4/WIP source samples, enabled separately; their inclusion does not establish stable family support.
+
+Execution of this new suite remains pending. When run, it retains the actual browser fixture, bundle, observations, and screenshots so the same consumer can be used for a supported-host screen-reader session. ARIA projection and native keyboard observations do not measure spoken delivery. Actual assistive-technology behavior, other Adapters, non-Web hosts, and family visual acceptance remain separate evidence requirements. The related prototype definitions remain draft.
 
 ## References
 
