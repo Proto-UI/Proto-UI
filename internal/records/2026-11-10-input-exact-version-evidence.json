@@ -1,0 +1,1973 @@
+{
+  "schemaVersion": 1,
+  "kind": "input-exact-version-evidence-recovery",
+  "date": "2026-11-10",
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "sourceBase": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "owner": "SolThirty1155InputDebt",
+  "integrationOwner": "Main",
+  "evidenceDisposition": "partial",
+  "productChecksExecuted": false,
+  "currentNativeCapturesExecuted": false,
+  "uploadedByThisWork": false,
+  "issueClosureEarned": false,
+  "requestParaphrase": "Recover Input exact-version source/rendered evidence, preserve original conditions and supply genuine current-source capture/publication work without duplicating Textarea ownership.",
+  "canonicalLedger": {
+    "path": "internal/governance/release-0.3-source-ledger.json",
+    "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+    "frozenSnapshotUnchanged": true,
+    "correctionPath": "internal/governance/release-0.3-source-corrections.json",
+    "noCanonicalLedgerMutation": true
+  },
+  "originalConditions": [
+    {
+      "key": "issue.1155.001",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+      "sourceLine": 6,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 接取有界新 Issue 并记录授权 — 历史状态 pending",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentSourceKey": "issue.1093.001",
+      "parentOriginal": "- [ ] 接取有界新 Issue 并记录授权 — 历史状态 pending",
+      "liveBodyChecked": true,
+      "currentDisposition": "live-issue-historically-checked-no-new-acceptance-claim",
+      "owner": "historical live Issue audit",
+      "sourceComment": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964"
+    },
+    {
+      "key": "issue.1155.002",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+      "sourceLine": 7,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 实现新 Issue 并提交对应 PR — 历史状态 pending",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentSourceKey": "issue.1093.002",
+      "parentOriginal": "- [ ] 实现新 Issue 并提交对应 PR — 历史状态 pending",
+      "liveBodyChecked": true,
+      "currentDisposition": "live-issue-historically-checked-no-new-acceptance-claim",
+      "owner": "historical live Issue audit",
+      "sourceComment": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964"
+    },
+    {
+      "key": "issue.1155.003",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+      "sourceLine": 8,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 持续响应评审直到获准合并闭环 — 历史状态 pending",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentSourceKey": "issue.1093.003",
+      "parentOriginal": "- [ ] 持续响应评审直到获准合并闭环 — 历史状态 pending",
+      "liveBodyChecked": true,
+      "currentDisposition": "live-issue-historically-checked-no-new-acceptance-claim",
+      "owner": "historical live Issue audit",
+      "sourceComment": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964"
+    },
+    {
+      "key": "issue.1155.004",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+      "sourceLine": 9,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 关闭 Input 精确版本视觉证据欠账 — 历史状态 pending",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentSourceKey": "issue.1093.004",
+      "parentOriginal": "- [ ] 关闭 Input 精确版本视觉证据欠账 — 历史状态 pending",
+      "liveBodyChecked": false,
+      "currentDisposition": "source-ready-evidence-candidate-native-and-publication-unrun",
+      "owner": "SolThirty1155InputDebt with Main validation/publication",
+      "sourceComment": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964"
+    },
+    {
+      "key": "issue.1155.005",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1155",
+      "sourceLine": 10,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 定位 Textarea 运行时就绪验证超时 — 历史状态 pending",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentSourceKey": "issue.1093.005",
+      "parentOriginal": "- [ ] 定位 Textarea 运行时就绪验证超时 — 历史状态 pending",
+      "liveBodyChecked": false,
+      "currentDisposition": "linked-1164-ownership-preserved-no-duplicate-writer",
+      "owner": "1164 retained-consumer owner and Main",
+      "sourceComment": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964"
+    }
+  ],
+  "linkedOriginalCondition": {
+    "key": "issue.1093.010",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+    "sourceLine": 21,
+    "section": "### 相邻会话的证据与集成债务",
+    "original": "- [ ] Input 必须补齐实际最终 head 的 visual/publication 证据，不能用 materially different 旧 head 的截图关闭债务",
+    "historicalChecked": false,
+    "release": "criterion-split",
+    "developmentState": "reconcile-live-evidence",
+    "acceptanceState": "not-yet-reconciled",
+    "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+    "linkedChildKey": "issue.1157.004",
+    "currentInputEvidenceOwner": 1155,
+    "remainingHistoricalFinalEvidence": "2dd4b96c8fdd783b5e0e5df79fc263ca411237b5"
+  },
+  "liveDiscussion": {
+    "observedAt": "2026-11-10T12:42:32.028885+00:00",
+    "nativeCommentCount": 11,
+    "uniqueDeliveredComments": 11,
+    "pages": [
+      {
+        "page": 1,
+        "count": 11
+      }
+    ],
+    "snapshotSha256": "63bcb31ba7acae58b535c145e5d7f7da1610aa96f9cd7066b9f36c51bf4d3515",
+    "comments": [
+      {
+        "id": 6588186091,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6588186091",
+        "updatedAt": "2026-11-02T20:53:11Z",
+        "bodySha256": "b94bf59ebf5ceaca267a6402ffe77f30f07a6ccf1e60b4e12881511809ff0642"
+      },
+      {
+        "id": 6588267363,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6588267363",
+        "updatedAt": "2026-11-02T20:57:12Z",
+        "bodySha256": "250c488638798d47a717652432bc6749468a0025ebb56777840928a8576cb1ec"
+      },
+      {
+        "id": 6588612378,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6588612378",
+        "updatedAt": "2026-11-02T21:13:53Z",
+        "bodySha256": "e785622e5f263e4bc8d4c1d01f9554e175abf08a33a6ee68c57e89b157d1dd7a"
+      },
+      {
+        "id": 6593534244,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6593534244",
+        "updatedAt": "2026-11-03T02:04:51Z",
+        "bodySha256": "f66816f1476d701e8fe3bb786b8486aab1c12b2e9b530cc2230b7f577d851c59"
+      },
+      {
+        "id": 6594691881,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6594691881",
+        "updatedAt": "2026-11-03T03:28:35Z",
+        "bodySha256": "33cbe0d7ae62ec3f3921792c1b1d01a017f3870928cfc76c444cbe26c961360f"
+      },
+      {
+        "id": 6594878016,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6594878016",
+        "updatedAt": "2026-11-03T03:42:48Z",
+        "bodySha256": "3891c494dd1bf12b04ceeb0d8ccb782d860d986e4ea7df75fa598f20f55e0d43"
+      },
+      {
+        "id": 6599799311,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6599799311",
+        "updatedAt": "2026-11-03T09:17:46Z",
+        "bodySha256": "b2daf490fc725672c340f0433a5827ce56e712e93a0097f2db8d1c60a3cd6693"
+      },
+      {
+        "id": 6599925104,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6599925104",
+        "updatedAt": "2026-11-03T09:24:26Z",
+        "bodySha256": "57c944bd7ab0f3344c8d5853438547f2ac424c1e0dd4cda03705af3cbc4f9737"
+      },
+      {
+        "id": 6601033800,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6601033800",
+        "updatedAt": "2026-11-03T10:21:12Z",
+        "bodySha256": "0499a529af89856edf09d262f2c3666b7aecd48773c7ad11ba7935d60a41b87b"
+      },
+      {
+        "id": 6684407311,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6684407311",
+        "updatedAt": "2026-11-06T12:09:10Z",
+        "bodySha256": "ded8c717df99438ba8a0d59a00315874b1c8e05e96f94fa22c69383e9e343e29"
+      },
+      {
+        "id": 6700033964,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1155#issuecomment-6700033964",
+        "updatedAt": "2026-11-07T01:02:53Z",
+        "bodySha256": "f4a1d5ee6b6dd5729f1edc6c860eed05df10d7a2b2a5fae240bc9c08bf562786"
+      }
+    ]
+  },
+  "authority": [
+    {
+      "path": "spec/prototypes/P-BASE-INPUT.yaml",
+      "id": "P-BASE-INPUT",
+      "status": "draft"
+    },
+    {
+      "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+      "id": "P-SHADCN-INPUT",
+      "status": "draft"
+    },
+    {
+      "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+      "id": "P-BRUTALIST-INPUT",
+      "status": "draft"
+    },
+    {
+      "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+      "id": "C-TEXT-CONTROL-0001",
+      "status": "draft"
+    },
+    {
+      "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+      "id": "M-TEXT-CONTROL-0001",
+      "status": "draft"
+    },
+    {
+      "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+      "id": "HC-TEXT-CONTROL-0001",
+      "status": "draft"
+    }
+  ],
+  "relatedOwnership": {
+    "reservedBy": "Main live message",
+    "confirmedWith": "SolMore1160Forms",
+    "ownedSuitePaths": [
+      "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+      "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+      "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts"
+    ],
+    "textarea": "criterion preserved and linked to1164/Main; no duplicate writer",
+    "inputShell": "1095 owner independent",
+    "sharedRuntimePlanner": "Main only; existing three suites reused"
+  },
+  "sourceVersions": [
+    {
+      "label": "qualified-812",
+      "headSha": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+      "entries": [
+        {
+          "path": "packages/prototypes/base/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 7209,
+          "sha256": "03bbb77eb078718575244d0ad601fb9951f4e454eb1767e7b708b91962b9c1eb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/packages/prototypes/base/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/base/src/input/types.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2038,
+          "sha256": "ec5340385469eced80f8c892afa28b84d51ebaf912deab5fc7da7992fa9e529b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/packages/prototypes/base/src/input/types.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1793,
+          "sha256": "23a65351c97450c28c401fc2dd7a6ede7bd92d856fa96711b59a9c0f05e3037f",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/packages/prototypes/shadcn/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/visual.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "packages/prototypes/brutalist/src/input/root.proto.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3050,
+          "sha256": "6f6fc837b1a02c71dddb60d35cbbdfc4c5eff533945525c750ff371fdbd51fcc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/en/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2857,
+          "sha256": "5214eb97727f82ae06f6925f6e410af5718e2cc41bb76bb6df550844da1d17a4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1883,
+          "sha256": "0bbdde61da88e1db3d6480771c4886dfdad77cbec4d855bd45dfac6c004a2bf8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1772,
+          "sha256": "2ac9f30f7e7fbd3c11618bb8b6c71c5b3542789af754591c23afc341a1c3a423",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3459,
+          "sha256": "f8e5b4a72a6fd4e64e68c9c13d803ea4bb89c26d71a9d1d2ffec46f2b663cfdc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1586,
+          "sha256": "92dd42331e28e1c3fd5e1348671638df69ed518ed1dee78d727951598690d250",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6929,
+          "sha256": "d64033ee36371e7c84d7074b35c8502e4a9c531892fbe925c5d0ebf9f838db1e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8093,
+          "sha256": "dc4a0a232c4fdad39dd845a917fd6aa5806d0061ebd87513ee6a2e4aa40b2782",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 10202,
+          "sha256": "dd94798f59fcdc3711f623d5648a4bda75ccdafed24ee7f77597d2dbd55964c1",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/content/docs/zh-cn/browser-harness.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12752,
+          "sha256": "dacf135fe81cf76ad7597b35e4882981ae87d625db4b7ab88c2be8b50470f26e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 13186,
+          "sha256": "baa9a5d9e2be3868461bbaa2847858e18b187ef80c945b64f2f42dcc1735f659",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/components/PrototypePreviewer/previewer-client.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 22442,
+          "sha256": "d976b45a8d9a40ee8e4e9c81acb670ef25508b5605da84441c51fd8ed4dbde17",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/components/PrototypePreviewer/demo-renderer.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2056,
+          "sha256": "2b28881e6c97f5c8fae4118f996292a01877652a19261a9467b2023b6730c669",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts"
+        },
+        {
+          "path": "apps/www/src/components/surface-recipes.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/components/site-library-family.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/styles/global.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 5759,
+          "sha256": "c695fff89e9b8bdc784500bafb64fc7f943fb424e0f3606f491c701b74846a28",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/styles/global.css"
+        },
+        {
+          "path": "apps/www/src/styles/runtime-box.css",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/styles/markdown.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11549,
+          "sha256": "0157d67656477e67fe9c40565d8792d1ec288b00c9926137c2b5aa2bae881611",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/styles/markdown.css"
+        },
+        {
+          "path": "apps/www/src/styles/tailwindcss.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3569,
+          "sha256": "c828b0e753a5e4dcf435a8958d89784a4e10df5e2d10ec7f628638abc714dd88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/styles/tailwindcss.css"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/apps/www/src/styles/proto-ui-style.css"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4175,
+          "sha256": "13365b6a267446baebbe42da4d2b7029ce7ad72cbe3797c183cb104dd57c5400",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/spec/prototypes/P-BASE-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11473,
+          "sha256": "e1e707ccab209bf9c8cf07971f9dec2afe3e458794c32fe31a81abc6484cf893",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/spec/prototypes/P-SHADCN-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8069,
+          "sha256": "0c16d8046700f60588a1e0b1dec2fe1ec8a6c2cda4cc47cb3c9d319ffd08c31b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/spec/contracts/C-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3264,
+          "sha256": "49bd6c3eba3cbae042f062841c5e3c8aca67a3cf322fd43eb85692d020bf197b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/spec/modules/M-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2978,
+          "sha256": "cbd35cadeced41e51cb6c361b297371c80670f38dc9ddc6547e84c2214e10eeb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2ea0499f555a32e927493e0d04e44d3b56e0c945/spec/host-caps/HC-TEXT-CONTROL-0001.yaml"
+        }
+      ]
+    },
+    {
+      "label": "final-812",
+      "headSha": "2dd4b96c8fdd783b5e0e5df79fc263ca411237b5",
+      "entries": [
+        {
+          "path": "packages/prototypes/base/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 7209,
+          "sha256": "03bbb77eb078718575244d0ad601fb9951f4e454eb1767e7b708b91962b9c1eb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/packages/prototypes/base/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/base/src/input/types.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2038,
+          "sha256": "ec5340385469eced80f8c892afa28b84d51ebaf912deab5fc7da7992fa9e529b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/packages/prototypes/base/src/input/types.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1793,
+          "sha256": "23a65351c97450c28c401fc2dd7a6ede7bd92d856fa96711b59a9c0f05e3037f",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/packages/prototypes/shadcn/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/visual.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "packages/prototypes/brutalist/src/input/root.proto.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3050,
+          "sha256": "6f6fc837b1a02c71dddb60d35cbbdfc4c5eff533945525c750ff371fdbd51fcc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/en/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2857,
+          "sha256": "5214eb97727f82ae06f6925f6e410af5718e2cc41bb76bb6df550844da1d17a4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1883,
+          "sha256": "0bbdde61da88e1db3d6480771c4886dfdad77cbec4d855bd45dfac6c004a2bf8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1772,
+          "sha256": "2ac9f30f7e7fbd3c11618bb8b6c71c5b3542789af754591c23afc341a1c3a423",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3459,
+          "sha256": "f8e5b4a72a6fd4e64e68c9c13d803ea4bb89c26d71a9d1d2ffec46f2b663cfdc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1586,
+          "sha256": "92dd42331e28e1c3fd5e1348671638df69ed518ed1dee78d727951598690d250",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6929,
+          "sha256": "d64033ee36371e7c84d7074b35c8502e4a9c531892fbe925c5d0ebf9f838db1e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8093,
+          "sha256": "dc4a0a232c4fdad39dd845a917fd6aa5806d0061ebd87513ee6a2e4aa40b2782",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11245,
+          "sha256": "64a6da3f89e8cc9453b2e7ff28a9baa919f636fab45f983d88476ca5bfcb1138",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/content/docs/zh-cn/browser-harness.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+          "status": "read-from-exact-Git-object",
+          "bytes": 9711,
+          "sha256": "3e3078faa291e0e3367bb26da941698fad2442ba96609dfb0f9613f47c53e0b8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 15488,
+          "sha256": "536fab79751e0164666692795f6606e1e88c2e710a7155173bc301c42373fd13",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/previewer-client.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 5398,
+          "sha256": "221145e3ee8a1a20c3d807473c6df17f4fa3d86140f3d23b357933b3ff25d942",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6439,
+          "sha256": "d5f27438322bdd9f14c10627e3c42760c63167d2e05d4540856f4ec22250a6bb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 24578,
+          "sha256": "6d71994e32cc1778b77cd0fde23fcb98dfb6e76504a9b15a53f962bab8ab3c16",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/demo-renderer.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2056,
+          "sha256": "2b28881e6c97f5c8fae4118f996292a01877652a19261a9467b2023b6730c669",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts"
+        },
+        {
+          "path": "apps/www/src/components/surface-recipes.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 754,
+          "sha256": "de80868282d57a641706ae16065e792b4096085088301b6d6aca0e092dfd3d63",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/surface-recipes.ts"
+        },
+        {
+          "path": "apps/www/src/components/site-library-family.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1635,
+          "sha256": "17fcefcdf85abc148f0b8fd94e66200403790f903a1beae310658d84571cad01",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/components/site-library-family.ts"
+        },
+        {
+          "path": "apps/www/src/styles/global.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6011,
+          "sha256": "cb51a1f94bbe3dffd132a5aedda0eefcedf99a6588be9ea1f45a8087407a74b5",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/styles/global.css"
+        },
+        {
+          "path": "apps/www/src/styles/runtime-box.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1020,
+          "sha256": "0b8d683a4afc811cfe2ec5648b9c9d112129efe024d05a9d0859ed623ad24a81",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/styles/runtime-box.css"
+        },
+        {
+          "path": "apps/www/src/styles/markdown.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12855,
+          "sha256": "55b8e5c4ac2419b9e3f23fc68a7510f9317090a1706613a03747a71d7f0ff7ad",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/styles/markdown.css"
+        },
+        {
+          "path": "apps/www/src/styles/tailwindcss.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3415,
+          "sha256": "c6cc929112b04ae279f51b5b1ff2dd8d0e13f3cb9c5f70777b489e8ae1541bbd",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/styles/tailwindcss.css"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/apps/www/src/styles/proto-ui-style.css"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4175,
+          "sha256": "13365b6a267446baebbe42da4d2b7029ce7ad72cbe3797c183cb104dd57c5400",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/spec/prototypes/P-BASE-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11479,
+          "sha256": "2c8270d892f241a7c7891acc8465b4cc0aba3053ba4036c0ecccbbea816846ef",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/spec/prototypes/P-SHADCN-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8069,
+          "sha256": "0c16d8046700f60588a1e0b1dec2fe1ec8a6c2cda4cc47cb3c9d319ffd08c31b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/spec/contracts/C-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3264,
+          "sha256": "49bd6c3eba3cbae042f062841c5e3c8aca67a3cf322fd43eb85692d020bf197b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/spec/modules/M-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2978,
+          "sha256": "cbd35cadeced41e51cb6c361b297371c80670f38dc9ddc6547e84c2214e10eeb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/2dd4b96c8fdd783b5e0e5df79fc263ca411237b5/spec/host-caps/HC-TEXT-CONTROL-0001.yaml"
+        }
+      ]
+    },
+    {
+      "label": "intranet-885",
+      "headSha": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+      "entries": [
+        {
+          "path": "packages/prototypes/base/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 7209,
+          "sha256": "03bbb77eb078718575244d0ad601fb9951f4e454eb1767e7b708b91962b9c1eb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/packages/prototypes/base/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/base/src/input/types.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2038,
+          "sha256": "ec5340385469eced80f8c892afa28b84d51ebaf912deab5fc7da7992fa9e529b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/packages/prototypes/base/src/input/types.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1793,
+          "sha256": "23a65351c97450c28c401fc2dd7a6ede7bd92d856fa96711b59a9c0f05e3037f",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/packages/prototypes/shadcn/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/visual.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "packages/prototypes/brutalist/src/input/root.proto.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3050,
+          "sha256": "6f6fc837b1a02c71dddb60d35cbbdfc4c5eff533945525c750ff371fdbd51fcc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/en/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2857,
+          "sha256": "5214eb97727f82ae06f6925f6e410af5718e2cc41bb76bb6df550844da1d17a4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1883,
+          "sha256": "0bbdde61da88e1db3d6480771c4886dfdad77cbec4d855bd45dfac6c004a2bf8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1772,
+          "sha256": "2ac9f30f7e7fbd3c11618bb8b6c71c5b3542789af754591c23afc341a1c3a423",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3459,
+          "sha256": "f8e5b4a72a6fd4e64e68c9c13d803ea4bb89c26d71a9d1d2ffec46f2b663cfdc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1586,
+          "sha256": "92dd42331e28e1c3fd5e1348671638df69ed518ed1dee78d727951598690d250",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6929,
+          "sha256": "d64033ee36371e7c84d7074b35c8502e4a9c531892fbe925c5d0ebf9f838db1e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8093,
+          "sha256": "dc4a0a232c4fdad39dd845a917fd6aa5806d0061ebd87513ee6a2e4aa40b2782",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11245,
+          "sha256": "64a6da3f89e8cc9453b2e7ff28a9baa919f636fab45f983d88476ca5bfcb1138",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/content/docs/zh-cn/browser-harness.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+          "status": "read-from-exact-Git-object",
+          "bytes": 10460,
+          "sha256": "f3fde9efa38a6cfba71b58c3c11ae133c74501b0465ac8d2615fdce02af3aea8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 16061,
+          "sha256": "17b855fd7724f12c2305a02f163541c077468034a77237853bd9ed0b09b76053",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/previewer-client.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 5393,
+          "sha256": "f8693872f94efd3802937d3a2570eda4e190b7121301f42f403e2fe7b02d2baa",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6434,
+          "sha256": "a041e0bf0d46e06e3995066d0d2ea58ea735625df02595775660228eade84997",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 24794,
+          "sha256": "62a64698be5c897ac481b2379c0ae7794c50e4e5699c71b2d21cb75e36db66db",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/demo-renderer.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2090,
+          "sha256": "8b65cc68b1df658c496db6e77fb7d7832aa0c78b80bba0abf7d32ce1a7f40f6b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts"
+        },
+        {
+          "path": "apps/www/src/components/surface-recipes.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 754,
+          "sha256": "de80868282d57a641706ae16065e792b4096085088301b6d6aca0e092dfd3d63",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/surface-recipes.ts"
+        },
+        {
+          "path": "apps/www/src/components/site-library-family.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1635,
+          "sha256": "17fcefcdf85abc148f0b8fd94e66200403790f903a1beae310658d84571cad01",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/components/site-library-family.ts"
+        },
+        {
+          "path": "apps/www/src/styles/global.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6041,
+          "sha256": "db3728b305a95003c512d0cdb886a84d320bc7e6220f8bd7753be1cbb24a6864",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/styles/global.css"
+        },
+        {
+          "path": "apps/www/src/styles/runtime-box.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1020,
+          "sha256": "0b8d683a4afc811cfe2ec5648b9c9d112129efe024d05a9d0859ed623ad24a81",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/styles/runtime-box.css"
+        },
+        {
+          "path": "apps/www/src/styles/markdown.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12855,
+          "sha256": "55b8e5c4ac2419b9e3f23fc68a7510f9317090a1706613a03747a71d7f0ff7ad",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/styles/markdown.css"
+        },
+        {
+          "path": "apps/www/src/styles/tailwindcss.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3415,
+          "sha256": "c6cc929112b04ae279f51b5b1ff2dd8d0e13f3cb9c5f70777b489e8ae1541bbd",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/styles/tailwindcss.css"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/apps/www/src/styles/proto-ui-style.css"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4175,
+          "sha256": "13365b6a267446baebbe42da4d2b7029ce7ad72cbe3797c183cb104dd57c5400",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/spec/prototypes/P-BASE-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11479,
+          "sha256": "2c8270d892f241a7c7891acc8465b4cc0aba3053ba4036c0ecccbbea816846ef",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/spec/prototypes/P-SHADCN-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8069,
+          "sha256": "0c16d8046700f60588a1e0b1dec2fe1ec8a6c2cda4cc47cb3c9d319ffd08c31b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/spec/contracts/C-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3264,
+          "sha256": "49bd6c3eba3cbae042f062841c5e3c8aca67a3cf322fd43eb85692d020bf197b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/spec/modules/M-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2978,
+          "sha256": "cbd35cadeced41e51cb6c361b297371c80670f38dc9ddc6547e84c2214e10eeb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/1699b70ecf5ff51459aebb3f7bedeed92f9f111b/spec/host-caps/HC-TEXT-CONTROL-0001.yaml"
+        }
+      ]
+    },
+    {
+      "label": "assigned-base",
+      "headSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "entries": [
+        {
+          "path": "packages/prototypes/base/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 7415,
+          "sha256": "ae98f695623732691c1e87c83c69bd14cd0754af41b51fff872f042be7689583",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/packages/prototypes/base/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/base/src/input/types.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2121,
+          "sha256": "6008982eee87b5a7dc9e406926dfddc3f8bc583410f469186478f55288809bfb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/packages/prototypes/base/src/input/types.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 890,
+          "sha256": "3d443f5c855ed0e4af59323910a63765339658ed4d6a0c62356a2ad2b4728235",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/packages/prototypes/shadcn/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/visual.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6335,
+          "sha256": "3c9b115988150f0fee07d568f3372981796ef132af2772fc82b3c349cae3d742",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/packages/prototypes/shadcn/src/input/visual.ts"
+        },
+        {
+          "path": "packages/prototypes/brutalist/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1252,
+          "sha256": "a097cbaa5f2bf02c070d0445ba5e00bd3db7cb7546962a7a758c6f93fba75a08",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/packages/prototypes/brutalist/src/input/root.proto.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4490,
+          "sha256": "587d48fe5b7211edd76d29e622ac349ca4f16dbd6fb1729b09d3e2aca27120d8",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/en/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4292,
+          "sha256": "b378a995b99c415823d6641850fa99f04acce7814a0620bfd6f9561f912cb466",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4009,
+          "sha256": "f4db5f7e2b788d24fae08a84bc5ad2c61961437ed8e3954c2d09136d7d2d533b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3772,
+          "sha256": "c12c7c2fa98f2c56d7c1a3481b94a2dc922c247b2437af35523287bb50de22f0",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2922,
+          "sha256": "8b2aa4c546ee405058f50801ad9287bf1c854168ddd699e1e00fb6c592f7c578",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2844,
+          "sha256": "e6b6356f1184e5e5604af293b0fd3062aa4e14f10640ddb1cf59c6153278ae15",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2851,
+          "sha256": "1459a7aee6b4d9ce43002e634542695e66e7ed12707ec36c7607b670e3a0bd23",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1665,
+          "sha256": "679e1b63b253aca9b74fbeb10bfe8c4df8151ab28ae6be27825cdfd2383dc082",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1595,
+          "sha256": "e0765c1fe67ec9f0ec99976d54b5024732d9a6ef55508d85d812bcfb4cf055ea",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6929,
+          "sha256": "d64033ee36371e7c84d7074b35c8502e4a9c531892fbe925c5d0ebf9f838db1e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8093,
+          "sha256": "b4d4a62d73ec687bf3dc03c06a28b4f56e5878a6db0b29c1cf21beb711e12871",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 9209,
+          "sha256": "3e371c0c76cc382c3a67b6c589fb2fd4097a5b97091fe82619e557dd92698375",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 30379,
+          "sha256": "3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/content/docs/zh-cn/browser-harness.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11323,
+          "sha256": "2611501cb59055d0bf428559f0e86be6050bdc09ac1255d84d967e4f11e4428a",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 22394,
+          "sha256": "76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/previewer-client.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 16992,
+          "sha256": "27cab6308bc256b4824051cb9799899e240983e43c6d700183757ccc1001851d",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12568,
+          "sha256": "e991371e00c8aeced8fbe6ed0989efd2d46a581ee33e9a7212af5a9ed1336603",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 73784,
+          "sha256": "c851c3d1d6a760fe556a89e81db7951719eca6b789d97702efcdc91761376c66",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/demo-renderer.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2548,
+          "sha256": "f5932d1a2384bd004fee4315af14b25a41666b20e7f3fe07b564f76645546f14",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts"
+        },
+        {
+          "path": "apps/www/src/components/surface-recipes.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 754,
+          "sha256": "de80868282d57a641706ae16065e792b4096085088301b6d6aca0e092dfd3d63",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/surface-recipes.ts"
+        },
+        {
+          "path": "apps/www/src/components/site-library-family.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1973,
+          "sha256": "9d43c6e760a03712f8353e5c3ecde02a20120db4ee3b247b27e7737a65dfdea4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/components/site-library-family.ts"
+        },
+        {
+          "path": "apps/www/src/styles/global.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6041,
+          "sha256": "db3728b305a95003c512d0cdb886a84d320bc7e6220f8bd7753be1cbb24a6864",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/styles/global.css"
+        },
+        {
+          "path": "apps/www/src/styles/runtime-box.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1296,
+          "sha256": "cfe4da25449431fb510d37ca8e9457eec52478339036484c7903cc08a178ebac",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/styles/runtime-box.css"
+        },
+        {
+          "path": "apps/www/src/styles/markdown.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12972,
+          "sha256": "7a57967d29091264b08a3d1db4ba3751a13172744d1451d6e1814b2f650943f4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/styles/markdown.css"
+        },
+        {
+          "path": "apps/www/src/styles/tailwindcss.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3751,
+          "sha256": "a5f9f7fdc0cbedc7dd78cd87c76860c78a977fa3af610880e93e73ddfaa90488",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/styles/tailwindcss.css"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/apps/www/src/styles/proto-ui-style.css"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4937,
+          "sha256": "a6337ce3bdd889bbf3bfa2bfb35ca11a6d1da5166d6ce8b5cecebb73727ae9b6",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/prototypes/P-BASE-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11382,
+          "sha256": "9b12a5ecc067edaa27ffcd9d8227274d7feed9df1a088098e67033eba490d29b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/prototypes/P-SHADCN-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4701,
+          "sha256": "dcc8da8aaa5427e779396a66fa79986e7bbe203d352622bb16d7611d46042adc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/prototypes/P-BRUTALIST-INPUT.yaml"
+        },
+        {
+          "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8607,
+          "sha256": "bc8bb4ab39e20c919414b3be54b1e38fae731916c70ee3c45dc822197ae8bc8f",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/contracts/C-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3264,
+          "sha256": "49bd6c3eba3cbae042f062841c5e3c8aca67a3cf322fd43eb85692d020bf197b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/modules/M-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2978,
+          "sha256": "cbd35cadeced41e51cb6c361b297371c80670f38dc9ddc6547e84c2214e10eeb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/0607c6c5c386b8a932ab850e92a8873b2121dc45/spec/host-caps/HC-TEXT-CONTROL-0001.yaml"
+        }
+      ]
+    },
+    {
+      "label": "final-885",
+      "headSha": "63fc86e5105038d194eb2b5ac1a59c3f717bd5f5",
+      "entries": [
+        {
+          "path": "packages/prototypes/base/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 7415,
+          "sha256": "ae98f695623732691c1e87c83c69bd14cd0754af41b51fff872f042be7689583",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/packages/prototypes/base/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/base/src/input/types.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2038,
+          "sha256": "ec5340385469eced80f8c892afa28b84d51ebaf912deab5fc7da7992fa9e529b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/packages/prototypes/base/src/input/types.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/root.proto.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1970,
+          "sha256": "91b72b4a2212b9f252fc3c229949d8c222a6c390a1a8ecd249f768b22d0bbf64",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/packages/prototypes/shadcn/src/input/root.proto.ts"
+        },
+        {
+          "path": "packages/prototypes/shadcn/src/input/visual.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "packages/prototypes/brutalist/src/input/root.proto.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3050,
+          "sha256": "6f6fc837b1a02c71dddb60d35cbbdfc4c5eff533945525c750ff371fdbd51fcc",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/en/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2857,
+          "sha256": "5214eb97727f82ae06f6925f6e410af5718e2cc41bb76bb6df550844da1d17a4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/ui-libraries/base/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2061,
+          "sha256": "4072e41a1272219c858f41197741b820470bb4c708d462f6309fac06e4d6d7cb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/en/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1918,
+          "sha256": "fddce533e35005df08ea2f994895cd4125c2d99f6b11d41115fa5401ac2cebd1",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/input.mdx"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/input.mdx",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2851,
+          "sha256": "1459a7aee6b4d9ce43002e634542695e66e7ed12707ec36c7607b670e3a0bd23",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1586,
+          "sha256": "92dd42331e28e1c3fd5e1348671638df69ed518ed1dee78d727951598690d250",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.demo.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6929,
+          "sha256": "d64033ee36371e7c84d7074b35c8502e4a9c531892fbe925c5d0ebf9f838db1e",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8093,
+          "sha256": "b4d4a62d73ec687bf3dc03c06a28b4f56e5878a6db0b29c1cf21beb711e12871",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 16529,
+          "sha256": "c8cd026fb038069e385810090dfcb866822dbeb491f59f87775d3e19a7bf7d49",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/content/docs/zh-cn/browser-harness.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11278,
+          "sha256": "8aff227ee1a9a1ce169c12ed31bc1a9e4c2203e86b3aaa2fd9458c1db607aa0c",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 19564,
+          "sha256": "816ffb7a9d4d000461347d926b85a4bf31522783a6794ff6601f8adda2ff8756",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/previewer-client.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12169,
+          "sha256": "131e6dae5c2bea59c37c00c3a6d5c999a7d8ba4300d9ecde24448892abdabcbd",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12336,
+          "sha256": "904cdfa4defc6b5ee493a9c8d167d4b34fe1a17799864ad6d776a7c540e69edd",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 35711,
+          "sha256": "42fa1c75a9f4dfbef9b8c6d91004974df06bbbc7eaf2273be756144e0c6097a2",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/demo-renderer.ts"
+        },
+        {
+          "path": "apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2548,
+          "sha256": "f5932d1a2384bd004fee4315af14b25a41666b20e7f3fe07b564f76645546f14",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts"
+        },
+        {
+          "path": "apps/www/src/components/surface-recipes.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 754,
+          "sha256": "de80868282d57a641706ae16065e792b4096085088301b6d6aca0e092dfd3d63",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/surface-recipes.ts"
+        },
+        {
+          "path": "apps/www/src/components/site-library-family.ts",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1635,
+          "sha256": "17fcefcdf85abc148f0b8fd94e66200403790f903a1beae310658d84571cad01",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/components/site-library-family.ts"
+        },
+        {
+          "path": "apps/www/src/styles/global.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 6041,
+          "sha256": "db3728b305a95003c512d0cdb886a84d320bc7e6220f8bd7753be1cbb24a6864",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/styles/global.css"
+        },
+        {
+          "path": "apps/www/src/styles/runtime-box.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 1296,
+          "sha256": "cfe4da25449431fb510d37ca8e9457eec52478339036484c7903cc08a178ebac",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/styles/runtime-box.css"
+        },
+        {
+          "path": "apps/www/src/styles/markdown.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 12972,
+          "sha256": "7a57967d29091264b08a3d1db4ba3751a13172744d1451d6e1814b2f650943f4",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/styles/markdown.css"
+        },
+        {
+          "path": "apps/www/src/styles/tailwindcss.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3415,
+          "sha256": "c6cc929112b04ae279f51b5b1ff2dd8d0e13f3cb9c5f70777b489e8ae1541bbd",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/styles/tailwindcss.css"
+        },
+        {
+          "path": "apps/www/src/styles/proto-ui-style.css",
+          "status": "read-from-exact-Git-object",
+          "bytes": 294,
+          "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/apps/www/src/styles/proto-ui-style.css"
+        },
+        {
+          "path": "spec/prototypes/P-BASE-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 4937,
+          "sha256": "a6337ce3bdd889bbf3bfa2bfb35ca11a6d1da5166d6ce8b5cecebb73727ae9b6",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/spec/prototypes/P-BASE-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-SHADCN-INPUT.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 11382,
+          "sha256": "9b12a5ecc067edaa27ffcd9d8227274d7feed9df1a088098e67033eba490d29b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/spec/prototypes/P-SHADCN-INPUT.yaml"
+        },
+        {
+          "path": "spec/prototypes/P-BRUTALIST-INPUT.yaml",
+          "status": "unavailable-in-local-object",
+          "exitCode": 128
+        },
+        {
+          "path": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 8607,
+          "sha256": "bc8bb4ab39e20c919414b3be54b1e38fae731916c70ee3c45dc822197ae8bc8f",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/spec/contracts/C-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/modules/M-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 3264,
+          "sha256": "49bd6c3eba3cbae042f062841c5e3c8aca67a3cf322fd43eb85692d020bf197b",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/spec/modules/M-TEXT-CONTROL-0001.yaml"
+        },
+        {
+          "path": "spec/host-caps/HC-TEXT-CONTROL-0001.yaml",
+          "status": "read-from-exact-Git-object",
+          "bytes": 2978,
+          "sha256": "cbd35cadeced41e51cb6c361b297371c80670f38dc9ddc6547e84c2214e10eeb",
+          "sourceUrl": "https://github.com/Proto-UI/Proto-UI/blob/63fc86e5105038d194eb2b5ac1a59c3f717bd5f5/spec/host-caps/HC-TEXT-CONTROL-0001.yaml"
+        }
+      ]
+    }
+  ],
+  "renderedHistory": {
+    "qualified812": {
+      "head": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+      "kind": "actual retained original PNGs and source-attributed receipts; no new execution",
+      "originalPngCount": 16,
+      "persistedNativeReadBlobMatches": 10,
+      "receiptSourceSha256": [
+        {
+          "originalPath": "/workspace/pr812-cjk-visual-env-20261005/native-journeys-partial.json",
+          "sha256": "13b7c140763d64056d98878508fd4e3f47ece70bca253697f8fdb851bd63f06a"
+        },
+        {
+          "originalPath": "/workspace/pr812-cjk-visual-env-20261005/stable-recaptures.json",
+          "sha256": "0cebd35b97e1648b778baabc658b0e4c622bf2a89c024b41792c7240050ef59a"
+        },
+        {
+          "originalPath": "/workspace/pr812-cjk-visual-env-20261005/font-provenance.json",
+          "sha256": "eafb1798631d438d5cacd91d3f2e673a1a4e7c44632d02e47d369b6815db0b44"
+        }
+      ],
+      "limits": [
+        "Chinese light captures; no inferred complete English/family/theme matrix",
+        "Original source-bound observations are not final2dd4 or current-source acceptance",
+        "Native-journeys receipt retains scroll/framing failures; React CDP capture still visibly clips the top of the preview",
+        "Original isolated/main-realm Vue2 observation is a tooling distinction; it does not diagnose unrelated suite failures"
+      ]
+    },
+    "final812": {
+      "observedAt": "2026-11-10T13:02:18.357253+00:00",
+      "run": {
+        "id": 37364391539,
+        "head_sha": "2dd4b96c8fdd783b5e0e5df79fc263ca411237b5",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/37364391539",
+        "run_attempt": 1
+      },
+      "artifactTotal": 0,
+      "artifacts": [],
+      "currentRenderedEvidence": "not-established",
+      "archiveReadback": "live authenticated artifact inventory reports total_count0; no archive contents recovered",
+      "nextAction": "Main to run exact2dd4 built EN/ZH Input consumer and retain separate source/driver/result/image bindings; a later current-source run does not replace it"
+    },
+    "intranet885": {
+      "sourceKey": "owner-conversation:885:6094851533",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/pull/885#issuecomment-6094851533",
+      "observedSourceHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+      "finalSourceHead": "63fc86e5105038d194eb2b5ac1a59c3f717bd5f5",
+      "originalPngDirectoryAvailable": false,
+      "retainedWebpReadbacks": 4,
+      "limits": [
+        "WebP bytes are the original Read tool representation, not recovered original PNG bytes",
+        "Original PNG hashes are unavailable",
+        "No new-head, final885 or production deployment acceptance is inferred",
+        "Original ordinary CI failure and publication debt remain historical facts"
+      ]
+    },
+    "images": [
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue-edited-readonly-focus-stable-final.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue-edited-readonly-focus-stable-final.png",
+        "sha256": "4868590706d4af5798b459e115a95329e6b2f8ce100db624b8a7b543a291fb86",
+        "bytes": 79509,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "d7f6ae6e",
+            "observedAt": "2026-10-05T04:48:58.864Z",
+            "blobSha256": "4868590706d4af5798b459e115a95329e6b2f8ce100db624b8a7b543a291fb86",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue-edited-readonly-focus-cdp.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue-edited-readonly-focus-cdp.png",
+        "sha256": "270128cf20f315515ed93592042b5034d751fd13fcbc06e634c45644d3916fc5",
+        "bytes": 86776,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-react-edited-readonly-focus-cdp.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-react-edited-readonly-focus-cdp.png",
+        "sha256": "a6792db9c84acdea7093b4475dcac6eca61257587c5ba20c0de616dbad99c6b5",
+        "bytes": 86835,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue2-edited-readonly-focus-cdp.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue2-edited-readonly-focus-cdp.png",
+        "sha256": "af64ca9d3247d7dcfeec160ca1c7d7d010dacd0d9a59d35e2ef5f49b31e4e8d7",
+        "bytes": 79785,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "3e72ab1a",
+            "observedAt": "2026-10-05T04:41:19.776Z",
+            "blobSha256": "af64ca9d3247d7dcfeec160ca1c7d7d010dacd0d9a59d35e2ef5f49b31e4e8d7",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue2-edited-readonly-focus.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue2-edited-readonly-focus.png",
+        "sha256": "1bf257d828126ef212ac845496e8ceca2b619dd44cac55e36d9e0294b4141206",
+        "bytes": 87606,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue2-initial.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue2-initial.png",
+        "sha256": "350f7f8711c980a4d710c524d53b45d8388004d6b744f785ae44f2250d326590",
+        "bytes": 80283,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "a2ba99e2",
+            "observedAt": "2026-10-05T04:41:19.805Z",
+            "blobSha256": "350f7f8711c980a4d710c524d53b45d8388004d6b744f785ae44f2250d326590",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-before-vue2-runtime-menu.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-before-vue2-runtime-menu.png",
+        "sha256": "7539afd265e52b6aedf25000fd03dcc3c714300c53d5203513d6414af826c51c",
+        "bytes": 87546,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "606c8b3a",
+            "observedAt": "2026-10-05T04:51:27.357Z",
+            "blobSha256": "7539afd265e52b6aedf25000fd03dcc3c714300c53d5203513d6414af826c51c",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue-edited-readonly-focus.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue-edited-readonly-focus.png",
+        "sha256": "261678520f1e2d3aa10c00da5c7a7c6a1953ebf421b5c58a3425f4c4ec18284e",
+        "bytes": 92654,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "f683d3ea",
+            "observedAt": "2026-10-05T04:41:19.738Z",
+            "blobSha256": "261678520f1e2d3aa10c00da5c7a7c6a1953ebf421b5c58a3425f4c4ec18284e",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-vue-initial.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-vue-initial.png",
+        "sha256": "1c3337482d26adca7595e34e60a6a0a61264dfdfcf0f350b3ba445d52a55c775",
+        "bytes": 79996,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "372bafac",
+            "observedAt": "2026-10-05T04:41:19.864Z",
+            "blobSha256": "1c3337482d26adca7595e34e60a6a0a61264dfdfcf0f350b3ba445d52a55c775",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-before-vue-runtime-menu.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-before-vue-runtime-menu.png",
+        "sha256": "e1a3d76cd30da840a4afd8bbdc9040e29b3957db812aa493fa7e75ad5625d92a",
+        "bytes": 87828,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-react-edited-readonly-focus.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-react-edited-readonly-focus.png",
+        "sha256": "7c5d3f48f21dacc7840c66f299f83a202f410d66c84600f00e890f916f9e8fec",
+        "bytes": 97063,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "a14fde56",
+            "observedAt": "2026-10-05T04:41:19.895Z",
+            "blobSha256": "7c5d3f48f21dacc7840c66f299f83a202f410d66c84600f00e890f916f9e8fec",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-react-initial.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-react-initial.png",
+        "sha256": "21e98b51b5f06fbfe69fb8cd9d83ff97c3789b8cc26af20333e3af87fc91ef36",
+        "bytes": 80369,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "be1c754c",
+            "observedAt": "2026-10-05T04:41:19.833Z",
+            "blobSha256": "21e98b51b5f06fbfe69fb8cd9d83ff97c3789b8cc26af20333e3af87fc91ef36",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-before-react-runtime-menu.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-before-react-runtime-menu.png",
+        "sha256": "a315cc608ce0ff4a6c8ceb8b49d8371998cc535aaed35b5f6e22f2d13cf99515",
+        "bytes": 87178,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-wc-edited-readonly-focus-stable.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-wc-edited-readonly-focus-stable.png",
+        "sha256": "a26ef7bd7d5e4ab3ac9609be4e517c6e6bdf47743f2062bae9f97b0f78d69248",
+        "bytes": 81725,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-wc-edited-readonly-focus.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-wc-edited-readonly-focus.png",
+        "sha256": "8adec2d6d0d8f17a73238bad3f666f3c97b2ad6b2fecf890321ef9292b7b6073",
+        "bytes": 82729,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "3b98ecf3",
+            "observedAt": "2026-10-05T04:27:53.003Z",
+            "blobSha256": "8adec2d6d0d8f17a73238bad3f666f3c97b2ad6b2fecf890321ef9292b7b6073",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/2ea0499f/zh-cn-wc-initial.png",
+        "originalPath": "/workspace/pr812-cjk-visual-env-20261005/captures/zh-cn-wc-initial.png",
+        "sha256": "255ee7f8a096866dcb1a1452ac535dfa5959f100d977feb880850744ca0e452b",
+        "bytes": 77629,
+        "sourceHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+        "kind": "retained-original-PNG",
+        "historyRead": [
+          {
+            "eventId": "a4246f4c",
+            "observedAt": "2026-10-05T04:24:03.330Z",
+            "blobSha256": "255ee7f8a096866dcb1a1452ac535dfa5959f100d977feb880850744ca0e452b",
+            "retainedBytesEqualPersistedReadBlob": true
+          }
+        ],
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/1699b70/wc-rendered-readback.webp",
+        "originalPath": "/tmp/pui-pr885-intranet-native-fIeZY6/en-input-wc-confirmed-native-1699.png",
+        "sha256": "50cafac84c8b08db1619921bdf532317b036f32435a774bd71d1d7337b26dc20",
+        "bytes": 78842,
+        "sourceHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+        "kind": "historical-Read-WebP-derivative-original-PNG-unavailable",
+        "originalReadEventId": "64c379a6",
+        "observedAt": "2026-10-10T05:38:18.217Z",
+        "persistedBlobSha256": "50cafac84c8b08db1619921bdf532317b036f32435a774bd71d1d7337b26dc20",
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/1699b70/react-rendered-readback.webp",
+        "originalPath": "/tmp/pui-pr885-intranet-native-fIeZY6/en-input-react-confirmed-native-1699.png",
+        "sha256": "5bc5cb3de1a0e1694591e90d58d01edf3d4194a12d739b6489767700448cabe8",
+        "bytes": 80244,
+        "sourceHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+        "kind": "historical-Read-WebP-derivative-original-PNG-unavailable",
+        "originalReadEventId": "f27df1c0",
+        "observedAt": "2026-10-10T05:38:46.890Z",
+        "persistedBlobSha256": "5bc5cb3de1a0e1694591e90d58d01edf3d4194a12d739b6489767700448cabe8",
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/1699b70/vue-rendered-readback.webp",
+        "originalPath": "/tmp/pui-pr885-intranet-native-fIeZY6/en-input-vue-native-1699.png",
+        "sha256": "1d22f9762dbb1efb746dca7336cf694f3a27e1093a5867b8b2a400a7e2441f5d",
+        "bytes": 79424,
+        "sourceHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+        "kind": "historical-Read-WebP-derivative-original-PNG-unavailable",
+        "originalReadEventId": "6bf2a72b",
+        "observedAt": "2026-10-10T05:38:59.564Z",
+        "persistedBlobSha256": "1d22f9762dbb1efb746dca7336cf694f3a27e1093a5867b8b2a400a7e2441f5d",
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      },
+      {
+        "path": "docs/evidence/input-exact-version/1699b70/vue2-rendered-readback.webp",
+        "originalPath": "/tmp/pui-pr885-intranet-native-fIeZY6/en-input-vue2-native-1699.png",
+        "sha256": "541211bb9a833696b7e4bfa3d46e662c83292373ac6336ad4c1828e7fc2d69a0",
+        "bytes": 79638,
+        "sourceHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+        "kind": "historical-Read-WebP-derivative-original-PNG-unavailable",
+        "originalReadEventId": "876cfc32",
+        "observedAt": "2026-10-10T05:35:56.930Z",
+        "persistedBlobSha256": "541211bb9a833696b7e4bfa3d46e662c83292373ac6336ad4c1828e7fc2d69a0",
+        "newExecution": false,
+        "currentHeadAcceptance": false
+      }
+    ]
+  },
+  "plannedCurrentConsumer": {
+    "status": "authored-not-run",
+    "families": [
+      "base",
+      "shadcn",
+      "brutalist"
+    ],
+    "locales": [
+      "en",
+      "zh-cn"
+    ],
+    "runtimes": [
+      "wc",
+      "react",
+      "vue",
+      "vue2"
+    ],
+    "expectedNativeCases": 24,
+    "expectedMetadataCases": 3,
+    "expectedPngsOnCompleteSuccess": 176,
+    "expectedFamilies": {
+      "base": {
+        "cases": 8,
+        "pngs": 48,
+        "states": [
+          "light-initial",
+          "light-uncontrolled-edit",
+          "light-owner-accepted",
+          "light-readonly",
+          "dark-readonly",
+          "dark-remounted"
+        ]
+      },
+      "shadcn": {
+        "cases": 8,
+        "pngs": 56,
+        "states": [
+          "light-initial",
+          "light-selection",
+          "light-pointer-focused",
+          "dark-pointer-focused",
+          "dark-selection",
+          "dark-edited",
+          "dark-readonly"
+        ]
+      },
+      "brutalist": {
+        "cases": 8,
+        "pngs": 72,
+        "states": [
+          "light-initial",
+          "light-edited",
+          "light-readonly",
+          "light-focused",
+          "dark-focused",
+          "dark-composition-events",
+          "dark-320-text100",
+          "dark-320-text200",
+          "light-320-text200"
+        ]
+      }
+    },
+    "captureBinding": [
+      "source.json records HEAD, Git tree, dirty state, complete tracked/nonignored-untracked membership and literal symlinks",
+      "source manifest digest is not a Git commit; dirty evidence cannot claim commitBound",
+      "generated CSS and each screenshot have independent hashes; finish rejects source/CSS/image drift",
+      "external server source is explicitly unverified; it cannot qualify commitBound",
+      "session receipt requires separate full Vitest result and human visual review/upload readback"
+    ],
+    "inputLimits": [
+      "DOM selection is labeled as static selection presentation",
+      "Synthetic composition is separately labeled; no OS IME/native-host/AT/Compiler/packed-package or complete upstream parity claim"
+    ]
+  },
+  "retainedTextareaWork": {
+    "issue": 1164,
+    "originalSourceKey": "issue.1155.005",
+    "parentSourceKey": "issue.1093.005",
+    "completeRemainingConditions": [
+      "exact-head Node24 CI",
+      "Windows native generation/launch and descendant cleanup evidence",
+      "real Chrome execution",
+      "entire150s beforeAll budget including generation, route readiness and browser launch",
+      "both local Base/Brutalist entry argv and repo cwd guards; wrong-app, removed await and wrong cwd must fail",
+      "keep startup15/readiness128 and later13stop-owner historical scopes separate from fresh execution",
+      "keep original Node22 timing and corrected premature completion claims",
+      "do not replace the pinned shared readiness/harness evidence or infer historical replay from source equality"
+    ],
+    "writerTakenOver": false
+  },
+  "remainingOriginalWork": [
+    "Main serial formatting/types/metadata/native validation and review repair for this candidate",
+    "exact historical final2dd4 rendered/built consumer evidence or explicit source-bound disposition",
+    "visual inspection and real accessible publication URLs for adequate exact-version captures",
+    "preserve historical rejected frames and missing original885 PNG bytes",
+    "Textarea delegated criteria, actual exact-head CI/DCO and lawful integration/readback before earned whole-Issue closure"
+  ]
+}
