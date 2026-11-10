@@ -11,7 +11,7 @@ export function revealCodeExampleTab(tab: HTMLElement, viewport: HTMLElement): v
   else if (target.right > bounds.right) viewport.scrollLeft += target.right - bounds.right;
 }
 
-type TabProjection = { select(index: number): void; destroy(): void };
+export type TabProjection = { select(index: number): void; destroy(): void };
 
 /** Progressive legacy chrome, like runtime-tabs.ts: real family Tabs rendered
  * by WC, independently of the host whose source is being read. This is not a
@@ -29,8 +29,12 @@ export function enhanceCodeExampleTabs(options: {
     return { select() {}, destroy() {} };
   }
   const scope = list.closest<HTMLElement>('[data-projection-family], [data-site-library-family]');
-  const family = (scope?.dataset.projectionFamily ?? scope?.dataset.siteLibraryFamily ??
-    doc.documentElement.dataset.siteLibraryFamily) === 'brutalist' ? 'brutalist' : 'shadcn';
+  const family =
+    (scope?.dataset.projectionFamily ??
+      scope?.dataset.siteLibraryFamily ??
+      doc.documentElement.dataset.siteLibraryFamily) === 'brutalist'
+      ? 'brutalist'
+      : 'shadcn';
   const definitions = family === 'brutalist' ? brutalist : shadcn;
   const entries = {
     root: definitions.tabsRoot,
@@ -49,27 +53,44 @@ export function enhanceCodeExampleTabs(options: {
     setElementProps(node, props);
     return node;
   };
-  let value = Math.max(0, tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true'));
+  let value = Math.max(
+    0,
+    tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true')
+  );
   let destroyed = false;
-  const rootProps = () => ({ value: String(value), orientation: 'horizontal', activationMode: 'automatic' });
-  const root = element('root', { ...rootProps(), surfaceStyle: { display: 'block', minWidth: '0', width: '100%' } });
+  const rootProps = () => ({
+    value: String(value),
+    orientation: 'horizontal',
+    activationMode: 'automatic',
+  });
+  const root = element('root', {
+    ...rootProps(),
+    surfaceStyle: { display: 'block', minWidth: '0', width: '100%' },
+  });
   root.dataset.codeExampleTabsProjection = family;
   const projectedList = element('list', {
-    appearance: 'underline', a11yLabel: list.getAttribute('aria-label') ?? 'Code example', loop: false,
+    appearance: 'underline',
+    a11yLabel: list.getAttribute('aria-label') ?? 'Code example',
+    loop: false,
     surfaceStyle: { paddingInline: '0.75rem', gap: '1.25rem', minWidth: '0' },
   });
-  projectedList.dataset.codeExampleTablist = list.hasAttribute('data-code-host-tabs') ? 'host' : 'file';
+  projectedList.dataset.codeExampleTablist = list.hasAttribute('data-code-host-tabs')
+    ? 'host'
+    : 'file';
   root.append(projectedList);
   const originals = panels.map((panel) => ({
-    panel, marker: doc.createComment('code-example-source'),
-    role: panel.getAttribute('role'), labelledBy: panel.getAttribute('aria-labelledby'),
+    panel,
+    marker: doc.createComment('code-example-source'),
+    role: panel.getAttribute('role'),
+    labelledBy: panel.getAttribute('aria-labelledby'),
   }));
   if (panels.length !== tabs.length) throw new Error('[CodeExample] Tabs and panels must match.');
   const triggers: HTMLElement[] = [];
   const contents: HTMLElement[] = [];
   for (const [index, tab] of tabs.entries()) {
     const trigger = element('trigger', {
-      value: String(index), appearance: 'underline',
+      value: String(index),
+      appearance: 'underline',
       surfaceStyle: { minHeight: '2.75rem', fontSize: '0.8125rem', lineHeight: '1.25rem' },
     });
     // Astro preserves formatting whitespace around authored labels. Keep the
@@ -87,7 +108,8 @@ export function enhanceCodeExampleTabs(options: {
     projectedList.append(trigger);
     triggers.push(trigger);
     const content = element('content', {
-      value: String(index), keepMounted: true,
+      value: String(index),
+      keepMounted: true,
       surfaceStyle: { margin: '0', minWidth: '0' },
     });
     const original = originals[index];
@@ -103,14 +125,17 @@ export function enhanceCodeExampleTabs(options: {
     if (index >= 0) revealCodeExampleTab(triggers[index], projectedList);
   };
   const hint = list.hasAttribute('data-code-host-tabs')
-    ? list.closest('[data-code-example]')?.querySelector<HTMLElement>('[data-code-host-overflow]') : null;
+    ? list.closest('[data-code-example]')?.querySelector<HTMLElement>('[data-code-host-overflow]')
+    : null;
   const hintMarker = hint ? doc.createComment('code-example-host-hint') : null;
   const updateOverflow = () => {
     if (hint) hint.hidden = projectedList.scrollWidth <= projectedList.clientWidth + 1;
     reveal();
   };
-  const resize = typeof doc.defaultView?.ResizeObserver === 'function'
-    ? new doc.defaultView.ResizeObserver(updateOverflow) : null;
+  const resize =
+    typeof doc.defaultView?.ResizeObserver === 'function'
+      ? new doc.defaultView.ResizeObserver(updateOverflow)
+      : null;
   let queued = false;
   const publishValue = () => {
     if (queued || destroyed) return;
@@ -118,7 +143,10 @@ export function enhanceCodeExampleTabs(options: {
     queueMicrotask(() => {
       queued = false;
       if (!destroyed) {
-        setElementProps(root, { ...rootProps(), surfaceStyle: { display: 'block', minWidth: '0', width: '100%' } });
+        setElementProps(root, {
+          ...rootProps(),
+          surfaceStyle: { display: 'block', minWidth: '0', width: '100%' },
+        });
         reveal();
       }
     });
@@ -156,20 +184,22 @@ export function enhanceCodeExampleTabs(options: {
     }
     root.addEventListener('valueChange', change);
     strip.after(root);
-  // Keep the working native controls if a real Tabs owner fails to initialize.
-  if (
-    projectedList.getAttribute('role') !== 'tablist' ||
-    !triggers.every((trigger) => trigger.getAttribute('role') === 'tab') ||
-    !contents.every((content) => content.getAttribute('role') === 'tabpanel')
-  ) {
-    destroy();
-    throw new Error('[CodeExample] Tabs projection did not initialize; native controls retained.');
-  }
-  // Do not steal a keyboard interaction already in progress during hydration.
-  if (strip.contains(doc.activeElement)) {
-    destroy();
-    return { select() {}, destroy() {} };
-  }
+    // Keep the working native controls if a real Tabs owner fails to initialize.
+    if (
+      projectedList.getAttribute('role') !== 'tablist' ||
+      !triggers.every((trigger) => trigger.getAttribute('role') === 'tab') ||
+      !contents.every((content) => content.getAttribute('role') === 'tabpanel')
+    ) {
+      destroy();
+      throw new Error(
+        '[CodeExample] Tabs projection did not initialize; native controls retained.'
+      );
+    }
+    // Do not steal a keyboard interaction already in progress during hydration.
+    if (strip.contains(doc.activeElement)) {
+      destroy();
+      return { select() {}, destroy() {} };
+    }
     if (hint && hintMarker) {
       hint.before(hintMarker);
       projectedList.after(hint);

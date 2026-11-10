@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { enhanceCodeExampleTabs, revealCodeExampleTab } from './code-example-tabs';
+import {
+  enhanceCodeExampleTabs,
+  revealCodeExampleTab,
+  type TabProjection,
+} from './code-example-tabs';
 
-const projections: ReturnType<typeof enhanceCodeExampleTabs>[] = [];
+const projections: TabProjection[] = [];
 afterEach(() => {
   for (const projection of projections.splice(0).reverse()) projection.destroy();
   document.body.replaceChildren();
@@ -40,7 +44,9 @@ describe('CodeExample real legacy Tabs enhancement', () => {
       expect(content?.getAttribute('aria-labelledby')).toBe(trigger.id);
     }
     expect(root.querySelectorAll('[data-code-example-projected-tab]')).toHaveLength(2);
-    expect(root.querySelector('[data-code-example-projected-tab]')?.getAttribute('data-pui-style')).toContain('bg-transparent');
+    expect(
+      root.querySelector('[data-code-example-projected-tab]')?.getAttribute('data-pui-style')
+    ).toContain('bg-transparent');
     expect(list.parentElement!.hidden).toBe(true);
     expect(panels.map((panel) => panel.querySelector('pre'))).toEqual(source);
     expect(panels.every((panel) => panel.isConnected)).toBe(true);
@@ -59,27 +65,36 @@ describe('CodeExample real legacy Tabs enhancement', () => {
     const pre = panels[0].querySelector('pre')!;
     pre.textContent = '\n  exact source with indentation  \n';
     projections.push(enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} }));
-    expect([...root.querySelectorAll('[data-code-example-projected-tab]')].map((tab) => tab.textContent))
-      .toEqual(['React', 'Web Components']);
+    expect(
+      [...root.querySelectorAll('[data-code-example-projected-tab]')].map((tab) => tab.textContent)
+    ).toEqual(['React', 'Web Components']);
     expect(pre.textContent).toBe('\n  exact source with indentation  \n');
   });
 
-  it.each(['list', 'content'])('restores source and fallback if the real %s fails role admission', (part) => {
-    const { root, list, tabs, panels } = fixture();
-    const source = panels.map((panel) => panel.querySelector('pre'));
-    const getAttribute = Element.prototype.getAttribute;
-    vi.spyOn(Element.prototype, 'getAttribute').mockImplementation(function (this: Element, name: string) {
-      if (name === 'role' && this.localName.endsWith(`tabs-${part}`)) return null;
-      return getAttribute.call(this, name);
-    });
-    expect(() => enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} })).toThrow('native controls retained');
-    expect(root.querySelector('[data-code-example-tabs-projection]')).toBeNull();
-    expect(list.parentElement!.hidden).toBe(false);
-    expect(panels.map((panel) => panel.parentElement)).toEqual([root, root]);
-    expect(panels.map((panel) => panel.querySelector('pre'))).toEqual(source);
-    expect(panels.map((panel) => panel.getAttribute('role'))).toEqual(['tabpanel', 'tabpanel']);
-    expect(panels.map((panel) => panel.getAttribute('aria-labelledby'))).toEqual(['a', 'b']);
-  });
+  it.each(['list', 'content'])(
+    'restores source and fallback if the real %s fails role admission',
+    (part) => {
+      const { root, list, tabs, panels } = fixture();
+      const source = panels.map((panel) => panel.querySelector('pre'));
+      const getAttribute = Element.prototype.getAttribute;
+      vi.spyOn(Element.prototype, 'getAttribute').mockImplementation(function (
+        this: Element,
+        name: string
+      ) {
+        if (name === 'role' && this.localName.endsWith(`tabs-${part}`)) return null;
+        return getAttribute.call(this, name);
+      });
+      expect(() => enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} })).toThrow(
+        'native controls retained'
+      );
+      expect(root.querySelector('[data-code-example-tabs-projection]')).toBeNull();
+      expect(list.parentElement!.hidden).toBe(false);
+      expect(panels.map((panel) => panel.parentElement)).toEqual([root, root]);
+      expect(panels.map((panel) => panel.querySelector('pre'))).toEqual(source);
+      expect(panels.map((panel) => panel.getAttribute('role'))).toEqual(['tabpanel', 'tabpanel']);
+      expect(panels.map((panel) => panel.getAttribute('aria-labelledby'))).toEqual(['a', 'b']);
+    }
+  );
 
   it('retains an in-progress native keyboard interaction rather than hiding its focused tab', () => {
     const { root, list, tabs, panels } = fixture();
@@ -104,10 +119,16 @@ describe('CodeExample real legacy Tabs enhancement', () => {
   it('does not accept a bubbled nested Tabs valueChange as a host change', () => {
     const { root, list, tabs, panels } = fixture();
     const changes: number[] = [];
-    projections.push(enhanceCodeExampleTabs({ list, tabs, panels, onSelect: (index) => changes.push(index) }));
-    panels[0].dispatchEvent(new CustomEvent('valueChange', { bubbles: true, detail: { value: '1' } }));
+    projections.push(
+      enhanceCodeExampleTabs({ list, tabs, panels, onSelect: (index) => changes.push(index) })
+    );
+    panels[0].dispatchEvent(
+      new CustomEvent('valueChange', { bubbles: true, detail: { value: '1' } })
+    );
     expect(changes).toEqual([]);
-    root.querySelector('[data-code-example-tabs-projection]')!.dispatchEvent(new CustomEvent('valueChange', { detail: { value: '1' } }));
+    root
+      .querySelector('[data-code-example-tabs-projection]')!
+      .dispatchEvent(new CustomEvent('valueChange', { detail: { value: '1' } }));
     expect(changes).toEqual([1]);
   });
 });

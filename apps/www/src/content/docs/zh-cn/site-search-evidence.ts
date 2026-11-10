@@ -152,6 +152,17 @@ export function installSearchStartupTrace() {
           generation: host?.dataset.projectionGenerationHost ?? null,
           currentOwner: mount?.dataset.projectionOwner ?? null,
           currentGeneration: (searchRoot as HTMLElement | null)?.dataset.searchGeneration ?? null,
+          // Also report the active dialog generation for Dialog-content evidence.
+          dialogGeneration: (() => {
+            const dialogMount = (searchRoot as HTMLElement | null)?.querySelector<HTMLElement>(
+              '[data-search-dialog-mount]'
+            );
+            const activeHost = [
+              ...(dialogMount?.querySelectorAll<HTMLElement>('[data-projection-generation-host]') ??
+                []),
+            ].find((host) => host.dataset.projectionGenerationState === 'active');
+            return activeHost?.dataset.projectionGenerationHost ?? null;
+          })(),
           view: (searchRoot as HTMLElement | null)?.dataset.searchView ?? null,
         };
         const readSettledAt = target ? performance.now() : null;

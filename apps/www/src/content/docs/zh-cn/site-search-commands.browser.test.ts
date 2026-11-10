@@ -593,7 +593,6 @@ describe.sequential('Search family Button commands', () => {
               throw error;
             }
             await page.evaluate(() => (window as any).__puiSearchStartup?.stop());
-            const close = await searchPart(page, 'close');
             expect(await trigger.evaluate((button) => button.localName)).toBe(
               `wc-${family}-button`
             );
@@ -622,6 +621,10 @@ describe.sequential('Search family Button commands', () => {
             else expect(box!.width).toBeGreaterThan(150);
             await capture(page, id, 'trigger');
             await trigger.locator('svg').click();
+            // The Dialog materializes in its own lazy scope; resolve its close
+            // control only after the open intent, so the locator binds the
+            // Dialog's own committed generation.
+            const close = await searchPart(page, 'close');
             await expect
               .poll(async () => (await page.evaluate(readSearchPublicState)).open)
               .toBe(true);
@@ -839,16 +842,29 @@ for (const viewport of headerTriggerViewports) {
           );
           const waitForClosedPortals = async () => {
             for (const ref of ['mask', 'panel']) {
-              const part = await searchPart(page, ref);
               await expect
-                .poll(async () => {
-                  if ((await part.count()) === 0) return true;
-                  return part.evaluate(
-                    (node) =>
-                      node.hasAttribute('data-pui-view-detached') &&
-                      getComputedStyle(node).display === 'none'
-                  );
-                })
+                .poll(async () =>
+                  page.evaluate((ref) => {
+                    // Observe the Dialog's own portals by owner.  Before the
+                    // Dialog's first open there is no committed generation, so
+                    // the owner-scoped observation stays valid in every state.
+                    const search = document.querySelector<HTMLElement>('site-search');
+                    const mount = search?.querySelector<HTMLElement>('[data-search-dialog-mount]');
+                    const owner = mount?.dataset.projectionOwner;
+                    if (!owner) return true;
+                    const nodes = [
+                      ...document.querySelectorAll<HTMLElement>(
+                        `[data-projection-owner="${CSS.escape(owner)}"][data-demo-ref="${ref}"]`
+                      ),
+                    ];
+                    if (nodes.length === 0) return true;
+                    return nodes.every(
+                      (node) =>
+                        node.hasAttribute('data-pui-view-detached') &&
+                        getComputedStyle(node).display === 'none'
+                    );
+                  }, ref)
+                )
                 .toBe(true);
             }
           };
@@ -878,13 +894,18 @@ for (const viewport of headerTriggerViewports) {
                 `${active} > .pui-projection-scope > .pui-projection-content`,
                 dialogMount
               );
+              // The Dialog content element carries its own scope generation, so
+              // portaled content (mask, panel) is matched by the Dialog's own
+              // committed generation and never by the opener's command
+              // generation.
+              const dialogGeneration = dialogContent.dataset.projectionGeneration ?? '';
               const portalSelector =
                 `[data-projection-owner="${CSS.escape(dialogMount.dataset.projectionOwner!)}"]` +
-                `[data-projection-generation="${CSS.escape(search.dataset.searchGeneration!)}"]`;
+                `[data-projection-generation="${CSS.escape(dialogGeneration)}"]`;
               return {
                 family: search.dataset.searchFamily,
                 runtime: search.dataset.searchRuntime,
-                generation: search.dataset.searchGeneration,
+                generation: dialogGeneration,
                 wrapper: rect(required('.site-header-search')),
                 trigger: rect(required(`${active} [data-open-modal]`, search)),
                 peers: ['home-theme', 'home-menu'].map((ref) => ({

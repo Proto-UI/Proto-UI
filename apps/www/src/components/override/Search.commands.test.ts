@@ -4,7 +4,122 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { siteSearchShortcutLabel } from '../site-search-shortcut';
 import { PREFERRED_ADAPTER_EVENT } from '../adapter-preference';
 import { searchCommandParticipant, initDocumentationSearchCommands } from '../site-search-commands';
+import type * as ProjectionScopeModule from '../PrototypePreviewer/projection-scope';
+import type {
+  ProjectionScopeController,
+  ProjectionScopeMaterializeRequest,
+  ProjectionScopeSnapshot,
+} from '../PrototypePreviewer/projection-scope';
 vi.setConfig({ testTimeout: 20_000 });
+
+type RuntimeRequestObservation = {
+  root: HTMLElement;
+  owner: string;
+  runtime: string;
+  before: ProjectionScopeSnapshot;
+  materializationStart: number;
+  requestedAtMs: number;
+  pending: Promise<ProjectionScopeSnapshot>;
+};
+type RuntimeScopeObservation = {
+  controller: ProjectionScopeController;
+  root: HTMLElement | null;
+  mount: HTMLElement | null;
+  kind: 'command' | 'dialog' | null;
+  materializations: ProjectionScopeMaterializeRequest[];
+  requests: RuntimeRequestObservation[];
+};
+type RuntimeScopes = {
+  roots: WeakMap<HTMLElement, Set<RuntimeScopeObservation>>;
+  materializing: {
+    scope: RuntimeScopeObservation;
+    request: ProjectionScopeMaterializeRequest;
+  } | null;
+};
+const runtimeScopes = vi.hoisted((): RuntimeScopes => ({
+  roots: new WeakMap<HTMLElement, Set<RuntimeScopeObservation>>(),
+  materializing: null,
+}));
+vi.mock('../PrototypePreviewer/projection-scope', async (original) => {
+  const actual = await original<typeof ProjectionScopeModule>();
+  return {
+    ...actual,
+    createProjectionScopeController(
+      options: Parameters<typeof actual.createProjectionScopeController>[0]
+    ) {
+      let scope!: RuntimeScopeObservation;
+      const controller = actual.createProjectionScopeController({
+        ...options,
+        materialize(request) {
+          scope.materializations.push(request);
+          const previous = runtimeScopes.materializing;
+          runtimeScopes.materializing = { scope, request };
+          try {
+            return options.materialize(request);
+          } finally {
+            runtimeScopes.materializing = previous;
+          }
+        },
+      });
+      scope = {
+        controller,
+        root: null,
+        mount: null,
+        kind: null,
+        materializations: [],
+        requests: [],
+      };
+      const request = controller.request;
+      vi.spyOn(controller, 'request').mockImplementation(function (
+        this: ProjectionScopeController,
+        patch,
+        requestOptions
+      ) {
+        const { root, mount } = scope;
+        if (!root || !mount) return request.call(this, patch, requestOptions);
+        const owner = mount.dataset.projectionOwner;
+        if (!owner) throw new Error('Observed Search scope requires its actual projection owner');
+        const before = controller.getSnapshot();
+        const materializationStart = scope.materializations.length;
+        const requestedAtMs = performance.now();
+        const pending = request.call(this, patch, requestOptions);
+        scope.requests.push({
+          root,
+          owner,
+          runtime: patch.runtimeId ?? before.selection.runtimeId,
+          before,
+          materializationStart,
+          requestedAtMs,
+          pending,
+        });
+        // Keep the real controller, receiver and exact original completion Promise.
+        return pending;
+      });
+      return controller;
+    },
+  };
+});
+
+function observeSearchMaterialization(
+  root: HTMLElement,
+  mount: HTMLElement,
+  kind: 'command' | 'dialog',
+  request: ProjectionScopeMaterializeRequest
+) {
+  const active = runtimeScopes.materializing;
+  if (!active || active.request !== request)
+    throw new Error('Search materialization must belong to its actual scope request');
+  const { scope } = active;
+  if (scope.root && (scope.root !== root || scope.mount !== mount || scope.kind !== kind))
+    throw new Error('A Search scope cannot change its root, mount or owner role');
+  scope.root = root;
+  scope.mount = mount;
+  scope.kind = kind;
+  let scopes = runtimeScopes.roots.get(root);
+  if (!scopes) runtimeScopes.roots.set(root, (scopes = new Set()));
+  scopes.add(scope);
+}
+
 // Observe the actual public composition context without replacing host handles,
 // setup behavior, its return cleanup, or the original factory contract.
 const compositionContexts = vi.hoisted(
@@ -180,6 +295,29 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
   )(
     searchCommandParticipant,
     (participant: Parameters<typeof initDocumentationSearchCommands>[0]) => {
+      const materialize = participant.materialize;
+      vi.spyOn(participant, 'materialize').mockImplementation(function (
+        this: typeof participant,
+        request,
+        namespace
+      ) {
+        const mount = participant.mounts[0];
+        if (!mount) throw new Error('Search requires its real command mount');
+        observeSearchMaterialization(participant.root, mount, 'command', request);
+        return materialize.call(this, request, namespace);
+      });
+      const materializeDialog = participant.materializeDialog;
+      vi.spyOn(participant, 'materializeDialog').mockImplementation(function (
+        this: typeof participant,
+        request,
+        namespace,
+        options
+      ) {
+        const mount = participant.root.querySelector<HTMLElement>('[data-search-dialog-mount]');
+        if (!mount) throw new Error('Search requires its real Dialog mount');
+        observeSearchMaterialization(participant.root, mount, 'dialog', request);
+        return materializeDialog.call(this, request, namespace, options);
+      });
       docs = initDocumentationSearchCommands(participant);
       destroyCompleted = observeSuccessfulDestroy(docs);
       return docs;
@@ -200,20 +338,31 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
   await docs.ready;
   await settle();
   const ref = (name: string) => {
-    const owner = root.querySelector<HTMLElement>('[data-search-dialog-mount]')!.dataset
-      .projectionOwner;
-    const gen = root.dataset.searchGeneration;
-    // The dialog lives in its own lazy scope whose generation differs from
-    // the opener's. Match by owner and ref; the active host is unique.
-    return [...document.querySelectorAll<HTMLElement>('[data-demo-ref]')].find(
-      (node) => {
-        if (node.dataset.demoRef !== name || node.dataset.projectionOwner !== owner)
-          return false;
-        if (node.dataset.projectionGeneration === gen) return true;
-        const host = node.closest<HTMLElement>('[data-projection-generation-host]');
-        return host?.dataset.projectionGenerationState === 'active';
-      }
+    const dialogMount = root.querySelector<HTMLElement>('[data-search-dialog-mount]')!;
+    const owner = dialogMount.dataset.projectionOwner;
+    // Every ref this fixture observes belongs to the public Dialog's own lazy
+    // scope.  Portaled dialog content (mask, panel, close, input) carries
+    // data-projection-owner and data-projection-generation from
+    // stampProjectionSurfaces, but lives outside any generation host, so the
+    // closest-host fallback cannot reach it.  Resolve the active dialog
+    // generation from the dialog mount's own hosts and match it directly.
+    const activeDialogGens = new Set(
+      [...dialogMount.querySelectorAll<HTMLElement>('[data-projection-generation-host]')]
+        .filter((host) => host.dataset.projectionGenerationState === 'active')
+        .map((host) => host.dataset.projectionGenerationHost)
     );
+    return [...document.querySelectorAll<HTMLElement>('[data-demo-ref]')].find((node) => {
+      if (node.dataset.demoRef !== name || node.dataset.projectionOwner !== owner) return false;
+      // A staging generation must never satisfy a live observation, so the
+      // opener's unrelated generation counter is not a matching fact.
+      if (
+        node.dataset.projectionGeneration &&
+        activeDialogGens.has(node.dataset.projectionGeneration)
+      )
+        return true;
+      const host = node.closest<HTMLElement>('[data-projection-generation-host]');
+      return host?.dataset.projectionGenerationState === 'active';
+    });
   };
   cleanup.push(async () => {
     dispose();
@@ -282,10 +431,76 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
       return () => release();
     },
     async runtime(runtime: string) {
+      const scopes = [...(runtimeScopes.roots.get(root) ?? [])].filter(
+        (scope) => scope.controller.getSnapshot().phase !== 'destroyed'
+      );
+      expect(scopes.filter((scope) => scope.kind === 'command')).toHaveLength(1);
+      const boundaries = scopes.map((scope) => ({ scope, requestCount: scope.requests.length }));
       document.dispatchEvent(
         new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
       );
-      await vi.waitFor(() => expect(root.dataset.searchRuntime).toBe(runtime));
+      // The preference notification starts real asynchronous host transactions.
+      // Await those original operations within the existing test case bound;
+      // a second refresh would supersede them and a polling deadline is unrelated.
+      await Promise.all(
+        boundaries.map(async ({ scope, requestCount }) => {
+          const requests = scope.requests.slice(requestCount);
+          expect(requests).toHaveLength(1);
+          const observed = requests[0]!;
+          expect(observed.root).toBe(root);
+          expect(observed.runtime).toBe(runtime);
+          expect(observed.before.phase).toBe('ready');
+          const committed = await observed.pending;
+          const completionObservedAtMs = performance.now();
+          const materialized = scope.materializations.slice(observed.materializationStart);
+          if (observed.before.selection.runtimeId === runtime) {
+            expect(materialized).toHaveLength(0);
+            expect(committed.generation).toBe(observed.before.generation);
+          } else {
+            expect(materialized).toHaveLength(1);
+            expect(materialized[0]!.selection.runtimeId).toBe(runtime);
+            expect(committed.generation).toBe(materialized[0]!.generation);
+            expect(committed.generation).toBeGreaterThan(observed.before.generation);
+          }
+          expect(scope.requests).toHaveLength(requestCount + 1);
+          expect(committed.phase).toBe('ready');
+          expect(committed.selection.runtimeId).toBe(runtime);
+          expect(scope.controller.getSnapshot()).toEqual(committed);
+          const mount = scope.mount;
+          if (!mount) throw new Error('Completed Search request lost its observed mount');
+          expect(mount.dataset.projectionOwner).toBe(observed.owner);
+          const hosts = [
+            ...mount.querySelectorAll<HTMLElement>('[data-projection-generation-host]'),
+          ].filter(
+            (host) =>
+              host.dataset.projectionOwnerHost === observed.owner &&
+              host.dataset.projectionGenerationState === 'active'
+          );
+          expect(hosts).toHaveLength(1);
+          expect(hosts[0]!.dataset.projectionGenerationHost).toBe(String(committed.generation));
+          expect(hosts[0]!.inert).toBe(false);
+          const surface = [
+            ...hosts[0]!.querySelectorAll<HTMLElement>('[data-projection-scope]'),
+          ].find((element) => element.dataset.projectionScope === observed.owner);
+          if (!surface) {
+            throw new Error(`Completed Search request has no scope for ${observed.owner}`);
+          }
+          expect(surface.dataset.projectionGeneration).toBe(String(committed.generation));
+          expect(surface.dataset.projectionRuntime).toBe(runtime);
+          console.info('[Search runtime request completion]', {
+            root: root.localName,
+            kind: scope.kind,
+            owner: observed.owner,
+            runtime,
+            previousGeneration: observed.before.generation,
+            committedGeneration: committed.generation,
+            requestedAtMs: observed.requestedAtMs,
+            completionObservedAtMs,
+            clock: 'Vitest worker performance.now(); completion observation after actual commit/retirement, not a native commit timestamp',
+          });
+        })
+      );
+      expect(root.dataset.searchRuntime).toBe(runtime);
       await settle();
     },
   };
@@ -390,7 +605,9 @@ describe('public Search intent and resource lifetime', () => {
     release();
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.loadRuntime).toHaveBeenCalledTimes(1);
-    expect(f.open).toBe(true);
+    // The public Dialog materializes in its own lazy scope, independently of
+    // the backend's readiness.  Observe the Dialog's own open state.
+    await vi.waitFor(() => expect(f.open).toBe(true));
     expect(f.present).toBe(true);
   });
   it('keeps failed intent silent, permits explicit retry, and reuses one prepared backend', async () => {
@@ -405,7 +622,7 @@ describe('public Search intent and resource lifetime', () => {
     click(f.trigger);
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.fetchIndex).toHaveBeenCalledTimes(2);
-    expect(f.open).toBe(true);
+    await vi.waitFor(() => expect(f.open).toBe(true));
     expect(f.present).toBe(true);
     click(f.close);
     await settle();
@@ -430,16 +647,21 @@ describe('public Search intent and resource lifetime', () => {
     const f = await mount('shadcn');
     const release = f.holdProbe();
     click(f.trigger);
-    await settle();
+    // The Dialog materializes lazily on first open; the Close button only
+    // exists once the Dialog has been presented.  Observe the Dialog's own
+    // open state and the Close button's presence before clicking it.
+    await vi.waitFor(() => expect(f.open).toBe(true));
+    await vi.waitFor(() => expect(f.close).toBeDefined());
     click(f.close);
-    await settle();
-    expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.open).toBe(false));
     await vi.waitFor(() => expect(f.present).toBe(false));
     click(f.trigger);
     await settle();
     release();
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
-    expect(f.open).toBe(true);
+    // The public Dialog materializes in its own lazy scope, independently of
+    // the backend's readiness.  Observe the Dialog's own open state.
+    await vi.waitFor(() => expect(f.open).toBe(true));
     expect(f.present).toBe(true);
     expect(f.fetchIndex).toHaveBeenCalledTimes(1);
     expect(f.input).toBe(document.activeElement);
@@ -457,8 +679,12 @@ describe('public Search intent and resource lifetime', () => {
       click(f.trigger);
       await vi.waitFor(() => expect(f.loadRuntime).toHaveBeenCalledTimes(1));
       const oldTrigger = f.trigger;
-      if (action === 'close') click(f.close);
-      else if (action === 'route') document.dispatchEvent(new Event('astro:before-swap'));
+      if (action === 'close') {
+        // Dialog materialization completes independently of backend loading.
+        await vi.waitFor(() => expect(f.open).toBe(true));
+        await vi.waitFor(() => expect(f.close).toBeDefined());
+        click(f.close);
+      } else if (action === 'route') document.dispatchEvent(new Event('astro:before-swap'));
       else f.dispose();
       if (action === 'route') expect(f.docs.destroy).toHaveBeenCalledTimes(1);
       await settle();
@@ -571,9 +797,13 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     it('opens once from the descendant and ignores a later native echo of the outward callback', async () => {
       const f = await mount(family);
       const trigger = f.trigger;
+      // The opener holds focus before the Dialog opens.  A synthetic click does
+      // not move focus, so without this the Dialog has no opener to restore
+      // focus to on dismissal and the return-to-opener contract is unproven.
+      trigger.focus();
+      expect(document.activeElement).toBe(trigger);
       trigger.dispatchEvent(new CustomEvent('click', { bubbles: true }));
-      await settle();
-      expect(f.open).toBe(true);
+      await vi.waitFor(() => expect(f.open).toBe(true));
       expect(f.present).toBe(true);
       click(trigger);
       await settle();
@@ -592,6 +822,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       const f = await mount(family);
       click(f.trigger);
       await vi.waitFor(() => expect(f.open).toBe(true));
+      await vi.waitFor(() => expect(f.input).toBeDefined());
       type(f.input!, 'Button');
       await vi.waitFor(() => expect(f.ref('results')?.textContent).toContain('Result Button'));
       for (const key of ['Enter', ' ']) {
@@ -680,6 +911,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         await vi.waitFor(() => expect(f.present).toBe(false));
         click(f.trigger);
         await vi.waitFor(() => expect(f.open).toBe(true));
+        await vi.waitFor(() => expect(f.input).toBeDefined());
         type(f.input!, 'Retained');
         await vi.waitFor(() => expect(f.ref('results')?.textContent).toContain('Result Retained'));
         const oldInput = f.input;
@@ -763,6 +995,46 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       expect(document.activeElement).toBe(f.input);
       expect(f.open).toBe(true);
       expect(f.present).toBe(true);
+    });
+    it(`${family}/${runtime} auto-enters the query when the runtime switched while closed`, async () => {
+      // A runtime switch made while the Dialog is closed must not change the
+      // next fresh open's entry behaviour: the Dialog still auto-enters the
+      // query when the user opens it.
+      const f = await mount(family);
+      if (runtime === 'wc') await f.runtime('react');
+      click(f.trigger);
+      await vi.waitFor(() => expect(f.open).toBe(true));
+      click(f.close);
+      await vi.waitFor(() => expect(f.open).toBe(false));
+      await vi.waitFor(() => expect(f.present).toBe(false));
+      await f.runtime(runtime);
+      click(f.trigger);
+      await vi.waitFor(() => expect(f.open).toBe(true));
+      await vi.waitFor(() => expect(f.input).toBeDefined());
+      await vi.waitFor(() => expect(document.activeElement).toBe(f.input));
+    });
+    it(`${family}/${runtime} auto-enters the query on a fresh open after a runtime switch`, async () => {
+      // The runtime switch preserves the focused control for the generation it
+      // replaces.  It must not permanently opt that generation out of the
+      // Dialog's own entry policy: closing and reopening the same generation
+      // is a fresh open and must auto-enter the query again.
+      const f = await mount(family);
+      if (runtime === 'wc') await f.runtime('react');
+      click(f.trigger);
+      await vi.waitFor(() => expect(f.open).toBe(true));
+      const oldClose = f.close;
+      oldClose.focus();
+      await vi.waitFor(() => expect(document.activeElement).toBe(oldClose));
+      await f.runtime(runtime);
+      await vi.waitFor(() => expect(document.activeElement).toBe(f.close));
+      // Close and reopen the same (swapped) generation.
+      click(f.close);
+      await vi.waitFor(() => expect(f.open).toBe(false));
+      await vi.waitFor(() => expect(f.present).toBe(false));
+      click(f.trigger);
+      await vi.waitFor(() => expect(f.open).toBe(true));
+      await vi.waitFor(() => expect(f.input).toBeDefined());
+      await vi.waitFor(() => expect(document.activeElement).toBe(f.input));
     });
   }
 }

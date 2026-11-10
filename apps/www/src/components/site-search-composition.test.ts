@@ -118,6 +118,9 @@ describe('public Search composition, actual prototype loaders and four hosts', (
           copy: { ...copy, error: longError, retry: longRetry, loading: longLoading },
           isCurrent: () => active,
           onFailure: (error) => errors.push(error),
+          // Direct compositions have no generation swap or pending focus restore.
+          takeFocusRestore: () => null,
+          focusEpoch: () => 0,
         });
         const ids = new Set<string>();
         collectPrototypeIds(composition.demo.root, ids);
@@ -257,6 +260,8 @@ it('opens through the public Dialog even when its closed Command has no instance
     onFailure: (error) => {
       throw error;
     },
+    takeFocusRestore: () => null,
+    focusEpoch: () => 0,
   });
   const host = document.createElement('div');
   const status = document.createElement('div');
@@ -342,6 +347,8 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
       copy: { ...copy, pages: 'Pages', results: 'Results', goToPage: 'Go to page' },
       isCurrent: () => true,
       onFailure: (error) => errors.push(error),
+      takeFocusRestore: () => null,
+      focusEpoch: () => 0,
     });
     const ids = new Set<string>();
     collectPrototypeIds(composition.demo.root, ids);
@@ -459,6 +466,8 @@ function controlledHintFixture() {
     copy,
     isCurrent: () => true,
     onFailure: (error) => errors.push(error),
+    takeFocusRestore: () => null,
+    focusEpoch: () => 0,
   });
   const cleanup = composition.demo.setup!({
     host: document.createElement('div'),
@@ -583,6 +592,8 @@ function resultsCommitFixture(
     copy: { ...copy, pages: 'Pages', results: 'Results' },
     isCurrent: () => true,
     onFailure: (error) => errors.push(error),
+    takeFocusRestore: () => null,
+    focusEpoch: () => 0,
   });
   const cleanup = composition.demo.setup!({
     host: document.createElement('div'),

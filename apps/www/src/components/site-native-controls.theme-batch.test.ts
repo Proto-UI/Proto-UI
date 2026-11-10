@@ -1,5 +1,5 @@
 import { getElementProps } from '@proto.ui/adapter-web-component';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initSiteNativeControls } from './site-native-controls';
 const theme = vi.hoisted(() => ({ color: '#222222', read: vi.fn() }));
 vi.mock('./PrototypePreviewer/projection-theme', () => ({
@@ -292,4 +292,238 @@ it('isolates successive batches and cancels old queued work on immediate release
   window.dispatchEvent(new Event('blur'));
   await settle();
   expect(theme.read).toHaveBeenCalledTimes(2);
+});
+
+describe('progressive native decoration', () => {
+  // Control only task delivery around real native owners and public WCs.
+  // These fixtures do not measure browser idle time or native responsiveness.
+  function idleTasks() {
+    let id = 0;
+    const pending = new Map<number, () => void>();
+    vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+      const next = ++id;
+      pending.set(next, () => callback({ didTimeout: false, timeRemaining: () => 50 }));
+      return next;
+    });
+    vi.stubGlobal('cancelIdleCallback', (task: number) => pending.delete(task));
+    const retainNext = () => {
+      const callback = pending.values().next().value;
+      if (!callback) throw new Error('No pending native decoration task');
+      return callback;
+    };
+    const next = () => {
+      const entry = pending.entries().next().value;
+      if (!entry) throw new Error('No pending native decoration task');
+      pending.delete(entry[0]);
+      entry[1]();
+    };
+    return {
+      next,
+      retainNext,
+      drain() {
+        for (let remaining = 100; pending.size; remaining--) {
+          if (!remaining) throw new Error('Native decoration did not finish');
+          next();
+        }
+      },
+    };
+  }
+  afterEach(() => {
+    // Release with the same task API that admitted this batch.
+    for (const release of releases.splice(0)) release();
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('keeps all SSR navigation usable between complete owner moves and decorates the whole population', () => {
+    const tasks = idleTasks();
+    const owners = [...document.querySelectorAll<HTMLElement>('summary,a')];
+    const content = owners.map((owner) => [...owner.childNodes]);
+    const summary = document.querySelector('summary')!;
+    const details = document.querySelector('details')!;
+    const initiallyOpen = details.open;
+    const range = document.createElement('div');
+    range.dataset.siteTocHighlight = '';
+    document.body.append(range);
+    const release = initSiteNativeControls(document, { progressive: true });
+    releases.push(release);
+    expect(document.querySelector('[data-site-link-enhanced]')).toBeNull();
+    for (const [index, owner] of owners.entries())
+      expect([...owner.childNodes]).toEqual(content[index]);
+    expect(details.open).toBe(initiallyOpen);
+    summary.click();
+    expect(details.open).toBe(!initiallyOpen);
+    const link = document.querySelector('a')!;
+    link.focus();
+    tasks.next();
+    expect(range.querySelector('wc-site-shadcn-surface')).not.toBeNull();
+    expect(document.querySelector('[data-site-link-enhanced]')).toBeNull();
+    tasks.next();
+    expect(document.querySelectorAll('[data-site-link-enhanced]')).toHaveLength(1);
+    expect(details.open).toBe(!initiallyOpen);
+    summary.click();
+    expect(details.open).toBe(initiallyOpen);
+    tasks.drain();
+    expect(document.querySelectorAll('[data-site-link-enhanced]')).toHaveLength(owners.length);
+    expect(document.activeElement).toBe(link);
+    for (const [index, owner] of owners.entries()) {
+      expect(owner.querySelectorAll('[data-site-link-content]')).toHaveLength(1);
+      expect(content[index].every((node) => owner.contains(node))).toBe(true);
+    }
+    expect(link.getAttribute('href')).toBe('/a/');
+    release();
+    for (const [index, owner] of owners.entries())
+      expect([...owner.childNodes]).toEqual(content[index]);
+    expect(range.children).toHaveLength(0);
+    expect(document.activeElement).toBe(link);
+    expect(details.open).toBe(initiallyOpen);
+  });
+
+  it('retains pending native facts and samples the current family and CSSOM palette before each move', async () => {
+    const tasks = idleTasks();
+    releases.push(initSiteNativeControls(document, { progressive: true }));
+    tasks.next();
+    const link = document.querySelector('a')!;
+    const source = link.firstChild;
+    link.setAttribute('aria-current', 'page');
+    link.dispatchEvent(new Event('pointerenter'));
+    link.dispatchEvent(new MouseEvent('pointerdown', { button: 0 }));
+    link.focus();
+    theme.color = '#123abc'; // CSSOM input with no root mutation notification.
+    document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+    tasks.next();
+    await settle();
+    const surface = link.querySelector<HTMLElement>('wc-site-brutalist-surface')!;
+    expect(getElementProps(surface)).toMatchObject({ hovered: true, pressed: true, current: true });
+    expect(link.contains(source)).toBe(true);
+    expect(document.activeElement).toBe(link);
+    theme.color = '#abcdef';
+    tasks.drain();
+    await settle();
+    expect(document.querySelectorAll('wc-site-brutalist-surface')).toHaveLength(3);
+    expect(document.querySelector('wc-site-shadcn-surface')).toBeNull();
+    assertColor('#abcdef');
+  });
+
+  it.each(['before the first move', 'after one move'])(
+    'releases pending ownership %s and ignores a canceled task after reinitialization',
+    (when) => {
+      const tasks = idleTasks();
+      const owners = [...document.querySelectorAll<HTMLElement>('summary,a')];
+      const content = owners.map((owner) => [...owner.childNodes]);
+      const release = initSiteNativeControls(document, { progressive: true });
+      releases.push(release);
+      const duplicate = initSiteNativeControls();
+      duplicate();
+      if (when === 'after one move') tasks.next();
+      const canceled = tasks.retainNext();
+      release();
+      for (const [index, owner] of owners.entries())
+        expect([...owner.childNodes]).toEqual(content[index]);
+      document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+      theme.color = '#abcdef';
+      releases.push(initSiteNativeControls(document, { progressive: true }));
+      canceled(); // Deliberate late-delivery injection, after actual cancellation.
+      tasks.drain();
+      release();
+      expect(document.querySelectorAll('wc-site-brutalist-surface')).toHaveLength(3);
+      expect(document.querySelector('wc-site-shadcn-surface')).toBeNull();
+      assertColor('#abcdef');
+      for (const [index, owner] of owners.entries())
+        expect(content[index].every((node) => owner.contains(node))).toBe(true);
+    }
+  );
+
+  it('releases a detached pending owner so its original node can be initialized after reinsertion', () => {
+    const tasks = idleTasks();
+    const link = document.querySelector('a')!;
+    const parent = link.parentElement!;
+    const source = link.firstChild;
+    releases.push(initSiteNativeControls(document, { progressive: true }));
+    link.remove();
+    tasks.drain();
+    expect(link.querySelector('[data-site-link-content]')).toBeNull();
+    expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(2);
+    parent.append(link);
+    releases.push(initSiteNativeControls());
+    expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(3);
+    expect(link.contains(source)).toBe(true);
+  });
+
+  it('captures a Selection created synchronously by the preceding owner connection', () => {
+    const tasks = idleTasks();
+    const summary = document.querySelector('summary')!;
+    const link = document.querySelector('a')!;
+    const source = link.firstChild!;
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    // Preserve the existing HappyDOM15 getter boundary; this is not native
+    // directionality evidence. Both real owner moves still execute.
+    vi.spyOn(selection, 'focusOffset', 'get').mockReturnValue(1);
+    const restore = vi.spyOn(selection, 'setBaseAndExtent');
+    const append = summary.append.bind(summary);
+    vi.spyOn(summary, 'append').mockImplementation((...nodes) => {
+      append(...nodes);
+      selection.setBaseAndExtent(link, 0, link, 1);
+    });
+    releases.push(initSiteNativeControls(document, { progressive: true }));
+    tasks.next();
+    expect(selection.anchorNode).toBe(link);
+    tasks.next();
+    expect(restore).toHaveBeenLastCalledWith(source.parentNode, 0, source.parentNode, 1);
+    expect(selection.anchorNode).toBe(source.parentNode);
+    expect(link.contains(source)).toBe(true);
+    tasks.drain();
+  });
+
+  it('cannot resume a retired first move after synchronous cancellation and replacement initialization', async () => {
+    const tasks = idleTasks();
+    const summary = document.querySelector('summary')!;
+    const source = summary.firstChild;
+    const append = summary.append.bind(summary);
+    let release = () => {};
+    let reenter = true;
+    let retired: Node | undefined;
+    vi.spyOn(summary, 'append').mockImplementation((...nodes) => {
+      append(...nodes); // Actual public WC connection precedes the injected reentry.
+      if (!reenter) return;
+      reenter = false;
+      retired = summary.firstChild!;
+      initSiteNativeControls()(); // A duplicate must not acquire queued siblings.
+      release();
+      releases.push(initSiteNativeControls(document, { progressive: true }));
+    });
+    release = initSiteNativeControls(document, { progressive: true });
+    releases.push(release);
+    tasks.next();
+    tasks.drain();
+    await settle();
+    expect(retired?.isConnected).toBe(false);
+    expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(3);
+    expect(summary.querySelectorAll('[data-site-link-content]')).toHaveLength(1);
+    expect(summary.contains(source)).toBe(true);
+    release();
+    expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(3);
+  });
+
+  it.each([false, true])(
+    'completes or cancels the timer fallback without idle APIs: cancel=%s',
+    async (cancel) => {
+      vi.stubGlobal('requestIdleCallback', undefined);
+      vi.stubGlobal('cancelIdleCallback', undefined);
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      const owners = [...document.querySelectorAll<HTMLElement>('summary,a')];
+      const content = owners.map((owner) => [...owner.childNodes]);
+      const release = initSiteNativeControls(document, { progressive: true });
+      releases.push(release);
+      expect(document.querySelector('[data-site-link-content]')).toBeNull();
+      if (cancel) release();
+      await vi.runAllTimersAsync();
+      expect(document.querySelectorAll('[data-site-link-content]')).toHaveLength(cancel ? 0 : 3);
+      release();
+      await vi.runAllTimersAsync();
+      for (const [index, owner] of owners.entries())
+        expect([...owner.childNodes]).toEqual(content[index]);
+    }
+  );
 });

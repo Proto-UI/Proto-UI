@@ -5,15 +5,68 @@ import {
   PREFERRED_ADAPTER_KEY,
 } from './adapter-preference';
 import { initCodeExamples } from './code-example-client';
+import { enhanceCodeExampleTabs, type TabProjection } from './code-example-tabs';
+import { enhanceCodeExampleTree } from './code-example-tree';
 
 // These tests retain the native fallback contract. The real Tabs projection has
 // a separate suite and browser evidence; do not conflate the two owners.
 vi.mock('./code-example-tabs', async (importOriginal) => ({
-  ...await importOriginal<typeof import('./code-example-tabs')>(),
-  enhanceCodeExampleTabs: () => ({ select() {}, destroy() {} }),
+  ...(await importOriginal<typeof import('./code-example-tabs')>()),
+  enhanceCodeExampleTabs: vi.fn(),
 }));
 
-vi.mock('./code-example-tree', () => ({ enhanceCodeExampleTree: () => ({ select() {}, destroy() {} }) }));
+vi.mock('./code-example-tree', () => ({ enhanceCodeExampleTree: vi.fn() }));
+
+interface AcquiredProjection {
+  kind: 'tree' | 'tabs';
+  list: HTMLElement;
+  selected: HTMLElement | null;
+  projection: TabProjection;
+}
+
+const acquired: AcquiredProjection[] = [];
+const tasks = new Map<number, () => void>();
+const idleTasks = new Map<number, () => void>();
+const browserWindow: Window = window;
+let nextTask = 0;
+let nextIdleTask = 0;
+
+function installIdleTasks(): void {
+  vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+    const id = nextIdleTask++;
+    idleTasks.set(id, () => callback({ didTimeout: false, timeRemaining: () => 0 }));
+    return id;
+  });
+  vi.stubGlobal('cancelIdleCallback', (id: number) => idleTasks.delete(id));
+}
+
+function recordProjection(kind: AcquiredProjection['kind'], list: HTMLElement): TabProjection {
+  const projection = { select: vi.fn(), destroy: vi.fn() };
+  acquired.push({
+    kind,
+    list,
+    selected: list.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]'),
+    projection,
+  });
+  return projection;
+}
+
+// Deliver actual scheduled callbacks one at a time. These injected task turns
+// distinguish yielding and ownership; they are not native timing evidence.
+function runNextTask(pending = tasks): void {
+  const next = pending.entries().next().value;
+  if (!next) throw new Error('Expected a pending CodeExample task.');
+  const [id, callback] = next;
+  pending.delete(id);
+  callback();
+}
+
+function finishTasks(pending = tasks): void {
+  for (let count = 0; pending.size; count++) {
+    if (count === 20) throw new Error('CodeExample projection work did not finish.');
+    runNextTask(pending);
+  }
+}
 
 function exampleMarkup(id: string, initialHost: 'wc' | 'react' = 'wc'): string {
   const hosts = ['wc', 'react'] as const;
@@ -102,11 +155,35 @@ describe('CodeExample client', () => {
   beforeEach(() => {
     document.body.innerHTML = exampleMarkup('first');
     localStorage.clear();
+    acquired.length = 0;
+    tasks.clear();
+    idleTasks.clear();
+    nextTask = 0;
+    nextIdleTask = 0;
+    // Retain the existing timer-path cases; idle admission is exercised below.
+    vi.stubGlobal('requestIdleCallback', undefined);
+    vi.stubGlobal('cancelIdleCallback', undefined);
+    vi.mocked(enhanceCodeExampleTree)
+      .mockReset()
+      .mockImplementation(({ list }) => recordProjection('tree', list));
+    vi.mocked(enhanceCodeExampleTabs)
+      .mockReset()
+      .mockImplementation(({ list }) => recordProjection('tabs', list));
+    vi.spyOn(browserWindow, 'setTimeout').mockImplementation((callback) => {
+      if (typeof callback !== 'function') throw new Error('Expected a function timer.');
+      const id = ++nextTask;
+      tasks.set(id, () => callback());
+      return id;
+    });
+    vi.spyOn(browserWindow, 'clearTimeout').mockImplementation((id) => {
+      if (id !== undefined) tasks.delete(id);
+    });
   });
 
   afterEach(() => {
     document.dispatchEvent(new Event('astro:before-swap'));
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     document.body.innerHTML = '';
     localStorage.clear();
   });
@@ -234,17 +311,25 @@ describe('CodeExample client', () => {
 
   it('lets an explicit WIP host remain selectable without inventing file or copy controls', () => {
     const root = document.querySelector<HTMLElement>('[data-code-example]')!;
-    root.querySelector('[data-code-host-tabs]')!.insertAdjacentHTML('beforeend',
-      '<button role="tab" data-code-host-tab data-code-host="qt" aria-selected="false" aria-controls="qt-wip" tabindex="-1">Qt</button>');
-    root.insertAdjacentHTML('beforeend',
-      '<section id="qt-wip" data-code-host-panel data-code-host="qt" role="tabpanel" hidden><p data-code-example-wip>WIP: no stable CLI path yet.</p></section>');
+    root
+      .querySelector('[data-code-host-tabs]')!
+      .insertAdjacentHTML(
+        'beforeend',
+        '<button role="tab" data-code-host-tab data-code-host="qt" aria-selected="false" aria-controls="qt-wip" tabindex="-1">Qt</button>'
+      );
+    root.insertAdjacentHTML(
+      'beforeend',
+      '<section id="qt-wip" data-code-host-panel data-code-host="qt" role="tabpanel" hidden><p data-code-example-wip>WIP: no stable CLI path yet.</p></section>'
+    );
     initCodeExamples(document);
     root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="qt"]')!.click();
     expect(selectedHost(root)).toBe('qt');
     const panel = root.querySelector<HTMLElement>('#qt-wip')!;
     expect(panel.hidden).toBe(false);
     expect(panel.querySelector('[data-code-file-tabs], [data-site-copy], pre')).toBeNull();
-    document.dispatchEvent(new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } }));
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
     expect(selectedHost(root)).toBe('qt');
   });
 
@@ -255,7 +340,9 @@ describe('CodeExample client', () => {
     const command = panel.querySelector<HTMLElement>('[data-code-example-command]')!;
     panel.querySelectorAll<HTMLButtonElement>('[data-code-file-tab]')[1].click();
     expect(command.hidden).toBe(false);
-    expect(command.querySelector('[role="tab"], [role="tabpanel"], [data-code-file-panel]')).toBeNull();
+    expect(
+      command.querySelector('[role="tab"], [role="tabpanel"], [data-code-file-panel]')
+    ).toBeNull();
     expect(command.textContent).toContain('add wc shadcn-button');
     expect(panel.querySelector('[data-code-file-tabs]')!.textContent).not.toContain('install.sh');
   });
@@ -271,5 +358,365 @@ describe('CodeExample client', () => {
     expect(root.dataset.codeExampleInit).toBe('1');
     expect(selectedHost(root)).toBe('react');
   });
-});
 
+  it('yields between complete groups while pending native choices stay current', () => {
+    document.body.innerHTML = exampleMarkup('first') + exampleMarkup('second');
+    const roots = [...document.querySelectorAll<HTMLElement>('[data-code-example]')];
+    initCodeExamples(document);
+    initCodeExamples(document);
+    expect(acquired).toEqual([]);
+    expect(tasks.size).toBe(1);
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
+    const selectedReactFile = roots[0].querySelector<HTMLButtonElement>(
+      '[data-code-host-panel][data-code-host="react"] [data-code-file-index="1"]'
+    )!;
+    selectedReactFile.click();
+    roots[0].querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="wc"]')!.click();
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
+    expect(roots.map(selectedHost)).toEqual(['wc', 'react']);
+    expect(selectedFile(roots[0], 'react')).toBe('1');
+    runNextTask();
+    expect(acquired).toHaveLength(1);
+    expect(acquired[0].kind).toBe('tree');
+    expect(tasks.size).toBe(1);
+    for (let turn = 0; tasks.size; turn++) {
+      if (turn === 20) throw new Error('CodeExample groups did not finish.');
+      const count = acquired.length;
+      runNextTask();
+      expect(acquired.length - count).toBeLessThanOrEqual(1);
+    }
+    expect(acquired).toHaveLength(6);
+    for (const root of roots) {
+      const groups = acquired.filter(({ list }) => root.contains(list));
+      expect(groups.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+      expect(groups[2].selected?.dataset.codeHost).toBe(selectedHost(root));
+    }
+    expect(acquired.find(({ list }) => list.contains(selectedReactFile))?.selected).toBe(
+      selectedReactFile
+    );
+    expect(roots.map(selectedHost)).toEqual(['wc', 'react']);
+    expect(selectedFile(roots[0], 'react')).toBe('1');
+  });
+
+  it('preserves current choices through complete idle groups and retires a partial owner before replacement', () => {
+    installIdleTasks();
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    const react = root.querySelector<HTMLButtonElement>(
+      '[data-code-host-tab][data-code-host="react"]'
+    )!;
+    const reactFile = root.querySelector<HTMLButtonElement>(
+      '[data-code-host-panel][data-code-host="react"] [data-code-file-index="1"]'
+    )!;
+    initCodeExamples(document);
+    initCodeExamples(document);
+    react.click();
+    reactFile.click();
+    expect(selectedHost(root)).toBe('react');
+    expect(selectedFile(root, 'react')).toBe('1');
+    expect(tasks.size).toBe(0);
+    expect(idleTasks.size).toBe(1);
+    expect(acquired).toEqual([]);
+    runNextTask(idleTasks);
+    expect(acquired).toHaveLength(1);
+    expect(acquired[0].kind).toBe('tree');
+    runNextTask(idleTasks);
+    expect(acquired).toHaveLength(2);
+    expect(acquired[1].kind).toBe('tree');
+    expect(acquired[1].selected).toBe(reactFile);
+    expect(idleTasks.size).toBe(1);
+    const released: number[] = [];
+    for (const [index, { projection }] of acquired.entries())
+      vi.mocked(projection.destroy).mockImplementation(() => {
+        released.push(index);
+      });
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(idleTasks.size).toBe(0);
+    expect(released).toEqual([1, 0]);
+    finishTasks(idleTasks);
+    expect(acquired).toHaveLength(2);
+    root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="wc"]')!.click();
+    expect(selectedHost(root)).toBe('react');
+    initCodeExamples(root);
+    react.click();
+    reactFile.click();
+    finishTasks(idleTasks);
+    expect(acquired.slice(2).map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(acquired[3].selected).toBe(reactFile);
+    expect(acquired[4].selected).toBe(react);
+    expect(released).toEqual([1, 0]);
+    for (const { projection } of acquired.slice(0, 2))
+      expect(projection.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it('cancels a zero idle handle without consuming an unrelated timer or blocking fresh work', () => {
+    installIdleTasks();
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    initCodeExamples(document);
+    initCodeExamples(document);
+    expect([...idleTasks.keys()]).toEqual([0]);
+    nextTask = -1;
+    let timerRan = false;
+    expect(
+      browserWindow.setTimeout(() => {
+        timerRan = true;
+      }, 0)
+    ).toBe(0);
+    // A later capability change must not change the API owning the pending task.
+    vi.stubGlobal('requestIdleCallback', undefined);
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(idleTasks.size).toBe(0);
+    expect(tasks.has(0)).toBe(true);
+    runNextTask();
+    expect(timerRan).toBe(true);
+    expect(acquired).toEqual([]);
+    expect(root.dataset.codeExampleInit).toBeUndefined();
+    initCodeExamples(root);
+    finishTasks();
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+  });
+
+  it('keeps zero-handle timer fallback ownership when idle support appears before teardown', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    nextTask = -1;
+    initCodeExamples(document);
+    initCodeExamples(document);
+    expect([...tasks.keys()]).toEqual([0]);
+    installIdleTasks();
+    let idleRan = false;
+    expect(
+      browserWindow.requestIdleCallback(() => {
+        idleRan = true;
+      })
+    ).toBe(0);
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(tasks.size).toBe(0);
+    expect(idleTasks.has(0)).toBe(true);
+    runNextTask(idleTasks);
+    expect(idleRan).toBe(true);
+    expect(acquired).toEqual([]);
+    expect(root.dataset.codeExampleInit).toBeUndefined();
+    initCodeExamples(root);
+    finishTasks(idleTasks);
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+  });
+
+  it('prepares current native state before insertion and enhances only after connection', () => {
+    const fragment = document.createElement('div');
+    fragment.innerHTML = exampleMarkup('detached');
+    const root = fragment.querySelector<HTMLElement>('[data-code-example]')!;
+    localStorage.setItem(PREFERRED_ADAPTER_KEY, 'react');
+    initCodeExamples(root);
+    expect(selectedHost(root)).toBe('react');
+    expect(acquired).toEqual([]);
+    document.body.append(root);
+    finishTasks();
+    expect(acquired).toHaveLength(3);
+    expect(selectedHost(root)).toBe('react');
+  });
+
+  it('reconciles a native file choice made during acquisition without duplicating its owner', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    vi.mocked(enhanceCodeExampleTree).mockImplementationOnce((options) => {
+      const projection = recordProjection('tree', options.list);
+      initCodeExamples(document);
+      options.tabs[1].click();
+      return projection;
+    });
+    initCodeExamples(document);
+    runNextTask();
+    expect(acquired).toHaveLength(1);
+    expect(selectedFile(root, 'wc')).toBe('1');
+    expect(acquired[0].projection.select).toHaveBeenCalledTimes(1);
+    expect(acquired[0].projection.select).toHaveBeenCalledWith(1);
+    finishTasks();
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(selectedFile(root, 'wc')).toBe('1');
+  });
+
+  it('cancels before its first group and permits a fresh explicit initialization', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    initCodeExamples(document);
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(tasks.size).toBe(0);
+    expect(acquired).toEqual([]);
+    expect(root.dataset.codeExampleInit).toBeUndefined();
+    root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!.click();
+    expect(selectedHost(root)).toBe('wc');
+    initCodeExamples(root);
+    root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!.click();
+    expect(selectedHost(root)).toBe('react');
+    finishTasks();
+    expect(acquired).toHaveLength(3);
+  });
+
+  it('releases acquired groups in reverse order and ignores retired gestures and callbacks', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    let lateSelect: ((index: number) => void) | undefined;
+    vi.mocked(enhanceCodeExampleTabs).mockImplementationOnce((options) => {
+      lateSelect = options.onSelect;
+      return recordProjection('tabs', options.list);
+    });
+    initCodeExamples(document);
+    finishTasks();
+    const released: number[] = [];
+    for (const [index, { projection }] of acquired.entries()) {
+      vi.mocked(projection.destroy).mockImplementation(() => {
+        released.push(index);
+      });
+    }
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(released).toEqual([2, 1, 0]);
+    expect(tasks.size).toBe(0);
+    if (!lateSelect) throw new Error('Expected the acquired host selection callback.');
+    lateSelect(1);
+    root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!.click();
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
+    expect(selectedHost(root)).toBe('wc');
+    expect(root.dataset.codeExampleInit).toBeUndefined();
+    for (const { projection } of acquired) expect(projection.destroy).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['disconnect', 'adopt'] as const)(
+    'retires partial acquisition after %s without running a later group',
+    (action) => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      initCodeExamples(document);
+      runNextTask();
+      expect(acquired).toHaveLength(1);
+      if (action === 'disconnect') root.remove();
+      else {
+        const other = document.implementation.createHTMLDocument('other');
+        // Happy DOM requires explicit adoption to establish the root's document.
+        other.body.append(other.adoptNode(root));
+        expect(root.ownerDocument).toBe(other);
+        expect(root.isConnected).toBe(true);
+      }
+      const hostTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-code-host-tab]')];
+      const focus = vi.spyOn(hostTabs[1], 'focus');
+      expect(press(hostTabs[0], 'ArrowRight').defaultPrevented).toBe(false);
+      expect(focus).not.toHaveBeenCalled();
+      finishTasks();
+      expect(acquired).toHaveLength(1);
+      expect(acquired[0].projection.destroy).toHaveBeenCalledTimes(1);
+      expect(root.dataset.codeExampleInit).toBeUndefined();
+      root
+        .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
+        .click();
+      expect(selectedHost(root)).toBe('wc');
+    }
+  );
+
+  it.each([false, true])(
+    'retains an in-flight claim through route teardown and a late release failure=%s',
+    (fails) => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      const error = new Error('late projection release failed');
+      vi.mocked(enhanceCodeExampleTree).mockImplementationOnce(({ list }) => {
+        const projection = recordProjection('tree', list);
+        if (fails)
+          vi.mocked(projection.destroy).mockImplementationOnce(() => {
+            throw error;
+          });
+        document.dispatchEvent(new Event('astro:before-swap'));
+        initCodeExamples(document);
+        expect(root.dataset.codeExampleInit).toBe('1');
+        return projection;
+      });
+      initCodeExamples(document);
+      if (fails) expect(() => runNextTask()).toThrow(error);
+      else runNextTask();
+      expect(acquired).toHaveLength(1);
+      expect(acquired[0].projection.destroy).toHaveBeenCalledTimes(1);
+      expect(tasks.size).toBe(0);
+      expect(root.dataset.codeExampleInit).toBe(fails ? '1' : undefined);
+      initCodeExamples(document);
+      finishTasks();
+      expect(acquired).toHaveLength(fails ? 1 : 4);
+    }
+  );
+
+  it('attempts all reverse releases including falsy failures and lets another root finish', () => {
+    document.body.innerHTML = exampleMarkup('first') + exampleMarkup('second');
+    const [first, second] = [...document.querySelectorAll<HTMLElement>('[data-code-example]')];
+    initCodeExamples(document);
+    for (let turn = 0; acquired.filter(({ list }) => first.contains(list)).length < 2; turn++) {
+      if (turn === 20) throw new Error('Expected two acquired file groups.');
+      runNextTask();
+    }
+    const retiring = acquired.filter(({ list }) => first.contains(list));
+    expect(retiring).toHaveLength(2);
+    const error = new Error('first group cleanup failed');
+    vi.mocked(retiring[0].projection.destroy).mockImplementationOnce(() => {
+      throw error;
+    });
+    vi.mocked(retiring[1].projection.destroy).mockImplementationOnce(() => {
+      throw undefined;
+    });
+    first.remove();
+    let failure: unknown;
+    for (let turn = 0; tasks.size && !(failure instanceof AggregateError); turn++) {
+      if (turn === 20) throw new Error('Expected disconnected owner cleanup.');
+      try {
+        runNextTask();
+      } catch (error) {
+        failure = error;
+      }
+    }
+    if (!(failure instanceof AggregateError)) throw new Error('Expected both cleanup failures.');
+    expect(failure.errors).toEqual([undefined, error]);
+    for (const { projection } of retiring) expect(projection.destroy).toHaveBeenCalledTimes(1);
+    // Failed retirement is not a successful release or permission to replace
+    // a possibly still-live projection. Other roots remain independent.
+    expect(first.dataset.codeExampleInit).toBe('1');
+    finishTasks();
+    expect(acquired.filter(({ list }) => second.contains(list)).map(({ kind }) => kind)).toEqual([
+      'tree',
+      'tree',
+      'tabs',
+    ]);
+    second
+      .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
+      .click();
+    expect(selectedHost(second)).toBe('react');
+  });
+
+  it('preserves a scheduling failure while releasing every pending owner', () => {
+    document.body.innerHTML = exampleMarkup('first') + exampleMarkup('second');
+    const roots = [...document.querySelectorAll<HTMLElement>('[data-code-example]')];
+    vi.mocked(enhanceCodeExampleTree).mockImplementationOnce(({ list }) => {
+      const projection = recordProjection('tree', list);
+      vi.mocked(projection.destroy).mockImplementationOnce(() => {
+        throw undefined;
+      });
+      return projection;
+    });
+    initCodeExamples(document);
+    const error = new Error('browser task scheduling failed');
+    vi.mocked(browserWindow.setTimeout).mockImplementationOnce(() => {
+      throw error;
+    });
+    let failure: unknown;
+    try {
+      runNextTask();
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBe(error);
+    expect(tasks.size).toBe(0);
+    expect(acquired).toHaveLength(1);
+    expect(acquired[0].projection.destroy).toHaveBeenCalledTimes(1);
+    const failedRoot = roots.find((root) => root.contains(acquired[0].list))!;
+    const releasedRoot = roots.find((root) => root !== failedRoot)!;
+    expect(failedRoot.dataset.codeExampleInit).toBe('1');
+    expect(releasedRoot.dataset.codeExampleInit).toBeUndefined();
+    initCodeExamples(document);
+    finishTasks();
+    expect(acquired).toHaveLength(4);
+  });
+});

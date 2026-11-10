@@ -22,6 +22,7 @@ import {
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { collectPrototypeIds, type DemoSpec } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
+import type { SiteSearchFocusRestore } from './site-search-composition';
 
 // These fixed glyphs are required by every Search generation. Keep them in
 // the command owner's initial module graph instead of discovering their import
@@ -39,6 +40,8 @@ export type SearchCommandParticipant = {
   bind(callbacks: SearchCallbacks): void;
   open(): void;
   toggle(): void;
+  /** Current open state of the public Dialog session. */
+  isOpen(): boolean;
   onOpen?(listener: () => void): () => void;
   setRetryDisabled(value: boolean): void;
   focus(command: SearchCommand): void;
@@ -48,7 +51,11 @@ export type SearchCommandParticipant = {
   ): Promise<MaterializedProjectionCandidate[]>;
   materializeDialog(
     request: ProjectionScopeMaterializeRequest,
-    namespace?: string
+    namespace?: string,
+    options?: {
+      focusEpoch(): number;
+      takeFocusRestore(): SiteSearchFocusRestore | null;
+    }
   ): Promise<MaterializedProjectionCandidate>;
   prepareCommit(commit: ProjectionScopeCommit): { publish(): void; rollback(): void };
   dispose(): void;
@@ -285,6 +292,9 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       if (search) search.session.setOpen(!search.session.read().open);
       else callbacks?.open();
     },
+    isOpen() {
+      return !!search?.session.read().open;
+    },
     onOpen(listener: () => void) {
       if (!search) return () => {};
       let wasOpen = search.session.read().open;
@@ -362,7 +372,14 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       }
       return candidates;
     },
-    async materializeDialog(request: ProjectionScopeMaterializeRequest, namespace = 'homepage') {
+    async materializeDialog(
+      request: ProjectionScopeMaterializeRequest,
+      namespace = 'homepage',
+      options?: {
+        focusEpoch(): number;
+        takeFocusRestore(): SiteSearchFocusRestore | null;
+      }
+    ) {
       if (!search || !dialogMount) throw new Error('Public Search owner is missing');
       const family = request.selection.projectionFamilyId as SiteLibraryFamily;
       let candidate: MaterializedProjectionCandidate | undefined;
@@ -379,6 +396,8 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         onFailure: (error) => {
           if (current()) search.fail(error);
         },
+        focusEpoch: options?.focusEpoch ?? (() => 0),
+        takeFocusRestore: options?.takeFocusRestore ?? (() => null),
       });
       const ids = new Set<string>();
       collectPrototypeIds(composition.demo.root, ids);
@@ -484,12 +503,38 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   // the initial-ready budget instead of waiting for the full dialog tree.
   let dialogController: ProjectionScopeController | null = null;
   let dialogStarted = false;
+  // Bounded focus continuity for the public Dialog across a generation swap.
+  // The restore request is armed only while the Dialog is actually open, so a
+  // runtime switch made while the Dialog is closed cannot change the next
+  // fresh open's entry behaviour.  A newer swap replaces the pending request,
+  // so a superseded swap can never restore focus into a later generation.
+  //
+  // The epoch advances on every focus change so focus that moved after the
+  // swap began wins over the restore, even when that focus later fell back
+  // to the document.  Focus falling back to the document is not a focus
+  // change of its own and does not advance the epoch.
+  let dialogFocusEpoch = 0;
+  const onDialogFocus = (event: FocusEvent) => {
+    const target = event.target;
+    if (!target) return;
+    if (target === root.ownerDocument.body || target === root.ownerDocument.documentElement) return;
+    dialogFocusEpoch++;
+  };
+  document.addEventListener('focusin', onDialogFocus, true);
+  let pendingDialogFocus: SiteSearchFocusRestore | null = null;
   const createDialog = () => {
     const namespace = `docs-dialog-${++attempt}`;
     return createProjectionScopeController({
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
-        const candidate = await participant.materializeDialog(request, namespace);
+        const candidate = await participant.materializeDialog(request, namespace, {
+          focusEpoch: () => dialogFocusEpoch,
+          takeFocusRestore: () => {
+            const pending = pendingDialogFocus;
+            pendingDialogFocus = null;
+            return pending;
+          },
+        });
         let stop: () => void;
         try {
           stop = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
@@ -593,6 +638,32 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       runtime = next;
       void refresh();
       if (dialogController) {
+        const doc = root.ownerDocument;
+        const view = doc.defaultView;
+        const dialogMount = root.querySelector<HTMLElement>('[data-search-dialog-mount]');
+        const owner = dialogMount?.dataset.projectionOwner;
+        const focused = doc.activeElement;
+        // The restore is armed only while the Dialog is genuinely open and
+        // one of its own controls holds focus.  A runtime switch made while
+        // the Dialog is closed must leave the next fresh open's automatic
+        // entry focus untouched.
+        const openNow = participant.isOpen();
+        if (
+          openNow &&
+          view &&
+          focused instanceof view.HTMLElement &&
+          owner &&
+          focused.dataset.projectionOwner === owner &&
+          focused.dataset.demoRef
+        ) {
+          pendingDialogFocus = {
+            ref: focused.dataset.demoRef,
+            origin: focused,
+            epoch: dialogFocusEpoch,
+          };
+        } else {
+          pendingDialogFocus = null;
+        }
         observe(
           dialogController.request({ runtimeId: runtime, projectionFamilyId: family }),
           dialogController
@@ -608,6 +679,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       if (!alive) return;
       alive = false;
       offDialogOpen?.();
+      document.removeEventListener('focusin', onDialogFocus, true);
       document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
       try {
         await controller.destroy();

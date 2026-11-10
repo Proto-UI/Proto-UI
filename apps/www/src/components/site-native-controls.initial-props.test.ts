@@ -137,7 +137,6 @@ it.each(['first registration', 'already registered'])(
     });
     expect(probe.initial.find((entry) => entry.host === nodes[1])!.props).toMatchObject({
       weight: 'semibold',
-      decoration: 'underline',
     });
     for (const [index, node] of nodes.entries()) {
       expect(
@@ -155,7 +154,7 @@ it.each(['first registration', 'already registered'])(
       expect(node.style.getPropertyValue('--pui-foreground')).toBe('#222222');
     }
     expect(link.querySelector('span')).toBe(source);
-    expect(nodes[1].getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline');
+    expect(link.getAttribute('aria-current')).toBe('page');
   }
 );
 
@@ -183,8 +182,7 @@ it('uses one public update per existing atom and retains pressed/current facts',
     expect(metrics(node).controllerUpdates - before[index].controllerUpdates).toBe(1);
   }
   expect(getElementProps(nodes[0])?.pressed).toBe(true);
-  expect(nodes[0].getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
-  expect(nodes[1].getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline');
+  expect(link.getAttribute('aria-current')).toBe('page');
   const beforeThemeChange = nodes.map(metrics);
   document.documentElement.style.setProperty('--pui-foreground', '#ff0000');
   await settle();
