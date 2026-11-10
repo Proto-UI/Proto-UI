@@ -23,6 +23,10 @@ Only `internal/coverage-matrices/prototype-coverage-matrix.json` was modified. T
 
 `node scripts/coverage-matrices/test/editor-boundary-projection.test.mjs` — 5/5 pass.
 
+`node scripts/coverage-matrices/prototype-coverage.mjs` — the 11 `Consumer source field drift` errors that this sync targeted are 0 on the candidate. The same 11 errors are present on the pre-sync source, so they measure the stale derived projection rather than an unrelated condition.
+
+`node scripts/coverage-matrices/test/prototype-coverage.test.mjs` — 120 cases; 69 failures before this sync, 55 after, with no case regressed. The 14 newly passing cases are the ledger/JSON agreement assertions that the stale `consumerRows` entries had broken, including `review 4198701671: consumer program and exact ledger are closed sets`. The 55 remaining failures are pre-existing source-state gaps in this checkout, not drift from this change: the retained Shadcn style source pins `LICENSE.md` while it is stored under `upstream/`, `P-BASE-MENUBAR` cites two Base families without one inherited owner, and the GPUI native-receipt cases lack their bound receipts.
+
 The readable views (`prototype-coverage-matrix.md`, `finf-delivery-checklist.md`) were not regenerated: the canonical `--write` path fails candidate-source validation on current main (`internal/fixtures/shadcn-style-source/LICENSE.md` is pinned by the retained manifest but stored under `upstream/`), and the two views are already stale on main for unrelated JSON drift. Both gaps pre-date this change and belong to #870's broader reconciliation.
 
 ## Original-condition accounting
@@ -30,5 +34,5 @@ The readable views (`prototype-coverage-matrix.md`, `finf-delivery-checklist.md`
 | Source key | Original condition | Current accounting |
 | --- | --- | --- |
 | `745.body.Acceptance.1` | Both exact rows and their re-review triggers reflect the merged #531 research result. | Delivered by #928, extended by #1417; this sync ensures the derived JSON projection agrees with the authoritative ledger. |
-| `745.body.Acceptance.3` | The matrix checker and focused tests pass on the candidate. | The five focused cases pass. The matrix checker's `--write` path has a pre-existing fixture dependency unrelated to editor rows. |
+| `745.body.Acceptance.3` | The matrix checker and focused tests pass on the candidate. | The five focused cases pass and the matrix checker's 11 consumer-drift errors are 0. The broader `prototype-coverage` suite fixes 14 cases and regresses none; its remaining 55 failures and the checker's `--write` path have a pre-existing fixture dependency unrelated to editor rows. |
 | `745.body.CurrentDirection.InspectorDelta` | Assess new Inspector requirements as explicit deltas while retaining research/infrastructure exemptions and old validation failures. | Ledger text (from #1417) and JSON projection (this change) now agree; the Inspector delta is consistently reflected in both the source ledger and the derived index. |
