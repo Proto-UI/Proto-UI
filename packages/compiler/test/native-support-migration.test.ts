@@ -93,6 +93,23 @@ function string(value: unknown): string {
   if (typeof value !== 'string') throw new Error('Expected string');
   return value;
 }
+type HistoricalSupportArtifact = { path: string; contents: string };
+async function historicalSupportArtifacts(): Promise<{
+  native: HistoricalSupportArtifact;
+  adapter: HistoricalSupportArtifact;
+}> {
+  // The capture-old source tree predates this verifier's retained payload.
+  // Resolve it only in the verification stage, including Vite import analysis.
+  const filename = fileURLToPath(new NodeURL('../src/native-support-legacy.ts', import.meta.url));
+  const loaded: unknown = await import(/* @vite-ignore */ filename);
+  const exports = object(loaded);
+  const native = object(exports.legacyNativeInteractionArtifact);
+  const adapter = object(exports.legacyNativeAdapterModulesArtifact);
+  return {
+    native: { path: string(native.path), contents: string(native.contents) },
+    adapter: { path: string(adapter.path), contents: string(adapter.contents) },
+  };
+}
 interface ArtifactRecord {
   path: string;
   kind: string;
@@ -202,6 +219,8 @@ function verifyCapturedCli(record: Record<string, unknown>) {
 }
 async function corpusForVerification(): Promise<string> {
   if (corpusDirectory) return requiredCorpus();
+  const { native: legacyNativeInteractionArtifact, adapter: legacyNativeAdapterModulesArtifact } =
+    await historicalSupportArtifacts();
   const fixture = fileURLToPath(
     new NodeURL('./fixtures/native-support-migration-v1.json', import.meta.url)
   );
@@ -254,11 +273,11 @@ async function corpusForVerification(): Promise<string> {
         contents = string(retained[filename]);
         origin = 'retained-exact-old-cli-bytes';
       } else if (filename === nativeInteractionArtifact.path) {
-        contents = nativeInteractionArtifact.contents;
-        origin = 'known-public-legacy-native-literal';
+        contents = legacyNativeInteractionArtifact.contents;
+        origin = 'retained-exact-legacy-native-literal';
       } else if (filename === nativeAdapterModulesArtifact.path) {
-        contents = nativeAdapterModulesArtifact.contents;
-        origin = 'known-public-legacy-adapter-literal';
+        contents = legacyNativeAdapterModulesArtifact.contents;
+        origin = 'retained-exact-legacy-adapter-literal';
       } else if (/^\.proto-ui\/context\/(?:scope-v1|key-[a-f0-9]{64})\.ts$/.test(filename)) {
         contents = await readFile(path.join(currentOutput, filename), 'utf8');
         origin = 'same-input-context-helper-exact-old-sha';
@@ -928,6 +947,39 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
         expect(await inventory(path.join(root, id))).toEqual(before);
   });
 
+  it('keeps the captured helper immutable while migrating to the current support bytes', async () => {
+    // These verification modules are absent at the original capture boundary;
+    // static imports would make capture-old depend on its future verifier.
+    const { native: legacyNativeInteractionArtifact, adapter: legacyNativeAdapterModulesArtifact } =
+      await historicalSupportArtifacts();
+    const { nativeInteractionArtifacts } = await import('../src/native-interaction');
+    expect(digest(legacyNativeInteractionArtifact.contents)).toBe(
+      legacyHashes['.proto-ui/interaction/native-v1.ts']
+    );
+    expect(digest(legacyNativeAdapterModulesArtifact.contents)).toBe(
+      legacyHashes['.proto-ui/interaction/adapter-modules-v1.ts']
+    );
+    expect(legacyNativeAdapterModulesArtifact.contents).not.toBe(
+      nativeAdapterModulesArtifact.contents
+    );
+    expect(legacyNativeInteractionArtifact.contents).not.toBe(nativeInteractionArtifact.contents);
+    for (const name of fixtureNames) {
+      expect(
+        await readFile(path.join(root, 'old-' + name, legacyNativeInteractionArtifact.path), 'utf8')
+      ).toBe(legacyNativeInteractionArtifact.contents);
+      expect(
+        await readFile(
+          path.join(root, 'old-' + name, legacyNativeAdapterModulesArtifact.path),
+          'utf8'
+        )
+      ).toBe(legacyNativeAdapterModulesArtifact.contents);
+    }
+    for (const file of nativeInteractionArtifacts('full')) {
+      const filename = file.path.replace('.proto-ui/', '.proto-ui/shared/');
+      expect(await readFile(path.join(migrated, filename), 'utf8')).toBe(file.contents);
+    }
+  });
+
   it('preserves every component and source map byte and records exact original manifests', async () => {
     const outputFiles = await plainFiles(migrated);
     const top = object(JSON.parse(await readFile(path.join(migrated, 'provenance.json'), 'utf8')));
@@ -1139,18 +1191,20 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     await expect(lstat(test.output)).rejects.toMatchObject({ code: 'ENOENT' });
     await saveEvidence('invalid-cli-' + label, result);
   });
-  it.each(['Component.js', 'Component.js.map', '.proto-ui/interaction/native-v1.ts'])(
-    'rejects changed bytes in %s before any output open',
-    async (filename) => {
-      const test = await migrationCase();
-      const target = path.join(test.directory, 'subject', filename);
-      await writeFile(target, Buffer.concat([await readFile(target), Buffer.from('\n// changed')]));
-      await rejectedBeforeWrite(
-        test,
-        'changed-' + path.basename(filename).toLowerCase().replaceAll('.', '-')
-      );
-    }
-  );
+  it.each([
+    'Component.js',
+    'Component.js.map',
+    '.proto-ui/interaction/native-v1.ts',
+    '.proto-ui/interaction/adapter-modules-v1.ts',
+  ])('rejects changed bytes in %s before any output open', async (filename) => {
+    const test = await migrationCase();
+    const target = path.join(test.directory, 'subject', filename);
+    await writeFile(target, Buffer.concat([await readFile(target), Buffer.from('\n// changed')]));
+    await rejectedBeforeWrite(
+      test,
+      'changed-' + path.basename(filename).toLowerCase().replaceAll('.', '-')
+    );
+  });
   it('rejects missing recorded files', async () => {
     const test = await migrationCase();
     await rm(path.join(test.directory, 'subject/.proto-ui/interaction/native-v1.ts'));
@@ -1166,20 +1220,22 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     await mkdir(path.join(test.directory, 'subject/empty-consumer-directory'));
     await rejectedBeforeWrite(test, 'extra-directory');
   });
-  it('rejects a modified helper even when its manifest and trusted SHA have been resealed', async () => {
-    const test = await migrationCase(),
-      directory = path.join(test.directory, 'subject');
-    const value = await manifest(directory),
-      filename = '.proto-ui/interaction/native-v1.ts';
-    const bytes =
-      (await readFile(path.join(directory, filename), 'utf8')) + '\n// unknown helper version\n';
-    await writeFile(path.join(directory, filename), bytes);
-    const record = value.artifacts.find((file) => file.path === filename);
-    if (!record) throw new Error('Missing old helper');
-    record.sha256 = digest(bytes);
-    await reseal(test, value);
-    await rejectedBeforeWrite(test, 'resealed-helper');
-  });
+  it.each(['.proto-ui/interaction/native-v1.ts', '.proto-ui/interaction/adapter-modules-v1.ts'])(
+    'rejects a modified %s even when its manifest and trusted SHA have been resealed',
+    async (filename) => {
+      const test = await migrationCase(),
+        directory = path.join(test.directory, 'subject');
+      const value = await manifest(directory);
+      const bytes =
+        (await readFile(path.join(directory, filename), 'utf8')) + '\n// unknown helper version\n';
+      await writeFile(path.join(directory, filename), bytes);
+      const record = value.artifacts.find((file) => file.path === filename);
+      if (!record) throw new Error('Missing old helper');
+      record.sha256 = digest(bytes);
+      await reseal(test, value);
+      await rejectedBeforeWrite(test, 'resealed-' + path.basename(filename).replaceAll('.', '-'));
+    }
+  );
   it('rejects an unknown helper with otherwise complete matching ownership', async () => {
     const test = await migrationCase(),
       directory = path.join(test.directory, 'subject'),

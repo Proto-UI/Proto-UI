@@ -34,6 +34,7 @@ function createEntry(options: {
       return outcome;
     },
     hasPendingFocus: () => false,
+    cancelPendingFocus: () => undefined,
     clearFocus: () => undefined,
     setScopeActive: () => undefined,
     pushWarning: () => undefined,

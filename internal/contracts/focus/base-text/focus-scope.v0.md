@@ -145,7 +145,8 @@ Activation is an explicit runtime action:
 Deactivation is also explicit:
 
 - deactivation clears the scope active fact;
-- deactivation restores focus to the previously captured focus target when that target still exists;
+- ordinary deactivation defaults to `restore: previous`, requesting the previously captured focus target when that target still exists;
+- explicit `restore: none` suppresses automatic focus transfer and preserves an outside destination; it does not suppress Focus-owned cleanup or an explicit handback authored by the consumer;
 - deactivation forwards the focus request reason to restored focus so keyboard-triggered close keeps keyboard modality;
 - restore is a controlled focus transfer and may bypass the active-scope gate that ordinary outside focus requests must obey.
 

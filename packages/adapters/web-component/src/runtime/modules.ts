@@ -743,6 +743,29 @@ function scopedNegatedEntrySubject(selector: string) {
   return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
 }
 
+function hasEntryPositionDependency(selector: string): boolean {
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    if (character !== ':') continue;
+    const position =
+      /^:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i.exec(
+        selector.slice(index)
+      );
+    if (
+      position &&
+      (!position[0].endsWith('(') ||
+        matchingSelectorParen(selector, index + position[0].length - 1) >= 0)
+    )
+      return true;
+  }
+  return false;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -795,9 +818,18 @@ function collectEntryStyleDependencies(
         else {
           try {
             const scoped = scopedNegatedEntrySubject(selector);
+            // Position can change before a selector list or its subject matches.
+            // Retain only direct parents of the existing bounded external chain.
+            if (scoped) {
+              for (const subject of scoped.positionSubjects)
+                for (const candidate of externalSubjects)
+                  if (candidate.parentNode && candidate.matches(subject))
+                    positionParents.add(candidate.parentNode);
+            } else if (hasEntryPositionDependency(selector)) {
+              for (const candidate of externalSubjects)
+                if (candidate.parentNode) positionParents.add(candidate.parentNode);
+            }
             const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
-            // The bounded ancestor fallback skips body and html. A known
-            // sibling-position dependency still needs its direct parent.
             if (
               (!relational || scoped?.positionSubjects.length) &&
               candidates.some((candidate) => candidate.matches(probe))
@@ -807,10 +839,6 @@ function collectEntryStyleDependencies(
                 : [];
               if (!matches.length) relational = 1;
               else for (const candidate of matches) relationalSubjects.add(candidate);
-              for (const subject of scoped?.positionSubjects ?? [])
-                for (const candidate of externalSubjects)
-                  if (candidate.parentNode && candidate.matches(subject))
-                    positionParents.add(candidate.parentNode);
             }
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded

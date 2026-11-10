@@ -194,15 +194,18 @@ console.log('可用原型:', getAvailablePrototypes());
 
 ## 🎨 样式定制
 
-预览器使用 CSS 变量进行样式控制：
+RuntimeBox 的 canvas 由对应 family 的公开 Surface 绘制；运行时工具栏与源码面板位于 canvas 外。官网通过 [`panelSurfaceProps('canvas')`](../surface-recipes.ts) 选择无阴影的面板外观和 family 默认圆角：Brutalist 使用 5px `rounded-base` 与 2px 黑边，Shadcn 使用 `--pui-radius-xl` 与 1px 边框。这是官网的组合选择，Surface 的 `radius: 'none'` 仍是合法输入。
+
+预览器的 CSS 变量只控制 canvas 布局，不额外绘制祖先边框、圆角、底色或阴影：
 
 ```css
 .proto-previewer {
-  --border-color: var(--sl-color-gray-5);
-  --border-radius: 12px;
-  --padding: 12px;
+  --runtime-box-content-padding: 1.5rem 1rem;
+  --runtime-box-content-min: 10rem;
 }
 ```
+
+[`runtime-preview-evidence.ts`](../../content/docs/zh-cn/runtime-preview-evidence.ts) 同时检查实际圆角、边框、底色、间距和重复祖先绘制；token 断言不能替代真实浏览器截图与视觉检查。
 
 ### Proto UI Style Token 同步
 

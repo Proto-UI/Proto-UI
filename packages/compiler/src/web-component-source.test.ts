@@ -20,6 +20,7 @@ interface NativeElement extends HTMLElement {
   logicalOwner: symbol | null;
   viewEpoch: number;
   present: boolean;
+  connectedCallback(): void;
   update(): void;
   setProps(props: Record<string, unknown>): void;
   getExposes(): {
@@ -43,10 +44,10 @@ afterEach(() => {
   }
 });
 
-function create(source: string): NativeElement {
+function create(source: string, shadow = true): NativeElement {
   const parsed = parsePrototype(source, { fileName: 'independent.proto.ts' });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const emitted = emitWebComponentSource(parsed.value, { shadow: true });
+  const emitted = emitWebComponentSource(parsed.value, { shadow });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   // Execute the generated consumer, not authored input and not an IR interpreter.
   const sources = new Map(
@@ -106,6 +107,21 @@ export default definePrototype({name:'independent-view', setup(def){
   def.lifecycle.onMounted(() => {mounts.set(mounts.get()+1);});
   def.lifecycle.onUnmounted(() => {unmounts.set(unmounts.get()+1);});
   return (renderer) => renderer.el('section', [renderer.el('p', count.get()), renderer.slot()]);
+}});`;
+const defaultViewSource = `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'default-view-reconnect',setup(def){
+  def.props.define({label:{type:'string',default:'default'}});
+  const count=def.state.numberDiscrete('reconnect.created',0);
+  const mounts=def.state.numberDiscrete('reconnect.mounts',0);
+  const unmounts=def.state.numberDiscrete('reconnect.unmounts',0);
+  def.expose.state('count',count);
+  def.expose.state('mounts',mounts);
+  def.expose.state('unmounts',unmounts);
+  def.expose.method('bump',(next:number)=>{count.set(next);});
+  def.lifecycle.onCreated(()=>{count.set(count.get()+1);});
+  def.lifecycle.onMounted(()=>{mounts.set(mounts.get()+1);});
+  def.lifecycle.onUnmounted(()=>{unmounts.set(unmounts.get()+1);});
+  return (r)=>r.el('section',[r.el('p',r.read.props.get().label),r.el('output',count.get()),r.slot()]);
 }});`;
 
 // These regressions exercise externally observable ownership, update, disposal and slot contracts.
@@ -233,6 +249,121 @@ describe('native Web Component semantic source', () => {
     expect(observed).toEqual([9]);
     await Promise.resolve();
     expect(element.shadowRoot?.textContent).toBe('9');
+  });
+
+  it.each(['light', 'shadow'] as const)(
+    'reconciles a preconfigured %s owner after its first connection reaction arrives while disconnected',
+    async (mode) => {
+      const element = create(defaultViewSource, mode === 'shadow');
+      element.setProps({ label: 'configured before connection' });
+      const content = document.createElement('strong');
+      content.textContent = 'consumer slot';
+      element.append(content);
+      // Drive the permitted native reaction ordering explicitly: a light-slot commit
+      // can remove a child before its already-enqueued connection callback is delivered.
+      // Execute the real generated callback, then reconnect through actual DOM insertion.
+      element.connectedCallback();
+      const identity = element.logicalOwner;
+      expect(identity).not.toBeNull();
+      expect(element.present).toBe(false);
+      expect(element.viewEpoch).toBe(0);
+      await Promise.resolve();
+      const parent = create(
+        `import {definePrototype} from '@proto.ui/core';
+        export default definePrototype({name:'light-slot-parent',setup(){}});`,
+        false
+      );
+      parent.append(element);
+      document.body.append(parent);
+      await Promise.resolve();
+      const root = element.shadowRoot ?? element;
+      const frame = root.querySelector('section');
+      const exposes = element.getExposes();
+      expect(element.logicalOwner).toBe(identity);
+      expect(element.present).toBe(true);
+      expect(element.viewEpoch).toBe(1);
+      expect(frame).not.toBeNull();
+      expect(root.querySelector('p')?.textContent).toBe('configured before connection');
+      expect(root.querySelector('output')?.textContent).toBe('1');
+      expect(element.contains(content)).toBe(true);
+      expect(exposes.count?.get()).toBe(1);
+      expect(exposes.mounts?.get()).toBe(1);
+      expect(exposes.unmounts?.get()).toBe(0);
+      const events: number[] = [];
+      exposes.count?.subscribe(({ next }) => events.push(next));
+      exposes.bump?.(7);
+      element.remove();
+      document.body.append(element);
+      element.connectedCallback();
+      await Promise.resolve();
+      expect(element.logicalOwner).toBe(identity);
+      expect(element.viewEpoch).toBe(1);
+      expect(root.querySelector('section')).toBe(frame);
+      expect(root.querySelector('output')?.textContent).toBe('1');
+      expect(element.getExposes().count).toBe(exposes.count);
+      expect(exposes.count?.get()).toBe(7);
+      expect(events).toEqual([7]);
+      expect(exposes.mounts?.get()).toBe(1);
+      expect(exposes.unmounts?.get()).toBe(0);
+    }
+  );
+
+  it('does not reenter a light-slot commit when child acceptance synchronously moves its parent', async () => {
+    const parent = create(defaultViewSource, false);
+    const child = create(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'child-acceptance-move',setup(def){
+        def.expose.event('accepted');
+        def.lifecycle.onCreated((run)=>{run.expose.emit('accepted');});
+        return (r)=>r.el('span','accepted child');
+      }});`);
+    const destination = document.createElement('div');
+    document.body.append(destination);
+    parent.append(child);
+    const observations: { owner: symbol | null; present: boolean }[] = [];
+    parent.addEventListener('accepted', () => {
+      observations.push({ owner: parent.logicalOwner, present: parent.present });
+      destination.append(parent);
+    });
+    try {
+      document.body.append(parent);
+      const frame = parent.querySelector('section');
+      await Promise.resolve();
+      const exposes = parent.getExposes();
+      expect(observations).toEqual([{ owner: parent.logicalOwner, present: false }]);
+      expect(parent.logicalOwner).not.toBeNull();
+      expect(parent.parentNode).toBe(destination);
+      expect(parent.present).toBe(true);
+      expect(parent.viewEpoch).toBe(1);
+      expect(parent.querySelector('section')).toBe(frame);
+      expect(child.present).toBe(true);
+      expect(child.shadowRoot?.textContent).toBe('accepted child');
+      expect(exposes.count?.get()).toBe(1);
+      expect(exposes.mounts?.get()).toBe(1);
+      expect(exposes.unmounts?.get()).toBe(0);
+    } finally {
+      destination.remove();
+    }
+  });
+
+  it('does not materialize a queued connection after terminal disposal', async () => {
+    const element = create(defaultViewSource);
+    element.connectedCallback();
+    document.body.append(element);
+    const exposes = element.getExposes();
+    expect(element.present).toBe(false);
+    expect(exposes.count?.get()).toBe(1);
+    expect(exposes.mounts?.get()).toBe(0);
+    element.dispose();
+    await Promise.resolve();
+    expect(element.logicalOwner).toBeNull();
+    expect(element.present).toBe(false);
+    expect(element.shadowRoot?.childNodes).toHaveLength(0);
+    expect(() => exposes.count?.get()).toThrow(/disposed/);
+    element.remove();
+    document.body.append(element);
+    await Promise.resolve();
+    expect(element.logicalOwner).toBeNull();
+    expect(element.present).toBe(false);
   });
 
   it('keeps synchronous DOM moves alive, disposes settled disconnections, and does not revive explicitly disposed elements', async () => {

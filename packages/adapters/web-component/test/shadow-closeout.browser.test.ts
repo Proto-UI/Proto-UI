@@ -2425,15 +2425,17 @@ describe('Shadow closeout native boundaries', () => {
   });
 
   it.each([
-    { initialSibling: false, bodyPosition: null },
-    { initialSibling: true, bodyPosition: null },
-    { initialSibling: false, bodyPosition: '1' },
-    { initialSibling: true, bodyPosition: '1' },
-    { initialSibling: false, bodyPosition: '2n+1' },
-    { initialSibling: true, bodyPosition: '2n+1' },
+    { initialSibling: false, bodyPosition: null, selectorList: false },
+    { initialSibling: true, bodyPosition: null, selectorList: false },
+    { initialSibling: false, bodyPosition: '1', selectorList: false },
+    { initialSibling: true, bodyPosition: '1', selectorList: false },
+    { initialSibling: false, bodyPosition: '2n+1', selectorList: false },
+    { initialSibling: true, bodyPosition: '2n+1', selectorList: false },
+    { initialSibling: false, bodyPosition: '1', selectorList: true },
+    { initialSibling: true, bodyPosition: '1', selectorList: true },
   ])(
-    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
-    async ({ initialSibling, bodyPosition }) => {
+    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition, selector list: $selectorList)',
+    async ({ initialSibling, bodyPosition, selectorList }) => {
       const page = await browser.newPage();
       const atBody = bodyPosition !== null;
       try {
@@ -2441,8 +2443,8 @@ describe('Shadow closeout native boundaries', () => {
         await page.addStyleTag({
           content: `
             ${atBody ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
-            .positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'}
-              button { visibility: hidden; }
+            .positional-entry${atBody && !selectorList ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'}
+              button${selectorList ? ', .unrelated' : ''} { visibility: hidden; }
           `,
         });
         await page.evaluate(
@@ -2469,6 +2471,9 @@ describe('Shadow closeout native boundaries', () => {
             host.innerHTML = '<button>Inside</button>';
             wrapper.append(host);
             if (initialSibling) parent.append(sibling);
+            // Retain this native node across removal for the reinsertion checks.
+            const fixture = window as Window & { __positionalEntrySibling: HTMLElement };
+            fixture.__positionalEntrySibling = sibling;
             parent.append(wrapper);
             if (!atBody) document.body.append(parent);
           },
@@ -2495,20 +2500,21 @@ describe('Shadow closeout native boundaries', () => {
 
         const toggleSibling = () =>
           page.evaluate(() => {
-            const sibling = document.querySelector('#positional-entry-sibling');
-            if (sibling) {
+            // The fixture retains the same sibling while it is detached.
+            const fixture = window as Window & { __positionalEntrySibling: HTMLElement };
+            const sibling = fixture.__positionalEntrySibling;
+            if (sibling.isConnected) {
               sibling.remove();
               return;
             }
-            const added = document.createElement('span');
-            added.id = 'positional-entry-sibling';
-            added.hidden = true;
-            document.querySelector('#positional-entry-parent')!.prepend(added);
+            document.querySelector('#positional-entry-parent')!.prepend(sibling);
           });
         await toggleSibling();
         expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
         await toggleSibling();
         expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+        await toggleSibling();
+        expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
       } finally {
         await page.close();
       }

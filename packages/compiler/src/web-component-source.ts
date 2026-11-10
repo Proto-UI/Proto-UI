@@ -785,7 +785,19 @@ export class ${className} extends HTMLElement {
   get present(): boolean { return this.${prefix}Owner?.view ?? false; }
   connectedCallback(): void {
     ++this.${prefix}Disconnect;
-    if (this.${prefix}Closed || this.${prefix}Owner) return;
+    if (this.${prefix}Closed) return;
+    if (this.${prefix}Owner) {
+      const owner = this.${prefix}Owner;
+      if (!owner.view) {
+        const version = this.${prefix}Disconnect;
+        // Finish an enclosing native slot commit before retrying a retained owner.
+        queueMicrotask(() => {
+          if (this.${prefix}Closed || owner !== this.${prefix}Owner || version !== this.${prefix}Disconnect || !this.isConnected || owner.view) return;
+          owner.reconcile();
+        });
+      }
+      return;
+    }
     const port = createNativeBrowserPort(this, ${options.shadow ? 'true' : 'false'});
     this.${prefix}Port = port;
     const owner = ${prefix}CreateOwner(port);
