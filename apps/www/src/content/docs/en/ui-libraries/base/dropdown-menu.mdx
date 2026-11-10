@@ -28,9 +28,11 @@ Content composes overlay, transition, collection navigation, typeahead, and anch
 
 This family represents actions or functions opened by a button. It must not disguise ordinary navigation, arbitrary forms, or persistent selection as a menu. Group, Label, Separator and Shortcut are bounded draft extensions below. Checkbox Item, Radio Item and Submenu remain outside this slice.
 
-## 0.2 delivery and evidence
+## Package and generated facade
 
-The stable 0.2.0 package exports `@proto.ui/prototypes-base/dropdown`. The CLI component ID is `base-dropdown` and generates Root, Trigger, Content, and Item. `T-BASE-DROPDOWN-MENU-0001` maps the family criteria to `packages/prototypes/base/test/dropdown.test.ts`; the preview runs through the Web Component, React, and Vue adapters.
+The package entry is `@proto.ui/prototypes-base/dropdown`. The current source CLI registers `base-dropdown` and generates Root, Trigger, Content, and Item for the selected host. Group, Label, Separator, and Shortcut are additional package exports; this CLI target does not generate their facades.
+
+`T-BASE-DROPDOWN-MENU-0001` maps the family criteria to `packages/prototypes/base/test/dropdown.test.ts`. The preview declares Web Component, React, and Vue; that declaration does not establish new-head execution or packed-consumer acceptance.
 
 ## Lifecycle
 
@@ -50,7 +52,7 @@ Group and Label provide a live accessible naming relationship; Separator and Sho
 
 ## API
 
-Dropdown Menu is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

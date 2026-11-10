@@ -19,9 +19,13 @@ Dropdown Menu inherits Base trigger/content/item semantics and applies rounded f
 
 Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions and a disabled API action. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
 
+## Package and generated facade
+
+The package entry is `@proto.ui/prototypes-brutalist/dropdown`. The current source CLI registers `brutalist-dropdown` and generates Root, Trigger, Content, and Item for the selected host. Group, Label, Separator, and Shortcut are additional package exports; this CLI target does not generate their facades. Source registration does not establish installed-package or packed-consumer acceptance.
+
 ## API
 
-Dropdown Menu is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}

@@ -46,6 +46,8 @@ Recipe 加载、结构检查和源码宿主 renderer 检查不代表真实渲染
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。registry id 是 `shadcn-dropdown`，不是 `shadcn-dropdown-menu`。
 
+当前源码 CLI 目标生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是 `@proto.ui/prototypes-shadcn/dropdown` 的额外导出；这个目标不会生成它们的 facade。源码注册不代表已安装包或打包消费者验收。
+
 ## API
 
 传入 `open` 进入受控模式。

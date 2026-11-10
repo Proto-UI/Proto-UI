@@ -317,6 +317,33 @@ const retainedFrame = (family) =>
   );
 const retainedContent = (sample) =>
   sample.surfaces.find((surface) => surface.prototypeId.endsWith('-content') && surface.id === '');
+test('Dropdown replay rejects a controlled identity shared by another authored part', async () => {
+  const frame = retainedFrame('dropdown-menu');
+  const plan = await loadRecorded(frame);
+  const sample = replay(frame);
+  const trigger = sample.surfaces.find((surface) => surface.uid === sample.primary);
+  const content = retainedContent(sample);
+  const root = sample.surfaces.find((surface) => surface.prototypeId === plan.rootPrototypeId);
+  // Deliberately synthesize an open portal from the immutable closed recording.
+  // Neither these state/paint changes nor the duplicate ID are native evidence.
+  trigger.ariaExpanded = 'true';
+  content.id = trigger.controls[0];
+  content.parent = null;
+  for (const surface of sample.surfaces.filter(
+    (surface) => surface === content || surface.parent === content.uid
+  )) {
+    surface.withinContent = false;
+    surface.painted = true;
+    surface.visibility = { visible: true, classification: 'source-model-visible', limits: [] };
+  }
+  assert.equal(compareContrastAnatomy(plan, sample).achieved, true, 'unique open target');
+  root.id = content.id;
+  const ambiguous = compareContrastAnatomy(plan, sample);
+  assert.equal(ambiguous.achieved, false, 'controls must identify exactly one observed target');
+  assert.equal(ambiguous.extras.length, 0, 'the duplicate belongs to authored anatomy');
+  root.id = '';
+  assert.equal(compareContrastAnatomy(plan, sample).achieved, true, 'restored unique target');
+});
 // These are explicit negative mutations of recorded observations. They are
 // structural-model controls, not claims that a browser produced these states.
 for (const family of ['dropdown-menu', 'select', 'dialog', 'tooltip', 'tabs']) {

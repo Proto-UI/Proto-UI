@@ -335,6 +335,15 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     }
     accept(instance, candidates, required, instance.policy);
     const content = matched.get(instance.path);
+    // One collector observation contains this document's current lease and
+    // one uid per physical root. Check only the target reached by this relation;
+    // another prototype cannot hide a distinct physical target with that ID.
+    if (
+      content &&
+      ids.includes(content.id) &&
+      actual.some((surface) => surface.uid !== content.uid && surface.id === content.id)
+    )
+      reject(instance, 'Presence relation resolves to multiple observed physical targets.');
     if (
       instance.policy === 'inline-expanded' &&
       content &&
