@@ -1,0 +1,356 @@
+{
+  "date": "2026-11-10",
+  "scope": "Issue1156 original legacy-mode source recovery and bounded Select ownership handoff; non-normative evidence",
+  "agentDisclosure": [
+    "Agent role: SolThirty1156Legacy, as supplied by the current task; not authenticated backend identity.",
+    "No current ModelTrace measurement or acceptance is claimed. The failed historical9737 receipt remains literal historical evidence."
+  ],
+  "baseCommit": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "baseTree": "6dfeee464d3e4b73ffa3b1c311dca573390fbef9",
+  "issue": {
+    "number": 1156,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/1156",
+    "observedState": "OPEN",
+    "originalCondition": "纳入 Finf 并验证实际修复闭环 — 历史状态 blocked",
+    "checked": false,
+    "parentIssue": 1093,
+    "finfTracker": 890,
+    "releaseDisposition": "0.4 per existing1156comments; this record does not reclassify the release",
+    "discussionReadback": {
+      "commentIds": [
+        6684408584,
+        6700036107
+      ],
+      "page1Count": 2,
+      "page2Count": 0,
+      "perPage": 100,
+      "latestAuditUrl": "https://github.com/Proto-UI/Proto-UI/issues/1156#issuecomment-6700036107"
+    }
+  },
+  "originalPhase": {
+    "snapshotTimestamp": "2026-10-11T13:08:00.890Z",
+    "name": "遗留模式清理",
+    "tasks": [
+      {
+        "content": "委派核查已废弃模式与对照代码",
+        "historicalStatus": "completed"
+      },
+      {
+        "content": "核实遗留模式的当前源码事实",
+        "historicalStatus": "completed"
+      },
+      {
+        "content": "发布已证实遗留问题的 Issue",
+        "historicalStatus": "abandoned"
+      },
+      {
+        "content": "纳入 Finf 并验证实际修复闭环",
+        "historicalStatus": "blocked",
+        "originalBlocker": "已发布精确提交 9737c1a8c 和 PR872 评论 6083902111；现由 Finf 集成人独占 integration ref。等待独立评审、纳入实际组合 head 和复验，不冒充已集成。"
+      }
+    ],
+    "boundary": "Literal historical task statuses. The abandoned publication task is not restored, and the two completed audit tasks do not establish current source or acceptance."
+  },
+  "originalSource": {
+    "key": "owner-conversation:872:6083902111",
+    "kind": "owner-conversation",
+    "stableId": 6083902111,
+    "sourceUrl": "https://github.com/Proto-UI/Proto-UI/pull/872#issuecomment-6083902111",
+    "sourceCarrier": "internal/records/2026-10-14-finf-followup-source-debt.json",
+    "sourceCarrierHead": "7f18c4e5a5fd4ab0a87675b7bccbd18082a398e1",
+    "completeOriginalBodySha256": "e8002d1ff998b0e53054864da264c2f2dde1d3a2c7ab63852ed94b80ee261a1c",
+    "completeOriginalBodyBytes": 6515,
+    "requiresFollowupCheckbox": true,
+    "sourceRecordCount": 997,
+    "sourceRecordCountIsNotConfirmedBugCount": true,
+    "historicalDisposition": "conservative_original_obligations_and_negative_or_limited_or_historical_evidence_not_current_acceptance",
+    "preservation": "The complete original body, failed ModelTrace and every compound condition remain unchanged in the existing carrier. This additive record supplies the previously unnamed concrete repair."
+  },
+  "historicalRepair": {
+    "commit": "9737c1a8c7f89df44610022861f58706ad388592",
+    "tree": "adabee6018ed67e12cc1b8c9fd20d94901fa89af",
+    "parent": "48b6f1bf6def5ffe1d1a7c34be91d670b1e7a077",
+    "parentTree": "ac6a778aff629165d48af8669641e996f2ccb50c",
+    "branchAtPublication": "audit/state-accessor-select-20261009",
+    "author": "cyjin-yl <cyjin.yl@gmail.com>",
+    "committer": "cyjin-yl <cyjin.yl@gmail.com>",
+    "signOff": "Signed-off-by: cyjin-yl <cyjin.yl@gmail.com>",
+    "originalTwoFilePatchSha256": "d54a32aa1aa1c3d6c8c79c537d31dfa47f58cfc6a43048a05cb14c6c68628149",
+    "originalCommitAncestorOfBase": false,
+    "ancestryLimit": "This read-only ancestry result does not identify a source-loss or revert cause. Current source facts are bound independently.",
+    "reportedHistoricalEvidence": {
+      "date": "2026-10-09",
+      "before": "The real WC Adapter/Runtime/Base composed smoke failed after an adversarial borrowed accessibility-slot write.",
+      "after": "The exact historical repair passed the same smoke;9files88tests and Node24 workspace TypeScript passed.",
+      "setupFailures": "Original missing declared dependency/generated-prerequisite collection/type failures were retained before the historical successful rerun.",
+      "limits": [
+        "HappyDOM/fake-clock ownership and integration evidence",
+        "No historical native-browser visual acceptance",
+        "No current-head test result, hostedCI, independent approval or whole-Finf acceptance"
+      ]
+    }
+  },
+  "authority": [
+    {
+      "id": "D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001",
+      "status": "active",
+      "path": "spec/decisions/D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001.yaml",
+      "anchors": [
+        "D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001-C",
+        "D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001-D",
+        "D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001-E"
+      ],
+      "effect": "Protocol facts retain protocol truth; A11y consumes their handles. Deprecated implementation and compatibility tests may coexist. Legacy activeSince provenance remains unknown."
+    },
+    {
+      "id": "P-BASE-SELECT-ITEM",
+      "status": "draft",
+      "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+      "anchors": [
+        "P-BASE-SELECT-ITEM-STATE-SEPARATION",
+        "P-BASE-SELECT-ITEM-CONTROLLED",
+        "P-BASE-SELECT-ITEM-A11Y",
+        "P-BASE-SELECT-ITEM-AUTHORING-ENTRIES"
+      ],
+      "relations": [
+        "dependsOn P-BASE-SELECT/P-BASE-SELECT-CONTENT",
+        "dependsOn C-A11Y-0001/C-AS-COLLECTION-ITEM-0001/C-AS-FOCUSABLE-0001/C-AS-TRIGGER-0001",
+        "verifies T-BASE-SELECT-ITEM-0001"
+      ],
+      "effect": "selected derives from committed Root value; active remains separate; prototype and asSelectItem share setup; no stable admission claimed."
+    },
+    {
+      "id": "M-STATE-0001",
+      "status": "draft",
+      "path": "spec/modules/M-STATE-0001.yaml",
+      "anchors": [
+        "M-STATE-0001-A",
+        "M-STATE-0001-C",
+        "M-STATE-0001-H"
+      ],
+      "effect": "Ordinary bool State owns its slot; deprecated semantic accessors are peripheral Runtime bridges."
+    },
+    {
+      "id": "M-A11Y-0001",
+      "status": "draft",
+      "path": "spec/modules/M-A11Y-0001.yaml",
+      "relations": [
+        "dependsOn M-STATE-0001",
+        "requires HC-A11Y-0001"
+      ],
+      "effect": "Observe State and delegate host semantic projection."
+    },
+    {
+      "id": "T-BASE-SELECT-ITEM-0001",
+      "status": "draft",
+      "path": "spec/tests/T-BASE-SELECT-ITEM-0001.yaml",
+      "effect": "Existing planned/passing implementation entries retain their actual source/evidence boundaries; this record changes no case/status/history."
+    }
+  ],
+  "migrationDirection": {
+    "issue": 637,
+    "observedState": "CLOSED",
+    "authorizationSource": "https://github.com/Proto-UI/Proto-UI/issues/637#issuecomment-5617759381",
+    "latestDisposition": "https://github.com/Proto-UI/Proto-UI/issues/637#issuecomment-6684464925",
+    "scope": "The original direction authorizes inventory and Select migration. Tooltip pressed and package/export/API retirement need their separate bounded decisions. Full637retirement is deferred0.4 and is not resolved or reopened here."
+  },
+  "currentSourceFacts": {
+    "itemPath": "packages/prototypes/base/src/select/item.proto.ts",
+    "lineAtBase": 19,
+    "observedDeclaration": "const selected = def.state.fromAccessibility('selected');",
+    "semanticWriter": "setupSelectItem.sync computes nextSelected from Item ownValue === committed context.value, then writes selected.",
+    "projection": "The same selected handle is exposed and passed to accessible.state('selected', selected).",
+    "sharedAuthoring": "setupSelectItem supplies both asSelectItem and the default selectItem prototype.",
+    "testPath": "packages/prototypes/base/test/select.test.ts",
+    "existingCase": "The original conflicting legacy-slot regression is absent at the bound base.",
+    "claimBoundary": "Static source inspection only; no current reproduction was run."
+  },
+  "bindings": [
+    {
+      "role": "historical-parent",
+      "revision": "48b6f1bf6def5ffe1d1a7c34be91d670b1e7a077",
+      "path": "packages/prototypes/base/src/select/item.proto.ts",
+      "sha256": "05af2e7f08d293947626dc2b2d193d9c9052a8d01cf3f92f5a25e4054fb67bf8",
+      "bytes": 5899
+    },
+    {
+      "role": "historical-parent",
+      "revision": "48b6f1bf6def5ffe1d1a7c34be91d670b1e7a077",
+      "path": "packages/prototypes/base/test/select.test.ts",
+      "sha256": "d616105f1d886393bfdd5848c4495b02cce96d18c1ec817dc8a26b9debe6af21",
+      "bytes": 21114
+    },
+    {
+      "role": "historical-candidate",
+      "revision": "9737c1a8c7f89df44610022861f58706ad388592",
+      "path": "packages/prototypes/base/src/select/item.proto.ts",
+      "sha256": "607561a422081f70db4bec2e779f7c2129e53ca1405098562ebb3295bf9d0c73",
+      "bytes": 5893
+    },
+    {
+      "role": "historical-candidate",
+      "revision": "9737c1a8c7f89df44610022861f58706ad388592",
+      "path": "packages/prototypes/base/test/select.test.ts",
+      "sha256": "ef5dbc850ac86ae221779b5d2efad421fe1cbe17092d3f8e6da82f7cd6cfc2a3",
+      "bytes": 22822
+    },
+    {
+      "role": "current-base",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "path": "packages/prototypes/base/src/select/item.proto.ts",
+      "sha256": "c2b36678b54559fb39e72e9ae246f8d996f02fef7f138b514d165ab0d97a56ea",
+      "bytes": 6905
+    },
+    {
+      "role": "current-base",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+      "path": "packages/prototypes/base/test/select.test.ts",
+      "sha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+      "bytes": 31865
+    }
+  ],
+  "preparedCandidates": [
+    {
+      "path": "packages/prototypes/base/src/select/item.proto.ts",
+      "preimageSha256": "c2b36678b54559fb39e72e9ae246f8d996f02fef7f138b514d165ab0d97a56ea",
+      "candidateSha256": "1ffd9ec0121c771ea37961b106bc688aebdfa6a44627307bec10368402bccc89",
+      "patchSha256": "1a53e0e461a9181004e686bef8c63a763a406164cf4f0f5a70cb1cd5df0bcf7a",
+      "applied": false
+    },
+    {
+      "path": "packages/prototypes/base/test/select.test.ts",
+      "preimageSha256": "1601db8d8d4a9e5c344c7a71e947e2a14f7a0748a1ffab222fd1c9c9fd37f843",
+      "candidateSha256": "28e9e6c517bbe7835fee77dc11f656b9be25c8c2e561fa4d8f9a2c20ea2b5709",
+      "patchSha256": "c29a20ce2b8baafd2740e1be3a0e666775f9ba2b20092d4c1319c193ef586583",
+      "applied": false
+    }
+  ],
+  "candidateBoundary": {
+    "sourceChange": "Only replace def.state.fromAccessibility('selected') with def.state.bool('selected', false).",
+    "testChange": "Restore the original real asSelectItem/WC consumer regression in the current test file, retaining controlled Root alpha→beta and conflicting legacy true/false writes. Add a public read method to witness that each injected legacy write actually took effect.",
+    "productWriter": "SolMore1159Select after Main actual before and explicit production admission; the existing four-file24-native candidate remains frozen.",
+    "1156OwnedChange": "This issue-specific dated record only. Exact original/current source/test preimages and unapplied patches are private handoff materials, not published or executed results.",
+    "otherPaths": "Compiler/IR, Runtime/Core APIs, Tooltip, Material, Presence, source-157 oracle, public registries and original carrier are unchanged by1156."
+  },
+  "originalConditionAccounting": [
+    {
+      "id": "1156-original",
+      "original": "纳入 Finf 并验证实际修复闭环 — 历史状态 blocked",
+      "state": "unmet",
+      "completedReachablePart": "Recovered the exact source key, original two-file repair, literal blocker, provenance and preimages; handed current unapplied candidates to sole Select writer.",
+      "remaining": "Main before/after, affected consumers/native evidence, independent review, actual combined-source integration and1156public fix-loop readback."
+    },
+    {
+      "id": "source-ownership",
+      "sourceKey": "owner-conversation:872:6083902111",
+      "condition": "Keep Select protocol selected and aria-selected governed by committed Root under conflicting retained legacy-slot writes; controlled Root changes remain effective.",
+      "state": "prepared-unapplied-unrun",
+      "remaining": "Same meaningful consumer must fail on current accessor-backed source and pass after admitted repair. Do not relabel historical before/after as current."
+    },
+    {
+      "id": "source-integration",
+      "sourceKey": "owner-conversation:872:6083902111",
+      "condition": "Finf integrator independently reviews/incorporates the candidate under its current source boundary and reruns affected checks on actual combined head.",
+      "state": "unmet",
+      "remaining": "Current source/consumer/native receipts, independent exact-head review, CI/nativeDCO, lawful integration and actual receipt."
+    },
+    {
+      "id": "source-exclusions",
+      "sourceKey": "owner-conversation:872:6083902111",
+      "condition": "Do not infer an abandoned production-control defect, delete the source-157 comparison oracle or Material/Presence boundaries, invent Tooltip pressed semantics, promote lifecycle or claim full637retirement.",
+      "state": "preserved",
+      "remaining": "Retain these boundaries through Main/1159 integration and review."
+    },
+    {
+      "id": "historical-evidence",
+      "sourceKey": "owner-conversation:872:6083902111",
+      "condition": "Preserve old setup failures, actual9files88passes and TypeScript, plus the lack of native/hosted/independent/current acceptance.",
+      "state": "preserved",
+      "remaining": "Append new bound results without replacing the historical subject/hash or failed ModelTrace."
+    }
+  ],
+  "serialMainValidation": {
+    "executionStatus": "not-run",
+    "beforeCommand": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH corepack pnpm@10.32.1 exec vitest run packages/prototypes/base/test/select.test.ts -t 'keeps deprecated A11y borrowed views separate from committed selection' --maxWorkers=1 --minWorkers=1 --fileParallelism=false --reporter=default",
+    "afterCommand": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH corepack pnpm@10.32.1 exec vitest run packages/prototypes/base/test/select.test.ts -t 'keeps deprecated A11y borrowed views separate from committed selection' --maxWorkers=1 --minWorkers=1 --fileParallelism=false --reporter=default",
+    "sourceMaterialization": "Before uses test-only candidate with original current-base production source. Only after a real discriminating before may Main admit the one-line source candidate through1159.",
+    "affectedConsumerFiles": [
+      "packages/prototypes/base/test/select.test.ts",
+      "packages/prototypes/shadcn/test/select.test.ts",
+      "packages/prototypes/brutalist/test/select.test.ts",
+      "packages/prototypes/liquid-glass/test/select-material.test.ts",
+      "packages/prototypes/test-utils/test/select-projections.behavior.test.ts",
+      "packages/adapters/react/test/select.test.ts",
+      "packages/adapters/react/test/select-keyboard.integration.test.ts",
+      "packages/adapters/vue/test/select.test.ts",
+      "packages/adapters/vue2/test/select.test.ts"
+    ],
+    "affectedConsumerCommand": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH corepack pnpm@10.32.1 exec vitest run packages/prototypes/base/test/select.test.ts packages/prototypes/shadcn/test/select.test.ts packages/prototypes/brutalist/test/select.test.ts packages/prototypes/liquid-glass/test/select-material.test.ts packages/prototypes/test-utils/test/select-projections.behavior.test.ts packages/adapters/react/test/select.test.ts packages/adapters/react/test/select-keyboard.integration.test.ts packages/adapters/vue/test/select.test.ts packages/adapters/vue2/test/select.test.ts --maxWorkers=1 --minWorkers=1 --fileParallelism=false --reporter=default",
+    "typesCommand": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH corepack pnpm@10.32.1 check:types:workspace",
+    "ordering": "Serialize types after all docs/browser builders retire; Main retains actual logs, failures and source hashes. No old88test count is asserted for current files."
+  },
+  "consumerTransition": {
+    "testName": "keeps deprecated A11y borrowed views separate from committed selection",
+    "steps": [
+      {
+        "action": "Mount real controlled Root alpha/open with composed Item beta",
+        "expectedRoot": "alpha",
+        "expectedSelected": false,
+        "expectedAriaSelected": "false"
+      },
+      {
+        "action": "Write retained legacy accessibility slot true and read it back true",
+        "expectedRoot": "alpha",
+        "expectedSelected": false,
+        "expectedAriaSelected": "false"
+      },
+      {
+        "action": "Set controlled Root value beta",
+        "expectedRoot": "beta",
+        "expectedSelected": true,
+        "expectedAriaSelected": "true"
+      },
+      {
+        "action": "Write retained legacy slot false and read it back false",
+        "expectedRoot": "beta",
+        "expectedSelected": true,
+        "expectedAriaSelected": "true"
+      }
+    ],
+    "beforePrediction": "Accessor-backed source incorrectly shares the conflicting slot; prediction awaits Main execution.",
+    "internalEvidence": "Measure the executed Root/legacy-slot/selected/aria transitions. No log/prose screenshot substitutes for those observations."
+  },
+  "affectedNativeVisual": {
+    "owner": "SolMore1159Select/Main",
+    "entry": "apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts",
+    "candidateStatus": "Existing1159 frozen24-native carrier, unrun here",
+    "routes": [
+      "/en/ui-libraries/shadcn/select/",
+      "/zh-cn/ui-libraries/shadcn/select/"
+    ],
+    "journey": "All four runtimes: keyboard empty entry, End+Enter enabled selection, reopen/Escape;390px; disabledSolid keyboard/pointer negatives and enabledVue hover/commit/reopen; genuineRTL/reduced-motion observations.",
+    "expectedCaptureSuffixes": [
+      "first.png",
+      "narrow.png",
+      "disabled.png",
+      "pointer-reopen.png"
+    ],
+    "limits": "Affected real native consumer evidence only. That carrier does not include the legacy-slot wrapper or conflicting writes. It is not proof of that exact native scenario, whole1159, all-family, AT or independently compiled acceptance."
+  },
+  "currentEvidence": {
+    "productChecks": "not-run",
+    "buildsImportsInstallsFormat": "not-run",
+    "nativeBrowser": "not-run",
+    "independentReview": "not-performed",
+    "hostedCiAndNativeDco": "not-observed",
+    "prPublicationIntegrationAndClosure": "not-performed",
+    "metadataOnly": "Read-only source/object/hash and source/Issue recovery; genuine v2 metadata handoff admission is a separate local preparation artifact, not product validation."
+  },
+  "remainingOriginalWork": [
+    "Execute and retain the actual current-source before discriminant.",
+    "Have sole Select writer1159 apply only Main-admitted source/test changes and rebind the actual source.",
+    "Execute the identical after consumer plus affected public/family/Adapter checks and applicable native evidence; retain exact scenario limits.",
+    "Address independent review findings and obtain real exact-headCI/nativeDCO under current platform/provenance rules.",
+    "Integrate lawfully, post/read back the criterion-bound1156fix-loop evidence and close only when its original condition is earned.637fullretirement and1093siblings remain separately accounted."
+  ]
+}
