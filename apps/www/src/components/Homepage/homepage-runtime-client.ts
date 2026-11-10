@@ -469,6 +469,22 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       onValueChange: (value) => requestComponent(value as SharedBaseFamilyId),
     },
   });
+  // The retained typography view is the native owner of its source. A failed
+  // or superseded publication leaves the failed generation's carrier in the
+  // native content, and retiring that batch would strip the source text
+  // instead of restoring the committed carrier. Hand the ownership back
+  // before the failed batch is revoked. A passive refresh can still cover
+  // sources or viewport changes made while the failed batch was preparing.
+  const restoreRetainedTypography = (retained: MaterializedProjectionCandidate | undefined) => {
+    if (!retained) return;
+    try {
+      retained.activate();
+    } catch (error) {
+      // The retained batch was already retired. Leave the passive refresh
+      // able to install a current owner for this source.
+      console.error('[HomepageRuntime] failed to restore the retained typography batch.', error);
+    }
+  };
   const controller = createProjectionScopeController({
     initialSelection: { runtimeId: initialRuntime, projectionFamilyId: initialFamily },
     async materialize(request) {
@@ -589,7 +605,6 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       const headerPublication = headerSurface?.prepareCommit(commit);
       const searchPublication = search?.prepareCommit(commit);
       const previous = activeCandidates;
-      const previousTypography = activeTypography;
       const previousFamily = activeFamily;
       const previousComponent = committedComponent;
       const previousSiteMarkers = [
@@ -605,6 +620,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         'aria-busy',
       ].map((name) => [name, root.getAttribute(name)] as const);
       const previousStatus = status?.textContent ?? null;
+      // The typography owner the committed generation keeps. A passive refresh
+      // may replace it while this publication is prepared, so the rollback
+      // restores the owner that is actually current instead of the one that
+      // was current when the preparation started.
+      let retainedTypography: MaterializedProjectionCandidate | undefined;
+      let published = false;
       return {
         publish() {
           // A reader can use native fallback navigation while async code is
@@ -616,6 +637,8 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
             const index = group.links.findIndex((link) => link === document.activeElement);
             return index < 0 ? [] : [{ group, index }];
           })[0];
+          retainedTypography = activeTypography;
+          published = true;
           activeCandidates = next;
           activeTypography = prepared.typography;
           activeFamily = family;
@@ -645,8 +668,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           }
         },
         rollback() {
+          // The committed generation keeps the typography owner it actually
+          // holds now. A published generation replaced that owner with its
+          // own candidate; a generation that never published never did.
+          const committedTypography = published ? retainedTypography : activeTypography;
           activeCandidates = previous;
-          activeTypography = previousTypography;
+          activeTypography = committedTypography;
           activeFamily = previousFamily;
           committedComponent = previousComponent;
           groups.forEach((group, index) => {
@@ -664,6 +691,11 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           demoPublication?.rollback();
           headerPublication?.rollback();
           searchPublication?.rollback();
+          // The failed generation's carrier is still in the native content.
+          // Give the committed view its source back before that batch is
+          // revoked, so retiring it cannot strip the source text and let a
+          // passive refresh install a third owner in its place.
+          restoreRetainedTypography(committedTypography);
         },
       };
     },

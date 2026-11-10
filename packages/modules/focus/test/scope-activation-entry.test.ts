@@ -43,6 +43,7 @@ function fixture(configuredEntry: FocusScopeConfig['entry'] = 'first', child = t
         return 'applied';
       },
       hasPendingFocus: () => false,
+      cancelPendingFocus: () => undefined,
       clearFocus: () => {
         focused = false;
       },

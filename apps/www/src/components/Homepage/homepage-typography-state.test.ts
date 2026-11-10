@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { initHomepageRuntime } from './homepage-runtime-client';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
 import {
@@ -15,6 +16,7 @@ import type { MaterializedProjectionCandidate } from '../PrototypePreviewer/proj
 // the other real typography suites do. Browser behavior and deadlines stay real.
 let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
 beforeAll(() => {
+  installGeneratedProtoUiStylesheet();
   observerKeeper = retainHappyDomMutationCallbacks(window);
 });
 afterAll(() => observerKeeper.restore());
@@ -76,7 +78,17 @@ beforeEach(() => {
     media: '(max-width: 47.999rem)',
     onchange: null,
   }) as MediaQueryList;
-  vi.spyOn(window, 'matchMedia').mockReturnValue(media);
+  // Both samples stay in the medium Hero bucket (1024px and 704px).
+  // Only the compact query changes; a compact viewport cannot also be wide.
+  vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+    query === media.media
+      ? media
+      : (Object.assign(new EventTarget(), {
+          matches: query === '(min-width: 40rem)',
+          media: query,
+          onchange: null,
+        }) as MediaQueryList)
+  );
   document.body.innerHTML = `<header data-homepage-runtime>
     <output data-homepage-runtime-status></output>
     <div id="navigation" data-homepage-actions data-homepage-controls="runtime">
@@ -152,13 +164,14 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     it(`${cause}: keeps the original logical owners, draft, switch, caret and page snapshot`, async () => {
       const before = await editGallery();
       if (cause === 'viewport') {
+        const originalSurface = surface();
         resize(true);
+        await expect.poll(() => surface()).not.toBe(originalSurface);
         await expect
           .poll(() =>
             document.querySelector('h1 [data-typography-prototype]')?.getAttribute('data-pui-style')
           )
-          // The Shadcn site hero keeps the source-aligned medium slogan at
-          // every viewport, so a compact viewport does not shrink it.
+          // Both sampled widths keep the source-aligned medium slogan.
           .toContain('text-3xl');
       } else {
         const heading = document.createElement('h2');
@@ -286,7 +299,9 @@ describe('homepage passive typography refresh preserves real gallery state', () 
 
   it('whole-page publication rollback restores the latest locally refreshed typography and live gallery', async () => {
     const before = await editGallery();
+    const originalSurface = surface();
     resize(true);
+    await expect.poll(() => surface()).not.toBe(originalSurface);
     await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-3xl');
     const refreshedSurface = surface();
     const applyFamily = siteFamily.applySiteLibraryFamily;
@@ -313,6 +328,73 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     handle = undefined;
     expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+  });
+
+  it('a failed publication keeps the committed owner and no replacement batch', async () => {
+    await editGallery();
+    const committedSurface = surface();
+    const preparations = preparation.count;
+    const applyFamily = siteFamily.applySiteLibraryFamily;
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
+      applyFamily(document, family);
+      if (family === 'brutalist') throw new Error('injected page publication failure');
+    });
+    select('family', 'brutalist');
+    await expect
+      .poll(
+        () => document.querySelector<HTMLElement>('[data-homepage-runtime]')!.dataset.runtimeState
+      )
+      .toBe('error');
+    // The failed generation's own batch is revoked with the failed
+    // publication, and no replacement batch replaces the committed one.
+    await expect
+      .poll(() => document.querySelectorAll('[data-site-typography-batch]').length)
+      .toBe(1);
+    // Real MutationObserver deliveries are platform timed, so a fixed settle
+    // is the only way to observe that no later delivery starts a passive
+    // refresh. This is the same settle the role-change cases above use.
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    // The committed carrier is the same original node. The failed generation
+    // neither keeps the native content nor is replaced by a third owner.
+    expect(surface()).toBe(committedSurface);
+    expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(1);
+    // The native owner carries the committed generation's identity, not the
+    // failed publication's.
+    expect(document.querySelector('h1')!.getAttribute('data-typography-family')).toBe('shadcn');
+    expect(document.querySelector('h1')!.getAttribute('data-typography-generation')).toBe('1');
+    // Only the failed generation itself was prepared. A replacement owner
+    // needs one more typography batch.
+    expect(preparation.count).toBe(preparations + 1);
+  });
+
+  it('a source added during a failed publication joins the retained generation', async () => {
+    const before = await editGallery();
+    const held = holdNext();
+    const applyFamily = siteFamily.applySiteLibraryFamily;
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
+      applyFamily(document, family);
+      if (family === 'brutalist') throw new Error('injected page publication failure');
+    });
+    select('family', 'brutalist');
+    await held.entered;
+    const added = document.createElement('h2');
+    added.textContent = 'Added during failed publication preparation';
+    document.querySelector('main')!.append(added);
+    held.release();
+    await expect
+      .poll(
+        () => document.querySelector<HTMLElement>('[data-homepage-runtime]')!.dataset.runtimeState
+      )
+      .toBe('error');
+    await expect.poll(() => added.getAttribute('data-typography-family')).toBe('shadcn');
+    expect(added.getAttribute('data-typography-generation')).toBe('1');
+    expect(added.textContent).toBe('Added during failed publication preparation');
+    expect(document.querySelector('main')!.contains(added)).toBe(true);
+    expect(handle!.getSnapshot()).toEqual(before.snapshot);
+    expect(note()).toBe(before.input);
+    expect(note().value).toBe('Keep my unsaved note');
   });
 
   it('a source added during a whole-page runtime preparation joins its committed generation without a second page commit', async () => {

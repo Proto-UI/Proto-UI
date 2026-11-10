@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { getElementProps } from '@proto.ui/adapter-web-component';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import type { DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import { createHomepageShowcase } from './homepage-showcase';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+
+beforeAll(() => {
+  installGeneratedProtoUiStylesheet();
+});
 
 // Real homepage recipe, loader, prototypes, renderer and WC Adapter in Happy DOM.
 // Synthetic input/keyboard events do not establish browser paint or pointer geometry.

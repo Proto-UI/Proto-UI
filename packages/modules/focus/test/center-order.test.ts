@@ -50,6 +50,7 @@ function navigation(options: {
     orderTargets: options.orderTargets,
     requestFocus: () => 'applied',
     hasPendingFocus: () => false,
+    cancelPendingFocus: () => undefined,
     clearFocus: () => undefined,
     setScopeActive: () => undefined,
     pushWarning: () => undefined,
@@ -75,6 +76,7 @@ function navigation(options: {
         return 'applied';
       },
       hasPendingFocus: () => false,
+      cancelPendingFocus: () => undefined,
       clearFocus: () => {
         focused.delete(token);
       },

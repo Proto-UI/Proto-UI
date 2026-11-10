@@ -1,6 +1,17 @@
 name: Finf representative feature screenshots
 on:
   workflow_dispatch:
+    inputs:
+      popover_evidence:
+        description: Popover evidence selection; fault modes intentionally fail
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - normal
+          - wrong-width
+          - nonsettling
   workflow_call:
 permissions:
   contents: read
@@ -39,7 +50,33 @@ jobs:
           - shadcn-drawer-presence
           - shadcn-card
           - brutalist-switch-consumer
+        # Preserve the full group inventory above for all/reusable invocations.
+        # Only an explicitly recognized manual selection excludes other groups.
+        exclude: >-
+          ${{ github.event_name == 'workflow_dispatch' && contains(fromJSON('["normal","wrong-width","nonsettling"]'), inputs.popover_evidence) && fromJSON('[{"group":"forms"},{"group":"calendar"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || fromJSON('[]') }}
+
     steps:
+      - name: Validate manual Popover evidence selection
+        id: popover_dispatch
+        env:
+          PUI_FINF_POPOVER_REQUEST: ${{ github.event_name == 'workflow_dispatch' && inputs.popover_evidence || 'all' }}
+          PUI_FINF_POPOVER_GROUP: ${{ matrix.group }}
+        run: |
+          set -euo pipefail
+          case "$PUI_FINF_POPOVER_REQUEST" in
+            all) ;;
+            normal|wrong-width|nonsettling)
+              if [ "$PUI_FINF_POPOVER_GROUP" != disclosure-overlays ]; then
+                printf 'Targeted Popover selection reached unexpected group: %s\n' "$PUI_FINF_POPOVER_GROUP" >&2
+                exit 2
+              fi
+              ;;
+            *)
+              printf 'Unknown manual Popover evidence selection: %s\n' "$PUI_FINF_POPOVER_REQUEST" >&2
+              exit 2
+              ;;
+          esac
+          printf 'mode=%s\n' "$PUI_FINF_POPOVER_REQUEST" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.CANDIDATE_SHA }}
@@ -78,8 +115,29 @@ jobs:
           PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
           PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
           PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
+          PUI_FINF_POPOVER_EVIDENCE: ${{ steps.popover_dispatch.outputs.mode }}
         run: |
           set -euo pipefail
+          unset PUI_FINF_POPOVER_NEGATIVE_CONTROL
+          POPOVER_ARGS=()
+          case "$PUI_FINF_POPOVER_EVIDENCE" in
+            all) ;;
+            normal)
+              POPOVER_ARGS=(-t '(shadcn|brutalist)-popover$')
+              ;;
+            wrong-width)
+              export PUI_FINF_POPOVER_NEGATIVE_CONTROL=wrong-width
+              POPOVER_ARGS=(-t 'shadcn-popover$')
+              ;;
+            nonsettling)
+              export PUI_FINF_POPOVER_NEGATIVE_CONTROL=nonsettling
+              POPOVER_ARGS=(-t 'shadcn-popover$')
+              ;;
+            *)
+              printf 'Unknown validated Popover evidence selection: %s\n' "$PUI_FINF_POPOVER_EVIDENCE" >&2
+              exit 2
+              ;;
+          esac
           TEST_FILE=apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
           if [ "$PUI_FINF_FEATURE_GROUP" = resident-motion-capability ]; then
             TEST_FILE=packages/adapters/base/test/resident-motion.browser.test.ts
@@ -115,6 +173,7 @@ jobs:
           fi
           corepack pnpm@10.32.1 exec vitest run \
             "$TEST_FILE" \
+            "${POPOVER_ARGS[@]}" \
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
             --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
             2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
