@@ -141,6 +141,15 @@ const composedParent = (element: Element): Element | null =>
   element.parentElement ??
   (element.getRootNode() instanceof ShadowRoot ? (element.getRootNode() as ShadowRoot).host : null);
 
+const composedContains = (
+  parent: Element | null | undefined,
+  element: Element | null | undefined
+): boolean => {
+  for (let current = element ?? null; current; current = composedParent(current))
+    if (current === parent) return true;
+  return false;
+};
+
 const composedChildren = (node: Node): Node[] => {
   if (node instanceof HTMLSlotElement) {
     const assigned = node.assignedNodes({ flatten: true });
@@ -149,23 +158,76 @@ const composedChildren = (node: Node): Node[] => {
   return [...(node instanceof Element && node.shadowRoot ? node.shadowRoot : node).childNodes];
 };
 
-const currentProjection = (scope: HTMLElement | null) => {
+// Anatomy and numeric facts share the authored boundary. Runtime picker Roots
+// and inline panels surround that boundary; their controls relation does not
+// turn the selected panel (or its consumer descendants) into a reader portal.
+interface ContrastAuthoredBoundary {
+  retained: HTMLElement | null;
+  shell: HTMLElement | null;
+}
+const authoredProjectionRootFilter = (
+  scope: HTMLElement | null,
+  boundary: ContrastAuthoredBoundary | null
+) => {
+  // Flat calibration fixtures may use the scope itself. Production always uses
+  // the independently validated retained consumer, never that fallback.
+  const content = boundary
+    ? boundary.retained
+    : (scope?.querySelector<HTMLElement>('[data-projection-content]') ?? scope);
+  const owner = scope?.dataset.projectionOwner ?? scope?.dataset.projectionScope;
+  const generation = scope?.dataset.projectionGeneration;
+  const readerIds = new Set(
+    [...(scope?.querySelectorAll('[data-projection-control] [aria-controls]') ?? [])].flatMap(
+      (element) => (element.getAttribute('aria-controls') ?? '').split(/\s+/).filter(Boolean)
+    )
+  );
+  // Only targets disjoint from the selected scope are detached reader parts.
+  // Their relation may land on a plain wrapper around reader-owned Roots.
+  const readerPortals = [...document.querySelectorAll<HTMLElement>('[id]')].filter(
+    (element) =>
+      readerIds.has(element.id) &&
+      !composedContains(scope, element) &&
+      !composedContains(element, scope)
+  );
+  return (element: HTMLElement): boolean => {
+    if (element === boundary?.shell) return false;
+    // Inside the scope, the retained consumer is the subject. Detached parts
+    // retain their exact lease admission; anatomy still checks recipe identity,
+    // multiplicity and presence relations before granting any frame credit.
+    if (
+      !composedContains(content, element) &&
+      (composedContains(scope, element) ||
+        composedContains(element, scope) ||
+        !owner ||
+        !generation ||
+        element.dataset.projectionOwner !== owner ||
+        element.dataset.projectionGeneration !== generation)
+    )
+      return false;
+    for (let current: Element | null = element; current; current = composedParent(current))
+      if (current.hasAttribute('data-projection-control')) return false;
+    return !readerPortals.some((portal) => composedContains(portal, element));
+  };
+};
+
+const currentProjection = (
+  scope: HTMLElement | null,
+  boundary: ContrastAuthoredBoundary | null = null
+) => {
   const owner = scope?.dataset.projectionOwner ?? scope?.dataset.projectionScope;
   const generation = scope?.dataset.projectionGeneration;
   if (!owner || !generation) throw new Error('Current projection lease missing.');
+  const isAuthoredRoot = authoredProjectionRootFilter(scope, boundary);
   const roots: HTMLElement[] = [];
   const visit = (root: Document | ShadowRoot) => {
     for (const element of root.querySelectorAll<HTMLElement>('*')) {
       if (
         element.matches('[data-pui-root]') &&
         element.dataset.projectionOwner === owner &&
-        element.dataset.projectionGeneration === generation
-      ) {
-        let current: Element | null = element;
-        while (current && !current.hasAttribute('data-projection-control'))
-          current = composedParent(current);
-        if (!current) roots.push(element);
-      }
+        element.dataset.projectionGeneration === generation &&
+        isAuthoredRoot(element)
+      )
+        roots.push(element);
       if (element.shadowRoot) visit(element.shadowRoot);
     }
   };
@@ -284,8 +346,11 @@ const stateProperties = [
   'content',
 ] as const;
 
-const readContrastStateInScope = (scope: HTMLElement | null): string => {
-  const { owner, generation, surfaces } = currentProjection(scope);
+const readContrastStateInScope = (
+  scope: HTMLElement | null,
+  boundary: ContrastAuthoredBoundary | null = null
+): string => {
+  const { owner, generation, surfaces } = currentProjection(scope, boundary);
   const snapshot = (node: Node): unknown => {
     if (!stateNodes.has(node)) stateNodes.set(node, nextStateNode++);
     if (!(node instanceof Element)) {
@@ -386,8 +451,10 @@ const readContrastStateInScope = (scope: HTMLElement | null): string => {
 export const readContrastState = (): string =>
   readContrastStateInScope(document.querySelector<HTMLElement>('[data-projection-scope]'));
 
-export const readSubjectContrastState = (subject: ContrastAuditSubject): string =>
-  readContrastStateInScope(requireContrastAuditSubject(subject).scope);
+export const readSubjectContrastState = (subject: ContrastAuditSubject): string => {
+  const boundary = requireContrastAuditSubject(subject);
+  return readContrastStateInScope(boundary.scope, boundary);
+};
 
 type SolidPaint = { rgba: number[] | null; alpha: number | null; limits: string[] };
 const paint = (color: string): SolidPaint => {
@@ -1098,8 +1165,8 @@ const requireContrastAuditSubject = (subject: ContrastAuditSubject) => {
 };
 
 // Structural observation only; the Node audit compares this current lease to
-// the exact authored recipe. Reader toolbar portals are excluded by their own
-// controls relations, not by assuming all portals belong to the product.
+// the exact authored recipe. Keep foreign in-content Roots visible to that
+// comparison so a damaged lease cannot disappear from the anatomy check.
 const readContrastAnatomyInScope = (
   primary: Element | null,
   scope: HTMLElement | null,
@@ -1110,21 +1177,7 @@ const readContrastAnatomyInScope = (
   const generation = scope?.dataset.projectionGeneration;
   const authoredContent = boundary ? boundary.retained : content;
   const all = [...document.querySelectorAll<HTMLElement>('[data-pui-root]')];
-  const readerIds = new Set(
-    [...(scope?.querySelectorAll('[data-projection-control] [aria-controls]') ?? [])].flatMap(
-      (element) => (element.getAttribute('aria-controls') ?? '').split(/\s+/).filter(Boolean)
-    )
-  );
-  const readerPortals = all.filter((element) => readerIds.has(element.id));
-  const roots = all.filter(
-    (element) =>
-      !(boundary?.observation.achieved && element === boundary.shell) &&
-      (content?.contains(element) ||
-        (element.dataset.projectionOwner === owner &&
-          element.dataset.projectionGeneration === generation)) &&
-      !element.closest('[data-projection-control]') &&
-      !readerPortals.some((portal) => portal.contains(element))
-  );
+  const roots = all.filter(authoredProjectionRootFilter(scope, boundary));
   const indices = new Map(roots.map((element, index) => [element, index]));
   const surfaces = roots.map((element, uid) => {
     let parent = composedParent(element);
@@ -1335,7 +1388,7 @@ const collectContrastFrameInScope = async (
     image: string;
     family: string;
   },
-  resolveScope: () => HTMLElement | null
+  subject: ContrastAuditSubject | null = null
 ): Promise<ContrastFrame> => {
   const luminance = (color: readonly number[]) => {
     const linear = color.slice(0, 3).map((channel) => {
@@ -1366,9 +1419,12 @@ const collectContrastFrameInScope = async (
   };
   // No further await: this fingerprint and the facts below belong to one
   // synchronous read after image decoding. The runner compares it to pre-PNG.
-  const scope = resolveScope();
-  const stateFingerprint = readContrastStateInScope(scope);
-  const { owner, generation, surfaces } = currentProjection(scope);
+  const boundary = subject ? requireContrastAuditSubject(subject) : null;
+  const scope = boundary
+    ? boundary.scope
+    : document.querySelector<HTMLElement>('[data-projection-scope]');
+  const stateFingerprint = readContrastStateInScope(scope, boundary);
+  const { owner, generation, surfaces } = currentProjection(scope, boundary);
   const background = (element: Element): { rgba: number[] | null; limits: string[] } => {
     const chain: SolidPaint[] = [],
       limits: string[] = [];
@@ -1901,14 +1957,12 @@ const collectContrastFrameInScope = async (
 
 // Calibration remains a distinct entry. Missing production subjects never use it.
 export const collectContrastFrame = (input: { image: string; family: string }) =>
-  collectContrastFrameInScope(input, () =>
-    document.querySelector<HTMLElement>('[data-projection-scope]')
-  );
+  collectContrastFrameInScope(input);
 export const collectSubjectContrastFrame = (input: {
   image: string;
   family: string;
   subject: ContrastAuditSubject;
 }) => {
   requireContrastAuditSubject(input.subject);
-  return collectContrastFrameInScope(input, () => requireContrastAuditSubject(input.subject).scope);
+  return collectContrastFrameInScope(input, input.subject);
 };
