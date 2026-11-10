@@ -2509,6 +2509,7 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: false, bodyPosition: 'grouped-independent' },
     { initialSibling: false, bodyPosition: 'filtered-built-in' },
     { initialSibling: false, bodyPosition: 'filtered-parent' },
+    { initialSibling: false, bodyPosition: 'filtered-ancestor' },
     { initialSibling: false, bodyPosition: 'filtered-reset' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
@@ -2522,6 +2523,7 @@ describe('Shadow closeout native boundaries', () => {
       const filteredBuiltIn = shape === 'filtered-built-in';
       const filteredDefined = shape === 'filtered-defined' || filteredBuiltIn;
       const filteredParent = shape === 'filtered-parent';
+      const filteredAncestor = shape === 'filtered-ancestor';
       const filteredReset = shape === 'filtered-reset';
       const afterDocumentRelation = shape === 'filtered-after-document-relation';
       const filtered = shape === 'filtered' || afterDocumentRelation;
@@ -2530,6 +2532,8 @@ describe('Shadow closeout native boundaries', () => {
         'grouped-independent': '.unrelated:has(.flag), .positional-entry:first-child button',
         'filtered-reset':
           '.positional-entry:not(:has(.flag)):nth-child(1 of :checked, .positional-entry) a',
+        'filtered-ancestor':
+          '.positional-entry:not(:has(.flag)) > .section[data-mode] > .container > .row:nth-child(1 of .row) button',
         'filtered-parent':
           '.positional-entry[data-mode]:not(:has(.flag)) > .row:nth-child(1 of .row) button',
         'filtered-built-in':
@@ -2573,6 +2577,7 @@ describe('Shadow closeout native boundaries', () => {
             filteredDefined,
             filteredBuiltIn,
             filteredParent,
+            filteredAncestor,
             filteredReset,
             css,
           }) => {
@@ -2622,10 +2627,12 @@ describe('Shadow closeout native boundaries', () => {
               ? '<span hidden data-eligible></span><div class="row"><button>Inside</button></div>'
               : filteredParent
                 ? '<div class="row"><button>Inside</button></div>'
-                : filteredReset
-                  ? '<a href="#entry">Inside</a>'
-                  : '<button>Inside</button>';
-            if (filteredTarget || filteredInternal || filteredParent)
+                : filteredAncestor
+                  ? '<section class="section"><div class="container"><div class="row"><button>Inside</button></div></div></section>'
+                  : filteredReset
+                    ? '<a href="#entry">Inside</a>'
+                    : '<button>Inside</button>';
+            if (filteredTarget || filteredInternal || filteredParent || filteredAncestor)
               host.className = 'positional-entry';
             wrapper.append(host);
             if (initialSibling || filteredDefined) sibling.className = 'eligible';
@@ -2634,7 +2641,11 @@ describe('Shadow closeout native boundaries', () => {
               !filteredInternal
             )
               parent.append(sibling);
-            parent.append(filteredTarget || filteredInternal || filteredParent ? host : wrapper);
+            parent.append(
+              filteredTarget || filteredInternal || filteredParent || filteredAncestor
+                ? host
+                : wrapper
+            );
             if (inShadow) document.body.append(boundary);
             else if (!atBody || filteredReset) document.body.append(parent);
           },
@@ -2648,6 +2659,7 @@ describe('Shadow closeout native boundaries', () => {
             filteredDefined,
             filteredBuiltIn,
             filteredParent,
+            filteredAncestor,
             filteredReset,
             css,
           }
@@ -2701,9 +2713,11 @@ describe('Shadow closeout native boundaries', () => {
           expect(await snapshot()).toEqual(visible);
           return;
         }
-        if (filteredTarget || filteredParent) {
-          const attr = filteredParent ? 'data-mode' : 'data-eligible';
-          const host = page.locator('closeout-positional-entry');
+        if (filteredTarget || filteredParent || filteredAncestor) {
+          const attr = filteredParent || filteredAncestor ? 'data-mode' : 'data-eligible';
+          const host = page.locator(
+            filteredAncestor ? 'closeout-positional-entry > .section' : 'closeout-positional-entry'
+          );
           expect(await snapshot()).toEqual(visible);
           await host.evaluate((element, name) => element.setAttribute(name, ''), attr);
           expect(await snapshot()).toEqual(hidden);

@@ -2044,6 +2044,26 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       : { childList: true, attributes: true }
                   );
               }
+              // A filtered position can be gated by selectors on the owned
+              // chain above its parent, outside the observed sibling branches.
+              const filteredPositionAncestors = new Set<Element>();
+              for (const parent of filteredPositionParents.keys()) {
+                for (
+                  let ancestor = parent.parentElement;
+                  ancestor && belongsToObservedEntryTree(ancestor);
+                  ancestor = ancestor.parentElement
+                ) {
+                  if (filteredPositionAncestors.has(ancestor)) break;
+                  filteredPositionAncestors.add(ancestor);
+                  if (!filteredPositionParents.has(ancestor))
+                    entryObserver?.observe(
+                      ancestor,
+                      observedRoots.has(ancestor)
+                        ? { ...options, attributeFilter: undefined }
+                        : { attributes: true }
+                    );
+                }
+              }
               for (const subject of entryRelationalSubjects) {
                 entryExternalStyleObserver.observe(subject, {
                   childList: true,
