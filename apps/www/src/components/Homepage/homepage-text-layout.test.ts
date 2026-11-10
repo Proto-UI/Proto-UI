@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
 import { composeHomepageText } from './homepage-text';
 import type { DemoNode } from '../PrototypePreviewer/demo-types';
+import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+
+beforeAll(() => {
+  installGeneratedProtoUiStylesheet();
+});
 
 // Real four-Adapter rendering, with only CDN acquisition replaced by installed
 // framework versions. This proves display ownership, not native line geometry.
