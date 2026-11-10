@@ -84,6 +84,22 @@ Context 的双向箭头也不是说它“没有方向”，而是说 Component �
 
 一个新的 API 需求不会自动变成新的信息通路。只要它仍然是让 App Maker 配置 Component，就可以被 Props 通路吸收；只要它仍然在让 User 感知 Component，就仍然属于 Feedback。新的通路需要对应现有通路无法吸收的、稳定且重要的参与者身份或关系方向，并承担可以独立辨认的语义责任。
 
+<details id="legacy-information-flow-comparison">
+<summary><strong>怎样阅读早期的信息通路图？</strong></summary>
+
+下面保留的早期图与上表具有相同的五条通路方向。其中的 `Maker`，就是本章在配置与暴露关系中称为 App Maker 的角色。Context 的两个箭头允许双向协作，不规定 callback 的执行顺序。
+
+<figure class="whitepaper-figure">
+  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图" aria-describedby="legacy-information-flow-description">
+    <img src="/diagrams/information-flow-model.svg" alt="早期的信息通路图" aria-describedby="legacy-information-flow-description" width="600" height="760" class="whitepaper-diagram" loading="lazy" />
+  </button>
+  <figcaption id="legacy-information-flow-description">User 发送 Event 并接收 Feedback；Maker 发送 Props 并接收 Expose；Component 之间通过 Context 交换信息。State、Lifecycle 与 Meta 是 Component 内部的维度。State 保存事实，Lifecycle 处理时间与执行秩序；早期正文用 Meta 指自描述与额外语义。点击查看大图</figcaption>
+</figure>
+
+[第四章：通路之外的语义](/zh-cn/whitepaper/4-semantics-beyond-channels/) 在 State 与 Lifecycle 之外展开了 Anatomy，用来描述 part 的角色与结构关系。Anatomy 不是把旧图中的 Meta 换个名字。保留的早期图与本章通路图说明模型的不同侧面，都没有把这些内部维度变成额外的信息通路。
+
+</details>
+
 <details>
 <summary><strong>拓展：Host 和 Component Author 放在哪里？</strong></summary>
 
