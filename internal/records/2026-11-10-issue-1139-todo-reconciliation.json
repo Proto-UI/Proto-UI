@@ -1,0 +1,1518 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.issue-1139-todo-reconciliation",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "issue": 1139,
+  "parentIssue": 1088,
+  "originalCarrierPullRequest": 887,
+  "date": "2026-11-10",
+  "sourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "owner": "SolThirty1139TodoLedger",
+  "source": {
+    "path": "internal/records/2026-11-10-issue-1139-todo-reconciliation-sources.json",
+    "sha256": "43009036308b89991e519d65d3c9a45cf88fb36805b51422e2f8583ae79ff02b"
+  },
+  "scope": "Approved Issue1139-specific source ledger and reader; original50main TODOs preserved. No other product implementation or global ledger changes.",
+  "authority": {
+    "governance": [
+      {
+        "path": "AGENTS.md",
+        "anchors": [
+          "Authority and conflicts",
+          "Change discipline"
+        ]
+      },
+      {
+        "path": "spec/README.md",
+        "anchors": [
+          "Lifecycle and versions",
+          "Relations"
+        ]
+      },
+      {
+        "path": "internal/agent-operations/contributor-agents.md",
+        "anchors": [
+          "Ordinary contribution boundaries",
+          "Evidence discipline",
+          "Handoff and exact-action trust"
+        ]
+      },
+      {
+        "path": "internal/governance/release-0.3-plan.md",
+        "anchors": [
+          "Splitting Finf V2 without losing source criteria",
+          "Development completion versus release acceptance"
+        ]
+      }
+    ],
+    "catalogEntity": null,
+    "lifecycle": "not-applicable administrative record; product lifecycle unchanged",
+    "originalFrozenLedger": {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "sourceRevision": "91f2fdb5e36cfac675d22d1e07e1c4e6b051147d",
+      "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+      "mutated": false
+    },
+    "effectiveSourceNote": "The existing global frozen/corrections/effective ledger remains authoritative for its own acquisition. This dated reconciliation does not replace it or invent source keys."
+  },
+  "criteria": [
+    {
+      "key": "issue.1139.001",
+      "original": "- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）",
+      "parentSourceKey": "issue.1088.006",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 6,
+      "parentSourceLine": 14,
+      "state": "original rejected operation and five current unresolved threads reconciled in prepared source",
+      "remaining": "Main must validate the source, original parent keys, all five rejection results and live thread readback, obtain independent review and lawfully integrate the dated correction. No historical thread closure is required or represented by this record.",
+      "allowed": "Additive factual correction/reader source projection only.",
+      "excluded": "Resolving or reopening PR833; changing closed-target rejection policy; replaying/restamping measurements; merging or closing other work.",
+      "specLifecycle": "not-applicable: administrative reconciliation; no catalog entity or stable guarantee is introduced",
+      "relations": [
+        "Issue1139 child of1088",
+        "1088 retains original PR887 main TODO clauses",
+        "1136/1137/1138/1140 retain distinct neighboring evidence/CI/source/WC slices"
+      ],
+      "owner": "SolThirty1139TodoLedger for this source projection; Main for validation/review/publication/integration; original semantic owners for remaining product conditions",
+      "checks": {
+        "product": "not-run",
+        "consumer": "not-run",
+        "visual": "source-bound internal walkthrough prepared; no product visual claim",
+        "ci": "no candidate CI collected",
+        "dco": "no candidate commit or native DCO collected",
+        "independentReview": "not-run",
+        "integration": "not-performed"
+      },
+      "checked": false
+    },
+    {
+      "key": "issue.1139.002",
+      "original": "- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）",
+      "parentSourceKey": "issue.1088.011",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 7,
+      "parentSourceLine": 19,
+      "state": "all50original main TODO clauses and native blockers carried with current tracking/owners",
+      "remaining": "Main must validate the full50mapping and review every exposed current-evidence gap with its existing owner. The additional54native-snapshot tasks remain separately retained outside this approved50projection.",
+      "allowed": "Recover complete source conditions, keep original/parent keys, record actual live state and next operation.",
+      "excluded": "Dropping compound conditions; turning historical results or merged metadata into current acceptance; taking another implementation owner’s path.",
+      "specLifecycle": "not-applicable: administrative reconciliation; no catalog entity or stable guarantee is introduced",
+      "relations": [
+        "Issue1139 child of1088",
+        "1088 retains original PR887 main TODO clauses",
+        "1136/1137/1138/1140 retain distinct neighboring evidence/CI/source/WC slices"
+      ],
+      "owner": "SolThirty1139TodoLedger for this source projection; Main for validation/review/publication/integration; original semantic owners for remaining product conditions",
+      "checks": {
+        "product": "not-run",
+        "consumer": "not-run",
+        "visual": "source-bound internal walkthrough prepared; no product visual claim",
+        "ci": "no candidate CI collected",
+        "dco": "no candidate commit or native DCO collected",
+        "independentReview": "not-run",
+        "integration": "not-performed"
+      },
+      "checked": false
+    },
+    {
+      "key": "issue.1139.003",
+      "original": "- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）",
+      "parentSourceKey": "issue.1088.012",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 8,
+      "parentSourceLine": 20,
+      "state": "source repair authored; original compound delivery condition remains open",
+      "remaining": "Each original actionable behavior/evidence repair must finish with its existing owner, genuine source-bound validation, required independent review and lawful integration. This record does not declare those repairs complete.",
+      "allowed": "Only this approved Issue1139 source/evidence projection; Main coordinates all existing implementation candidates.",
+      "excluded": "Duplicate product/compiler/IR implementations; direct GitHub writes; invented approvals/CI/DCO/merges; bulk checkbox/Issue closure.",
+      "specLifecycle": "not-applicable: administrative reconciliation; no catalog entity or stable guarantee is introduced",
+      "relations": [
+        "Issue1139 child of1088",
+        "1088 retains original PR887 main TODO clauses",
+        "1136/1137/1138/1140 retain distinct neighboring evidence/CI/source/WC slices"
+      ],
+      "owner": "SolThirty1139TodoLedger for this source projection; Main for validation/review/publication/integration; original semantic owners for remaining product conditions",
+      "checks": {
+        "product": "not-run",
+        "consumer": "not-run",
+        "visual": "source-bound internal walkthrough prepared; no product visual claim",
+        "ci": "no candidate CI collected",
+        "dco": "no candidate commit or native DCO collected",
+        "independentReview": "not-run",
+        "integration": "not-performed"
+      },
+      "checked": false
+    },
+    {
+      "key": "issue.1139.004",
+      "original": "- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）",
+      "parentSourceKey": "issue.1088.013",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 9,
+      "parentSourceLine": 21,
+      "state": "original blocked gates and next operations retained without bypass",
+      "remaining": "Main continues the actual per-owner gate operations, records real new results and independent acceptance, and updates only earned original conditions. Historical eight-PR and current eight-PR deferrals are not PR833 thread-rewrite authority.",
+      "allowed": "Preserve failed, missing, unknown-write and independent-acceptance boundaries and precise follow-on operations.",
+      "excluded": "Treating Rejected as Closed; treating no marker as zero mutations for PublicationUnknown; self-approval or ruleset bypass; retroactive acceptance.",
+      "specLifecycle": "not-applicable: administrative reconciliation; no catalog entity or stable guarantee is introduced",
+      "relations": [
+        "Issue1139 child of1088",
+        "1088 retains original PR887 main TODO clauses",
+        "1136/1137/1138/1140 retain distinct neighboring evidence/CI/source/WC slices"
+      ],
+      "owner": "SolThirty1139TodoLedger for this source projection; Main for validation/review/publication/integration; original semantic owners for remaining product conditions",
+      "checks": {
+        "product": "not-run",
+        "consumer": "not-run",
+        "visual": "source-bound internal walkthrough prepared; no product visual claim",
+        "ci": "no candidate CI collected",
+        "dco": "no candidate commit or native DCO collected",
+        "independentReview": "not-run",
+        "integration": "not-performed"
+      },
+      "checked": false
+    }
+  ],
+  "threadReconciliation": {
+    "pullRequest": 833,
+    "historicalHeadSha": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+    "currentPlatformState": "merged",
+    "currentMergeCommitSha": "dd203d0f9d06aabf74d7a37e2f33d2cb40fadcd2",
+    "historicalRejectedOperation": {
+      "outcome": "rejected",
+      "mutationCountPerOriginalThread": 0,
+      "reconciliationCountPerOriginalThread": 0,
+      "appliedOriginalThreads": 0,
+      "attemptedOriginalThreads": 5,
+      "sourceEvents": [
+        "7e48b8f9",
+        "f5333e70"
+      ],
+      "source": "sources.nativeSource.rejectedOperationToolResults",
+      "notClosed": "Rejected is an operation outcome; it is not a closed Issue/thread or a successful resolution."
+    },
+    "staleCompletionPreimage": {
+      "source": "sources.nativeSource.fiveBoundaryPhasePreimage.tasks[1]",
+      "content": "Resolve five newly repaired review threads",
+      "status": "completed",
+      "correction": "The later blocked reconciliation task and original rejected terminal results supersede this completion claim as evidence. The historical snapshot is preserved without editing it."
+    },
+    "originalFive": [
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-V",
+        "rootId": 4194374599,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374599",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "isResolved": false,
+        "sourceOriginalCommitSha": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "originalConditionSource": "sources.pr833Threads.originalFive[threadId=PRRT_kwDOMhQZjc6pbY-V].comments",
+        "disposition": "historical original finding remains unresolved on platform; no mutation attempted by this worker",
+        "activeWorkflowBoundary": "The original ModelTrace workflow is permanently retired by PR985; original source/finding remains literal history, not a new measurement requirement."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-c",
+        "rootId": 4194374608,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374608",
+        "path": "scripts/agent-operations/modeltrace-cli.mjs",
+        "isResolved": false,
+        "sourceOriginalCommitSha": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "originalConditionSource": "sources.pr833Threads.originalFive[threadId=PRRT_kwDOMhQZjc6pbY-c].comments",
+        "disposition": "historical original finding remains unresolved on platform; no mutation attempted by this worker",
+        "activeWorkflowBoundary": "The original ModelTrace workflow is permanently retired by PR985; original source/finding remains literal history, not a new measurement requirement."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-g",
+        "rootId": 4194374615,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374615",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "isResolved": false,
+        "sourceOriginalCommitSha": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "originalConditionSource": "sources.pr833Threads.originalFive[threadId=PRRT_kwDOMhQZjc6pbY-g].comments",
+        "disposition": "historical original finding remains unresolved on platform; no mutation attempted by this worker",
+        "activeWorkflowBoundary": "The original ModelTrace workflow is permanently retired by PR985; original source/finding remains literal history, not a new measurement requirement."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-k",
+        "rootId": 4194374621,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374621",
+        "path": "scripts/agent-operations/collaboration-runtime.mjs",
+        "isResolved": false,
+        "sourceOriginalCommitSha": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "originalConditionSource": "sources.pr833Threads.originalFive[threadId=PRRT_kwDOMhQZjc6pbY-k].comments",
+        "disposition": "historical original finding remains unresolved on platform; no mutation attempted by this worker",
+        "activeWorkflowBoundary": "The original ModelTrace workflow is permanently retired by PR985; original source/finding remains literal history, not a new measurement requirement."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-p",
+        "rootId": 4194374631,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374631",
+        "path": "scripts/agent-operations/agent-publish.mjs",
+        "isResolved": false,
+        "sourceOriginalCommitSha": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "originalConditionSource": "sources.pr833Threads.originalFive[threadId=PRRT_kwDOMhQZjc6pbY-p].comments",
+        "disposition": "historical original finding remains unresolved on platform; no mutation attempted by this worker",
+        "activeWorkflowBoundary": "Generic unknown-write reconciliation still applies; current source inspection is not a runtime pass."
+      }
+    ],
+    "laterUnresolved": [
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcY_8",
+        "rootId": 4194782756,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782756",
+        "path": "scripts/agent-operations/review-packet.mjs",
+        "isResolved": false,
+        "originalCommit": "1190c6cb338c4ff8430dee0d0cf5fe31b917941e",
+        "scope": "Distinct later finding; not one of the five rejected resolutions."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcZAF",
+        "rootId": 4194782768,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782768",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "isResolved": false,
+        "originalCommit": "1190c6cb338c4ff8430dee0d0cf5fe31b917941e",
+        "scope": "Distinct later finding; not one of the five rejected resolutions."
+      }
+    ],
+    "counts": {
+      "allThreads": 48,
+      "resolvedOtherThreads": 41,
+      "originalUnresolved": 5,
+      "laterUnresolved": 2
+    },
+    "historicalGateBoundary": {
+      "reportedRun": 37613588932,
+      "reportedAttempt": 2,
+      "reportedHeadPrefix": "3ca09b402",
+      "reportedOutcome": "failure",
+      "reportedSuccessfulBrowserShards": 8,
+      "reportedFailures": [
+        "general",
+        "aggregate test"
+      ],
+      "reportedExternalMergePrefix": "96fa2528",
+      "source": "native task blocker, not rerun",
+      "currentPlatformMergeSha": "dd203d0f9d06aabf74d7a37e2f33d2cb40fadcd2",
+      "identityBoundary": "Preserve the native reported96fa2528prefix and current API merge identity separately; no ancestry equivalence or historical mutation attribution inferred."
+    },
+    "noThreadOrIssueMutation": true
+  },
+  "todos": {
+    "sourceCount": 50,
+    "publicSectionCount": 31,
+    "parentMappedConditions": 47,
+    "retiredModelTraceConditions": 3,
+    "rows": [
+      {
+        "recordId": "pr887-main.001",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:2",
+        "originalPublicClause": "- [ ] Publish captured Spinner visuals to authorized destination",
+        "originalPublicSection": "External gates",
+        "originalPublicLine": 18,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[0].native.blocker",
+        "parentSourceKey": "issue.1084.001",
+        "retainedCriterionKeys": [
+          "issue.1084.001"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 775,
+            "source": "sources.pullRequests[number=775]"
+          }
+        ],
+        "nextAction": "Rebind the retained captures to their exact source and obtain the already-required authorized destination before publication; no historical local path becomes a public image."
+      },
+      {
+        "recordId": "pr887-main.002",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:3",
+        "originalPublicClause": "- [ ] Review remaining GPUI stack and verify parent completion",
+        "originalPublicSection": "External gates",
+        "originalPublicLine": 19,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[1].native.blocker",
+        "parentSourceKey": "issue.1084.002",
+        "retainedCriterionKeys": [
+          "issue.1084.002"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with existing GPUIowner",
+        "currentPullRequestReadback": [
+          {
+            "number": 822,
+            "source": "sources.pullRequests[number=822]"
+          }
+        ],
+        "nextAction": "Reconcile the now-merged PR822 against its actual accepted head and the original #687/platform/Overlay boundaries; retain separately unverified parent completion."
+      },
+      {
+        "recordId": "pr887-main.003",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:4",
+        "originalPublicClause": "- [ ] Obtain independent review and integrate audit PR 775",
+        "originalPublicSection": "External gates",
+        "originalPublicLine": 20,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[2].native.blocker",
+        "parentSourceKey": "issue.1084.003",
+        "retainedCriterionKeys": [
+          "issue.1084.003"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 775,
+            "source": "sources.pullRequests[number=775]"
+          }
+        ],
+        "nextAction": "Bind original PR775 conditions and actual a575e74c3ef62eeebe42c071ca1dda43d99b2206 integration; collect missing independent acceptance and current audit evidence without another merge."
+      },
+      {
+        "recordId": "pr887-main.004",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:7/task:3",
+        "originalPublicClause": "- [ ] Integrate PR 775 only after all gates",
+        "originalPublicSection": "PR 775 review",
+        "originalPublicLine": 24,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[3].native.blocker",
+        "parentSourceKey": "issue.1084.004",
+        "retainedCriterionKeys": [
+          "issue.1084.004"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 775,
+            "source": "sources.pullRequests[number=775]"
+          }
+        ],
+        "nextAction": "Reconcile the actual merged PR775 and its historical gates separately; no new merge or retrospective approval is authorized by this record."
+      },
+      {
+        "recordId": "pr887-main.005",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:12/task:0",
+        "originalPublicClause": "- [ ] Handle persistent Spinner animation without false idle",
+        "originalPublicSection": "New audit findings",
+        "originalPublicLine": 28,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[4].native.blocker",
+        "parentSourceKey": "issue.1084.005",
+        "retainedCriterionKeys": [
+          "issue.1084.005"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main runs the current-source full matrix through the real passive-rest Spinner observation without forced idle; retain cancelled/missing cases."
+      },
+      {
+        "recordId": "pr887-main.006",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:12/task:1",
+        "originalPublicClause": "- [ ] Require exact binary outcome after keyboard activation",
+        "originalPublicSection": "New audit findings",
+        "originalPublicLine": 29,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[5].native.blocker",
+        "parentSourceKey": "issue.1084.006",
+        "retainedCriterionKeys": [
+          "issue.1084.006"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main exercises the remaining real keyboard activation cases and records the exact accepted/refused outcome without treating the cancelled Checkbox cases as passing."
+      },
+      {
+        "recordId": "pr887-main.007",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:15/task:1",
+        "originalPublicClause": "- [ ] Confirm Spinner uses passive rest coverage only",
+        "originalPublicSection": "Additional audit findings",
+        "originalPublicLine": 33,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[6].native.blocker",
+        "parentSourceKey": "issue.1084.007",
+        "retainedCriterionKeys": [
+          "issue.1084.007"
+        ],
+        "liveTrackingIssue": 1084,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Bind the actual audit source and run the real passive-rest consumer after supervised runtime/anatomy readiness is established."
+      },
+      {
+        "recordId": "pr887-main.008",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:0",
+        "originalPublicClause": "- [ ] Repair Vue and Vue2 Button projection readiness",
+        "originalPublicSection": "Default matrix failures",
+        "originalPublicLine": 37,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[7].native.blocker",
+        "parentSourceKey": "issue.1085.001",
+        "retainedCriterionKeys": [
+          "issue.1085.001"
+        ],
+        "liveTrackingIssue": 1085,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1160owner; Main coordinates audit consumer",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the existing Button owner candidate and execute both Vue and Vue2 readiness transitions in the real audit consumer; no second readiness implementation here."
+      },
+      {
+        "recordId": "pr887-main.009",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:1",
+        "originalPublicClause": "- [ ] Repair Vue Select projection readiness failure",
+        "originalPublicSection": "Default matrix failures",
+        "originalPublicLine": 38,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[8].native.blocker",
+        "parentSourceKey": "issue.1085.002",
+        "retainedCriterionKeys": [
+          "issue.1085.002"
+        ],
+        "liveTrackingIssue": 1085,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1159owner; Main coordinates audit consumer",
+        "currentPullRequestReadback": [],
+        "nextAction": "Execute the actual Vue Select public consumer with the existing owner candidate and preserve the original failure/readiness boundary."
+      },
+      {
+        "recordId": "pr887-main.010",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:2",
+        "originalPublicClause": "- [ ] Repair React Select last item focus evidence",
+        "originalPublicSection": "Default matrix failures",
+        "originalPublicLine": 39,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[9].native.blocker",
+        "parentSourceKey": "issue.1085.003",
+        "retainedCriterionKeys": [
+          "issue.1085.003"
+        ],
+        "liveTrackingIssue": 1085,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1159owner; Main coordinates audit consumer",
+        "currentPullRequestReadback": [],
+        "nextAction": "Observe native focus reaching the actual last React Select item with unchanged source-bound focus predicates."
+      },
+      {
+        "recordId": "pr887-main.011",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:18/task:0",
+        "originalPublicClause": "- [ ] Require complete state aware interactive recipe anatomy",
+        "originalPublicSection": "Materialized anatomy",
+        "originalPublicLine": 43,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[10].native.blocker",
+        "parentSourceKey": "issue.1086.002",
+        "retainedCriterionKeys": [
+          "issue.1086.002"
+        ],
+        "liveTrackingIssue": 1086,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1164owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Reconcile the original state-aware anatomy and negative controls with the existing audit owner; run the actual complete matrix at its accepted source."
+      },
+      {
+        "recordId": "pr887-main.012",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:19/task:0",
+        "originalPublicClause": "- [ ] Restore supervised source bound audit runtime",
+        "originalPublicSection": "Runtime restoration",
+        "originalPublicLine": 47,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[11].native.blocker",
+        "parentSourceKey": "issue.1086.001",
+        "retainedCriterionKeys": [
+          "issue.1086.001"
+        ],
+        "liveTrackingIssue": 1086,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main runtime/integration owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Establish supervised current-source runtime readiness and one owned service; old executor smoke or stale service identity is insufficient."
+      },
+      {
+        "recordId": "pr887-main.013",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:22/task:5",
+        "originalPublicClause": "- [ ] Repair React readiness registry within governed budget",
+        "originalPublicSection": "Focus CI consumers",
+        "originalPublicLine": 51,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[12].native.blocker",
+        "parentSourceKey": "issue.1086.003",
+        "retainedCriterionKeys": [
+          "issue.1086.003"
+        ],
+        "liveTrackingIssue": 1086,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1191owner with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 819,
+            "source": "sources.pullRequests[number=819]"
+          },
+          {
+            "number": 811,
+            "source": "sources.pullRequests[number=811]"
+          }
+        ],
+        "nextAction": "Reconcile merged PR819/811 source first; Main measures the actual current React package and real consumer under the governed numeric policy."
+      },
+      {
+        "recordId": "pr887-main.014",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:22/task:6",
+        "originalPublicClause": "- [ ] Verify exact Focus package budget and consumers",
+        "originalPublicSection": "Focus CI consumers",
+        "originalPublicLine": 52,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[13].native.blocker",
+        "parentSourceKey": "issue.1086.004",
+        "retainedCriterionKeys": [
+          "issue.1086.004"
+        ],
+        "liveTrackingIssue": 1086,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1191owner with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 819,
+            "source": "sources.pullRequests[number=819]"
+          },
+          {
+            "number": 811,
+            "source": "sources.pullRequests[number=811]"
+          }
+        ],
+        "nextAction": "Preserve historical93,742/91,765 failure and run one source-bound current package/packed React Focus consumer transaction; do not change numbers in this slice."
+      },
+      {
+        "recordId": "pr887-main.015",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:28/task:2",
+        "originalPublicClause": "- [ ] Continue each pull request through governed merge",
+        "originalPublicSection": "Pull request delivery priority",
+        "originalPublicLine": 56,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[14].native.blocker",
+        "parentSourceKey": "issue.1087.001",
+        "retainedCriterionKeys": [
+          "issue.1087.001"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main integration owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the original per-PR conditions, actual current heads and gates; already-merged sources receive factual integration links and retain independent acceptance debt."
+      },
+      {
+        "recordId": "pr887-main.016",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:28/task:4",
+        "originalPublicClause": "- [ ] Integrate reviewed native Tabs exact head",
+        "originalPublicSection": "Pull request delivery priority",
+        "originalPublicLine": 57,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[15].native.blocker",
+        "parentSourceKey": "issue.1087.002",
+        "retainedCriterionKeys": [
+          "issue.1087.002"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with existing GPUIowner",
+        "currentPullRequestReadback": [
+          {
+            "number": 822,
+            "source": "sources.pullRequests[number=822]"
+          }
+        ],
+        "nextAction": "PR822 is already merged at c54cdb880fc7acac07b8f9206b7d83d111d84779; reconcile the public-setter/HC-Test boundaries at its actual source instead of repeating integration."
+      },
+      {
+        "recordId": "pr887-main.017",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:29/task:0",
+        "originalPublicClause": "- [ ] Obtain exact head budget CI and review",
+        "originalPublicSection": "React budget integration",
+        "originalPublicLine": 61,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[16].native.blocker",
+        "parentSourceKey": "issue.1087.003",
+        "retainedCriterionKeys": [
+          "issue.1087.003"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with existing React package owner",
+        "currentPullRequestReadback": [
+          {
+            "number": 819,
+            "source": "sources.pullRequests[number=819]"
+          }
+        ],
+        "nextAction": "Reconcile PR819 actual merged32fedd1fce0336988e51d2f070d0970b85bd9cea and historical Vercel quota failure separately; no retroactive independent approval."
+      },
+      {
+        "recordId": "pr887-main.018",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:29/task:1",
+        "originalPublicClause": "- [ ] Integrate budget baseline before synchronizing Focus PR",
+        "originalPublicSection": "React budget integration",
+        "originalPublicLine": 62,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[17].native.blocker",
+        "parentSourceKey": "issue.1087.004",
+        "retainedCriterionKeys": [
+          "issue.1087.004"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with existing Issue1191owner",
+        "currentPullRequestReadback": [
+          {
+            "number": 819,
+            "source": "sources.pullRequests[number=819]"
+          },
+          {
+            "number": 811,
+            "source": "sources.pullRequests[number=811]"
+          }
+        ],
+        "nextAction": "Record actual PR819 and811 merge order/source lineage, then collect the current package/consumer acceptance required by the original condition."
+      },
+      {
+        "recordId": "pr887-main.019",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:30/task:5",
+        "originalPublicClause": "- [ ] Continue Collapsible review CI and governed integration",
+        "originalPublicSection": "Base Collapsible delivery",
+        "originalPublicLine": 66,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[18].native.blocker",
+        "parentSourceKey": "issue.1087.005",
+        "retainedCriterionKeys": [
+          "issue.1087.005"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1096owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the existing Collapsible owner source and retained original review/consumer conditions; Main reconciles actual integration and performs current-source evidence."
+      },
+      {
+        "recordId": "pr887-main.020",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:40/task:3",
+        "originalPublicClause": "- [ ] Continue pagination CI review until governed integration",
+        "originalPublicSection": "Existing pagination pull request",
+        "originalPublicLine": 70,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[19].native.blocker",
+        "parentSourceKey": "issue.1087.006",
+        "retainedCriterionKeys": [
+          "issue.1087.006"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with original pagination owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Recover the exact c1c47af2862247273869142ad4235b2225785e49 PR source and its original trusted check/independent-review disposition; no duplicate pagination implementation."
+      },
+      {
+        "recordId": "pr887-main.021",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:42/task:4",
+        "originalPublicClause": "- [ ] Continue budget skill CI review and governed integration",
+        "originalPublicSection": "Existing budget skill pull request",
+        "originalPublicLine": 74,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[20].native.blocker",
+        "parentSourceKey": "issue.1087.007",
+        "retainedCriterionKeys": [
+          "issue.1087.007"
+        ],
+        "liveTrackingIssue": 1087,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main with original budget tooling owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Bind the exact924source and seven original thread dispositions to its actual PR/integration; preserve ordinary independent review and package policy."
+      },
+      {
+        "recordId": "pr887-main.022",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:45/task:5",
+        "originalPublicClause": "- [ ] Validate publish and sustain independent ModelTrace integration",
+        "originalPublicSection": "Existing ModelTrace pull request",
+        "originalPublicLine": 78,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[21].native.blocker",
+        "parentSourceKey": null,
+        "retainedCriterionKeys": [],
+        "liveTrackingIssue": null,
+        "liveTrackingState": null,
+        "scopeDisposition": "permanently-retired-workflow; original condition/history retained",
+        "retirementSource": "https://github.com/Proto-UI/Proto-UI/pull/985",
+        "owner": "Main historical tracking owner",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          },
+          {
+            "number": 985,
+            "source": "sources.pullRequests[number=985]"
+          }
+        ],
+        "nextAction": "Retain the literal original condition and blocker; PR985 permanently retires the workflow. Reconcile historical publication uncertainty separately without reintroducing measurement."
+      },
+      {
+        "recordId": "pr887-main.023",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:56/task:1",
+        "originalPublicClause": "- [ ] Publish exact main reconciliation progress comment",
+        "originalPublicSection": "ModelTrace commit progress",
+        "originalPublicLine": 82,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[22].native.blocker",
+        "parentSourceKey": null,
+        "retainedCriterionKeys": [],
+        "liveTrackingIssue": null,
+        "liveTrackingState": null,
+        "scopeDisposition": "permanently-retired-workflow; original condition/history retained",
+        "retirementSource": "https://github.com/Proto-UI/Proto-UI/pull/985",
+        "owner": "Main historical tracking owner",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          },
+          {
+            "number": 985,
+            "source": "sources.pullRequests[number=985]"
+          }
+        ],
+        "nextAction": "Retain the bb5 PublicationUnknown attempt and readbacks; retirement does not turn it into an attributable write or authorize reposting."
+      },
+      {
+        "recordId": "pr887-main.024",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:75/task:5",
+        "originalPublicClause": "- [ ] Publish precise budget handoff repair evidence",
+        "originalPublicSection": "Existing review repair delivery",
+        "originalPublicLine": 86,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[23].native.blocker",
+        "parentSourceKey": "issue.1088.001",
+        "retainedCriterionKeys": [
+          "issue.1136.001",
+          "issue.1088.001"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1136RepairEvidence with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the exact original marker/payload and existing native receipts for bounded read-only unknown-write reconciliation; only Main can consider a genuinely new authorized publication."
+      },
+      {
+        "recordId": "pr887-main.025",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:76/task:2",
+        "originalPublicClause": "- [ ] Reproduce source owned homepage Context failure",
+        "originalPublicSection": "Collapsible homepage evidence",
+        "originalPublicLine": 90,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[24].native.blocker",
+        "parentSourceKey": "issue.1088.002",
+        "retainedCriterionKeys": [
+          "issue.1136.002",
+          "issue.1088.002"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1136RepairEvidence with existing Issue1096owner",
+        "currentPullRequestReadback": [],
+        "nextAction": "Recover the original source preimage and let Main execute the unchanged homepage Context failure producer; no new-source hash substitutes for the historical source."
+      },
+      {
+        "recordId": "pr887-main.026",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:79/task:4",
+        "originalPublicClause": "- [ ] Verify new candidate native CI gates",
+        "originalPublicSection": "Fresh review repair delivery",
+        "originalPublicLine": 94,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[25].native.blocker",
+        "parentSourceKey": "issue.1088.003",
+        "retainedCriterionKeys": [
+          "issue.1137.001",
+          "issue.1088.003"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1137GateEvidence with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          }
+        ],
+        "nextAction": "Bind the original84cb87e1candidate and actual DCO/Vercel/no-Actions observations; Main verifies only the correct source/candidate gate transaction."
+      },
+      {
+        "recordId": "pr887-main.027",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:2",
+        "originalPublicClause": "- [ ] Publish distinct five boundary repair evidence",
+        "originalPublicSection": "Five boundary current delivery",
+        "originalPublicLine": 98,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[26].native.blocker",
+        "parentSourceKey": "issue.1088.004",
+        "retainedCriterionKeys": [
+          "issue.1136.003",
+          "issue.1088.004"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1136RepairEvidence with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          }
+        ],
+        "nextAction": "Preserve the second PublicationUnknown attempt and its distinct marker/body; do not copy/restamp excluded identify156–162 results or blindly repost."
+      },
+      {
+        "recordId": "pr887-main.028",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:3",
+        "originalPublicClause": "- [ ] Verify exact five boundary native gates",
+        "originalPublicSection": "Five boundary current delivery",
+        "originalPublicLine": 99,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[27].native.blocker",
+        "parentSourceKey": "issue.1088.005",
+        "retainedCriterionKeys": [
+          "issue.1137.002",
+          "issue.1088.005"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1137GateEvidence with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          }
+        ],
+        "nextAction": "Preserve run37613588932 attempt2 at3ca09b402 as failed (general/aggregate) with8successful browser shards; any current-source execution is separate evidence."
+      },
+      {
+        "recordId": "pr887-main.029",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:5",
+        "originalPublicClause": "- [ ] Reconcile rejected merged pull request thread state",
+        "originalPublicSection": "Five boundary current delivery",
+        "originalPublicLine": 100,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[28].native.blocker",
+        "parentSourceKey": "issue.1088.006",
+        "retainedCriterionKeys": [
+          "issue.1139.001",
+          "issue.1088.006"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "rejected-operation source correction prepared",
+        "owner": "SolThirty1139TodoLedger with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 833,
+            "source": "sources.pullRequests[number=833]"
+          }
+        ],
+        "nextAction": "Main validates this original-five-thread correction and source/parent key mapping, then obtains independent review; historical PR833 thread state remains unchanged."
+      },
+      {
+        "recordId": "pr887-main.030",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:84/task:1",
+        "originalPublicClause": "- [ ] Verify exact two finding hosted review gates",
+        "originalPublicSection": "ModelTrace retained review delivery",
+        "originalPublicLine": 104,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[29].native.blocker",
+        "parentSourceKey": null,
+        "retainedCriterionKeys": [],
+        "liveTrackingIssue": null,
+        "liveTrackingState": null,
+        "scopeDisposition": "permanently-retired-workflow; original condition/history retained",
+        "retirementSource": "https://github.com/Proto-UI/Proto-UI/pull/985",
+        "owner": "Main historical tracking owner",
+        "currentPullRequestReadback": [
+          {
+            "number": 878,
+            "source": "sources.pullRequests[number=878]"
+          },
+          {
+            "number": 985,
+            "source": "sources.pullRequests[number=985]"
+          }
+        ],
+        "nextAction": "Retain PR878 f288 hosted failures and separate local incomplete240s outcomes; PR985 retirement does not rewrite those results or waive unrelated provenance."
+      },
+      {
+        "recordId": "pr887-main.031",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:85/task:2",
+        "originalPublicClause": "- [ ] Verify native typed repair hosted integration gates",
+        "originalPublicSection": "Current main type drift",
+        "originalPublicLine": 108,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[30].native.blocker",
+        "parentSourceKey": "issue.1088.007",
+        "retainedCriterionKeys": [
+          "issue.1137.003",
+          "issue.1088.007"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1137GateEvidence with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 879,
+            "source": "sources.pullRequests[number=879]"
+          }
+        ],
+        "nextAction": "PR879 is merged at14df5b5e30ab8f1cc720030ade7269a26d3a5158; bind original typed repair source and all hosted/consumer gates without calling the old failing jobs green."
+      },
+      {
+        "recordId": "pr887-main.032",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:87/task:3",
+        "originalPublicClause": "- [ ] Verify package repair hosted integration gates",
+        "originalPublicSection": "Feedback package finalization",
+        "originalPublicLine": 112,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[31].native.blocker",
+        "parentSourceKey": "issue.1088.008",
+        "retainedCriterionKeys": [
+          "issue.1137.004",
+          "issue.1088.008"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1137GateEvidence with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 880,
+            "source": "sources.pullRequests[number=880]"
+          }
+        ],
+        "nextAction": "PR880 actual final head a0acf4fe6fa493c1c1ea85d532ed6c536bc0fb8f differs from old20f; preserve both and reconcile the final hosted source/gates."
+      },
+      {
+        "recordId": "pr887-main.033",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:92/task:2",
+        "originalPublicClause": "- [ ] Repair governed source failures and native consumer evidence",
+        "originalPublicSection": "Current native failure ownership",
+        "originalPublicLine": 116,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[32].native.blocker",
+        "parentSourceKey": "issue.1088.009",
+        "retainedCriterionKeys": [
+          "issue.1138.001",
+          "issue.1088.009"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1138Packed; Main coordinates existing product owners",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the retained original source and each current implementation owner; Main executes the actual package/packed/native evidence while1140owns the numeric baseline transaction."
+      },
+      {
+        "recordId": "pr887-main.034",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:93/task:0",
+        "originalPublicClause": "- [ ] Validate current package graph and packed consumers",
+        "originalPublicSection": "Current native repair finalization",
+        "originalPublicLine": 120,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[33].native.blocker",
+        "parentSourceKey": "issue.1088.010",
+        "retainedCriterionKeys": [
+          "issue.1138.002",
+          "issue.1088.010"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1138Packed; Main coordinates existing product owners",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main performs exact source package graph and real packed consumers; preserve original118,915/117,850 failure and separate numeric transaction from functional evidence."
+      },
+      {
+        "recordId": "pr887-main.035",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:0",
+        "originalPublicClause": "- [ ] Reconcile every remaining TODO against live evidence",
+        "originalPublicSection": "Remaining TODO continuation",
+        "originalPublicLine": 124,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[34].native.blocker",
+        "parentSourceKey": "issue.1088.011",
+        "retainedCriterionKeys": [
+          "issue.1139.002",
+          "issue.1088.011"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1139TodoLedger with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main validates all50literal conditions, original blockers and source/owner links in this record; every unresolved semantic/CI/publication condition remains explicitly carried."
+      },
+      {
+        "recordId": "pr887-main.036",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:1",
+        "originalPublicClause": "- [ ] Complete all actionable repairs and governed delivery",
+        "originalPublicSection": "Remaining TODO continuation",
+        "originalPublicLine": 125,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[35].native.blocker",
+        "parentSourceKey": "issue.1088.012",
+        "retainedCriterionKeys": [
+          "issue.1139.003",
+          "issue.1088.012"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main and each existing semantic owner; SolThirty1139TodoLedger retains reconciliation",
+        "currentPullRequestReadback": [],
+        "nextAction": "Complete existing owners’ real repairs, serial validation, independent review and lawful integration, then bind each original condition; local ledger preparation does not satisfy this compound condition."
+      },
+      {
+        "recordId": "pr887-main.037",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:2",
+        "originalPublicClause": "- [ ] Follow blocked gates without bypassing independent acceptance",
+        "originalPublicSection": "Remaining TODO continuation",
+        "originalPublicLine": 126,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[36].native.blocker",
+        "parentSourceKey": "issue.1088.013",
+        "retainedCriterionKeys": [
+          "issue.1139.004",
+          "issue.1088.013"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main integration owner; SolThirty1139TodoLedger retains reconciliation",
+        "currentPullRequestReadback": [],
+        "nextAction": "Follow each named blocker through the actual owner/next operation and current gate readback; the eight-current-PR review deferral does not authorize PR833 thread rewriting or bulk closure."
+      },
+      {
+        "recordId": "pr887-main.038",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:97/task:1",
+        "originalPublicClause": "- [ ] Deliver independently reviewed WC numerical baseline transaction",
+        "originalPublicSection": "Source PR 886 gate followup",
+        "originalPublicLine": 130,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[37].native.blocker",
+        "parentSourceKey": "issue.1088.014",
+        "retainedCriterionKeys": [
+          "issue.1140.001",
+          "issue.1088.014"
+        ],
+        "liveTrackingIssue": 1088,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "SolThirty1140WcBaseline with Main",
+        "currentPullRequestReadback": [
+          {
+            "number": 886,
+            "source": "sources.pullRequests[number=886]"
+          }
+        ],
+        "nextAction": "Keep the original failed comparison, independent numeric transaction and exact current candidate/consumer evidence separate; Main owns validation and lawful delivery."
+      },
+      {
+        "recordId": "pr887-main.039",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:0",
+        "originalPublicClause": "- [ ] Trace source changes through pure Prototype descriptions",
+        "originalPublicSection": "Pure Prototype portability audit",
+        "originalPublicLine": 134,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[38].native.blocker",
+        "parentSourceKey": "issue.1089.001",
+        "retainedCriterionKeys": [
+          "issue.1089.001"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing compiler and Prototype owners with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Trace each actual changed shared definition/lifecycle before its consumer evidence; no Compiler/IR edits or component business embedding in this record."
+      },
+      {
+        "recordId": "pr887-main.040",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:1",
+        "originalPublicClause": "- [ ] Verify compiler admission and governed host boundaries",
+        "originalPublicSection": "Pure Prototype portability audit",
+        "originalPublicLine": 135,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[39].native.blocker",
+        "parentSourceKey": "issue.1089.002",
+        "retainedCriterionKeys": [
+          "issue.1089.002"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing proto-compiler owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Verify the definition-bound source admission and host responsibility at the existing compiler owner candidate; unsupported is not implemented support."
+      },
+      {
+        "recordId": "pr887-main.041",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:2",
+        "originalPublicClause": "- [ ] Exercise changed shared semantics without Web globals",
+        "originalPublicSection": "Pure Prototype portability audit",
+        "originalPublicLine": 136,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[40].native.blocker",
+        "parentSourceKey": "issue.1089.003",
+        "retainedCriterionKeys": [
+          "issue.1089.003"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing compiler and Prototype owners with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main executes the actual applicable hostless/shared-semantic consumers while preserving each original definition and source binding."
+      },
+      {
+        "recordId": "pr887-main.042",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:3",
+        "originalPublicClause": "- [ ] Repair any cross layer host leakage found",
+        "originalPublicSection": "Pure Prototype portability audit",
+        "originalPublicLine": 137,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[41].native.blocker",
+        "parentSourceKey": "issue.1089.004",
+        "retainedCriterionKeys": [
+          "issue.1089.004"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing semantic owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Attribute an actual reproducible definition/host leak before repair; do not invent a leak or move business logic into Compiler/IR."
+      },
+      {
+        "recordId": "pr887-main.043",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:0",
+        "originalPublicClause": "- [ ] Keep compiler layer thin without Prototype embedding",
+        "originalPublicSection": "Independent clean room composition",
+        "originalPublicLine": 141,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[42].native.blocker",
+        "parentSourceKey": "issue.1089.005",
+        "retainedCriterionKeys": [
+          "issue.1089.005"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing proto-compiler owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Review the real lowering against shared definitions and original thin-compiler boundary; no component/path dispatch or interpreter substitute."
+      },
+      {
+        "recordId": "pr887-main.044",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:1",
+        "originalPublicClause": "- [ ] Keep Prototype implementation faithful to authoritative definition",
+        "originalPublicSection": "Independent clean room composition",
+        "originalPublicLine": 142,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[43].native.blocker",
+        "parentSourceKey": "issue.1089.006",
+        "retainedCriterionKeys": [
+          "issue.1089.006"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Prototype owners with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Reconcile each existing Prototype source against its applicable definition/lifecycle without changing it to fit a compiler subset."
+      },
+      {
+        "recordId": "pr887-main.045",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:2",
+        "originalPublicClause": "- [ ] Verify independent implementations compose without compensating behavior",
+        "originalPublicSection": "Independent clean room composition",
+        "originalPublicLine": 143,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[44].native.blocker",
+        "parentSourceKey": "issue.1089.007",
+        "retainedCriterionKeys": [
+          "issue.1089.007"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing compiler and Prototype owners with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main executes source-bound composition using independent implementations and reports supported/unsupported/failed cases separately."
+      },
+      {
+        "recordId": "pr887-main.046",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:110/task:4",
+        "originalPublicClause": "- [ ] Validate definition bound repaired consumer composition",
+        "originalPublicSection": "Finf independent boundary reproduction",
+        "originalPublicLine": 147,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[45].native.blocker",
+        "parentSourceKey": "issue.1089.008",
+        "retainedCriterionKeys": [
+          "issue.1089.008"
+        ],
+        "liveTrackingIssue": 1089,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing compiler and Prototype owners with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Main exercises the exact repaired public/native consumer composition and governed definitions; a hostless proof alone does not satisfy the original condition."
+      },
+      {
+        "recordId": "pr887-main.047",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:1",
+        "originalPublicClause": "- [ ] Repair public docs 78 family catalog drift",
+        "originalPublicSection": "Finf public head synchronization",
+        "originalPublicLine": 151,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[46].native.blocker",
+        "parentSourceKey": "issue.1090.001",
+        "retainedCriterionKeys": [
+          "issue.1141.001",
+          "issue.1090.001"
+        ],
+        "liveTrackingIssue": 1090,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1042owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Use the existing public catalog/documentation owner and real supported-family criteria; no empty entity/count-only fix or central registry edit here."
+      },
+      {
+        "recordId": "pr887-main.048",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:2",
+        "originalPublicClause": "- [ ] Repair Dropdown anatomy replay model",
+        "originalPublicSection": "Finf public head synchronization",
+        "originalPublicLine": 152,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[47].native.blocker",
+        "parentSourceKey": "issue.1090.002",
+        "retainedCriterionKeys": [
+          "issue.1141.002",
+          "issue.1090.002"
+        ],
+        "liveTrackingIssue": 1090,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "existing Issue1141owner with Main",
+        "currentPullRequestReadback": [],
+        "nextAction": "Preserve historical pinned anatomy fixture/hash and all original model negative controls; Main integrates that owner candidate without replacing old evidence with new-source hashes."
+      },
+      {
+        "recordId": "pr887-main.049",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:5",
+        "originalPublicClause": "- [ ] Integrate verified PR content into Finf via maintainer push",
+        "originalPublicSection": "Finf public head synchronization",
+        "originalPublicLine": 153,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[48].native.blocker",
+        "parentSourceKey": "issue.1090.003",
+        "retainedCriterionKeys": [
+          "issue.1142.001",
+          "issue.1090.003"
+        ],
+        "liveTrackingIssue": 1090,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main integration owner; original Issue1142tracking",
+        "currentPullRequestReadback": [
+          {
+            "number": 872,
+            "source": "sources.pullRequests[number=872]"
+          },
+          {
+            "number": 887,
+            "source": "sources.pullRequests[number=887]"
+          }
+        ],
+        "nextAction": "Reconcile actual PR887/source integration and preserved contributions before any new exact-head integration; historical maintainer-push wording grants this worker no write permission."
+      },
+      {
+        "recordId": "pr887-main.050",
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:112/task:1",
+        "originalPublicClause": "- [ ] Reconcile feature integration with mainline acceptance gates",
+        "originalPublicSection": "Maintainer Finf integration delegation",
+        "originalPublicLine": 157,
+        "originalNativeStatus": "blocked",
+        "originalNativeBlockerSource": "sources.nativeSource.tasks[49].native.blocker",
+        "parentSourceKey": "issue.1090.004",
+        "retainedCriterionKeys": [
+          "issue.1142.002",
+          "issue.1090.004"
+        ],
+        "liveTrackingIssue": 1090,
+        "liveTrackingState": "open",
+        "scopeDisposition": "existing owner retains original behavior/evidence obligation",
+        "owner": "Main integration owner; original Issue1142tracking",
+        "currentPullRequestReadback": [
+          {
+            "number": 872,
+            "source": "sources.pullRequests[number=872]"
+          },
+          {
+            "number": 887,
+            "source": "sources.pullRequests[number=887]"
+          }
+        ],
+        "nextAction": "Bind actual integrated source, unresolved original criteria, genuine CI/DCO and required independent acceptance; PR887 being merged is not a whole-program pass."
+      }
+    ],
+    "allOriginalConditionsRetained": true,
+    "allNativeBlockersRetained": true,
+    "allParentKeysRetained": true,
+    "acceptedByThisRecord": 0,
+    "remainingSemanticAcceptance": "Each named original condition remains with its existing owner and exact source/evidence boundary. Retirement is not a fabricated passing test or thread resolution.",
+    "commonEvidenceBoundary": {
+      "authorityAndLifecycle": {
+        "projection": "AGENTS.md; contributor-agents.md; release-0.3-plan.md",
+        "catalog": "No product semantics, catalog entity or lifecycle is changed; product definitions and acceptance remain with each existing semantic owner."
+      },
+      "ownerSource": "Current-user assignment/shared contract and original parent tracking. Captured original Issues have no platform assignee; that does not revoke existing delegation. No new claim is fabricated.",
+      "development": "Prepared source/owner mapping; Main validation, independent review, publication and integration remain unrun.",
+      "acceptance": "No row gains product acceptance from this record or from merged PR metadata.",
+      "historicalNativeState": "All50of these original main TODOs were blocked in event5788e9e7; their exact blockers remain in the source file.",
+      "liveIssueReadback": "Each nonretired row names a live original tracking Issue; complete captured body/comment readbacks are in sources.issues[number].",
+      "pullRequestReadback": "Each named PR points to sources.pullRequests[number], which contains actual merged/head/merge-SHA data; this supplies no independent-review/CI/DCO or complete-feature acceptance."
+    }
+  },
+  "sourceSnapshotBoundary": {
+    "nativeSnapshotUnfinished": 104,
+    "approvedOriginalPublicMainTasks": 50,
+    "additionalPrivateSnapshotTasks": 54,
+    "action": "Retained privately for Main recovery owners; no expansion of this approved source projection, no reactivation of old authorization or abandoned work."
+  },
+  "releaseDisposition": {
+    "sourceLedgerClassification": "criterion-split",
+    "decision": "unresolved; original timestamped classifications retained",
+    "timeline": [
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1139#issuecomment-6684414121",
+        "createdAt": "2026-11-06T12:05:46Z",
+        "source": "sources.releaseScopeSources[id=6684414121]"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684404077",
+        "createdAt": "2026-11-06T12:05:11Z",
+        "source": "sources.releaseScopeSources[id=6684404077]"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684503838",
+        "createdAt": "2026-11-06T12:10:52Z",
+        "source": "sources.releaseScopeSources[id=6684503838]"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6685904031",
+        "createdAt": "2026-11-06T13:26:01Z",
+        "source": "sources.releaseScopeSources[id=6685904031]"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/1323#issuecomment-6690899056",
+        "createdAt": "2026-11-06T17:18:25Z",
+        "source": "sources.releaseScopeSources[id=6690899056]"
+      }
+    ],
+    "boundary": "The Nov6Issue1139/1088deferrals, later #890criterion-specific correction, and subsequent #1323meta deferral are distinct source facts. Main owns release reconciliation; the current assignment authorizes this bounded local record only."
+  },
+  "allowedChanges": [
+    "internal/records/2026-11-10-issue-1139-todo-reconciliation-sources.json",
+    "internal/records/2026-11-10-issue-1139-todo-reconciliation.json",
+    "internal/records/2026-11-10-issue-1139-todo-reconciliation.md"
+  ],
+  "excludedChanges": [
+    "all historical source records",
+    "global release source ledger/corrections",
+    "central registration/catalog/workflows",
+    "Compiler/IR and product code",
+    "Git and GitHub mutations",
+    "runtime/browser/native/product checks"
+  ],
+  "validation": {
+    "state": "prepared; not executed",
+    "owner": "Main serial slot",
+    "reader": "internal/records/2026-11-10-issue-1139-todo-reconciliation.md",
+    "expected": {
+      "originalCriteria": 4,
+      "originalMainTasks": 50,
+      "originalMainSections": 31,
+      "originalParentMappedTasks": 47,
+      "retiredTasks": 3,
+      "originalRejectedThreads": 5,
+      "laterThreadsExcludedFromFive": 2,
+      "sourceResult": "exact source/parent conditions preserved; rejected0/5 does not become closed/applied; no product acceptance inferred"
+    },
+    "productChecksExecuted": [],
+    "externalMutations": 0
+  },
+  "remainingOriginalWork": [
+    "Main metadata/data validation of this candidate and independent review/repair; no review performed here.",
+    "Main publication and lawful integration of the prepared correction; no PR/commit created by this worker.",
+    "Existing owners’ complete original repairs/evidence/governed delivery remain required for issue.1139.003 and the related50task conditions.",
+    "Current release classification and true unknown-write/CI/DCO/native/independent-acceptance gaps stay explicit; no old thread or Issue is closed by this record."
+  ],
+  "closure": {
+    "issueRemainsOpen": true,
+    "checkboxWrites": 0,
+    "prCreated": false,
+    "merged": false,
+    "earnedClosureAsserted": false
+  }
+}

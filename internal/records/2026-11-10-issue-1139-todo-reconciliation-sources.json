@@ -1,0 +1,2856 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.issue-1139-todo-source-projection",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "issue": 1139,
+  "capturedAt": "2026-11-10T12:58:16.988Z",
+  "sourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "scope": "Exact four Issue1139 conditions and original50main TODO clauses carried by PR887; bounded current tracking and original PR833 five-thread readback.",
+  "warning": "Frozen source/evidence projection. Historical authored status, old source results, current platform state, local preparation and current acceptance are distinct. Nothing grants authority or resolves a historical thread.",
+  "sourceKeyPolicy": "Existing issue.NNNN.NNN keys remain literal. sourceLocator is a new location within the recovered native event, not an original native task ID or replacement criterion key.",
+  "collection": {
+    "issue1139": {
+      "expected": 1,
+      "delivered": 1
+    },
+    "issue1088": {
+      "expected": 3,
+      "delivered": 3
+    },
+    "pr887TopLevelComments": {
+      "expected": 77,
+      "independentlyReported": 77,
+      "delivered": 77,
+      "pageCounts": [
+        77
+      ],
+      "reviewThreadAudit": "not in this bounded subject"
+    },
+    "pr833TopLevelComments": {
+      "expected": 22,
+      "independentlyReported": 22,
+      "delivered": 22,
+      "pageCounts": [
+        22
+      ]
+    },
+    "pr833Reviews": {
+      "independentlyReported": 16,
+      "delivered": 16,
+      "pageCounts": [
+        16
+      ]
+    },
+    "pr833Threads": {
+      "expected": 48,
+      "independentlyReported": 48,
+      "delivered": 48,
+      "pageCounts": [
+        48
+      ],
+      "hasNextPage": false,
+      "nestedCommentCountMismatches": [],
+      "allCommentsDelivered": true
+    }
+  },
+  "nativeSource": {
+    "sessionId": "01a0cc26-1013-72dd-b00d-4429c2af2b17",
+    "eventId": "5788e9e7",
+    "timestamp": "2026-10-14T05:47:23.344Z",
+    "method": "Read-only JSONL projection of toolResult todo details; only the50clauses named by the original public main section are included.",
+    "sourceSnapshotPhaseCount": 120,
+    "sourceSnapshotUnfinishedCount": 104,
+    "originalPublicMainTaskCount": 50,
+    "additionalSnapshotTaskCount": 54,
+    "additionalSnapshotBoundary": "The additional54include later intake/source-preservation/connected-operation work and adjacent-session tasks. Their private recovered snapshot is retained for Main, outside this approved50task projection; no old authorization, abandoned task or duplicate implementation is reactivated.",
+    "tasks": [
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:2",
+        "native": {
+          "phaseIndex": 2,
+          "phase": "External gates",
+          "taskIndex": 2,
+          "content": "Publish captured Spinner visuals to authorized destination",
+          "status": "blocked",
+          "blocker": "Two real WC captures retained locally; no authenticated attachment session or explicitly approved evidence storage destination. Do not upload to another contributor branch or call local paths public images."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "External gates",
+          "line": 18,
+          "original": "- [ ] Publish captured Spinner visuals to authorized destination"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.001",
+            "original": "- [ ] Publish captured Spinner visuals to authorized destination（发布已捕获的 Spinner 视觉到授权目标）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:3",
+        "native": {
+          "phaseIndex": 2,
+          "phase": "External gates",
+          "taskIndex": 3,
+          "content": "Review remaining GPUI stack and verify parent completion",
+          "status": "blocked",
+          "blocker": "Human-assisted current-user review has full advisory eligibility, not an obsolete MainC2 ceiling. Main advanced exact native follow-up822 with fresh independent workers and verified COMMENT5407823498; public-setter verification/catalog P2 blockers remain, no clean approval/integration inferred. Prior stack756 is merged atd05; parent687 completion and remaining explicit platform/Overlay/semantics boundaries are separate and must not be closed from this bounded review."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "External gates",
+          "line": 19,
+          "original": "- [ ] Review remaining GPUI stack and verify parent completion"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.002",
+            "original": "- [ ] Review remaining GPUI stack and verify parent completion（评审剩余 GPUI 栈并验证父项完成）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:2/task:4",
+        "native": {
+          "phaseIndex": 2,
+          "phase": "External gates",
+          "taskIndex": 4,
+          "content": "Obtain independent review and integrate audit PR 775",
+          "status": "blocked",
+          "blocker": "Integration requires independent exact-head approval and trusted CI; current local source reviews are not platform approval. Repair and validation work remains separately tracked."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "External gates",
+          "line": 20,
+          "original": "- [ ] Obtain independent review and integrate audit PR 775"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.003",
+            "original": "- [ ] Obtain independent review and integrate audit PR 775（获得独立评审并合入 audit PR 775）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:7/task:3",
+        "native": {
+          "phaseIndex": 7,
+          "phase": "PR 775 review",
+          "taskIndex": 3,
+          "content": "Integrate PR 775 only after all gates",
+          "status": "blocked",
+          "blocker": "Pushed8df4b632 mergesmain42aaca07 and fixes sixthmaskP1; Node24Dialog48/48proof and reply4172186689 verified. CurrentCI37106958627running. Need independentexact-headapproval and requiredthreadresolution; guangliang2019requested. No self-approval/bypass."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "PR 775 review",
+          "line": 24,
+          "original": "- [ ] Integrate PR 775 only after all gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.004",
+            "original": "- [ ] Integrate PR 775 only after all gates（仅在全部 gate 通过后合入 PR 775）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:12/task:0",
+        "native": {
+          "phaseIndex": 12,
+          "phase": "New audit findings",
+          "taskIndex": 0,
+          "content": "Handle persistent Spinner animation without false idle",
+          "status": "blocked",
+          "blocker": "Source repair and22nativeinstrumentcontrols complete; d7default run cancelled before Spinner. Final clean-source full matrix awaits concrete remaining consumer repairs, no fake idle or passing inference."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "New audit findings",
+          "line": 28,
+          "original": "- [ ] Handle persistent Spinner animation without false idle"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.005",
+            "original": "- [ ] Handle persistent Spinner animation without false idle（处理持续 Spinner 动画，避免虚假 idle）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:12/task:1",
+        "native": {
+          "phaseIndex": 12,
+          "phase": "New audit findings",
+          "taskIndex": 1,
+          "content": "Require exact binary outcome after keyboard activation",
+          "status": "blocked",
+          "blocker": "Exact binary guard repaired with22nativeinstrumentcontrols; d7Toggle8+Switch8+Checkbox6casespassed buttwoCheckboxcasespendingwhenfullruncancelled. Remaining clean-sourcefullmatrix waits current anatomywriterand supervised server recovery; no missingcase treatedpassing."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "New audit findings",
+          "line": 29,
+          "original": "- [ ] Require exact binary outcome after keyboard activation"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.006",
+            "original": "- [ ] Require exact binary outcome after keyboard activation（键盘激活后要求精确二元结果）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:15/task:1",
+        "native": {
+          "phaseIndex": 15,
+          "phase": "Additional audit findings",
+          "taskIndex": 1,
+          "content": "Confirm Spinner uses passive rest coverage only",
+          "status": "blocked",
+          "blocker": "Actual source repair is retained; final clean-source default matrix remains dependent on supervised runtime restoration and concrete remaining consumer/anatomy repairs. Current user prioritizes existing PR review repairs; no passive-rest completion is inferred from source-only work."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Additional audit findings",
+          "line": 33,
+          "original": "- [ ] Confirm Spinner uses passive rest coverage only"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1084,
+            "key": "issue.1084.007",
+            "original": "- [ ] Confirm Spinner uses passive rest coverage only（确认 Spinner 仅用被动 rest 覆盖）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:0",
+        "native": {
+          "phaseIndex": 17,
+          "phase": "Default matrix failures",
+          "taskIndex": 0,
+          "content": "Repair Vue and Vue2 Button projection readiness",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Default matrix failures",
+          "line": 37,
+          "original": "- [ ] Repair Vue and Vue2 Button projection readiness"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1085,
+            "key": "issue.1085.001",
+            "original": "- [ ] Repair Vue and Vue2 Button projection readiness（修复 Vue 与 Vue2 Button 投影就绪）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:1",
+        "native": {
+          "phaseIndex": 17,
+          "phase": "Default matrix failures",
+          "taskIndex": 1,
+          "content": "Repair Vue Select projection readiness failure",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Default matrix failures",
+          "line": 38,
+          "original": "- [ ] Repair Vue Select projection readiness failure"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1085,
+            "key": "issue.1085.002",
+            "original": "- [ ] Repair Vue Select projection readiness failure（修复 Vue Select 投影就绪失败）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:17/task:2",
+        "native": {
+          "phaseIndex": 17,
+          "phase": "Default matrix failures",
+          "taskIndex": 2,
+          "content": "Repair React Select last item focus evidence",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Default matrix failures",
+          "line": 39,
+          "original": "- [ ] Repair React Select last item focus evidence"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1085,
+            "key": "issue.1085.003",
+            "original": "- [ ] Repair React Select last item focus evidence（修复 React Select 末项焦点证据）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:18/task:0",
+        "native": {
+          "phaseIndex": 18,
+          "phase": "Materialized anatomy",
+          "taskIndex": 0,
+          "content": "Require complete state aware interactive recipe anatomy",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Materialized anatomy",
+          "line": 43,
+          "original": "- [ ] Require complete state aware interactive recipe anatomy"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1086,
+            "key": "issue.1086.002",
+            "original": "- [ ] Require complete state aware interactive recipe anatomy（要求完整状态感知交互式 recipe 解剖）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:19/task:0",
+        "native": {
+          "phaseIndex": 19,
+          "phase": "Runtime restoration",
+          "taskIndex": 0,
+          "content": "Restore supervised source bound audit runtime",
+          "status": "blocked",
+          "blocker": "Current 2026-10-04 hub ps still fails broker startup/connect ENOENT after10s. Previously verified omp executor smoke did not establish broker readiness; stale owned audit service is not current-source proof. No unverified kill, unsupervised replacement or provenance bypass. Isolated finite consumer evidence remains separate from the full supervised audit."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Runtime restoration",
+          "line": 47,
+          "original": "- [ ] Restore supervised source bound audit runtime"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1086,
+            "key": "issue.1086.001",
+            "original": "- [ ] Restore supervised source bound audit runtime（恢复监督源绑定审计运行时）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:22/task:5",
+        "native": {
+          "phaseIndex": 22,
+          "phase": "Focus CI consumers",
+          "taskIndex": 5,
+          "content": "Repair React readiness registry within governed budget",
+          "status": "blocked",
+          "blocker": "User authorized separately reviewed baseline transaction. PR819 exact f381 is published, package build and isolated React consumer CI passed; independent review and governed integration remain pending before synchronizing PR811. Current PR811 13a still fails old87500 by264. No fixed-budget restoration or merge inferred."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Focus CI consumers",
+          "line": 51,
+          "original": "- [ ] Repair React readiness registry within governed budget"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1086,
+            "key": "issue.1086.003",
+            "original": "- [ ] Repair React readiness registry within governed budget（在受治预算内修复 React 就绪注册表）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:22/task:6",
+        "native": {
+          "phaseIndex": 22,
+          "phase": "Focus CI consumers",
+          "taskIndex": 6,
+          "content": "Verify exact Focus package budget and consumers",
+          "status": "blocked",
+          "blocker": "Current main169407b2 React root measures93,742gzip against admitted91,765 (+1,977), native Node24.21/esbuild0.25.12 receipt /tmp/focus-current-main-package-budget-163.json. No numeric budget changes; final-head hosted package/consumer check-runs unavailable. Consumer smoke not yet claimed."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Focus CI consumers",
+          "line": 52,
+          "original": "- [ ] Verify exact Focus package budget and consumers"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1086,
+            "key": "issue.1086.004",
+            "original": "- [ ] Verify exact Focus package budget and consumers（验证精确 Focus 包预算与消费者）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:28/task:2",
+        "native": {
+          "phaseIndex": 28,
+          "phase": "Pull request delivery priority",
+          "taskIndex": 2,
+          "content": "Continue each pull request through governed merge",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pull request delivery priority",
+          "line": 56,
+          "original": "- [ ] Continue each pull request through governed merge"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.001",
+            "original": "- [ ] Continue each pull request through governed merge（让每个 PR 走受治合并）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:28/task:4",
+        "native": {
+          "phaseIndex": 28,
+          "phase": "Pull request delivery priority",
+          "taskIndex": 4,
+          "content": "Integrate reviewed native Tabs exact head",
+          "status": "blocked",
+          "blocker": "PR822 exact88e946f review COMMENT5407823498 applied and verified. Two independent P2 boundaries remain: public setter snapshot publication requires executed probe/correction, current HC/T catalog contradicts new provider. No APPROVE or REQUEST_CHANGES manufactured from unresolved in-scope verification debt; retain contributor independence and await source-owner response/new exact-head proof before integration."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pull request delivery priority",
+          "line": 57,
+          "original": "- [ ] Integrate reviewed native Tabs exact head"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.002",
+            "original": "- [ ] Integrate reviewed native Tabs exact head（合入已评审的 native Tabs 精确 head）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:29/task:0",
+        "native": {
+          "phaseIndex": 29,
+          "phase": "React budget integration",
+          "taskIndex": 0,
+          "content": "Obtain exact head budget CI and review",
+          "status": "blocked",
+          "blocker": "Exact f381 all observed check runs including test/package/React consumer are SUCCESS, additive evidence comment5980978622 verified. Independent platform approval still absent (guangliang2019 requested); Vercel provider daily deployment quota FAILURE remains, not the authorization exception. Continue other existing PR work without selfapproval, bypass or rerun."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "React budget integration",
+          "line": 61,
+          "original": "- [ ] Obtain exact head budget CI and review"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.003",
+            "original": "- [ ] Obtain exact head budget CI and review（获得精确 head 预算 CI 与评审）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:29/task:1",
+        "native": {
+          "phaseIndex": 29,
+          "phase": "React budget integration",
+          "taskIndex": 1,
+          "content": "Integrate budget baseline before synchronizing Focus PR",
+          "status": "blocked",
+          "blocker": "PR819 exactf381 all observed check runs SUCCESS but no independent APPROVED review, requestedguangliang2019; realVercel dailydeploymentquotaFAILURE blocks currentreadiness. PR811 exact13a both technical reviewfindings nowresolved throughboundverifiedreceipts, reviewrequested andownCI/dependencycommentpublished; sourceoldcapFAIL264 stillreal. No merge/main sync until gates actually pass."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "React budget integration",
+          "line": 62,
+          "original": "- [ ] Integrate budget baseline before synchronizing Focus PR"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.004",
+            "original": "- [ ] Integrate budget baseline before synchronizing Focus PR（同步 Focus PR 前先合入预算基线）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:30/task:5",
+        "native": {
+          "phaseIndex": 30,
+          "phase": "Base Collapsible delivery",
+          "taskIndex": 5,
+          "content": "Continue Collapsible review CI and governed integration",
+          "status": "blocked",
+          "blocker": "Exact65bb published;20checksSUCCESS/DCO;3025unit/201browser/5Collapsible actualnewHead;8original/newcriteria individually resolved, progresscomment5988956760 verified. No real independent platformAPPROVED;guangliang2019 alreadyrequested. Cannot selfapprove/bypassmerge. Continue next actionable existingPR while awaiting actual independentreview."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Base Collapsible delivery",
+          "line": 66,
+          "original": "- [ ] Continue Collapsible review CI and governed integration"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.005",
+            "original": "- [ ] Continue Collapsible review CI and governed integration（继续 Collapsible 评审 CI 与受治集成）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:40/task:3",
+        "native": {
+          "phaseIndex": 40,
+          "phase": "Existing pagination pull request",
+          "taskIndex": 3,
+          "content": "Continue pagination CI review until governed integration",
+          "status": "blocked",
+          "blocker": "Published exact c1c47af2862247273869142ad4235b2225785e49; current12checksSUCCESS/4pathSKIPPED includingDCO/Vercel. MainCI37274484860 and testjob111648399980SUCCESS; hosted894AgentOps/defaultNode24.21 actual. Originalthread resolved;0independentAPPROVED, guangliang2019alreadyrequested. No selfapproval/bypass; continue other existing PR work."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Existing pagination pull request",
+          "line": 70,
+          "original": "- [ ] Continue pagination CI review until governed integration"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.006",
+            "original": "- [ ] Continue pagination CI review until governed integration（继续分页 CI 评审直到受治集成）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:42/task:4",
+        "native": {
+          "phaseIndex": 42,
+          "phase": "Existing budget skill pull request",
+          "taskIndex": 4,
+          "content": "Continue budget skill CI review and governed integration",
+          "status": "blocked",
+          "blocker": "Published exact924;13checksSUCCESS/4pathSKIPPED inclDCO/Vercel, actualCI37283984783/test111678412903success730AgentOps/2979unit/196browser. All7threads individually resolved, bounded comment5991312842verified. No real independentAPPROVED;guangliang2019alreadyrequested. No selfapproval or bypass; advance other existingPRs."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Existing budget skill pull request",
+          "line": 74,
+          "original": "- [ ] Continue budget skill CI review and governed integration"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1087,
+            "key": "issue.1087.007",
+            "original": "- [ ] Continue budget skill CI review and governed integration（继续预算 skill CI 评审与受治集成）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:45/task:5",
+        "native": {
+          "phaseIndex": 45,
+          "phase": "Existing ModelTrace pull request",
+          "taskIndex": 5,
+          "content": "Validate publish and sustain independent ModelTrace integration",
+          "status": "blocked",
+          "blocker": "Published309bbde033139ca836ef1d683e89da1e07856aa4 via real hooks/DCO and one normal push; finding4190575814 resolved by one applied verified schema-v2 receipt. Exact additive comment6008809575 acknowledged and full-body/actor readback verified; first TLS failure proven source-bound read-only preflight,0mutations, historicalbb5unknown untouched. Final focused332/full831dualNode. New-head03:27:39 snapshot11SUCCESS inclVercel/DCO,20IN_PROGRESS/10QUEUED,0exact-headAPPROVED. Oldquota failure belongs684, not309. Need trusted terminal CI, actual independent approval and rules; no bypass."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Existing ModelTrace pull request",
+          "line": 78,
+          "original": "- [ ] Validate publish and sustain independent ModelTrace integration"
+        },
+        "parentCriteria": []
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:56/task:1",
+        "native": {
+          "phaseIndex": 56,
+          "phase": "ModelTrace commit progress",
+          "taskIndex": 1,
+          "content": "Publish exact main reconciliation progress comment",
+          "status": "blocked",
+          "blocker": "One bb5 progress publication attempt returned PublicationUnknown. Complete read-only reconciliations at21:02 and21:09 observed no exact marker; outcome remains unattributable. Do not repost blindly; preserve attempted payload, acknowledgment uncertainty and all readback."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "ModelTrace commit progress",
+          "line": 82,
+          "original": "- [ ] Publish exact main reconciliation progress comment"
+        },
+        "parentCriteria": []
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:75/task:5",
+        "native": {
+          "phaseIndex": 75,
+          "phase": "Existing review repair delivery",
+          "taskIndex": 5,
+          "content": "Publish precise budget handoff repair evidence",
+          "status": "blocked",
+          "blocker": "One actual comment POST returned PublicationUnknown. Complete read-only reconciliation of all8comments found0exact markers; lost acknowledgment and outcome remain unattributable. Do not repost or equate absence with0mutations; preserve prepared body, exact marker and native receipts."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Existing review repair delivery",
+          "line": 86,
+          "original": "- [ ] Publish precise budget handoff repair evidence"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.001",
+            "original": "- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:76/task:2",
+        "native": {
+          "phaseIndex": 76,
+          "phase": "Collapsible homepage evidence",
+          "taskIndex": 2,
+          "content": "Reproduce source owned homepage Context failure",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Collapsible homepage evidence",
+          "line": 90,
+          "original": "- [ ] Reproduce source owned homepage Context failure"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.002",
+            "original": "- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:79/task:4",
+        "native": {
+          "phaseIndex": 79,
+          "phase": "Fresh review repair delivery",
+          "taskIndex": 4,
+          "content": "Verify new candidate native CI gates",
+          "status": "blocked",
+          "blocker": "Exact84cb87e1 public delivery verified; actual new-head checks show DCO success and Vercel build-rate-limit FAILURE, exact-head Actions API returned total_count0 (no native run observed), and0independent approvals. Five genuinely new reviewer criteria separately appended. No rerun/quota bypass/merge or old42-success attribution; repair new criteria while retaining delivered proof."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Fresh review repair delivery",
+          "line": 94,
+          "original": "- [ ] Verify new candidate native CI gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.003",
+            "original": "- [ ] Verify new candidate native CI gates（验证新候选 native CI gate）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:2",
+        "native": {
+          "phaseIndex": 82,
+          "phase": "Five boundary current delivery",
+          "taskIndex": 2,
+          "content": "Publish distinct five boundary repair evidence",
+          "status": "blocked",
+          "blocker": "Second per-commit comment remains PublicationUnknown. Current complete discussion readback retained; absence is not zero-write proof, and no replayed record or blind retry is authorized."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Five boundary current delivery",
+          "line": 98,
+          "original": "- [ ] Publish distinct five boundary repair evidence"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.004",
+            "original": "- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:3",
+        "native": {
+          "phaseIndex": 82,
+          "phase": "Five boundary current delivery",
+          "taskIndex": 3,
+          "content": "Verify exact five boundary native gates",
+          "status": "blocked",
+          "blocker": "Exact run37613588932 attempt2 at3ca09b402 completed failure:8 browser shards passed, general and aggregate test failed. External merge96fa2528 does not make CI passing or establish independent approval; no rerun or bypass."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Five boundary current delivery",
+          "line": 99,
+          "original": "- [ ] Verify exact five boundary native gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.005",
+            "original": "- [ ] Verify exact five boundary native gates（验证精确五边界 native gate）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:82/task:5",
+        "native": {
+          "phaseIndex": 82,
+          "phase": "Five boundary current delivery",
+          "taskIndex": 5,
+          "content": "Reconcile rejected merged pull request thread state",
+          "status": "blocked",
+          "blocker": "All five original threads remain unresolved. Supported collaboration requires OPEN; mergedPR833 is rejected/0mutations. Preserve actual receipts; do not use raw mutation, forged OPEN state, placeholders or replayed measurements."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Five boundary current delivery",
+          "line": 100,
+          "original": "- [ ] Reconcile rejected merged pull request thread state"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.006",
+            "original": "- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:84/task:1",
+        "native": {
+          "phaseIndex": 84,
+          "phase": "ModelTrace retained review delivery",
+          "taskIndex": 1,
+          "content": "Verify exact two finding hosted review gates",
+          "status": "blocked",
+          "blocker": "PR878 exactf288 nativeCI37875520577 completed FAILURE, not pending. Actualtest-general113643158156 runs canonicalAgentOps1644/1644pass0fail0cancelled (native564.81s), so local240s incomplete outcomes remain separate historical failures rather than the final hostedAgentOps result. General114/19 and7browser shards still fail; browser6/type/Rust/plans succeed, publicpackage/consumer/stage path-skipped. Contrast/PoppypreviewSUCCESS. Complete native log /tmp/pr878-current-head-general-169.log and exactjobmap /tmp/pr878-current-exact-head-ci-jobs-169.json. Independent platformAPPROVED absent at prior snapshot, no selfapproval/rerun/bypass/merge; repair source owners in separate ownworktree."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "ModelTrace retained review delivery",
+          "line": 104,
+          "original": "- [ ] Verify exact two finding hosted review gates"
+        },
+        "parentCriteria": []
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:85/task:2",
+        "native": {
+          "phaseIndex": 85,
+          "phase": "Current main type drift",
+          "taskIndex": 2,
+          "content": "Verify native typed repair hosted integration gates",
+          "status": "blocked",
+          "blocker": "PR879 exact219e5b2cd type-check andDCO actuallySUCCESS; reviewrequested guangliang2019 verifiedapplied1; progress6071084294 verified. Actualpublic-package-build,consumer,stage,general andsource-and-host failures remain; no approval or merge/bypass inferred."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Current main type drift",
+          "line": 108,
+          "original": "- [ ] Verify native typed repair hosted integration gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.007",
+            "original": "- [ ] Verify native typed repair hosted integration gates（验证 native 类型修复宿主集成 gate）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:87/task:3",
+        "native": {
+          "phaseIndex": 87,
+          "phase": "Feedback package finalization",
+          "taskIndex": 3,
+          "content": "Verify package repair hosted integration gates",
+          "status": "blocked",
+          "blocker": "Fresh actual2026-10-09PR880 is externally MERGEDat03:50:42Z bycyjin-yl, headadvanced20f→a0acf4fe6fa493c1c1ea85d532ed6c536bc0fb8f, mergeca28a4db278f948e34c57ae779385673d37d391b. Main performed neitherintermediateadvance nor merge. CurrentnativeCI/review/rules ofa0acfare notyetcollected; old20f failures retained. Do notclaim Mainlegalmerge/independentapproval/fullCIgreen from externalstate. Exactreceipt /tmp/pr880-external-current-main-integration-169.json. Our isolatedSourceCI branch safelyfast-forwardedca28disjointfrom11ownchanges; five incomingpackagefiles preserved, no Mainnumericbudgetwrite."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Feedback package finalization",
+          "line": 112,
+          "original": "- [ ] Verify package repair hosted integration gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.008",
+            "original": "- [ ] Verify package repair hosted integration gates（验证包修复宿主集成 gate）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:92/task:2",
+        "native": {
+          "phaseIndex": 92,
+          "phase": "Current native failure ownership",
+          "taskIndex": 2,
+          "content": "Repair governed source failures and native consumer evidence",
+          "status": "blocked",
+          "blocker": "Current functional/native/type/format/pack evidence complete; genuineWC118915/117850capfailure persists. Independent119059costproposal completed178 undertargetdelegation; numericownertransaction andactualcandidateCI/review stillneeded, not an attendednumericalapprovalgate."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Current native failure ownership",
+          "line": 116,
+          "original": "- [ ] Repair governed source failures and native consumer evidence"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.009",
+            "original": "- [ ] Repair governed source failures and native consumer evidence（修复受治源失败与原生消费者证据）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:93/task:0",
+        "native": {
+          "phaseIndex": 93,
+          "phase": "Current native repair finalization",
+          "taskIndex": 0,
+          "content": "Validate current package graph and packed consumers",
+          "status": "blocked",
+          "blocker": "Current functional/native/type/format/pack evidence complete; genuineWC118915/117850capfailure persists. Independent119059costproposal completed178 undertargetdelegation; numericownertransaction andactualcandidateCI/review stillneeded, not an attendednumericalapprovalgate."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Current native repair finalization",
+          "line": 120,
+          "original": "- [ ] Validate current package graph and packed consumers"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.010",
+            "original": "- [ ] Validate current package graph and packed consumers（验证当前包图与打包消费者）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:0",
+        "native": {
+          "phaseIndex": 95,
+          "phase": "Remaining TODO continuation",
+          "taskIndex": 0,
+          "content": "Reconcile every remaining TODO against live evidence",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Remaining TODO continuation",
+          "line": 124,
+          "original": "- [ ] Reconcile every remaining TODO against live evidence"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.011",
+            "original": "- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:1",
+        "native": {
+          "phaseIndex": 95,
+          "phase": "Remaining TODO continuation",
+          "taskIndex": 1,
+          "content": "Complete all actionable repairs and governed delivery",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Remaining TODO continuation",
+          "line": 125,
+          "original": "- [ ] Complete all actionable repairs and governed delivery"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.012",
+            "original": "- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:95/task:2",
+        "native": {
+          "phaseIndex": 95,
+          "phase": "Remaining TODO continuation",
+          "taskIndex": 2,
+          "content": "Follow blocked gates without bypassing independent acceptance",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Remaining TODO continuation",
+          "line": 126,
+          "original": "- [ ] Follow blocked gates without bypassing independent acceptance"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.013",
+            "original": "- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:97/task:1",
+        "native": {
+          "phaseIndex": 97,
+          "phase": "Source PR 886 gate followup",
+          "taskIndex": 1,
+          "content": "Deliver independently reviewed WC numerical baseline transaction",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Source PR 886 gate followup",
+          "line": 130,
+          "original": "- [ ] Deliver independently reviewed WC numerical baseline transaction"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1088,
+            "key": "issue.1088.014",
+            "original": "- [ ] Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:0",
+        "native": {
+          "phaseIndex": 99,
+          "phase": "Pure Prototype portability audit",
+          "taskIndex": 0,
+          "content": "Trace source changes through pure Prototype descriptions",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pure Prototype portability audit",
+          "line": 134,
+          "original": "- [ ] Trace source changes through pure Prototype descriptions"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.001",
+            "original": "- [ ] Trace source changes through pure Prototype descriptions（通过纯 Prototype 描述追踪源码变化）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:1",
+        "native": {
+          "phaseIndex": 99,
+          "phase": "Pure Prototype portability audit",
+          "taskIndex": 1,
+          "content": "Verify compiler admission and governed host boundaries",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pure Prototype portability audit",
+          "line": 135,
+          "original": "- [ ] Verify compiler admission and governed host boundaries"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.002",
+            "original": "- [ ] Verify compiler admission and governed host boundaries（验证编译器准入与受治宿主边界）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:2",
+        "native": {
+          "phaseIndex": 99,
+          "phase": "Pure Prototype portability audit",
+          "taskIndex": 2,
+          "content": "Exercise changed shared semantics without Web globals",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pure Prototype portability audit",
+          "line": 136,
+          "original": "- [ ] Exercise changed shared semantics without Web globals"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.003",
+            "original": "- [ ] Exercise changed shared semantics without Web globals（不用 Web 全局量演练改动的共享语义）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:99/task:3",
+        "native": {
+          "phaseIndex": 99,
+          "phase": "Pure Prototype portability audit",
+          "taskIndex": 3,
+          "content": "Repair any cross layer host leakage found",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Pure Prototype portability audit",
+          "line": 137,
+          "original": "- [ ] Repair any cross layer host leakage found"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.004",
+            "original": "- [ ] Repair any cross layer host leakage found（修复发现的跨层宿主泄漏）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:0",
+        "native": {
+          "phaseIndex": 100,
+          "phase": "Independent clean room composition",
+          "taskIndex": 0,
+          "content": "Keep compiler layer thin without Prototype embedding",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Independent clean room composition",
+          "line": 141,
+          "original": "- [ ] Keep compiler layer thin without Prototype embedding"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.005",
+            "original": "- [ ] Keep compiler layer thin without Prototype embedding（保持编译器层薄、不嵌入 Prototype）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:1",
+        "native": {
+          "phaseIndex": 100,
+          "phase": "Independent clean room composition",
+          "taskIndex": 1,
+          "content": "Keep Prototype implementation faithful to authoritative definition",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Independent clean room composition",
+          "line": 142,
+          "original": "- [ ] Keep Prototype implementation faithful to authoritative definition"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.006",
+            "original": "- [ ] Keep Prototype implementation faithful to authoritative definition（保持 Prototype 实现忠于权威定义）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:100/task:2",
+        "native": {
+          "phaseIndex": 100,
+          "phase": "Independent clean room composition",
+          "taskIndex": 2,
+          "content": "Verify independent implementations compose without compensating behavior",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Independent clean room composition",
+          "line": 143,
+          "original": "- [ ] Verify independent implementations compose without compensating behavior"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.007",
+            "original": "- [ ] Verify independent implementations compose without compensating behavior（验证独立实现无补偿行为地组合）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:110/task:4",
+        "native": {
+          "phaseIndex": 110,
+          "phase": "Finf independent boundary reproduction",
+          "taskIndex": 4,
+          "content": "Validate definition bound repaired consumer composition",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Finf independent boundary reproduction",
+          "line": 147,
+          "original": "- [ ] Validate definition bound repaired consumer composition"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1089,
+            "key": "issue.1089.008",
+            "original": "- [ ] Validate definition bound repaired consumer composition（验证定义绑定修复后的消费者组合）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:1",
+        "native": {
+          "phaseIndex": 111,
+          "phase": "Finf public head synchronization",
+          "taskIndex": 1,
+          "content": "Repair public docs 78 family catalog drift",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Finf public head synchronization",
+          "line": 151,
+          "original": "- [ ] Repair public docs 78 family catalog drift"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1090,
+            "key": "issue.1090.001",
+            "original": "- [ ] Repair public docs 78 family catalog drift（修复公开文档 78 家族目录漂移）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:2",
+        "native": {
+          "phaseIndex": 111,
+          "phase": "Finf public head synchronization",
+          "taskIndex": 2,
+          "content": "Repair Dropdown anatomy replay model",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Finf public head synchronization",
+          "line": 152,
+          "original": "- [ ] Repair Dropdown anatomy replay model"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1090,
+            "key": "issue.1090.002",
+            "original": "- [ ] Repair Dropdown anatomy replay model（修复 Dropdown 解剖回放模型）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:111/task:5",
+        "native": {
+          "phaseIndex": 111,
+          "phase": "Finf public head synchronization",
+          "taskIndex": 5,
+          "content": "Integrate verified PR content into Finf via maintainer push",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Finf public head synchronization",
+          "line": 153,
+          "original": "- [ ] Integrate verified PR content into Finf via maintainer push"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1090,
+            "key": "issue.1090.003",
+            "original": "- [ ] Integrate verified PR content into Finf via maintainer push（经 maintainer push 把已验证 PR 内容合入 Finf）"
+          }
+        ]
+      },
+      {
+        "sourceLocator": "native-session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:5788e9e7/phase:112/task:1",
+        "native": {
+          "phaseIndex": 112,
+          "phase": "Maintainer Finf integration delegation",
+          "taskIndex": 1,
+          "content": "Reconcile feature integration with mainline acceptance gates",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        },
+        "public": {
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+          "section": "Maintainer Finf integration delegation",
+          "line": 157,
+          "original": "- [ ] Reconcile feature integration with mainline acceptance gates"
+        },
+        "parentCriteria": [
+          {
+            "issue": 1090,
+            "key": "issue.1090.004",
+            "original": "- [ ] Reconcile feature integration with mainline acceptance gates（调和特性集成与主线验收 gate）"
+          }
+        ]
+      }
+    ],
+    "fiveBoundaryPhasePreimage": {
+      "phaseIndex": 82,
+      "name": "Five boundary current delivery",
+      "tasks": [
+        {
+          "taskIndex": 0,
+          "content": "Publish signed five boundary repair candidate",
+          "status": "completed",
+          "blocker": null
+        },
+        {
+          "taskIndex": 1,
+          "content": "Resolve five newly repaired review threads",
+          "status": "completed",
+          "blocker": null
+        },
+        {
+          "taskIndex": 2,
+          "content": "Publish distinct five boundary repair evidence",
+          "status": "blocked",
+          "blocker": "Second per-commit comment remains PublicationUnknown. Current complete discussion readback retained; absence is not zero-write proof, and no replayed record or blind retry is authorized."
+        },
+        {
+          "taskIndex": 3,
+          "content": "Verify exact five boundary native gates",
+          "status": "blocked",
+          "blocker": "Exact run37613588932 attempt2 at3ca09b402 completed failure:8 browser shards passed, general and aggregate test failed. External merge96fa2528 does not make CI passing or establish independent approval; no rerun or bypass."
+        },
+        {
+          "taskIndex": 4,
+          "content": "Diagnose exact five boundary native CI failure",
+          "status": "completed",
+          "blocker": null
+        },
+        {
+          "taskIndex": 5,
+          "content": "Reconcile rejected merged pull request thread state",
+          "status": "blocked",
+          "blocker": "All five original threads remain unresolved. Supported collaboration requires OPEN; mergedPR833 is rejected/0mutations. Preserve actual receipts; do not use raw mutation, forged OPEN state, placeholders or replayed measurements."
+        }
+      ]
+    },
+    "rejectedOperationToolResults": [
+      {
+        "id": "7e48b8f9",
+        "timestamp": "2026-10-08T07:44:20.516Z",
+        "toolName": "bash",
+        "content": [
+          "PRRT_kwDOMhQZjc6pbY-V -> rejected mutations: 0 reconciliations: 0\nPRRT_kwDOMhQZjc6pbY-c -> rejected mutations: 0 reconciliations: 0\nPRRT_kwDOMhQZjc6pbY-g -> rejected mutations: 0 reconciliations: 0\nPRRT_kwDOMhQZjc6pbY-k -> rejected mutations: 0 reconciliations: 0\nPRRT_kwDOMhQZjc6pbY-p -> rejected mutations: 0 reconciliations: 0\n\n\nWall time: 0.17 seconds"
+        ],
+        "sourceType": "exact native tool-result excerpt; no request replay",
+        "contentSha256": "7c47616bfa7e6c6807fd216c7727c6f0ba323f08834d7dfb9c873196e50524bb"
+      },
+      {
+        "id": "f5333e70",
+        "timestamp": "2026-10-08T07:48:42.085Z",
+        "toolName": "eval",
+        "content": [
+          "PRRT_kwDOMhQZjc6pbY-V -> rejected mutations: 0 live-authorization-rejected\nPRRT_kwDOMhQZjc6pbY-c -> rejected mutations: 0 live-authorization-rejected\nPRRT_kwDOMhQZjc6pbY-g -> rejected mutations: 0 live-authorization-rejected\nPRRT_kwDOMhQZjc6pbY-k -> rejected mutations: 0 live-authorization-rejected\nPRRT_kwDOMhQZjc6pbY-p -> rejected mutations: 0 live-authorization-rejected\nAPPLIED 0 of 5"
+        ],
+        "sourceType": "exact native tool-result excerpt; no request replay",
+        "contentSha256": "f51f327a80766dde48eb7c241845a2a8e862495395d61246e1198623d95152af"
+      }
+    ],
+    "invalidHistoricalMeasurementBoundary": {
+      "sourceEvent": "abb64978",
+      "timestamp": "2026-10-08T08:02:35.391Z",
+      "excludedPaths": [
+        "/tmp/pr833-identify-156",
+        "/tmp/pr833-identify-157",
+        "/tmp/pr833-identify-158",
+        "/tmp/pr833-identify-159",
+        "/tmp/pr833-identify-160",
+        "/tmp/pr833-identify-161",
+        "/tmp/pr833-identify-162"
+      ],
+      "reason": "Original source explicitly identifies repeated/copied prior probe outputs and restamped response windows as nongenuine remeasurement. They are not acceptance or fresh attribution."
+    }
+  },
+  "originalCriteria": [
+    {
+      "key": "issue.1139.001",
+      "original": "- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）",
+      "parentSourceKey": "issue.1088.006",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 6,
+      "parentSourceLine": 14
+    },
+    {
+      "key": "issue.1139.002",
+      "original": "- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）",
+      "parentSourceKey": "issue.1088.011",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 7,
+      "parentSourceLine": 19
+    },
+    {
+      "key": "issue.1139.003",
+      "original": "- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）",
+      "parentSourceKey": "issue.1088.012",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 8,
+      "parentSourceLine": 20
+    },
+    {
+      "key": "issue.1139.004",
+      "original": "- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）",
+      "parentSourceKey": "issue.1088.013",
+      "originalSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "parentSourceUrl": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "historicalChecked": false,
+      "sourceLine": 9,
+      "parentSourceLine": 21
+    }
+  ],
+  "issues": [
+    {
+      "number": 1084,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1084",
+      "title": "[Finf v2][887-followup] Spinner 持续动画 + GPUI 栈 + audit PR 775 独立评审与受治合入",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:23Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：External gates / PR 775 review / New audit findings / Additional audit findings。关联 Finf v2 总追踪 #890。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Publish captured Spinner visuals to authorized destination（发布已捕获的 Spinner 视觉到授权目标）\n- [ ] Review remaining GPUI stack and verify parent completion（评审剩余 GPUI 栈并验证父项完成）\n- [ ] Obtain independent review and integrate audit PR 775（获得独立评审并合入 audit PR 775）\n- [ ] Integrate PR 775 only after all gates（仅在全部 gate 通过后合入 PR 775）\n- [ ] Handle persistent Spinner animation without false idle（处理持续 Spinner 动画，避免虚假 idle）\n- [ ] Require exact binary outcome after keyboard activation（键盘激活后要求精确二元结果）\n- [ ] Confirm Spinner uses passive rest coverage only（确认 Spinner 仅用被动 rest 覆盖）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。PR 775 独立评审与受治合入是 gate，不能因迁移而失效。",
+      "bodySha256": "9aa3f9d87b6b1eac496fddc771edb51f5a09658bc75d32bef25eef097fccf4b1",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684403039,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1084#issuecomment-6684403039",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:07Z",
+            "updatedAt": "2026-11-06T12:05:07Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) Spinner sustained animation, GPUI stack, and PR775 independent review/merge are outside the 0.3 scope.",
+            "bodySha256": "334cadbfa61bd94e2ce14f45c8f1841449679e482bd825bfed511c99736baaf7"
+          },
+          {
+            "id": 6684504597,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1084#issuecomment-6684504597",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:54Z",
+            "updatedAt": "2026-11-06T12:10:54Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThe retained items bind to historical artifacts and external gates: publishing already-captured Spinner visuals to an authorized destination (evidence publication, not code), reviewing the remaining GPUI stack and verifying parent completion (GPUI non-Web backend work), obtaining independent review and governed integration of audit PR775 with all gates (a specific historical PR lifecycle), and the Spinner continuous-animation/idle/keyboard-outcome/rest-coverage items which are acceptance-evidence requirements from that audit rather than a bounded current-main defect report. All are Finf v2 (#887 follow-up, #890) audit/gate debt; PR775's own gate cannot be discharged by this tracker. Deferred to 0.4.",
+            "bodySha256": "d8335388b00d7a38fb099f6d6f2d040c6ca6e0719bb111ac5619ec2714903349"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1085,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1085",
+      "title": "[Finf v2][887-followup] 默认矩阵失败：Vue/Vue2 Button 与 Select 投影就绪 + React Select 末项焦点证据",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:21Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：Default matrix failures。关联 Finf v2 总追踪 #890。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Repair Vue and Vue2 Button projection readiness（修复 Vue 与 Vue2 Button 投影就绪）\n- [ ] Repair Vue Select projection readiness failure（修复 Vue Select 投影就绪失败）\n- [ ] Repair React Select last item focus evidence（修复 React Select 末项焦点证据）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "303e8fd7ed82b2f7ff74329ccbc05ed5922ee12ec3a078c460257ac4b3de1c11",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684402052,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1085#issuecomment-6684402052",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:04Z",
+            "updatedAt": "2026-11-06T12:05:04Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) default-matrix failures (Vue/Vue2 Button+Select projection readiness, React Select focus evidence) are outside the 0.3 scope.",
+            "bodySha256": "d4ce1c47d3cdffc3092f785d31a81b74b153a72bbff2d9532f993c7d4226e7b0"
+          },
+          {
+            "id": 6684503980,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1085#issuecomment-6684503980",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:52Z",
+            "updatedAt": "2026-11-06T12:10:52Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThe three items are projection-readiness *evidence* repairs for the Finf default matrix: Vue and Vue2 Button projection readiness, Vue Select projection readiness failure, and React Select last-item focus evidence. They concern the Finf v2 default-matrix harness and its per-family readiness/focus evidence at specific historical heads (the body requires original source keys and forbids substituting historical evidence for current-head acceptance), not identified defects in the current Base prototypes themselves. This matrix-evidence program is Finf v2 (#887 follow-up, #890) scope; any concrete current-main Vue/React projection bug surfaced independently can be filed as its own bounded issue. Deferred to 0.4.",
+            "bodySha256": "7a2b5290aaa118ab3a4bc63580c34dd724462e4e760bb5314f8f8e89116dcc15"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1086,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1086",
+      "title": "[Finf v2][887-followup] Runtime restoration + Focus CI 消费者：监督源绑定审计运行时 + React 就绪注册表预算",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:18Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：Runtime restoration / Materialized anatomy / Focus CI consumers。关联 Finf v2 总追踪 #890。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Restore supervised source bound audit runtime（恢复监督源绑定审计运行时）\n- [ ] Require complete state aware interactive recipe anatomy（要求完整状态感知交互式 recipe 解剖）\n- [ ] Repair React readiness registry within governed budget（在受治预算内修复 React 就绪注册表）\n- [ ] Verify exact Focus package budget and consumers（验证精确 Focus 包预算与消费者）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "7f0966f70c70d88874994791a2024de6418753df8d3219979f0f4df2bd95ac6d",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684406148,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1086#issuecomment-6684406148",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:18Z",
+            "updatedAt": "2026-11-06T12:05:18Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) runtime restoration and Focus CI consumer work are outside the 0.3 scope.",
+            "bodySha256": "6b863c2b0bfc4c82624321b5a42fb0658c3c21d1362416ccb73a0e9609d9a83b"
+          },
+          {
+            "id": 6684503357,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1086#issuecomment-6684503357",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:50Z",
+            "updatedAt": "2026-11-06T12:10:50Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThe four items are session-infrastructure restoration tied to the interrupted #887 session's own tooling: restoring the supervised source-bound audit runtime (that session's custom audit harness), requiring complete state-aware interactive recipe anatomy (anatomy-model requirements for the materialized-anatomy work), repairing the React readiness registry 'within governed budget' (the session's budget-governance instrumentation), and verifying the exact Focus package budget/consumers. All are Finf v2 (#887 follow-up, #890) runtime/evidence restoration tasks with exact-head evidence requirements, not bounded defects in current-main Base/Shadcn/Brutalist/Lucide prototypes, www, or CLI. Deferred to 0.4.",
+            "bodySha256": "955f5a92ba0555f2ae2b5794e417bd646f9ec00fd327ee4171475f2930cfa6f7"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1087,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1087",
+      "title": "[Finf v2][887-followup] PR 投递优先级 + React 预算集成：受治合并 native Tabs + 预算基线同步 Focus PR",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:16Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：Pull request delivery priority / React budget integration / Base Collapsible delivery / Existing pagination pull request / Existing budget skill pull request。关联 Finf v2 总追踪 #890。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Continue each pull request through governed merge（让每个 PR 走受治合并）\n- [ ] Integrate reviewed native Tabs exact head（合入已评审的 native Tabs 精确 head）\n- [ ] Obtain exact head budget CI and review（获得精确 head 预算 CI 与评审）\n- [ ] Integrate budget baseline before synchronizing Focus PR（同步 Focus PR 前先合入预算基线）\n- [ ] Continue Collapsible review CI and governed integration（继续 Collapsible 评审 CI 与受治集成）\n- [ ] Continue pagination CI review until governed integration（继续分页 CI 评审直到受治集成）\n- [ ] Continue budget skill CI review and governed integration（继续预算 skill CI 评审与受治集成）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。受治合并 gate 不能因迁移而失效。",
+      "bodySha256": "a12423cb081acefa7f4673ca19b1735f6082a3a301ec2814c3f7ae1683404353",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684405111,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1087#issuecomment-6684405111",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:15Z",
+            "updatedAt": "2026-11-06T12:05:15Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) PR delivery priority and React budget integration (native Tabs, Focus PR baselines) are outside the 0.3 scope.",
+            "bodySha256": "8b901d87532cd990bfcb2e4e41c52d787854523dc4771d21b0da615e32207943"
+          },
+          {
+            "id": 6684502696,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1087#issuecomment-6684502696",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:48Z",
+            "updatedAt": "2026-11-06T12:10:48Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nAll seven items are continuation of specific historical PRs through governed merge — native Tabs exact-head integration, exact-head budget CI/review, budget-baseline integration before Focus PR synchronization, Collapsible review/CI, pagination CI/review, and budget-skill CI/review. Each refers to PR lifecycles from the interrupted #887 session whose candidates/heads have since been superseded or merged through their own tracks; the tracker itself contains no code deliverable, and its acceptance boundary demands the original source keys and exact-head gates. This is Finf v2 (#887 follow-up, #890) PR-orchestration debt, not a bounded 0.3 prototype/www/CLI fix. Deferred to 0.4.",
+            "bodySha256": "220d05d65e7e4fde588d616cc4674416226d1b3dafe7fba3612a36de9954837e"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1088,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1088",
+      "title": "[Finf v2][887-followup] 评审修复投递 + 剩余 TODO 续接 + PR 886 gate：预算交接修复证据 / 五边界 / 原生失败所有权 / WC 数值基线",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:14Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：Existing review repair delivery / Collapsible homepage evidence / Fresh review repair delivery / Five boundary current delivery / Current main type drift / Feedback package finalization / Current native failure ownership / Current native repair finalization / Remaining TODO continuation / Source PR 886 gate followup。关联 Finf v2 总追踪 #890。\n\n注：887 的 ModelTrace commit progress / ModelTrace retained review delivery 两项已由 ModelTrace 永久退役（PR985 已合入 main）覆盖，不另开 Issue。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）\n- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）\n- [ ] Verify new candidate native CI gates（验证新候选 native CI gate）\n- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）\n- [ ] Verify exact five boundary native gates（验证精确五边界 native gate）\n- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）\n- [ ] Verify native typed repair hosted integration gates（验证 native 类型修复宿主集成 gate）\n- [ ] Verify package repair hosted integration gates（验证包修复宿主集成 gate）\n- [ ] Repair governed source failures and native consumer evidence（修复受治源失败与原生消费者证据）\n- [ ] Validate current package graph and packed consumers（验证当前包图与打包消费者）\n- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）\n- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）\n- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）\n- [ ] Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "f33b2df1895ee34f9d4c5e7900979391b8f9d4a2c9ef61cd8862a2d16b1f7302",
+      "comments": {
+        "expected": 3,
+        "delivered": 3,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6550302588,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6550302588",
+            "author": "cyjin-yl",
+            "createdAt": "2026-10-31T23:00:46Z",
+            "updatedAt": "2026-10-31T23:00:46Z",
+            "body": "## 已拆分为有界子 Issue（2026-11-01 全量梳理，Finf v2 #890 清零）\n\n本 Issue 保留为追踪入口，以下子 Issue 为有界执行切片（范围逐项保留自本 Issue，非重复）：\n\n- #1136\n- #1137\n- #1138\n- #1139\n- #1140\n\n全部子 Issue 关闭且验收通过后，本 Issue 方可关闭。",
+            "bodySha256": "a681c7a62106e7c0bea39de68f6ab8ca91ffe6c9b244e2e0a38a9378cc6d9d97"
+          },
+          {
+            "id": 6684404077,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684404077",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:11Z",
+            "updatedAt": "2026-11-06T12:05:11Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) review-fix delivery, remaining TODO continuation, and PR886 gate evidence are outside the 0.3 scope.",
+            "bodySha256": "80aafcecdb4b76e883c6eef44ef80d031044cd0e016211e75c4a22042bbe0724"
+          },
+          {
+            "id": 6684503838,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684503838",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:52Z",
+            "updatedAt": "2026-11-06T12:10:52Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThe 14 retained items are historical PR-session gates and evidence publication, each bound to specific old candidates rather than current-main defects: budget-handoff repair evidence, five-boundary repair evidence and native gates, reconciling rejected-but-merged PR thread state, native typed/package repair hosted integration gates, package-graph and packed-consumer validation, and per-TODO reconciliation against live evidence — plus the PR886 gate follow-up (WC numerical baseline transaction requiring independent review). The body's own boundary requires each item's original source key, conditions, owner/claim and true CI/DCO evidence at its historical head; these cannot be converted into bounded current-main fixes. Finf v2 (#887 follow-up, #890) evidence/gate debt; deferred to 0.4.",
+            "bodySha256": "f686722bbcd5f88b59a690043c8e186162e259b7d4a39245569e0440f71116bb"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1089,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1089",
+      "title": "[Finf v2][887-followup] 纯 Prototype 可移植审计 + 独立洁净室组合 + Finf 独立边界复现",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:11Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」：Pure Prototype portability audit / Independent clean room composition / Finf independent boundary reproduction。关联 Finf v2 总追踪 #890。编译器/IR 类任务归 proto-compiler pane 受治投递。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Trace source changes through pure Prototype descriptions（通过纯 Prototype 描述追踪源码变化）\n- [ ] Verify compiler admission and governed host boundaries（验证编译器准入与受治宿主边界）\n- [ ] Exercise changed shared semantics without Web globals（不用 Web 全局量演练改动的共享语义）\n- [ ] Repair any cross layer host leakage found（修复发现的跨层宿主泄漏）\n- [ ] Keep compiler layer thin without Prototype embedding（保持编译器层薄、不嵌入 Prototype）\n- [ ] Keep Prototype implementation faithful to authoritative definition（保持 Prototype 实现忠于权威定义）\n- [ ] Verify independent implementations compose without compensating behavior（验证独立实现无补偿行为地组合）\n- [ ] Validate definition bound repaired consumer composition（验证定义绑定修复后的消费者组合）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "1a0653f63c39194a95643abb4cb0c7743a98b3673d44c35364f21b3dc0387794",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684403079,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1089#issuecomment-6684403079",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:08Z",
+            "updatedAt": "2026-11-06T12:05:08Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) pure-Prototype portability audit, independent clean-room composition, and Finf boundary reproduction are outside the 0.3 scope.",
+            "bodySha256": "24973b17a51ef0c26218e8b9a4ba27b9a9af94d285f9a20b87e42cd3b50b9b5d"
+          },
+          {
+            "id": 6684503197,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1089#issuecomment-6684503197",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:50Z",
+            "updatedAt": "2026-11-06T12:10:50Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThis is the pure-Prototype portability/clean-room verification program: tracing source changes through pure Prototype descriptions, exercising changed shared semantics without Web globals, repairing any cross-layer host leakage found, keeping the compiler layer thin without Prototype embedding, and validating that independent clean-room implementations compose without compensating behavior. These are open-ended audit/repair-verification tasks with no bounded failure signature or file scope — an audit program whose outcome set is unknown by definition, explicitly a Finf v2 (#887 follow-up, #890) workstream routed to governed proto-compiler delivery. Not a bounded 0.3 fix; deferred to 0.4.",
+            "bodySha256": "8c57449fb503c6e926fc45080e129d6eb264853b531cff440170d1822be92461"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1090,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1090",
+      "title": "[Finf v2][887-followup] 全局 Compiler 贯通 + 原型非 Web 验收 + Finf 公开 head 同步 + Maintainer 集成委托",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:45:08Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #887「尚未完成的主会话工作」与「相邻中断会话」：Finf public head synchronization / Maintainer Finf integration delegation / 全局 Compiler 贯通 / 原型 Compiler 与非 Web 验收。关联 Finf v2 总追踪 #890。编译器/IR 类任务归 proto-compiler pane 受治投递。\n\n## 未完成项（原 checklist 逐项保留）\n\n- [ ] Repair public docs 78 family catalog drift（修复公开文档 78 家族目录漂移）\n- [ ] Repair Dropdown anatomy replay model（修复 Dropdown 解剖回放模型）\n- [ ] Integrate verified PR content into Finf via maintainer push（经 maintainer push 把已验证 PR 内容合入 Finf）\n- [ ] Reconcile feature integration with mainline acceptance gates（调和特性集成与主线验收 gate）\n- [ ] 贯通 Presentation 准入中间表示与目标生成\n- [ ] 贯通 shader Runtime 与 Compiler 实现契约\n- [ ] 验证正式 Compiler 与非 Web 消费链路\n- [ ] 验证定义驱动独立实现的组合契合\n- [ ] 落实 Compiler 与原型独立定义约束\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "ee49e6dd2055ada52f7dcf99920f219614974f4fd846a53e0053cbae5736f5ea",
+      "comments": {
+        "expected": 3,
+        "delivered": 3,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6550302898,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1090#issuecomment-6550302898",
+            "author": "cyjin-yl",
+            "createdAt": "2026-10-31T23:00:48Z",
+            "updatedAt": "2026-10-31T23:00:48Z",
+            "body": "## 已拆分为有界子 Issue（2026-11-01 全量梳理，Finf v2 #890 清零）\n\n本 Issue 保留为追踪入口，以下子 Issue 为有界执行切片（范围逐项保留自本 Issue，非重复）：\n\n- #1141\n- #1142\n- #1143\n- #1144\n- #1145\n\n全部子 Issue 关闭且验收通过后，本 Issue 方可关闭。",
+            "bodySha256": "ff466c873fa02f36d637b3f74c8b909ff4046dc1243aeed16dad621ae42682e2"
+          },
+          {
+            "id": 6684401984,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1090#issuecomment-6684401984",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:04Z",
+            "updatedAt": "2026-11-06T12:05:04Z",
+            "body": "Deferred to 0.4 release scope: Finf v2 (#887 follow-up) global compiler wiring, prototype non-Web acceptance, and Finf head sync are outside the 0.3 scope.",
+            "bodySha256": "8611348019950e20b8e1b34767b6c1ac4bbce5b956f3f8db2f28042eceaaaa3a"
+          },
+          {
+            "id": 6684502604,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1090#issuecomment-6684502604",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:10:48Z",
+            "updatedAt": "2026-11-06T12:10:48Z",
+            "body": "Triage determination (0.3 release sprint): **deferred to 0.4** — content-specific rationale.\n\nThe retained checklist mixes Finf-integration ops with unbounded compiler/non-Web work: repairing the public-docs 78-family catalog drift and Dropdown anatomy replay model are Finf-publication artifacts (Finf public head sync); integrating verified PR content into Finf via maintainer push and reconciling feature integration with mainline acceptance gates are maintainer-delegated integration operations; the remaining four items ('贯通 Presentation 准入中间表示与目标生成', '贯通 shader Runtime 与 Compiler 实现契约', '验证正式 Compiler 与非 Web 消费链路', '验证定义驱动独立实现的组合契合') constitute the global compiler end-to-end wiring + non-Web consumer acceptance program, which the body itself routes to the proto-compiler pane under governed delivery — unbounded compiler work explicitly outside 0.3's bounded atomic-lowering allowance. Finf v2 (#887 follow-up, #890); deferred to 0.4.",
+            "bodySha256": "160887b54f2b9ef8406c6146e818e84a2e4c11408c0348d5707667517fe5c2e1"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1136,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1136",
+      "title": "[Finf v2][887-followup][repair-evidence] 评审修复证据投递：预算交接 / 主页 Context / 五边界",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:34Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）\n- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）\n- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "6012cd3fca91ecd89fc8e7aa11e3d10293774864766e6c48b6f381ecc2a75433",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684417080,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1136#issuecomment-6684417080",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:56Z",
+            "updatedAt": "2026-11-06T12:05:56Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1137,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1137",
+      "title": "[Finf v2][887-followup][gate-verification] Native CI 与宿主集成 gate 验证",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:31Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Verify new candidate native CI gates（验证新候选 native CI gate）\n- [ ] Verify exact five boundary native gates（验证精确五边界 native gate）\n- [ ] Verify native typed repair hosted integration gates（验证 native 类型修复宿主集成 gate）\n- [ ] Verify package repair hosted integration gates（验证包修复宿主集成 gate）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "a00e4b1c0eec6ea8a20c0f0f16323d22f8846b8bf4bef958ad8c753ccdcbf966",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684416023,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1137#issuecomment-6684416023",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:52Z",
+            "updatedAt": "2026-11-06T12:05:52Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1138,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1138",
+      "title": "[Finf v2][887-followup][source-repair] 受治源失败修复与包图验证",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:29Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Repair governed source failures and native consumer evidence（修复受治源失败与原生消费者证据）\n- [ ] Validate current package graph and packed consumers（验证当前包图与打包消费者）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "6034852062fb457168e77513321b79e55e7c36a09a5f7cefb3927c6683fbb4ba",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684414911,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1138#issuecomment-6684414911",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:48Z",
+            "updatedAt": "2026-11-06T12:05:48Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1139,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1139",
+      "title": "[Finf v2][887-followup][todo-reconciliation] 剩余 TODO 调和与受治投递闭环",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:27Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）\n- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）\n- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）\n- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "4a6a7d42e78be3acff5eb53a4c2f95253268dfe0c817dda3f368075a24788d9f",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684414121,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1139#issuecomment-6684414121",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:46Z",
+            "updatedAt": "2026-11-06T12:05:46Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1140,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1140",
+      "title": "[Finf v2][887-followup][wc-baseline] 独立评审的 WC 数值基线事务投递",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:24Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+      "bodySha256": "ec0b0762a377c7ec3a1a252848aea84adffd3ea851cdc0eee06130cfe28489bb",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684413124,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1140#issuecomment-6684413124",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:42Z",
+            "updatedAt": "2026-11-06T12:05:42Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1142,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1142",
+      "title": "[Finf v2][887-followup][finf-integration] 已验证 PR 内容合入 Finf 与主线 gate 调和",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:19Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1090（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Integrate verified PR content into Finf via maintainer push（经 maintainer push 把已验证 PR 内容合入 Finf）\n- [ ] Reconcile feature integration with mainline acceptance gates（调和特性集成与主线验收 gate）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "d6a612013a09c88282c7e186cf0f7a00476cb16ba57f8fd0f1f9f31ec2f4ea8c",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684410859,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1142#issuecomment-6684410859",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:34Z",
+            "updatedAt": "2026-11-06T12:05:34Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1143,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1143",
+      "title": "[Finf v2][887-followup][compiler-ir] 贯通 Presentation 准入 IR 与 shader Runtime 契约",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:17Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1090（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] 贯通 Presentation 准入中间表示与目标生成\n- [ ] 贯通 shader Runtime 与 Compiler 实现契约\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "9aac671ca95abe2e5c8772dc82b3c3684b69ebb3331e14ed4213b53215f3ce2f",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684409803,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1143#issuecomment-6684409803",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:05:31Z",
+            "updatedAt": "2026-11-06T12:05:31Z",
+            "body": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope.",
+            "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1144,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1144",
+      "title": "[Finf v2][887-followup][nonweb-verification] 正式 Compiler 与非 Web 消费链路验证",
+      "state": "open",
+      "updatedAt": "2026-11-06T12:44:14Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1090（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] 验证正式 Compiler 与非 Web 消费链路\n- [ ] 验证定义驱动独立实现的组合契合\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "55a594cd62c8425289ba8e4c0ff61b51ffb4a0a0467efa6f880ad059966bc5c3",
+      "comments": {
+        "expected": 1,
+        "delivered": 1,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684396810,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1144#issuecomment-6684396810",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:04:46Z",
+            "updatedAt": "2026-11-06T12:08:44Z",
+            "body": "Deferred to 0.4. This issue tracks verifying the formal Compiler against non-Web consumer chains plus definition-driven independent-implementation composition. Per the 0.3 plan only the bounded compiler atomic-lowering slice is in scope; full non-Web chain validation is Finf v2 roadmap work, and the issue itself routes Compiler/IR delivery to the proto-compiler pane.",
+            "bodySha256": "da22b93731e7c645e1ea5c49c6c0e7924e295a278f4ac737ee0b8a4abf806543"
+          }
+        ]
+      }
+    },
+    {
+      "number": 1145,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1145",
+      "title": "[Finf v2][887-followup][independent-definition] 落实 Compiler 与原型独立定义约束",
+      "state": "open",
+      "updatedAt": "2026-11-07T01:05:23Z",
+      "assignees": [],
+      "body": "## 来源\n\n拆自 #1090（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] 落实 Compiler 与原型独立定义约束\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 编译器/IR 投递走 proto-compiler pane。",
+      "bodySha256": "45cec9ddf284affcc4b1eb01e4e4b0b64ba954c03b2cb90d8f17028774859cbb",
+      "comments": {
+        "expected": 2,
+        "delivered": 2,
+        "pages": 1,
+        "records": [
+          {
+            "id": 6684397663,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1145#issuecomment-6684397663",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-06T12:04:49Z",
+            "updatedAt": "2026-11-06T12:08:46Z",
+            "body": "Deferred to 0.4. Tracks enforcing the Compiler-vs-prototype independent-Definition constraint — a compiler/IR governance item routed to the proto-compiler pane, not one of the bounded atomic-lowering fixes in 0.3 scope.",
+            "bodySha256": "9fdf6418ebacef1dddb4fba9d93ea171020ffe506cae63c493463cecc46c9f33"
+          },
+          {
+            "id": 6700066402,
+            "url": "https://github.com/Proto-UI/Proto-UI/issues/1145#issuecomment-6700066402",
+            "author": "cyjin-yl",
+            "createdAt": "2026-11-07T01:05:22Z",
+            "updatedAt": "2026-11-07T01:05:22Z",
+            "body": "**Release audit checkpoint — 2026-11-07, origin/main `94e1c11f7`** (0.3 row: \"Required core/Runtime/Module/Adapter/compiler prerequisites\" → independent definitions, ledger maps this issue).\n\nScope child — **落实 Compiler 与原型独立定义约束** — is not met at main. Live evidence of boundary violations:\n- `packages/compiler/src/react.ts:142-144` emits consumer imports of `@proto.ui/prototypes-base/transition` (compiler output binds to prototype package surfaces);\n- `packages/compiler/src/conformance/button-cases.ts:671` hardcodes prototype source path `packages/prototypes/base/src/button/button.proto.ts` as conformance `source`;\n- `packages/compiler/test/fixtures/button-ssr/button.proto.ts:2` imports `../../../../prototypes/base/src/button/button.proto` (`asButton`) — a test-fixture dependency, acceptable as test-only, but it documents the shared-definition pattern the constraint forbids in compiler runtime paths;\n- prototypes depend only on `@proto.ui/{core,hooks,types,module-*}` (verified `packages/prototypes/base/package.json`) — the prototype→compiler direction is clean.\n\nBox checked: **0/1** — constraint not enforced on the compiler side.\n\nNext executable action: **proto-compiler pane slice** — remove the compiler-runtime prototype-surface bindings (`react.ts` transition import emission + `button-cases.ts` hardcoded source), replacing with compiler-owned IR/config inputs; per issue body, compiler/IR delivery routes through the proto-compiler pane. Prior 0.4-deferral superseded by `release-0.3-list.md` committed scope (prerequisite row names #1145).\n",
+            "bodySha256": "a64341ba629d5ed404cf7130f5d8d84be6ecf28f4756d777eee6cdad911deb95"
+          }
+        ]
+      }
+    }
+  ],
+  "pullRequests": [
+    {
+      "number": 775,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/775",
+      "title": "test(brutalist): add calibrated rendered contrast audit",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-07T09:19:11Z",
+      "headSha": "876f0ff7d243b9dcf0b706c10cace43bf3b82492",
+      "baseSha": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "mergeCommitSha": "a575e74c3ef62eeebe42c071ca1dda43d99b2206",
+      "updatedAt": "2026-10-07T09:19:11Z",
+      "bodySha256": "300f5ba28f63fba643e3c21fddc2b7c2da611b39ab920430e60793af5300d974",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 811,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/811",
+      "title": "fix(react): defer native focus until host event readiness",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-07T09:42:47Z",
+      "headSha": "101be1748bdcad1f6e31fd82794dcdec941c1f65",
+      "baseSha": "d4bdb66b54d68625fb3da1109a76e0829c1e77d7",
+      "mergeCommitSha": "c91d790f8b84b7e82bd9f24039a415fc886202fa",
+      "updatedAt": "2026-10-07T09:42:47Z",
+      "bodySha256": "0529025994f87ffd1d345517834e7a22e18df816db4e863d1d1d74166bf4f204",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 819,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/819",
+      "title": "chore(ci): propose bounded React native focus budget baseline",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-07T08:58:54Z",
+      "headSha": "32fedd1fce0336988e51d2f070d0970b85bd9cea",
+      "baseSha": "48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c",
+      "mergeCommitSha": "342d7c44cd13922b6a839c4c879f68071d17334d",
+      "updatedAt": "2026-10-07T08:58:55Z",
+      "bodySha256": "4a2931e8b7e6966776885091209f7a7814896d4d347cd2d065f4c0050f83fa32",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 822,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/822",
+      "title": "feat(gpui): move through Base Tabs with arrow keys in the host's view order",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-07T07:11:06Z",
+      "headSha": "9de30809830ca98cefc58da950eab6e8e7dde8de",
+      "baseSha": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "mergeCommitSha": "c54cdb880fc7acac07b8f9206b7d83d111d84779",
+      "updatedAt": "2026-10-07T07:11:06Z",
+      "bodySha256": "8eb77bbfdbf56ff16e323d92e5334aa28a48a7d1655cc3fd2c2a564f6e27a3ec",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 833,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/833",
+      "title": "feat(agent): require self-measured ModelTrace disclosure",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-06T14:16:44Z",
+      "headSha": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "baseSha": "e64c695beb358a15bc1d6ed3725313d00164abfb",
+      "mergeCommitSha": "dd203d0f9d06aabf74d7a37e2f33d2cb40fadcd2",
+      "updatedAt": "2026-10-06T14:16:44Z",
+      "bodySha256": "41b74481f4b98ccf39a077b6e1a9a5e13b0528a2c1319631ae7b7c943f98a8a6",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 846,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/846",
+      "title": "[Evidence only, do not merge] Measure Search cold-open parity",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:46:13Z",
+      "headSha": "9bc86756da7cb0655949649b54af4161d1f56716",
+      "baseSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "mergeCommitSha": "ce17c567b997ca1d74e7cfdbe3814beadbdcf335",
+      "updatedAt": "2026-10-14T06:46:13Z",
+      "bodySha256": "e1a55ecf83a1dc9b7bfc4ce5080313566e2519845e6662610f9cea7516ca47df",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 869,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/869",
+      "title": "docs(design): compare 158 HIG topics with Proto UI principles and ownership",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T05:47:31Z",
+      "headSha": "5242ea83793050035ecebd9c3e23761600d3dd15",
+      "baseSha": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+      "mergeCommitSha": "3eb8adcd69c3cb1eed85279650ea4b468dca31be",
+      "updatedAt": "2026-10-14T05:47:31Z",
+      "bodySha256": "0423dcff6422c4ef3b534075ea836f1c71700e56e70f4f4a496812e620db95b1",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 872,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/872",
+      "title": "Finf: complete prototype coverage and four-family atomic parity",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T05:21:37Z",
+      "headSha": "991cc33ac38421dfba2a4a800a886ec275bc4c71",
+      "baseSha": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+      "mergeCommitSha": "9c5bc249495c69be1d1c27f43bdd791cf41e87e8",
+      "updatedAt": "2026-10-14T05:24:08Z",
+      "bodySha256": "e974e7fe2f549f8a4e1b4e165bface38c7beda3d486442f9a7bcd00dd62356d7",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 878,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/878",
+      "title": "fix(agent): close private review inputs and retest provenance gaps",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:41:04Z",
+      "headSha": "152fe45aadafbc4db362597ea55082c7e0109386",
+      "baseSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "mergeCommitSha": "3e266baf201736d7f3ef19f1384db8e78ddb5c95",
+      "updatedAt": "2026-10-14T06:46:08Z",
+      "bodySha256": "74729952d39e636b5182f96963190ce03aa0df927932279853c739cf45b2b6d2",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 879,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/879",
+      "title": "fix(focus): preserve native scope request and A11y fixture types",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T05:46:37Z",
+      "headSha": "a24eb91d2609252d5419ad58dd64d8cdb4ea6422",
+      "baseSha": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+      "mergeCommitSha": "14df5b5e30ab8f1cc720030ade7269a26d3a5158",
+      "updatedAt": "2026-10-14T05:46:38Z",
+      "bodySha256": "f8ccc20353685f9cc15819ae0b4ad5c646aceefcd1cc4e49a761da23aa01ba77",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 880,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/880",
+      "title": "fix(build): emit declared independent package exports",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-09T03:50:42Z",
+      "headSha": "a0acf4fe6fa493c1c1ea85d532ed6c536bc0fb8f",
+      "baseSha": "7e28d06f26150513d6096f0c24e59b871ae8ae62",
+      "mergeCommitSha": "ca28a4db278f948e34c57ae779385673d37d391b",
+      "updatedAt": "2026-10-09T03:50:42Z",
+      "bodySha256": "0ace4a84855e3279849f5c3ee0375a1174a593a6a08f4ff83e5bdeb9642a62aa",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 884,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/884",
+      "title": "fix: restore Anatomy and Runtime lifecycle cleanup",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:26:31Z",
+      "headSha": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+      "baseSha": "3eb8adcd69c3cb1eed85279650ea4b468dca31be",
+      "mergeCommitSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "updatedAt": "2026-10-14T06:26:31Z",
+      "bodySha256": "0d72e87792a6900dc5e387a15ea12734296b9a92b3d0bcedf3a9f130152ac6dd",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 885,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/885",
+      "title": "chore(preview): retire Poppy preview for one isolated intranet publisher",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:45:58Z",
+      "headSha": "63fc86e5105038d194eb2b5ac1a59c3f717bd5f5",
+      "baseSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "mergeCommitSha": "955fa64bf5eb7ab26c25f4b2c0958721d6b507d8",
+      "updatedAt": "2026-10-14T06:45:59Z",
+      "bodySha256": "007e09abd229e2e1ca354ceaa7854cbebbcd12442b583b9288d7f7d1a3be0f25",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 886,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/886",
+      "title": "fix: preserve native owner readiness and terminal resource cleanup",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-14T06:41:52Z",
+      "headSha": "9d64fb08d82e12550285eb8681c9aa182b8f7522",
+      "baseSha": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "mergeCommitSha": "9f360300ff25e69793d6f029470a759bda1298b0",
+      "updatedAt": "2026-10-14T06:41:52Z",
+      "bodySha256": "c23818939a40b444b5bef0de6cc3ae0682672e933bff598095ec3530925c3941",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 887,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+      "title": "872 follow ups Finf v1",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-16T16:50:08Z",
+      "headSha": "8941fab0c6da7a0cbb7875c51c031a58ea67eb3a",
+      "baseSha": "ce17c567b997ca1d74e7cfdbe3814beadbdcf335",
+      "mergeCommitSha": "a0dc3792b78ab593f6466a53876ea1d91fe32004",
+      "updatedAt": "2026-10-30T09:29:00Z",
+      "bodySha256": "796af070cd5b007c84311d91e632b2486f3013b88bc5debab6c5bcd2d04933bf",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    },
+    {
+      "number": 985,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/985",
+      "title": "chore(agent): retire ModelTrace requirements permanently",
+      "state": "closed",
+      "merged": true,
+      "mergedAt": "2026-10-23T07:42:02Z",
+      "headSha": "00dc091f846f7f92985835e1a24df340dfcb5b50",
+      "baseSha": "a60be3c86f439f40c83359da1d026c2f74e2726e",
+      "mergeCommitSha": "81339ddce9b6fc9b488331e10a533884ace96593",
+      "updatedAt": "2026-10-23T07:52:41Z",
+      "bodySha256": "20ff5f42d6a5a831c6847a38baaaa80525ddeb9ab84f5a7943c5f65105b510d2",
+      "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge."
+    }
+  ],
+  "pr887MainSource": {
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+    "updatedAt": "2026-10-30T09:29:00Z",
+    "bodySha256": "796af070cd5b007c84311d91e632b2486f3013b88bc5debab6c5bcd2d04933bf",
+    "sectionStartLine": 11,
+    "sectionEndLine": 157,
+    "sectionSource": "## 尚未完成的主会话工作\n\n以下逐项承接停止时的全部 50 项未完成任务；28 项已有 gate 的完整历史原因另行保留，不会因迁移而失效。旧 PR 已被其他人推进或合并时，必须先核对当前事实，不能重复写入或把历史证据当作当前 head 证据。\n\n\n### External gates\n\n- [ ] Publish captured Spinner visuals to authorized destination\n- [ ] Review remaining GPUI stack and verify parent completion\n- [ ] Obtain independent review and integrate audit PR 775\n\n### PR 775 review\n\n- [ ] Integrate PR 775 only after all gates\n\n### New audit findings\n\n- [ ] Handle persistent Spinner animation without false idle\n- [ ] Require exact binary outcome after keyboard activation\n\n### Additional audit findings\n\n- [ ] Confirm Spinner uses passive rest coverage only\n\n### Default matrix failures\n\n- [ ] Repair Vue and Vue2 Button projection readiness\n- [ ] Repair Vue Select projection readiness failure\n- [ ] Repair React Select last item focus evidence\n\n### Materialized anatomy\n\n- [ ] Require complete state aware interactive recipe anatomy\n\n### Runtime restoration\n\n- [ ] Restore supervised source bound audit runtime\n\n### Focus CI consumers\n\n- [ ] Repair React readiness registry within governed budget\n- [ ] Verify exact Focus package budget and consumers\n\n### Pull request delivery priority\n\n- [ ] Continue each pull request through governed merge\n- [ ] Integrate reviewed native Tabs exact head\n\n### React budget integration\n\n- [ ] Obtain exact head budget CI and review\n- [ ] Integrate budget baseline before synchronizing Focus PR\n\n### Base Collapsible delivery\n\n- [ ] Continue Collapsible review CI and governed integration\n\n### Existing pagination pull request\n\n- [ ] Continue pagination CI review until governed integration\n\n### Existing budget skill pull request\n\n- [ ] Continue budget skill CI review and governed integration\n\n### Existing ModelTrace pull request\n\n- [ ] Validate publish and sustain independent ModelTrace integration\n\n### ModelTrace commit progress\n\n- [ ] Publish exact main reconciliation progress comment\n\n### Existing review repair delivery\n\n- [ ] Publish precise budget handoff repair evidence\n\n### Collapsible homepage evidence\n\n- [ ] Reproduce source owned homepage Context failure\n\n### Fresh review repair delivery\n\n- [ ] Verify new candidate native CI gates\n\n### Five boundary current delivery\n\n- [ ] Publish distinct five boundary repair evidence\n- [ ] Verify exact five boundary native gates\n- [ ] Reconcile rejected merged pull request thread state\n\n### ModelTrace retained review delivery\n\n- [ ] Verify exact two finding hosted review gates\n\n### Current main type drift\n\n- [ ] Verify native typed repair hosted integration gates\n\n### Feedback package finalization\n\n- [ ] Verify package repair hosted integration gates\n\n### Current native failure ownership\n\n- [ ] Repair governed source failures and native consumer evidence\n\n### Current native repair finalization\n\n- [ ] Validate current package graph and packed consumers\n\n### Remaining TODO continuation\n\n- [ ] Reconcile every remaining TODO against live evidence\n- [ ] Complete all actionable repairs and governed delivery\n- [ ] Follow blocked gates without bypassing independent acceptance\n\n### Source PR 886 gate followup\n\n- [ ] Deliver independently reviewed WC numerical baseline transaction\n\n### Pure Prototype portability audit\n\n- [ ] Trace source changes through pure Prototype descriptions\n- [ ] Verify compiler admission and governed host boundaries\n- [ ] Exercise changed shared semantics without Web globals\n- [ ] Repair any cross layer host leakage found\n\n### Independent clean room composition\n\n- [ ] Keep compiler layer thin without Prototype embedding\n- [ ] Keep Prototype implementation faithful to authoritative definition\n- [ ] Verify independent implementations compose without compensating behavior\n\n### Finf independent boundary reproduction\n\n- [ ] Validate definition bound repaired consumer composition\n\n### Finf public head synchronization\n\n- [ ] Repair public docs 78 family catalog drift\n- [ ] Repair Dropdown anatomy replay model\n- [ ] Integrate verified PR content into Finf via maintainer push\n\n### Maintainer Finf integration delegation\n\n- [ ] Reconcile feature integration with mainline acceptance gates",
+    "migrationComment": {
+      "id": 6519493896,
+      "url": "https://github.com/Proto-UI/Proto-UI/pull/887#issuecomment-6519493896",
+      "createdAt": "2026-10-30T09:28:59Z",
+      "body": "## Finf v2 清零：887 未完成工作已拆为小 Issue（2026-10-30）\n\n本 Issue 的全部可操作未完成项已拆为 17 个 Finf v2 小 Issue，关联总追踪 #890。历史前缀与 dated 审查快照保留在本 body，不删除。\n\n### 主会话工作（31 节）→ 1084–1090\n- #1084 Spinner 持续动画 + GPUI 栈 + audit PR 775 独立评审与受治合入\n- #1085 默认矩阵失败：Vue/Vue2 Button 与 Select 投影就绪 + React Select 末项焦点证据\n- #1086 Runtime restoration + Focus CI 消费者：监督源绑定审计运行时 + React 就绪注册表预算\n- #1087 PR 投递优先级 + React 预算集成：受治合并 native Tabs + 预算基线同步 Focus PR\n- #1088 评审修复投递 + 剩余 TODO 续接 + PR 886 gate：预算交接修复证据 / 五边界 / 原生失败所有权 / WC 数值基线\n- #1089 纯 Prototype 可移植审计 + 独立洁净室组合 + Finf 独立边界复现\n- #1090 全局 Compiler 贯通 + 原型非 Web 验收 + Finf 公开 head 同步 + Maintainer 集成委托\n\n### 相邻中断会话（13 节）→ 1091–1093\n- #1091 设计语言工作 + 液态玻璃接管 + 三小时无人接管授权\n- #1092 DCBot 生产部署回读 + 内网 Preview 单轨迁移 + PR884 加速闭环 + 通用 hook 实现收尾\n- #1093 当前 PR 优先闭环 + 遗留模式清理 + 证据与集成债务 + source-preservation 复核\n\n### Finf scope 54 原型（0/54 已验收）→ 1094–1100\n- #1094 Form 与关系：Label/Field/Fieldset/Form/Checkbox Group\n- #1095 集合/搜索/协同焦点：Autocomplete/Combobox/Command/Toggle Group/Toolbar/Menubar/Navigation Menu/Context Menu\n- #1096 Disclosure：Collapsible/Accordion\n- #1097 Overlay 与通知：Popover/Alert Dialog/Drawer/Toast\n- #1098 值/分段输入与日期：Slider/Number Field/Progress/Meter/OTP/Calendar/Date Picker\n- #1099 几何与长/层级集合：Resizable/Carousel/Message Scroller/Tree/Virtual List/Data Table\n- #1100 既有 Base 家族四投影原子对等（22 原型）+ 回归 + 先前工作收尾\n\n注：887 的 ModelTrace 三项已由 ModelTrace 永久退役（PR985 已合入 main）覆盖；原已 abandoned 项保留不自动恢复。本 Issue 的未完成工作现已全部由上述小 Issue 跟踪，本 Issue 作为历史前缀与 dated 审查快照保留。"
+    }
+  },
+  "pr833Threads": {
+    "originalFive": [
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-V",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "line": 601,
+        "originalLine": 601,
+        "commentCount": 1,
+        "comments": [
+          {
+            "databaseId": 4194374599,
+            "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374599",
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Reject duplicate models in candidate rankings**\n\nWhen a schema-v2 collaboration receipt is ingested, a caller can replace a lower-ranked candidate's `modelId`/`familyId` with the top candidate's values, recompute the unkeyed receipt ID, and pass this validation because only the candidate count is constrained; the later loop verifies that each entry exists in the bank but never that models are distinct. `buildModelTraceRecord` cannot produce such a ranking because the scorer emits one result per bank model, so require unique candidate model identities in both runtime and schema validation before accepting the receipt as canonical.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+            "createdAt": "2026-10-06T10:51:02Z",
+            "updatedAt": "2026-10-06T10:51:02Z",
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "commit": {
+              "oid": "e0fac293222137c3d95eb04760b492d4bd3c0320"
+            },
+            "originalCommit": {
+              "oid": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70"
+            }
+          }
+        ]
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-c",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": "scripts/agent-operations/modeltrace-cli.mjs",
+        "line": 64,
+        "originalLine": 64,
+        "commentCount": 1,
+        "comments": [
+          {
+            "databaseId": 4194374608,
+            "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374608",
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep challenge context inputs outside the checkout**\n\nWhen `challenge` is invoked with `--context` pointing inside the checkout, this path reads the private session ID and context declarations without the containment check applied to every `score` input. The command succeeds and leaves that private context file available for staging; copying it outside before publication also means the publisher's check of the later supplied path cannot detect the original. Apply the same realpath-based outside-repository check to the challenge context before reading it.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+            "createdAt": "2026-10-06T10:51:02Z",
+            "updatedAt": "2026-10-06T10:51:02Z",
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "commit": {
+              "oid": "e0fac293222137c3d95eb04760b492d4bd3c0320"
+            },
+            "originalCommit": {
+              "oid": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70"
+            }
+          }
+        ]
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-g",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "line": 5,
+        "originalLine": 5,
+        "commentCount": 1,
+        "comments": [
+          {
+            "databaseId": 4194374615,
+            "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374615",
+            "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Verify the scorer before importing executable code**\n\nWhen the vendored scorer is modified or replaced in a checkout, this static import executes that file before `loadBank()` compares its bytes with `SCORER_DIGEST`. A malicious scorer can therefore read `process.argv`, environment credentials, or private ModelTrace files and perform arbitrary side effects before the checksum error is raised, defeating the claimed integrity and privacy boundary. Load executable scorer code only from the bytes after their digest has been verified, with the verification and evaluation protected against replacement races.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+            "createdAt": "2026-10-06T10:51:02Z",
+            "updatedAt": "2026-10-06T10:51:02Z",
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "commit": {
+              "oid": "e0fac293222137c3d95eb04760b492d4bd3c0320"
+            },
+            "originalCommit": {
+              "oid": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70"
+            }
+          }
+        ]
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-k",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": "scripts/agent-operations/collaboration-runtime.mjs",
+        "line": 1047,
+        "originalLine": 1047,
+        "commentCount": 1,
+        "comments": [
+          {
+            "databaseId": 4194374621,
+            "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374621",
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Bind collaboration receipts to measurement chronology**\n\nWhen a schema-v2 collaboration receipt embeds a ModelTrace receipt measured after the claimed mutation, `validateModelTraceReceipt` accepts its structure and this check verifies only the repository, so ingestion treats the later measurement as attribution for the earlier write. This permits retroactive ModelTrace attachment—the existing synthetic receipt path even accepts `verifiedAt` values preceding `modelTrace.measuredAt`—despite the requirement that measurement be current before a write. Require the measurement to precede the receipt's verified mutation time and, where available, bind freshness to the platform object's write timestamp.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+            "createdAt": "2026-10-06T10:51:02Z",
+            "updatedAt": "2026-10-06T10:51:02Z",
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "commit": {
+              "oid": "e0fac293222137c3d95eb04760b492d4bd3c0320"
+            },
+            "originalCommit": {
+              "oid": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70"
+            }
+          }
+        ]
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-p",
+        "isResolved": false,
+        "isOutdated": false,
+        "path": "scripts/agent-operations/agent-publish.mjs",
+        "line": 393,
+        "originalLine": 393,
+        "commentCount": 1,
+        "comments": [
+          {
+            "databaseId": 4194374631,
+            "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374631",
+            "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Reconcile publications before enforcing receipt freshness**\n\nWhen an Issue, PR, comment, or body update was already published but the acknowledgement was lost or the command is rerun after the receipt expires, this unconditional `measure()` call fails freshness before `findPublished()` can perform its read-only marker/full-body reconciliation. Supplying a new measurement does not recover the operation because its disclosure changes the expected full body, so an unknown successful write can no longer be resolved through the supported publisher. Fresh evidence beyond the earlier collaboration-validation issue is that this separate publisher path blocks its own idempotent readback; load and validate the historical bound record for reconciliation, then require freshness only immediately before a mutation.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+            "createdAt": "2026-10-06T10:51:02Z",
+            "updatedAt": "2026-10-06T10:51:02Z",
+            "author": {
+              "login": "chatgpt-codex-connector"
+            },
+            "commit": {
+              "oid": "e0fac293222137c3d95eb04760b492d4bd3c0320"
+            },
+            "originalCommit": {
+              "oid": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70"
+            }
+          }
+        ]
+      }
+    ],
+    "laterUnresolved": [
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcY_8",
+        "rootId": 4194782756,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782756",
+        "path": "scripts/agent-operations/review-packet.mjs",
+        "isResolved": false,
+        "originalCommit": "1190c6cb338c4ff8430dee0d0cf5fe31b917941e",
+        "scope": "Distinct later finding; not one of the five rejected resolutions."
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcZAF",
+        "rootId": 4194782768,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782768",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "isResolved": false,
+        "originalCommit": "1190c6cb338c4ff8430dee0d0cf5fe31b917941e",
+        "scope": "Distinct later finding; not one of the five rejected resolutions."
+      }
+    ],
+    "allThreadIdentities": [
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o2gGO",
+        "rootId": 4179310428,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4179310428",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o2gGR",
+        "rootId": 4179310431,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4179310431",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o2gGV",
+        "rootId": 4179310437,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4179310437",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o2gGZ",
+        "rootId": 4179310442,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4179310442",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o_gYr",
+        "rootId": 4182966558,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4182966558",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o_gYw",
+        "rootId": 4182966566,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4182966566",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o_gY2",
+        "rootId": 4182966576,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4182966576",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6o_gY7",
+        "rootId": 4182966586,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4182966586",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pCA4_",
+        "rootId": 4183978698,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4183978698",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pCA5C",
+        "rootId": 4183978703,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4183978703",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pCA5G",
+        "rootId": 4183978710,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4183978710",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pCA5K",
+        "rootId": 4183978714,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4183978714",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pCA5P",
+        "rootId": 4183978723,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4183978723",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pI2xF",
+        "rootId": 4186754708,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4186754708",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pI2xN",
+        "rootId": 4186754724,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4186754724",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pI2xV",
+        "rootId": 4186754733,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4186754733",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pI2xg",
+        "rootId": 4186754746,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4186754746",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pJtXq",
+        "rootId": 4187106869,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4187106869",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pJtXv",
+        "rootId": 4187106878,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4187106878",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pJtXz",
+        "rootId": 4187106880,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4187106880",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pL5ha",
+        "rootId": 4188017041,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188017041",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pL5hh",
+        "rootId": 4188017049,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188017049",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pL5ho",
+        "rootId": 4188017058,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188017058",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pL5hq",
+        "rootId": 4188017063,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188017063",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pMPuD",
+        "rootId": 4188156863,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188156863",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pMpqf",
+        "rootId": 4188321418,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188321418",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pMpqm",
+        "rootId": 4188321425,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188321425",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pOOdU",
+        "rootId": 4188967451,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188967451",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pOOde",
+        "rootId": 4188967464,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188967464",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pOOdj",
+        "rootId": 4188967470,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4188967470",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pPBMp",
+        "rootId": 4189296675,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189296675",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pPBMw",
+        "rootId": 4189296685,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189296685",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pQoVL",
+        "rootId": 4189973385,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189973385",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pQoVR",
+        "rootId": 4189973394,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189973394",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pQoVT",
+        "rootId": 4189973398,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189973398",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pQoVY",
+        "rootId": 4189973404,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4189973404",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pSGvV",
+        "rootId": 4190575814,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4190575814",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pTzMp",
+        "rootId": 4191280244,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4191280244",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pTzMs",
+        "rootId": 4191280248,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4191280248",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pTzMu",
+        "rootId": 4191280253,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4191280253",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pTzMx",
+        "rootId": 4191280256,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4191280256",
+        "isResolved": true,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-V",
+        "rootId": 4194374599,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374599",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-c",
+        "rootId": 4194374608,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374608",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-g",
+        "rootId": 4194374615,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374615",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-k",
+        "rootId": 4194374621,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374621",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pbY-p",
+        "rootId": 4194374631,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374631",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcY_8",
+        "rootId": 4194782756,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782756",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      },
+      {
+        "threadId": "PRRT_kwDOMhQZjc6pcZAF",
+        "rootId": 4194782768,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194782768",
+        "isResolved": false,
+        "commentExpected": 1,
+        "commentDelivered": 1,
+        "hasNextPage": false
+      }
+    ]
+  },
+  "releaseScopeSources": [
+    {
+      "id": 6684414121,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1139#issuecomment-6684414121",
+      "createdAt": "2026-11-06T12:05:46Z",
+      "updatedAt": "2026-11-06T12:05:46Z",
+      "author": "cyjin-yl",
+      "bodySha256": "40a0b1dba2f8a9ada30540043bb85dee7de0578916cac1ae47f23f4a269a9bce",
+      "sourceReference": "Complete body retained in issues[].comments.records; no duplicate text."
+    },
+    {
+      "id": 6684404077,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684404077",
+      "createdAt": "2026-11-06T12:05:11Z",
+      "updatedAt": "2026-11-06T12:05:11Z",
+      "author": "cyjin-yl",
+      "bodySha256": "80aafcecdb4b76e883c6eef44ef80d031044cd0e016211e75c4a22042bbe0724",
+      "sourceReference": "Complete body retained in issues[].comments.records; no duplicate text."
+    },
+    {
+      "id": 6684503838,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1088#issuecomment-6684503838",
+      "createdAt": "2026-11-06T12:10:52Z",
+      "updatedAt": "2026-11-06T12:10:52Z",
+      "author": "cyjin-yl",
+      "bodySha256": "f686722bbcd5f88b59a690043c8e186162e259b7d4a39245569e0440f71116bb",
+      "sourceReference": "Complete body retained in issues[].comments.records; no duplicate text."
+    },
+    {
+      "id": 6685904031,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6685904031",
+      "createdAt": "2026-11-06T13:26:01Z",
+      "updatedAt": "2026-11-06T13:26:01Z",
+      "author": "cyjin-yl",
+      "body": "## Finf v2 状态更正：合并记录与完整验收分开\n\nAgent: dot for cyjin-yl。本条保留正文中的 25 个已合并 PR 历史，并纠正 [closed-as-complete 结论](https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6684427724) 的范围。Issue 已重新开放；“这些 PR 已 merged”不能等同于全部 Finf 原条件完成。\n\n当前 main `2ed17a801313c9a3772f9b88e3f0c1f7f3a53be5` 的 [release plan](https://github.com/Proto-UI/Proto-UI/blob/2ed17a801313c9a3772f9b88e3f0c1f7f3a53be5/internal/governance/release-0.3-plan.md#L23-L45) 与 [delivery list](https://github.com/Proto-UI/Proto-UI/blob/2ed17a801313c9a3772f9b88e3f0c1f7f3a53be5/internal/governance/release-0.3-list.md#L26-L52) 仍保留：\n\n- #1094–#1100 的 forms、collections/search/focus、disclosure、overlay、value/date、geometry 和既有 22 原型条件，以及 #1159 / #1160 / #1161 / #1162 分组中的适用四家族开发与验收。\n- #1055 / #1061 / #1120 / #1145 等适用的 compiler 前置；全后端、操作族与混合原生 consumer 总目标仍由 #732 / #733 / #1055 / #1056 / #1061 / #1120 / #1018 承接，分片不削减最终条件。\n- #1091 → #1146 / #1147 / #1148 / #1149 / #1150 等样式工作按原条件继续，不因本次对账中止。\n\n#1323 的“所有 Finf follow-up 均为 0.4”分类必须与已入库承诺逐 criterion 对账；本条不接受或实施新的整体延期。对确已交付的小项保留证据和勾选，对未验收项继续开放并给出原载体、负责人/待确认 owner、下一步及版本依据。GitHub assignee 为空不撤销既有 owner/claim。\n\n开发合并、确切源码的原生消费者测试、独立验收和 umbrella 完成都要分别记录。历史 checkbox、delivery rows 和 PR/Issue 数量有重叠，不能拼成完成百分比。本条未执行新测试，不代作独立 APPROVE，也不覆盖正文或历史评论。\n\n<!-- dot-closure-reconcile-890-20261106-v1 -->",
+      "bodySha256": "6fdad23f397f83662b6b8491dcfdcfc062ca0cd19210f3c49babd1fc2fe9690d"
+    },
+    {
+      "id": 6690899056,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1323#issuecomment-6690899056",
+      "createdAt": "2026-11-06T17:18:25Z",
+      "updatedAt": "2026-11-06T17:18:25Z",
+      "author": "cyjin-yl",
+      "bodySha256": "08d3a8b4700582cfaaaeff356075bcc17511bf16cd6623edf319cea227c06ad2",
+      "bodyLineCount": 136,
+      "scopeNote": "Exact1088and1139sections only; full source comment was read and retained in private capture. Unrelated scope is not imported into this record.",
+      "intro": {
+        "startLine": 1,
+        "endLine": 5,
+        "source": "## Workflow, evidence-process and historical operations\n\nThese issues remain OPEN. Unchecked criteria are copied from their current bodies; this umbrella records deferral without marking acceptance.\n\n### #839 — [workflow][skills] 为 pui-collaborate 增加共享验证与回执的 connector transport"
+      },
+      "sections": [
+        {
+          "startLine": 40,
+          "endLine": 55,
+          "source": "### #1088 — [Finf v2][887-followup] 评审修复投递 + 剩余 TODO 续接 + PR 886 gate：预算交接修复证据 / 五边界 / 原生失败所有权 / WC 数值基线\n- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）\n- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）\n- [ ] Verify new candidate native CI gates（验证新候选 native CI gate）\n- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）\n- [ ] Verify exact five boundary native gates（验证精确五边界 native gate）\n- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）\n- [ ] Verify native typed repair hosted integration gates（验证 native 类型修复宿主集成 gate）\n- [ ] Verify package repair hosted integration gates（验证包修复宿主集成 gate）\n- [ ] Repair governed source failures and native consumer evidence（修复受治源失败与原生消费者证据）\n- [ ] Validate current package graph and packed consumers（验证当前包图与打包消费者）\n- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）\n- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）\n- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）\n- [ ] Deliver independently reviewed WC numerical baseline transaction（投递独立评审的 WC 数值基线事务）\n"
+        },
+        {
+          "startLine": 88,
+          "endLine": 93,
+          "source": "### #1139 — [Finf v2][887-followup][todo-reconciliation] 剩余 TODO 调和与受治投递闭环\n- [ ] Reconcile rejected merged pull request thread state（调和被拒绝的已合并 PR 线程状态）\n- [ ] Reconcile every remaining TODO against live evidence（对每个剩余 TODO 按活证据调和）\n- [ ] Complete all actionable repairs and governed delivery（完成所有可操作修复与受治投递）\n- [ ] Follow blocked gates without bypassing independent acceptance（按受阻 gate 跟进，不绕过独立验收）\n"
+        }
+      ]
+    }
+  ],
+  "retirement": {
+    "number": 985,
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/985",
+    "title": "chore(agent): retire ModelTrace requirements permanently",
+    "state": "closed",
+    "merged": true,
+    "mergedAt": "2026-10-23T07:42:02Z",
+    "headSha": "00dc091f846f7f92985835e1a24df340dfcb5b50",
+    "baseSha": "a60be3c86f439f40c83359da1d026c2f74e2726e",
+    "mergeCommitSha": "81339ddce9b6fc9b488331e10a533884ace96593",
+    "updatedAt": "2026-10-23T07:52:41Z",
+    "bodySha256": "20ff5f42d6a5a831c6847a38baaaa80525ddeb9ab84f5a7943c5f65105b510d2",
+    "evidenceLimit": "Platform state only; no claim about original full criterion acceptance, CI/DCO, contribution rights, independent review, or this worker performing the merge.",
+    "body": "## Owner-directed permanent retirement\n\nRemove ModelTrace completely from future Agent commits and current publication/review workflows. This is permanent removal, not a dot exemption, optional measurement mode or replacement fingerprinting scheme.\n\n- Delete the collector/scorer, vendored bank, CLI, receipt/context schemas, commit-message hook, identify skill, exemption code and measurement-only tests.\n- Remove admission, freshness checks, disclosure construction and obsolete options from commit, publication, collaboration, review and connector paths.\n- Remove the requirement from current Skills, repository guidance, governance/contributor pages, GitHub templates and generated coverage footer source. Preserve dated historical records and unrelated benchmark model identifiers.\n- Preserve genuine DCO/source ownership, scoped authorization, live permission, exact branch/head/tree checks, idempotency and unknown-write reconciliation.\n- Preserve already-sealed evidence bytes via their approved `--body-digest`; retain the normal target-bound marker path for unsealed publication.\n\n## Executed acceptance evidence\n\nSource: `00dc091f846f7f92985835e1a24df340dfcb5b50`; authorized tree: `56b961a591c646b8176ffb83142a8425cb1e7e6b`.\n\nThe actual supported publisher ran with `PUI_AGENT=1`, human-assisted/current-user authorization, the exact contributor branch/head/tree, and no measurement record/context arguments. It created this real commit with the configured contributor's genuine sign-off and returned `status: published` after immutable message/parent/tree readback. This is a real contributor-workflow smoke, not just a parser test.\n\nNegative native Git controls also passed: a commit hook that removes the genuine committer trailer while leaving `Not-Signed-off-by` yields `PublicationUnknown` after exactly one attempt, never success or retry. Matching genuine pre-existing sign-offs publish successfully; another author's sign-off does not replace the committer's DCO. Sealed evidence body changes reject before any GitHub mutation.\n\n- Agent operations structure: passed.\n- Contributor Skills/registry/schema checks: passed, including the final post-review run.\n- Agent snapshot generation and `check:agent-doc`: passed.\n- Final affected publisher/publication-binding suites: **133/133 passed**, no skipped/cancelled cases.\n- Earlier complete serial AgentOps run: 1,460 passed / 3 failed. All three failures were obsolete exact separator-newline assertions in native Git commit tests; those assertions were removed in favor of authored-content preservation and Git's actual trailer values. The final affected run above covers the repaired cases.\n- Complete committed-source serial AgentOps rerun: **running, not claimed passed**.\n- Two independent read-only source reviews completed. All concrete findings were repaired and the bounded repairs rechecked; these are not platform approvals.\n- Current source/Skills/templates/docs scan found no remaining feature references in the cleaned active surfaces. Historical records are intentionally not rewritten.\n\n## Remaining debt / honest limits\n\nThe unrelated coverage validator still reports its pre-existing frozen candidate/path-binding drift for Accordion and stale checklist. The two prose views were rendered from unchanged data using the owning generator exports; that rendering is not represented as successful source validation. Repository-wide CI/review debt is not waived or called green by this evidence. No compiler/IR/WASM, product semantics, deployed UI, credentials, rulesets or production services were changed.\n\n<!-- finfv2-permanent-retirement:00dc091f846f7f92985835e1a24df340dfcb5b50 -->\n",
+    "scope": "Permanent retirement of ModelTrace does not assert historical thread resolution, independent approval, unknown-write reconciliation or current product acceptance."
+  },
+  "readonlySourceBindings": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84",
+      "changed": false
+    },
+    {
+      "path": "internal/agent-operations/skills.yaml",
+      "sha256": "8d3e44ed9bbab8d69cf58a9f0a0653286961327e5fa16663fd412b447def5588",
+      "changed": false
+    },
+    {
+      "path": "internal/agent-operations/contributor-agents.md",
+      "sha256": "fc7d49dd1521d1077ec64022cc9a366cea2d4e5e2424c49926ce467f130ef125",
+      "changed": false
+    },
+    {
+      "path": "internal/agent-operations/handoff.md",
+      "sha256": "b908d7855ed0a83f1575cbb1857fecf4b03be6ea09ed2116134b160dec6dd02d",
+      "changed": false
+    },
+    {
+      "path": "internal/governance/release-0.3-plan.md",
+      "sha256": "37863fa6b54dd327a73731dd5d95f842bca8a52c7236d5d537623dd2710d7eea",
+      "changed": false
+    },
+    {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+      "changed": false
+    },
+    {
+      "path": "internal/governance/release-0.3-source-corrections.json",
+      "sha256": "7d3e175405dea94a8af84b66e6f59b858ed3d6a83200f5fa0e8c631db84e1e59",
+      "changed": false
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-followup-continuation.json",
+      "sha256": "d42a54918c3fe22b08360fa9415ae00895ecfe092ff7433e4ec2fc8ed96b12ae",
+      "changed": false
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-followup-source-debt.json",
+      "sha256": "17f9016c7fe65ac7aa0335dbea85654bdd43c5ab1a34dbce953c045fc6e8e7cb",
+      "changed": false
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-source-closure.json",
+      "sha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5",
+      "changed": false
+    },
+    {
+      "path": "scripts/agent-operations/collaboration-runtime.mjs",
+      "sha256": "5ce58ecab3323bb4cd134a8b105f4a57eff3e3b1b40048a0f1429ad4238d5521",
+      "changed": false
+    },
+    {
+      "path": "scripts/agent-operations/agent-publish.mjs",
+      "sha256": "a2eaac69e1b202089fb80b2e986a430967498d25da38e2354937e64b079c46f7",
+      "changed": false
+    }
+  ],
+  "executed": "Read-only source/platform collection and metadata routing only; no product checks or external mutations."
+}
