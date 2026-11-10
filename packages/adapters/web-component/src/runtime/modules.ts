@@ -751,11 +751,10 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   type PositionSubject = { probe: string; filtered: boolean; watchesDefinition: boolean };
   const subjects: PositionSubject[] = [];
   const branchSubjects: PositionSubject[] = [];
-  let branchStart = 0;
   let copyFrom = 0;
   let probe = '';
   const collect = (end: number) => {
-    if (!branchSubjects.length || !selector.slice(branchStart, end).includes(':has(')) return;
+    if (!branchSubjects.length) return;
     const relaxed = probe + selector.slice(copyFrom, end);
     if (candidates.some((candidate) => candidate.matches(relaxed)))
       subjects.push(...branchSubjects);
@@ -772,7 +771,7 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
       index = literalEnd;
     } else if (character === ',') {
       collect(index);
-      branchStart = copyFrom = index + 1;
+      copyFrom = index + 1;
       probe = '';
       branchSubjects.length = 0;
     } else if (character === ':') {
@@ -1884,11 +1883,15 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // fallback forever. Upgrade notifications are the bounded
               // readiness signal: resample once per newly defined name.
               const registry = target.ownerDocument.defaultView?.customElements;
-              const watchUpgrade = (element: Element) => {
-                const name = element.localName;
+              const watchUpgrade = (element: Element, includeBuiltIn = false) => {
+                const name = element.localName.includes('-')
+                  ? element.localName
+                  : includeBuiltIn
+                    ? element.getAttribute('is')
+                    : null;
                 if (
                   !registry ||
-                  !name.includes('-') ||
+                  !name?.includes('-') ||
                   pendingUpgrades.has(name) ||
                   registry.get(name)
                 )
@@ -2031,9 +2034,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 observedRoots
               );
               entryRelationalSubjects = relationalSubjects;
-              for (const parent of positionParents)
-                if (!belongsToObservedEntryTree(parent))
-                  entryObserver?.observe(parent, { childList: true, attributes: true });
+              for (const parent of positionParents) {
+                const filtered = filteredPositionParents.has(parent as Element | ShadowRoot);
+                if (filtered || !belongsToObservedEntryTree(parent))
+                  entryObserver?.observe(
+                    parent,
+                    filtered && observedRoots.has(parent)
+                      ? { ...options, attributeFilter: undefined }
+                      : { childList: true, attributes: true }
+                  );
+              }
               for (const subject of entryRelationalSubjects) {
                 entryExternalStyleObserver.observe(subject, {
                   childList: true,
@@ -2058,8 +2068,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 for (const sibling of parent.children) {
                   observeSibling(sibling);
                   if (!watchesDefinition) continue;
-                  watchUpgrade(sibling);
-                  for (const descendant of sibling.querySelectorAll('*')) watchUpgrade(descendant);
+                  watchUpgrade(sibling, true);
+                  for (const descendant of sibling.querySelectorAll('*'))
+                    watchUpgrade(descendant, true);
                 }
               }
               for (const subject of siblingSubjects) {

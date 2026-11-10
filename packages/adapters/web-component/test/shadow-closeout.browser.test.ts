@@ -2506,6 +2506,9 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: true, bodyPosition: 'filtered-after-document-relation-shadow' },
     { initialSibling: false, bodyPosition: 'filtered-defined' },
     { initialSibling: false, bodyPosition: 'filtered-defined-shadow' },
+    { initialSibling: false, bodyPosition: 'grouped-independent' },
+    { initialSibling: false, bodyPosition: 'filtered-built-in' },
+    { initialSibling: false, bodyPosition: 'filtered-parent' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
@@ -2515,11 +2518,18 @@ describe('Shadow closeout native boundaries', () => {
       const atBody = shape !== null && !inShadow;
       const filteredTarget = shape === 'filtered-target';
       const filteredInternal = shape === 'filtered-internal';
-      const filteredDefined = shape === 'filtered-defined';
+      const filteredBuiltIn = shape === 'filtered-built-in';
+      const filteredDefined = shape === 'filtered-defined' || filteredBuiltIn;
+      const filteredParent = shape === 'filtered-parent';
       const afterDocumentRelation = shape === 'filtered-after-document-relation';
       const filtered = shape === 'filtered' || afterDocumentRelation;
       const selectors: Record<string, string> = {
         grouped: '.positional-entry:not(:has(.flag)):nth-child(2n+1) button, .unrelated',
+        'grouped-independent': '.unrelated:has(.flag), .positional-entry:first-child button',
+        'filtered-parent':
+          '.positional-entry[data-mode]:not(:has(.flag)) > .row:nth-child(1 of .row) button',
+        'filtered-built-in':
+          '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible:defined) button',
         functional: '.positional-entry:not(:has(.flag)):not(:first-child) button',
         hover: '.positional-entry:not(:has(.flag)):hover:first-child button',
         'filtered-target':
@@ -2556,6 +2566,8 @@ describe('Shadow closeout native boundaries', () => {
             filteredTarget,
             filteredInternal,
             filteredDefined,
+            filteredBuiltIn,
+            filteredParent,
             css,
           }) => {
             const p = (window as any).Closeout;
@@ -2581,9 +2593,11 @@ describe('Shadow closeout native boundaries', () => {
               sheet.replaceSync(css);
               parent.adoptedStyleSheets = [sheet];
             } else parent.id = 'positional-entry-parent';
-            const sibling = document.createElement(
-              filteredDefined ? 'closeout-filtered-peer' : 'span'
-            );
+            const peer = document.createElement('template');
+            peer.innerHTML = '<button is="closeout-filtered-peer"></button>';
+            const sibling = filteredBuiltIn
+              ? (peer.content.firstElementChild as HTMLButtonElement)
+              : document.createElement(filteredDefined ? 'closeout-filtered-peer' : 'span');
             sibling.id = 'positional-entry-sibling';
             sibling.hidden = true;
             const wrapper = document.createElement('div');
@@ -2592,13 +2606,16 @@ describe('Shadow closeout native boundaries', () => {
             const host = new C();
             host.innerHTML = filteredInternal
               ? '<span hidden data-eligible></span><div class="row"><button>Inside</button></div>'
-              : '<button>Inside</button>';
-            if (filteredTarget || filteredInternal) host.className = 'positional-entry';
+              : filteredParent
+                ? '<div class="row"><button>Inside</button></div>'
+                : '<button>Inside</button>';
+            if (filteredTarget || filteredInternal || filteredParent)
+              host.className = 'positional-entry';
             wrapper.append(host);
             if (initialSibling || filteredDefined) sibling.className = 'eligible';
             if ((initialSibling || filtered || filteredDefined) && !filteredInternal)
               parent.append(sibling);
-            parent.append(filteredTarget || filteredInternal ? host : wrapper);
+            parent.append(filteredTarget || filteredInternal || filteredParent ? host : wrapper);
             if (inShadow) document.body.append(boundary);
             else if (!atBody) document.body.append(parent);
           },
@@ -2610,6 +2627,8 @@ describe('Shadow closeout native boundaries', () => {
             filteredTarget,
             filteredInternal,
             filteredDefined,
+            filteredBuiltIn,
+            filteredParent,
             css,
           }
         );
@@ -2635,9 +2654,13 @@ describe('Shadow closeout native boundaries', () => {
         const hidden = { visibility: 'hidden', tabIndex: '0' };
         if (filteredDefined) {
           expect(await snapshot()).toEqual(hidden);
-          await page.evaluate(() =>
-            customElements.define('closeout-filtered-peer', class extends HTMLElement {})
-          );
+          await page.evaluate((builtIn) => {
+            if (builtIn)
+              customElements.define('closeout-filtered-peer', class extends HTMLButtonElement {}, {
+                extends: 'button',
+              });
+            else customElements.define('closeout-filtered-peer', class extends HTMLElement {});
+          }, filteredBuiltIn);
           expect(await snapshot()).toEqual(visible);
           return;
         }
@@ -2650,12 +2673,13 @@ describe('Shadow closeout native boundaries', () => {
           expect(await snapshot()).toEqual(visible);
           return;
         }
-        if (filteredTarget) {
+        if (filteredTarget || filteredParent) {
+          const attr = filteredParent ? 'data-mode' : 'data-eligible';
           const host = page.locator('closeout-positional-entry');
           expect(await snapshot()).toEqual(visible);
-          await host.evaluate((element) => element.setAttribute('data-eligible', ''));
+          await host.evaluate((element, name) => element.setAttribute(name, ''), attr);
           expect(await snapshot()).toEqual(hidden);
-          await host.evaluate((element) => element.removeAttribute('data-eligible'));
+          await host.evaluate((element, name) => element.removeAttribute(name), attr);
           expect(await snapshot()).toEqual(visible);
           return;
         }
