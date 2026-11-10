@@ -86,6 +86,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
   'packages/adapters/web-component/test/native-text-width.browser.test.ts',
   'packages/prototypes/shadcn/test/drawer-presence.browser.test.ts',
+  'packages/prototypes/base/test/async-region.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
   'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
   'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',
