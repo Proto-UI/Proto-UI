@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "studyId": "dialog-check-discrimination-754-v1",
+  "issue": 754,
+  "visibility": "public-calibration-not-held-out",
+  "subjectHead": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "historicalIssueBaseline": "3d9ab9f56dbabbf386162145778ea1de546db825",
+  "expectationReview": "pending-independent-review-before-evaluation",
+  "environment": "Vitest happy-dom, synthetic keyboard/pointer, real Web Component Adapter and Base Dialog; no native-input, paint or AT claim",
+  "inputs": {
+    "packages/prototypes/base/src/dialog/root.proto.ts": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378",
+    "packages/prototypes/base/src/dialog/content.proto.ts": "8c58eeba11413db5b9381f103b97fd12e20c0b0f6d58e0fe73c24710db484c67",
+    "packages/prototypes/base/test/dialog.test.ts": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+    "packages/prototypes/base/test/dialog-controlled-dismissal.test.ts": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893",
+    "packages/adapters/web-component/test/dialog-overlay.test.ts": "e130f82e5a08ad4f96fa7b4b9f44209290ee241642db84b92fd4a90e1f320347",
+    "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da",
+    "scripts/test/dialog-run-integrity-reporter.mjs": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa"
+  },
+  "existingSuites": {
+    "packages/prototypes/base/test/dialog.test.ts": 17,
+    "packages/prototypes/base/test/dialog-controlled-dismissal.test.ts": 3,
+    "packages/adapters/web-component/test/dialog-overlay.test.ts": 8
+  },
+  "oracleSuite": "scripts/analysis/dialog-conformance-study/oracle.test.ts",
+  "cases": [
+    {
+      "id": "D754-FOCUS",
+      "criterion": "P-BASE-DIALOG-CONTENT-FOCUS",
+      "expected": "Wrapped Cancel and Save controls retain forward and reverse loop; Tab default is prevented; keyboard Escape restores the opening trigger.",
+      "existingCheckFragments": ["traps tab navigation inside active dialog content", "restores focus-visible to the trigger after keyboard close"]
+    },
+    {
+      "id": "D754-CONTROLLED",
+      "criterion": "P-BASE-DIALOG-CONTENT-CONTROLLED",
+      "relatedCriterion": "P-BASE-DIALOG-CONTENT-DISMISS",
+      "expected": "Escape emits one close request; declining and delaying owner input retain logical open and presence; owner acceptance alone starts leave.",
+      "existingCheckFragments": ["controlled root keeps prop state", "controlled dismissal emits requests without closing", "retains the latest owner input with none reply", "retains the latest owner input with sync reply", "retains the latest owner input with microtask reply"]
+    },
+    {
+      "id": "D754-RELATIONS",
+      "criterion": "P-BASE-DIALOG-CONTENT-A11Y-RELATIONS",
+      "expected": "Live Title/Description removal clears both relationships and retains the documented Root label fallback; re-add restores live targets.",
+      "existingCheckFragments": ["projects only live Title and Description relationships"]
+    },
+    {
+      "id": "D754-PRESENCE",
+      "criterion": "P-BASE-DIALOG-CONTENT-PRESENCE",
+      "expected": "Logical close enters leaving while Content remains attached; explicit unit Transition completion then detaches the view and releases the modal lock.",
+      "existingCheckFragments": ["mask and content transition states synchronize with root.open changes", "retains the latest owner input with none reply", "retains the latest owner input with sync reply", "retains the latest owner input with microtask reply"]
+    },
+    {
+      "id": "D754-ACTION",
+      "criterion": "P-BASE-DIALOG-CLOSE-COMMAND",
+      "expectationSource": "Fixture application task: Cancel and Save close the surface but invoke only their own recorded action.",
+      "expected": "Pointer Cancel records cancel only; after reopen pointer Save records save exactly once. Closing alone does not satisfy this task.",
+      "existingCheckFragments": []
+    }
+  ],
+  "variants": [
+    {"id": "baseline", "kind": "valid-control", "caseId": null, "patch": null},
+    {
+      "id": "focus-no-loop",
+      "kind": "injected-broken",
+      "caseId": "D754-FOCUS",
+      "patch": {"path": "packages/prototypes/base/src/dialog/content.proto.ts", "before": "focusScope.configure({ trap: true, loop: true });", "after": "focusScope.configure({ trap: false, loop: false });"}
+    },
+    {
+      "id": "controlled-eager-close",
+      "kind": "injected-broken",
+      "caseId": "D754-CONTROLLED",
+      "patch": {"path": "packages/prototypes/base/src/dialog/root.proto.ts", "before": "if (!next.controlled) {", "after": "if (true) {"}
+    },
+    {
+      "id": "description-dangling",
+      "kind": "injected-broken",
+      "caseId": "D754-RELATIONS",
+      "patch": {"path": "packages/prototypes/base/src/dialog/content.proto.ts", "before": "hasDescription ? createDialogPartId(ctx.rootId, 'description') : ''", "after": "createDialogPartId(ctx.rootId, 'description')"}
+    },
+    {
+      "id": "presence-early-complete",
+      "kind": "injected-broken",
+      "caseId": "D754-PRESENCE",
+      "patch": {"path": "packages/prototypes/base/src/dialog/content.proto.ts", "before": "leave: transition.controls.leave,", "after": "leave: () => { transition.controls.leave(); transition.controls.complete(); },"}
+    },
+    {
+      "id": "legal-rounded-border",
+      "kind": "legal-customization",
+      "caseId": null,
+      "patch": {"path": "packages/prototypes/base/src/dialog/content.proto.ts", "before": "    setupDialogContent(def);\n    def.feedback.style.use(", "after": "    setupDialogContent(def);\n    def.feedback.style.use(tw('rounded-xl border-2'));\n    def.feedback.style.use("}
+    }
+  ],
+  "heldOutVariants": "not-provided; independent author and reviewed expectations required; public cases cannot be relabelled held-out",
+  "repairComparison": "not-run; calibration is prior; ordinary/criterion-linked and maintenance comparisons remain separate",
+  "lifecycle": "All selected Dialog/Focus criteria are draft. No stable conformance or release-admission claim."
+}
