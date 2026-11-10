@@ -98,9 +98,7 @@ implementations:
     consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE]
     exercises: [P-SHADCN-INPUT-SHELL]
     notes:
-      [
-        Source-expression and generated-theme regression supports the collector oracle only; it does not itself execute native measurements.,
-      ]
+      - Direct corrupt-observation controls execute the same consumer-specific geometry oracle as the collector; generated-theme coverage preserves the fixed 10px theme and old 6px negative. These controls replace driver source-spelling assertions and do not execute native measurements. New controls remain unexecuted for this candidate.
   - id: catalog-regression
     kind: workspace-check
     status: planned
@@ -138,8 +136,12 @@ openQuestions:
 sources:
   - path: internal/contracts/command/shadcn-input-shell.presentation.v0.md
   - path: .github/workflows/shadcn-command-style.yml
+  - path: scripts/prototypes/shadcn-command-evidence-oracle.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Mapped bounded existing evidence separately from missing direct-boundary and inherited-editor conformance; no fresh passing or stable claim.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Clarify the native oracle's direct corrupt-observation controls and helper source while retaining draft, needs-review and unexecuted candidate status.
 tags: [test, shadcn, input-shell, lifecycle, catalog]

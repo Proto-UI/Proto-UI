@@ -5,6 +5,7 @@ import { createServer } from 'node:http';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve, join, extname, sep } from 'node:path';
 import { build } from 'esbuild';
+import { assertCommandEvidenceShell } from './shadcn-command-evidence-oracle.ts';
 import { collectProtoStyleTokensFromFiles } from '../../packages/cli/src/services/prototype-style-tokens.ts';
 import {
   renderProtoStyleTokenCss,
@@ -52,6 +53,12 @@ await writeFile(
   `<!doctype html><html data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:,"><link rel="stylesheet" href="tokens.css"><style>${palette}body{font:14px system-ui;margin:20px;background:var(--pui-background);color:var(--pui-foreground)}main{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}section{min-width:0}h1{font-size:22px}h2{font-size:16px}@media(max-width:600px){main{grid-template-columns:1fr}}</style></head><body><h1>Public Command and single-control input shell</h1><p>NY compatibility / Rhea · Real adapters · Shared family scope</p><main></main><script type="module" src="app.js"></script></body></html>`
 );
 const hash = (x) => createHash('sha256').update(x).digest('hex');
+const receiptFiles = sourceFiles.concat([
+  'packages/prototypes/shadcn/src/input-shell/visual.ts',
+  'scripts/prototypes/shadcn-command-evidence.mjs',
+  'scripts/prototypes/shadcn-command-evidence-app.mjs',
+  'scripts/prototypes/shadcn-command-evidence-oracle.ts',
+]);
 const receipt = {
   revision: process.env.EVIDENCE_HEAD_SHA ?? 'local-unpublished',
   upstream: '3d98900e9b73c45f035f8109e9d41ba6a51685e7',
@@ -61,7 +68,7 @@ const receipt = {
     'New York standalone Command compatibility retained, not full upstream anatomy',
   ],
   files: await Promise.all(
-    sourceFiles.map(async (path) => ({ path, sha256: hash(await readFile(path)) }))
+    receiptFiles.map(async (path) => ({ path, sha256: hash(await readFile(path)) }))
   ),
   artifacts: await Promise.all(
     ['app.js', 'index.html', 'tokens.css'].map(async (path) => ({
@@ -135,9 +142,8 @@ try {
   const snapshot = () =>
     page.evaluate(() =>
       window.commandEvidence.records.map((r) => {
-        const input = r.editor(),
-          shell = r.host.querySelector('[data-pui-style~="transition-[color,box-shadow]"]'),
-          activeId = input.getAttribute('aria-activedescendant'),
+        const { input, shell } = r.elements();
+        const activeId = input.getAttribute('aria-activedescendant'),
           active = activeId ? document.getElementById(activeId) : null;
         const cs = getComputedStyle(input),
           ss = getComputedStyle(shell);
@@ -214,16 +220,7 @@ try {
       );
       const facts = await endpoint((rows) => {
         assert.equal(rows.length, 8);
-        for (const r of rows) {
-          assert.equal(r.theme.rootFontSize, '16px');
-          assert.equal(r.theme.rootRadiusToken, '0.625rem');
-          assert.equal(r.theme.mdRadiusToken, 'max(calc(0.625rem - 2px), 0px)');
-          assert.equal(r.input.border, '0px');
-          assert.equal(r.input.radius, '0px');
-          assert.equal(r.shell.radius, style === 'rhea' ? '18px' : '8px');
-          assert.equal(r.shell.height, style === 'rhea' ? 32 : 36);
-          assert.equal(r.input.font, r.type === 'command' ? '14px' : '14px');
-        }
+        for (const r of rows) assertCommandEvidenceShell(r, style);
       });
       observations.push({ theme, style, facts });
       await capture(`${theme}-${style}`);
@@ -349,7 +346,7 @@ try {
         window.retainedEditor = e;
       });
       await page.evaluate(() => window.commandEvidence.set({ style: 'new-york-v4' }));
-      await endpoint((rows) => rows.forEach((r) => assert.equal(r.shell.radius, '8px')));
+      await endpoint((rows) => rows.forEach((r) => assertCommandEvidenceShell(r, 'new-york-v4')));
       const continuity = await input.evaluate((e) => ({
         same: e === window.retainedEditor,
         value: e.value,
