@@ -1,0 +1,1768 @@
+{
+  "schemaVersion": 1,
+  "kind": "apple-hig-source-summary-reconciliation",
+  "date": "2026-11-10",
+  "issue": 864,
+  "scope": "仅从已留存的自写源摘要补全比较数据；保留158原始行及82未完topic条件。无新Apple正文读取、规范语义、Proto平台支持或运行/AT认证。",
+  "headContext": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "inputs": {
+    "review": {
+      "path": "internal/records/2026-10-06-apple-hig-proto-ui-first-review.json",
+      "sha256": "1d3527aa751382af5df18b033941dd29cf260264c556ca4a537e67f1b91f48fb",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    "markdown": {
+      "path": "internal/records/2026-10-06-apple-hig-proto-ui-first-review.md",
+      "sha256": "82744a47366df7753cb382871f3c8e7c6564e00a9f995e489c8c0e18f43e9211",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    "carrier": {
+      "path": "internal/records/2026-10-14-finf-followup-source-debt.json",
+      "sha256": "17f9016c7fe65ac7aa0335dbea85654bdd43c5ab1a34dbce953c045fc6e8e7cb",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    },
+    "issueLedger": {
+      "path": "internal/governance/release-0.3-source-ledger.json",
+      "sha256": "7b8d96ab6368dbb36764346932fd737d5e127c8b27aeb1208d0337b0a3c11a5e",
+      "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+    }
+  },
+  "sourceConditions": [
+    "thread:869:4203974712",
+    "thread:869:4210272378"
+  ],
+  "articleScopePolicy": [
+    "affirmedPlatforms只录入原摘要明确肯定的文章范围，不由排除项的补集推断。",
+    "platformSectionMentions不等于肯定平台或Proto支持；缺失继续未知。",
+    "qualifiedPlatforms保留服务/UI、观看/拍摄、启动/配对投射以及主体/相关技术的差异。",
+    "排除项仅作用于该文章主体，不能抹掉同平台其它相关能力。",
+    "原始正文hash、访问日期、代码基线、历史status/unknowns保持原值；不补造失败日志或当前运行证据。"
+  ],
+  "observedIssue": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/864",
+    "updatedAt": "2026-11-06T12:45:46Z",
+    "state": "open",
+    "bodySha256": "0c434e1b30e515628242b1045e7f559f0775e94dcef38560a89d3392ec479de3",
+    "comments": [
+      {
+        "id": 6164305393,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/864#issuecomment-6164305393",
+        "updatedAt": "2026-10-14T08:34:54Z",
+        "bodySha256": "52c20021a559e9fb4a84928cbc2e81811359eb4c7588d80afe7d2b25d02536e9"
+      },
+      {
+        "id": 6550224105,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/864#issuecomment-6550224105",
+        "updatedAt": "2026-10-31T22:52:58Z",
+        "bodySha256": "34bb8fe594355307e6f9c6d0f68f1fab2d1b430315ae5a8e3dd4730cd8f46868"
+      },
+      {
+        "id": 6684430624,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/864#issuecomment-6684430624",
+        "updatedAt": "2026-11-06T12:06:42Z",
+        "bodySha256": "eb469ac5bead50c98ef93884d6ba34aca1a749ed96ffd3442cdb38e51588fd92"
+      },
+      {
+        "id": 6684478246,
+        "url": "https://github.com/Proto-UI/Proto-UI/issues/864#issuecomment-6684478246",
+        "updatedAt": "2026-11-06T12:09:24Z",
+        "bodySha256": "cc968ae8585b7ef1ab2c70adbb20289271de00cbc6445e06c60ce3b849e70cfa"
+      }
+    ],
+    "scopeNote": "11月6日0.4延后意见保留为历史。当前用户仅授权有界源证据修复；不由此改写release disposition或宣布Issue完成。"
+  },
+  "topics": [
+    {
+      "sourceKey": "hig:design-principles",
+      "issueCriterionKey": "issue.864.006",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/design-principles",
+      "sourceRowSha256": "8886d96c0f13e0beed9646150196b2374b212e2a92f627e7d26bc354887a15c6",
+      "parentRecordSha256": "a02a1a722927fab739b8f522a3b252635751c98eb345b1f44b414b1d923e49d0"
+    },
+    {
+      "sourceKey": "hig:designing-for-ios",
+      "issueCriterionKey": "issue.864.007",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios",
+      "sourceRowSha256": "db72618815e47c7712af7f5f8cecdc32b382ed35dccd224e958c0cff5a63da47",
+      "parentRecordSha256": "cd34aae98bc53bb7a8ae0f43bfd1d0fe777466feb7965e4545f2d1bc7b58721f"
+    },
+    {
+      "sourceKey": "hig:designing-for-ipados",
+      "issueCriterionKey": "issue.864.008",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados",
+      "sourceRowSha256": "19db7ae90976d49477cda582f2deb5c78509bfcd86fd78598e4fb93ce1667a3d",
+      "parentRecordSha256": "663b21f89b74b3253b321ac5283183473276ebb048bb1ade3c7f5efa8e7c19fa"
+    },
+    {
+      "sourceKey": "hig:designing-for-macos",
+      "issueCriterionKey": "issue.864.009",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos",
+      "sourceRowSha256": "cf86ed0b4b3b44e930db632fc200dbee52defd5109ab6b8358af784528789637",
+      "parentRecordSha256": "c11722bca5b9d1ee0d68cc29df37042eb5b283d28153f25a424134f9cad3fb33"
+    },
+    {
+      "sourceKey": "hig:designing-for-tvos",
+      "issueCriterionKey": "issue.864.010",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-tvos",
+      "sourceRowSha256": "8d14da34c780c665a1d7d6bffbc54c71c670c7565c781138d3188f0f23d41860",
+      "parentRecordSha256": "fb3d6d5129c1a69fbfc4c3a0eeb9a96cd2c2151573a03bcef8df87e35df5aff6"
+    },
+    {
+      "sourceKey": "hig:designing-for-visionos",
+      "issueCriterionKey": "issue.864.011",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos",
+      "sourceRowSha256": "e1cc4006bc5a18d0d15046fd11b6a58b8a50fe2a422c272b2bdd35d0feda018c",
+      "parentRecordSha256": "8c3b6923f6a5660f84e13815e2c0e622f852e5e7a53c6e9607a97da5ba6ff31f"
+    },
+    {
+      "sourceKey": "hig:designing-for-watchos",
+      "issueCriterionKey": "issue.864.012",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos",
+      "sourceRowSha256": "c25f52f04f0fb8a758893337c02cade89deb888d8ff4913950ec57b9c52db062",
+      "parentRecordSha256": "92f1c511d534e87419f2a08ed01edeef4d11de10817c6c0bcc02d116ecbf6ff3"
+    },
+    {
+      "sourceKey": "hig:designing-for-games",
+      "issueCriterionKey": "issue.864.013",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-games",
+      "sourceRowSha256": "58c767ac4f24bb259463d2020a5a2178c59d6fbc7ef30908da34c3469d58b118",
+      "parentRecordSha256": "d671cb74ba42c7c0fd0a16d71df67762dd61db9099395f9b78a4eb9d81a24a2b"
+    },
+    {
+      "sourceKey": "hig:designing-for-iphone-duo",
+      "issueCriterionKey": "issue.864.014",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo",
+      "sourceRowSha256": "3aaa242ddc131ae522100a6e5596ba93d9f30e2a02513bdb94a5b068c51c670f",
+      "parentRecordSha256": "06f83fc982744f24565942067e53b6dd1037a8d54408d54f22592db6c73b38d5"
+    },
+    {
+      "sourceKey": "hig:accessibility",
+      "issueCriterionKey": "issue.864.015",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+      "sourceRowSha256": "648b90f4e1c83b57bb005f5288c1813483ea0cb85974b1cd2ecd610dd817d7a0",
+      "parentRecordSha256": "5695d9cd97a5750127de9afafa4096de35ec93250b543407fc1ca8cca526016e"
+    },
+    {
+      "sourceKey": "hig:app-icons",
+      "issueCriterionKey": "issue.864.016",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/app-icons",
+      "sourceRowSha256": "c343c0c277b1a232988851d0214d1ba06f716fed375848b373afacd121d1d2ee",
+      "parentRecordSha256": "24ad6e388c2285d37072baa48646960b7fcfddf84364620b3abd71f6908ae6c3"
+    },
+    {
+      "sourceKey": "hig:branding",
+      "issueCriterionKey": "issue.864.017",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/branding",
+      "sourceRowSha256": "74638827a23789f40ff7ed881f4b3cbec602506d6350ddb43ef6ea99eebbec51",
+      "parentRecordSha256": "89a881bee6b7e737f39146ca4800d255b1f382e7c019a25cbc3012e4daad6f7c"
+    },
+    {
+      "sourceKey": "hig:color",
+      "issueCriterionKey": "issue.864.018",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color",
+      "sourceRowSha256": "763d1aac42f324dd41718b517a6ab1b96b742d9bc19651d6be63c6748274b5f9",
+      "parentRecordSha256": "9bc3fd030d596bd9577cf1208e486c556bc2d3ea949e9ad1b81b8e35b4bb7a6a"
+    },
+    {
+      "sourceKey": "hig:dark-mode",
+      "issueCriterionKey": "issue.864.019",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/dark-mode",
+      "sourceRowSha256": "7d7c88a79a80a57782ba0c06ef47e133d0cd3d9c7268b6cebd81bf648c7bb599",
+      "parentRecordSha256": "889a778e6ca962b64ff556368ae8176d67f12fe08d2ecef4a597e96629140d9c"
+    },
+    {
+      "sourceKey": "hig:icons",
+      "issueCriterionKey": "issue.864.020",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/icons",
+      "sourceRowSha256": "ce58feacc38d2ffce05fe38dd7cec7ebb41c3df33276b650e760d78473a184d0",
+      "parentRecordSha256": "66e530c567f826b29c42cf620fde4c9afca215f8641ec62b41a531ef64cf7284"
+    },
+    {
+      "sourceKey": "hig:images",
+      "issueCriterionKey": "issue.864.021",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/images",
+      "sourceRowSha256": "ea336f223049b9a3bf06298c2c89de1181beb68c6ca1435af851741feac6b283",
+      "parentRecordSha256": "d703791674eb9027705a3c655bb0622a4dace6e40d118ca9f1c56fe4ef2d8a20"
+    },
+    {
+      "sourceKey": "hig:immersive-experiences",
+      "issueCriterionKey": "issue.864.022",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/immersive-experiences",
+      "sourceRowSha256": "3b0df8534483eeb3237a2a5484c8f7af7a66fd326d5e17794ca13aee6ad9dee1",
+      "parentRecordSha256": "73a4225d2d88a4b5e4b60b619d2e8332ac815ba0424b529857faacd626a45e94"
+    },
+    {
+      "sourceKey": "hig:inclusion",
+      "issueCriterionKey": "issue.864.023",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/inclusion",
+      "sourceRowSha256": "58de29ee7adbbd38715d0bbb2e8d96a64348374aa0e980f3b109a9987114607a",
+      "parentRecordSha256": "9128f49ced347c59ae9f428645aca6396af6d42cf1277b96eb85325f2704d7f2"
+    },
+    {
+      "sourceKey": "hig:layout",
+      "issueCriterionKey": "issue.864.024",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+      "sourceRowSha256": "0fa1bde92f99514acfe318669896dbfc6a8b8245b64137dc5e40c8e77db81da4",
+      "parentRecordSha256": "32570c3355223eeab917ccfac4de4e634ae778b19823cd4b23aad082db6c623f"
+    },
+    {
+      "sourceKey": "hig:materials",
+      "issueCriterionKey": "issue.864.025",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+      "sourceRowSha256": "46a6c31f599a8c58fd1439cce7344352fe941ac1134a529a131e1a086caf42e0",
+      "parentRecordSha256": "46a7e6f7ae9a9360b116ed2b48c7ca014a15b800b8bf54386dc171b779649723"
+    },
+    {
+      "sourceKey": "hig:motion",
+      "issueCriterionKey": "issue.864.026",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/motion",
+      "sourceRowSha256": "ef2f9639c1c8fd04093bd80208f92b03d2ccd46f417b43a615340b2d474dbc52",
+      "parentRecordSha256": "ad11cdfb0aeddc93fe933097f8bc8ba67b0d6af88832816fadd8cd78c7cd43c9"
+    },
+    {
+      "sourceKey": "hig:privacy",
+      "issueCriterionKey": "issue.864.027",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/privacy",
+      "sourceRowSha256": "c6ec36ef94a2f052bb18d98ab7a1cf443418c4efac5160d472476002afa27985",
+      "parentRecordSha256": "f31b4b0de21a2986a955c6772a85ac52d2661f7d7bc6c98408205a06dfba2e42"
+    },
+    {
+      "sourceKey": "hig:right-to-left",
+      "issueCriterionKey": "issue.864.028",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/right-to-left",
+      "sourceRowSha256": "73a42132b4ee5ab4df66d926c565d709c15e9bfc0f410ba0ac560a0b628b4c38",
+      "parentRecordSha256": "ac7eba7ecd4520f48ab0e8269f030a8d1258adb22110968d7d4b22ed0b9f0813"
+    },
+    {
+      "sourceKey": "hig:sf-symbols",
+      "issueCriterionKey": "issue.864.029",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sf-symbols",
+      "sourceRowSha256": "99d09b81d979f32e8fdad45145c0a056539ea96d96ea408ef0da39155678f46e",
+      "parentRecordSha256": "47cbba9c097cdcddc9426e30a9021c400e5f548f11b32a1fd99a158d635c1f27"
+    },
+    {
+      "sourceKey": "hig:spatial-layout",
+      "issueCriterionKey": "issue.864.030",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/spatial-layout",
+      "sourceRowSha256": "396ad0914fa480de43df30c460f1937cf89a10943214e34647746cdced7df21b",
+      "parentRecordSha256": "d22825a0ab356fba0a60b93c9944e2bb2ffb87199d724b9b4229d3ec49fefbb8"
+    },
+    {
+      "sourceKey": "hig:typography",
+      "issueCriterionKey": "issue.864.031",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/typography",
+      "sourceRowSha256": "56376ff7e93ae161bb1f30c3a770e792f27e7eadbd27e6a64aeb14927950fc26",
+      "parentRecordSha256": "0c56451a05dd3bc54e65fc4629b4c1bd3191ff49cef94af4779c239b3eb1a268"
+    },
+    {
+      "sourceKey": "hig:writing",
+      "issueCriterionKey": "issue.864.032",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/writing",
+      "sourceRowSha256": "2e714b51cc15994c2ba70436d830fdb000dcb73531ca41f395477e2ddb447927",
+      "parentRecordSha256": "c1c97c076e579afff0a2671f175f2c1438d62626c3e03e8757dc1d5442343675"
+    },
+    {
+      "sourceKey": "hig:charting-data",
+      "issueCriterionKey": "issue.864.033",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/charting-data",
+      "sourceRowSha256": "55463461c0736931526192bcd4e9cf63c7692021ea88b2f4716e3184cdb67eda",
+      "parentRecordSha256": "53e2b5dbd44ae865caea28ce29ee58ca12cc127469653c639db5fbff2e6a88fa"
+    },
+    {
+      "sourceKey": "hig:collaboration-and-sharing",
+      "issueCriterionKey": "issue.864.034",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/collaboration-and-sharing",
+      "sourceRowSha256": "dcf88d44709f8d6a935029f89386651c6520d53d5ba51f028c00129e39fb8cbf",
+      "parentRecordSha256": "b0c9a3ca8736a26b24a792af351e25c97fabd55954cb596b3a38aff9c65fa682"
+    },
+    {
+      "sourceKey": "hig:drag-and-drop",
+      "issueCriterionKey": "issue.864.035",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/drag-and-drop",
+      "sourceRowSha256": "bbedb67acf5bfe100577cac81c6c5b42a3933becde12ca99eff779c6708be326",
+      "parentRecordSha256": "f634cff59c4afa245d37b7df4d17a04238dbb29cb4478dd19c9c7a60e03eaa72"
+    },
+    {
+      "sourceKey": "hig:entering-data",
+      "issueCriterionKey": "issue.864.036",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/entering-data",
+      "sourceRowSha256": "93761685ce53cd07eb1601472993ef1878c89308d1928afc7a626334bf86463a",
+      "parentRecordSha256": "f4e5c291dd1d1491346741b7b2853b33fa1281165c4154a35c4fc4b9f37f077f"
+    },
+    {
+      "sourceKey": "hig:feedback",
+      "issueCriterionKey": "issue.864.037",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/feedback",
+      "sourceRowSha256": "11f1d0e25beb1c8235d4314f0b0fc4fca1fdd7f2f8d032d4304efd9e3ac84255",
+      "parentRecordSha256": "fec8e06b98275a026e67165ee47abfb10043362bdc96673ce9bfd8c99722dd8e"
+    },
+    {
+      "sourceKey": "hig:file-management",
+      "issueCriterionKey": "issue.864.038",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/file-management",
+      "sourceRowSha256": "888b5aae7f07267e921baa0b7f8a816f905daa74cfaad3c29b5d7ed07fc9f2de",
+      "parentRecordSha256": "6e84032f000db4b150fddd06a4c082141d17a2020cd0f16510e16ab31cc89458"
+    },
+    {
+      "sourceKey": "hig:going-full-screen",
+      "issueCriterionKey": "issue.864.039",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/going-full-screen",
+      "sourceRowSha256": "82097fa3620bf376e9b89ef3f66aafb7b89c155530534ab1f266428041fc4abf",
+      "parentRecordSha256": "2e6b964361a7f93605f22cd5fe85d25a3159b8e9661ab0a7a6ea738f934f5fe4"
+    },
+    {
+      "sourceKey": "hig:launching",
+      "issueCriterionKey": "issue.864.040",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/launching",
+      "sourceRowSha256": "303cd925032d4d7d148618c016e1e744ff435216d93f2a4652a45f49cd54a045",
+      "parentRecordSha256": "2a7ee8b3fd8881f16f0b7313ecd9f2f688d456088c696cd252dc1dd8ed5dd0de"
+    },
+    {
+      "sourceKey": "hig:live-viewing-apps",
+      "issueCriterionKey": "issue.864.041",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/live-viewing-apps",
+      "sourceRowSha256": "6912d0e846496593cdaaa0dadf6b95453bd192777b2ff4455b10778dd4aaa1b4",
+      "parentRecordSha256": "115096ee35370cc696dd6224306c6f08534cc3184855df534baad1837cef228c"
+    },
+    {
+      "sourceKey": "hig:loading",
+      "issueCriterionKey": "issue.864.042",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/loading",
+      "sourceRowSha256": "9413f7f22f2fc63947eef7492e1eea67f1858958d66da2f4144b8f866e520905",
+      "parentRecordSha256": "7ac4965062cc813ceff64f51c4bd8d06e935733da782dd35ae6853a3a9c7b27f"
+    },
+    {
+      "sourceKey": "hig:managing-accounts",
+      "issueCriterionKey": "issue.864.043",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/managing-accounts",
+      "sourceRowSha256": "8706c9ebdd8267bff1dfa40122152d072302f672d7c8265e3964256eee23e1bc",
+      "parentRecordSha256": "6c29173c3a5282ff4dd26aa1e310d41a3efd0e1183c6181e3b64f53c27ba28de"
+    },
+    {
+      "sourceKey": "hig:managing-notifications",
+      "issueCriterionKey": "issue.864.044",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/managing-notifications",
+      "sourceRowSha256": "a85542b6b8d06fbf7f2289330681c96caa34205d15205717d94f8160e87ce46c",
+      "parentRecordSha256": "5a1a8dcc0bc0304c4398fddd47c6704579d724957dc4f1d34ae9ab7128fc9142"
+    },
+    {
+      "sourceKey": "hig:modality",
+      "issueCriterionKey": "issue.864.045",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/modality",
+      "sourceRowSha256": "7c6927f341e3d8bf127726fb614de7d99a9d6cfaa9dfc6c98cd580611adcc241",
+      "parentRecordSha256": "baa0146677193882891328f4318e9cb25792a0fdba172e44d2b8c3e26b73408b"
+    },
+    {
+      "sourceKey": "hig:multitasking",
+      "issueCriterionKey": "issue.864.046",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/multitasking",
+      "sourceRowSha256": "66e6e8afcb59ff9f83b0f74660eb9d7043c9aff9cd3c08b831cb34b83dea6b49",
+      "parentRecordSha256": "2946200f9d0a7378cff5d15a11192e0135baeec343a43beceb96d18ec05b456d"
+    },
+    {
+      "sourceKey": "hig:offering-help",
+      "issueCriterionKey": "issue.864.047",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
+      "sourceRowSha256": "b53e30b2a18111196379fe7e48344e1bbfcf35f4177a97045621be8029862e68",
+      "parentRecordSha256": "7f542fec45df0d86e181b9151d9144926f4bb4e5a1378a57435d95ae90288086"
+    },
+    {
+      "sourceKey": "hig:onboarding",
+      "issueCriterionKey": "issue.864.048",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/onboarding",
+      "sourceRowSha256": "fa3967ed476d8ceb7ab00d4c530a414ee3a76d6e6b332ed2c65ac22eda007911",
+      "parentRecordSha256": "941fc15190ec3df31dc8376df5e6f67d87b5472296998878c603e43c7e7f28f4"
+    },
+    {
+      "sourceKey": "hig:playing-audio",
+      "issueCriterionKey": "issue.864.049",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/playing-audio",
+      "sourceRowSha256": "2ea294826fc09fdf7e8f6a4cdb956f32ff400ee93178e37a4777cb0f67a371fa",
+      "parentRecordSha256": "585ed1fc5c168ea1ae98dbc2fc6366620acf2e2e22880b6c3ee2c60cb774e95e"
+    },
+    {
+      "sourceKey": "hig:playing-haptics",
+      "issueCriterionKey": "issue.864.050",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/playing-haptics",
+      "sourceRowSha256": "9912c492cf2873ad241659ecd620bc6d3a1640cd08b5f376f034400ce2244c72",
+      "parentRecordSha256": "4acfd3f096376e3cdf62c9a608dbafa8cc62327ce92088ea0781d4744349ef86"
+    },
+    {
+      "sourceKey": "hig:playing-video",
+      "issueCriterionKey": "issue.864.051",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/playing-video",
+      "sourceRowSha256": "6233e82342400deaec4109a90c54b1c14a9891971f095ebae985b33e8e0ca38d",
+      "parentRecordSha256": "28b6a2bf2acb56e5709e97db4b17e0d60968ce5b73d07f7d6e00e53e09486378"
+    },
+    {
+      "sourceKey": "hig:printing",
+      "issueCriterionKey": "issue.864.052",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/printing",
+      "sourceRowSha256": "8c789d0bc7cfdc09176a50339ff5990116f852227985e7b6bb5c25e3df5b6457",
+      "parentRecordSha256": "d363d2a286f31c58876fb5b42f7b9bca1b6fcaca833b802b03513c77e68dab4f"
+    },
+    {
+      "sourceKey": "hig:ratings-and-reviews",
+      "issueCriterionKey": "issue.864.053",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/ratings-and-reviews",
+      "sourceRowSha256": "086d0aa6df2e320a22693728117c1468c20a0635ed16e3a3e9df2903652e2c2e",
+      "parentRecordSha256": "05806a44b26d31e83735d3af8e1aba1d91d8ad7d62e91b807b583277ff15bfef"
+    },
+    {
+      "sourceKey": "hig:searching",
+      "issueCriterionKey": "issue.864.054",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/searching",
+      "sourceRowSha256": "91f63b8327473fd3f608e78b66a8af767dcf85b16edc5b00cdb8f727284f1a64",
+      "parentRecordSha256": "3c5efcc9c48a1782e9a14213acc6421e14fefcac56e0bff4f28fe35cfb7f6d6b"
+    },
+    {
+      "sourceKey": "hig:settings",
+      "issueCriterionKey": "issue.864.055",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/settings",
+      "sourceRowSha256": "62526f86831a6c80a5aa8c36a1972eb0485a488e72ef17675abe9c36db0638a2",
+      "parentRecordSha256": "bee50a2f822542da411ecf377f633ee02745bdebce0ca937757600cdc97d54b4"
+    },
+    {
+      "sourceKey": "hig:undo-and-redo",
+      "issueCriterionKey": "issue.864.056",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/undo-and-redo",
+      "sourceRowSha256": "5c501a07c4c96c21b5f66bb9596cd9f24782b61eb6b4066e8541df9b7c491c87",
+      "parentRecordSha256": "a8aa21b3d39ccd8e9fca3322c18a34f60a7e571dc4a845a72226617383ef55dc"
+    },
+    {
+      "sourceKey": "hig:workouts",
+      "issueCriterionKey": "issue.864.057",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/workouts",
+      "sourceRowSha256": "58cf8cda4dfce86409b03019a664af6428d14800a0249000faa91e8433a539e3",
+      "parentRecordSha256": "faf81036b1a04674d4364131f5abf687868fe1901164c67e029d060b8e789bcd"
+    },
+    {
+      "sourceKey": "hig:action-button",
+      "issueCriterionKey": "issue.864.058",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/action-button",
+      "sourceRowSha256": "19e5f9e17559fdd52c7eab6615326abd77c2012c504c4aecbb09e76170e71799",
+      "parentRecordSha256": "f5134ed54d9c9f1fda3682c16fe53abc8fed174172350c72838b1ac66cd77c87"
+    },
+    {
+      "sourceKey": "hig:apple-pencil-and-scribble",
+      "issueCriterionKey": "issue.864.059",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/apple-pencil-and-scribble",
+      "sourceRowSha256": "2e7960ac753917b48f84bacf8ab4e51370825ae94e0ab1746f6e7e35b48b2d87",
+      "parentRecordSha256": "2ea5b05089a44b08835b54f894e70d72956726f45ec244bdcb164477a021c014"
+    },
+    {
+      "sourceKey": "hig:camera-control",
+      "issueCriterionKey": "issue.864.060",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/camera-control",
+      "sourceRowSha256": "50eedcce7ca0ea97b23cfdea03e28949b38c2c58b53d74428b58413dc693d38a",
+      "parentRecordSha256": "bdc7455890c60bebbbfcbb194b9fe4ad1c63d486e101813ef25d7d76af4072c6"
+    },
+    {
+      "sourceKey": "hig:digital-crown",
+      "issueCriterionKey": "issue.864.061",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/digital-crown",
+      "sourceRowSha256": "29f5f6132c466ecfa0e0c16d399ea5139f8558015d6b2063fe86cde79d9c7fc6",
+      "parentRecordSha256": "ac1ea60e66f732aa28dfb82508c353c18e96bdd0bf1960eed49f0362783a1f69"
+    },
+    {
+      "sourceKey": "hig:eyes",
+      "issueCriterionKey": "issue.864.062",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/eyes",
+      "sourceRowSha256": "13ee9bdd4e8d240631f5e997e21830f265ff3505e9c1cae07f9e6c72f552453e",
+      "parentRecordSha256": "86e42d49cb4951766b9b1f2635276e4a235673ff1acacf61b3f5c5ff6dc13f89"
+    },
+    {
+      "sourceKey": "hig:focus-and-selection",
+      "issueCriterionKey": "issue.864.063",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/focus-and-selection",
+      "sourceRowSha256": "75ed3c6536b99ebfb53e13fa438232172ed82f5b916520d462f8cfb0d2fc5efc",
+      "parentRecordSha256": "24a9b477fdfca768b8a947aa845fcccd5440667c5672818f91777b240bffb87f"
+    },
+    {
+      "sourceKey": "hig:game-controls",
+      "issueCriterionKey": "issue.864.064",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/game-controls",
+      "sourceRowSha256": "6ace1955883d9f4c77ed453e686a542dd5912b938565bba8c8ca2e248ae03a53",
+      "parentRecordSha256": "e14439d0da69737879c6d752dd98258fa2f9b1380175935c80ba4bc081cf7c51"
+    },
+    {
+      "sourceKey": "hig:gestures",
+      "issueCriterionKey": "issue.864.065",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/gestures",
+      "sourceRowSha256": "e6ea03d40a1d28a4ef200cce534b338e38b131a8683048d8edcddd3ab9e45ea9",
+      "parentRecordSha256": "566974e96627cc39604e2061047b5824324e6823b2070b4a0754ceea4cbb4fa5"
+    },
+    {
+      "sourceKey": "hig:gyro-and-accelerometer",
+      "issueCriterionKey": "issue.864.066",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/gyro-and-accelerometer",
+      "sourceRowSha256": "72fb46a425d86fc375b469c7c6ad35eb6ba24f431fc414549bd22e6f3e4b824c",
+      "parentRecordSha256": "0713b8d295cd2d3b94c03bbd660d1469554cd28f86f53e6d62b2fcdeb8bf90eb"
+    },
+    {
+      "sourceKey": "hig:keyboards",
+      "issueCriterionKey": "issue.864.067",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/keyboards",
+      "sourceRowSha256": "43a72a896d37b83510041d420c8dd4a84937fa4ca25ee748570639c8b7544996",
+      "parentRecordSha256": "a4d949ae70b7c8e163e3c6ccc69dfe0e6da291a54164c7ae1a782010459fb9c9"
+    },
+    {
+      "sourceKey": "hig:nearby-interactions",
+      "issueCriterionKey": "issue.864.068",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/nearby-interactions",
+      "sourceRowSha256": "05916f61877f4c92daa579d2d4a8301e85a45bb86135d3c3fd32368138d9dceb",
+      "parentRecordSha256": "a8e545afe3bbb38356650df2c58f42b56bb0eea5e3ee4b33e4a2f6aaed95c792"
+    },
+    {
+      "sourceKey": "hig:pointing-devices",
+      "issueCriterionKey": "issue.864.069",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/pointing-devices",
+      "sourceRowSha256": "5b55ffa3e86f4d45cf77dd7597dbd36c6a18e9c2c615c00d3609ed627b9a4baa",
+      "parentRecordSha256": "51ec3c64e607f97ee5e886190cb5c14d37c78d594e3fc7ee57cade9db23ac456"
+    },
+    {
+      "sourceKey": "hig:remotes",
+      "issueCriterionKey": "issue.864.070",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/remotes",
+      "sourceRowSha256": "b17aa7b00be8f8a363cff2b0032aa1d684ee7458ab71ccc0732707a947fe2bc0",
+      "parentRecordSha256": "0e9c0a40484a660575dd93e097bc720ade9414515e1d92ab52ddf4e81f7d2c0b"
+    },
+    {
+      "sourceKey": "hig:airplay",
+      "issueCriterionKey": "issue.864.071",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/airplay",
+      "sourceRowSha256": "e438f5f484ecf98c825f68a3a3f8c486b79029b4ef038882cc0e8a54476bcb2b",
+      "parentRecordSha256": "1da69138151151fc41f612a4270551b84aa9ce9c4494f7b02c0a45745d62be3d"
+    },
+    {
+      "sourceKey": "hig:always-on",
+      "issueCriterionKey": "issue.864.072",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/always-on",
+      "sourceRowSha256": "eccbdd514c6307c360452b5edf44fdc176def9b69a0cfff89d7a7ca306c3d185",
+      "parentRecordSha256": "4c64757722872a8d87220f1b8de81009c90389878a57dbfaf5b9c59660ed2320"
+    },
+    {
+      "sourceKey": "hig:app-clips",
+      "issueCriterionKey": "issue.864.073",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/app-clips",
+      "sourceRowSha256": "a68a4ab230fe8745b6d8cf579d8dbbaaf8e363832427379a03e435a3bdc56a49",
+      "parentRecordSha256": "52585ae07ae6c9f5f9191881c273b6aa844d4f565ac8c6228df4de9d3f902579"
+    },
+    {
+      "sourceKey": "hig:apple-in-app-purchase",
+      "issueCriterionKey": "issue.864.074",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/apple-in-app-purchase",
+      "sourceRowSha256": "77e65b860e55b28c721d9316ac1791955329bf3708928693e34f243fc0764936",
+      "parentRecordSha256": "9efc91a49e7a4228c54e1637eaedb20e0a018e72854f6fc640b8b913a70a88b1"
+    },
+    {
+      "sourceKey": "hig:apple-pay",
+      "issueCriterionKey": "issue.864.075",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/apple-pay",
+      "sourceRowSha256": "fe11bf2ef22dd4972300b3cf663beb6ca3eae19a1e8138d68e9e4795e73ae9c9",
+      "parentRecordSha256": "a0f21e622bfe3e0b6a85a23b0190ed5d6aef1080e45642042791c1d00dd7bed1"
+    },
+    {
+      "sourceKey": "hig:augmented-reality",
+      "issueCriterionKey": "issue.864.076",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/augmented-reality",
+      "sourceRowSha256": "77cfe3681b7c9eab462ed46882089e68b8a7c2328a466ad3bf672f62159d628f",
+      "parentRecordSha256": "72ea9316ac872786e8e4f5860f141a3db643deac0c0ee093190cf34c46acb88b"
+    },
+    {
+      "sourceKey": "hig:carekit",
+      "issueCriterionKey": "issue.864.077",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/carekit",
+      "sourceRowSha256": "440c1f20a4a74c983b274aacfeb40b3b5e49a5bc807832fb39ca9d7181e42142",
+      "parentRecordSha256": "50f1af7bda1a6356a809f4d29e411e17c90ad6e82dea7a2f54f5e92da84cb309"
+    },
+    {
+      "sourceKey": "hig:carplay",
+      "issueCriterionKey": "issue.864.078",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/carplay",
+      "sourceRowSha256": "8a0cabdeabdf6a5075b7fdc90373dd693c8f571fc1b9b8c52dbd5054ec907118",
+      "parentRecordSha256": "438c080252a4cb1d5c157a8a744f0d2f3c011cd977de3bf54f7b10b776477a76"
+    },
+    {
+      "sourceKey": "hig:game-center",
+      "issueCriterionKey": "issue.864.079",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/game-center",
+      "sourceRowSha256": "b10e089bed3ebebf8921f9ec1540ca7b9e1ba43902e202c65fe4193ce0fca1dd",
+      "parentRecordSha256": "5f371d4c87913b7247f1573c8f303cf80accb949f8708054e273e91eef23a137"
+    },
+    {
+      "sourceKey": "hig:generative-ai",
+      "issueCriterionKey": "issue.864.080",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/generative-ai",
+      "sourceRowSha256": "b4b1ef475dff0c3bde6025b1843e2eaf7c84b4827a137bd76dc77ccf9f2cc52e",
+      "parentRecordSha256": "b8a51c067417b1d21ab5a9d21be66d508e09179d295357bb8773718f2bbf2f1e"
+    },
+    {
+      "sourceKey": "hig:healthkit",
+      "issueCriterionKey": "issue.864.081",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/healthkit",
+      "sourceRowSha256": "22d569a2eaac03ac3c7e42ce0b4ad561be90b09244ba4e85ba3366160f14d95e",
+      "parentRecordSha256": "0c59bce173a7d61048185efecf3e8fdd5aeca5136a4fd2bb2376fc613b02ddc9"
+    },
+    {
+      "sourceKey": "hig:homekit",
+      "issueCriterionKey": "issue.864.082",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/homekit",
+      "sourceRowSha256": "c5e55ecd64908d8f1e13ab62c5da0b80359e8f3136eb294f97d3852ed7f28b5f",
+      "parentRecordSha256": "0fa31ea281a9c61726c52920d26242cc7aee9600d13f07e8d4123a2e5cf95dd7"
+    },
+    {
+      "sourceKey": "hig:icloud",
+      "issueCriterionKey": "issue.864.083",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/icloud",
+      "sourceRowSha256": "eab85dcd3dddd334e187df398b85c8a7d5bd8cb20227a011377a2a1fde183f02",
+      "parentRecordSha256": "84ca067fce4b170bd7bdd28eb6ef8f394c882a5095006378bb1267b559d70da8"
+    },
+    {
+      "sourceKey": "hig:id-verifier",
+      "issueCriterionKey": "issue.864.084",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/id-verifier",
+      "sourceRowSha256": "7c214bdde2baa258af18aeceffb26c2dd30c4917e667deb0da502ca30473d2b4",
+      "parentRecordSha256": "7eda290ed801de95ba9e4cfb4139c157e13b0bd9c5cc60ef57ddffceb93da36a"
+    },
+    {
+      "sourceKey": "hig:imessage-apps-and-stickers",
+      "issueCriterionKey": "issue.864.085",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/imessage-apps-and-stickers",
+      "sourceRowSha256": "51b27ac33d3f4648c1d1dddb9cecd77d9c7e66df2ca55078d72879a11337d9cf",
+      "parentRecordSha256": "88eaa6774c5c84e370aec22ff848d55b490d95803c2daf3f888126e01a1b097d"
+    },
+    {
+      "sourceKey": "hig:live-photos",
+      "issueCriterionKey": "issue.864.086",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/live-photos",
+      "sourceRowSha256": "de7f6a7dd7aeba75e143a488c1bddfae865990736472c4178d997ccf82388731",
+      "parentRecordSha256": "c6fbeff33f2b8cbf3a77b574b66809e5b169578829f006a510e2b1272d242dec"
+    },
+    {
+      "sourceKey": "hig:mac-catalyst",
+      "issueCriterionKey": "issue.864.087",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/mac-catalyst",
+      "sourceRowSha256": "3d6edf313312effbf866a44face81d75cd1e05e2c0410f287ba01124cb412131",
+      "parentRecordSha256": "96601ec6c6ad28b7f63fad6d113e14ae0b8ba3bcaa0b665479e36a13d1a63f4f"
+    },
+    {
+      "sourceKey": "hig:machine-learning",
+      "issueCriterionKey": "issue.864.088",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/machine-learning",
+      "sourceRowSha256": "cb81eec9f1ff2c1526a8f79b5e03aca347fc9353b2b8a31fb28e3f202f1d5cea",
+      "parentRecordSha256": "1ea342123ab4f963cd809d692a8b482c9ff32d20cda095608412ff4860710c0c"
+    },
+    {
+      "sourceKey": "hig:maps",
+      "issueCriterionKey": "issue.864.089",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/maps",
+      "sourceRowSha256": "2da7c71756c11a268c7876f2753b317891ea84954aeab72a1c32985b5b0957e8",
+      "parentRecordSha256": "4ee438433c3e9612784778aad2658f5e7d483fbcf490ec6080122947a588b131"
+    },
+    {
+      "sourceKey": "hig:nfc",
+      "issueCriterionKey": "issue.864.090",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/nfc",
+      "sourceRowSha256": "6ad7cc6b205fab182d125d046c6dc5dc9ce516b259312ffdb9e5b7e5381f8c42",
+      "parentRecordSha256": "f5b9d38ba64eda4e39b7f25ea97b6e2b040f4fe1b41283a12265ac17d7febe04"
+    },
+    {
+      "sourceKey": "hig:photo-editing",
+      "issueCriterionKey": "issue.864.091",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/photo-editing",
+      "sourceRowSha256": "2a7820ca5d51e8dd427eb287232d2c28d0bd95d5b8ab7bf0bc219c4af90209de",
+      "parentRecordSha256": "fa16083735496b94c2b70b2eec706791f355f0d45edb7e7e36729677069dc09d"
+    },
+    {
+      "sourceKey": "hig:researchkit",
+      "issueCriterionKey": "issue.864.092",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/researchkit",
+      "sourceRowSha256": "98e2a7428f5b3750d2132e43575aeddcaef790502470d2a3c83ea421eef444a5",
+      "parentRecordSha256": "193e9dbc6abd1b5805cebf3f1179fdad8c64c043ccc4ac0923d7252cec53b391"
+    },
+    {
+      "sourceKey": "hig:shareplay",
+      "issueCriterionKey": "issue.864.093",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/shareplay",
+      "sourceRowSha256": "dc6e777a33a8dcc859f223f8fb905e1d92c4053d975f6f1fb5a85d659cdcbc3c",
+      "parentRecordSha256": "817bff8cfaaf9606b601a7622edbd363dcd553e6e569312b409976624892017c"
+    },
+    {
+      "sourceKey": "hig:shazamkit",
+      "issueCriterionKey": "issue.864.094",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/shazamkit",
+      "sourceRowSha256": "039a5f564066af8396e0f298b5b6ef444acba72240cce430aa8c9af5459390a3",
+      "parentRecordSha256": "f3b62c2837afea3fff68b76e442ed3484d63ac0fb0012d6c02ff73a32ca8e8e9"
+    },
+    {
+      "sourceKey": "hig:sign-in-with-apple",
+      "issueCriterionKey": "issue.864.095",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sign-in-with-apple",
+      "sourceRowSha256": "ec8d277bc3b91b5b866279c533f6d42a914e9984820d41e743d131eb2c96abc6",
+      "parentRecordSha256": "89fd9b47d21b8d44cccbdd21f7844642dcee66e8276d20fa24a3751ae15cf449"
+    },
+    {
+      "sourceKey": "hig:siri",
+      "issueCriterionKey": "issue.864.096",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/siri",
+      "sourceRowSha256": "3d5385bafbae842a5a41d1a3413ac82d66d44b84f3d25b2c032b13e18de0f8f5",
+      "parentRecordSha256": "45a8018b968bf5dbe97e352f98d8c7c9cc350caa48e31fb2b01d1437e288861f"
+    },
+    {
+      "sourceKey": "hig:tap-to-pay-on-iphone",
+      "issueCriterionKey": "issue.864.097",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tap-to-pay-on-iphone",
+      "sourceRowSha256": "ed3a3aedc28b1e4adf5689d51dfb1191d287f3829fb4e0a75f782e78154d2c89",
+      "parentRecordSha256": "eb4c79738546eb3f58a22e279da0e35b74ae2bee0dea5f94581fe4d2a48e69af"
+    },
+    {
+      "sourceKey": "hig:voiceover",
+      "issueCriterionKey": "issue.864.098",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/voiceover",
+      "sourceRowSha256": "7904db8ba7327a262d17bdd5e0ac759ddf44fb86b64eddb4f233939c6dac8507",
+      "parentRecordSha256": "b308fc3665e5c06a3a226ec533b8ca95b828a97cc38d136572a6491d4b83b8b2"
+    },
+    {
+      "sourceKey": "hig:wallet",
+      "issueCriterionKey": "issue.864.099",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/wallet",
+      "sourceRowSha256": "07a2a50f2cd06ad7c97ac2d9580d4f11dcf1209559d602959e9b8deb5e631972",
+      "parentRecordSha256": "a040ae62ac6ca29d04d4443ce43e5095e55cdb52317808ab5a722c3b5b430467"
+    },
+    {
+      "sourceKey": "hig:charts",
+      "issueCriterionKey": "issue.864.100",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/charts",
+      "sourceRowSha256": "691e3cd72fd8eea202872583aa73fe0b9e7115a8deee19213d835570c5bb9bd3",
+      "parentRecordSha256": "2c3ae198581604607e0962621851b7f520fcfca2c426833fa1ceb9a0ef4e3a37"
+    },
+    {
+      "sourceKey": "hig:image-views",
+      "issueCriterionKey": "issue.864.101",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/image-views",
+      "sourceRowSha256": "2706f1e536a005ba80744085d0dd5fb156e71bf003946082ae1f206b30fa4ce2",
+      "parentRecordSha256": "9a3a840288f44b804788c3f444589d47600d02112ce703cd794905c4bf609a32"
+    },
+    {
+      "sourceKey": "hig:text-views",
+      "issueCriterionKey": "issue.864.102",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/text-views",
+      "sourceRowSha256": "8af351fb00541feec3570d9ba94d1af52af81ce3241d22d4a906cc2c3ece8920",
+      "parentRecordSha256": "8ed12f1f21d8d3235e9371eeaed79bea3cca6f335161f423d18297a0ef625cb8"
+    },
+    {
+      "sourceKey": "hig:web-views",
+      "issueCriterionKey": "issue.864.103",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/web-views",
+      "sourceRowSha256": "dc64cbe3dc454216952cb60c972f4e42e7b2a59a914ff183d75bc4bb4b2b9aa1",
+      "parentRecordSha256": "a8271ab3aff4c36af71604030f28b40999b7ac7b055fca4b794b9af75a4f0117"
+    },
+    {
+      "sourceKey": "hig:boxes",
+      "issueCriterionKey": "issue.864.104",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/boxes",
+      "sourceRowSha256": "31e39bd64b9c49c90e541509f863f4bd976cc3975ce13a67d1726c4c0f2fe428",
+      "parentRecordSha256": "0ba460758432e6bdc56965765acbe7f60f6d0545cb19b6718cc5d468be7a38d1"
+    },
+    {
+      "sourceKey": "hig:collections",
+      "issueCriterionKey": "issue.864.105",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/collections",
+      "sourceRowSha256": "71a33b3941036e3bc4d56ac6746f504e274025a84d0104f277f3bb0aacbe3676",
+      "parentRecordSha256": "6545cea265fac91dcecf32de320fdf93af909a2940bade6b0be6d4b08f9945d3"
+    },
+    {
+      "sourceKey": "hig:column-views",
+      "issueCriterionKey": "issue.864.106",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/column-views",
+      "sourceRowSha256": "ba0cdac0826ac2b40abb7b462dfe43f1962edde13574e7116255b97d0def570a",
+      "parentRecordSha256": "c5aca642ad96375a416b3fc4ea070c3f9f06121a259b5b720df49140e3a63f0f"
+    },
+    {
+      "sourceKey": "hig:disclosure-controls",
+      "issueCriterionKey": "issue.864.107",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/disclosure-controls",
+      "sourceRowSha256": "258d8902f6b97ead6b888b66224240fda8b034605e0eaaceab6b5971a158afa0",
+      "parentRecordSha256": "0256bd8e3f5bbc620753f9b1d694ae9fa155dcd72c9ff65069ca24434955d47a"
+    },
+    {
+      "sourceKey": "hig:labels",
+      "issueCriterionKey": "issue.864.108",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/labels",
+      "sourceRowSha256": "b07d01362f89fd0826b6827583b58177faea70b8ea5e99a3fdb9fb7457e86a9d",
+      "parentRecordSha256": "b3415d61c3e6caf84e9d3f8624a95a98a669dba430812af4e998f59a35f6ee28"
+    },
+    {
+      "sourceKey": "hig:lists-and-tables",
+      "issueCriterionKey": "issue.864.109",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+      "sourceRowSha256": "97622b7a184e2540b682f7d321bb821cdd7744b643b6c48095c99edd007eec38",
+      "parentRecordSha256": "eea8d54dfe0a2d052f9fdc7092f02dd5bbe269997aebd352fe5ccb58ec789b92"
+    },
+    {
+      "sourceKey": "hig:lockups",
+      "issueCriterionKey": "issue.864.110",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lockups",
+      "sourceRowSha256": "a772d11374ef0f5d483bae3dd5d23deaa26d0cd5ca070903bc70387e30958308",
+      "parentRecordSha256": "bd8636d75eb75b1bee2f97b63b478d65e37faa2b7747d7a635a58d4d3c4d9aa1"
+    },
+    {
+      "sourceKey": "hig:outline-views",
+      "issueCriterionKey": "issue.864.111",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/outline-views",
+      "sourceRowSha256": "332dd18c10faddca080e9ed3b8784cf2a24756f06595aed9014f9c6beb5f65df",
+      "parentRecordSha256": "c24ed8196e43bf0097e7133fd9f0bef3d3ec42f65edc9eb02ac67e60d4a1682b"
+    },
+    {
+      "sourceKey": "hig:split-views",
+      "issueCriterionKey": "issue.864.112",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/split-views",
+      "sourceRowSha256": "4b2019ef9a38958f47788e26197e85aa649bfed15146676c8f91972308ef04a1",
+      "parentRecordSha256": "bd0d236603e5463fc535270fa6654ced42bb66e2d00f13a85462ad41c01a1afe"
+    },
+    {
+      "sourceKey": "hig:tab-views",
+      "issueCriterionKey": "issue.864.113",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-views",
+      "sourceRowSha256": "ccd12188384d41fed89c8bb21fe1450ea9819af7c8993d580a828f04077009ea",
+      "parentRecordSha256": "adaf4247640e3f109761a30bc2118eff4775edf0fd8791605465263a8fadf8c9"
+    },
+    {
+      "sourceKey": "hig:activity-views",
+      "issueCriterionKey": "issue.864.114",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/activity-views",
+      "sourceRowSha256": "6bbff591c884539c3efee9799d4837ead7c34d64a696843fa50c1d0d76ba8953",
+      "parentRecordSha256": "476bd07752b02f4db3f7d530cfe9174c72599ecc1cc2951a20d9acf191b4c196"
+    },
+    {
+      "sourceKey": "hig:buttons",
+      "issueCriterionKey": "issue.864.115",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+      "sourceRowSha256": "9f30c6901814896aada5b062c76334170b0011129b6ea676c8d4cd897e4930b2",
+      "parentRecordSha256": "90c25c26da7839b8846db5da145abe4fee04a4f2671d087feaaea42763d4d419"
+    },
+    {
+      "sourceKey": "hig:context-menus",
+      "issueCriterionKey": "issue.864.116",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/context-menus",
+      "sourceRowSha256": "4fbdfdb1609b1a65067ada275442d0ecd01019f8c84122c7dc54cb9fe3849135",
+      "parentRecordSha256": "19e69dbe9650326dc6f4c982919220b28ff602fa59c7eb69e028e0290f762638"
+    },
+    {
+      "sourceKey": "hig:dock-menus",
+      "issueCriterionKey": "issue.864.117",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/dock-menus",
+      "sourceRowSha256": "6b3f34a07978de3a61834ee7a9e64e50e3faf8bb5ffe47401579ab891e4a542d",
+      "parentRecordSha256": "2bc4f10a81573cdbfb6aa6cd5b261e06f3381f01d02f63fd45afddf8997785f6"
+    },
+    {
+      "sourceKey": "hig:edit-menus",
+      "issueCriterionKey": "issue.864.118",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/edit-menus",
+      "sourceRowSha256": "211e8de7a96e9d787985ea7ed3fcf05c02cce046b5d0ef1a3113ea86221a5e4f",
+      "parentRecordSha256": "0f5699ae6b88fcc8f5e88d8fb990b29f9a5811031bb38080aade3eb7edd0c898"
+    },
+    {
+      "sourceKey": "hig:home-screen-quick-actions",
+      "issueCriterionKey": "issue.864.119",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/home-screen-quick-actions",
+      "sourceRowSha256": "e612c836c417f2d250b0f403c6ed1c6abc79a57b8eee2f4a9b055c55b1c1ea57",
+      "parentRecordSha256": "2647c319d9b63b43b43fce89e886dc96259314458a8fa19c48c6acd4c68978bf"
+    },
+    {
+      "sourceKey": "hig:menus",
+      "issueCriterionKey": "issue.864.120",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "sourceRowSha256": "088babea12380a5ec9e12a8272ff8126f6c0949debe314a7985e574341d761d5",
+      "parentRecordSha256": "b020d66a251b777c1247f1e581546dba868c8ee9b8af7f94af6645aa172ea2e6"
+    },
+    {
+      "sourceKey": "hig:ornaments",
+      "issueCriterionKey": "issue.864.121",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/ornaments",
+      "sourceRowSha256": "e0ca41217e56622a6d70eb73afcdfc42fa577d8fde4bac6f19dba12841862979",
+      "parentRecordSha256": "e3781b0c30e3b7b531ef4c394d35fde3e12450d2845d3ce4260288863d5eec08"
+    },
+    {
+      "sourceKey": "hig:pop-up-buttons",
+      "issueCriterionKey": "issue.864.122",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/pop-up-buttons",
+      "sourceRowSha256": "5d85e904fa4f6ce5c6f1b9470fee529655df02e8817c77ba5a6d9015a58f50bc",
+      "parentRecordSha256": "69db92d997119dd82c7132acc2394a3a512f9ac28e93a4486033c355217ec51f"
+    },
+    {
+      "sourceKey": "hig:pull-down-buttons",
+      "issueCriterionKey": "issue.864.123",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/pull-down-buttons",
+      "sourceRowSha256": "9ddc505cef3a9daceb14370707226ff296ee8dd2a5655c0a05c80282a9e889ed",
+      "parentRecordSha256": "c787157623419ca1de4a4de185403b7bbc060bca4311e0b548bb9ce6fd7502ca"
+    },
+    {
+      "sourceKey": "hig:the-menu-bar",
+      "issueCriterionKey": "issue.864.124",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/the-menu-bar",
+      "sourceRowSha256": "35329d1fe0c238ccf39768ea4bc053dedda372f1a0defde90c1ee53d26610c6d",
+      "parentRecordSha256": "4446c36893374145a54f35a09005d09a2bf8ab8c246cb13b545c50d90b09d6df"
+    },
+    {
+      "sourceKey": "hig:toolbars",
+      "issueCriterionKey": "issue.864.125",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars",
+      "sourceRowSha256": "d4383d420008e9d32c9d75e6b8996c37f8c11c44813b3b351983c472adc7e122",
+      "parentRecordSha256": "53150cc82e0130f3652e1832a08c042c067442ae1e5c290c3dbaa97b0834bccc"
+    },
+    {
+      "sourceKey": "hig:path-controls",
+      "issueCriterionKey": "issue.864.126",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/path-controls",
+      "sourceRowSha256": "067886f88c405797da26df1f17591008a75a51dd89f0c38991822ac887811795",
+      "parentRecordSha256": "1414f1c4674c3d812b972c3bbbf92480644fdd82b8627349c4f0ad1c8f80f844"
+    },
+    {
+      "sourceKey": "hig:search-fields",
+      "issueCriterionKey": "issue.864.127",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "sourceRowSha256": "151e159e1f1e19f15f7831d2068e4136b9257f81ef99b01eddff87cfbb3fb803",
+      "parentRecordSha256": "d2600626fd884e1befca24171d5f42c8e81693681e66322a9bca1919d2659863"
+    },
+    {
+      "sourceKey": "hig:sidebars",
+      "issueCriterionKey": "issue.864.128",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "sourceRowSha256": "93ae9ad2054df6167396aaf9cb8a73a4dc20004b55d2fd60753048b8dd29526c",
+      "parentRecordSha256": "8ce7ee7b8b476c3cb2e8b5ee94d1194a22a2e9c62a20969bd6c4ccd72862be3f"
+    },
+    {
+      "sourceKey": "hig:tab-bars",
+      "issueCriterionKey": "issue.864.129",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "sourceRowSha256": "7fafb9f40e295850c9ec1f3ed1528f65d40a089165414cbdcc0ee11b0406a120",
+      "parentRecordSha256": "1ebec0105ef1db665e8e967ddea9ceab162fdae38f4179eafd22a7157ecb4744"
+    },
+    {
+      "sourceKey": "hig:token-fields",
+      "issueCriterionKey": "issue.864.130",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/token-fields",
+      "sourceRowSha256": "23680a2400f062c6731d16212fc8596778453e7d937db8b8b7f78ecde24e2cba",
+      "parentRecordSha256": "a8112a9d5aab23c1f15fc196e463adbbbaa6ffea52782fe4ef85ffde244425f3"
+    },
+    {
+      "sourceKey": "hig:action-sheets",
+      "issueCriterionKey": "issue.864.131",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/action-sheets",
+      "sourceRowSha256": "53be58f7937eb156da86e1a909ddd7182211d392ec7ef931a1221136d6678073",
+      "parentRecordSha256": "1ebe3fd9f51662afded3c082915bc496e02556faf1b73106ec06428c81a61430"
+    },
+    {
+      "sourceKey": "hig:alerts",
+      "issueCriterionKey": "issue.864.132",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/alerts",
+      "sourceRowSha256": "4168d0cb76526802092759cb4e8d8c7d0ca998c098994cc47054d57fe28a8c30",
+      "parentRecordSha256": "34efa82906ef9c2d6af90a4cc5eb08c3e3a48c45ec93068f966c085439a5d6ac"
+    },
+    {
+      "sourceKey": "hig:page-controls",
+      "issueCriterionKey": "issue.864.133",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/page-controls",
+      "sourceRowSha256": "30f5d0dc0ac9010b30ae73ef54bf783df0223f83c3997fdd7277bffb7c55ae51",
+      "parentRecordSha256": "f329dd602ac78c6f4ee8db467f623527ad19be6105fcd6d412d2bb77fd22dad5"
+    },
+    {
+      "sourceKey": "hig:panels",
+      "issueCriterionKey": "issue.864.134",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/panels",
+      "sourceRowSha256": "34560c9889660f497b3ed34b27f6d07a40108403a4c4a19d0f33ce5b2facabe6",
+      "parentRecordSha256": "730d652aa146efffa9a58730332c37f72ad6ec30fdad74e4e068cb43539b6e6e"
+    },
+    {
+      "sourceKey": "hig:popovers",
+      "issueCriterionKey": "issue.864.135",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/popovers",
+      "sourceRowSha256": "269a0fd8da1796eb5a0653ce6bd6325c35733f5cc8b4d83f4ff9795dbf38b41c",
+      "parentRecordSha256": "732b95338813a8b309bb8277b086af314dc80620e38d139c81178ee2aad73f20"
+    },
+    {
+      "sourceKey": "hig:scroll-views",
+      "issueCriterionKey": "issue.864.136",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/scroll-views",
+      "sourceRowSha256": "d6363ebea47d556e25a18734ad5b3f5809b7d8187c28c9199f6c3740ba5a80df",
+      "parentRecordSha256": "31175c79ff32785f2ec81884d68aea416a4a68d4f5e00753b223627e42bcedb2"
+    },
+    {
+      "sourceKey": "hig:sheets",
+      "issueCriterionKey": "issue.864.137",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "sourceRowSha256": "b00ba1db81a2a4c261501893be56d5b4bf5df0cda59029eda8e411194926702d",
+      "parentRecordSha256": "51733f390692b36fe45c586b542624bd16e6f56494cf1f6a83efdf1a1e4d0009"
+    },
+    {
+      "sourceKey": "hig:windows",
+      "issueCriterionKey": "issue.864.138",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/windows",
+      "sourceRowSha256": "4b7b5fc3b01c65cbfebf31254579d5e44cfa410fc78fe198d8a8f60655866726",
+      "parentRecordSha256": "cc995b87509ee845cb4e7eb23d9090083ffb17b27e617af3211ec2923e8719c3"
+    },
+    {
+      "sourceKey": "hig:color-wells",
+      "issueCriterionKey": "issue.864.139",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color-wells",
+      "sourceRowSha256": "8cb7823e6ed19005680ff68d67c8529048ff8e4415f9fa8acd324b9544182def",
+      "parentRecordSha256": "a708c467c01258fe4525c2b2f0ab41bf57fe780c1b095a89269f428c4f4b2ed0"
+    },
+    {
+      "sourceKey": "hig:combo-boxes",
+      "issueCriterionKey": "issue.864.140",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/combo-boxes",
+      "sourceRowSha256": "ed821e0896aeef358835ea82d630127c9d70c206a55fbd47302f08208de2d2c8",
+      "parentRecordSha256": "93d09e0c2c805f241d54617e7771c0cb4dc04c61fafb2df0bda52a6c49b16fdd"
+    },
+    {
+      "sourceKey": "hig:digit-entry-views",
+      "issueCriterionKey": "issue.864.141",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/digit-entry-views",
+      "sourceRowSha256": "9529bbebe374114ba53acb785e4e4a101965405bf65f348885942b46d16b216d",
+      "parentRecordSha256": "525ea6c81bc7e8a1353024292a040ce9c6fa99a3087573b7ec4c3913a28457c4"
+    },
+    {
+      "sourceKey": "hig:image-wells",
+      "issueCriterionKey": "issue.864.142",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/image-wells",
+      "sourceRowSha256": "f2b74a558f25fb38a90374896c30fbebe16451a66daafc95f3ab6fd4ff1d4468",
+      "parentRecordSha256": "49aa127039375b198efa26ac4267dc65b7e9df6130a5f2e310ad62968abb2da7"
+    },
+    {
+      "sourceKey": "hig:pickers",
+      "issueCriterionKey": "issue.864.143",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/pickers",
+      "sourceRowSha256": "5da763646003cc30d22e12e277c72acc53dc104955440d93deb3600a002d4561",
+      "parentRecordSha256": "dd68143042adceb4c29603d923af4622a497d88126b8e343676906ec8c2027b4"
+    },
+    {
+      "sourceKey": "hig:segmented-controls",
+      "issueCriterionKey": "issue.864.144",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls",
+      "sourceRowSha256": "f82f69ab5a49ffa617d7c6bac8facc9b1416b40f78ed374b158b36fa30a28d4d",
+      "parentRecordSha256": "4c2fe709f5007b17095ca6c91b4763eec71b56eb26526164c0ff61350ff45041"
+    },
+    {
+      "sourceKey": "hig:sliders",
+      "issueCriterionKey": "issue.864.145",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sliders",
+      "sourceRowSha256": "f80438c5c7277228280aea7cfbf42c51d3babd52c9832cd29a82714a9145711c",
+      "parentRecordSha256": "ec0acac980c6efe2e957f5a913c6e5aa7eaa4874929430fdafda7835e852f4bd"
+    },
+    {
+      "sourceKey": "hig:steppers",
+      "issueCriterionKey": "issue.864.146",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/steppers",
+      "sourceRowSha256": "c0af285016882a266574649daa0d4406adfaa57af84b9f39f8c76af737b59e2f",
+      "parentRecordSha256": "5d9de96c2e6aca19433df9e2be88e6c8b0f67543db207ea1b6bb043c17dcf089"
+    },
+    {
+      "sourceKey": "hig:text-fields",
+      "issueCriterionKey": "issue.864.147",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+      "sourceRowSha256": "73d92956ebadd23d9f6ba3157611e466e97311fff7f284f62cee9704320084ba",
+      "parentRecordSha256": "c78eb82982986f1503d5f2fd745ad47454342ca59cfe456b9becbb2297fbc93a"
+    },
+    {
+      "sourceKey": "hig:toggles",
+      "issueCriterionKey": "issue.864.148",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
+      "sourceRowSha256": "a31fa478b52d6b1ce24d56833076c6b7742005d15441fe8060e9a0462666a595",
+      "parentRecordSha256": "8ef4f2b31af12c9a39c57bc043df69165542627eb0354f5161620df8c5e62466"
+    },
+    {
+      "sourceKey": "hig:virtual-keyboards",
+      "issueCriterionKey": "issue.864.149",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/virtual-keyboards",
+      "sourceRowSha256": "ffd8b64fbabd9fc1e7591053d75a3d0e94e7564e471116677af567fd5f307ab5",
+      "parentRecordSha256": "fb260f72242e696d59baa1a3b956ee163a0f94e4485cf1929be5cd50ea8bb475"
+    },
+    {
+      "sourceKey": "hig:activity-rings",
+      "issueCriterionKey": "issue.864.150",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/activity-rings",
+      "sourceRowSha256": "d65d72e80f531a4739e1562a363f06e281d1aee879f4a070f164cdec5e427403",
+      "parentRecordSha256": "aa3d4320f8bd5aa2370d756c9dc560eedc6a7d6fe7a755c4232a0f8b084d48f8"
+    },
+    {
+      "sourceKey": "hig:gauges",
+      "issueCriterionKey": "issue.864.151",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/gauges",
+      "sourceRowSha256": "9604604e508cdae49a85eb0cb77f812e99f23b4b348eae660ff6aa8b44a341b0",
+      "parentRecordSha256": "11cc9ccd694f220a161805b748a2838d1a2ae22df947af046e14097a24dbe5ca"
+    },
+    {
+      "sourceKey": "hig:progress-indicators",
+      "issueCriterionKey": "issue.864.152",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators",
+      "sourceRowSha256": "bcbdbc6481683137b041d142d66f296ffccd6de605a7cfc878dcec6f4b46e1b3",
+      "parentRecordSha256": "850de342c699be4e257301058e484a3e9dbd32cc81702997ce50b7e72cbd7f83"
+    },
+    {
+      "sourceKey": "hig:rating-indicators",
+      "issueCriterionKey": "issue.864.153",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/rating-indicators",
+      "sourceRowSha256": "73f0056907e87188190a5ce3d8928aa6fec2be85e2f1b87463554e382c18d925",
+      "parentRecordSha256": "02ef2957c6fefec7363ae16a2f03258e22f4202a7c4b6a1120daba87471fa1ce"
+    },
+    {
+      "sourceKey": "hig:app-shortcuts",
+      "issueCriterionKey": "issue.864.154",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/app-shortcuts",
+      "sourceRowSha256": "9ed15bbabb4af72369658ea65eaf7250aa8576c8d07b75b5edc52af5bffb8e15",
+      "parentRecordSha256": "b7453fbc2be7c0978ab1ce8cfccbb43d30781181aac5b7eae52a3bee3f79e860"
+    },
+    {
+      "sourceKey": "hig:complications",
+      "issueCriterionKey": "issue.864.155",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/complications",
+      "sourceRowSha256": "85db0894a195b0bf8923a8d4e83c9c97ee28bd832d0958058ace3aae4fcf63eb",
+      "parentRecordSha256": "24feea9e79c31201095d9f7cfe1391465bfe05ca9016da7c1dcf41baf882241a"
+    },
+    {
+      "sourceKey": "hig:controls",
+      "issueCriterionKey": "issue.864.156",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/controls",
+      "sourceRowSha256": "f4bc5ee0d7569dd966dbec36de565392c7d9668519b95297c9e5eb651d44c21f",
+      "parentRecordSha256": "588eae91d787217baa3275515e2654a802dafba592a6a8ceac68eb3b06aaeffd"
+    },
+    {
+      "sourceKey": "hig:live-activities",
+      "issueCriterionKey": "issue.864.157",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/live-activities",
+      "sourceRowSha256": "ecbfa9673fe1357dbe9e941010409c6cf68633ea4db1586686c747277db7260c",
+      "parentRecordSha256": "2787127ebb03144a57cf5e55e9f8c1e22f1d55b40763243f3f93e5a320a8890c"
+    },
+    {
+      "sourceKey": "hig:notifications",
+      "issueCriterionKey": "issue.864.158",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/notifications",
+      "sourceRowSha256": "cdac8731d6a6143fde5830d09b5b8fd6b39f6b19ec5d57a935dd053735cb00ea",
+      "parentRecordSha256": "43f00e8af15c65ff787d6ba893de5a09945baa21dc9bee378e196a1d0fc6cc6d"
+    },
+    {
+      "sourceKey": "hig:snippets",
+      "issueCriterionKey": "issue.864.159",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/snippets",
+      "sourceRowSha256": "7a7d2e2e5ba5ac0d1fff5e1a19e320b31af0aff225771d3db60a0abe99d8aae2",
+      "parentRecordSha256": "d82b218375d3f3d81c00c81deb3fc150e5db89e841e69756c650ac59aff8dfb3"
+    },
+    {
+      "sourceKey": "hig:status-bars",
+      "issueCriterionKey": "issue.864.160",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/status-bars",
+      "sourceRowSha256": "a18db00ccdaeb58e836e37570488aaa9ee1eea99a2bebfee6072c949a37b20c0",
+      "parentRecordSha256": "c533eacf16b1aca7c855ffdc50ba7bfcd973c401e844db349ba66687e9d87559"
+    },
+    {
+      "sourceKey": "hig:top-shelf",
+      "issueCriterionKey": "issue.864.161",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/top-shelf",
+      "sourceRowSha256": "d0a619dad216fef9f3e6c3fc5f913595404c11a351c0297c5749a709a597f8b5",
+      "parentRecordSha256": "1debe219c635da24817382ece9d07b79c07b75aa5a67ff9f12fbec97d94960f2"
+    },
+    {
+      "sourceKey": "hig:watch-faces",
+      "issueCriterionKey": "issue.864.162",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/watch-faces",
+      "sourceRowSha256": "2c78ef45d2f207c20e68c5a00bf84a19707b4e3a3298eae2c4a8c78661b45beb",
+      "parentRecordSha256": "99852157033652c52ebc7dc86827b171753274a307a0d57f38ddd57a8cb2e114"
+    },
+    {
+      "sourceKey": "hig:widgets",
+      "issueCriterionKey": "issue.864.163",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/widgets",
+      "sourceRowSha256": "2db507f49ca2baa2f45ab0303222208a690c41673f566327d1ca92fe8646c9b2",
+      "parentRecordSha256": "cd21748efc49d05753c508f340c44c241980a61550979f29a9951715f2bf77fa"
+    }
+  ],
+  "platformCorrections": [
+    {
+      "sourceKey": "hig:airplay",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS、visionOS；正文明确watchOS不支持。",
+      "articleBodySha256": "1b10a51236f9162511c5bbfdecb5abfd5b59380704e37892dcac19c6b6168d5e",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "excludedPlatforms": [
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:always-on",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、watchOS；iPadOS、macOS、tvOS、visionOS明确不支持。",
+      "articleBodySha256": "77d6921a91942a6da567780f78c002f892ad7b3acb5ab047b7b0f2cbbcfeffbc",
+      "affirmedPlatforms": [
+        "iOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:app-clips",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS；macOS、tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "de70634e4f1f8e6c786d09f1a6269fbe74adb26048e5fcefdffe4d9cf1ba52ad",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:apple-in-app-purchase",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS、visionOS；另有watchOS注册/订阅布局指导。",
+      "articleBodySha256": "da1670c4f0148af7fa57595ebca31739a29376d8fc236944c80f575e1649af84",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "excludedPlatforms": [],
+      "qualifiedPlatforms": [
+        {
+          "platform": "watchOS",
+          "scope": "保留注册/订阅布局指导；不据此声称完整购买 UI 或设备可用性。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:apple-pay",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、visionOS、watchOS及支持的Web浏览器；正文明确tvOS不支持。",
+      "articleBodySha256": "b43357e315aad9e35abc4dd94c67e1cd7700b4ba88cc10357b5052a824a33eae",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:augmented-reality",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "主要iOS/iPadOS；visionOS独立ARKit指导；macOS、tvOS、watchOS明确不支持。",
+      "articleBodySha256": "b7f3c4e8805ff7e33537d90193e9d393bd8a492cba2e41812ad3e1d94f71a2bd",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "visionOS",
+          "scope": "另有独立 ARKit 指导；此记录不将其并为 iOS/iPadOS 的同一能力保证。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:carekit",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS；其余四Apple平台明确不支持。",
+      "articleBodySha256": "02626e9c96abd5b1806111f1a0436a521d8141d90d3b13460abe2645ed4f6c18",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:carplay",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS连接车载系统；iPadOS、macOS、tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "54693e1e5227fcfce0bb923d574f5f1539c973ed1dc2fc8d15d1a5728e8c3982",
+      "affirmedPlatforms": [
+        "iOS"
+      ],
+      "excludedPlatforms": [
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:game-center",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS/iPadOS/macOS Game Overlay；visionOS/tvOS dashboard；watchOS可用GameKit但无可调用的系统Game Center UI，内容在配对iPhone。",
+      "articleBodySha256": "7d040449ca647eead164f3bf51e53fc7d4bf6a300b5dac955656e0b84d447156",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "excludedPlatforms": [],
+      "qualifiedPlatforms": [
+        {
+          "platform": "watchOS",
+          "scope": "GameKit 服务可用，但没有可调用的系统 Game Center UI；内容在配对 iPhone。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:healthkit",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、watchOS；macOS、tvOS、visionOS明确不支持。",
+      "articleBodySha256": "9952ecc6c713a4fc9099d4162ef2ec742b11ea27ef84d17ecf12956c66bb0cea",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:id-verifier",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS/iPhone；iPadOS、macOS、tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "f92fc485002dacc18376ff264d96628b18546ba3bf043dceb41acde30912bc03",
+      "affirmedPlatforms": [
+        "iOS"
+      ],
+      "excludedPlatforms": [
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:imessage-apps-and-stickers",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS；macOS、tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "eb7fff568c74e22caf39a363f213039557bfc7441ed74ae0fdee996eb9c2ba6c",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:live-photos",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS；visionOS可观看不可拍摄；watchOS明确不支持。",
+      "articleBodySha256": "24542ae45d1b0cf08a4ee2130f656f6508224ee6cb7492d2ca4673cbabdd40a0",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS"
+      ],
+      "excludedPlatforms": [
+        "watchOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "visionOS",
+          "scope": "可观看、不可拍摄；保留操作差异。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:mac-catalyst",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iPadOS与macOS；iOS、tvOS、visionOS、watchOS明确不支持此技术条目。",
+      "articleBodySha256": "f6b4bd02f90707c4b674a07866ae38e48587a644a21c81ddff4d0b34f5976a64",
+      "affirmedPlatforms": [
+        "iPadOS",
+        "macOS"
+      ],
+      "excludedPlatforms": [
+        "iOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:maps",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS、visionOS；watchOS为不可交互快照，点击打开系统Maps，最多5个annotations；正文另含MapKit JS/Web。",
+      "articleBodySha256": "d15095fa9d7923c8783f82e9a230f8289d22a7b9a7e0cea246f6a6f5b3ee4c7d",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "excludedPlatforms": [],
+      "qualifiedPlatforms": [
+        {
+          "platform": "watchOS",
+          "scope": "仅不可交互快照，点击打开系统 Maps，最多 5 个 annotations；不是完整交互地图。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:nfc",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "正文平台节列iOS、iPadOS；macOS、tvOS、visionOS、watchOS不支持；正文具体设备能力需另验。",
+      "articleBodySha256": "b0169830a3e53a48cba034beeadd1f7d6bf62ea8c2428677ff4b4a5e2e687ba2",
+      "affirmedPlatforms": [],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "iOS",
+          "scope": "摘要只列平台节；具体 NFC 设备能力仍需核验，不提升为整篇肯定支持。"
+        },
+        {
+          "platform": "iPadOS",
+          "scope": "摘要只列平台节；具体 NFC 设备能力仍需核验，不提升为整篇肯定支持。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:photo-editing",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS；tvOS、visionOS、watchOS不支持。",
+      "articleBodySha256": "b7ef639c866a850aba5e40ec2b648def3e8ee9de8fdde66cdaba0fb9de776511",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:researchkit",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS；macOS、tvOS、visionOS、watchOS不支持。",
+      "articleBodySha256": "5d310b6e51ba15ae1350c2eb956a0f7e6e867b6775bcbc7fb595744537b38e8e",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:shareplay",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS、visionOS；watchOS明确不支持。",
+      "articleBodySha256": "b49806021821ba69ddb0dd4f778d0f6c38f571124f9cb367ef53dd1b67203449",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "excludedPlatforms": [
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:sign-in-with-apple",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "正文说明所有平台及网站含非Apple平台可提供；Apple平台节列6平台。",
+      "articleBodySha256": "48952489256d3ee8b298135e127872c9b81570d437ef86b1d4c700987e922640",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:tap-to-pay-on-iphone",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS/iPhone；iPadOS、macOS、tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "1632c10d9b438c91c2194aae4b2dd9686974474a4d2c79a4820ddf38c0c80f31",
+      "affirmedPlatforms": [
+        "iOS"
+      ],
+      "excludedPlatforms": [
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:voiceover",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、tvOS、watchOS；visionOS另有custom gestures与Direct Gesture模式注意。",
+      "articleBodySha256": "3e2f95044278300e59d0f8b2e438a3c143b9624d83afc9996a7c25921ea7d992",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [],
+      "qualifiedPlatforms": [
+        {
+          "platform": "visionOS",
+          "scope": "原摘要另列 custom gestures / Direct Gesture 模式；不据此声称 Proto 的实际 VoiceOver 验收。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:wallet",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "正文平台节列iOS、iPadOS、macOS、visionOS；watchOS有passes布局专节；tvOS明确不支持。正文核心Wallet容器是iPhone/Apple Watch，具体feature按设备区分。",
+      "articleBodySha256": "486a85787137a13cf419d9b9997e8c31f815d6682da16f6c7ae7c1be30135584",
+      "affirmedPlatforms": [],
+      "excludedPlatforms": [
+        "tvOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "iOS",
+          "scope": "原摘要明确核心 Wallet 容器是 iPhone；具体 feature 按设备区分。"
+        },
+        {
+          "platform": "watchOS",
+          "scope": "原摘要明确核心容器包含 Apple Watch，且另有 passes 布局；不扩成其它平台的同一容器保证。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:app-shortcuts",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、visionOS、watchOS；tvOS不支持。macOS不支持App Shortcuts本身，但正文明确支持App Intents actions并可组装自定义shortcut。",
+      "articleBodySha256": "b6ae11345870a56f92269d796eb980b6bb65c2be24b9e49a3ac8c00e8b41fe77",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "macOS",
+          "scope": "排除的是 App Shortcuts 本身；App Intents actions 与可组合自定义 shortcut 是另一项保留的肯定事实。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:complications",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "watchOS；iOS、iPadOS、macOS、tvOS、visionOS明确不支持本条。",
+      "articleBodySha256": "2af3dceaf97a1792bad5ba76f1c72efce8dbbd7d3bcd5101516f3e19e639730a",
+      "affirmedPlatforms": [
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:controls",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS；watchOS、tvOS、visionOS明确不支持。",
+      "articleBodySha256": "a0d8e8e541bc6ec91e61d221672a7c54673bebaeddad810126200fe2a05fdbba",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:live-activities",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "从iOS/iPadOS启动；映射至配对macOS menu bar、watchOS Smart Stack、CarPlay；正文不支持tvOS、visionOS。",
+      "articleBodySha256": "310651bcefbe51fc18f80ad50e1ab8851a1f03ee335ef38c10b014ad3f376114",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS",
+        "visionOS"
+      ],
+      "qualifiedPlatforms": [
+        {
+          "platform": "macOS",
+          "scope": "接收配对投射到 menu bar；不等同可从此设备启动。"
+        },
+        {
+          "platform": "watchOS",
+          "scope": "接收配对投射到 Smart Stack；不等同可从此设备启动。"
+        }
+      ]
+    },
+    {
+      "sourceKey": "hig:snippets",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS；tvOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "7e89930cf5f3d48954233b9bc51650a9db3612264a9844ce481a0d6222512e48",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:status-bars",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS；macOS、tvOS、visionOS、watchOS明确不支持本条。",
+      "articleBodySha256": "a7a33ba3df86cdec3dcd48e4e1a13c194ca8946efd55b459ccad091842ff0b64",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS"
+      ],
+      "excludedPlatforms": [
+        "macOS",
+        "tvOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:top-shelf",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "tvOS；iOS、iPadOS、macOS、visionOS、watchOS明确不支持。",
+      "articleBodySha256": "180aed169d766ffc33da6a68cba872da1a3c7c0823b5e64e17527d351c89432f",
+      "affirmedPlatforms": [
+        "tvOS"
+      ],
+      "excludedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:watch-faces",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "watchOS；iOS、iPadOS、macOS、tvOS、visionOS明确不支持本条。",
+      "articleBodySha256": "116a8a9dee15d36e82f01cb79ec858ee5da1dddefdce29d4e772b4b20a7a036b",
+      "affirmedPlatforms": [
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "tvOS",
+        "visionOS"
+      ],
+      "qualifiedPlatforms": []
+    },
+    {
+      "sourceKey": "hig:widgets",
+      "sourceField": "source.platformScopeSummary",
+      "sourceSummary": "iOS、iPadOS、macOS、visionOS、watchOS；tvOS明确不支持；正文包含StandBy与CarPlay场景。",
+      "articleBodySha256": "005b104bc3b05a9c7b03c4fa55f8db6981d2ee4f68bd02b600dc1619ee55b6db",
+      "affirmedPlatforms": [
+        "iOS",
+        "iPadOS",
+        "macOS",
+        "visionOS",
+        "watchOS"
+      ],
+      "excludedPlatforms": [
+        "tvOS"
+      ],
+      "qualifiedPlatforms": []
+    }
+  ]
+}
