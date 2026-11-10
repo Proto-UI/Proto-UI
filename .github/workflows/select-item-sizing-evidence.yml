@@ -26,7 +26,7 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Bind checkout and execute the eight styled website cases
+      - name: Bind checkout and execute the styled website environment journeys
         env:
           PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE: ${{ runner.temp }}/select-website-item-sizing
           EXPECTED_HEAD: ${{ github.sha }}
@@ -43,19 +43,51 @@ jobs:
           from pathlib import Path
           root = Path(os.environ['PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE'])
           report = json.loads((root / 'vitest.json').read_text())
-          assert report['numTotalTests'] == report['numPassedTests'] == 8
+          assert report['numTotalTests'] == report['numPassedTests'] == 24
           assert report['success'] and report['numFailedTests'] == report['numPendingTests'] == report['numTodoTests'] == 0
           source = json.loads((root / 'source.json').read_text())
           assert source['source'] == os.environ['EXPECTED_HEAD']
-          for locale in ['en', 'zh-cn']:
-              for runtime in ['wc', 'react', 'vue', 'vue2']:
-                  case = json.loads((root / f'{locale}-{runtime}.json').read_text())
-                  assert case['source'] == source['source'] and case['sourceTree'] == source['sourceTree']
-                  assert case['runtime'] == runtime and case['locale'] == locale
-                  assert [o['phase'] for o in case['observations']] == ['first-entry', 'selected-reopen', 'narrow-reopen']
-                  assert all(o['value']['runtime'] == runtime for o in case['observations'])
-                  assert (root / f'{locale}-{runtime}-first.png').is_file()
-                  assert (root / f'{locale}-{runtime}-narrow.png').is_file()
+          environments = [
+              {'id': 'default', 'direction': 'ltr', 'reducedMotion': 'no-preference'},
+              {'id': 'rtl', 'direction': 'rtl', 'reducedMotion': 'no-preference'},
+              {'id': 'reduced-motion', 'direction': 'ltr', 'reducedMotion': 'reduce'},
+          ]
+          phases = [
+              'first-entry', 'selected-reopen', 'narrow-reopen',
+              'disabled-keyboard-skip', 'disabled-pointer-move',
+              'disabled-pointer-click', 'enabled-pointer-move', 'pointer-selected-reopen',
+          ]
+          motion_phases = [
+              'first-entry', 'selected-reopen', 'narrow-reopen',
+              'disabled-probe-entry', 'pointer-selected-reopen',
+          ]
+          pointer_phases = [
+              'disabled-pointer-move', 'disabled-pointer-click',
+              'enabled-pointer-move', 'enabled-pointer-click',
+          ]
+          for environment in environments:
+              suffix = '' if environment['id'] == 'default' else '-' + environment['id']
+              for locale in ['en', 'zh-cn']:
+                  for runtime in ['wc', 'react', 'vue', 'vue2']:
+                      name = f'{locale}-{runtime}{suffix}'
+                      case = json.loads((root / f'{name}.json').read_text())
+                      assert case['source'] == source['source'] and case['sourceTree'] == source['sourceTree']
+                      assert case['runtime'] == runtime and case['locale'] == locale
+                      assert case['environment'] == environment
+                      assert case['failure'] is None and case['secondaryErrors'] == []
+                      assert [o['phase'] for o in case['observations']] == phases
+                      for observation in case['observations']:
+                          value = observation['value']
+                          assert value['runtime'] == runtime
+                          assert value['reducedMotion'] == environment['reducedMotion']
+                          boxes = [value[key] for key in ['trigger', 'content', 'surface', 'viewport']] + value['items']
+                          assert all(box['direction'] == environment['direction'] for box in boxes)
+                      assert [m['phase'] for m in case['motion']] == motion_phases
+                      assert all(m['value']['status'] == 'settled' and m['value']['error'] is None for m in case['motion'])
+                      assert all(m['value']['cleanup'] == {'frame': True, 'timer': True} for m in case['motion'])
+                      assert [p['phase'] for p in case['pointerInputs']] == pointer_phases
+                      for capture in ['first', 'narrow', 'disabled', 'pointer-reopen']:
+                          assert (root / f'{name}-{capture}.png').is_file()
           PYCOUNT
       - name: Retain source-bound results, four-box facts and screenshots
         if: always()
