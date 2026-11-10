@@ -21,6 +21,7 @@ beforeAll(async () => {
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { createShadowColorSchemeEnvironmentOwner as createEnvironment } from './packages/adapters/web-component/src/shadow-color-scheme-environment';
         export { createWebComponentPortalMount as createPortal } from './packages/adapters/web-component/src/portal-mount';
+        export { registerWebPortalDestination } from '@proto.ui/adapter-base';
         export { createShadowSplitEffectsPort as createSplitEffects } from './packages/adapters/web-component/src/shadow-split-effects';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { getLogicalParent, getProtoParent } from './packages/adapters/web-component/src/platform/instance-tree';
@@ -2424,6 +2425,434 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('samples descendant entry after neighboring mutation callbacks finish', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-entry-mutation-turn',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.innerHTML = '<button>Inside</button>';
+        document.body.append(host);
+      });
+      const result = await page.evaluate(async () => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const host = document.querySelector('closeout-entry-mutation-turn')!;
+        const button = host.querySelector('button')!;
+        const sentinel = document.createElement('div');
+        document.body.append(sentinel);
+        const observer = new MutationObserver(() => {
+          button.style.visibility = 'hidden';
+          observer.disconnect();
+        });
+        observer.observe(sentinel, { attributes: true });
+        const native = window.getComputedStyle;
+        let samples = 0;
+        window.getComputedStyle = (element, pseudo) => {
+          if (element === button) samples++;
+          return native.call(window, element, pseudo);
+        };
+        try {
+          button.style.color = 'red';
+          sentinel.setAttribute('data-trigger', '');
+          await new Promise<void>((resolve) => queueMicrotask(() => queueMicrotask(resolve)));
+          return { samples, tabindex: host.getAttribute('tabindex') };
+        } finally {
+          window.getComputedStyle = native;
+          observer.disconnect();
+          sentinel.remove();
+        }
+      });
+      expect(result).toEqual({ samples: 1, tabindex: '0' });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    { initialSibling: false, bodyPosition: null, selectorList: false },
+    { initialSibling: true, bodyPosition: null, selectorList: false },
+    { initialSibling: false, bodyPosition: '1', selectorList: false },
+    { initialSibling: true, bodyPosition: '1', selectorList: false },
+    { initialSibling: false, bodyPosition: '2n+1', selectorList: false },
+    { initialSibling: true, bodyPosition: '2n+1', selectorList: false },
+    { initialSibling: false, bodyPosition: 'grouped', selectorList: false },
+    { initialSibling: true, bodyPosition: 'grouped', selectorList: false },
+    { initialSibling: false, bodyPosition: 'functional', selectorList: false },
+    { initialSibling: true, bodyPosition: 'functional', selectorList: false },
+    { initialSibling: false, bodyPosition: 'hover', selectorList: false },
+    { initialSibling: true, bodyPosition: 'hover', selectorList: false },
+    { initialSibling: false, bodyPosition: 'grouped-shadow', selectorList: false },
+    { initialSibling: true, bodyPosition: 'grouped-shadow', selectorList: false },
+    { initialSibling: false, bodyPosition: 'functional-shadow', selectorList: false },
+    { initialSibling: true, bodyPosition: 'functional-shadow', selectorList: false },
+    { initialSibling: false, bodyPosition: 'hover-shadow', selectorList: false },
+    { initialSibling: true, bodyPosition: 'hover-shadow', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered', selectorList: false },
+    { initialSibling: true, bodyPosition: 'filtered', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-shadow', selectorList: false },
+    { initialSibling: true, bodyPosition: 'filtered-shadow', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-target', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-target-shadow', selectorList: false },
+    { initialSibling: true, bodyPosition: 'filtered-internal', selectorList: false },
+    {
+      initialSibling: false,
+      bodyPosition: 'filtered-after-document-relation-shadow',
+      selectorList: false,
+    },
+    {
+      initialSibling: true,
+      bodyPosition: 'filtered-after-document-relation-shadow',
+      selectorList: false,
+    },
+    { initialSibling: false, bodyPosition: 'filtered-defined', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-defined-shadow', selectorList: false },
+    { initialSibling: false, bodyPosition: 'grouped-independent', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-built-in', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-parent', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-ancestor', selectorList: false },
+    { initialSibling: false, bodyPosition: 'filtered-reset', selectorList: false },
+    { initialSibling: false, bodyPosition: '1', selectorList: true },
+    { initialSibling: true, bodyPosition: '1', selectorList: true },
+  ])(
+    'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition, selector list: $selectorList)',
+    async ({ initialSibling, bodyPosition, selectorList }) => {
+      const page = await browser.newPage();
+      const inShadow = bodyPosition?.endsWith('-shadow') ?? false;
+      const shape = bodyPosition?.replace(/-shadow$/, '') ?? null;
+      const atBody = shape !== null && !inShadow;
+      const filteredTarget = shape === 'filtered-target';
+      const filteredInternal = shape === 'filtered-internal';
+      const filteredBuiltIn = shape === 'filtered-built-in';
+      const filteredDefined = shape === 'filtered-defined' || filteredBuiltIn;
+      const filteredParent = shape === 'filtered-parent';
+      const filteredAncestor = shape === 'filtered-ancestor';
+      const filteredReset = shape === 'filtered-reset';
+      const afterDocumentRelation = shape === 'filtered-after-document-relation';
+      const filtered = shape === 'filtered' || afterDocumentRelation;
+      const selectors: Record<string, string> = {
+        grouped: '.positional-entry:not(:has(.flag)):nth-child(2n+1) button, .unrelated',
+        'grouped-independent': '.unrelated:has(.flag), .positional-entry:first-child button',
+        'filtered-reset':
+          '.positional-entry:not(:has(.flag)):nth-child(1 of :checked, .positional-entry) a',
+        'filtered-ancestor':
+          '.positional-entry:not(:has(.flag)) > .section[data-mode] > .container > .row:nth-child(1 of .row) button',
+        'filtered-parent':
+          '.positional-entry[data-mode]:not(:has(.flag)) > .row:nth-child(1 of .row) button',
+        'filtered-built-in':
+          '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible:defined) button',
+        functional: '.positional-entry:not(:has(.flag)):not(:first-child) button',
+        hover: '.positional-entry:not(:has(.flag)):hover:first-child button',
+        'filtered-target':
+          '.positional-entry[data-eligible]:not(:has(.flag)):nth-child(1 of [data-eligible]) button',
+        'filtered-internal':
+          '.positional-entry:not(:has(.flag)) > .row:nth-child(1 of .row, [data-eligible]) button',
+        'filtered-defined':
+          '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible:defined) button',
+      };
+      const selector = selectorList
+        ? '.positional-entry:first-child:not(:has(.flag)) button, .unrelated'
+        : filtered
+          ? '.positional-entry.eligible:not(:has(.flag)):nth-child(1 of .eligible) button'
+          : (selectors[shape ?? ''] ??
+            `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`);
+      const css = `
+        ${shape ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
+        ${filteredInternal ? '.positional-entry > [data-eligible] ~ .row button { color: red; }' : ''}
+        ${filteredDefined ? '.eligible:defined ~ .positional-entry button { color: red; }' : ''}
+        ${filteredReset ? 'input:checked ~ .positional-entry a { color: red; }' : ''}
+        ${selector} { visibility: hidden; }
+      `;
+      try {
+        await page.addScriptTag({ content: script });
+        if (afterDocumentRelation)
+          await page.addStyleTag({
+            content:
+              'body:has(.unrelated-root-flag) .unrelated-root-target { visibility: hidden; }',
+          });
+        if (!inShadow) await page.addStyleTag({ content: css });
+        await page.evaluate(
+          ({
+            initialSibling,
+            atBody,
+            inShadow,
+            filtered,
+            filteredTarget,
+            filteredInternal,
+            filteredDefined,
+            filteredBuiltIn,
+            filteredParent,
+            filteredAncestor,
+            filteredReset,
+            hover,
+            css,
+          }) => {
+            const p = (window as any).Closeout;
+            const C = p.adapt(
+              p.define({
+                name: 'closeout-positional-entry',
+                setup() {
+                  p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                  return (r: any) => r.slot();
+                },
+              }),
+              { shadow: true }
+            );
+            const boundary = document.createElement('div');
+            boundary.id = 'positional-entry-shadow-host';
+            const parent = filteredReset
+              ? document.createElement('form')
+              : inShadow
+                ? boundary.attachShadow({ mode: 'open' })
+                : atBody
+                  ? document.body
+                  : document.createElement('div');
+            if (parent instanceof ShadowRoot) {
+              const sheet = new CSSStyleSheet();
+              sheet.replaceSync(css);
+              parent.adoptedStyleSheets = [sheet];
+            } else parent.id = 'positional-entry-parent';
+            const peer = document.createElement('template');
+            peer.innerHTML = '<button is="closeout-filtered-peer"></button>';
+            const sibling = filteredBuiltIn
+              ? (peer.content.firstElementChild as HTMLButtonElement)
+              : document.createElement(
+                  filteredReset ? 'input' : filteredDefined ? 'closeout-filtered-peer' : 'span'
+                );
+            if (sibling instanceof HTMLInputElement && filteredReset) {
+              sibling.type = 'checkbox';
+              sibling.checked = true;
+            }
+            sibling.id = 'positional-entry-sibling';
+            sibling.hidden = true;
+            const wrapper = document.createElement('div');
+            wrapper.className =
+              filtered || filteredDefined ? 'positional-entry eligible' : 'positional-entry';
+            const host = new C();
+            host.innerHTML = filteredInternal
+              ? '<span hidden data-eligible></span><div class="row"><button>Inside</button></div>'
+              : filteredParent
+                ? '<div class="row"><button>Inside</button></div>'
+                : filteredAncestor
+                  ? '<section class="section"><div class="container"><div class="row"><button>Inside</button></div></div></section>'
+                  : filteredReset
+                    ? '<a href="#entry">Inside</a>'
+                    : '<button>Inside</button>';
+            if (filteredTarget || filteredInternal || filteredParent || filteredAncestor)
+              host.className = 'positional-entry';
+            wrapper.append(host);
+            if (initialSibling || filteredDefined) sibling.className = 'eligible';
+            if (
+              (initialSibling || filtered || filteredDefined || filteredReset) &&
+              !filteredInternal
+            )
+              parent.append(sibling);
+            // Retain the same native peer across removal and reinsertion.
+            const fixture = window as unknown as Window & {
+              __positionalEntrySibling: HTMLElement;
+              __positionalEntryPointer?: { x: number; y: number; trusted: boolean };
+            };
+            fixture.__positionalEntrySibling = sibling;
+            if (hover) {
+              wrapper.style.padding = '12px';
+              wrapper.style.minHeight = '48px';
+              wrapper.addEventListener('pointermove', (event) => {
+                fixture.__positionalEntryPointer = {
+                  x: event.clientX,
+                  y: event.clientY,
+                  trusted: event.isTrusted,
+                };
+              });
+            }
+            parent.append(
+              filteredTarget || filteredInternal || filteredParent || filteredAncestor
+                ? host
+                : wrapper
+            );
+            if (inShadow) document.body.append(boundary);
+            else if (!atBody || filteredReset) document.body.append(parent);
+          },
+          {
+            initialSibling,
+            atBody,
+            inShadow,
+            filtered,
+            filteredTarget,
+            filteredInternal,
+            filteredDefined,
+            filteredBuiltIn,
+            filteredParent,
+            filteredAncestor,
+            filteredReset,
+            hover: shape === 'hover',
+            css,
+          }
+        );
+        const snapshot = () =>
+          page.evaluate(
+            () =>
+              new Promise<{ visibility: string; tabIndex: string | null }>((resolve) =>
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => {
+                    const root =
+                      document.querySelector('#positional-entry-shadow-host')?.shadowRoot ??
+                      document;
+                    const host = root.querySelector('closeout-positional-entry')!;
+                    resolve({
+                      visibility: getComputedStyle(host.querySelector('button, a')!).visibility,
+                      tabIndex: host.getAttribute('tabindex'),
+                    });
+                  })
+                )
+              )
+          );
+        const nativeHoverSnapshot = () =>
+          page.locator('.positional-entry').evaluate((element) => {
+            // Read the point recorded from actual native input in this fixture.
+            const fixture = window as Window & {
+              __positionalEntryPointer?: { x: number; y: number; trusted: boolean };
+            };
+            const pointer = fixture.__positionalEntryPointer ?? null;
+            const root = element.getRootNode();
+            const hit =
+              pointer && (root instanceof Document || root instanceof ShadowRoot)
+                ? root.elementFromPoint(pointer.x, pointer.y)
+                : null;
+            const rect = element.getBoundingClientRect();
+            return {
+              // Qualify the fixture: bare :hover excludes non-links in quirks mode.
+              hovered: element.matches('.positional-entry:hover'),
+              pointer,
+              hitSelf: hit === element,
+              rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+            };
+          });
+        const visible = { visibility: 'visible', tabIndex: null };
+        const hidden = { visibility: 'hidden', tabIndex: '0' };
+        if (filteredReset) {
+          expect(await snapshot()).toEqual(visible);
+          await page.locator('#positional-entry-parent').evaluate((element) => {
+            (element as HTMLFormElement).reset();
+          });
+          expect(await snapshot()).toEqual(hidden);
+          return;
+        }
+        if (filteredDefined) {
+          expect(await snapshot()).toEqual(hidden);
+          await page.evaluate((builtIn) => {
+            if (builtIn)
+              customElements.define('closeout-filtered-peer', class extends HTMLButtonElement {}, {
+                extends: 'button',
+              });
+            else customElements.define('closeout-filtered-peer', class extends HTMLElement {});
+          }, filteredBuiltIn);
+          expect(await snapshot()).toEqual(visible);
+          return;
+        }
+        if (filteredInternal) {
+          const peer = page.locator('closeout-positional-entry > span');
+          expect(await snapshot()).toEqual(visible);
+          await peer.evaluate((element) => element.removeAttribute('data-eligible'));
+          expect(await snapshot()).toEqual(hidden);
+          await peer.evaluate((element) => element.setAttribute('data-eligible', ''));
+          expect(await snapshot()).toEqual(visible);
+          return;
+        }
+        if (filteredTarget || filteredParent || filteredAncestor) {
+          const attr = filteredParent || filteredAncestor ? 'data-mode' : 'data-eligible';
+          const host = page.locator(
+            filteredAncestor ? 'closeout-positional-entry > .section' : 'closeout-positional-entry'
+          );
+          expect(await snapshot()).toEqual(visible);
+          await host.evaluate((element, name) => element.setAttribute(name, ''), attr);
+          expect(await snapshot()).toEqual(hidden);
+          await host.evaluate((element, name) => element.removeAttribute(name), attr);
+          expect(await snapshot()).toEqual(visible);
+          return;
+        }
+        if (shape === 'hover') {
+          expect(await snapshot()).toEqual(visible);
+          expect(await nativeHoverSnapshot()).toMatchObject({ hovered: false, pointer: null });
+          await page.locator('.positional-entry').hover({ position: { x: 6, y: 6 } });
+        }
+        const withSibling = shape === 'functional' ? hidden : visible;
+        const withoutSibling = shape === 'functional' ? visible : hidden;
+        expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+        const initialHover = shape === 'hover' ? await nativeHoverSnapshot() : undefined;
+        const expectNativeHover = async () => {
+          expect(await nativeHoverSnapshot()).toMatchObject({
+            hovered: true,
+            pointer: {
+              x: initialHover?.pointer?.x,
+              y: initialHover?.pointer?.y,
+              trusted: true,
+            },
+            hitSelf: true,
+            rect: initialHover?.rect,
+          });
+        };
+        if (shape === 'hover') await expectNativeHover();
+
+        const toggleSibling = () =>
+          page.evaluate((filtered) => {
+            const root = document.querySelector('#positional-entry-shadow-host')?.shadowRoot;
+            // The fixture retains this native peer while it is detached.
+            const fixture = window as unknown as Window & { __positionalEntrySibling: HTMLElement };
+            const sibling = fixture.__positionalEntrySibling;
+            if (filtered) {
+              sibling.classList.toggle('eligible');
+              return;
+            }
+            if (sibling.isConnected) {
+              sibling.remove();
+              return;
+            }
+            (root ?? document.querySelector('#positional-entry-parent')!).prepend(sibling);
+          }, filtered);
+        await toggleSibling();
+        expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
+        if (shape === 'hover') await expectNativeHover();
+        await toggleSibling();
+        expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
+        if (shape === 'hover') await expectNativeHover();
+        if (filtered) {
+          await page.evaluate(() => {
+            const root = document.querySelector('#positional-entry-shadow-host')?.shadowRoot;
+            const peer = (root ?? document).querySelector('#positional-entry-sibling')!;
+            const replacement = document.createElement('span');
+            replacement.id = peer.id;
+            replacement.hidden = true;
+            peer.replaceWith(replacement);
+            // Continue the authored membership check on the replacement peer.
+            const fixture = window as unknown as Window & { __positionalEntrySibling: HTMLElement };
+            fixture.__positionalEntrySibling = replacement;
+          });
+          expect(await snapshot()).toEqual(withoutSibling);
+          await toggleSibling();
+          expect(await snapshot()).toEqual(withSibling);
+        } else {
+          await toggleSibling();
+          expect(await snapshot()).toEqual(initialSibling ? withoutSibling : withSibling);
+          if (shape === 'hover') await expectNativeHover();
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('reprojects descendant entry after a preceding sibling selector changes', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
@@ -4125,6 +4554,377 @@ describe('Shadow closeout native boundaries', () => {
       });
       expect(result).toEqual({ initial: null, disabled: '0', restored: null });
       expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects a descendant entry when its registered portal destination changes selector state', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content:
+          '.unused:has(.flag), .destination[data-mode] .portal-root > .row:nth-child(1 of .row) button { visibility: hidden; }',
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-portaled-entry-destination',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        const destination = document.createElement('div');
+        destination.className = 'destination';
+        const branch = document.createElement('section');
+        branch.className = 'portal-root';
+        branch.innerHTML = '<div class="row"><button>Inside</button></div>';
+        const button = branch.querySelector('button')!;
+        host.append(branch);
+        document.body.append(host, destination);
+        const release = p.registerWebPortalDestination(document.body, destination);
+        const portal = p.createPortal();
+        const snapshot = async () => {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+          return {
+            visibility: getComputedStyle(button).visibility,
+            tabIndex: host.getAttribute('tabindex'),
+          };
+        };
+        try {
+          portal.mount(branch);
+          const mounted = branch.parentElement === destination;
+          const initial = await snapshot();
+          destination.setAttribute('data-mode', '');
+          const hidden = await snapshot();
+          destination.removeAttribute('data-mode');
+          const restored = await snapshot();
+          return { mounted, initial, hidden, restored };
+        } finally {
+          portal.unmount(branch);
+          release();
+        }
+      });
+      expect(result).toEqual({
+        mounted: true,
+        initial: { visibility: 'visible', tabIndex: null },
+        hidden: { visibility: 'hidden', tabIndex: '0' },
+        restored: { visibility: 'visible', tabIndex: null },
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry after a filtered peer CustomStateSet mutation', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content:
+          '.state-entry:not(:has(.flag)):nth-child(1 of :state(eligible), .state-entry) button { visibility: hidden; }',
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        class StatePeer extends HTMLElement {
+          readonly states = this.attachInternals().states;
+        }
+        customElements.define('closeout-filtered-state-peer', StatePeer);
+        const peer = new StatePeer();
+        peer.className = 'state-peer';
+        peer.hidden = true;
+        const reference = new StatePeer();
+        const native = {
+          add: reference.states.add,
+          delete: reference.states.delete,
+          clear: reference.states.clear,
+        };
+        const describeReturn = (value: unknown, receiver: object) => ({
+          type: typeof value,
+          receiver: value === receiver,
+          boolean: typeof value === 'boolean' ? value : null,
+        });
+        const captureError = (call: () => unknown) => {
+          try {
+            call();
+            return null;
+          } catch (error) {
+            if (!(error instanceof Error)) throw error;
+            return { name: error.name, message: error.message };
+          }
+        };
+        const nativeReturns = {
+          add: describeReturn(native.add.call(reference.states, 'eligible'), reference.states),
+          delete: describeReturn(
+            native.delete.call(reference.states, 'eligible'),
+            reference.states
+          ),
+          clear: describeReturn(native.clear.call(reference.states), reference.states),
+        };
+        const nativeErrors = {
+          addBrand: captureError(() => Reflect.apply(native.add, {}, ['eligible'])),
+          deleteBrand: captureError(() => Reflect.apply(native.delete, {}, ['eligible'])),
+          clearBrand: captureError(() => Reflect.apply(native.clear, {}, [])),
+          addSymbol: captureError(() =>
+            Reflect.apply(native.add, reference.states, [Symbol('state')])
+          ),
+        };
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-filtered-state-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.className = 'state-entry';
+        const button = document.createElement('button');
+        button.textContent = 'Inside';
+        host.append(button);
+        document.body.append(peer, host);
+        // Observe native style and observer delivery across two real rendering frames.
+        const settle = async () => {
+          const frame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => requestAnimationFrame(() => frame.resolve()));
+          await frame.promise;
+        };
+        const snapshot = async () => {
+          await settle();
+          return {
+            peerState: peer.matches('.state-peer:state(eligible)'),
+            visibility: getComputedStyle(button).visibility,
+            tabIndex: host.getAttribute('tabindex'),
+          };
+        };
+        const initial = await snapshot();
+        const observedErrors = {
+          addBrand: captureError(() => Reflect.apply(peer.states.add, {}, ['eligible'])),
+          deleteBrand: captureError(() => Reflect.apply(peer.states.delete, {}, ['eligible'])),
+          clearBrand: captureError(() => Reflect.apply(peer.states.clear, {}, [])),
+          addSymbol: captureError(() =>
+            Reflect.apply(peer.states.add, peer.states, [Symbol('state')])
+          ),
+        };
+        let coercions = 0;
+        const stateName = {
+          toString() {
+            coercions += 1;
+            return 'eligible';
+          },
+        };
+        const addReturn = describeReturn(
+          Reflect.apply(peer.states.add, peer.states, [stateName]),
+          peer.states
+        );
+        const added = await snapshot();
+        peer.states.add('eligible');
+        const repeatedAdd = await snapshot();
+        const deleteReturn = describeReturn(peer.states.delete('eligible'), peer.states);
+        const deleted = await snapshot();
+        const missingDelete = peer.states.delete('eligible');
+        peer.states.add('eligible');
+        const beforeClear = await snapshot();
+        const clearReturn = describeReturn(peer.states.clear(), peer.states);
+        const cleared = await snapshot();
+        peer.states.clear();
+        await settle();
+        host.remove();
+        await settle();
+        const detachedHTML = host.outerHTML;
+        peer.states.add('eligible');
+        await settle();
+        return {
+          samples: [initial, added, repeatedAdd, deleted, beforeClear, cleared],
+          nativeReturns,
+          observedReturns: { add: addReturn, delete: deleteReturn, clear: clearReturn },
+          nativeErrors,
+          observedErrors,
+          coercions,
+          missingDelete,
+          detachedStable: host.outerHTML === detachedHTML,
+        };
+      });
+      expect(
+        result.samples.map(({ peerState, visibility }) => ({ peerState, visibility }))
+      ).toEqual([
+        { peerState: false, visibility: 'hidden' },
+        { peerState: true, visibility: 'visible' },
+        { peerState: true, visibility: 'visible' },
+        { peerState: false, visibility: 'hidden' },
+        { peerState: true, visibility: 'visible' },
+        { peerState: false, visibility: 'hidden' },
+      ]);
+      expect(result.observedReturns).toEqual(result.nativeReturns);
+      expect(result.observedErrors).toEqual(result.nativeErrors);
+      expect(result.coercions).toBe(1);
+      expect(result.missingDelete).toBe(false);
+      expect(result.detachedStable).toBe(true);
+      expect(result.samples.map(({ tabIndex }) => tabIndex)).toEqual([
+        '0',
+        null,
+        null,
+        '0',
+        null,
+        '0',
+      ]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry when an unfiltered registered portal projection changes position', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content: '.unused:has(.flag), .portal-root:first-child button { visibility: hidden; }',
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-unfiltered-portal-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        const destination = document.createElement('div');
+        const branch = document.createElement('section');
+        branch.className = 'portal-root';
+        const button = document.createElement('button');
+        button.textContent = 'Inside';
+        branch.append(button);
+        host.append(branch);
+        document.body.append(host, destination);
+        const release = p.registerWebPortalDestination(document.body, destination);
+        const portal = p.createPortal();
+        const peer = document.createElement('span');
+        peer.hidden = true;
+        const snapshot = async () => {
+          const frame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => requestAnimationFrame(() => frame.resolve()));
+          await frame.promise;
+          return {
+            visibility: getComputedStyle(button).visibility,
+            tabIndex: host.getAttribute('tabindex'),
+          };
+        };
+        try {
+          portal.mount(branch);
+          const mounted = branch.parentElement === destination;
+          const initial = await snapshot();
+          destination.prepend(peer);
+          const prepended = await snapshot();
+          peer.remove();
+          const removed = await snapshot();
+          destination.prepend(peer);
+          const reinserted = await snapshot();
+          return {
+            mounted,
+            samePeer: destination.firstElementChild === peer && peer.nextElementSibling === branch,
+            samples: [initial, prepended, removed, reinserted],
+          };
+        } finally {
+          portal.unmount(branch);
+          release();
+        }
+      });
+      expect(result.mounted).toBe(true);
+      expect(result.samePeer).toBe(true);
+      expect(result.samples.map(({ visibility }) => visibility)).toEqual([
+        'hidden',
+        'visible',
+        'hidden',
+        'visible',
+      ]);
+      expect(result.samples.map(({ tabIndex }) => tabIndex)).toEqual(['0', null, '0', null]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects descendant entry from styles in its registered portal destination ShadowRoot', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const carrier = document.createElement('div');
+        const shadow = carrier.attachShadow({ mode: 'open' });
+        const destination = document.createElement('div');
+        destination.className = 'destination';
+        shadow.append(destination);
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(
+          '.unused:has(.flag), .destination[data-mode] .portal-root > .row:nth-child(1 of .row) button { visibility: hidden; }'
+        );
+        shadow.adoptedStyleSheets = [sheet];
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-shadow-destination-entry',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        const branch = document.createElement('section');
+        branch.className = 'portal-root';
+        branch.innerHTML = '<div class="row"><button>Inside</button></div>';
+        const button = branch.querySelector('button')!;
+        host.append(branch);
+        document.body.append(host, carrier);
+        const release = p.registerWebPortalDestination(document.body, destination);
+        const portal = p.createPortal();
+        const snapshot = async () => {
+          const frame = Promise.withResolvers<void>();
+          requestAnimationFrame(() => requestAnimationFrame(() => frame.resolve()));
+          await frame.promise;
+          return {
+            visibility: getComputedStyle(button).visibility,
+            tabIndex: host.getAttribute('tabindex'),
+          };
+        };
+        try {
+          portal.mount(branch);
+          const mounted = branch.parentElement === destination;
+          const destinationRoot = branch.getRootNode() === shadow;
+          const initial = await snapshot();
+          destination.setAttribute('data-mode', '');
+          const hidden = await snapshot();
+          destination.removeAttribute('data-mode');
+          const restored = await snapshot();
+          return { mounted, destinationRoot, samples: [initial, hidden, restored] };
+        } finally {
+          portal.unmount(branch);
+          release();
+        }
+      });
+      expect(result.mounted).toBe(true);
+      expect(result.destinationRoot).toBe(true);
+      expect(result.samples.map(({ visibility }) => visibility)).toEqual([
+        'visible',
+        'hidden',
+        'visible',
+      ]);
+      expect(result.samples.map(({ tabIndex }) => tabIndex)).toEqual([null, '0', null]);
     } finally {
       await page.close();
     }

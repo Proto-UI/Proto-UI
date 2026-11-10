@@ -14,6 +14,16 @@ The guarantee is limited to the default getter in same-document light DOM withou
 
 The separate draft `preference.*` and `styleSupport.*` namespaces use mounted sources paired to the instance's actual Runtime getter, including the split-profile wrapper. Default sources follow `ownerDocument`: adoption retires old subscriptions, binds destination facts, and requests Rule style reconciliation. Terminal disposal releases them; remount creates fresh sources. Explicit `getMeta` does not install these default sources, so these namespaced Rule inputs remain unknown without a paired provider. Native browser regressions cover light, direct Shadow and split consumers with controlled media/CSS-support facts; they do not establish OS preference delivery, alpha/blur material fidelity, or broader `colorScheme` equivalence. See [C-RULE-PREFERENCES-0001](../../../spec/contracts/C-RULE-PREFERENCES-0001.yaml) and [C-RULE-STYLE-SUPPORT-0001](../../../spec/contracts/C-RULE-STYLE-SUPPORT-0001.yaml), both draft.
 
+## Focus entry observation
+
+Descendant-first focus entry projects the region's self fallback from current descendant eligibility. For sibling-position conditions such as `:first-child` and `:nth-child(2n+1)` on a relational selector subject, the current source retains shallow child-list watches on direct parents in its bounded external chain. These dependencies survive an initially nonmatching subject or a selector list that cannot use scoped negated-subject observation. Prepending, removing or reinserting a hidden preceding sibling can then refresh the fallback without a resize.
+
+Owned portal projections also contribute their actual position parents at registered same-document destinations. Dependency discovery reads stylesheets in each projection's containing open ShadowRoot, so destination selector attributes can refresh descendant eligibility while logical ownership stays at the origin.
+
+Native `CustomStateSet.add`, `delete` and `clear` join the existing shared window invalidation subscription while entry observation is active. Membership changes coalesce into an entry refresh; native return values, argument conversion and exceptions are retained. Repeated adds, missing deletes and empty clears do not request a refresh. The last subscriber releases the method hooks using the existing ownership checks.
+
+The parent watches share the existing entry-observation lifetime. Refresh rebuilds their dependencies; stopping observation disconnects them, and generation checks prevent stale callbacks from changing a newer projection. Ordinary descendant-only negation retains its scoped subject observation. The [Focus Entry capability](../../../spec/host-caps/HC-FOCUS-ENTRY-0001.yaml) and [entry eligibility mutation case](../../../spec/tests/T-FOCUS-SCOPE-0001.yaml) remain draft; this bounded mutation coverage does not establish general CSS selector or consumer coverage.
+
 ## Package Role
 
 Adapter package intended to be used together with Proto UI prototypes and the shared runtime stack.
