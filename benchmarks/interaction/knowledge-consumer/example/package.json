@@ -1,0 +1,22 @@
+{
+  "name": "interaction-knowledge-tabs-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "start": "vite --host 127.0.0.1 --strictPort",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --strictPort",
+    "check:consumer": "node check.mjs"
+  },
+  "dependencies": {
+    "@radix-ui/react-tabs": "1.1.13",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "playwright-core": "1.58.2",
+    "vite": "6.4.1"
+  }
+}

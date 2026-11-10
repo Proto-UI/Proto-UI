@@ -1,0 +1,44 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  color: #192735;
+  background: #f3f5f8;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(44rem, 100%); margin: 4rem auto; padding: 0 1rem; }
+h1 { margin: 0.5rem 0 1rem; font-size: clamp(1.8rem, 5vw, 2.5rem); letter-spacing: -0.04em; }
+h2 { margin-top: 0; font-size: 1.2rem; }
+p { line-height: 1.6; }
+.eyebrow { margin: 0; color: #44566b; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.hint { max-width: 38rem; margin-bottom: 2rem; color: #44566b; }
+.reference-card { padding: 1rem; border: 1px solid #bdc8d5; border-radius: 1rem; background: #fff; }
+.tabs-list { display: flex; gap: 0.25rem; overflow-x: auto; padding: 0.35rem; border-radius: 0.7rem; background: #edf1f6; }
+button { font: inherit; cursor: pointer; }
+.tab { flex: 1 0 auto; min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid transparent; border-radius: 0.45rem; color: inherit; background: transparent; }
+.tab[aria-selected='true'] { border-color: #284e9d; color: #173e89; background: #fff; font-weight: 700; }
+button:disabled { cursor: default; color: #697789; }
+:focus-visible { outline: 3px solid #215cc5; outline-offset: 2px; }
+.tab-panel { min-height: 9rem; margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; }
+.tab-panel[hidden] { display: none; }
+.host-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+.host-actions button { min-height: 2.75rem; padding: 0.6rem 0.9rem; border: 1px solid #a6b5c7; border-radius: 0.5rem; color: inherit; background: #fff; }
+.host-result { color: #44566b; font-size: 0.9rem; }
+
+@media (prefers-color-scheme: dark) {
+  :root { color: #e4ecf5; background: #151e2a; }
+  .eyebrow, .hint, .host-result { color: #b2c1d3; }
+  .reference-card { border-color: #51637b; background: #1e2b3c; }
+  .tabs-list { background: #152031; }
+  .tab[aria-selected='true'] { border-color: #9abaff; color: #dce8ff; background: #29426a; }
+  button:disabled { color: #8c9cb1; }
+  :focus-visible { outline-color: #9abaff; }
+  .host-actions button { border-color: #778da7; background: #1e2b3c; }
+}
+
+@media (forced-colors: active) {
+  .tab[aria-selected='true'] { border-color: Highlight; }
+  :focus-visible { outline-color: Highlight; }
+}
