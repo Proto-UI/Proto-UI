@@ -43,7 +43,27 @@ cases:
       - P-BASE-DIALOG-CONTENT-PRESENCE
       - P-BASE-DIALOG-CONTENT-DISMISS
     expectation: mask-rematerialization-does-not-steal-content-outside-owner
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-PUBLIC-NATIVE
+    title: The ordinary public Dialog preserves native modal interaction across all four Web runtimes
+    covers:
+      - P-BASE-DIALOG-CONTENT-PRESENCE
+      - P-BASE-DIALOG-CONTENT-FOCUS
+      - P-BASE-DIALOG-CONTENT-DISMISS
+      - P-BASE-DIALOG-CONTENT-A11Y-ROLE
+      - P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
+    expectation: native-keyboard-and-pointer-close-restore-and-reopen-with-one-ax-dialog-under-default-and-reduced-motion
 implementations:
+  - id: shadcn-public-four-runtime-dialog-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-PUBLIC-NATIVE]
+    exercises: [P-BASE-DIALOG-CONTENT, P-SHADCN-DIALOG-CONTENT]
+    notes:
+      - Eight unexecuted candidate cases consume the ordinary public Rhea recipe in WC, React, Vue and Vue 2 under default and reduced-motion preferences. Existing WC partial-remount evidence remains a separate case.
+      - Native Enter, Space, forward/reverse Tab, Cancel, Save, CloseIcon, Escape and exact-owner Mask hit testing observe natural leave completion, focus restoration, AX name/description and closed AX exclusion. No transition completion or open-state injection is used.
+      - Browser AX is not screen-reader evidence. Controlled refusal, first-frame motion, responsive/theme/locale matrices, packed consumers and other native hosts remain separate acceptance debt; source hashes name direct inputs rather than a complete transitive closure.
   - id: dialog-entry-policy-contract
     kind: module-test
     status: planned
@@ -131,6 +151,9 @@ verifies:
         - P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
 exercises: { prototypes: [P-BASE-DIALOG-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added planned four-runtime public native Dialog evidence for existing focus, dismissal, accessibility and retained-presence behavior without promoting lifecycle or claiming execution.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Mapped the S4 post-dismissal paint regression separately from semantic dismissal and accessibility evidence.
