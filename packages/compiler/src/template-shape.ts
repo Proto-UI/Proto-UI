@@ -1,4 +1,4 @@
-import type { ExpressionIR, StatementIR, ValueType } from './ir';
+import type { ExpressionIR, PrototypeIR, StatementIR, ValueType } from './ir';
 
 // Compiler-private lexical shape facts. No shape object is emitted to a consumer.
 export type NativeShape =
@@ -62,6 +62,12 @@ export class NativeLexicalScope {
   lookup(name: string): NativeBinding | undefined {
     return this.name === name ? this.binding : this.parent?.lookup(name);
   }
+}
+
+export function moduleLexicalScope(ir: PrototypeIR): NativeLexicalScope {
+  let scope = NativeLexicalScope.empty();
+  for (const binding of ir.moduleBindings ?? []) scope = scope.bind(binding.name, binding.value);
+  return scope;
 }
 
 export function nativeShape(
@@ -183,6 +189,18 @@ export function nativeShape(
         if (!result) return null;
         returns.push(result);
         return true;
+      } else if (statement.kind === 'throw') return true;
+      else if (statement.kind === 'try') {
+        const branchReturns: NativeShape[] = [], finalReturns: NativeShape[] = [];
+        const tried = body(statement.body, scope, branchReturns);
+        const catchScope = statement.catch?.name
+          ? scope.parameter(statement.catch.name, undefined, scope, null) : scope;
+        const caught = statement.catch ? body(statement.catch.body, catchScope, branchReturns) : true;
+        const finalized = statement.finally ? body(statement.finally, scope, finalReturns) : false;
+        if (finalized === null || (!finalized && (tried === null || caught === null))) return null;
+        if (!finalized) returns.push(...branchReturns);
+        returns.push(...finalReturns);
+        if (finalized || (tried && caught)) return true;
       } else if (statement.kind === 'if') {
         const then = body(statement.then, scope, returns),
           otherwise = body(statement.otherwise, scope, returns);

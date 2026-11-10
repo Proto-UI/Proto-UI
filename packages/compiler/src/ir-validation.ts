@@ -8,6 +8,7 @@ import {
   isDataValueType,
   isPublicValueType,
   isCapabilityAssignable,
+  lexicalValueType,
   type CompileResult,
   type FunctionContext,
   type ExpressionIR,
@@ -24,6 +25,7 @@ import {
   operationCallbackRule,
   operationArgumentRule,
   operationResultType,
+  argumentData,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -74,6 +76,10 @@ const CAPABILITIES = new Set([
   'observed:boolean',
   'state:number',
   'state:string',
+  'lexical:boolean',
+  'lexical:number',
+  'lexical:string',
+  'exception',
   ...MODULE_CAPABILITY_TYPES,
 ]);
 CAPABILITIES.add('authored-result');
@@ -348,6 +354,9 @@ const EXPRESSION_FIELDS = [
   'handle',
   'declaration',
   'states',
+  'cell',
+  'delta',
+  'prefix',
 ];
 /** Validate the complete data graph before any semantic read or normalization.
  * In particular, unused fields cannot smuggle an accessor into a later copy.
@@ -387,7 +396,12 @@ function assertDataGraph(input: unknown): void {
 }
 const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   literal: ['value'],
+  undefined: [],
   reference: ['name'],
+  'lexical-cell': ['value'],
+  'lexical-read': ['cell'],
+  'lexical-write': ['cell', 'value'],
+  'lexical-update': ['cell', 'delta', 'prefix'],
   'context-key': ['keyId'],
   'static-capability': ['declarationId'],
   'style-handle': ['handle'],
@@ -406,6 +420,8 @@ const STATEMENT_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   const: ['name', 'value'],
   effect: ['expression'],
   if: ['condition', 'then', 'otherwise'],
+  throw: ['value'],
+  try: ['body', 'catch', 'finally'],
   return: ['value'],
 };
 function exactKindFields(
@@ -503,6 +519,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       'contextKeys',
       'staticDeclarations',
       'moduleDeclarations',
+      'moduleBindings',
       'props',
       'exposes',
       'requirements',
@@ -775,7 +792,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       phase: Phase,
       context: FunctionContext,
       allowFunction = false,
-      argumentRule?: ArgumentRule
+      argumentRule?: ArgumentRule,
+      lexical?: 'create' | 'reference'
     ): ValueType {
       const node = object(value, EXPRESSION_FIELDS),
         location = span(node.span);
@@ -785,6 +803,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       try {
         let type: ValueType;
         switch (node.kind) {
+          case 'undefined':
+            type = 'void';
+            break;
           case 'literal':
             if (
               (node.value !== null &&
@@ -798,7 +819,35 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (!validIdentifier(node.name) || !scope.has(node.name))
               bad('Unbound IR reference.', location);
             type = readBinding(node.name, scope)!.type;
+            if (lexicalValueType(type) && lexical !== 'reference')
+              bad('Lexical storage identities cannot escape through value references.', location);
             break;
+          case 'lexical-cell': {
+            if (lexical !== 'create') bad('Lexical storage must be declared by a binding.', location);
+            const initial = expression(node.value, scope, phase, context);
+            if (initial !== 'boolean' && initial !== 'number' && initial !== 'string')
+              bad('Lexical storage requires a scalar data initializer.', location);
+            type = `lexical:${initial}`;
+            break;
+          }
+          case 'lexical-read':
+          case 'lexical-write':
+          case 'lexical-update': {
+            const target = object(node.cell, EXPRESSION_FIELDS);
+            if (target.kind !== 'reference') bad('Lexical access needs a declared storage binding.', location);
+            const storage = expression(target, scope, phase, context, false, undefined, 'reference');
+            const scalar = lexicalValueType(storage);
+            if (!scalar) bad('Lexical access cannot mutate a value or semantic handle.', location);
+            if (node.kind === 'lexical-write') {
+              const value = expression(node.value, scope, phase, context);
+              if (!assignable(value, scalar)) bad('Lexical write type mismatch.', location);
+            } else if (node.kind === 'lexical-update') {
+              if (scalar !== 'number' || (node.delta !== 1 && node.delta !== -1) || typeof node.prefix !== 'boolean')
+                bad('Lexical update requires a number, unit delta and explicit prefix flag.', location);
+            }
+            type = scalar;
+            break;
+          }
           case 'static-capability':
             const declarationId = text(node.declarationId);
             if (!staticCapabilities.has(declarationId))
@@ -953,6 +1002,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               bad('IR member optionality must be explicit.', location);
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
             if (capabilityType !== undefined) type = capabilityType;
+            else if (owner === 'exception') type = 'exception';
             else if (owner === 'props' && props.has(key)) type = props.get(key)!;
             else if (eventPayloadMemberType(owner, key) !== undefined)
               type = eventPayloadMemberType(owner, key)!;
@@ -977,11 +1027,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (args.length < required || args.length > helper.parameters.length)
               bad('Helper argument count mismatch.', location);
             args.forEach((argument, index) => {
+              // Validate the entire expression and its declared type before
+              // using literal contents as evidence for the helper parameter.
+              const actual = expression(argument, scope, phase, context);
+              const expected = helper.parameters[index].type;
               if (
-                !assignable(
-                  expression(argument, scope, phase, context),
-                  helper.parameters[index].type
-                )
+                !assignable(actual, expected) &&
+                !assignable(argumentData(argument as ExpressionIR) ?? actual, expected)
               )
                 bad('Helper argument type mismatch.', location);
             });
@@ -1133,6 +1185,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             'condition',
             'then',
             'otherwise',
+            'body',
+            'catch',
+            'finally',
           ]),
           location = span(node.span);
         exactKindFields(node, STATEMENT_KIND_FIELDS, ['kind', 'span']);
@@ -1146,7 +1201,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               if (!validIdentifier(node.name) || scope.has(node.name))
                 bad('Invalid/rebound local identifier.', location);
               const val = object(node.value, EXPRESSION_FIELDS),
-                type = expression(val, scope, phase, context, val.kind === 'function');
+                type = expression(val, scope, phase, context, val.kind === 'function', undefined, 'create');
               const alias = val.kind === 'reference' ? scope.get(String(val.name)) : undefined;
               scope.set(node.name, {
                 ...alias,
@@ -1190,6 +1245,37 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               );
               terminal = true;
               break;
+            case 'throw': {
+              const type = expression(node.value, scope, phase, context);
+              if (!isDataValueType(type) && type !== 'exception')
+                bad('Thrown values must be admitted data or a caught exception.', location);
+              terminal = true;
+              break;
+            }
+            case 'try': {
+              if (node.catch === undefined && node.finally === undefined)
+                bad('Try requires catch or finally.', location);
+              const branchReturns: ValueType[] = [];
+              const bodyTerminal = statements(node.body, new Map(scope), phase, context, branchReturns);
+              let catchTerminal = true;
+              if (node.catch !== undefined) {
+                const caught = object(node.catch, ['name', 'body']);
+                const catchScope = new Map(scope);
+                if (caught.name !== undefined) {
+                  if (!validIdentifier(caught.name) || catchScope.has(caught.name))
+                    bad('Invalid/rebound catch binding.', location);
+                  catchScope.set(caught.name, { type: 'exception', origin: caught });
+                }
+                catchTerminal = statements(caught.body, catchScope, phase, context, branchReturns);
+              }
+              const finalReturns: ValueType[] = [];
+              const finalTerminal = node.finally === undefined ? false :
+                statements(node.finally, new Map(scope), phase, context, finalReturns);
+              if (!finalTerminal) reachableReturns.push(...branchReturns);
+              reachableReturns.push(...finalReturns);
+              terminal ||= finalTerminal || (bodyTerminal && catchTerminal);
+              break;
+            }
             default:
               bad('Unknown IR statement.', location);
           }
@@ -1199,8 +1285,23 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       return terminal;
     }
-    for (const hook of hooks) fn(hook.setup, new Map(), 'setup');
-    fn(root.setup, new Map(), 'setup');
+    const moduleScope: Scope = new Map();
+    if (root.moduleBindings !== undefined) {
+      for (const value of array(root.moduleBindings)) {
+        const binding = object(value, ['kind', 'name', 'value', 'span']);
+        if (binding.kind !== 'const') bad('Module scope admits only static bindings.', span(binding.span));
+        const initializer = object(binding.value, EXPRESSION_FIELDS);
+        const scalar = initializer.kind === 'lexical-cell'
+          ? object(initializer.value, EXPRESSION_FIELDS) : initializer;
+        if (initializer.kind !== 'function' && scalar.kind !== 'literal' &&
+            !(scalar.kind === 'unary' && (scalar.operator === '+' || scalar.operator === '-') &&
+              object(scalar.operand, EXPRESSION_FIELDS).kind === 'literal'))
+          bad('Module initializers cannot execute authored code.', span(binding.span));
+      }
+      statements(root.moduleBindings, moduleScope, 'setup', 'helper', []);
+    }
+    for (const hook of hooks) fn(hook.setup, moduleScope, 'setup');
+    fn(root.setup, moduleScope, 'setup');
     return {
       ok: true,
       value: replacements.size ? (canonicalCopy(input) as PrototypeIR) : (input as PrototypeIR),

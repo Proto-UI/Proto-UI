@@ -12,12 +12,15 @@ import { parsePrototype } from '../src/parser';
 import { emitWebComponentSource } from '../src/web-component-source';
 
 // Draft authority: C-AS-FOCUS-SCOPE-0002-B/C/D/K, C-AS-FOCUSABLE-0001-G,
-// M-FOCUS-0001-D/E. These ordinary atomic consumers are not authored Popover.
+// M-FOCUS-0001-D/E, and owned-entry Scope L/M, Entry I, Module H.
+// These ordinary atomic consumers are not authored Popover.
 export const focusScopeTags = {
   none: 'pui-focus-native-none',
   ordinary: 'pui-focus-native-default',
   previous: 'pui-focus-native-previous',
   manual: 'pui-focus-native-manual',
+  owned: 'pui-focus-native-owned-entry',
+  ownedSelf: 'pui-focus-native-owned-self',
   target: 'pui-focus-native-target',
 } as const;
 export type ScopeKind = Exclude<keyof typeof focusScopeTags, 'target'>;
@@ -25,13 +28,24 @@ export const focusEvidenceDigest = (value: string | Buffer) =>
   createHash('sha256').update(value).digest('hex');
 
 function scopeSource(kind: ScopeKind, config: string) {
+  const ownsEntry = kind === 'owned' || kind === 'ownedSelf';
   return `import {definePrototype} from '@proto.ui/core';
-import {asFocusScope} from '@proto.ui/hooks';
-export default definePrototype({name:'ordinary-focus-${kind}',setup(def){
+import {asFocusScope${ownsEntry ? ',asFocusEntry' : ''}} from '@proto.ui/hooks';
+export default definePrototype({name:'ordinary-focus-${kind === 'ownedSelf' ? 'owned-self' : kind}',setup(def){
   const scope=asFocusScope();scope.configure(${config});
+  ${
+    ownsEntry
+      ? `const entry=asFocusEntry();entry.configure({strategy:'descendant-first',fallback:'${kind === 'ownedSelf' ? 'self' : 'none'}'});
+  def.expose.method('entry',()=>{entry.focus({reason:'pointer',preventScroll:true});});
+  def.expose.method('disableEntry',(disabled:boolean)=>{entry.setDisabled(disabled);});
+  def.props.define({present:{type:'boolean',default:true}});
+  def.lifecycle.onCreated(run=>{run.lifecycle.setPresent(run.props.get().present ?? true);});
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present ?? true);});`
+      : ''
+  }
   def.expose.state('active',scope.active);
   def.expose.state('hasFocused',scope.hasFocused);
-  def.expose.method('open',()=>{scope.activate({reason:'keyboard'});});
+  def.expose.method('open',()=>{scope.activate({reason:'keyboard'${ownsEntry ? ',preventScroll:true' : ''}});});
   def.expose.method('openManual',()=>{scope.activate({reason:'keyboard',entry:'manual'});});
   def.expose.method('close',()=>{scope.deactivate();});
   def.expose.event('handback',{payload:'void'});
@@ -51,6 +65,8 @@ const authoredSources = {
   ordinary: scopeSource('ordinary', '{}'),
   previous: scopeSource('previous', "{restore:'previous'}"),
   manual: scopeSource('manual', "{entry:'manual',restore:'none'}"),
+  owned: scopeSource('owned', "{entryFallback:'entry',emptyPolicy:'none',restore:'none'}"),
+  ownedSelf: scopeSource('ownedSelf', "{entryFallback:'entry',emptyPolicy:'none',restore:'none'}"),
   target: `import {definePrototype} from '@proto.ui/core';
 import {asFocusable,asTrigger,asAccessible} from '@proto.ui/hooks';
 export default definePrototype({name:'ordinary-focus-target',setup(def){
@@ -77,13 +93,15 @@ const entry = `import {register as none} from './none';
 import {register as ordinary} from './ordinary';
 import {register as previous} from './previous';
 import {register as manual} from './manual';
+import {register as owned} from './owned';
+import {register as ownedSelf} from './ownedSelf';
 import {register as target} from './target';
 none('${focusScopeTags.none}');ordinary('${focusScopeTags.ordinary}');
-previous('${focusScopeTags.previous}');manual('${focusScopeTags.manual}');target('${focusScopeTags.target}');
+previous('${focusScopeTags.previous}');manual('${focusScopeTags.manual}');owned('${focusScopeTags.owned}');ownedSelf('${focusScopeTags.ownedSelf}');target('${focusScopeTags.target}');
 const params=new URLSearchParams(location.search);
 const kind=params.get('scope')??'none';
 const tags=${JSON.stringify(focusScopeTags)};
-if(!['none','ordinary','previous','manual'].includes(kind))throw new Error('Unknown scope variant');
+if(!['none','ordinary','previous','manual','owned','ownedSelf'].includes(kind))throw new Error('Unknown scope variant');
 const timeline=[];
 for(const type of ['focusin','focusout','pointerdown','click','keydown'])document.addEventListener(type,event=>{
   const composedPath=event.composedPath().filter(node=>node instanceof Element).map(node=>({tag:node.localName,id:node.id}));
@@ -105,7 +123,11 @@ const trigger=item('trigger','Original trigger');
 const destination=item('destination','Generated outside destination');
 const nativeOutside=document.createElement('button');nativeOutside.id='native-outside';nativeOutside.textContent='Native outside destination';
 const scope=region(tags[kind],'scope');
-const inside=item('inside','Inside focus target');scope.append(inside);
+const inside=item('inside','Inside focus target');
+const nativeEntry=kind==='owned'?document.createElement('button'):null;
+if(nativeEntry){nativeEntry.id='native-entry';nativeEntry.textContent='Native entry descendant';scope.append(nativeEntry);}
+const logicalChild=!['owned','ownedSelf'].includes(kind)||params.get('logicalChild')==='true';
+if(logicalChild)scope.append(inside);
 let inner=null,nestedInside=null;
 if(params.get('nested')==='true'){inner=region(tags.none,'inner');nestedInside=item('nested-inside','Nested focus target');inner.append(nestedInside);scope.append(inner);}
 const handbacks=[];
@@ -116,7 +138,8 @@ scope.addEventListener('handback',event=>{
 });
 trigger.addEventListener('activateScope',event=>{if(event.target===trigger)scope.getExposes().open();});
 document.querySelector('#mount').append(trigger,destination,nativeOutside,scope);
-window.focusScopeConsumer={trigger,destination,nativeOutside,scope,inside,inner,nestedInside,timeline,handbacks,kind};
+if(!logicalChild)document.querySelector('#mount').append(inside);
+window.focusScopeConsumer={trigger,destination,nativeOutside,nativeEntry,scope,inside,inner,nestedInside,timeline,handbacks,kind};
 window.focusScopeConsumerReady=true;
 `;
 

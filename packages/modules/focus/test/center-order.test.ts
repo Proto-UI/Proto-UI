@@ -36,6 +36,7 @@ function navigation(options: {
       orientation: 'vertical',
       entry: 'first',
       restore: 'none',
+      entryFallback: 'none',
       emptyPolicy: 'none',
     }),
     getRovingConfig: () => ({

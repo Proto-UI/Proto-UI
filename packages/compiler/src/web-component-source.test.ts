@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { createRequire } from 'node:module';
 import { fileURLToPath, URL as NodeURL } from 'node:url';
@@ -32,6 +33,31 @@ interface NativeElement extends HTMLElement {
     focusable?: StateProjection<boolean>;
     bump?: (next: number) => void;
     disable?: (next: boolean) => void;
+    arm?: () => void;
+    consume?: () => void;
+    read?: () => number;
+    snapshot?: () => number;
+    post?: () => number;
+    pre?: () => number;
+    id?: string;
+    allocate?: () => string;
+    resetTrace?: () => void;
+    readTrace?: () => string;
+    falsy?: (tag: number) => boolean;
+    uncaughtFalsy?: (tag: number) => void;
+    sameRecord?: () => boolean;
+    sameArray?: () => boolean;
+    codeDiscrimination?: () => boolean;
+    rethrowRecord?: () => boolean;
+    returnAfterCleanup?: () => string;
+    returnTraceBeforeFinally?: () => string;
+    finalReturn?: () => string;
+    finalThrow?: () => boolean;
+    replaceThrow?: () => boolean;
+    caughtScope?: () => boolean;
+    propertyError?: () => boolean;
+    stringUnits?: () => boolean;
+    bareCatch?: () => boolean;
   };
   dispose(): void;
 }
@@ -44,8 +70,8 @@ afterEach(() => {
   }
 });
 
-function create(source: string, shadow = true): NativeElement {
-  const parsed = parsePrototype(source, { fileName: 'independent.proto.ts' });
+function create(source: string, shadow = true, exportName = 'default'): NativeElement {
+  const parsed = parsePrototype(source, { fileName: 'independent.proto.ts', exportName });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitWebComponentSource(parsed.value, { shadow });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
@@ -126,6 +152,154 @@ export default definePrototype({name:'default-view-reconnect',setup(def){
 
 // These regressions exercise externally observable ownership, update, disposal and slot contracts.
 describe('native Web Component semantic source', () => {
+  it('retains arbitrary thrown data, code discrimination and caught closure identity', () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/exception-flow.proto.ts', import.meta.url), 'utf8');
+    const element = create(source);
+    document.body.append(element);
+    const methods = element.getExposes();
+    for (let tag = 0; tag < 5; tag++) expect(methods.falsy?.(tag)).toBe(true);
+    expect(methods.sameRecord?.()).toBe(true);
+    expect(methods.sameArray?.()).toBe(true);
+    expect(methods.codeDiscrimination?.()).toBe(true);
+    expect(methods.caughtScope?.()).toBe(true);
+    expect(methods.propertyError?.()).toBe(true);
+    expect(methods.stringUnits?.()).toBe(true);
+  });
+
+  it('runs finalizers once, honors their abrupt completion and preserves uncaught falsy values', () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/exception-flow.proto.ts', import.meta.url), 'utf8');
+    const element = create(source);
+    document.body.append(element);
+    const methods = element.getExposes();
+    methods.resetTrace?.();
+    expect(methods.rethrowRecord?.()).toBe(true);
+    expect(methods.readTrace?.()).toBe('body;inner;inner-final;outer;outer-final;');
+    methods.resetTrace?.();
+    expect(methods.returnAfterCleanup?.()).toBe('before');
+    expect(methods.readTrace?.()).toBe('try;finally;');
+    methods.resetTrace?.();
+    expect(methods.returnTraceBeforeFinally?.()).toBe('');
+    expect(methods.readTrace?.()).toBe('after;');
+    methods.resetTrace?.();
+    expect(methods.finalReturn?.()).toBe('override');
+    expect(methods.readTrace?.()).toBe('try;finally;');
+    expect(methods.finalThrow?.()).toBe(true);
+    expect(methods.replaceThrow?.()).toBe(true);
+    methods.resetTrace?.();
+    expect(methods.bareCatch?.()).toBe(true);
+    expect(methods.readTrace?.()).toBe('catch;finally;');
+    const values = [0, false, null, undefined, ''];
+    for (const [tag, expected] of values.entries()) {
+      methods.resetTrace?.();
+      let failed = false;
+      let thrown: unknown;
+      try {
+        methods.uncaughtFalsy?.(tag);
+      } catch (error) {
+        failed = true;
+        thrown = error;
+      }
+      expect(failed).toBe(true);
+      expect(thrown).toBe(expected);
+      expect(methods.readTrace?.()).toBe('unhandled-final;');
+      expect(methods.sameRecord?.()).toBe(true);
+    }
+  });
+
+  it('commits only the renderer result selected by finally', async () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/exception-flow.proto.ts', import.meta.url), 'utf8');
+    const element = create(source, true, 'FinallyRenderer');
+    document.body.append(element);
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelectorAll('output')).toHaveLength(1);
+    expect(element.shadowRoot?.querySelector('output')?.textContent).toBe('visible');
+    expect(element.shadowRoot?.querySelector('p')).toBeNull();
+  });
+
+  it('retains private lexical cells without notifying or rendering and snapshots const aliases', async () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/lexical-values.proto.ts', import.meta.url), 'utf8');
+    const first = create(source);
+    const second = document.createElement(first.localName) as NativeElement;
+    mounted.push(second);
+    document.body.append(first, second);
+    const a = first.getExposes(), b = second.getExposes();
+    a.arm?.();
+    a.consume?.();
+    // Compound assignment reads the old 1 before change() writes 20 and returns 2.
+    expect(a.read?.()).toBe(3);
+    expect(a.snapshot?.()).toBe(1);
+    expect(b.read?.()).toBe(1);
+    expect(first.shadowRoot?.textContent).toBe('ready');
+    expect(a.post?.()).toBe(3);
+    expect(a.pre?.()).toBe(5);
+    first.update();
+    await Promise.resolve();
+    expect(first.shadowRoot?.textContent).toBe('used');
+    expect(second.shadowRoot?.textContent).toBe('ready');
+    first.remove();
+    document.body.append(first);
+    expect(first.getExposes().read?.()).toBe(5);
+    first.dispose();
+    expect(() => a.read?.()).toThrow(/disposed/);
+    expect(b.read?.()).toBe(1);
+  });
+
+  it('clears a private arm flag before a synchronous public State observer reenters', () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'private-reentrant-arm',setup(def){
+        let armed=false;
+        const count=def.state.numberDiscrete('count',0);
+        def.expose.state('count',count);
+        def.expose.method('arm',()=>{armed=true;});
+        def.expose.method('consume',()=>{if(!armed)return;armed=false;count.set(count.get()+1);});
+      }});`);
+    document.body.append(element);
+    const api = element.getExposes();
+    const transitions: number[] = [];
+    api.count?.subscribe(({next}) => {
+      transitions.push(next);
+      api.consume?.();
+    });
+    api.arm?.();
+    api.consume?.();
+    api.consume?.();
+    expect(transitions).toEqual([1]);
+    expect(api.count?.get()).toBe(1);
+  });
+
+  it('shares module lexical allocation across live owners and retained detach', () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/module-lexical-values.proto.ts', import.meta.url), 'utf8');
+    const first = create(source);
+    const second = document.createElement(first.localName) as NativeElement;
+    mounted.push(second);
+    document.body.append(first, second);
+    expect(first.getExposes().id).toBe('owner-1');
+    expect(second.getExposes().id).toBe('owner-2');
+    expect(first.getExposes().allocate?.()).toBe('owner-3');
+    first.remove();
+    document.body.append(first);
+    expect(first.getExposes().id).toBe('owner-1');
+    expect(second.getExposes().allocate?.()).toBe('owner-4');
+    first.dispose();
+    expect(second.getExposes().allocate?.()).toBe('owner-5');
+  });
+
+  it('binds semantic module helpers to the calling owner while retaining their private closures', () => {
+    const source = readFileSync(new NodeURL('../test/fixtures/module-lexical-values.proto.ts', import.meta.url), 'utf8');
+    const first = create(source, true, 'WithState');
+    const second = document.createElement(first.localName) as NativeElement;
+    mounted.push(second);
+    document.body.append(first, second);
+    first.getExposes().bump?.(2);
+    expect(first.getExposes().read?.()).toBe(2);
+    expect(first.getExposes().count?.get()).toBe(2);
+    expect(second.getExposes().read?.()).toBe(0);
+    expect(second.getExposes().count?.get()).toBe(0);
+    first.dispose();
+    second.getExposes().bump?.(3);
+    expect(second.getExposes().read?.()).toBe(3);
+  });
+
   it('does not render state writes until an explicit update, and invalidates exposed handles on disposal', async () => {
     const element = create(stateSource);
     document.body.appendChild(element);

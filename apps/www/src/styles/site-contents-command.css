@@ -1,4 +1,4 @@
-/* Layout only for enhanced views; all paint belongs to the actual family Button. */
+/* Layout only; the enhanced public Popover Trigger owns its family paint. */
 [data-site-contents-command] {
   display: flex;
   flex: none;
@@ -9,7 +9,8 @@
 [data-site-contents-mount]:empty {
   display: none;
 }
-/* SSR paint comes from the same public Button snapshot as the live view.
+/* The startup fallback uses the Header's public Button snapshot. The enhanced
+   navigation Trigger uses that family's public navigation presentation.
    This rule owns target geometry only, never a second family recipe. */
 [data-site-contents-fallback] {
   display: inline-flex;

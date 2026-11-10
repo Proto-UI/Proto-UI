@@ -92,8 +92,15 @@ const owners = new Map<object, Owner>();
 const activeScopes: Owner[] = [];
 let scopeRevision = 0;
 let focusRequestEpoch = 0;
+type ScopeEntryIntent = { cancel(): void };
+let scopeEntryIntent: ScopeEntryIntent | undefined;
 /** Internal request bookkeeping shared with the native-only Focus bridge. */
-export function noteNativeFocusRequest() { focusRequestEpoch += 1; }
+export function noteNativeFocusRequest(owner?: ScopeEntryIntent): boolean {
+  const epoch = ++focusRequestEpoch, previous = scopeEntryIntent;
+  scopeEntryIntent = owner;
+  if (previous !== owner) previous?.cancel();
+  return epoch === focusRequestEpoch && scopeEntryIntent === owner;
+}
 const parts = new WeakMap<NativeAnatomyPart, Owner>();
 const targets = new WeakMap<HTMLElement, Owner>();
 const boundaryStacks = new WeakMap<Document, Owner[]>();
@@ -257,12 +264,14 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   const topologySubscribers = new Set<() => void>();
   let entryConfig: Record<string, unknown> = { strategy: 'self', fallback: 'self', disabled: false };
   const focusConfig: Record<string, unknown> = { disabled: false, navParticipation: 'auto' };
-  const scopeConfig: Record<string, unknown> = { trap: false, loop: false, navigation: 'tab', orientation: 'both', entry: 'first', restore: 'previous', emptyPolicy: 'container' };
+  const scopeConfig: Record<string, unknown> = { trap: false, loop: false, navigation: 'tab', orientation: 'both', entry: 'first', entryFallback: 'none', restore: 'previous', emptyPolicy: 'container' };
   const rovingConfig: Record<string, unknown> = { loop: false, navigation: 'arrow', orientation: 'both', entry: 'active', selectOnFocus: false };
   let pendingFocus: NativeFocusRequest | null = null, pendingNavigation: { operation: string; options?: NativeFocusRequest } | null = null;
   let restoreTarget: HTMLElement | null = null;
   let restoreOwner: Owner | undefined;
   let scopeActivation = 0;
+  let ownedEntry: (ScopeEntryIntent & { activation: number; request: NativeFocusRequest; applying: boolean }) | undefined;
+  let entryRootLease: HTMLElement | null = null;
   const observed = <T extends boolean | string | number>(initial: T) => {
     let value = initial;
     const listeners = new Set<(event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void>();
@@ -304,18 +313,18 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (current !== value) { if (value) target.style.setProperty(name, value); else target.style.removeProperty(name); }
     record.projected = value;
   }
-  function focusCandidates(roving: boolean): Owner[] {
+  function focusCandidates(roving: boolean, logical = false): Owner[] {
     const found: Owner[] = [];
     for (const candidate of owners.values()) {
-      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || candidate.focusConfig.navParticipation === 'none') continue;
+      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || (!(logical && roving) && candidate.focusConfig.navParticipation === 'none')) continue;
       const target = candidate.target();
-      if (!target?.isConnected || target.closest('[hidden],[inert],[data-pui-view-detached]')) continue;
+      if (!logical && (!target?.isConnected || target.closest('[hidden],[inert],[data-pui-view-detached]'))) continue;
       if (roving) {
         const key = candidate.focusConfig.groupKey;
         const provider = ancestor(candidate, participant => participant !== candidate && participant.rovingDeclared && (!key || participant.rovingConfig.key === key));
         if (provider !== owner) continue;
       } else if (!descends(candidate, owner)) continue;
-      const duplicate = found.findIndex(entry => entry.target() === target);
+      const duplicate = target ? found.findIndex(entry => entry.target() === target) : -1;
       if (duplicate < 0) found.push(candidate);
       else if (descends(candidate, found[duplicate])) found[duplicate] = candidate;
     }
@@ -324,9 +333,9 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function requestFocus(request?: NativeFocusRequest) {
     alive();
     if (focusConfig.disabled || !canFocus()) return;
-    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { noteNativeFocusRequest(); pendingFocus = request ?? {}; return; }
+    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { if (noteNativeFocusRequest()) pendingFocus = request ?? {}; return; }
     if (options.baseFocus) options.invoke(() => options.baseFocus!().focusSelf(request));
-    else { noteNativeFocusRequest(); root!.focus({ preventScroll: request?.preventScroll }); }
+    else if (noteNativeFocusRequest()) root!.focus({ preventScroll: request?.preventScroll });
   }
   function canFocus(): boolean {
     alive();
@@ -355,20 +364,53 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     members[next].focus({ reason: request?.reason ?? 'keyboard', preventScroll: request?.preventScroll });
     for (const member of members) member.changed();
   }
+  function entryTarget(): HTMLElement | null {
+    if (!ready() || !canFocus()) return null;
+    if (entryConfig.strategy === 'descendant-first') {
+      const candidates = root!.querySelectorAll<HTMLElement>('a[href],area[href],button,input,select,textarea,summary,iframe,audio[controls],video[controls],[contenteditable],[tabindex]');
+      for (const candidate of candidates) {
+        if (candidate.closest('[hidden],[inert],[aria-hidden="true"],[data-pui-view-detached]') || candidate.hasAttribute('disabled') || candidate.getAttribute('aria-disabled') === 'true' || candidate.tabIndex < 0) continue;
+        if (candidate.localName === 'input' && (candidate as HTMLInputElement).type === 'hidden') continue;
+        return candidate;
+      }
+    }
+    return entryConfig.fallback === 'self' ? root : null;
+  }
+  function cancelOwnedEntry(intent = ownedEntry) {
+    if (!intent) return;
+    if (ownedEntry === intent) ownedEntry = undefined;
+    if (scopeEntryIntent === intent) scopeEntryIntent = undefined;
+  }
+  function releaseEntryRoot() {
+    const target = entryRootLease; entryRootLease = null;
+    if (target?.getAttribute('tabindex') === '-1') target.removeAttribute('tabindex');
+  }
+  function focusEntryTarget(target: HTMLElement, request?: NativeFocusRequest) {
+    // Entry may focus its Root without adding it to sequential navigation or
+    // declaring the portable Focusable role. Preserve authored tabindex values.
+    if (target === root && target.tabIndex < 0 && !target.hasAttribute('tabindex')) {
+      entryRootLease = target; target.setAttribute('tabindex', '-1');
+    }
+    target.focus({ preventScroll: request?.preventScroll });
+  }
+  function fulfillOwnedEntry() {
+    const intent = ownedEntry;
+    if (!intent || intent.applying || intent.activation !== scopeActivation || entryConfig.disabled) return;
+    const target = entryTarget();
+    if (!target || ownedEntry !== intent) return;
+    intent.applying = true;
+    try {
+      focusEntryTarget(target, intent.request);
+      if (ownedEntry === intent && (target.getRootNode() as Document | ShadowRoot).activeElement === target) cancelOwnedEntry(intent);
+    } finally { intent.applying = false; }
+  }
   const entry: NativeFocusEntry = {
     configure(config) { setup('focusEntry.configure'); entryConfig = { ...entryConfig, ...config }; },
-    setDisabled(value) { runtime('focusEntry.setDisabled'); entryConfig.disabled = value; },
+    setDisabled(value) { runtime('focusEntry.setDisabled'); entryConfig.disabled = value; if (value) { ++scopeActivation; cancelOwnedEntry(); releaseEntryRoot(); } },
     focus(request) {
-      runtime('focusEntry.focus'); if (entryConfig.disabled || !ready() || !canFocus()) return;
-      if (entryConfig.strategy === 'descendant-first') {
-        const candidates = root!.querySelectorAll<HTMLElement>('a[href],area[href],button,input,select,textarea,summary,iframe,audio[controls],video[controls],[contenteditable],[tabindex]');
-        for (const candidate of candidates) {
-          if (candidate.closest('[hidden],[inert],[aria-hidden="true"],[data-pui-view-detached]') || candidate.hasAttribute('disabled') || candidate.getAttribute('aria-disabled') === 'true' || candidate.tabIndex < 0) continue;
-          if (candidate.localName === 'input' && (candidate as HTMLInputElement).type === 'hidden') continue;
-          candidate.focus({ preventScroll: request?.preventScroll }); return;
-        }
-      }
-      if (entryConfig.fallback === 'self') root!.focus({ preventScroll: request?.preventScroll });
+      runtime('focusEntry.focus'); if (entryConfig.disabled) return;
+      const target = entryTarget();
+      if (target && noteNativeFocusRequest()) focusEntryTarget(target, request);
     },
   };
   const roving: NativeFocusRoving = {
@@ -393,32 +435,45 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     activate(request) {
       runtime('focusScope.activate');
       const activation = ++scopeActivation, epoch = generation;
+      const useEntry = scopeConfig.entryFallback === 'entry';
+      const requestEpoch = focusRequestEpoch;
+      if (useEntry) { cancelOwnedEntry(); request = { ...(request ?? { reason: 'programmatic' as const }) }; if (activation !== scopeActivation || requestEpoch !== focusRequestEpoch) return; }
       restoreTarget = null; restoreOwner = undefined;
       if (ready()) { const current = root!.ownerDocument.activeElement; if (current && !contains(root!, current)) { restoreTarget = current as HTMLElement; restoreOwner = targets.get(restoreTarget); } }
       const index = activeScopes.indexOf(owner); if (index >= 0) activeScopes.splice(index, 1); activeScopes.push(owner);
-      const revision = ++scopeRevision;
+      let revision = ++scopeRevision;
       owner.scopeActive = true; scopeActive.set(true);
       if (activation !== scopeActivation || epoch !== generation || !owner.alive() || !owner.scopeActive) return;
       if (request?.entry !== 'manual' && scopeConfig.entry !== 'manual') {
-        const candidates = focusCandidates(owner.rovingDeclared);
+        const candidates = focusCandidates(owner.rovingDeclared, useEntry);
         if (activation !== scopeActivation || epoch !== generation || !owner.alive() || !owner.scopeActive) return;
         // Strip only activation policy; omitted requests retain the old default.
         let focusRequest: NativeFocusRequest = request ?? { reason: 'programmatic' };
         if (request && Object.hasOwn(request, 'entry')) { const { entry: _entry, ...nativeRequest } = request; focusRequest = nativeRequest; }
-        if (candidates.length) { if (revision === scopeRevision) candidates[0].focus(focusRequest); }
-        else if (scopeConfig.emptyPolicy !== 'container') { const current = activeScopes.indexOf(owner); if (current >= 0) { activeScopes.splice(current, 1); ++scopeRevision; } owner.scopeActive = false; scopeActive.set(false); }
+        if (candidates.length) { if (revision === scopeRevision && (!useEntry || requestEpoch === focusRequestEpoch)) candidates[0].focus(focusRequest); }
+        else {
+          if (scopeConfig.emptyPolicy !== 'container') { const current = activeScopes.indexOf(owner); if (current >= 0) { activeScopes.splice(current, 1); revision = ++scopeRevision; } owner.scopeActive = false; scopeActive.set(false); }
+          if (useEntry && owner.entryDeclared && !entryConfig.disabled && activation === scopeActivation && revision === scopeRevision && requestEpoch === focusRequestEpoch && owner.alive()) {
+            const intent = { activation, request: focusRequest, applying: false, cancel: () => cancelOwnedEntry(intent) };
+            ownedEntry = intent;
+            if (noteNativeFocusRequest(intent)) fulfillOwnedEntry();
+          }
+        }
       }
     },
     deactivate(request) {
       runtime('focusScope.deactivate');
+      const requestEpoch = focusRequestEpoch, activation = ++scopeActivation;
+      cancelOwnedEntry();
       const index = activeScopes.indexOf(owner);
       if (index < 0) return;
-      const target = restoreTarget, previous = restoreOwner, activation = ++scopeActivation, epoch = generation;
-      const doc = root?.ownerDocument, focused = doc?.activeElement, requestEpoch = focusRequestEpoch;
+      const target = restoreTarget, previous = restoreOwner, epoch = generation;
+      const doc = root?.ownerDocument, focused = doc?.activeElement;
       activeScopes.splice(index, 1); const revision = ++scopeRevision; owner.scopeActive = false;
       // Retire old queued requests before active-state observers can remount a
       // child or create new work. Logical membership survives view detachment.
       for (const participant of owners.values()) {
+        if (activation !== scopeActivation || requestEpoch !== focusRequestEpoch) break;
         if (participant === owner || descends(participant, owner)) participant.cancelPendingFocus();
       }
       if (activation !== scopeActivation || epoch !== generation || !owner.alive()) return;
@@ -1361,11 +1416,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (owner.rovingDeclared) { const focused = root!.ownerDocument.activeElement; const members = focusCandidates(true); rovingHasFocused.set(members.some(member => member.target() === focused)); rovingActive.set(members.some(member => member.active)); }
     if (pendingFocus) { const request = pendingFocus; pendingFocus = null; requestFocus(request); }
     if (pendingNavigation) { const request = pendingNavigation; pendingNavigation = null; navigate(request.operation, request.options); }
+    if (ownedEntry) fulfillOwnedEntry();
     requestPresentation();
   }
   function portalTarget(): HTMLElement | null { return ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayOpen.handle.get() ? root!.ownerDocument.body : null; }
   function unmount() {
     const previous = root;
+    releaseEntryRoot();
     ++generation; ++imageGeneration;
     invalidateTransition(); stopPosition(); unlockModal();
     root = null;
@@ -1430,7 +1487,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       listen(doc, 'focusin', native => { if (overlayOpen.handle.get() && overlayConfig.closeOnFocusOutside && classify({ target: native.target, nativeEvent: native }) === 'outside') options.invoke(() => setOverlayOpen(false, 'focus.outside')); });
       attachText(); applyImage(true); attachScroll(); attachPosition();
       reconcileStack(); refresh(); announceTopology();
-      if (typeof MutationObserver !== 'undefined' && (claims.size || owner.scopeDeclared || owner.rovingDeclared || scrollChrome)) { const mutation = new MutationObserver(records => { if (!records.some(record => record.type === 'childList')) return; announceTopology(); if (scrollChrome) attachChrome(); }); mutation.observe(root, { childList: true, subtree: true }); cleanups.push(() => mutation.disconnect()); }
+      if (typeof MutationObserver !== 'undefined' && (claims.size || owner.scopeDeclared || owner.rovingDeclared || scrollChrome)) { const mutation = new MutationObserver(records => { if (!records.some(record => record.type === 'childList')) return; announceTopology(); if (ownedEntry) fulfillOwnedEntry(); if (scrollChrome) attachChrome(); }); mutation.observe(root, { childList: true, subtree: true }); cleanups.push(() => mutation.disconnect()); }
     } catch (error) { try { unmount(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Modules] mount and cleanup failed.'); } throw error; }
   }
   const registeredFacts = new Set<object>();
@@ -1454,10 +1511,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     setRovingStatus(status) { runtime('focus.setRovingStatus'); if (status.selected !== undefined) owner.selected = Boolean(status.selected); if (status.active !== undefined) owner.active = Boolean(status.active); refresh(); },
     canFocus,
     focus(request) { runtime('focus.focus'); requestFocus(request); },
-    blur() { runtime('focus.blur'); pendingFocus = null; if (ready()) root!.blur(); },
+    blur() { runtime('focus.blur'); ++scopeActivation; cancelOwnedEntry(); pendingFocus = null; if (ready()) root!.blur(); },
     rootTag, rootProperties, projectAttributes, portalTarget, adoptControlState, refresh, mount, unmount,
     dispose() {
       if (disposed) return;
+      ++scopeActivation; cancelOwnedEntry();
       transitionDisposed = true; transitionMounted = false; queuedTransition = null;
       const rootOwner = logicalRoot(owner);
       const failures: unknown[] = [];

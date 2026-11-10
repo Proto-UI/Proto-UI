@@ -28,6 +28,8 @@ interface ScopeExposes {
   open(): void;
   openManual(): void;
   close(): void;
+  entry?(): void;
+  disableEntry?(disabled: boolean): void;
 }
 interface GeneratedHost<Exposes> extends HTMLElement {
   readonly logicalOwner: symbol | null;
@@ -57,6 +59,7 @@ interface FocusConsumer {
   trigger: GeneratedHost<TargetExposes>;
   destination: GeneratedHost<TargetExposes>;
   nativeOutside: HTMLButtonElement;
+  nativeEntry: HTMLButtonElement | null;
   scope: GeneratedHost<ScopeExposes>;
   inside: GeneratedHost<TargetExposes>;
   inner: GeneratedHost<ScopeExposes> | null;
@@ -173,7 +176,7 @@ async function observation(page: Page): Promise<FocusObservation> {
 type RecordObservation = (label: string) => Promise<void>;
 async function withConsumer(
   name: string,
-  options: { scope?: ScopeKind; nested?: boolean; handback?: boolean },
+  options: { scope?: ScopeKind; nested?: boolean; handback?: boolean; logicalChild?: boolean },
   run: (page: Page, record: RecordObservation) => Promise<void>
 ) {
   const context = await fixture.browser.newContext({
@@ -218,6 +221,7 @@ async function withConsumer(
       scope: options.scope ?? 'none',
       nested: String(options.nested ?? false),
       handback: String(options.handback ?? true),
+      logicalChild: String(options.logicalChild ?? false),
     });
     const response = await page.goto(fixture.baseUrl + '/?' + params);
     expect(response?.status()).toBe(200);
@@ -786,4 +790,252 @@ describe.sequential('ordinary generated Focus scope native consumer', () => {
       30_000
     );
   }
+});
+
+describe.sequential('ordinary generated Scope-owned native Entry', () => {
+  it(
+    'self fallback focuses the Entry Root through a programmatic lease without declaring target state',
+    async () =>
+      withConsumer('owned-entry-native-self', { scope: 'ownedSelf' }, async (page, record) => {
+        await outsideNativeFocus(page, record);
+        expect(
+          await page.evaluate(() => window.focusScopeConsumer.scope.getAttribute('tabindex'))
+        ).toBe(null);
+        await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().open());
+        await focused(page, 'scope');
+        expect(
+          await page.evaluate(() => {
+            const c = window.focusScopeConsumer;
+            return {
+              active: c.scope.getExposes().active.get(),
+              tabindex: c.scope.getAttribute('tabindex'),
+              targetStateExposed: Object.hasOwn(c.scope.getExposes(), 'focused'),
+            };
+          })
+        ).toEqual({ active: false, tabindex: '-1', targetStateExposed: false });
+        await record('entry-self-acquired-without-sequential-target');
+        await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().disableEntry!(true));
+        expect(
+          await page.evaluate(() => window.focusScopeConsumer.scope.getAttribute('tabindex'))
+        ).toBe(null);
+        await outsideNativeFocus(page, record);
+        await closeScope(page);
+        await afterMountedFrames(page);
+        await focused(page, 'native-outside');
+        await record('entry-lease-retired-on-role-disable');
+      }),
+    30_000
+  );
+
+  it(
+    'keeps manual activation local, then enters the native region without creating a Focusable Root',
+    async () =>
+      withConsumer('owned-entry-native-region', { scope: 'owned' }, async (page, record) => {
+        await outsideNativeFocus(page, record);
+        await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().openManual());
+        await focused(page, 'native-outside');
+        await record('manual-keeps-outside-focus');
+        await closeScope(page);
+        await page.locator('#trigger').click();
+        await focused(page, 'native-entry');
+        expect(
+          await page.evaluate(() => {
+            const c = window.focusScopeConsumer;
+            return {
+              active: c.scope.getExposes().active.get(),
+              rootFocused: document.activeElement === c.scope,
+              rootTabindex: c.scope.getAttribute('tabindex'),
+              insideFocused: c.inside.getExposes().focused.get(),
+              nativeFocusEvents: c.timeline.filter(
+                (event) => event.type === 'focusin' && event.target === 'native-entry'
+              ).length,
+            };
+          })
+        ).toEqual({
+          active: false,
+          rootFocused: false,
+          rootTabindex: null,
+          insideFocused: false,
+          nativeFocusEvents: 1,
+        });
+        await record('native-entry-acquired-once');
+        await outsideNativeFocus(page, record);
+        await closeScope(page);
+        await afterMountedFrames(page);
+        await focused(page, 'native-outside');
+        await record('inactive-close-preserves-outside-destination');
+      }),
+    30_000
+  );
+
+  it(
+    'selected logical child priority survives its missing host view',
+    async () =>
+      withConsumer(
+        'owned-entry-selected-child',
+        { scope: 'owned', logicalChild: true },
+        async (page, record) => {
+          await holdChild(page);
+          await setChildPresent(page, false);
+          await outsideNativeFocus(page, record);
+          await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().open());
+          await afterMountedFrames(page);
+          await focused(page, 'native-outside');
+          expect(
+            await page.evaluate(() =>
+              window.focusScopeConsumer.timeline.some(
+                (event) => event.type === 'focusin' && event.target === 'native-entry'
+              )
+            )
+          ).toBe(false);
+          await record('logical-child-selected-without-view');
+          await setChildPresent(page, true);
+          await afterMountedFrames(page);
+          await focused(page, 'inside');
+          expect(
+            await page.evaluate(() =>
+              window.focusScopeConsumer.timeline.some(
+                (event) => event.type === 'focusin' && event.target === 'native-entry'
+              )
+            )
+          ).toBe(false);
+          await record('selected-child-owns-later-host-readiness');
+        }
+      ),
+    30_000
+  );
+
+  it(
+    'retains an initial Entry resolution gap and acquires only once when the current descendant appears',
+    async () =>
+      withConsumer('owned-entry-initial-gap', { scope: 'owned' }, async (page, record) => {
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.nativeEntry!.remove();
+          c.scope.getExposes().entry!();
+        });
+        await outsideNativeFocus(page, record);
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.scope.append(c.nativeEntry!);
+        });
+        await afterMountedFrames(page);
+        await focused(page, 'native-outside');
+        await record('independent-unresolved-entry-remains-noop');
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.nativeEntry!.remove();
+          c.scope.getExposes().open();
+        });
+        expect(
+          await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().active.get())
+        ).toBe(false);
+        await record('activation-owns-unresolved-entry');
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.scope.append(c.nativeEntry!);
+        });
+        await focused(page, 'native-entry');
+        await record('current-native-descendant-satisfies-entry');
+        await outsideNativeFocus(page, record);
+        await page.evaluate(() =>
+          window.focusScopeConsumer.scope.append(document.createElement('span'))
+        );
+        await afterMountedFrames(page);
+        await focused(page, 'native-outside');
+        expect(
+          await page.evaluate(
+            () =>
+              window.focusScopeConsumer.timeline.filter(
+                (event) => event.type === 'focusin' && event.target === 'native-entry'
+              ).length
+          )
+        ).toBe(1);
+        await record('later-readiness-does-not-reacquire');
+      }),
+    30_000
+  );
+
+  for (const cancel of ['deactivate', 'Entry disable', 'new target'] as const) {
+    it(
+      cancel + ' cancels unavailable native Entry before later readiness',
+      async () =>
+        withConsumer(
+          'owned-entry-cancel-' + cancel.replaceAll(' ', '-'),
+          { scope: 'owned' },
+          async (page, record) => {
+            await outsideNativeFocus(page, record);
+            await page.evaluate(() => {
+              const c = window.focusScopeConsumer;
+              c.nativeEntry!.style.display = 'none';
+              c.scope.getExposes().open();
+            });
+            await focused(page, 'native-outside');
+            await record('native-entry-unavailable');
+            await page.evaluate((action) => {
+              const c = window.focusScopeConsumer;
+              if (action === 'deactivate') c.scope.getExposes().close();
+              else if (action === 'Entry disable') {
+                c.scope.getExposes().disableEntry!(true);
+                c.scope.getExposes().disableEntry!(false);
+              } else c.destination.getExposes().focusSelf({ reason: 'pointer' });
+              c.nativeEntry!.style.display = '';
+              c.scope.append(document.createElement('span'));
+            }, cancel);
+            await afterMountedFrames(page);
+            await focused(page, cancel === 'new target' ? 'destination' : 'native-outside');
+            expect(
+              await page.evaluate(() =>
+                window.focusScopeConsumer.timeline.some(
+                  (event) => event.type === 'focusin' && event.target === 'native-entry'
+                )
+              )
+            ).toBe(false);
+            await record('canceled-entry-does-not-steal-later-focus');
+          }
+        ),
+      30_000
+    );
+  }
+
+  it(
+    'deactivate cancels an owned continuation while the retained Scope view is absent',
+    async () =>
+      withConsumer('owned-entry-retained-scope-close', { scope: 'owned' }, async (page, record) => {
+        await outsideNativeFocus(page, record);
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.nativeEntry!.remove();
+          c.scope.getExposes().open();
+          c.scope.setProps({ present: false });
+        });
+        await expect
+          .poll(() => page.evaluate(() => window.focusScopeConsumer.scope.present))
+          .toBe(false);
+        await record('scope-view-absent-with-owned-continuation');
+        await closeScope(page);
+        await page.evaluate(() => {
+          const c = window.focusScopeConsumer;
+          c.scope.append(c.nativeEntry!);
+          c.scope.setProps({ present: true });
+        });
+        await expect
+          .poll(() => page.evaluate(() => window.focusScopeConsumer.scope.present))
+          .toBe(true);
+        await afterMountedFrames(page);
+        await focused(page, 'native-outside');
+        expect(
+          await page.evaluate(() =>
+            window.focusScopeConsumer.timeline.some(
+              (event) => event.type === 'focusin' && event.target === 'native-entry'
+            )
+          )
+        ).toBe(false);
+        await record('retained-scope-readiness-cannot-resurrect-close');
+        await page.evaluate(() => window.focusScopeConsumer.scope.getExposes().entry!());
+        await focused(page, 'native-entry');
+        await record('new-independent-entry-still-available');
+      }),
+    30_000
+  );
 });

@@ -10,9 +10,10 @@ import {
   gpuiNativeSdkFiles,
 } from './gpui-native-sdk';
 import type { DataType } from './data-types';
-import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
-import { isDataValueType, isPublicValueType } from './ir';
+import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
+import { isDataValueType, isPublicValueType, lexicalValueType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
+import { partitionModuleBindings } from './source-module-bindings';
 import type { RuleCondition } from './rule-declarations';
 import type {
   CompileResult,
@@ -242,24 +243,11 @@ export function emitGpuiSource(
     'binding.release',
     'subscription.release',
   ]);
-  const activationSites = admittedAnalysis.sites.filter(
-    (site) => site.operation === 'focus.activate'
-  );
-  const reachedActivation = (node: ExpressionIR): boolean =>
-    activationSites.some(
-      (site) =>
-        site.span.file === node.span.file &&
-        site.span.start === node.span.start &&
-        site.span.end === node.span.end
-    );
-  function hasActivationEntry(type: DataType): boolean {
-    return (
-      typeof type !== 'string' &&
-      (type.kind === 'record'
-        ? type.fields.some((field) => field.name === 'entry')
-        : type.kind === 'union' && type.members.some(hasActivationEntry))
-    );
-  }
+  const exceptionPrototypeMembers: Readonly<Record<string, boolean>> = {
+    ['__proto__']: true, constructor: true, toString: true, toLocaleString: true, valueOf: true,
+    hasOwnProperty: true, isPrototypeOf: true, propertyIsEnumerable: true,
+    __defineGetter__: true, __defineSetter__: true, __lookupGetter__: true, __lookupSetter__: true,
+  };
   function inspect(value: unknown, enclosingSpan = ir.setup.span): void {
     if (Array.isArray(value)) {
       value.forEach((item) => inspect(item, enclosingSpan));
@@ -271,6 +259,12 @@ export function emitGpuiSource(
     // Carry the nearest real IR owner (e.g. the typed parameter), never invent one.
     const span = node.span ?? enclosingSpan;
     if (node.kind === 'function' && !reached.has(node.function)) return;
+    if (node.kind === 'member' && node.object.type === 'exception' && Object.hasOwn(exceptionPrototypeMembers, node.property))
+      diagnostics.push({
+        code: 'PUI_GPUI_EXCEPTION_PROPERTY', category: 'unsupported-input',
+        message: 'GPUI caught values expose data fields and scalar/list members; JavaScript prototype reflection has no admitted native lowering.',
+        span,
+      });
     if (node.kind === 'literal' && typeof node.value === 'string' && hasLoneSurrogate(node.value)) {
       diagnostics.push({
         code: 'PUI_GPUI_STRING_UNSUPPORTED',
@@ -294,21 +288,6 @@ export function emitGpuiSource(
         category: 'unsupported-input',
         message: `GPUI operation ${node.operation} has no concrete pinned host lowering. No success fallback is emitted.`,
         span: node.span,
-      });
-    if (
-      node.kind === 'operation' &&
-      node.operation === 'focus.activate' &&
-      reachedActivation(node) &&
-      node.arguments[0] &&
-      isDataValueType(node.arguments[0].type) &&
-      hasActivationEntry(node.arguments[0].type)
-    )
-      diagnostics.push({
-        code: 'PUI_GPUI_FOCUS_ACTIVATION_REQUIRED',
-        category: 'unsupported-input',
-        message:
-          'Per-activation focus entry policy has no pinned GPUI lowering. Existing focus activation without entry remains supported.',
-        span: node.arguments[0].span,
       });
     if (
       node.kind === 'operation' &&
@@ -412,8 +391,14 @@ export function emitGpuiSource(
     if (typeof value === 'boolean') return `Value::boolean(${value})`;
     return `Value::number(${Object.is(value, -0) ? '-0.0' : Number.isInteger(value) ? `${value}.0` : String(value)})`;
   }
-  let templateScope = NativeLexicalScope.empty();
+  const moduleScope = moduleLexicalScope(ir);
+  const moduleParts = partitionModuleBindings(ir);
+  const moduleBindings = new Map(moduleParts.shared.map((binding) => [binding.name, binding.value]));
+  let templateScope = moduleScope;
   const functionDeclarations = new Map<FunctionIR, NativeLexicalScope>();
+  const cellDepths = new Map<ExpressionIR, number>();
+  const capturedCells = new Set<ExpressionIR>();
+  let lexicalDepth = 0;
   const parameterBindings = new WeakMap<object, { fn: FunctionIR; index: number }>();
   const nativeRecordParameters = new Map<FunctionIR, Set<number>>();
   const nativeRecordReturns = new Set<FunctionIR>();
@@ -440,7 +425,18 @@ export function emitGpuiSource(
   function indexExpression(node: ExpressionIR, scope: NativeLexicalScope): void {
     if (node.kind === 'function') {
       functionDeclarations.set(node.function, scope);
+      lexicalDepth++;
       indexBody(node.function.body, parameterScope(node.function, scope));
+      lexicalDepth--;
+    } else if (node.kind === 'reference') {
+      const value = scope.lookup(node.name)?.value;
+      if (value?.kind === 'lexical-cell' && lexicalDepth > cellDepths.get(value)!)
+        capturedCells.add(value);
+    } else if (node.kind === 'lexical-cell') indexExpression(node.value, scope);
+    else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') indexExpression(node.cell, scope);
+    else if (node.kind === 'lexical-write') {
+      indexExpression(node.cell, scope);
+      indexExpression(node.value, scope);
     } else if (node.kind === 'array') node.elements.forEach((item) => indexExpression(item, scope));
     else if (node.kind === 'record')
       node.entries.forEach((entry) => indexExpression(entry.value, scope));
@@ -461,11 +457,17 @@ export function emitGpuiSource(
     let scope = initial;
     for (const statement of body) {
       if (statement.kind === 'const') {
+        if (statement.value.kind === 'lexical-cell') cellDepths.set(statement.value, lexicalDepth);
         indexExpression(statement.value, scope);
         scope = scope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') indexExpression(statement.expression, scope);
       else if (statement.kind === 'return') {
         if (statement.value) indexExpression(statement.value, scope);
+      } else if (statement.kind === 'throw') indexExpression(statement.value, scope);
+      else if (statement.kind === 'try') {
+        indexBody(statement.body, scope);
+        if (statement.catch) indexBody(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope);
+        if (statement.finally) indexBody(statement.finally, scope);
       } else {
         indexExpression(statement.condition, scope);
         indexBody(statement.then, scope);
@@ -473,14 +475,15 @@ export function emitGpuiSource(
       }
     }
   }
-  functionDeclarations.set(ir.setup, NativeLexicalScope.empty());
-  indexBody(ir.setup.body, parameterScope(ir.setup, NativeLexicalScope.empty()));
+  indexBody(ir.moduleBindings ?? [], NativeLexicalScope.empty());
+  functionDeclarations.set(ir.setup, moduleScope);
+  indexBody(ir.setup.body, parameterScope(ir.setup, moduleScope));
   // Authored-hook functions have their own lexical entry rather than inheriting
   // a caller's same-spelled locals. The canonical admitted function objects are reused.
   for (const fn of admittedAnalysis.functions) {
     if (!functionDeclarations.has(fn)) {
-      functionDeclarations.set(fn, NativeLexicalScope.empty());
-      indexBody(fn.body, parameterScope(fn, NativeLexicalScope.empty()));
+      functionDeclarations.set(fn, moduleScope);
+      indexBody(fn.body, parameterScope(fn, moduleScope));
     }
   }
   function helperFunction(name: string, scope = templateScope): FunctionIR | undefined {
@@ -497,6 +500,36 @@ export function emitGpuiSource(
   }
   const nativeReturns = new Map<FunctionIR, boolean>();
   const activeNativeReturns = new Set<FunctionIR>();
+  const functionResults = new Map<FunctionIR, { value?: ExpressionIR; scope: NativeLexicalScope }[]>();
+  function returnedValues(fn: FunctionIR): { value?: ExpressionIR; scope: NativeLexicalScope }[] {
+    const known = functionResults.get(fn);
+    if (known) return known;
+    const results: { value?: ExpressionIR; scope: NativeLexicalScope }[] = [];
+    function collect(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
+      let scope = initial;
+      for (const statement of body) {
+        if (statement.kind === 'const') scope = scope.bind(statement.name, statement.value);
+        else if (statement.kind === 'return') { results.push({ value: statement.value, scope }); return true; }
+        else if (statement.kind === 'throw') return true;
+        else if (statement.kind === 'if') {
+          const then = collect(statement.then, scope), otherwise = collect(statement.otherwise, scope);
+          if (then && otherwise) return true;
+        } else if (statement.kind === 'try') {
+          const start = results.length;
+          const tried = collect(statement.body, scope);
+          const caught = statement.catch ? collect(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope) : true;
+          const end = results.length;
+          const finalized = statement.finally ? collect(statement.finally, scope) : false;
+          if (finalized) results.splice(start, end - start);
+          if (finalized || (tried && caught)) return true;
+        }
+      }
+      return false;
+    }
+    collect(fn.body, parameterScope(fn, functionDeclarations.get(fn) ?? moduleScope));
+    functionResults.set(fn, results);
+    return results;
+  }
   function shapeHasNative(shape: NativeShape | null): boolean {
     return (
       !!shape &&
@@ -539,26 +572,9 @@ export function emitGpuiSource(
       throw new Error('Recursive helper escaped checked GPUI ABI admission.');
     activeNativeReturns.add(fn);
     try {
-      function returned(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
-        let scope = initial;
-        for (const statement of body) {
-          if (statement.kind === 'const') scope = scope.bind(statement.name, statement.value);
-          else if (statement.kind === 'return')
-            return !!statement.value && snapshotAbi(statement.value, scope);
-          else if (
-            statement.kind === 'if' &&
-            (returned(statement.then, scope) || returned(statement.otherwise, scope))
-          )
-            return true;
-        }
-        return false;
-      }
       const result =
         fn !== ir.setup &&
-        returned(
-          fn.body,
-          parameterScope(fn, functionDeclarations.get(fn) ?? NativeLexicalScope.empty())
-        );
+        returnedValues(fn).some(({ value, scope }) => !!value && snapshotAbi(value, scope));
       nativeReturns.set(fn, result);
       return result;
     } finally {
@@ -642,6 +658,11 @@ export function emitGpuiSource(
         else if (node.kind === 'binary') {
           inspect(node.left, scope);
           inspect(node.right, scope);
+        } else if (node.kind === 'lexical-cell') inspect(node.value, scope);
+        else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') inspect(node.cell, scope);
+        else if (node.kind === 'lexical-write') {
+          inspect(node.cell, scope);
+          inspect(node.value, scope);
         } else if (node.kind === 'unary') inspect(node.operand, scope);
         else if (node.kind === 'member') inspect(node.object, scope);
         else if (node.kind === 'rule') {
@@ -664,11 +685,12 @@ export function emitGpuiSource(
           else if (statement.kind === 'return') {
             if (statement.value) {
               inspect(statement.value, scope);
-              if (recordAbi(statement.value, scope) && !nativeRecordReturns.has(fn)) {
-                nativeRecordReturns.add(fn);
-                changed = true;
-              }
             }
+          } else if (statement.kind === 'throw') inspect(statement.value, scope);
+          else if (statement.kind === 'try') {
+            body(fn, statement.body, scope);
+            if (statement.catch) body(fn, statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope);
+            if (statement.finally) body(fn, statement.finally, scope);
           } else {
             inspect(statement.condition, scope);
             body(fn, statement.then, scope);
@@ -676,12 +698,17 @@ export function emitGpuiSource(
           }
         }
       }
-      for (const fn of admittedAnalysis.functions)
+      for (const fn of admittedAnalysis.functions) {
         body(
           fn,
           fn.body,
           parameterScope(fn, functionDeclarations.get(fn) ?? NativeLexicalScope.empty())
         );
+        if (!nativeRecordReturns.has(fn) && returnedValues(fn).some(({ value, scope }) => !!value && recordAbi(value, scope))) {
+          nativeRecordReturns.add(fn);
+          changed = true;
+        }
+      }
     } while (changed);
   }
   settleRecordAbis();
@@ -924,6 +951,15 @@ impl __PuiNativeRecordValue {
               else if (statement.kind === 'return') {
                 if (statement.value) found.push(...resolve(statement.value, current));
                 return true;
+              } else if (statement.kind === 'throw') return true;
+              else if (statement.kind === 'try') {
+                const start = found.length;
+                const tried = returns(statement.body, current);
+                const caught = statement.catch ? returns(statement.catch.body, statement.catch.name ? current.parameter(statement.catch.name, undefined, current, null) : current) : true;
+                const end = found.length;
+                const finalized = statement.finally ? returns(statement.finally, current) : false;
+                if (finalized) found.splice(start, end - start);
+                if (finalized || (tried && caught)) return true;
               } else if (statement.kind === 'if') {
                 const then = returns(statement.then, current),
                   otherwise = returns(statement.otherwise, current);
@@ -1020,6 +1056,7 @@ impl __PuiNativeRecordValue {
   }
 
   let uses = { names: new Set<string>(), owner: false };
+  let emitsExceptions = false;
   function ownerReference(): string {
     uses.owner = true;
     return 'owner';
@@ -1035,6 +1072,9 @@ impl __PuiNativeRecordValue {
     const recordReturn = nativeRecordReturns.has(fn);
     const savedTemplateScope = templateScope;
     templateScope = parameterScope(fn, functionDeclarations.get(fn) ?? templateScope);
+    const moduleBody = fn.context === 'setup'
+      ? statements(moduleParts.owned, scope, depth + 1, false) : '';
+    if (fn.context === 'setup') moduleParts.owned.forEach((binding) => scope.add(binding.name));
     const body = statements(
       fn.body,
       scope,
@@ -1048,7 +1088,7 @@ impl __PuiNativeRecordValue {
     const functionUses = uses;
     uses = parentUses;
     const captures = [...environment]
-      .filter((name) => functionUses.names.has(name) && !parameterNames.has(name))
+      .filter((name) => functionUses.names.has(name) && !parameterNames.has(name) && !moduleBindings.has(name))
       .map((name) => {
         uses.names.add(name);
         return `let ${local(name)} = ${local(name)}.clone();`;
@@ -1083,9 +1123,9 @@ impl __PuiNativeRecordValue {
         : recordReturn
           ? '__PuiNativeRecordValue'
           : 'Value';
-      return `{ ${owner} ${captures} let call:Rc<dyn Fn(${parameterTypes})->${resultType}>=Rc::new(move |${signature}| -> ${resultType} {\n${body}${indent}}); native::gpui_native_owner::NativeCallable { identity:Rc::new(()), call } }`;
+      return `{ ${owner} ${captures} let call:Rc<dyn Fn(${parameterTypes})->${resultType}>=Rc::new(move |${signature}| -> ${resultType} {\n${moduleBody}${body}${indent}}); native::gpui_native_owner::NativeCallable { identity:Rc::new(()), call } }`;
     }
-    return `{ ${owner} ${captures} Value::${nativeReturn ? 'Renderer' : 'Function'}(Rc::new(move |${parameters ? 'arguments' : '_'}: Vec<Value>| {\n${parameters}${body}${indent}})) }`;
+    return `{ ${owner} ${captures} Value::${nativeReturn ? 'Renderer' : 'Function'}(Rc::new(move |${parameters ? 'arguments' : '_'}: Vec<Value>| {\n${parameters}${moduleBody}${body}${indent}})) }`;
   }
   function expression(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
     if (node.kind === 'operation' && node.operation === 'render.el')
@@ -1115,9 +1155,13 @@ impl __PuiNativeRecordValue {
                 ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)'
                 : 'Value::Undefined'
           );
-        return `(${local(node.name)}.call)(${args.join(', ')})`;
+        return moduleBindings.has(node.name)
+          ? `${local(node.name)}.with(|function| (function.call)(${args.join(', ')}))`
+          : `(${local(node.name)}.call)(${args.join(', ')})`;
       }
-      return `${local(node.name)}.call(vec![${args.join(', ')}])`;
+      return moduleBindings.has(node.name)
+        ? `${local(node.name)}.with(|function| function.call(vec![${args.join(', ')}]))`
+        : `${local(node.name)}.call(vec![${args.join(', ')}])`;
     }
     const args =
       node.kind === 'operation'
@@ -1138,17 +1182,43 @@ impl __PuiNativeRecordValue {
           : `capability(&${ownerReference()})`);
     const receiverOwner = () => `&(${receiver()}).owner()`;
     switch (node.kind) {
+      case 'undefined':
+        return 'Value::Undefined';
       case 'literal':
         return literal(node.value, node.span);
       case 'reference':
         uses.names.add(node.name);
+        if (moduleBindings.has(node.name) && !lexicalValueType(node.type))
+          return `${local(node.name)}.with(|value| value.clone())`;
+        if (lexicalValueType(node.type)) {
+          const cell = templateScope.lookup(node.name)?.value;
+          return cell && capturedCells.has(cell) ? `&*${local(node.name)}` : `&${local(node.name)}`;
+        }
         return `${local(node.name)}.clone()`;
+      case 'lexical-cell': {
+        const value = `std::cell::RefCell::new(${expression(node.value, environment, depth)})`;
+        return capturedCells.has(node) ? `Rc::new(${value})` : value;
+      }
+      case 'lexical-read':
+        if (node.cell.kind === 'reference' && moduleBindings.has(node.cell.name))
+          return `${local(node.cell.name)}.with(|cell| cell.borrow().clone())`;
+        return `{ let value = (${expression(node.cell, environment, depth)}).borrow().clone(); value }`;
+      case 'lexical-write':
+        if (node.cell.kind === 'reference' && moduleBindings.has(node.cell.name))
+          return `{ let value = ${expression(node.value, environment, depth)}; ${local(node.cell.name)}.with(|cell| *cell.borrow_mut() = value.clone()); value }`;
+        return `{ let value = ${expression(node.value, environment, depth)}; *(${expression(node.cell, environment, depth)}).borrow_mut() = value.clone(); value }`;
+      case 'lexical-update': {
+        if (node.cell.kind === 'reference' && moduleBindings.has(node.cell.name))
+          return `${local(node.cell.name)}.with(|cell| { let previous = cell.borrow().clone(); let value = Value::number(previous.scalar_number() ${node.delta === 1 ? '+' : '-'} 1.0); *cell.borrow_mut() = value.clone(); ${node.prefix ? 'value' : 'previous'} })`;
+        const cell = expression(node.cell, environment, depth);
+        return `{ let cell = ${cell}; let previous = cell.borrow().clone(); let value = Value::number(previous.scalar_number() ${node.delta === 1 ? '+' : '-'} 1.0); *cell.borrow_mut() = value.clone(); ${node.prefix ? 'value' : 'previous'} }`;
+      }
       case 'context-key':
         return `Value::string(${string(node.keyId)})`;
       case 'style-handle':
         return `Value::Style(vec![${node.handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`;
       case 'member':
-        return `(${expression(node.object, environment, depth)}).member(${string(node.property, node.span)}, ${node.optional})`;
+        return `(${expression(node.object, environment, depth)}).${node.object.type === 'exception' ? 'caught_member' : 'member'}(${string(node.property, node.span)}, ${node.optional})`;
       case 'unary': {
         const operand = expression(node.operand, environment, depth);
         return node.operator === '!'
@@ -1620,7 +1690,9 @@ impl __PuiNativeRecordValue {
     complete = true,
     nativeReturn = false,
     rendererResult = false,
-    recordReturn = false
+    recordReturn = false,
+    completion = false,
+    discardReturn = false
   ): string {
     const scope = new Set(inherited),
       indent = '    '.repeat(depth);
@@ -1638,14 +1710,59 @@ impl __PuiNativeRecordValue {
         code += `${indent}let ${local(statement.name)} = ${expression(statement.value, scope, depth)};\n`;
         scope.add(statement.name);
         templateScope = templateScope.bind(statement.name, statement.value);
-      } else if (statement.kind === 'effect')
-        code += `${indent}${expression(statement.expression, scope, depth)};\n`;
+      } else if (statement.kind === 'effect') {
+        const value = statement.expression;
+        if (value.kind === 'lexical-write')
+          code += value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
+            ? `${indent}{ let value = ${expression(value.value, scope, depth)}; ${local(value.cell.name)}.with(|cell| *cell.borrow_mut() = value); }\n`
+            : `${indent}{ let value = ${expression(value.value, scope, depth)}; *(${expression(value.cell, scope, depth)}).borrow_mut() = value; }\n`;
+        else if (value.kind === 'lexical-update')
+          code += value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
+            ? `${indent}${local(value.cell.name)}.with(|cell| { let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); });\n`
+            : `${indent}{ let cell = ${expression(value.cell, scope, depth)}; let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); }\n`;
+        else code += `${indent}${expression(value, scope, depth)};\n`;
+      }
       else if (statement.kind === 'return') {
-        code += `${indent}return ${statement.value ? (rendererResult && statement.value.type === 'function' ? rendererEntry(statement.value, scope, depth) : nativeReturn ? snapshotExpression(statement.value, scope, depth) : recordReturn ? recordExpression(statement.value, scope, depth) : statement.value.type === 'function' ? callableValue(statement.value, scope, depth) : expression(statement.value, scope, depth)) : nativeReturn ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)' : recordReturn ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)' : 'Value::Undefined'};\n`;
+        const value = discardReturn ? '()' : statement.value ? (rendererResult && statement.value.type === 'function' ? rendererEntry(statement.value, scope, depth) : nativeReturn ? snapshotExpression(statement.value, scope, depth) : recordReturn ? recordExpression(statement.value, scope, depth) : statement.value.type === 'function' ? callableValue(statement.value, scope, depth) : expression(statement.value, scope, depth)) : nativeReturn ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)' : recordReturn ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)' : 'Value::Undefined';
+        if (discardReturn && statement.value) code += `${indent}let _ = ${expression(statement.value, scope, depth)};\n`;
+        code += `${indent}return ${completion ? `std::ops::ControlFlow${discardReturn ? '::<(), ()>' : ''}::Break(${value})` : value};\n`;
         templateScope = savedTemplateScope;
         return code;
+      } else if (statement.kind === 'throw') {
+        emitsExceptions = true;
+        code += `${indent}throw_value(${expression(statement.value, scope, depth)});\n`;
+        templateScope = savedTemplateScope;
+        return code;
+      } else if (statement.kind === 'try') {
+        emitsExceptions = true;
+        const finalOverrides = statement.finally !== undefined && statementsTerminate(statement.finally);
+        const branch = (items: readonly StatementIR[], level: number, name?: string, discard = discardReturn): string => {
+          const outer = templateScope;
+          const next = new Set(scope);
+          if (name) {
+            next.add(name);
+            templateScope = templateScope.parameter(name, undefined, templateScope, null);
+          }
+          try {
+            return statements(items, next, level, false, nativeReturn, rendererResult, recordReturn, true, discard) +
+              (statementsTerminate(items) ? '' : `${'    '.repeat(level)}std::ops::ControlFlow${discard ? '::<(), ()>' : ''}::Continue(())\n`);
+          } finally { templateScope = outer; }
+        };
+        const level = depth + (statement.finally ? 2 : 1);
+        const pad = '    '.repeat(level);
+        const caught = statement.catch;
+        const returnAbi = nativeReturn ? 'native::gpui_native_owner::NativeSnapshot' : recordReturn ? '__PuiNativeRecordValue' : 'Value';
+        const bodyFlow = `std::ops::ControlFlow<${discardReturn || finalOverrides ? '()' : returnAbi}>`;
+        const finalFlow = `std::ops::ControlFlow<${discardReturn ? '()' : returnAbi}>`;
+        const operation = caught
+          ? `match catch_authored::<${bodyFlow}>(|| {\n${branch(statement.body, level + 1, undefined, discardReturn || finalOverrides)}${pad}}) {\n${pad}    Ok(flow) => flow,\n${pad}    Err(${caught.name ? local(caught.name) : '_'}) => {\n${branch(caught.body, level + 2, caught.name, discardReturn || finalOverrides)}${pad}    }\n${pad}}`
+          : `{\n${branch(statement.body, level + 1, undefined, discardReturn || finalOverrides)}${pad}}`;
+        const flow = statement.finally
+          ? `${finalOverrides ? 'authored_finally_override' : 'authored_finally'}(|| -> ${bodyFlow} {\n${pad}${operation}\n${'    '.repeat(depth + 1)}}, || -> ${finalFlow} {\n${branch(statement.finally, depth + 2)}${'    '.repeat(depth + 1)}})`
+          : operation;
+        code += `${indent}match ${flow} {\n${indent}    std::ops::ControlFlow::Break(value) => return ${completion ? 'std::ops::ControlFlow::Break(value)' : 'value'},\n${indent}    std::ops::ControlFlow::Continue(()) => {}\n${indent}}\n`;
       } else
-        code += `${indent}if (${expression(statement.condition, scope, depth)}).truthy() {\n${statements(statement.then, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn)}${indent}}` : ''}\n`;
+        code += `${indent}if (${expression(statement.condition, scope, depth)}).truthy() {\n${statements(statement.then, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn, completion, discardReturn)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, scope, depth + 1, false, nativeReturn, rendererResult, recordReturn, completion, discardReturn)}${indent}}` : ''}\n`;
     }
     templateScope = savedTemplateScope;
     return complete
@@ -1770,6 +1887,7 @@ impl __PuiNativeRecordValue {
       )
       .join(', ');
     typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> ${portableReturn ? rustType(returnType, exposure.span) : 'Value'} {
+        refresh_native_entry(&self.owner, window);
         let arguments = vec![${args}];
         let callback = self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).expect("exposed method").clone();
         check_method(${string(exposure.name, exposure.span)}, &arguments);
@@ -1817,14 +1935,30 @@ impl __PuiNativeRecordValue {
         : `        image_declaration(&owner, ${staticValue(declaration.config, declaration.span)});`
     )
     .join('\n');
+  const moduleCode = moduleParts.shared.map((binding) => {
+    const value = binding.value;
+    if (value.kind === 'lexical-cell')
+      return `std::thread_local! { static ${local(binding.name)}: std::cell::RefCell<Value> = std::cell::RefCell::new(${expression(value.value, new Set(), 0)}); }`;
+    let type = 'Value';
+    if (value.kind === 'function' && typedFunction(value.function)) {
+      const fn = value.function;
+      const parameters = fn.parameters.map((_, index) => nativeFunctionParameter(fn, index)
+        ? 'native::gpui_native_owner::NativeSnapshot' : nativeRecordParameter(fn, index) ? '__PuiNativeRecordValue' : 'Value').join(', ');
+      const result = returnsNative(fn) ? 'native::gpui_native_owner::NativeSnapshot' : nativeRecordReturns.has(fn) ? '__PuiNativeRecordValue' : 'Value';
+      type = `native::gpui_native_owner::NativeCallable<dyn Fn(${parameters}) -> ${result}>`;
+    }
+    return `std::thread_local! { static ${local(binding.name)}: ${type} = ${expression(value, new Set(), 0)}; }`;
+  }).join('\n');
   const setupCallable = functionValue(ir.setup, new Set(), 2);
   const nativeRecords = nativeRecordTypes();
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.
+  ${emitsExceptions ? '#[cfg(panic = "abort")] compile_error!("Authored exception lowering requires panic=unwind");' : ''}
   pub use proto_ui_gpui_native as native;
   use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};
   use std::rc::Rc;
   use serde_json::Value as Json;
   use native::gpui_native_owner::*;
+  ${moduleCode}
   ${staticArtifacts.map((declaration) => `#[path = ${string(declaration.path)}] mod ${declaration.name};`).join('\n')}
   fn style_vocabulary() -> &'static native::gpui_native_style::StyleVocabulary {
       static VOCABULARY: std::sync::OnceLock<native::gpui_native_style::StyleVocabulary> = std::sync::OnceLock::new();
@@ -1853,6 +1987,7 @@ impl __PuiNativeRecordValue {
       pub fn owner(&self) -> OwnerWeak { Rc::downgrade(&self.owner) }
       pub fn state(&self, name: &str) -> Json { self.owner.borrow().exposes.get(name).expect("unknown exposed State").clone().get().data() }
       pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App) -> Json {
+          refresh_native_entry(&self.owner, window);
           let callback = self.owner.borrow().exposes.get(name).expect("unknown exposed method").clone();
           let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect(); check_method(name, &arguments);
           let result = invoke(&self.owner, "expose-method", &callback, arguments);
@@ -1863,7 +1998,7 @@ impl __PuiNativeRecordValue {
       pub fn take_events(&self) -> Vec<(String, Json)> { std::mem::take(&mut self.owner.borrow_mut().emitted) }
       pub fn dispose(&self, window: &mut Window, cx: &mut App) { let drive = self.owner.borrow().native_drive.clone(); Owner::dispose(&self.owner); if let Some(drive) = drive { drive(window, cx); } }
   }
-  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: [Subscription; 3], _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription> }
+  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: [Subscription; 3], _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
   impl ${componentName} {
       pub fn new_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Self { Self::new(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
       pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Self {
@@ -1877,23 +2012,54 @@ impl __PuiNativeRecordValue {
           Owner::finish(&owner_ref, renderer);
           let focus = cx.focus_handle();
           let focus_owner = owner_ref.clone();
-          let on_focus = cx.on_focus(&focus, window, move |view, window, cx| { native_focus_fact(&focus_owner, true); dispatch(&focus_owner, "host:focus", false, event_fields("host:focus")); view.drive(window, cx); });
+          let on_focus = cx.on_focus(&focus, window, move |view, window, cx| {
+              let epoch = focus_owner.borrow().epoch;
+              if !ready(&focus_owner) || focus_owner.borrow().window_id != Some(window.window_handle().window_id()) { return; }
+              refresh_native_entry(&focus_owner, window);
+              native_focus_fact(&focus_owner, view.focus.is_focused(window));
+              if !ready(&focus_owner) || focus_owner.borrow().epoch != epoch { return; }
+              dispatch(&focus_owner, "host:focus", false, event_fields("host:focus"));
+              if ready(&focus_owner) && focus_owner.borrow().epoch == epoch { view.drive(window, cx); }
+          });
           let blur_owner = owner_ref.clone();
-          let on_blur = cx.on_blur(&focus, window, move |view, window, cx| { native_focus_fact(&blur_owner, false); text_blur(&blur_owner, window, cx); dispatch(&blur_owner, "host:blur", false, event_fields("host:blur")); view.drive(window, cx); });
+          let on_blur = cx.on_blur(&focus, window, move |view, window, cx| {
+              let epoch = blur_owner.borrow().epoch;
+              if !ready(&blur_owner) || blur_owner.borrow().window_id != Some(window.window_handle().window_id()) { return; }
+              refresh_native_entry(&blur_owner, window);
+              native_focus_fact(&blur_owner, view.focus.is_focused(window));
+              if !ready(&blur_owner) || blur_owner.borrow().epoch != epoch { return; }
+              text_blur(&blur_owner, window, cx);
+              dispatch(&blur_owner, "host:blur", false, event_fields("host:blur"));
+              if ready(&blur_owner) && blur_owner.borrow().epoch == epoch { view.drive(window, cx); }
+          });
           let activation_owner = owner_ref.clone();
-          let on_activation = cx.observe_window_activation(window, move |view, window, cx| { if !window.is_window_active() { native_window_blur(&activation_owner); view.drive(window, cx); } });
+          let on_activation = cx.observe_window_activation(window, move |view, window, cx| { if activation_owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() { native_window_blur(&activation_owner); view.drive(window, cx); } });
           let global_key_capture = subscribe_global_key_capture(&owner_ref, cx);
           let window_input = window_input_needed(&owner_ref).then(|| cx.focus_handle().tab_stop(false));
-          let focus_lost = window_input.as_ref().map(|_| cx.on_focus_lost(window, |view, window, cx| { if let Some(focus) = &view.window_input { restore_window_input(&view.owner, focus, window, cx); } }));
-          Self { owner: owner_ref, focus, window_input, _focus_subscriptions: [on_focus, on_blur, on_activation], _focus_lost: focus_lost, _global_key_capture: global_key_capture }
+          let focus_lost = window_input.as_ref().map(|_| cx.on_focus_lost(window, |view, window, cx| { if view.owner.borrow().window_id == Some(window.window_handle().window_id()) { if let Some(focus) = &view.window_input { restore_window_input(&view.owner, focus, window, cx); } } }));
+          Self { owner: owner_ref, focus, window_input, _focus_subscriptions: [on_focus, on_blur, on_activation], _focus_lost: focus_lost, _global_key_capture: global_key_capture, _entry_readiness: None }
       }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
       pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) { replace_props(&self.owner, raw); self.drive(window, cx); }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), &'static str> { set_native_parent(&self.owner, parent.unwrap_or_default())?; cx.notify(); Ok(()) }
+      fn bind_entry_readiness(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+          if !self.owner.borrow().modules.hooks.contains("focus-entry") { return; }
+          let window_id = window.window_handle().window_id();
+          if self._entry_readiness.as_ref().is_some_and(|(bound, _)| *bound == window_id) { return; }
+          self._entry_readiness.take();
+          let view = cx.entity().downgrade();
+          let subscription = window.observe_focus_tree(cx, move |_, window, cx| {
+              let _ = view.update(cx, |view, cx| {
+                  if view._entry_readiness.as_ref().is_some_and(|(bound, _)| *bound == window.window_handle().window_id()) { view.drive(window, cx); }
+              });
+          });
+          self._entry_readiness = Some((window_id, subscription));
+      }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-          if self.owner.borrow().disposed { cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); cx.notify(); return; }
           modules_drive(&self.owner, &self.focus, window, cx);
+          if self.owner.borrow().disposed { self._entry_readiness.take(); cx.notify(); return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
           let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { cx.notify(); }
@@ -1904,7 +2070,10 @@ impl __PuiNativeRecordValue {
   impl Render for ${componentName} {
       fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
           Owner::project(&self.owner);
-          if self.owner.borrow().disposed || !self.owner.borrow().present { return gpui::div().into_any_element(); }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); return gpui::div().into_any_element(); }
+          if !self.owner.borrow().present { return gpui::div().into_any_element(); }
+          bind_native_focus_window(&self.owner, window);
+          self.bind_entry_readiness(window, cx);
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
           self.owner.borrow_mut().dirty = false;
           let snapshot = self.owner.borrow().projection.clone().expect("live native projection");

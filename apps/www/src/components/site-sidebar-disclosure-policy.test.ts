@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { URL as NodeURL } from 'node:url';
 import { runInNewContext } from 'node:vm';
 import { afterEach, expect, it, vi } from 'vitest';
 import {
@@ -12,7 +13,7 @@ import {
 import { initSidebarCurrentVisibility } from './site-sidebar-current-visibility';
 const key = 'proto-ui.sidebar.manual.v1';
 const rawBootstrap = readFileSync(
-  new URL('./site-sidebar-disclosure-bootstrap.js', import.meta.url),
+  new NodeURL('./site-sidebar-disclosure-bootstrap.js', import.meta.url),
   'utf8'
 );
 // Execute the exact authored resource in a test-only VM, not a serialized
@@ -115,13 +116,15 @@ it('rejects duplicate/mismatched identities rather than sharing one stored row',
   expect(() => bootstrap(root, ['same', 'same'])).toThrow();
   expect(() => bootstrap(root, ['one'])).toThrow();
 });
+// HappyDOM aliases PageTransitionEvent to Event. These controlled pageshow
+// inputs carry persisted explicitly; native BFCache restoration is separate.
 it('disposes route and bfcache listeners without stale reactivation', () => {
   const { root, groups } = fixture();
   dispose = bootstrap(root, ['current', 'other']);
   dispose();
   dispose();
   groups[0]!.open = false;
-  window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+  window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
   expect(groups[0]!.open).toBe(false);
 });
 it('loads the sole original raw bootstrap with only document supplied', () => {
@@ -357,7 +360,7 @@ it.each(['route', 'pageshow'] as const)(
       if (action === 'route') {
         history.replaceState(null, '', '/next-policy-route/');
         document.dispatchEvent(new Event('astro:page-load'));
-      } else window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+      } else window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
       expect(settled).toHaveBeenCalledTimes(1);
       expect(settled).toHaveBeenCalledWith('settled');
       expect(lease.readIntent()).toBe('none');
@@ -418,7 +421,7 @@ it('BFCache preserves non-UI live DOM rather than replaying a stale session snap
   dispose = bootstrap(root, ['current', 'other'], [true, false]);
   expect(groups[1]!.open).toBe(false);
   groups[1]!.open = true;
-  window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+  window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
   expect(groups[1]!.open).toBe(true);
 });
 

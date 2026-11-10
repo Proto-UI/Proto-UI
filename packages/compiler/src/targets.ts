@@ -652,6 +652,7 @@ export function checkTargetOperations(
   }
   function expression(value: ExpressionIR, scope: Scope): void {
     switch (value.kind) {
+      case 'undefined':
       case 'literal':
         return;
       case 'style-handle':
@@ -717,6 +718,17 @@ export function checkTargetOperations(
       case 'unary':
         expression(value.operand, scope);
         return;
+      case 'lexical-cell':
+        expression(value.value, scope);
+        return;
+      case 'lexical-read':
+      case 'lexical-update':
+        expression(value.cell, scope);
+        return;
+      case 'lexical-write':
+        expression(value.cell, scope);
+        expression(value.value, scope);
+        return;
       case 'binary':
         expression(value.left, scope);
         expression(value.right, scope);
@@ -765,7 +777,7 @@ export function checkTargetOperations(
         else if (!reachedHooks.has(hook.id)) {
           reachedHooks.add(hook.id);
           activeHooks.add(hook.id);
-          fn(hook.setup, new Map());
+          fn(hook.setup, new Map(moduleScope));
           activeHooks.delete(hook.id);
         }
         return;
@@ -821,13 +833,23 @@ export function checkTargetOperations(
           statements(statement.then, new Map(scope));
           statements(statement.otherwise, new Map(scope));
           break;
+        case 'try':
+          statements(statement.body, new Map(scope));
+          if (statement.catch) statements(statement.catch.body, new Map(scope));
+          if (statement.finally) statements(statement.finally, new Map(scope));
+          break;
+        case 'throw':
+          expression(statement.value, scope);
+          return;
         case 'return':
           if (statement.value) expression(statement.value, scope);
           return;
       }
     }
   }
-  fn(ir.setup, new Map());
+  const moduleScope: Scope = new Map();
+  statements(ir.moduleBindings ?? [], moduleScope);
+  fn(ir.setup, moduleScope);
   if (selected.mode === 'source')
     diagnostics.push(...validateNativeInteraction(ir, reachedFunctions));
   return diagnostics.length

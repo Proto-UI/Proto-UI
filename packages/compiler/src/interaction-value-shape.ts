@@ -112,6 +112,18 @@ export function interactionValueAlternatives(
           returns.push(...values);
         }
         return true;
+      } else if (statement.kind === 'throw') return true;
+      else if (statement.kind === 'try') {
+        const branchReturns: InteractionValueAlternative[] = [], finalReturns: InteractionValueAlternative[] = [];
+        const tried = body(statement.body, scope, branchReturns);
+        const catchScope = statement.catch?.name
+          ? scope.parameter(statement.catch.name, undefined, scope, null) : scope;
+        const caught = statement.catch ? body(statement.catch.body, catchScope, branchReturns) : true;
+        const finalized = statement.finally ? body(statement.finally, scope, finalReturns) : false;
+        if (finalized === null || (!finalized && (tried === null || caught === null))) return null;
+        if (!finalized) returns.push(...branchReturns);
+        returns.push(...finalReturns);
+        if (finalized || (tried && caught)) return true;
       } else if (statement.kind === 'if') {
         const then = body(statement.then, scope, returns);
         const otherwise = body(statement.otherwise, scope, returns);

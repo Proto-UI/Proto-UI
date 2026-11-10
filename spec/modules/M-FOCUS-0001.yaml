@@ -44,6 +44,20 @@ criteria:
           anchors: [C-AS-FOCUSABLE-0001-C, C-AS-FOCUSABLE-0001-G]
         - id: C-AS-FOCUS-ENTRY-0001
           anchors: [C-AS-FOCUS-ENTRY-0001-F, C-AS-FOCUS-ENTRY-0001-G, C-AS-FOCUS-ENTRY-0001-H]
+  - id: M-FOCUS-0001-H
+    text:
+      en: >-
+        Focus owns the explicit entryFallback: entry composition with a private per-activation identity. It selects logical entry once, delegates to the separately declared Entry only if no logical target was selected, and retains only the current owned continuation through readiness and retained-view detachment. Logical deactivate cancels that continuation before inactive/absent-view early returns and before notifying observers, without clearing a newer independent intent or changing Entry/target fact ownership. Boundary state, Entry availability, configured restoration and explicit consumer handback remain distinct; no component-specific protocol or public outcome/readiness API is introduced.
+
+      zh-CN: >-
+        Focus 以私有的每次激活 identity 持有显式 entryFallback: entry 组合。它只进行一次 logical entry 选择，未选择 logical target 时才委派独立声明的 Entry，并仅跨 readiness 与 retained-view detach 保留当前 owned continuation。logical deactivate 必须在 inactive/缺少 view 的提前返回及通知 observer 前取消此 continuation，不能清除较新的独立 intent 或改变 Entry/target fact ownership。边界事实、Entry availability、配置的恢复策略与消费者显式 handback 仍相互独立；不引入组件专属协议或 public outcome/readiness API。
+
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUS-SCOPE-0002
+          anchors: [C-AS-FOCUS-SCOPE-0002-L, C-AS-FOCUS-SCOPE-0002-M]
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors: [C-AS-FOCUS-ENTRY-0001-I]
 satisfies:
   contracts:
     [
@@ -98,6 +112,9 @@ openQuestions:
       en: The implementation exports one shared center, and this bounded Web catalog does not admit a cross-document focus-domain policy. The ordering half of this question moved to HC-FOCUS-ORDER-0001 and criterion M-FOCUS-0001-F in 0.3.0-alpha.1.
       zh-CN: 实现导出一个共享 center，本有界 Web 编目不接纳跨 document 的 focus-domain policy。本问题的排序部分已在 0.3.0-alpha.1 移至 HC-FOCUS-ORDER-0001 与 criterion M-FOCUS-0001-F。
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Assign the explicit logical-first activation-owned Entry fallback and its private cancellation/readiness lifetime to Focus without moving target facts or consumer policy to the host.
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Project the scope contract's existing restore-none opt-out and ordinary previous-owner default without moving cleanup or explicit consumer focus into host policy.

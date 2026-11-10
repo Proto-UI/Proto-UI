@@ -63,3 +63,141 @@ This follow-up keeps the typed native-record/owner slice, binds admitted target 
 New controls are separated so the old-product control does not import an absent new helper: the 66 GPUI definitions plus 51 common interaction-admission definitions can run against both products; 11 private-new-helper unit definitions apply only to the candidate. The common matrix uses actual parse/validateIR/target admission for all four source Web profiles and GPUI, with explicit malformed-IR boundary controls. Private shape tests are compiler analysis tests, not authored-source acceptance or native host evidence. Their actual TS results and the preserved five early-parser failures are separated in the current-status section above; native host acceptance remains unexecuted.
 
 This bounded return/config transport is not a claim of full callback/callable or all-operation completion. Actual native consumer compilation, typed scalar/state and callback closure, every accepted operation, OS focus/event/a11y/layout, and retained size/initialization evidence remain pending. Cargo/rustc and generated Rust execution are excluded until a separate exact dependency/source approval.
+
+## Current Scope and Entry consumer definitions — 2026-11-10
+
+`focus-region.proto.ts`, `focus-target.proto.ts` and `focus-consumer.rs` are separate current inputs for the draft `C-AS-FOCUS-SCOPE-0002-L/M`, `C-AS-FOCUS-ENTRY-0001-H/I` and `HC-FOCUS-ENTRY-0001-A` behavior. They do not replace `composed.proto.ts`, its `32ee71108a670cc76033d2a3394453753fc783a23a81f2ae3f49d9e46d88a1cb` pin, `consumer.rs`, `snapshot.rs` or any historical migration capture. No source compilation, Cargo check or native test of these new inputs has been run by their implementation owner.
+
+The region declares Scope and Entry separately and opts in with `entryFallback: 'entry'`. Its other exports exercise configured manual, the omitted fallback default and container/previous restoration. The target has independent Focusable and Entry roles; the text export exercises actual native pointer dispatch. The Rust consumer imports actual generated components into an ordinary GPUI parent. It covers logical selection before a child has a view, rejected acquisition, empty self entry without target facts, both manual forms, cancellation while inactive/detached, retained reattachment, replacement of an old queued recipient, independent requests, role-specific disable, synchronous observers, terminal disposal, restoration and accepted-acquisition settlement. One replacement test deliberately stages the actual compiled exposed callback through `invoke` before native drive, so physical replacement occurs while the old recipient is still queued; it does not claim that this ordering came from an OS event.
+
+`ordinary_native_only_descendant_wins_over_self_without_logical_membership` is a live acceptance counterexample. It nests an ordinary GPUI `FocusHandle` without creating a Proto Focusable or roving member and requires descendant-first acquisition of that handle. The current generated Entry resolver only knows compiled logical owners, so source inspection predicts this assertion will fail. It must remain a failure until a real permitted host mechanism implements discovery. A passing self-entry case, compiler admission or an unsupported diagnostic cannot satisfy it. This is an inherited Entry host-coverage gap: the new Scope composition delegates the already defined Entry policy and does not narrow that policy.
+
+At the pinned SDK revision, `FocusHandle::contains` checks a handle already known to the caller; `Window::focused` returns only the current handle. The rendered dispatch tree and tab-stop map are private to GPUI. `Window::focus_next` and `focus_prev` change focus, so probing through those methods would introduce observable intermediate effects. No public target registration, altered membership, new bridge, SDK fork or version change is introduced here. The host guarantee already exists in draft `HC-FOCUS-ENTRY-0001`; an allowed implementation mechanism for arbitrary foreign descendants remains unresolved.
+
+### Prepare the actual source outputs
+
+Use Node 24 and the repository's installed dependencies. From the repository root, set `PUI_GPUI_FOCUS_DIR` to an absolute, fresh destination whose parent exists. These commands are the existing private compiler CLI write path; `cli-entry.ts` is the executable wrapper around `runCompilerCli`. Retain each JSON result, the semantic IR, provenance and every generated supporting file.
+
+```sh
+PUI_GPUI_FOCUS_FIXTURE=packages/compiler/test/fixtures/gpui-native-template
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-region.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --output "$PUI_GPUI_FOCUS_DIR/owned" --profile gpui-source-v1 --json
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-region.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --export ManualRegion --output "$PUI_GPUI_FOCUS_DIR/manual" --profile gpui-source-v1 --native-sdk-path "$PUI_GPUI_FOCUS_DIR/owned/.proto-ui/gpui-native" --json
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-region.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --export DefaultRegion --output "$PUI_GPUI_FOCUS_DIR/default" --profile gpui-source-v1 --native-sdk-path "$PUI_GPUI_FOCUS_DIR/owned/.proto-ui/gpui-native" --json
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-region.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --export ContainerRegion --output "$PUI_GPUI_FOCUS_DIR/container" --profile gpui-source-v1 --native-sdk-path "$PUI_GPUI_FOCUS_DIR/owned/.proto-ui/gpui-native" --json
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-target.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --output "$PUI_GPUI_FOCUS_DIR/target" --profile gpui-source-v1 --native-sdk-path "$PUI_GPUI_FOCUS_DIR/owned/.proto-ui/gpui-native" --json
+node --import tsx packages/compiler/src/cli-entry.ts compile "$PUI_GPUI_FOCUS_FIXTURE/focus-target.proto.ts" --root "$PUI_GPUI_FOCUS_FIXTURE" --export TextTarget --output "$PUI_GPUI_FOCUS_DIR/text" --profile gpui-source-v1 --native-sdk-path "$PUI_GPUI_FOCUS_DIR/owned/.proto-ui/gpui-native" --json
+```
+
+The six crates must share the first crate's actual emitted SDK. Separate bundled SDK copies would have separate owner types and registries and would invalidate the composition. Preserve the original root manifest, then add the other generated crates as ordinary root dev dependencies and install the consumer without modifying any generated Rust or SDK file:
+
+```sh
+export PUI_GPUI_FOCUS_DIR
+node --input-type=module <<'NODE'
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+const root = process.env.PUI_GPUI_FOCUS_DIR;
+if (!root || !path.isAbsolute(root)) throw new Error('Absolute PUI_GPUI_FOCUS_DIR required');
+const manifest = path.join(root, 'owned', 'Cargo.toml');
+const original = await readFile(manifest, 'utf8');
+await writeFile(manifest + '.compiler-original', original, { flag: 'wx' });
+let consumerDependencies = '';
+for (const kind of ['manual', 'default', 'container', 'target', 'text']) {
+  const dependency = await readFile(path.join(root, kind, 'Cargo.toml'), 'utf8');
+  const packageName = /^\s*name\s*=\s*"([^"]+)"/m.exec(dependency)?.[1];
+  if (!packageName) throw new Error('Missing generated package name: ' + kind);
+  consumerDependencies += `focus_${kind} = { package = ${JSON.stringify(packageName)}, path = ${JSON.stringify('../' + kind)} }\n`;
+}
+await writeFile(manifest, original + '\n' + consumerDependencies);
+await mkdir(path.join(root, 'owned', 'tests'));
+await copyFile('packages/compiler/test/fixtures/gpui-native-template/focus-consumer.rs', path.join(root, 'owned', 'tests', 'focus_consumer.rs'));
+NODE
+```
+
+### Native prerequisites and parent commands
+
+The generated SDK remains `proto-ui-gpui-native = 0.1.0`; both ordinary and test-support GPUI dependencies pin `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8`. That upstream revision's `rust-toolchain.toml` selects **Rust 1.98.1**. The repository's separate `native/gpui/rust-toolchain.toml` says `stable`; it is not an exact generated-consumer compiler pin. An installed compatible toolchain, the actual generated consumer's Cargo lock and full verified registry/Git closure, licenses, build scripts/procedural macros, platform libraries and a working text/font system are prerequisites. The source-only procedure above neither resolves dependencies nor creates a lock. Do not copy the unrelated native workspace lock or download tooling implicitly to hide a missing prerequisite.
+
+After the parent admits that exact closure, the proposed serial commands are:
+
+```sh
+cargo +1.98.1 check --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --tests
+cargo +1.98.1 test --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --test focus_consumer -- --test-threads=1
+```
+
+Keep the complete case inventory, original failures, stdout/stderr and actual native terminal outcome. The native-only descendant case remains in the full command; filtering it out cannot establish complete Entry conformance. These proposed commands have not been executed for this source.
+
+The existing supported platform environment is the macOS lane described in `native/gpui/README.md` and `.github/workflows/ci.yml`'s `rust-macos` job. That job currently runs the separate native workspace; it does **not** compile these generated consumers. The Linux job explicitly omits GPUI because its backend/system prerequisites are absent. Local Linux use requires independently established pinned backend prerequisites. GPUI `TestAppContext`/`VisualTestContext` use the SDK test platform: their framework-window focus/layout/ownership results do not require or prove an OS-visible display, real OS pointer/keyboard input, pixels or accessibility. A separately admitted OS-visible journey needs a working native display/session and its actual platform dependencies; an unavailable Xvfb installation is neither a passing journey nor a reason to replace it with mock evidence.
+
+## Local physical Entry experiment — 2026-11-11, source ready and unrun
+
+The preceding dated section preserves the pre-repair discovery gap. The current
+support consumes a generic local GPUI patch based on exact upstream
+`62e5991dd0f0c8a3af8d5e7e9c4652490d468db8`: `Window::resolve_focus_entry`,
+`focus_tree_generation` and `observe_focus_tree`. The query reads committed
+dispatch ancestry and native paint-order focus registrations, including ordinary
+tracked handles with `tab_stop(false)`. It distinguishes unavailable from proven
+empty and never probes by moving focus. A generation changes for physical focus
+registration, order or ancestry; its subscription delivers after draw and covers
+cached native subtree changes without polling or identical-redraw notifications.
+
+The generated Entry intent retains request and activation identity, options and
+an attempted window/view-epoch/generation binding. It retains no physical target
+handle. Application resolves the current native handle in `modules_drive`;
+logical selection remains the first activation branch, and accepted acquisition
+settles before callbacks can create a new request. Detach withdraws physical
+readiness before unmounted observers. Independent Entry still requires an
+initially resolvable region, while an opted-in Scope activation can await one.
+Self Tab participation follows actual self-fallback resolution. An ordinary
+`NativeSnapshot::native_view(AnyView)` has no extra registration contract.
+
+The manifests still name the original public GPUI revision. **That unmodified
+public revision does not contain these new APIs.** The owned SDK patch and a
+fresh generated root-level Cargo `[patch]` form a local native experiment, not
+published-62e compatibility. A concrete reviewed and published SDK revision,
+followed by the separately authorized manifest/pin change, remains a publication
+prerequisite. Neither a fork URL nor a package version is invented here.
+
+`produce-focus-consumers.mjs` uses its own current repository root, requires a
+matching source binding, and prepares the six original exports with one emitted
+support crate. It also attempts the actual unmodified Base Popover Root, Trigger
+and Content sources. It archives exact inputs and CLI stdout/stderr, preserves
+the generated root manifest, adds ordinary dev dependencies and the explicit
+local GPUI patch, and copies `focus-consumer.rs` unchanged. In `after` mode it
+additionally installs the five `focus-foreign-consumer.rs` cases. The one public
+Content consumer is installed only when all three actual public parts compile;
+any public diagnostic remains a failed production result. Atomic consumers do
+not substitute for public Content. In particular, the authored Content's legal
+`try`/`catch` in `hasLivePart` may expose the current generic parser's
+`PUI1004 Unsupported TryStatement statement.` boundary. That is a source-supported
+expectation, not an observed compiler result or permission to change the Prototype.
+
+From the current compiler root, Main can produce a fresh bound `after` subject:
+
+```sh
+node packages/compiler/test/fixtures/gpui-native-template/produce-focus-consumers.mjs \
+  --binding "$PUI_GPUI_SOURCE_BINDING" --output "$PUI_GPUI_FOCUS_DIR" \
+  --upstream-sdk /workspace/worktrees/release03-gpui-focus-sdk-20261111 --phase after
+```
+
+Use Node 24. For the real negative, restore the independently retained compiler
+and upstream SDK preimages in Main's owned source state, select that matching
+before binding and a different fresh output, and use `--phase before`. Keep the
+original native descendant case and original twenty-case consumer unchanged.
+The producer runs no Cargo command, creates no lock and admits no registry/Git
+closure. Main must admit each actual generated subject's lock and complete
+dependency/platform/font/toolchain closure before the offline commands below.
+
+```sh
+cargo +1.98.1 check --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --tests
+cargo +1.98.1 test --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --test focus_consumer ordinary_native_only_descendant_wins_over_self_without_logical_membership -- --exact --test-threads=1
+cargo +1.98.1 test --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --test focus_consumer -- --test-threads=1
+cargo +1.98.1 test --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --test focus_foreign_consumer -- --test-threads=1
+cargo +1.98.1 test --manifest-path "$PUI_GPUI_FOCUS_DIR/owned/Cargo.toml" --offline --locked --test focus_public_content_consumer -- --test-threads=1
+```
+
+The SDK's four native boundary cases are selected in its actual workspace with
+`cargo +1.98.1 test -p gpui --lib --features test-support --offline --locked
+window::focus_entry_tests -- --test-threads=1`. These SDK and consumer cases,
+source production, formatter, types and other product checks are all **UNRUN** by
+this implementation owner. The original twenty cases and all historical images,
+reports and pinned inputs retain their original bytes and evidence status.

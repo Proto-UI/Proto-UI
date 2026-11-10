@@ -1,6 +1,6 @@
 import type { ExpressionIR, FunctionIR, ParameterIR, PrototypeIR, StatementIR } from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
-import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
+import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
 
 type Operation = Extract<ExpressionIR, { kind: 'operation' }>;
 
@@ -122,6 +122,17 @@ export function collectVue2IdentityOnlyFunctions(
       case 'unary':
         expression(value.operand, scope, 'other');
         return;
+      case 'lexical-cell':
+        expression(value.value, scope, 'other');
+        return;
+      case 'lexical-read':
+      case 'lexical-update':
+        expression(value.cell, scope, 'other');
+        return;
+      case 'lexical-write':
+        expression(value.cell, scope, 'other');
+        expression(value.value, scope, 'other');
+        return;
       case 'member':
         expression(value.object, scope, 'other');
         return;
@@ -143,6 +154,7 @@ export function collectVue2IdentityOnlyFunctions(
         // Every hook root/body is independently visited, including unused hooks.
         return;
       case 'literal':
+      case 'undefined':
       case 'context-key':
       case 'static-capability':
       case 'style-handle':
@@ -177,6 +189,16 @@ export function collectVue2IdentityOnlyFunctions(
         case 'return':
           if (statement.value) expression(statement.value, scope, 'other');
           break; // deliberately continue visiting syntactically unreachable uses
+        case 'throw':
+          expression(statement.value, scope, 'other');
+          break;
+        case 'try': {
+          statements(statement.body, scope);
+          const caught = statement.catch;
+          if (caught) statements(caught.body, caught.name ? scope.parameter(caught.name, undefined, scope, null) : scope);
+          if (statement.finally) statements(statement.finally, scope);
+          break;
+        }
         case 'if':
           expression(statement.condition, scope, 'other');
           statements(statement.then, scope);
@@ -191,7 +213,9 @@ export function collectVue2IdentityOnlyFunctions(
     }
   }
 
-  for (const root of roots) body(root, NativeLexicalScope.empty());
+  const moduleScope = moduleLexicalScope(ir);
+  statements(ir.moduleBindings ?? [], NativeLexicalScope.empty());
+  for (const root of roots) body(root, moduleScope);
   const eligible = new Set<FunctionIR>();
   for (const record of entries.values()) {
     if (roots.has(record.fn)) record.blocked.add('root-entry');
@@ -237,6 +261,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   const active = new Set<FunctionIR>();
   const invoked = new Set<FunctionIR>();
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook.setup]));
+  const moduleScope = moduleLexicalScope(ir);
 
   function record(value: ExpressionIR, scope: NativeLexicalScope) {
     const result = nativeShape(value, scope);
@@ -326,6 +351,15 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
             else if (statement.kind === 'return') {
               if (statement.value) result.push(...targets(statement.value, current));
               return true;
+            } else if (statement.kind === 'throw') return true;
+            else if (statement.kind === 'try') {
+              const start = result.length;
+              const tried = returns(statement.body, current);
+              const caught = statement.catch ? returns(statement.catch.body, statement.catch.name ? current.parameter(statement.catch.name, undefined, current, null) : current) : true;
+              const end = result.length;
+              const finalized = statement.finally ? returns(statement.finally, current) : false;
+              if (finalized) result.splice(start, end - start);
+              if (finalized || (tried && caught)) return true;
             } else if (statement.kind === 'if') {
               const then = returns(statement.then, current);
               const otherwise = returns(statement.otherwise, current);
@@ -487,7 +521,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       case 'authored-hook': {
         const hook = hooks.get(value.hookId);
         if (!hook) throw new Error(`Vue2 native context traversal lost hook ${value.hookId}.`);
-        enter(hook, NativeLexicalScope.empty());
+        enter(hook, moduleScope);
         return;
       }
       case 'array':
@@ -505,6 +539,17 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
         return;
       case 'unary':
         expression(value.operand, scope);
+        return;
+      case 'lexical-cell':
+        expression(value.value, scope);
+        return;
+      case 'lexical-read':
+      case 'lexical-update':
+        expression(value.cell, scope);
+        return;
+      case 'lexical-write':
+        expression(value.cell, scope);
+        expression(value.value, scope);
         return;
     }
   }
@@ -538,6 +583,14 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
           if (setup && statement.value.type === 'function') renderer(statement.value, scope);
         }
         return true;
+      } else if (statement.kind === 'throw') {
+        expression(statement.value, scope);
+        return true;
+      } else if (statement.kind === 'try') {
+        const tried = statements(statement.body, scope, setup);
+        const caught = statement.catch ? statements(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope, setup) : true;
+        const finalized = statement.finally ? statements(statement.finally, scope, setup) : false;
+        if (finalized || (tried && caught)) return true;
       } else {
         expression(statement.condition, scope);
         const then = statements(statement.then, scope, setup);
@@ -548,7 +601,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     return false;
   }
 
-  enter(ir.setup, NativeLexicalScope.empty());
+  enter(ir.setup, moduleScope);
   return {
     invoked,
     identityOnly: collectVue2IdentityOnlyFunctions(ir, invoked).eligible,

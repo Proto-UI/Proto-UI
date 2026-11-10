@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-// App composition/lease tests with a deliberately synthetic Dialog host.
+// App composition/lease tests with a deliberately synthetic Popover host.
 // Real public focus, scroll lock, portal and paint require the browser journey.
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -11,10 +11,12 @@ import { siteContentsNavigation } from './site-header-disclosure';
 const rendered = vi.hoisted(() => ({
   fail: false,
   holdLeave: false,
+  holdDisposal: false,
   missingFacts: false,
   demos: [] as DemoSpec[],
   finishes: [] as Array<() => void>,
   retire: [] as Array<() => void>,
+  disposals: [] as Array<() => void>,
   order: [] as string[],
 }));
 vi.mock('./PrototypePreviewer/projection-materializer', () => ({
@@ -29,6 +31,10 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
     host.dataset.projectionGenerationState = 'staging';
     host.inert = true;
     options.mount.append(host);
+    const trigger = document.createElement('button');
+    trigger.setAttribute('aria-controls', `owned-test-content-${request.generation}`);
+    trigger.setAttribute('aria-expanded', 'false');
+    host.append(trigger);
     let panel: HTMLElement | undefined;
     let onOpenChange: ((detail: { open: boolean }) => void) | undefined;
     let slotId = '';
@@ -39,30 +45,32 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
       node.children?.forEach(walk);
     };
     walk(demo.root);
-    const fact = (initial: boolean) => {
+    const fact = <T>(initial: T) => {
       let value = initial;
-      const listeners = new Set<(event: { type: 'next'; next: boolean }) => void>();
+      const listeners = new Set<(event: { type: 'next'; next: T }) => void>();
       return {
         get: () => value,
-        subscribe(listener: (event: { type: 'next'; next: boolean }) => void) {
+        subscribe(listener: (event: { type: 'next'; next: T }) => void) {
           listeners.add(listener);
           return () => {
             listeners.delete(listener);
           };
         },
-        set(next: boolean) {
+        set(next: T) {
           if (next === value) return;
           value = next;
           for (const listener of listeners) listener({ type: 'next', next });
         },
       };
     };
-    const open = fact(false),
-      isPresent = fact(false);
-    const instance = { getExposes: () => ({ open, isPresent }) };
+    const open = fact<boolean>(false),
+      isPresent = fact<boolean>(false),
+      transitionState = fact<string>('closed');
+    const instance = { getExposes: () => ({ open, isPresent, transitionState }) };
     const finish = () => {
       if (open.get()) return;
       rendered.order.push('public-isPresent-false');
+      transitionState.set('closed');
       isPresent.set(false);
       rendered.order.push(
         panel?.querySelector('nav.docs-sidebar')
@@ -92,14 +100,16 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
         };
       },
       setProps(ref, props) {
-        if (ref !== 'contents-dialog') return;
+        if (ref !== 'contents-popover') return;
         if (props.onOpenChange) onOpenChange = props.onOpenChange as typeof onOpenChange;
         if (!Object.hasOwn(props, 'open')) return;
         if (props.open && !panel) {
+          trigger.setAttribute('aria-expanded', 'true');
           open.set(true);
+          transitionState.set('entered');
           isPresent.set(true);
           panel = document.createElement('div');
-          // Synthetic shadow-boundary counterexample, NOT a real WC Dialog.
+          // Synthetic shadow-boundary counterexample, NOT a real WC Popover.
           // A light-DOM slot cannot closest() the role surface in its shadow.
           const surface = document.createElement('div');
           surface.id = `owned-test-dialog-${request.generation}`;
@@ -112,13 +122,15 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
           document.body.append(panel);
         } else if (props.open) open.set(true);
         else if (open.get()) {
+          trigger.setAttribute('aria-expanded', 'false');
           open.set(false);
+          transitionState.set('leaving');
           rendered.order.push('public-close-call-exited');
           if (!rendered.holdLeave) queueMicrotask(finish);
         }
       },
     };
-    const cleanup = demo.setup?.({ host, refs: {}, api });
+    const cleanup = demo.setup?.({ host, refs: { 'contents-trigger': trigger }, api });
     const retire = () => {
       instanceListener?.({ 'contents-panel': undefined }, 2);
       if (typeof cleanup === 'function') cleanup();
@@ -141,7 +153,15 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
       testDismiss() {
         onOpenChange?.({ open: false });
       },
-      dispose: retire,
+      dispose() {
+        if (!rendered.holdDisposal) return retire();
+        const { promise, resolve } = Promise.withResolvers<void>();
+        rendered.disposals.push(() => {
+          retire();
+          resolve();
+        });
+        return promise;
+      },
     };
   },
 }));
@@ -151,13 +171,15 @@ let navigation: ReturnType<typeof siteContentsNavigation>;
 const candidates: Array<{ dispose(): void | Promise<void> }> = [];
 afterEach(async () => {
   rendered.holdLeave = false;
+  rendered.holdDisposal = false;
   participant?.dispose();
+  rendered.disposals.splice(0).forEach((finish) => finish());
   rendered.finishes.forEach((finish) => finish());
   navigation?.destroy();
   for (const candidate of candidates.splice(0)) await candidate.dispose();
   document.body.replaceChildren();
   document.body.removeAttribute('data-mobile-menu-expanded');
-  document.body.removeAttribute('data-site-contents-dialog');
+  document.body.removeAttribute('data-site-contents-popover');
   rendered.fail = false;
   rendered.missingFacts = false;
   rendered.retire.length = 0;
@@ -170,7 +192,7 @@ afterEach(async () => {
 function fixture() {
   const media = Object.assign(new EventTarget(), { matches: false }) as MediaQueryList;
   vi.spyOn(window, 'matchMedia').mockReturnValue(media);
-  document.body.innerHTML = `<header><div data-site-contents-command aria-expanded="false"><button data-site-contents-fallback>Contents</button></div></header><div data-site-contents-panel-mount data-contents-title="目录" data-contents-close="关闭目录"></div><section data-home><span data-before></span><nav class="docs-sidebar" aria-label="Documentation"><div id="starlight__sidebar"><details data-policy-id="canonical"><summary>UI Libraries</summary><a href="#article" aria-current="page">Current</a></details></div></nav><main id="article"></main></section>`;
+  document.body.innerHTML = `<header><div data-site-contents-command aria-expanded="false"><button data-site-contents-fallback>Contents</button><div data-site-contents-mount data-site-contents-panel-mount></div></div></header><section data-home><span data-before></span><nav class="docs-sidebar" aria-label="Documentation"><div id="starlight__sidebar"><details data-policy-id="canonical"><summary>UI Libraries</summary><a href="#article" aria-current="page">Current</a></details></div></nav><main id="article"></main></section>`;
   const header = document.querySelector('header')!;
   const tree = document.querySelector<HTMLElement>('nav.docs-sidebar')!;
   const main = document.querySelector('main')!;
@@ -197,22 +219,33 @@ async function publish(generation = 1) {
   return { candidate, publication };
 }
 
-describe('Contents single native tree/public Dialog composition boundary', () => {
-  it('declares public family Dialog parts and Rhea scope without private Transition/focus props', async () => {
+describe('Contents single native tree/public Popover composition boundary', () => {
+  it('composes one real Header trigger with Content and preserves its public Content relationship', async () => {
     fixture();
     await publish();
     const demo = rendered.demos[0]!;
     expect(demo.root).toMatchObject({
-      prototypeId: 'shadcn-dialog-root',
+      prototypeId: 'shadcn-popover-root',
       props: { styleProfile: 'rhea', open: false },
     });
     const serialized = JSON.stringify(demo.root);
-    for (const part of ['mask', 'content', 'title', 'close'])
-      expect(serialized).toContain(`shadcn-dialog-${part}`);
+    for (const part of ['trigger', 'content', 'title'])
+      expect(serialized).toContain(`shadcn-popover-${part}`);
+    // The rejected Dialog mask and bottom Close are gone.
+    expect(serialized).not.toContain('shadcn-dialog');
+    expect(serialized).not.toContain('popover-close');
+    expect(serialized).not.toContain('popover-mask');
     expect(serialized).not.toMatch(/focusEntry|enterDuration|leaveDuration|tabindex|aria-modal/);
     expect(readFileSync('apps/www/src/components/site-contents-panel.ts', 'utf8')).not.toContain(
       'onAfterLeave'
     );
+    const trigger = document.querySelector<HTMLElement>('[data-site-contents-button]')!;
+    expect(trigger.closest('header')).not.toBeNull();
+    expect(trigger.getAttribute('aria-controls')).toBe('owned-test-content-1');
+    navigation!.toggle();
+    navigation!.refresh();
+    expect(trigger.getAttribute('aria-controls')).toBe('owned-test-content-1');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('opens a lazy slot, moves exactly the original nav, and restores its original sibling and disclosure identity', async () => {
@@ -235,7 +268,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await settle();
     expect(tree.parentElement).toBe(home);
     expect(tree.nextSibling).toBe(main);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(false);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(false);
     expect(details.open).toBe(true);
     expect(trustedPolicyCount).toBe(1); // Listener retained, not a native-toggle claim.
   });
@@ -249,7 +282,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     expect(escape.defaultPrevented).toBe(false);
     expect(command.getAttribute('aria-expanded')).toBe('true');
-    // This unit deliberately does not emulate public Dialog dismissal.
+    // This unit deliberately does not emulate public Popover dismissal.
     navigation!.close();
     expect(command.getAttribute('aria-expanded')).toBe('false');
   });
@@ -278,7 +311,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     );
     expect(tree.parentElement).toBe(home);
     navigation!.toggle();
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
     rendered.fail = false;
     rendered.missingFacts = false;
     rendered.retire.length = 0;
@@ -343,7 +376,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     navigation!.close();
     await settle();
     expect(tree.parentElement).toBe(slot);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(true);
 
     navigation!.toggle();
     await settle();
@@ -354,7 +387,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     expect(command.getAttribute('aria-expanded')).toBe('true');
     expect(tree.isConnected).toBe(true);
     expect(tree.parentElement).toBe(slot);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(true);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(true);
     expect(document.querySelector('nav.docs-sidebar')).toBe(tree);
     expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
     expect(rendered.order).toEqual(['public-close-call-exited']);
@@ -366,17 +399,17 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await settle();
     expect(tree.parentElement).toBe(home);
     expect(tree.nextSibling).toBe(main);
-    expect(tree.hasAttribute('data-site-contents-dialog-tree')).toBe(false);
+    expect(tree.hasAttribute('data-site-contents-popover-tree')).toBe(false);
   });
 
   it('fails preparation without public facts without hiding or borrowing the only native tree', async () => {
     const { tree, home } = fixture();
     rendered.missingFacts = true;
     await expect(participant!.materialize(request())).rejects.toThrow(
-      'public open/presence facts are unavailable'
+      'public open/presence/transition facts are unavailable'
     );
     expect(tree.parentElement).toBe(home);
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
   });
 
   it('returns a stranded lease after public instance retirement and rejects disposal instead of hanging', async () => {
@@ -392,7 +425,27 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     await expect(candidate.dispose()).rejects.toThrow('public instance disappeared');
     candidates.splice(candidates.indexOf(candidate), 1);
     expect(tree.parentElement).toBe(home);
-    expect(document.body.hasAttribute('data-site-contents-dialog')).toBe(false);
+    expect(document.body.hasAttribute('data-site-contents-popover')).toBe(false);
+    expect(error).toHaveBeenCalled();
+  });
+
+  it('waits for actual asynchronous renderer disposal before fatal native-tree handback', async () => {
+    const { tree, home } = fixture();
+    const { candidate } = await publish();
+    navigation!.toggle();
+    const slot = tree.parentElement;
+    rendered.holdDisposal = true;
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    rendered.retire[0]!();
+    await settle();
+    expect(tree.parentElement).toBe(slot);
+    expect(tree.parentElement).not.toBe(home);
+    expect(rendered.disposals).toHaveLength(1);
+    rendered.disposals.shift()!();
+    await settle();
+    expect(tree.parentElement).toBe(home);
+    await expect(candidate.dispose()).rejects.toThrow('public instance disappeared');
+    candidates.splice(candidates.indexOf(candidate), 1);
     expect(error).toHaveBeenCalled();
   });
 
@@ -409,7 +462,7 @@ describe('Contents single native tree/public Dialog composition boundary', () =>
     expect(frame).toMatch(
       /<noscript>[\s\S]*?\.mobile-sidebar-pane[\s\S]*?display: flex !important/
     );
-    expect(frame).toContain('.docs-sidebar[data-site-contents-dialog-tree]');
+    expect(frame).toContain('.docs-sidebar[data-site-contents-popover-tree]');
     expect(frame).not.toMatch(/body\[data-mobile-menu-expanded\][\s\S]{0,40}overflow: hidden/);
     expect(sidebar).not.toContain('MobileMenuFooter');
     expect(sidebar.match(/<SidebarSublist /g)).toHaveLength(1);

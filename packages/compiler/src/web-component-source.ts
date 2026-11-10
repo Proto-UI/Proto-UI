@@ -1,5 +1,6 @@
 import { unsupportedPointerFacts } from './pointer-facts-admission';
-import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
+import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
+import { partitionModuleBindings } from './source-module-bindings';
 import { dataTypeEqual, formatDataType } from './data-types';
 import { isDataValueType } from './ir';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -106,6 +107,7 @@ export function emitWebComponentSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = checked.value;
+  const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'web-component-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
@@ -313,6 +315,7 @@ export function emitWebComponentSource(
     : '';
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
+    if (type === 'exception') return 'unknown';
     if (isDataValueType(type))
       return interacting && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
         ? `${prefix}NativeFocusOptions`
@@ -349,7 +352,7 @@ export function emitWebComponentSource(
       : 'unknown';
   }
   // Lexical shape information stays in the compiler; it is never delivered as IR.
-  let nativeScope = NativeLexicalScope.empty();
+  let nativeScope = moduleLexicalScope(ir);
   let nativeSequence = 0;
   function nativeBinding(name: string): ExpressionIR | undefined {
     return nativeScope.lookup(name)?.value;
@@ -464,10 +467,22 @@ export function emitWebComponentSource(
 
   function expr(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return JSON.stringify(node.value);
       case 'reference':
         return node.name;
+      case 'lexical-cell':
+        return expr(node.value, depth);
+      case 'lexical-read':
+        return expr(node.cell, depth);
+      case 'lexical-write':
+        return `(${expr(node.cell, depth)} = ${expr(node.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expr(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        return `(${node.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return `(${keyNames.get(node.keyId)} as ${prefix}ContextKey<${contextTypes.get(node.keyId)}>)`;
       case 'style-handle':
@@ -480,7 +495,7 @@ export function emitWebComponentSource(
           `${prefix}OwnerProps()`
         );
       case 'member':
-        return `(${expr(node.object, depth)})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
+        return `(${expr(node.object, depth)}${node.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
       case 'unary':
         return `(${node.operator}${expr(node.operand, depth)})`;
       case 'binary':
@@ -514,7 +529,7 @@ export function emitWebComponentSource(
     nativeRenderer?: string
   ): string {
     const indent = '  '.repeat(depth);
-    const terminator = body.findIndex((statement) => statement.kind === 'return');
+    const terminator = body.findIndex((statement) => statement.kind === 'return' || statement.kind === 'throw');
     const deadBindings = new Set<string>();
     return body
       .slice(0, terminator < 0 ? body.length : terminator + 1)
@@ -535,7 +550,7 @@ export function emitWebComponentSource(
         switch (statement.kind) {
           case 'const':
             nativeScope = nativeScope.bind(statement.name, statement.value);
-            return `${origin}${indent}const ${statement.name} = ${expr(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
@@ -546,6 +561,18 @@ export function emitWebComponentSource(
               return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\n${nativeAppend(statement.value, output, fragment, frame)}\n${indent}return ${fragment};\n`;
             }
             return `${origin}${indent}return${statement.value ? ` ${expr(statement.value, depth)}` : ''};\n`;
+          case 'throw':
+            return `${origin}${indent}throw ${expr(statement.value, depth)};\n`;
+          case 'try': {
+            const branch = (items: readonly StatementIR[], name?: string) => {
+              const saved = nativeScope;
+              try {
+                if (name) nativeScope = nativeScope.parameter(name, undefined, nativeScope, null);
+                return statements(items, depth + 1, nativeRenderer);
+              } finally { nativeScope = saved; }
+            };
+            return `${origin}${indent}try {\n${branch(statement.body)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${branch(statement.catch.body, statement.catch.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
+          }
           case 'if': {
             const branch = (body: readonly StatementIR[]) => {
               const savedNativeScope = nativeScope;
@@ -562,6 +589,7 @@ export function emitWebComponentSource(
       .join('');
   }
   const hookCode =
+    statements(moduleParts.owned, 2) +
     `    const ${prefix}HookResults = new Map<string, object | undefined>();\n` +
     ir.hooks
       .filter((hook) => reachedHooks.has(hook.id))
@@ -677,6 +705,7 @@ export function emitWebComponentSource(
 // Helper cost: guarded owner, presentation serialization/adoption, per-request Context and AX intent.
 ${imports}${support.imports}
 ${staticImports}
+${statements(moduleParts.shared, 0)}
 export type GeneratedProps = {\n${props}\n};
 const ${prefix}PropTypes = ${JSON.stringify(Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type])))};
 type ${prefix}PropsSnapshot = {\n${resolvedProps}\n};
@@ -760,6 +789,7 @@ ${context ? '// Context cost: shared reference-key modules, owner scopes, checke
 // setPresent detaches only the view; explicit dispose permanently closes this element.
 ${contextImports}
 ${staticImports}
+${statements(moduleParts.shared, 0)}
 import { createNativeBrowserPort, type NativeBrowserPort as BrowserPort, type NativeBrowserPort as HostPort, type NativeFrameBuilder } from './.proto-ui/web-component/browser-v1';
 const ${prefix}PropTypes = ${JSON.stringify(Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type])))};
 ${styled ? `import {createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens, type NativeStyle as ${prefix}Style, type NativeStyleHandle as ${prefix}NativeStyleHandle, type NativeRuleHandle as ${prefix}NativeRuleHandle} from './.proto-ui/style/native-v1';\n` : ''}

@@ -1,4 +1,5 @@
-import { NativeLexicalScope } from './template-shape';
+import { NativeLexicalScope, moduleLexicalScope } from './template-shape';
+import { partitionModuleBindings } from './source-module-bindings';
 import {
   collectVue2NativeChildShapes,
   createVue2NativeTemplateEmitter,
@@ -18,6 +19,7 @@ import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './na
 import { OPERATION_RULES } from './operations';
 import { vue2SsrEntrypoints } from './vue2-ssr-entry';
 import { checkTargetOperations, resolveTargetProfile } from './targets';
+import { statementsTerminate as terminates } from './ir';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -45,6 +47,7 @@ export function emitVue2Source(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'vue2-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
@@ -196,6 +199,12 @@ export function emitVue2Source(
     } else if (node.kind === 'function') inspectBody(node.function.body);
     else if (node.kind === 'member') inspect(node.object);
     else if (node.kind === 'unary') inspect(node.operand);
+    else if (node.kind === 'lexical-cell') inspect(node.value);
+    else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') inspect(node.cell);
+    else if (node.kind === 'lexical-write') {
+      inspect(node.cell);
+      inspect(node.value);
+    }
     else if (node.kind === 'binary') {
       inspect(node.left);
       inspect(node.right);
@@ -208,6 +217,12 @@ export function emitVue2Source(
       if (statement.kind === 'const') inspect(statement.value);
       else if (statement.kind === 'effect') inspect(statement.expression);
       else if (statement.kind === 'return' && statement.value) inspect(statement.value);
+      else if (statement.kind === 'throw') inspect(statement.value);
+      else if (statement.kind === 'try') {
+        inspectBody(statement.body);
+        if (statement.catch) inspectBody(statement.catch.body);
+        if (statement.finally) inspectBody(statement.finally);
+      }
       else if (statement.kind === 'if') {
         inspect(statement.condition);
         inspectBody(statement.then);
@@ -234,7 +249,7 @@ export function emitVue2Source(
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
   // Client-native checkpoint. SSR capture residualization is a separate pending
   // part of this same candidate; this switch must disappear before completion.
-  let nativeScope = NativeLexicalScope.empty();
+  let nativeScope = moduleLexicalScope(ir);
   const nativePlan = options.ssr ? undefined : collectVue2NativeChildShapes(ir);
   const nativeTemplate =
     nativePlan &&
@@ -264,6 +279,7 @@ export function emitVue2Source(
   );
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
+    if (type === 'exception') return 'unknown';
     if (typeof type === 'object') return formatDataType(type);
     if (['boolean', 'number', 'string', 'null', 'void', 'unknown'].includes(type)) return type;
     if (type === 'props') return `${prefix}ResolvedProps`;
@@ -329,10 +345,22 @@ export function emitVue2Source(
 
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
         return value.name;
+      case 'lexical-cell':
+        return expression(value.value, depth);
+      case 'lexical-read':
+        return expression(value.cell, depth);
+      case 'lexical-write':
+        return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        return `(${value.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return contextNames.get(value.keyId)!;
       case 'style-handle':
@@ -346,7 +374,7 @@ export function emitVue2Source(
           false
         );
       case 'member':
-        return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
@@ -379,14 +407,6 @@ export function emitVue2Source(
       }
     }
   }
-  function terminates(statements: readonly StatementIR[]): boolean {
-    for (const statement of statements) {
-      if (statement.kind === 'return') return true;
-      if (statement.kind === 'if' && terminates(statement.then) && terminates(statement.otherwise))
-        return true;
-    }
-    return false;
-  }
   function body(
     statements: readonly StatementIR[],
     depth: number,
@@ -406,13 +426,26 @@ export function emitVue2Source(
           continue;
         }
         deadBindings.delete(statement.name);
-        output += `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
         nativeScope = nativeScope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') {
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
       } else if (statement.kind === 'return') {
         output += `${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
         break;
+      } else if (statement.kind === 'throw') {
+        output += `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
+        break;
+      } else if (statement.kind === 'try') {
+        const branch = (items: readonly StatementIR[], name?: string) => {
+          const saved = nativeScope;
+          try {
+            if (name) nativeScope = nativeScope.parameter(name, undefined, nativeScope, null);
+            return body(items, depth + 1, new Set(deadBindings));
+          } finally { nativeScope = saved; }
+        };
+        output += `${origin}${indent}try {\n${branch(statement.body)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${branch(statement.catch.body, statement.catch.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
+        if (terminates([statement])) break;
       } else {
         const branch = (statements: readonly StatementIR[]) => {
           const saved = nativeScope;
@@ -442,13 +475,16 @@ export function emitVue2Source(
     statements.some(
       (statement) =>
         statement.kind === 'return' ||
-        (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise)))
+        (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise))) ||
+        (statement.kind === 'try' && (canReturn(statement.body) || (statement.catch !== undefined && canReturn(statement.catch.body)) || (statement.finally !== undefined && canReturn(statement.finally))))
     );
   let opaqueDeclaration = false;
   for (const statement of ir.setup.body) {
     if (
       statement.kind === 'return' ||
-      (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise)))
+      statement.kind === 'throw' ||
+      (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise))) ||
+      (statement.kind === 'try' && canReturn([statement]))
     )
       break;
     if (
@@ -511,7 +547,7 @@ export function emitVue2Source(
     .join('\n')
     .replace(/\*\//g, '*\\/');
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
-  const hooks = reachedHooks.size
+  const hooks = body(moduleParts.owned, 1) + (reachedHooks.size
     ? `  const ${prefix}HookResults = new Map();\n` +
       ir.hooks
         .filter((hook) => reachedHooks.has(hook.id))
@@ -526,7 +562,7 @@ export function emitVue2Source(
   };`
         )
         .join('\n')
-    : '';
+    : '');
   const styleImport = usesStyle
     ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n`
     : '';
@@ -602,6 +638,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
 // Source graph SHA-256: ${ir.source.sha256}
 ${contextImports}
 ${staticImports}
+${body(moduleParts.shared, 0)}
 
 /** @typedef {{
 ${propsType}

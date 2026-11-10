@@ -149,8 +149,8 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
   const family = resolveSiteLibraryFamily(document.defaultView?.location.pathname ?? '/');
   let alive = true;
   const retired = new Set<Promise<void>>();
-  const contents = contentsCommandParticipant(header);
   const contentsPanel = contentsPanelParticipant(header);
+  const contents = contentsPanel ? null : contentsCommandParticipant(header);
   let attempt = 0;
   const create = () => {
     const participant = headerSurfaceParticipant(header)!;
@@ -192,7 +192,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           },
           async dispose() {
             stop();
-            // Keep the opener alive until public Dialog close/focus return and
+            // Keep the actual public Trigger alive until Popover close and
             // native-tree handback finish; framework teardown must not win that race.
             const panelResults = await Promise.allSettled(
               panelCandidate ? [panelCandidate.dispose()] : []
@@ -266,7 +266,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
     destroy() {
       return (destroyPromise ??= (async () => {
         alive = false;
-        contentsPanel?.dispose();
+        contentsPanel?.revoke();
         contents?.revoke();
         observer.disconnect();
         document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
@@ -277,6 +277,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         } finally {
           if (documentationOwners.get(header) === handle) {
             documentationOwners.delete(header);
+            contentsPanel?.dispose();
             contents?.dispose();
             const panel = header.querySelector('[data-site-header-panel]');
             for (const name of [

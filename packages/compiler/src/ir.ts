@@ -108,10 +108,12 @@ export const MODULE_CAPABILITY_TYPES = [
 export type ModuleCapabilityType = (typeof MODULE_CAPABILITY_TYPES)[number];
 export type ValueType =
   | DataType
+  | `lexical:${PrimitiveType}`
   | ModuleCapabilityType
   | `nullable:${ModuleCapabilityType}`
   | `optional:${ModuleCapabilityType}`
   | 'unknown'
+  | 'exception'
   | 'def'
   | 'run'
   | 'authored-result'
@@ -154,6 +156,14 @@ export type CompilerProfile =
 
 export function isDataValueType(type: ValueType): type is DataType {
   return typeof type !== 'string' || ['boolean', 'number', 'string', 'null', 'void'].includes(type);
+}
+
+/** Compiler-private storage identity, never a semantic State or public capability. */
+export function lexicalValueType(type: ValueType): PrimitiveType | undefined {
+  if (type === 'lexical:boolean') return 'boolean';
+  if (type === 'lexical:number') return 'number';
+  if (type === 'lexical:string') return 'string';
+  return undefined;
 }
 
 /** Public identity-bearing snapshots are not JSON and do not grant setup or Run authority. */
@@ -209,7 +219,12 @@ interface ExpressionBase {
 export type ExpressionIR = ExpressionBase &
   (
     | { kind: 'literal'; value: Primitive }
+    | { kind: 'undefined' }
     | { kind: 'reference'; name: string }
+    | { kind: 'lexical-cell'; value: ExpressionIR }
+    | { kind: 'lexical-read'; cell: ExpressionIR }
+    | { kind: 'lexical-write'; cell: ExpressionIR; value: ExpressionIR }
+    | { kind: 'lexical-update'; cell: ExpressionIR; delta: 1 | -1; prefix: boolean }
     | { kind: 'context-key'; keyId: string }
     | { kind: 'static-capability'; declarationId: string }
     | { kind: 'style-handle'; handle: StyleTokenHandle }
@@ -264,7 +279,27 @@ export type StatementIR =
       otherwise: StatementIR[];
       span: SourceSpan;
     }
+  | { kind: 'throw'; value: ExpressionIR; span: SourceSpan }
+  | {
+      kind: 'try';
+      body: StatementIR[];
+      catch?: { name?: string; body: StatementIR[] };
+      finally?: StatementIR[];
+      span: SourceSpan;
+    }
   | { kind: 'return'; value?: ExpressionIR; span: SourceSpan };
+
+/** Abrupt completion in this synchronous statement subset, including throws. */
+export function statementsTerminate(body: readonly StatementIR[]): boolean {
+  return body.some((statement) =>
+    statement.kind === 'return' || statement.kind === 'throw' ||
+    (statement.kind === 'if' && statementsTerminate(statement.then) && statementsTerminate(statement.otherwise)) ||
+    (statement.kind === 'try' && (
+      (statement.finally !== undefined && statementsTerminate(statement.finally)) ||
+      (statementsTerminate(statement.body) && (!statement.catch || statementsTerminate(statement.catch.body)))
+    ))
+  );
+}
 
 export interface PropIR {
   name: string;
@@ -297,6 +332,8 @@ export interface PrototypeIR {
   sourceFiles: readonly { file: string; content: string; sha256: string }[];
   setup: FunctionIR;
   hooks: AuthoredHookIR[];
+  /** Reached source-module bindings, shared by instances of this compiled artifact. */
+  moduleBindings?: Extract<StatementIR, { kind: 'const' }>[];
   contextKeys: ContextKeyIR[];
   staticDeclarations: StaticCapabilityIR[];
   moduleDeclarations: ModuleDeclarationIR[];

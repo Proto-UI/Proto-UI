@@ -364,8 +364,9 @@ pub fn text_pointer_down(owner:&OwnerRef,event:&gpui::MouseDownEvent,window:&mut
         let(anchor,target)=if event.click_count>=3{(text.editor[..target].rfind('\n').map(|i|i+1).unwrap_or(0),text.editor[target..].find('\n').map(|i|target+i).unwrap_or(text.editor.len()))}
         else if event.click_count==2{text.editor.unicode_word_indices().find(|(start,word)|target>=*start&&target<=start+word.len()).map(|(start,word)|(start,start+word.len())).unwrap_or((target,target))}
         else{(if event.modifiers.shift{if text.reversed{text.selection.end}else{text.selection.start}}else{target},target)};
-        text.selection=anchor.min(target)..anchor.max(target);text.reversed=target<anchor;text.drag_anchor=Some(anchor);text.reveal_caret=true;o.modules.focus.reason="pointer".into();o.focus_requested=true;o.dirty=true;
-    }text_drive(owner,window,cx);
+        text.selection=anchor.min(target)..anchor.max(target);text.reversed=target<anchor;text.drag_anchor=Some(anchor);text.reveal_caret=true;o.dirty=true;
+    }
+    note_focus_intent_in(owner,Some(window.window_handle().window_id()));queue_focus(owner,"pointer",false,false);text_drive(owner,window,cx);
 }
 pub fn text_pointer_move(owner:&OwnerRef,event:&gpui::MouseMoveEvent,window:&mut Window,cx:&mut App){
     if !text_supported(owner){return}let changed={let mut o=owner.borrow_mut();let text=&mut o.modules.text;

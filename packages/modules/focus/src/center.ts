@@ -1,4 +1,8 @@
-import { createFocusRequestIntent, retainFocusRequestIntent } from './request-intent';
+import {
+  createFocusRequestIntent,
+  createScopeFocusRequestIntent,
+  retainFocusRequestIntent,
+} from './request-intent';
 import type {
   FocusRequestOptions,
   FocusScopeActivationOptions,
@@ -35,7 +39,8 @@ export type FocusCenterEntry = {
   /** Snapshot options under execution ownership before host getters or scope policy reenter. */
   prepareFocusRequest?(
     options?: FocusRequestOptions,
-    behavior?: FocusRequestBehavior
+    behavior?: FocusRequestBehavior,
+    createIntent?: (options?: FocusRequestOptions) => FocusRequestOptions
   ): {
     isCurrent(): boolean;
     apply(): FocusRequestOutcome;
@@ -54,6 +59,9 @@ type ActiveScopeRecord = {
   previous: FocusInstanceToken | null;
 };
 
+/** Private ownership of the optional Scope continuation, never a host receipt. */
+export type ScopeEntryIntent = { cancel(): void };
+
 export class FocusCenter {
   private readonly entries = new Map<FocusInstanceToken, FocusCenterEntry>();
   private readonly activeScopes: ActiveScopeRecord[] = [];
@@ -62,6 +70,7 @@ export class FocusCenter {
   private currentFocused: FocusInstanceToken | null = null;
   private ownerEpoch = 0;
   private requestEpoch = 0;
+  private scopeEntryIntent: ScopeEntryIntent | undefined;
   private readonly pendingRovingEntries = new Map<
     FocusInstanceToken,
     {
@@ -71,6 +80,26 @@ export class FocusCenter {
       attempted?: FocusInstanceToken;
     }
   >();
+
+  getRequestEpoch(): number {
+    return this.requestEpoch;
+  }
+
+  noteEntryIntent(owner?: ScopeEntryIntent): boolean {
+    const epoch = ++this.requestEpoch;
+    const previous = this.scopeEntryIntent;
+    this.scopeEntryIntent = owner;
+    if (previous !== owner) previous?.cancel();
+    return epoch === this.requestEpoch && this.scopeEntryIntent === owner;
+  }
+
+  supersedeScopeEntryIntent(): boolean {
+    return !this.scopeEntryIntent || this.noteEntryIntent();
+  }
+
+  releaseScopeEntryIntent(owner: ScopeEntryIntent): void {
+    if (this.scopeEntryIntent === owner) this.scopeEntryIntent = undefined;
+  }
 
   upsert(entry: FocusCenterEntry): void {
     this.entries.set(entry.instance, entry);
@@ -253,16 +282,18 @@ export class FocusCenter {
   private requestFocusOutcome(
     entry: FocusCenterEntry,
     options?: FocusRequestOptions,
-    behavior?: FocusRequestBehavior
+    behavior?: FocusRequestBehavior,
+    createIntent = retainFocusRequestIntent
   ): FocusRequestOutcome {
     this.requestEpoch += 1;
-    const execution = entry.prepareFocusRequest?.(options, behavior);
-    if (!execution) options = retainFocusRequestIntent(options);
+    const execution = entry.prepareFocusRequest?.(options, behavior, createIntent);
+    if (!execution) options = createIntent(options);
     const current = () => execution?.isCurrent() ?? true;
     const apply = () => (execution ? execution.apply() : entry.requestFocus(options, behavior));
     let failed = false;
     try {
       if (!current()) return 'rejected';
+      if (!this.supersedeScopeEntryIntent() || !current()) return 'rejected';
       // A pre-projection request is retained until its logical parent and target exist.
       const target = entry.getRootTarget();
       if (!current()) return 'rejected';
@@ -304,6 +335,7 @@ export class FocusCenter {
 
   noteFocused(entry: FocusCenterEntry): void {
     this.requestEpoch += 1;
+    if (!this.supersedeScopeEntryIntent()) return;
     const epoch = ++this.ownerEpoch;
     // Claim the transfer before callbacks: a nested owner must stop old cleanup.
     this.currentFocused = entry.instance;
@@ -318,7 +350,11 @@ export class FocusCenter {
     }
   }
 
-  activateScope(scope: FocusCenterEntry, options?: FocusScopeActivationOptions): boolean {
+  activateScope(
+    scope: FocusCenterEntry,
+    options?: FocusScopeActivationOptions,
+    onEmpty?: () => void
+  ): boolean {
     if (!scope.isScopeProvider()) return false;
 
     // A retained logical owner may request activation before its next host view
@@ -335,7 +371,8 @@ export class FocusCenter {
     const previous = focused && !this.isDescendantOf(focused, scope) ? focused.instance : null;
     const record = { scope: scope.instance, previous };
     this.activeScopes.push(record);
-    const revision = ++this.scopeRevision;
+    let revision = ++this.scopeRevision;
+    const requestEpoch = onEmpty ? this.requestEpoch : undefined;
     scope.setScopeActive(true);
     if (!this.activeScopes.includes(record)) return this.isScopeActive(scope);
 
@@ -346,20 +383,33 @@ export class FocusCenter {
       : (this.getScopeMembers(scope)[0] ?? null);
     if (!this.activeScopes.includes(record)) return this.isScopeActive(scope);
     if (target) {
-      // Entry is a scope policy, not a new Host Focus request field.
-      const { entry: _entry, ...request } = options ?? { reason: 'programmatic' as const };
-      if (revision === this.scopeRevision) this.requestFocus(target, request, { syncFacts: true });
+      // Snapshot and strip activation policy inside the target's preflight so
+      // getters cannot overwrite newer intent or drain older readiness first.
+      if (revision === this.scopeRevision && (!onEmpty || requestEpoch === this.requestEpoch))
+        this.requestFocusOutcome(
+          target,
+          options,
+          { syncFacts: true },
+          createScopeFocusRequestIntent
+        );
       return true;
     }
 
-    if (scope.getScopeConfig().emptyPolicy === 'container') return true;
-    this.activeScopes.splice(this.activeScopes.indexOf(record), 1);
-    this.scopeRevision += 1;
-    scope.setScopeActive(false);
-    return false;
+    const keepBoundary = scope.getScopeConfig().emptyPolicy === 'container';
+    if (!keepBoundary) {
+      this.activeScopes.splice(this.activeScopes.indexOf(record), 1);
+      revision = ++this.scopeRevision;
+      scope.setScopeActive(false);
+    }
+    if (revision === this.scopeRevision && requestEpoch === this.requestEpoch) onEmpty?.();
+    return keepBoundary;
   }
 
-  deactivateScope(scope: FocusCenterEntry, options?: FocusRequestOptions): boolean {
+  deactivateScope(
+    scope: FocusCenterEntry,
+    options?: FocusRequestOptions,
+    requestEpoch = this.requestEpoch
+  ): boolean {
     let index = -1;
     for (let i = this.activeScopes.length - 1; i >= 0; i--) {
       if (this.activeScopes[i]?.scope === scope.instance) {
@@ -375,7 +425,6 @@ export class FocusCenter {
     const [{ previous }] = this.activeScopes.splice(index, 1);
     const revision = ++this.scopeRevision;
     const epoch = this.ownerEpoch;
-    const requestEpoch = this.requestEpoch;
     const current = () =>
       revision === this.scopeRevision &&
       epoch === this.ownerEpoch &&
@@ -386,6 +435,7 @@ export class FocusCenter {
     // Retire the closing scope's old requests before observers can replace
     // them. Fact cleanup stays after the notification under its owner guard.
     for (const entry of this.entries.values()) {
+      if (!current()) break;
       if (entry.instance === scope.instance || !entry.isFocusable()) continue;
       if (this.isDescendantOf(entry, scope) && entry.hasPendingFocus()) {
         entry.cancelPendingFocus();

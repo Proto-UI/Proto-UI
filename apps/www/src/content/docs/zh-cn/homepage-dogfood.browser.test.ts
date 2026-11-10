@@ -19,6 +19,7 @@ import {
   measureHeaderPreferenceFocusRing,
 } from './site-header-breakpoint-evidence';
 import type { Browser, ElementHandle, JSHandle, Page } from 'playwright-core';
+import type * as SidebarCurrentVisibility from '../../../components/site-sidebar-current-visibility';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
 const LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' } as const;
@@ -586,7 +587,306 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       await context.close();
     }
   }, 180_000);
-  it('uses real family Contents Buttons through all four Docs runtimes with keyboard and exact-source visual evidence', async () => {
+  it('reveals current articles through native shadow slots and preserves viewport handback', async () => {
+    const directory = path.join(
+      process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
+        path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
+      'sidebar-native-slot'
+    );
+    await mkdir(directory, { recursive: true });
+    const source = {
+      sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+      dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
+      files: Object.fromEntries(
+        [
+          'apps/www/src/components/site-sidebar-current-visibility.ts',
+          'apps/www/src/components/site-sidebar-disclosure-policy.ts',
+          'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
+          'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+        ].map((file) => [file, createHash('sha256').update(readFileSync(file)).digest('hex')])
+      ),
+    };
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(baseUrl).origin
+        ? route.continue()
+        : route.abort()
+    );
+    const page = await context.newPage();
+    const errors: string[] = [];
+    const observations: unknown[] = [];
+    const completionErrors: unknown[] = [];
+    let failed = false;
+    let failure: unknown;
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.goto(`${baseUrl}/zh-cn/ui-libraries/shadcn/button/`, {
+        waitUntil: 'networkidle',
+      });
+      const fixture = await page.evaluateHandle(async () => {
+        await document.fonts.ready;
+        // Keep this import in the native browser realm, following the existing
+        // browser fixtures rather than Vitest's Node SSR import rewriting.
+        const browserImport = new Function('url', 'return import(url)') as (
+          url: string
+        ) => Promise<unknown>;
+        const { initSidebarCurrentVisibility, nearestSidebarScroller } = (await browserImport(
+          '/src/components/site-sidebar-current-visibility.ts'
+        )) as typeof SidebarCurrentVisibility;
+        const home = document.createElement('div');
+        home.style.cssText =
+          'position:fixed;left:16px;top:80px;width:240px;z-index:2147483000;background:white;color:black';
+        const tree = document.createElement('nav');
+        tree.id = 'pui-sidebar-native-slot-fixture';
+        tree.setAttribute('aria-label', 'Native slot visibility fixture');
+        tree.style.cssText =
+          'display:block;width:240px;height:160px;overflow-y:auto;overflow-anchor:none;scroll-behavior:auto;font:16px/20px sans-serif';
+        tree.innerHTML =
+          '<ul class="top-level" style="margin:0;padding:0;list-style:none"><li style="margin:0;padding:0"><div style="height:720px"></div><a href="#pui-sidebar-native-slot-current" aria-current="page" style="display:block;height:44px;box-sizing:border-box;background:#ffe49a">Current article</a><div style="height:640px"></div></li></ul>';
+        const current = tree.querySelector<HTMLAnchorElement>('[aria-current="page"]')!;
+        const sibling = document.createElement('span');
+        sibling.textContent = 'Original home sibling';
+        home.append(tree, sibling);
+        const host = document.createElement('div');
+        host.style.cssText =
+          'position:fixed;left:16px;top:300px;width:240px;z-index:2147483000';
+        const shadow = host.attachShadow({ mode: 'open' });
+        const content = document.createElement('div');
+        content.style.cssText =
+          'box-sizing:content-box;width:212px;height:160px;padding:12px;border:2px solid black;overflow-y:auto;overflow-anchor:none;overscroll-behavior:contain;scroll-behavior:auto;background:white;color:black';
+        const slot = document.createElement('slot');
+        content.append(slot);
+        shadow.append(content);
+        const nativeSlot = document.createElement('div');
+        host.append(nativeSlot);
+        const focusTarget = document.createElement('button');
+        focusTarget.textContent = 'Keep focus';
+        focusTarget.style.cssText =
+          'position:fixed;left:300px;top:16px;width:74px;height:44px;z-index:2147483001';
+        document.body.append(home, host, focusTarget);
+        focusTarget.focus();
+        const documentPosition = { x: scrollX, y: scrollY };
+        const stop = initSidebarCurrentVisibility(tree);
+        let placement: 'home' | 'slotted' = 'home';
+        let inputPhase = 'idle';
+        let manualDone: Promise<void> | undefined;
+        let releaseScrollEnd: (() => void) | undefined;
+        const inputs: { phase: string; trusted: boolean; viewportTarget: boolean }[] = [];
+        const recordWheel = (event: WheelEvent) => {
+          inputs.push({
+            phase: inputPhase,
+            trusted: event.isTrusted,
+            viewportTarget: event.target === content && !event.composedPath().includes(tree),
+          });
+        };
+        content.addEventListener('wheel', recordWheel, { passive: true });
+        return {
+          read() {
+            const viewport = placement === 'slotted' ? content : tree;
+            const owner = nearestSidebarScroller(current, tree);
+            const box = viewport.getBoundingClientRect();
+            const row = current.getBoundingClientRect();
+            const top = box.top + viewport.clientTop;
+            const bottom = top + viewport.clientHeight;
+            const manualInputs = inputs.filter((input) => input.phase === 'trusted-manual');
+            return {
+              placement,
+              owner: owner === tree ? 'home' : owner === content ? 'slotted' : 'none',
+              nativeSlotAssigned: nativeSlot.assignedSlot === slot,
+              sameTree: document.getElementById(tree.id) === tree,
+              sameCurrent: tree.querySelector('[aria-current="page"]') === current,
+              treeCount: document.querySelectorAll(`#${tree.id}`).length,
+              homeSibling: tree.parentNode === home && tree.nextSibling === sibling,
+              focusPreserved: document.activeElement === focusTarget,
+              documentPreserved: scrollX === documentPosition.x && scrollY === documentPosition.y,
+              scrollTop: viewport.scrollTop,
+              scrollHeight: viewport.scrollHeight,
+              clientHeight: viewport.clientHeight,
+              viewportTop: top,
+              viewportBottom: bottom,
+              rowTop: row.top,
+              rowBottom: row.bottom,
+              visible: row.width > 0 && row.height > 0 && row.top >= top - 1 && row.bottom <= bottom + 1,
+              nearestBottom: Math.abs(row.bottom - bottom) <= 1,
+              trustedManualInput:
+                manualInputs.length > 0 &&
+                manualInputs.every((input) => input.trusted && input.viewportTarget),
+              inputs: [...inputs],
+            };
+          },
+          lend() {
+            placement = 'slotted';
+            tree.style.height = 'auto';
+            tree.style.overflowY = 'visible';
+            tree.setAttribute('data-site-contents-popover-tree', '');
+            nativeSlot.append(tree);
+          },
+          armManualWheel() {
+            inputPhase = 'trusted-manual';
+            const { promise, resolve } = Promise.withResolvers<void>();
+            manualDone = promise;
+            const onEnd = () => resolve();
+            content.addEventListener('scrollend', onEnd, { once: true });
+            releaseScrollEnd = () => content.removeEventListener('scrollend', onEnd);
+            const box = content.getBoundingClientRect();
+            return {
+              x: box.left + content.clientLeft + 4,
+              y: box.top + content.clientTop + 4,
+            };
+          },
+          waitForManualWheel() {
+            if (!manualDone) throw new Error('Native manual wheel was not armed');
+            return manualDone;
+          },
+          async resizeAfterManual() {
+            const { promise, resolve } = Promise.withResolvers<void>();
+            const observer = new ResizeObserver(() => {
+              observer.disconnect();
+              resolve();
+            });
+            observer.observe(content);
+            content.style.height = '128px';
+            document.dispatchEvent(new CustomEvent('site-contents:open'));
+            await promise;
+          },
+          handBack() {
+            placement = 'home';
+            tree.style.height = '160px';
+            tree.style.overflowY = 'auto';
+            home.insertBefore(tree, sibling);
+            tree.removeAttribute('data-site-contents-popover-tree');
+            tree.scrollTop = 0;
+            // This controlled persisted-history notification starts a new
+            // request. The retired viewport event is explicitly synthetic;
+            // it must not cancel that request through an obsolete binding.
+            window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+            inputPhase = 'retired-viewport-probe';
+            content.dispatchEvent(new WheelEvent('wheel', { bubbles: true }));
+          },
+          dispose() {
+            stop();
+            releaseScrollEnd?.();
+            content.removeEventListener('wheel', recordWheel);
+            home.remove();
+            host.remove();
+            focusTarget.remove();
+          },
+        };
+      });
+      const read = () => fixture.evaluate((probe) => probe.read());
+      const capture = async (phase: string) => {
+        const observation = {
+          phase,
+          metrics: await read(),
+          screenshot: `${phase}.png`,
+          screenshotComplete: false,
+        };
+        observations.push(observation);
+        await page.screenshot({ path: path.join(directory, observation.screenshot) });
+        observation.screenshotComplete = true;
+      };
+      await expect
+        .poll(async () => {
+          const state = await read();
+          return { owner: state.owner, visible: state.visible, nearest: state.nearestBottom };
+        })
+        .toEqual({ owner: 'home', visible: true, nearest: true });
+      await capture('home-revealed');
+      await fixture.evaluate((probe) => probe.lend());
+      await expect
+        .poll(async () => {
+          const state = await read();
+          return {
+            owner: state.owner,
+            assigned: state.nativeSlotAssigned,
+            visible: state.visible,
+            nearest: state.nearestBottom,
+          };
+        })
+        .toEqual({ owner: 'slotted', assigned: true, visible: true, nearest: true });
+      const slotted = await read();
+      expect(slotted).toMatchObject({
+        sameTree: true,
+        sameCurrent: true,
+        treeCount: 1,
+        focusPreserved: true,
+        documentPreserved: true,
+      });
+      await capture('slotted-revealed');
+      const wheel = await fixture.evaluate((probe) => probe.armManualWheel());
+      await page.mouse.move(wheel.x, wheel.y);
+      await page.mouse.wheel(0, -160);
+      await fixture.evaluate((probe) => probe.waitForManualWheel());
+      const manual = await read();
+      expect(manual.trustedManualInput).toBe(true);
+      expect(Math.abs(manual.scrollTop - slotted.scrollTop)).toBeGreaterThan(1);
+      await fixture.evaluate((probe) => probe.resizeAfterManual());
+      const afterLayout = await read();
+      expect(afterLayout.scrollTop).toBe(manual.scrollTop);
+      expect(afterLayout).toMatchObject({ focusPreserved: true, documentPreserved: true });
+      await capture('manual-retained');
+      await fixture.evaluate((probe) => probe.handBack());
+      await expect
+        .poll(async () => {
+          const state = await read();
+          return {
+            owner: state.owner,
+            sibling: state.homeSibling,
+            visible: state.visible,
+            nearest: state.nearestBottom,
+          };
+        })
+        .toEqual({ owner: 'home', sibling: true, visible: true, nearest: true });
+      expect(await read()).toMatchObject({
+        sameTree: true,
+        sameCurrent: true,
+        treeCount: 1,
+        focusPreserved: true,
+        documentPreserved: true,
+      });
+      await capture('home-restored');
+      await fixture.evaluate((probe) => probe.dispose());
+      await fixture.dispose();
+      expect(errors).toEqual([]);
+    } catch (error) {
+      failed = true;
+      failure = error;
+    }
+    try {
+      await context.close();
+    } catch (error) {
+      completionErrors.push(error);
+    }
+    try {
+      await writeFile(
+        path.join(directory, 'receipt.json'),
+        JSON.stringify(
+          {
+            source,
+            result: failed || completionErrors.length > 0 ? 'failed' : 'passed',
+            failure: failed ? String(failure) : null,
+            completionErrors: completionErrors.map(String),
+            errors,
+            observations,
+            boundary:
+              'Native browser helper fixture with real DOM, automatic slot assignment, CSS geometry and trusted wheel input. Persisted-history and retired-viewport events are controlled injections. This does not establish public Popover-family or full website acceptance.',
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      completionErrors.push(error);
+    }
+    if (failed) {
+      if (completionErrors.length) console.error('[Native slot completion]', completionErrors);
+      throw failure;
+    }
+    if (completionErrors.length)
+      throw new AggregateError(completionErrors, 'Native slot evidence or context cleanup failed');
+  }, 60_000);
+
+  it('uses real family Popover Triggers through all four Docs runtimes with keyboard and exact-source visual evidence', async () => {
     type CloseObservation = {
       initialMarker: string | null;
       events: (
@@ -803,7 +1103,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           );
           if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
           expect(await root.getByRole('button', { name: '页面目录', exact: true }).count()).toBe(1);
-          expect(await command.getAttribute('aria-controls')).toBe('starlight__sidebar');
+          const contentId = await command.getAttribute('aria-controls');
+          expect(contentId).toBeTruthy();
+          expect(contentId).not.toBe('starlight__sidebar');
           for (const action of ['click', 'Enter', 'Space']) {
             expect(await command.getAttribute('aria-expanded')).toBe('false');
             if (action === 'click') await command.click();
@@ -814,13 +1116,16 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('true');
             await expect
               .poll(() =>
-                page.locator('nav.docs-sidebar[data-site-contents-dialog-tree]').isVisible()
+                page.locator('nav.docs-sidebar[data-site-contents-popover-tree]').isVisible()
               )
               .toBe(true);
-            expect(await command.getAttribute('aria-controls')).toBe('starlight__sidebar');
+            expect(await command.getAttribute('aria-controls')).toBe(contentId);
             const dialog = page.getByRole('dialog');
             expect(await dialog.count()).toBe(1);
-            expect(await dialog.getAttribute('aria-modal')).toBe('true');
+            expect(await dialog.getAttribute('id')).toBe(contentId);
+            // The mobile contents shell is a nonmodal public Popover, so it
+            // keeps the dialog role without the modal state.
+            expect(await dialog.getAttribute('aria-modal')).toBe('false');
             expect(
               await dialog.evaluate((surface) => {
                 let node: Node | null = document.querySelector('nav.docs-sidebar');
@@ -859,8 +1164,24 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 );
               })
             ).toBe(true);
-            // Native tab traversal must remain within the real public modal,
-            // including the original anchors and disclosure summaries.
+            // Opening must actually enter public Content. The old offscreen
+            // shell left focus on the Header, making close-return trivial.
+            expect(
+              await dialog.evaluate((surface) => {
+                let active = document.activeElement;
+                while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+                let node: Node | null = active;
+                while (node) {
+                  if (node === surface) return true;
+                  node =
+                    (node as Element).assignedSlot ??
+                    node.parentNode ??
+                    (node.getRootNode() as ShadowRoot).host ??
+                    null;
+                }
+                return false;
+              })
+            ).toBe(true);
             await page.keyboard.press('Tab');
             expect(
               await dialog.evaluate((surface) => {
@@ -878,26 +1199,32 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 return false;
               })
             ).toBe(true);
-            await page.keyboard.press('Shift+Tab');
-            expect(
-              await dialog.evaluate((surface) => {
-                let active = document.activeElement;
-                while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
-                let node: Node | null = active;
-                while (node) {
-                  if (node === surface) return true;
-                  node =
-                    (node as Element).assignedSlot ??
-                    node.parentNode ??
-                    (node.getRootNode() as ShadowRoot).host ??
-                    null;
-                }
-                return false;
-              })
-            ).toBe(true);
             const beforeScroll = await page.evaluate(() => scrollY);
-            await page.mouse.move(2, 800);
-            await page.mouse.wheel(0, 500);
+            const scrolling = await dialog.evaluate((element) => {
+              const surface =
+                element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
+                element;
+              const box = element.getBoundingClientRect();
+              return {
+                top: surface.scrollTop,
+                max: surface.scrollHeight - surface.clientHeight,
+                x: box.left + box.width / 2,
+                y: box.top + box.height / 2,
+              };
+            });
+            expect(scrolling.max).toBeGreaterThan(0);
+            await page.mouse.move(scrolling.x, scrolling.y);
+            await page.mouse.wheel(0, scrolling.top < scrolling.max / 2 ? 500 : -500);
+            await expect
+              .poll(() =>
+                dialog.evaluate((element) => {
+                  const surface =
+                    element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
+                    element;
+                  return surface.scrollTop;
+                })
+              )
+              .not.toBe(scrolling.top);
             await page.evaluate(
               () =>
                 new Promise<void>((resolve) =>
@@ -906,7 +1233,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             );
             expect(await page.evaluate(() => scrollY)).toBe(beforeScroll);
             if (action === 'click') {
-              const id = `${family}-${runtime}-public-dialog-open`;
+              const id = `${family}-${runtime}-public-popover-open`;
               const metrics = await dialog.evaluate((element) => {
                 const panel = element.getBoundingClientRect();
                 const tree = document.querySelector('nav.docs-sidebar')!;
@@ -960,6 +1287,11 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               expect(metrics.overflow).toBeLessThanOrEqual(1);
               expect(metrics.treePosition).toBe('static');
               expect(metrics.tree.width).toBeGreaterThan(120);
+              expect(metrics.panel.y).toBeGreaterThanOrEqual(0);
+              expect(metrics.panel.y + metrics.panel.height).toBeLessThanOrEqual(845);
+              expect(metrics.panel.x).toBeGreaterThanOrEqual(0);
+              expect(metrics.panel.x + metrics.panel.width).toBeLessThanOrEqual(391);
+              expect(metrics.panel.height).toBeGreaterThan(0);
             }
             await page.evaluate(() => {
               const state = window as typeof window & {
@@ -971,7 +1303,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               const tree = state.__contentsOriginalTree!;
               const home = state.__contentsOriginalParent!;
               const observation: CloseObservation = {
-                initialMarker: tree.getAttribute('data-site-contents-dialog-tree'),
+                initialMarker: tree.getAttribute('data-site-contents-popover-tree'),
                 events: [],
               };
               const collect = (records: MutationRecord[]) => {
@@ -993,7 +1325,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               observer.observe(home, { childList: true });
               observer.observe(tree, {
                 attributes: true,
-                attributeFilter: ['data-site-contents-dialog-tree'],
+                attributeFilter: ['data-site-contents-popover-tree'],
                 attributeOldValue: true,
               });
               state.__contentsTakeCloseObservation = () => {
@@ -1022,7 +1354,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                     return (
                       !!tree?.isConnected &&
                       tree === document.querySelector('nav.docs-sidebar') &&
-                      !tree.hasAttribute('data-site-contents-dialog-tree')
+                      !tree.hasAttribute('data-site-contents-popover-tree')
                     );
                   }),
                 { timeout: remainingCloseMs }
@@ -1037,7 +1369,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             closeObservations.push({ family, runtime, action, observation: closeObservation });
             expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
             expect(
-              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
+              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree')
             ).toBeNull();
             expect(
               await page.evaluate(() => {
@@ -1201,7 +1533,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         const contents = header.locator(
           '[data-site-contents-command] [data-projection-generation-state="active"] [data-site-contents-button]'
         );
-        expect(await contents.getAttribute('aria-controls')).toBe('starlight__sidebar');
+        const contentsId = await contents.getAttribute('aria-controls');
+        expect(contentsId).toBeTruthy();
+        expect(contentsId).not.toBe('starlight__sidebar');
         expect(await header.getByRole('button', { name: '页面目录', exact: true }).count()).toBe(1);
         expect(await contents.getAttribute('title')).toBe('页面目录');
         await revealHeaderPreferences(page);
@@ -1255,9 +1589,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         await contents.click();
         expect(await page.locator('body').getAttribute('data-mobile-menu-expanded')).not.toBeNull();
         expect(await menu.getAttribute('aria-expanded')).toBe('false');
-        // Public modal blocks background Header interaction; close it normally
-        // before entering Navigation and settings, rather than clicking through.
-        expect(await contents.getAttribute('aria-controls')).toBe('starlight__sidebar');
+        // Nonmodal navigation leaves the actual Header settings target usable.
+        expect(await contents.getAttribute('aria-controls')).toBe(contentsId);
         const dialog = page.getByRole('dialog');
         await expect.poll(() => dialog.isVisible()).toBe(true);
         const menuHit = await menu.evaluate((element) => {
@@ -1266,11 +1599,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
           );
         });
-        expect(menuHit).toBe(false);
-        await page.keyboard.press('Escape');
+        expect(menuHit).toBe(true);
+        await menu.click();
         await expect.poll(() => contents.getAttribute('aria-expanded')).toBe('false');
         await expect.poll(() => dialog.count()).toBe(0);
-        await menu.click();
         expect(await menu.getAttribute('aria-expanded')).toBe('true');
         expect(await contents.getAttribute('aria-expanded')).toBe('false');
         expect(await page.locator('body').getAttribute('data-mobile-menu-expanded')).toBeNull();

@@ -475,7 +475,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
 /** The application retains one directory-disclosure owner across replaceable
  * command views. The legacy host branch remains compatible with old consumers;
  * the Docs Header uses an ordinary app-owned host, with no upstream listener. */
-/** A replaceable public Dialog view, not another open/focus/scroll owner. */
+/** A replaceable public Popover view, not another open/focus/scroll owner. */
 export interface SiteContentsPresentation {
   available(): boolean;
   setOpen(open: boolean): void;
@@ -483,8 +483,14 @@ export interface SiteContentsPresentation {
 }
 
 export interface SiteContentsNavigation {
-  bindButton(button: HTMLElement, active: () => boolean, focus: () => void): () => void;
+  bindButton(
+    button: HTMLElement,
+    active: () => boolean,
+    focus: () => void,
+    options?: { publicRelationships: boolean }
+  ): () => void;
   bindPresentation(presentation: SiteContentsPresentation): () => void;
+  setOpen(open: boolean): void;
   toggle(): void;
   close(restoreFocus?: boolean): void;
   focus(): void;
@@ -504,7 +510,14 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
   if (existing) return existing;
   const view = document.defaultView!;
   const appOwned = menuHost.hasAttribute('data-site-contents-command');
-  const bindings = new Map<HTMLElement, { active(): boolean; focus(): void }>();
+  const bindings = new Map<
+    HTMLElement,
+    {
+      active(): boolean;
+      focus(): void;
+      publicRelationships?: boolean;
+    }
+  >();
   bindings.set(fallback, {
     active: () => fallback.isConnected && !fallback.hidden && !fallback.inert && !fallback.disabled,
     focus: () => fallback.focus(),
@@ -528,7 +541,10 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
   };
   const syncExpandedState = () => {
     const next = menuHost.getAttribute('aria-expanded') === 'true';
-    for (const button of bindings.keys()) {
+    for (const [button, binding] of bindings) {
+      // Public Popover Trigger owns expanded/controls/hasPopup and its actual
+      // Content ID (including a shadow surface). Do not replace it with nav ID.
+      if (binding.publicRelationships) continue;
       button.setAttribute('aria-expanded', String(next));
       button.setAttribute('aria-controls', presentation?.controlsId() || 'starlight__sidebar');
       if (presentation) button.setAttribute('aria-haspopup', 'dialog');
@@ -538,7 +554,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     const changed = next !== expanded;
     expanded = next;
     document.body.toggleAttribute('data-mobile-menu-expanded', next);
-    document.body.toggleAttribute('data-site-contents-dialog', !!presentation);
+    document.body.toggleAttribute('data-site-contents-popover', !!presentation);
     if (changed) presentation?.setOpen(next);
     if (newlyOpened) document.dispatchEvent(new view.CustomEvent(SITE_CONTENTS_OPEN_EVENT));
   };
@@ -549,17 +565,17 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.body.removeAttribute('data-mobile-menu-expanded');
     syncExpandedState();
     if (alreadyClosed) presentation?.setOpen(false);
-    // Public Dialog owns modal close/restore. The in-flow fallback retains its
+    // Public Popover owns close/restore. The in-flow fallback retains its
     // old application command return, without a second modal focus policy.
     if (restoreFocus && !presentation) focus();
   };
-  const toggle = () => {
+  const setOpen = (next: boolean) => {
     if (destroyed) return;
-    const next = menuHost.getAttribute('aria-expanded') !== 'true';
     menuHost.setAttribute('aria-expanded', String(next));
     document.body.toggleAttribute('data-mobile-menu-expanded', next);
     syncExpandedState();
   };
+  const toggle = () => setOpen(menuHost.getAttribute('aria-expanded') !== 'true');
   // A native fallback already supplies Enter/Space click synthesis. Enhanced
   // Buttons supply only their public outward activation through their view.
   const onFallback = (event: Event) => {
@@ -619,7 +635,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.removeEventListener('astro:before-swap', destroy);
     document.removeEventListener('focusin', onFocus, true);
     presentation = undefined;
-    document.body.removeAttribute('data-site-contents-dialog');
+    document.body.removeAttribute('data-site-contents-popover');
     bindings.clear();
     contentsNavigations.delete(menuHost);
   };
@@ -641,15 +657,16 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
         syncExpandedState();
       };
     },
-    bindButton(button, active, focus) {
+    bindButton(button, active, focus, options) {
       if (destroyed) return () => {};
-      const binding = { active, focus };
+      const binding = { active, focus, ...options };
       bindings.set(button, binding);
       syncExpandedState();
       return () => {
         if (bindings.get(button) === binding) bindings.delete(button);
       };
     },
+    setOpen,
     toggle,
     close: collapseMenu,
     focus,

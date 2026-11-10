@@ -15,14 +15,66 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BASE-POPOVER-OPENING-ENTRY
+    text:
+      zh-CN: >-
+        Base Content 为一次已接纳 open 的自动入场启用独立的 descendant-first/self Entry role，并仅请求一次配置 entryFallback: entry 的 Scope 激活。 合格 logical member 优先，包括尚待 host target 或 acquisition 被拒绝的已选 member；只有同次 current 激活未选择 logical target 时才委派宿主后代或允许的 Content self fallback。 两类请求均保留 opening reason 与 preventScroll: true。Content 不声明 Focusable 或新增 roving membership，不以 isActive 推断选择结果，也不再发出竞争的 Entry.focus。
+
+      en: >-
+        For automatic entry into an accepted open, Base Content enables a separate descendant-first/self Entry role and requests one Scope activation configured with entryFallback: entry. Eligible logical members retain priority, including a selected member awaiting a host target or rejected acquisition; only the same current activation without a logical selection delegates to a host descendant or permitted Content self fallback. Both requests preserve the opening reason and preventScroll: true. Content declares no Focusable or new roving membership, does not infer selection from isActive, and issues no competing Entry.focus.
+
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUS-SCOPE-0002
+          anchors: [C-AS-FOCUS-SCOPE-0002-G, C-AS-FOCUS-SCOPE-0002-L]
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors:
+            [
+              C-AS-FOCUS-ENTRY-0001-D,
+              C-AS-FOCUS-ENTRY-0001-F,
+              C-AS-FOCUS-ENTRY-0001-G,
+              C-AS-FOCUS-ENTRY-0001-I,
+            ]
+  - id: P-BASE-POPOVER-ENTRY-LIFETIME
+    text:
+      zh-CN: >-
+        opening 的消费独立于 Scope 边界 active；受控拒绝 open 不入场，未变化的已接纳 open、无新 opening 的 remount 或后代插入不得重新入场。 首次 mounted acquisition 可消费尚未消费的已接纳 open；同次仍为 current 的 pending intent 可由 Focus 跨 readiness 与 retained detach 保留。 已接纳的 logical close 必须在缺少 mounted view 的提前返回前禁用 Entry 并取消 Scope-owned intent；同步 observer 接纳的较新 opening 不得被旧 completion、cleanup 或 handback 覆盖。
+
+      en: >-
+        Opening consumption is independent of the Scope boundary's active fact. A refused controlled open does not enter; unchanged accepted open, remount without a new opening, or descendant insertion must not re-enter. First mounted acquisition may consume an unconsumed accepted open; Focus may retain that activation's still-current pending intent through readiness and retained detachment. An accepted logical close disables Entry and cancels Scope-owned intent before an absent-mounted-view early return. Old completion, cleanup or handback must not overwrite a newer opening accepted by a synchronous observer.
+
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUS-SCOPE-0002
+          anchors: [C-AS-FOCUS-SCOPE-0002-M]
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors: [C-AS-FOCUS-ENTRY-0001-E, C-AS-FOCUS-ENTRY-0001-I]
+        - id: C-LIFECYCLE-0006
+          anchors: [C-LIFECYCLE-0006-B, C-LIFECYCLE-0006-C, C-LIFECYCLE-0006-D]
+  - id: P-BASE-POPOVER-FOCUS-HANDBACK
+    text:
+      zh-CN: >-
+        非 Alert 的已验证 outside press/focus 先取消该 opening 的 Scope-owned intent，再走既有 Root close request channel，包括尚无 mounted view 时的取消。 受控 owner 拒绝 close 时保留 open、Presence 与 Entry availability，不通过未变化的 open 重新激活，也不取消较新的独立 Entry/target intent。 Scope 保留 restore: none；已接纳 Close/Escape 的显式 Trigger handback 保留原 reason，outside close 不覆盖外部目的地。此 opening-only preventScroll 策略不修改其他显式 focus request。
+
+      en: >-
+        A verified non-Alert outside press/focus cancels this opening's Scope-owned intent before using the existing Root close request channel, including cancellation without a mounted view. Controlled refusal preserves open, Presence and Entry availability, does not reactivate through unchanged open, and does not cancel newer independent Entry/target intent. Scope retains restore: none. Explicit Trigger handback for accepted Close/Escape preserves its reason, while outside close preserves the outside destination. This opening-only preventScroll policy does not rewrite other explicit focus requests.
+
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUS-SCOPE-0002
+          anchors: [C-AS-FOCUS-SCOPE-0002-D, C-AS-FOCUS-SCOPE-0002-M]
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-AS-FOCUS-SCOPE-0002
+    - C-AS-FOCUS-ENTRY-0001
 verifies:
-  tests: []
+  tests: [T-POPOVER-OPENING-ENTRY-0001]
 sources:
   - path: packages/prototypes/base/src/popover/
+  - path: packages/prototypes/base/test/navigation-overlays/popover-entry-focus-scroll.test.ts
+  - path: internal/contracts/overlay/base-popover-entry-focus-scroll.v0.md
 openQuestions:
   - id: P-BASE-POPOVER-Q-ADMISSION
     question:
@@ -31,6 +83,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-POPOVER
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Define logical-first opening-owned region fallback, scroll-preserving options and close/outside cancellation independently of boundary activity; retain draft lifecycle and native admission requirements.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base popover family as draft.

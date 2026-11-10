@@ -154,6 +154,18 @@ While a scope is active, ordinary focus requests from outside that scope should 
 
 When trap/loop is enabled on the top active scope, Tab navigation should be interpreted as structured next/previous focus requests within that scope and should prevent host default traversal from escaping the scope. If the scope temporarily has no focused child because of pointer interaction on blank space or host variance, the next Tab navigation should recover from the last remembered scoped target or from the first/last eligible child.
 
+## 6.2 Optional activation-owned Entry fallback
+
+`Scope.configure({ entryFallback: 'entry' })` opts automatic activation into the same instance's separately declared, enabled `asFocusEntry()` role. The default is `entryFallback: 'none'`. Both setup `entry: 'manual'` and per-activation `activate({ entry: 'manual' })` suppress automatic child entry and this fallback.
+
+Logical child selection keeps priority. A selected child still owns the request when its host Root is absent or the host rejects its attempt. Only an activation that selected no logical child may use Entry's existing strategy and fallback, with that activation's `reason` and `preventScroll`. This does not declare the Scope Root Focusable, add it to navigation membership, or establish Root focus facts from an Entry request.
+
+The optional continuation belongs to that exact activation. It can wait for the first resolvable host view, then re-resolve Entry against the current view on readiness. It does not repeat Scope child selection or acquire again after success. Independent first unresolved `Entry.focus()` keeps its existing no-op behavior.
+
+`Scope.deactivate()` retires the owned continuation before inactive observers or an absent-view/already-inactive return. This also applies when `emptyPolicy: 'none'` left the coordination boundary inactive: boundary state and continuation ownership are separate. Entry disable, explicit blur, terminal retirement, a new activation, or a newer admitted independent Entry/target request also end the old continuation. Retained detachment alone preserves it. Later readiness or reenabling Entry cannot resurrect canceled work, and cancellation must preserve new independent work created by reentrant callbacks. Ordinary boundary cleanup and configured restore policy still apply independently.
+
+The detailed authority is `C-AS-FOCUS-SCOPE-0002` criteria L/M, `C-AS-FOCUS-ENTRY-0001` criterion I, and `M-FOCUS-0001` criterion H.
+
 ---
 
 ## 7. Context Boundary

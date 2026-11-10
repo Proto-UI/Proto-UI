@@ -1,0 +1,901 @@
+{
+  "generated": "2026-11-09T14:13:01.278Z",
+  "route": "/zh-cn/start-here/what-you-saw/",
+  "viewports": [320, 390, 1188, 1279, 1280, 1440, 1920],
+  "fontSizes": [16, 20, 24, 32],
+  "results": [
+    {
+      "viewport": {
+        "width": 320,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 320,
+        "innerW": 320,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2505.59375,
+          "w": 320,
+          "h": 3282,
+          "top": 2505.59375,
+          "right": 320,
+          "bottom": 5787.59375,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 320,
+        "innerW": 320,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2505.59375,
+          "w": 320,
+          "h": 3282,
+          "top": 2505.59375,
+          "right": 320,
+          "bottom": 5787.59375,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 320,
+        "innerW": 320,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2505.59375,
+          "w": 320,
+          "h": 3282,
+          "top": 2505.59375,
+          "right": 320,
+          "bottom": 5787.59375,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 320,
+        "innerW": 320,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2505.59375,
+          "w": 320,
+          "h": 3282,
+          "top": 2505.59375,
+          "right": 320,
+          "bottom": 5787.59375,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 390,
+        "innerW": 390,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2200,
+          "w": 390,
+          "h": 3282,
+          "top": 2200,
+          "right": 390,
+          "bottom": 5482,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 390,
+        "innerW": 390,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2200,
+          "w": 390,
+          "h": 3282,
+          "top": 2200,
+          "right": 390,
+          "bottom": 5482,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 390,
+        "innerW": 390,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2200,
+          "w": 390,
+          "h": 3282,
+          "top": 2200,
+          "right": 390,
+          "bottom": 5482,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": true,
+      "docOverflow": {
+        "scrollW": 390,
+        "innerW": 390,
+        "overflow": false
+      },
+      "treeInFlow": true,
+      "popoverOpen": true,
+      "dialogCount": 1,
+      "ariaModal": "false",
+      "maskPresent": false,
+      "closeButtonPresent": false,
+      "treeInSlot": true,
+      "treeMarked": true,
+      "treeCount": 1,
+      "tocAboveArticle": {
+        "tocTop": 0,
+        "articleTop": 80,
+        "tocAbove": true
+      },
+      "scrollOwners": [
+        {
+          "tag": "WC-SHADCN-POPOVER-CONTENT",
+          "id": "pui-popover-1-content",
+          "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d",
+          "ovY": "auto",
+          "maxH": "none"
+        }
+      ],
+      "popoverGeometry": {
+        "rect": {
+          "x": 0,
+          "y": 2200,
+          "w": 390,
+          "h": 3282,
+          "top": 2200,
+          "right": 390,
+          "bottom": 5482,
+          "left": 0
+        },
+        "style": {
+          "pos": "static",
+          "radius": "0px",
+          "border": "0px",
+          "ovY": "auto",
+          "maxH": "none",
+          "bg": "oklab(0.999998 -0.00000980496 0.0000234246 / 0.9)",
+          "blur": "blur(4px)"
+        }
+      },
+      "linksPreserved": {
+        "linkCount": 288,
+        "currentPage": true,
+        "detailsCount": 18
+      },
+      "focusTrap": {
+        "hasFocus": false,
+        "activeTag": "WC-SHADCN-BUTTON"
+      },
+      "focusAfterClose": {
+        "tag": "WC-SHADCN-BUTTON",
+        "id": "",
+        "cls": "pui-projection-prototype pui-projection-owner-73_69_74_65_2d"
+      },
+      "popoverClosed": true
+    },
+    {
+      "viewport": {
+        "width": 1188,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1188,
+        "innerW": 1188,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1188,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1188,
+        "innerW": 1188,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1188,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1188,
+        "innerW": 1188,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1188,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1188,
+        "innerW": 1188,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1279,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1279,
+        "innerW": 1279,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1279,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1279,
+        "innerW": 1279,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1279,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1279,
+        "innerW": 1279,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1279,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1279,
+        "innerW": 1279,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1280,
+        "innerW": 1280,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1280,
+        "innerW": 1280,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1280,
+        "innerW": 1280,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1280,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1280,
+        "innerW": 1280,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1440,
+        "innerW": 1440,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1440,
+        "innerW": 1440,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1440,
+        "innerW": 1440,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1440,
+        "innerW": 1440,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "fontSize": 16
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1920,
+        "innerW": 1920,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "fontSize": 20
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1920,
+        "innerW": 1920,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "fontSize": 24
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1920,
+        "innerW": 1920,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "fontSize": 32
+      },
+      "errors": [],
+      "hasContentsButton": true,
+      "isMobileViewport": false,
+      "docOverflow": {
+        "scrollW": 1920,
+        "innerW": 1920,
+        "overflow": false
+      },
+      "treeInFlow": true
+    },
+    {
+      "noJS": {
+        "treeVisible": true,
+        "treeLinks": 288,
+        "paneDisplay": "flex",
+        "paneMaxH": "506.4px",
+        "paneOverflowY": "auto"
+      }
+    }
+  ]
+}

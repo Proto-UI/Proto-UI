@@ -11,6 +11,7 @@ import { nativeInteractionArtifact } from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
+import { partitionModuleBindings } from './source-module-bindings';
 import type {
   CompileResult,
   ExpressionIR,
@@ -30,6 +31,7 @@ export function emitReactSource(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'react-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
@@ -202,6 +204,7 @@ export function emitReactSource(
   const transportFile = '.proto-ui/context/react-v1.ts';
 
   function typeName(type: ValueType): string {
+    if (type === 'exception') return 'unknown';
     if (typeof type !== 'string')
       return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
         ? `${p}NativeFocusOptions`
@@ -247,10 +250,22 @@ export function emitReactSource(
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
         return value.name;
+      case 'lexical-cell':
+        return expression(value.value, depth);
+      case 'lexical-read':
+        return expression(value.cell, depth);
+      case 'lexical-write':
+        return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        return `(${value.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return contextKeys.get(value.keyId)!;
       case 'static-capability':
@@ -260,7 +275,7 @@ export function emitReactSource(
       case 'rule':
         return emitNativeRule(value, (item) => expression(item, depth), `${p}Style`, 'resolved');
       case 'member':
-        return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
@@ -297,7 +312,7 @@ export function emitReactSource(
   }
   function statements(body: readonly StatementIR[], depth: number): string {
     const indent = '  '.repeat(depth);
-    const terminator = body.findIndex((value) => value.kind === 'return');
+    const terminator = body.findIndex((value) => value.kind === 'return' || value.kind === 'throw');
     return body
       .slice(0, terminator < 0 ? body.length : terminator + 1)
       .map((value) => {
@@ -313,11 +328,15 @@ export function emitReactSource(
         const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
         switch (value.kind) {
           case 'const':
-            return `${origin}${indent}const ${value.name} = ${expression(value.value, depth)};\n`;
+            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name} = ${expression(value.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(value.expression, depth)};\n`;
           case 'return':
             return `${origin}${indent}return${value.value ? ` ${expression(value.value, depth)}` : ''};\n`;
+          case 'throw':
+            return `${origin}${indent}throw ${expression(value.value, depth)};\n`;
+          case 'try':
+            return `${origin}${indent}try {\n${statements(value.body, depth + 1)}${indent}}${value.catch ? ` catch${value.catch.name ? ` (${value.catch.name})` : ''} {\n${statements(value.catch.body, depth + 1)}${indent}}` : ''}${value.finally ? ` finally {\n${statements(value.finally, depth + 1)}${indent}}` : ''}\n`;
           case 'if':
             return `${origin}${indent}if (${expression(value.condition, depth)}) {\n${statements(value.then, depth + 1)}${indent}}${value.otherwise.length ? ` else {\n${statements(value.otherwise, depth + 1)}${indent}}` : ''}\n`;
         }
@@ -364,7 +383,7 @@ export function emitReactSource(
   const propSchemas = ir.props
     .map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.type)},`)
     .join('\n');
-  const hookDefinitions = ir.hooks
+  const hookDefinitions = statements(moduleParts.owned, 1) + ir.hooks
     .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
     .map(
       (hook) => `  const ${hooks.get(hook.id)} = () => {
@@ -398,6 +417,7 @@ ${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction
 ${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
 ${contextImports}
 ${staticImports}
+${statements(moduleParts.shared, 0)}
 
 export type GeneratedProps = {
 ${props}

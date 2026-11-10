@@ -34,6 +34,7 @@ export interface SourceModule {
   file: ts.SourceFile;
   imports: Map<string, Imported>;
   declarations: Map<string, ts.Expression | ts.FunctionDeclaration>;
+  mutableBindings: Set<string>;
   exports: Map<string, SourceExport>;
   starExports: Imported[];
   readonly runtimeEdges: readonly SourceEdge[];
@@ -51,6 +52,17 @@ const HOOKS: Record<string, true> = {
   asTableStructure: true, asBoundary: true, asHitParticipation: true,
   asCollection: true, asCollectionItem: true,
 };
+
+/** Pure scalar initializers have no module-evaluation effects to execute or erase. */
+export function scalarInitializer(node: ts.Expression): boolean {
+  if (ts.isParenthesizedExpression(node)) return scalarInitializer(node.expression);
+  return ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) ||
+    ts.isNumericLiteral(node) || node.kind === ts.SyntaxKind.TrueKeyword ||
+    node.kind === ts.SyntaxKind.FalseKeyword ||
+    (ts.isPrefixUnaryExpression(node) &&
+      (node.operator === ts.SyntaxKind.MinusToken || node.operator === ts.SyntaxKind.PlusToken) &&
+      ts.isNumericLiteral(node.operand));
+}
 
 export function sourceSpan(node: ts.Node): SourceSpan {
   const file = node.getSourceFile();
@@ -166,6 +178,7 @@ export class SourceGraph {
       file,
       imports: new Map(),
       declarations: new Map(),
+      mutableBindings: new Set(),
       exports: new Map(),
       starExports: [],
       runtimeEdges: edges.filter((edge) => !edge.typeOnly),
@@ -241,12 +254,21 @@ export class SourceGraph {
           rejectNode(statement, 'PUI1004', 'Only named synchronous functions are admitted.');
         this.add(result, statement.name.text, statement, statement);
       } else if (ts.isVariableStatement(statement)) {
-        if (!(statement.declarationList.flags & ts.NodeFlags.Const))
-          rejectNode(statement, 'PUI1004', 'Top-level bindings must be immutable.');
+        const mutable = !!(statement.declarationList.flags & ts.NodeFlags.Let);
+        if (!(statement.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)))
+          rejectNode(statement, 'PUI1004', 'Top-level bindings must use const or let.');
         for (const declaration of statement.declarationList.declarations) {
           if (!declaration.initializer)
             rejectNode(declaration, 'PUI1004', 'A declaration requires an initializer.');
           const value = declaration.initializer;
+          if (scalarInitializer(value)) {
+            const name = identifier(declaration.name);
+            this.add(result, name, value, statement);
+            if (mutable) result.mutableBindings.add(name);
+            continue;
+          }
+          if (mutable)
+            rejectNode(value, 'PUI1004', 'Module let currently requires a pure scalar initializer.');
           if (!ts.isCallExpression(value) || !ts.isIdentifier(value.expression))
             rejectNode(
               value,

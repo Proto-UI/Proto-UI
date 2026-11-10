@@ -1,4 +1,8 @@
-import { createFocusRequestIntent, retainFocusRequestIntent } from './request-intent';
+import {
+  createFocusRequestIntent,
+  createScopeFocusRequestIntent,
+  retainFocusRequestIntent,
+} from './request-intent';
 import {
   type FocusFacts,
   type FocusEntryConfig,
@@ -52,6 +56,7 @@ import {
   type FocusCenterEntry,
   type FocusRequestBehavior,
   type FocusRequestOutcome,
+  type ScopeEntryIntent,
 } from './center';
 
 const DEFAULT_FOCUSABLE_CONFIG: FocusableConfig = Object.freeze({
@@ -72,6 +77,7 @@ const DEFAULT_SCOPE_CONFIG: FocusScopeConfig = Object.freeze({
   navigation: 'tab',
   orientation: 'vertical',
   entry: 'first',
+  entryFallback: 'none',
   // Preserve ordinary previous-owner restoration; none is an explicit opt-out.
   restore: 'previous',
   emptyPolicy: 'none',
@@ -157,6 +163,7 @@ type FocusOperation = {
   deferredReadinessVersion?: number;
   cancelled?: boolean;
   previous?: FocusOperation;
+  scopeEntry?: ScopeEntryIntent;
 };
 
 class FocusModuleImpl extends ModuleBase {
@@ -178,13 +185,15 @@ class FocusModuleImpl extends ModuleBase {
   private focusApplicationVersion = 0;
   private entryAcquisitionVersion = 0;
   private focusOperation: FocusOperation | undefined;
+  private scopeActivation = 0;
+  private scopeEntryIntent: ScopeEntryIntent | undefined;
   private focusFactsEpoch = 0;
   private hostEventsWired = false;
   private scopeEventsWired = false;
   private rovingEventsWired = false;
   private pendingFocusRequest:
     | { kind: 'target'; options: FocusRequestOptions; syncFacts: boolean }
-    | { kind: 'entry'; options: FocusRequestOptions }
+    | { kind: 'entry'; options: FocusRequestOptions; scopeEntry?: ScopeEntryIntent }
     | undefined;
   private offTargetReady: (() => void) | undefined;
   private lastHostFocusableTarget: HTMLElement | null = null;
@@ -438,8 +447,25 @@ class FocusModuleImpl extends ModuleBase {
     };
     this.focusOperation = operation;
     // An enabled target request supersedes older intent before Center admission.
-    if (kind === 'target') this.clearPendingFocus(!replay);
+    if (kind === 'target') {
+      if (!FOCUS_CENTER.supersedeScopeEntryIntent()) operation.cancelled = true;
+      if (this.focusOperation === operation && !operation.cancelled)
+        this.clearPendingFocus(!replay);
+    }
     return operation;
+  }
+
+  private cancelScopeEntryIntent(owner = this.scopeEntryIntent): void {
+    if (!owner) return;
+    if (this.scopeEntryIntent === owner) this.scopeEntryIntent = undefined;
+    FOCUS_CENTER.releaseScopeEntryIntent(owner);
+    for (let operation = this.focusOperation; operation; operation = operation.previous) {
+      if (operation.scopeEntry === owner) operation.cancelled = true;
+    }
+    if (this.focusOperation?.cancelled)
+      this.focusOperation = this.liveFocusPredecessor(this.focusOperation);
+    if (this.pendingFocusRequest?.kind === 'entry' && this.pendingFocusRequest.scopeEntry === owner)
+      this.clearPendingFocus();
   }
 
   private cancelFocusOperation(kind?: FocusOperation['kind']): void {
@@ -535,7 +561,7 @@ class FocusModuleImpl extends ModuleBase {
         );
         return outcome;
       },
-      prepareFocusRequest: (options, behavior) => {
+      prepareFocusRequest: (options, behavior, createIntent = retainFocusRequestIntent) => {
         if (!this.focusableDeclared || this.focusableConfig.disabled) {
           return {
             isCurrent: () => false,
@@ -546,7 +572,7 @@ class FocusModuleImpl extends ModuleBase {
         let operation = prepared;
         let intent: FocusRequestOptions | undefined;
         const applicationVersion = this.focusApplicationVersion;
-        if (prepared) intent = retainFocusRequestIntent(options);
+        if (prepared) intent = createIntent(options);
         else {
           // Center-originated author options need the same tentative owner as
           // direct requests. Already-owned snapshots retain their retry identity.
@@ -560,7 +586,7 @@ class FocusModuleImpl extends ModuleBase {
                 this.pendingFocusRequest?.options === snapshot
               );
             },
-            retainFocusRequestIntent
+            createIntent
           );
         }
         const current = () =>
@@ -980,6 +1006,7 @@ class FocusModuleImpl extends ModuleBase {
       'navigation',
       'orientation',
       'entry',
+      'entryFallback',
       'restore',
       'emptyPolicy',
       'group',
@@ -1055,7 +1082,7 @@ class FocusModuleImpl extends ModuleBase {
       // Do not pre-clear an entry replay: applyEntryFocus keeps the slot when
       // the replacement target has not mounted yet, so readiness from the
       // later commit can still fulfill the same intent.
-      this.applyEntryFocus(pending.options, { replay: true });
+      this.applyEntryFocus(pending.options, { replay: true, scopeEntry: pending.scopeEntry });
     } else {
       this.pendingFocusRequest = undefined;
       this.applyTargetFocus(pending.options, pending.syncFacts, true);
@@ -1072,6 +1099,7 @@ class FocusModuleImpl extends ModuleBase {
     const operation = prepared ?? this.beginFocusOperation('target');
     const applicationVersion = this.focusApplicationVersion;
     const current = () => this.focusOperation === operation && !operation.cancelled;
+    if (!current()) return 'rejected';
     // Replacing the Module slot during an attempt does not cancel its queued host retry.
     this.clearPendingFocus(false);
     let failed = false;
@@ -1132,6 +1160,7 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   private cancelPendingFocus(): void {
+    this.cancelScopeEntryIntent();
     this.cancelFocusOperation();
     this.clearPendingFocus();
   }
@@ -1171,8 +1200,13 @@ class FocusModuleImpl extends ModuleBase {
     this.withFocusRequestIntent('entry', options, (intent) => this.applyEntryFocus(intent));
   }
 
-  private applyEntryFocus(options: FocusRequestOptions, intent?: { replay: boolean }): void {
+  private applyEntryFocus(
+    options: FocusRequestOptions,
+    intent?: { replay: boolean; scopeEntry?: ScopeEntryIntent }
+  ): void {
     if (!this.entryDeclared || this.entryConfig.disabled) return;
+    const scopeEntry = intent?.scopeEntry;
+    if (scopeEntry && this.scopeEntryIntent !== scopeEntry) return;
     const previous = this.focusOperation;
     const applicationVersion = this.focusApplicationVersion;
     const retainedEntry =
@@ -1182,7 +1216,11 @@ class FocusModuleImpl extends ModuleBase {
     // but roll back a first unresolved entry so it remains a genuine no-op.
     const operation = this.beginFocusOperation('entry');
     operation.previous = previous;
-    const current = () => this.focusOperation === operation && !operation.cancelled;
+    operation.scopeEntry = scopeEntry;
+    const current = () =>
+      this.focusOperation === operation &&
+      !operation.cancelled &&
+      (!scopeEntry || this.scopeEntryIntent === scopeEntry);
     const restorePrevious = () => {
       this.focusOperation = this.liveFocusPredecessor(previous);
     };
@@ -1192,9 +1230,11 @@ class FocusModuleImpl extends ModuleBase {
       if (!current()) return;
       if (!target || !this.caps.has(FOCUS_REQUEST_FOCUS_CAP)) {
         if (!current()) return;
-        if (retainedEntry) {
+        if (retainedEntry || scopeEntry) {
           operation.admitted = true;
-          this.pendingFocusRequest = { kind: 'entry', options };
+          if (!intent?.replay && !scopeEntry && !FOCUS_CENTER.noteEntryIntent()) return;
+          if (!current()) return;
+          this.pendingFocusRequest = { kind: 'entry', options, scopeEntry };
         } else restorePrevious();
         return;
       }
@@ -1205,7 +1245,15 @@ class FocusModuleImpl extends ModuleBase {
           : null;
       if (!current()) return;
       if (!resolved) {
+        if (scopeEntry) {
+          operation.admitted = true;
+          this.pendingFocusRequest = { kind: 'entry', options, scopeEntry };
+          return;
+        }
         if (retainedEntry) {
+          operation.admitted = true;
+          if (!intent?.replay && !FOCUS_CENTER.noteEntryIntent()) return;
+          if (!current()) return;
           // Only a replay preserves its intent across the temporary
           // no-target gap before a replacement commits. An explicit newer
           // request whose policy result is no-target ends the retained
@@ -1217,12 +1265,20 @@ class FocusModuleImpl extends ModuleBase {
         return;
       }
       operation.admitted = true;
+      if (!intent?.replay && !scopeEntry && !FOCUS_CENTER.noteEntryIntent()) return;
+      if (!current()) return;
       this.clearPendingFocus(!intent?.replay);
+      if (!current()) return;
       operation.preflight = false;
       this.focusApplicationVersion += 1;
       const applied = this.caps.get(FOCUS_REQUEST_FOCUS_CAP)(resolved, options, 'entry');
       if (current() && applied !== false) this.entryAcquisitionVersion += 1;
-      if (current() && applied === false) this.pendingFocusRequest = { kind: 'entry', options };
+      if (current() && applied === false)
+        this.pendingFocusRequest = { kind: 'entry', options, scopeEntry };
+      else if (current() && scopeEntry) {
+        FOCUS_CENTER.releaseScopeEntryIntent(scopeEntry);
+        this.scopeEntryIntent = undefined;
+      }
     } catch (error) {
       failed = true;
       if (current() && !operation.admitted) restorePrevious();
@@ -1244,6 +1300,8 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   blur(): void {
+    if (this.scopeActivation) this.scopeActivation += 1;
+    this.cancelScopeEntryIntent();
     this.cancelPendingFocus();
     this.blurTarget();
   }
@@ -1324,18 +1382,58 @@ class FocusModuleImpl extends ModuleBase {
 
   activateScope(options?: FocusScopeActivationOptions): void {
     this.declareScope();
+    if (this.scopeConfig.entryFallback === 'entry') {
+      const activation = ++this.scopeActivation;
+      const requestEpoch = FOCUS_CENTER.getRequestEpoch();
+      this.cancelScopeEntryIntent();
+      if (activation !== this.scopeActivation || requestEpoch !== FOCUS_CENTER.getRequestEpoch())
+        return;
+      const entry = this.createCenterEntry();
+      if (
+        !entry ||
+        activation !== this.scopeActivation ||
+        requestEpoch !== FOCUS_CENTER.getRequestEpoch()
+      )
+        return;
+      FOCUS_CENTER.activateScope(entry, options, () => {
+        if (activation !== this.scopeActivation || !this.entryDeclared || this.entryConfig.disabled)
+          return;
+        this.withFocusRequestIntent(
+          'entry',
+          options,
+          (intent) => {
+            if (
+              activation !== this.scopeActivation ||
+              requestEpoch !== FOCUS_CENTER.getRequestEpoch()
+            )
+              return;
+            const owner: ScopeEntryIntent = { cancel: () => this.cancelScopeEntryIntent(owner) };
+            this.scopeEntryIntent = owner;
+            if (!FOCUS_CENTER.noteEntryIntent(owner) || this.scopeEntryIntent !== owner) return;
+            this.applyEntryFocus(intent, { replay: false, scopeEntry: owner });
+          },
+          createScopeFocusRequestIntent
+        );
+      });
+      return;
+    }
     const entry = this.createCenterEntry();
     if (!entry) return;
     FOCUS_CENTER.activateScope(entry, options);
   }
 
   deactivateScope(options?: FocusRequestOptions): void {
+    const requestEpoch = FOCUS_CENTER.getRequestEpoch();
+    const activation = this.scopeActivation ? ++this.scopeActivation : 0;
+    this.cancelScopeEntryIntent();
+    if (activation !== this.scopeActivation) return;
     const entry = this.createCenterEntry();
+    if (activation !== this.scopeActivation) return;
     if (!entry) {
       this.setScopeActive(false);
       return;
     }
-    FOCUS_CENTER.deactivateScope(entry, options);
+    FOCUS_CENTER.deactivateScope(entry, options, requestEpoch);
   }
 
   isScopeActive(): boolean {
@@ -1395,6 +1493,10 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   setEntryDisabled(disabled: boolean): void {
+    if (disabled) {
+      if (this.scopeActivation) this.scopeActivation += 1;
+      this.cancelScopeEntryIntent();
+    }
     if (disabled) this.cancelFocusOperation('entry');
     if (disabled && this.pendingFocusRequest?.kind === 'entry') this.clearPendingFocus();
     this.entryConfig = Object.freeze({
@@ -1512,6 +1614,8 @@ class FocusModuleImpl extends ModuleBase {
   override onInstancePhase(phase: InstancePhase): void {
     super.onInstancePhase(phase);
     if (phase === 'disposing') {
+      if (this.scopeActivation) this.scopeActivation += 1;
+      this.cancelScopeEntryIntent();
       this.focusOperation = undefined;
       this.focusFactsEpoch += 1;
       this.clearPendingFocus();
