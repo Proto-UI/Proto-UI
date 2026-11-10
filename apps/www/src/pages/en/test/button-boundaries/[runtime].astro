@@ -1,0 +1,143 @@
+---
+import ThemeProvider from '../../../../components/override/ThemeProvider.astro';
+import '../../../../styles/global.css';
+
+export function getStaticPaths() {
+  return ['wc', 'react', 'vue', 'vue2'].map((runtime) => ({
+    params: { runtime },
+    props: { runtime },
+  }));
+}
+const { runtime } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>New York Button boundaries — {runtime}</title>
+    <ThemeProvider />
+  </head>
+  <body>
+    <main data-button-boundary-runtime={runtime}>
+      <h1>New York Button · {runtime}</h1>
+      <p>Public direct Button, production Adapter and generated stylesheet.</p>
+      <p>Native browser evidence does not certify OS assistive technology or other families.</p>
+      <div class="fixture-options" aria-label="Acceptance fixture inputs">
+        <label>
+          Current size
+          <select data-button-boundary-size>
+            <option value="default">Default</option>
+            <option value="sm">Small</option>
+            <option value="lg">Large</option>
+            <option value="icon">Icon</option>
+            <option value="icon-compact">Compact icon</option>
+          </select>
+        </label>
+        <label><input type="checkbox" data-button-boundary-wrap-input /> Wrap</label>
+        <label><input type="checkbox" data-button-boundary-disabled /> Disable</label>
+        <button type="button" data-button-boundary-reset>Remove authored props</button>
+      </div>
+      <div data-button-boundary-host={runtime} data-mount-state="pending"></div>
+      <p data-button-boundary-error role="alert"></p>
+    </main>
+    <script>
+      import { createButtonBoundaryFixture } from '../../../../content/docs/zh-cn/button-boundary-fixture';
+      import { renderDemo } from '../../../../components/PrototypePreviewer/demo-renderer';
+      import { loadPrototypes } from '../../../../components/PrototypePreviewer/prototype-modules';
+      import type { DemoRenderResult } from '../../../../components/PrototypePreviewer/demo-types';
+      import type { RuntimeId } from '../../../../components/PrototypePreviewer/runtimes/ids';
+
+      const host = document.querySelector<HTMLElement>('[data-button-boundary-host]')!;
+      const runtime = host.dataset.buttonBoundaryHost as RuntimeId;
+      let current = true;
+      let view: DemoRenderResult | undefined;
+      const report = (error: unknown) => {
+        document.querySelector('[data-button-boundary-error]')!.textContent =
+          error instanceof Error ? error.message : String(error);
+        console.error(error);
+      };
+      window.addEventListener(
+        'pagehide',
+        () => {
+          current = false;
+          host.dataset.mountState = 'retired';
+          const retiring = view;
+          view = undefined;
+          try {
+            void Promise.resolve(retiring?.destroy()).catch(report);
+          } catch (error) {
+            report(error);
+          }
+        },
+        { once: true }
+      );
+      async function mount() {
+        await loadPrototypes(['shadcn-button']);
+        if (!current) return;
+        const mounted = await renderDemo({
+          runtime,
+          demo: createButtonBoundaryFixture(),
+          host,
+          isCurrent: () => current,
+        });
+        if (!current) {
+          await mounted.destroy();
+          return;
+        }
+        view = mounted;
+        host.dataset.mountState = 'ready';
+      }
+      void mount().catch((error) => {
+        if (current) host.dataset.mountState = 'error';
+        report(error);
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 1rem;
+    background: var(--pui-background);
+    color: var(--pui-foreground);
+    font-family: var(--font-sans);
+  }
+  main {
+    max-width: 60rem;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  .fixture-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+  :global([data-button-boundary-controls]) {
+    display: grid;
+    justify-items: start;
+    gap: 1rem;
+    min-width: 0;
+  }
+  :global([data-button-boundary-row]) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    max-width: 100%;
+  }
+  :global([data-button-boundary-wrap]) {
+    width: 12rem;
+    max-width: 100%;
+  }
+  :global([data-demo-ref='counts']) {
+    overflow-wrap: anywhere;
+  }
+</style>

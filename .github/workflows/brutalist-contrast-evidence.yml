@@ -21,15 +21,15 @@ jobs:
       matrix:
         include:
           - shard: binary-and-buttons
-            families: button,toggle,switch,checkbox
+            families: button,toggle,switch,checkbox,radio-group
           - shard: popup-boundaries
             families: dropdown-menu,select,dialog
           - shard: intent-and-tabs
-            families: tooltip,hover-card,tabs
+            families: tooltip,hover-card,tabs,transition
           - shard: naming-and-disclosures
-            families: label,collapsible,accordion,field
+            families: label,collapsible,accordion,field,live-region,async-region
           - shard: passive-and-editors
-            families: badge,card,skeleton,separator,spinner,textarea,scroll-area,input
+            families: badge,card,skeleton,separator,spinner,textarea,scroll-area,input,image
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

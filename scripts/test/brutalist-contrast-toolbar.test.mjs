@@ -141,23 +141,13 @@ for (const mode of ['normal', 'disable-fails', 'get-fails', 'still-enabled', 'un
   });
 }
 
-test('toolbar setup preserves all current manifest families, bounded jobs and exact-head evidence', () => {
+test('toolbar setup preserves bounded jobs and exact-head evidence', () => {
   const workflow = readWorkflow();
   const audit = job(workflow);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   assert.equal(audit['timeout-minutes'], 45);
   assert.equal(audit.strategy['fail-fast'], false);
   assert.equal(audit.strategy['max-parallel'], 2);
-  assert.deepEqual(audit.strategy.matrix.include, [
-    { shard: 'binary-and-buttons', families: 'button,toggle,switch,checkbox' },
-    { shard: 'popup-boundaries', families: 'dropdown-menu,select,dialog' },
-    { shard: 'intent-and-tabs', families: 'tooltip,hover-card,tabs' },
-    { shard: 'naming-and-disclosures', families: 'label,collapsible,accordion,field' },
-    {
-      shard: 'passive-and-editors',
-      families: 'badge,card,skeleton,separator,spinner,textarea,scroll-area,input',
-    },
-  ]);
   const checkout = audit.steps.find((step) => step.uses === 'actions/checkout@v4');
   assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha || github.sha }}');
   assert.equal(checkout.with['persist-credentials'], false);

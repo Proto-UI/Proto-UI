@@ -9,6 +9,15 @@ cases:
     title: explicit legacy supported variants sizes and wrapping close through the actual preset
     covers: [P-SHADCN-BUTTON-NEW-YORK-PAINT, P-SHADCN-BUTTON-SIZE-PROP, P-SHADCN-BUTTON-WRAP-PROP]
     expectation: fixed-02cad611-profile-without-modern-paint-leakage
+  - id: T-SHADCN-BUTTON-0001-CASE-NEW-YORK-NATIVE-BOUNDARIES
+    title: direct legacy variants and size transitions retain real input and bounded text scaling
+    covers:
+      - P-SHADCN-BUTTON-NEW-YORK-PAINT
+      - P-SHADCN-BUTTON-ICON-COMPACT
+      - P-SHADCN-BUTTON-WRAP-PROP
+      - P-SHADCN-BUTTON-INTERACTION-STYLES
+      - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
+    expectation: Native pointer, Enter and Space each produce one outward activation for all six existing variants. Light/dark paint follows the independently pinned New York oracle. Default/sm/lg/icon/compact dimensions and mutually exclusive gaps survive same-instance prop changes and removal, including wrap-enabled fixed icons. Disabled rejects pointer input and is skipped by Tab. Independent 16px/32px root text settings retain the declared rem geometry; a long wrapped label fits its container at a 320px viewport. Real source-bound captures and terminal receipts are required; authored fixtures do not establish execution, OS AT or complete family parity.
   - id: T-SHADCN-BUTTON-0001-CASE-GHOST-MODERN
     title: modern ghost has a separate source-specific muted oracle
     covers: [P-SHADCN-BUTTON-GHOST-MODERN-PAINT]
@@ -71,6 +80,17 @@ cases:
       - P-SHADCN-BUTTON-AS-CHILD-OMISSION
     expectation: shadcn-button-does-not-overclaim-upstream-parity
 implementations:
+  - id: website-shadcn-button-new-york-native-boundaries
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-NEW-YORK-NATIVE-BOUNDARIES]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Sixteen planned journeys cover four actual Web Adapters, two color schemes and two independent root font sizes. The private fixture renders the public direct Button through the production renderer and generated stylesheet; it adds no globally registered demo ID or component paint.
+      - Per-variant pointer/Enter/Space outward counters, disabled pointer rejection and Tab exclusion, fixed icon geometry under wrapping, same-instance size/disabled/default restoration and narrow multiline bounds are executable assertions. Screenshots and source hashes are produced only by actual execution.
+      - No current before-run failure or after-run pass is asserted. Shared passive Form hover80 and its separate collector gap, failed public Header Ghost evidence, other profiles/families, packed consumers and OS accessibility remain independent acceptance work.
   - id: prototypes-shadcn-button-new-york-profile
     kind: module-test
     status: planned
@@ -204,4 +224,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Registered planned independent component-native Ghost evidence while retaining the separate public Header journey and its failure signals.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped planned direct New York variant, size, text-scale and native-input boundaries without claiming execution or changing passive Form paint and other family acceptance.
 tags: [prototype, shadcn, button, delta, compatibility, test]
