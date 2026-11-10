@@ -743,6 +743,45 @@ function scopedNegatedEntrySubject(selector: string) {
   return subject === null || /[,+~]/.test(probe) ? null : { subject, probe, positionSubjects };
 }
 
+const entryPositionCondition =
+  /:(?:(?:first|last|only)-(?:child|of-type)\b|nth-(?:last-)?(?:child|of-type)\()/i;
+
+function mayReachPositionalEntry(selector: string, candidates: readonly Element[]): boolean {
+  let branchStart = 0;
+  let copyFrom = 0;
+  let probe = '';
+  const reaches = (end: number) => {
+    const branch = selector.slice(branchStart, end);
+    if (!branch.includes(':has(') || !entryPositionCondition.test(branch)) return false;
+    const relaxed = probe + selector.slice(copyFrom, end);
+    return candidates.some((candidate) => candidate.matches(relaxed));
+  };
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) index = literalEnd;
+    else if (character === ',') {
+      if (reaches(index)) return true;
+      branchStart = copyFrom = index + 1;
+      probe = '';
+    } else if (character === ':') {
+      let end = index + (selector[index + 1] === ':' ? 2 : 1);
+      while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+      if (selector[end] === '(') {
+        const close = matchingSelectorParen(selector, end);
+        if (close < 0) return true;
+        end = close + 1;
+      }
+      // Dependency discovery must include currently inactive states, including
+      // position tests nested in a functional pseudo such as :not().
+      probe += selector.slice(copyFrom, index) + ':where(*)';
+      copyFrom = end;
+      index = end - 1;
+    }
+  }
+  return reaches(selector.length);
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -796,6 +835,7 @@ function collectEntryStyleDependencies(
           try {
             const scoped = scopedNegatedEntrySubject(selector);
             const probe = scoped?.probe ?? relaxEntryHasConditions(selector);
+            let foundPositionParent = false;
             // The bounded ancestor fallback skips body and html. A known
             // sibling-position dependency still needs its direct parent.
             if (
@@ -809,8 +849,28 @@ function collectEntryStyleDependencies(
               else for (const candidate of matches) relationalSubjects.add(candidate);
               for (const subject of scoped?.positionSubjects ?? [])
                 for (const candidate of externalSubjects)
-                  if (candidate.parentNode && candidate.matches(subject))
+                  if (candidate.parentNode && candidate.matches(subject)) {
                     positionParents.add(candidate.parentNode);
+                    foundPositionParent = true;
+                  }
+            }
+            if (
+              !foundPositionParent &&
+              entryPositionCondition.test(selector) &&
+              mayReachPositionalEntry(selector, candidates)
+            ) {
+              relational = 1;
+              // The conservative subtree watch already covers ordinary
+              // ancestors. At the document boundary watch only child lists.
+              for (const candidate of externalSubjects) {
+                const parent = candidate.parentNode;
+                if (
+                  parent &&
+                  (parent === target.ownerDocument.body ||
+                    parent === target.ownerDocument.documentElement)
+                )
+                  positionParents.add(parent);
+              }
             }
           } catch {
             // Unknown selector syntax is correctness-sensitive: retain a bounded

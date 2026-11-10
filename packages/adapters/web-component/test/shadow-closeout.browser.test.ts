@@ -2487,18 +2487,31 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: true, bodyPosition: '1' },
     { initialSibling: false, bodyPosition: '2n+1' },
     { initialSibling: true, bodyPosition: '2n+1' },
+    { initialSibling: false, bodyPosition: 'grouped' },
+    { initialSibling: true, bodyPosition: 'grouped' },
+    { initialSibling: false, bodyPosition: 'functional' },
+    { initialSibling: true, bodyPosition: 'functional' },
+    { initialSibling: false, bodyPosition: 'hover' },
+    { initialSibling: true, bodyPosition: 'hover' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
       const page = await browser.newPage();
       const atBody = bodyPosition !== null;
+      const selector =
+        bodyPosition === 'grouped'
+          ? '.positional-entry:not(:has(.flag)):nth-child(2n+1) button, .unrelated'
+          : bodyPosition === 'functional'
+            ? '.positional-entry:not(:has(.flag)):not(:first-child) button'
+            : bodyPosition === 'hover'
+              ? '.positional-entry:not(:has(.flag)):hover:first-child button'
+              : `.positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'} button`;
       try {
         await page.addScriptTag({ content: script });
         await page.addStyleTag({
           content: `
             ${atBody ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
-            .positional-entry${atBody ? `:not(:has(.flag)):nth-child(${bodyPosition})` : ':first-child:not(:has(.flag))'}
-              button { visibility: hidden; }
+            ${selector} { visibility: hidden; }
           `,
         });
         await page.evaluate(
@@ -2545,8 +2558,14 @@ describe('Shadow closeout native boundaries', () => {
                 )
               )
           );
-        const withSibling = { visibility: 'visible', tabIndex: null };
-        const withoutSibling = { visibility: 'hidden', tabIndex: '0' };
+        const visible = { visibility: 'visible', tabIndex: null };
+        const hidden = { visibility: 'hidden', tabIndex: '0' };
+        if (bodyPosition === 'hover') {
+          expect(await snapshot()).toEqual(visible);
+          await page.locator('.positional-entry').hover({ position: { x: 1, y: 1 } });
+        }
+        const withSibling = bodyPosition === 'functional' ? hidden : visible;
+        const withoutSibling = bodyPosition === 'functional' ? visible : hidden;
         expect(await snapshot()).toEqual(initialSibling ? withSibling : withoutSibling);
 
         const toggleSibling = () =>
