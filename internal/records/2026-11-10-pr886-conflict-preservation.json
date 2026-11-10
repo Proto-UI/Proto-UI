@@ -1,0 +1,2593 @@
+{
+  "schemaVersion": 1,
+  "kind": "pr886-source-preservation-audit",
+  "date": "2026-11-10",
+  "issue": 1158,
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "owner": "SolThirty1158Preserve886",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "worktree": "/workspace/worktrees/release03-thirty-issue-1158-sol-20261110",
+  "branch": "fix/release03-thirty-issue-1158-sol-20261110",
+  "auditBaseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "candidateState": "source-and-audit-ready; validation/review/publication/integration not performed",
+  "issueStateAtObservation": "OPEN",
+  "releasePlacement": "Original current discussion defers this historical integration debt to0.4. The current user assigns this bounded audit now; no release-list or lifecycle change is made.",
+  "originalCriteria": [
+    {
+      "id": "issue1158-checklist-1",
+      "parentSourceTopic": "[Finf v2][887-followup][saved-sources]",
+      "originalMachineKey": null,
+      "sourceAnchors": [
+        "https://github.com/Proto-UI/Proto-UI/issues/1158",
+        "https://github.com/Proto-UI/Proto-UI/issues/1093",
+        "https://github.com/Proto-UI/Proto-UI/pull/887"
+      ],
+      "completeOriginalCondition": "合并前完成当前全部 PR 的 source-preservation 核对，保留 #879、#869、#878、#886、#884、#885 的独立修复/功能；本地候选不是已入 main 的结果",
+      "currentIssueCheckbox": "checked by original Issue maintainer; preserved unchanged",
+      "evidence": "Existing2026-10-14 source closure archive refs and six real merge/native-DCO receipts are carried below. This new audit does not re-certify every feature or relabel old evidence as current execution.",
+      "owner": "Historical Finf integration; Main owns current publication/integration",
+      "remaining": "No reversal of the existing checked item. Any new source regression is separately bounded, not inferred from an aggregate count."
+    },
+    {
+      "id": "issue1158-checklist-2",
+      "parentSourceTopic": "[Finf v2][887-followup][saved-sources]",
+      "originalMachineKey": null,
+      "sourceAnchors": [
+        "https://github.com/Proto-UI/Proto-UI/issues/1158#issuecomment-6700038892",
+        "https://github.com/Proto-UI/Proto-UI/issues/1093",
+        "https://github.com/Proto-UI/Proto-UI/pull/887"
+      ],
+      "completeOriginalCondition": "对 #886 的 16 文件 / 75 冲突块逐项核对：保留演进后的 native/runtime/Portal/motion/control-label 行为和实际增量；删除 incidental oracle 不得删除可观察契约 guard",
+      "originalParentClause": "- [ ] 对 #886 的 16 文件 / 75 冲突块逐项核对：保留演进后的 native/runtime/Portal/motion/control-label 行为和实际增量；删除 incidental oracle 不得删除可观察契约 guard。",
+      "currentIssueCheckbox": "unchecked; no external mutation by this worker",
+      "authoredAccounting": "Every one of the authentic16-file75-block markers has an explicit current source-bound behavior/oracle disposition and both original immutable preimages. The10 nonconflicting original companion paths and two intentional storage-only helper deletions are separately accounted.",
+      "owner": "SolThirty1158Preserve886 for audit/review repairs; Main for serial validation/publication/lawful integration",
+      "remaining": "Main executes proportional metadata/consumer/native checks, obtains independent exact-source review and actual current-head platform/DCO admission, publishes the record in a real PR, integrates lawfully and posts its actual per-block receipt. Only then reconcile the original checkbox/Issue closure. No current acceptance is inferred from this uncommitted candidate."
+    }
+  ],
+  "originalKeyPolicy": "The source Issue/parent saved-sources checkboxes provide no machine key; originalMachineKey is null rather than invented. Their full wording/topic/URLs and exact PR887 parent clause are preserved. The two published thread:886:* source keys are preserved literally. New PR886-01..75 IDs identify this audit only.",
+  "sourceRoleRevisions": {
+    "commonBase": "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+    "originalTarget": "b8a8f2856686c3b4306f8aa9c09659acc9e7365c",
+    "originalSource": "caef71a43310d11fdd3f314f8706d62b57071a70",
+    "historicalResolved": "56652309f85038167fc4614333189a48de106458",
+    "integratedSource": "9d64fb08d82e12550285eb8681c9aa182b8f7522",
+    "integratedMerge": "9f360300ff25e69793d6f029470a759bda1298b0",
+    "auditBase": "0607c6c5c386b8a932ab850e92a8873b2121dc45"
+  },
+  "authenticPreimages": {
+    "path": "internal/records/2026-11-10-pr886-conflict-preimages.json",
+    "sha256": "71f70de6c899c97d90b3a0242dea6d7d5cb3a28405e2e67d431476d1feceb7f6",
+    "scope": "Authentic four historical outputs; canonical26-file before/historical/integrated/current Git blob/SHA256 bindings; two deliberate helper-deletion preimages.",
+    "fileCount": 16,
+    "blockCount": 75,
+    "countsByFile": [
+      {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "blocks": 30
+      },
+      {
+        "path": "packages/adapters/web-component/src/portal-mount.ts",
+        "blocks": 1
+      },
+      {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "blocks": 10
+      },
+      {
+        "path": "packages/adapters/web-component/src/runtime/session.ts",
+        "blocks": 2
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "blocks": 2
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "blocks": 4
+      },
+      {
+        "path": "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+        "blocks": 1
+      },
+      {
+        "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "blocks": 2
+      },
+      {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "blocks": 3
+      },
+      {
+        "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+        "blocks": 1
+      },
+      {
+        "path": "packages/compiler/test/fixtures/source-presentation/presentation.css",
+        "blocks": 1
+      },
+      {
+        "path": "packages/runtime/src/instance/session.ts",
+        "blocks": 7
+      },
+      {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "blocks": 4
+      },
+      {
+        "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "blocks": 2
+      },
+      {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "blocks": 2
+      },
+      {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "blocks": 3
+      }
+    ],
+    "newMergeMembershipNotSubstituted": true
+  },
+  "authority": [
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "status": "draft",
+      "anchors": [
+        "I",
+        "J",
+        "K"
+      ],
+      "meaning": "Retain same-checkpoint FIFO, acquired-created exact initiating-value cleanup and current ordinary beforeDispose fail-fast separately."
+    },
+    {
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "status": "draft",
+      "meaning": "CASE-SAME-CHECKPOINT-FIFO and CASE-FAILED-CREATED-TERMINAL-CLEANUP retain I/J identity mapping; metadata is not new execution."
+    },
+    {
+      "path": "spec/host-caps/HC-FOCUS-TARGET-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "meaning": "Actual event-owning target eligibility, releaseable readiness, retained entry intent and request/fact ownership."
+    },
+    {
+      "path": "spec/contracts/C-FEEDBACK-STYLE-0003.yaml",
+      "status": "draft",
+      "anchors": [
+        "C",
+        "D"
+      ],
+      "meaning": "Host token/class/attribute storage is not a semantic equality oracle; observable paint and lifetime remain required."
+    },
+    {
+      "path": "spec/contracts/C-TEMPLATE-0002.yaml",
+      "status": "draft",
+      "anchors": [
+        "A",
+        "C"
+      ],
+      "meaning": "Child structural style is separate from Root ownership."
+    },
+    {
+      "path": "spec/host-caps/HC-OVERLAY-PORTAL-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "A",
+        "BINDING"
+      ],
+      "meaning": "Retain logical identity and generation/lease-bound projection retirement; stale cleanup cannot move a successor."
+    },
+    {
+      "path": "spec/contracts/C-CONTROL-LABEL-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "OWNED-NAME",
+        "ACTIVATION",
+        "LOWERING",
+        "WEB"
+      ],
+      "meaning": "Retain explicit association transport, callback scope, current physical surface and cleanup; no broad native/AT claim."
+    },
+    {
+      "path": "spec/contracts/C-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "E",
+        "H"
+      ],
+      "meaning": "Retain per-view commit/release, final target ownership and stale callback rejection; no source-only motion acceptance."
+    }
+  ],
+  "blocks": [
+    {
+      "id": "PR886-01",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 229,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-01",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep evolved once-only owner/view retirement fields; reconnect stays held until the captured owner finishes.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 231,
+        "anchor": "private _terminalReconnectRequested"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-02",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 399,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-02",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep terminal reconnect coalescing together with explicit refusal of serialized association attributes.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 413,
+        "anchor": "instance-association attributes have no lowering"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-03",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 422,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-03",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep guarded retireOwner on partial initialization while the initiating synchronous failure escapes unchanged.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 422,
+        "anchor": "if (initializing) void this.retireOwner()"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-04",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 4,
+      "historicalConflictLine": 444,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-04",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Use resource-identity-bound split release and the unified owner retirement transaction; an old token must not unlock or release its successor.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 427,
+        "anchor": "private _releaseSplitResources"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-05",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 5,
+      "historicalConflictLine": 492,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-05",
+      "historicalChoice": "empty-textual-marker-no-behavior",
+      "keptBehavior": "Both original sides are empty at this marker. Keep only the surrounding class/method boundary; this block adds no semantic operation.",
+      "removedOracleDisposition": "Empty-versus-empty textual marker; no assertion or behavior exists to remove.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 427,
+        "anchor": "private _releaseSplitResources"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-06",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 6,
+      "historicalConflictLine": 534,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-06",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Create the replacement logical token only after terminal retirement; retain early owner claiming, logical unbinding and native-link projection ownership.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 480,
+        "anchor": "const instanceToken = this._instanceToken"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-07",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 7,
+      "historicalConflictLine": 568,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-07",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep acquired owner cleanup before outward publication, once-only resource release and document/native-link observer retirement.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 497,
+        "anchor": "const releaseOwnerResources ="
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-08",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 8,
+      "historicalConflictLine": 623,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-08",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain clearing the captured style applier even if another owner release fails.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 526,
+        "anchor": "applier?.clear();"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-09",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 9,
+      "historicalConflictLine": 635,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-09",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain split identity checks, Expose reader invalidation, callback-scope retirement and Anatomy release.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 535,
+        "anchor": "scopedExposesReader.invalidate()"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-10",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 10,
+      "historicalConflictLine": 656,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-10",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Use the evolved owner disposer captured before markProtoInstance; retain native-link child transfer and do not duplicate an older terminal state machine.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 545,
+        "anchor": "this._releaseOwnerResources = releaseOwnerResources"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-11",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 11,
+      "historicalConflictLine": 807,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-11",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep per-subscriber MutationObserver ownership and disconnect/removal; do not duplicate registration on merge.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 630,
+        "anchor": "propsObservers.delete(mo)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-12",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 12,
+      "historicalConflictLine": 829,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-12",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Gate Expose publication on current owner lifetime; retain view-scoped current router/event gate and releasable target-ready subscriptions.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 647,
+        "anchor": "let focusIngressReady = false"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-13",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 13,
+      "historicalConflictLine": 862,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-13",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep all current-owner, terminal and event-gate identity checks before enabling focus observation.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 669,
+        "anchor": "currentEventGate !== gate"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-14",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 14,
+      "historicalConflictLine": 875,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-14",
+      "historicalChoice": "original-omission-restored-in-integrated-source",
+      "keptBehavior": "Retain the evolved gate guards AND original completeCleanup snapshot fanout. Parent failure must still attempt captured descendants and preserve the first exact failure.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 674,
+        "anchor": "gate?.enable();"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-15",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 15,
+      "historicalConflictLine": 952,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-15",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain physical native-link mounting before view presentation and current terminal/detach checks.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 566,
+        "anchor": "mountNativeLink();"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-16",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 16,
+      "historicalConflictLine": 989,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-16",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the completed Runtime tail marker used by guarded reconnect; do not unlock during unfinished cleanup.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 777,
+        "anchor": "this._terminalCleanupComplete = true"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-17",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 17,
+      "historicalConflictLine": 999,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-17",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain an explicit initial-attach flag and reject attaching a retired owner; do not recreate a view during teardown.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 783,
+        "anchor": "const attachView = (initial = false)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-18",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 18,
+      "historicalConflictLine": 1011,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-18",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain early acquired final-style lease capture, once-only release before invoking user cleanup, event/router/split child teardown and readiness invalidation after old view removal.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 796,
+        "anchor": "const releaseFinalStyleSink ="
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-19",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 19,
+      "historicalConflictLine": 1161,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-19",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the evolved split effects, physical text/native-link focus bridge, deferred readiness publication, visual sink transaction and current owner checks; do not restore the older reduced capability set.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 961,
+        "anchor": "resources.nativeReadiness = registerNativeFocusReadiness"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-20",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 20,
+      "historicalConflictLine": 1405,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-20",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep Feedback surface projection and the captured logical instance passed into the current module realization.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1077,
+        "anchor": "feedbackSurfaceProjection: this._surfaceProjection"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-21",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 21,
+      "historicalConflictLine": 1444,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-21",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep retained entry-target readiness, released pending subscriptions, bounded retry generation and acquisition cancellation on current policy changes.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1117,
+        "anchor": "isEntryAcquisitionReady: (target)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-22",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 22,
+      "historicalConflictLine": 1523,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-22",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Reject stale layout retry callbacks after view disposal, owner retirement or intent generation replacement.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1171,
+        "anchor": "generation !== focusRetryGeneration"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-23",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 23,
+      "historicalConflictLine": 1545,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-23",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Commit visual feedback only after the acquisition transaction succeeds; retain the exact acquisition failure and rollback resources.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1192,
+        "anchor": "if (acquisitionFailed) throw acquisitionError"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-24",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 24,
+      "historicalConflictLine": 1573,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-24",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Publish native readiness through the acquired current-view registration after attachment, rather than an unowned optional notifier.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1215,
+        "anchor": "resources.nativeReadiness!.publish()"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-25",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 25,
+      "historicalConflictLine": 1585,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-25",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep view detach guarded by current owner lifetime; an old detach must not act on a replacement owner.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1222,
+        "anchor": "const reconcileIntent ="
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-26",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 26,
+      "historicalConflictLine": 1607,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-26",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep current owner and terminal checks in asynchronous presence/cleanup continuation.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 643,
+        "anchor": "ownerResourcesReleased ||"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-27",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 27,
+      "historicalConflictLine": 1625,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-27",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep current owner and terminal checks before later reconnect/presentation continuation.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 385,
+        "anchor": "this._terminalDisposing ||"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-28",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 28,
+      "historicalConflictLine": 1672,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-28",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain initialPresent attachView(true); subsequent view epochs follow the ordinary attach path.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1299,
+        "anchor": "if (initialPresent) attachView(true)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-29",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 29,
+      "historicalConflictLine": 1706,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-29",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep captured listener snapshot fanout with an explicit failed flag, so undefined/false throws remain failures and all captured listeners run.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1331,
+        "anchor": "Array.from(this._focusTargetReadyListeners)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-30",
+      "path": "packages/adapters/web-component/src/adapt.ts",
+      "blockNumber": 30,
+      "historicalConflictLine": 1749,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-30",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain unified retireOwner: retire captured Portal/logical/view resources before awaiting the Runtime tail, attempt all private releases, preserve first failure and only then release/reconnect the current owner.",
+      "removedOracleDisposition": "No observable oracle is removed; this is production lifetime/resource composition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 1378,
+        "anchor": "private async retireOwner()"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-31",
+      "path": "packages/adapters/web-component/src/portal-mount.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 193,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-31",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep logical-parent revocation and marker cleanup while an identity/epoch check prevents restoration over a reentrant replacement Portal. Terminal abandonment remains distinct from projection undo.",
+      "removedOracleDisposition": "No oracle removed; keep stale-cleanup and reparent ownership guards.",
+      "authority": [
+        "HC-OVERLAY-PORTAL-0001-A",
+        "HC-OVERLAY-PORTAL-0001-BINDING"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/portal-mount.ts",
+        "gitBlob": "45516d96694d94b13eb30f43f7f69156be932488",
+        "fileSha256": "6a5c0599b0f5c168d7f2cc9158a325b3c8b3eb60c4a1dfcce012d4d01b4ebc22",
+        "line": 320,
+        "anchor": "const restore = (restoreToOrigin = true)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-32",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 28,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-32",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Use one shared Focus helper import group; retain actual current-target resolution, native active-element observation and document order.",
+      "removedOracleDisposition": "Import deduplication only; no target-eligibility check is deleted.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-A",
+        "HC-FOCUS-TARGET-0001-B"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 17,
+        "anchor": "isWebFocusTargetActive"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-33",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 94,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-33",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the explicit FocusRequestKind type required by the three-argument privileged request boundary.",
+      "removedOracleDisposition": "No oracle or request-kind guard removed.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 88,
+        "anchor": "type FocusRequestKind"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-34",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 176,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-34",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain both readiness subscription and native-target readiness helpers once; import ordering has no lifetime meaning.",
+      "removedOracleDisposition": "No oracle removed; shared readiness subscriptions remain releasable.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 168,
+        "anchor": "subscribeFocusSurfaceReady"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-35",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 4,
+      "historicalConflictLine": 959,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-35",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep ControlLabel host and callback-scope capabilities plus the current physical surface getter/subscription; do not regress to a wiring function without label participation.",
+      "removedOracleDisposition": "No oracle removed; explicit association and target callback ownership remain.",
+      "authority": [
+        "C-CONTROL-LABEL-0001-LOWERING",
+        "C-CONTROL-LABEL-0001-WEB"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1055,
+        "anchor": "function createControlWiring"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-36",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 5,
+      "historicalConflictLine": 984,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-36",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep native-link host and callback capability wiring and its real native target.",
+      "removedOracleDisposition": "No oracle removed; native-link realization is an evolved target addition.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-A",
+        "HC-FOCUS-TARGET-0001-B"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1078,
+        "anchor": ".use('native-link'"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-37",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 6,
+      "historicalConflictLine": 1110,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-37",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep owner-level Presence sink/surface/view state and the ControlLabel surface forwarded to shared control wiring.",
+      "removedOracleDisposition": "No oracle removed; per-view Presence ownership is preserved.",
+      "authority": [
+        "C-FEEDBACK-RESIDENT-MOTION-0001-E",
+        "C-CONTROL-LABEL-0001-WEB"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1204,
+        "anchor": "let presenceSink: PresencePresentationSink"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-38",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 7,
+      "historicalConflictLine": 1201,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-38",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep all four focus intent/acquisition/pending-release callbacks; reorder types without changing their ownership or signatures.",
+      "removedOracleDisposition": "No oracle removed.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1306,
+        "anchor": "onFocusPendingReleased?:"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-39",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 8,
+      "historicalConflictLine": 1238,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-39",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep native-link-aware physical Trigger resolution and the separately retained focus request state; do not replace the resolver with only a request variable.",
+      "removedOracleDisposition": "No oracle removed; actual current surface remains the admission target.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-A",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1334,
+        "anchor": "const getPhysicalTriggerSurface"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-40",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 9,
+      "historicalConflictLine": 1343,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-40",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep view-level Presence sink ownership and both current/replacement ControlLabel surface notifications; keep resident motion/visual/final-style wiring adjacent to that view.",
+      "removedOracleDisposition": "No oracle removed; commit/release belongs to the current physical view.",
+      "authority": [
+        "C-FEEDBACK-RESIDENT-MOTION-0001-E",
+        "C-FEEDBACK-RESIDENT-MOTION-0001-H",
+        "C-CONTROL-LABEL-0001-OWNED-NAME"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 1061,
+        "anchor": "subscribeControlLabelSurface"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-41",
+      "path": "packages/adapters/web-component/src/runtime/modules.ts",
+      "blockNumber": 10,
+      "historicalConflictLine": 2109,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-41",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep deepest actual focus observation and recheck the still-current intent after synchronous native focus reentry before success/retry accounting.",
+      "removedOracleDisposition": "Comment clarification only; no focus fact synthesized and no retry ownership guard removed.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-B",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/modules.ts",
+        "gitBlob": "2c6ab268e13f1772262e40e4108039fb568a7ff2",
+        "fileSha256": "445a723412f1af5693344248abc096857258ab75bf5fe5a4c623cbe382c9c0df",
+        "line": 2232,
+        "anchor": "const applied = isWebFocusTargetActive(target)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-42",
+      "path": "packages/adapters/web-component/src/runtime/session.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 24,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-42",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the evolved Shadow physical-view owner/profile argument surface; avoid restoring the obsolete extra shadowViewTarget member into the host-session shape.",
+      "removedOracleDisposition": "Type-shape deduplication; the actual physical commit target and view provider are retained in current owner/session wiring.",
+      "authority": [
+        "C-TEMPLATE-0002-A",
+        "C-LIFECYCLE-0002-G"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/session.ts",
+        "gitBlob": "df139b5b6794645212d0a411f72d40788c810331",
+        "fileSha256": "499a41b18e1dadcc6033b2e3fdeea86a84383d5c96e7a885b30a94abfc289246",
+        "line": 15,
+        "anchor": "createWebComponentHostSession"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-43",
+      "path": "packages/adapters/web-component/src/runtime/session.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 121,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-43",
+      "historicalChoice": "empty-textual-marker-no-behavior",
+      "keptBehavior": "Both original sides are empty at this marker. Keep the surrounding WC host-session boundary with no extra statement.",
+      "removedOracleDisposition": "Empty-versus-empty textual marker; no oracle or behavior removed.",
+      "authority": [
+        "C-LIFECYCLE-0002-G"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/runtime/session.ts",
+        "gitBlob": "df139b5b6794645212d0a411f72d40788c810331",
+        "fileSha256": "499a41b18e1dadcc6033b2e3fdeea86a84383d5c96e7a885b30a94abfc289246",
+        "line": 15,
+        "anchor": "createWebComponentHostSession"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-44",
+      "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 81,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-44",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the observable projected physical parent AND the original own parentNode descriptor after terminal Portal retirement.",
+      "removedOracleDisposition": "Retain both assertions; physical parent identity here proves lease ownership rather than pinning a style carrier.",
+      "authority": [
+        "HC-OVERLAY-PORTAL-0001-BINDING"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "gitBlob": "7516adbba943fead7e5d981b2e2140e6b67f6701",
+        "fileSha256": "313e0daccb49fc311395801a75bd5f5c72159272c38e40fc4c584d25a80785df",
+        "line": 76,
+        "anchor": "expectedDescriptor"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-45",
+      "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 127,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-45",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the physical projection parent and replacement logical parent after reentrant retirement.",
+      "removedOracleDisposition": "Retain both assertions; stale cleanup must not undo a newer logical owner.",
+      "authority": [
+        "HC-OVERLAY-PORTAL-0001-A",
+        "HC-OVERLAY-PORTAL-0001-BINDING"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "gitBlob": "7516adbba943fead7e5d981b2e2140e6b67f6701",
+        "fileSha256": "313e0daccb49fc311395801a75bd5f5c72159272c38e40fc4c584d25a80785df",
+        "line": 109,
+        "anchor": "newParent._instanceToken"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-46",
+      "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 81,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-46",
+      "historicalChoice": "original-omission-restored-in-integrated-source",
+      "keptBehavior": "Keep both original forced-visible ordinary-button and evolved hidden-owner/held-fallback fixtures; their premises are distinct, not substituted.",
+      "removedOracleDisposition": "Original omission is repaired in integratedSource9d64fb08; preserve four original completion policies beside five evolved policies.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "gitBlob": "6df40189224410bc2e516b89df88074c109b68ff",
+        "fileSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "line": 190,
+        "anchor": "re-resolves a forced-visible ordinary descendant owner"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-47",
+      "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 146,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-47",
+      "historicalChoice": "original-omission-restored-in-integrated-source",
+      "keptBehavior": "Retain original physical active/focused/fallback/visible/connected observations during unmount, and keep evolved fallback-readiness withholding for cancellation.",
+      "removedOracleDisposition": "No observable assertion removed; typed duplicate fixture identities distinguish the two premises.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-C",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "gitBlob": "6df40189224410bc2e516b89df88074c109b68ff",
+        "fileSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "line": 248,
+        "anchor": "ownerVisible: getComputedStyle(inner).display"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-48",
+      "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 194,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-48",
+      "historicalChoice": "original-omission-restored-in-integrated-source",
+      "keptBehavior": "Retain the connected-and-visible but observation-unready negative state, ordinary target disconnection and explicit empty-request cancellation; keep evolved pending-apply release.",
+      "removedOracleDisposition": "No oracle removed; neither premise can be called equivalent from source alone.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "gitBlob": "6df40189224410bc2e516b89df88074c109b68ff",
+        "fileSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "line": 293,
+        "anchor": "expect(ordinary.isConnected).toBe(false)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-49",
+      "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+      "blockNumber": 4,
+      "historicalConflictLine": 220,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-49",
+      "historicalChoice": "original-omission-restored-in-integrated-source",
+      "keptBehavior": "Retain original ordinary-button target vs fallback outcomes for apply/disable/blur/empty and evolved self/fallback outcomes including pending-apply.",
+      "removedOracleDisposition": "No oracle removed; both physical focus and semantic focused facts remain checked independently.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-B",
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "gitBlob": "6df40189224410bc2e516b89df88074c109b68ff",
+        "fileSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "line": 302,
+        "anchor": "completion === 'empty' ? inner.querySelector('button')"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-50",
+      "path": "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 293,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-50",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep revocation after actual view completion, including conceal/origin-observer delivery; a microtask count is not a terminal lifetime proof.",
+      "removedOracleDisposition": "Comment refinement only; the existing completion/terminal assertions remain.",
+      "authority": [
+        "C-LIFECYCLE-0002-G",
+        "HC-OVERLAY-PORTAL-0001-A"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+        "gitBlob": "2f05e9e279bf6ea7009e5a65e1641987bc03ec96",
+        "fileSha256": "6e15209e0401423c72ed1f9b01732084be522e0167ef45cc7d9d7b20bd4682c1",
+        "line": 293,
+        "anchor": "Revocation follows actual view completion"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-51",
+      "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 53,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-51",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Use a title describing Root projection separately from authored child style across undefined/false/true Shadow profiles.",
+      "removedOracleDisposition": "Title-only resolution; retain Root compatibility and unsupported/refusal coverage.",
+      "authority": [
+        "C-TEMPLATE-0002-C",
+        "C-FEEDBACK-STYLE-0003-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "gitBlob": "c03bd8694d9d6ada2385a1d60b137e19be449221",
+        "fileSha256": "6c5f228e04a90e6c03bf2074973936bc6dba73bcbe73523a68bb3e6f060877a6",
+        "line": 53,
+        "anchor": "Root projection separate from authored child style"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-52",
+      "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 75,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-52",
+      "historicalChoice": "remove-only-incidental-storage-oracle-retain-host-evidence-limit",
+      "keptBehavior": "Remove only child carrier/attribute/private storage assertions; retain Root delivery compatibility and native computed child paint/layout/containment/input/AX/lifetime guards in their actual finite consumer.",
+      "removedOracleDisposition": "Removed incidental oracle: exact data-pui-style/class/private attributes/inline-storage shape. Finite React computed-style evidence does not certify automatic WC child style painting; the original WC evidence limit remains explicit.",
+      "authority": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-FEEDBACK-STYLE-0003-D",
+        "C-TEMPLATE-0002-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "gitBlob": "c03bd8694d9d6ada2385a1d60b137e19be449221",
+        "fileSha256": "6c5f228e04a90e6c03bf2074973936bc6dba73bcbe73523a68bb3e6f060877a6",
+        "line": 53,
+        "anchor": "Root projection separate from authored child style"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-53",
+      "path": "packages/compiler/test/browser-source-presentation.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 324,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-53",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Describe ordinary child computed style/layout as the semantic oracle, independent of private carrier choice.",
+      "removedOracleDisposition": "Remove carrier naming as semantic acceptance; keep diagnostic source/manifest records.",
+      "authority": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-TEMPLATE-0002-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "gitBlob": "981a109dc8a0358aa9e993433faa1f8662d49e3f",
+        "fileSha256": "cdeec0200cce086e2938ad7d6e5e060f935c847e92ea9107a639bf06582391c4",
+        "line": 323,
+        "anchor": "ordinary child computed style and layout"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-54",
+      "path": "packages/compiler/test/browser-source-presentation.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 442,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-54",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Do not require a literal childTokens array in expected semantic observations; retain computed yellow child paint,8px padding,containment and hit ownership.",
+      "removedOracleDisposition": "Removed incidental token-array equality only; computed geometry/paint/input remain required.",
+      "authority": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-FEEDBACK-STYLE-0003-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "gitBlob": "981a109dc8a0358aa9e993433faa1f8662d49e3f",
+        "fileSha256": "cdeec0200cce086e2938ad7d6e5e060f935c847e92ea9107a639bf06582391c4",
+        "line": 430,
+        "anchor": "childBackground: 'rgb(234, 179, 8)'"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-55",
+      "path": "packages/compiler/test/browser-source-presentation.test.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 614,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-55",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Keep parity over semantic observations and independent native reference/runtime/source runs; retain the duplicate-activation mutant at Space keydown.",
+      "removedOracleDisposition": "Drop carrier/class/storage fields from parity, never activation counts,handles,view lifetime,AX,computed paint or geometry.",
+      "authority": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-FEEDBACK-STYLE-0003-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "gitBlob": "981a109dc8a0358aa9e993433faa1f8662d49e3f",
+        "fileSha256": "cdeec0200cce086e2938ad7d6e5e060f935c847e92ea9107a639bf06582391c4",
+        "line": 592,
+        "anchor": "function semantic(trace"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-56",
+      "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 144,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-56",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Read child computed paint/layout for the consumer and stop exporting carrier/token/class projection details as the semantic contract.",
+      "removedOracleDisposition": "Remove only private storage observations; the native runner still measures actual computed child outputs.",
+      "authority": [
+        "C-TEMPLATE-0002-C",
+        "C-FEEDBACK-STYLE-0003-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+        "gitBlob": "d6d929702eed546fa90a1baad4276582ebcf194e",
+        "fileSha256": "5e45d7d1f00233806319e4c64acdabc678f0cfe3d2673f588d9cdc665c1c2b51",
+        "line": 148,
+        "anchor": "childBackground:"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-57",
+      "path": "packages/compiler/test/fixtures/source-presentation/presentation.css",
+      "blockNumber": 1,
+      "historicalConflictLine": 2,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-57",
+      "historicalChoice": "retain-observables-remove-incidental-storage-oracle",
+      "keptBehavior": "Keep fixture CSS that renders accepted finite child styles with ordinary class or data-pui-style selectors; do not mandate either carrier in parity.",
+      "removedOracleDisposition": "Comment/source-bound finite CSS fixture; neither automatic WC style projection nor arbitrary token support is inferred.",
+      "authority": [
+        "C-FEEDBACK-STYLE-0003-D",
+        "C-TEMPLATE-0002-C"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/compiler/test/fixtures/source-presentation/presentation.css",
+        "gitBlob": "bd0f1064c247f5143e55924abf7c0da71536f660",
+        "fileSha256": "1cb0db2c147814165ecf7e0b9211457040cb5930a82143f652c40738417731e4",
+        "line": 2,
+        "anchor": "ordinary child styles may use class"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-58",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 472,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-58",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep the injected failure recorder shared by ordinary disposal/cleanup; do not replace newer aggregation with the old local first-error return shape.",
+      "removedOracleDisposition": "No oracle removed; created-value identity and normal disposal error visibility stay distinct.",
+      "authority": [
+        "C-LIFECYCLE-0002-J",
+        "C-LIFECYCLE-0002-K"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 501,
+        "anchor": "const beginDispose = (recordFailure"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-59",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 489,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-59",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep private acquired cleanup, preparation-failure handling and the failed-created mode; the authored initiating failure holder must remain separate from secondary cleanup errors.",
+      "removedOracleDisposition": "No oracle removed; do not restore a shape that loses later acquired cleanup.",
+      "authority": [
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 508,
+        "anchor": "const finalizeDispose = ("
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-60",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 524,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-60",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain exhaustive beforeDispose callbacks only for failed creation; current ordinary disposal stops authored callbacks after the first failure and still retires private resources.",
+      "removedOracleDisposition": "Original thread4237011671 remains historical. Current draft criterion K/code is later bounded evolution, not a claim that the old reviewed head passed.",
+      "authority": [
+        "C-LIFECYCLE-0002-J",
+        "C-LIFECYCLE-0002-K"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 524,
+        "anchor": "if (completeFailedCreation)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-61",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 4,
+      "historicalConflictLine": 562,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-61",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep secondary cleanup errors observable through the caller recorder without replacing an authored created failure; do not revert to an unrelated local return value.",
+      "removedOracleDisposition": "No oracle removed; preserve the separation of authored failure and transport/association failure.",
+      "authority": [
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 556,
+        "anchor": "for (const terminalError of terminalErrors)"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-62",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 5,
+      "historicalConflictLine": 594,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-62",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep synchronous invalidation when detached, asynchronous completion after host unmount and existing ordinary private-error aggregation/rejection.",
+      "removedOracleDisposition": "No oracle removed; a disposal Promise is not success until its actual rejection/completion is observed.",
+      "authority": [
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-K"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 585,
+        "anchor": "const finalized = mountPhase === 'detached'"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-63",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 6,
+      "historicalConflictLine": 646,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-63",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain ControlLabel and A11y prepareViewPresence plus initial InstanceAssociations application before created callbacks.",
+      "removedOracleDisposition": "No oracle removed; raw Props must not become an association transport.",
+      "authority": [
+        "C-CONTROL-LABEL-0001-LOWERING",
+        "C-CONTROL-LABEL-0001-OWNED-NAME"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 616,
+        "anchor": "applyInstanceAssociations(host.getInstanceAssociations?.())"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-64",
+      "path": "packages/runtime/src/instance/session.ts",
+      "blockNumber": 7,
+      "historicalConflictLine": 662,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-64",
+      "historicalChoice": "retain-source884-authored-created-identity-correction-after-original-merge-stage",
+      "keptBehavior": "Retain exact authored created failure, including falsy values, after all reachable acquired cleanup; keep separate association/transport cleanup aggregation.",
+      "removedOracleDisposition": "Historical pre-884 AggregateError wrapping was an inherited repair stage; integrated/current code and tests retain the authored-value identity correction.",
+      "authority": [
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/src/instance/session.ts",
+        "gitBlob": "b2a3933959d3ef4f0084bed9066dc9eddedeedba",
+        "fileSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+        "line": 634,
+        "anchor": "if (createdFailure) throw createdFailure.value"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-65",
+      "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 1091,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-65",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep sampled descendant entry acquisition without synthesizing requester focus facts; use the evolved ownership-focused test.",
+      "removedOracleDisposition": "Title evolution only; actual sample focus and fact ownership assertions remain.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "gitBlob": "ac4eed0a6073a8e2a20d827285e556a03bc1f86d",
+        "fileSha256": "878517e29f5a19ec73cd716a838553503cd95b45aee5e413750cc9d9d0fd288d",
+        "line": 1091,
+        "anchor": "delegates entry request ownership"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-66",
+      "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 1104,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-66",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Keep a distinct test Prototype registration identity for sampled entry-kind evidence.",
+      "removedOracleDisposition": "Fixture-name change only; no product behavior or condition is removed.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "gitBlob": "ac4eed0a6073a8e2a20d827285e556a03bc1f86d",
+        "fileSha256": "878517e29f5a19ec73cd716a838553503cd95b45aee5e413750cc9d9d0fd288d",
+        "line": 1101,
+        "anchor": "x-focus-sampled-entry-kind"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-67",
+      "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+      "blockNumber": 3,
+      "historicalConflictLine": 1138,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-67",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Require kind entry for sampled traversal, rather than accepting every request except root-limited native; retain actual descendant acquisition.",
+      "removedOracleDisposition": "The entry-kind negative guard is stronger than the permissive former stub. It does not prove all rejected readiness replay cases.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "gitBlob": "ac4eed0a6073a8e2a20d827285e556a03bc1f86d",
+        "fileSha256": "878517e29f5a19ec73cd716a838553503cd95b45aee5e413750cc9d9d0fd288d",
+        "line": 1132,
+        "anchor": "if (kind !== 'entry') return false"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-68",
+      "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+      "blockNumber": 4,
+      "historicalConflictLine": 1157,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-68",
+      "historicalChoice": "retain-evolved-target-with-source-intent",
+      "keptBehavior": "Retain exact observed request-kind sequence [entry] and the independent target-focused/requester-unfocused assertions.",
+      "removedOracleDisposition": "Observable privileged-boundary guard is retained, not discarded as incidental implementation detail.",
+      "authority": [
+        "HC-FOCUS-TARGET-0001-D"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "gitBlob": "ac4eed0a6073a8e2a20d827285e556a03bc1f86d",
+        "fileSha256": "878517e29f5a19ec73cd716a838553503cd95b45aee5e413750cc9d9d0fd288d",
+        "line": 1146,
+        "anchor": "expect(kinds).toEqual(['entry'])"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-69",
+      "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+      "blockNumber": 1,
+      "historicalConflictLine": 141,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-69",
+      "historicalChoice": "retain-source884-authored-created-identity-correction-after-original-merge-stage",
+      "keptBehavior": "Keep the identical authored createdFailure assertion instead of requiring inherited AggregateError storage; cleanup must still clear resources/handles.",
+      "removedOracleDisposition": "Remove only the obsolete aggregate representation expectation for authored created failure; do not remove cleanup outcomes.",
+      "authority": [
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "gitBlob": "004826f639ad52b6430f019a18161b36ad31ffe7",
+        "fileSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+        "line": 224,
+        "anchor": "preserves the created failure through Props"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-70",
+      "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+      "blockNumber": 2,
+      "historicalConflictLine": 156,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-70",
+      "historicalChoice": "retain-source884-authored-created-identity-correction-after-original-merge-stage",
+      "keptBehavior": "Keep falsy cleanup and initial-association rejection cases; current authored-created cases demand initiating-value identity and association failures retain their own transport boundary.",
+      "removedOracleDisposition": "Retain semantic negative cases, including forged reference/throwing getter. Update the earlier aggregate-shape oracle to current criterion J.",
+      "authority": [
+        "C-LIFECYCLE-0002-J",
+        "C-CONTROL-LABEL-0001-LOWERING"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "gitBlob": "004826f639ad52b6430f019a18161b36ad31ffe7",
+        "fileSha256": "f816a06f02b2ff935de2a852ed7dbada6f3eb6f7b370316af5d4a07e1ddabfe0",
+        "line": 362,
+        "anchor": "releases setup resources when initial associations fail"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-71",
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "blockNumber": 1,
+      "historicalConflictLine": 51,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-71",
+      "historicalChoice": "retain-distinct-current-criterion-identities-and-case-mappings",
+      "keptBehavior": "Keep same-checkpoint FIFO at criterion I and failed-created exact-value cleanup at criterion J; do not overwrite a pre-existing criterion identity.",
+      "removedOracleDisposition": "No test/oracle removed; distinct governance subjects stay separately addressable and draft.",
+      "authority": [
+        "C-LIFECYCLE-0002-I",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "gitBlob": "7ab6da8317f2037ff8dae183a13b4b12cf8d2868",
+        "fileSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "line": 53,
+        "anchor": "id: C-LIFECYCLE-0002-J"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-72",
+      "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "blockNumber": 2,
+      "historicalConflictLine": 109,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-72",
+      "historicalChoice": "retain-distinct-current-criterion-identities-and-case-mappings",
+      "keptBehavior": "Keep both FIFO and failed-created revision entries with the explicit criterion-J explanation; preserve subsequent K evolution without backdating stable admission.",
+      "removedOracleDisposition": "No oracle removed; original criterion-I spelling is historical source, not the current meaning.",
+      "authority": [
+        "C-LIFECYCLE-0002-I",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "gitBlob": "7ab6da8317f2037ff8dae183a13b4b12cf8d2868",
+        "fileSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "line": 112,
+        "anchor": "Defined same-checkpoint authored registration order"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-73",
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "blockNumber": 1,
+      "historicalConflictLine": 54,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-73",
+      "historicalChoice": "retain-distinct-current-criterion-identities-and-case-mappings",
+      "keptBehavior": "Keep CASE-SAME-CHECKPOINT-FIFO and its direct/hook/once composition mapping in addition to failed-created cleanup.",
+      "removedOracleDisposition": "No case removed; once-hook deduplication and two view epochs remain separate obligations.",
+      "authority": [
+        "C-LIFECYCLE-0002-I"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "gitBlob": "1956b1f24cf1fa1d337f64ea311b849cf05e754a",
+        "fileSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "line": 54,
+        "anchor": "id: T-LIFECYCLE-0001-CASE-SAME-CHECKPOINT-FIFO"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-74",
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "blockNumber": 2,
+      "historicalConflictLine": 68,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-74",
+      "historicalChoice": "retain-distinct-current-criterion-identities-and-case-mappings",
+      "keptBehavior": "Map CASE-FAILED-CREATED-TERMINAL-CLEANUP to current criterion J instead of conflicting with FIFO criterion I.",
+      "removedOracleDisposition": "Identity remap only; preserve the complete initiating-value/Delay/handle cleanup expectation.",
+      "authority": [
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "gitBlob": "1956b1f24cf1fa1d337f64ea311b849cf05e754a",
+        "fileSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "line": 61,
+        "anchor": "id: T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    },
+    {
+      "id": "PR886-75",
+      "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+      "blockNumber": 3,
+      "historicalConflictLine": 176,
+      "preimageReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#PR886-75",
+      "historicalChoice": "retain-distinct-current-criterion-identities-and-case-mappings",
+      "keptBehavior": "Retain explicit Test verifies anchor J alongside I and later K; current catalog mapping is not fresh execution evidence.",
+      "removedOracleDisposition": "No oracle removed; both governance subjects retain distinct executable mappings.",
+      "authority": [
+        "C-LIFECYCLE-0002-I",
+        "C-LIFECYCLE-0002-J"
+      ],
+      "authorityLifecycle": "draft; no activation is claimed",
+      "currentEvidence": {
+        "path": "spec/tests/T-LIFECYCLE-0001.yaml",
+        "gitBlob": "1956b1f24cf1fa1d337f64ea311b849cf05e754a",
+        "fileSha256": "a86bb955073205081e855660658317340fb6b4ca92f3f70ecf36e279f61ee03d",
+        "line": 65,
+        "anchor": "- C-LIFECYCLE-0002-J"
+      },
+      "reviewBoundary": "Source inspection only. Consumer/native execution and independent review remain Main-owned.",
+      "currentDisposition": "explicit-source-decision-prepared; not executed acceptance"
+    }
+  ],
+  "nonconflictingOriginalCompanions": [
+    {
+      "path": "internal/contracts/lifecycle/component-lifecycle.v0.md",
+      "decision": "Retain readable acquired-created rule, ordinary callback boundary and current I/J/K mapping; no lifecycle promotion.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:internal/contracts/lifecycle/component-lifecycle.v0.md",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/base/test/fixtures/focus-intent-native.ts",
+      "decision": "Retain actual native target/focus facts and supported Shadow/entry scopes; no full Adapter parity claim.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/base/test/fixtures/focus-intent-native.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/web-component/src/shadow-inner-surface.ts",
+      "decision": "Retain physical Shadow owner commit and live child-list behavior; logical ownership is not replaced by scraper/DOM ancestry.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/web-component/src/shadow-inner-surface.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts",
+      "decision": "Retain target eligibility, accessibility projection and unsupported/refusal assertions.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/web-component/test/fixtures/shadow-split-runtime.ts",
+      "decision": "Retain original source/native consumer fixture and profile-specific resource boundaries.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/web-component/test/fixtures/shadow-split-runtime.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/web-component/test/focus-entry-observer.test.ts",
+      "decision": "Retain actual current entry resolution and releasable observer readiness, including replacement/late targets.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/web-component/test/focus-entry-observer.test.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+      "decision": "Retain explicit unsupported companion refusal; no arbitrary Mask/palette/style support is inferred.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/modules/feedback/src/create.ts",
+      "decision": "Retain acquired final-style/Presence/Resident Motion commit/release ownership; current semantics are independent of private host storage.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/modules/feedback/src/create.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/modules/focus/src/create.ts",
+      "decision": "Retain entry-kind/request-vs-fact ownership and current-policy pending readiness; original thread4237011673 remains separately source-bound and is not retroactively passed.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/modules/focus/src/create.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    },
+    {
+      "path": "packages/runtime/src/instance/execute/callback-scope.ts",
+      "decision": "Retain source-equivalent callback scope, Props preparation and cleanup behavior; authored created failure remains primary.",
+      "bindingReference": "internal/records/2026-11-10-pr886-conflict-preimages.json#file:packages/runtime/src/instance/execute/callback-scope.ts",
+      "status": "source-bound-companion-accounted; execution-not-run"
+    }
+  ],
+  "intentionalRemovedHelpers": [
+    {
+      "path": "packages/compiler/test/source-presentation-projection.ts",
+      "preimageRevision": "b8a8f2856686c3b4306f8aa9c09659acc9e7365c",
+      "gitBlob": "047aeecbe3c0caca0c9d47395b331796b332210b",
+      "sha256": "5b9049a968ccbe0457b3d69ed606579906ccd46ca4a2c28215d8fed55717d5dc",
+      "bytes": 727,
+      "disposition": "Intentional deletion of storage-only projection helper/test; no production compiler source changed by this candidate. Browser computed paint/layout/AX/input/lifetime and duplicate-activation controls remain.",
+      "governingCriteria": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-FEEDBACK-STYLE-0003-D",
+        "C-TEMPLATE-0002-C"
+      ]
+    },
+    {
+      "path": "packages/compiler/test/source-presentation-projection.test.ts",
+      "preimageRevision": "b8a8f2856686c3b4306f8aa9c09659acc9e7365c",
+      "gitBlob": "ae87a14b9bfef4a963f72f75ec3fa9a9f3bad9d6",
+      "sha256": "bb264e4ac7b29b9693ab7d3a5b47d7f4063f2748c7ce9ca88fdc203f6ab55f31",
+      "bytes": 4471,
+      "disposition": "Intentional deletion of storage-only projection helper/test; no production compiler source changed by this candidate. Browser computed paint/layout/AX/input/lifetime and duplicate-activation controls remain.",
+      "governingCriteria": [
+        "C-FEEDBACK-STYLE-0003-C",
+        "C-FEEDBACK-STYLE-0003-D",
+        "C-TEMPLATE-0002-C"
+      ]
+    }
+  ],
+  "historicalIntegrationOmissions": [
+    {
+      "blockIds": [
+        "PR886-14"
+      ],
+      "originalLoss": "An earlier parent readiness listener failure could skip descendant notifications despite completeCleanup within the individual listener list.",
+      "historicalCorrection": "IntegratedSource9d64fb08 restores snapshot completeCleanup fanout after the evolved current-gate enable/owner guards.",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "gitBlob": "528b084121c92805b1b213e67cf050007923b493",
+        "fileSha256": "572487b25312d80826988effdd99a5984052bbb2fd88bfbf42f52c035c927273",
+        "line": 674,
+        "anchor": "gate?.enable();"
+      },
+      "newProductionEdit": "none; preserve current implementation"
+    },
+    {
+      "blockIds": [
+        "PR886-46",
+        "PR886-47",
+        "PR886-48",
+        "PR886-49"
+      ],
+      "originalLoss": "The evolved hidden-owner fixture displaced the original forced-visible ordinary-button/disabled-logical-owner premise and its four-policy observable guards.",
+      "historicalCorrection": "IntegratedSource9d64fb08 carries both premises, with only distinct fixture registrations/titles and precise consumer types.",
+      "currentEvidence": {
+        "path": "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "gitBlob": "6df40189224410bc2e516b89df88074c109b68ff",
+        "fileSha256": "c2d198eaaf48e4b5caf257a49c577a9cdf833a5fb564bff0d71dd9cb97766be7",
+        "line": 190,
+        "anchor": "re-resolves a forced-visible ordinary descendant owner"
+      },
+      "newProductionEdit": "none; preserve both current fixtures"
+    }
+  ],
+  "retainedOriginalReviewSourceKeys": [
+    {
+      "key": "thread:886:4237011671",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/pull/886#discussion_r4237011671",
+      "sourceHead": "caef71a43310d11fdd3f314f8706d62b57071a70",
+      "path": "packages/runtime/src/instance/session.ts",
+      "completeOriginalBody": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep normal beforeDispose callbacks fail-fast**\n\nWhen a normal `session.dispose()` has multiple `beforeDispose` callbacks and an earlier callback throws, this per-callback `attemptCleanup` now invokes every later callback before rejecting. Previously the loop stopped at the first failure, and the new `C-LIFECYCLE-0002-I` behavior only authorizes completing all callbacks for failed creation; the catalog explicitly leaves continuation after other lifecycle callback failures unresolved. Apply per-callback recovery only when `completeFailedCreation` is true so ordinary disposal does not silently acquire new callback-continuation semantics.\n\nAGENTS.md reference: [AGENTS.md:L80-L84](https://github.com/Proto-UI/Proto-UI/blob/caef71a43310d11fdd3f314f8706d62b57071a70/AGENTS.md#L80-L84)\n\nUseful? React with 👍 / 👎.",
+      "currentThreadState": {
+        "isResolved": false,
+        "isOutdated": true
+      },
+      "disposition": "Retain original source-head finding and its full condition. Current later source is separately bound; this worker makes no retrospective approval or external thread-resolution claim."
+    },
+    {
+      "key": "thread:886:4237011673",
+      "sourceUrl": "https://github.com/Proto-UI/Proto-UI/pull/886#discussion_r4237011673",
+      "sourceHead": "caef71a43310d11fdd3f314f8706d62b57071a70",
+      "path": "packages/modules/focus/src/create.ts",
+      "completeOriginalBody": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Retain rejected sampled-scope focus until readiness**\n\nWhen an active Web Component focus scope traps Tab while its sampled descendant belongs to a view whose observation gate is temporarily closed, this `entry` request returns `false` after default traversal has already been prevented. Unlike `applyEntryFocus`, this direct loop records no `pendingFocusRequest`; the retained owner-readiness notification therefore has nothing that can replay the traversal, leaving focus stuck until another keypress. `HC-FOCUS-TARGET-0001-D` requires a rejected entry application to retain distinct intent until readiness, so sampled traversal needs a replayable pending operation or a request kind whose rejection is intentionally non-retaining.\n\nAGENTS.md reference: [AGENTS.md:L73-L84](https://github.com/Proto-UI/Proto-UI/blob/caef71a43310d11fdd3f314f8706d62b57071a70/AGENTS.md#L73-L84)\n\nUseful? React with 👍 / 👎.",
+      "currentThreadState": {
+        "isResolved": false,
+        "isOutdated": true
+      },
+      "disposition": "Retain original source-head finding and its full condition. Current later source is separately bound; this worker makes no retrospective approval or external thread-resolution claim."
+    }
+  ],
+  "historicalSixSourceClosure": {
+    "sourceArchives": [
+      {
+        "number": 878,
+        "originalHead": "02800620b911c5d60a262c770999869e71026c7e",
+        "archiveRef": "refs/heads/archive/finf-200/pr878-02800620",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/02800620b911c5d60a262c770999869e71026c7e"
+      },
+      {
+        "number": 869,
+        "originalHead": "5242ea83793050035ecebd9c3e23761600d3dd15",
+        "archiveRef": "refs/heads/archive/finf-200/pr869-5242ea83",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/5242ea83793050035ecebd9c3e23761600d3dd15"
+      },
+      {
+        "number": 884,
+        "originalHead": "136e16b57c19de961532fa17cef51961f926bd7e",
+        "archiveRef": "refs/heads/archive/finf-200/pr884-136e16b5",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/136e16b57c19de961532fa17cef51961f926bd7e"
+      },
+      {
+        "number": 886,
+        "originalHead": "caef71a43310d11fdd3f314f8706d62b57071a70",
+        "archiveRef": "refs/heads/archive/finf-200/pr886-caef71a4",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/caef71a43310d11fdd3f314f8706d62b57071a70"
+      },
+      {
+        "number": 885,
+        "originalHead": "1699b70ecf5ff51459aebb3f7bedeed92f9f111b",
+        "archiveRef": "refs/heads/archive/finf-200/pr885-1699b70e",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/1699b70ecf5ff51459aebb3f7bedeed92f9f111b"
+      },
+      {
+        "number": 879,
+        "originalHead": "a24eb91d2609252d5419ad58dd64d8cdb4ea6422",
+        "archiveRef": "refs/heads/archive/finf-200/pr879-a24eb91d",
+        "commitUrl": "https://github.com/Proto-UI/Proto-UI/commit/a24eb91d2609252d5419ad58dd64d8cdb4ea6422"
+      }
+    ],
+    "integrationReceipts": [
+      {
+        "number": 884,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/884",
+        "sourceHead": "1e8df39f9524af063a139b8e08d07fa092b5c72a",
+        "mergeCommit": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 115708661470,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      },
+      {
+        "number": 886,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/886",
+        "sourceHead": "9d64fb08d82e12550285eb8681c9aa182b8f7522",
+        "mergeCommit": "9f360300ff25e69793d6f029470a759bda1298b0",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 115716035220,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      },
+      {
+        "number": 885,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/885",
+        "sourceHead": "63fc86e5105038d194eb2b5ac1a59c3f717bd5f5",
+        "mergeCommit": "955fa64bf5eb7ab26c25f4b2c0958721d6b507d8",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 115716036536,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      },
+      {
+        "number": 879,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/879",
+        "sourceHead": "a24eb91d2609252d5419ad58dd64d8cdb4ea6422",
+        "mergeCommit": "14df5b5e30ab8f1cc720030ade7269a26d3a5158",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 113897006840,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      },
+      {
+        "number": 869,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/869",
+        "sourceHead": "5242ea83793050035ecebd9c3e23761600d3dd15",
+        "mergeCommit": "3eb8adcd69c3cb1eed85279650ea4b468dca31be",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 115593620844,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      },
+      {
+        "number": 878,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/878",
+        "sourceHead": "152fe45aadafbc4db362597ea55082c7e0109386",
+        "mergeCommit": "3e266baf201736d7f3ef19f1384db8e78ddb5c95",
+        "merged": true,
+        "nativeDco": {
+          "app": 1861,
+          "id": 115716041366,
+          "conclusion": "success"
+        },
+        "independentApprovalOrCompleteFeatureAcceptanceNotClaimed": true
+      }
+    ],
+    "sourcePreservation": {
+      "allDistinctPaths": 3703,
+      "sourceRows": 7265,
+      "conflictFiles": 16,
+      "conflictBlocks": 75,
+      "featureRuntimeAcceptanceNotClaimed": true,
+      "introducedReadinessOmissions": "Two precisely recovered source notification/oracle choices, exercised through focused41consumer tests and actual first-error fanout helper; source886 recovery is applied at its own stage."
+    },
+    "deferredCriteria": {
+      "fullSourceAndHistoricalRecords": 1042,
+      "conservativeUncheckedSourceRecords": 997,
+      "originalHigRows": 158,
+      "allOriginalSourceBodiesAndCompoundConditionsRetained": true,
+      "allFourPreparedAdditiveCarrierPartsMustPublish": true,
+      "sourceRecordCountIsNotBugCount": true,
+      "ordinaryApprovalAndTechnicalCiNotClaimedPassed": true,
+      "original955AndAdditional26AndFinal16Retained": true,
+      "allSixCompleteAdditiveCarrierPartsMustPublish": true
+    }
+  },
+  "evidenceBoundaries": [
+    "The75 decisions are static source-preservation analysis, not independent approval or product/native conformance.",
+    "Existing App1861 success receipts apply only to their exact old integrated heads; this new candidate has no commit/PR/native check receipt.",
+    "Original #886 local193files/1723cases, final focused153cases,111 native Shadow closeout and packed consumers remain claims/results for their original recorded sources only. No old run is reported as executed on0607c6 or this candidate.",
+    "Original WC118915/117850 admission failure and four local unuploaded native captures remain historical debt; Issue1140 owns the separate numerical proposal. Current budgets are unchanged.",
+    "Automatic WC Template style projection, full palette/Mask, all four Adapters, native/GPUI and real assistive-technology behavior are not supplied by the finite React native oracle or explicit generated-CSS Shadow probe.",
+    "The existing source-debt carrier remains byte-for-byte outside this candidate; no compound finding, old thread, failure or unrun criterion is marked resolved."
+  ],
+  "liveReadback": {
+    "viewer": {
+      "login": "cyjin-yl"
+    },
+    "viewerPermission": "MAINTAIN",
+    "issueComments": {
+      "totalCount": 2,
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": "Y3Vyc29yOnYyOpHPAAAAAY9aeuw="
+      },
+      "nodes": [
+        {
+          "id": "IC_kwDOMhQZjc8AAAABjmwDgg",
+          "url": "https://github.com/Proto-UI/Proto-UI/issues/1158#issuecomment-6684410754",
+          "body": "Deferred to 0.4. Saved-but-undelivered source/evidence preservation tracker (source-preservation reconciliation for PRs #879/#869/#878/#886/#884/#885 incl. 75 conflict blocks in #886) — merge-time reconciliation ledger for that historical batch, deferred under Finf v2.",
+          "author": {
+            "login": "cyjin-yl"
+          },
+          "updatedAt": "2026-11-06T12:09:17Z"
+        },
+        {
+          "id": "IC_kwDOMhQZjc8AAAABj1p67A",
+          "url": "https://github.com/Proto-UI/Proto-UI/issues/1158#issuecomment-6700038892",
+          "body": "Audit note (2026-11-07, main `94e1c11f7`).\n\n- [x] 合并前完成当前全部 PR 的 source-preservation 核对 — evidenced by `internal/records/2026-10-14-finf-source-closure.json` on main: archive refs + integrationReceipts record all six named PRs merged — #879 `14df5b5e`, #869 `3eb8adcd`, #878 `3e266baf`, #886 `9f360300`, #884 `a247ae2c`, #885 `955fa64b` — with `originalHead`/`originalAuthor` preserved per PR and 997 follow-up source records carried in `2026-10-14-finf-followup-source-debt.json`.\n- [ ] #886 的 16 文件 / 75 冲突块逐项核对 — stays unchecked. The same ledger confirms the aggregate counts (`conflictFiles: 16`, `conflictBlocks: 75`) and records `introducedReadinessOmissions`, but no published per-block list verifies each of the 75 blocks individually (evolved native/runtime/Portal/motion/control-label retention vs. removed incidental oracle guards). Aggregate ≠ itemized.\n\nFirst unmet child: item 2. Owner = Finf v2 evidence maintainer. Next action: publish a per-file/per-block 75-item reconciliation table for #886 (path, block id, kept behavior, removed-oracle disposition) as an `internal/records/` document at current head and post the receipt here.\n\nRelease placement: not a `release-0.3-list.md` row — merge-reconciliation ledger for the historical batch, deferred to 0.4 (already linked in #1323).\n",
+          "author": {
+            "login": "cyjin-yl"
+          },
+          "updatedAt": "2026-11-07T01:03:12Z"
+        }
+      ]
+    },
+    "originalPullRequest": {
+      "state": "MERGED",
+      "headRefOid": "9d64fb08d82e12550285eb8681c9aa182b8f7522",
+      "baseRefOid": "a247ae2c9fa6b8a54467fe6072048d4692f57e1c",
+      "mergeCommit": {
+        "oid": "9f360300ff25e69793d6f029470a759bda1298b0",
+        "parents": {
+          "nodes": [
+            {
+              "oid": "3e266baf201736d7f3ef19f1384db8e78ddb5c95"
+            },
+            {
+              "oid": "9d64fb08d82e12550285eb8681c9aa182b8f7522"
+            }
+          ]
+        }
+      },
+      "comments": {
+        "totalCount": 4
+      },
+      "reviews": {
+        "totalCount": 2
+      },
+      "reviewThreads": {
+        "totalCount": 2,
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": "Y3Vyc29yOnYyOpK0MjAyNi0xMC0xMFQwODoxOTowOFrOqwnZ9Q=="
+        },
+        "nodes": [
+          {
+            "id": "PRRT_kwDOMhQZjc6rCdnz",
+            "isResolved": false,
+            "isOutdated": true,
+            "comments": {
+              "totalCount": 1,
+              "pageInfo": {
+                "hasNextPage": false,
+                "endCursor": "Y3Vyc29yOnYyOpK0MjAyNi0xMC0xMFQwODoxOTowOFrO_Iuq1w=="
+              },
+              "nodes": [
+                {
+                  "databaseId": 4237011671,
+                  "url": "https://github.com/Proto-UI/Proto-UI/pull/886#discussion_r4237011671",
+                  "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep normal beforeDispose callbacks fail-fast**\n\nWhen a normal `session.dispose()` has multiple `beforeDispose` callbacks and an earlier callback throws, this per-callback `attemptCleanup` now invokes every later callback before rejecting. Previously the loop stopped at the first failure, and the new `C-LIFECYCLE-0002-I` behavior only authorizes completing all callbacks for failed creation; the catalog explicitly leaves continuation after other lifecycle callback failures unresolved. Apply per-callback recovery only when `completeFailedCreation` is true so ordinary disposal does not silently acquire new callback-continuation semantics.\n\nAGENTS.md reference: [AGENTS.md:L80-L84](https://github.com/Proto-UI/Proto-UI/blob/caef71a43310d11fdd3f314f8706d62b57071a70/AGENTS.md#L80-L84)\n\nUseful? React with 👍 / 👎.",
+                  "path": "packages/runtime/src/instance/session.ts",
+                  "originalCommit": {
+                    "oid": "caef71a43310d11fdd3f314f8706d62b57071a70"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "id": "PRRT_kwDOMhQZjc6rCdn1",
+            "isResolved": false,
+            "isOutdated": true,
+            "comments": {
+              "totalCount": 1,
+              "pageInfo": {
+                "hasNextPage": false,
+                "endCursor": "Y3Vyc29yOnYyOpK0MjAyNi0xMC0xMFQwODoxOTowOFrO_Iuq2Q=="
+              },
+              "nodes": [
+                {
+                  "databaseId": 4237011673,
+                  "url": "https://github.com/Proto-UI/Proto-UI/pull/886#discussion_r4237011673",
+                  "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Retain rejected sampled-scope focus until readiness**\n\nWhen an active Web Component focus scope traps Tab while its sampled descendant belongs to a view whose observation gate is temporarily closed, this `entry` request returns `false` after default traversal has already been prevented. Unlike `applyEntryFocus`, this direct loop records no `pendingFocusRequest`; the retained owner-readiness notification therefore has nothing that can replay the traversal, leaving focus stuck until another keypress. `HC-FOCUS-TARGET-0001-D` requires a rejected entry application to retain distinct intent until readiness, so sampled traversal needs a replayable pending operation or a request kind whose rejection is intentionally non-retaining.\n\nAGENTS.md reference: [AGENTS.md:L73-L84](https://github.com/Proto-UI/Proto-UI/blob/caef71a43310d11fdd3f314f8706d62b57071a70/AGENTS.md#L73-L84)\n\nUseful? React with 👍 / 👎.",
+                  "path": "packages/modules/focus/src/create.ts",
+                  "originalCommit": {
+                    "oid": "caef71a43310d11fdd3f314f8706d62b57071a70"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "observationSource": "Exact bounded gh GraphQL response retained during this assignment. Issue2comments and PR2threads each report hasNextPage:false; thread comments are complete. PR body4comments/2reviews were also read through pr://886.",
+    "permissionBoundary": "This worker has no authorization for external writes; Main re-reads actor/rules/rights/CI/DCO at the actual action boundary."
+  },
+  "originalCarrierBinding": {
+    "pullRequest": 887,
+    "bodySha256": "796af070cd5b007c84311d91e632b2486f3013b88bc5debab6c5bcd2d04933bf",
+    "exactSavedSourceClause": "- [ ] 对 #886 的 16 文件 / 75 冲突块逐项核对：保留演进后的 native/runtime/Portal/motion/control-label 行为和实际增量；删除 incidental oracle 不得删除可观察契约 guard。",
+    "sourceOfHistoricalCorrectionDetails": "PR887 body source-preservation section lines457-474 as read during this assignment; authored/local old results remain dated."
+  },
+  "mainSerialValidation": [
+    {
+      "id": "M1",
+      "kind": "metadata-before-after",
+      "command": "/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node /tmp/release03-issue1158-sol-20261110/main-readback-audit.mjs /workspace/worktrees/release03-thirty-issue-1158-sol-20261110",
+      "expected": "Old base has only the aggregate record, not these3 new paths. After source application the authentic outputs yield16 distinct files/75 blocks/75 explicit decisions; all original views match immutable Git blobs and all26 current product preimages retain their recorded bytes. Missing/duplicate-row and corrupt-digest controls reject.",
+      "status": "authored-not-run"
+    },
+    {
+      "id": "M2",
+      "kind": "focused-runtime-consumers",
+      "command": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH /home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node /usr/local/lib/node_modules/corepack/dist/corepack.js pnpm@10.32.1 exec vitest run --maxWorkers=1 --no-file-parallelism packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts packages/runtime/test/contract/delay.v0.contract.test.ts packages/runtime/test/contract/focus.v0.contract.test.ts packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts packages/adapters/web-component/test/root-role-compatibility.test.ts packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+      "expectedFiles": [
+        "packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts",
+        "packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts",
+        "packages/runtime/test/contract/delay.v0.contract.test.ts",
+        "packages/runtime/test/contract/focus.v0.contract.test.ts",
+        "packages/adapters/web-component/test/focus-teardown-readiness.integration.test.ts",
+        "packages/adapters/web-component/test/focus-portal-parent-release.integration.test.ts",
+        "packages/adapters/web-component/test/focus-terminal-cleanup.integration.test.ts",
+        "packages/adapters/web-component/test/root-role-compatibility.test.ts",
+        "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts"
+      ],
+      "expectedCases": [
+        "The readiness file has1 departing Trigger case +5 evolved held-fallback policies +4 forced-visible original policies =10 declared cases; retain exact collected/executed counts.",
+        "Lifecycle cases include original/falsy created values, throwing secondary cleanup, ordinary fail-fast, queued Delay cancellation and invalidated retained handles.",
+        "Portal cases retain physical parent/descriptor and successor logical parent after reentry; native unsupported companion refusal remains a negative control."
+      ],
+      "boundary": "These runtime/integration cases use their actual configured environment; they are not native Chrome or AT evidence.",
+      "status": "planned-not-run"
+    },
+    {
+      "id": "M3",
+      "kind": "native-source-consumer-and-mutation",
+      "command": "env COMPILER_EVIDENCE_DIR=/tmp/i1158c PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH /home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node /usr/local/lib/node_modules/corepack/dist/corepack.js pnpm@10.32.1 exec vitest run --maxWorkers=1 --no-file-parallelism packages/compiler/test/browser-source-presentation.test.ts",
+      "expectedFiles": [
+        "packages/compiler/test/browser-source-presentation.test.ts"
+      ],
+      "expectedCases": [
+        "Exactly the one declared finite presentation case; actual runner count must be1 executed, not a no-match pass."
+      ],
+      "declaredJourneySteps": [
+        "initial",
+        "withdraw-opacity-rule",
+        "later-rule",
+        "withdraw-later-rule",
+        "suppress-width",
+        "patch-runtime",
+        "clear-runtime-patch",
+        "prop-rule",
+        "withdraw-prop-rule",
+        "later-before-detach",
+        "patch-before-detach",
+        "detach",
+        "reattach",
+        "clear-after-reattach",
+        "withdraw-after-reattach",
+        "tab-before",
+        "tab-root",
+        "space-down",
+        "space-up",
+        "explicit-update-space",
+        "pointer-down",
+        "pointer-up",
+        "explicit-update-pointer",
+        "disable",
+        "disabled-pointer",
+        "disabled-space",
+        "disabled-tab",
+        "dispose"
+      ],
+      "expectedObservations": {
+        "targets": [
+          "reference",
+          "runtime",
+          "source",
+          "source-duplicate-activation"
+        ],
+        "declaredStepsPerTarget": 28,
+        "expectedFullObservationsWhenComplete": 112
+      },
+      "positiveControl": "Reference, Runtime and generated source independently satisfy computed paint/layout/hit, AX, real keyboard/pointer activation, State/handle identity and detach/remount/dispose outcomes.",
+      "negativeControl": "Generated duplicate-activation mutation first diverges at space-down: control clicks1 vs mutant clicks2, with every preceding checkpoint equal.",
+      "visualOutputs": "/tmp/i1158c/source-presentation/{reference,runtime,source,source-duplicate-activation}-{step}.png plus replay.json, assessment.json, mutation.json and each target observations JSON. Inspect adjacent initial/rule/patch/withdrawal, detach/reattach, space-down/space-up, disable/disabled-pointer/dispose frames at800x500,deviceScaleFactor1.",
+      "boundary": "One finite React/reference/source consumer with explicit fixture CSS; not automatic WC Template paint, full compiler coverage, published-dist consumption or full design-language/browser/AT support.",
+      "status": "planned-not-run"
+    },
+    {
+      "id": "M4",
+      "kind": "native-shadow-targeted-consumer",
+      "command": "env PATH=/home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin:$PATH /home/ezra/.npm/_npx/387698761821791d/node_modules/node/bin/node /usr/local/lib/node_modules/corepack/dist/corepack.js pnpm@10.32.1 exec vitest run --maxWorkers=1 --no-file-parallelism packages/adapters/web-component/test/shadow-closeout.browser.test.ts -t 'refreshes native entry after input type changes|retains moves and restores styled resources after reconnect|makes Template-local percentage CSS usable'",
+      "expectedFiles": [
+        "packages/adapters/web-component/test/shadow-closeout.browser.test.ts"
+      ],
+      "expectedCases": [
+        "3 Light/direct/split native entry type-change profiles +2 real Runtime reconnect checkpoints(onUnmounted/onBeforeDispose) +1 explicit generated-CSS percentage consumer =6 selected declared cases. Record skipped remainder separately; skipped cases are not executed."
+      ],
+      "positiveControl": "Actual Chrome Tab traversal follows the live physical editor; reconnect retains State/owner/text and restores current style/subscriptions; explicit percentage CSS has visible geometry and correct own reference-box padding.",
+      "negativeBoundary": "Template percentage fixture explicitly applies generated ordinary-selector CSS; it does not claim automatic WC child style projection. Reconnect failure and missing native setup must remain real failures.",
+      "status": "planned-not-run"
+    }
+  ],
+  "productChecks": {
+    "executed": [],
+    "reason": "Current assignment explicitly delegates all product/test/build/lint/format/native/browser execution to Main. Only metadata routing, immutable content/history reads, source matching and hashing were performed.",
+    "plannedSourceIsExecutedResult": false
+  },
+  "externalOperations": {
+    "gitMutations": 0,
+    "commits": 0,
+    "pushes": 0,
+    "githubWrites": 0,
+    "reviewApprovals": 0,
+    "merges": 0,
+    "issueClosure": false
+  },
+  "handoffBoundary": "Retain this owner for Main validation/independent review repairs. Main must supply actual outputs and lawful integration/readback before original Issue closure."
+}
