@@ -46,6 +46,8 @@ Readable recipes: [My Account](https://github.com/Proto-UI/Proto-UI/blob/main/ap
 
 Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host. The registry id is `shadcn-dropdown`, not `shadcn-dropdown-menu`.
 
+The current source CLI target generates Root, Trigger, Content, and Item. Group, Label, Separator, and Shortcut are additional exports of `@proto.ui/prototypes-shadcn/dropdown`; this target does not generate their facades. Source registration does not establish installed-package or packed-consumer acceptance.
+
 ## API
 
 Passing `open` selects controlled mode.

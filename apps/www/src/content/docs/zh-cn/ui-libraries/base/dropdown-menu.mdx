@@ -28,9 +28,11 @@ Content 组合 overlay、transition、collection navigation、typeahead 与 anch
 
 这个 family 表示由按钮打开的一组 action/function。它不得把普通导航、任意 form 或 persistent selection 伪装成 menu。Group、Label、Separator 与 Shortcut 是下述有界草稿扩展。Checkbox Item、Radio Item 与 Submenu 不在本片交付范围。
 
-## 0.2 交付与证据
+## 包入口与生成的 facade
 
-稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/dropdown`。CLI component ID 是 `base-dropdown`，会生成 Root、Trigger、Content 与 Item。`T-BASE-DROPDOWN-MENU-0001` 把 family criteria 映射到 `packages/prototypes/base/test/dropdown.test.ts`；Preview 通过 Web Component、React 与 Vue Adapter 运行。
+包入口是 `@proto.ui/prototypes-base/dropdown`。当前源码 CLI 注册了 `base-dropdown`，为所选宿主生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是额外的包导出；这个 CLI 目标不会生成它们的 facade。
+
+`T-BASE-DROPDOWN-MENU-0001` 把 family criteria 映射到 `packages/prototypes/base/test/dropdown.test.ts`。Preview 声明支持 Web Component、React 与 Vue；该声明不代表新 head 已运行，也不代表打包消费者验收。
 
 ## Lifecycle
 
@@ -50,7 +52,7 @@ Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut �
 
 ## API
 
-Dropdown Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

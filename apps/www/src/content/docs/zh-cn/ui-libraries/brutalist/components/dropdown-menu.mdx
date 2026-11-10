@@ -19,9 +19,13 @@ Dropdown Menu 继承 Base 的 trigger/content/item 语义，并使用圆角平�
 
 Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
 
+## 包入口与生成的 facade
+
+包入口是 `@proto.ui/prototypes-brutalist/dropdown`。当前源码 CLI 注册了 `brutalist-dropdown`，为所选宿主生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是额外的包导出；这个 CLI 目标不会生成它们的 facade。源码注册不代表已安装包或打包消费者验收。
+
 ## API
 
-Dropdown Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
