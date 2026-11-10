@@ -2424,6 +2424,62 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('samples descendant entry after neighboring mutation callbacks finish', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.evaluate(() => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-entry-mutation-turn',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        host.innerHTML = '<button>Inside</button>';
+        document.body.append(host);
+      });
+      const result = await page.evaluate(async () => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const host = document.querySelector('closeout-entry-mutation-turn')!;
+        const button = host.querySelector('button')!;
+        const sentinel = document.createElement('div');
+        document.body.append(sentinel);
+        const observer = new MutationObserver(() => {
+          button.style.visibility = 'hidden';
+          observer.disconnect();
+        });
+        observer.observe(sentinel, { attributes: true });
+        const native = window.getComputedStyle;
+        let samples = 0;
+        window.getComputedStyle = (element, pseudo) => {
+          if (element === button) samples++;
+          return native.call(window, element, pseudo);
+        };
+        try {
+          button.style.color = 'red';
+          sentinel.setAttribute('data-trigger', '');
+          await new Promise<void>((resolve) => queueMicrotask(() => queueMicrotask(resolve)));
+          return { samples, tabindex: host.getAttribute('tabindex') };
+        } finally {
+          window.getComputedStyle = native;
+          observer.disconnect();
+          sentinel.remove();
+        }
+      });
+      expect(result).toEqual({ samples: 1, tabindex: '0' });
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each([
     { initialSibling: false, bodyPosition: null },
     { initialSibling: true, bodyPosition: null },

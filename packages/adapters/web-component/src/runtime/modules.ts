@@ -1673,6 +1673,23 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             const observedRoots = new Set<Node>();
             let entryRelationalSubjects = new Set<Element>();
             let hasExternalStyleInputs = false;
+            let pendingEntryRefresh: boolean | undefined;
+            const scheduleEntrySample = (refresh: boolean) => {
+              if (pendingEntryRefresh !== undefined) {
+                pendingEntryRefresh ||= refresh;
+                return;
+              }
+              pendingEntryRefresh = refresh;
+              // Other observers can still write in this delivery. Sample
+              // their final DOM together before the next rendering step.
+              queueMicrotask(() => {
+                const rebuild = pendingEntryRefresh;
+                pendingEntryRefresh = undefined;
+                if (!isCurrentEntryObservation()) return;
+                if (rebuild) refreshTree();
+                else projectEntry();
+              });
+            };
             const belongsToObservedEntryTree = (node: Node) => {
               for (const root of observedRoots) {
                 if (root === node || root.contains(node)) return true;
@@ -1829,7 +1846,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     return false;
                   })
                 )
-                  projectEntry();
+                  scheduleEntrySample(false);
               });
               // The entry region can itself be slotted or nested below
               // selector-bearing ancestors outside its owned subtree. Their
@@ -2259,7 +2276,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 // a different value must be resampled and restored exactly once.
                 // New native descendants can own open roots. A single DOM
                 // subtree observation never crosses those boundaries.
-                refreshTree();
+                scheduleEntrySample(true);
               }
             });
             if (view)
