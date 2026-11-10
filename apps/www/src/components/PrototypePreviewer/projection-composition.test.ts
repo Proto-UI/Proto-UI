@@ -10,6 +10,7 @@ import {
 import { PROJECTION_FAMILY_MANIFESTS, SHARED_BASE_FAMILY_IDS } from './projection-families';
 import { headerSelectControlProps } from '../site-header-control-recipes';
 import { withShadcnRheaDemo } from '../../content/docs/shadcn-demo-style';
+import { runtimePreviewRecipe } from './runtime-preview-surface';
 
 // These hand-authored Button fixtures declare their own narrow content recipe;
 // canonical recipe coverage below still loads and validates the real demos.
@@ -441,6 +442,46 @@ describe('Website projection composition', () => {
       }
     }
   });
+
+  it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const)(
+    'composes the real %s Popover demo and rejects an undeclared outside-focus Button',
+    async (projectionFamilyId) => {
+      const componentFamily = PROJECTION_FAMILY_MANIFESTS[projectionFamilyId].families.popover;
+      const childDemo = await loadDemo(componentFamily.recipeId);
+      const options = {
+        ownerId: `complete-${projectionFamilyId}-popover`,
+        runtimeId: 'wc' as const,
+        projectionFamilyId,
+        generation: 1,
+        componentId: 'popover' as const,
+        childDemo,
+        controls: controls(),
+        controlIds: [],
+      };
+      const contentRecipe = runtimePreviewRecipe(projectionFamilyId, 'popover');
+      const buttonPrototypeId = `${projectionFamilyId}-button`;
+      const defaultComposition = createProjectionComposition(options);
+      const runtimeComposition = createProjectionComposition({ ...options, contentRecipe });
+
+      for (const composition of [defaultComposition, runtimeComposition]) {
+        expect(
+          findNode(
+            composition.demo,
+            (node) => node.kind === 'proto' && node.prototypeId === buttonPrototypeId
+          )
+        ).toMatchObject({ children: ['Outside focus target'] });
+      }
+      expect(() =>
+        createProjectionComposition({
+          ...options,
+          contentRecipe: {
+            ...contentRecipe,
+            prototypeIds: contentRecipe.prototypeIds.filter((id) => id !== buttonPrototypeId),
+          },
+        })
+      ).toThrow(`uses undeclared Prototype(s): ${buttonPrototypeId}.`);
+    }
+  );
 
   it.each([
     {

@@ -73,10 +73,16 @@ describe('checked IR to React runtime-backed source', () => {
     Object.assign(version, { schemaVersion: 1 });
     expect(validateIR(version)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2001' }] });
     const operation = buttonIR();
-    const first = operation.setup.body[0];
-    if (first.kind !== 'const' || first.value.kind !== 'operation')
-      throw new Error('Expected initial accessibility capability');
-    Object.assign(first.value, { operation: 'process.exit' });
+    // Button can declare setup effects before its accessibility capability.
+    const accessible = operation.setup.body.find(
+      (statement) =>
+        statement.kind === 'const' &&
+        statement.value.kind === 'operation' &&
+        statement.value.operation === 'hook.asAccessible'
+    );
+    if (!accessible || accessible.kind !== 'const' || accessible.value.kind !== 'operation')
+      throw new Error('Expected Button accessibility capability');
+    Object.assign(accessible.value, { operation: 'process.exit' });
     expect(emitReact(operation)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
     const unbound = buttonIR();
     unbound.setup.body.push({

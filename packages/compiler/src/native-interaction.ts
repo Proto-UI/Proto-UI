@@ -9,7 +9,7 @@ import {
 import { isAssignable } from './data-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
 import { nativeImageViewArtifact } from './native-image-view';
-import { NativeLexicalScope } from './template-shape';
+import { NativeLexicalScope, moduleLexicalScope } from './template-shape';
 import { interactionValueAlternatives } from './interaction-value-shape';
 import type { TargetOperationAnalysis } from './targets';
 import {
@@ -230,6 +230,12 @@ export function validateNativeInteraction(
       } else if (value.kind === 'function') visitFunction(value.function, bindings);
       else if (value.kind === 'member') expression(value.object);
       else if (value.kind === 'unary') expression(value.operand);
+      else if (value.kind === 'lexical-cell') expression(value.value);
+      else if (value.kind === 'lexical-read' || value.kind === 'lexical-update') expression(value.cell);
+      else if (value.kind === 'lexical-write') {
+        expression(value.cell);
+        expression(value.value);
+      }
       else if (value.kind === 'binary') {
         expression(value.left);
         expression(value.right);
@@ -249,6 +255,19 @@ export function validateNativeInteraction(
         } else if (statement.kind === 'effect') expression(statement.expression);
         else if (statement.kind === 'return') {
           if (statement.value) expression(statement.value);
+        } else if (statement.kind === 'throw') expression(statement.value);
+        else if (statement.kind === 'try') {
+          const saved = bindings;
+          statements(statement.body);
+          bindings = saved;
+          if (statement.catch) {
+            if (statement.catch.name)
+              bindings = bindings.parameter(statement.catch.name, undefined, saved, null);
+            statements(statement.catch.body);
+            bindings = saved;
+          }
+          if (statement.finally) statements(statement.finally);
+          bindings = saved;
         } else {
           expression(statement.condition);
           const saved = bindings;
@@ -261,8 +280,11 @@ export function validateNativeInteraction(
     }
     statements(fn.body);
   }
-  visitFunction(ir.setup);
-  ir.hooks.forEach((hook) => visitFunction(hook.setup));
+  const moduleScope = moduleLexicalScope(ir);
+  for (const binding of ir.moduleBindings ?? [])
+    if (binding.value.kind === 'function') visitFunction(binding.value.function, moduleScope);
+  visitFunction(ir.setup, moduleScope);
+  ir.hooks.forEach((hook) => visitFunction(hook.setup, moduleScope));
   return diagnostics;
 }
 
@@ -510,7 +532,7 @@ export function createNativeInteraction<Run>(options: {
     focusSelf(request) {
       alive(); options.ensureRuntime('focus.focusSelf');
       if (disabled || !modules.canFocus()) return;
-      noteNativeFocusRequest();
+      if (!noteNativeFocusRequest()) return;
       if (request?.reason === 'keyboard') keyboard = true;
       else if (request?.reason === 'pointer') keyboard = false;
       if (!deliverable() || !root!.isConnected || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request; hasPendingFocus = true; return; }
@@ -659,6 +681,7 @@ export function createNativeInteraction<Run>(options: {
       for (const [name, semantic] of [['contextmenu','context.menu'],['input','input'],['change','change']] as const) listen(target, name, (native: Event) => { if (owns(native)) rootEmit(semantic, native); });
       listen(target, 'focus', (native: FocusEvent) => {
         if (focusDeclared && disabled) { target.blur(); return; }
+        if (focusDeclared && !noteNativeFocusRequest()) return;
         if (focusDeclared) { focused.set(true); focusVisible.set(keyboard); }
         rootEmit('nav.focus', native);
       });

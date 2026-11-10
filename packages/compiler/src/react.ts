@@ -73,6 +73,7 @@ export function emitReact(
     ])
   );
   function typeName(type: ValueType): string {
+    if (type === 'exception') return 'unknown';
     if (isDataValueType(type)) return formatDataType(type);
     if (type === 'def') return `${core}.DefHandle<GeneratedProps, GeneratedExposes>`;
     if (type === 'run') return `${core}.RunHandle<GeneratedProps>`;
@@ -162,10 +163,22 @@ export function emitReact(
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
         return value.name;
+      case 'lexical-cell':
+        return expression(value.value, depth);
+      case 'lexical-read':
+        return expression(value.cell, depth);
+      case 'lexical-write':
+        return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        return `(${value.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return keys.get(value.keyId)!.name;
       case 'style-handle':
@@ -198,7 +211,7 @@ export function emitReact(
         return `${expression(value.receiver, depth)}.rule({ ${metadata}when: (${builder}) => ${condition(declaration.when)}, intent: (${intent}) => { ${operations} } })`;
       }
       case 'member':
-        return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
@@ -234,11 +247,15 @@ export function emitReact(
         const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
         switch (statement.kind) {
           case 'const':
-            return `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(statement.expression, depth)};\n`;
           case 'return':
             return `${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
+          case 'throw':
+            return `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
+          case 'try':
+            return `${origin}${indent}try {\n${statements(statement.body, depth + 1)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${statements(statement.catch.body, depth + 1)}${indent}}` : ''}${statement.finally ? ` finally {\n${statements(statement.finally, depth + 1)}${indent}}` : ''}\n`;
           case 'if':
             return `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${statements(statement.then, depth + 1)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1)}${indent}}` : ''}\n`;
         }
@@ -261,7 +278,7 @@ export function emitReact(
       return `  ${JSON.stringify(value.name)}: ${type};`;
     })
     .join('\n');
-  const hookCode = ir.hooks
+  const hookCode = statements(ir.moduleBindings ?? [], 0) + ir.hooks
     .map(
       (hook) =>
         `const ${hooks.get(hook.id)} = ${core}.defineAsHook<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(hook.name)},\n  setup: ${fn(hook.setup, 1)},\n});\n`

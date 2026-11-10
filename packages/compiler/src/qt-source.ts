@@ -14,6 +14,7 @@ import { qtTableProjectionSource } from './qt-native-table';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import type { DataType } from './data-types';
 import { isDataValueType, isPublicValueType } from './ir';
+import { partitionModuleBindings } from './source-module-bindings';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -34,6 +35,9 @@ export function emitQtSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = checked.value;
+  const moduleParts = partitionModuleBindings(ir);
+  const sharedModuleNames = new Set(moduleParts.shared.map((binding) => binding.name));
+  let emittingModule = false;
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'qt-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const componentName = options.componentName ?? 'CompiledComponent';
@@ -165,12 +169,28 @@ export function emitQtSource(
   }
   function expression(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return typeof node.value === 'number' && Object.is(node.value, -0)
           ? '-0'
           : JSON.stringify(node.value);
       case 'reference':
-        return node.name;
+        return !emittingModule && sharedModuleNames.has(node.name) ? `${qualifier}Source.${node.name}` : node.name;
+      case 'lexical-cell':
+        return expression(node.value, depth);
+      case 'lexical-read':
+        return expression(node.cell, depth);
+      case 'lexical-write':
+        if (!emittingModule && node.cell.kind === 'reference' && sharedModuleNames.has(node.cell.name))
+          return `${qualifier}Source.__write_${node.cell.name}(${expression(node.value, depth)})`;
+        return `(${expression(node.cell, depth)} = ${expression(node.value, depth)})`;
+      case 'lexical-update': {
+        if (!emittingModule && node.cell.kind === 'reference' && sharedModuleNames.has(node.cell.name))
+          return `${qualifier}Source.__update_${node.cell.name}(${node.prefix}, ${node.delta})`;
+        const cell = expression(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        return `(${node.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return keys.get(node.keyId)!;
       case 'static-capability':
@@ -210,7 +230,7 @@ export function emitQtSource(
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
-        return `${node.name}(${node.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        return `${!emittingModule && sharedModuleNames.has(node.name) ? `${qualifier}Source.` : ''}${node.name}(${node.arguments.map((arg) => expression(arg, depth)).join(', ')})`;
       case 'authored-hook':
         return `${hooks.get(node.hookId)}()`;
       case 'operation': {
@@ -243,13 +263,18 @@ export function emitQtSource(
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       switch (statement.kind) {
         case 'const':
-          result += `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
+          result += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
           break;
         case 'effect':
           result += `${origin}${indent}${expression(statement.expression, depth)};\n`;
           break;
         case 'return':
           return `${result}${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
+        case 'throw':
+          return `${result}${origin}${indent}throw ${expression(statement.value, depth)};\n`;
+        case 'try':
+          result += `${origin}${indent}try {\n${statements(statement.body, depth + 1)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${statements(statement.catch.body, depth + 1)}${indent}}` : ''}${statement.finally ? ` finally {\n${statements(statement.finally, depth + 1)}${indent}}` : ''}\n`;
+          break;
         case 'if':
           result += `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${statements(statement.then, depth + 1)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1)}${indent}}` : ''}\n`;
           break;
@@ -316,6 +341,15 @@ export function emitQtSource(
     )
     .filter(Boolean)
     .join('\n');
+  emittingModule = true;
+  const moduleCode = statements(moduleParts.shared, 0) +
+    `export { ${moduleParts.shared.map((binding) => binding.name).join(', ')} };\n` +
+    moduleParts.shared.filter((binding) => binding.value.kind === 'lexical-cell').map((binding) =>
+      `export function __write_${binding.name}(value) { ${binding.name} = value; return value; }\n` +
+      `export function __update_${binding.name}(prefix, delta) { return delta === 1 ? (prefix ? ++${binding.name} : ${binding.name}++) : (prefix ? --${binding.name} : ${binding.name}--); }\n`
+    ).join('');
+  emittingModule = false;
+  const ownedModuleCode = statements(moduleParts.owned, 2);
   const code = `// Editable ordinary Qt Quick 6.4.2 source. No Proto Runtime/Core/Adapter dependency.
 // Authored templates are cached and reconciled only at explicit update or view epoch entry.
 // Helper cost: owned Props/State/Context resources, Qt native facts/style repaint, QML node reconciliation.
@@ -325,6 +359,7 @@ import QtQuick.Window 6.4
 import QtQml 6.4 as Qml
 import PuiQtNative 1.0
 import "./.proto-ui/qt/QtOwner.mjs" as ${qualifier}Native
+${moduleParts.shared.length ? `import "./.proto-ui/qt/Source.mjs" as ${qualifier}Source` : ''}
 import "./.proto-ui/qt/context/QtContextScope.mjs" as ${qualifier}Context
 import "./.proto-ui/qt" as ${qualifier}View
 ${ir.contextKeys.map((key, index) => `import ${JSON.stringify(context.keys.get(key.id)!.file)} as ${qualifier}Key${index}`).join('\n')}
@@ -382,6 +417,7 @@ ${publicApi}
             contextCheck: ${emitQtContextValidation(ir, keys, `${qualifier}Context.acceptsContextValue`)}
         })
         const ${p}Def = ${p}Owner.def
+${ownedModuleCode}
         const ${p}HookResults = new Map();
 ${ir.hooks
   .map(
@@ -430,6 +466,7 @@ ${eventDispatch}
       code,
       profile: 'qt-source-v1',
       supportingFiles: [
+        ...(moduleParts.shared.length ? [{ path: '.proto-ui/qt/Source.mjs', contents: moduleCode, kind: 'source' as const }] : []),
         ...context.files,
         ...staticFiles,
         { path: '.proto-ui/qt/QtOwner.mjs', contents: qtOwnerSource, kind: 'source' },

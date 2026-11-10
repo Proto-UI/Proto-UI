@@ -102,6 +102,8 @@ export type FocusScopeConfigPatch = Readonly<{
   navigation?: 'tab' | 'arrow' | 'tab+arrow';
   orientation?: 'vertical' | 'horizontal' | 'both';
   entry?: 'first' | 'selected' | 'active' | 'container' | 'manual';
+  /** Opt in to this activation's Entry role only when no logical target was selected. */
+  entryFallback?: 'none' | 'entry';
   restore?: 'previous' | 'trigger' | 'none';
   emptyPolicy?: 'container' | 'none';
   group?: boolean | FocusRovingConfigPatch;
@@ -115,6 +117,7 @@ export type FocusScopeConfig = Readonly<{
   navigation: 'tab' | 'arrow' | 'tab+arrow';
   orientation: 'vertical' | 'horizontal' | 'both';
   entry: 'first' | 'selected' | 'active' | 'container' | 'manual';
+  entryFallback: 'none' | 'entry';
   restore: 'previous' | 'trigger' | 'none';
   emptyPolicy: 'container' | 'none';
   group?: boolean | FocusRovingConfigPatch;

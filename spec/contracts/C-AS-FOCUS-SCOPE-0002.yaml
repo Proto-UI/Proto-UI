@@ -3,15 +3,15 @@ type: contract
 title: Focus scope activation gates focus and applies configured restoration
 status: draft
 since: 0.1.0
-lifecycleRationale: Draft scope policy; per-activation entry override requires focused execution, independent review and separate compiler admission and consumer conformance.
+lifecycleRationale: Draft scope policy; per-activation entry override and explicit activation-owned Entry fallback require focused execution, independent review and separate compiler admission and consumer conformance.
 summary: A focus scope may exist inactive in the logical tree; activation captures previous focus, moves focus into the scope and gates outside focus requests. Deactivation restores the captured owner by default, while restore none opts out of automatic handback.
 statement:
   zh-CN: >-
-    `asFocusScope()` 声明的 scope 不得因为存在于逻辑树中就自动生效。scope activation 必须是显式动作：激活时记录当前 scope 外部的 previous focus owner，将 scope 标记为 active，并在非 manual entry 策略下把焦点移交给 scope 内第一个合格的 logical focusable child；取消激活时清除 active，默认将焦点归还给激活前捕获的 previous owner，显式 restore: none 则不自动移交焦点。scope active 期间，scope 外部的普通 focus request 必须被忽略并产生诊断警告；scope 自身及其 logical descendants 的 focus request 继续允许。
+    `asFocusScope()` 声明的 scope 不得因为存在于逻辑树中就自动生效。scope activation 必须是显式动作：激活时记录当前 scope 外部的 previous focus owner，将 scope 标记为 active，并在非 manual entry 策略下把焦点移交给 scope 内第一个合格的 logical focusable child；取消激活时清除 active，默认将焦点归还给激活前捕获的 previous owner，显式 restore: none 则不自动移交焦点。scope active 期间，scope 外部的普通 focus request 必须被忽略并产生诊断警告；scope 自身及其 logical descendants 的 focus request 继续允许。显式 entryFallback: entry 仅在同一次激活未选择合格 logical target 时组合当前 owner 独立声明的 Entry role；该激活持有并可取消此 continuation，不取决于其边界是否仍为 active。
 
 
   en: >-
-    A scope declared by `asFocusScope()` must not become effective merely because it exists in the logical tree. Scope activation must be an explicit action: activation captures the previous focus owner outside the scope, marks the scope active, and transfers focus to the first eligible logical focusable child inside the scope for non-manual entry policies. Deactivation clears active and restores the captured previous owner by default; explicit restore: none performs no automatic focus transfer. While the scope is active, ordinary focus requests from outside the scope must be ignored with a diagnostic warning; focus requests from the scope itself or its logical descendants remain allowed.
+    A scope declared by `asFocusScope()` must not become effective merely because it exists in the logical tree. Scope activation must be an explicit action: activation captures the previous focus owner outside the scope, marks the scope active, and transfers focus to the first eligible logical focusable child inside the scope for non-manual entry policies. Deactivation clears active and restores the captured previous owner by default; explicit restore: none performs no automatic focus transfer. While the scope is active, ordinary focus requests from outside the scope must be ignored with a diagnostic warning; focus requests from the scope itself or its logical descendants remain allowed. An explicit entryFallback: entry opt-in composes the owner's separately declared Entry role only when that same activation selected no eligible logical target; the activation owns and can cancel that continuation independently of whether its boundary remains active.
 
 
 criteria:
@@ -67,6 +67,27 @@ criteria:
         activate(options) may suppress only this activation's automatic entry using entry: manual. Omitted entry or entry: configured follows the original setup policy and cannot force automatic entry over configured manual. At the untyped Runtime boundary only the literal manual suppresses entry; other values follow the configured branch, without extending the statically or compiler-admitted enum. This option does not mutate persistent configuration; later activations choose independently. Manual still activates the same scope boundary with trapping, looping, previous-owner capture and configured deactivation restoration, and allows subsequent explicit inside-focus requests. The option must not be forwarded as a new Host Focus request field. It provides neither target selection, readiness nor cancellation of existing pending requests. Calling activate remains an explicit activation; the option does not itself install a runtime props watcher or automatically reactivate a scope.
 
 
+  - id: C-AS-FOCUS-SCOPE-0002-L
+    text:
+      zh-CN: >-
+        setup 配置 entryFallback: entry 可显式组合当前 owner 独立声明且启用的 Entry role；默认 none 不改变现有入场。一次非 manual 激活必须先按现有 policy 选择 logical target；已选择的 child 即使等待 host target 或 acquisition 被拒绝，也不得触发 region fallback。仅当未选择任何合格 logical target 且该激活仍为 current 时，才按现有 Entry policy 请求 descendant-first 或允许的 self fallback，并保留同次激活快照中的 reason、preventScroll。configured manual 与本次 entry: manual 都抑制两类自动入场。fallback 不声明 Focusable、roving member 或 target facts，不提供 public target、selection 或 readiness receipt；isActive 仅是边界事实，不能用作选择结果。
+
+      en: >-
+        The setup configuration entryFallback: entry explicitly composes this owner's separately declared and enabled Entry role; the default none preserves existing entry. A non-manual activation first selects a logical target under the existing policy. A selected child suppresses region fallback even while awaiting its host target or after rejected acquisition. Only when no eligible logical target was selected and that activation remains current may the existing Entry policy request descendant-first or permitted self fallback, preserving that activation's snapshotted reason and preventScroll. Configured manual and per-activation entry: manual suppress both forms of automatic entry. Fallback declares no Focusable, roving member or target facts and exposes no public target, selection or readiness receipt; isActive is only a boundary fact, not a selection result.
+
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors: [C-AS-FOCUS-ENTRY-0001-D, C-AS-FOCUS-ENTRY-0001-F, C-AS-FOCUS-ENTRY-0001-G]
+  - id: C-AS-FOCUS-SCOPE-0002-M
+    text:
+      zh-CN: >-
+        opt-in fallback 的 continuation 属于同一次激活，可等待尚未出现的 region 或被拒绝的 acquisition；emptyPolicy 仍只决定边界策略，不能因此将 inactive 等同于取消。显式 deactivate 必须在 inactive 或缺少 view/Root 的提前返回前结束此激活，并在发布 inactive 给 observer 前取消其仍持有的请求。readiness 只能在当前 view 重新解析仍属该激活的 Entry，不能重新选择 logical child、重复已接纳的 acquisition 或复活已取消的 intent。重复激活、Entry disable、显式 blur、terminal disposal 与较新的独立 focus intent 必须阻止旧 continuation replay；retained view detach 可保留当前 logical intent，但不能复用旧 physical target。此取消必须按 identity 判断，不得清除较新的独立 Entry 或 target request，包括 reentrant resolver、host callback 或 state observer 中产生的请求。普通 Scope 边界 cleanup、restore 策略和消费者显式 handback 仍独立适用；停用已经 inactive 的边界不产生新的自动恢复。
+
+      en: >-
+        The opt-in fallback continuation belongs to the same activation and may await an absent region or rejected acquisition. Empty policy still controls only the boundary, so inactive does not imply cancellation. Explicit deactivate ends this activation before any inactive or absent-view/Root early return and cancels its still-owned request before publishing inactive to observers. Readiness may only re-resolve that activation's current Entry against the current view; it must not repeat logical selection, repeat accepted acquisition or resurrect canceled intent. Repeated activation, Entry disable, explicit blur, terminal disposal and newer independent focus intent prevent old continuation replay. Retained view detachment may preserve current logical intent, but never an old physical target. Cancellation is identity-scoped and must not clear a newer independent Entry or target request, including requests from reentrant resolvers, host callbacks or state observers. Ordinary Scope boundary cleanup, configured restoration and explicit consumer handback remain independently applicable; deactivating an already inactive boundary creates no new automatic restoration.
+
+
 sources:
   - path: internal/contracts/focus/base-text/focus-scope.v0.md
     sections:
@@ -101,10 +122,14 @@ dependsOn:
     - C-FOCUS-0002
     - C-AS-FOCUS-SCOPE-0001
     - C-AS-FOCUSABLE-0001
+    - C-AS-FOCUS-ENTRY-0001
 verifies:
   tests:
     - T-FOCUS-SCOPE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Define the explicitly selected logical-first activation-owned Entry fallback and its cancellation, readiness and retained-view boundaries without changing default entry or promoting lifecycle.
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Clarify the existing restore-none opt-out and ordinary previous-owner default without changing explicit consumer handback or promoting the draft lifecycle.

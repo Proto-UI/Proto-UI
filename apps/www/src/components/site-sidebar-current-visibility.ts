@@ -8,9 +8,19 @@ export function nearestSidebarScroller(
   link: HTMLElement,
   boundary: HTMLElement
 ): HTMLElement | null {
-  const view = boundary.ownerDocument.defaultView;
+  const document = boundary.ownerDocument;
+  const view = document.defaultView;
   if (!view || !boundary.contains(link)) return null;
-  for (let node = link.parentElement; node && boundary.contains(node); node = node.parentElement) {
+  let node: Element | null = link;
+  while (node) {
+    const parent: Element | null = node.assignedSlot ?? node.parentElement;
+    if (parent) node = parent;
+    else {
+      const root = node.getRootNode();
+      node = root instanceof view.ShadowRoot ? root.host : null;
+    }
+    if (!node || node === document.body || node === document.documentElement) return null;
+    if (!(node instanceof view.HTMLElement)) continue;
     const style = view.getComputedStyle(node);
     if (
       node.clientHeight > 0 &&
@@ -18,7 +28,6 @@ export function nearestSidebarScroller(
       /^(auto|scroll|overlay)$/.test(style.overflowY)
     )
       return node;
-    if (node === boundary) break;
   }
   return null;
 }
@@ -69,6 +78,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     release?.();
   };
   let expectedScroll: { owner: HTMLElement; top: number } | null = null;
+  let scrollOwner: HTMLElement | null = null;
   const currentLink = () =>
     boundary.querySelector<HTMLAnchorElement>('.top-level a[aria-current="page"]');
   const cancelFrame = () => {
@@ -80,6 +90,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     yielded = true;
     pending = false;
     cancelFrame();
+    observeScrollOwner(null);
   };
   const schedule = () => {
     if (!alive || policyWaiting || !pending || yielded || frame !== undefined) return;
@@ -116,6 +127,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       else releasePolicyWait = release;
       return;
     }
+    observeScrollOwner(null);
     if (current) resize?.unobserve(current);
     current = currentLink();
     if (current) resize?.observe(current);
@@ -157,6 +169,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     // A closed mobile drawer waits for its real opening event, without polling.
     if (rect.width <= 0 || rect.height <= 0 || current.closest('[hidden]')) return;
     const owner = nearestSidebarScroller(current, boundary);
+    observeScrollOwner(owner);
     if (!owner) {
       pending = false;
       return;
@@ -201,6 +214,11 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       request();
       return;
     }
+    const relocated = records.some(
+      (record) =>
+        record.type === 'attributes' && record.attributeName === 'data-site-contents-popover-tree'
+    );
+    if (relocated) observeScrollOwner(null);
     if (yielded) return;
     const projected = current?.dataset.siteLinkEnhanced === 'true';
     if (projected && !projectionSeen) {
@@ -208,18 +226,12 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       pending = true;
       stableFrames = 0;
     }
-    // The public Contents Dialog physically relocates this same native tree
-    // between its home rail and the dialog slot. The nearest actual scroll
+    // The public Contents Popover physically relocates this same native tree
+    // between its home rail and public Content. The nearest actual scroll
     // owner can change without another contents-open event, so re-measure the
     // settled row against that new owner. Never reopen a collapsed group,
     // move focus or scroll the document on this relocation.
-    if (
-      records.some(
-        (record) =>
-          record.type === 'attributes' &&
-          record.attributeName === 'data-site-contents-dialog-tree'
-      )
-    ) {
+    if (relocated) {
       pending = true;
       stableFrames = 0;
     }
@@ -234,7 +246,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       'open',
       'data-site-link-enhanced',
       'data-pui-style',
-      'data-site-contents-dialog-tree',
+      'data-site-contents-popover-tree',
     ],
   });
   const resize =
@@ -259,7 +271,12 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       yieldToUser();
   };
   const scroll = (event: Event) => {
-    if (!measured || !(event.target instanceof view.HTMLElement)) return;
+    if (
+      !measured ||
+      !(event.target instanceof view.HTMLElement) ||
+      event.target !== scrollOwner
+    )
+      return;
     if (
       expectedScroll?.owner === event.target &&
       Math.abs(event.target.scrollTop - expectedScroll.top) <= 0.5
@@ -272,12 +289,39 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     }
     yieldToUser();
   };
+  function observeScrollOwner(next: HTMLElement | null) {
+    if (scrollOwner === next) return;
+    if (scrollOwner && scrollOwner !== boundary) {
+      resize?.unobserve(scrollOwner);
+      scrollOwner.removeEventListener('wheel', yieldToUser);
+      scrollOwner.removeEventListener('touchstart', yieldToUser);
+      scrollOwner.removeEventListener('pointerdown', yieldToUser);
+      scrollOwner.removeEventListener('keydown', keydown);
+      scrollOwner.removeEventListener('scroll', scroll);
+    }
+    scrollOwner = next;
+    expectedScroll = null;
+    if (scrollOwner && scrollOwner !== boundary) {
+      resize?.observe(scrollOwner);
+      // An enclosing viewport receives input outside the retained nav too.
+      // Reuse this request's existing yield policy and retire the binding when
+      // the tree moves, the user takes over or this visibility owner ends.
+      if (!boundary.contains(scrollOwner)) {
+        scrollOwner.addEventListener('wheel', yieldToUser, { passive: true });
+        scrollOwner.addEventListener('touchstart', yieldToUser, { passive: true });
+        scrollOwner.addEventListener('pointerdown', yieldToUser, { passive: true });
+        scrollOwner.addEventListener('keydown', keydown);
+        scrollOwner.addEventListener('scroll', scroll);
+      }
+    }
+  }
   function destroy() {
     if (!alive) return;
     alive = false;
     cancelPolicyWait();
     cancelFrame();
     mutations.disconnect();
+    observeScrollOwner(null);
     resize?.disconnect();
     boundary.removeEventListener('wheel', yieldToUser);
     boundary.removeEventListener('touchstart', yieldToUser);

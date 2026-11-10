@@ -3,6 +3,8 @@ import type {
   FocusRequestOptions,
   FocusScopeActivationOptions,
   FocusScopeConfig,
+  FocusRovingConfig,
+  FocusFacts,
 } from '@proto.ui/core';
 import { FocusCenter, type FocusCenterEntry } from '../src/center';
 
@@ -24,18 +26,33 @@ function fixture(configuredEntry: FocusScopeConfig['entry'] = 'first', child = t
       isScopeProvider: () => scope,
       isRovingProvider: () => false,
       getFocusableConfig: () => ({ autoFocus: false, disabled: false, navParticipation: 'auto' }),
-      getScopeConfig: () =>
-        ({
-          entry: configuredEntry,
-          emptyPolicy: 'none',
-          trap: true,
-          loop: true,
-        }) as FocusScopeConfig,
-      getRovingConfig: () => ({ loop: true }) as ReturnType<FocusCenterEntry['getRovingConfig']>,
+      getScopeConfig: () => ({
+        entry: configuredEntry,
+        entryFallback: 'none',
+        emptyPolicy: 'none',
+        trap: true,
+        loop: true,
+        navigation: 'tab',
+        orientation: 'vertical',
+        restore: 'previous',
+      }),
+      getRovingConfig: (): FocusRovingConfig => ({
+        loop: true,
+        navigation: 'none',
+        orientation: 'vertical',
+        entry: 'first',
+        selectOnFocus: false,
+      }),
       getFacts: () =>
-        ({ focused, focusVisible: false, active: false }) as ReturnType<
-          FocusCenterEntry['getFacts']
-        >,
+        ({
+          focused,
+          focusVisible: false,
+          active: false,
+          focusable: !scope,
+          hasFocused: false,
+          rovingSelected: false,
+          rovingActive: false,
+        }) satisfies FocusFacts,
       getRootTarget: () => target,
       requestFocus: (options) => {
         focused = true;
@@ -160,5 +177,81 @@ describe('FocusScope per-activation manual entry override', () => {
     expect(configured.center.activateScope(configured.scope)).toBe(false);
     expect(configured.active()).toBe(false);
     expect(configured.moves).toEqual([]);
+  });
+});
+
+describe('Scope-owned Entry dispatch boundary', () => {
+  it.each(['pending', 'rejected'] as const)(
+    'a selected %s child never invokes empty fallback',
+    (outcome) => {
+      const f = fixture();
+      let fallback = 0;
+      f.inside.getRootTarget = () => null;
+      f.inside.requestFocus = () => outcome;
+      f.center.activateScope(f.scope, { reason: 'keyboard' }, () => {
+        fallback += 1;
+      });
+      expect(f.active()).toBe(true);
+      expect(fallback).toBe(0);
+    }
+  );
+  it.each(['none', 'container'] as const)(
+    'empty %s boundary and continuation dispatch remain distinct',
+    (emptyPolicy) => {
+      const f = fixture('first', false),
+        config = f.scope.getScopeConfig();
+      f.scope.getScopeConfig = () => ({ ...config, emptyPolicy, entryFallback: 'entry' });
+      let activeAtDispatch: boolean | undefined;
+      expect(
+        f.center.activateScope(f.scope, undefined, () => {
+          activeAtDispatch = f.active();
+        })
+      ).toBe(emptyPolicy === 'container');
+      expect(activeAtDispatch).toBe(emptyPolicy === 'container');
+      expect(f.moves).toEqual([]);
+    }
+  );
+  it.each(['configured', 'activation'] as const)(
+    'manual %s policy never dispatches an empty fallback',
+    (policy) => {
+      const f = fixture(policy === 'configured' ? 'manual' : 'first', false);
+      let fallback = 0;
+      f.center.activateScope(
+        f.scope,
+        policy === 'activation' ? { entry: 'manual' } : undefined,
+        () => {
+          fallback += 1;
+        }
+      );
+      expect(fallback).toBe(0);
+      expect(f.active()).toBe(true);
+    }
+  );
+  it('a newer request from activation observers suppresses old automatic fallback', () => {
+    const f = fixture('first', false),
+      setActive = f.scope.setScopeActive;
+    let fallback = 0;
+    f.scope.setScopeActive = (active) => {
+      setActive(active);
+      if (active) f.center.requestFocus(f.outside);
+    };
+    f.center.activateScope(f.scope, undefined, () => {
+      fallback += 1;
+    });
+    expect(fallback).toBe(0);
+  });
+  it('reentrant activation while the empty boundary becomes inactive owns subsequent work', () => {
+    const f = fixture('first', false),
+      setActive = f.scope.setScopeActive;
+    let fallback = 0;
+    f.scope.setScopeActive = (active) => {
+      setActive(active);
+      if (!active) f.center.activateScope(f.scope, { entry: 'manual' });
+    };
+    f.center.activateScope(f.scope, undefined, () => {
+      fallback += 1;
+    });
+    expect(f.active()).toBe(true);
+    expect(fallback).toBe(0);
   });
 });

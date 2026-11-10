@@ -89,11 +89,21 @@ Issue #817 仍保持 open。网站 demo inventory 只做 source-AST discovery �
 | `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
 | `gpui-source-v1` | 固定 Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` 的 GPUI | GPUI 加生成的共享 Rust support crate；不依赖 Proto UI Runtime/Adapter |
 
-Qt、Flutter profile identity **尚未实现**，选择它们会拒绝编译。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
 
 GPUI source owner 按定义将 `void` setup 解释为 host Root 内部的匿名 slot（`C-CORE-SYNTAX-0004-C`、`C-TEMPLATE-0001`）。包含 State 和公开 increment method 的纯作者定义在没有 Web global 的环境中完成编译，并在真实 headless GPUI window 中运行。同一生成组件按顺序接入两个 native slot child，method 调用前后保留实际测得的布局框，并通过公开 State 观察到 0 到 1 的变化。这份有界证据不代表 OS-visible rendering、assistive-technology fidelity 或完整 compiler/Prototype equivalence；缺失 native style declaration 会生成 diagnostic，而不会替换成 Web 行为。
 
 Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
+
+Static helper 参数可使用已支持的 local record alias，包括 optional field 与有限 literal union。直接传入 `{ entry: 'manual' }` 这类字面量时，会保留其具体值来核对参数类型；不兼容的 literal value 与伪造 IR 仍会被拒绝。Source frontend 与 IR validator 复用同一 data compatibility 规则，不执行作者代码。
+
+私有 scalar `let` 保留普通词法 lifetime 与 assignment semantics。Closure 共享其 storage，`const` alias 则保存读取当时的 scalar snapshot；写入不会请求 render，也不发送 State notification。JavaScript target 使用原生 `let`；GPUI 以 native reference ownership 保留被捕获的 cell，并在调用作者代码前结束每一次 borrow。纯 scalar module initializer 与实际到达的具名 source helper 保留跨 component instance 的 module lifetime。Helper 的 capture 来自定义它的 module，不能由 caller-local 同名变量补足。Module cell 属于单个 generated artifact（GPUI 中还限定 UI thread）；单独编译的 artifact 不会自动获得共享 source-module registry。Source graph、export 与 top-level execution 继续受闭图检查约束，编译不会执行 initializer 或未调用的 function body。
+
+私有同步 `try`/`catch`/`finally` 与 `throw` 保留原始的已准入 thrown data，包括 `undefined`、`null`、`false`、零、空字符串，以及 record/array identity。Catch binding 始终 opaque：TypeScript assertion 不授予 public data、State 或 execution authority。作者的 finalizer 按 source order 执行，其 return 或 throw 替换先前的 authored completion。GPUI 对生成的 source exception 要求 `panic=unwind`，且仅识别自身的 thrown-value marker；无关 native failure 在 cleanup 后保留原始 payload。可读取 caught data field 与 scalar/list member；JavaScript prototype property name 仍不在这项有界 GPUI access surface 内。
+
+Context failure delivery 保留已提交的每次 update，完成其余仍有效的 callback、重置 dispatch state，再抛出 primary authored value；即使该值为 falsy，也不会被当作成功。Required Context 断连 read/update 与 strict Anatomy 缺少 domain 的失败保留可区分的 error code，供作者 catch 判别。这些 source-lowering 边界不构成新的 native acceptance，也不替代未改动的真实公共 GPUI composition consumer。
+
+这项词法 lowering 保留普通 `defineHook` facade 的准入缺口。`D-AS-HOOK-DEFINE-HOOK-0001` 将其 capture、store 与 configurable authoring surface 留在核心 authored-asHook 契约之外；旧 parameterized-asHook note 仍为 proposal。现有普通 facade 及其公共 consumer 是有效 implementation evidence。Compiler 支持仍需独立治理的边界与真实 consumer evidence；仅添加 import whitelist，或替换为 atomic/authored asHook，不能建立这项支持。
 
 Native template 将 child style 与 Root feedback 分开，并支持 singular anonymous slot。任意 attribute、`PrototypeRef`、multiple/named slot、native interaction group/portal，以及准入 vocabulary 之外的 interaction operation 仍不支持。Raw host event 是 opaque；可读取 raw Props snapshot，但任意 raw member 不会冒充 typed portable data。Setup style 的 `unUse` 与 Rule declaration disposer 仍是 setup-only；runtime 变化使用 Rule 和 `run.feedback.style.patch/suppress/clearPatch`。
 

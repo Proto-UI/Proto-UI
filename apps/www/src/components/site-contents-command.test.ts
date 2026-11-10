@@ -67,7 +67,7 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
         args[1].ownerId.startsWith('site-contents-')
       )
         throw new Error('renderer unavailable');
-      if (args[1].content?.demo && args[1].componentId === 'dialog') {
+      if (args[1].content?.demo && args[1].componentId === 'popover') {
         const options = args[1],
           content = options.content!;
         const originalSetup = content.demo.setup;
@@ -424,7 +424,7 @@ it.each(
     )
   )
 )(
-  '$runtime/$family initially-closed public Dialog retains facts and the one native tree ($motion)',
+  '$runtime/$family initially-closed public Popover retains facts and the one native tree ($motion)',
   async ({ runtime, family, motion }) => {
     const originalMatchMedia = window.matchMedia.bind(window);
     vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
@@ -500,9 +500,6 @@ it.each(
       expect(retainedEvents).toBe(previousEvents + 1);
     };
     await vi.waitFor(assertNativeComposition);
-    const mount = document.createElement('div');
-    mount.dataset.siteContentsPanelMount = '';
-    home.before(mount);
     const participant = contentsPanelParticipant(header)!;
     panels.push(participant);
     const request = {
@@ -512,12 +509,22 @@ it.each(
     const candidate = await participant.materialize(request);
     candidates.push(candidate);
     const api = faults.panelApis.at(-1)!;
+    const trigger = candidate.host.querySelector<HTMLElement>('[data-site-contents-button]')!;
+    expect(trigger).not.toBeNull();
+    expect(trigger.closest('header')).toBe(header);
+    expect(api.getPublicInstance!('contents-trigger')).toBeDefined();
+    expect(api.getPublicInstance!('contents-popover')).toBeDefined();
+    expect(header.querySelectorAll('[data-site-contents-button]')).toHaveLength(1);
+    const contentId = trigger.getAttribute('aria-controls');
+    expect(contentId).toBeTruthy();
+    expect(contentId).not.toBe('starlight__sidebar');
     const initial = api.getPublicInstance!('contents-panel');
     expect(initial).toBeDefined();
     const fact = (key: string) =>
       (api.getExposes('contents-panel')?.[key] as { get(): unknown }).get();
     expect(fact('open')).toBe(false);
     expect(fact('isPresent')).toBe(false);
+    expect(fact('transitionState')).toBe('closed');
     assertNativeComposition();
     candidate.activate();
     participant.prepareCommit(request).publish();
@@ -528,14 +535,18 @@ it.each(
     await vi.waitFor(() => {
       expect(fact('open')).toBe(false);
       expect(fact('isPresent')).toBe(false);
+      expect(fact('transitionState')).toBe('closed');
       expect(tree.parentElement).toBe(home);
       assertNativeComposition();
     });
-    navigation.toggle();
+    click(trigger);
     await vi.waitFor(() => {
       expect(fact('open')).toBe(true);
       expect(tree.parentElement?.hasAttribute('data-site-contents-slot')).toBe(true);
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
+    navigation.refresh();
+    expect(trigger.getAttribute('aria-controls')).toBe(contentId);
     await vi.waitFor(assertNativeComposition);
     disclosure.open = true;
     // Interrupt a close with a same-view reopen without cloning or losing folds.
@@ -551,6 +562,7 @@ it.each(
     navigation.close();
     await vi.waitFor(() => {
       expect(fact('isPresent')).toBe(false);
+      expect(fact('transitionState')).toBe('closed');
       expect(tree.parentElement).toBe(home);
     });
     await vi.waitFor(assertNativeComposition);
@@ -562,3 +574,60 @@ it.each(
   },
   15_000
 );
+
+it('publishes the Docs Header public composition, transfers its open native tree across runtimes and returns it before disposal', async () => {
+  const { header, root, fallback, panel } = fixture();
+  const pane = document.getElementById('starlight__sidebar')!;
+  const tree = document.createElement('nav');
+  tree.className = 'docs-sidebar';
+  tree.setAttribute('aria-label', 'Documentation');
+  pane.before(tree);
+  tree.append(pane);
+  const retainedGroup = document.createElement('details');
+  retainedGroup.innerHTML = '<summary>Retained section</summary><a href="/kept/">Kept link</a>';
+  retainedGroup.open = true;
+  pane.append(retainedGroup);
+  const home = tree.parentElement;
+  const handle = initDocumentationHeaderSurface(header)!;
+  handles.push(handle);
+  await vi.waitFor(() => expect(root.dataset.contentsRuntime).toBe('wc'), { timeout: 15000 });
+  const trigger = activeButton(root);
+  expect(root.querySelectorAll('[data-site-contents-button]')).toHaveLength(1);
+  expect(fallback.hidden).toBe(true);
+  expect(root.dataset.contentsGeneration).toBe(panel.dataset.headerSurfaceGeneration);
+  const id = trigger.getAttribute('aria-controls');
+  expect(id).toBeTruthy();
+  expect(id).not.toBe('starlight__sidebar');
+  click(trigger);
+  await vi.waitFor(() => {
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(tree.parentElement?.hasAttribute('data-site-contents-slot')).toBe(true);
+  });
+  siteContentsNavigation(document)!.refresh();
+  expect(trigger.getAttribute('aria-controls')).toBe(id);
+  for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
+    const oldTrigger = activeButton(root);
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+    );
+    await vi.waitFor(
+      () => {
+        expect(root.dataset.contentsRuntime).toBe(runtime);
+        expect(root.dataset.contentsGeneration).toBe(panel.dataset.headerSurfaceGeneration);
+        expect(activeButton(root).getAttribute('aria-expanded')).toBe('true');
+        expect(tree.parentElement?.hasAttribute('data-site-contents-slot')).toBe(true);
+        expect(tree.querySelector('details')).toBe(retainedGroup);
+        expect(retainedGroup.open).toBe(true);
+        expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
+      },
+      { timeout: 15000 }
+    );
+    await vi.waitFor(() => expect(oldTrigger.isConnected).toBe(false));
+    expect(root.querySelectorAll('[data-site-contents-button]')).toHaveLength(1);
+  }
+  await handle.destroy();
+  expect(tree.parentElement).toBe(home);
+  expect(tree.contains(pane)).toBe(true);
+  expect(fallback.hidden).toBe(false);
+  expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
+}, 30000);

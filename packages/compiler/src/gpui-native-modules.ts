@@ -18,10 +18,23 @@ pub struct FocusModule {
     pub entry_disabled:bool,pub scope_active:bool,pub visible:bool,pub selected:bool,pub active:bool,
     pub module_active:bool,pub has_focused:bool,pub bypass_gate:bool,
     pub roving_declared:bool,
-    pub reason:String,pub blur_requested:bool,pub previous:OwnerWeak,pub remembered:OwnerWeak,
+    pub reason:&'static str,pub prevent_scroll:bool,pub blur_requested:bool,pub previous:OwnerWeak,pub remembered:OwnerWeak,
     pub pending:Option<(&'static str,Value)>,pub native:Option<FocusHandle>,
+    pub intent:u64,pub scope_activation:u64,pub scope_intent:u64,pub scope_recipient:Option<(OwnerWeak,u64)>,
+    pub entry_intent:Option<FocusEntryIntent>,pub request_source:Option<(OwnerWeak,u64)>,
+    entry_projection:Option<FocusEntryProjection>,entry_self_focused:bool,
 }
-thread_local!{static ACTIVE_SCOPES:RefCell<Vec<OwnerWeak>>=RefCell::new(Vec::new());}
+pub struct FocusEntryIntent {
+    id:u64,activation:Option<u64>,reason:&'static str,prevent_scroll:bool,attempted:Option<FocusEntryBinding>,
+}
+#[derive(Clone,Copy,PartialEq,Eq)]
+struct FocusEntryBinding { epoch:u64,window:gpui::WindowId,generation:u64 }
+struct FocusEntryProjection { binding:FocusEntryBinding,resolved:bool,self_fallback:bool }
+thread_local!{
+    static ACTIVE_SCOPES:RefCell<Vec<OwnerWeak>>=RefCell::new(Vec::new());
+    static ENTRY_INTENTS:RefCell<Vec<(OwnerWeak,u64)>>=RefCell::new(Vec::new());
+    static FOCUS_INTENT_EPOCH:Cell<u64>=Cell::new(0);
+}
 pub fn all_owners()->Vec<OwnerRef>{OWNERS.with(|all|{let mut all=all.borrow_mut();all.retain(|v|v.strong_count()>0);all.iter().filter_map(Weak::upgrade).filter(|o|!o.borrow().disposed).collect()})}
 pub fn descendant(owner:&OwnerRef,ancestor:&OwnerRef)->bool{let mut current=Some(owner.clone());let mut visited=BTreeSet::new();while let Some(node)=current{assert!(visited.insert(Rc::as_ptr(&node)as usize),"cyclic logical ancestry");if Rc::ptr_eq(&node,ancestor){return true}current=node.borrow().parent.upgrade();}false}
 pub fn ready(owner:&OwnerRef)->bool{let o=owner.borrow();!o.disposed&&o.mounted&&o.present&&o.bounds.is_some()}
@@ -63,15 +76,15 @@ pub fn observed(owner:&OwnerWeak,key:&str)->Value{
         "overlay.open"=>Value::boolean(owner.borrow().modules.overlay.open),
         "focus.visible"=>Value::boolean(owner.borrow().modules.focus.visible),
         "focus.ready"=>Value::boolean(owner.borrow().focusable&&!owner.borrow().focus_disabled),
-        "scope.active"|"roving.active"=>Value::boolean(owner.borrow().modules.focus.module_active),
+        "scope.active"=>Value::boolean(owner.borrow().modules.focus.scope_active),
+        "roving.active"=>Value::boolean(owner.borrow().modules.focus.module_active),
         "scope.hasFocused"|"roving.hasFocused"=>Value::boolean(owner.borrow().modules.focus.has_focused),
         _=>panic!("unmapped native observation {key}"),
     }
 }
 pub fn focus_setup(owner:&OwnerWeak,kind:&'static str)->Value{let handle=module_handle(owner,kind);if kind=="focus-roving"{ensure(owner).borrow_mut().modules.focus.roving_declared=true;}handle}
-pub fn native_focus_surface(owner:&OwnerRef)->bool{let owner=owner.borrow();owner.focusable&&!owner.focus_disabled||owner.modules.hooks.contains("focus-entry")}
-pub fn native_focus_available(owner:&OwnerRef)->bool{let owner=owner.borrow();!owner.focus_disabled&&(owner.focusable||owner.modules.hooks.contains("focus-entry")&&!owner.modules.focus.entry_disabled)}
-pub fn native_tab_participation(owner:&OwnerRef)->bool{let owner=owner.borrow();if owner.focusable{!owner.focus_disabled&&owner.focus_entry}else{owner.modules.hooks.contains("focus-entry")&&!owner.modules.focus.entry_disabled}}
+pub fn native_focus_available(owner:&OwnerRef)->bool{let owner=owner.borrow();owner.focusable&&!owner.focus_disabled||owner.modules.hooks.contains("focus-entry")&&!owner.modules.focus.entry_disabled}
+pub fn native_tab_participation(owner:&OwnerRef)->bool{let owner=owner.borrow();owner.focusable&&!owner.focus_disabled&&owner.focus_entry||owner.modules.hooks.contains("focus-entry")&&!owner.modules.focus.entry_disabled&&owner.modules.focus.entry_projection.as_ref().is_some_and(|projection|projection.self_fallback&&projection.binding.epoch==owner.epoch&&Some(projection.binding.window)==owner.window_id)}
 pub fn focus_setup_config(owner:&OwnerWeak,kind:&str,patch:Value)->Value{
     let owner=setup(owner);
     {let mut o=owner.borrow_mut();match kind{
@@ -82,7 +95,7 @@ pub fn focus_setup_config(owner:&OwnerWeak,kind:&str,patch:Value)->Value{
         _=>panic!("invalid focus configuration capability"),
     }}Value::Undefined
 }
-pub fn focus_entry_disabled(owner:&OwnerWeak,value:Value)->Value{let owner=runtime(owner);let mut owner=owner.borrow_mut();owner.modules.focus.entry_disabled=value.bool();if owner.modules.focus.entry_disabled&&!owner.focusable{owner.focus_requested=false;}owner.dirty=true;Value::Undefined}
+pub fn focus_entry_disabled(owner:&OwnerWeak,value:Value)->Value{let owner=runtime(owner);let disabled=value.bool();{let mut o=owner.borrow_mut();o.modules.focus.entry_disabled=disabled;o.dirty=true;}if disabled{retire_entry_intent(&owner);}Value::Undefined}
 pub fn focus_nav(owner:&OwnerWeak,value:Value)->Value{let owner=runtime(owner);let text=value.text();assert!(text=="auto"||text=="none","invalid navigation participation");let mut o=owner.borrow_mut();o.focus_entry=text=="auto";o.modules.focus.config.insert("navParticipation".into(),value);o.dirty=true;Value::Undefined}
 pub fn focus_status(owner:&OwnerWeak,value:Value)->Value{let owner=runtime(owner);let selected=value.member("selected",false);let active=value.member("active",false);let mut o=owner.borrow_mut();if !selected.nullish(){o.modules.focus.selected=selected.bool();}if !active.nullish(){o.modules.focus.active=active.bool();}o.dirty=true;Value::Undefined}
 pub fn focus_set_roving(owner:&OwnerWeak,key:&str,value:Value)->Value{let owner=runtime(owner);if key=="loop"{value.bool();}else{assert!(["both","horizontal","vertical"].contains(&value.text().as_str()),"invalid roving orientation");}owner.borrow_mut().modules.focus.roving.insert(key.into(),value);Value::Undefined}
@@ -91,26 +104,119 @@ fn focus_provider(owner:&OwnerRef)->Option<OwnerRef>{
     while let Some(candidate)=current{let o=candidate.borrow();let matches=o.modules.focus.roving_declared&&(key.nullish()||strict_equal(&field(&o.modules.focus.roving,"key"),&key));current=o.parent.upgrade();drop(o);if matches{return Some(candidate)}}None
 }
 pub fn focus_members(owner:&OwnerRef,roving:bool)->Vec<OwnerRef>{
+    focus_members_for(owner,roving,false)
+}
+fn focus_members_for(owner:&OwnerRef,roving:bool,logical:bool)->Vec<OwnerRef>{
     let window=owner.borrow().window_id;
-    let mut members:Vec<_>=all_owners().into_iter().filter(|candidate|{let c=candidate.borrow();let eligible=!Rc::ptr_eq(candidate,owner)&&c.focusable&&!c.focus_disabled&&c.present&&(window.is_none()||c.window_id.is_none()||c.window_id==window);drop(c);eligible&&if roving{focus_provider(candidate).is_some_and(|p|Rc::ptr_eq(&p,owner))}else{descendant(candidate,owner)}}).collect();
+    // Scope entry/traversal uses natural navigation members; roving and explicit
+    // requests still admit programmatic-only targets (C-AS-FOCUSABLE-0001-F).
+    let mut members:Vec<_>=all_owners().into_iter().filter(|candidate|{let c=candidate.borrow();let eligible=!Rc::ptr_eq(candidate,owner)&&c.focusable&&!c.focus_disabled&&(roving||c.focus_entry)&&(logical||c.present)&&(window.is_none()||c.window_id.is_none()||c.window_id==window);drop(c);eligible&&if roving{focus_provider(candidate).is_some_and(|p|Rc::ptr_eq(&p,owner))}else{descendant(candidate,owner)}}).collect();
     members.sort_by_key(|member|member.borrow().modules.topology.order);members
 }
 fn top_scope_in(window:Option<gpui::WindowId>)->Option<OwnerRef>{ACTIVE_SCOPES.with(|scopes|{let mut scopes=scopes.borrow_mut();scopes.retain(|s|s.upgrade().is_some_and(|s|!s.borrow().disposed&&s.borrow().modules.focus.scope_active));scopes.iter().rev().filter_map(Weak::upgrade).find(|s|window.is_none()||s.borrow().window_id.is_none()||s.borrow().window_id==window)})}
 fn top_scope(owner:&OwnerRef)->Option<OwnerRef>{top_scope_in(owner.borrow().window_id)}
-fn queue_native_focus(owner:&OwnerRef,options:Value,bypass_gate:bool){
-    let mut o=owner.borrow_mut();o.modules.focus.reason=text_or(options.member("reason",true),"programmatic");o.modules.focus.bypass_gate=bypass_gate;o.focus_requested=true;o.dirty=true;
+fn focus_window(owner:&OwnerRef)->Option<gpui::WindowId>{let mut current=Some(owner.clone());while let Some(owner)=current{let o=owner.borrow();if o.window_id.is_some(){return o.window_id}current=o.parent.upgrade();}None}
+fn same_focus_window(left:Option<gpui::WindowId>,right:Option<gpui::WindowId>)->bool{left.is_none()||right.is_none()||left==right}
+fn focus_intent_epoch(owner:&OwnerRef)->u64{let window=focus_window(owner);OWNERS.with(|owners|owners.borrow().iter().filter_map(Weak::upgrade).filter(|candidate|!candidate.borrow().disposed&&same_focus_window(window,focus_window(candidate))).map(|candidate|candidate.borrow().modules.focus.intent).max().unwrap_or(0))}
+fn pending_focus_since(owner:&OwnerRef,after:u64)->bool{let window=focus_window(owner);OWNERS.with(|owners|owners.borrow().iter().filter_map(Weak::upgrade).any(|candidate|{if !same_focus_window(window,focus_window(&candidate)){return false}let o=candidate.borrow();!o.disposed&&o.modules.focus.intent>after&&(o.focus_requested||o.modules.focus.entry_intent.is_some())}))}
+fn clear_focus_recipient(owner:&OwnerRef,id:u64,recipient:OwnerWeak){
+    if let Some(recipient)=recipient.upgrade(){let weak=Rc::downgrade(owner);let mut target=recipient.borrow_mut();if target.modules.focus.request_source.as_ref().is_some_and(|(source,intent)|Weak::ptr_eq(source,&weak)&&*intent==id){target.modules.focus.request_source=None;target.focus_requested=false;target.modules.focus.bypass_gate=false;target.dirty=true;}}
 }
-pub fn request_native_focus(owner:&OwnerRef,options:Value){
-    if !owner.borrow().focusable||owner.borrow().focus_disabled{return}
-    if ready(owner)&&top_scope(owner).is_some_and(|scope|!descendant(owner,&scope)){return}
-    queue_native_focus(owner,options,false);
+fn clear_scope_recipient(owner:&OwnerRef){let recipient=owner.borrow_mut().modules.focus.scope_recipient.take();if let Some((recipient,id))=recipient{clear_focus_recipient(owner,id,recipient);}}
+// Detachment withdraws only physical readiness. A retained activation may resolve
+// again in its new view; it can never carry a FocusHandle across that boundary.
+fn withdraw_entry_view(owner:&OwnerRef){let mut o=owner.borrow_mut();o.modules.focus.entry_projection=None;o.modules.focus.entry_self_focused=false;if let Some(intent)=o.modules.focus.entry_intent.as_mut(){intent.attempted=None;}}
+fn retire_entry_intent(owner:&OwnerRef){
+    let pending=owner.borrow_mut().modules.focus.entry_intent.take();let Some(pending)=pending else{return};let weak=Rc::downgrade(owner);
+    ENTRY_INTENTS.with(|entries|entries.borrow_mut().retain(|(candidate,id)|!Weak::ptr_eq(candidate,&weak)||*id!=pending.id));
+}
+fn retire_scope_entry(owner:&OwnerRef){if owner.borrow().modules.focus.entry_intent.as_ref().is_some_and(|intent|intent.activation.is_some()){retire_entry_intent(owner);}}
+fn note_focus_intent_in(owner:&OwnerRef,window:Option<gpui::WindowId>)->u64{
+    let id=FOCUS_INTENT_EPOCH.with(|epoch|{let id=epoch.get().wrapping_add(1);epoch.set(id);id});owner.borrow_mut().modules.focus.intent=id;
+    ACTIVE_SCOPES.with(|scopes|{for scope in scopes.borrow().iter().filter_map(Weak::upgrade){if same_focus_window(window,focus_window(&scope)){clear_scope_recipient(&scope);}}});
+    loop{let previous=ENTRY_INTENTS.with(|entries|{let mut entries=entries.borrow_mut();let index=entries.iter().position(|(source,_)|source.upgrade().map_or(true,|source|same_focus_window(window,focus_window(&source))));index.map(|index|entries.swap_remove(index))});let Some((source,_))=previous else{break};if let Some(source)=source.upgrade(){retire_entry_intent(&source);}}id
+}
+fn note_focus_intent(owner:&OwnerRef)->u64{note_focus_intent_in(owner,focus_window(owner))}
+fn focus_request_reason(options:&Value)->&'static str{
+    let reason=match options{Value::Record(fields)=>fields.get("reason").and_then(|value|if let Value::Json(Json::String(reason))=value{Some(reason.as_str())}else{None}),Value::Json(Json::Object(fields))=>fields.get("reason").and_then(Json::as_str),_=>None};
+    match reason{Some("keyboard")=>"keyboard",Some("pointer")=>"pointer",_=>"programmatic"}
+}
+fn entry_policy(owner:&OwnerRef)->(bool,bool){let o=owner.borrow();(matches!(o.modules.focus.entry.get("strategy"),Some(Value::Json(Json::String(strategy))) if strategy=="descendant-first"),!matches!(o.modules.focus.entry.get("fallback"),Some(Value::Json(Json::String(fallback))) if fallback=="none"))}
+fn native_entry_target(owner:&OwnerRef,focus:&FocusHandle,window:&Window)->Option<FocusHandle>{
+    let (descendants,fallback)=entry_policy(owner);
+    match window.resolve_focus_entry(focus){
+        gpui::FocusEntryResolution::Unavailable=>None,
+        gpui::FocusEntryResolution::Descendant(target) if descendants=>Some(target),
+        gpui::FocusEntryResolution::Descendant(_)|gpui::FocusEntryResolution::Empty if fallback=>Some(focus.clone()),
+        _=>None,
+    }
+}
+fn project_native_entry(owner:&OwnerRef,binding:FocusEntryBinding,target:Option<&FocusHandle>,focus:&FocusHandle){
+    let self_fallback=target.is_some_and(|target|target==focus);
+    let mut o=owner.borrow_mut();let previous=o.modules.focus.entry_projection.as_ref().is_some_and(|projection|projection.self_fallback);o.modules.focus.entry_projection=Some(FocusEntryProjection{binding,resolved:target.is_some(),self_fallback});if previous!=self_fallback{o.dirty=true;}
+}
+// Refresh before authored callbacks at a real native boundary, including the
+// first mounted callback. The cache only admits independent Entry's first
+// request; application always queries again and never retains this handle.
+pub fn refresh_native_entry(owner:&OwnerRef,window:&Window){
+    let binding={let o=owner.borrow();if o.disposed||!o.present||o.bounds.is_none()||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("focus-entry"){return}FocusEntryBinding{epoch:o.epoch,window:window.window_handle().window_id(),generation:window.focus_tree_generation()}};
+    if owner.borrow().modules.focus.entry_projection.as_ref().is_some_and(|projection|projection.binding==binding){return}
+    let focus=owner.borrow().modules.focus.native.clone();let Some(focus)=focus else{return};
+    let target=native_entry_target(owner,&focus,window);project_native_entry(owner,binding,target.as_ref(),&focus);
+}
+fn entry_was_resolved(owner:&OwnerRef)->bool{let o=owner.borrow();!o.disposed&&o.present&&o.mounted&&o.bounds.is_some()&&!o.modules.focus.entry_disabled&&o.modules.focus.entry_projection.as_ref().is_some_and(|projection|projection.resolved&&projection.binding.epoch==o.epoch&&Some(projection.binding.window)==o.window_id)}
+fn retain_entry_intent(owner:&OwnerRef,activation:Option<u64>,reason:&'static str,prevent_scroll:bool){
+    let id=note_focus_intent(owner);let mut o=owner.borrow_mut();o.modules.focus.reason=reason;o.modules.focus.prevent_scroll=prevent_scroll;o.modules.focus.entry_intent=Some(FocusEntryIntent{id,activation,reason,prevent_scroll,attempted:None});o.dirty=true;drop(o);
+    ENTRY_INTENTS.with(|entries|entries.borrow_mut().push((Rc::downgrade(owner),id)));
+}
+fn entry_intent_current(owner:&OwnerRef,id:u64,binding:FocusEntryBinding)->bool{
+    let o=owner.borrow();!o.disposed&&o.present&&o.mounted&&o.bounds.is_some()&&!o.modules.focus.entry_disabled&&o.epoch==binding.epoch&&o.window_id==Some(binding.window)&&o.modules.focus.intent==id&&o.modules.focus.entry_intent.as_ref().is_some_and(|intent|intent.id==id&&intent.activation.map_or(true,|activation|o.modules.focus.scope_activation==activation))
+}
+fn drive_entry_intent(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&mut App){
+    let window_id=window.window_handle().window_id();
+    if owner.borrow().window_id!=Some(window_id){return}
+    if !ready(owner){withdraw_entry_view(owner);return}
+    if !owner.borrow().modules.hooks.contains("focus-entry"){return}
+    let binding=FocusEntryBinding{epoch:owner.borrow().epoch,window:window_id,generation:window.focus_tree_generation()};
+    let request={let o=owner.borrow();o.modules.focus.entry_intent.as_ref().map(|intent|(intent.id,intent.reason,intent.prevent_scroll,intent.attempted))};
+    let refresh=owner.borrow().modules.focus.entry_projection.as_ref().is_none_or(|projection|projection.binding!=binding);
+    let attempt=request.is_some_and(|(_,_,_,attempted)|attempted!=Some(binding));
+    if !refresh&&!attempt{return}
+    // The SDK owns physical discovery. Nothing in the intent or projection stores
+    // a descendant handle, and ordinary AnyView children need no Proto registration.
+    let target=native_entry_target(owner,focus,window);
+    let self_fallback=target.as_ref().is_some_and(|target|target==focus);
+    project_native_entry(owner,binding,target.as_ref(),focus);
+    let Some((id,reason,prevent_scroll,attempted))=request else{return};
+    if !entry_intent_current(owner,id,binding){if owner.borrow().modules.focus.entry_intent.as_ref().is_some_and(|intent|intent.id==id){retire_entry_intent(owner);}return}
+    if attempted==Some(binding){return}
+    owner.borrow_mut().modules.focus.entry_intent.as_mut().expect("current native Entry intent").attempted=Some(binding);
+    let Some(target)=target else{return};
+    // Options belong to the actual generated target when it has one. Foreign
+    // handles stay native; this existing owner metadata is never a candidate list.
+    OWNERS.with(|owners|{for recipient in owners.borrow().iter().filter_map(Weak::upgrade){let mut recipient=recipient.borrow_mut();if !recipient.disposed&&recipient.mounted&&recipient.present&&recipient.window_id==Some(window_id)&&recipient.modules.focus.native.as_ref()==Some(&target){recipient.modules.focus.reason=reason;recipient.modules.focus.prevent_scroll=prevent_scroll;}}});
+    if !entry_intent_current(owner,id,binding)||window.focus_tree_generation()!=binding.generation{return}
+    window.focus(&target,cx);
+    if !entry_intent_current(owner,id,binding)||window.focus_tree_generation()!=binding.generation||!target.is_focused(window){return}
+    // Settle this request before any fact observer can create a new one.
+    retire_entry_intent(owner);
+    if self_fallback{owner.borrow_mut().modules.focus.entry_self_focused=true;native_focus_fact(owner,true);}
+}
+fn queue_focus(owner:&OwnerRef,reason:&'static str,prevent_scroll:bool,bypass_gate:bool){
+    let mut o=owner.borrow_mut();o.modules.focus.request_source=None;o.modules.focus.reason=reason;o.modules.focus.prevent_scroll=prevent_scroll;o.modules.focus.bypass_gate=bypass_gate;o.focus_requested=true;o.dirty=true;
+}
+fn queue_native_focus(owner:&OwnerRef,options:&Value,bypass_gate:bool){queue_focus(owner,focus_request_reason(options),bool_or(options.member("preventScroll",true),false),bypass_gate);}
+fn request_native_focus(owner:&OwnerRef,options:Value)->Option<u64>{
+    if !owner.borrow().focusable||owner.borrow().focus_disabled{return None}
+    if ready(owner)&&top_scope(owner).is_some_and(|scope|!descendant(owner,&scope)){return None}
+    let id=note_focus_intent(owner);queue_native_focus(owner,&options,false);Some(id)
 }
 pub fn focus_request(owner:&OwnerWeak,options:Value,entry:bool)->Value{
     let owner=runtime(owner);
-    if entry{let o=owner.borrow();if o.modules.focus.entry_disabled{return Value::Undefined}let strategy=text_or(field(&o.modules.focus.entry,"strategy"),"self");let fallback=text_or(field(&o.modules.focus.entry,"fallback"),"self");drop(o);if strategy=="descendant-first"{if let Some(target)=focus_members(&owner,false).first(){queue_native_focus(target,options,true);return Value::Undefined}}if fallback=="none"{return Value::Undefined}queue_native_focus(&owner,options,true);return Value::Undefined}
+    if entry{if entry_was_resolved(&owner){retain_entry_intent(&owner,None,focus_request_reason(&options),bool_or(options.member("preventScroll",true),false));}return Value::Undefined}
     request_native_focus(&owner,options);Value::Undefined
 }
-pub fn focus_blur(owner:&OwnerWeak)->Value{let owner=runtime(owner);let mut o=owner.borrow_mut();o.focus_requested=false;o.focused=false;o.modules.focus.visible=false;o.modules.focus.module_active=false;o.modules.focus.blur_requested=true;o.dirty=true;Value::Undefined}
+pub fn focus_blur(owner:&OwnerWeak)->Value{let owner=runtime(owner);{let mut o=owner.borrow_mut();o.modules.focus.scope_activation=o.modules.focus.scope_activation.wrapping_add(1);}retire_entry_intent(&owner);clear_scope_recipient(&owner);let source=owner.borrow().modules.focus.request_source.clone();if let Some((source,id))=source{if let Some(source)=source.upgrade(){if source.borrow().modules.focus.entry_intent.as_ref().is_some_and(|intent|intent.id==id){retire_entry_intent(&source);}}}let mut o=owner.borrow_mut();o.focus_requested=false;o.modules.focus.request_source=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.module_active=false;o.modules.focus.blur_requested=true;o.dirty=true;Value::Undefined}
 pub fn focus_is_focused(owner:&OwnerWeak)->Value{Value::boolean(ensure(owner).borrow().focused)}
 pub fn focus_is_active(owner:&OwnerWeak)->Value{Value::boolean(ensure(owner).borrow().modules.focus.scope_active)}
 pub fn focus_get_roving(owner:&OwnerWeak)->Value{ensure(owner).borrow_mut().modules.focus.roving_declared=true;Value::Handle(owner.clone(),"focus-roving")}
@@ -130,32 +236,58 @@ fn navigate_focus(owner:&OwnerRef,roving:bool,operation:&'static str,options:Val
     if let Some(index)=index{let target=&members[index];let pending=!ready(target)&&bool_or(options.member("defer",true),false);owner.borrow_mut().modules.focus.pending=if pending{Some((operation,options.clone()))}else{None};let options=if options.nullish(){record(vec![("reason",Value::string("keyboard"))])}else{options};request_native_focus(target,options);true}else{false}
 }
 pub fn focus_activate(owner:&OwnerWeak,options:Value)->Value{
-    let owner=runtime(owner);let window=owner.borrow().window_id;let previous=all_owners().into_iter().find(|o|o.borrow().window_id==window&&o.borrow().focused&&!descendant(o,&owner));{let mut o=owner.borrow_mut();o.modules.focus.previous=previous.as_ref().map(Rc::downgrade).unwrap_or_default();o.modules.focus.scope_active=true;o.modules.focus.module_active=true;o.modules.focus.has_focused=true;o.dirty=true;}
+    let owner=runtime(owner);let use_entry=matches!(owner.borrow().modules.focus.scope.get("entryFallback"),Some(Value::Json(Json::String(mode))) if mode=="entry");
+    let activation={let mut o=owner.borrow_mut();o.modules.focus.scope_activation=o.modules.focus.scope_activation.wrapping_add(1);o.modules.focus.scope_intent=FOCUS_INTENT_EPOCH.with(Cell::get);o.modules.focus.scope_activation};retire_scope_entry(&owner);clear_scope_recipient(&owner);let request_epoch=focus_intent_epoch(&owner);
+    let reason=focus_request_reason(&options);let prevent_scroll=bool_or(options.member("preventScroll",true),false);
+    let window=owner.borrow().window_id;let previous=all_owners().into_iter().find(|o|o.borrow().window_id==window&&o.borrow().focused&&!descendant(o,&owner));{let mut o=owner.borrow_mut();o.modules.focus.previous=previous.as_ref().map(Rc::downgrade).unwrap_or_default();o.modules.focus.scope_active=true;o.modules.focus.module_active=true;o.modules.focus.has_focused=true;o.dirty=true;}
     ACTIVE_SCOPES.with(|scopes|{let mut scopes=scopes.borrow_mut();scopes.retain(|s|!Weak::ptr_eq(s,&Rc::downgrade(&owner)));scopes.push(Rc::downgrade(&owner));});
-    let entry=text_or(field(&owner.borrow().modules.focus.scope,"entry"),"first");if entry!="manual"{let roving=owner.borrow().modules.focus.roving_declared;if let Some(target)=focus_members(&owner,roving).first(){request_native_focus(target,options);}else if text_or(field(&owner.borrow().modules.focus.scope,"emptyPolicy"),"none")=="none"{let mut o=owner.borrow_mut();o.modules.focus.scope_active=false;o.modules.focus.module_active=false;}}
+    if use_entry{poll_state_watchers();if owner.borrow().disposed||owner.borrow().modules.focus.scope_activation!=activation||request_epoch!=focus_intent_epoch(&owner){return Value::Undefined}}
+    let entry=text_or(field(&owner.borrow().modules.focus.scope,"entry"),"first");if entry!="manual"&&text_or(options.member("entry",true),"configured")!="manual"{
+        let roving=owner.borrow().modules.focus.roving_declared;let members=focus_members_for(&owner,roving,use_entry);
+        if let Some(target)=members.first(){if let Some(id)=request_native_focus(target,options){target.borrow_mut().modules.focus.request_source=Some((Rc::downgrade(&owner),id));let mut o=owner.borrow_mut();o.modules.focus.scope_intent=id;o.modules.focus.scope_recipient=Some((Rc::downgrade(target),id));}}
+        else{
+            if text_or(field(&owner.borrow().modules.focus.scope,"emptyPolicy"),"none")=="none"{let mut o=owner.borrow_mut();o.modules.focus.scope_active=false;o.modules.focus.module_active=false;}
+            if use_entry{poll_state_watchers();if owner.borrow().disposed||owner.borrow().modules.focus.scope_activation!=activation||request_epoch!=focus_intent_epoch(&owner){return Value::Undefined}
+                let enabled={let o=owner.borrow();o.modules.hooks.contains("focus-entry")&&!o.modules.focus.entry_disabled};
+                if enabled{retain_entry_intent(&owner,Some(activation),reason,prevent_scroll);let mut o=owner.borrow_mut();o.modules.focus.scope_intent=o.modules.focus.intent;}
+            }
+        }
+    }
     Value::Undefined
 }
 pub fn focus_restore(owner:&OwnerWeak)->Value{focus_request(owner,Value::Undefined,false)}
 pub fn focus_deactivate(owner:&OwnerWeak,options:Value)->Value{
-    let owner=runtime(owner);let was_active={let mut o=owner.borrow_mut();o.modules.focus.module_active=false;o.dirty=true;std::mem::take(&mut o.modules.focus.scope_active)};
+    let owner=runtime(owner);{let mut o=owner.borrow_mut();o.modules.focus.scope_activation=o.modules.focus.scope_activation.wrapping_add(1);}retire_scope_entry(&owner);clear_scope_recipient(&owner);
+    let request_epoch=focus_intent_epoch(&owner);let activation=owner.borrow().modules.focus.scope_activation;let scope_intent=owner.borrow().modules.focus.scope_intent;let superseded=request_epoch>scope_intent&&pending_focus_since(&owner,scope_intent);
+    let was_active={let mut o=owner.borrow_mut();o.modules.focus.module_active=false;o.dirty=true;std::mem::take(&mut o.modules.focus.scope_active)};
     if !was_active{return Value::Undefined}
-    for member in focus_members(&owner,false){let mut member=member.borrow_mut();member.focus_requested=false;member.modules.focus.module_active=false;if member.focused{member.modules.focus.blur_requested=true;member.focused=false;member.modules.focus.visible=false;}member.dirty=true;}
-    let previous=owner.borrow().modules.focus.previous.upgrade();if let Some(previous)=previous{if ready(&previous)&&previous.borrow().focusable&&!previous.borrow().focus_disabled{queue_native_focus(&previous,options,true);}}Value::Undefined
+    for member in focus_members(&owner,false){let mut member=member.borrow_mut();member.modules.focus.module_active=false;if member.focused{member.modules.focus.blur_requested=true;member.focused=false;member.modules.focus.visible=false;}member.dirty=true;}
+    poll_state_watchers();if owner.borrow().disposed||owner.borrow().modules.focus.scope_activation!=activation||superseded||request_epoch!=focus_intent_epoch(&owner)||text_or(field(&owner.borrow().modules.focus.scope,"restore"),"previous")=="none"{return Value::Undefined}
+    let previous=owner.borrow().modules.focus.previous.upgrade();if let Some(previous)=previous{if ready(&previous)&&previous.borrow().focusable&&!previous.borrow().focus_disabled{note_focus_intent(&previous);queue_native_focus(&previous,&options,true);}}Value::Undefined
 }
 pub fn native_focus_fact(owner:&OwnerRef,focused:bool){
+    if owner.borrow().disposed{return}
     if !focused{native_press_blur(owner);}
-    let focused=focused&&owner.borrow().focusable&&!owner.borrow().focus_disabled;
+    let focused={let mut o=owner.borrow_mut();if !focused{o.modules.focus.entry_self_focused=false;}focused&&(o.focusable&&!o.focus_disabled||!o.focusable&&o.modules.focus.entry_self_focused)};
     {let mut o=owner.borrow_mut();o.focused=focused;o.modules.focus.visible=focused&&o.modules.focus.reason=="keyboard";o.modules.focus.module_active=focused;if focused{o.modules.focus.has_focused=true;}o.dirty=true;}
     if focused{for scope in all_owners(){if !Rc::ptr_eq(&scope,owner)&&descendant(owner,&scope){scope.borrow_mut().modules.focus.remembered=Rc::downgrade(owner);scope.borrow_mut().dirty=true;}}}
     poll_state_watchers();
 }
 pub fn modules_drive(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&mut App){
+    if owner.borrow().disposed{retire_entry_intent(owner);withdraw_entry_view(owner);return}
+    if owner.borrow().window_id!=Some(window.window_handle().window_id()){return}
+    let live=ready(owner);
+    if !live{withdraw_entry_view(owner);}
     overlay_input_scope(owner,cx);
     positioning_drive(window);
-    owner.borrow_mut().modules.focus.native=Some(focus.clone());
+    if owner.borrow().disposed{return}
+    if live&&ready(owner){owner.borrow_mut().modules.focus.native=Some(focus.clone());}
     let blur=std::mem::take(&mut owner.borrow_mut().modules.focus.blur_requested);if (blur||text_disabled(owner))&&focus.is_focused(window){window.blur(cx);}
+    drive_entry_intent(owner,focus,window,cx);
+    if owner.borrow().disposed{return}
+    let blur=std::mem::take(&mut owner.borrow_mut().modules.focus.blur_requested);if blur&&focus.is_focused(window){window.blur(cx);}
     let request=owner.borrow().focus_requested;
-    if request&&ready(owner)&&native_focus_available(owner)&&!text_disabled(owner){let bypass_gate={let mut o=owner.borrow_mut();o.focus_requested=false;std::mem::take(&mut o.modules.focus.bypass_gate)};if bypass_gate||top_scope(owner).map_or(true,|scope|descendant(owner,&scope)){window.focus(focus,cx);}}
+    if request&&live&&ready(owner)&&native_focus_available(owner)&&!text_disabled(owner){let (bypass_gate,source)={let mut o=owner.borrow_mut();o.focus_requested=false;(std::mem::take(&mut o.modules.focus.bypass_gate),o.modules.focus.request_source.take())};if bypass_gate||top_scope(owner).map_or(true,|scope|descendant(owner,&scope)){window.focus(focus,cx);if focus.is_focused(window){if let Some((source,id))=source{if let Some(source)=source.upgrade(){let selected=source.borrow().modules.focus.scope_recipient.as_ref().is_some_and(|(_,intent)|*intent==id);if selected{source.borrow_mut().modules.focus.scope_recipient=None;}}}}}}
     transition_drive(owner,window,cx);
 }
 pub fn drive_queued_focus(owner:&OwnerRef,window:&mut Window,cx:&mut App){for other in owners_in(window){if Rc::ptr_eq(owner,&other){continue}let focus=other.borrow().modules.focus.native.clone();if let Some(focus)=focus{modules_drive(&other,&focus,window,cx);}}}

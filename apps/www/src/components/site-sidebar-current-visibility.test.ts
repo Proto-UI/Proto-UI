@@ -169,16 +169,15 @@ describe('current article nearest-edge layout', () => {
     document.body.style.overflowY = 'auto';
     expect(nearestSidebarScroller(link, root)).toBeNull();
   });
-  it('re-measures the actual owner when the public dialog relocates the same tree', async () => {
+  it('re-measures an inner scroll owner when the same tree relocates', async () => {
     const { root, pane, owner, link } = fixture();
     stop = initSidebarCurrentVisibility(root);
     await flush();
     expect(owner).toBe(root);
     expect(root.scrollTop).toBe(544);
 
-    // The real Contents panel moves this exact nav into its public Dialog and
-    // marks it with data-site-contents-dialog-tree. The inner pane then becomes
-    // the scroll owner; no second contents-open event is dispatched.
+    // Retain the original inner-pane geometry control. The current public
+    // Popover owns an enclosing viewport, exercised separately below.
     const dialog = document.createElement('div');
     document.body.append(dialog);
     root.style.overflowY = 'visible';
@@ -214,13 +213,89 @@ describe('current article nearest-edge layout', () => {
       height: 44,
       toJSON() {},
     }));
+    const { promise: relocated, resolve: resolveRelocation } = Promise.withResolvers<void>();
+    const observer = new MutationObserver(() => {
+      observer.disconnect();
+      resolveRelocation();
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-site-contents-popover-tree'],
+    });
+    root.setAttribute('data-site-contents-popover-tree', '');
     dialog.append(root);
-    root.setAttribute('data-site-contents-dialog-tree', '');
+    // Observe actual mutation delivery before draining the owned layout frames.
+    // HappyDOM delivers these notifications in a task, beyond Promise jobs.
+    await relocated;
     await flush();
     expect(nearestSidebarScroller(link, root)).toBe(pane);
     expect(pane.scrollTop).toBe(544);
     expect(window.scrollY).toBe(0);
   });
+  it.each([false, true])(
+    'reveals the same tree in its enclosing viewport (shadowHost=%s) and yields to its input',
+    async (shadowHost) => {
+      const { root, pane, link } = fixture();
+      const focused = document.querySelector<HTMLButtonElement>('#focus')!;
+      focused.focus();
+      const documentY = window.scrollY;
+      stop = initSidebarCurrentVisibility(root);
+      await flush();
+      expect(root.scrollTop).toBe(544);
+
+      // HappyDOM models parent/ShadowRoot.host ancestry but has no assignedSlot
+      // accessor. The existing homepage browser carrier owns the real slotted
+      // case with native CSS/layout/input; no slot answer is injected here.
+      const content = document.createElement('div');
+      const nativeSlot = document.createElement('div');
+      document.body.append(content);
+      if (shadowHost) {
+        const host = document.createElement('div');
+        content.append(host);
+        host.attachShadow({ mode: 'open' }).append(nativeSlot);
+      } else content.append(nativeSlot);
+      root.style.overflowY = 'visible';
+      pane.style.overflowY = 'visible';
+      content.style.overflowY = 'auto';
+      Object.defineProperties(content, {
+        clientHeight: { configurable: true, value: 300 },
+        clientTop: { configurable: true, value: 0 },
+        scrollHeight: { configurable: true, value: 1500 },
+      });
+      vi.spyOn(content, 'getBoundingClientRect').mockImplementation(
+        () => new DOMRect(0, 100, 240, 300)
+      );
+      vi.mocked(link.getBoundingClientRect).mockImplementation(
+        () => new DOMRect(0, 900 - content.scrollTop, 240, 44)
+      );
+      const { promise: relocated, resolve: resolveRelocation } = Promise.withResolvers<void>();
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolveRelocation();
+      });
+      observer.observe(root, {
+        attributes: true,
+        attributeFilter: ['data-site-contents-popover-tree'],
+      });
+      root.setAttribute('data-site-contents-popover-tree', '');
+      nativeSlot.append(root);
+      await relocated;
+      await flush();
+      expect(nearestSidebarScroller(link, root)).toBe(content);
+      expect(content.scrollTop).toBe(544);
+      expect(link.getBoundingClientRect().bottom).toBe(400);
+      expect(document.activeElement).toBe(focused);
+      expect(window.scrollY).toBe(documentY);
+
+      content.dispatchEvent(new WheelEvent('wheel'));
+      content.scrollTop = 10;
+      document.dispatchEvent(new CustomEvent('site-contents:open'));
+      await flush();
+      expect(content.scrollTop).toBe(10);
+      expect(document.activeElement).toBe(focused);
+      expect(window.scrollY).toBe(documentY);
+    }
+  );
   it('keeps visible rows stable, clamps bounds and aligns an over-tall row start', () => {
     const input = {
       top: 120,

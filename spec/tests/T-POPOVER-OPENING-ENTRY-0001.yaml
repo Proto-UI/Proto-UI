@@ -1,0 +1,83 @@
+id: T-POPOVER-OPENING-ENTRY-0001
+type: test
+title: Base Popover opening entry and cancellation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: '共享 Focus 与公共 consumer 的新组合仍待实际执行及独立审查；source-host evidence 不证明浏览器/native scrolling、输入或全部 profile。'
+  en: 'The new shared Focus/public consumer composition awaits execution and independent review. Source-host evidence does not prove browser/native scrolling, input or all profiles.'
+summary: One accepted Popover opening preserves logical priority and delegates only its empty path to Entry, with separate consumption and cancellation lifetime.
+cases:
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-LOGICAL
+    title: Mixed content preserves the eligible logical target even while its host rejects or awaits focus
+    covers: [P-BASE-POPOVER-OPENING-ENTRY]
+    expectation: logical-close-precedes-earlier-native-link-with-no-competing-entry-through-readiness
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-REGION
+    title: Native-only content enters its current descendant and empty content uses self without target facts
+    covers: [P-BASE-POPOVER-OPENING-ENTRY]
+    expectation: actual-descendant-or-self-host-focus-without-new-focused-or-roving-facts
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-OPTIONS
+    title: First open, reopen and inherited Date Picker retain opening reason and scroll policy
+    covers: [P-BASE-POPOVER-OPENING-ENTRY, P-BASE-POPOVER-FOCUS-HANDBACK]
+    expectation: opening-preventScroll-true-and-reason-preserved-with-explicit-focus-options-unchanged
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-CONSUMPTION
+    title: Default and controlled acceptance consume once without inactive-boundary or unchanged-open retries
+    covers: [P-BASE-POPOVER-ENTRY-LIFETIME]
+    expectation: refused-open-zero-entry-accepted-open-one-intent-no-unchanged-or-insertion-rearm
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-LIFETIME
+    title: Pending entry follows only the current view and logical close cancels while detached
+    covers: [P-BASE-POPOVER-ENTRY-LIFETIME]
+    expectation: retained-pending-remount-positive-control-and-detached-close-no-replay-until-new-opening
+  - id: T-POPOVER-OPENING-ENTRY-0001-CASE-DISMISSAL
+    title: Controlled outside refusal cancels pending entry while accepted close and Escape retain handback
+    covers: [P-BASE-POPOVER-ENTRY-LIFETIME, P-BASE-POPOVER-FOCUS-HANDBACK]
+    expectation: outside-destination-and-presence-preserved-with-no-readiness-replay-or-old-close-over-new-open
+implementations:
+  - id: public-popover-opening-entry
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/base/test/navigation-overlays/popover-entry-focus-scroll.test.ts
+    required: true
+    consumesCases:
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-LOGICAL
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-REGION
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-OPTIONS
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-CONSUMPTION
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-LIFETIME
+      - T-POPOVER-OPENING-ENTRY-0001-CASE-DISMISSAL
+    exercises: [P-BASE-POPOVER, M-FOCUS-0001]
+    notes:
+      - Real Base/family/Date Picker source and WC Adapter observe actual Happy DOM focus and native option calls. Controlled Runtime host readiness covers retained-view and pending intent; it does not certify native input, geometry, scrolling or generated compiler profiles.
+      - New assertions have no executed result. Main owns serial execution, exact-source native consumer evidence and independent review. Generic Focus arbitration remains mapped separately by T-FOCUS-SCOPE-0001.
+  - id: public-popover-dismissal-compatibility
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/base/test/navigation-overlays/popover-focus-restore.test.ts
+    required: true
+    consumesCases: [T-POPOVER-OPENING-ENTRY-0001-CASE-DISMISSAL]
+    exercises: [P-BASE-POPOVER]
+    notes:
+      - Existing real controlled Popover cases discriminate restore-none outside destinations from explicit Escape handback. Historical results do not certify the current shared composition.
+verifies:
+  prototypes:
+    - id: P-BASE-POPOVER
+      anchors:
+        - P-BASE-POPOVER-OPENING-ENTRY
+        - P-BASE-POPOVER-ENTRY-LIFETIME
+        - P-BASE-POPOVER-FOCUS-HANDBACK
+references:
+  tests: [T-FOCUS-SCOPE-0001]
+sources:
+  - path: packages/prototypes/base/src/popover/content.proto.ts
+  - path: internal/contracts/overlay/base-popover-entry-focus-scroll.v0.md
+openQuestions:
+  - id: T-POPOVER-OPENING-ENTRY-0001-Q-ADMISSION
+    question:
+      en: When have the source-host cases and exact-source native consumer journey executed and received independent review?
+      zh-CN: 何时完成 source-host cases、精确 source 的 native consumer journey 及独立审查？
+    blocks: [activation:T-POPOVER-OPENING-ENTRY-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Map the selected logical-first Popover Entry composition to direct public consumption, cancellation, retained-view and scroll-option cases without claiming execution or lifecycle admission.
+tags: [prototype, base, popover, focus, entry, lifecycle, test]

@@ -2311,7 +2311,8 @@ function staticKey(argument: OperationArgument): argument is OperationArgument &
     argument.kind === 'literal' && typeof argument.value === 'string' && argument.value.length > 0
   );
 }
-function argumentData(argument: OperationArgument): DataType | undefined {
+/** Literal-aware data evidence after the source or IR expression boundary is checked. */
+export function argumentData(argument: OperationArgument): DataType | undefined {
   if (
     argument.kind === 'literal' &&
     (argument.value === null ||

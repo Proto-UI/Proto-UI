@@ -27,6 +27,7 @@ function fixture(restore: FocusScopeConfig['restore'] = 'previous') {
     orientation: 'vertical',
     entry: 'first',
     restore,
+    entryFallback: 'none',
     emptyPolicy: 'none',
   };
   const rovingConfig: FocusRovingConfig = {

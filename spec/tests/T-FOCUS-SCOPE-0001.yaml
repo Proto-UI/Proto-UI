@@ -3,9 +3,33 @@ type: test
 title: Focus scope activation runtime contract tests
 status: draft
 since: 0.1.0
-lifecycleRationale: Existing scope evidence is retained; new per-activation and restore-policy cases are planned until their exact source executes, and do not prove native Dialog or Search continuity.
-summary: Runtime contract tests for explicit focus scope activation, previous focus restoration, and outside focus request gating.
+lifecycleRationale: Existing scope evidence is retained; new per-activation, restore-policy and activation-owned Entry fallback cases are planned until their exact source executes, and do not prove native consumer continuity.
+summary: Runtime and native consumer tests for explicit scope activation, optional activation-owned Entry fallback, previous focus restoration, and outside request gating.
 cases:
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+    title: A selected logical child suppresses Entry fallback even while host focus is pending or rejected
+    covers: [C-AS-FOCUS-SCOPE-0002-L, M-FOCUS-0001-H]
+    expectation: one-logical-selection-with-no-competing-region-entry
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REGION
+    title: Explicit fallback enters the current native descendant or self region without declaring target facts
+    covers: [C-AS-FOCUS-SCOPE-0002-L, C-AS-FOCUS-ENTRY-0001-I, M-FOCUS-0001-H]
+    expectation: same-activation-entry-policy-options-and-fact-free-host-effect
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-READINESS
+    title: Only the current activation re-resolves its pending region through readiness and retained view replacement
+    covers: [C-AS-FOCUS-SCOPE-0002-M, C-AS-FOCUS-ENTRY-0001-I, M-FOCUS-0001-H]
+    expectation: absent-or-rejected-owned-region-retries-current-view-once-without-old-physical-target
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
+    title: Deactivation while inactive or detached cancels only that activation's pending fallback
+    covers: [C-AS-FOCUS-SCOPE-0002-M, C-AS-FOCUS-ENTRY-0001-I, M-FOCUS-0001-H]
+    expectation: no-later-owned-focus-and-no-cancellation-of-newer-independent-intent
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REENTRY
+    title: Resolver, host and state reentry preserve newer focus and activation identity
+    covers: [C-AS-FOCUS-SCOPE-0002-M, C-AS-FOCUS-ENTRY-0001-I, M-FOCUS-0001-H]
+    expectation: old-completion-and-cleanup-cannot-erase-or-revive-newer-work
+  - id: T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    title: Default and manual entry retain existing independent Entry, boundary and restore semantics
+    covers: [C-AS-FOCUS-SCOPE-0002-L, C-AS-FOCUS-SCOPE-0002-M, C-AS-FOCUS-ENTRY-0001-I]
+    expectation: opt-in-only-with-independent-first-unresolved-noop-and-role-specific-cancellation
   - id: T-FOCUS-SCOPE-0001-CASE-ACTIVATION-ENTRY-OVERRIDE
     title: Manual override is activation-local and preserves the scope boundary and restoration
     covers:
@@ -63,6 +87,74 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: module-scope-owned-entry-policy
+    kind: module-test
+    status: planned
+    path: packages/modules/focus/test/scope-activation-entry.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REENTRY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    notes:
+      - Direct FocusCenter policy controls distinguish logical selection from host acquisition and boundary state; they do not certify host readiness or native focus.
+  - id: runtime-scope-owned-entry-lifetime
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/focus-entry-readiness.contract.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REGION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-READINESS
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REENTRY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    notes:
+      - Real Runtime Focus handles with controlled host capability outcomes exercise private Module ownership, absence versus rejected acquisition, role disable, replacement intent and retained-view cancellation. Controlled observations do not certify native input.
+  - id: emitted-native-scope-owned-entry
+    kind: fixture
+    status: planned
+    path: packages/compiler/src/focus-activation-entry.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REGION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-READINESS
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    notes:
+      - Actual generic DOM helpers exercise initial resolution gaps, explicit inactive cancellation, current logical child priority and temporary Entry self focusability. Ordinary generated React, Vue, Vue2 and WC consumers distinguish logical child selection from native descendant fallback. Historical helper source and migration captures remain unchanged.
+      - Happy DOM 15.11.7 returns -1 for absent tabindex in lib/nodes/html-element/HTMLElement.js lines 167-169; HTMLButtonElement inherits that getter. These helper and framework fixtures explicitly set tabindex 0 on their native Entry inputs before requests, including the fallback candidate beside a logical child. Exact physical focus and lifetime assertions remain; intrinsic unannotated-button eligibility requires the separate real-browser fixture and is not established by this controlled input.
+  - id: native-scope-owned-entry-consumer
+    kind: fixture
+    status: planned
+    path: packages/compiler/test/focus-scope-native.browser.test.ts
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REGION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-READINESS
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    notes:
+      - Ordinary generated WC owners exercise native descendant entry and removable programmatic self focusability, empty logical selection, missing selected child views, initial Entry resolution gaps, unavailable native focus, retained Scope view cancellation, manual suppression and independent subsequent Entry. Exact browser execution and source-bound receipts remain required.
+  - id: gpui-scope-owned-entry-consumer
+    kind: fixture
+    status: planned
+    path: packages/compiler/test/fixtures/gpui-native-template/focus-consumer.rs
+    required: true
+    consumesCases:
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-PRIORITY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REGION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-READINESS
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-CANCELLATION
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-REENTRY
+      - T-FOCUS-SCOPE-0001-CASE-OWNED-ENTRY-COMPATIBILITY
+    notes:
+      - Current authored inputs are packages/compiler/test/fixtures/gpui-native-template/focus-region.proto.ts with its default, ManualRegion, DefaultRegion and ContainerRegion exports, and packages/compiler/test/fixtures/gpui-native-template/focus-target.proto.ts with its default and TextTarget exports. The canonical CLI producer shares one pinned native SDK; packages/compiler/test/fixtures/gpui-native-template/README.md records the current recipe separately from historical composed/consumer/snapshot fixtures.
+      - The current focus-consumer.rs defines 20 live GPUI test cases for logical priority, self entry, current-view replacement, role-specific cancellation, retained views, independent intent and state/native-text reentry. All definitions and the producer remain unexecuted. Source authorship and GPUI framework-test-platform execution do not establish operating-system display or input acceptance.
+      - The live ordinary_native_only_descendant_wins_over_self_without_logical_membership counterexample is unexecuted and predicted to fail until a permitted native descendant discovery mechanism exists. It requires an ordinary nested native FocusHandle to win over self without compiled logical membership. No passing result, skipped obligation or complete descendant-first host capability is claimed; Main retains the actual native admission and unresolved host-mechanism boundary.
   - id: module-scope-restore-policy
     kind: module-test
     status: planned
@@ -171,7 +263,17 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-I
         - C-AS-FOCUS-SCOPE-0002-J
         - C-AS-FOCUS-SCOPE-0002-K
+        - C-AS-FOCUS-SCOPE-0002-L
+        - C-AS-FOCUS-SCOPE-0002-M
+    - id: C-AS-FOCUS-ENTRY-0001
+      anchors: [C-AS-FOCUS-ENTRY-0001-I]
+  modules:
+    - id: M-FOCUS-0001
+      anchors: [M-FOCUS-0001-H]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Map the explicitly selected activation-owned Entry fallback to logical-priority, host-region, readiness, cancellation, reentry and compatibility cases while keeping all new executions planned and preserving historical evidence.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Map planned restore-none/default, nested, stale-owner and cleanup controls without reclassifying prior evidence or claiming execution of the new source.

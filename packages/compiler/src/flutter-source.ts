@@ -18,6 +18,7 @@ import { OPERATION_RULES } from './operations';
 import type { RuleCondition } from './rule-declarations';
 import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { flutterNativeSource } from './flutter-native-host';
+import { partitionModuleBindings } from './source-module-bindings';
 
 /** Checked statements become ordinary Dart; the supporting host has no semantic IR. */
 export function emitFlutterSource(
@@ -27,6 +28,7 @@ export function emitFlutterSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = checked.value;
+  const moduleParts = partitionModuleBindings(ir);
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'flutter-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const component = options.componentName ?? 'CompiledComponent';
@@ -180,6 +182,7 @@ export function emitFlutterSource(
   }
   let helperBindings = new Map<string, FunctionIR>();
   let localTypes = new Map<string, ValueType>();
+  let usesExceptions = false;
   function data(type: DataType): string {
     if (typeof type === 'string')
       return (
@@ -214,6 +217,7 @@ export function emitFlutterSource(
     return type.members.includes('void') ? `NativeOptional<${base}>` : base;
   }
   function type(type: ValueType): string {
+    if (type === 'exception') return 'Object?';
     if (isDataValueType(type)) return data(type);
     if (typeof type !== 'string') throw new Error('Invalid Dart type');
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9))}?`;
@@ -368,6 +372,8 @@ export function emitFlutterSource(
   }
   function expr(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'undefined':
+        return 'const NativeVoid()';
       case 'literal':
         return typeof value.value === 'number'
           ? Object.is(value.value, -0)
@@ -387,6 +393,16 @@ export function emitFlutterSource(
               value.type === original.slice(9)
             ? `${id(value.name)}.value`
             : id(value.name);
+      }
+      case 'lexical-cell':
+        return expr(value.value, depth);
+      case 'lexical-read':
+        return expr(value.cell, depth);
+      case 'lexical-write':
+        return `(${expr(value.cell, depth)} = ${expr(value.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expr(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
         return keys.get(value.keyId)!.name;
@@ -411,6 +427,10 @@ export function emitFlutterSource(
       }
       case 'member': {
         const receiver = expr(value.object, depth);
+        if (value.object.type === 'exception') {
+          usesExceptions = true;
+          return `_puiCaughtMember(${receiver}, ${quote(value.property)}, ${value.optional})`;
+        }
         if (
           typeof value.object.type === 'string' &&
           value.object.type.startsWith('state-next:') &&
@@ -810,13 +830,32 @@ export function emitFlutterSource(
         else if (statement.value.kind === 'reference' && helperBindings.has(statement.value.name))
           helperBindings.set(statement.name, helperBindings.get(statement.value.name)!);
         else helperBindings.delete(statement.name);
-        result += `${indent}final ${id(statement.name)} = ${expr(statement.value, depth)};\n`;
+        result += `${indent}${statement.value.kind === 'lexical-cell' ? 'var' : 'final'} ${id(statement.name)} = ${expr(statement.value, depth)};\n`;
         localTypes.set(statement.name, statement.value.type);
       } else if (statement.kind === 'effect')
         result += `${indent}${expr(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
-        result += `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
+        result += returnType === 'void' && statement.value
+          ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
+          : `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
         break;
+      } else if (statement.kind === 'throw') {
+        usesExceptions = true;
+        result += statement.value.type === 'void' && statement.value.kind !== 'undefined'
+          ? `${indent}${expr(statement.value, depth)};\n${indent}throw const _PuiThrown(NativeVoid());\n`
+          : `${indent}throw _PuiThrown(nativeValue(${expr(statement.value, depth)}));\n`;
+        break;
+      } else if (statement.kind === 'try') {
+        usesExceptions = true;
+        const caught = statement.catch;
+        const branch = (items: readonly StatementIR[], name?: string) => {
+          const outer = localTypes;
+          localTypes = new Map(outer);
+          if (name) localTypes.set(name, 'exception');
+          try { return statements(items, depth + 1, returnType); }
+          finally { localTypes = outer; }
+        };
+        result += `${indent}try {\n${branch(statement.body)}${indent}}${caught ? ` on _PuiThrown${caught.name ? ' catch (caughtValue)' : ''} {\n${caught.name ? `${indent}  final ${id(caught.name)} = caughtValue.value;\n` : ''}${branch(caught.body, caught.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
       } else
         result += `${indent}if (nativeTruthy(${expr(statement.condition, depth)})) {\n${statements(statement.then, depth + 1, returnType)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, returnType)}${indent}}` : ''}\n`;
     }
@@ -910,7 +949,7 @@ export function emitFlutterSource(
     orderedHooks.push(hook);
   }
   ir.hooks.forEach(orderHook);
-  const hookAssignments = orderedHooks
+  const hookAssignments = statements(moduleParts.owned, 3, 'void') + orderedHooks
     .map((hook) => `      final ${hooks.get(hook.id)} = ${fn(hook.setup, 3)};`)
     .join('\n');
   const setupCode =
@@ -919,6 +958,7 @@ export function emitFlutterSource(
       : `      final author = (${fn(ir.setup, 3)})(${ir.setup.parameters.length ? '_owner' : ''});\n      _owner.renderer = (frame) => nativeChildren(author(frame));`;
   ir.props.forEach((entry) => data(entry.type));
   ir.contextKeys.forEach((entry) => data(entry.type));
+  const moduleCode = statements(moduleParts.shared, 0, 'void');
   const code = `// Flutter direct source v1. Source graph SHA-256: ${ir.source.sha256}
 // Native helper costs: owner/epochs, constrained state, props/watch, Context, style, input/focus/Semantics/layout.
 import 'package:flutter/widgets.dart';
@@ -927,6 +967,28 @@ export '.proto_ui/flutter_native.dart';
 ${[...shapes.keys()].map((hash) => `import '.proto_ui/data_${hash}.dart';\nexport '.proto_ui/data_${hash}.dart';`).join('\n')}
 ${ir.contextKeys.map((key) => `import '${keys.get(key.id)!.path}';`).join('\n')}
 ${ir.staticDeclarations.map((declaration) => `import '${staticCapabilities.get(declaration.id)!.path}';`).join('\n')}
+${usesExceptions ? `class _PuiThrown {
+  const _PuiThrown(this.value);
+  final Object? value;
+}
+Object? _puiCaughtMember(Object? value, String key, bool optional) {
+  value = nativeValue(value);
+  if (value == null || value is NativeVoid) {
+    if (optional) return const NativeVoid();
+    throw const _PuiThrown(<String, Object?>{'name':'TypeError','message':'Cannot read a property of a nullish value'});
+  }
+  if (value is Map<String, Object?>) return value.containsKey(key) ? value[key] : const NativeVoid();
+  if (value is String || value is List<Object?>) {
+    final length = value is String ? value.length : (value as List<Object?>).length;
+    if (key == 'length') return length.toDouble();
+    final index = int.tryParse(key);
+    if (index == null || index < 0 || index.toString() != key || index >= length) return const NativeVoid();
+    return value is String ? value.substring(index, index + 1) : (value as List<Object?>)[index];
+  }
+${[...shapes].map(([hash, shape]) => `  if (value is NativeData_${hash}) {\n    switch (key) {\n${shape.fields.map((field) => `      case ${quote(field.name)}: return nativeValue(value.${publicName(field.name)});`).join('\n')}\n    }\n  }`).join('\n')}
+  return const NativeVoid();
+}
+` : ''}${moduleCode}
 
 class GeneratedProps {
   GeneratedProps({${ir.props.map((p) => `NativeProvided<${data(p.type)}> ${publicName(p.name)} = const NativeProvided.absent()`).join(', ')}${ir.props.length ? ', ' : ''}Map<String, Object?> extra = const {}})

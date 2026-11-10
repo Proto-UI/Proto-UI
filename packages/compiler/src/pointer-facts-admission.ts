@@ -52,7 +52,7 @@ export function unsupportedPointerFacts(
       }
       case 'authored-hook': {
         const hook = hooks.get(value.hookId);
-        if (hook) fn(hook.setup, new Map());
+        if (hook) fn(hook.setup, new Map(moduleScope));
         return;
       }
       case 'member':
@@ -60,6 +60,17 @@ export function unsupportedPointerFacts(
         return;
       case 'unary':
         expression(value.operand, scope);
+        return;
+      case 'lexical-cell':
+        expression(value.value, scope);
+        return;
+      case 'lexical-read':
+      case 'lexical-update':
+        expression(value.cell, scope);
+        return;
+      case 'lexical-write':
+        expression(value.cell, scope);
+        expression(value.value, scope);
         return;
       case 'binary':
         expression(value.left, scope);
@@ -108,13 +119,23 @@ export function unsupportedPointerFacts(
           statements(statement.then, new Map(scope));
           statements(statement.otherwise, new Map(scope));
           break;
+        case 'try':
+          statements(statement.body, new Map(scope));
+          if (statement.catch) statements(statement.catch.body, new Map(scope));
+          if (statement.finally) statements(statement.finally, new Map(scope));
+          break;
+        case 'throw':
+          expression(statement.value, scope);
+          return;
         case 'return':
           if (statement.value) expression(statement.value, scope);
           return;
       }
     }
   }
-  fn(ir.setup, new Map());
-  if (closure === 'emitted-declarations') for (const hook of ir.hooks) fn(hook.setup, new Map());
+  const moduleScope: Scope = new Map();
+  statements(ir.moduleBindings ?? [], moduleScope);
+  fn(ir.setup, moduleScope);
+  if (closure === 'emitted-declarations') for (const hook of ir.hooks) fn(hook.setup, new Map(moduleScope));
   return diagnostics;
 }

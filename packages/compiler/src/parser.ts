@@ -9,6 +9,7 @@ import {
   operationCallbackRule,
   operationArgumentRule,
   operationResultType,
+  argumentData,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -30,6 +31,7 @@ import {
   rejectNode,
   sourceName,
   sourceSpan,
+  scalarInitializer,
   type FunctionNode,
   type SourceModule,
 } from './parser-module';
@@ -55,6 +57,8 @@ import {
   isDataValueType,
   isPublicValueType,
   isCapabilityAssignable,
+  lexicalValueType,
+  statementsTerminate,
   type AuthoredHookIR,
   type CompileResult,
   type ExposureIR,
@@ -76,6 +80,7 @@ import {
 
 interface Binding {
   type: ValueType;
+  lexical?: PrimitiveType;
   helper?: FunctionIR;
   phase?: Phase;
   keyId?: string;
@@ -139,12 +144,16 @@ class Frontend {
   readonly requirements = new Set<string>();
   readonly activeHooks = new Set<string>();
   readonly activeHelpers = new Set<string>();
-  readonly usedFunctions = new Set<FunctionNode>();
   private readonly builtinHooks = new Set<Operation>();
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
   private context: FunctionContext = 'setup';
   private ruleSequence = 0;
+  private moduleSequence = 0;
+  private readonly moduleBindings: Extract<StatementIR, { kind: 'const' }>[] = [];
+  private readonly moduleValues = new Map<string, Binding & { name: string }>();
+  private readonly moduleHelpers = new Map<string, { name: string; fn: FunctionIR }>();
+  private readonly sourceNames = new Set<string>();
 
   constructor(
     input: string,
@@ -270,7 +279,6 @@ class Frontend {
       ('asteriskToken' in node && node.asteriskToken)
     )
       rejectNode(node, 'PUI1004', 'Async/generator/external functions are unsupported.');
-    this.usedFunctions.add(node);
     const previousContext = this.context;
     this.context = context;
     try {
@@ -312,19 +320,29 @@ class Frontend {
             returns.push(statement.value?.type ?? 'void');
             return true;
           }
+          if (statement.kind === 'throw') return true;
           if (statement.kind === 'if') {
             const a = gather(statement.then),
               b = gather(statement.otherwise);
             if (a && b) return true;
           }
+          if (statement.kind === 'try') {
+            const start = returns.length;
+            const body = gather(statement.body);
+            const caught = statement.catch ? gather(statement.catch.body) : true;
+            const end = returns.length;
+            const finalized = statement.finally ? gather(statement.finally) : false;
+            if (finalized) returns.splice(start, end - start);
+            if (finalized || (body && caught)) return true;
+          }
         }
         return false;
       };
       if (!gather(body)) returns.push('void');
-      let returnType = union(returns, node);
+      let returnType: ValueType = returns.length ? union(returns, node) : 'void';
       if (node.type) {
         const declared = parseSourceDataType(module, node.type);
-        if (!assignable(returnType, declared))
+        if (returns.length && !assignable(returnType, declared))
           rejectNode(node.type, 'PUI1006', 'Function return does not satisfy its declared type.');
         returnType = declared;
       }
@@ -346,12 +364,9 @@ class Frontend {
     for (const node of nodes) {
       const span = sourceSpan(node);
       if (ts.isVariableStatement(node)) {
-        if (!(node.declarationList.flags & ts.NodeFlags.Const))
-          rejectNode(
-            node,
-            'PUI1004',
-            'Use immutable lexical bindings and governed State for mutable facts.'
-          );
+        const mutable = !!(node.declarationList.flags & ts.NodeFlags.Let);
+        if (!(node.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)))
+          rejectNode(node, 'PUI1004', 'Use block-scoped const or let bindings.');
         for (const declaration of node.declarationList.declarations) {
           const name = identifier(declaration.name);
           if (scope.has(name) || module.imports.has(name))
@@ -394,6 +409,17 @@ class Frontend {
               ...(value.kind === 'style-handle' ? { style: value.handle } : {}),
             });
           }
+          if (mutable) {
+            const type = declaration.type
+              ? parseSourceDataType(module, declaration.type)
+              : value.type;
+            if (type !== 'boolean' && type !== 'number' && type !== 'string')
+              rejectNode(declaration, 'PUI1004', 'Lexical let currently requires a scalar data type.');
+            if (!assignable(value.type, type))
+              rejectNode(declaration, 'PUI1006', 'Lexical initializer does not satisfy its type.');
+            scope.set(name, { type: `lexical:${type}`, lexical: type });
+            value = { kind: 'lexical-cell', value, type: `lexical:${type}`, span: sourceSpan(init) };
+          }
           output.push({ kind: 'const', name, value, span: sourceSpan(declaration) });
         }
       } else if (ts.isExpressionStatement(node))
@@ -427,14 +453,38 @@ class Frontend {
             )
           : [];
         output.push({ kind: 'if', condition, then, otherwise, span });
-        const terminal = (items: readonly StatementIR[]): boolean =>
-          items.some(
-            (item) =>
-              item.kind === 'return' ||
-              (item.kind === 'if' && terminal(item.then) && terminal(item.otherwise))
-          );
-        const continuing = terminal(then) ? elseScope : terminal(otherwise) ? thenScope : undefined;
+        const continuing = statementsTerminate(then) ? elseScope : statementsTerminate(otherwise) ? thenScope : undefined;
         if (continuing) for (const name of scope.keys()) scope.set(name, continuing.get(name)!);
+      } else if (ts.isThrowStatement(node)) {
+        const value = this.expression(module, node.expression, scope, phase);
+        if (!isDataValueType(value.type) && value.type !== 'exception')
+          rejectNode(node.expression, 'PUI1006', 'Thrown values must be admitted data or a caught exception.');
+        output.push({ kind: 'throw', value, span });
+      } else if (ts.isTryStatement(node)) {
+        const body = this.statements(module, node.tryBlock.statements, new Map(scope), phase);
+        let caught: Extract<StatementIR, { kind: 'try' }>['catch'];
+        if (node.catchClause) {
+          const catchScope = new Map(scope);
+          const binding = node.catchClause.variableDeclaration;
+          const name = binding ? identifier(binding.name) : undefined;
+          if (name !== undefined) {
+            if (catchScope.has(name) || module.imports.has(name))
+              rejectNode(binding!, 'PUI1005', `Shadowing/rebinding ${name} is not admitted.`);
+            if (binding?.type && binding.type.kind !== ts.SyntaxKind.UnknownKeyword && binding.type.kind !== ts.SyntaxKind.AnyKeyword)
+              rejectNode(binding.type, 'PUI1006', 'A catch binding remains an untrusted exception value.');
+            catchScope.set(name, { type: 'exception' });
+          }
+          caught = {
+            ...(name === undefined ? {} : { name }),
+            body: this.statements(module, node.catchClause.block.statements, catchScope, phase),
+          };
+        }
+        output.push({
+          kind: 'try', body,
+          ...(caught ? { catch: caught } : {}),
+          ...(node.finallyBlock ? { finally: this.statements(module, node.finallyBlock.statements, new Map(scope), phase) } : {}),
+          span,
+        });
       } else if (ts.isReturnStatement(node)) {
         if (!node.expression) output.push({ kind: 'return', span });
         else if (
@@ -489,6 +539,12 @@ class Frontend {
   ): ExpressionIR {
     if (ts.isParenthesizedExpression(node))
       return this.expression(module, node.expression, scope, phase, argumentRule);
+    if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
+      const value = this.expression(module, node.expression, scope, phase, argumentRule);
+      if (value.type !== 'exception')
+        rejectNode(node, 'PUI1006', 'A type assertion cannot grant data or capability provenance.');
+      return value;
+    }
     const span = sourceSpan(node);
     if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword)
       return {
@@ -508,12 +564,24 @@ class Frontend {
     }
     if (ts.isIdentifier(node)) {
       const binding = scope.get(node.text);
+      if (binding?.lexical)
+        return {
+          kind: 'lexical-read',
+          cell: { kind: 'reference', name: node.text, type: binding.type, span },
+          type: binding.lexical,
+          span,
+        };
       if (binding)
         return binding.keyId
           ? { kind: 'context-key', keyId: binding.keyId, type: 'context-key', span }
           : { kind: 'reference', name: node.text, type: binding.type, span };
       if (module.declarations.has(node.text) || module.imports.has(node.text)) {
         const resolved = this.graph.resolveBinding(module, node.text);
+        if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+          const binding = this.moduleValue(resolved.module, resolved.name, resolved.node as ts.Expression);
+          const reference: ExpressionIR = { kind: 'reference', name: binding.name, type: binding.type, span };
+          return binding.lexical ? { kind: 'lexical-read', cell: reference, type: binding.lexical, span } : reference;
+        }
         if (
           resolved.module &&
           ts.isCallExpression(resolved.node) &&
@@ -528,6 +596,7 @@ class Frontend {
           };
         return this.key(module, node.text, node);
       }
+      if (node.text === 'undefined') return { kind: 'undefined', type: 'void', span };
       rejectNode(
         node,
         'PUI1005',
@@ -622,6 +691,19 @@ class Frontend {
         span,
       };
     }
+    if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      (node.operator === ts.SyntaxKind.PlusPlusToken || node.operator === ts.SyntaxKind.MinusMinusToken)
+    ) {
+      const cell = this.lexicalTarget(module, node.operand, scope);
+      if (lexicalValueType(cell.type) !== 'number')
+        rejectNode(node, 'PUI1006', 'Lexical increment/decrement requires a number.');
+      return {
+        kind: 'lexical-update', cell,
+        delta: node.operator === ts.SyntaxKind.PlusPlusToken ? 1 : -1,
+        prefix: ts.isPrefixUnaryExpression(node), type: 'number', span,
+      };
+    }
     if (ts.isPrefixUnaryExpression(node)) {
       const operator = ts.tokenToString(node.operator);
       if (operator !== '!' && operator !== '-' && operator !== '+')
@@ -636,6 +718,23 @@ class Frontend {
     }
     if (ts.isBinaryExpression(node)) {
       const operator = ts.tokenToString(node.operatorToken.kind) ?? '';
+      if (node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) {
+        const cell = this.lexicalTarget(module, node.left, scope);
+        const type = lexicalValueType(cell.type)!;
+        let value = this.expression(module, node.right, scope, phase);
+        if (operator !== '=') {
+          const binary = operator.slice(0, -1);
+          if (!['+', '-', '*', '/', '%', '&&', '||', '??'].includes(binary))
+            rejectNode(node.operatorToken, 'PUI1004', 'Unsupported lexical assignment operator.');
+          const left: ExpressionIR = { kind: 'lexical-read', cell, type, span: sourceSpan(node.left) };
+          if (!isDataValueType(value.type)) rejectNode(node.right, 'PUI1006', 'Lexical writes require data.');
+          const result = this.checkedData(node, () => inferBinaryType(binary, type, value.type as DataType));
+          value = { kind: 'binary', operator: binary as Extract<ExpressionIR, { kind: 'binary' }>['operator'], left, right: value, type: result, span };
+        }
+        if (!assignable(value.type, type))
+          rejectNode(node.right, 'PUI1006', 'Lexical write does not satisfy its declared type.');
+        return { kind: 'lexical-write', cell, value, type, span };
+      }
       const left = this.expression(module, node.left, scope, phase),
         right = this.expression(module, node.right, scope, phase);
       const capabilityType = capabilityBinaryType(operator, left.type, right.type);
@@ -675,6 +774,7 @@ class Frontend {
       let type: ValueType;
       const capabilityType = capabilityMemberType(object.type, property, optional);
       if (capabilityType !== undefined) type = capabilityType;
+      else if (object.type === 'exception') type = 'exception';
       else if (object.type === 'props') {
         const prop = this.props.get(property);
         if (!prop) rejectNode(node, 'PUI1006', `Read of undeclared prop ${property}.`);
@@ -689,6 +789,18 @@ class Frontend {
       return { kind: 'member', object, property, optional, type, span };
     }
     if (ts.isCallExpression(node)) return this.call(module, node, scope, phase);
+    if (ts.isTemplateExpression(node)) {
+      let value: ExpressionIR = { kind: 'literal', value: node.head.text, type: 'string', span };
+      for (const part of node.templateSpans) {
+        const item = this.expression(module, part.expression, scope, phase);
+        if (item.type !== 'string' && item.type !== 'number' && item.type !== 'boolean')
+          rejectNode(part.expression, 'PUI1006', 'Template interpolation currently requires scalar data.');
+        value = { kind: 'binary', operator: '+', left: value, right: item, type: 'string', span };
+        if (part.literal.text)
+          value = { kind: 'binary', operator: '+', left: value, right: { kind: 'literal', value: part.literal.text, type: 'string', span: sourceSpan(part.literal) }, type: 'string', span };
+      }
+      return value;
+    }
     rejectNode(
       node,
       'PUI1004',
@@ -700,6 +812,54 @@ class Frontend {
     return expression?.kind === 'context-key'
       ? this.contextKeys.get(expression.keyId)?.type
       : undefined;
+  }
+
+  private moduleValue(module: SourceModule, name: string, value: ts.Expression): Binding & { name: string } {
+    const id = `${module.file.fileName}#${name}`;
+    const previous = this.moduleValues.get(id);
+    if (previous) return previous;
+    const initial = this.expression(module, value, new Map(), 'setup');
+    if (initial.type !== 'boolean' && initial.type !== 'number' && initial.type !== 'string')
+      rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
+    if (ts.isVariableDeclaration(value.parent) && value.parent.type &&
+        !assignable(initial.type, parseSourceDataType(module, value.parent.type)))
+      rejectNode(value.parent.type, 'PUI1006', 'Module initializer does not satisfy its declared type.');
+    const mutable = module.mutableBindings.has(name);
+    const binding: Binding & { name: string } = {
+      name: this.moduleName(),
+      type: mutable ? `lexical:${initial.type}` : initial.type,
+      ...(mutable ? { lexical: initial.type } : {}),
+    };
+    this.moduleValues.set(id, binding);
+    this.moduleBindings.push({
+      kind: 'const', name: binding.name,
+      value: mutable ? { kind: 'lexical-cell', value: initial, type: binding.type, span: sourceSpan(value) } : initial,
+      span: sourceSpan(value),
+    });
+    return binding;
+  }
+
+  private moduleName(): string {
+    let name: string;
+    do name = `__puiModule${this.moduleSequence++}`; while (this.sourceNames.has(name));
+    return name;
+  }
+
+  private lexicalTarget(module: SourceModule, node: ts.Expression, scope: Scope): ExpressionIR {
+    while (ts.isParenthesizedExpression(node)) node = node.expression;
+    if (!ts.isIdentifier(node))
+      rejectNode(node, 'PUI1004', 'Mutation requires a declared lexical let binding.');
+    let binding = scope.get(node.text), name = node.text;
+    if (!binding && (module.declarations.has(name) || module.imports.has(name))) {
+      const resolved = this.graph.resolveBinding(module, name);
+      if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
+        const value = this.moduleValue(resolved.module, resolved.name, resolved.node as ts.Expression);
+        binding = value;
+        name = value.name;
+      }
+    }
+    if (!binding?.lexical) rejectNode(node, 'PUI1004', 'Mutation requires a declared lexical let binding.');
+    return { kind: 'reference', name, type: binding.type, span: sourceSpan(node) };
   }
 
   private enforceHelperContext(fn: FunctionIR, origin: FunctionContext, phase: Phase): void {
@@ -791,7 +951,11 @@ class Frontend {
         if (args.length < required || args.length > binding.helper.parameters.length)
           rejectNode(node, 'PUI1006', `Helper ${name} argument count mismatch.`);
         args.forEach((argument, index) => {
-          if (!assignable(argument.type, binding.helper!.parameters[index].type))
+          const expected = binding.helper!.parameters[index].type;
+          if (
+            !assignable(argument.type, expected) &&
+            !assignable(argumentData(argument) ?? argument.type, expected)
+          )
             rejectNode(node.arguments[index], 'PUI1006', 'Helper argument type mismatch.');
         });
         if (this.context !== 'helper')
@@ -807,6 +971,36 @@ class Frontend {
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
       const resolved = this.graph.resolveBinding(module, name);
+      if (resolved.module && ts.isFunctionDeclaration(resolved.node)) {
+        const args = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
+        const id = `${resolved.module.file.fileName}#${resolved.name}`;
+        if (this.activeHelpers.has(id)) rejectNode(node, 'PUI1008', 'Recursive module helper is unsupported.');
+        let helper = this.moduleHelpers.get(id);
+        if (!helper) {
+          this.activeHelpers.add(id);
+          const name = this.moduleName();
+          const parameters: Scope = new Map();
+          resolved.node.parameters.forEach((parameter, index) => {
+            if (ts.isIdentifier(parameter.name) && args[index])
+              parameters.set(parameter.name.text, { type: args[index].type });
+          });
+          const fn = this.function(resolved.module, resolved.node, new Map(), this.helperPhase(resolved.module, resolved.node, parameters), args.map((argument) => argument.type), 'helper');
+          this.activeHelpers.delete(id);
+          helper = { name, fn };
+          this.moduleHelpers.set(id, helper);
+          this.moduleBindings.push({ kind: 'const', name, value: { kind: 'function', function: fn, type: 'function', span: sourceSpan(resolved.node) }, span: sourceSpan(resolved.node) });
+        }
+        const required = helper.fn.parameters.filter((parameter) => !parameter.optional).length;
+        if (args.length < required || args.length > helper.fn.parameters.length)
+          rejectNode(node, 'PUI1006', 'Module helper argument count mismatch.');
+        args.forEach((argument, index) => {
+          if (!assignable(argument.type, helper!.fn.parameters[index].type) &&
+              !assignable(argumentData(argument) ?? argument.type, helper!.fn.parameters[index].type))
+            rejectNode(node.arguments[index], 'PUI1006', 'Module helper argument type mismatch.');
+        });
+        if (this.context !== 'helper') this.enforceHelperContext(helper.fn, this.context, phase);
+        return { kind: 'helper-call', name: helper.name, arguments: args, type: helper.fn.returnType, span };
+      }
       if (
         resolved.module === null &&
         resolved.imported.module === '@proto.ui/core' &&
@@ -1222,6 +1416,13 @@ class Frontend {
     const fileName = sourceName(this.options.fileName ?? 'input.proto.ts');
     const module = this.graph.load(fileName);
     this.graph.validateExports();
+    for (const loaded of this.graph.modules.values()) {
+      const visit = (node: ts.Node): void => {
+        if (ts.isIdentifier(node)) this.sourceNames.add(node.text);
+        ts.forEachChild(node, visit);
+      };
+      visit(loaded.file);
+    }
     const exportName = this.options.exportName ?? 'default';
     const definition = this.graph.definition(module, exportName);
     if (definition.factory !== 'definePrototype')
@@ -1249,12 +1450,7 @@ class Frontend {
             else if (!extractModuleDeclaration(loaded, declaration))
               this.graph.descriptor(loaded, declaration);
           }
-        } else if (ts.isFunctionDeclaration(declaration) && !this.usedFunctions.has(declaration))
-          rejectNode(
-            declaration,
-            'PUI1004',
-            'Unreachable runtime function is outside this admitted source unit.'
-          );
+        }
       }
     for (const [name, values] of this.eventPayloads) {
       const exposure = this.exposes.get(name)!;
@@ -1281,6 +1477,7 @@ class Frontend {
       sourceFiles,
       setup,
       hooks: [...this.hooks.values()],
+      ...(this.moduleBindings.length ? { moduleBindings: this.moduleBindings } : {}),
       contextKeys: [...this.contextKeys.values()],
       staticDeclarations: [...this.staticDeclarations.values()],
       moduleDeclarations: [...this.moduleDeclarations.values()],

@@ -10,6 +10,7 @@ import { OPERATION_RULES } from './operations';
 import { checkTargetOperations, TARGET_PROFILES } from './targets';
 import { vueSsrSupportArtifact } from './vue-ssr-support';
 import { isDataValueType, isPublicValueType } from './ir';
+import { partitionModuleBindings } from './source-module-bindings';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -30,6 +31,7 @@ export function emitVueSource(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'vue-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
@@ -121,6 +123,17 @@ export function emitVueSource(
       case 'unary':
         inspect(node.operand);
         break;
+      case 'lexical-cell':
+        inspect(node.value);
+        break;
+      case 'lexical-read':
+      case 'lexical-update':
+        inspect(node.cell);
+        break;
+      case 'lexical-write':
+        inspect(node.cell);
+        inspect(node.value);
+        break;
       case 'binary':
         inspect(node.left);
         inspect(node.right);
@@ -203,6 +216,11 @@ export function emitVueSource(
       else if (statement.kind === 'effect') inspect(statement.expression);
       else if (statement.kind === 'return') {
         if (statement.value) inspect(statement.value);
+      } else if (statement.kind === 'throw') inspect(statement.value);
+      else if (statement.kind === 'try') {
+        inspectBody(statement.body);
+        if (statement.catch) inspectBody(statement.catch.body);
+        if (statement.finally) inspectBody(statement.finally);
       } else {
         inspect(statement.condition);
         inspectBody(statement.then);
@@ -236,6 +254,7 @@ export function emitVueSource(
   const usesRoot = true;
 
   function typeName(type: ValueType): string {
+    if (type === 'exception') return 'unknown';
     if (typeof type !== 'string') return formatDataType(type);
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
     if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
@@ -323,10 +342,22 @@ export function emitVueSource(
   }
   function expression(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
+      case 'undefined':
+        return '(void 0)';
       case 'literal':
         return JSON.stringify(node.value);
       case 'reference':
         return node.name;
+      case 'lexical-cell':
+        return expression(node.value, depth);
+      case 'lexical-read':
+        return expression(node.cell, depth);
+      case 'lexical-write':
+        return `(${expression(node.cell, depth)} = ${expression(node.value, depth)})`;
+      case 'lexical-update': {
+        const cell = expression(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        return `(${node.prefix ? operator + cell : cell + operator})`;
+      }
       case 'context-key':
         return contextNames.get(node.keyId)!;
       case 'style-handle':
@@ -334,7 +365,7 @@ export function emitVueSource(
       case 'rule':
         return emitNativeRule(node, (value) => expression(value, depth), n('Style'), n('Props'));
       case 'member':
-        return `(${expression(node.object, depth)})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
+        return `(${expression(node.object, depth)}${node.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
       case 'binary':
@@ -516,13 +547,18 @@ export function emitVueSource(
           deadBindings.add(statement.name);
           continue;
         }
-        output += `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
       } else if (statement.kind === 'effect')
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
         output += `${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
         break;
-      } else
+      } else if (statement.kind === 'throw') {
+        output += `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
+        break;
+      } else if (statement.kind === 'try')
+        output += `${origin}${indent}try {\n${statements(statement.body, depth + 1, new Set(deadBindings))}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${statements(statement.catch.body, depth + 1, new Set(deadBindings))}${indent}}` : ''}${statement.finally ? ` finally {\n${statements(statement.finally, depth + 1, new Set(deadBindings))}${indent}}` : ''}\n`;
+      else
         output += `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${statements(statement.then, depth + 1, new Set(deadBindings))}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, new Set(deadBindings))}${indent}}` : ''}\n`;
     }
     return output;
@@ -622,6 +658,7 @@ ${ir.contextKeys.map((key) => `      [${contextNames.get(key.id)}, (value: unkno
 `
     : '';
   const hookCode =
+    statements(moduleParts.owned, 2) +
     `    const ${n('HookResults')} = new Map<string, object | undefined>();\n` +
     ir.hooks
       .filter((hook) => hooks.has(hook.id))
@@ -653,6 +690,7 @@ ${usesInteraction ? `import { createNativeInteraction as ${n('CreateInteraction'
 ${usesInteraction ? `import type { NativeModuleCapability as ${n('ModuleCapability')} } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
 ${contextImports}
 ${staticImports}
+${statements(moduleParts.shared, 0)}
 
 ${usesStyle ? `type ${n('Def')} = Readonly<{ feedback: Readonly<{ style: ${n('NativeStyle')} }> }>;` : ''}
 type ${n('Run')} = Readonly<{ readonly owner: symbol${usesStyle ? `; readonly feedback: ${n('Def')}['feedback']` : ''} }>;

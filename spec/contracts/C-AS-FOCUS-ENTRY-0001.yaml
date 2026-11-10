@@ -57,11 +57,23 @@ criteria:
         - C-FOCUS-0001
   - id: C-AS-FOCUS-ENTRY-0001-H
     text:
-      en: A resolved entry target whose event-owning view cannot yet observe focus must reject acquisition without fabricating facts. Focus retains only the latest distinct entry intent and re-resolves its target on readiness, respecting role disable, explicit blur, supersession, retained-view and terminal-disposal boundaries. A first entry request without any resolvable host target remains a no-op; this does not create a pending target request or transfer descendant fact ownership to the entry region.
-      zh-CN: 已解析的 entry target 若其 event-owning view 尚不能观察 focus，必须拒绝 acquisition 而不得伪造 facts。Focus 只保留最新的独立 entry intent，在 readiness 时重新解析目标，并遵守 role disable、显式 blur、取代、retained-view 与 terminal-disposal 边界。首次 entry request 若没有任何可解析 host target，仍为 no-op；这不创建 pending target request，也不把后代 fact ownership 转给 entry region。
+      en: A resolved entry target whose event-owning view cannot yet observe focus must reject acquisition without fabricating facts. Focus retains only the latest distinct entry intent and re-resolves its target on readiness, respecting role disable, explicit blur, supersession, retained-view and terminal-disposal boundaries. A first independent Entry.focus request without any resolvable host target remains a no-op; this does not create a pending target request or transfer descendant fact ownership to the entry region.
+      zh-CN: 已解析的 entry target 若其 event-owning view 尚不能观察 focus，必须拒绝 acquisition 而不得伪造 facts。Focus 只保留最新的独立 entry intent，在 readiness 时重新解析目标，并遵守 role disable、显式 blur、取代、retained-view 与 terminal-disposal 边界。首次独立 Entry.focus request 若没有任何可解析 host target，仍为 no-op；这不创建 pending target request，也不把后代 fact ownership 转给 entry region。
     dependsOn:
       contracts:
         - C-FOCUS-0001
+  - id: C-AS-FOCUS-ENTRY-0001-I
+    text:
+      en: >-
+        A separately declared Entry role may be explicitly composed by the same owner's Scope through entryFallback: entry under C-AS-FOCUS-SCOPE-0002-L and M. Only that still-current activation may retain an initial unresolved region continuation. It uses the existing Entry policy and host request kind without acquiring target facts, remains cancelable by that activation's deactivate while its boundary is inactive or view is detached, and cannot cancel or revive newer independent Entry or target intent. This composition does not change the first-unresolved no-op of independent Entry.focus or require disabling the whole Entry role to cancel one activation.
+
+      zh-CN: >-
+        同一 owner 的 Scope 可通过 entryFallback: entry，按 C-AS-FOCUS-SCOPE-0002-L 与 M 显式组合独立声明的 Entry role。仅此仍为 current 的激活可保留首次尚未解析 region 的 continuation。它沿用现有 Entry policy 与宿主 request kind，不取得 target facts；即使边界 inactive 或 view detached，该激活的 deactivate 仍可取消它，且不得取消或复活较新的独立 Entry 或 target intent。此组合不改变独立 Entry.focus 首次无目标时的 no-op，也不要求为了取消一次激活而禁用整个 Entry role。
+
+    references:
+      contracts:
+        - id: C-AS-FOCUS-SCOPE-0002
+          anchors: [C-AS-FOCUS-SCOPE-0002-L, C-AS-FOCUS-SCOPE-0002-M]
 sources:
   - path: internal/records/2026-07-05-focus-entry-delegation.zh-CN.md
   - path: packages/hooks/src/as-focus-entry.ts
@@ -82,6 +94,9 @@ verifies:
   tests:
     - T-FOCUS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Distinguish explicitly composed Scope-owned unresolved continuation from independent Entry.focus retention and preserve role-specific, identity-scoped cancellation.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Owner-approved rejected entry retention follows actual-owner readiness without changing first-request no-target behavior or target fact ownership.
