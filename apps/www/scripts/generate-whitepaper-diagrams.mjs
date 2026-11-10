@@ -39,6 +39,14 @@ const heading = (number, title, sub) => {
 const foot = (y, value) => text(48, y, value, 21, 'start', 'muted');
 
 function anatomy() {
+  parts.push(
+    `<desc id="description">${esc(
+      tr(
+        'Switch Root 是 checked 值与 activation 的唯一 owner。Thumb 通过同域 Context 获取 checked 和 disabled，只派生展示状态，不成为第二个开关控件。Select Root 拥有 open 与选中值，Trigger、Value、Content 和 Item 各自承担独立关系。固定 Caret 只有 Feedback 时可以附属于 Trigger；一旦拥有独立 Event、Props、Expose 或 Context，就需要独立 Component 边界。Caret 是边界判断的设计案例，不是新增的 Base Select part；图中位置不规定实际 Host tree。',
+        'Switch Root alone owns checked and activation. Thumb receives checked and disabled through same-domain Context and derives display state without becoming a second switch control. Select Root owns open and selection; Trigger, Value, Content and Item have independent relations. A fixed, Feedback-only Caret may remain inside Trigger; its own Event, Props, Expose or Context requires a separate Component boundary. Caret is a boundary-design example, not a new Base Select part. Placement does not prescribe a Host tree.'
+      )
+    )}</desc>`
+  );
   heading(
     '03',
     tr('看得见的结构，不等于组件边界', 'Visible structure and component boundaries'),
@@ -54,9 +62,10 @@ function anatomy() {
   text(145, 304, 'Root', 25);
   text(278, 383, 'Thumb', 23);
   path('M278 359 V335', false);
-  text(390, 252, tr('Root：唯一的 value owner', 'Root: the sole value owner'), 24, 'start');
-  text(390, 294, 'Root → Context → Thumb', 25, 'start', 'strong');
-  text(390, 338, tr('Thumb：派生展示状态', 'Thumb: derived display state'), 24, 'start');
+  text(390, 241, tr('Root：checked 的唯一 owner', 'Root: sole owner of checked'), 24, 'start');
+  text(390, 274, tr('由 Root 处理 activation', 'Root handles activation'), 22, 'start');
+  text(390, 314, 'Root → Context → Thumb', 25, 'start', 'strong');
+  text(390, 352, tr('Thumb：派生展示状态', 'Thumb: derived display state'), 24, 'start');
   text(
     390,
     374,
@@ -73,6 +82,7 @@ function anatomy() {
   rect(98, 553, 258, 64, 'blue');
   text(122, 593, 'Value', 24, 'start');
   path('M311 578 L324 591 L337 578', false);
+  path('M344 584 H387 V649 H402', false);
   text(220, 642, 'Trigger', 22, 'middle', 'muted');
   rect(98, 663, 258, 108, 'green');
   text(122, 693, 'Content', 22, 'start', 'muted');
@@ -99,8 +109,8 @@ function anatomy() {
     413,
     754,
     tr(
-      '可独立配置或订阅 Context 时，|需要重新判断它的组件边界。',
-      'Independent configuration or Context|requires a new boundary decision.'
+      '独立的 Event / Props / Expose|或 Context：需要独立 Component。',
+      'Own Event / Props / Expose|or Context: a separate Component.'
     ),
     21,
     'start',

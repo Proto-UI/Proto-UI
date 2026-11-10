@@ -84,6 +84,22 @@ The bidirectional arrow for Context does not mean that Context has “no directi
 
 A new API requirement does not automatically become a new information channel. If it still lets an App Maker configure a Component, Props can absorb it. If it still lets a User perceive a Component, it remains Feedback. A new channel must correspond to a stable and important participant identity or relational direction that existing channels cannot absorb, and it must carry an independently recognizable semantic responsibility.
 
+<details id="legacy-information-flow-comparison">
+<summary><strong>Reading the Earlier Information-Flow Figure</strong></summary>
+
+The earlier figure below draws the same five channel directions as the table above. Its `Maker` is the role called App Maker in the configuration and exposure relations here. The two Context arrowheads allow cooperation in both directions; they do not prescribe a callback order.
+
+<figure class="whitepaper-figure">
+  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram" aria-describedby="legacy-information-flow-description">
+    <img src="/diagrams/information-flow-model.svg" alt="Earlier information-flow figure" aria-describedby="legacy-information-flow-description" width="600" height="760" class="whitepaper-diagram" loading="lazy" />
+  </button>
+  <figcaption id="legacy-information-flow-description">User sends Event and receives Feedback; Maker sends Props and receives Expose; components exchange Context. State, Lifecycle, and Meta sit inside Component as internal dimensions. State preserves facts, Lifecycle concerns time and execution order, and the earlier text used Meta for self-description and extra semantics. Open full-size diagram</figcaption>
+</figure>
+
+[Chapter 4: Semantics Beyond Channels](/en/whitepaper/4-semantics-beyond-channels/) develops State and Lifecycle alongside Anatomy, which describes part roles and structural relations. Anatomy does not rename the earlier Meta box. The retained figure and the current channel diagram explain different parts of the model; neither turns these internal dimensions into additional channels.
+
+</details>
+
 <details>
 <summary><strong>Extension: Where Do Host and Component Author Fit?</strong></summary>
 
