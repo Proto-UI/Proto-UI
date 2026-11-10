@@ -1,12 +1,12 @@
 id: T-SHADCN-ALERT-DIALOG-0001
 type: test
-title: Shadcn New York AlertDialog passive grouping source and host-unit coverage
+title: Shadcn New York AlertDialog grouping coverage and planned native layout evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
   en: Source and Web Component host-unit checks cover the bounded grouping contract. They do not prove real layout, native input, upstream mobile breakpoint parity or complete cross-Adapter acceptance.
   zh-CN: 源码与 Web Component host-unit 检查覆盖有界分组契约；不证明真实布局、原生输入、上游移动断点一致性或完整跨 Adapter 验收。
-summary: Covers passive Header/Footer ownership, authored child preservation, intrinsic layout tokens and unchanged command composition.
+summary: Covers passive Header/Footer ownership, authored child preservation and command composition; separately planned native cases measure New York rem geometry without claiming Rhea, mobile breakpoint, motion or AT acceptance.
 cases:
   - id: T-SHADCN-ALERT-DIALOG-0001-CASE-1
     title: Optional groups have empty public behavior and preserve authored descendants
@@ -24,6 +24,18 @@ cases:
     title: The public demo consumes both reusable grouping prototypes
     covers: [P-SHADCN-ALERT-DIALOG-HEADER-COMPOSITION, P-SHADCN-ALERT-DIALOG-FOOTER-COMPOSITION]
     expectation: grouped-alert-dialog-demo-source
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-5
+    title: Explicit New York native groups retain rem sizing at wide and narrow root16 and root32
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-LAYOUT, P-SHADCN-ALERT-DIALOG-FOOTER-LAYOUT]
+    expectation: Real computed Header gap is 0.375rem and Footer gap is 0.5rem with intrinsic reverse wrapping. The cited New York presentation contract also supplies panel p-6/gap-4/32rem cap and h-9 commands. The public Rhea DemoSpec remains unchanged; its paint is not judged against New York. Root-font scaling is not browser zoom or the unresolved upstream 40rem switch.
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-6
+    title: Native grouped commands retain Cancel entry, modal guard and one original request across reopen
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-COMPOSITION, P-SHADCN-ALERT-DIALOG-FOOTER-COMPOSITION]
+    expectation: Real pointer opens the uncontrolled consumer and presses its backdrop without dismissal, Cancel closes without Action, real Tab and Shift+Tab loop through the two commands, Enter emits Action once before closure and Escape closes a third window. Native focus returns to Trigger. This is bounded input evidence, not controlled-owner, AT or complete modal admission.
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-7
+    title: Native geometry and unforced images describe the same observed layout phase
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-LAYOUT, P-SHADCN-ALERT-DIALOG-FOOTER-LAYOUT]
+    expectation: Consecutive settled panel/Mask observations precede each animations-allow image; measurements after capture must retain the same geometry, paint and animation status. Failures preserve samples and actual image hashes. Static settlement supplies no entry/exit/reversal or reduced-motion conformance claim.
 implementations:
   - id: shadcn-alert-dialog-source-and-host-unit
     kind: module-test
@@ -46,6 +58,21 @@ implementations:
     required: true
     consumesCases: [T-SHADCN-ALERT-DIALOG-0001-CASE-4]
     exercises: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+  - id: shadcn-alert-dialog-native-layout
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SHADCN-ALERT-DIALOG-0001-CASE-5,
+        T-SHADCN-ALERT-DIALOG-0001-CASE-6,
+        T-SHADCN-ALERT-DIALOG-0001-CASE-7,
+      ]
+    exercises: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+    notes:
+      - Authored, not executed. Planned inventory is 4 supported Web runtimes x 2 color schemes x 4 wide/narrow root16/root32 scenarios = 32 cases. Source preparation and registry admission are not native execution.
+      - Uses the real public DemoSpec and preview renderer in a separate explicitly New York consumer. The original Rhea style scope, callbacks and product sources remain intact. No mobile breakpoint, motion, AT, packed or non-Web acceptance is implied.
 verifies:
   prototypes: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
 exercises:
@@ -53,7 +80,11 @@ exercises:
 sources:
   - path: packages/prototypes/shadcn/test/alert-dialog.test.ts
   - path: apps/www/src/components/PrototypePreviewer/shadcn-alert-dialog-layout.test.ts
+  - path: apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added planned exact-source native New York static geometry, root-font and grouped command cases; preserve historical host-unit results and all remaining responsive, motion, AT and family admission debt.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Preserved the independent AlertDialog command ownership while recovering the action/cancel selection affordance lost during shared paint extraction; no Drawer or global selection policy expansion.
