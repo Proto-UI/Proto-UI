@@ -2509,6 +2509,7 @@ describe('Shadow closeout native boundaries', () => {
     { initialSibling: false, bodyPosition: 'grouped-independent' },
     { initialSibling: false, bodyPosition: 'filtered-built-in' },
     { initialSibling: false, bodyPosition: 'filtered-parent' },
+    { initialSibling: false, bodyPosition: 'filtered-reset' },
   ])(
     'reprojects descendant entry when its negated relational subject changes sibling position (initial sibling: $initialSibling, body position: $bodyPosition)',
     async ({ initialSibling, bodyPosition }) => {
@@ -2521,11 +2522,14 @@ describe('Shadow closeout native boundaries', () => {
       const filteredBuiltIn = shape === 'filtered-built-in';
       const filteredDefined = shape === 'filtered-defined' || filteredBuiltIn;
       const filteredParent = shape === 'filtered-parent';
+      const filteredReset = shape === 'filtered-reset';
       const afterDocumentRelation = shape === 'filtered-after-document-relation';
       const filtered = shape === 'filtered' || afterDocumentRelation;
       const selectors: Record<string, string> = {
         grouped: '.positional-entry:not(:has(.flag)):nth-child(2n+1) button, .unrelated',
         'grouped-independent': '.unrelated:has(.flag), .positional-entry:first-child button',
+        'filtered-reset':
+          '.positional-entry:not(:has(.flag)):nth-child(1 of :checked, .positional-entry) a',
         'filtered-parent':
           '.positional-entry[data-mode]:not(:has(.flag)) > .row:nth-child(1 of .row) button',
         'filtered-built-in':
@@ -2547,6 +2551,7 @@ describe('Shadow closeout native boundaries', () => {
         ${shape ? '.positional-entry:has(.other-flag) button { visibility: visible; }' : ''}
         ${filteredInternal ? '.positional-entry > [data-eligible] ~ .row button { color: red; }' : ''}
         ${filteredDefined ? '.eligible:defined ~ .positional-entry button { color: red; }' : ''}
+        ${filteredReset ? 'input:checked ~ .positional-entry a { color: red; }' : ''}
         ${selector} { visibility: hidden; }
       `;
       try {
@@ -2568,6 +2573,7 @@ describe('Shadow closeout native boundaries', () => {
             filteredDefined,
             filteredBuiltIn,
             filteredParent,
+            filteredReset,
             css,
           }) => {
             const p = (window as any).Closeout;
@@ -2583,11 +2589,13 @@ describe('Shadow closeout native boundaries', () => {
             );
             const boundary = document.createElement('div');
             boundary.id = 'positional-entry-shadow-host';
-            const parent = inShadow
-              ? boundary.attachShadow({ mode: 'open' })
-              : atBody
-                ? document.body
-                : document.createElement('div');
+            const parent = filteredReset
+              ? document.createElement('form')
+              : inShadow
+                ? boundary.attachShadow({ mode: 'open' })
+                : atBody
+                  ? document.body
+                  : document.createElement('div');
             if (parent instanceof ShadowRoot) {
               const sheet = new CSSStyleSheet();
               sheet.replaceSync(css);
@@ -2597,7 +2605,13 @@ describe('Shadow closeout native boundaries', () => {
             peer.innerHTML = '<button is="closeout-filtered-peer"></button>';
             const sibling = filteredBuiltIn
               ? (peer.content.firstElementChild as HTMLButtonElement)
-              : document.createElement(filteredDefined ? 'closeout-filtered-peer' : 'span');
+              : document.createElement(
+                  filteredReset ? 'input' : filteredDefined ? 'closeout-filtered-peer' : 'span'
+                );
+            if (sibling instanceof HTMLInputElement && filteredReset) {
+              sibling.type = 'checkbox';
+              sibling.checked = true;
+            }
             sibling.id = 'positional-entry-sibling';
             sibling.hidden = true;
             const wrapper = document.createElement('div');
@@ -2608,16 +2622,21 @@ describe('Shadow closeout native boundaries', () => {
               ? '<span hidden data-eligible></span><div class="row"><button>Inside</button></div>'
               : filteredParent
                 ? '<div class="row"><button>Inside</button></div>'
-                : '<button>Inside</button>';
+                : filteredReset
+                  ? '<a href="#entry">Inside</a>'
+                  : '<button>Inside</button>';
             if (filteredTarget || filteredInternal || filteredParent)
               host.className = 'positional-entry';
             wrapper.append(host);
             if (initialSibling || filteredDefined) sibling.className = 'eligible';
-            if ((initialSibling || filtered || filteredDefined) && !filteredInternal)
+            if (
+              (initialSibling || filtered || filteredDefined || filteredReset) &&
+              !filteredInternal
+            )
               parent.append(sibling);
             parent.append(filteredTarget || filteredInternal || filteredParent ? host : wrapper);
             if (inShadow) document.body.append(boundary);
-            else if (!atBody) document.body.append(parent);
+            else if (!atBody || filteredReset) document.body.append(parent);
           },
           {
             initialSibling,
@@ -2629,6 +2648,7 @@ describe('Shadow closeout native boundaries', () => {
             filteredDefined,
             filteredBuiltIn,
             filteredParent,
+            filteredReset,
             css,
           }
         );
@@ -2643,7 +2663,7 @@ describe('Shadow closeout native boundaries', () => {
                       document;
                     const host = root.querySelector('closeout-positional-entry')!;
                     resolve({
-                      visibility: getComputedStyle(host.querySelector('button')!).visibility,
+                      visibility: getComputedStyle(host.querySelector('button, a')!).visibility,
                       tabIndex: host.getAttribute('tabindex'),
                     });
                   })
@@ -2652,6 +2672,14 @@ describe('Shadow closeout native boundaries', () => {
           );
         const visible = { visibility: 'visible', tabIndex: null };
         const hidden = { visibility: 'hidden', tabIndex: '0' };
+        if (filteredReset) {
+          expect(await snapshot()).toEqual(visible);
+          await page.locator('#positional-entry-parent').evaluate((element) => {
+            (element as HTMLFormElement).reset();
+          });
+          expect(await snapshot()).toEqual(hidden);
+          return;
+        }
         if (filteredDefined) {
           expect(await snapshot()).toEqual(hidden);
           await page.evaluate((builtIn) => {

@@ -2112,9 +2112,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               );
               const onFormReset = (event: Event) => {
                 const form = event.composedPath()[0];
+                if (!(form instanceof view!.HTMLFormElement)) return;
+                const filteredParents = [...filteredPositionParents.keys()];
                 if (
-                  form instanceof view!.HTMLFormElement &&
-                  [...form.elements].some((control) => belongsToObservedEntryTree(control))
+                  [...form.elements].some(
+                    (control) =>
+                      belongsToObservedEntryTree(control) ||
+                      filteredParents.some((parent) => parent.contains(control))
+                  )
                 )
                   queueMicrotask(projectCurrent);
               };
