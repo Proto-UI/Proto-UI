@@ -1,0 +1,2161 @@
+{
+  "schemaVersion": 1,
+  "kind": "finf.issue-repair-evidence-accounting",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "issue": {
+    "number": 1136,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/1136",
+    "stateAtReadback": "open",
+    "sourceBody": "## 来源\n\n拆自 #1088（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）\n- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）\n- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。",
+    "releaseDispositionComment": {
+      "id": 6684417080,
+      "text": "Deferred to 0.4 — this is a Finf v2 tracking/followup item outside the bounded 0.3 release scope."
+    },
+    "parent": 1088,
+    "carrier": 887
+  },
+  "preparedAt": "2026-11-10T13:07:41.278277+00:00",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "sourceCandidate": {
+    "worktree": "/workspace/worktrees/release03-thirty-issue-1136-sol-20261110",
+    "branch": "fix/release03-thirty-issue-1136-sol-20261110",
+    "baseSha": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "baseTree": "6dfeee464d3e4b73ffa3b1c311dca573390fbef9",
+    "ownedPaths": [
+      "internal/records/2026-11-10-issue1136-repair-evidence.json",
+      "internal/records/2026-11-10-issue1136-repair-evidence.md"
+    ],
+    "productSourceChanges": [],
+    "historicalSourceChanges": [],
+    "sharedRegistryChanges": []
+  },
+  "completionBoundary": {
+    "originalConditions": 3,
+    "originalConditionsCheckedByWorker": 0,
+    "issueClosed": false,
+    "productChecksExecutedByWorker": false,
+    "sourceReadyIsIssueComplete": false,
+    "gitMutations": 0,
+    "externalWrites": 0,
+    "metadataAdmissionIsTechnicalAcceptance": false
+  },
+  "sourceRecords": [
+    {
+      "id": "issue1136.budget-handoff",
+      "originalIssueCondition": "- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）",
+      "originalEnglishCondition": "Publish precise budget handoff repair evidence",
+      "parentIssue": 1088,
+      "parentIssueCondition": "- [ ] Publish precise budget handoff repair evidence（发布精确预算交接修复证据）",
+      "parentCarrier": {
+        "pullRequest": 887,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+        "heading": "Existing review repair delivery",
+        "condition": "Publish precise budget handoff repair evidence"
+      },
+      "originalSource": {
+        "sessionId": "01a0cc26-1013-72dd-b00d-4429c2af2b17",
+        "eventId": "4cd790cb",
+        "eventLine": 84700,
+        "timestamp": "2026-10-24T22:51:16.516Z",
+        "phaseIndex": 75,
+        "phaseName": "Existing review repair delivery",
+        "taskIndex": 5,
+        "jsonPointer": "/data/phases/75/tasks/5",
+        "originalPhaseId": null,
+        "originalTaskId": null,
+        "sourceKey": "session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:4cd790cb#/data/phases/75/tasks/5",
+        "keyKind": "exact recovered native event/JSON-pointer locator; original task has no separate ID",
+        "completeTaskObject": {
+          "content": "Publish precise budget handoff repair evidence",
+          "status": "blocked",
+          "blocker": "One actual comment POST returned PublicationUnknown. Complete read-only reconciliation of all8comments found0exact markers; lost acknowledgment and outcome remain unattributable. Do not repost or equate absence with0mutations; preserve prepared body, exact marker and native receipts."
+        }
+      },
+      "state": "open",
+      "accepted": false,
+      "workerProductChecksExecuted": false,
+      "sourceRepair": {
+        "pullRequest": 825,
+        "beforeSha": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "afterSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "tree": "deba405545f6dccc2990d9d46529c5368fc70b0b",
+        "reviewCommentIds": [
+          4187998807,
+          4187998815
+        ],
+        "scope": "Require candidate digests before entering budget leaf and substantive blocker/refresh notes on constrained terminal handoffs; no numerical budget mutation."
+      },
+      "historicalEvidence": {
+        "nativeParentEvidenceEvent": "d29761f4",
+        "reportedFocused": {
+          "passed": 19,
+          "tests": 19
+        },
+        "reportedCompleteAgentOperations": {
+          "passed": 733,
+          "tests": 733,
+          "node": "24.21.0"
+        },
+        "initialFailedTestControlRetained": true,
+        "initialTestControlDisposition": "Corrected recursive source control to a valid unrelated regression-to-validate route; did not weaken numerical guards.",
+        "executionClassification": "Recovered exact historical summary, not worker execution. Original named result files are not currently present.",
+        "sourceDeliveryEvent": "1e26e10c",
+        "sourceRepairAndCriteriaCompleteAtThatCheckpoint": true,
+        "fullDeliveryCompleteAtThatCheckpoint": false
+      },
+      "publication": {
+        "status": "PublicationUnknown",
+        "originalPostAttemptsReported": 1,
+        "oldReadback": {
+          "eventId": "eb48ca7f",
+          "timestamp": "2026-10-06T05:58:18.957Z",
+          "commentsRead": 8,
+          "exactMarkerMatches": 0,
+          "lostAcknowledgement": true,
+          "attributedToInvocation": false
+        },
+        "digest": "24f58d0d77e85e36f40435981c4b7b7fbaf9d0624db7ce3df184c9ce65bb6b6a",
+        "marker": "<!-- proto-ui-agent-publication:24f58d0d77e85e36f40435981c4b7b7fbaf9d0624db7ce3df184c9ce65bb6b6a -->",
+        "currentReadback": {
+          "observedAt": "2026-11-10T13:07:41.278179+00:00",
+          "commentsExpected": 15,
+          "commentsRead": 15,
+          "emptyPage2": true,
+          "exactMarkerMatches": [],
+          "originalOutcomeAttributable": false
+        },
+        "preparedBodyRecovery": {
+          "recoveredBytesSHA256": "8e7767ca4c198de5f020c6da76ffedf668a6e4c6458750cc38940a985450542a",
+          "recoveredBytes": 2827,
+          "sourceEventId": "2eca92df",
+          "sourceEventLine": 38372,
+          "sourceExpression": "fs149Q.writeFile(original prepared path, literal + head825150Q + literal, exclusive write)",
+          "headBindingEventId": "1e26e10c",
+          "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+          "originalHistoricalFileSHA256": null,
+          "originalFileReadback": "Original /tmp file is absent; recovery binds the exact two literal fragments to the separately confirmed contemporaneous head. Hash names current recovered bytes only.",
+          "completePublishedBodyRecovered": false,
+          "reason": "Publisher appended historical disclosure and idempotency marker; this prepared text alone is not the full expected publication body."
+        },
+        "recoveredPreparedBody": "## Package-budget workflow review repair\n\nUser-directed follow-up to criteria `4187998807` and `4187998815`. Exact candidate: `d012d8630279fd8df228bc7b6cfb10c0d8936e9c`, preserving contributor parent `3c25b74f94e6d1576f8d133704cd55d462198733`. One real-hook/DCO commit; publication is an ordinary non-force branch push, not history rewriting.\n\n### Source-bound internal walkthrough\n\n| Handoff state | Before repair | Frozen repaired candidate |\n| --- | --- | --- |\n| Enter `pui-package-budget` with a candidate-change lacking its digest | Could enter with an unbound candidate | Reject before admission, for any source and both v1/v2 |\n| Enter with repeated v2 candidate-change materials and only some digests | An incomplete multi-candidate binding could survive | Require a digest on **every** candidate-change |\n| Constrained terminal stop from this leaf, no substantive note | Could omit blocker / evidence-refresh explanation | Require **at least one nonblank note** |\n| Other leaves / optional-digest artifacts / received handoff | Existing generic and binding semantics | Unchanged; unrelated route and unchanged-candidate controls remain enforced |\n\nThe repair is confined to `scripts/agent-operations/skill-registry.mjs`, three existing behavioral test files and the existing budget skill handoff guidance. Structural guards do not authenticate opaque evidence contents or the truth of prose.\n\nNative **synthetic v1/v2 handoffs through the real validator** reproduced both governed failures before source edits and passed against the frozen candidate. No actual numerical-budget transaction or live collaboration operation was used as smoke input.\n\n- Final focused evidence: **19/19 passed**. The initial 18/19 run is retained: one new unrelated-route control accidentally used a recursive source. Only that test control was corrected to the registered `pui-regression` → `pui-validate` route; no numeric or handoff guard was weakened.\n- Complete AgentOps validation: **733/733 passed**, Node24.21.0, no failures/skips/cancellations/todos.\n- Agent-doc check passed: projection is renderable; disposable local projection was absent as expected, not claimed as regenerated.\n- Independent read-only **local frozen-candidate** review: correct, no findings. It inspected retained proof without rerunning validation; this is not GitHub APPROVED, a sealed new-head review, or trusted CI.\n- Executed smoke source was archived before removing only the owned throwaway script.\n\nNo numerical budget, measured package size, handoff schema, generic optional-digest rule, received-handoff deep-equality/binding retention or unrelated routing was changed. Exact-head trusted CI, independent platform approval and repository rules remain required before integration. No self-approval, merge, CI rerun or settings change is claimed.\n",
+        "fullExpectedPublishedBodyRecovered": false,
+        "reposted": false
+      },
+      "currentAuthority": [
+        ".agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings",
+        "internal/agent-operations/handoff.md#post-mutation-validation-evidence",
+        "internal/agent-operations/contributor-agents.md#metadata-carrier-and-service-control-operations"
+      ],
+      "owner": "SolThirty1136RepairEvidence; Main owns any actual publication and exact-action reconciliation",
+      "remainingOriginalWork": [
+        "Preserve the original unknown operation and missing full expected body/acknowledgment; no blind retry.",
+        "Main may prepare a genuinely new criterion-bound #1136 evidence operation under current authority and must bind its actual request/readback, without attributing the old POST.",
+        "Read back the actual accepted publication URL and independently reviewed/integrated evidence before checking the original publication condition."
+      ]
+    },
+    {
+      "id": "issue1136.homepage-context",
+      "originalIssueCondition": "- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）",
+      "originalEnglishCondition": "Reproduce source owned homepage Context failure",
+      "parentIssue": 1088,
+      "parentIssueCondition": "- [ ] Reproduce source owned homepage Context failure（复现源拥有的主页 Context 失败）",
+      "parentCarrier": {
+        "pullRequest": 887,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+        "heading": "Collapsible homepage evidence",
+        "condition": "Reproduce source owned homepage Context failure"
+      },
+      "originalSource": {
+        "sessionId": "01a0cc26-1013-72dd-b00d-4429c2af2b17",
+        "eventId": "4cd790cb",
+        "eventLine": 84700,
+        "timestamp": "2026-10-24T22:51:16.516Z",
+        "phaseIndex": 76,
+        "phaseName": "Collapsible homepage evidence",
+        "taskIndex": 2,
+        "jsonPointer": "/data/phases/76/tasks/2",
+        "originalPhaseId": null,
+        "originalTaskId": null,
+        "sourceKey": "session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:4cd790cb#/data/phases/76/tasks/2",
+        "keyKind": "exact recovered native event/JSON-pointer locator; original task has no separate ID",
+        "completeTaskObject": {
+          "content": "Reproduce source owned homepage Context failure",
+          "status": "blocked",
+          "blocker": "Current user moves development TODOs to #872 followups and a future new PR. Preserve task/evidence; resume only under the new PR after fresh baseline/authorization."
+        }
+      },
+      "state": "open",
+      "accepted": false,
+      "workerProductChecksExecuted": false,
+      "sourceFailure": {
+        "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+        "runId": 37400958063,
+        "runAttempt": 1,
+        "jobId": 112067791864,
+        "jobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112067791864",
+        "conclusion": "failure",
+        "artifactId": 11385551526,
+        "artifactName": "homepage-candidate-dae1a67acb07efb56e8ff39713b781b861dabf4a-37400958063-1",
+        "scriptPath": "apps/www/scripts/capture-homepage-evidence.ts",
+        "scriptSha256": "b667eef1f411ae6dbd6a17ea1ce874e680fe80b9d5d3a35db01ae91a5b03edcf",
+        "sourceLogSha256": "8e016918767b20f6e90d32eb4095f153c35bab7814ca73a600e0b8dea06c481b",
+        "sourceLogLines": 4922,
+        "recoveredFailureSummary": {
+          "failedCases": 8,
+          "totalOriginalPageErrors": 24,
+          "distinctRuntimeStages": [
+            "wc:gallery-menu"
+          ],
+          "firstExactStack": "Error: [Context] provider missing for key: base-dropdown\n    at contextError (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/modules/context/src/impl.ts:16:15)\n    at ContextModuleImpl.update (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/modules/context/src/impl.ts:174:13)\n    at Object.update (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/modules/context/src/create.ts:20:39)\n    at Object.update (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/runtime/src/kernel/handles/run.ts:25:38)\n    at updateActiveValue (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/prototypes/base/src/dropdown/item.proto.ts:65:17)\n    at http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/prototypes/base/src/dropdown/item.proto.ts:83:7\n    at http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/modules/state/src/impl.ts:61:48\n    at http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/runtime/src/instance/instance.ts:107:47\n    at CallbackScope.runNoSync (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/runtime/src/instance/execute/callback-scope.ts:64:14)\n    at StateModuleImpl.callbackDispatcher (http://127.0.0.1:41173/@fs/home/runner/work/Proto-UI/Proto-UI/candidate/packages/runtime/src/instance/instance.ts:107:19)",
+          "fullOriginalDetailsRetained": true
+        },
+        "caseIds": [
+          "zh-cn-desktop-light",
+          "zh-cn-desktop-dark",
+          "zh-cn-mobile-light",
+          "zh-cn-mobile-dark",
+          "en-desktop-light",
+          "en-desktop-dark",
+          "en-mobile-light",
+          "en-mobile-dark"
+        ],
+        "error": "[Context] provider missing for key: base-dropdown",
+        "runtime": "wc",
+        "activeProbeStage": "gallery-menu",
+        "inferenceLimit": "The Collapsible phase heading does not attribute this base-dropdown exception to Collapsible."
+      },
+      "historicalEvidence": {
+        "sourceSummaryEvent": "076c2993",
+        "sourceFirstCaseEvent": "92cdfbf0",
+        "originalStackSliceEvent": "a9a86a65",
+        "stackSliceIsCompleteOriginalMetricsFile": false,
+        "mechanismProbeEvent": "2c67b9d5",
+        "mechanismProbe": {
+          "exitCode": 0,
+          "repeatableDetachPreservesProviderAndSubscription": true,
+          "terminalProviderAndAncestryDisconnectProduceSameDiagnostic": true,
+          "originalWCAttribution": false,
+          "visualVerification": false
+        },
+        "failedRecoveryAttempt": {
+          "eventId": "e6e23b5f",
+          "exitCode": 1,
+          "reason": "UND_ERR_CONNECT_TIMEOUT fetching selected metrics entry",
+          "laterRecoveryObserved": true
+        },
+        "currentProviderReadback": {
+          "runLatestAttempt": 7,
+          "originalAttempt1ReadSeparately": true,
+          "originalJobRunAttempt": 1,
+          "originalAttempt1Conclusion": "failure",
+          "artifactsCurrentlyListed": 0,
+          "artifactInventoryEmptyPage2": true
+        },
+        "historicalSourceScriptRefetchedAsData": {
+          "blobSha": "907e07c1af54654d37897c3f75bb39efc00cd33a",
+          "sha256": "b667eef1f411ae6dbd6a17ea1ce874e680fe80b9d5d3a35db01ae91a5b03edcf",
+          "matchesOriginalPinnedSha256": true
+        },
+        "freshReproductionRun": false
+      },
+      "currentAuthority": [
+        {
+          "entity": "M-CONTEXT-0001",
+          "status": "draft",
+          "criteria": [
+            "M-CONTEXT-0001-E",
+            "M-CONTEXT-0001-H",
+            "M-CONTEXT-0001-I"
+          ]
+        },
+        {
+          "entity": "C-CONTEXT-0011",
+          "status": "draft",
+          "criteria": [
+            "C-CONTEXT-0011-A",
+            "C-CONTEXT-0011-B"
+          ]
+        },
+        {
+          "entity": "C-CONTEXT-0012",
+          "status": "draft",
+          "criteria": [
+            "C-CONTEXT-0012-A",
+            "C-CONTEXT-0012-B",
+            "C-CONTEXT-0012-D"
+          ]
+        },
+        {
+          "entity": "T-CONTEXT-0003",
+          "status": "draft",
+          "criteria": [
+            "T-CONTEXT-0003-CASE-RETAINED-OWNER",
+            "T-CONTEXT-0003-CASE-LIFETIME",
+            "T-CONTEXT-0003-CASE-ADAPTER"
+          ]
+        }
+      ],
+      "owner": "SolThirty1136RepairEvidence owns historical recovery/accounting; Main assigns source reproduction to the actual current product owner; no takeover of RuntimeBox, Focus or typography.",
+      "remainingOriginalWork": [
+        "Establish the original source-owned native WC gallery-menu failure mechanism on its source, preserving runtime/input/ancestry/lifetime transitions; recovered original failure is already ground truth and does not need a confirming rerun.",
+        "The three-arm hostless mechanism probe is not the source-owned native homepage reproduction.",
+        "After a separately owned actual source repair, Main binds complete current-head public consumer/native/visual results; preserve all original failed source/producer hashes."
+      ]
+    },
+    {
+      "id": "issue1136.five-boundary",
+      "originalIssueCondition": "- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）",
+      "originalEnglishCondition": "Publish distinct five boundary repair evidence",
+      "parentIssue": 1088,
+      "parentIssueCondition": "- [ ] Publish distinct five boundary repair evidence（发布独立五边界修复证据）",
+      "parentCarrier": {
+        "pullRequest": 887,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/887",
+        "heading": "Five boundary current delivery",
+        "condition": "Publish distinct five boundary repair evidence"
+      },
+      "originalSource": {
+        "sessionId": "01a0cc26-1013-72dd-b00d-4429c2af2b17",
+        "eventId": "4cd790cb",
+        "eventLine": 84700,
+        "timestamp": "2026-10-24T22:51:16.516Z",
+        "phaseIndex": 82,
+        "phaseName": "Five boundary current delivery",
+        "taskIndex": 2,
+        "jsonPointer": "/data/phases/82/tasks/2",
+        "originalPhaseId": null,
+        "originalTaskId": null,
+        "sourceKey": "session:01a0cc26-1013-72dd-b00d-4429c2af2b17/event:4cd790cb#/data/phases/82/tasks/2",
+        "keyKind": "exact recovered native event/JSON-pointer locator; original task has no separate ID",
+        "completeTaskObject": {
+          "content": "Publish distinct five boundary repair evidence",
+          "status": "blocked",
+          "blocker": "Second per-commit comment remains PublicationUnknown. Current complete discussion readback retained; absence is not zero-write proof, and no replayed record or blind retry is authorized."
+        }
+      },
+      "state": "open",
+      "accepted": false,
+      "workerProductChecksExecuted": false,
+      "sourceRepair": {
+        "originalPullRequest": 833,
+        "originalFiveFindingBaseline": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "retainedRepairCommit": "3428a2620d91d84376714df4f16778198d430e00",
+        "retainedRepairTree": "a9dcb7a3863d74e4615ff1eb8a5b8d5bd0ec23a0",
+        "successorPullRequest": 873,
+        "integratedHead": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+        "integratedTree": "ed9e4a024290f80cc5cdbaaf1d8a8d4dc98381fa",
+        "parents": [
+          "c8d0ca8cecd6ac12b27678df40a86722d4795068",
+          "3428a2620d91d84376714df4f16778198d430e00"
+        ],
+        "reviewCommentIds": [
+          4194374599,
+          4194374608,
+          4194374615,
+          4194374621,
+          4194374631
+        ],
+        "originalThirteenFileSha256": {
+          "scripts/agent-operations/modeltrace.mjs": "77793eb4ea1c140bf82613eb2ebc5d9deb0a2db781b94a38a4ff998ac1db178f",
+          "scripts/agent-operations/modeltrace-cli.mjs": "16734fdfd10cf7393a1b6a072852c67b2c44958ece6eb80c6bc8d46cc197ec00",
+          "scripts/agent-operations/collaboration-runtime.mjs": "943a38086a00e2382c3a3473ab1541307ed0b4976c6e1047d6f664362339623c",
+          "scripts/agent-operations/agent-publish.mjs": "6a70e6b6d0f93a4b3dcc5bffc37c111bbd12fd112a915fd1d1d31bd255c97c68",
+          "internal/agent-operations/schemas/modeltrace-receipt.schema.json": "5cb5cc44a74e3fa276f550d7642d08ab9194baf3ab88d86efe72fd94097d5887",
+          "scripts/agent-operations/test/modeltrace.test.mjs": "0cc22c5f74f4290b3627f78009c6fa1b5d240d175c077e562d85ea0b7993f40d",
+          "scripts/agent-operations/test/modeltrace-private-output.test.mjs": "2e41dbd2dfc47e3faa6ea7b224a79c840c482399276d803d85d754e2ecd46940",
+          "scripts/agent-operations/test/collaboration-runtime.test.mjs": "95abf557bb32b95aaf70f498ee852d0d9e6c414c8e87633980ad9fe6ec32d9a6",
+          "scripts/agent-operations/test/agent-publish.test.mjs": "287b147ee9b7ae18c0756e70f04ab72115a6978b449209571b856a9015b95175",
+          "scripts/agent-operations/test/modeltrace-scorer-load.test.mjs": "1cc08fb740857361f0a7eeca556426f2dc81c74f56f921d9d4520849f08957bb",
+          "internal/agent-operations/README.md": "197e553e4d6d5ae4d35c63e0e9bf5a832d6ea7d7806492fd9cb959f1bc2b38d6",
+          "scripts/agent-operations/test/collaboration-invocation.test.mjs": "5566083c952f0469eb01410a2900fbfeb567a884e2bc642fc81fd38511fda1d4",
+          "scripts/agent-operations/test/owner-authorization.test.mjs": "c11fdb2b3d253ac6550caa7e0acc361073384f83bedb39d9d2fd036f969290ab"
+        },
+        "freshImmutableObjectReadback": {
+          "filesRead": 13,
+          "sameAsOriginalFrozenManifest": true,
+          "sourceExecution": false
+        }
+      },
+      "historicalEvidence": {
+        "frozenCandidateEvent": "55c9fd40",
+        "publicRetainedCommitEvidenceUrl": "https://github.com/Proto-UI/Proto-UI/pull/873#issuecomment-6036905011",
+        "publicRetainedCommitMarker": "<!-- agent-commit-progress:Proto-UI/Proto-UI#873:3428a2620d91d84376714df4f16778198d430e00 -->",
+        "reportedFrozenAgentOperations": {
+          "passed": 868,
+          "tests": 868,
+          "skipped": 0,
+          "source": "Original public commit progress; current immutable13-file hash equality does not attest execution."
+        },
+        "synchronizedPreparedBodyReports": {
+          "focusedPassed": 450,
+          "focusedTests": 450,
+          "completePassed": 1142,
+          "completeTests": 1142,
+          "evidenceClassification": "Original prepared text only. No new executed result is inferred from preparation."
+        },
+        "historicalNativeRun": {
+          "runId": 37613588932,
+          "attempt": 2,
+          "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+          "conclusion": "failure",
+          "originalFinalTaskReports": "8 browser shards passed; general and aggregate test failed.",
+          "gateReconciliationOwner": "SolThirty1137GateEvidence"
+        },
+        "historicalLocalIndependentReviewIsPlatformApproval": false
+      },
+      "publication": {
+        "status": "PublicationUnknown",
+        "unknownOperation": "Second per-commit progress comment for synchronized head3ca09b402; distinct from public earlier3428a262 progress.",
+        "requestAttemptedOnce": true,
+        "originalReconciliationEvent": "ff70325b",
+        "originalReconciliationTimestamp": "2026-10-07T11:29:26.802198+00:00",
+        "originalCompleteDiscussionCount": 4,
+        "digest": "e30bc9a710dbd6f6d6e015d0c8a36c3dd2886c5beb9561cad9f19822506e8433",
+        "marker": "<!-- proto-ui-agent-publication:e30bc9a710dbd6f6d6e015d0c8a36c3dd2886c5beb9561cad9f19822506e8433 -->",
+        "currentReadback": {
+          "observedAt": "2026-11-10T13:07:41.278261+00:00",
+          "commentsExpected": 4,
+          "commentsRead": 4,
+          "emptyPage2": true,
+          "exactMarkerMatches": [],
+          "earlier3428a262CommentExists": true,
+          "originalOutcomeAttributable": false
+        },
+        "preparedBodyRecovery": {
+          "recoveredBytesSHA256": "410bfafeea8f11a8e86120dcc7d746fa0c650a4bb08e6751b59bd59ea5cc3a19",
+          "recoveredBytes": 2020,
+          "sourceEventId": "bf1d974c",
+          "sourceEventLine": 41186,
+          "sourceExpression": "Literal pr155_progress_specs second tuple, substituting the contemporaneously verified pr155_commit_sha only; no archived code executed.",
+          "headBindingEventId": "ff70325b",
+          "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+          "originalHistoricalFileSHA256": null,
+          "originalFileReadback": "Original /tmp file is absent; recovery binds literal f-string fragments to the separately confirmed contemporaneous head. Hash names current recovered bytes only.",
+          "completePublishedBodyRecovered": false,
+          "reason": "Historical publisher appended disclosure/marker; exact full-body response/acknowledgment remains unavailable."
+        },
+        "recoveredPreparedBody": "## Development commit progress — current-main integration\n\nCommit: [3ca09b402e9ee4fe82d147083371d800ee613f37](https://github.com/Proto-UI/Proto-UI/commit/3ca09b402e9ee4fe82d147083371d800ee613f37). First parent: `c8d0ca8cecd6ac12b27678df40a86722d4795068`; retained repair parent: `3428a2620d91d84376714df4f16778198d430e00`.\n\n- Integrates the five-boundary repair without rewriting prior contributor history. The publisher conflict preserves current main's Dot-only disclosure/exemption helper while ordinary Agent publication keeps historical initial admission and the final fresh measurement gate. Main does not claim the Dot exemption.\n- Node24.21.0/pnpm10.32.1 on this synchronized source: **450/450** focused tests, **1142/1142** complete Agent Operations tests, zero skipped. All thirteen affected files passed Prettier check; Agent projection was generated from671entities and checked, remaining ignored/uncommitted.\n- Actual synchronized CLI reused the original expired record/context/body for [comment6014810685](https://github.com/Proto-UI/Proto-UI/pull/833#issuecomment-6014810685) and returned `already-published`, exact digest `391cfa398b80d7901e499fd574c8a09fd80ae2cca242f627e366e166cdb0725c`, no new mutation.\n- Actual record-aware commit verified the authorized tree `ed9e4a024290f80cc5cdbaaf1d8a8d4dc98381fa`, stored message, first parent and sign-off; normal push and PR creation acknowledgements were read back by their supported boundary. No blind retry or force push.\n- Native new-head CI and actual independent platform approval remain pending. Existing PR833 approvals/CI are not attributed to this follow-up; no parent Issue closure is inferred.\n\n@guangliang2019 Please independently review this exact head and the preserved five criteria. The original merged-PR findings are linked in the body; this is a follow-up implementation, not a claim that the fix was already present in the old merged tree.\n\n<!-- agent-commit-progress:Proto-UI/Proto-UI#873:3ca09b402e9ee4fe82d147083371d800ee613f37 -->\n",
+        "fullExpectedPublishedBodyRecovered": false,
+        "reposted": false
+      },
+      "currentAuthority": [
+        "internal/agent-operations/contributor-agents.md#metadata-carrier-and-service-control-operations",
+        "internal/agent-operations/handoff.md",
+        "https://github.com/Proto-UI/Proto-UI/pull/985"
+      ],
+      "permanentRetirement": {
+        "pullRequest": 985,
+        "mergeSha": "81339ddce9b6fc9b488331e10a533884ace96593",
+        "effect": "Historical five-boundary source and receipts remain evidence. Do not revive collector, scorer, schemas, measurements or old publication workflow.",
+        "replayAuthorized": false
+      },
+      "owner": "SolThirty1136RepairEvidence owns distinct publication/evidence;1137 owns original native gate reconciliation; Main owns any new external write.",
+      "remainingOriginalWork": [
+        "Preserve the second unknown write independently of the already published earlier commit evidence.",
+        "Main prepares any newly authorized current evidence operation with actual request and readback; no expired ModelTrace restamping or publication replay.",
+        "Current independent acceptance and original gate/thread dispositions belong to their separate source-bound owners; mergedPR873 is not a passing CI claim."
+      ]
+    }
+  ],
+  "fullOriginalReviewClauses": [
+    {
+      "pr": 825,
+      "id": 4187998807,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/825#discussion_r4187998807",
+      "created_at": "2026-10-05T19:39:53Z",
+      "updated_at": "2026-10-05T19:39:53Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Reject digestless candidates before entering the budget leaf**\n\nWhen a structurally valid incoming handoff contains a `candidate-change` without the optional `digest`, `pui-package-budget` can be entered but cannot use its required pre-edit terminal path after discovering stale or otherwise unusable measurements: retaining the candidate fails this assertion, while adding a digest fails the preceding deep-equality check. This affects both v1 and v2 because ordinary handoff validation permits omitted digests, so either require candidate digests when routing into this leaf or permit an unchanged digestless candidate to terminate.\n\nAGENTS.md reference: [AGENTS.md:L17-L17](https://github.com/Proto-UI/Proto-UI/blob/45af0397c107e534f1c2ebe889da338fa360a2b1/AGENTS.md#L17-L17)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/skill-registry.mjs",
+      "commit_id": "c14c318374ca040ae0a4c94233b7cbc021dd3154",
+      "original_commit_id": "45af0397c107e534f1c2ebe889da338fa360a2b1",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 825,
+      "id": 4187998815,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/825#discussion_r4187998815",
+      "created_at": "2026-10-05T19:39:53Z",
+      "updated_at": "2026-10-05T19:39:53Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Require a blocker note for constrained terminal handoffs**\n\nWhen `pui-package-budget` returns its unchanged candidate with `nextSkillId: null`, this branch accepts the handoff even if `notes` is empty—the new v2 integration fixture exercises exactly that case. The leaf contract requires explicit blocker and refresh work in the notes, so the current validator lets the workflow stop without recording why no transaction occurred or what must happen next; require at least one nonempty note for this constrained terminal path.\n\nAGENTS.md reference: [AGENTS.md:L17-L17](https://github.com/Proto-UI/Proto-UI/blob/45af0397c107e534f1c2ebe889da338fa360a2b1/AGENTS.md#L17-L17)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/skill-registry.mjs",
+      "commit_id": "c14c318374ca040ae0a4c94233b7cbc021dd3154",
+      "original_commit_id": "45af0397c107e534f1c2ebe889da338fa360a2b1",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 833,
+      "id": 4194374599,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374599",
+      "created_at": "2026-10-06T10:51:02Z",
+      "updated_at": "2026-10-06T10:51:02Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Reject duplicate models in candidate rankings**\n\nWhen a schema-v2 collaboration receipt is ingested, a caller can replace a lower-ranked candidate's `modelId`/`familyId` with the top candidate's values, recompute the unkeyed receipt ID, and pass this validation because only the candidate count is constrained; the later loop verifies that each entry exists in the bank but never that models are distinct. `buildModelTraceRecord` cannot produce such a ranking because the scorer emits one result per bank model, so require unique candidate model identities in both runtime and schema validation before accepting the receipt as canonical.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/modeltrace.mjs",
+      "commit_id": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "original_commit_id": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 833,
+      "id": 4194374608,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374608",
+      "created_at": "2026-10-06T10:51:02Z",
+      "updated_at": "2026-10-06T10:51:02Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep challenge context inputs outside the checkout**\n\nWhen `challenge` is invoked with `--context` pointing inside the checkout, this path reads the private session ID and context declarations without the containment check applied to every `score` input. The command succeeds and leaves that private context file available for staging; copying it outside before publication also means the publisher's check of the later supplied path cannot detect the original. Apply the same realpath-based outside-repository check to the challenge context before reading it.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/modeltrace-cli.mjs",
+      "commit_id": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "original_commit_id": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 833,
+      "id": 4194374615,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374615",
+      "created_at": "2026-10-06T10:51:02Z",
+      "updated_at": "2026-10-06T10:51:02Z",
+      "body": "**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Verify the scorer before importing executable code**\n\nWhen the vendored scorer is modified or replaced in a checkout, this static import executes that file before `loadBank()` compares its bytes with `SCORER_DIGEST`. A malicious scorer can therefore read `process.argv`, environment credentials, or private ModelTrace files and perform arbitrary side effects before the checksum error is raised, defeating the claimed integrity and privacy boundary. Load executable scorer code only from the bytes after their digest has been verified, with the verification and evaluation protected against replacement races.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/modeltrace.mjs",
+      "commit_id": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "original_commit_id": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 833,
+      "id": 4194374621,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374621",
+      "created_at": "2026-10-06T10:51:02Z",
+      "updated_at": "2026-10-06T10:51:02Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Bind collaboration receipts to measurement chronology**\n\nWhen a schema-v2 collaboration receipt embeds a ModelTrace receipt measured after the claimed mutation, `validateModelTraceReceipt` accepts its structure and this check verifies only the repository, so ingestion treats the later measurement as attribution for the earlier write. This permits retroactive ModelTrace attachment—the existing synthetic receipt path even accepts `verifiedAt` values preceding `modelTrace.measuredAt`—despite the requirement that measurement be current before a write. Require the measurement to precede the receipt's verified mutation time and, where available, bind freshness to the platform object's write timestamp.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/collaboration-runtime.mjs",
+      "commit_id": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "original_commit_id": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+      "in_reply_to_id": null
+    },
+    {
+      "pr": 833,
+      "id": 4194374631,
+      "html_url": "https://github.com/Proto-UI/Proto-UI/pull/833#discussion_r4194374631",
+      "created_at": "2026-10-06T10:51:02Z",
+      "updated_at": "2026-10-06T10:51:02Z",
+      "body": "**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Reconcile publications before enforcing receipt freshness**\n\nWhen an Issue, PR, comment, or body update was already published but the acknowledgement was lost or the command is rerun after the receipt expires, this unconditional `measure()` call fails freshness before `findPublished()` can perform its read-only marker/full-body reconciliation. Supplying a new measurement does not recover the operation because its disclosure changes the expected full body, so an unknown successful write can no longer be resolved through the supported publisher. Fresh evidence beyond the earlier collaboration-validation issue is that this separate publisher path blocks its own idempotent readback; load and validate the historical bound record for reconciliation, then require freshness only immediately before a mutation.\n\nAGENTS.md reference: [AGENTS.md:L23-L23](https://github.com/Proto-UI/Proto-UI/blob/84cb87e1f094bd53506d2d2419eefdf38f8c3a70/AGENTS.md#L23-L23)\n\nUseful? React with 👍 / 👎.",
+      "path": "scripts/agent-operations/agent-publish.mjs",
+      "commit_id": "e0fac293222137c3d95eb04760b492d4bd3c0320",
+      "original_commit_id": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+      "in_reply_to_id": null
+    }
+  ],
+  "immutableHistoricalSourcePairs": [
+    {
+      "path": ".agents/skills/pui-package-budget/SKILL.md",
+      "status": "modified",
+      "before": {
+        "revision": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "path": ".agents/skills/pui-package-budget/SKILL.md",
+        "blobSha": "bd7f44029547c5831d47a1ff3cb43e82cfa18a66",
+        "sha256": "16bd05fdd3310d1fa1c2ba6c36cd1be5753370776ea12fe22bd59728732ebe62",
+        "bytes": 6997,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "path": ".agents/skills/pui-package-budget/SKILL.md",
+        "blobSha": "0b8dd6082dae24fc364f43099a8438a7371f3cc6",
+        "sha256": "f879f91d07d2075e72edda252bff000a1dd95bbd85adb7c701eb18c27898571b",
+        "bytes": 7209,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/skill-registry.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "path": "scripts/agent-operations/skill-registry.mjs",
+        "blobSha": "24f23af1c762a34b7e68b525a6eea7983aa87399",
+        "sha256": "8fea5ee1acdbf10f458813cf997e7715f38cb97c5a825af6c66ceaed56d21d2f",
+        "bytes": 28743,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "path": "scripts/agent-operations/skill-registry.mjs",
+        "blobSha": "9b66436afc712f697307219e6736383c02511cc2",
+        "sha256": "06ffd3a5f8a0b5f462f682a96ff484828ce2e08db6cdf83f6dce4265ab6b94ff",
+        "bytes": 29159,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/package-budget-decision-flow.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "path": "scripts/agent-operations/test/package-budget-decision-flow.test.mjs",
+        "blobSha": "99413cd813604c7d418cb34a69d930730c880fb6",
+        "sha256": "fa481b45c19911685430bc91fdf7e192fe097f96ba701b9cbb66c010f354f646",
+        "bytes": 7713,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "path": "scripts/agent-operations/test/package-budget-decision-flow.test.mjs",
+        "blobSha": "49205f4d6215b70d17d64e3df47abef81c736cb4",
+        "sha256": "b26fadfb21e1c58f455cf26fd9375e38c8d995e553783e55c3c704f7b16eb832",
+        "bytes": 7857,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/package-budget-handoff.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "path": "scripts/agent-operations/test/package-budget-handoff.test.mjs",
+        "blobSha": "cc848144028e1ea3d8b190f5d726748aaaeae6b5",
+        "sha256": "26c55ab399558b890dc4bf25a9ac33395e0c9b667ac362c11490debdd465d0bd",
+        "bytes": 8391,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "path": "scripts/agent-operations/test/package-budget-handoff.test.mjs",
+        "blobSha": "0cc61624dfa54227f3bbf453615b33e3161418e1",
+        "sha256": "552af54177cac3688002cdf164750d867fa0e525c9fb0155750e9c033cf536e0",
+        "bytes": 9436,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/package-budget-v2-integration.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "3c25b74f94e6d1576f8d133704cd55d462198733",
+        "path": "scripts/agent-operations/test/package-budget-v2-integration.test.mjs",
+        "blobSha": "fb937088a021e6b214beb4419f5db8f5bf52ac56",
+        "sha256": "a5efda0162a5de3e7df71ee60d814215895b70c884a7aca0c34edf42f953a6cc",
+        "bytes": 7319,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+        "path": "scripts/agent-operations/test/package-budget-v2-integration.test.mjs",
+        "blobSha": "07f2729c0b773570bd35e45c8d4f0ff20d2b3b6e",
+        "sha256": "c79d933a28c035d24c7a26f912b7420ebb784c915446af38d239eac193adbba8",
+        "bytes": 8845,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "internal/agent-operations/README.md",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "internal/agent-operations/README.md",
+        "blobSha": "34f457c0d8d385591f05624895e90ecd3d46a575",
+        "sha256": "16c2c208d43be3a859eb8105bd3997f6eac8c9610006f71742b1f031f2b959b1",
+        "bytes": 50537,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "internal/agent-operations/README.md",
+        "blobSha": "588d37ef3fc40cad48b6d39e5702fe88367ed3d5",
+        "sha256": "197e553e4d6d5ae4d35c63e0e9bf5a832d6ea7d7806492fd9cb959f1bc2b38d6",
+        "bytes": 51915,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "internal/agent-operations/schemas/modeltrace-receipt.schema.json",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "internal/agent-operations/schemas/modeltrace-receipt.schema.json",
+        "blobSha": "122d5d88e53835480a800f9d10954348ce00bf1e",
+        "sha256": "7cc7a291cdfe7f4f0d93be4f504f56d8a49b09c207a4e7c75fd1317660bf951c",
+        "bytes": 10286,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "internal/agent-operations/schemas/modeltrace-receipt.schema.json",
+        "blobSha": "6477bece4b075cd71ede8030262884ced46aa2c2",
+        "sha256": "5cb5cc44a74e3fa276f550d7642d08ab9194baf3ab88d86efe72fd94097d5887",
+        "bytes": 14399,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/agent-publish.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/agent-publish.mjs",
+        "blobSha": "958f2ef210fa5fab82d0b41812ab07cd30132549",
+        "sha256": "c7452783d88d442ca9628443392bded8a208978edc3db8b8f7404781807bbbaf",
+        "bytes": 28928,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/agent-publish.mjs",
+        "blobSha": "b885a9033c1e84d99ebf7dbfcc67286f642f52b4",
+        "sha256": "6a70e6b6d0f93a4b3dcc5bffc37c111bbd12fd112a915fd1d1d31bd255c97c68",
+        "bytes": 29315,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/collaboration-runtime.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/collaboration-runtime.mjs",
+        "blobSha": "080d422d9330266dc85133290903dc5a012de6db",
+        "sha256": "013fef66090a520c2f121c4cf200291d293fc3bc57602da8fb0f16f97e5a9b7b",
+        "bytes": 46127,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/collaboration-runtime.mjs",
+        "blobSha": "20f95d6d7c9f870a85f9b5e801aded357b16c5fc",
+        "sha256": "943a38086a00e2382c3a3473ab1541307ed0b4976c6e1047d6f664362339623c",
+        "bytes": 46645,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/modeltrace-cli.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/modeltrace-cli.mjs",
+        "blobSha": "9000119a6b843096285388c0e760a3c10851e3ff",
+        "sha256": "fce30b7e78ecb20486fb58c94fc6a9244086043b1ad1202ff67b6a40eb02da15",
+        "bytes": 5209,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/modeltrace-cli.mjs",
+        "blobSha": "441b013accbe0d84a49f53cd5854aaa953c69ce9",
+        "sha256": "16734fdfd10cf7393a1b6a072852c67b2c44958ece6eb80c6bc8d46cc197ec00",
+        "bytes": 5293,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/modeltrace.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "blobSha": "acd8dc0b8fe3e5ac925bd15ccf0b7dcf529b9ff8",
+        "sha256": "86a30200e2888a2c6af5de183d0b59acff26bed2b37d32ae84113bfc2ce5cf6a",
+        "bytes": 32183,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/modeltrace.mjs",
+        "blobSha": "5e92eed0753347b813a07b4a17f53ba373f86437",
+        "sha256": "77793eb4ea1c140bf82613eb2ebc5d9deb0a2db781b94a38a4ff998ac1db178f",
+        "bytes": 33097,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/agent-publish.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/agent-publish.test.mjs",
+        "blobSha": "3f8de5f8fe2eeda8571118e1f8ad19d78ad32c3a",
+        "sha256": "3e8f092a2f072bd77c7b131c53bb1051ca9c938045279bd0f68aaaf932c79a20",
+        "bytes": 61930,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/agent-publish.test.mjs",
+        "blobSha": "c6caf0d03eea7e039e7e01c75e1e870453570725",
+        "sha256": "287b147ee9b7ae18c0756e70f04ab72115a6978b449209571b856a9015b95175",
+        "bytes": 68821,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/collaboration-invocation.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/collaboration-invocation.test.mjs",
+        "blobSha": "06c93ec67360540057079562856c0dbac45c49d8",
+        "sha256": "37ce33a76674b8ff45db5734301b56b7eabc068a916792be78048dfadba673aa",
+        "bytes": 21154,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/collaboration-invocation.test.mjs",
+        "blobSha": "3bad3c0756bfdf8d664e1df716d003f5b226da7f",
+        "sha256": "5566083c952f0469eb01410a2900fbfeb567a884e2bc642fc81fd38511fda1d4",
+        "bytes": 21347,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/collaboration-runtime.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/collaboration-runtime.test.mjs",
+        "blobSha": "2f7ba5d660dd0ba35e2e88ed490811a274b13e9c",
+        "sha256": "05cde37a43dbb57f1748021bd441cdc463d67e9ab3e5198dcb6735ac2744d8c2",
+        "bytes": 109654,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/collaboration-runtime.test.mjs",
+        "blobSha": "e9f26411137e5745f377fa3c92f8d8a7b4870980",
+        "sha256": "95abf557bb32b95aaf70f498ee852d0d9e6c414c8e87633980ad9fe6ec32d9a6",
+        "bytes": 113736,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/modeltrace-private-output.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/modeltrace-private-output.test.mjs",
+        "blobSha": "2c21a8ea01790824aadc74840a0bc86d3816dad2",
+        "sha256": "88c78d54130eac91533fd8ca6018ccc4124892834bb9da6223aa6dac664bba3c",
+        "bytes": 2060,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/modeltrace-private-output.test.mjs",
+        "blobSha": "992042bffb3d863b11bb9aa82ec32ed43a121bb4",
+        "sha256": "2e41dbd2dfc47e3faa6ea7b224a79c840c482399276d803d85d754e2ecd46940",
+        "bytes": 4569,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/modeltrace-scorer-load.test.mjs",
+      "status": "added",
+      "before": null,
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/modeltrace-scorer-load.test.mjs",
+        "blobSha": "464be60d947c0de21149430dc297e5b548261410",
+        "sha256": "1cc08fb740857361f0a7eeca556426f2dc81c74f56f921d9d4520849f08957bb",
+        "bytes": 4360,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/modeltrace.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/modeltrace.test.mjs",
+        "blobSha": "077ce8b0407ff85ba173e3096d96414e09152fc0",
+        "sha256": "d9f6088ec71702dae1eb571fd2566db8cd897127d82555a3a5791c521d61642c",
+        "bytes": 47446,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/modeltrace.test.mjs",
+        "blobSha": "dba028a13e81ef5e5042c0a20b4fff329d66671a",
+        "sha256": "0cc22c5f74f4290b3627f78009c6fa1b5d240d175c077e562d85ea0b7993f40d",
+        "bytes": 51332,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    },
+    {
+      "path": "scripts/agent-operations/test/owner-authorization.test.mjs",
+      "status": "modified",
+      "before": {
+        "revision": "84cb87e1f094bd53506d2d2419eefdf38f8c3a70",
+        "path": "scripts/agent-operations/test/owner-authorization.test.mjs",
+        "blobSha": "a48e1e8112b33135fc8eac8eebc5e02f993b07ab",
+        "sha256": "dedeef51a58437404df30d45290e09d60b2a883195d7145e099386ce369870c8",
+        "bytes": 27387,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      },
+      "after": {
+        "revision": "3428a2620d91d84376714df4f16778198d430e00",
+        "path": "scripts/agent-operations/test/owner-authorization.test.mjs",
+        "blobSha": "768db900cf8fe1bd9d14147ec78362b1196f493f",
+        "sha256": "c11fdb2b3d253ac6550caa7e0acc361073384f83bedb39d9d2fd036f969290ab",
+        "bytes": 27650,
+        "readOnlyProvider": "GitHub REST contents API at immutable SHA"
+      }
+    }
+  ],
+  "sourceAndDiscussionReadback": {
+    "observedActor": "cyjin-yl",
+    "repositoryPermissions": {
+      "admin": false,
+      "maintain": true,
+      "push": true,
+      "triage": true,
+      "pull": true
+    },
+    "externalWriteAuthorizedToWorker": false,
+    "allRelevantSourceDiscussionPagination": {
+      "825": {
+        "commentsExpected": 15,
+        "commentsDelivered": 15,
+        "commentsEndPage": 0,
+        "reviewCommentsExpected": 17,
+        "reviewCommentsDelivered": 17,
+        "reviewCommentsEndPage": 0,
+        "reviewsDelivered": 14,
+        "reviewsEndPage": 0
+      },
+      "833": {
+        "commentsExpected": 22,
+        "commentsDelivered": 22,
+        "commentsEndPage": 0,
+        "reviewCommentsExpected": 48,
+        "reviewCommentsDelivered": 48,
+        "reviewCommentsEndPage": 0,
+        "reviewsDelivered": 16,
+        "reviewsEndPage": 0
+      },
+      "835": {
+        "commentsExpected": 8,
+        "commentsDelivered": 8,
+        "commentsEndPage": 0,
+        "reviewCommentsExpected": 9,
+        "reviewCommentsDelivered": 9,
+        "reviewCommentsEndPage": 0,
+        "reviewsDelivered": 5,
+        "reviewsEndPage": 0
+      },
+      "873": {
+        "commentsExpected": 4,
+        "commentsDelivered": 4,
+        "commentsEndPage": 0,
+        "reviewCommentsExpected": 0,
+        "reviewCommentsDelivered": 0,
+        "reviewCommentsEndPage": 0,
+        "reviewsDelivered": 1,
+        "reviewsEndPage": 0
+      }
+    },
+    "carrier887": "/tmp/release03-issue1136-sol-20261110/github-snapshot.json",
+    "newHeadCiDcoAndPlatformReview": "not-run/not-established; Main must collect actual current candidate results",
+    "originalNativeCheckRuns": {
+      "d012d8630279fd8df228bc7b6cfb10c0d8936e9c": {
+        "observedAt": "2026-11-10T13:04:49.121360+00:00",
+        "totalCount": 37,
+        "delivered": 37,
+        "endPageCount": 0,
+        "checkRuns": [
+          {
+            "id": 112131976419,
+            "name": "test",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112131976419"
+          },
+          {
+            "id": 112129973679,
+            "name": "Vercel Preview Comments",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 8329,
+            "appSlug": "vercel",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://vercel.com/github"
+          },
+          {
+            "id": 112129647012,
+            "name": "test-browser (2/8, browser-2-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129647012"
+          },
+          {
+            "id": 112129646701,
+            "name": "test-browser (3/8, browser-3-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646701"
+          },
+          {
+            "id": 112129646658,
+            "name": "test-browser (8/8, browser-8-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646658"
+          },
+          {
+            "id": 112129646655,
+            "name": "test-browser (4/8, browser-4-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646655"
+          },
+          {
+            "id": 112129646651,
+            "name": "test-browser (7/8, browser-7-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646651"
+          },
+          {
+            "id": 112129646582,
+            "name": "test-browser (1/8, browser-1-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646582"
+          },
+          {
+            "id": 112129646579,
+            "name": "test-browser (6/8, browser-6-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646579"
+          },
+          {
+            "id": 112129646539,
+            "name": "test-browser (5/8, browser-5-of-8)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646539"
+          },
+          {
+            "id": 112129646409,
+            "name": "test-general",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129646409"
+          },
+          {
+            "id": 112129643260,
+            "name": "release-stage",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129643260"
+          },
+          {
+            "id": 112129643113,
+            "name": "release-consumer-react",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129643113"
+          },
+          {
+            "id": 112129642838,
+            "name": "cli-smoke",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129642838"
+          },
+          {
+            "id": 112129642665,
+            "name": "public_package_build",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129642665"
+          },
+          {
+            "id": 112129595633,
+            "name": "release-scan",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595633"
+          },
+          {
+            "id": 112129595229,
+            "name": "type-check",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595229"
+          },
+          {
+            "id": 112129595207,
+            "name": "public_package_plan",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595207"
+          },
+          {
+            "id": 112129595202,
+            "name": "test-plan",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595202"
+          },
+          {
+            "id": 112129595198,
+            "name": "rust-interop",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595198"
+          },
+          {
+            "id": 112129595103,
+            "name": "lockstep-check",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595103"
+          },
+          {
+            "id": 112129595077,
+            "name": "rust",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129595077"
+          },
+          {
+            "id": 112129594934,
+            "name": "rust-macos",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835453/job/112129594934"
+          },
+          {
+            "id": 112129594837,
+            "name": "isolated-controls (code-surfaces, code-surfaces)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594837"
+          },
+          {
+            "id": 112129594774,
+            "name": "Build docs preview",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835473/job/112129594774"
+          },
+          {
+            "id": 112129594742,
+            "name": "isolated-controls (native-links, site-native-links)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594742"
+          },
+          {
+            "id": 112129594721,
+            "name": "isolated-controls (copy-commands, site-copy-commands)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594721"
+          },
+          {
+            "id": 112129594709,
+            "name": "isolated-controls (search-commands, site-search-commands)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594709"
+          },
+          {
+            "id": 112129594700,
+            "name": "native-typography",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835466/job/112129594700"
+          },
+          {
+            "id": 112129594698,
+            "name": "mobile-navigation-reading",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594698"
+          },
+          {
+            "id": 112129594667,
+            "name": "isolated-controls (runtime-box, runtime-preview-surface, runtime-preview-evidence)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594667"
+          },
+          {
+            "id": 112129594658,
+            "name": "isolated-controls (code-surface-grammar, code-surface-grammar)",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594658"
+          },
+          {
+            "id": 112129594656,
+            "name": "visual-density",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594656"
+          },
+          {
+            "id": 112129594475,
+            "name": "capture",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835455/job/112129594475"
+          },
+          {
+            "id": 112129594438,
+            "name": "public-atom-previews",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835454/job/112129594438"
+          },
+          {
+            "id": 112129594392,
+            "name": "browser",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37420835474/job/112129594392"
+          },
+          {
+            "id": 112129583438,
+            "name": "DCO",
+            "headSha": "d012d8630279fd8df228bc7b6cfb10c0d8936e9c",
+            "appId": 1861,
+            "appSlug": "dco",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://probot.github.io/apps/dco/"
+          }
+        ]
+      },
+      "dae1a67acb07efb56e8ff39713b781b861dabf4a": {
+        "observedAt": "2026-11-10T13:04:51.573434+00:00",
+        "totalCount": 42,
+        "delivered": 42,
+        "endPageCount": 0,
+        "checkRuns": [
+          {
+            "id": 112709346693,
+            "name": "isolated-controls (runtime-box, runtime-preview-surface, runtime-preview-evidence)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709346693"
+          },
+          {
+            "id": 112709342772,
+            "name": "isolated-controls (code-surfaces, code-surfaces)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709342772"
+          },
+          {
+            "id": 112709336806,
+            "name": "visual-density",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709336806"
+          },
+          {
+            "id": 112709325944,
+            "name": "isolated-controls (copy-commands, site-copy-commands)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709325944"
+          },
+          {
+            "id": 112709293137,
+            "name": "isolated-controls (search-commands, site-search-commands)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709293137"
+          },
+          {
+            "id": 112709292558,
+            "name": "isolated-controls (code-surface-grammar, code-surface-grammar)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709292558"
+          },
+          {
+            "id": 112709292103,
+            "name": "isolated-controls (native-links, site-native-links)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709292103"
+          },
+          {
+            "id": 112709290885,
+            "name": "mobile-navigation-reading",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709290885"
+          },
+          {
+            "id": 112709289228,
+            "name": "capture",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "failure",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958063/job/112709289228"
+          },
+          {
+            "id": 112070557867,
+            "name": "test",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112070557867"
+          },
+          {
+            "id": 112068188256,
+            "name": "Vercel Preview Comments",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 8329,
+            "appSlug": "vercel",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://vercel.com/github"
+          },
+          {
+            "id": 112068093327,
+            "name": "release-consumer-react",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112068093327"
+          },
+          {
+            "id": 112068093291,
+            "name": "public_package_build",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112068093291"
+          },
+          {
+            "id": 112068093238,
+            "name": "cli-smoke",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112068093238"
+          },
+          {
+            "id": 112068093189,
+            "name": "release-stage",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112068093189"
+          },
+          {
+            "id": 112067836222,
+            "name": "test-browser (5/8, browser-5-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836222"
+          },
+          {
+            "id": 112067836177,
+            "name": "test-browser (2/8, browser-2-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836177"
+          },
+          {
+            "id": 112067836174,
+            "name": "test-browser (7/8, browser-7-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836174"
+          },
+          {
+            "id": 112067836173,
+            "name": "test-browser (4/8, browser-4-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836173"
+          },
+          {
+            "id": 112067836153,
+            "name": "test-browser (6/8, browser-6-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836153"
+          },
+          {
+            "id": 112067836091,
+            "name": "test-browser (8/8, browser-8-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836091"
+          },
+          {
+            "id": 112067836084,
+            "name": "test-browser (3/8, browser-3-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836084"
+          },
+          {
+            "id": 112067836076,
+            "name": "test-browser (1/8, browser-1-of-8)",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836076"
+          },
+          {
+            "id": 112067836032,
+            "name": "test-general",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067836032"
+          },
+          {
+            "id": 112067792277,
+            "name": "rust-macos",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067792277"
+          },
+          {
+            "id": 112067791926,
+            "name": "rust-interop",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791926"
+          },
+          {
+            "id": 112067791909,
+            "name": "native-typography",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958158/job/112067791909"
+          },
+          {
+            "id": 112067791901,
+            "name": "rust",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791901"
+          },
+          {
+            "id": 112067791877,
+            "name": "public_package_plan",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791877"
+          },
+          {
+            "id": 112067791869,
+            "name": "browser",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958137/job/112067791869"
+          },
+          {
+            "id": 112067791862,
+            "name": "test-plan",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791862"
+          },
+          {
+            "id": 112067791858,
+            "name": "release-scan",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791858"
+          },
+          {
+            "id": 112067791785,
+            "name": "type-check",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791785"
+          },
+          {
+            "id": 112067791669,
+            "name": "lockstep-check",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958088/job/112067791669"
+          },
+          {
+            "id": 112067791508,
+            "name": "capture",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958052/job/112067791508"
+          },
+          {
+            "id": 112067791438,
+            "name": "Build docs preview",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958031/job/112067791438"
+          },
+          {
+            "id": 112067791360,
+            "name": "four-web-preferences",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958077/job/112067791360"
+          },
+          {
+            "id": 112067791336,
+            "name": "browser-evidence",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958116/job/112067791336"
+          },
+          {
+            "id": 112067791159,
+            "name": "focused-browser",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958027/job/112067791159"
+          },
+          {
+            "id": 112067791070,
+            "name": "capture",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958012/job/112067791070"
+          },
+          {
+            "id": 112067791025,
+            "name": "public-atom-previews",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37400958000/job/112067791025"
+          },
+          {
+            "id": 112067781482,
+            "name": "DCO",
+            "headSha": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+            "appId": 1861,
+            "appSlug": "dco",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://probot.github.io/apps/dco/"
+          }
+        ]
+      },
+      "3428a2620d91d84376714df4f16778198d430e00": {
+        "observedAt": "2026-11-10T13:04:53.587310+00:00",
+        "totalCount": 0,
+        "delivered": 0,
+        "endPageCount": 0,
+        "checkRuns": []
+      },
+      "3ca09b402e9ee4fe82d147083371d800ee613f37": {
+        "observedAt": "2026-11-10T13:04:56.511230+00:00",
+        "totalCount": 29,
+        "delivered": 29,
+        "endPageCount": 0,
+        "checkRuns": [
+          {
+            "id": 112777265768,
+            "name": "test",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "failure",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112777265768"
+          },
+          {
+            "id": 112774994226,
+            "name": "test-plan",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774994226"
+          },
+          {
+            "id": 112774991694,
+            "name": "rust",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774991694"
+          },
+          {
+            "id": 112774979531,
+            "name": "rust-macos",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774979531"
+          },
+          {
+            "id": 112774966390,
+            "name": "public_package_plan",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774966390"
+          },
+          {
+            "id": 112774964873,
+            "name": "lockstep-check",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774964873"
+          },
+          {
+            "id": 112774934240,
+            "name": "test-browser (4/8, browser-4-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774934240"
+          },
+          {
+            "id": 112774934204,
+            "name": "test-browser (2/8, browser-2-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774934204"
+          },
+          {
+            "id": 112774933964,
+            "name": "test-browser (8/8, browser-8-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933964"
+          },
+          {
+            "id": 112774933790,
+            "name": "test-browser (7/8, browser-7-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933790"
+          },
+          {
+            "id": 112774933516,
+            "name": "release-consumer-react",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933516"
+          },
+          {
+            "id": 112774933469,
+            "name": "test-browser (3/8, browser-3-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933469"
+          },
+          {
+            "id": 112774933445,
+            "name": "test-browser (1/8, browser-1-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933445"
+          },
+          {
+            "id": 112774933386,
+            "name": "test-browser (6/8, browser-6-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933386"
+          },
+          {
+            "id": 112774933116,
+            "name": "release-stage",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933116"
+          },
+          {
+            "id": 112774933006,
+            "name": "public_package_build",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774933006"
+          },
+          {
+            "id": 112774932938,
+            "name": "cli-smoke",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "skipped",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774932938"
+          },
+          {
+            "id": 112774932636,
+            "name": "test-browser (5/8, browser-5-of-8)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774932636"
+          },
+          {
+            "id": 112774931713,
+            "name": "type-check",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774931713"
+          },
+          {
+            "id": 112774931396,
+            "name": "release-scan",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774931396"
+          },
+          {
+            "id": 112774931243,
+            "name": "test-general",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "failure",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774931243"
+          },
+          {
+            "id": 112774931152,
+            "name": "rust-interop",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588932/job/112774931152"
+          },
+          {
+            "id": 112766505103,
+            "name": "Vercel Preview Comments",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 8329,
+            "appSlug": "vercel",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://vercel.com/github"
+          },
+          {
+            "id": 112766491334,
+            "name": "family-audit-evidence (popup-boundaries, dropdown-menu,select,dialog)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588875/job/112766491334"
+          },
+          {
+            "id": 112766491219,
+            "name": "family-audit-evidence (intent-and-tabs, tooltip,hover-card,tabs)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588875/job/112766491219"
+          },
+          {
+            "id": 112766490936,
+            "name": "family-audit-evidence (passive-and-editors, badge,card,skeleton,separator,spinner,textarea,scroll...",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588875/job/112766490936"
+          },
+          {
+            "id": 112766490782,
+            "name": "family-audit-evidence (binary-and-buttons, button,toggle,switch,checkbox)",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588875/job/112766490782"
+          },
+          {
+            "id": 112766489655,
+            "name": "Build docs preview",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 15368,
+            "appSlug": "github-actions",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37613588778/job/112766489655"
+          },
+          {
+            "id": 112766480345,
+            "name": "DCO",
+            "headSha": "3ca09b402e9ee4fe82d147083371d800ee613f37",
+            "appId": 1861,
+            "appSlug": "dco",
+            "status": "completed",
+            "conclusion": "success",
+            "detailsUrl": "https://probot.github.io/apps/dco/"
+          }
+        ]
+      }
+    }
+  },
+  "witnesses": [
+    {
+      "eventId": "d430a0f9",
+      "timestamp": "2026-10-06T04:49:11.209Z",
+      "sourceResultTextSha256": "182691d2b65131498af7ba42422d06c3d45c9b5f33bd6da40f116f1d4b9d2cc2",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "d29761f4",
+      "timestamp": "2026-10-06T04:49:40.590Z",
+      "sourceResultTextSha256": "459f816def4edc71917f3dec98459649b7119e377d1a7994c0cca4e8f4c77420",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "1e26e10c",
+      "timestamp": "2026-10-06T08:58:03.315Z",
+      "sourceResultTextSha256": "2d77bc2553052f2928542cdf989f6fa7c4ec5cae48736e4fc64ef99c11688113",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "eb48ca7f",
+      "timestamp": "2026-10-06T05:58:19.019Z",
+      "sourceResultTextSha256": "a081f66b561df51d5ea3ac614903888bb7ac6d726e01c612380698e4eb846677",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "55c9fd40",
+      "timestamp": "2026-10-07T10:46:59.849Z",
+      "sourceResultTextSha256": "e879b95518830073899894564f3e1c3706aa9626df4263ddeaee98239e696521",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "076c2993",
+      "timestamp": "2026-10-06T07:54:52.872Z",
+      "sourceResultTextSha256": "ef55e28f9094a1ca3e2b3360a8b466524941b491acfc260a717e5612deea5703",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "92cdfbf0",
+      "timestamp": "2026-10-06T07:50:01.594Z",
+      "sourceResultTextSha256": "2bb18658135e243b33c282e496fe6c7e4e14585e12952b7408b5b577b1ff8271",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "2c67b9d5",
+      "timestamp": "2026-10-06T09:32:27.073Z",
+      "sourceResultTextSha256": "f1365fe741c913240efc6d97b91c53993052cc2fac0f15080b16bb3c46278dd6",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    },
+    {
+      "eventId": "ff70325b",
+      "timestamp": "2026-10-07T11:29:26.890Z",
+      "sourceResultTextSha256": "7c1aee807f2f1f1579a6ef9b3a719429bb61bdc2a1d3c67f8623c208abe7180e",
+      "hashScope": "Complete retained text of this one exact toolResult; not a hash of an absent original file."
+    }
+  ],
+  "localPreparationArtifacts": [
+    {
+      "type": "exact-task-scoped-native-witnesses",
+      "path": "/tmp/release03-issue1136-sol-20261110/exact-historical-witnesses.json",
+      "sha256": "726dd4be890eb5250d7514023d437897a6c590f945d09c2e03f10e648f171986"
+    },
+    {
+      "type": "original-clause-discussion-snapshot",
+      "path": "/tmp/release03-issue1136-sol-20261110/original-clauses-and-public-comments.json",
+      "sha256": "a497e542d2d196144c6dad656743510c8428e11f1acee5f51a560c560c9a7970"
+    },
+    {
+      "type": "historical-source-preimage-manifest",
+      "path": "/tmp/release03-issue1136-sol-20261110/historical-source-manifest.json",
+      "sha256": "9ddc3da6fdc2e6e2862fb16affd48b58f837293a0625da06361268c8cd653644"
+    },
+    {
+      "type": "original-native-provider-readback",
+      "path": "/tmp/release03-issue1136-sol-20261110/original-native-check-readbacks.json",
+      "sha256": "461dfee13390b7789c67ee66ffb0f2e489b3d2161b06133f8e6af1421d3cd9e1"
+    },
+    {
+      "type": "prepared-text-recovery-origins",
+      "path": "/tmp/release03-issue1136-sol-20261110/recovered-prepared-body-origins.json",
+      "sha256": "37981c1e72f409fcde9a0309165c7ac37ecfca1d8667aa749888b182103ff37d"
+    }
+  ],
+  "publicDeliveryState": "This record is local preparation until Main publishes actual immutable source and evidence URLs; no Issue/PR write or checkbox/closure was made.",
+  "remainingOwners": {
+    "1137": "native gates/thread reconciliation",
+    "1138": "source repair/package consumers",
+    "1139": "remainingTODO accounting",
+    "1140": "independently reviewed WC numerical baseline"
+  },
+  "mainContinuation": "Follow the paired Markdown record for serial commands, meaningful historical/current boundaries, source consumers, visual acceptance and a PR draft. Preserve any later owner repair result as a new source-bound artifact."
+}
