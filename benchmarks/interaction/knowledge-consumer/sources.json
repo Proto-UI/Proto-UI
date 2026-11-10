@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "kind": "interaction-knowledge-consumer-source-map",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "projectionSourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "status": "proposed-reader-projection; independent review and execution not performed",
+  "catalogLifecycle": "All listed knowledge/prototype/test entities remain draft. Catalog passing labels are not fresh runs.",
+  "historicalMaterialPolicy": "The existing f5bae261 knowledge excerpt and its d0c7691246598fc7b688fd8ccb752ff70f67e857eab76bac29079ab9ea1bbecd digest remain unchanged. The new current-source projection is separate.",
+  "files": [
+    {
+      "path": "spec/knowledge/K-COMPONENT-INTERACTION-0001.yaml",
+      "sha256": "9f11e75d4957139220e802f8738bc1ff305f2406d16d0263e8df06795278b26c"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS.yaml",
+      "sha256": "45a157edb149abdb382333aea6860b9793c534b9e1da5068aa818d0f561b1420"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+      "sha256": "ce2856e08704c40ad19ce92fbbab6d7119314404a49de54f80a5b84f9d1fdd51"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+      "sha256": "1e79af05f12d575b722da0c951dd47268a0e17b27d4d3c76310f725088fc252b"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+      "sha256": "4a1d1a7e74ed60bc21bd6a6883f0e52221dcb36ae27500fdc098c340571d11a5"
+    },
+    {
+      "path": "spec/tests/T-BASE-TABS-0001.yaml",
+      "sha256": "925949f0fbfa121caeed4e3a99a8b486b0215a6080a08cfbc5de0277d43b9bde"
+    },
+    {
+      "path": "benchmarks/interaction/dataset.json",
+      "sha256": "c18379045409409d6aa38539fd71e31301b4d0684f4dd942b840a6d24fec7f46"
+    },
+    {
+      "path": "benchmarks/interaction/scoring.json",
+      "sha256": "dcc91c7307cbe81f3955958806bda49f1bb1da278a13258d32b2ec4df126e1b1"
+    },
+    {
+      "path": "benchmarks/interaction/cases/tabs-manual-activation.json",
+      "sha256": "e45e574d2caf5f60b2652306f73f4df01a3c44bbeba1c1e7a6e8a937c3e6bfc6"
+    },
+    {
+      "path": "benchmarks/interaction/materials/tabs-manual-activation-knowledge.txt",
+      "sha256": "d0c7691246598fc7b688fd8ccb752ff70f67e857eab76bac29079ab9ea1bbecd"
+    },
+    {
+      "path": "internal/records/2026-09-24-product-and-compiler-discussion.md",
+      "sha256": "1bdb109211aca2b97001ee4e97c1cd126469478efdf53e28e6a18e63978d610c"
+    },
+    {
+      "path": "internal/records/2026-09-25-meeting-follow-up-and-compiler-plan.md",
+      "sha256": "77673a29fb7017b94af2f1e42b074df59dc19cd4ac43f235e4d7f69a069baf29"
+    }
+  ],
+  "externalReferences": [
+    {
+      "url": "https://www.w3.org/WAI/ARIA/apg/patterns/tabs/",
+      "role": "Independent public authoring guidance; live read, not a retained frozen standards snapshot."
+    },
+    {
+      "url": "https://www.radix-ui.com/primitives/docs/components/tabs",
+      "role": "Public target API guidance; live read, not behavior evidence."
+    },
+    {
+      "url": "https://registry.npmjs.org/@radix-ui/react-tabs/1.1.13",
+      "role": "Exact direct dependency identity and declared React18 peer support inspected.",
+      "integrity": "sha512-7xdcatg7/U+7+Udyoj2zodtI9H/IIopqo+YOIcZOq1nJwXWBZ9p8xiu5llXlekDbZkca79a/fozEYQXIA4sW6A=="
+    },
+    {
+      "url": "https://registry.npmjs.org/vite/6.4.1",
+      "role": "Exact direct build-tool identity and Node24 engine compatibility inspected.",
+      "integrity": "sha512-+Oxm7q9hDoLMyJOYfUYBuHQo+dkAloi33apOPP56pzj+vsdJDzr+j1NISE5pyaAuKL4A3UD34qd0lx5+kfKp2g=="
+    }
+  ],
+  "ownership": {
+    "core": "Existing governed interaction definitions; changes require the existing semantic review process.",
+    "business": "Application-specific content and scenarios; community ownership requires an explicit accepting maintainer.",
+    "example": "Bounded repository-owned product guidance with no separate repository or ongoing support promise."
+  },
+  "evidenceLimits": [
+    "No package install, build, import check, browser run, model participant or formal comparison has executed for this candidate.",
+    "Transitive package lock, independent oracle admission and verified isolated executor remain prerequisites for measurements."
+  ]
+}

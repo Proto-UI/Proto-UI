@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "kind": "interaction-knowledge-consumer-original-condition-ledger",
+  "issueNumber": 734,
+  "issueUrl": "https://github.com/Proto-UI/Proto-UI/issues/734",
+  "issueStateObserved": "OPEN",
+  "updatedAtObserved": "2026-11-06T12:46:59Z",
+  "sourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+  "originalLedgerPath": "internal/governance/release-0.3-source-ledger.json",
+  "originalLedgerBodySha256": "633f2d0336b0845d3a2aba58b611d5612f7b4d553d908b15656b1c2b1cc61289",
+  "currentAssignmentBodySha256": "633f2d0336b0845d3a2aba58b611d5612f7b4d553d908b15656b1c2b1cc61289",
+  "originalCriteriaCount": 10,
+  "criteria": [
+    {
+      "key": "issue.734.001",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 8,
+      "section": "## Acceptance criteria",
+      "original": "- [ ] A discoverable skill entry and a real clean-project example explain source knowledge, chosen library/generation route, target versions and limitations.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "SKILL.md",
+        "README.md",
+        "sources.json",
+        "knowledge.md",
+        "example/package.json",
+        "example/index.html",
+        "example/src/main.jsx",
+        "example/src/style.css"
+      ],
+      "authoredState": "Authored discoverable local skill and complete clean-project source; benchmark README shared link is an unapplied Main patch.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Actual independent clean install/build/run and visual/consumer acceptance; transitive lock and shared navigation integration.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.002",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 9,
+      "section": "## Acceptance criteria",
+      "original": "- [ ] The three comparison paths have explicit interaction, accessibility and host-integration checks; record actual task outcome, defects, time/cost and maintenance burden, including unsuccessful results.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "protocol.md",
+        "study.json",
+        "task.txt",
+        "example/check.mjs"
+      ],
+      "authoredState": "Explicit common interaction/accessibility/host checks and measurements; no actual participant or comparison result.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Actual mature-library, knowledge-assisted and unassisted deliveries with raw outputs, independent evaluation, cost/time/maintenance and failed/neutral attempts.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.003",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 10,
+      "section": "## Acceptance criteria",
+      "original": "- [ ] Findings feed back into concrete knowledge/test gaps. Prompt review or one attractive screenshot is not treated as behavioral evidence.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "protocol.md"
+      ],
+      "authoredState": "Concrete finding-to-authority-to-knowledge/test feedback procedure authored. No model failure or behavioral knowledge gap invented.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Observed divergences and appropriate concrete knowledge/test changes, or an evidence-grounded no-gap result.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.004",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 11,
+      "section": "## Acceptance criteria",
+      "original": "- [ ] Core interaction knowledge is separated from business-specific blocks/scenario skills and their community ownership. Do not create a separate repository or promise maintenance merely because it was discussed.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "SKILL.md",
+        "protocol.md",
+        "sources.json"
+      ],
+      "authoredState": "Core knowledge, application fixture and potential community business ownership kept distinct; no separate repository or maintenance promise.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Independent review and integration of the bounded guidance; retain explicit future business owner admission.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.005",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 12,
+      "section": "## Acceptance criteria",
+      "original": "- [ ] No mandatory 36+9 runs, 20% improvement, user-count floor or compiler-completion prerequisite. Choose enough checks for the actual claim and expose what remains unmeasured.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "SKILL.md",
+        "protocol.md",
+        "study.json"
+      ],
+      "authoredState": "No36+9, improvement/user floor or compiler prerequisite introduced; existing formal independent-repeat policy retained.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Execute enough observations for the actual narrow claim and report omissions.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 54,
+      "section": "### Experiment completion criteria",
+      "original": "- [ ] Conditions, selected primitives, exposure boundary, task requests, oracle, and environment are documented well enough for another operator to repeat the comparison.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "protocol.md",
+        "study.json",
+        "task.txt",
+        "sources.json",
+        "knowledge.md"
+      ],
+      "authoredState": "Selected primitive, equality/exposure plan, task and proposed semantic checks authored with public-development limits.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Independently reviewed facts/oracle, verified executor separation, exact real model/environment/budget and frozen execution inputs.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.007",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 55,
+      "section": "### Experiment completion criteria",
+      "original": "- [ ] All collected measurements and omitted/deviating runs are recorded with limitations and confounders.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "protocol.md",
+        "study.json"
+      ],
+      "authoredState": "No collected run is fabricated: results array is empty, status not-run and deviations policy explicit.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Retain all actual planned/collected/omitted/excluded/aborted/deviating attempts and confounders after execution.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.008",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 56,
+      "section": "### Experiment completion criteria",
+      "original": "- [ ] Results support an interpretable supported / weakened / inconclusive / falsified classification, including when no difference is observed.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "protocol.md",
+        "study.json"
+      ],
+      "authoredState": "Interpretation rules authored; no measured classification assigned to an unexecuted comparison.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Actual per-primitive table and interpretable supported/weakened/inconclusive/falsified judgment bound to collected evidence.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.009",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 57,
+      "section": "### Experiment completion criteria",
+      "original": "- [ ] No minimum improvement, favorable direction, statistical-significance threshold, or successful Proto UI implementation is required.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "SKILL.md",
+        "protocol.md"
+      ],
+      "authoredState": "No favorable direction, effect-size/significance or successful Proto condition required.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Preserve real neutral/negative/failed observations through review and interpretation.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    },
+    {
+      "key": "issue.734.010",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/734",
+      "sourceLine": 58,
+      "section": "### Experiment completion criteria",
+      "original": "- [ ] Claims remain within primitive interaction behavior; this does not evaluate or guarantee business-composition quality or overall product usability.",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "currentReleaseDisposition": "0.4 experimental per live Nov6 comment; original frozen ledger disposition retained above",
+      "candidatePaths": [
+        "SKILL.md",
+        "protocol.md",
+        "README.md"
+      ],
+      "authoredState": "Claims bounded to primitive interaction; no business-usability, compiler, other-host or AT guarantee.",
+      "currentAcceptanceState": "not-earned; source candidate unrun and unintegrated",
+      "remainingOriginalWork": "Actual observations and final review must remain within the documented bounds.",
+      "executionOwner": "Main; SolThirty734Knowledge retains source repair ownership"
+    }
+  ],
+  "discussionSources": [
+    {
+      "id": 5909773199,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-5909773199",
+      "preserved": "Separate knowledge availability, representation and deterministic realization; matched-information control required only for representation claims."
+    },
+    {
+      "id": 5909865821,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-5909865821",
+      "preserved": "Reusable task/visibility/oracle/evidence units; development/evaluation/held-out distinctions, exact model manifests, independent repeats, separate scoring dimensions, complete raw outputs and variance. Capability ladder and broader task classes are future bounded expansions, not a new shipping gate."
+    },
+    {
+      "id": 5925824412,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-5925824412",
+      "preserved": "Public regression is calibration, real hidden isolation unavailable, strict formal conditions blocked; no deterministic compiler claim inherited."
+    },
+    {
+      "id": 5946592103,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-5946592103",
+      "preserved": "Historical759/771 infrastructure/CI statement retained as dated discussion, not reverified as current results. Fixture-ID journeys cannot fairly score arbitrary generated pages; executor/oracle/model access remain separate prerequisites."
+    },
+    {
+      "id": 6684442029,
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-6684442029",
+      "preserved": "Deferred to0.4; independent research workstream outside0.3 scope and not a release gate."
+    }
+  ],
+  "pagination": {
+    "endpoint": "GET repos/Proto-UI/Proto-UI/issues/734/comments?per_page=100 with --paginate",
+    "returnedComments": 5,
+    "independentIssueCommentsCount": 5,
+    "allDiscussionRead": true
+  },
+  "optionalFollowup": {
+    "sourceMarker": "proto-ui-radar-20260928:representation",
+    "preserved": "Matched-content ordinary documentation versus source-mapped projection from505; retain same facts/context/budget/access, size and retrieval cost. Optional, no second framework or full-page study gate. Keep748 blind discovery and754 evaluation failure material separated."
+  },
+  "closure": "Keep Issue734 open. Source readiness, metadata admission, a recipe pass or PR merge alone does not earn all original conditions."
+}

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "kind": "interaction-knowledge-consumer-study-plan",
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/734",
+  "releaseDisposition": "0.4 experimental; preserve Nov6 deferral; no0.3 gate",
+  "status": "not-run",
+  "frozen": false,
+  "benchmark": {
+    "datasetId": "interaction-benchmark-v0",
+    "version": "0.0.0-calibration.3",
+    "caseId": "tabs-manual-activation",
+    "split": "development",
+    "origin": "public-calibration",
+    "existingOracleRef": "public-calibration-tabs-manual-activation-v2",
+    "resultAdmission": "Existing benchmark schemas remain calibration-only; this plan is not an admitted model result."
+  },
+  "selection": {
+    "primitive": "Tabs",
+    "reason": "Inspected root/list/trigger/content criteria and mapped existing tests; exercises focus versus selection, disabled traversal, accessible relationships and host removal without overlay, compiler or Adapter prerequisites.",
+    "limits": "One public primitive does not support ecosystem-wide claims; other candidate names are not automatic admission."
+  },
+  "task": {
+    "path": "task.txt",
+    "sha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+    "originalSourcePath": "benchmarks/interaction/cases/tabs-manual-activation.json",
+    "extension": "Host action count and exact target/source layout are ordinary information shared across all arms."
+  },
+  "conditions": [
+    {
+      "id": "library",
+      "intent": "Practical mature-library delivery; use Radix Tabs1.1.13 public APIs, not the already-authored example as a timed participant result.",
+      "visibleFiles": [
+        "task.txt"
+      ],
+      "additionalMaterial": "Same permitted public target ecosystem information; no Proto knowledge.",
+      "exposureRequirement": "Retain exact supplied material and actual retrieval/access log."
+    },
+    {
+      "id": "unassisted",
+      "intent": "AI ordinary requirements plus permitted public ecosystem material; method remains flexible.",
+      "visibleFiles": [
+        "task.txt"
+      ],
+      "withheld": "Proto criteria/contracts/knowledge, repository implementation, example and evaluator.",
+      "exposureRequirement": "Retain actual supplied and read bytes; same public target info as knowledge condition."
+    },
+    {
+      "id": "knowledge",
+      "intent": "Same task and allowed implementation choices as unassisted, plus declared interaction facts.",
+      "visibleFiles": [
+        "task.txt",
+        "knowledge.md"
+      ],
+      "knowledgeSha256": "b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16",
+      "withheld": "Final Proto implementation, generated output, clean example and evaluator.",
+      "exposureRequirement": "Retain supplied/read bytes and stable source references; missing access is a handoff deviation."
+    }
+  ],
+  "targets": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "vite": "6.4.1",
+    "library": "@radix-ui/react-tabs@1.1.13",
+    "checker": "playwright-core@1.58.2",
+    "node": "24.x, actual patch recorded per run",
+    "browser": "Actual Chromium binary/version and hash must be retained",
+    "lock": "Direct pins authored; a transitive lock must be generated, retained and frozen before any measured cell."
+  },
+  "pairedControls": [
+    "Exact provider/model/snapshot/reasoning/sampling/context/tool configuration",
+    "Task/prompt structure and permitted ordinary material",
+    "Target framework, dependency lock, browser and OS image",
+    "Tool/token/compute/wall-time and repair budgets",
+    "Independent evaluator and frozen check/severity/conflict policy"
+  ],
+  "operatorAdmission": {
+    "modelManifest": "Not supplied; Main must record the actual configured participant before any run. No backend identity is inferred.",
+    "budgets": "Not selected or spent; choose and freeze an equal affordable budget before both AI conditions.",
+    "isolation": "Unavailable in the current shared repository; public case cannot become held-out or strict blind.",
+    "oracle": "check.mjs is a public consumer observation candidate awaiting independent review, not an admitted formal oracle.",
+    "formalRepeats": 3,
+    "formalRepeatSource": "Existing dataset formalPolicy.minimumIndependentRepeats; no36+9 or effect-size gate.",
+    "counterbalance": "Rotate library/unassisted/knowledge order across repetitions when practical; retain actual order and deviations."
+  },
+  "optionalRepresentationControl": {
+    "required": false,
+    "condition": "Same independently reviewed facts and target/API/examples in readable documentation versus a source-mapped projection; freeze size, retrieval cost and actual access.",
+    "claimBoundary": "No representation claim without this control; deterministic realization remains owned by#749/#732."
+  },
+  "measurements": [
+    "Exact raw task outputs and first/final source snapshots",
+    "First-pass and final behavioral/accessibility/host/cleanup check vectors",
+    "Initially omitted and unsupported invented requirements",
+    "Defects with severity/type/first divergence and independent authority",
+    "Iterations, repairs, evaluator/human interventions",
+    "Tokens, compute, elapsed/human time and monetary cost, or unavailable with reason",
+    "Observed maintenance/change work, dependencies/version sensitivity and unmeasured longer-term burden",
+    "Every failed, aborted, omitted, excluded and deviating run",
+    "Per-cell distribution/run variance and paired differences; no opaque aggregate score"
+  ],
+  "results": [],
+  "interpretation": {
+    "classification": null,
+    "reason": "No comparison has run; supported/weakened/inconclusive/falsified belongs to actual collected evidence."
+  }
+}
