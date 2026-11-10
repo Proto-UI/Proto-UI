@@ -86,6 +86,13 @@ const CONSUMER_LEDGERS = Object.freeze({
   harness: 'internal/agent-harness/dogfood-coverage-matrix.md',
 });
 const LIFECYCLES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
+const SHADCN_MODERN_STYLES = Object.freeze([
+  'vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea',
+]);
+const SHADCN_LEGACY_STYLE = 'new-york-v4';
+const SHADCN_STYLE_MANIFEST = 'internal/fixtures/shadcn-style-source/manifest.json';
+const COVERAGE_RELEASE_BOUNDARY =
+  'Release boundary: [the 0.3 plan](../governance/release-0.3-plan.md) commits Base, Shadcn, Brutalist and Lucide scope; Bootstrap 2.3.2 and Liquid Glass remain WIP / Experimental for 0.4. The four-family tracking matrix retains its [recorded 0.4 deferral](https://github.com/Proto-UI/Proto-UI/issues/870#issuecomment-6684477558). Original mixed criteria and evidence debts remain separately accountable; deferral, source presence and this documentation update do not complete them or close #870.';
 const SUBJECT_ALIASES = Object.freeze({
   menu: 'dropdown-menu',
   'preview-card': 'hover-card',
@@ -219,10 +226,106 @@ const inventoryPaths = (inventory) =>
     ),
   ].sort();
 
+const sourcePathsOf = (entity) =>
+  (entity.sources ?? [])
+    .map((source) => (typeof source === 'string' ? source : source?.path))
+    .filter((source) => typeof source === 'string');
+
+// A cataloged composition can name a TypeScript entry or directory instead of
+// a .proto.ts file. Enumerate real regular files before resolving citations;
+// neither a directory name nor a catalog identity creates missing atomic parts.
+function prototypeSources(lib, catalog, repoRoot, reader, includeCatalogEntries) {
+  const prefix = `packages/prototypes/${lib}/src/`;
+  const files = [];
+  const visit = (directory) => {
+    for (const entry of reader.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(file);
+      else if (entry.isFile() && entry.name.endsWith('.ts'))
+        files.push(path.relative(repoRoot, file).split(path.sep).join('/'));
+    }
+  };
+  visit(path.join(repoRoot, prefix));
+  const sourceFiles = new Set(files.filter((file) => file.endsWith('.proto.ts')));
+  const entitySources = new Map();
+  for (const entity of catalog.filter((item) => item.id.startsWith(`P-${lib.toUpperCase()}-`))) {
+    const citations = sourcePathsOf(entity).filter(
+      (source) => source.startsWith(prefix) && !source.split('/').includes('..')
+    );
+    const declarations = files.filter(
+      (file) => file.endsWith('.proto.ts') && citations.includes(file)
+    );
+    const resolved = declarations.length || !includeCatalogEntries
+      ? declarations
+      : files.filter((file) => citations.some(
+          (source) => source === file || file.startsWith(source.endsWith('/') ? source : `${source}/`)
+        ));
+    entitySources.set(entity.id, resolved);
+    for (const file of resolved) sourceFiles.add(file);
+  }
+  return { sourceFiles: [...sourceFiles].sort(), entitySources };
+}
+
+function shadcnStyleSource(repoRoot) {
+  const bytes = fs.readFileSync(path.join(repoRoot, SHADCN_STYLE_MANIFEST));
+  const manifest = JSON.parse(bytes);
+  if (
+    manifest.kind !== 'proto-ui.shadcn-source-inspection' ||
+    manifest.repository !== 'https://github.com/shadcn-ui/ui' ||
+    !/^[a-f0-9]{40}$/.test(manifest.revision ?? '') ||
+    !setEqual(manifest.styles ?? [], SHADCN_MODERN_STYLES) ||
+    manifest.legacy?.id !== SHADCN_LEGACY_STYLE || manifest.legacy?.preserve !== true
+  ) throw new Error('Shadcn style membership/source boundary drift');
+  if (!setEqual((manifest.sources ?? []).map((source) => source.path), [
+    'LICENSE.md',
+    'apps/v4/registry/styles.tsx',
+    'apps/v4/registry/bases.ts',
+    'apps/v4/registry/_legacy-styles.ts',
+    ...SHADCN_MODERN_STYLES.map((style) => `apps/v4/registry/styles/style-${style}.css`),
+  ])) throw new Error('Retained Shadcn style source set drift');
+  const directory = path.posix.dirname(SHADCN_STYLE_MANIFEST);
+  const sourcePaths = [SHADCN_STYLE_MANIFEST];
+  for (const source of manifest.sources ?? []) {
+    const storage = source.storagePath;
+    if (typeof storage !== 'string' || path.posix.isAbsolute(storage) ||
+      storage.split('/').some((part) => !part || part === '.' || part === '..') ||
+      storage.includes('\\')) throw new Error('Unsafe retained Shadcn style source path');
+    const file = `${directory}/${storage}`;
+    if (sha256(fs.readFileSync(path.join(repoRoot, file))) !== source.sha256)
+      throw new Error(`Retained Shadcn style source drift: ${file}`);
+    sourcePaths.push(file);
+  }
+  return {
+    reference: { path: SHADCN_STYLE_MANIFEST, sha256: sha256(bytes), revision: manifest.revision },
+    styles: [...manifest.styles, manifest.legacy.id],
+    sourcePaths,
+  };
+}
+
+function shadcnStyleCoverage(mapping, repoRoot) {
+  const { reference, styles } = shadcnStyleSource(repoRoot);
+  return {
+    reference,
+    styles,
+    rows: mapping.map((row) => ({
+      baseIdentity: row.baseIdentity,
+      projectionIdentities: [...row.projectionCells.shadcn.mappedCurrentIdentities],
+      styleCells: Object.fromEntries(styles.map((style) => [style, {
+        status: row.projectionCells.shadcn.mappedCurrentIdentities.length
+          ? 'required-unassessed' : 'required-missing',
+        acceptance: 'unverified',
+        evidence: [],
+      }])),
+    })),
+  };
+}
+
 // Bind all implementation/export helpers and tests in the six source packages,
 // not only the .proto.ts definitions used by the family-count denominator.
 function candidateBindingPaths(inventory, repoRoot) {
   const paths = new Set(inventoryPaths(inventory));
+  for (const source of shadcnStyleSource(repoRoot).sourcePaths) paths.add(source);
+  for (const ledger of Object.values(CONSUMER_LEDGERS)) paths.add(ledger);
   const visit = (directory) => {
     if (!fs.existsSync(directory)) return;
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -588,6 +691,7 @@ function candidateView(data) {
     prototypeInventory: candidate.prototypeInventory,
     projectionRows: candidate.projectionRows,
     atomicProjectionMapping: candidate.atomicProjectionMapping,
+    shadcnStyleCoverage: candidate.shadcnStyleCoverage,
     gpuiCoverageRows: candidate.gpuiCoverageRows,
     packageConsumption: candidate.packageConsumption,
     sourceSnapshot: {
@@ -647,36 +751,22 @@ export function refreshCandidateSource(data, repoRoot, identity) {
   const previous = data.candidateSource ?? data;
   const prototypeInventory = {};
   const familyKeys = ['bootstrap-2-3-2', 'brutalist', 'liquid-glass', 'shadcn'];
-  const sourcePathsOf = (entity) =>
-    (entity.sources ?? [])
-      .map((source) => (typeof source === 'string' ? source : source?.path))
-      .filter((path) => typeof path === 'string');
+  const sources = Object.fromEntries(Object.keys(data.prototypeInventory).map((lib) => [
+    lib, prototypeSources(lib, catalog, repoRoot, fs, true),
+  ]));
   // Every Base identity names the subject family its projections belong to.
   // That family is the anchor used to resolve a multi-family source citation.
   const baseFamilyById = new Map();
   for (const entity of catalog.filter((e) => e.id.startsWith('P-BASE-'))) {
     const families = [
       ...new Set(
-        sourcePathsOf(entity)
-          .filter(
-            (path) => path.startsWith('packages/prototypes/base/src/') && path.endsWith('.proto.ts')
-          )
-          .map((path) => path.split('/')[4])
+        (sources.base.entitySources.get(entity.id) ?? []).map((source) => source.split('/')[4])
       ),
     ];
     if (families.length === 1) baseFamilyById.set(entity.id, families[0]);
   }
   for (const lib of Object.keys(data.prototypeInventory)) {
-    const sourceFiles = [];
-    const visit = (directory) => {
-      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-        const file = path.join(directory, entry.name);
-        if (entry.isDirectory()) visit(file);
-        else if (entry.isFile() && entry.name.endsWith('.proto.ts'))
-          sourceFiles.push(path.relative(repoRoot, file).split(path.sep).join('/'));
-      }
-    };
-    visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
+    const { sourceFiles, entitySources } = sources[lib];
     const families = [...new Set(sourceFiles.map((p) => p.split('/')[4]))].sort();
     // Ownership: one identity owns exactly one family per library. Catalog
     // sources are supporting evidence, so a cited declaration in another
@@ -688,12 +778,7 @@ export function refreshCandidateSource(data, repoRoot, identity) {
       if (!entity.id.startsWith(`P-${lib.toUpperCase()}-`)) continue;
       const cited = [
         ...new Set(
-          sourcePathsOf(entity)
-            .filter(
-              (path) =>
-                path.startsWith(`packages/prototypes/${lib}/src/`) && path.endsWith('.proto.ts')
-            )
-            .map((path) => path.split('/')[4])
+          (entitySources.get(entity.id) ?? []).map((source) => source.split('/')[4])
         ),
       ];
       if (cited.length === 0) continue;
@@ -729,10 +814,10 @@ export function refreshCandidateSource(data, repoRoot, identity) {
       const tests = [
         ...new Set([
           ...(old?.tests ?? []),
-          ...entities.flatMap((e) =>
-            (e.sources ?? [])
-              .map((source) => source.path)
-              .filter((p) => p.startsWith(`packages/prototypes/${lib}/test/`))
+          ...entities.flatMap((entity) =>
+            sourcePathsOf(entity).filter((source) =>
+              source.startsWith(`packages/prototypes/${lib}/test/`)
+            )
           ),
         ]),
       ]
@@ -894,9 +979,30 @@ export function refreshCandidateSource(data, repoRoot, identity) {
     prototypeInventory,
     projectionRows,
     atomicProjectionMapping,
+    shadcnStyleCoverage: shadcnStyleCoverage(atomicProjectionMapping, repoRoot),
     gpuiCoverageRows,
     packageConsumption,
   };
+}
+
+// Refresh only source-derived candidate/consumer projections. Historical main,
+// comparison pins, migration identities, carried conditions and gate results
+// are retained verbatim. A changed consumer ID set needs explicit migration.
+export function refreshSourceInventory(data, repoRoot, identity) {
+  const refreshed = structuredClone(data);
+  for (const [program, ledger] of Object.entries(CONSUMER_LEDGERS)) {
+    const { rows } = consumerLedgerRows(fs.readFileSync(path.join(repoRoot, ledger), 'utf8'));
+    const existing = refreshed.consumerRows.filter((row) => row.program === program);
+    if (!setEqual([...rows.keys()], existing.map((row) => row.ID)))
+      throw new Error(`Consumer ID migration requires explicit reconciliation: ${program}`);
+    for (const row of existing) Object.assign(row, rows.get(row.ID));
+    refreshed.counts.consumerPrograms[program] = {
+      rows: existing.length,
+      states: count(existing.map((row) => row.State)),
+    };
+  }
+  refreshed.candidateSource = refreshCandidateSource(refreshed, repoRoot, identity);
+  return refreshed;
 }
 
 export function validate(data, repoRoot = root, candidatePass = false, sourceReader = fs) {
@@ -1007,6 +1113,14 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
   const entities = [];
   const inheritance = new Map();
   const catalog = new Map();
+  const sourceCatalogById = new Map(sourceFs
+    .readdirSync(path.join(repoRoot, 'spec/prototypes'))
+    .filter((file) => /^P-.*\.yaml$/.test(file))
+    .map((file) => [
+      file.slice(0, -5),
+      parseYaml(sourceFs.readFileSync(path.join(repoRoot, 'spec/prototypes', file), 'utf8')),
+    ]));
+  const sourceCatalog = [...sourceCatalogById.values()];
   for (const [lib, families] of Object.entries(data.prototypeInventory)) {
     const values = Object.values(families);
     const n = data.counts.libraryInventory[lib];
@@ -1014,16 +1128,9 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
     require(values.flatMap((f) => f.entityIds).length === n.entities, `${lib} part count drift`);
     const sourcePaths = values.flatMap((f) => f.sourceFiles);
     require(sourcePaths.length === n.sourceFiles, `${lib} source count drift`);
-    const actualSourcePaths = [];
-    const visit = (directory) => {
-      for (const entry of sourceFs.readdirSync(directory, { withFileTypes: true })) {
-        const full = path.join(directory, entry.name);
-        if (entry.isDirectory()) visit(full);
-        else if (entry.isFile() && entry.name.endsWith('.proto.ts'))
-          actualSourcePaths.push(path.relative(repoRoot, full).split(path.sep).join('/'));
-      }
-    };
-    visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
+    const { sourceFiles: actualSourcePaths, entitySources } = prototypeSources(
+      lib, sourceCatalog, repoRoot, sourceFs, candidatePass
+    );
     require(setEqual(sourcePaths, actualSourcePaths), `${lib} source identity set drift`);
     for (const [family, f] of Object.entries(families)) {
       require(f.family === family &&
@@ -1041,7 +1148,7 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
         const file = path.join(repoRoot, `spec/prototypes/${id}.yaml`);
         require(sourceFs.existsSync(file), `Missing entity: ${id}`);
         if (sourceFs.existsSync(file)) {
-          const entity = parseYaml(sourceFs.readFileSync(file, 'utf8'));
+          const entity = sourceCatalogById.get(id);
           catalog.set(id, entity);
           inheritance.set(
             id,
@@ -1049,8 +1156,8 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
           );
           require(entity.id === id &&
             LIFECYCLES.includes(entity.status), `Invalid catalog identity/lifecycle: ${id}`);
-          require((entity.sources ?? []).some((source) =>
-            f.sourceFiles.includes(source.path)
+          require((entitySources.get(id) ?? []).some((source) =>
+            f.sourceFiles.includes(source)
           ), `Inventory catalog source family mismatch: ${id}`);
         }
       }
@@ -1207,6 +1314,12 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
         projection?.entityIds?.includes(id)
       ), `Projection cell atomic mapping mismatch: ${r.baseIdentity} -> ${lib}`);
     }
+  }
+  if (candidatePass) {
+    require(
+      stableJson(data.shadcnStyleCoverage) === stableJson(shadcnStyleCoverage(mapping, repoRoot)),
+      'Shadcn atomic/style source or unassessed acceptance boundary drift'
+    );
   }
   const gpuiRows = data.gpuiCoverageRows ?? [];
   require(setEqual(
@@ -1475,6 +1588,9 @@ export function renderPlan(d) {
     [
       '# Finf complete-delivery checklist',
       `Tracker: ${issue(d.tracker)}. Status: **work in progress, not merge-ready**. ${p.initialTodoCount} initial unchecked items: ${p.coreTodoCount} full delivery items and ${p.priorWorkRoutingCount} existing-PR closeout/carry items.`,
+      COVERAGE_RELEASE_BOUNDARY,
+      'Current scope interpretation: the single Shadcn family column is only an inheritance inventory. Eight modern styles and independently retained New York have separate source and acceptance cells in the [active matrix](prototype-coverage-matrix.md). Complete source evidence, current exact-head CI, contribution rights and independent review remain required. Independently acceptable dependent stacked PRs are allowed by the 2026-10-22 tracker decision.',
+      '## Retained original delivery scope',
       p.scope,
       p.completionRule,
       '## One checkbox means all acceptance gates',
@@ -1536,8 +1652,9 @@ export function renderPlan(d) {
         ])
       ),
       '## Integration discipline',
+      'The original integration routing below is historical. Current topic ownership and real dependencies determine bounded stacked PRs; the historical single-PR route does not prohibit them. No routing change waives the retained acceptance conditions.',
       p.singleIntegrationOwner,
-      'Continue old PRs in place while they can be finished normally. For a carry, retain frozen source, original author/provenance, exact failures, unresolved criteria and evidence links. Do not rewrite history or close an unfinished item as fixed. Only the integrator updates this Finf ref with an expected-head lease. No new leaf PR is required for an internal Finf topic slice; independent review, CI, DCO, repository protection and actual semantic boundaries remain mandatory.',
+      'For a carry, retain frozen source, original author/provenance, exact failures, unresolved criteria and evidence links. Do not close an unfinished item as fixed. The integration owner revalidates exact heads, dependencies, independent review, CI, DCO, repository protection and actual semantic boundaries before publication or integration.',
       ...OVERLAY_REQUIRED_DIMENSIONS.map((x) => '- Required Overlay evidence: ' + x),
       'Overlay root cause is not yet reproduced. The scrollbar-coordinate regression must retain actual baseline, repaired real-input journeys and every dependent anchored/portaled composition; it cannot be checked from a guessed offset patch.',
       p.materialBoundary,
@@ -1555,6 +1672,8 @@ export function render(d) {
   const sections = [
     '# Active prototype comparison and four-family projection matrix',
     `Status: non-normative operational inventory. Tracker: ${issue(d.tracker)}. Observed ${d.observedAt}; Proto UI main baseline \`${d.protoMain}\`; source inventory ${snapshot.kind} \`${snapshot.revision}\`${snapshot.kind === 'candidate' ? ' (candidate-only implementation, not current main)' : ''}. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by \`node scripts/coverage-matrices/prototype-coverage.mjs --write\`.`,
+    COVERAGE_RELEASE_BOUNDARY,
+    'The main comparison counts and migration states below are the pinned historical observations at their recorded dates. A separately bound candidate inventory follows; it does not relabel historical source hashes, checks, approvals or unfinished work.',
     '## Independent project and counting boundary',
     d.referencePolicy,
     'A comparison difference alone is not a defect or a new Base obligation. The maintainer has separately selected the complete Finf groups 1–6, all four projections and the Overlay regression as explicit project-owned work. `candidate-needs-independent-admission` means research, not approval. Existing historical `UPSTREAM-*` reference IDs retain source identity only; this document neither renames them nor grants another project authority. Actual technical dependencies and licenses remain unchanged.',
@@ -1569,14 +1688,39 @@ export function render(d) {
           '## Separate candidate source inventory',
           `Candidate ${d.candidateSource.revision ? 'commit' : 'local tree'} ${d.candidateSource.revision ?? d.candidateSource.tree}; based on main ${d.candidateSource.baseMain}. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.`,
           table(
-            ['Library', 'Main families / identities', 'Candidate families / identities'],
+            ['Library', 'Historical main families / identities', 'Candidate families / identities', 'Release scope'],
             Object.entries(d.candidateSource.counts.libraryInventory).map(([lib, value]) => [
               lib,
               `${c.libraryInventory[lib].families} / ${c.libraryInventory[lib].entities}`,
               `${value.families} / ${value.entities}`,
+              ['bootstrap-2-3-2', 'liquid-glass'].includes(lib)
+                ? 'WIP / Experimental; 0.4' : '0.3 committed scope; acceptance separate',
             ])
           ),
           `Candidate atomic GPUI obligations: ${d.candidateSource.gpuiCoverageRows.length}; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.`,
+          'Candidate source definitions include regular .proto.ts files and concrete TypeScript entries resolved from catalog citations. A cataloged composition contributes only its actual P identity; its exported helpers do not invent unadmitted atomic parts. All concrete paths and hashes remain in the JSON.',
+          '### Candidate four-family source cells',
+          table(
+            ['Base family / P identities', 'Shadcn', 'Brutalist', 'Bootstrap 2.3.2 (WIP / 0.4)', 'Liquid Glass (WIP / 0.4)'],
+            d.candidateSource.projectionRows.map((row) => [
+              `${row.base.family} / ${row.base.entityCount}`,
+              ...['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'].map((lib) =>
+                `${row.families[lib].status} / ${row.families[lib].partCount} P identities`
+              ),
+            ])
+          ),
+          ...(d.candidateSource.shadcnStyleCoverage ? [
+            '### Separate Shadcn style obligations',
+            `Membership source: [retained manifest](../fixtures/shadcn-style-source/manifest.json), shadcn-ui/ui \`${d.candidateSource.shadcnStyleCoverage.reference.revision}\`. The eight modern styles and New York are distinct columns. Listed projection identities establish family inheritance only; every style mapping, unsupported boundary, runtime, consumer, visual and native result remains unassessed here. Neither a shared style selector nor one successful component/profile proves another cell.`,
+            table(
+              ['Base P identity', 'Shadcn family inheritance only', ...d.candidateSource.shadcnStyleCoverage.styles],
+              d.candidateSource.shadcnStyleCoverage.rows.map((row) => [
+                row.baseIdentity,
+                row.projectionIdentities.join(', ') || 'required missing',
+                ...d.candidateSource.shadcnStyleCoverage.styles.map((style) => row.styleCells[style].status),
+              ])
+            ),
+          ] : []),
         ]
       : []),
     '## Reference sets and difference accounting',
@@ -1680,10 +1824,10 @@ export function render(d) {
     ),
     d.ownScopeBeyondComparators.map((x) => '- ' + x).join('\n'),
     'The App keeps domain truth, backend transport, file storage, credentials, navigation and execution decisions. UI primitives expose semantic requests; rendering/remounts must not send, delete, approve or retry. HIG comparison remains #864/#869: its 158 article rows are not 158 missing components.',
-    '## Fresh migration ledger',
-    `**${d.migrationLedger.length} Issue/PR references re-read** (93 carried references plus 8 directly relevant current dependencies). The old #377 body is preserved in [this dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md). Closed/merged is a GitHub state, not proof of current runtime, lifecycle admission or consumer acceptance. Historical unchecked criteria are preserved in JSON but require reconciliation; they are not blindly re-opened.`,
+    '## Pinned historical migration ledger',
+    `**${d.migrationLedger.length} retained Issue/PR references** (93 carried references plus 8 dependencies at the original observation). Each JSON row retains its own observedAt, state and inherited criteria. These are dated observations, not freshly queried GitHub state. The old #377 body is preserved in [this dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md). Closed/merged is a GitHub state, not proof of current runtime, lifecycle admission or consumer acceptance. Historical unchecked criteria remain accountable.`,
     table(
-      ['Issue / PR', 'Fresh observed state', 'Carried result, debt and routing'],
+      ['Issue / PR', 'State at recorded observation', 'Carried result, debt and routing'],
       d.migrationLedger.map((r) => [
         `${issue(r.number)} ${r.title}`,
         r.pr
@@ -1712,12 +1856,21 @@ export function render(d) {
   return sections.join('\n\n') + '\n';
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const data = JSON.parse(fs.readFileSync(path.join(root, dataPath), 'utf8'));
+  let data = JSON.parse(fs.readFileSync(path.join(root, dataPath), 'utf8'));
+  const refreshIndex = process.argv.indexOf('--refresh-candidate');
+  if (refreshIndex !== -1) {
+    const revision = process.argv[refreshIndex + 1];
+    if (!process.argv.includes('--write') || !/^[a-f0-9]{40}$/.test(revision ?? ''))
+      throw new Error('--refresh-candidate requires a full commit SHA and --write');
+    data = refreshSourceInventory(data, root, { revision });
+  }
   const errors = validate(data);
   const output = render(data);
   const planOutput = renderPlan(data);
   const planPath = path.join(root, 'internal/coverage-matrices/finf-delivery-checklist.md');
   if (process.argv.includes('--write') && errors.length === 0) {
+    if (refreshIndex !== -1)
+      fs.writeFileSync(path.join(root, dataPath), JSON.stringify(data, null, 2) + '\n');
     fs.writeFileSync(path.join(root, markdownPath), output);
     fs.writeFileSync(planPath, planOutput);
   } else if (
