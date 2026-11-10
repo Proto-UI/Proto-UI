@@ -21,6 +21,7 @@ beforeAll(async () => {
         export { sampleWebComponentScopeTargets as sample } from './packages/adapters/web-component/src/focus-scope-targets';
         export { createShadowColorSchemeEnvironmentOwner as createEnvironment } from './packages/adapters/web-component/src/shadow-color-scheme-environment';
         export { createWebComponentPortalMount as createPortal } from './packages/adapters/web-component/src/portal-mount';
+        export { registerWebPortalDestination } from '@proto.ui/adapter-base';
         export { createShadowSplitEffectsPort as createSplitEffects } from './packages/adapters/web-component/src/shadow-split-effects';
         export { AdaptToWebComponent as adapt } from './packages/adapters/web-component/src/adapt';
         export { getLogicalParent, getProtoParent } from './packages/adapters/web-component/src/platform/instance-tree';
@@ -4474,6 +4475,71 @@ describe('Shadow closeout native boundaries', () => {
       });
       expect(result).toEqual({ initial: null, disabled: '0', restored: null });
       expect(errors).toEqual([]);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('reprojects a descendant entry when its registered portal destination changes selector state', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      await page.addStyleTag({
+        content:
+          '.unused:has(.flag), .destination[data-mode] .portal-root > .row:nth-child(1 of .row) button { visibility: hidden; }',
+      });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-portaled-entry-destination',
+            setup() {
+              p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C();
+        const destination = document.createElement('div');
+        destination.className = 'destination';
+        const branch = document.createElement('section');
+        branch.className = 'portal-root';
+        branch.innerHTML = '<div class="row"><button>Inside</button></div>';
+        const button = branch.querySelector('button')!;
+        host.append(branch);
+        document.body.append(host, destination);
+        const release = p.registerWebPortalDestination(document.body, destination);
+        const portal = p.createPortal();
+        const snapshot = async () => {
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+          return {
+            visibility: getComputedStyle(button).visibility,
+            tabIndex: host.getAttribute('tabindex'),
+          };
+        };
+        try {
+          portal.mount(branch);
+          const mounted = branch.parentElement === destination;
+          const initial = await snapshot();
+          destination.setAttribute('data-mode', '');
+          const hidden = await snapshot();
+          destination.removeAttribute('data-mode');
+          const restored = await snapshot();
+          return { mounted, initial, hidden, restored };
+        } finally {
+          portal.unmount(branch);
+          release();
+        }
+      });
+      expect(result).toEqual({
+        mounted: true,
+        initial: { visibility: 'visible', tabIndex: null },
+        hidden: { visibility: 'hidden', tabIndex: '0' },
+        restored: { visibility: 'visible', tabIndex: null },
+      });
     } finally {
       await page.close();
     }

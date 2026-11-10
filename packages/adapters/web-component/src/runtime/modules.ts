@@ -149,6 +149,7 @@ import { type PropsBaseType } from '@proto.ui/types';
 import {
   createWebComponentPortalMount,
   getWebComponentPortalProjectionForOrigin,
+  isWebComponentPortaled,
 } from '../portal-mount';
 import {
   composedParentElement,
@@ -2044,17 +2045,20 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       : { childList: true, attributes: true }
                   );
               }
-              // A filtered position can be gated by selectors on the owned
-              // chain above its parent, outside the observed sibling branches.
+              // A filtered position can be gated by selectors above its
+              // parent, including the physical chain of an owned portal.
               const filteredPositionAncestors = new Set<Element>();
               for (const parent of filteredPositionParents.keys()) {
+                let followsPortal =
+                  parent.nodeType === 1 && isWebComponentPortaled(parent as HTMLElement);
                 for (
                   let ancestor = parent.parentElement;
-                  ancestor && belongsToObservedEntryTree(ancestor);
+                  ancestor && (followsPortal || belongsToObservedEntryTree(ancestor));
                   ancestor = ancestor.parentElement
                 ) {
                   if (filteredPositionAncestors.has(ancestor)) break;
                   filteredPositionAncestors.add(ancestor);
+                  followsPortal ||= isWebComponentPortaled(ancestor as HTMLElement);
                   if (!filteredPositionParents.has(ancestor))
                     entryObserver?.observe(
                       ancestor,
