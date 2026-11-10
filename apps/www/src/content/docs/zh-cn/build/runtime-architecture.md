@@ -117,6 +117,12 @@ corepack pnpm@10.32.1 check:types
 
 接下来阅读 [Host Caps](/zh-cn/build/host-caps/)理解 capability wiring，阅读 [Adapter 指南](/zh-cn/build/adapter-guide/)理解当前贡献边界，或阅读[契约与测试](/zh-cn/build/contracts-and-tests/)理解证据追踪。
 
+## 文档原生导航装饰
+
+文档中的原始链接与 `summary` 始终拥有导航和展开行为。站点入口立即绑定它们的 hover、pressed、focus 与 current 事实，再通过 idle callback 逐个安装公共 family Surface/Text；没有 idle API 时使用零延迟任务让出主线程。每个任务完成一个原生 owner 的完整装饰，让 Search 初始化与原生交互有机会在任务之间运行。直接调用 `initSiteNativeControls` 默认仍同步完成，只有整页入口显式选择渐进装饰。
+
+等待期间的控件保留 SSR 内容和原生交互；装饰时读取当前 family、主题和交互事实。每次物理移动仍通过 `withNativeContentLease` 单独保留当前焦点、方向性 Selection 与原始节点。Astro 页面替换会取消待执行任务、释放全部事实监听并恢复原始内容；重复初始化不能接管已预约或已连接的 owner。源码见 [site-native-controls.ts](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/components/site-native-controls.ts) 与 [SocialIcons.astro](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/components/override/SocialIcons.astro)。
+
 ## 首页组件展示
 
 `website-component-gallery` 是网站使用十一类现有 Prototype 编排的组合：Button、Toggle、Checkbox、Switch、Select、Textarea、Tabs、Dialog、Dropdown Menu、Hover Card 和 Separator。控件直接展示，并组成偏好设置、文本编辑/预览与浮层任务。六个展示表面由站点实验性被动 `SitePreviewSurface` 拥有视觉，不冒称已有官方 Shadcn Card，也不新增 Base 行为。

@@ -95,8 +95,13 @@ export function siteLinkIcon(link: HTMLElement): SiteLinkIcon | 'none' {
 
 /** Enhances SSR anchors and summaries, preserving native navigation/disclosure owners.
  * Homepage-owned groups use the same Prototype through their four-runtime
- * transaction; this small WC bridge is only for static documentation chrome. */
-export function initSiteNativeControls(scope: ParentNode = document): () => void {
+ * transaction; this small WC bridge is only for static documentation chrome.
+ * The document bootstrap opts into progressive decoration; direct consumers
+ * retain complete synchronous initialization. Each task moves one whole owner. */
+export function initSiteNativeControls(
+  scope: ParentNode = document,
+  options: { progressive?: boolean } = {}
+): () => void {
   const document = scope.nodeType === 9 ? (scope as Document) : (scope as Node).ownerDocument;
   if (!document) return () => {};
   const view = document.defaultView;
@@ -175,9 +180,12 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
   const releases: Array<() => void> = [];
   // One passive public family Surface per TOC, sharing this batch's theme.
   // The native TOC owner alone measures and moves its aria-hidden mount.
-  for (const range of ranges) {
+  const enhanceRange = (range: HTMLElement) => {
+    let alive = true;
     let family = batchFamily;
     let surface = document.createElement(`wc-site-${family}-surface`);
+    if (!batchAlive) return;
+    let mountedSurface: HTMLElement | null = null;
     const props = () => ({
       variant: 'muted',
       radius: family === 'brutalist' ? 'default' : 'md',
@@ -192,77 +200,92 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
       },
     });
     const apply = () => {
+      if (!alive) return false;
       const target = surface as HTMLElement & {
         setProps?: (props: Record<string, unknown>) => void;
       };
       if (target.isConnected && target.setProps) target.setProps(props());
       else setElementProps(target, props());
+      return alive && surface === target;
     };
-    apply();
-    range.append(surface);
-    range.setAttribute('data-toc-range-ready', '');
     const update = () => {
+      if (!alive) return;
       if (family !== batchFamily) {
         const previous = surface;
         family = batchFamily;
         surface = document.createElement(`wc-site-${family}-surface`);
-        apply();
+        if (!apply()) return;
+        mountedSurface = surface;
         previous.replaceWith(surface);
       } else apply();
     };
     updates.add(update);
     const release = () => {
+      if (!alive) return;
+      alive = false;
       updates.delete(update);
-      bindings.delete(range);
+      mountedSurface?.remove();
       surface.remove();
       range.removeAttribute('data-toc-range-ready');
+      if (bindings.get(range) === release) bindings.delete(range);
     };
     bindings.set(range, release);
     releases.push(release);
-  }
-  for (const link of links) {
+    if (!apply()) return;
+    mountedSurface = surface;
+    range.append(surface);
+    if (alive) range.setAttribute('data-toc-range-ready', '');
+  };
+  const prepareLink = (link: HTMLElement): (() => void) | undefined => {
     let alive = true;
+    let releasing = false;
     const appearance = siteLinkAppearance(link);
     const readingToc = appearance === 'toc' && siteIsReadingToc(link);
     let restoreCaption = () => {};
     let family = batchFamily;
-    let surface = document.createElement(`wc-site-${family}-surface`);
+    let surface: HTMLElement | undefined;
+    let mountedSurface: HTMLElement | null = null;
+    let composing = false;
     let texts: HTMLElement[] = [];
     // Original arrows and text regions remain separate flex items, in source
     // order. Wrapping an entire anchor would break pagination reversal and
     // sidebar label/badge alignment even if the accessible name survived.
-    const content = Array.from(link.childNodes);
+    let content: ChildNode[] = [];
     const composeContent = () => {
-      surface.dataset.siteLinkContent = '';
-      registerNativeContentContainer(surface, content);
+      const owner = surface;
+      if (!owner) return;
+      owner.dataset.siteLinkContent = '';
+      registerNativeContentContainer(owner, content);
       texts = [];
       for (const node of content) {
+        if (!alive || surface !== owner) return;
         if (
           (node.nodeType === 1 &&
             (node as Element).namespaceURI === 'http://www.w3.org/2000/svg') ||
           (node.nodeType === 3 && !node.textContent?.trim())
         ) {
-          surface.append(node);
+          owner.append(node);
         } else {
           const text = document.createElement(`wc-site-${family}-text`);
+          if (!alive || surface !== owner) return;
           text.dataset.siteLinkText = '';
           registerNativeContentContainer(text, [node]);
           text.append(node);
-          surface.append(text);
+          if (!alive || surface !== owner) return;
+          owner.append(text);
+          if (!alive || surface !== owner) return;
           texts.push(text);
         }
       }
     };
-    link.classList.add('site-native-link');
-    link.dataset.siteLinkEnhanced = 'true';
+    // The native bridge must also observe hover/press/focus while this owner
+    // still uses its SSR fallback. Appearance classifies TOC in-view facts.
     link.dataset.siteLinkAppearance = appearance;
-    link.dataset.siteNativeLink = '';
-    link.removeAttribute('data-slot');
-    link.removeAttribute('data-site-primary-nav-link');
     let facts = { hovered: false, pressed: false, focusVisible: false, current: false };
     let initialized = false;
     let propsRevision = 0;
     const applyProps = () => {
+      if (!surface) return () => {};
       const theme = batchTheme;
       const props = {
         ...linkSurfaceProps(family, appearance, siteLinkEmphasis(link), facts),
@@ -317,62 +340,103 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
       };
     };
     const update = () => {
-      if (!alive || !initialized) return;
+      if (!alive || !initialized || !surface) return;
       if (batchFamily !== family) {
         const previous = surface;
         family = batchFamily;
         surface = document.createElement(`wc-site-${family}-surface`);
+        const next = surface;
         let replayPending = () => {};
         withNativeContentLease(link, () => {
+          if (!alive || surface !== next) return;
+          composing = true;
           composeContent();
+          if (!alive || surface !== next) return;
           replayPending = applyProps();
-          previous.replaceWith(surface);
+          if (!alive || surface !== next) return;
+          mountedSurface = next;
+          previous.replaceWith(next);
+          composing = false;
         });
         replayPending();
       } else applyProps()();
     };
     updates.add(update);
-    const unbind = bindNativeLinkFacts(link, (next) => {
+    let unbind: (() => void) | undefined;
+    const release = () => {
+      if (!alive || releasing) return;
+      releasing = true;
+      // Keep the final native-fact withdrawal, then stop all stale props work
+      // before restoring content, including a partially connected first move.
+      updates.delete(update);
+      try {
+        unbind?.();
+      } finally {
+        alive = false;
+        try {
+          if (surface)
+            withNativeContentLease(link, () => {
+              restoreCaption();
+              if (mountedSurface?.parentElement === link) mountedSurface.replaceWith(...content);
+              else if (composing) link.append(...content);
+              surface?.remove();
+              delete link.dataset.siteLinkEnhanced;
+            });
+        } finally {
+          if (bindings.get(link) === release) bindings.delete(link);
+        }
+      }
+    };
+    bindings.set(link, release);
+    releases.push(release);
+    unbind = bindNativeLinkFacts(link, (next) => {
       facts = next;
       // A changed theme already broadcasts this owner's latest facts.
       if (!sampleFactsTheme()) update();
     });
-    let replayPending = () => {};
-    try {
+    if (!alive) {
+      unbind();
+      return;
+    }
+    return () => {
+      if (!alive) return;
+      family = batchFamily;
+      surface = document.createElement(`wc-site-${family}-surface`);
+      if (!alive) return;
+      content = Array.from(link.childNodes);
+      link.classList.add('site-native-link');
+      link.dataset.siteLinkEnhanced = 'true';
+      link.dataset.siteNativeLink = '';
+      link.removeAttribute('data-slot');
+      link.removeAttribute('data-site-primary-nav-link');
+      let replayPending = () => {};
+      let preparedTheme = batchTheme;
+      let preparedFacts = facts;
       withNativeContentLease(link, () => {
+        if (!alive) return;
+        composing = true;
         restoreCaption = preparePaginationCaption(link);
+        if (!alive) {
+          restoreCaption();
+          return;
+        }
         composeContent();
+        if (!alive || !surface) return;
+        preparedTheme = batchTheme;
+        preparedFacts = facts;
         replayPending = applyProps();
+        if (!alive) return;
+        mountedSurface = surface;
         link.append(surface);
+        composing = false;
       });
+      if (!alive) return;
       initialized = true;
       replayPending();
-    } catch (error) {
-      updates.delete(update);
-      alive = false;
-      unbind();
-      throw error;
-    }
-    const release = () => {
-      if (!alive) return;
-      // The fact bridge clears its contribution before the binding is torn
-      // down; no queued replay may modify the new page/generation afterwards.
-      updates.delete(update);
-      unbind();
-      alive = false;
-      bindings.delete(link);
-      withNativeContentLease(link, () => {
-        restoreCaption();
-        if (surface.parentElement === link) {
-          surface.replaceWith(...content);
-          delete link.dataset.siteLinkEnhanced;
-        }
-      });
+      if (family !== batchFamily || preparedTheme !== batchTheme || preparedFacts !== facts)
+        update();
     };
-    bindings.set(link, release);
-    releases.push(release);
-  }
-  initializing = false;
+  };
   const observer = new view.MutationObserver(refreshTheme);
   observer.observe(document.documentElement, {
     attributes: true,
@@ -380,12 +444,92 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
   });
   const media = view.matchMedia?.('(prefers-color-scheme: dark)');
   media?.addEventListener?.('change', refreshTheme);
-  return () => {
+  const targets = [...ranges, ...links];
+  const initializeLinks: Array<() => void> = [];
+  let cursor = 0;
+  let pendingTask: number | undefined;
+  const usesIdle = typeof view.requestIdleCallback === 'function';
+  const releaseBatch = () => {
     if (!batchAlive) return;
     batchAlive = false;
+    if (pendingTask !== undefined) {
+      if (usesIdle) view.cancelIdleCallback(pendingTask);
+      else view.clearTimeout(pendingTask);
+      pendingTask = undefined;
+    }
     observer.disconnect();
     media?.removeEventListener?.('change', refreshTheme);
-    for (const release of releases) release();
+    let failure: { error: unknown } | undefined;
+    for (const release of releases) {
+      try {
+        release();
+      } catch (error) {
+        failure ??= { error };
+      }
+    }
+    for (const target of targets)
+      if (bindings.get(target) === releaseBatch) bindings.delete(target);
     updates.clear();
+    if (failure) throw failure.error;
   };
+  // Claim the complete population before any connection callback or task can
+  // reenter initialization. A duplicate never takes pending or active owners.
+  for (const target of targets) bindings.set(target, releaseBatch);
+  const initializeNext = () => {
+    const index = cursor++;
+    const target = targets[index]!;
+    if (options.progressive && (!target.isConnected || target.ownerDocument !== document)) {
+      const release = bindings.get(target);
+      if (release === releaseBatch) bindings.delete(target);
+      else release?.();
+      return;
+    }
+    initializing = true;
+    try {
+      if (index < ranges.length) enhanceRange(target);
+      else initializeLinks[index - ranges.length]!();
+    } finally {
+      initializing = false;
+    }
+  };
+  const scheduleNext = () => {
+    if (!batchAlive || cursor === targets.length) return;
+    pendingTask = usesIdle
+      ? view.requestIdleCallback(continueInitialization)
+      : view.setTimeout(continueInitialization, 0);
+  };
+  const continueInitialization = () => {
+    pendingTask = undefined;
+    if (!batchAlive) return;
+    try {
+      // A different family, media preference or CSSOM palette may have become
+      // current while this owner was waiting. Sample before its first write.
+      refreshTheme();
+      if (batchAlive) initializeNext();
+    } catch (error) {
+      try {
+        releaseBatch();
+      } finally {
+        throw error;
+      }
+    }
+    scheduleNext();
+  };
+  try {
+    for (const link of links) {
+      const initialize = prepareLink(link);
+      if (!batchAlive) break;
+      initializeLinks.push(initialize!);
+    }
+    initializing = false;
+    if (options.progressive) scheduleNext();
+    else while (batchAlive && cursor < targets.length) initializeNext();
+  } catch (error) {
+    try {
+      releaseBatch();
+    } finally {
+      throw error;
+    }
+  }
+  return releaseBatch;
 }

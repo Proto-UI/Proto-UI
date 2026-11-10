@@ -53,10 +53,27 @@ afterAll(async () => {
 
 /** Scope includes portals outside site-search; read coordinates after every generation commit. */
 async function parts(page: Page) {
-  const coordinates = await page.locator('site-search').evaluate((root) => ({
-    owner: root.querySelector<HTMLElement>('[data-search-dialog-mount]')?.dataset.projectionOwner,
-    generation: (root as HTMLElement).dataset.searchGeneration,
-  }));
+  // The Dialog is its own lazy projection scope, so its generation is never
+  // the opener's command generation.  Wait for the Dialog's own active public
+  // host within the locator budget so the locator never binds a stale
+  // generation literal that could wait forever.
+  const handle = await page.waitForFunction(() => {
+    const root = document.querySelector<HTMLElement>('site-search');
+    const mount = root?.querySelector<HTMLElement>('[data-search-dialog-mount]');
+    const owner = mount?.dataset.projectionOwner;
+    const activeHost = [
+      ...(mount?.querySelectorAll<HTMLElement>('[data-projection-generation-host]') ?? []),
+    ].find((host) => host.dataset.projectionGenerationState === 'active');
+    const generation = activeHost?.dataset.projectionGenerationHost;
+    if (!owner || !generation) return null;
+    return { owner, generation };
+  });
+  let coordinates: { owner: string; generation: string };
+  try {
+    coordinates = (await handle.jsonValue()) as { owner: string; generation: string };
+  } finally {
+    await handle.dispose();
+  }
   if (!coordinates.owner || !coordinates.generation)
     throw new Error('Missing committed Search coordinates');
   const scope = `[data-projection-owner=${JSON.stringify(coordinates.owner)}][data-projection-generation=${JSON.stringify(coordinates.generation)}]`;
@@ -91,17 +108,27 @@ async function capture(page: Page, family: string, state: string, facts: unknown
   await mkdir(evidenceDirectory, { recursive: true });
   const observed = await page.evaluate(() => {
     const search = document.querySelector<HTMLElement>('site-search');
-    const owner = search?.querySelector<HTMLElement>('[data-search-dialog-mount]')?.dataset
-      .projectionOwner;
-    const generation = search?.dataset.searchGeneration;
-    const scoped = [
-      ...document.querySelectorAll<HTMLElement>(
-        '[data-projection-owner][data-projection-generation]'
-      ),
-    ].filter(
-      (node) =>
-        node.dataset.projectionOwner === owner && node.dataset.projectionGeneration === generation
-    );
+    const mount = search?.querySelector<HTMLElement>('[data-search-dialog-mount]');
+    const owner = mount?.dataset.projectionOwner;
+    // Resolve the active dialog generation from the dialog mount's own hosts,
+    // not the opener's data-search-generation, so portaled content matches.
+    const activeHost = [
+      ...(mount?.querySelectorAll<HTMLElement>('[data-projection-generation-host]') ?? []),
+    ].find((host) => host.dataset.projectionGenerationState === 'active');
+    // Pure observation: a Dialog that has not materialized has no generation.
+    const generation = activeHost?.dataset.projectionGenerationHost ?? null;
+    const scoped =
+      owner && generation
+        ? [
+            ...document.querySelectorAll<HTMLElement>(
+              '[data-projection-owner][data-projection-generation]'
+            ),
+          ].filter(
+            (node) =>
+              node.dataset.projectionOwner === owner &&
+              node.dataset.projectionGeneration === generation
+          )
+        : [];
     const ref = (name: string) => scoped.find((node) => node.dataset.demoRef === name);
     const query = ref('query');
     const input = (query?.matches('input') ? query : query?.querySelector('input')) as
@@ -216,7 +243,12 @@ describe.sequential('Required production Search recovery with generated Pagefind
           const search = document.querySelector<HTMLElement>('site-search');
           const owner = search?.querySelector<HTMLElement>('[data-search-dialog-mount]')?.dataset
             .projectionOwner;
-          const generation = search?.dataset.searchGeneration;
+          const dialogMount = search?.querySelector<HTMLElement>('[data-search-dialog-mount]');
+          const activeDialogHost = [
+            ...(dialogMount?.querySelectorAll<HTMLElement>('[data-projection-generation-host]') ??
+              []),
+          ].find((host) => host.dataset.projectionGenerationState === 'active');
+          const generation = activeDialogHost?.dataset.projectionGenerationHost ?? null;
           if (!(event.target instanceof Element)) return;
           const target = event.target;
           const projection = target.closest<HTMLElement>('[data-projection-owner]');

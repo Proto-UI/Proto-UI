@@ -401,7 +401,7 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       composing.set(false, 'reason: search IME end');
       invoke(run, 'setInputValue', event.value, false);
     });
-    def.event.onGlobal('key.down', (run, event) => {
+    def.event.on('key.down', (run, event) => {
       if (!focus.focused.get() || disabled.get() || readOnly.get() || composing.get()) return;
       const key = event.key;
       if (key === 'Tab') {

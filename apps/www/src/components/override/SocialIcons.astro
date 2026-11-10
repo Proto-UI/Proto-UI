@@ -46,7 +46,7 @@ const entries = (Object.keys(SITE_LINK_ICONS) as SiteLinkIcon[]).map((icon) => (
   let release = () => {};
   const initialize = () => {
     release();
-    release = initSiteNativeControls(document);
+    release = initSiteNativeControls(document, { progressive: true });
   };
   initialize();
   document.addEventListener('astro:page-load', initialize);

@@ -25,6 +25,22 @@ export interface SiteSearchCopy {
 }
 
 /** Public, reusable Dialog + Command composition. No DOM keyboard/dialog implementation. */
+export interface SiteSearchFocusRestore {
+  /**
+   * The Dialog content's public ref that owned focus before the generation
+   * swap.  The equivalent control in the new generation carries the same ref.
+   */
+  ref: string;
+  /** The element that held focus when the swap began. */
+  origin: Element | null;
+  /**
+   * Focus epoch captured when the swap began.  The scope advances it on every
+   * focus change, so focus that moved after the swap began wins over the
+   * restore even when it later fell back to the document.
+   */
+  epoch: number;
+}
+
 export function createSiteSearchComposition(options: {
   family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
   shadcnStyle: 'rhea' | 'new-york-v4';
@@ -32,6 +48,14 @@ export function createSiteSearchComposition(options: {
   copy: SiteSearchCopy;
   isCurrent(): boolean;
   onFailure(error: unknown): void;
+  /**
+   * Pending bounded focus restore for the generation being opened.  The scope
+   * replaces it on every swap, so a superseded swap can never restore into a
+   * later generation.
+   */
+  takeFocusRestore(): SiteSearchFocusRestore | null;
+  /** The scope's current focus epoch, used to detect newer focus intent. */
+  focusEpoch(): number;
 }): { demo: DemoSpec; activate(): void } {
   const { family, shadcnStyle, session, copy } = options;
   const initial = session.read();
@@ -210,11 +234,141 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
+      // A generation swap replaces the focused control with an equivalent one in
+      // the new generation.  The Dialog content's own automatic entry focus
+      // must not win that race, so this generation's content runs with
+      // focusEntry 'manual' and the requested control is focused afterwards.
+      //
+      // The content reads focusEntry at each activation, and the content may
+      // still be detached when the open transition is published (its own
+      // activation then runs on mount).  The policy is therefore held for the
+      // whole open period of this generation and handed back when the Dialog
+      // closes, so every later open of this generation is a normal fresh open
+      // that auto-enters the query again.
+      let pendingFocusRestore: SiteSearchFocusRestore | null = null;
+      let focusRestoreArmed = false;
+      let entryPolicyManual = false;
+      let offPanelTransition: (() => void) | null = null;
+      let panelTransitionOwner: unknown = null;
       type HintRequest = { target: HTMLElement; visible: boolean };
       let committedHint: HintRequest | undefined;
       let pendingHint: HintRequest | undefined;
       let binding: ReturnType<typeof bindInputShellControl> | undefined;
       const current = () => live && options.isCurrent();
+      /**
+       * Focus the control the user held across a generation swap.
+       *
+       * The request stays pending until this generation actually owns a
+       * focusable target, so a target that publishes after the open transition
+       * is not lost.  It is cancelled when the focus the user held is no longer
+       * the current focus (user intent wins) or when the Dialog closes.
+       */
+      /**
+       * Hand the entry policy back to 'auto'.
+       *
+       * The policy is held for the whole open period this generation was
+       * swapped into, and is released only when the Dialog actually closes.
+       * Releasing it earlier — on a cancelled or completed restore — could
+       * happen before this content's own scope activation, and that later
+       * activation would then auto-enter and take the focus the user holds.
+       */
+      const releaseEntryPolicy = () => {
+        if (!entryPolicyManual) return;
+        entryPolicyManual = false;
+        api.setProps('panel', { focusEntry: 'auto' });
+      };
+      /**
+       * The Dialog content's own presentation signal.  It reports that the
+       * content has presented its view.  It is a presentation fact, not a
+       * mount, layout or focusability guarantee; it only narrows when the
+       * public focus call is attempted, so the call is not made before the
+       * content is up.  Whether the focus actually landed is proven by the
+       * control's own focus state.
+       */
+      const panelPresented = () => {
+        const exposes = api.getPublicInstance?.('panel')?.getExposes();
+        const isPresent = exposes?.isPresent as { get(): boolean } | undefined;
+        if (isPresent?.get() === true) return true;
+        const transitionState = exposes?.transitionState as { get(): string } | undefined;
+        return transitionState?.get() === 'entered';
+      };
+      /**
+       * The control's own public focus fact.  The public instance lookup
+       * proves the control's identity; its exposed focus state is what proves
+       * that the focus actually landed on it.
+       */
+      const targetHoldsFocus = (ref: string) => {
+        const focused = api.getExposes(ref)?.focused as { get(): boolean } | undefined;
+        return focused?.get() === true;
+      };
+      const restoreRequestedFocus = () => {
+        const request = pendingFocusRestore;
+        if (!request) return;
+        if (!live || !current()) return;
+        // The target must be this generation's own control.
+        if (!api.getPublicInstance?.(request.ref)) return;
+        // The call is attempted once the content has presented its view.
+        // This only narrows the attempt: the presentation signal does not
+        // establish native readiness, so the focus module can still retain a
+        // request for a target that cannot yet take focus.  The composition
+        // cannot withdraw such a retained request, and a later epoch change
+        // does not withdraw it either.  That boundary is an open dependency,
+        // not something this guard prevents.
+        if (!panelPresented()) return;
+        // Newer focus intent wins: any focus change since the swap began is
+        // the user's, even when the focus later fell back to the document.
+        if (options.focusEpoch() !== request.epoch) {
+          // Newer focus intent wins.  The entry policy is still held: the
+          // content's own activation may not have happened yet, and releasing
+          // it now would let that activation auto-enter and steal the focus
+          // the user just moved.
+          pendingFocusRestore = null;
+          return;
+        }
+        // The focus the user held must still be the current focus, or focus
+        // must have fallen back to the document because the replaced
+        // generation's element was retired.  Any other focus is user intent.
+        const doc = request.origin?.ownerDocument ?? null;
+        const active = doc?.activeElement ?? null;
+        if (
+          active &&
+          active !== request.origin &&
+          active !== doc?.body &&
+          active !== doc?.documentElement
+        ) {
+          pendingFocusRestore = null;
+          return;
+        }
+        // The public focus request is only complete once the control itself
+        // reports that it holds focus.  A request the active scope refuses
+        // leaves the request pending, so it is retried rather than lost.
+        api.call(request.ref, 'focusSelf');
+        if (!targetHoldsFocus(request.ref)) return;
+        pendingFocusRestore = null;
+      };
+      /** Re-check the pending restore whenever the content's own transition completes. */
+      const watchPanelTransition = () => {
+        const instance = api.getPublicInstance?.('panel');
+        if (!instance || instance === panelTransitionOwner) return;
+        // A replaced panel is a new content with its own transition.
+        offPanelTransition?.();
+        offPanelTransition = null;
+        panelTransitionOwner = instance;
+        const transition = instance.getExposes()?.transitionState as
+          | {
+              get(): string;
+              subscribe(cb: (event: { type?: string; next: string }) => void): () => void;
+            }
+          | undefined;
+        if (!transition?.subscribe) return;
+        offPanelTransition = transition.subscribe((event) => {
+          // The content's transition is a retry trigger: its own scope becomes
+          // active when the content mounts, which is when a public focus
+          // request for this generation's control can be accepted.
+          if (event.type !== 'next') return;
+          restoreRequestedFocus();
+        });
+      };
       const disposers = new Set<() => void>();
       const inputValueChange = (detail: { value: string; composing: boolean }) => {
         if (current() && !seedingQuery) session.input(detail.value, detail.composing);
@@ -237,6 +391,13 @@ export function createSiteSearchComposition(options: {
           // a later reopen, even if its retained DOM box identity is unchanged.
           pendingHint = undefined;
           committedHint = undefined;
+          if (!open) {
+            // A closed generation hands the entry policy back and drops its
+            // pending restore, so a later open of this generation is a normal
+            // fresh open that auto-enters the query again.
+            pendingFocusRestore = null;
+            releaseEntryPolicy();
+          }
           api.setProps('dialog', { open: false });
           return;
         }
@@ -246,7 +407,24 @@ export function createSiteSearchComposition(options: {
         // available before that first creation; retained controls are seeded below.
         if (!api.getPublicInstance?.('command'))
           api.setProps('command', { defaultInputValue: snapshot.query });
+        // A generation swap that replaced the focused control arms this
+        // generation's entry policy before the Dialog opens, so the content's
+        // own automatic entry focus cannot claim focus for the new generation.
+        if (!focusRestoreArmed) {
+          focusRestoreArmed = true;
+          const request = options.takeFocusRestore();
+          if (request) {
+            pendingFocusRestore = request;
+            entryPolicyManual = true;
+            api.setProps('panel', { focusEntry: 'manual' });
+          }
+        }
         api.setProps('dialog', { open: true });
+        // The content may still be detached, so its activation can happen
+        // after this paint.  The restore waits for the content's own presented
+        // boundary and for the target this generation owns.
+        watchPanelTransition();
+        restoreRequestedFocus();
         if (!current() || epoch !== paintEpoch) return;
         const command = api.getPublicInstance?.('command');
         if (!command) return;
@@ -467,7 +645,12 @@ export function createSiteSearchComposition(options: {
       if (!api.subscribePublicInstances)
         throw new Error('Search requires committed public instance identity subscriptions');
       const offInstances = api.subscribePublicInstances(
-        family === 'shadcn' ? ['command', 'query-shell', 'query'] : ['command'],
+        // 'panel' and 'close' are observed so the pending focus restore can
+        // wait for the content's presented boundary and for the target this
+        // generation actually owns.
+        family === 'shadcn'
+          ? ['command', 'query-shell', 'query', 'panel', 'close']
+          : ['command', 'panel', 'close'],
         (instances) => {
           // A portal/ref replacement retires its old facts binding first.
           binding?.dispose();
@@ -493,6 +676,10 @@ export function createSiteSearchComposition(options: {
             );
           }
           if (current()) requestPaint();
+          // The target may publish after the open transition, so the pending
+          // restore is re-checked whenever this generation's instances change.
+          watchPanelTransition();
+          restoreRequestedFocus();
         }
       );
       activateView = requestPaint;
@@ -504,8 +691,14 @@ export function createSiteSearchComposition(options: {
         paintEpoch++;
         pendingHint = undefined;
         committedHint = undefined;
+        pendingFocusRestore = null;
         const errors: unknown[] = [];
-        for (const stop of [off, offInstances, () => binding?.dispose()]) {
+        for (const stop of [
+          off,
+          offInstances,
+          () => binding?.dispose(),
+          () => offPanelTransition?.(),
+        ]) {
           try {
             stop();
           } catch (error) {
