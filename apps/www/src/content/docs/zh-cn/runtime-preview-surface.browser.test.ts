@@ -143,8 +143,7 @@ async function capture(
     'xpath=ancestor::article[contains(concat(" ", normalize-space(@class), " "), " prototype-card ")]'
   );
   const subject = (await overviewArticle.count()) ? overviewArticle : root;
-  // Include the overview title and former outer-frame area, with enough room
-  // for the actual canvas hard shadow; a tight inner crop would hide the bug.
+  // Include the overview title and former outer-frame area to expose duplicate paint.
   await subject.screenshot({ path: path.join(directory, `${id}.png`) });
   await writeFile(
     path.join(directory, `${id}.json`),
@@ -298,12 +297,18 @@ describe('RuntimeBox single actual Prototype surface', () => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     try {
       await page.goto(`${baseUrl}/zh-cn/ui-libraries/base/button/`, { waitUntil: 'networkidle' });
-      const root = page.locator('[data-demo-id="demo-base-button"]');
+      // The introductory demo owns runtime tabs; adapter snippets are toolbar-free.
+      const root = page.locator('[data-demo-id="demo-base-button"]').filter({
+        has: page.locator('[data-runtime-tabs-mount]'),
+      });
+      expect(await root.count()).toBe(1);
       await ready(root, 'wc');
       expect(await root.getAttribute('data-projection-mode')).toBeNull();
       const paint = await measure(root, 'shadcn', [24, 16, 24, 16]);
       expect(runtimePreviewEvidenceIssues(paint)).toEqual([]);
-      const command = root.locator('.pui-runtime-preview-surface [role="button"]').first();
+      const command = root
+        .locator('.pui-runtime-preview-surface')
+        .getByRole('button', { name: 'Run action', exact: true });
       await command.focus();
       expect(await command.evaluate((element) => element === document.activeElement)).toBe(true);
       await command.press('Enter');
