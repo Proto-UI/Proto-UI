@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readContrastProvenance } from './contrast-provenance.mjs';
+import { verifyDiagramBuild } from './whitepaper-diagram-build.mjs';
+import {
+  diagramPagePaths,
+  diagramPngReceipt,
+  diagramSha256,
+  verifyDiagramReport,
+} from './whitepaper-diagram-evidence-receipts.mjs';
 import {
   selectDiagramProfile,
   diagramLocale,
@@ -16,7 +22,6 @@ import {
 
 // Reject unknown selections before filesystem access or browser initialization.
 const profile = selectDiagramProfile(process.env.DIAGRAM_EVIDENCE_FIGURE);
-const { chromium } = await import('playwright-core');
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const dist = path.join(root, 'apps/www/dist');
@@ -26,19 +31,28 @@ assert.ok(
   'An absolute evidence directory is required'
 );
 const out = path.join(evidenceRoot, profile.figure);
-const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+const provenance = readContrastProvenance(root);
+const revision = provenance.head;
 assert.equal(
   revision,
   process.env.CANDIDATE_SHA,
   'Capture the exact candidate, not a merge revision'
 );
 assert.ok(process.env.CHROME_PATH, 'Use an explicitly identified runner browser');
+const build = await verifyDiagramBuild({ root, directory: evidenceRoot, revision });
+const { chromium } = await import('playwright-core');
 await fs.mkdir(out, { recursive: true });
 const report = {
+  schemaVersion: 1,
+  kind: 'proto-ui.whitepaper-diagram-capture',
   revision,
   figure: profile.figure,
   profile,
   renderer: 'built Astro documentation / Chromium',
+  provenance,
+  build,
+  pages: {},
+  assets: [],
   cases: [],
   fonts: [],
   failures: [],
@@ -83,6 +97,12 @@ try {
   report.browser = browser.version();
   for (const locale of ['zh-cn', 'en']) {
     const { asset, route } = diagramLocale(profile, locale);
+    const pagePaths = diagramPagePaths(profile, locale);
+    report.pages[locale] = {
+      ...pagePaths,
+      sourceSha256: diagramSha256(await fs.readFile(path.join(root, pagePaths.sourcePath))),
+      builtSha256: diagramSha256(await fs.readFile(path.join(root, pagePaths.builtPath))),
+    };
     const verified = new Map();
     for (const selected of diagramVariants(profile, locale)) {
       const bytes = await fs.readFile(path.join(dist, selected.asset));
@@ -96,11 +116,13 @@ try {
         bytes.toString(),
         /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=/i
       );
-      verified.set(selected.name, {
+      const binding = {
         ...selected,
-        svgSha256: createHash('sha256').update(bytes).digest('hex'),
-        sourceSha256: createHash('sha256').update(authored).digest('hex'),
-      });
+        svgSha256: diagramSha256(bytes),
+        sourceSha256: diagramSha256(authored),
+      };
+      verified.set(selected.name, binding);
+      report.assets.push({ locale, ...binding });
     }
     for (const theme of ['light', 'dark']) {
       const context = await browser.newContext({ colorScheme: theme, reducedMotion: 'reduce' });
@@ -150,7 +172,10 @@ try {
                   ...bounds(node.querySelector(':scope > rect')),
                 })
               ),
-              text: [...document.querySelectorAll('tspan')].map((node) => {
+              text: [...document.querySelectorAll('text')].flatMap((node) => {
+                const spans = [...node.querySelectorAll('tspan')];
+                return spans.length ? spans : [node];
+              }).map((node) => {
                 const group = node.closest('[data-node], [data-diagnosis]');
                 return {
                   text: node.textContent,
@@ -272,6 +297,13 @@ try {
             (expected) => document.documentElement.dataset.theme === expected,
             theme
           );
+          if (profile.revealDetailsId) {
+            const details = page.locator(`details#${profile.revealDetailsId}`);
+            if (!(await details.evaluate((node) => node.open))) {
+              await details.locator(':scope > summary').click();
+            }
+            assert.ok(await details.evaluate((node) => node.open));
+          }
           // Locate the stable fallback img, then verify what picture actually chose.
           const image = page.locator(`img[src="${asset}"]`);
           const measureImage = (node) => {
@@ -281,6 +313,10 @@ try {
               naturalWidth: node.naturalWidth,
               naturalHeight: node.naturalHeight,
               alt: node.alt,
+              describedBy: (node.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean).map((id) => {
+                const description = node.ownerDocument.getElementById(id);
+                return { id, present: Boolean(description), text: description?.textContent?.trim() || '' };
+              }),
               complete: node.complete,
               x: rect.x,
               y: rect.y,
@@ -360,9 +396,20 @@ try {
               origin + expected.asset,
               'Use the viewport-selected allowlisted asset'
             );
-            assert.equal(measurement.naturalWidth, expected.width);
-            assert.equal(measurement.naturalHeight, expected.height);
+            if (profile.intrinsic === 'viewBox') {
+              assert.ok(measurement.naturalWidth > 0 && measurement.naturalHeight > 0);
+              assert.ok(
+                Math.abs(measurement.naturalWidth / measurement.naturalHeight - expected.width / expected.height) < 0.01,
+                'A viewBox-only asset retains its aspect ratio without inventing intrinsic pixels'
+              );
+            } else {
+              assert.equal(measurement.naturalWidth, expected.width);
+              assert.equal(measurement.naturalHeight, expected.height);
+            }
             assert.ok(measurement.complete && measurement.alt.length > 0);
+            for (const description of measurement.describedBy) {
+              assert.ok(description.present && description.text, 'Authored descriptions must resolve');
+            }
             assert.equal(measurement.scheme, theme);
             assert.ok(measurement.width > 0 && measurement.height > 0);
             assert.ok(
@@ -390,13 +437,14 @@ try {
             // The authored fallback is lazy-loaded, so make it load before waiting.
             await image.scrollIntoViewIfNeeded();
             await page.waitForFunction(
-              ({ fallback, source, width, height }) => {
+              ({ fallback, source, width, height, viewBox }) => {
                 const node = document.querySelector(`img[src="${fallback}"]`);
                 return (
                   node?.complete &&
                   node.currentSrc === source &&
-                  node.naturalWidth === width &&
-                  node.naturalHeight === height
+                  (viewBox
+                    ? node.naturalWidth > 0 && node.naturalHeight > 0 && Math.abs(node.naturalWidth / node.naturalHeight - width / height) < 0.01
+                    : node.naturalWidth === width && node.naturalHeight === height)
                 );
               },
               {
@@ -404,6 +452,7 @@ try {
                 source: origin + expected.asset,
                 width: expected.width,
                 height: expected.height,
+                viewBox: profile.intrinsic === 'viewBox',
               }
             );
             await image.scrollIntoViewIfNeeded();
@@ -414,18 +463,15 @@ try {
               measurement.x >= -1 && measurement.x + measurement.width <= size.width + 1,
               'Article image must fit the viewport'
             );
-            if (profile.figure === 'evolution-feedback') {
-              assert.ok(
-                await page.evaluate(
-                  () =>
-                    document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
-                ),
-                'The article must not introduce horizontal overflow'
-              );
-              // A viewport article image may be partial. Record that explicitly;
-              // do not equate source dimensions with unobstructed visibility.
-              measurement.visibleRegion = await image.evaluate(measureVisibleRegion);
-            }
+            assert.ok(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1
+              ),
+              'The article must not introduce horizontal overflow'
+            );
+            // A viewport article image may be partial. Record that explicitly;
+            // do not equate source dimensions with unobstructed visibility.
+            measurement.visibleRegion = await image.evaluate(measureVisibleRegion);
             if (expected.name === 'mobile' && size.width === 390 && size.height === 844) {
               assert.ok(
                 measurement.minimumRenderedFontSize >= 16,
@@ -450,29 +496,23 @@ try {
           const filename = `${id}-article.png`;
           await page.screenshot({ path: path.join(out, filename) });
           entry.screenshots.push(filename);
-          if (profile.figure === 'evolution-feedback') {
-            entry.articleCapture = {
-              kind: 'viewport',
-              file: filename,
-              viewport,
-              source: entry.image,
-              screenshotSha256: createHash('sha256')
-                .update(await fs.readFile(path.join(out, filename)))
-                .digest('hex'),
-            };
-          }
-          const figure = `${id}-figure.png`;
-          if (profile.figure !== 'evolution-feedback') {
-            await image.screenshot({ path: path.join(out, figure) });
-            entry.screenshots.push(figure);
-          } else {
+          entry.articleCapture = {
+            kind: 'viewport',
+            file: filename,
+            viewport,
+            source: entry.image,
+            ...diagramPngReceipt(await fs.readFile(path.join(out, filename))),
+          };
+          {
             const originalRegion = await image.evaluate(measureVisibleRegion);
             assert.ok(originalRegion.headers.length > 0, 'Measure the actual site header');
             const configuredViewport = page.viewportSize();
             assert.deepEqual(configuredViewport, viewport);
             const fullPage = !originalRegion.fitsUnobstructedViewport;
             const kind = fullPage ? 'document-region' : 'viewport-region';
-            const figureFile = `${id}-figure-${fullPage ? 'document' : 'viewport'}.png`;
+            const figureFile = profile.figure === 'evolution-feedback'
+              ? `${id}-figure-${fullPage ? 'document' : 'viewport'}.png`
+              : `${id}-figure.png`;
             entry.figureCapture = { kind, file: figureFile, originalRegion, outcome: 'running' };
             try {
               // Only genuine scrolling changes the view. Tall figures need a
@@ -551,12 +591,9 @@ try {
               });
               entry.screenshots.push(figureFile);
               const png = await fs.readFile(path.join(out, figureFile));
-              assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
-              const dimensions = { width: png.readUInt32BE(16), height: png.readUInt32BE(20) };
-              Object.assign(entry.figureCapture, {
-                dimensions,
-                screenshotSha256: createHash('sha256').update(png).digest('hex'),
-              });
+              const receipt = diagramPngReceipt(png);
+              Object.assign(entry.figureCapture, receipt);
+              const { dimensions } = receipt;
               assert.deepEqual(dimensions, { width: clip.width, height: clip.height });
               assert.deepEqual(page.viewportSize(), configuredViewport);
               const after = await image.evaluate(measureVisibleRegion);
@@ -623,10 +660,32 @@ try {
               return !content || content.hasAttribute('data-pui-view-detached');
             });
           };
+          entry.accessibility = {
+            triggerLabel: await trigger.locator('.docs-image-trigger-label').textContent(),
+            triggerSnapshot: await trigger.ariaSnapshot(),
+            imageDescriptions: entry.image.describedBy,
+            caption: await image.evaluate((node) =>
+              node.closest('figure')?.querySelector('figcaption')?.textContent?.trim() || ''
+            ),
+          };
           entry.preview = await openPreview();
+          entry.accessibility.previewDescription = await page.locator('.docs-image-accessible-description').textContent();
+          entry.accessibility.previewSnapshot = await page.locator('[data-docs-image-content]').ariaSnapshot();
+          if (entry.accessibility.caption) {
+            assert.ok(
+              entry.accessibility.previewDescription.includes(entry.accessibility.caption),
+              'The actual Dialog retains the authored localized figure caption'
+            );
+          }
           const fullSize = `${id}-preview.png`;
           await page.screenshot({ path: path.join(out, fullSize) });
           entry.screenshots.push(fullSize);
+          entry.previewCapture = {
+            kind: 'viewport',
+            file: fullSize,
+            source: entry.preview,
+            ...diagramPngReceipt(await fs.readFile(path.join(out, fullSize))),
+          };
           await dismissPreview();
           if (profile.figure === 'evolution-feedback') {
             entry.interactions = [];
@@ -681,6 +740,15 @@ try {
   assert.equal(report.cases.length, diagramEvidenceCases(profile).length * 4);
   assert.equal(report.fonts.length, diagramVariants(profile, 'en').length * 4);
   assert.deepEqual(report.failures, []);
+  report.completedProvenance = readContrastProvenance(root);
+  report.completedBuild = await verifyDiagramBuild({ root, directory: evidenceRoot, revision });
+  await verifyDiagramReport(profile, report, {
+    revision,
+    provenance: report.completedProvenance,
+    build: report.completedBuild,
+    readSource: (relative) => fs.readFile(path.join(root, relative)),
+    readScreenshot: (filename) => fs.readFile(path.join(out, filename)),
+  });
   console.log(
     `Verified ${report.cases.length} exact-head article renders and ${report.fonts.length} ${profile.fonts} font probes.`
   );

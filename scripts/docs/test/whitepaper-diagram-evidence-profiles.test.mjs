@@ -5,6 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import {
   selectDiagramProfile,
+  diagramProfiles,
   diagramLocale,
   diagramVariants,
   selectDiagramVariant,
@@ -35,6 +36,8 @@ test('Switch remains the bounded default; unknown and path-like selections fail'
 for (const [figure, chapter, height, fonts] of [
   ['switch-activation', '4-semantics-beyond-channels', 920, 'embedded-handwritten'],
   ['evolution-feedback', '7-evolving-within-boundaries', 928, 'system'],
+  ['conditional-consistency', '6-consistency-boundary', 862, 'system'],
+  ['component-anatomy', '3-component-boundary', 920, 'system'],
 ]) {
   test(`${figure} binds both locales to actual authored assets, routes and dimensions`, async () => {
     const profile = selectDiagramProfile(figure);
@@ -66,7 +69,7 @@ for (const [figure, chapter, height, fonts] of [
   });
 }
 
-test('only the six explicit profile/locale assets can be selected', async () => {
+test('the four generated profiles bind their ten explicit locale assets', async () => {
   const expected = {
     'switch-activation': {
       en: ['/diagrams/whitepaper-switch-activation.en.svg'],
@@ -82,7 +85,20 @@ test('only the six explicit profile/locale assets can be selected', async () => 
         '/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg',
       ],
     },
+    'conditional-consistency': {
+      en: ['/diagrams/whitepaper-conditional-consistency.en.svg'],
+      'zh-cn': ['/diagrams/whitepaper-conditional-consistency.zh-cn.svg'],
+    },
+    'component-anatomy': {
+      en: ['/diagrams/whitepaper-component-anatomy.en.svg'],
+      'zh-cn': ['/diagrams/whitepaper-component-anatomy.zh-cn.svg'],
+    },
   };
+  assert.deepEqual(
+    diagramProfiles().filter((profile) => profile.figure !== 'information-flow-model').map((profile) => profile.figure),
+    Object.keys(expected)
+  );
+  assert.ok(Object.isFrozen(diagramProfiles()));
   for (const [figure, locales] of Object.entries(expected)) {
     const profile = selectDiagramProfile(figure);
     for (const [locale, paths] of Object.entries(locales)) {
@@ -126,6 +142,30 @@ test('only the six explicit profile/locale assets can be selected', async () => 
       }
       assert.throws(() => diagramVariants({ ...profile }, locale), /allowlisted/);
       assert.throws(() => diagramVariants(profile, '../en'));
+    }
+  }
+});
+
+test('the retained legacy profile uses canonical chapters and viewBox geometry in both locales', () => {
+  const profile = selectDiagramProfile('information-flow-model');
+  assert.deepEqual(profile, {
+    figure: 'information-flow-model',
+    chapter: '2-interaction-relations',
+    width: 600,
+    height: 760,
+    intrinsic: 'viewBox',
+    fonts: 'system',
+    revealDetailsId: 'legacy-information-flow-comparison',
+  });
+  for (const locale of ['en', 'zh-cn']) {
+    assert.deepEqual(diagramLocale(profile, locale), {
+      asset: '/diagrams/information-flow-model.svg',
+      route: `/${locale}/whitepaper/2-interaction-relations/`,
+    });
+    for (const width of [390, 639, 640, 1440]) {
+      assert.deepEqual(selectDiagramVariant(profile, locale, width), {
+        name: 'desktop', asset: '/diagrams/information-flow-model.svg', width: 600, height: 760,
+      });
     }
   }
 });
@@ -182,7 +222,7 @@ test('Switch captures stay unchanged; evolution adds bounded resize, boundary an
 
 test('evidence identities distinguish figure, locale, theme, width, revision and asset', () => {
   const ids = new Set();
-  for (const figure of ['switch-activation', 'evolution-feedback']) {
+  for (const { figure } of diagramProfiles()) {
     for (const locale of ['en', 'zh-cn']) {
       for (const theme of ['light', 'dark']) {
         for (const width of [390, 1440]) {
@@ -200,7 +240,7 @@ test('evidence identities distinguish figure, locale, theme, width, revision and
       }
     }
   }
-  assert.equal(ids.size, 16);
+  assert.equal(ids.size, 40);
   const profile = selectDiagramProfile();
   const original = diagramEvidenceId(profile, 'en', 'light', 390, revision, hash);
   assert.equal(original, `switch-activation-en-light-390-${revision}-${hash}`);

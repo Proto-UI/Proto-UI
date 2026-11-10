@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-// Only generator-owned diagrams with a reviewed article and typography contract.
+// Only diagrams with an explicit article, asset and typography contract.
 // Dimensions: generate-whitepaper-diagrams.mjs; font policy: diagrams/README.md.
 const profiles = Object.freeze({
   'switch-activation': Object.freeze({
@@ -17,7 +17,31 @@ const profiles = Object.freeze({
     height: 928,
     fonts: 'system',
   }),
+  'conditional-consistency': Object.freeze({
+    figure: 'conditional-consistency',
+    chapter: '6-consistency-boundary',
+    width: 960,
+    height: 862,
+    fonts: 'system',
+  }),
+  'component-anatomy': Object.freeze({
+    figure: 'component-anatomy',
+    chapter: '3-component-boundary',
+    width: 960,
+    height: 920,
+    fonts: 'system',
+  }),
+  'information-flow-model': Object.freeze({
+    figure: 'information-flow-model',
+    chapter: '2-interaction-relations',
+    width: 600,
+    height: 760,
+    intrinsic: 'viewBox',
+    fonts: 'system',
+    revealDetailsId: 'legacy-information-flow-comparison',
+  }),
 });
+const allProfiles = Object.freeze(Object.values(profiles));
 
 // Keep assets explicit: neither an environment value nor a URL supplies a path.
 const variant = (name, asset, width, height) => Object.freeze({ name, asset, width, height });
@@ -39,6 +63,26 @@ const assets = Object.freeze({
       variant('desktop', '/diagrams/whitepaper-evolution-feedback.zh-cn.svg', 960, 928),
       variant('mobile', '/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg', 500, 1000),
     ]),
+  }),
+  'conditional-consistency': Object.freeze({
+    en: Object.freeze([
+      variant('desktop', '/diagrams/whitepaper-conditional-consistency.en.svg', 960, 862),
+    ]),
+    'zh-cn': Object.freeze([
+      variant('desktop', '/diagrams/whitepaper-conditional-consistency.zh-cn.svg', 960, 862),
+    ]),
+  }),
+  'component-anatomy': Object.freeze({
+    en: Object.freeze([
+      variant('desktop', '/diagrams/whitepaper-component-anatomy.en.svg', 960, 920),
+    ]),
+    'zh-cn': Object.freeze([
+      variant('desktop', '/diagrams/whitepaper-component-anatomy.zh-cn.svg', 960, 920),
+    ]),
+  }),
+  'information-flow-model': Object.freeze({
+    en: Object.freeze([variant('desktop', '/diagrams/information-flow-model.svg', 600, 760)]),
+    'zh-cn': Object.freeze([variant('desktop', '/diagrams/information-flow-model.svg', 600, 760)]),
   }),
 });
 const viewport = (width, height) => Object.freeze({ width, height });
@@ -67,9 +111,13 @@ const evolutionCases = Object.freeze([
 export function selectDiagramProfile(selection = 'switch-activation') {
   assert.ok(
     typeof selection === 'string' && Object.hasOwn(profiles, selection),
-    'DIAGRAM_EVIDENCE_FIGURE must be switch-activation or evolution-feedback'
+    `DIAGRAM_EVIDENCE_FIGURE must be one of: ${Object.keys(profiles).join(', ')}`
   );
   return profiles[selection];
+}
+
+export function diagramProfiles() {
+  return allProfiles;
 }
 
 export function diagramLocale(profile, locale) {
