@@ -359,10 +359,17 @@ describe('independent probes', () => {
         setElementProps(f.items[0].root, { value: 'c' });
     });
     setElementProps(f.items[0].root, { value: 'b' });
+    // A later mounted/updated callback must not be needed to repair a stale key.
+    expect(f.items[0].root.getExposes().value.get()).toBe('c');
+    expect(f.items[0].root.getExposes().open.get()).toBe(false);
+    expect(f.items[0].content.getExposes().open.get()).toBe(false);
     await flush();
     expect(f.items[0].root.getExposes().value.get()).toBe('c');
     expect(f.items[0].root.getExposes().open.get()).toBe(false);
     expect(f.items[0].trigger.getExposes().expanded.get()).toBe(false);
+    expect(f.items[0].content.getExposes().hidden.get()).toBe(true);
+    expect(f.root.getExposes().getOpenItems()).toEqual(['b']);
+    expect(f.requests).toEqual([]);
     off();
   });
   it('modifier navigation is untouched', async () => {

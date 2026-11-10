@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, type ExposedStateHandle, type Prototype } from '@proto.ui/core';
+import type { PropsBaseType } from '@proto.ui/types';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -10,6 +11,8 @@ import {
   type AnatomyPort,
 } from '@proto.ui/module-anatomy';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   COLLAPSIBLE_CONTEXT,
   COLLAPSIBLE_FAMILY,
@@ -78,6 +81,100 @@ function fixture(
   root.append(trigger, content);
   return { root, trigger, content, requests };
 }
+
+describe('Collapsible Content interrupted owner synchronization', () => {
+  for (const observed of ['open', 'hidden'] as const) {
+    for (const initialOpen of [false, true]) {
+      it(`keeps current hidden and desired presence when ${observed} reverses an owner ${initialOpen ? 'close' : 'open'}`, async () => {
+        // T-BASE-COLLAPSIBLE-0001-CASE-CONTROLLED / CASE-L1-LIFECYCLE.
+        // Inspect actual Runtime intent before any Adapter can repair it in a
+        // later mount/update callback. This is not a native-view observation.
+        const parents = new Map<object, object | null>();
+        const prototypes = new Map<object, unknown>();
+        const requests: unknown[] = [];
+        const create = <P extends PropsBaseType>(
+          prototype: Prototype<P>,
+          parent: object | null,
+          props: P
+        ) => {
+          const identity = document.createElement('div');
+          parents.set(identity, parent);
+          prototypes.set(identity, prototype);
+          let exposes: Record<string, unknown> = {};
+          const session = createRuntimeSession(prototype, {
+            prototypeName: prototype.name,
+            getRawProps: () => props,
+            schedule: (task) => task(),
+            commit: (_children, signal) => signal?.done(),
+            onRuntimeReady(wiring) {
+              wiring.attach('anatomy', [
+                [ANATOMY_INSTANCE_TOKEN_CAP, identity],
+                [ANATOMY_PARENT_CAP, (token: object) => parents.get(token) ?? null],
+                [ANATOMY_GET_PROTO_CAP, (token: object) => prototypes.get(token)],
+                [ANATOMY_ROOT_TARGET_CAP, (token: object) => token],
+              ]);
+              wiring.attach('context', [
+                [CONTEXT_INSTANCE_TOKEN_CAP, identity],
+                [CONTEXT_PARENT_CAP, (token: object) => parents.get(token) ?? null],
+              ]);
+              wiring.attach('expose-state', [
+                [EXPOSES_RECORD_SINK_CAP, (next: Record<string, unknown>) => (exposes = next)],
+              ]);
+              wiring.attach('expose-event', [
+                [EXPOSE_EVENT_SINK_CAP, (_key: string, payload: unknown) => requests.push(payload)],
+              ]);
+            },
+          });
+          return {
+            identity,
+            session,
+            get exposes() {
+              return exposes;
+            },
+          };
+        };
+        type BooleanStateView = Pick<ExposedStateHandle<boolean>, 'get' | 'subscribe'>;
+        const isBooleanState = (value: unknown): value is BooleanStateView =>
+          value !== null &&
+          typeof value === 'object' &&
+          'get' in value &&
+          typeof value.get === 'function' &&
+          typeof value.get() === 'boolean' &&
+          'subscribe' in value &&
+          typeof value.subscribe === 'function';
+        const state = (exposes: Record<string, unknown>, key: string): BooleanStateView => {
+          const value = exposes[key];
+          if (!isBooleanState(value)) throw new TypeError(`Missing boolean state ${key}`);
+          return value;
+        };
+        const root = create(collapsibleRoot, null, { open: initialOpen });
+        let disposeContent: (() => Promise<void>) | undefined;
+        let off: (() => void) | undefined;
+        try {
+          const content = create(collapsibleContent, root.identity, { keepMounted: false });
+          disposeContent = () => content.session.dispose();
+          let reversed = false;
+          off = state(content.exposes, observed).subscribe((event) => {
+            if (event.type !== 'next' || reversed) return;
+            reversed = true;
+            root.session.controller.applyRawProps({ open: initialOpen });
+          });
+          root.session.controller.applyRawProps({ open: !initialOpen });
+          expect(reversed).toBe(true);
+          expect(state(root.exposes, 'open').get()).toBe(initialOpen);
+          expect(state(content.exposes, 'open').get()).toBe(initialOpen);
+          expect(state(content.exposes, 'hidden').get()).toBe(!initialOpen);
+          expect(content.session.viewIntent.getSnapshot().present).toBe(initialOpen);
+          expect(requests).toEqual([]);
+        } finally {
+          off?.();
+          await disposeContent?.();
+          await root.session.dispose();
+        }
+      });
+    }
+  }
+});
 
 describe('Base Collapsible consumer contract', () => {
   it('commits uncontrolled requests, initializes defaultOpen once and emits no synchronization events', async () => {
