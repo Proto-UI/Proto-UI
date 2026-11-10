@@ -227,27 +227,43 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':
     '.github/workflows/language-select-navigation-evidence.yml',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts':
+    '.github/workflows/homepage-visual-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts':
     '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts':
+    '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts':
+    '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-tint-stage-diagnostic.browser.test.ts':
+    '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-visible-refraction-diagnostic.browser.test.ts':
+    '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts':
     '.github/workflows/finf-button-ghost-component-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts':
     '.github/workflows/finf-button-ghost-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-liquid-dropdown.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-shadcn-toggle.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts':
     '.github/workflows/liquid-elevation-control-evidence.yml',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
@@ -257,11 +273,15 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':
     '.github/workflows/site-startup-theme-evidence.yml',
   'packages/prototypes/brutalist/test/switch-motion.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'packages/prototypes/shadcn/test/switch-motion.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'packages/adapters/base/test/resident-motion.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'packages/web-conformance/test/select-group.browser.test.ts':
     '.github/workflows/select-target-alignment-evidence.yml',
   'packages/web-conformance/test/select-target-alignment.browser.test.ts':
+    '.github/workflows/select-target-alignment-evidence.yml',
 });
 
 // Bound each CI worker to a deterministic share of the complete development inventory.
