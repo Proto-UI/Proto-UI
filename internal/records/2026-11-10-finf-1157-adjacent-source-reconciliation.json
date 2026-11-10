@@ -1,0 +1,2635 @@
+{
+  "schemaVersion": 1,
+  "kind": "finf.adjacent-source-reconciliation",
+  "date": "2026-11-10",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "issue": 1157,
+  "issueUrl": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+  "owner": "SolThirty1157Sources42",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "scope": "All42 historical candidate/source identities, exact layered source hashes, unfinished documentation/I.docTabs observations and every original1157/1093 condition.",
+  "status": "source-ready; Main validation, public delivery, review and integration pending",
+  "binding": {
+    "historicalBase": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+    "historicalBaseTree": "9153dd303e350a4e2d941f8790ea03e7c21429ed",
+    "currentSourceRevision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+    "pathSetSha256": "3d2687423cee0d91cc72e11741c94112fd232a1a2718c8c56ec26d7955cea36c",
+    "layersSha256": "7ea23e690684a106cbdc284662862f56d9592ab8c9a6c91f7a33b39ed4cb39cc",
+    "conditionSourcesSha256": "d797243fab9f9e0811f630c5bff90d3b30fecf3f2622c4576bda72505213422a"
+  },
+  "sourceAccounting": {
+    "historicalCandidatePaths": 42,
+    "orderedLayerRows": 49,
+    "layerCounts": [
+      3,
+      26,
+      5,
+      6,
+      7,
+      2
+    ],
+    "retainedHistoricalByteMatches": 42,
+    "historicalCommittedPreimages": 39,
+    "historicalUncommittedDraftOnlyPaths": 3,
+    "currentPresentPaths": 39,
+    "currentAbsentPaths": 3,
+    "currentByteIdenticalToHistoricalCandidate": 0,
+    "boundary": "The42paths are the complete union of the named historical candidate manifests. They are not a count of accepted features, reproduced bugs, every dirty/generated file, or the separate42original source commits in an older publication packet."
+  },
+  "metadataAcquisition": {
+    "observedAt": "2026-11-10T13:04:17.774Z",
+    "historicalRoot": "/workspace/worktrees/compiler-core-default-slot-20261010",
+    "currentRoot": "/workspace/worktrees/release03-thirty-issue-1157-sol-20261110",
+    "operations": [
+      "Read-only Git HEAD/branch and initial clean worktree identity",
+      "Complete paginated1157and887 discussion reads; canonical parent/child key acquisition",
+      "Exact retained historical file-read receipt recovery",
+      "sha256sum over42historical paths and39present current paths",
+      "GIT_NO_LAZY_FETCH=1 git cat-file --batch for all42 immutable historical preimages"
+    ],
+    "currentMissingReadback": "sha256sum exited1 solely for C-HOOK-0001/T-HOOK-0001/T-HOOK-0002 missing; preserved as absence, not a checker success or product failure.",
+    "oldPathLogReadback": "Bounded git log for the three local-draft paths returned no entries; no committed removal, retirement or exhaustive-history conclusion follows.",
+    "productChecksExecuted": false,
+    "productSourceOrGitMutations": false,
+    "externalWrites": false
+  },
+  "authority": [
+    {
+      "id": "C-AS-HOOK-0001",
+      "path": "spec/contracts/C-AS-HOOK-0001.yaml",
+      "status": "draft",
+      "relation": "subjectless attachment; distinguishes interaction inheritance from ordinary logic reuse"
+    },
+    {
+      "id": "C-AS-HOOK-0004",
+      "path": "spec/contracts/C-AS-HOOK-0004.yaml",
+      "status": "draft",
+      "relation": "same caller/identity installs once; no latest-wins inference"
+    },
+    {
+      "id": "C-AS-HOOK-0007",
+      "path": "spec/contracts/C-AS-HOOK-0007.yaml",
+      "status": "draft",
+      "relation": "borrowed projection cannot escalate observed handles"
+    },
+    {
+      "id": "D-AS-HOOK-DEFINE-HOOK-0001",
+      "path": "spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml",
+      "status": "draft",
+      "relation": "current generic authoring API classification unresolved; no resurrection or promotion"
+    },
+    {
+      "id": "T-AS-HOOK-0001",
+      "path": "spec/tests/T-AS-HOOK-0001.yaml",
+      "status": "draft",
+      "relation": "Runtime/type implementation entries; not a new executed pass"
+    },
+    {
+      "id": "C-HOOK-0001",
+      "path": "spec/contracts/C-HOOK-0001.yaml",
+      "status": "historical-local-draft-candidate-only",
+      "relation": "13-criterion frozen candidate exists in historical worktree; absent in both immutable historical base6047 and current0607; no committed retirement inferred"
+    },
+    {
+      "id": "T-HOOK-0001",
+      "path": "spec/tests/T-HOOK-0001.yaml",
+      "status": "historical-local-draft-candidate-only",
+      "relation": "planned historical generic conformance; not current authority"
+    },
+    {
+      "id": "T-HOOK-0002",
+      "path": "spec/tests/T-HOOK-0002.yaml",
+      "status": "historical-local-draft-candidate-only",
+      "relation": "planned historical target composition; not current authority"
+    }
+  ],
+  "authorityBoundary": "Historical C-HOOK/T-HOOK local draft source and13criteria remain historical. Current D-AS-HOOK-DEFINE-HOOK-0001 remains unresolved draft; do not reintroduce the candidate contract, promise generic target support, or promote lifecycle.",
+  "historicalCompatibility": {
+    "ir": 6,
+    "webInteractionAndModuleHelperABI": 2,
+    "contextAndStyleHelperABI": 1,
+    "gpuiSDK": "0.3.0",
+    "boundary": "Private historical compatibility dimensions; neither project release nor native profile promotion. The later ordinary-hook once SDK/projection overlay remains separate from generic-hook realization."
+  },
+  "preserveIntents": [
+    "Canonical void-setup anonymous slot and portable activate→GPUI Click mapping",
+    "Host-neutral observable Presentation oracle, with forbidden host-token/storage identity pins removed and negative control retained",
+    "Remove all Compiler-owned ordinary asTransition business substitution without replacing it with a shim or copied machine",
+    "Preserve unrelated Module mechanisms, original Transition/Collapsible business and all governed observable outcomes",
+    "Preserve later native ordinary-asHook once and its SDK/projection version overlay",
+    "Keep generic defineHook distinct from ordinary authored/privileged asHook, with first tuple/raw value, definition-object/caller identity, real capture and retained failures",
+    "Preserve both updated reader paragraphs while retaining draft/planned target-native conformance"
+  ],
+  "layers": [
+    {
+      "ordinal": 1,
+      "id": "core-repair",
+      "sourceKey": "core-default-slot-20261010",
+      "sourceArtifact": "pui-core-default-slot-20261010-evidence-report.json",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "packages/compiler/src/gpui-native-owner.ts",
+          "beforeSha256": "0f8d8100faa8624b2b2e3673ad31652ef932066946c65b21bca0418271d5dcae",
+          "afterSha256": "4bc6e1893e06cfa30b890760f9ef587f56e98d8608d713eab0e076fa71ec5971",
+          "changes": [
+            "Undefined setup result reuses canonical slot() as one anonymous default render; existing function remains unchanged",
+            "Portable activate action maps to existing pinned GPUI Click action; unknown names still reject",
+            "Canonical outer-expression formatting; emitted Rust source remains 229877 bytes with identical SHA-256"
+          ]
+        },
+        {
+          "path": "packages/compiler/test/browser-source-presentation.test.ts",
+          "beforeSha256": "c7e567b1ac653f1556fb2cc11ff069fa626a69fcdaae237a9b6041963f676d8e",
+          "afterSha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+          "changes": [
+            "Remove forbidden one-to-one host token/storage expectations and their unused measurements; retain the complete observable semantic oracle"
+          ]
+        },
+        {
+          "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+          "beforeSha256": "fb232e581cdd6ae0f203b76ff276bb67dd94abe26e45728dd80c7d9843dfb036",
+          "afterSha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+          "changes": [
+            "Remove forbidden one-to-one host token/storage expectations and their unused measurements; retain the complete observable semantic oracle"
+          ]
+        }
+      ]
+    },
+    {
+      "ordinal": 2,
+      "id": "definition-source-cutover",
+      "sourceKey": "definition-source-cutover-20261010",
+      "sourceArtifact": "pui-definition-source-cutover-20261010-docs-candidate-change.json",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "packages/compiler/src/operations.ts",
+          "beforeSha256": "a9a4717b1235e593c20b648daa84a406e7ded115054f4a34b226620dd1d4a9bc",
+          "afterSha256": "5cf7c43911e83e1773d2b65ea9aa427f321d53541fdaecbeaab536e88880e61d",
+          "beforeBytes": 59078,
+          "afterBytes": 57738
+        },
+        {
+          "path": "packages/compiler/src/parser-module.ts",
+          "beforeSha256": "614603147c232932cfdb35a9bf85b43943737a9259b56f2013e28ba29e046a1f",
+          "afterSha256": "6d79b7faa1a50655ab7ec23d26554d5849ab5ad433a55d95ed72a1a00d75dabb",
+          "beforeBytes": 25511,
+          "afterBytes": 25281
+        },
+        {
+          "path": "packages/compiler/src/parser.ts",
+          "beforeSha256": "3bc0f3882ab169cfb18fe28f8f8411faf4ddd55b6e89cffd44c38f190829dc6d",
+          "afterSha256": "739679200ffe58df8adffa9ab1abdae38efcd716acd4476fe88779ac08dfbe69",
+          "beforeBytes": 47450,
+          "afterBytes": 45843
+        },
+        {
+          "path": "packages/compiler/src/ir.ts",
+          "beforeSha256": "37d17a3bb5aff66b3413fdc329b5dd827612c1f1e9d216e32ae22118f3ae2a81",
+          "afterSha256": "8e74c867c1cb7a475993c88c637e0f0333b21d3c214a71b5eda65dde5bfbbe71",
+          "beforeBytes": 8824,
+          "afterBytes": 8722
+        },
+        {
+          "path": "packages/compiler/src/react.ts",
+          "beforeSha256": "7c54c76cf0f9578f88dbcad307c07825886da0711a4701637b6c066408f6f4dc",
+          "afterSha256": "b2d5d9b76aa2048687d16a9240c46fb5ee9e4acdf9eb1696757ca63e4598b6a8",
+          "beforeBytes": 14703,
+          "afterBytes": 14142
+        },
+        {
+          "path": "packages/compiler/src/targets.ts",
+          "beforeSha256": "92420f989186f411a9af1f3c2bb1ae221bd33ccac6bcd8066c0ac5e1b6059b09",
+          "afterSha256": "40fb81dd361fd5e7b7b1460f79f1a609d7c9f3ffe2c76939f723cb7409151332",
+          "beforeBytes": 24472,
+          "afterBytes": 24313
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-sdk.ts",
+          "beforeSha256": "39cb397dc6c9a0952ffd283c63df538b5a692344f1fe5b8fa1b9bcd5d72b799e",
+          "afterSha256": "a4f5a7de58e4ebd28be5797ade24d1e2e13f4ac8b6303105340f6caee1d6d190",
+          "beforeBytes": 3891,
+          "afterBytes": 3891
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-modules.ts",
+          "beforeSha256": "7a3d309ef2d5b010a571fe6e29db51b1598f47c94954fa53ba3f67b623e7049a",
+          "afterSha256": "ef18c1701e01129058d0a73a99e1d5a5363dd8ffae98ca4947a9fb8c276b5cb2",
+          "beforeBytes": 40218,
+          "afterBytes": 28241
+        },
+        {
+          "path": "packages/compiler/src/gpui-source.ts",
+          "beforeSha256": "2e8b129ff5f47423981a3c391bc14964c06fdcafbc4ab6ab102fe7e14866c58a",
+          "afterSha256": "bbba1783036579c501814674ed8264ad782336a5a6da80166926110013f37d1b",
+          "beforeBytes": 49584,
+          "afterBytes": 49033
+        },
+        {
+          "path": "packages/compiler/src/native-adapter-modules.ts",
+          "beforeSha256": "5e9facbbdce79cf876793891e6845bb43a203786a62b49bdc8d9f30eba13040b",
+          "afterSha256": "2353e7608b9c5b90cd12f5455b56a544709fd36fa7dc1b6bd8b72b117a520daf",
+          "beforeBytes": 132265,
+          "afterBytes": 122064
+        },
+        {
+          "path": "packages/compiler/src/native-interaction.ts",
+          "beforeSha256": "3e37b9a0c1fe45237532602d64ef967d0561858b39a2dbc99ab294918b490164",
+          "afterSha256": "53c08aef9281fe250eb33b91196c2ffcabad13b18d6cd716662633913aa6fb8b",
+          "beforeBytes": 43646,
+          "afterBytes": 43139
+        },
+        {
+          "path": "packages/compiler/src/react-source.ts",
+          "beforeSha256": "aca748c019687121c52d7444a5509f5df1cde1076bd01a07aa38a2069e906003",
+          "afterSha256": "4b7a0e43f20c4df418611c241d7c118295dd07b0c842d175f8d2f9f242a2a648",
+          "beforeBytes": 67788,
+          "afterBytes": 66666
+        },
+        {
+          "path": "packages/compiler/src/vue-source.ts",
+          "beforeSha256": "f92c27c5011209ce68750d6a4043c620f9191a26986f6e1946c5c08f9097c376",
+          "afterSha256": "d2a0f9b79bcf2cf69edb18ff8a2d45a9d61c90a5bd363078466f37e6a46f8423",
+          "beforeBytes": 81396,
+          "afterBytes": 80010
+        },
+        {
+          "path": "packages/compiler/src/vue2-source.ts",
+          "beforeSha256": "d8bf3da312098f29ad129725919c9d20afde200d34431e012f92f8048a078eb3",
+          "afterSha256": "63e578439aa898c513061ea44fdaaf06aa8e19de64cef250efa91a14ca529809",
+          "beforeBytes": 54627,
+          "afterBytes": 53586
+        },
+        {
+          "path": "packages/compiler/src/web-component-source.ts",
+          "beforeSha256": "d01fe8408d87e4864d4a93365994253021d928e9f12fa4ac4d7673ff68457ca4",
+          "afterSha256": "5f94b98a042f18eb248fa2a215baffdba4f06ddc20e760a136cfc386b44c2bd7",
+          "beforeBytes": 58640,
+          "afterBytes": 57566
+        },
+        {
+          "path": "packages/compiler/src/qt-native-presentation.ts",
+          "beforeSha256": "1b65e238db3651bcaa09d5ac15fa030c7b4d83a452f26142dffafb85544b2497",
+          "afterSha256": "9ef16f936b66e1ade0852e15852cd8d555f756ea24796b8d4c5518349a46e502",
+          "beforeBytes": 12446,
+          "afterBytes": 5997
+        },
+        {
+          "path": "packages/compiler/src/qt-native-owner.ts",
+          "beforeSha256": "cf53850ddce8cec40f143e3964bc013d4f68eb7e96b68cbf83407b08e8773b6a",
+          "afterSha256": "0e2255d034a29633693d50fd548249d37673b3cd53ae3017784127116faa5cb4",
+          "beforeBytes": 25050,
+          "afterBytes": 23922
+        },
+        {
+          "path": "packages/compiler/src/flutter-native-host.ts",
+          "beforeSha256": "229c59671b367c22df9c62dc110ccff1fb0254691bc815d043a90245d3dc8902",
+          "afterSha256": "43a88250fbbbb2a66fb0aa3ae43f597ed5b148ad75ec5a27e6675620675710fc",
+          "beforeBytes": 67256,
+          "afterBytes": 66972
+        },
+        {
+          "path": "packages/compiler/src/flutter-native-modules.ts",
+          "beforeSha256": "1417c66986fddf66d08c295f3f646222ab4452e2d5dbde6bcfbf8a2c323f2152",
+          "afterSha256": "a7a322a3549d8e660f8bde40d6807e733856c730fc16cf242b79533545083cf1",
+          "beforeBytes": 81831,
+          "afterBytes": 73643
+        },
+        {
+          "path": "packages/compiler/src/flutter-source.ts",
+          "beforeSha256": "f05d3e99db1d3e678ea26c7ba47ac8540b89a05d2cea61c8b10e73e92e5642b9",
+          "afterSha256": "17f8460d2593e9533454e7a74d11d7925b44db4a102f317b06b5acdde8ddc581",
+          "beforeBytes": 52425,
+          "afterBytes": 52173
+        },
+        {
+          "path": "packages/compiler/test/source-graph.test.ts",
+          "beforeSha256": "86eea5e5b8b99126cbc714e917c65a181e467c9176212d3ec989eb403717708f",
+          "afterSha256": "a83d157ea0d8b9a1cc80740bba63a5c408eff72761ecd4ba65abfb7e61264c91",
+          "beforeBytes": 13528,
+          "afterBytes": 14062
+        },
+        {
+          "path": "packages/compiler/src/qt-native-view.ts",
+          "beforeSha256": "df7ec4202ec577c6023cfc12bb17a2f8902e17426fd5d4fd27847ff2eadd01e7",
+          "afterSha256": "17e11227c4dd899fc18abfb4ff91bd022bd74972b9f5c62e187db054b2d0b7aa",
+          "beforeBytes": 18249,
+          "afterBytes": 17783
+        },
+        {
+          "path": "packages/compiler/src/web-component-ssr-support.ts",
+          "beforeSha256": "9282e4b32a28e31e9665312e26871789083826c0db196bfd15318070abce9f25",
+          "afterSha256": "ff86aa447055c9bfd9ad1caa9f932718e3d0677058de1edc82fdb4da0d6bbc0d",
+          "beforeBytes": 43767,
+          "afterBytes": 43767
+        },
+        {
+          "path": "packages/compiler/src/qt-native-table.ts",
+          "beforeSha256": "51f8f50a5270497d5b26738b2a3fc3b7f6fb1e4ad883d386b5cafbc648643888",
+          "afterSha256": "e1f79978aacc66082b5471403da1c7d3ca93d0dd73fc3aaf92fe585c2648d42f",
+          "beforeBytes": 856,
+          "afterBytes": 866
+        },
+        {
+          "path": "apps/www/src/content/docs/en/build/compiler-guide.md",
+          "beforeSha256": "28f2c3e3b70525c87097be3ae3b705d370113a91f578e6f43ff4adb386d1565a",
+          "afterSha256": "670b08c6be8ef79cfe4993c436df220b9423683dd8f0fcb37c13cf8b5227d838",
+          "beforeBytes": 14257,
+          "afterBytes": 14565
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/build/compiler-guide.md",
+          "beforeSha256": "6d1d880f9e45832fdc2a77a28ea695109160b46e9047e57d03585bd2b94ba1e4",
+          "afterSha256": "137a3274210b8732098592028d416a601cbc7a1907e56b9fe3d54638e13dedb7",
+          "beforeBytes": 13492,
+          "afterBytes": 13781
+        }
+      ]
+    },
+    {
+      "ordinal": 3,
+      "id": "ordinary-hook-once",
+      "sourceKey": "ordinary-hook-once-20261010",
+      "sourceArtifact": "pui-ordinary-hook-once-20261010-docs-candidate-change.json",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "packages/compiler/src/gpui-native-owner.ts",
+          "beforeSha256": "4bc6e1893e06cfa30b890760f9ef587f56e98d8608d713eab0e076fa71ec5971",
+          "beforeBytes": 77649,
+          "afterSha256": "79332ce2db753acd2295944c3d2585f4133f333240c1ed3410d1da3de1f6c765",
+          "afterBytes": 77928
+        },
+        {
+          "path": "packages/compiler/src/gpui-source.ts",
+          "beforeSha256": "bbba1783036579c501814674ed8264ad782336a5a6da80166926110013f37d1b",
+          "beforeBytes": 49033,
+          "afterSha256": "ee72cc0693018e5ac50636273635307955404770e6b9881db184c88618e7d972",
+          "afterBytes": 49119
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-sdk.ts",
+          "beforeSha256": "a4f5a7de58e4ebd28be5797ade24d1e2e13f4ac8b6303105340f6caee1d6d190",
+          "beforeBytes": 3891,
+          "afterSha256": "0f124e77359cdf95fa0df5b36d52c3c899dd1d99eb7b412ba3380d8f2d7875cd",
+          "afterBytes": 3891
+        },
+        {
+          "path": "apps/www/src/content/docs/en/build/compiler-guide.md",
+          "beforeSha256": "670b08c6be8ef79cfe4993c436df220b9423683dd8f0fcb37c13cf8b5227d838",
+          "beforeBytes": 14565,
+          "afterSha256": "ffc86bd3801c201da763b63d897d0e8c6ec7f3cd88e0c47e0bf5d1e0fea61f2a",
+          "afterBytes": 15155
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/build/compiler-guide.md",
+          "beforeSha256": "137a3274210b8732098592028d416a601cbc7a1907e56b9fe3d54638e13dedb7",
+          "beforeBytes": 13781,
+          "afterSha256": "254be8f4575ed4769a4b837f698eaa5f31e41f09533d5b7c0206ed1b5c4994a1",
+          "afterBytes": 14374
+        }
+      ]
+    },
+    {
+      "ordinal": 4,
+      "id": "definition-freeze",
+      "sourceKey": "hook-definition-freeze-20261011",
+      "sourceArtifact": "pui-hook-definition-freeze-20261011-source-manifest.json",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "sha256": "2dd787ca49d44a487cdd7c3fd5001757db4e2e736ac81004f409314ad2327ce3"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+          "sha256": "62f64634e8cfed328b9ab73f74e15bbf90e320c4a1bfbb38ed8640261a6fe17b"
+        },
+        {
+          "path": "spec/contracts/C-HOOK-0001.yaml",
+          "sha256": "9d2ea33fc3310749c860c57fd3498fcc57c986ac061d8e7f7d4a6163e7689585"
+        },
+        {
+          "path": "spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml",
+          "sha256": "e4a59438b5612f9296f7c8912aa7e0fff1876638b78882160c1fc5e5e3f8a9e9"
+        },
+        {
+          "path": "spec/tests/T-HOOK-0001.yaml",
+          "sha256": "58ab8715ba956164db4b3b5c1aecb234c7440d6a6284d68463810c1e0aabd8c1"
+        },
+        {
+          "path": "spec/tests/T-HOOK-0002.yaml",
+          "sha256": "9f87c9eecc508f1f64609f74872101fd14b08dbff2abc99349a01d8a509fb6dd"
+        }
+      ]
+    },
+    {
+      "ordinal": 5,
+      "id": "original-realization",
+      "sourceKey": "generic-hook-original-realization-20261011",
+      "sourceArtifact": "pui-generic-hook-original-realization-20261011-original-evidence-report.json",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "packages/core/src/prototype.ts",
+          "sha256": "618bd329841973e4a1b9f43a57578c70b79151636c31bb060fb092f30eb15bde"
+        },
+        {
+          "path": "packages/runtime/src/kernel/as-hook.ts",
+          "sha256": "34b2fcad196989acf8ee7d4d2a76adbfe53dab6126a87feffbc7a72e64e34f8d"
+        },
+        {
+          "path": "packages/prototypes/base/src/tools/use-open-state.ts",
+          "sha256": "eaee3f6345305405acbd843041ac2cb92ea2b9589240c3a5969fcb6f0175f63a"
+        },
+        {
+          "path": "packages/prototypes/base/src/tools/use-escape-key.ts",
+          "sha256": "f237b834d627b9ceaad32f853d2e06baa5fadfc9773f43a1ccb01daebb00cba4"
+        },
+        {
+          "path": "packages/prototypes/base/src/behaviors/use-typeahead-navigation.ts",
+          "sha256": "eef46bc0439954f44f519e76c1ae246effe8212ebef90db06e87c7b7f0edd925"
+        },
+        {
+          "path": "packages/runtime/test/contract/as-hook.v0.contract.test.ts",
+          "sha256": "b12501ccb8ae95637132c659aa5b7af4d24f16b885f7bb45d68cb37745f3b179"
+        },
+        {
+          "path": "internal/contracts/types/as-hook.contract.v0.type-test.ts",
+          "sha256": "21069dd54fd021ca8da5252e4f43da6da1f4242bff40067fcfac5687bb94cff7"
+        }
+      ]
+    },
+    {
+      "ordinal": 6,
+      "id": "reader-projection",
+      "sourceKey": "generic-hook-original-realization-20261011-reader-projection",
+      "sourceArtifact": "pui-generic-hook-original-realization-20261011-docs-candidate.json and terminal source-hash result",
+      "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "publicationState": "historical-local-uncommitted-candidate; no current integration or acceptance inferred",
+      "files": [
+        {
+          "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "sha256": "48cbc28823f854cbf18dc6a43d2ef69f7e8d7cf64dd74059773ad4e05a043749"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+          "sha256": "57bf3d4c34490d66a218dcff4116a066601f316edaf358bd75e44c87988a89e0"
+        }
+      ]
+    }
+  ],
+  "sourceRows": [
+    {
+      "ordinal": 1,
+      "path": "packages/compiler/src/gpui-native-owner.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "0f8d8100faa8624b2b2e3673ad31652ef932066946c65b21bca0418271d5dcae",
+        "gitBlobSha": "1482153ffad15a4ccda9787de02a35c3453b12c7",
+        "bytes": 77420
+      },
+      "layerIds": [
+        "core-repair",
+        "ordinary-hook-once"
+      ],
+      "finalHistoricalSha256": "79332ce2db753acd2295944c3d2585f4133f333240c1ed3410d1da3de1f6c765",
+      "retainedHistoricalSource": {
+        "sha256": "79332ce2db753acd2295944c3d2585f4133f333240c1ed3410d1da3de1f6c765",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "dfabd1c532812af9fe66c0ddd6dc0e18479e274ca197d47d78c972c501fe297c",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 2,
+      "path": "packages/compiler/test/browser-source-presentation.test.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "c7e567b1ac653f1556fb2cc11ff069fa626a69fcdaae237a9b6041963f676d8e",
+        "gitBlobSha": "dbdce4e595aa07d32ec6737290514c8fbc9c5006",
+        "bytes": 19260
+      },
+      "layerIds": [
+        "core-repair"
+      ],
+      "finalHistoricalSha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+      "retainedHistoricalSource": {
+        "sha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "cdeec0200cce086e2938ad7d6e5e060f935c847e92ea9107a639bf06582391c4",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 3,
+      "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "fb232e581cdd6ae0f203b76ff276bb67dd94abe26e45728dd80c7d9843dfb036",
+        "gitBlobSha": "23ef05d9a9082a4f26276ae05f5d765dc6981d6e",
+        "bytes": 5603
+      },
+      "layerIds": [
+        "core-repair"
+      ],
+      "finalHistoricalSha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+      "retainedHistoricalSource": {
+        "sha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "5e45d7d1f00233806319e4c64acdabc678f0cfe3d2673f588d9cdc665c1c2b51",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 4,
+      "path": "packages/compiler/src/operations.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "a9a4717b1235e593c20b648daa84a406e7ded115054f4a34b226620dd1d4a9bc",
+        "gitBlobSha": "4d54b247f9d2add17652e873a3b1d4ae83ba1a01",
+        "bytes": 59078
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "5cf7c43911e83e1773d2b65ea9aa427f321d53541fdaecbeaab536e88880e61d",
+      "retainedHistoricalSource": {
+        "sha256": "5cf7c43911e83e1773d2b65ea9aa427f321d53541fdaecbeaab536e88880e61d",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "4b8826ebc42be4b96872e3901ada1cf60119148d44ee2e04e449f5d86a3443c1",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 5,
+      "path": "packages/compiler/src/parser-module.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "614603147c232932cfdb35a9bf85b43943737a9259b56f2013e28ba29e046a1f",
+        "gitBlobSha": "528f4a290885f38ab8eed229f0b1f497dff48d11",
+        "bytes": 25511
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "6d79b7faa1a50655ab7ec23d26554d5849ab5ad433a55d95ed72a1a00d75dabb",
+      "retainedHistoricalSource": {
+        "sha256": "6d79b7faa1a50655ab7ec23d26554d5849ab5ad433a55d95ed72a1a00d75dabb",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "614603147c232932cfdb35a9bf85b43943737a9259b56f2013e28ba29e046a1f",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 6,
+      "path": "packages/compiler/src/parser.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "3bc0f3882ab169cfb18fe28f8f8411faf4ddd55b6e89cffd44c38f190829dc6d",
+        "gitBlobSha": "2ff570b15fe5bc447baa907c79d6d3e9b4888453",
+        "bytes": 47450
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "739679200ffe58df8adffa9ab1abdae38efcd716acd4476fe88779ac08dfbe69",
+      "retainedHistoricalSource": {
+        "sha256": "739679200ffe58df8adffa9ab1abdae38efcd716acd4476fe88779ac08dfbe69",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "008c2e178e3ea1b45680c147eb1e29e34a5f4a8a59ba955c5884e7ff2712d41b",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 7,
+      "path": "packages/compiler/src/ir.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "37d17a3bb5aff66b3413fdc329b5dd827612c1f1e9d216e32ae22118f3ae2a81",
+        "gitBlobSha": "2d6076d44d7a38de168017361756f35cb73bcb55",
+        "bytes": 8824
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "8e74c867c1cb7a475993c88c637e0f0333b21d3c214a71b5eda65dde5bfbbe71",
+      "retainedHistoricalSource": {
+        "sha256": "8e74c867c1cb7a475993c88c637e0f0333b21d3c214a71b5eda65dde5bfbbe71",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "8379f68cafb8e2595e7cf9a5687d43f745262455ca51ad1903717e8090f1a369",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 8,
+      "path": "packages/compiler/src/react.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "7c54c76cf0f9578f88dbcad307c07825886da0711a4701637b6c066408f6f4dc",
+        "gitBlobSha": "0e5f0345e8bb48a5945ba105f277fa0577feba26",
+        "bytes": 14703
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "b2d5d9b76aa2048687d16a9240c46fb5ee9e4acdf9eb1696757ca63e4598b6a8",
+      "retainedHistoricalSource": {
+        "sha256": "b2d5d9b76aa2048687d16a9240c46fb5ee9e4acdf9eb1696757ca63e4598b6a8",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "ac7b9429bf4b8b925ad55db683788d396ac8b0cd098fb51dc6d8a80b1470e91b",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 9,
+      "path": "packages/compiler/src/targets.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "92420f989186f411a9af1f3c2bb1ae221bd33ccac6bcd8066c0ac5e1b6059b09",
+        "gitBlobSha": "718ba847bb890adda1f565474b009a4b7700d492",
+        "bytes": 24472
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "40fb81dd361fd5e7b7b1460f79f1a609d7c9f3ffe2c76939f723cb7409151332",
+      "retainedHistoricalSource": {
+        "sha256": "40fb81dd361fd5e7b7b1460f79f1a609d7c9f3ffe2c76939f723cb7409151332",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "9df0df241be66f18c733dda2ea1cfc6bbf53aa40ecc4c5d80190148a4de52521",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 10,
+      "path": "packages/compiler/src/gpui-native-sdk.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "39cb397dc6c9a0952ffd283c63df538b5a692344f1fe5b8fa1b9bcd5d72b799e",
+        "gitBlobSha": "84542dde4a0f53d34a97692ecce870610d326b65",
+        "bytes": 3891
+      },
+      "layerIds": [
+        "definition-source-cutover",
+        "ordinary-hook-once"
+      ],
+      "finalHistoricalSha256": "0f124e77359cdf95fa0df5b36d52c3c899dd1d99eb7b412ba3380d8f2d7875cd",
+      "retainedHistoricalSource": {
+        "sha256": "0f124e77359cdf95fa0df5b36d52c3c899dd1d99eb7b412ba3380d8f2d7875cd",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "39cb397dc6c9a0952ffd283c63df538b5a692344f1fe5b8fa1b9bcd5d72b799e",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 11,
+      "path": "packages/compiler/src/gpui-native-modules.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "7a3d309ef2d5b010a571fe6e29db51b1598f47c94954fa53ba3f67b623e7049a",
+        "gitBlobSha": "2c8a05c722de7cfc87dd0a2162d38402e0a9677f",
+        "bytes": 40218
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "ef18c1701e01129058d0a73a99e1d5a5363dd8ffae98ca4947a9fb8c276b5cb2",
+      "retainedHistoricalSource": {
+        "sha256": "ef18c1701e01129058d0a73a99e1d5a5363dd8ffae98ca4947a9fb8c276b5cb2",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "7a3d309ef2d5b010a571fe6e29db51b1598f47c94954fa53ba3f67b623e7049a",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 12,
+      "path": "packages/compiler/src/gpui-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "2e8b129ff5f47423981a3c391bc14964c06fdcafbc4ab6ab102fe7e14866c58a",
+        "gitBlobSha": "ca17a3dfd5c33ea51be0edcc2579f85fd557c826",
+        "bytes": 49584
+      },
+      "layerIds": [
+        "definition-source-cutover",
+        "ordinary-hook-once"
+      ],
+      "finalHistoricalSha256": "ee72cc0693018e5ac50636273635307955404770e6b9881db184c88618e7d972",
+      "retainedHistoricalSource": {
+        "sha256": "ee72cc0693018e5ac50636273635307955404770e6b9881db184c88618e7d972",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "190d0561cd916d402c7b90ebf6ebabb5155211003fa19bdfabf203f5b5bbbd58",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 13,
+      "path": "packages/compiler/src/native-adapter-modules.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "5e9facbbdce79cf876793891e6845bb43a203786a62b49bdc8d9f30eba13040b",
+        "gitBlobSha": "45f075c198f653e15f93015b073993fab4d39347",
+        "bytes": 132265
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "2353e7608b9c5b90cd12f5455b56a544709fd36fa7dc1b6bd8b72b117a520daf",
+      "retainedHistoricalSource": {
+        "sha256": "2353e7608b9c5b90cd12f5455b56a544709fd36fa7dc1b6bd8b72b117a520daf",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "408d0e2a063ced8839edf9ad88d48f915f042d18a771b5de60bff4b26bd8c791",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 14,
+      "path": "packages/compiler/src/native-interaction.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "3e37b9a0c1fe45237532602d64ef967d0561858b39a2dbc99ab294918b490164",
+        "gitBlobSha": "f19f37141d91f9cbe7586af3da1b7bd33bd4e28a",
+        "bytes": 43646
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "53c08aef9281fe250eb33b91196c2ffcabad13b18d6cd716662633913aa6fb8b",
+      "retainedHistoricalSource": {
+        "sha256": "53c08aef9281fe250eb33b91196c2ffcabad13b18d6cd716662633913aa6fb8b",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "07f658b4d08a5d85cc7eded7337e517b72bcfc8552c6e3f0d74ea4a7a1daf402",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 15,
+      "path": "packages/compiler/src/react-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "aca748c019687121c52d7444a5509f5df1cde1076bd01a07aa38a2069e906003",
+        "gitBlobSha": "199100ae378de7aa6512960420a3f3bdb8b0200b",
+        "bytes": 67788
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "4b7a0e43f20c4df418611c241d7c118295dd07b0c842d175f8d2f9f242a2a648",
+      "retainedHistoricalSource": {
+        "sha256": "4b7a0e43f20c4df418611c241d7c118295dd07b0c842d175f8d2f9f242a2a648",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "f96fae49411f478dbe30278404340fed3ad06d81699f4d0e9067e99d200daacb",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 16,
+      "path": "packages/compiler/src/vue-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "f92c27c5011209ce68750d6a4043c620f9191a26986f6e1946c5c08f9097c376",
+        "gitBlobSha": "77bc6af52bfd630237b8b41183b9047749549306",
+        "bytes": 81396
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "d2a0f9b79bcf2cf69edb18ff8a2d45a9d61c90a5bd363078466f37e6a46f8423",
+      "retainedHistoricalSource": {
+        "sha256": "d2a0f9b79bcf2cf69edb18ff8a2d45a9d61c90a5bd363078466f37e6a46f8423",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "70a5c121445636c22cf4a5ee96c22978167688067ac8de46e288ef3aaec7058d",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 17,
+      "path": "packages/compiler/src/vue2-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "d8bf3da312098f29ad129725919c9d20afde200d34431e012f92f8048a078eb3",
+        "gitBlobSha": "48d56d5c238b9cc212a47978fe81e0a9819590b3",
+        "bytes": 54627
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "63e578439aa898c513061ea44fdaaf06aa8e19de64cef250efa91a14ca529809",
+      "retainedHistoricalSource": {
+        "sha256": "63e578439aa898c513061ea44fdaaf06aa8e19de64cef250efa91a14ca529809",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "a8b71de18618b9ddc2df19cb4c90154b2ebc428d33a91fc73a62ad6f88a86134",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 18,
+      "path": "packages/compiler/src/web-component-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "d01fe8408d87e4864d4a93365994253021d928e9f12fa4ac4d7673ff68457ca4",
+        "gitBlobSha": "971ffeedd3d7e3e49c74139dcc5cc7497cf932f1",
+        "bytes": 58640
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "5f94b98a042f18eb248fa2a215baffdba4f06ddc20e760a136cfc386b44c2bd7",
+      "retainedHistoricalSource": {
+        "sha256": "5f94b98a042f18eb248fa2a215baffdba4f06ddc20e760a136cfc386b44c2bd7",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "a4336c1c65263c8ffb9b75515defef9c0e0a4262abbb6730f447855fd496f718",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 19,
+      "path": "packages/compiler/src/qt-native-presentation.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "1b65e238db3651bcaa09d5ac15fa030c7b4d83a452f26142dffafb85544b2497",
+        "gitBlobSha": "eaa3bb67a99d2f55597ca9e871be5ca74a19f78f",
+        "bytes": 12446
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "9ef16f936b66e1ade0852e15852cd8d555f756ea24796b8d4c5518349a46e502",
+      "retainedHistoricalSource": {
+        "sha256": "9ef16f936b66e1ade0852e15852cd8d555f756ea24796b8d4c5518349a46e502",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "1b65e238db3651bcaa09d5ac15fa030c7b4d83a452f26142dffafb85544b2497",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 20,
+      "path": "packages/compiler/src/qt-native-owner.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "cf53850ddce8cec40f143e3964bc013d4f68eb7e96b68cbf83407b08e8773b6a",
+        "gitBlobSha": "f456823b1fd267846798ef7c7a602a2659e68f77",
+        "bytes": 25050
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "0e2255d034a29633693d50fd548249d37673b3cd53ae3017784127116faa5cb4",
+      "retainedHistoricalSource": {
+        "sha256": "0e2255d034a29633693d50fd548249d37673b3cd53ae3017784127116faa5cb4",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "cf53850ddce8cec40f143e3964bc013d4f68eb7e96b68cbf83407b08e8773b6a",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 21,
+      "path": "packages/compiler/src/flutter-native-host.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "229c59671b367c22df9c62dc110ccff1fb0254691bc815d043a90245d3dc8902",
+        "gitBlobSha": "e79399332c5069b80ce2bc7054bc2d0a71cc9ea8",
+        "bytes": 67256
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "43a88250fbbbb2a66fb0aa3ae43f597ed5b148ad75ec5a27e6675620675710fc",
+      "retainedHistoricalSource": {
+        "sha256": "43a88250fbbbb2a66fb0aa3ae43f597ed5b148ad75ec5a27e6675620675710fc",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "55d308c4ca8060b689317ea9289dc3f67a4261a9254ffabf71f49d47ea71e1c2",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 22,
+      "path": "packages/compiler/src/flutter-native-modules.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "1417c66986fddf66d08c295f3f646222ab4452e2d5dbde6bcfbf8a2c323f2152",
+        "gitBlobSha": "5fb2814d58ae41bb66c292ddf40b45e41cae3806",
+        "bytes": 81831
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "a7a322a3549d8e660f8bde40d6807e733856c730fc16cf242b79533545083cf1",
+      "retainedHistoricalSource": {
+        "sha256": "a7a322a3549d8e660f8bde40d6807e733856c730fc16cf242b79533545083cf1",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "1417c66986fddf66d08c295f3f646222ab4452e2d5dbde6bcfbf8a2c323f2152",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 23,
+      "path": "packages/compiler/src/flutter-source.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "f05d3e99db1d3e678ea26c7ba47ac8540b89a05d2cea61c8b10e73e92e5642b9",
+        "gitBlobSha": "d7c8745223c6454ae9f41c6c9bdd838ded1f8b40",
+        "bytes": 52425
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "17f8460d2593e9533454e7a74d11d7925b44db4a102f317b06b5acdde8ddc581",
+      "retainedHistoricalSource": {
+        "sha256": "17f8460d2593e9533454e7a74d11d7925b44db4a102f317b06b5acdde8ddc581",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "07ed3c2e0eb969b65f7da739a36f9948c6005ad4cd1f3959589ed84f8c50f506",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 24,
+      "path": "packages/compiler/test/source-graph.test.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "86eea5e5b8b99126cbc714e917c65a181e467c9176212d3ec989eb403717708f",
+        "gitBlobSha": "ef9be8936678cc46b8a89557597ad2f14ab0bf21",
+        "bytes": 13528
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "a83d157ea0d8b9a1cc80740bba63a5c408eff72761ecd4ba65abfb7e61264c91",
+      "retainedHistoricalSource": {
+        "sha256": "a83d157ea0d8b9a1cc80740bba63a5c408eff72761ecd4ba65abfb7e61264c91",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "86eea5e5b8b99126cbc714e917c65a181e467c9176212d3ec989eb403717708f",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 25,
+      "path": "packages/compiler/src/qt-native-view.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "df7ec4202ec577c6023cfc12bb17a2f8902e17426fd5d4fd27847ff2eadd01e7",
+        "gitBlobSha": "322b77c73ab01e1b31d06723606f953ec83ef954",
+        "bytes": 18249
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "17e11227c4dd899fc18abfb4ff91bd022bd74972b9f5c62e187db054b2d0b7aa",
+      "retainedHistoricalSource": {
+        "sha256": "17e11227c4dd899fc18abfb4ff91bd022bd74972b9f5c62e187db054b2d0b7aa",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "df7ec4202ec577c6023cfc12bb17a2f8902e17426fd5d4fd27847ff2eadd01e7",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 26,
+      "path": "packages/compiler/src/web-component-ssr-support.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "9282e4b32a28e31e9665312e26871789083826c0db196bfd15318070abce9f25",
+        "gitBlobSha": "02954fd1e0c86d6d2b64d5e9e4b9c763443b648c",
+        "bytes": 43767
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "ff86aa447055c9bfd9ad1caa9f932718e3d0677058de1edc82fdb4da0d6bbc0d",
+      "retainedHistoricalSource": {
+        "sha256": "ff86aa447055c9bfd9ad1caa9f932718e3d0677058de1edc82fdb4da0d6bbc0d",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "9664f53d31e2c783583daf9be7415fc218786168daaf8d3eec2fccadd6a3ebf2",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 27,
+      "path": "packages/compiler/src/qt-native-table.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "51f8f50a5270497d5b26738b2a3fc3b7f6fb1e4ad883d386b5cafbc648643888",
+        "gitBlobSha": "50ae63db759dcf70dd1dc522f85383da3e8d3af4",
+        "bytes": 856
+      },
+      "layerIds": [
+        "definition-source-cutover"
+      ],
+      "finalHistoricalSha256": "e1f79978aacc66082b5471403da1c7d3ca93d0dd73fc3aaf92fe585c2648d42f",
+      "retainedHistoricalSource": {
+        "sha256": "e1f79978aacc66082b5471403da1c7d3ca93d0dd73fc3aaf92fe585c2648d42f",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "51f8f50a5270497d5b26738b2a3fc3b7f6fb1e4ad883d386b5cafbc648643888",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 28,
+      "path": "apps/www/src/content/docs/en/build/compiler-guide.md",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "affcb596954a6b7567b015c4e3f5f3a1999b7af84f066ba0c705c5a024d03161",
+        "gitBlobSha": "b4225d920706a20a6e1ccd06f7a2dcd5d6acfaea",
+        "bytes": 12997
+      },
+      "layerIds": [
+        "definition-source-cutover",
+        "ordinary-hook-once"
+      ],
+      "finalHistoricalSha256": "ffc86bd3801c201da763b63d897d0e8c6ec7f3cd88e0c47e0bf5d1e0fea61f2a",
+      "retainedHistoricalSource": {
+        "sha256": "ffc86bd3801c201da763b63d897d0e8c6ec7f3cd88e0c47e0bf5d1e0fea61f2a",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "b300205b5431cde20e5e269d55da49bd259a8bb97b97709314880515d08d6aae",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 29,
+      "path": "apps/www/src/content/docs/zh-cn/build/compiler-guide.md",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "7c6c2aee0072d7810a68644711b6bd24be54cdda726db626631d5f81941f487b",
+        "gitBlobSha": "c41da38737111cb835df9b46190856ed2e5c17f9",
+        "bytes": 12299
+      },
+      "layerIds": [
+        "definition-source-cutover",
+        "ordinary-hook-once"
+      ],
+      "finalHistoricalSha256": "254be8f4575ed4769a4b837f698eaa5f31e41f09533d5b7c0206ed1b5c4994a1",
+      "retainedHistoricalSource": {
+        "sha256": "254be8f4575ed4769a4b837f698eaa5f31e41f09533d5b7c0206ed1b5c4994a1",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "c7ceca1db724a0a0d7cffa04fee495a8a4cd1c5ea1006d9ce2a508789f307d46",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 30,
+      "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "4b1fe4d1490f90f5cea8b490b5f05936a14868d1f98ff23c06313ed7d1375fb6",
+        "gitBlobSha": "e970e618e31437383c7e53e3ecd290858db8aa1c",
+        "bytes": 20210
+      },
+      "layerIds": [
+        "definition-freeze",
+        "reader-projection"
+      ],
+      "finalHistoricalSha256": "48cbc28823f854cbf18dc6a43d2ef69f7e8d7cf64dd74059773ad4e05a043749",
+      "retainedHistoricalSource": {
+        "sha256": "48cbc28823f854cbf18dc6a43d2ef69f7e8d7cf64dd74059773ad4e05a043749",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "4b1fe4d1490f90f5cea8b490b5f05936a14868d1f98ff23c06313ed7d1375fb6",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 31,
+      "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "5d8bd64cd1a6a791bdff0dd428a9cbbf238bc85f110e8ef53921f279b8095815",
+        "gitBlobSha": "0223e983ace223f886f7886b03067c1b7e6a0e45",
+        "bytes": 19125
+      },
+      "layerIds": [
+        "definition-freeze",
+        "reader-projection"
+      ],
+      "finalHistoricalSha256": "57bf3d4c34490d66a218dcff4116a066601f316edaf358bd75e44c87988a89e0",
+      "retainedHistoricalSource": {
+        "sha256": "57bf3d4c34490d66a218dcff4116a066601f316edaf358bd75e44c87988a89e0",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "5d8bd64cd1a6a791bdff0dd428a9cbbf238bc85f110e8ef53921f279b8095815",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 32,
+      "path": "spec/contracts/C-HOOK-0001.yaml",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": false,
+        "sha256": null,
+        "gitBlobSha": null,
+        "bytes": null
+      },
+      "layerIds": [
+        "definition-freeze"
+      ],
+      "finalHistoricalSha256": "9d2ea33fc3310749c860c57fd3498fcc57c986ac061d8e7f7d4a6163e7689585",
+      "retainedHistoricalSource": {
+        "sha256": "9d2ea33fc3310749c860c57fd3498fcc57c986ac061d8e7f7d4a6163e7689585",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": false,
+        "sha256": null,
+        "comparison": "absent-at-current-base"
+      },
+      "integrationDisposition": "Historical uncommitted draft candidate; also absent at immutable historical base. No committed removal/retirement inferred."
+    },
+    {
+      "ordinal": 33,
+      "path": "spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "bfb3ca54978462171b448e901436b393c1037924daef2ea8f5575c942f3b3171",
+        "gitBlobSha": "5b059ef738b6590615f2cc6898b5983940d3a7aa",
+        "bytes": 3772
+      },
+      "layerIds": [
+        "definition-freeze"
+      ],
+      "finalHistoricalSha256": "e4a59438b5612f9296f7c8912aa7e0fff1876638b78882160c1fc5e5e3f8a9e9",
+      "retainedHistoricalSource": {
+        "sha256": "e4a59438b5612f9296f7c8912aa7e0fff1876638b78882160c1fc5e5e3f8a9e9",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "bfb3ca54978462171b448e901436b393c1037924daef2ea8f5575c942f3b3171",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 34,
+      "path": "spec/tests/T-HOOK-0001.yaml",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": false,
+        "sha256": null,
+        "gitBlobSha": null,
+        "bytes": null
+      },
+      "layerIds": [
+        "definition-freeze"
+      ],
+      "finalHistoricalSha256": "58ab8715ba956164db4b3b5c1aecb234c7440d6a6284d68463810c1e0aabd8c1",
+      "retainedHistoricalSource": {
+        "sha256": "58ab8715ba956164db4b3b5c1aecb234c7440d6a6284d68463810c1e0aabd8c1",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": false,
+        "sha256": null,
+        "comparison": "absent-at-current-base"
+      },
+      "integrationDisposition": "Historical uncommitted draft candidate; also absent at immutable historical base. No committed removal/retirement inferred."
+    },
+    {
+      "ordinal": 35,
+      "path": "spec/tests/T-HOOK-0002.yaml",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": false,
+        "sha256": null,
+        "gitBlobSha": null,
+        "bytes": null
+      },
+      "layerIds": [
+        "definition-freeze"
+      ],
+      "finalHistoricalSha256": "9f87c9eecc508f1f64609f74872101fd14b08dbff2abc99349a01d8a509fb6dd",
+      "retainedHistoricalSource": {
+        "sha256": "9f87c9eecc508f1f64609f74872101fd14b08dbff2abc99349a01d8a509fb6dd",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": false,
+        "sha256": null,
+        "comparison": "absent-at-current-base"
+      },
+      "integrationDisposition": "Historical uncommitted draft candidate; also absent at immutable historical base. No committed removal/retirement inferred."
+    },
+    {
+      "ordinal": 36,
+      "path": "packages/core/src/prototype.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "794efec380ce58f26e1bd74ce2dfdcac9736d24a33e0b5bb7ae7ee920d7da6d7",
+        "gitBlobSha": "1aa237c937fe732801d997c03f4463cc48c852c2",
+        "bytes": 17051
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "618bd329841973e4a1b9f43a57578c70b79151636c31bb060fb092f30eb15bde",
+      "retainedHistoricalSource": {
+        "sha256": "618bd329841973e4a1b9f43a57578c70b79151636c31bb060fb092f30eb15bde",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 37,
+      "path": "packages/runtime/src/kernel/as-hook.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "15e7148ac161e938af9199b9b2ac291487d4111e20fd3d822e090e2ebf0e6648",
+        "gitBlobSha": "d1fb635a7639a410694fb617dd93a102904be21f",
+        "bytes": 15836
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "34b2fcad196989acf8ee7d4d2a76adbfe53dab6126a87feffbc7a72e64e34f8d",
+      "retainedHistoricalSource": {
+        "sha256": "34b2fcad196989acf8ee7d4d2a76adbfe53dab6126a87feffbc7a72e64e34f8d",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "6391c8c382cb938ae5d14b6260bc17c42fc89ae0168470823360dd0977989552",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 38,
+      "path": "packages/prototypes/base/src/tools/use-open-state.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "ceb420a55e8493faaa02d38f8391125a1ebff4158ac5811ff2605d8ce9ab606c",
+        "gitBlobSha": "72f666cb777d27e246383481686f3e2f89b08a1f",
+        "bytes": 4486
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "eaee3f6345305405acbd843041ac2cb92ea2b9589240c3a5969fcb6f0175f63a",
+      "retainedHistoricalSource": {
+        "sha256": "eaee3f6345305405acbd843041ac2cb92ea2b9589240c3a5969fcb6f0175f63a",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "ceb420a55e8493faaa02d38f8391125a1ebff4158ac5811ff2605d8ce9ab606c",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 39,
+      "path": "packages/prototypes/base/src/tools/use-escape-key.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "79aab292364faa4e38ca3022d1fc6a4287a4f2eb0c5138682f0ecaa244dae661",
+        "gitBlobSha": "265c28ec93685a315a90647e0a7ed851dbf9fe18",
+        "bytes": 1075
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "f237b834d627b9ceaad32f853d2e06baa5fadfc9773f43a1ccb01daebb00cba4",
+      "retainedHistoricalSource": {
+        "sha256": "f237b834d627b9ceaad32f853d2e06baa5fadfc9773f43a1ccb01daebb00cba4",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "79aab292364faa4e38ca3022d1fc6a4287a4f2eb0c5138682f0ecaa244dae661",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 40,
+      "path": "packages/prototypes/base/src/behaviors/use-typeahead-navigation.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "ac2160ec9643ebef80c8978437c9b06bf287cd30c2020bec0f9da6a7aa20cfac",
+        "gitBlobSha": "46d1e377b5c0d6f6501e7252903a10ffbdd0bce5",
+        "bytes": 2423
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "eef46bc0439954f44f519e76c1ae246effe8212ebef90db06e87c7b7f0edd925",
+      "retainedHistoricalSource": {
+        "sha256": "eef46bc0439954f44f519e76c1ae246effe8212ebef90db06e87c7b7f0edd925",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "ac2160ec9643ebef80c8978437c9b06bf287cd30c2020bec0f9da6a7aa20cfac",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 41,
+      "path": "packages/runtime/test/contract/as-hook.v0.contract.test.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "adfe708f8484c9da60ec029ab1851d44de6874e16f1eb4e438bc844fb8674713",
+        "gitBlobSha": "e21b668e734802bd77612d72b257914a4f077a5d",
+        "bytes": 22358
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "b12501ccb8ae95637132c659aa5b7af4d24f16b885f7bb45d68cb37745f3b179",
+      "retainedHistoricalSource": {
+        "sha256": "b12501ccb8ae95637132c659aa5b7af4d24f16b885f7bb45d68cb37745f3b179",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "cbb2f4e1d4194318f80356831934d3a1542557e55c835fcf8f1b9b6e0097200d",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    },
+    {
+      "ordinal": 42,
+      "path": "internal/contracts/types/as-hook.contract.v0.type-test.ts",
+      "historicalPreimage": {
+        "revision": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+        "present": true,
+        "sha256": "882f3bcbf5c6ec4bb2e7e23e82f8b0e9d6edfd1dc520334e1318cdec9d55002b",
+        "gitBlobSha": "db9a003de37042b7bddfd9d9e4fd344bf09b8599",
+        "bytes": 2727
+      },
+      "layerIds": [
+        "original-realization"
+      ],
+      "finalHistoricalSha256": "21069dd54fd021ca8da5252e4f43da6da1f4242bff40067fcfac5687bb94cff7",
+      "retainedHistoricalSource": {
+        "sha256": "21069dd54fd021ca8da5252e4f43da6da1f4242bff40067fcfac5687bb94cff7",
+        "matchesFinalHistorical": true
+      },
+      "currentSource": {
+        "revision": "0607c6c5c386b8a932ab850e92a8873b2121dc45",
+        "present": true,
+        "sha256": "882f3bcbf5c6ec4bb2e7e23e82f8b0e9d6edfd1dc520334e1318cdec9d55002b",
+        "comparison": "different-bytes; no semantic or integration-loss conclusion"
+      },
+      "integrationDisposition": "Current source differs; source presence and old passes do not establish current conformance or loss."
+    }
+  ],
+  "protectedHistoricalInputs": {
+    "cutoverProtectedFiles": [
+      {
+        "path": "packages/compiler/src/gpui-native-owner.ts",
+        "beforeSha256": "4bc6e1893e06cfa30b890760f9ef587f56e98d8608d713eab0e076fa71ec5971",
+        "afterSha256": "4bc6e1893e06cfa30b890760f9ef587f56e98d8608d713eab0e076fa71ec5971",
+        "beforeBytes": 77649,
+        "afterBytes": 77649
+      },
+      {
+        "path": "packages/compiler/test/browser-source-presentation.test.ts",
+        "beforeSha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+        "afterSha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+        "beforeBytes": 18351,
+        "afterBytes": 18351
+      },
+      {
+        "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+        "beforeSha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+        "afterSha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+        "beforeBytes": 5265,
+        "afterBytes": 5265
+      },
+      {
+        "path": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+        "beforeSha256": "11857d5485119ab131deefb5befa201aa65ca27cb9573ad2664616e17286786d",
+        "afterSha256": "11857d5485119ab131deefb5befa201aa65ca27cb9573ad2664616e17286786d",
+        "beforeBytes": 8087,
+        "afterBytes": 8087
+      },
+      {
+        "path": "packages/prototypes/base/src/transition/machine.ts",
+        "beforeSha256": "30d0b6bb913aeec046b5d011472271ec38b7733bb9b29248c027b7ec6ac4b3b9",
+        "afterSha256": "30d0b6bb913aeec046b5d011472271ec38b7733bb9b29248c027b7ec6ac4b3b9",
+        "beforeBytes": 4849,
+        "afterBytes": 4849
+      },
+      {
+        "path": "packages/prototypes/base/src/collapsible/root.proto.ts",
+        "beforeSha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+        "afterSha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+        "beforeBytes": 4946,
+        "afterBytes": 4946
+      }
+    ],
+    "cutoverBaseline": {
+      "schemaVersion": 1,
+      "scopeId": "definition-source-cutover-20261010",
+      "repository": "github.com:Proto-UI/Proto-UI",
+      "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "recordedAt": "2026-10-10T13:19:07.518Z",
+      "files": [
+        {
+          "path": "packages/compiler/src/operations.ts",
+          "sha256": "a9a4717b1235e593c20b648daa84a406e7ded115054f4a34b226620dd1d4a9bc",
+          "bytes": 59078
+        },
+        {
+          "path": "packages/compiler/src/parser-module.ts",
+          "sha256": "614603147c232932cfdb35a9bf85b43943737a9259b56f2013e28ba29e046a1f",
+          "bytes": 25511
+        },
+        {
+          "path": "packages/compiler/src/parser.ts",
+          "sha256": "3bc0f3882ab169cfb18fe28f8f8411faf4ddd55b6e89cffd44c38f190829dc6d",
+          "bytes": 47450
+        },
+        {
+          "path": "packages/compiler/src/ir.ts",
+          "sha256": "37d17a3bb5aff66b3413fdc329b5dd827612c1f1e9d216e32ae22118f3ae2a81",
+          "bytes": 8824
+        },
+        {
+          "path": "packages/compiler/src/react.ts",
+          "sha256": "7c54c76cf0f9578f88dbcad307c07825886da0711a4701637b6c066408f6f4dc",
+          "bytes": 14703
+        },
+        {
+          "path": "packages/compiler/src/targets.ts",
+          "sha256": "92420f989186f411a9af1f3c2bb1ae221bd33ccac6bcd8066c0ac5e1b6059b09",
+          "bytes": 24472
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-sdk.ts",
+          "sha256": "39cb397dc6c9a0952ffd283c63df538b5a692344f1fe5b8fa1b9bcd5d72b799e",
+          "bytes": 3891
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-modules.ts",
+          "sha256": "7a3d309ef2d5b010a571fe6e29db51b1598f47c94954fa53ba3f67b623e7049a",
+          "bytes": 40218
+        },
+        {
+          "path": "packages/compiler/src/gpui-source.ts",
+          "sha256": "2e8b129ff5f47423981a3c391bc14964c06fdcafbc4ab6ab102fe7e14866c58a",
+          "bytes": 49584
+        },
+        {
+          "path": "packages/compiler/src/native-adapter-modules.ts",
+          "sha256": "5e9facbbdce79cf876793891e6845bb43a203786a62b49bdc8d9f30eba13040b",
+          "bytes": 132265
+        },
+        {
+          "path": "packages/compiler/src/native-interaction.ts",
+          "sha256": "3e37b9a0c1fe45237532602d64ef967d0561858b39a2dbc99ab294918b490164",
+          "bytes": 43646
+        },
+        {
+          "path": "packages/compiler/src/react-source.ts",
+          "sha256": "aca748c019687121c52d7444a5509f5df1cde1076bd01a07aa38a2069e906003",
+          "bytes": 67788
+        },
+        {
+          "path": "packages/compiler/src/vue-source.ts",
+          "sha256": "f92c27c5011209ce68750d6a4043c620f9191a26986f6e1946c5c08f9097c376",
+          "bytes": 81396
+        },
+        {
+          "path": "packages/compiler/src/vue2-source.ts",
+          "sha256": "d8bf3da312098f29ad129725919c9d20afde200d34431e012f92f8048a078eb3",
+          "bytes": 54627
+        },
+        {
+          "path": "packages/compiler/src/web-component-source.ts",
+          "sha256": "d01fe8408d87e4864d4a93365994253021d928e9f12fa4ac4d7673ff68457ca4",
+          "bytes": 58640
+        },
+        {
+          "path": "packages/compiler/src/qt-native-presentation.ts",
+          "sha256": "1b65e238db3651bcaa09d5ac15fa030c7b4d83a452f26142dffafb85544b2497",
+          "bytes": 12446
+        },
+        {
+          "path": "packages/compiler/src/qt-native-owner.ts",
+          "sha256": "cf53850ddce8cec40f143e3964bc013d4f68eb7e96b68cbf83407b08e8773b6a",
+          "bytes": 25050
+        },
+        {
+          "path": "packages/compiler/src/qt-source.ts",
+          "sha256": "1aa9085269f19ddb093506faebca06dffc05cfd5dacf2ff544c5ce221a41aaa5",
+          "bytes": 21991
+        },
+        {
+          "path": "packages/compiler/src/flutter-native-host.ts",
+          "sha256": "229c59671b367c22df9c62dc110ccff1fb0254691bc815d043a90245d3dc8902",
+          "bytes": 67256
+        },
+        {
+          "path": "packages/compiler/src/flutter-native-modules.ts",
+          "sha256": "1417c66986fddf66d08c295f3f646222ab4452e2d5dbde6bcfbf8a2c323f2152",
+          "bytes": 81831
+        },
+        {
+          "path": "packages/compiler/src/flutter-source.ts",
+          "sha256": "f05d3e99db1d3e678ea26c7ba47ac8540b89a05d2cea61c8b10e73e92e5642b9",
+          "bytes": 52425
+        },
+        {
+          "path": "packages/compiler/src/gpui-native-owner.ts",
+          "sha256": "4bc6e1893e06cfa30b890760f9ef587f56e98d8608d713eab0e076fa71ec5971",
+          "bytes": 77649
+        },
+        {
+          "path": "packages/compiler/test/browser-source-presentation.test.ts",
+          "sha256": "190110e4ea961daf89af4ef01139e5ad84dc3df838f256ec2c79b02395dc00f3",
+          "bytes": 18351
+        },
+        {
+          "path": "packages/compiler/test/fixtures/source-presentation/main.ts",
+          "sha256": "3936902b87f19126ccf4e0250eb4cbec7a23fa4a68aa5dbee5a47353b0c8465f",
+          "bytes": 5265
+        },
+        {
+          "path": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+          "sha256": "11857d5485119ab131deefb5befa201aa65ca27cb9573ad2664616e17286786d",
+          "bytes": 8087
+        },
+        {
+          "path": "packages/prototypes/base/src/transition/machine.ts",
+          "sha256": "30d0b6bb913aeec046b5d011472271ec38b7733bb9b29248c027b7ec6ac4b3b9",
+          "bytes": 4849
+        },
+        {
+          "path": "packages/prototypes/base/src/collapsible/root.proto.ts",
+          "sha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+          "bytes": 4946
+        },
+        {
+          "path": "packages/compiler/test/source-graph.test.ts",
+          "sha256": "86eea5e5b8b99126cbc714e917c65a181e467c9176212d3ec989eb403717708f",
+          "bytes": 13528
+        }
+      ]
+    },
+    "integrationBaseline": {
+      "schemaVersion": 1,
+      "scopeId": "definition-source-cutover-20261010",
+      "repository": "github.com:Proto-UI/Proto-UI",
+      "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "recordedAt": "2026-10-10T13:24:58.667Z",
+      "files": [
+        {
+          "path": "packages/compiler/src/qt-native-view.ts",
+          "sha256": "df7ec4202ec577c6023cfc12bb17a2f8902e17426fd5d4fd27847ff2eadd01e7",
+          "bytes": 18249
+        },
+        {
+          "path": "packages/compiler/src/web-component-ssr-support.ts",
+          "sha256": "9282e4b32a28e31e9665312e26871789083826c0db196bfd15318070abce9f25",
+          "bytes": 43767
+        }
+      ]
+    },
+    "boundary": "Protected ordinary Transition/Collapsible and Presentation sources remain distinct from the42candidate union. Preserve their recorded guards and preimages; no current behavior equality follows."
+  },
+  "sourceMaterials": [
+    {
+      "key": "cutoverBaseline",
+      "sourceArtifact": "pui-definition-source-cutover-20261010-baseline.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_3ea0f6b2aba24a7e8863a6b84b757aac",
+      "retainedReadbackTextSha256": "0ccc30d6095767f15b9d4ecfe2a12d8a8234766a173591ccb6a9464af5eb2540",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "docsHandoff",
+      "sourceArtifact": "pui-generic-hook-original-realization-20261011-docs-validation-handoff.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_355159cd099b4f2590a12fefcceb96f6",
+      "retainedReadbackTextSha256": "72827da11bb36471b434d926f604163a1a35a334dcdd549c72f3b150499bcd00",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "docs",
+      "sourceArtifact": "pui-generic-hook-original-realization-20261011-docs-candidate.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_74ee93bc20dc4606a55349c0629355e3",
+      "retainedReadbackTextSha256": "c48db90eee5020a0f936eebd938151b52fdb7df6493096b1978fca5635aea430",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "original",
+      "sourceArtifact": "pui-generic-hook-original-realization-20261011-original-evidence-report.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_6a7bbb1a49a04ed1a0cea8660d161308",
+      "retainedReadbackTextSha256": "0a666d8ee447b2b0f534860c5357a014017afe8372aa9e8f9510ce52673870e8",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "core",
+      "sourceArtifact": "pui-core-default-slot-20261010-evidence-report.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_5028c3b97c25469a8e533d1749dea07b",
+      "retainedReadbackTextSha256": "7dccc6f7f13bbcd4e5d70e3d5397603f1f5c795d8faa3d294ae6c2466de79702",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "freeze",
+      "sourceArtifact": "pui-hook-definition-freeze-20261011-source-manifest.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_68a730be350741738b9f3341495292e8",
+      "retainedReadbackTextSha256": "5da8c0f8442cfd30f017fa2985c1f50b9b44b0220925631ea0edcf7db52e85d3",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "once",
+      "sourceArtifact": "pui-ordinary-hook-once-20261010-docs-candidate-change.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_9c1825d0ed72477aaead26e33b0e4f2e",
+      "retainedReadbackTextSha256": "1352aded1380b24a6a7a2025bd929600d4366e5bc55d04074dd5086feefbc3c8",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "integrationBaseline",
+      "sourceArtifact": "pui-definition-source-cutover-20261010-integration-baseline.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_77c951dbe0ae46c0aae8f6c20330f8a5",
+      "retainedReadbackTextSha256": "f95305f625fbd02530b7af7482490126d28b57e06811071a406d420abb844188",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    },
+    {
+      "key": "cutover",
+      "sourceArtifact": "pui-definition-source-cutover-20261010-docs-candidate-change.json",
+      "producer": "AdjacentTODORecovery196",
+      "readToolCallIdPrefix": "call_2c207137544f4201b66acccfea5fb57e",
+      "retainedReadbackTextSha256": "36a61e77bfab3a1fd2e8889a7155ee12f31ab9a9995d383b061b3378ac24e2f6",
+      "digestBoundary": "Digest of the complete retained file-read text; not a claim that a missing original /tmp artifact was re-created or re-executed."
+    }
+  ],
+  "aggregateLedgers": [
+    {
+      "path": "internal/records/2026-10-14-finf-source-closure.json",
+      "sha256": "7c2cd6ebc59579bd6d829a3e2935d55739affbb99b8669fb97f5bb954e7ea4c5",
+      "changed": false,
+      "boundary": "Existing broad997-source-record carrier remains unchanged and does not replace the explicit42candidate manifest."
+    },
+    {
+      "path": "internal/records/2026-10-14-finf-followup-source-debt.json",
+      "sha256": "17f9016c7fe65ac7aa0335dbea85654bdd43c5ab1a34dbce953c045fc6e8e7cb",
+      "changed": false,
+      "boundary": "Existing broad997-source-record carrier remains unchanged and does not replace the explicit42candidate manifest."
+    }
+  ],
+  "canonicalSourceLedger": {
+    "path": "internal/governance/release-0.3-source-ledger.json",
+    "childBodySha256": "3cd4675c2ac5663e3e25c815080f29ae084baea275a1cc5ec77ab9b3ccc4b068",
+    "parentBodySha256": "f213d898120cdf59fbb1ec1061cd0f08107bbfe43ca359d499fb34057c9f107e",
+    "currentSourceReleaseDisposition": "criterion-split",
+    "sourceKeyBoundary": "Original source keys and complete Chinese checkbox wording are retained verbatim; this record does not edit the effective shared release ledger."
+  },
+  "conditions": [
+    {
+      "key": "issue.1157.001",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 6,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 保留全部 42 个历史 candidate/source path 的 source manifest、基线、哈希与证据边界；本地 uncommitted/draft/source review 不等于已发布或已验收",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.007",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 18,
+      "parentOriginal": "- [ ] 保留全部 42 个历史 candidate/source path 的 source manifest、基线、哈希与证据边界；本地 uncommitted/draft/source review 不等于已发布或已验收",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 1
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "SolThirty1157Sources42; Main owns archive/publication/integration",
+      "state": "All42 exact paths and layered hashes recovered; all42 retained historical bytes match. Current39 present paths differ and3 local-draft-only paths are absent. Record not published or accepted.",
+      "next": "Main runs source-only readback, archives exact42 bytes with complete member/byte readback, validates and publishes the scoped record under its actual final commit."
+    },
+    {
+      "key": "issue.1157.002",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 7,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 对最后启动而无结果的 documentation checks 与 I.docTabs 页面观察重新按新 head 执行；不能把 tool-start 当作成功结果",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.008",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 19,
+      "parentOriginal": "- [ ] 对最后启动而无结果的 documentation checks 与 I.docTabs 页面观察重新按新 head 执行；不能把 tool-start 当作成功结果",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 2
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "SolThirty1157Sources42; Main serial execution",
+      "state": "Original five documentation checks and two I.docTabs observations have no terminal result. This assignment has not executed new checks or opened pages.",
+      "next": "Main executes the five exact checks serially, then observes both actual current EN/ZH routes and retains head/source/screenshot/readback receipts."
+    },
+    {
+      "key": "issue.1157.003",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 8,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 保留原始实现、后续 ordinary-hook once overlay 与 draft-definition/projection 的边界，验证正式 Compiler 与非 Web consumer 的组合，不用旧 Runtime 单层 proof 替代",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.009",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 20,
+      "parentOriginal": "- [ ] 保留原始实现、后续 ordinary-hook once overlay 与 draft-definition/projection 的边界，验证正式 Compiler 与非 Web consumer 的组合，不用旧 Runtime 单层 proof 替代",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 3
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "Existing Compiler owner and Main;1157 preserves evidence boundary",
+      "state": "Core repair, business-substitution cutover, ordinary-hook once, draft-definition freeze, original Runtime realization and final reader projection are separate deltas. No current formal generic Compiler/non-Web composition receipt is available.",
+      "next": "Compiler owner supplies the currently admitted same-source input, authority and real non-Web consumer command. Main executes it and retains unsupported/failure outcomes; ordinary emission or old TestPlatform/Runtime proof cannot close this condition."
+    },
+    {
+      "key": "issue.1157.004",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 9,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] Input 必须补齐实际最终 head 的 visual/publication 证据，不能用 materially different 旧 head 的截图关闭债务",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.010",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 21,
+      "parentOriginal": "- [ ] Input 必须补齐实际最终 head 的 visual/publication 证据，不能用 materially different 旧 head 的截图关闭债务",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 4
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "SolThirty1155InputDebt and existing C4 delegates; Main",
+      "state": "Old2ea qualified captures do not cover materially changed final2dd4 rendering. This record neither replaces1155 nor publishes Input images.",
+      "next": "Complete1155 exact-final-head Input visual/publication handoff; cross-link its genuine uploaded/source-bound receipt to1157 criterion4."
+    },
+    {
+      "key": "issue.1157.005",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 10,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] 私有 bot / Preview 外部退役、生产部署、临时 takeover 与 repository source integration 分开授权；不在本 PR 中暗示已部署或自动扩大权限",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.011",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 22,
+      "parentOriginal": "- [ ] 私有 bot / Preview 外部退役、生产部署、临时 takeover 与 repository source integration 分开授权；不在本 PR 中暗示已部署或自动扩大权限",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 5
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "Main coordinates source-integration tracking; external service owners retain their separate authority",
+      "state": "No private bot/Preview retirement, production deployment or takeover is performed or newly authorized. Historical source carriers and old conditional takeover grants remain historical.",
+      "next": "Publish the authorization-separation disposition for this record; perform any service operation only under its own current exact-target authorization and authenticated deployed-revision readback."
+    },
+    {
+      "key": "issue.1157.006",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1157",
+      "sourceLine": 11,
+      "section": "## 范围（原 checklist 逐项保留）",
+      "original": "- [ ] GenericHookTargetCoreMap 的历史空字符串 terminal yield 曾被 schema 拒绝，没有有效 terminal map；不能当作已消费或已接受的 SDK 结果",
+      "historicalChecked": false,
+      "release": "criterion-split",
+      "developmentState": "reconcile-live-evidence",
+      "acceptanceState": "not-yet-reconciled",
+      "nextAction": "Preserve source condition; bind concrete family/surface and latest evidence before updating its checkbox.",
+      "parentKey": "issue.1093.012",
+      "parentSource": "https://github.com/Proto-UI/Proto-UI/issues/1093",
+      "parentSourceLine": 23,
+      "parentOriginal": "- [ ] GenericHookTargetCoreMap 的历史空字符串 terminal yield 曾被 schema 拒绝，没有有效 terminal map；不能当作已消费或已接受的 SDK 结果",
+      "origin": {
+        "pr": 887,
+        "section": "相邻会话的证据与集成债务",
+        "ordinal": 6
+      },
+      "currentAcceptance": "unmet",
+      "releaseDisposition": "criterion-split; preserve Issue-specific0.4 note and committed-family/www/CLI prerequisite accounting",
+      "owner": "SolThirty1157Sources42 prepares disposition; Main publishes it",
+      "state": "Original terminal data was the empty string; schema rejected it. No valid terminal map was produced or consumed.",
+      "next": "Publish the exact rejection disposition. A future independently supplied map is new evidence and must not restamp the rejected historical attempt."
+    }
+  ],
+  "canonicalPendingTasks": [
+    {
+      "phase": "DCBot 修复",
+      "task": "将修复部署到生产并回读确认",
+      "status": "blocked",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/2/tasks/11",
+      "scope": "External Life/DCBot production installation and authenticated runtime readback; local repairs and published source do not complete deployment."
+    },
+    {
+      "phase": "三小时无人接管授权",
+      "task": "筛选当前满足三小时空闲的事项",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/9/tasks/1",
+      "scope": "Historical conditional queue screening; the old three-hour unattended grant is data, not current selection/takeover/write authority."
+    },
+    {
+      "phase": "三小时无人接管授权",
+      "task": "逐项实现独立评审合入并验证闭环",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/9/tasks/2",
+      "scope": "Historical multi-item implementation/independent-review/integration loop. Preserve its task; do not convert it into an active autonomous mission or bypass exact-head platform gates."
+    },
+    {
+      "phase": "当前 PR 优先闭环",
+      "task": "关闭 Input 精确版本视觉证据欠账",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/14/tasks/9",
+      "scope": "Final-head PR812 actual rendering/publication evidence. Final2dd4 changed shared preview Surface/layout/readiness; old2ea qualified observations cannot be restamped as final-head visual/built-output/all-overlay acceptance."
+    },
+    {
+      "phase": "内网 Preview 单轨迁移",
+      "task": "删除 Poppy preview 全部旧链路残留",
+      "status": "blocked",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/24/tasks/2",
+      "scope": "Source PR885/head1699 and private dcbotPR3/head0883938 are historical carriers. Actual bot/edge deployment, ownership-bound Pages project/domain retirement and obsolete shared-App callback retirement still require authenticated management access; preserve shared services/data."
+    },
+    {
+      "phase": "原型 Compiler 与非 Web 验收",
+      "task": "验证正式 Compiler 与非 Web 消费链路",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/26/tasks/1",
+      "scope": "Full canonical Compiler and real non-Web production consumption. Bounded ordinary/native probes, headless TestPlatform or emitted output alone do not prove full Prototype/native profile/Module support or OS fidelity."
+    },
+    {
+      "phase": "原型 Compiler 与非 Web 验收",
+      "task": "验证定义驱动独立实现的组合契合",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/26/tasks/3",
+      "scope": "Independent definition-derived realizations must satisfy the same oracle and naturally compose on identical authored input. Original generic realization is bounded; target/Core generic IR/native realization and complete same-source generic composition remain missing. Latest literal status is pending, superseding the older in_progress delta."
+    },
+    {
+      "phase": "原型 Compiler 与非 Web 验收",
+      "task": "落实 Compiler 与原型独立定义约束",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/26/tasks/4",
+      "scope": "Keep Compiler a thin generic translator and Prototype business independently authored from governing definitions. Business-substitution removal is a bounded achieved slice, not clean-room provenance or complete independent target realization; moving copied machinery alone is insufficient."
+    },
+    {
+      "phase": "通用 hook 实现收尾",
+      "task": "同步原始实现实测文档及证据",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/38/tasks/0",
+      "scope": "Measured original Core/Runtime/Base results must be projected accurately in EN/ZH as-hook pages while retaining draft/planned target/native conformance. Two paragraphs/table projections were changed, but final checks/render observations have no recorded result."
+    },
+    {
+      "phase": "通用 hook 实现收尾",
+      "task": "归档自有脚本并完成投影验证",
+      "status": "pending",
+      "originalSourceEntry": "41ef0d32",
+      "sourceTimestamp": "2026-10-11T13:08:00.890Z",
+      "pointer": "/data/phases/38/tasks/1",
+      "scope": "Finalize source-bound projection evidence and owned-disposable cleanup without deleting prior evidence or stopping shared services. The smoke-source archive already exists; that fact does not close unfinished projection verification or imply all cleanup is complete."
+    }
+  ],
+  "lastUnacknowledgedAction": {
+    "assistantEntryId": "d5f8b4a0",
+    "assistantTimestamp": "2026-10-11T13:11:30.711Z",
+    "toolStartEntryId": "dbaafe46",
+    "toolStartTimestamp": "2026-10-11T13:11:30.714Z",
+    "tool": "eval",
+    "resultRecorded": false,
+    "checks": [
+      {
+        "name": "generic-hook-original-public-doc-check",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "check:public-docs"
+        ],
+        "result": "not-recorded",
+        "currentExecution": "not-run"
+      },
+      {
+        "name": "generic-hook-original-agent-doc-check",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "check:agent-doc"
+        ],
+        "result": "not-recorded",
+        "currentExecution": "not-run"
+      },
+      {
+        "name": "generic-hook-original-agent-operations-check",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "check:agent-operations"
+        ],
+        "result": "not-recorded",
+        "currentExecution": "not-run"
+      },
+      {
+        "name": "generic-hook-original-doc-types",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "-s",
+          "check:types:docs"
+        ],
+        "result": "not-recorded",
+        "currentExecution": "not-run"
+      },
+      {
+        "name": "generic-hook-original-doc-format",
+        "argv": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--check",
+          "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx"
+        ],
+        "result": "not-recorded",
+        "currentExecution": "not-run"
+      }
+    ],
+    "browserRequest": {
+      "cacheVariable": "I.docTabs",
+      "routes": [
+        "/en/specifications/as-hook/",
+        "/zh-cn/specifications/as-hook/"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "tabsCreated": "not-established",
+      "pagesObserved": "not-established"
+    },
+    "lastAcknowledgedFact": "Historical owned docs service reported ready. Its earlier ENOENT launch remains historical; service readiness is not a documentation-check or page-observation result.",
+    "crash": {
+      "status134BunAbort": "user-reported ground truth; not rerun to confirm",
+      "OOMCause": "not-established",
+      "checkAttribution": "not-established"
+    }
+  },
+  "terminalMap": {
+    "sourceArtifact": "GenericHookTargetCoreMap.jsonl",
+    "toolCallId": "b659543d-6e14-493e-8786-3302217470f6",
+    "rejectionEntryId": "526697ca",
+    "rejectionTimestamp": "2026-10-11T13:08:28.590Z",
+    "dataType": "string",
+    "dataEmpty": true,
+    "schemaRejected": true,
+    "rejection": "Output does not match schema: expected object, received string. Call yield again with the corrected shape — 2 retry attempt(s) remain before the schema constraint is dropped.",
+    "validTerminalMap": false,
+    "consumedOrAccepted": false,
+    "boundary": "A source-reading trail and a successful separate Factory/IR map do not supply this missing terminal map. A new future map is a new result."
+  },
+  "historicalEvidence": {
+    "core": {
+      "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "commands": [
+        {
+          "command": "Two actual generated native Rust consumers; recorded Cargo commands and raw output retained",
+          "result": "passed",
+          "tests": 2,
+          "suites": 2,
+          "report": "/tmp/pui-core-default-slot-20261010-native-green-receipt.json",
+          "raw": "/tmp/pui-core-default-slot-20261010-native-v2-green.txt",
+          "platform": "Pinned GPUI TestPlatform + NoopTextSystem; actual hit-tested SDK simulated mouse, not OS input"
+        },
+        {
+          "command": "Focused existing Compiler CLI/parser/output/source-map/targets/update-intent cases on Node22.23.2",
+          "result": "passed",
+          "tests": 78,
+          "report": "/tmp/pui-core-default-slot-20261010-focused-node22.json"
+        },
+        {
+          "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test --minWorkers=1 --maxWorkers=1 --reporter=json --outputFile=/tmp/pui-core-default-slot-20261010-final-compiler-node24.json",
+          "result": "passed",
+          "exitCode": 0,
+          "files": 28,
+          "tests": 228,
+          "failed": 0,
+          "pending": 0,
+          "node": "v24.21.0",
+          "chrome": "150.0.7871.24",
+          "report": "/tmp/pui-core-default-slot-20261010-final-compiler-node24.json"
+        },
+        {
+          "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+          "result": "passed",
+          "exitCode": 0,
+          "node": "v24.21.0",
+          "report": "/tmp/pui-core-default-slot-20261010-final-workspace-types-node24.json"
+        },
+        {
+          "command": "corepack pnpm@10.32.1 exec prettier --check packages/compiler/src/gpui-native-owner.ts",
+          "result": "passed",
+          "exitCode": 0
+        }
+      ],
+      "limitations": [
+        "Broader clean-room input/profile packet remains unresolved and is not superseded by this bounded repair",
+        "No stable profile/Module promotion, source-convention broadening, Prototype business or test-only branch",
+        "No OS-native visuals or accessibility action invocation proof",
+        "No commit/push/approval/platform write",
+        "Existing Compiler-owned packaged Transition business-machine substitution remains unresolved and is not legitimized by this green run",
+        "No full production Collapsible admission or complete native Module/profile evidence",
+        "No OS-native fonts/pixels/input or accessibility-action invocation fidelity proof",
+        "AGENTS Node22 instruction and package Node24 engine differ; versions are reported literally, not inferred as CI baseline",
+        "No formal review approval, commit, push or platform mutation"
+      ]
+    },
+    "originalRealization": {
+      "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "status": "bounded-original-realization-verified; workspace failures retained; not full contract acceptance",
+      "checks": [
+        {
+          "name": "unchanged raw value / once reproduction",
+          "runtime": "Node22.23.3",
+          "exitCode": 0,
+          "reference": "/tmp/pui-generic-hook-original-realization-20261011-baseline22-raw-value.json",
+          "observed": "one installation, same result reference, actual Enter event changes raw and captured state"
+        },
+        {
+          "name": "original Runtime and existing Base helper outcomes",
+          "runtime": "Node22.23.3",
+          "passed": 35,
+          "failed": 0,
+          "reference": "/tmp/pui-generic-hook-original-realization-20261011-final-focused22-report.json"
+        },
+        {
+          "name": "generic author type contracts",
+          "exitCode": 0,
+          "reference": "/tmp/pui-generic-hook-original-realization-20261011-baseline22-type-contracts.json"
+        },
+        {
+          "name": "capture completion, author-caught recursive rejection and rejected retired metadata",
+          "exitCode": 0,
+          "reference": "/tmp/pui-generic-hook-original-realization-20261011-failure-scope-probe.json"
+        },
+        {
+          "name": "ordinary projection compatibility",
+          "exitCode": 0,
+          "reference": "/tmp/pui-generic-hook-original-realization-20261011-ordinary-projection-binding-green-result.json",
+          "red": "/tmp/pui-generic-hook-original-realization-20261011-ordinary-projection-binding-red-result.json"
+        },
+        {
+          "name": "affected workspace types",
+          "process": "generic-hook-final-workspace-types22",
+          "exitCode": 0
+        },
+        {
+          "name": "owned-source formatter",
+          "process": "generic-hook-final-format22",
+          "exitCode": 0
+        }
+      ],
+      "broaderValidation": {
+        "general": {
+          "report": "/tmp/pui-generic-hook-original-realization-20261011-baseline22-general-vitest-report.json",
+          "passed": 6330,
+          "failed": 105,
+          "filesPassed": 1573,
+          "filesFailed": 35,
+          "selection": "unaltered canonical createRuntimeTestPlan([])[0]"
+        },
+        "existingWcFailures": {
+          "report": "/tmp/pui-generic-hook-original-realization-20261011-full-wc-baseline-comparison.json",
+          "failed": 98,
+          "exactFailedNamesMatchFrozenBaseline": true,
+          "candidateOnly": []
+        },
+        "compilerBrowser": {
+          "report": "/tmp/pui-generic-hook-original-realization-20261011-compiler-browser22.json",
+          "passed": 12,
+          "failed": 0,
+          "correction": "Only CHROME_PATH set to actual existing Chrome150; initial setup failures retained; ordinary fixtures do not prove generic support"
+        },
+        "cli": {
+          "report": "/tmp/pui-generic-hook-original-realization-20261011-other-baseline-comparison.json",
+          "failedOnFrozenBaseline": 1,
+          "observation": "Shadow style command snapshot wc/index.ts is undefined on both revisions; no source or assertion adjustment"
+        },
+        "contrast": {
+          "initial": "/tmp/pui-generic-hook-original-realization-20261011-other-baseline-comparison.json",
+          "isolated": {
+            "schemaVersion": 1,
+            "scopeId": "generic-hook-original-realization-20261011",
+            "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+            "report": "/tmp/pui-generic-hook-original-realization-20261011-contrast-candidate22-isolated.json",
+            "counts": {
+              "passed": 435,
+              "failed": 0
+            },
+            "sourceAndAssertionChanges": false,
+            "condition": "Exact candidate contrast file run alone after browser/baseline load settled; one worker, unchanged timeout/inputs/source.",
+            "classification": "Controlled isolated execution passed; earlier readiness failures retained as load/ordering-sensitive observations, not a proven product regression or blanket all-suite green."
+          },
+          "meaning": "Earlier controlled readiness failures remain load/ordering-sensitive observations. Exact unchanged isolated candidate passed; no blanket full-suite claim."
+        }
+      },
+      "limitations": [
+        "No arbitrary declaration-to-host capability realization, unavailable-capability or Adapter preselection evidence.",
+        "No Compiler/target/native implementation or same-source independent composition acceptance in this slice.",
+        "Standalone Node22 baseline verified against official SHA256; Node24 historical proof retained separately.",
+        "No full C-HOOK-0001/T-HOOK conformance or lifecycle activation acceptance.",
+        "Readonly trace and capture failure evidence do not establish independent atomic rollback or arbitrary Module/Proxy support.",
+        "No Compiler/IR/backend edits or business copies in this original slice."
+      ]
+    },
+    "ordinaryOnceRemaining": [
+      "Full ordinary captured return handles/projectHandle/shared-helper source convention",
+      "Other target authored-hook once/capture realizations",
+      "Full production/native Module/profile acceptance"
+    ],
+    "cutoverRemaining": [
+      "Actual EN/ZH rendered reader-projection verification",
+      "Owned throwaway cleanup and final evidence closure"
+    ],
+    "cutoverLimitations": [
+      "The complete neutral shared-helper/configurable-hook/capture source convention is not defined by the current private subset or catalog",
+      "Native structured part relationships and complete reviewed Module/profile support are not established",
+      "Clean-room historical provenance cannot be inferred from current implementation shape or passing traces"
+    ],
+    "boundary": "All outcomes in this section are retained historical reports at their listed hashes/layers. None ran in this assignment or certifies0607/current combined source."
+  },
+  "inputEvidenceBoundary": {
+    "sourceArtifact": "InputFinalVisualMap.json",
+    "qualifiedOldHead": "2ea0499f555a32e927493e0d04e44d3b56e0c945",
+    "materiallyDifferentFinalHead": "2dd4b96c8fdd783b5e0e5df79fc263ca411237b5",
+    "historicalMerge": "e2a836d658ffaf0044f4c711e06a272e6c2dcb88",
+    "owner": "SolThirty1155InputDebt and existing C4 delegates",
+    "currentNativeExecution": "not-run",
+    "publication": "not-performed",
+    "boundary": "Retain the distinct8851699 source/evidence stream too. New24case Input captures do not rewrite either older head or by themselves supply old exact-final-run publication readback."
+  },
+  "authorizationSeparation": {
+    "repositorySourceIntegration": {
+      "owner": "Main",
+      "performedHere": false
+    },
+    "privateBotDeployment": {
+      "performedHere": false,
+      "permission": "separate current exact-target authority required"
+    },
+    "PreviewExternalRetirement": {
+      "performedHere": false,
+      "permission": "separate current exact-target authority required"
+    },
+    "productionDeployment": {
+      "performedHere": false,
+      "permission": "separate current exact-target authority required"
+    },
+    "temporaryTakeover": {
+      "performedHere": false,
+      "historicalThreeHourGrant": "not inherited"
+    },
+    "compilerImplementation": {
+      "owner": "existing Compiler owner",
+      "performedHere": false
+    },
+    "sourceCandidatePublication": "No current Issue/PR/deployment receipt is claimed."
+  },
+  "releaseDisposition": {
+    "canonicalLedger": "criterion-split",
+    "issueSpecificAudit": {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1157#issuecomment-6700036505",
+      "head": "94e1c11f7",
+      "classification": "0.4 evidence-debt tracker; all6unmet"
+    },
+    "countervailingGeneralSource": {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6685904031",
+      "boundary": "Rejects blanket Finf deferral without per-criterion accounting; actual committed-family/www/CLI prerequisites remain."
+    },
+    "decisionHere": "No release selection, scope reduction, checkbox update or closure. Preserve both dated statements and all original work."
+  },
+  "mainValidation": {
+    "status": "not-run",
+    "serialOnly": true,
+    "dependencyBoundary": "Assignment worktree has metadata-only setup. Main owns real product dependency availability and all heavy/native/browser execution.",
+    "commands": [
+      {
+        "id": "before-record-presence",
+        "command": "git cat-file -e 0607c6c5c386b8a932ab850e92a8873b2121dc45:internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.json",
+        "expected": "Nonzero: this new record has no immutable preimage. This is an evidence-artifact addition, not a reproduced product failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "source-readback",
+        "command": "node scripts/analysis/check-finf-1157-sources.mjs --historical-root /workspace/worktrees/compiler-core-default-slot-20261010 --current-root /workspace/worktrees/release03-thirty-issue-1157-sol-20261110",
+        "expected": "42 retained historical paths,39 immutable preimages,39 current paths and3 explicit absent local-draft paths. Source-only result; no product acceptance.",
+        "status": "not-run"
+      },
+      {
+        "id": "owned-format",
+        "command": "corepack pnpm@10.32.1 exec prettier --check internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.json internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.md scripts/analysis/check-finf-1157-sources.mjs",
+        "expected": "Main records actual formatting outcome; repairs retain historical hashes and all original conditions.",
+        "status": "not-run"
+      },
+      {
+        "id": "documentation-1",
+        "command": "corepack pnpm@10.32.1 check:public-docs",
+        "expected": "Retain actual exit/result. Serial execution replaces neither the original missing receipt nor any historical failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "documentation-2",
+        "command": "corepack pnpm@10.32.1 check:agent-doc",
+        "expected": "Retain actual exit/result. Serial execution replaces neither the original missing receipt nor any historical failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "documentation-3",
+        "command": "corepack pnpm@10.32.1 check:agent-operations",
+        "expected": "Retain actual exit/result. Serial execution replaces neither the original missing receipt nor any historical failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "documentation-4",
+        "command": "corepack pnpm@10.32.1 -s check:types:docs",
+        "expected": "Retain actual exit/result. Serial execution replaces neither the original missing receipt nor any historical failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "documentation-5",
+        "command": "corepack pnpm@10.32.1 exec prettier --check apps/www/src/content/docs/en/specifications/as-hook.mdx apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+        "expected": "Retain actual exit/result. Serial execution replaces neither the original missing receipt nor any historical failure.",
+        "status": "not-run"
+      },
+      {
+        "id": "ordinary-consumer-controls",
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/runtime/test/contract/as-hook.v0.contract.test.ts packages/compiler/test/authored-hook-identity.test.ts --minWorkers=1 --maxWorkers=1",
+        "expected": "Current ordinary-hook once, same-name winner, distinct-owner and setup-only behavior; negative projectHandle/recursive calls remain rejected. Native emission cases explicitly do not execute native targets. No generic Compiler/non-Web acceptance.",
+        "status": "not-run"
+      },
+      {
+        "id": "as-hook-visual-server",
+        "command": "corepack pnpm@10.32.1 --filter apps-www exec astro dev --host 127.0.0.1 --port 45457",
+        "expected": "Main uses the candidate with actual installed/generated prerequisites already prepared, retains service source/head and readiness, then performs the two documented browser observations. Stop only this owned service after capture.",
+        "status": "not-run"
+      },
+      {
+        "id": "delegated-input-base",
+        "command": "env -u PROTO_UI_BROWSER_BASE_URL PROTO_UI_RUNTIME_EVIDENCE_DIR=/tmp/i1155after corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts --minWorkers=1 --maxWorkers=1",
+        "expected": "Run only after Main integrates1155 owned visual-evidence changes. Owner proposes8locale×runtime cases per family,24total, with source/session manifests and state PNG/JSON. Final-head and publication remain1155 acceptance; an old2ea image cannot close2dd4 debt.",
+        "status": "not-run",
+        "owner": "SolThirty1155InputDebt"
+      },
+      {
+        "id": "delegated-input-shadcn",
+        "command": "env -u PROTO_UI_BROWSER_BASE_URL PROTO_UI_RUNTIME_EVIDENCE_DIR=/tmp/i1155after corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts --minWorkers=1 --maxWorkers=1",
+        "expected": "Run only after Main integrates1155 owned visual-evidence changes. Owner proposes8locale×runtime cases per family,24total, with source/session manifests and state PNG/JSON. Final-head and publication remain1155 acceptance; an old2ea image cannot close2dd4 debt.",
+        "status": "not-run",
+        "owner": "SolThirty1155InputDebt"
+      },
+      {
+        "id": "delegated-input-brutalist",
+        "command": "env -u PROTO_UI_BROWSER_BASE_URL PROTO_UI_RUNTIME_EVIDENCE_DIR=/tmp/i1155after corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-brutalist-input.browser.test.ts --minWorkers=1 --maxWorkers=1",
+        "expected": "Run only after Main integrates1155 owned visual-evidence changes. Owner proposes8locale×runtime cases per family,24total, with source/session manifests and state PNG/JSON. Final-head and publication remain1155 acceptance; an old2ea image cannot close2dd4 debt.",
+        "status": "not-run",
+        "owner": "SolThirty1155InputDebt"
+      }
+    ],
+    "sourceArchive": {
+      "status": "not-created-here",
+      "scope": "Exactly42historical paths; use sourceRows as literal file list, retain SHA256 and complete member/byte readback before any source rewrite.",
+      "historicalRoot": "/workspace/worktrees/compiler-core-default-slot-20261010",
+      "archiveCandidate": "/tmp/finf1157-historical42-20261110.tar.gz",
+      "independentReadback": "Run the source-only verifier against an owned extraction and require the archive member set to equal all42sourceRows; a listing or successful tar exit alone is insufficient."
+    },
+    "negativeControls": [
+      {
+        "id": "missing-original-row",
+        "mutation": "Copy record to owned/tmp JSON; remove exactly one sourceRows entry without modifying original.",
+        "expected": "Verifier rejects the missing path;42cannot be shortened or deduplicated away.",
+        "status": "not-run"
+      },
+      {
+        "id": "false-tool-start-success",
+        "mutation": "Copy record; change first lastUnacknowledgedAction.checks result from not-recorded to passed.",
+        "expected": "Verifier rejects promotion of an unacknowledged tool start.",
+        "status": "not-run"
+      },
+      {
+        "id": "historical-byte-drift",
+        "mutation": "Copy all42 historical sources into owned/tmp; change one source byte without modifying frozen historical worktree.",
+        "expected": "Verifier rejects that exact path even if the current product source is present.",
+        "status": "not-run"
+      }
+    ],
+    "consumerBoundary": "Ordinary source-generated consumers are supplemental controls. Actual formal generic Compiler/non-Web composition still needs a source-admitted same-input producer from its existing owner; no runnable generic native producer is invented.",
+    "nativeCompositionRemaining": {
+      "status": "unmet",
+      "prerequisites": [
+        "Settle or identify the applicable current shared generic definition without promoting old local drafts",
+        "Existing Compiler owner binds the exact admitted source and actual non-Web consumer invocation",
+        "Main executes and records positive/negative native lifetime/input outcomes on that source"
+      ],
+      "currentSupplement": "authored-hook-identity explicitly labels Qt/Flutter/GPUI as emission only; no native execution covered."
+    },
+    "visual": {
+      "status": "not-run",
+      "locales": [
+        "en",
+        "zh-cn"
+      ],
+      "routes": [
+        "/en/specifications/as-hook/",
+        "/zh-cn/specifications/as-hook/"
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "acceptance": [
+        "Actual current route status and rendered main/article, no page errors",
+        "Default once and caller-owned behavior remain readable in both locales",
+        "Generic defineHook/useHook classification remains unresolved; historical bounded original evidence is not displayed as a stable target-native guarantee",
+        "Capture both actual rendered pages and exact source/head/URL/viewport plus capture hashes; screenshots alone do not establish Compiler/non-Web conformance"
+      ],
+      "browserEval": "for (const locale of ['en', 'zh-cn']) {\n  const tab = await browser.open({ name: 'finf1157-current-' + locale, url: 'http://127.0.0.1:45457/' + locale + '/specifications/as-hook/', viewport: { width: 1280, height: 900 } });\n  await tab.waitForSelector('main');\n  print({ locale, url: await tab.url(), observation: await tab.observe({ includeAll: true }), errors: await tab.errors() });\n  print(await tab.screenshot({ fullPage: true }));\n}\n"
+    },
+    "ciDcoReview": {
+      "currentNewCommit": null,
+      "CI": "not-run",
+      "nativeDCO": "not-observed-for-new-candidate",
+      "independentReview": "not-performed",
+      "integration": "not-performed",
+      "required": "Main binds the actual published candidate, actor, rights/sign-off, nativeDCO, current platform rules and independent review before lawful integration. Old DCO success is not restamped."
+    }
+  },
+  "closure": {
+    "issueStateObserved": "OPEN",
+    "canCloseFromThisRecord": false,
+    "remainingOriginalKeys": [
+      "issue.1157.001",
+      "issue.1157.002",
+      "issue.1157.003",
+      "issue.1157.004",
+      "issue.1157.005",
+      "issue.1157.006"
+    ],
+    "nextOwner": "Main validates/publishes/reviews/integrates the bounded record; source owner retains1157 continuation and repairs validation findings. Every original condition remains tracked until its own receipt is earned."
+  }
+}
