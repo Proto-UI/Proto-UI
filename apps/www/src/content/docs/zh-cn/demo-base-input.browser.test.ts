@@ -4,33 +4,42 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
+import { RUNTIMES, applyColorScheme, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
+import { createInputEvidence, type InputEvidenceSession } from './input-visual-evidence';
 
 let browser: Browser;
 let baseUrl = '';
 let evidenceDir = '';
+let evidence: InputEvidenceSession;
 beforeAll(async () => {
-  evidenceDir = await mkdtemp(join(tmpdir(), 'proto-base-input-'));
+  evidenceDir = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'base-input')
+    : await mkdtemp(join(tmpdir(), 'pui-input-base-'));
   console.info('[base-input-evidence] ' + evidenceDir);
   baseUrl = await startServer(['/en/ui-libraries/base/input/', '/zh-cn/ui-libraries/base/input/']);
   browser = await launchBrowser();
+  evidence = await createInputEvidence(evidenceDir, 'base', browser);
 }, 180_000);
 afterAll(async () => {
   try {
     await browser?.close();
   } finally {
-    await stopServer();
+    try {
+      await evidence?.finish();
+    } finally {
+      await stopServer();
+    }
   }
 }, 60_000);
 
 // P-BASE-INPUT-PHYSICAL-TARGET, VALUE-OWNERSHIP, A11Y-AND-FOCUS, BOUNDARY.
 // Real reader controls and actual editors; no fabricated preview state.
 describe.sequential('Base Input live documentation RuntimeBox', () => {
-  for (const locale of ['en', 'zh-cn'])
+  for (const locale of ['en', 'zh-cn'] as const)
     it.each(RUNTIMES)(
       locale + '/%s: real Base editors and runtime replacement',
       async (runtime) => {
-        const context = await browser.newContext({ viewport: { width: 960, height: 800 } });
+        const context = await browser.newContext({ viewport: { width: 960, height: 800 }, colorScheme: 'light' });
         // Explicit unavailable-CDN condition, not a mocked framework or editor.
         const blockedFrameworkRequests: string[] = [];
         await context.route('https://esm.sh/**', async (route) => {
@@ -45,6 +54,7 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
             waitUntil: 'domcontentloaded',
           });
           expect(response?.status()).toBe(200);
+          await applyColorScheme(page, 'light');
           const preview = page.locator('[data-previewer-id]').first();
           // A reader reveals the lazy preview before operating its runtime control.
           await preview.scrollIntoViewIfNeeded();
@@ -70,12 +80,22 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
                   })),
                 })
             );
-            await preview.screenshot({
-              path: join(evidenceDir, locale + '-' + runtime + '-readiness-failed.png'),
+            await evidence.capture(preview, {
+              locale, runtime, scheme: 'light', state: 'readiness-failed', observations: { errors },
             });
             throw error;
           }
           const host = preview.locator('.host');
+          const capture = async (scheme: 'light' | 'dark', state: string) => evidence.capture(preview, {
+            locale, runtime, scheme, state,
+            observations: await host.locator('input').evaluateAll((inputs) => inputs.map((element) => {
+              const input = element as HTMLInputElement;
+              const rect = input.getBoundingClientRect();
+              return { value: input.value, disabled: input.disabled, readOnly: input.readOnly,
+                focused: input === document.activeElement, nativeFocusVisible: input.matches(':focus-visible'),
+                width: rect.width, height: rect.height };
+            })),
+          });
           expect(await host.locator('input,textarea,[contenteditable]').count()).toBe(4);
           expect(
             await host
@@ -93,16 +113,16 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
           expect(await controlled.inputValue()).toBe('Owner-controlled value');
           expect(await disabled.isDisabled()).toBe(true);
           expect(await readonly.getAttribute('readonly')).not.toBeNull();
-          await preview.screenshot({
-            path: join(evidenceDir, locale + '-' + runtime + '-initial.png'),
-          });
+          await capture('light', 'initial');
           await editable.fill('Uncontrolled edit');
           expect(await editable.inputValue()).toBe('Uncontrolled edit');
+          await capture('light', 'uncontrolled-edit');
           await controlled.fill('Controlled accepted');
           await expect.poll(async () => controlled.inputValue()).toBe('Controlled accepted');
           await expect
             .poll(async () => host.locator('[data-demo-ref="status"]').textContent())
             .toBe('Owner accepted: Controlled accepted');
+          await capture('light', 'owner-accepted');
           await readonly.focus();
           expect(await readonly.evaluate((element) => element === document.activeElement)).toBe(
             true
@@ -130,9 +150,9 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
             minLength: 1,
             maxLength: 120,
           });
-          await preview.screenshot({
-            path: join(evidenceDir, locale + '-' + runtime + '-edited.png'),
-          });
+          await capture('light', 'readonly');
+          await applyColorScheme(page, 'dark');
+          await capture('dark', 'readonly');
           const replacement = runtime === 'react' ? 'vue' : 'react';
           await selectRuntime(page, preview, replacement, 'input', 4);
           expect(await host.locator('input,textarea,[contenteditable]').count()).toBe(4);
@@ -146,6 +166,7 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
               .getByRole('textbox', { name: 'Controlled Base Input', exact: true })
               .inputValue()
           ).toBe('Owner-controlled value');
+          await capture('dark', 'remounted');
           expect(errors).toEqual([]);
           expect(blockedFrameworkRequests).toEqual([]);
         } finally {

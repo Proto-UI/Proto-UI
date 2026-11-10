@@ -13,24 +13,33 @@ import {
   startServer,
   stopServer,
 } from './browser-harness';
+import { createInputEvidence, type InputEvidenceSession } from './input-visual-evidence';
 
-const ROUTE = '/en/ui-libraries/shadcn/input/';
+const ROUTES = ['/en/ui-libraries/shadcn/input/', '/zh-cn/ui-libraries/shadcn/input/'];
 let browser: Browser;
 let baseUrl = '';
 let evidenceDir = '';
+let evidence: InputEvidenceSession;
 
 beforeAll(async () => {
-  evidenceDir = await mkdtemp(join(tmpdir(), 'proto-shadcn-input-'));
+  evidenceDir = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'shadcn-input')
+    : await mkdtemp(join(tmpdir(), 'pui-input-shadcn-'));
   console.info(`[shadcn-input-evidence] ${evidenceDir}`);
-  baseUrl = await startServer(ROUTE);
+  baseUrl = await startServer(ROUTES);
   browser = await launchBrowser();
+  evidence = await createInputEvidence(evidenceDir, 'shadcn', browser);
 }, 180_000);
 
 afterAll(async () => {
   try {
     await browser?.close();
   } finally {
-    await stopServer();
+    try {
+      await evidence?.finish();
+    } finally {
+      await stopServer();
+    }
   }
 }, 60_000);
 
@@ -97,8 +106,9 @@ async function selectAllTextStyle(page: Page) {
 }
 
 describe.sequential('Shadcn Input rendered preview acceptance', () => {
-  it.each(RUNTIMES)(
-    '%s renders Base Input with the Shadcn surface',
+  for (const locale of ['en', 'zh-cn'] as const)
+    it.each(RUNTIMES)(
+    `${locale}/%s renders Base Input with the Shadcn surface`,
     async (runtime) => {
       const context = await browser.newContext({
         viewport: { width: 1280, height: 900 },
@@ -111,14 +121,19 @@ describe.sequential('Shadcn Input rendered preview acceptance', () => {
         if (message.type() === 'error') errors.push(message.text());
       });
       try {
-        await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
+        const response = await page.goto(`${baseUrl}/${locale}/ui-libraries/shadcn/input/`, { waitUntil: 'domcontentloaded' });
+        expect(response?.status()).toBe(200);
+        await applyColorScheme(page, 'light');
         const preview = page.locator('[data-previewer-id]').first();
+        const capture = async (scheme: 'light' | 'dark', state: string, observations: unknown) =>
+          evidence.capture(preview, { locale, runtime, scheme, state, observations });
         try {
           await selectRuntime(page, preview, runtime, 'input', 3);
         } catch (error) {
           console.error(
             `[shadcn-input-readiness] ${JSON.stringify({
               runtime,
+              locale,
               browserErrors: errors,
               preview: await preview.evaluate((root) => ({
                 mode: (root as HTMLElement).dataset.projectionMode,
@@ -169,14 +184,13 @@ describe.sequential('Shadcn Input rendered preview acceptance', () => {
           cursor: 'not-allowed',
         });
         expect(light.controls[2]).toMatchObject({ type: 'text', readOnly: true });
+        await capture('light', 'initial', light);
 
         const lightSelection = await selectAllTextStyle(page);
         expect(lightSelection.selectedText).toBe('Guang');
         expect(lightSelection.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(lightSelection.color).not.toBe(light.controls[0]?.caretColor);
-        if (runtime === 'wc') {
-          await preview.screenshot({ path: join(evidenceDir, 'selection-light-wc.png') });
-        }
+        await capture('light', 'selection', { method: 'DOM focus/setSelectionRange; static selection presentation', selection: lightSelection });
 
         await page.locator('[data-projection-content] input').first().click();
         const focused = await renderedFacts(page);
@@ -187,16 +201,27 @@ describe.sequential('Shadcn Input rendered preview acceptance', () => {
         if (focused.controls[0]?.nativeFocusVisible) {
           expect(focused.controls[0]?.boxShadow).not.toBe(light.controls[0]?.boxShadow);
         }
+        await capture('light', 'pointer-focused', focused);
 
         await applyColorScheme(page, 'dark');
         const dark = await renderedFacts(page);
         expect(dark.controls[0]?.background).not.toBe(light.controls[0]?.background);
+        await capture('dark', 'pointer-focused', dark);
         const darkSelection = await selectAllTextStyle(page);
         expect(darkSelection.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(darkSelection.backgroundColor).not.toBe(lightSelection.backgroundColor);
-        if (runtime === 'wc') {
-          await preview.screenshot({ path: join(evidenceDir, 'selection-dark-wc.png') });
-        }
+        await capture('dark', 'selection', { method: 'DOM focus/setSelectionRange; static selection presentation', selection: darkSelection });
+        const inputs = page.locator('[data-projection-content] input');
+        await inputs.first().press('End');
+        await page.keyboard.type(' native');
+        expect(await inputs.first().inputValue()).toBe('Guang native');
+        await capture('dark', 'edited', await renderedFacts(page));
+        await page.keyboard.press('Tab');
+        expect(await inputs.nth(2).evaluate((input) => input === document.activeElement)).toBe(true);
+        await page.keyboard.type('ignored');
+        expect(await inputs.nth(2).inputValue()).toBe('Base keeps this focusable.');
+        expect(await inputs.nth(1).inputValue()).toBe('Unavailable');
+        await capture('dark', 'readonly', await renderedFacts(page));
         expect(errors).toEqual([]);
       } finally {
         await context.close();
