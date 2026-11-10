@@ -7,7 +7,7 @@ lifecycleRationale:
     en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Passive owner-scoped header slot without interaction or State ownership.
 statement:
-    en: The Prototype invokes asDrawerHeader() once and preserves children and the Drawer header role within its logical Root.
+    en: The Prototype invokes asDrawerHeader() once and preserves children and the Drawer header role within its logical Root. Modal surfaces and footer colors use paired semantic palette tokens so nested public components remain readable. Dark appearance is a Proto adaptation; fixed white footer highlights are omitted.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DRAWER-HEADER-BASE
     text:

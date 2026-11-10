@@ -129,28 +129,28 @@ export const SELECT_TRIGGER_SURFACE_BG: Record<
  */
 export const SELECT_SURFACE_STYLE: Record<SelectTranslucentStyle, StyleHandle> = {
   vega: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-md bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-md bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
   ),
   nova: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-lg bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-lg bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
   ),
   maia: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-2xl)] bg-popover/70 text-popover-foreground shadow-2xl ring-1 ring-foreground/5 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-2xl)] bg-popover/70 text-popover-foreground shadow-2xl ring-1 ring-foreground/5 outline-none duration-100 animate-none'
   ),
   lyra: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-none bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-none bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
   ),
   mira: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-32 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-lg bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-lg bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
   ),
   luma: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-3xl)] bg-popover/70 text-popover-foreground shadow-lg ring-1 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-3xl)] bg-popover/70 text-popover-foreground shadow-lg ring-1 outline-none duration-100 animate-none'
   ),
   sera: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-none bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-none bg-popover/70 text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-none duration-100 animate-none'
   ),
   rhea: tw(
-    'relative isolate z-50 flex flex-col box-border min-w-36 w-[var(--proto-ui-anchor-width)] max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-2xl)] bg-popover/70 text-popover-foreground shadow-lg ring-1 outline-none duration-100 animate-none'
+    'relative isolate z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-2xl)] bg-popover/70 text-popover-foreground shadow-lg ring-1 outline-none duration-100 animate-none'
   ),
 };
 

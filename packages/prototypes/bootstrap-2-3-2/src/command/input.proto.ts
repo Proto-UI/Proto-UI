@@ -11,12 +11,12 @@ export default definePrototype<CommandInputProps, CommandInputExposes>({
     const behavior = asCommandInput();
     def.feedback.style.use(
       tw(
-        'inline-block box-border h-[30px] w-[220px] min-w-0 mb-[10px] rounded-[4px] border border-border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] text-[#555] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'inline-block box-border h-[30px] w-[220px] min-w-0 mb-[10px] rounded-[4px] border border-border px-[6px] py-[4px] text-[14px] font-normal leading-[20px] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
       )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(false),
-      intent: (i) => i.feedback.style.use(tw('bg-background')),
+      intent: (i) => i.feedback.style.use(tw('bg-background text-foreground')),
     });
     def.rule({
       when: (w) =>
@@ -37,7 +37,7 @@ export default definePrototype<CommandInputProps, CommandInputExposes>({
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-[#eee] cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('bg-[#eee] text-[#555] cursor-not-allowed')),
     });
     return behavior.render;
   },

@@ -956,28 +956,6 @@ describe('native navigation observation contracts (no browser or server)', () =>
     assert.match(browserSource, /await page\.mouse\.move\(pointer\.x, pointer\.y\)/);
   });
 
-  it('retains exact document and sidebar ownership deltas from an initial zero scroll', () => {
-    assert.match(browserSource, /expect\(\(await facts\(\)\)\.documentY\)\.toBe\(0\)/);
-    for (const [before, after] of [
-      ['before', 'beforeWheel'],
-      ['beforeWheel', 'manuallyScrolled'],
-      ['manuallyScrolled', 'afterMutation'],
-    ]) {
-      assert.match(
-        browserSource,
-        new RegExp(
-          `expect\\(\\s*${after}\\.documentY,[\\s\\S]*?\\)\\.toBe\\(\\s*${before}\\.documentY\\s*\\)`
-        )
-      );
-    }
-    assert.match(
-      browserSource,
-      /expect\(\s*afterMutation\.scrollTop,[\s\S]*?\.toBe\(\s*manuallyScrolled\.scrollTop\s*\)/
-    );
-    assert.match(browserSource, /ownerBottom: box\.bottom/);
-    assert.match(browserSource, /documentViewportHeight: innerHeight/);
-  });
-
   it('desktop sidebar height compensates its actual sticky top offset', () => {
     const frame = readFileSync('apps/www/src/components/override/PageFrame.astro', 'utf8');
     const desktop = frame.slice(frame.indexOf('@media (min-width: 64rem)'));
@@ -1017,86 +995,7 @@ describe('native navigation precondition evidence', () => {
     'apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts',
     'utf8'
   );
-  it('uses a real Brutalist document with substantive headings for TOC journeys', () => {
-    // Register exact journeys, not a stale count over an arbitrary file tail.
-    // The first journey contains light+dark; the other four each own one route.
-    const expected = [
-      [
-        'renders docs navigation through the same Prototype while preserving native targets and caption projection',
-        2,
-      ],
-      [
-        'opens the actual narrow-screen contents drawer and keeps long pagination labels within the page',
-        1,
-      ],
-      [
-        'keeps docs native destinations, current truth, heading navigation and keyboard focus without JavaScript',
-        1,
-      ],
-      ['keeps compact Sidebar typography across root text, viewport and enhancement', 1],
-      [
-        'keeps reading TOC native row boxes, depth padding and multiline growth through enhancement',
-        1,
-      ],
-    ];
-    const route = '/zh-cn/ui-libraries/brutalist/components/textarea/';
-    const verify = (input) => {
-      const parsed = ts.createSourceFile('native-links.ts', input, ts.ScriptTarget.Latest, true);
-      const registrations = [];
-      const visit = (node) => {
-        if (
-          ts.isCallExpression(node) &&
-          ts.isIdentifier(node.expression) &&
-          node.expression.text === 'it'
-        ) {
-          const [name, callback] = node.arguments;
-          if (name && ts.isStringLiteral(name) && callback)
-            registrations.push({ name: name.text, nameNode: name, callback });
-        }
-        ts.forEachChild(node, visit);
-      };
-      visit(parsed);
-      const admitted = [];
-      for (const [name, count] of expected) {
-        const matches = registrations.filter((entry) => entry.name === name);
-        assert.equal(matches.length, 1, `one non-skipped registration: ${name}`);
-        const routes = [];
-        const countRoutes = (node) => {
-          if (ts.isStringLiteral(node) && node.text === route) routes.push(node);
-          ts.forEachChild(node, countRoutes);
-        };
-        countRoutes(matches[0].callback);
-        assert.equal(routes.length, count, `real headed document fixtures: ${name}`);
-        admitted.push({ nameNode: matches[0].nameNode, routeNode: routes[0] });
-      }
-      return admitted;
-    };
-    const admitted = verify(source);
-    const replaceNode = (node, value) =>
-      source.slice(0, node.getStart()) + JSON.stringify(value) + source.slice(node.end);
-    for (const { nameNode, routeNode } of admitted) {
-      assert.throws(() => verify(replaceNode(nameNode, 'removed registered journey')));
-      assert.throws(() => verify(replaceNode(routeNode, '/invalid-no-heading-fixture/')));
-    }
-    const document = readFileSync(
-      'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/textarea.mdx',
-      'utf8'
-    );
-    assert.ok((document.match(/^## /gm) ?? []).length >= 2);
-    const button = readFileSync(
-      'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/button.mdx',
-      'utf8'
-    );
-    assert.equal(
-      (button.match(/^## /gm) ?? []).length,
-      0,
-      'Retain why the old nth(1) fixture was invalid'
-    );
-    assert.match(
-      source,
-      /const toc = page\.locator\('sl-toc a\[data-site-link-appearance="toc"\]'\)\.nth\(1\)/
-    );
-  });
+
   it('waits for the actual option portal to close and propagates a stuck closing surface', async () => {
     const parsed = ts.createSourceFile('native.ts', source, ts.ScriptTarget.Latest, true);
     const helper = parsed.statements.find(

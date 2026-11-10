@@ -7,7 +7,7 @@ lifecycleRationale:
     en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Drawer family over the Base Drawer protocol with modal-vocabulary sheet chrome.
 statement:
-    en: The family composes the eight exported Base Drawer parts (Root, Trigger, Mask, Content, Title, Description, Close, Handle) plus the implemented Header and Footer parts, each consuming its matching hook once. DRAWER-SCROLL is the Content-owned semantic scroll declaration and DRAWER-ACCEPTED-SIDE is a read-only owner observation helper; neither is a rendered part or a cataloged family entity.
+    en: The family composes the eight exported Base Drawer parts (Root, Trigger, Mask, Content, Title, Description, Close, Handle) plus the implemented Header and Footer parts, each consuming its matching hook once. DRAWER-SCROLL is the Content-owned semantic scroll declaration and DRAWER-ACCEPTED-SIDE is a read-only owner observation helper; neither is a rendered part or a cataloged family entity. Modal surfaces and footer colors use paired semantic palette tokens so nested public components remain readable. Dark appearance is a Proto adaptation; fixed white footer highlights are omitted.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DRAWER-BASE
     text:

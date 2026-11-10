@@ -7,6 +7,9 @@ type TextControlVisualFacts = {
   readOnly?: State<boolean>;
 };
 
+// Fixed light control surfaces need dark error ink in either page theme.
+export const bootstrapLightControlInvalidPaint = 'border-[#953b39] text-[#953b39]';
+
 /** Passive forms.less paint; the caller retains its one Base editor and Field binding. */
 export function setupInputVisual<Props extends object, Exposes>(
   def: DefHandle<Props, Exposes>,
@@ -47,10 +50,6 @@ export function setupInputVisual<Props extends object, Exposes>(
     intent: (i) => i.feedback.style.use(tw('bg-[#eee] cursor-not-allowed')),
   });
   if (invalid) {
-    def.rule({
-      when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-destructive text-destructive')),
-    });
     def.rule({
       when: (w) => w.all(w.state(invalid).eq(true), w.state(focused).eq(true)),
       intent: (i) =>

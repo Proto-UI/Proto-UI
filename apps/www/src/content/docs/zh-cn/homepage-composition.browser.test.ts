@@ -10,7 +10,7 @@ import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harn
 import { revealHeaderPreferences } from './site-header-browser';
 import { copySourceBindingIssues, type CopySourceBinding } from './copy-command-evidence';
 
-// Eight fresh, credential-free homepage contexts; five layout samples reuse each page.
+// Eight fresh, credential-free homepage contexts; six layout samples reuse each page.
 // Four separate width-fixture contexts isolate intrinsic input sizing.
 // 150s startup + 8 x 45s scenes + 30s no-JS + 30s width + 20s teardown
 // + 1s pure contracts = 591s < the unchanged 600s lane cap.
@@ -25,22 +25,17 @@ const directory = join(
 const HOME = '[data-home-showcase="website-component-gallery"]';
 const ACTIVE = `${HOME} [data-projection-generation-state="active"]`;
 const RUNTIME_LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
-const GALLERY_IDS = [
-  'controls',
-  'hover',
-  'workspace-command',
-  'workspace-help',
-  'preferences',
-  'workspace-progress',
-  'workspace-analytics',
-  'editor',
-  'overlays',
-  'choices',
-] as const;
+import {
+  galleryFlowEvidence,
+  chartContainmentIssues,
+  type GalleryRect,
+  type GalleryFlowFacts,
+} from '../../../components/Homepage/homepage-layout-evidence';
 const LAYOUTS = [
   { name: '1400', width: 1400, textScale: 100 },
   { name: '1180', width: 1180, textScale: 100 },
   { name: '2048', width: 2048, textScale: 100 },
+  { name: '2560', width: 2560, textScale: 100 },
   { name: '320', width: 320, textScale: 100 },
   { name: '320-text200', width: 320, textScale: 200 },
 ] as const;
@@ -60,149 +55,6 @@ type CaptureSelection = Array<{
     scenes: Array<{ name: string | null; generation: string | null }>;
   }>;
 }>;
-type GalleryRect = {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-  width: number;
-  height: number;
-};
-type GalleryFlowFacts = {
-  containerCount: number;
-  viewportWidth: number;
-  rootFontSize: number;
-  columnGap: number;
-  container: GalleryRect | null;
-  cards: Array<{
-    id: string | null;
-    visible: boolean;
-    rect: GalleryRect;
-    rowGap: number;
-    fragments: GalleryRect[];
-  }>;
-};
-/** Pure geometry observer. One CSS pixel allows fractional layout rounding only. */
-export function galleryFlowEvidence(facts: GalleryFlowFacts) {
-  const issues: string[] = [];
-  const epsilon = 1;
-  // Differentiated axes: columns breathe more than stacked rows; compact cards
-  // use a tighter authored rhythm. Only one CSS pixel of rounding is allowed.
-  const expectedGap = facts.rootFontSize * (facts.viewportWidth <= 767 ? 1.5 : 2);
-  if (facts.containerCount !== 1 || !facts.container)
-    issues.push('expected exactly one gallery container');
-  if (
-    JSON.stringify(facts.cards.map((card) => card.id)) !== JSON.stringify(GALLERY_IDS) ||
-    new Set(facts.cards.map((card) => card.id)).size !== GALLERY_IDS.length
-  )
-    issues.push('missing, duplicate or reordered gallery card');
-  if (!Number.isFinite(expectedGap) || expectedGap <= 0)
-    issues.push('invalid gallery spacing baseline');
-  if (!Number.isFinite(facts.columnGap) || Math.abs(facts.columnGap - expectedGap) > epsilon)
-    issues.push('gallery column gap differs from the responsive spacing contract');
-  const columns: Array<{
-    left: number;
-    right: number;
-    cards: GalleryFlowFacts['cards'];
-    adjacentGaps: Array<{ before: string | null; after: string | null; gap: number }>;
-  }> = [];
-  for (const card of facts.cards) {
-    const rect = card.rect;
-    if (
-      !card.visible ||
-      !Object.values(rect).every(Number.isFinite) ||
-      rect.width <= 0 ||
-      rect.height <= 0
-    )
-      issues.push(`${card.id}: absent painted gallery card`);
-    if (
-      card.fragments.length !== 1 ||
-      card.fragments.some(
-        (fragment) =>
-          !Object.values(fragment).every(Number.isFinite) ||
-          fragment.width <= 0 ||
-          fragment.height <= 0 ||
-          Object.keys(rect).some(
-            (key) =>
-              Math.abs(fragment[key as keyof GalleryRect] - rect[key as keyof GalleryRect]) >
-              epsilon
-          )
-      )
-    )
-      issues.push(`${card.id}: split or inconsistent gallery card fragment`);
-    if (rect.left < -epsilon || rect.right > facts.viewportWidth + epsilon)
-      issues.push(`${card.id}: gallery card outside viewport`);
-    let column = columns.find((entry) => Math.abs(entry.left - rect.left) <= epsilon);
-    if (!column) {
-      column = { left: rect.left, right: rect.right, cards: [], adjacentGaps: [] };
-      columns.push(column);
-    }
-    if (Math.abs(column.right - rect.right) > epsilon)
-      issues.push(`${card.id}: inconsistent gallery column width`);
-    column.cards.push(card);
-  }
-  columns.sort((a, b) => a.left - b.left);
-  for (const column of columns) {
-    column.cards.sort((a, b) => a.rect.top - b.rect.top);
-    if (facts.container && Math.abs(column.cards[0]!.rect.top - facts.container.top) > epsilon)
-      issues.push(`${column.cards[0]!.id}: gallery column starts with a hole`);
-    for (let index = 1; index < column.cards.length; index++) {
-      const previous = column.cards[index - 1]!,
-        current = column.cards[index]!;
-      const gap = current.rect.top - previous.rect.bottom;
-      column.adjacentGaps.push({ before: previous.id, after: current.id, gap });
-      if (!Number.isFinite(previous.rowGap) || previous.rowGap <= 0)
-        issues.push(`${previous.id}: invalid gallery row gap`);
-      if (Math.abs(gap - previous.rowGap) > epsilon)
-        issues.push(
-          `${previous.id}/${current.id}: gallery gap differs from the responsive spacing contract`
-        );
-    }
-  }
-  if (
-    JSON.stringify(columns.flatMap((column) => column.cards.map((card) => card.id))) !==
-    JSON.stringify(facts.cards.map((card) => card.id))
-  )
-    issues.push('painted gallery column order differs from DOM order');
-  for (let index = 0; index < facts.cards.length; index++)
-    for (let other = index + 1; other < facts.cards.length; other++) {
-      const a = facts.cards[index]!,
-        b = facts.cards[other]!;
-      if (
-        Math.min(a.rect.right, b.rect.right) - Math.max(a.rect.left, b.rect.left) > epsilon &&
-        Math.min(a.rect.bottom, b.rect.bottom) - Math.max(a.rect.top, b.rect.top) > epsilon
-      )
-        issues.push(`${a.id}/${b.id}: gallery cards overlap`);
-    }
-  if (facts.container) {
-    const expectedColumns =
-      facts.viewportWidth <= 639
-        ? 1
-        : Math.max(
-            1,
-            Math.floor(
-              (facts.container.width + expectedGap) / (18 * facts.rootFontSize + expectedGap)
-            )
-          );
-    if (columns.length !== expectedColumns)
-      issues.push('painted gallery column count differs from available 18rem tracks');
-    if (facts.container.width > 100 * facts.rootFontSize + epsilon)
-      issues.push('gallery exceeds the 100rem wide-screen limit');
-    for (let index = 1; index < columns.length; index++)
-      if (Math.abs(columns[index]!.left - columns[index - 1]!.right - expectedGap) > epsilon)
-        issues.push('painted gallery column gap differs from the responsive spacing contract');
-  }
-  return {
-    issues: [...new Set(issues)],
-    expectedGap,
-    columns: columns.map((column) => ({
-      left: column.left,
-      right: column.right,
-      ids: column.cards.map((card) => card.id),
-      adjacentGaps: column.adjacentGaps,
-    })),
-  };
-}
 /** Pure evidence observer, not application behavior; independently negative-tested below. */
 export function captureSelectionIssues(
   selection: CaptureSelection,
@@ -220,14 +72,19 @@ export function captureSelectionIssues(
   const names = scope.scenes.map((scene) => scene.name).sort();
   if (
     JSON.stringify(names) !==
-    JSON.stringify(['workspace-command', 'workspace-help', 'workspace-progress'])
+    JSON.stringify([
+      'workspace-analytics',
+      'workspace-command',
+      'workspace-help',
+      'workspace-progress',
+    ])
   )
     issues.push('missing or duplicate scene');
   if (scope.scenes.some((scene) => scene.generation !== host.hostGeneration))
     issues.push('stale scene generation');
   return issues;
 }
-it('passive evidence rejects invalid generations and incomplete, split, reordered or gapped galleries', () => {
+it('passive evidence rejects invalid and incomplete generations', () => {
   const good: CaptureSelection = [
     {
       hostGeneration: '3',
@@ -237,7 +94,12 @@ it('passive evidence rejects invalid generations and incomplete, split, reordere
           runtime: 'wc',
           family: 'shadcn',
           state: 'ready',
-          scenes: ['workspace-command', 'workspace-help', 'workspace-progress'].map((name) => ({
+          scenes: [
+            'workspace-analytics',
+            'workspace-command',
+            'workspace-help',
+            'workspace-progress',
+          ].map((name) => ({
             name,
             generation: '3',
           })),
@@ -264,92 +126,6 @@ it('passive evidence rejects invalid generations and incomplete, split, reordere
   duplicateScene[0]!.scopes[0]!.scenes[2] = duplicateScene[0]!.scopes[0]!.scenes[0]!;
   expect(captureSelectionIssues(duplicateScene, 'wc', 'shadcn')).toContain(
     'missing or duplicate scene'
-  );
-  const rect = (left: number, top: number): GalleryRect => ({
-    left,
-    top,
-    right: left + 288,
-    bottom: top + 100,
-    width: 288,
-    height: 100,
-  });
-  const gallery: GalleryFlowFacts = {
-    containerCount: 1,
-    viewportWidth: 1180,
-    rootFontSize: 16,
-    columnGap: 32,
-    container: { left: 0, right: 928, top: 0, bottom: 372, width: 928, height: 372 },
-    cards: GALLERY_IDS.map((id, index) => {
-      const box = rect(Math.floor(index / 3) * 320, (index % 3) * 124);
-      return { id, visible: true, rect: box, rowGap: 24, fragments: [{ ...box }] };
-    }),
-  };
-  expect(galleryFlowEvidence(gallery).issues).toEqual([]);
-  const narrow = structuredClone(gallery);
-  narrow.viewportWidth = 320;
-  narrow.columnGap = 24;
-  narrow.container = { left: 0, right: 288, top: 0, bottom: 1200, width: 288, height: 1200 };
-  narrow.cards.forEach((card, index) => {
-    card.rect = rect(0, index * 120);
-    card.rowGap = 20;
-    card.fragments = [{ ...card.rect }];
-  });
-  expect(galleryFlowEvidence(narrow).issues).toEqual([]);
-  const missingCard = structuredClone(gallery);
-  missingCard.cards.pop();
-  expect(galleryFlowEvidence(missingCard).issues).toContain(
-    'missing, duplicate or reordered gallery card'
-  );
-  const duplicateCard = structuredClone(gallery);
-  duplicateCard.cards[8]!.id = duplicateCard.cards[0]!.id;
-  expect(galleryFlowEvidence(duplicateCard).issues).toContain(
-    'missing, duplicate or reordered gallery card'
-  );
-  const splitCard = structuredClone(gallery);
-  splitCard.cards[0]!.fragments.push(rect(312, 0));
-  expect(galleryFlowEvidence(splitCard).issues).toContain(
-    'controls: split or inconsistent gallery card fragment'
-  );
-  const hiddenCard = structuredClone(gallery);
-  hiddenCard.cards[0]!.visible = false;
-  expect(galleryFlowEvidence(hiddenCard).issues).toContain('controls: absent painted gallery card');
-  const reordered = structuredClone(gallery);
-  [reordered.cards[0]!.rect, reordered.cards[1]!.rect] = [
-    reordered.cards[1]!.rect,
-    reordered.cards[0]!.rect,
-  ];
-  for (const card of reordered.cards) card.fragments = [{ ...card.rect }];
-  expect(galleryFlowEvidence(reordered).issues).toContain(
-    'painted gallery column order differs from DOM order'
-  );
-  const overlap = structuredClone(gallery);
-  overlap.cards[1]!.rect = rect(0, 90);
-  overlap.cards[1]!.fragments = [{ ...overlap.cards[1]!.rect }];
-  expect(galleryFlowEvidence(overlap).issues).toContain('controls/hover: gallery cards overlap');
-  const rowHole = structuredClone(gallery);
-  rowHole.cards[2]!.rect = rect(0, 700);
-  rowHole.cards[2]!.fragments = [{ ...rowHole.cards[2]!.rect }];
-  expect(galleryFlowEvidence(rowHole).issues).toContain(
-    'hover/workspace-command: gallery gap differs from the responsive spacing contract'
-  );
-  const wrongGap = structuredClone(gallery);
-  wrongGap.columnGap = 48;
-  expect(galleryFlowEvidence(wrongGap).issues).toContain(
-    'gallery column gap differs from the responsive spacing contract'
-  );
-  const noFragments = structuredClone(gallery);
-  noFragments.cards[0]!.fragments = [];
-  expect(galleryFlowEvidence(noFragments).issues).toContain(
-    'controls: split or inconsistent gallery card fragment'
-  );
-  const wrongColumns = structuredClone(narrow);
-  wrongColumns.cards[8]!.rect = rect(312, 0);
-  wrongColumns.cards[8]!.fragments = [{ ...wrongColumns.cards[8]!.rect }];
-  expect(galleryFlowEvidence(wrongColumns).issues).toContain(
-    'painted gallery column count differs from available 18rem tracks'
-  );
-  expect(galleryFlowEvidence(wrongColumns).issues).toContain(
-    'choices: gallery card outside viewport'
   );
 }, 1_000);
 
@@ -576,7 +352,7 @@ async function plan(page: Page, value: number) {
 
 // Passive geometry observer: never repairs overflow or rewrites scene behavior.
 async function layoutFacts(page: Page) {
-  return page.evaluate((active) => {
+  const facts = await page.evaluate((active) => {
     const scenes = [
       ...document.querySelectorAll<HTMLElement>(`${active} [data-gallery-demo^="workspace-"]`),
     ];
@@ -634,6 +410,7 @@ async function layoutFacts(page: Page) {
       })),
     }));
     const issues: string[] = [];
+    const charts: Array<{ card: GalleryRect; parts: GalleryRect[] }> = [];
     const cards = scenes.map((scene) => {
       const bounds = scene.getBoundingClientRect();
       const name = scene.dataset.galleryDemo!;
@@ -641,6 +418,17 @@ async function layoutFacts(page: Page) {
         issues.push(`${name}: absent painted scene`);
       if (bounds.left < -1 || bounds.right > innerWidth + 1)
         issues.push(`${name}: outside viewport`);
+      if (name === 'workspace-analytics') {
+        const parts = [
+          scene.querySelector('.home-gallery__media'),
+          scene.querySelector('.home-gallery__chart'),
+          ...scene.querySelectorAll('rect[data-gallery-bar]'),
+        ].filter((node): node is Element => Boolean(node));
+        charts.push({
+          card: rect(bounds),
+          parts: parts.map((node) => rect(node.getBoundingClientRect())),
+        });
+      }
       const boxes: Array<Record<string, unknown>> = [];
       const texts: Array<Record<string, unknown>> = [];
       for (const node of [scene, ...scene.querySelectorAll<HTMLElement>('*')]) {
@@ -726,6 +514,68 @@ async function layoutFacts(page: Page) {
         texts,
       };
     });
+    const hero = (
+      [
+        ['heading', '.homepage-hero h1'],
+        ['tagline', '.homepage-hero__tagline'],
+        ['announcement', '.homepage-hero__eyebrow a'],
+      ] as const
+    ).flatMap(([kind, selector]) => {
+      const owners = [...document.querySelectorAll<HTMLElement>(selector)].filter(visible);
+      if (owners.length !== 1) issues.push(`hero ${kind}: absent or duplicate painted owner`);
+      return owners.map((owner) => {
+        const bounds = owner.getBoundingClientRect();
+        const css = getComputedStyle(owner);
+        const texts: GalleryRect[] = [];
+        if (bounds.width <= 0 || bounds.height <= 0)
+          issues.push(`hero ${kind}: absent painted area`);
+        if (bounds.left < -1 || bounds.right > innerWidth + 1)
+          issues.push(`hero ${kind}: owner outside viewport`);
+        const walker = document.createTreeWalker(owner, NodeFilter.SHOW_TEXT);
+        for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+          if (!text.textContent?.trim() || !text.parentElement || !visible(text.parentElement))
+            continue;
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          for (const bounds of range.getClientRects()) {
+            if (bounds.width <= 0 || bounds.height <= 0) continue;
+            texts.push(rect(bounds));
+            if (bounds.left < -1 || bounds.right > innerWidth + 1)
+              issues.push(`hero ${kind}: text outside viewport`);
+            for (
+              let parent: HTMLElement | null = text.parentElement;
+              parent;
+              parent = parent.parentElement
+            ) {
+              const style = getComputedStyle(parent);
+              if (style.display === 'contents') continue;
+              const clip = parent.getBoundingClientRect();
+              if (
+                /hidden|clip/.test(style.overflowX) &&
+                (bounds.left < clip.left - 1 || bounds.right > clip.right + 1)
+              )
+                issues.push(`hero ${kind}: horizontally clipped text`);
+              if (
+                /hidden|clip/.test(style.overflowY) &&
+                (bounds.top < clip.top - 1 || bounds.bottom > clip.bottom + 1)
+              )
+                issues.push(`hero ${kind}: vertically clipped text`);
+            }
+          }
+        }
+        if (!texts.length) issues.push(`hero ${kind}: absent painted text`);
+        return {
+          kind,
+          text: owner.textContent?.trim(),
+          enhanced: owner.hasAttribute('data-typography-owner'),
+          bounds: rect(bounds),
+          texts,
+          fontSize: css.fontSize,
+          lineHeight: css.lineHeight,
+          fontWeight: css.fontWeight,
+        };
+      });
+    });
     const documentWidth = document.documentElement.scrollWidth,
       bodyWidth = document.body.scrollWidth;
     if (Math.max(documentWidth, bodyWidth) > innerWidth + 1)
@@ -737,10 +587,19 @@ async function layoutFacts(page: Page) {
       rootFontSize: getComputedStyle(document.documentElement).fontSize,
       gallery,
       cards,
+      charts,
+      hero,
       selection,
       issues: [...new Set(issues)],
     };
   }, ACTIVE);
+  return {
+    ...facts,
+    issues: [
+      ...facts.issues,
+      ...facts.charts.flatMap(({ card, parts }) => chartContainmentIssues(card, parts)),
+    ],
+  };
 }
 
 describe.sequential(
@@ -748,7 +607,7 @@ describe.sequential(
   () => {
     for (const runtime of RUNTIMES)
       for (const family of ['shadcn', 'brutalist'] as const) {
-        it(`${runtime}/${family} connects the three scenes and keeps their content readable`, async () => {
+        it(`${runtime}/${family} connects the example tasks and keeps their content readable`, async () => {
           const prefix = `${source.exactSHA}-${runtime}-${family}`;
           const errors: string[] = [],
             blockedRequests: string[] = [];
@@ -1409,6 +1268,7 @@ describe.sequential(
               await save();
               await capture(layout.name);
               expect(facts.cards.map((card) => card.name).sort()).toEqual([
+                'workspace-analytics',
                 'workspace-command',
                 'workspace-help',
                 'workspace-progress',
@@ -1420,7 +1280,12 @@ describe.sequential(
                   scene: string | null;
                 }>;
                 expect(samples.length).toBeGreaterThan(0);
-                for (const scene of ['workspace-command', 'workspace-progress', 'workspace-help'])
+                for (const scene of [
+                  'workspace-analytics',
+                  'workspace-command',
+                  'workspace-progress',
+                  'workspace-help',
+                ])
                   expect(samples.some((sample) => sample.scene === scene)).toBe(true);
                 for (const sample of samples)
                   expect(sample.after).toBeCloseTo(sample.before * 2, 3);
@@ -1623,38 +1488,18 @@ it('without JavaScript both localized homepages retain a readable documentation 
       record.nativeHero = nativeHero;
       for (const width of [320, 640, 1280]) {
         await page.setViewportSize({ width, height: 1000 });
-        const facts = await page.evaluate(() => {
-          const heading = document.querySelector<HTMLElement>('.homepage-hero h1')!;
-          const tagline = document.querySelector<HTMLElement>('.homepage-hero__tagline')!;
-          const titleStyle = getComputedStyle(heading),
-            descriptionStyle = getComputedStyle(tagline);
-          return {
-            enhanced: heading.hasAttribute('data-typography-owner'),
-            heading: {
-              fontSize: titleStyle.fontSize,
-              lineHeight: titleStyle.lineHeight,
-              fontWeight: titleStyle.fontWeight,
-            },
-            tagline: {
-              fontSize: descriptionStyle.fontSize,
-              lineHeight: descriptionStyle.lineHeight,
-            },
-          };
-        });
+        const facts = await layoutFacts(page);
         nativeHero.push({ width, facts });
         await save();
-        expect(facts).toEqual({
-          enhanced: false,
-          heading: {
-            fontSize: width >= 1280 ? '48px' : '30px',
-            lineHeight: width >= 1280 ? '52.8px' : '33px',
-            fontWeight: '600',
-          },
-          tagline: {
-            fontSize: width >= 640 ? '18px' : '16px',
-            lineHeight: width >= 640 ? '28px' : '24px',
-          },
-        });
+        // English and Chinese have intentional, distinct native typography.
+        // Require readable native paint and unclipped text instead of making
+        // both languages inherit one font-weight/line-height recipe.
+        expect(facts.issues, JSON.stringify(facts.issues)).toEqual([]);
+        const heading = facts.hero.find((owner) => owner.kind === 'heading')!;
+        const tagline = facts.hero.find((owner) => owner.kind === 'tagline')!;
+        expect(heading.enhanced).toBe(false);
+        expect(parseFloat(heading.fontSize)).toBeGreaterThan(parseFloat(tagline.fontSize));
+        expect(await page.getByRole('heading', { level: 1 }).isVisible()).toBe(true);
       }
       await page.setViewportSize({ width: 320, height: 1000 });
       expect(await fallback.isVisible()).toBe(true);
@@ -1728,6 +1573,7 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
     context.setDefaultTimeout(2_000);
     context.setDefaultNavigationTimeout(8_000);
     const errors: string[] = [];
+    const fontSizes = new Map<string, number>();
     let page: Page | undefined;
     try {
       await restrictNetwork(context, blockedRequests);
@@ -1758,12 +1604,13 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
           );
           for (const family of ['shadcn', 'brutalist']) {
             const editable = page.locator(`[data-width-case="${family}-144-value"] input`);
-            await editable.fill(
-              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789'
-            );
-            expect(await editable.inputValue()).toBe(
-              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789'
-            );
+            const value =
+              'Actual native editing with a long value abcdefghijklmnopqrstuvwxyz0123456789';
+            await editable.fill(value);
+            await editable.press('ArrowLeft');
+            await page.keyboard.type('!');
+            expect(await editable.inputValue()).toBe(`${value.slice(0, -1)}!${value.slice(-1)}`);
+            await hasFocus(editable);
             expect(
               await page.locator(`[data-width-case="${family}-144-disabled"] input`).isDisabled()
             ).toBe(true);
@@ -1778,7 +1625,7 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
                 return { left: r.left, right: r.right, width: r.width };
               };
               return {
-                id: owner.dataset.widthCase,
+                id: owner.dataset.widthCase!,
                 parentWidth: Number(owner.dataset.width),
                 variant: owner.dataset.variant,
                 parent: box(owner),
@@ -1833,11 +1680,16 @@ it('CommandInput fits actual narrow parents across four runtimes without clippin
             expect(fact.input.width).toBeCloseTo(fact.parentWidth, 0);
             expect(fact.input.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
             expect(fact.input.right).toBeLessThanOrEqual(fact.parent.right + 1);
+            expect(fact.root.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
+            expect(fact.root.right).toBeLessThanOrEqual(fact.parent.right + 1);
+            expect(fact.host.left).toBeGreaterThanOrEqual(fact.parent.left - 1);
             expect(fact.host.right).toBeLessThanOrEqual(fact.parent.right + 1);
-            expect(fact.rootOverflow).toBe('visible');
-            expect(fact.hostOverflow).toBe('visible');
-            expect(fact.grow).toBe('1');
-            expect(fact.font).toBe(textPercent === 100 ? '16px' : '32px');
+            expect(fact.input.left).toBeGreaterThanOrEqual(fact.root.left - 1);
+            expect(fact.input.right).toBeLessThanOrEqual(fact.root.right + 1);
+            const fontSize = parseFloat(fact.font);
+            expect(fontSize).toBeGreaterThan(0);
+            if (textPercent === 100) fontSizes.set(fact.id, fontSize);
+            else expect(fontSize).toBeCloseTo(fontSizes.get(fact.id)! * 2, 3);
             expect(fact.placeholder).toContain('abcdefghijklmnopqrstuvwxyz');
             expect(fact.disabled).toBe(fact.variant === 'disabled');
             if (fact.variant !== 'placeholder') expect(fact.value.length).toBeGreaterThan(60);

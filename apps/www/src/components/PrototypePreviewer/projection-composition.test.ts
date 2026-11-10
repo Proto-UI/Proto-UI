@@ -1,7 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { DemoChild, DemoNode, DemoRuntimeApi, DemoSetupContext, DemoSpec } from './demo-types';
+import {
+  collectPrototypeIds,
+  type DemoChild,
+  type DemoNode,
+  type DemoRuntimeApi,
+  type DemoSetupContext,
+  type DemoSpec,
+} from './demo-types';
 import { loadDemo } from './demo-modules';
+import { renderDemo } from './demo-renderer';
+import { loadPrototypes } from './prototype-modules';
 import {
   createProjectionComposition,
   PROJECTION_FOCUS_KEYS,
@@ -553,8 +562,8 @@ describe('Website projection composition', () => {
     }
   );
 
-  it('bounds child setup, closes before value callbacks, locks controls, restores focus, and cleans up', () => {
-    const order: string[] = [];
+  it('bounds child setup and rejects gated, locked and retired control requests', async () => {
+    const requests: string[] = [];
     const childCleanup = vi.fn();
     const childSetup = vi.fn((_context: DemoSetupContext) => childCleanup);
     const childDemo = {
@@ -575,17 +584,13 @@ describe('Website projection composition', () => {
       componentId: 'button',
       contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo,
-      controls: controls(order),
+      controls: controls(requests),
     });
     const { host, refs } = mountDemoTree(composition.demo);
     const api: DemoRuntimeApi = {
-      call(ref, path) {
-        order.push(`call:${ref}:${path}`);
-      },
+      call: () => undefined,
       getExposes: () => undefined,
-      setProps(ref, props) {
-        order.push(`props:${ref}:${String(props.disabled)}`);
-      },
+      setProps: () => undefined,
     };
     const cleanup = composition.demo.setup?.({ host, refs, api });
     expect(cleanup).toBeTypeOf('function');
@@ -608,8 +613,6 @@ describe('Website projection composition', () => {
 
     composition.setLocked(true);
     expect(host.querySelector('[data-projection-scope]')?.getAttribute('aria-busy')).toBe('true');
-    expect(order.filter((entry) => entry.endsWith(':close'))).toHaveLength(3);
-    expect(order.filter((entry) => entry.endsWith(':true'))).toHaveLength(3);
     composition.setLocked(false);
 
     const runtimeControl = findNode(
@@ -624,41 +627,185 @@ describe('Website projection composition', () => {
       throw new Error('Runtime control root ref required.');
     }
 
-    order.length = 0;
     refs[runtimeRoot.ref]!.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'react' } })
     );
-    expect(order[0]).toBe(`call:${runtimeRoot.ref}:close`);
-    expect(order[1]).toBe('runtime:react');
+    await Promise.resolve();
+    expect(requests).toEqual(['runtime:react']);
 
     composition.setEventGateOpen(false);
-    order.length = 0;
+    requests.length = 0;
     refs[runtimeRoot.ref]!.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'react' } })
     );
-    expect(order).toEqual([`call:${runtimeRoot.ref}:close`]);
+    await Promise.resolve();
+    expect(requests).toEqual([]);
     composition.setEventGateOpen(true);
 
-    expect(composition.restoreFocus(PROJECTION_FOCUS_KEYS.runtime)).toBe(true);
-    const runtimeTrigger = runtimeRoot.children?.[0];
-    if (
-      typeof runtimeTrigger === 'string' ||
-      runtimeTrigger?.kind !== 'proto' ||
-      !runtimeTrigger.ref
-    ) {
-      throw new Error('Runtime trigger ref required.');
-    }
-    expect(document.activeElement).toBe(refs[runtimeTrigger.ref]);
+    refs[runtimeRoot.ref]!.dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'vue' } })
+    );
+    composition.setLocked(true);
+    composition.setLocked(false);
+    await Promise.resolve();
+    expect(requests).toEqual([]);
 
+    refs[runtimeRoot.ref]!.dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'vue2' } })
+    );
     (cleanup as () => void)();
+    await Promise.resolve();
     expect(childCleanup).toHaveBeenCalledTimes(1);
-    order.length = 0;
+    expect(requests).toEqual([]);
     refs[runtimeRoot.ref]!.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'react' } })
     );
-    expect(order).toEqual([]);
+    await Promise.resolve();
+    expect(requests).toEqual([]);
     expect(composition.restoreFocus(PROJECTION_FOCUS_KEYS.runtime)).toBe(false);
   });
+
+  it.each(['wc', 'react'] as const)(
+    'finishes real Item close and Trigger handback before accepting %s',
+    async (requestedValue) => {
+      let context!: DemoSetupContext;
+      const readState = (ref: string, name: string) => {
+        const state = context.api.getExposes(ref)?.[name];
+        if (
+          !state ||
+          typeof state !== 'object' ||
+          !('get' in state) ||
+          typeof state.get !== 'function'
+        )
+          throw new Error(`Missing public ${name} state for ${ref}`);
+        return state.get();
+      };
+      const accepted: Array<{
+        requestedValue: string;
+        open: unknown;
+        previousValue: unknown;
+        focused: boolean;
+        focusFact: unknown;
+      }> = [];
+      const config = controls();
+      const composition = createProjectionComposition({
+        ownerId: `canonical-selection-${requestedValue}`,
+        runtimeId: 'wc',
+        projectionFamilyId: 'shadcn',
+        generation: 1,
+        componentId: 'button',
+        contentRecipe: buttonFixtureRecipe('shadcn'),
+        childDemo: {
+          type: 'demo',
+          root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Child'] },
+        },
+        controls: {
+          ...config,
+          runtime: {
+            ...config.runtime,
+            onValueChange(value) {
+              accepted.push({
+                requestedValue: value,
+                open: readState(rootRef, 'open'),
+                previousValue: readState(rootRef, 'value'),
+                focused: document.activeElement === context.refs[triggerRef],
+                focusFact: readState(triggerRef, 'focused'),
+              });
+              context.api.setProps(rootRef, { value });
+            },
+          },
+        },
+        controlIds: ['runtime'],
+      });
+      const root = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-root'
+      );
+      const trigger = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-trigger'
+      );
+      const popup = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-content'
+      );
+      const item = findNode(
+        composition.demo,
+        (node) =>
+          node.kind === 'proto' &&
+          node.prototypeId === 'shadcn-select-item' &&
+          node.props?.value === requestedValue
+      );
+      if (
+        root.kind !== 'proto' ||
+        !root.ref ||
+        trigger.kind !== 'proto' ||
+        !trigger.ref ||
+        popup.kind !== 'proto' ||
+        item.kind !== 'proto'
+      )
+        throw new Error('Expected the authored Select control parts');
+      const rootRef = root.ref;
+      const triggerRef = trigger.ref;
+      // This real-protocol host unit explicitly authors public popper mode;
+      // the native Header journeys retain their original item-aligned geometry.
+      popup.props = { ...popup.props, position: 'popper' };
+      item.ref = 'accepted-option';
+      const prototypeIds = new Set<string>();
+      collectPrototypeIds(composition.demo.root, prototypeIds);
+      await loadPrototypes([...prototypeIds]);
+      const host = document.createElement('div');
+      document.body.append(host);
+      const view = await renderDemo({
+        runtime: 'wc',
+        host,
+        demo: {
+          ...composition.demo,
+          setup(next) {
+            context = next;
+            return composition.demo.setup?.(next);
+          },
+        },
+      });
+      try {
+        let duringSignal: Record<string, unknown> | undefined;
+        context.refs[rootRef]!.addEventListener('valueChange', () => {
+          duringSignal = {
+            open: readState(rootRef, 'open'),
+            value: readState(rootRef, 'value'),
+            accepted: accepted.length > 0,
+          };
+        });
+        context.api.call(rootRef, 'requestOpen', {
+          open: true,
+          reason: 'trigger',
+          focusReason: 'keyboard',
+        });
+        await vi.waitFor(() => expect(readState(rootRef, 'open')).toBe(true));
+        context.api.call('accepted-option', 'focusSelf', { reason: 'keyboard' });
+        await vi.waitFor(() =>
+          expect(document.activeElement).toBe(context.refs['accepted-option'])
+        );
+        for (const type of ['keydown', 'keyup'])
+          context.refs['accepted-option']!.dispatchEvent(
+            new KeyboardEvent(type, { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true })
+          );
+        await vi.waitFor(() => {
+          expect(accepted).toEqual([
+            { requestedValue, open: false, previousValue: 'wc', focused: true, focusFact: true },
+          ]);
+          expect(readState(rootRef, 'value')).toBe(requestedValue);
+          expect(context.refs[triggerRef]!.textContent?.trim()).toBe(
+            requestedValue === 'wc' ? 'Web Components' : 'React'
+          );
+        });
+        expect(duringSignal).toEqual({ open: true, value: 'wc', accepted: false });
+      } finally {
+        await view.destroy();
+      }
+    },
+    20_000
+  );
 
   it('continues composition teardown after a control close fails', () => {
     const controlEvents: string[] = [];
@@ -712,8 +859,8 @@ describe('Website projection composition', () => {
 
   it.each(['react', 'vue', 'vue2'] as const)(
     'routes %s projection controls through the framework callback channel only',
-    (runtimeId) => {
-      const order: string[] = [];
+    async (runtimeId) => {
+      const requests: string[] = [];
       const composition = createProjectionComposition({
         ownerId: `scope-${runtimeId}`,
         runtimeId,
@@ -725,15 +872,13 @@ describe('Website projection composition', () => {
           type: 'demo',
           root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Child'] },
         },
-        controls: controls(order),
+        controls: controls(requests),
         eventGateOpen: false,
       });
       const { host, refs } = mountDemoTree(composition.demo);
       const propsByRef = new Map<string, Record<string, unknown>>();
       const api: DemoRuntimeApi = {
-        call(ref, path) {
-          order.push(`call:${ref}:${path}`);
-        },
+        call: () => undefined,
         getExposes: () => undefined,
         setProps(ref, props) {
           propsByRef.set(ref, { ...(propsByRef.get(ref) ?? {}), ...props });
@@ -744,24 +889,40 @@ describe('Website projection composition', () => {
       const onValueChange = propsByRef.get(runtimeRootRef)?.onValueChange;
       expect(onValueChange).toBeTypeOf('function');
 
-      order.length = 0;
       refs[runtimeRootRef]!.dispatchEvent(
         new CustomEvent('valueChange', { detail: { value: 'wc' } })
       );
-      expect(order).toEqual([]);
+      await Promise.resolve();
+      expect(requests).toEqual([]);
 
       (onValueChange as (detail: unknown) => void)({ value: 'wc' });
-      expect(order).toEqual([`call:${runtimeRootRef}:close`]);
+      await Promise.resolve();
+      expect(requests).toEqual([]);
 
       composition.setEventGateOpen(true);
-      order.length = 0;
+      refs[runtimeRootRef]!.dispatchEvent(
+        new CustomEvent('valueChange', { detail: { value: 'wc' } })
+      );
+      await Promise.resolve();
+      expect(requests).toEqual([]);
       (onValueChange as (detail: unknown) => void)({ value: 'wc' });
-      expect(order).toEqual([`call:${runtimeRootRef}:close`, 'runtime:wc']);
+      await Promise.resolve();
+      expect(requests).toEqual(['runtime:wc']);
 
-      (cleanup as () => void)();
-      order.length = 0;
       (onValueChange as (detail: unknown) => void)({ value: 'react' });
-      expect(order).toEqual([]);
+      composition.setEventGateOpen(false);
+      composition.setEventGateOpen(true);
+      await Promise.resolve();
+      expect(requests).toEqual(['runtime:wc']);
+
+      (onValueChange as (detail: unknown) => void)({ value: 'react' });
+      (cleanup as () => void)();
+      await Promise.resolve();
+      expect(requests).toEqual(['runtime:wc']);
+      requests.length = 0;
+      (onValueChange as (detail: unknown) => void)({ value: 'react' });
+      await Promise.resolve();
+      expect(requests).toEqual([]);
     }
   );
 

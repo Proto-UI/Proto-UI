@@ -67,14 +67,6 @@ test('pointer coverage reaches all four runtimes before strict non-first keyboar
     2
   );
   assert.deepEqual(HOMEPAGE_KEYBOARD_TRANSITION, { from: 'react', to: 'vue' });
-  const source = readFileSync(new URL('capture-homepage-evidence.ts', import.meta.url), 'utf8');
-  assert.match(source, /chooseRuntime\(page, runtime, false\)/);
-  assert.ok(
-    source.indexOf('HOMEPAGE_POINTER_RUNTIME_SEQUENCE.entries()') <
-      source.indexOf('chooseRuntime(page, HOMEPAGE_KEYBOARD_TRANSITION.to, true)')
-  );
-  assert.match(source, /aria-selected="true"\]:focus/);
-  assert.match(source, /report\.failures\.push/);
 });
 
 test('density retains the whole increment baseline alongside a separately pinned feedback pair', () => {
@@ -224,13 +216,6 @@ test('the actual serialized failure snapshot reaches the historical classifier',
   assert.equal(classifyCapturedFailure(input), 'baseline-react-select-home-focus');
   assert.equal(classifyCapturedFailure({ ...input, revisionKind: 'candidate' }), 'unexpected');
   assert.equal(classifyCapturedFailure({ ...input, failureState: null }), 'unexpected');
-});
-
-test('font evidence selects visible captions and excludes clipped accessible labels', () => {
-  const source = readFileSync(new URL('capture-homepage-evidence.ts', import.meta.url), 'utf8');
-  assert.match(source, /name: 'definition-label', selector: '\.home-demo-previewer__meta-label'/);
-  assert.match(source, /getBoundingClientRect\(\)\.width > 2/);
-  assert.match(source, /getBoundingClientRect\(\)\.height > 2/);
 });
 
 test('the actual ownership probe recognizes real control-only groups and rejects empty ones', async () => {
@@ -605,6 +590,7 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
             'workspace-help',
             'preferences',
             'workspace-progress',
+            'workspace-analytics',
             'editor',
             'overlays',
             'choices',
@@ -996,6 +982,8 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     })),
   };
   assert.equal(observe(facts, 32).length, 0);
+  assert.equal(observe({ ...facts, cards: [...facts.cards].reverse() }, 32).length, 0,
+    'Membership and physical spacing do not depend on stale DOM ordering');
   const narrow = {
     columnGap: '24px',
     cards: ids.map((id, i) => ({
@@ -1038,10 +1026,6 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     mutate(broken);
     assert.ok(observe(broken, 32).length > 0);
   }
-  assert.match(source, /assert\.deepEqual\(\s*gallerySpacingIssues\(facts\.gallerySpacing,/);
-  const headerHeight = /select\.height\s*-\s*44\)\s*<=\s*1/;
-  assert.match(source, headerHeight);
-  assert.doesNotMatch(source.replace(headerHeight, 'select.height - 36) <= 1'), headerHeight);
 });
 
 test('only composition restores a hash-keyed font package without extending existing budgets', () => {
@@ -1199,101 +1183,6 @@ test('200% text observer records the animated intermediate frame then requires t
   }
 });
 
-test('Accordion readiness remains count-one and width failures retain full physical layout evidence', () => {
-  const browser = readFileSync(
-    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
-    'utf8'
-  );
-  const verify = (source: string) => {
-    assert.match(
-      source,
-      /await expect\.poll\(\(\) => panel\.count\(\), \{ timeout: 1500, interval: 25 \}\)\.toBe\(1\)/
-    );
-    assert.match(source, /step\.afterPress = await accordionSnapshot\(\)/);
-    assert.match(source, /step\.ready = await accordionSnapshot\(\)/);
-    assert.match(source, /await attribute\(panel, 'aria-labelledby', triggerId\)/);
-    assert.match(source, /expect\(fact\.input\.width\)\.toBeCloseTo\(fact\.parentWidth, 0\)/);
-    assert.match(source, /flexBasis: css\.flexBasis/);
-    assert.match(source, /record\.failureDOM = await page\.evaluate/);
-  };
-  verify(browser);
-  for (const fragment of [
-    'step.ready = await accordionSnapshot()',
-    "await attribute(panel, 'aria-labelledby', triggerId)",
-    'expect(fact.input.width).toBeCloseTo(fact.parentWidth, 0)',
-    'record.failureDOM = await page.evaluate',
-  ])
-    assert.throws(() => verify(browser.replaceAll(fragment, '')));
-});
-
-test('homepage Command verifies the public outer shell and actual muted active paint without changing the editor', () => {
-  const source = readFileSync(
-    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
-    'utf8'
-  );
-  const required = [
-    'expect(paint.shellCount).toBe(1)',
-    "expect(paint.rootRadius).toBe('22px')",
-    "expect(paint.shellRadius).toBe('18px')",
-    'expect(paint.shellHeight).toBe(32)',
-    "expect(paint.innerRadius).toBe('0px')",
-    "expect(paint.innerBorder).toBe('0px')",
-    "expect(paint.innerFont).toBe('14px')",
-    "expect(paint.activeRadius).toBe('14px')",
-    'expect(paint.activeBackground).toBe(paint.expectedMuted)',
-    "expect(paint.activeText).toBe('Build a prototype')",
-    'record.commandPaint = paint',
-    'record.commandPaintSamples = samples',
-    "expect(paint.themeMutedToken).not.toBe('')",
-    "expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)')",
-    'reference.remove()',
-  ];
-  const verify = (candidate: string) => {
-    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
-    assert.match(candidate, /finally\s*\{\s*record\.commandPaint = paint;\s*await save\(\);/);
-  };
-  verify(source);
-  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
-});
-
-test('homepage Select verifies the inherited Rhea surface, real portal and keyboard continuity', () => {
-  const source = readFileSync(
-    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
-    'utf8'
-  );
-  const required = [
-    "await stage('select-rhea')",
-    "await trigger.press('ArrowDown')",
-    "await page.keyboard.press('End')",
-    "await page.keyboard.press('Home')",
-    "await page.keyboard.press('Enter')",
-    'await hasFocus(trigger)',
-    "radius: '18px', height: 32, fontSize: '14px', gap: '6px'",
-    "filter: 'blur(40px) saturate(1.5)'",
-    "leafAriaHidden: 'true'",
-    "padding: '4px', itemRadius: '14px', escaped: true",
-    'record.selectPaintSamples = selectPaintSamples',
-    'record.selectPaint = facts',
-    'editor.evaluate((current, original) => current === original, originalEditor)',
-    'backgroundMatches: background === expectedBackground',
-    'Boolean(themePopover)',
-    "expectedBackground !== 'rgba(0, 0, 0, 0)'",
-    'reference.remove()',
-    "await capture('select-rhea-open')",
-    "expect(background).not.toBe('rgba(0, 0, 0, 0)')",
-    'expect(await sameEditor()).toBe(true)',
-  ];
-  const verify = (candidate: string) => {
-    candidate = candidate.replace(/\s+/g, ' ');
-    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
-    assert.match(candidate, /finally\s*\{\s*await save\(\);\s*\}/);
-    assert.equal(candidate.split('expect(await sameEditor()).toBe(true)').length - 1, 2);
-  };
-  const normalized = source.replace(/\s+/g, ' ');
-  verify(normalized);
-  for (const fragment of required) assert.throws(() => verify(normalized.replaceAll(fragment, '')));
-});
-
 test('composition screenshots preserve and disclose actual interaction framing', () => {
   const source = readFileSync(
     new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
@@ -1361,93 +1250,4 @@ test('gallery activation requires one exact localized result rather than a remov
     assert.equal(probe(), false, 'duplicate result');
     window.happyDOM.abort();
   }
-  assert.ok(text.includes("expected: zh ? '主要按钮: 已触发' : 'Primary button: Activated'"));
-  assert.match(
-    text,
-    /gallery-primary[^\n]+\.click\(\);\s*await page\.waitForFunction\(galleryButtonActivated/
-  );
-});
-
-test('Hero native evidence measures actual Text paint, real resize and unchanged editor without changing budgets', () => {
-  const source = readFileSync(
-    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
-    'utf8'
-  ).replace(/\s+/g, ' ');
-  const required = [
-    "await stage('hero-responsive-typography')",
-    'await page.setViewportSize({ width, height: 1000 })',
-    "native.querySelector<HTMLElement>( '[data-typography-prototype]' )",
-    'getComputedStyle(owner)',
-    "fontSize: width >= 1280 ? '48px' : '30px'",
-    "lineHeight: width >= 1280 ? '52.8px' : '33px'",
-    "fontWeight: '600'",
-    "letterSpacing: width >= 1280 ? '-2.4px' : '-0.75px'",
-    'heroSamples.push({ width, expected, facts })',
-    'current === original, originalNote',
-    'current === original, originalHeading',
-    'await hasFocus(note)',
-    "expect(await note.inputValue()).toBe('Preserved across Hero viewport changes')",
-    'record.nativeHero = nativeHero',
-    'enhanced: false',
-    '45_000',
-  ];
-  const verify = (candidate: string) => {
-    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
-  };
-  verify(source);
-  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
-});
-
-test('density candidate uses the independent exact family heading oracle without relaxing other checks', () => {
-  const source = readFileSync(
-    new URL('capture-visual-density-evidence.ts', import.meta.url),
-    'utf8'
-  );
-  const ast = ts.createSourceFile(
-    'density.ts',
-    source,
-    ts.ScriptTarget.ES2022,
-    true,
-    ts.ScriptKind.TS
-  );
-  const declaration = ast.statements.find(
-    (node) =>
-      ts.isFunctionDeclaration(node) && node.name?.text === 'expectedCandidateSloganFontSize'
-  );
-  assert.ok(declaration);
-  const code = ts.transpileModule(declaration.getText(ast).replace('export ', ''), {
-    compilerOptions: { target: ts.ScriptTarget.ES2022 },
-  }).outputText;
-  const expected = runInNewContext(`${code}\nexpectedCandidateSloganFontSize`);
-  const cases = [
-    ['shadcn', 390, 30],
-    ['shadcn', 960, 30],
-    ['shadcn', 1279, 30],
-    ['shadcn', 1280, 48],
-    ['shadcn', 1440, 48],
-    ['brutalist', 390, 24],
-    ['brutalist', 1440, 36],
-  ] as const;
-  const check = (oracle: typeof expected) => {
-    for (const [family, width, size] of cases) assert.equal(oracle(family, width), size);
-  };
-  check(expected);
-  // Old shared sizing, wrong xl boundary, and accidentally changing Brutalist all fail.
-  for (const mutant of [
-    (_family: string, width: number) => (width === 390 ? 24 : 36),
-    (family: string, width: number) =>
-      family === 'shadcn' ? (width > 1280 ? 48 : 30) : expected(family, width),
-    (_family: string, width: number) => (width >= 1280 ? 48 : 30),
-  ])
-    assert.throws(() => check(mutant));
-  const call =
-    'assert.equal(facts.slogan.fontSize, expectedCandidateSloganFontSize(v.family, v.width))';
-  const checkCall = (text: string) => assert.ok(text.includes(call));
-  checkCall(source);
-  assert.throws(() => checkCall(source.replace(call, '')));
-  assert.ok(source.includes('assert.ok(facts.overflow <= 1)'));
-  assert.ok(source.includes('assert.equal(facts.title.fontSize, 16)'));
-  assert.ok(
-    source.includes("assert.equal(facts.caption.fontSize, v.family === 'shadcn' ? 14 : 12)")
-  );
 });

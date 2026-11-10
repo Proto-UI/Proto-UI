@@ -196,6 +196,38 @@ describe.each(searchFamilies)('historical $slug projection', (family) => {
     expect(p.empty.textContent).toContain('No matching fruit');
   });
 
+  it('pairs enabled semantic ink and disabled light-control ink through state changes', async () => {
+    const p = await search(family);
+    expect(tokens(p.editor)).toContain('bg-background');
+    expect(tokens(p.editor)).toContain('text-foreground');
+    expect(tokens(p.editor)).not.toContain('text-[#555]');
+    p.editor.focus();
+    await flush();
+    expect(tokens(p.editor)).toContain('text-foreground');
+    setElementProps(p.root, { readOnly: true });
+    await flush();
+    expect(p.editor.readOnly).toBe(true);
+    expect(tokens(p.editor)).toContain('bg-background');
+    expect(tokens(p.editor)).toContain('text-foreground');
+    setElementProps(p.root, { disabled: true });
+    await flush();
+    await activationTurn();
+    await flush();
+    expect(p.editor.hasAttribute('data-disabled')).toBe(true);
+    expect(tokens(p.editor)).toContain('data-[disabled]:bg-[#eee]');
+    expect(tokens(p.editor)).toContain('data-[disabled]:text-[#555]');
+    expect(tokens(p.editor)).not.toContain('text-foreground');
+    expect(tokens(p.editor)).not.toContain('bg-background');
+    setElementProps(p.root, {});
+    await flush();
+    await activationTurn();
+    await flush();
+    expect(tokens(p.editor)).toContain('bg-background');
+    expect(tokens(p.editor)).toContain('text-foreground');
+    expect(tokens(p.editor)).not.toContain('text-[#555]');
+    expect(p.input.querySelector('input')).toBe(p.editor);
+  });
+
   it('preserves IME and reversible readonly/disabled facts without another editor', async () => {
     const p = await search(family);
     const selected = requests(p.root, slug === 'command' ? 'execute' : 'valueChange');

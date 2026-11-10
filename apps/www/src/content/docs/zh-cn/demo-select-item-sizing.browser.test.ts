@@ -10,6 +10,7 @@ import {
   sizingMotionIssues,
   type SizingMotionHandle,
   type SizingMotionResult,
+  type SizingMotionSelection,
 } from './demo-select-item-sizing-motion';
 import {
   RUNTIMES,
@@ -35,7 +36,7 @@ beforeAll(async () => {
     );
   source = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   sourceTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
-  baseUrl = await startServer([route('en'), route('zh-cn')]);
+  baseUrl = await startServer([route('en'), route('zh-cn'), '/en/', '/zh-cn/']);
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     chromiumSandbox: true,
@@ -167,32 +168,25 @@ async function facts(trigger: Locator) {
   });
 }
 type Facts = Awaited<ReturnType<typeof facts>>;
-function assertGeometry(value: Facts, runtime: string) {
+function assertGeometry(value: Facts, runtime: string, selection: SizingMotionSelection) {
   expect(value.runtime).toBe(runtime);
   expect(value.expanded).toBe('true');
   expect(value.trigger.rect.height).toBeGreaterThan(0);
-  // #1330: the popup matches the Trigger. Rows are full-width flow children
-  // inside group padding (rhea p-1 is 4px each side), not the retired row lease.
-  expect(
-    Math.abs(value.surface.rect.width - value.trigger.rect.width),
-    'surface width matches trigger'
-  ).toBeLessThanOrEqual(0.5);
-  expect(
-    Math.abs(value.surface.rect.left - value.trigger.rect.left),
-    'surface aligns to trigger'
-  ).toBeLessThanOrEqual(0.5);
-  for (const item of value.items) {
+  const selected = value.items.filter((item) => item.selected === 'true');
+  expect(selected).toHaveLength(selection === 'unset' ? 0 : 1);
+  // Initial unset value aligns the first enabled record without selecting it.
+  // P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT and SELECTION-INVARIANT.
+  const aligned =
+    selection === 'unset'
+      ? value.items.find((item) => item.disabled === 'false')
+      : selected[0];
+  expect(aligned).toBeDefined();
+  for (const edge of ['left', 'right', 'top', 'bottom'] as const)
     expect(
-      Math.abs(item.rect.height - value.trigger.rect.height),
-      `${item.text} border-box height`
+      Math.abs(aligned!.rect[edge] - value.trigger.rect[edge]),
+      `aligned row ${edge} replaces trigger`
     ).toBeLessThanOrEqual(0.5);
-    const insetLeft = item.rect.left - value.trigger.rect.left;
-    const insetRight = value.trigger.rect.right - item.rect.right;
-    expect(Math.abs(insetLeft - insetRight), `${item.text} row inset symmetry`).toBeLessThanOrEqual(
-      0.5
-    );
-    expect(insetLeft, `${item.text} row inset`).toBeGreaterThanOrEqual(-0.5);
-    expect(insetLeft, `${item.text} row inset`).toBeLessThanOrEqual(4.5);
+  for (const item of value.items) {
     expect(
       item.scrollWidth - item.clientWidth,
       `${item.text} horizontal text overflow`
@@ -205,7 +199,7 @@ function assertGeometry(value: Facts, runtime: string) {
     expect(box.scrollWidth - box.clientWidth, `${label} horizontal overflow`).toBeLessThanOrEqual(
       1
     );
-  // The popup is the Trigger's width. Do not treat a wider decorative frame as success.
+  // Chrome is outside the matched row; still forbid viewport clipping.
   expect(value.surface.rect.left).toBeGreaterThanOrEqual(-0.5);
   expect(value.surface.rect.right).toBeLessThanOrEqual(value.browser.width + 0.5);
   const focused = value.items.filter((item) => item.focused);
@@ -239,9 +233,10 @@ for (const locale of ['en', 'zh-cn'])
           height: 900,
         });
         const observations: Array<{ phase: string; value: Facts }> = [];
+        const headerObservations: Array<{ phase: string; value: Facts }> = [];
         const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
         const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
-        const startMotion = async (trigger: Locator) => {
+        const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
           if (activeMotion.handle) throw new Error('Previous motion trace was not released');
           // Begin the open-cycle trace from an established keyboard focus state.
           // Otherwise the opening key also changes input modality, starts the
@@ -261,7 +256,7 @@ for (const locale of ['en', 'zh-cn'])
               { timeout: 1200 }
             )
             .toBe(true);
-          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace);
+          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace, selection);
         };
         const finishMotion = async (phase: string) => {
           if (!activeMotion.handle) throw new Error('Motion trace was not installed before action');
@@ -284,8 +279,9 @@ for (const locale of ['en', 'zh-cn'])
             exact: true,
           });
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+          expect(await trigger.innerText()).toBe('Select an adapter');
           await page.keyboard.press('Tab');
-          await startMotion(trigger);
+          await startMotion(trigger, 'unset');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -295,7 +291,8 @@ for (const locale of ['en', 'zh-cn'])
           await finishMotion('first-entry');
           const first = await facts(trigger);
           observations.push({ phase: 'first-entry', value: first });
-          assertGeometry(first, runtime);
+          assertGeometry(first, runtime, 'unset');
+          expect(first.trigger.text).toBe('Select an adapter');
           if (output) await page.screenshot({ path: path.join(output, `${name}-first.png`) });
           await page.keyboard.press('End');
           await expect
@@ -303,10 +300,18 @@ for (const locale of ['en', 'zh-cn'])
               (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
             )
             .toEqual(['Web Components']);
+          const navigated = await facts(trigger, 4);
+          expect(navigated.items.map((item) => item.selected)).toEqual([
+            'false',
+            'false',
+            'false',
+            'false',
+          ]);
+          expect(navigated.trigger.text).toBe('Select an adapter');
           await page.keyboard.press('Enter');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await expect.poll(() => trigger.innerText()).toContain('Web Components');
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('Enter');
           await expect
             .poll(async () =>
@@ -316,7 +321,7 @@ for (const locale of ['en', 'zh-cn'])
           await finishMotion('selected-reopen');
           const reopen = await facts(trigger);
           observations.push({ phase: 'selected-reopen', value: reopen });
-          assertGeometry(reopen, runtime);
+          assertGeometry(reopen, runtime, 'selected');
           expect(reopen.items.map((item) => item.selected)).toEqual([
             'false',
             'false',
@@ -331,7 +336,7 @@ for (const locale of ['en', 'zh-cn'])
             .toBe(true);
           await page.setViewportSize({ width: 390, height: 900 });
           await trigger.scrollIntoViewIfNeeded();
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -341,10 +346,63 @@ for (const locale of ['en', 'zh-cn'])
           await finishMotion('narrow-reopen');
           const narrow = await facts(trigger);
           observations.push({ phase: 'narrow-reopen', value: narrow });
-          assertGeometry(narrow, runtime);
+          assertGeometry(narrow, runtime, 'selected');
           if (output) await page.screenshot({ path: path.join(output, `${name}-narrow.png`) });
           await page.keyboard.press('Escape');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+          // The reported regression is the real homepage family picker, whose
+          // 44px Header Trigger is not the demo's intrinsic 32px row recipe.
+          await page.setViewportSize({ width: 1180, height: 900 });
+          await page.goto(`${baseUrl}/${locale}/`);
+          const header = page.locator('[data-homepage-runtime]');
+          await expect.poll(() => header.getAttribute('data-runtime-state')).toBe('ready');
+          const runtimeTrigger = header.getByRole('combobox', {
+            name: locale === 'en' ? 'Page runtime' : '整页 Runtime',
+            exact: true,
+          });
+          await runtimeTrigger.click();
+          await page
+            .getByRole('option', {
+              name: { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' }[runtime],
+              exact: true,
+            })
+            .click();
+          await expect.poll(() => header.getAttribute('data-runtime')).toBe(runtime);
+          await expect.poll(() => header.getAttribute('data-runtime-state')).toBe('ready');
+          const familyTrigger = header.getByRole('combobox', {
+            name: locale === 'en' ? 'Page library' : '整页组件库',
+            exact: true,
+          });
+          for (const phase of ['first-open', 'reopen'] as const) {
+            await familyTrigger.click();
+            await expect
+              .poll(async () =>
+                (await facts(familyTrigger)).items
+                  .filter((item) => item.focused)
+                  .map((item) => item.text)
+              )
+              .toEqual(['Shadcn']);
+            const value = await facts(familyTrigger);
+            headerObservations.push({ phase, value });
+            expect(value.runtime).toBe(runtime);
+            const selected = value.items.filter((item) => item.selected === 'true');
+            expect(selected).toHaveLength(1);
+            for (const edge of ['left', 'right', 'top', 'bottom'] as const)
+              expect(
+                Math.abs(selected[0].rect[edge] - value.trigger.rect[edge]),
+                `Header ${phase} ${edge}`
+              ).toBeLessThanOrEqual(0.5);
+            expect(value.trigger.rect.height).toBeGreaterThanOrEqual(44);
+            if (output)
+              await page.screenshot({ path: path.join(output, `${name}-header-${phase}.png`) });
+            await page.keyboard.press('Escape');
+            await expect.poll(() => familyTrigger.getAttribute('aria-expanded')).toBe('false');
+            await expect
+              .poll(() =>
+                familyTrigger.evaluate((node) => node.ownerDocument.activeElement === node)
+              )
+              .toBe(true);
+          }
         } catch (error) {
           testFailed = true;
           testError = error;
@@ -396,6 +454,7 @@ for (const locale of ['en', 'zh-cn'])
                     runtime,
                     locale,
                     observations,
+                    headerObservations,
                     motion,
                     failure: testFailed ? String(testError) : null,
                     secondaryErrors: secondaryErrors.map(({ phase, error }) => ({

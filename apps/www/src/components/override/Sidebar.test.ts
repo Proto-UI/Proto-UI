@@ -99,3 +99,43 @@ it('actual canonical scope retains non-UI sections and does not install another 
   visit(script);
   expect(forbidden).toEqual([]);
 });
+
+it('renders every early draft as a badge without appending status to translated link labels', () => {
+  const drafts = new Map<string, string[]>();
+  function visit(node: ts.Node) {
+    if (ts.isObjectLiteralExpression(node)) {
+      const label = property(node, 'label');
+      const translations = property(node, 'translations');
+      for (const value of [label, ...(translations && ts.isObjectLiteralExpression(translations)
+        ? translations.properties.filter(ts.isPropertyAssignment).map((entry) => entry.initializer)
+        : [])]) {
+        if (value && ts.isStringLiteral(value)) {
+          expect(value.text).not.toMatch(/[（(](?:Draft|草案)[）)]/u);
+        }
+      }
+      const badge = property(node, 'badge');
+      if (badge && ts.isIdentifier(badge) && badge.text === 'earlyDraftBadge') {
+        const slug = property(node, 'slug');
+        expect(slug && ts.isStringLiteral(slug)).toBe(true);
+        if (slug && ts.isStringLiteral(slug)) {
+          const family = slug.text.split('/')[1]!;
+          drafts.set(family, [...(drafts.get(family) ?? []), slug.text]);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
+  expect(Object.fromEntries([...drafts].map(([family, slugs]) => [family, slugs.length]))).toEqual({
+    base: 31,
+    shadcn: 34,
+    brutalist: 35,
+    'bootstrap-2-3-2': 30,
+    'liquid-glass': 31,
+  });
+  expect(config).toContain("text: 'Early draft'");
+  expect(config).toContain("class: 'docs-wip-badge docs-early-draft-badge'");
+  // Existing WIP and experimental family states are not relabeled as drafts.
+  expect(config).toContain("text: { en: 'WIP', 'zh-CN': '施工中' }");
+  expect(config).toContain("text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }");
+});

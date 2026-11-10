@@ -14,7 +14,7 @@ export default definePrototype<SliderValuesPartProps, SliderValuesThumbExposes>(
     // corners, neutral border/fill and inset-light/drop shadow vocabulary.
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-[20px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-border bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] outline-none select-none'
+        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-[20px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-border bg-[#f5f5f5_linear-gradient(#fff,#e6e6e6)_0_0_repeat-x] text-[#333] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)] outline-none select-none'
       )
     );
     def.rule({

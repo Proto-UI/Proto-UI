@@ -32,6 +32,8 @@ export type TargetAlignmentMetrics = Readonly<{
     atEnd: boolean;
     /** Optional measured outer chrome needed to retain a requested row border box. */
     minimumOuterInlineSpan?: number;
+    /** Logical border-box inset of a size-matched target inside the painted surface. */
+    inlineStartInset?: number;
   }>;
   scrollport: Readonly<{
     scrollHeight: number;
@@ -79,6 +81,7 @@ export function solveTargetAlignment(
     t.offset,
     t.height,
     ...(t.minimumOuterInlineSpan === undefined ? [] : [t.minimumOuterInlineSpan]),
+    ...(t.inlineStartInset === undefined ? [] : [t.inlineStartInset]),
     ...Object.values(s),
   ];
   if (!finite(facts)) return invalid('nonfinite-fact');
@@ -97,6 +100,7 @@ export function solveTargetAlignment(
       c.paddingBottom,
       t.offset,
       ...(t.minimumOuterInlineSpan === undefined ? [] : [t.minimumOuterInlineSpan]),
+      ...(t.inlineStartInset === undefined ? [] : [t.inlineStartInset]),
       s.scrollHeight,
       s.offsetTop,
       s.height,
@@ -120,10 +124,9 @@ export function solveTargetAlignment(
     return invalid('invalid-constraint');
 
   const rtl = metrics.direction === 'rtl';
-  // The popup's inline start edge aligns with the reference's inline start edge.
-  // Content metrics never decide placement: a trigger label edit or a row's own
-  // text inset must not shift the popup.
-  const referenceInset = rtl ? v.width - a.right : a.left;
+  // A size-matched target replaces the reference box. Its surrounding chrome
+  // remains outside that box; text metrics never decide the placement.
+  const referenceInset = (rtl ? v.width - a.right : a.left) - (t.inlineStartInset ?? 0);
   const minimumInlineSpan = Math.max(a.width, t.minimumOuterInlineSpan ?? 0);
   const widthForClamp = Math.max(minimumInlineSpan, c.width);
   const inlineInset = clamp(

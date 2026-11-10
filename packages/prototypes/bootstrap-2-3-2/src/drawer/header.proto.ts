@@ -12,7 +12,7 @@ export default definePrototype<DrawerHeaderProps, DrawerHeaderExposes>({
   name: 'bootstrap-2-3-2-drawer-header',
   setup(def) {
     asDrawerHeader();
-    def.feedback.style.use(tw('min-w-0 px-[15px] py-[9px] border-b border-[#eee]'));
+    def.feedback.style.use(tw('min-w-0 px-[15px] py-[9px] border-b border-border'));
     return (renderer) => renderer.r.slot();
   },
 });

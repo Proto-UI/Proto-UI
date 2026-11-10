@@ -21,6 +21,10 @@ cases:
     covers:
       [P-SHADCN-SELECT-STYLE-TRIGGER, P-SHADCN-SELECT-STYLE-FIELD, P-SHADCN-SELECT-STYLE-POPUP]
     expectation: exact-computed-color-geometry-focus-and-translucent-compositing
+  - id: T-SHADCN-SELECT-STYLE-0001-CASE-INPLACE
+    title: Selected row replaces the Trigger rectangle rather than only matching the popup
+    covers: [P-SHADCN-SELECT-STYLE-POPUP-WIDTH]
+    expectation: selected-row-four-edge-error-at-most-half-css-pixel-on-open-reopen-and-narrow-viewport-with-actual-header-consumer
 implementations:
   - id: shadcn-select-profile-trigger
     kind: module-test
@@ -56,4 +60,11 @@ implementations:
     path: scripts/prototypes/shadcn-select-evidence.mjs
     required: true
     consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-NATIVE]
+    exercises: [P-SHADCN-SELECT-STYLE]
+  - id: shadcn-select-inplace-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-INPLACE]
     exercises: [P-SHADCN-SELECT-STYLE]

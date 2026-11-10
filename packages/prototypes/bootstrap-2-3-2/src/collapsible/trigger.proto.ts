@@ -25,7 +25,7 @@ const collapsibleTrigger = definePrototype<
     );
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
+      intent: (i) => i.feedback.style.use(tw('text-foreground underline')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),

@@ -21,8 +21,11 @@ a.home-runtime-link[data-site-link-enhanced='true']:is(
 
 .site-social-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.65rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Starlight's scoped fallback selectors still match the original a and label

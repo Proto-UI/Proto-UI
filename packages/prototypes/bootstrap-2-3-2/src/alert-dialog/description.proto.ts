@@ -13,7 +13,7 @@ export default definePrototype<AlertDialogDescriptionProps, AlertDialogDescripti
     // Existing Description carries .modal-body copy and its 15px inset.
     def.feedback.style.use(
       tw(
-        'relative overflow-y-auto max-h-[400px] p-[15px] text-[14px] leading-[20px] text-foreground'
+        'block min-w-0 relative overflow-y-auto max-h-[400px] p-[15px] text-[14px] leading-[20px] text-foreground'
       )
     );
     return behavior.render;

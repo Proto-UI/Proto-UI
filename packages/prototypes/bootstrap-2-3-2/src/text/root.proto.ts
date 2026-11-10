@@ -56,7 +56,7 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     });
     def.rule({
       when: (w) => w.prop('tone').eq('muted'),
-      intent: (i) => i.feedback.style.use(tw('text-[#999]')),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
     });
     def.rule({
       when: (w) => w.prop('tone').eq('inherit'),

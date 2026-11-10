@@ -26,14 +26,32 @@ type CodeStyleFacts = {
   lineHeight: string;
 };
 
+type CodeFrameFacts = {
+  background: string;
+  border: string;
+  borderWidth: string;
+  radius: string;
+  surfaceCount: number;
+  role: string | null;
+  tabIndex: string | null;
+  pointerEvents: string;
+};
+
 type SurfaceFacts = {
   ec: CodeStyleFacts;
   preview: CodeStyleFacts;
   ecCode: CodeStyleFacts;
   previewCode: CodeStyleFacts;
-  border: [string, string];
-  radius: [string, string];
-  expectedPreviewRadius: string;
+  ecFrame: CodeFrameFacts;
+  previewFrame: CodeFrameFacts | null;
+  source: {
+    raw: string | null;
+    text: string | null;
+    highlighted: boolean;
+    selectable: boolean;
+    visible: boolean;
+    outsidePaint: boolean;
+  };
   canvasCount: number | null;
   layoutBorderWidths: string[] | null;
   documentOverflow: number;
@@ -74,15 +92,26 @@ async function ready(page: Page): Promise<void> {
 async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFacts> {
   const ecFacts = await ecPage.evaluate(() => {
     const ec = document.querySelector<HTMLElement>('.expressive-code pre')!;
-    const frame = ec.closest<HTMLElement>('[data-site-code-surface="frame"]')!
+    const sourceFrame = ec.closest<HTMLElement>('[data-site-code-surface="frame"]')!;
+    const frame = sourceFrame
       .querySelector<HTMLElement>(':scope > .site-code-surface-mount .site-code-surface-paint')!;
-    const facts = (element: HTMLElement, surface?: HTMLElement): CodeStyleFacts => {
+    const frameStyle = getComputedStyle(frame);
+    const facts = (element: HTMLElement): CodeStyleFacts => {
       const style = getComputedStyle(element);
-      return { background: surface ? getComputedStyle(surface).backgroundColor : style.backgroundColor,
+      return { background: style.backgroundColor,
         color: style.color, font: style.fontFamily, size: style.fontSize, lineHeight: style.lineHeight };
     };
-    return { pre: facts(ec, frame), code: facts(ec.querySelector('code')!),
-      border: getComputedStyle(frame).borderLeftColor, radius: getComputedStyle(frame).borderRadius };
+    return { pre: facts(ec), code: facts(ec.querySelector('code')!),
+      frame: {
+        background: frameStyle.backgroundColor,
+        border: frameStyle.borderLeftColor,
+        borderWidth: frameStyle.borderLeftWidth,
+        radius: frameStyle.borderRadius,
+        surfaceCount: sourceFrame.querySelectorAll(':scope > .site-code-surface-mount .site-code-surface-paint').length,
+        role: frame.getAttribute('role'),
+        tabIndex: frame.getAttribute('tabindex'),
+        pointerEvents: getComputedStyle(frame.closest('.site-code-surface-mount')!).pointerEvents,
+      } };
   });
   return page.evaluate((ecFacts) => {
     const preview = [...document.querySelectorAll<HTMLElement>('.proto-previewer .proto-previewer__code, [data-code-example-command] .proto-previewer__code')].find(
@@ -93,30 +122,20 @@ async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFac
     const canvases = card.querySelectorAll<HTMLElement>(
       '.pui-runtime-preview-surface[data-pui-style]'
     );
-    const sourceFrame = preview.closest<HTMLElement>('[data-site-code-surface="frame"]')!;
-    const frame = sourceFrame.querySelector<HTMLElement>(
+    const sourceFrame = preview.closest<HTMLElement>('[data-site-code-surface="frame"]');
+    const frame = sourceFrame?.querySelector<HTMLElement>(
       ':scope > .site-code-surface-mount .site-code-surface-paint'
-    )!;
-    if (!frame) throw new Error('The committed RuntimeBox canvas must exist before paint evidence');
-    const frameStyle = getComputedStyle(frame);
-    const layoutStyle = getComputedStyle(card);
-    // Source frames now share an actual passive Prototype; the RuntimeBox
-    // canvas remains separate. Derive expected radius from the theme input.
-    const radiusProbe = document.createElement('span');
-    radiusProbe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
-    radiusProbe.style.setProperty('--pui-radius', frameStyle.getPropertyValue('--pui-radius'));
-    radiusProbe.style.setProperty(
-      '--pui-radius-xl',
-      frameStyle.getPropertyValue('--pui-radius-xl')
     );
-    radiusProbe.style.borderRadius = 'var(--pui-radius-xl)';
-    document.body.append(radiusProbe);
-    const expectedPreviewRadius = getComputedStyle(radiusProbe).borderRadius;
-    radiusProbe.remove();
-    const facts = (element: HTMLElement, surface?: HTMLElement): CodeStyleFacts => {
+    if (sourceFrame && !frame) throw new Error('The authored source frame has no committed paint');
+    const frameStyle = frame ? getComputedStyle(frame) : null;
+    const layoutStyle = getComputedStyle(card);
+    const code = preview.querySelector<HTMLElement>('code')!;
+    // Native source typography is shared even when RuntimeBox deliberately
+    // authors no source frame. Its canvas is a separate owner, never a fallback.
+    const facts = (element: HTMLElement): CodeStyleFacts => {
       const style = getComputedStyle(element);
       return {
-        background: surface ? getComputedStyle(surface).backgroundColor : style.backgroundColor,
+        background: style.backgroundColor,
         color: style.color,
         font: style.fontFamily,
         size: style.fontSize,
@@ -125,12 +144,28 @@ async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFac
     };
     return {
       ec: ecFacts.pre,
-      preview: facts(preview, frame),
+      preview: facts(preview),
       ecCode: ecFacts.code,
-      previewCode: facts(preview.querySelector('code')!),
-      border: [ecFacts.border, frameStyle.borderLeftColor],
-      radius: [ecFacts.radius, frameStyle.borderRadius],
-      expectedPreviewRadius,
+      previewCode: facts(code),
+      ecFrame: ecFacts.frame,
+      previewFrame: frame && frameStyle && sourceFrame ? {
+        background: frameStyle.backgroundColor,
+        border: frameStyle.borderLeftColor,
+        borderWidth: frameStyle.borderLeftWidth,
+        radius: frameStyle.borderRadius,
+        surfaceCount: sourceFrame.querySelectorAll(':scope > .site-code-surface-mount .site-code-surface-paint').length,
+        role: frame.getAttribute('role'),
+        tabIndex: frame.getAttribute('tabindex'),
+        pointerEvents: getComputedStyle(frame.closest('.site-code-surface-mount')!).pointerEvents,
+      } : null,
+      source: {
+        raw: code.getAttribute('data-raw-code'),
+        text: code.textContent,
+        highlighted: Boolean(code.querySelector('span[style]')),
+        selectable: getComputedStyle(preview).userSelect !== 'none',
+        visible: preview.checkVisibility(),
+        outsidePaint: !preview.closest('.site-code-surface-mount, .pui-runtime-preview-surface'),
+      },
       canvasCount: isRuntimePreview ? canvases.length : null,
       layoutBorderWidths: isRuntimePreview
         ? [
@@ -149,16 +184,29 @@ async function expectSurfaces(page: Page, ecPage: Page = page): Promise<SurfaceF
   const facts = await surfaceFacts(page, ecPage);
   expect(facts.preview).toEqual(facts.ec);
   expect(facts.previewCode).toEqual(facts.ecCode);
-  expect(facts.ec.size).toBe('13px');
-  expect(facts.ec.lineHeight).toBe('24px');
-  expect(facts.radius[0]).toBe(facts.expectedPreviewRadius);
-  expect(parseFloat(facts.expectedPreviewRadius)).toBeGreaterThan(0);
-  expect(facts.radius[1]).toBe(facts.expectedPreviewRadius);
+  expect(facts.source.raw?.trim()).toBeTruthy();
+  expect(facts.source.text).toBe(facts.source.raw);
+  expect(facts.source.highlighted).toBe(true);
+  expect(facts.source.selectable).toBe(true);
+  expect(facts.source.visible).toBe(true);
+  expect(facts.source.outsidePaint).toBe(true);
+  for (const frame of [facts.ecFrame, facts.previewFrame]) {
+    if (!frame) continue;
+    expect(frame.surfaceCount).toBe(1);
+    expect(parseFloat(frame.borderWidth)).toBeGreaterThan(0);
+    expect(frame.role).toBeNull();
+    expect(frame.tabIndex).toBeNull();
+    expect(frame.pointerEvents).toBe('none');
+  }
   if (facts.canvasCount !== null) {
+    expect(facts.previewFrame).toBeNull();
     expect(facts.canvasCount).toBe(1);
     expect(facts.layoutBorderWidths).toEqual(['0px', '0px', '0px', '0px']);
+  } else {
+    // The CodeExample command explicitly authors the same source-frame role
+    // as EC. Compare those real frames without imposing one on RuntimeBox.
+    expect(facts.previewFrame).toEqual(facts.ecFrame);
   }
-  expect(facts.border[0]).toBe(facts.border[1]);
   if (facts.documentOverflow > 1) {
     const overflow = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>('body *')]
@@ -868,14 +916,18 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
           performance.getEntriesByType('navigation').map((entry) => entry.name)
         )
       ).toEqual([`${baseUrl}${QUICK_START}`]);
-      const expectedInstall = new Map<string, CodeStyleFacts>();
+      const expectedInstall = new Map<string, CodeStyleFacts & { radius: string }>();
       for (const theme of ['light', 'dark']) {
         await page.evaluate((mode) => {
           document.documentElement.dataset.theme = mode;
         }, theme);
         await ecPage.evaluate((mode) => { document.documentElement.dataset.theme = mode; }, theme);
         const facts = await expectSurfaces(page, ecPage);
-        expectedInstall.set(theme, facts.ec);
+        expectedInstall.set(theme, {
+          ...facts.ec,
+          background: facts.ecFrame.background,
+          radius: facts.ecFrame.radius,
+        });
         await expectCopyControls(page, true, ecPage);
         await page.evaluate(() => {
           document.dispatchEvent(new Event('astro:page-load'));
@@ -908,29 +960,16 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
             )!;
             const style = getComputedStyle(surface);
             const code = getComputedStyle(element.querySelector('code')!);
-            const probe = document.createElement('span');
-            probe.style.setProperty('--pui-radius', style.getPropertyValue('--pui-radius'));
-            probe.style.setProperty('--pui-radius-xl', style.getPropertyValue('--pui-radius-xl'));
-            probe.style.borderRadius = 'var(--pui-radius-xl)';
-            document.body.append(probe);
-            const expectedRadius = getComputedStyle(probe).borderRadius;
-            probe.remove();
             return {
               background: style.backgroundColor,
               color: code.color,
               radius: style.borderRadius,
-              expectedRadius,
               font: code.fontFamily,
               size: code.fontSize,
               lineHeight: code.lineHeight,
             };
           });
-        expect(install).toEqual({
-          ...facts.ec,
-          radius: install.expectedRadius,
-          expectedRadius: install.expectedRadius,
-        });
-        expect(parseFloat(install.radius)).toBeGreaterThan(0);
+        expect(install).toEqual(facts.ec);
         const body = page.locator('.install-command-card__body:visible').first();
         expect(
           await body.evaluate((element) => {

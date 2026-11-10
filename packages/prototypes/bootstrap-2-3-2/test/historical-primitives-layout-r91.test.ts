@@ -598,6 +598,8 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     document.body.append(form);
     await settle();
     expect(form.getExposes().getValues()).toEqual({ quantity: 2, code: '12' });
+    expect(separator.getAttribute('data-pui-style')).toContain('text-muted-foreground');
+    expect(separator.getAttribute('data-pui-style')).not.toContain('text-[#555]');
     expect(numberControl.querySelectorAll('input')).toHaveLength(1);
     expect(otpControl.querySelectorAll('input')).toHaveLength(1);
     await click(increment);
@@ -905,6 +907,8 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
       expect(root.getExposes().value.get()).toBe(25);
       expect(thumb.getExposes().value.get()).toBe(25);
       expect(value.textContent).toBe('Quarter');
+      expect(value.getAttribute('data-pui-style')).toContain('text-muted-foreground');
+      expect(value.getAttribute('data-pui-style')).not.toContain('text-[#555]');
       await update(root, {
         value: 75,
         valueText: 'Three quarters',

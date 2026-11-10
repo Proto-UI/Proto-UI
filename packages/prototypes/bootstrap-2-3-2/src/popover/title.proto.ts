@@ -12,7 +12,7 @@ export default definePrototype<PopoverTitleProps, PopoverTitleExposes>({
     const behavior = asPopoverTitle();
     def.feedback.style.use(
       tw(
-        'm-0 px-[14px] py-[8px] text-[14px] font-normal leading-[18px] bg-[#f7f7f7] border-b border-[#ebebeb] rounded-t-[5px]'
+        'm-0 px-[14px] py-[8px] text-[14px] font-normal leading-[18px] bg-secondary text-secondary-foreground border-b border-[#ebebeb] rounded-t-[5px]'
       )
     );
     return behavior.render;

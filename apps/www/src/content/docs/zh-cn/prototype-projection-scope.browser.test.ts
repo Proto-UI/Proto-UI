@@ -41,61 +41,87 @@ const EXPECTED_TASK_PROTOTYPES = {
     button: 'brutalist-button',
   },
 } as const;
-const GALLERY_PART_COUNTS = {
-  'button': 12,
-  'separator-root': 2,
-  'toggle': 4,
-  'checkbox-root': 4,
-  'checkbox-indicator': 4,
-  'label-root': 4,
-  'switch-root': 2,
-  'switch-thumb': 2,
-  'hover-card-root': 1,
-  'hover-card-trigger': 1,
-  'hover-card-content': 1,
-  'select-root': 1,
-  'select-trigger': 1,
-  'select-value': 1,
-  'select-content': 1,
-  'select-item': 3,
-  'textarea-root': 2,
-  'tabs-root': 1,
-  'tabs-list': 1,
-  'tabs-trigger': 2,
-  'tabs-content': 2,
-  'dialog-root': 1,
-  'dialog-trigger': 1,
-  'dialog-mask': 1,
-  'dialog-content': 1,
-  'dialog-header': 1,
-  'dialog-title': 1,
-  'dialog-description': 1,
-  'dialog-footer': 1,
-  'dialog-close': 2,
-  'dialog-close-icon': 1,
-  'dropdown-root': 1,
-  'dropdown-trigger': 1,
-  'dropdown-content': 1,
-  'dropdown-item': 2,
-  'command-root': 1,
-  'command-input': 1,
-  'command-content': 1,
-  'command-item': 4,
-  'command-empty': 1,
-  'progress-root': 1,
-  'progress-label': 1,
-  'progress-track': 1,
-  'progress-indicator': 1,
-  'progress-value': 1,
-  'slider-root': 1,
-  'slider-track': 1,
-  'slider-indicator': 1,
-  'slider-thumb': 1,
-  'accordion-root': 1,
-  'accordion-item': 3,
-  'accordion-heading': 3,
-  'accordion-trigger': 3,
-  'accordion-content': 3,
+// Independent task anatomy: actions, choices, editors and disclosure members
+// describe the intended compositions. Passive Text/Card/Surface wrappers can
+// change without changing a task, but must still retain its owner/coordinate.
+const GALLERY_TASK_PARTS = {
+  controls: {
+    button: 4,
+    toggle: 2,
+    'separator-root': 1,
+    'checkbox-root': 1,
+    'checkbox-indicator': 1,
+    'label-root': 1,
+    'switch-root': 1,
+    'switch-thumb': 1,
+  },
+  hover: { 'hover-card-root': 1, 'hover-card-trigger': 1, 'hover-card-content': 1 },
+  'workspace-command': {
+    'command-root': 1,
+    'command-input': 1,
+    'command-content': 1,
+    'command-item': 4,
+    'command-empty': 1,
+  },
+  'workspace-help': {
+    'accordion-root': 1,
+    'accordion-item': 3,
+    'accordion-heading': 3,
+    'accordion-trigger': 3,
+    'accordion-content': 3,
+  },
+  preferences: {
+    'select-root': 1,
+    'select-trigger': 1,
+    'select-value': 1,
+    'select-content': 1,
+    'select-item': 3,
+    'switch-root': 1,
+    'switch-thumb': 1,
+    'textarea-root': 1,
+    button: 2,
+  },
+  'workspace-progress': {
+    'progress-root': 1,
+    'progress-label': 1,
+    'progress-track': 1,
+    'progress-indicator': 1,
+    'progress-value': 1,
+    'slider-root': 1,
+    'slider-track': 1,
+    'slider-indicator': 1,
+    'slider-thumb': 1,
+    button: 1,
+  },
+  'workspace-analytics': { 'separator-root': 1 },
+  editor: {
+    'tabs-root': 1,
+    'tabs-list': 1,
+    'tabs-trigger': 2,
+    'tabs-content': 2,
+    toggle: 2,
+    'textarea-root': 1,
+    button: 1,
+  },
+  overlays: {
+    'dialog-root': 1,
+    'dialog-trigger': 1,
+    'dialog-mask': 1,
+    'dialog-content': 1,
+    'dialog-header': 1,
+    'dialog-title': 1,
+    'dialog-description': 1,
+    'dialog-footer': 1,
+    'dialog-close': 2,
+    'dialog-close-icon': 1,
+    'dropdown-root': 1,
+    'dropdown-trigger': 1,
+    'dropdown-content': 1,
+    'dropdown-item': 2,
+    'separator-root': 1,
+    button: 2,
+  },
+  choices: { 'checkbox-root': 3, 'checkbox-indicator': 3, 'label-root': 3, button: 1 },
 } as const;
 const TASK_PART_REFS = {
   'settings-view': 'select',
@@ -466,61 +492,91 @@ async function workspaceTask(
 
 async function assertTaskPartInventory(
   scope: Locator,
-  _content: Locator,
+  content: Locator,
   portal: Locator,
   expected: ProjectionCoordinate
 ): Promise<void> {
-  // These are the renderer's actual Prototype marker surfaces, not the content
-  // wrapper (which also carries the recipe root identity). The union deduplicates
-  // any still-in-tree portal and includes the content root after it is portaled.
   const ownerId = await scope.getAttribute('data-projection-scope');
-  const parts = scope
-    .page()
-    .locator(
-      `${attributeEquals('data-projection-owner', ownerId!)}${attributeEquals('data-projection-generation', expected.generation)}.pui-projection-prototype`
-    );
+  // Include physical descendants even if an owner/generation stamp is wrong.
+  // Include escaped owned parts and the real controlled Select portal too.
+  const parts = content
+    .locator('.pui-projection-prototype')
+    .or(
+      scope
+        .page()
+        .locator(`${attributeEquals('data-projection-owner', ownerId!)}.pui-projection-prototype`)
+    )
+    .or(portal)
+    .or(portal.locator('.pui-projection-prototype'));
   const family = expected.projectionFamilyId;
-  const expectedIds = [
-    ...Object.entries(GALLERY_PART_COUNTS).flatMap(([suffix, count]) =>
-      // Default disclosure state opens exactly one answer. WC retains the two
-      // closed authored hosts; React/Vue/Vue2 withdraw their non-overlay bodies.
-      Array(
-        suffix === 'button' && family === 'brutalist'
-          ? count - 1
-          : suffix === 'accordion-content' && expected.runtimeId !== 'wc'
-            ? 1
-            : count
-      ).fill(`${family}-${suffix}`)
-    ),
-    ...(family === 'shadcn'
-      ? [
-          ...Array(3).fill('shadcn-select-item-text'),
-          'shadcn-select-surface',
-          'shadcn-select-viewport',
-          'shadcn-select-group',
-          'shadcn-command-input-wrapper',
-          'shadcn-input-shell',
-        ]
-      : []),
-    ...(family === 'shadcn'
-      ? ['root', 'header', 'content'].flatMap((part) => Array(9).fill(`shadcn-card-${part}`))
-      : Array(9).fill('brutalist-surface-root')),
-    ...Array(expected.runtimeId === 'wc' ? 35 : 33).fill(`${family}-text-root`),
-  ].sort();
-  const actualIds = await parts.evaluateAll((elements) =>
-    elements.map((element) => element.getAttribute('data-projection-prototype')).sort()
-  );
-  expect(actualIds, 'all declared gallery instances, including closed/portaled parts').toEqual(
-    expectedIds
-  );
-  expect(new Set(actualIds).size, 'complete declared task recipe').toBe(
-    family === 'shadcn' ? 64 : 56
-  );
   await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
   const owners = await parts.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-projection-owner'))
   );
-  expect(owners, 'every task part retains scope ownership').toEqual(expectedIds.map(() => ownerId));
+  expect(
+    owners.every((owner) => owner === ownerId),
+    'every task part retains scope ownership'
+  ).toBe(true);
+  const passiveIds = [
+    `${family}-text-root`,
+    `${family}-surface-root`,
+    ...['root', 'header', 'content'].map((part) => `shadcn-card-${part}`),
+  ];
+  const actualIds = await parts.evaluateAll(
+    (elements, passive) =>
+      elements
+        .map((element) => element.getAttribute('data-projection-prototype') ?? '')
+        .filter((id) => !passive.includes(id))
+        .sort(),
+    passiveIds
+  );
+  const taskIds = await content.locator('[data-gallery-demo]').evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-gallery-demo')).sort()
+  );
+  expect(taskIds, 'each intended gallery task occurs once').toEqual(
+    Object.keys(GALLERY_TASK_PARTS).sort()
+  );
+  const expectedSemanticIds: string[] = [];
+  for (const [taskId, anatomy] of Object.entries(GALLERY_TASK_PARTS)) {
+    const task = content.locator(attributeEquals('data-gallery-demo', taskId));
+    const expectedIds = Object.entries(anatomy).flatMap(([suffix, count]) =>
+      Array(suffix === 'accordion-content' && expected.runtimeId !== 'wc' ? 1 : count)
+        .fill(`${family}-${suffix}`)
+    );
+    if (family === 'shadcn') {
+      if (taskId === 'preferences') {
+        expectedIds.push(
+          'shadcn-select-surface',
+          'shadcn-select-viewport',
+          'shadcn-select-group',
+          ...Array(3).fill('shadcn-select-item-text')
+        );
+      }
+      if (taskId === 'workspace-command') {
+        expectedIds.push('shadcn-command-input-wrapper', 'shadcn-input-shell');
+      }
+      // Shadcn's Dialog Trigger delegates to a composed Button; Brutalist's
+      // Trigger is itself the action. Both retain Cancel and Confirm actions.
+      if (taskId === 'overlays') expectedIds.push('shadcn-button');
+    }
+    let taskParts = task.locator('.pui-projection-prototype');
+    if (taskId === 'preferences') {
+      taskParts = taskParts.or(portal).or(portal.locator('.pui-projection-prototype'));
+    }
+    const taskIds = await taskParts.evaluateAll(
+      (elements, passive) =>
+        elements
+          .map((element) => element.getAttribute('data-projection-prototype') ?? '')
+          .filter((id) => !passive.includes(id))
+          .sort(),
+      passiveIds
+    );
+    expect(taskIds, `${taskId} complete semantic anatomy`).toEqual(expectedIds.sort());
+    expectedSemanticIds.push(...expectedIds);
+  }
+  expect(actualIds, 'no missing, duplicate or orphaned semantic task part').toEqual(
+    expectedSemanticIds.sort()
+  );
   expect(
     await portal.evaluate((element) => element.closest('[data-projection-content]') === null),
     'task Select content actually escapes the content DOM through its portal'

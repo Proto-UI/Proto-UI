@@ -317,6 +317,14 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
       const paints = [];
       for (const runtime of RUNTIMES) {
         expect(await host(runtime).getAttribute('data-mounted')).toBe('true');
+        const cardForeground = await page
+          .locator(`[data-runtime-card="${runtime}"]`)
+          .evaluate((element) => getComputedStyle(element).color);
+        observations.push({ runtime, theme, cardForeground });
+        // Consumer labels use the foreground paired with the family page surface.
+        expect(cardForeground).toBe(
+          theme === 'light' ? 'rgb(51, 51, 51)' : 'rgb(238, 238, 238)'
+        );
         const checkbox = await paint(part(runtime, 'checkbox'));
         const indicator = await paint(part(runtime, 'indicator'));
         const switchRoot = await paint(part(runtime, 'switch'));
@@ -339,6 +347,7 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           textarea,
           separator,
         };
+        observations.push({ runtime, theme, paints: facts });
         // Values are family source feedback, not another family's visual oracle:
         // packages/prototypes/bootstrap-2-3-2/src/{checkbox,switch,toggle,input,textarea,separator}.
         for (const value of [checkbox, switchRoot, thumb, toggle, input, textarea]) {
@@ -364,12 +373,20 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         for (const value of [input, textarea]) {
           expect(value.padding).toBe('4px 6px');
           expect(value.background).toBe('rgb(255, 255, 255)');
-          expect(value.color).toBe('rgb(51, 51, 51)');
+          // Pinned forms.less uses @gray, not body/button @grayDark:
+          // twbs/bootstrap@b4c4072679943773a7582daa63f545ba818fa627
+          // less/forms.less:81-87; less/variables.less:13 (@gray = #555).
+          expect(value.color).toBe('rgb(85, 85, 85)');
           expect(value.shadow).not.toBe('none');
         }
         expect(Number.parseFloat(textarea.height)).toBeGreaterThanOrEqual(64);
         expect(separator.height).toBe('1px');
-        expect(separator.background).toBe('rgb(204, 204, 204)');
+        // P-BOOTSTRAP-2-3-2-SEPARATOR-VISUAL defines the one-pixel family-border
+        // extension. theme.ts pairs border #ccc / #5a5a5a with its light/dark page.
+        expect(separator.background).toBe(
+          theme === 'light' ? 'rgb(204, 204, 204)' : 'rgb(90, 90, 90)'
+        );
+        expect(separator.border).toBe('0px');
         expect(
           await part(runtime, 'indicatorControlled').locator('svg path').getAttribute('d')
         ).toBe('M5 12H19');
@@ -377,7 +394,6 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           4
         );
         paints.push(facts);
-        observations.push({ runtime, theme, paints: facts });
       }
       for (const facts of paints.slice(1)) expect(facts).toEqual(paints[0]);
       expect(pageErrors).toEqual([]);
@@ -469,7 +485,18 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         const raised = await paint(toggle);
         await toggle.click();
         await expect.poll(() => toggle.getAttribute('aria-pressed')).toBe('true');
+        const activated = await paint(toggle);
+        observations.push({
+          runtime,
+          theme,
+          ref: 'toggle',
+          stage: 'activation-shadow-before-assertion',
+          raised,
+          activated,
+          styleTokens: await toggle.getAttribute('data-pui-style'),
+        });
         expect((await paint(toggle)).shadow).not.toBe(raised.shadow);
+        expect(activated.image).toBe('none');
         await toggle.press('Enter');
         await expect.poll(() => toggle.getAttribute('aria-pressed')).toBe('false');
         expect((await requests(runtime, 'toggle', 'activeChange')).length).toBe(2);
@@ -744,6 +771,13 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
       for (const orientation of ['vertical', 'horizontal', 'vertical', 'horizontal']) {
         await setProps(runtime, 'separator', { orientation });
         await expect.poll(() => separator.getAttribute('aria-orientation')).toBe(orientation);
+        observations.push({
+          runtime,
+          ref: 'separator',
+          stage: 'orientation-before-size-assertion',
+          orientation,
+          paint: await paint(separator),
+        });
         await expect
           .poll(
             async () => (await paint(separator))[orientation === 'vertical' ? 'width' : 'height']

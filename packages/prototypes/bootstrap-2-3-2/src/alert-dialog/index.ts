@@ -25,3 +25,5 @@ export type {
   AlertDialogMaskProps,
   AlertDialogMaskExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+
+export { default as alertDialogFooter } from './footer.proto';

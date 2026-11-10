@@ -278,7 +278,9 @@ it('replaces all nine recipes on the same open Select, portal, scrollport, calle
       expect(tokens(decoration)).toContain('backdrop-filter-[blur(40px)_saturate(1.5)]');
       expect(tokens(m.separator)).toContain('bg-foreground/5');
       expect(tokens(m.items[0]!)).toContain('bg-foreground/10');
-      expect(tokens(m.surface)).toContain(recipe.profile === 'mira' ? 'min-w-32' : 'min-w-36');
+      expect(tokens(m.surface)).toContain('min-w-0');
+      expect(tokens(m.surface)).not.toContain('min-w-36');
+      expect(tokens(m.surface)).not.toContain('min-w-32');
     }
   }
   expect(changes).toBe(0);

@@ -172,3 +172,22 @@
   border-color: var(--site-brutalist-foreground);
   box-shadow: none;
 }
+
+/* The Bootstrap page uses its own explicit dark adaptation, independently of
+   the preserved Shadcn bank used while staging another projection family. */
+:root[data-site-library-family='bootstrap-2-3-2'],
+[data-site-family-scope][data-site-library-family='bootstrap-2-3-2'] {
+  --color-background: var(--site-bootstrap-background);
+  --color-foreground: var(--site-bootstrap-foreground);
+  --color-secondary: var(--site-bootstrap-secondary);
+  --color-secondary-foreground: var(--site-bootstrap-secondary-foreground);
+  --color-muted: var(--site-bootstrap-muted);
+  --color-muted-foreground: var(--site-bootstrap-muted-foreground);
+  --color-border: var(--site-bootstrap-border);
+  --color-ring: var(--site-bootstrap-ring);
+  --sl-color-text: var(--site-bootstrap-foreground);
+  --sl-color-bg: var(--site-bootstrap-background);
+  --sl-color-bg-nav: var(--site-bootstrap-background);
+  --sl-color-bg-sidebar: var(--site-bootstrap-background);
+  --sl-color-hairline: var(--site-bootstrap-border);
+}

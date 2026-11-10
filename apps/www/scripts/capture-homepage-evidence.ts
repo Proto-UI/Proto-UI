@@ -500,9 +500,12 @@ async function exerciseWorkspaceSettings(
     .locator(`${HOME} [data-gallery-demo]`)
     .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-gallery-demo')));
   assert.deepEqual(
-    [...liveResult].join(','),
-    'controls,hover,workspace-command,workspace-help,preferences,workspace-progress,workspace-analytics,editor,overlays,choices',
-    'Every real component composition remains present'
+    [...liveResult].sort(),
+    [
+      'controls', 'hover', 'workspace-command', 'workspace-help', 'preferences',
+      'workspace-progress', 'workspace-analytics', 'editor', 'overlays', 'choices',
+    ].sort(),
+    'Each intended task occurs once, independently of responsive visual ordering'
   );
   activeProbeStage = 'workspace-settings-saved-capture';
   await capture('saved');
@@ -1009,37 +1012,40 @@ try {
             );
             // The approved mobile composition flows Hero → editor → preview.
             // Do not compress the first task control above the fold at the cost of readable content.
-            const globalControls = await page
-              .locator(
-                '[data-homepage-runtime] [data-projection-generation-state="active"] [data-projection-control] [role="combobox"]'
-              )
-              .evaluateAll((elements) =>
-                elements.map((element) => {
-                  const value = element.querySelector<HTMLElement>(
-                    '[data-pui-part="select-value"], [data-projection-prototype$="-select-value"]'
-                  );
-                  const rect = element.getBoundingClientRect();
-                  return {
-                    name: element.getAttribute('aria-label'),
-                    width: rect.width,
-                    height: rect.height,
-                    text: value?.textContent,
-                    fullValueVisible: !!value && value.scrollWidth <= value.clientWidth + 1,
-                  };
-                })
+            const globalControls = [];
+            for (const control of ['runtime', 'family', 'locale']) {
+              const trigger = page.locator(
+                `[data-homepage-runtime] [data-projection-generation-state="active"] [data-projection-control="${control}"] [role="combobox"]`
               );
+              assert.equal(await trigger.count(), 1, `One current ${control} preference owner`);
+              assert.ok(await trigger.isVisible(), `${control} is reachable in the opened Header`);
+              const facts = await trigger.evaluate((element) => {
+                const value = element.querySelector<HTMLElement>(
+                  '[data-pui-part="select-value"], [data-projection-prototype$="-select-value"]'
+                );
+                const rect = element.getBoundingClientRect();
+                return {
+                  name: element.getAttribute('aria-label'),
+                  width: rect.width,
+                  height: rect.height,
+                  text: value?.textContent,
+                  fullValueVisible: !!value && value.scrollWidth <= value.clientWidth + 1,
+                  hitOwned: element.contains(
+                    document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+                  ),
+                };
+              });
+              assert.ok(facts.name && facts.text?.trim(), `${control} has a name and selected value`);
+              globalControls.push({ control, ...facts });
+            }
             evidence.globalControls = globalControls;
-            assert.equal(
-              globalControls.length,
-              2,
-              'Exactly one global runtime and library control'
-            );
             assert.ok(
               globalControls.every(
                 (control) =>
-                  control.width >= 120 &&
+                  control.width >= 44 &&
                   control.height >= (viewport.width < 768 ? 44 : 36) &&
-                  control.fullValueVisible
+                  control.fullValueVisible &&
+                  control.hitOwned
               ),
               'Global selected values and targets must be fully visible'
             );

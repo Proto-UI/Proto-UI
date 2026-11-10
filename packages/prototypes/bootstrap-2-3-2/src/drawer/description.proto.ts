@@ -9,6 +9,6 @@ export default definePrototype<DrawerDescriptionProps, DrawerDescriptionExposes>
   name: 'bootstrap-2-3-2-drawer-description',
   setup(def) {
     asDrawerDescription();
-    def.feedback.style.use(tw('p-[15px] text-[14px] leading-[20px] text-[#333]'));
+    def.feedback.style.use(tw('p-[15px] text-[14px] leading-[20px] text-foreground'));
   },
 });

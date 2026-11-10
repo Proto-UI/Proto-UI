@@ -320,3 +320,33 @@ it('matches ordinary reading TOC geometry without shrinking mobile variants or S
     expect(linkTextProps('toc', idle, family, undefined, true).leading).toBe('size');
   }
 });
+
+it('uses each family ordinary Button appearance for native CTA links', () => {
+  for (const emphasis of ['primary', 'secondary'] as const) {
+    const props = linkSurfaceProps('bootstrap-2-3-2', 'action', emphasis);
+    expect(props).toMatchObject({
+      actionProfile: 'button',
+      radius: 'default',
+      border: 'all',
+      elevation: 'raised',
+    });
+    expect(props.variant).toBe(emphasis === 'primary' ? 'solid' : 'secondary');
+    expect(linkSurfaceLayout('bootstrap-2-3-2', 'action', emphasis)).toMatchObject({
+      minHeight: '30px',
+      padding: '4px 12px',
+      whiteSpace: 'normal',
+      pointerEvents: 'none',
+    });
+    expect(linkTextProps('action', idle, 'bootstrap-2-3-2')).toMatchObject({
+      size: 'base',
+      leading: 'size',
+      weight: 'normal',
+      tone: 'inherit',
+    });
+  }
+  expect(linkSurfaceProps('shadcn', 'action', 'primary')).toMatchObject({ actionProfile: 'luma' });
+  expect(linkSurfaceProps('brutalist', 'action', 'primary')).not.toHaveProperty(
+    'actionProfile',
+    'button'
+  );
+});

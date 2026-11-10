@@ -14,7 +14,7 @@ criteria:
             en: Invoke asHoverCardTrigger() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-TRIGGER-VISUAL
     text:
-            en: 'Trigger uses the pinned link recipe: #08c rest with no underline, #005580 plus underline on hover/focus. It supplies hover/focus intent without owning link navigation.'
+            en: 'Trigger retains the pinned #08c resting link color without underline. The Proto UI light/dark adaptation uses readable semantic foreground plus underline on hover/focus rather than the light-only historical #005580. It supplies hover/focus intent without owning link navigation.'
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-TRIGGER-CLOSURE
     text:
             en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
@@ -42,6 +42,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Bootstrap 2.3.2 Hover Card Trigger Hover Card projection cataloged as a draft family projection over the implemented source slice.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Explicitly define readable semantic hover/focus ink for the Proto UI dark adaptation; retain Base intent and native link ownership.
 tags:
   - prototype
   - bootstrap-2-3-2

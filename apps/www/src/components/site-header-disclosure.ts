@@ -109,10 +109,14 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (preferences.parentElement === parent) return;
     // Move the complete mount owner, never its renderer-created children. In
     // particular, both homepage Selects retain one owner and one set of IDs.
-    parent.insertBefore(
-      preferences,
-      !compactLayout && preferencesNext?.parentNode === parent ? preferencesNext : null
-    );
+    const before =
+      !compactLayout && preferencesNext?.parentNode === parent ? preferencesNext : null;
+    const move = (
+      parent as HTMLElement & { moveBefore?: (node: Node, before: Node | null) => void }
+    ).moveBefore;
+    if (typeof move === 'function' && preferences.isConnected && parent.isConnected)
+      move.call(parent, preferences, before);
+    else parent.insertBefore(preferences, before);
   };
   const panelProperties = [
     '--site-header-panel-left',
@@ -216,7 +220,12 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (panel) panel.hidden = enhanced && !open;
     if (settings) settings.hidden = enhanced && !open;
     if (enhanced) movePreferences(compactLayout);
-    if (focusInPreferences && focused?.isConnected && !focused.closest('[hidden], [inert]'))
+    if (
+      focusInPreferences &&
+      document.activeElement !== focused &&
+      focused?.isConnected &&
+      !focused.closest('[hidden], [inert]')
+    )
       focused.focus({ preventScroll: true });
     for (const button of buttons) {
       button.setAttribute('aria-expanded', String(open));

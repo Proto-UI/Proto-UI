@@ -1,4 +1,4 @@
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asFieldSelectTrigger,
   type FieldSelectTriggerAsHookContract,
@@ -7,6 +7,7 @@ import {
 } from '@proto.ui/prototypes-base/field';
 import type { Bootstrap232SelectTriggerProps } from '../select/types';
 import { setupSelectTriggerVisual } from '../select/trigger-visual';
+import { bootstrapLightControlInvalidPaint } from '../input/visual';
 
 export type Bootstrap232FieldSelectTriggerProps = FieldSelectTriggerProps &
   Bootstrap232SelectTriggerProps;
@@ -27,6 +28,12 @@ export default definePrototype<
     const binding = trigger.getAsHookHandle!('as-optional-field-control');
     if (!trigger.stateHandles || !binding)
       throw new Error('[bootstrap-2-3-2-field-select-trigger] Missing Base/Field facts');
-    return setupSelectTriggerVisual(def, trigger.stateHandles, binding.state.invalid);
+    // Keep this Rule beside its existing public Field binding so the family
+    // source collector can retain the emitted invalid selector.
+    def.rule({
+      when: (w) => w.state(binding.state.invalid).eq(true),
+      intent: (i) => i.feedback.style.use(tw(bootstrapLightControlInvalidPaint)),
+    });
+    return setupSelectTriggerVisual(def, trigger.stateHandles);
   },
 });

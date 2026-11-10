@@ -14,9 +14,9 @@ Inputs are one immutable host-local coordinate-space sample: layout viewport, re
 
 ### Initial inline plan
 
-LTR: d = text.left − surface.left; desired = value.left − d; minimum = trigger.width + trigger.left − desired.
+Without a size-matched block target: desired is trigger.left in LTR or viewport.width − trigger.right in RTL; minimum is trigger.width.
 
-RTL: d = surface.right − text.right; desired = viewport.width − value.right − d; minimum = trigger.width + viewport.width − trigger.right − desired.
+With a size-matched block target: d is the target border-box logical starting inset inside Surface (including surrounding chrome, never ItemText); desired is the same reference inset minus d. Minimum is max(trigger.width, requested target width plus measured outer chrome). The matching target's width and height are prepared before sampling these facts. This 2026-11-09 current-user-directed in-place contour policy supersedes popup-only equality while retaining the ordinary unsized plan.
 
 For both, extent = max(minimum, surface.width); inset = clamp(desired, M, max(M, viewport.width − M − extent)). Return logical left/right inset and minimum inline span. Oversize content can overflow its ending edge; do not clamp both edges. RTL conversion to physical left requires final actual frame width and remains host-owned.
 

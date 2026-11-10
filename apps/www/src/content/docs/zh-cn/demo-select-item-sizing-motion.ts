@@ -18,6 +18,9 @@ export interface SizingMotionSample {
   surface: SizingMotionBox;
   viewport: SizingMotionBox;
   items: SizingMotionBox[];
+  alignedIndex: number;
+  selectedIndices: number[];
+  disabledIndices: number[];
   animations: Array<{
     target: string;
     name: string | null;
@@ -28,6 +31,7 @@ export interface SizingMotionSample {
   }>;
   focused: boolean;
 }
+export type SizingMotionSelection = 'unset' | 'selected';
 export interface SizingMotionResult {
   status:
     | 'settled'
@@ -38,6 +42,7 @@ export interface SizingMotionResult {
     | 'stopped'
     | 'frame-cap'
     | 'error';
+  selection: SizingMotionSelection;
   startedAt: number;
   endedAt: number;
   samples: SizingMotionSample[];
@@ -51,7 +56,10 @@ export interface SizingMotionHandle {
 export type SizingMotionTrigger = HTMLElement & { __puiSizingMotion?: SizingMotionHandle };
 
 // All runtime dependencies are inside this function: Playwright serializes it into the page.
-export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMotionHandle {
+export function installSizingMotionTrace(
+  trigger: SizingMotionTrigger,
+  selection: SizingMotionSelection
+): SizingMotionHandle {
   trigger.__puiSizingMotion?.stop();
   const doc = trigger.ownerDocument;
   const win = doc.defaultView!;
@@ -97,6 +105,7 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
     timer = null;
     resolve({
       status: status === 'settled' && (!frameClean || !timerClean) ? 'error' : status,
+      selection,
       startedAt,
       endedAt: win.performance.now(),
       samples,
@@ -234,6 +243,22 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
         endTime: Number(animation.effect?.getComputedTiming().endTime ?? NaN),
       }));
       const focused = items.includes(doc.activeElement as HTMLElement);
+      const selectedIndices: number[] = [];
+      const disabledIndices: number[] = [];
+      for (const [index, item] of items.entries()) {
+        if (item.getAttribute('aria-selected') === 'true') selectedIndices.push(index);
+        if (item.getAttribute('aria-disabled') === 'true') disabledIndices.push(index);
+      }
+      // P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT permits an unset value
+      // to align the first enabled row. Navigation must leave selection unset.
+      // The caller declares that initial state; a missing selected row in a
+      // committed-value phase must never acquire this fallback.
+      const alignedIndex =
+        selection === 'unset'
+          ? items.findIndex((_, index) => !disabledIndices.includes(index))
+          : selectedIndices.length === 1
+            ? selectedIndices[0]
+            : -1;
       // Every box and animation is read in the same callback, with one timestamp.
       samples.push({
         at: win.performance.now(),
@@ -244,6 +269,9 @@ export function installSizingMotionTrace(trigger: SizingMotionTrigger): SizingMo
         surface: box(surface),
         viewport: box(viewport),
         items: items.map(box),
+        alignedIndex,
+        selectedIndices,
+        disabledIndices,
         animations,
         focused,
       });
@@ -306,17 +334,31 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       )
     )
       issues.push('unexpected additional transform');
-    // #1330 retired the row border-box lease. The popup matches the Trigger;
-    // rows are full-width flow children inside group chrome (rhea p-1 is 8px).
     if (
-      !near(sample.content.layoutWidth, sample.trigger.layoutWidth) ||
-      !near(sample.surface.layoutWidth, sample.trigger.layoutWidth)
+      sample.selectedIndices.length !== (result.selection === 'unset' ? 0 : 1) ||
+      sample.alignedIndex !== result.samples[0].alignedIndex ||
+      sample.disabledIndices.includes(sample.alignedIndex) ||
+      (result.selection === 'unset' &&
+        sample.alignedIndex !==
+          sample.items.findIndex((_, index) => !sample.disabledIndices.includes(index))) ||
+      (result.selection === 'selected' && sample.selectedIndices[0] !== sample.alignedIndex)
     )
-      issues.push('popup width is not the trigger');
+      issues.push('selection/alignment mismatch during motion');
+    // In-place certifies the semantic alignment row, including the initial
+    // first-enabled candidate, while preserving the committed selection census.
+    const aligned = sample.items[sample.alignedIndex];
+    if (
+      !aligned ||
+      !near(aligned.layoutWidth, sample.trigger.layoutWidth) ||
+      !near(aligned.layoutHeight, sample.trigger.layoutHeight)
+    )
+      issues.push('layout mismatch during motion');
+    if (
+      !near(sample.content.layoutWidth, sample.surface.layoutWidth) ||
+      sample.surface.layoutWidth < sample.trigger.layoutWidth - 0.5
+    )
+      issues.push('popup cannot contain the matched row');
     for (const item of sample.items) {
-      const inset = sample.trigger.layoutWidth - item.layoutWidth;
-      if (!near(item.layoutHeight, sample.trigger.layoutHeight) || inset < -0.5 || inset > 8.5)
-        issues.push('layout mismatch during motion');
       if (
         !near(item.width, item.layoutWidth * scale) ||
         !near(item.height, item.layoutHeight * scale)

@@ -60,6 +60,19 @@ function expansion(overrides: Partial<Parameters<typeof reduceScrollExpansion>[0
 }
 
 describe('target alignment requested initial plans (fixed 2.2.6 source vectors)', () => {
+  it.each(['ltr', 'rtl'] as const)(
+    'aligns the sized target border box, outside its chrome (%s)',
+    (direction) => {
+      const m = metrics();
+      const p = plan({
+        ...m,
+        direction,
+        target: { ...m.target, inlineStartInset: 5, minimumOuterInlineSpan: 170 },
+      });
+      expect(p.inline.minimumSpan).toBe(170);
+      expect(p.inline.inset).toBe(direction === 'ltr' ? 95 : 735);
+    }
+  );
   it('keeps initial surface alignment normal, with LTR min width160/left100 and target center320', () => {
     const p = plan();
     expect(p).toEqual({

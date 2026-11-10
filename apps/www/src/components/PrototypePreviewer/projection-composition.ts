@@ -805,6 +805,7 @@ export function createProjectionComposition(
 
   let locked = options.locked === true;
   let eventGateOpen = options.eventGateOpen ?? !locked;
+  let controlAcceptanceEpoch = 0;
   let themeSurfaceStyle = options.themeSurfaceStyle
     ? copyThemeSurfaceStyle(options.themeSurfaceStyle)
     : undefined;
@@ -1018,13 +1019,23 @@ export function createProjectionComposition(
         const handleValueChange = (value: string | undefined) => {
           if (value === undefined) return;
           if (activeContext !== context) return;
-          // Close before callbacks can begin an async generation replacement.
-          if (!(id === 'runtime' && runtimeTabs))
-            context.api.call(rootRef, 'close', 'projection control valueChange');
           if (locked || !eventGateOpen) return;
           const control = options.controls[id] as ProjectionControlConfig<string>;
           if (!control.options.some((option) => option.value === value && !option.disabled)) return;
-          control.onValueChange(value);
+          // Item finishes its public close-on-select and Trigger handback after
+          // valueChange returns. Replacing or disabling its owner inside that
+          // signal would cancel the close request and lose its focus origin.
+          const acceptanceEpoch = controlAcceptanceEpoch;
+          queueMicrotask(() => {
+            if (
+              activeContext !== context ||
+              acceptanceEpoch !== controlAcceptanceEpoch ||
+              locked ||
+              !eventGateOpen
+            )
+              return;
+            control.onValueChange(value);
+          });
         };
         if (options.runtimeId === 'wc') {
           // Web Components expose protocol events as bubbling CustomEvents.
@@ -1371,10 +1382,12 @@ export function createProjectionComposition(
   return {
     demo,
     setLocked(nextLocked) {
+      if (nextLocked) controlAcceptanceEpoch++;
       locked = nextLocked;
       if (activeContext) applyLocked(activeContext);
     },
     setEventGateOpen(open) {
+      if (!open) controlAcceptanceEpoch++;
       eventGateOpen = open;
     },
     setThemeSurfaceStyle(nextThemeSurfaceStyle) {
@@ -1394,7 +1407,6 @@ export function createProjectionComposition(
       const trigger = activeContext.refs[triggerRef];
       if (!trigger) return false;
       activeContext.api.call(triggerRef, 'focusSelf', { reason: 'programmatic' });
-      if (trigger.ownerDocument.activeElement !== trigger) trigger.focus();
       return true;
     },
   };

@@ -504,6 +504,9 @@ async function linkPaint(link: Locator) {
       textTokens: (textSurface?.getAttribute('data-pui-style') ?? '').split(/\s+/),
       background: style.backgroundColor,
       shadow: style.boxShadow,
+      paintSettled: surface
+        .getAnimations()
+        .every((animation) => !animation.pending && animation.playState === 'finished'),
       transform: style.transform,
       weight: textStyle.fontWeight,
       font: textStyle.fontFamily,
@@ -656,11 +659,30 @@ async function assertSocialPaint(
   await first.focus();
   await page.keyboard.press('Tab');
   expect(await links.nth(1).evaluate((anchor) => anchor === document.activeElement)).toBe(true);
-  const unfocused = await linkPaint(first);
   const focusToken = family === 'brutalist' ? 'ring-2' : 'ring-3';
+  // Token admission can precede the real Surface transition endpoint. Retain
+  // both painted endpoints within the existing 1s paint-observation budget.
+  await expect
+    .poll(
+      async () => {
+        const paint = await linkPaint(first);
+        return !paint.tokens.includes(focusToken) && paint.paintSettled;
+      },
+      { timeout: 1_000 }
+    )
+    .toBe(true);
+  const unfocused = await linkPaint(first);
   expect(unfocused.tokens).not.toContain(focusToken);
   await page.keyboard.press('Shift+Tab');
-  await expect.poll(async () => (await linkPaint(first)).tokens).toContain(focusToken);
+  await expect
+    .poll(
+      async () => {
+        const paint = await linkPaint(first);
+        return paint.tokens.includes(focusToken) && paint.paintSettled;
+      },
+      { timeout: 1_000 }
+    )
+    .toBe(true);
   const focused = await linkPaint(first);
   expect(focused.focused).toBe(true);
   if (family === 'brutalist') {
@@ -733,10 +755,26 @@ async function assertNavigationFocus(page: Page, link: Locator) {
   await page.mouse.move(0, 0);
   await link.focus();
   await page.keyboard.press('Tab');
-  await expect.poll(async () => (await linkPaint(link)).tokens).not.toContain('ring-2');
+  await expect
+    .poll(
+      async () => {
+        const paint = await linkPaint(link);
+        return !paint.tokens.includes('ring-2') && paint.paintSettled;
+      },
+      { timeout: 1_000 }
+    )
+    .toBe(true);
   const baseline = await linkPaint(link);
   await page.keyboard.press('Shift+Tab');
-  await expect.poll(async () => (await linkPaint(link)).tokens).toContain('ring-2');
+  await expect
+    .poll(
+      async () => {
+        const paint = await linkPaint(link);
+        return paint.tokens.includes('ring-2') && paint.paintSettled;
+      },
+      { timeout: 1_000 }
+    )
+    .toBe(true);
   const observed = await linkPaint(link);
   expect(observed.focused).toBe(true);
   expect(observed.tokens).toEqual(

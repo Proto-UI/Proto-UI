@@ -7,7 +7,7 @@ lifecycleRationale:
   en: New passive family anatomy is draft until the real homepage consumer, four-Web interaction and independent review establish the projection.
 summary: A passive modal-header wrapper with the pinned Bootstrap border and spacing recipe.
 statement:
-  en: Header claims the existing Dialog header anatomy role and projects its authored slot. It owns no title relationship, close behavior or second interaction state.
+  en: Header claims the existing Dialog header anatomy role and projects its authored slot. It owns no title relationship, close behavior or second interaction state. Modal surfaces and footer colors use paired semantic palette tokens so nested public components remain readable. Dark appearance is a Proto adaptation; fixed white footer highlights are omitted.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-HEADER-COMPOSITION
     text:

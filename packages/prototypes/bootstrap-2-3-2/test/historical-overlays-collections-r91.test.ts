@@ -39,6 +39,7 @@ const prototypes = [
   alert.alertDialogDescription,
   alert.alertDialogCancel,
   alert.alertDialogAction,
+  alert.alertDialogFooter,
   popover.popoverRoot,
   popover.popoverTrigger,
   popover.popoverContent,
@@ -161,7 +162,9 @@ function alertFixture(props: Record<string, unknown> = {}) {
   const description = node(alert.alertDialogDescription, {}, 'This action cannot be undone.');
   const cancel = node(alert.alertDialogCancel, {}, 'Cancel');
   const action = node(alert.alertDialogAction, {}, 'Confirm deletion');
-  content.append(title, description, cancel, action);
+  const footer = node(alert.alertDialogFooter);
+  footer.append(cancel, action);
+  content.append(title, description, footer);
   root.append(trigger, mask, content);
   document.body.append(root);
   return { root, trigger, mask, content, title, description, cancel, action };

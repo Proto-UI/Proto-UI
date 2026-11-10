@@ -6,6 +6,7 @@ import {
   bootstrapButtonFlatFill,
   bootstrapButtonPressedFill,
   bootstrapButtonRaised,
+  bootstrapButtonDefaultSize,
   bootstrapButtonPressed,
 } from './paint';
 
@@ -57,7 +58,7 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     // v2.3.2 keeps a 20px line height in every size. All size-dependent
     // dimensions are exclusive rules, including default, so no size competes.
     const sizes = {
-      default: 'px-[12px] py-[4px] text-[14px] rounded-[4px]',
+      default: bootstrapButtonDefaultSize,
       large: 'px-[19px] py-[11px] text-[17.5px] rounded-[6px]',
       small: 'px-[10px] py-[2px] text-[11.9px] rounded-[3px]',
       mini: 'px-[6px] py-[0px] text-[10.5px] rounded-[3px]',

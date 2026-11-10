@@ -70,7 +70,8 @@ it('repaints a live portal through the logical scope without replacing caller op
     expect(root.getExposes().open.get()).toBe(true);
     if (profile === 'rhea') {
       expect(tokens(surface)).toContain('bg-popover/70');
-      expect(tokens(surface)).toContain('min-w-36');
+      expect(tokens(surface)).toContain('min-w-0');
+      expect(tokens(surface)).not.toContain('min-w-36');
       expect(tokens(surface)).not.toMatch(/(?:^|\s)border(?:\s|$)/);
       expect(tokens(leaf)).toContain('backdrop-filter-[blur(40px)_saturate(1.5)]');
       expect(tokens(item)).toContain('rounded-[var(--pui-radius-xl)]');
@@ -93,6 +94,17 @@ it('repaints a live portal through the logical scope without replacing caller op
   expect(tokens(content.querySelector('[data-pui-owned-decoration]')!)).toContain(
     'backdrop-filter-'
   );
+  setElementProps(content, { position: 'popper' });
+  await settle();
+  expect(tokens(surface)).toContain('min-w-36');
+  expect(tokens(surface)).toContain('w-[var(--proto-ui-anchor-width)]');
+  expect(tokens(surface)).not.toContain('min-w-0');
+  setElementProps(content, { position: 'item-aligned' });
+  await settle();
+  expect(tokens(surface)).toContain('min-w-0');
+  expect(tokens(surface)).toContain('w-full');
+  expect(tokens(surface)).not.toContain('min-w-36');
+  expect(tokens(surface)).not.toContain('w-[var(--proto-ui-anchor-width)]');
 });
 
 it('rejects live Rhea on legacy Content-only rather than silently omitting the translucent Surface', async () => {

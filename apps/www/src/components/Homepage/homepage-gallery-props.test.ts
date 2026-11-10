@@ -85,11 +85,11 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
     verify();
     const assertTextOwners = (owners: Element[]) => {
       // Direct WC rendering retains authored boxes inside detached content hosts.
-      expect(owners).toHaveLength(37);
-      expect(new Set(owners).size).toBe(37);
+      expect(owners).toHaveLength(52);
+      expect(new Set(owners).size).toBe(52);
       expect(
         owners.filter((owner) => !owner.closest('[data-gallery-demo^="workspace-"]'))
-      ).toHaveLength(24);
+      ).toHaveLength(26);
       const scenes = {
         'workspace-command': [
           'What comes next?',
@@ -103,7 +103,20 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const) {
         ],
         'workspace-analytics': [
           'Plan rhythm',
-          'Sample data · follows this page’s plan, not live visitor statistics.',
+          'Six stages. One idea taking shape.',
+          '40%',
+          'Plan complete',
+          'Idea',
+          'Plan',
+          'Build',
+          'Refine',
+          'Review',
+          'Done',
+          'Up next',
+          'Build a prototype',
+          'Still to explore',
+          '60%',
+          'Sample data · linked to this page’s plan',
         ],
         'workspace-help': [
           'A little help along the way',

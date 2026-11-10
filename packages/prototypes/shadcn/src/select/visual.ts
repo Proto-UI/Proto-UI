@@ -30,7 +30,7 @@ export function setupSelectPaint<Props extends ShadcnStyleProps, Exposes = Recor
     intent: (i) =>
       i.feedback.style.use(
         tw(
-          'relative z-50 flex flex-col box-border min-w-[8rem] max-h-full overflow-x-hidden overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none duration-150'
+          'relative z-50 flex flex-col box-border max-h-full overflow-x-hidden overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none duration-150'
         )
       ),
   });
@@ -41,6 +41,28 @@ export function setupSelectPaint<Props extends ShadcnStyleProps, Exposes = Recor
       intent: (i) => i.feedback.style.use(SELECT_SURFACE_STYLE[profile]),
     });
   }
+  def.rule({
+    when: (w) => w.all(w.state(position).eq('popper'), w.state(style).eq('new-york-v4')),
+    intent: (i) => i.feedback.style.use(tw('min-w-[8rem]')),
+  });
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.all(w.state(position).eq('popper'), w.state(style).eq(profile)),
+      intent: (i) =>
+        i.feedback.style.use(
+          profile === 'mira'
+            ? tw('min-w-32 w-[var(--proto-ui-anchor-width)]')
+            : tw('min-w-36 w-[var(--proto-ui-anchor-width)]')
+        ),
+    });
+  }
+  // In-place sizing belongs to the selected row. The host includes Group,
+  // Viewport and border gutters in the containing frame, outside that row.
+  // A family minimum popup width must not enlarge a narrower Trigger's row.
+  def.rule({
+    when: (w) => w.state(position).eq('item-aligned'),
+    intent: (i) => i.feedback.style.use(tw('min-w-0 w-full')),
+  });
   for (const profile of ['luma', 'rhea'] as const) {
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),

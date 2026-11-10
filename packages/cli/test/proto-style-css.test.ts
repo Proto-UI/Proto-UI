@@ -30,6 +30,18 @@ const STYLE_CSS_LANES: ReadonlyArray<{
   },
 ];
 
+describe('Bootstrap light-control error ink closure', () => {
+  for (const { target, render } of STYLE_CSS_LANES) {
+    it(`${target} translates the finite dark error ink and its invalid variant`, () => {
+      const css = render(['text-[#953b39]', 'data-[invalid]:text-[#953b39]']);
+      expect(css).toContain('color: #953b39;');
+      expect(css).toContain('[data-invalid]');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['text-[#953b38]'])).toContain('Unsupported Proto UI style tokens');
+    });
+  }
+});
+
 function splitSurfaceSelector(token: string): string {
   return `:host([data-pui-split-root-style~="${token}"]) > [data-pui-split-surface][data-pui-style~="${token}"]`;
 }

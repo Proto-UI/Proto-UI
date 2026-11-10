@@ -1,4 +1,4 @@
-import { tw, type DefHandle, type RenderFn, type State } from '@proto.ui/core';
+import { tw, type DefHandle, type RenderFn } from '@proto.ui/core';
 import type { SelectTriggerAsHookContract } from '@proto.ui/prototypes-base/select';
 import type { Bootstrap232SelectTriggerProps } from './types';
 import { setupButtonVisual } from '../button/visual';
@@ -12,8 +12,7 @@ import { setupButtonVisual } from '../button/visual';
  */
 export function setupSelectTriggerVisual(
   def: DefHandle<Bootstrap232SelectTriggerProps>,
-  state: SelectTriggerAsHookContract['state'],
-  invalid?: State<boolean>
+  state: SelectTriggerAsHookContract['state']
 ): RenderFn {
   setupButtonVisual(def, state);
   // The custom Select keeps long labels readable; its historical .btn paint
@@ -21,12 +20,6 @@ export function setupSelectTriggerVisual(
   def.feedback.style.use(
     tw('min-w-0 max-w-full justify-between gap-[2px] whitespace-normal text-start')
   );
-  if (invalid) {
-    def.rule({
-      when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-destructive text-destructive')),
-    });
-  }
   return (renderer) => [
     renderer.r.slot(),
     renderer.el(

@@ -446,7 +446,9 @@
   line-height: 1rem;
   color: var(--color-muted-foreground);
 }
-@media (max-width: 79.999rem) {
+/* PageFrame's existing Header container measures available space at the
+   current text size; viewport media rems keep their initial font size. */
+@container docs-page (max-width: 79.999rem) {
   .home-runtime-header {
     --site-header-search-width: 2.75rem;
     --site-header-search-padding: 0;
@@ -683,13 +685,20 @@
     }
   }
   @container docs-page (max-width: 42rem) {
-    .site-header[data-docs-site-header] {
+    .site-header[data-docs-site-header],
+    .home-runtime-header {
       grid-template-columns: minmax(0, 1fr) repeat(3, 2.75rem);
       grid-template-areas: 'brand search theme menu' 'navigation navigation navigation navigation' 'context context context context';
     }
-    .site-header[data-docs-site-header] [data-site-header-desktop-navigation] {
+    .site-header[data-docs-site-header] [data-site-header-desktop-navigation],
+    .home-runtime-header [data-site-header-desktop-navigation] {
       flex-wrap: wrap;
       margin-inline-start: 0;
+    }
+    .home-runtime-header
+      [data-site-header-desktop-navigation]
+      :is(.home-actions-fallback, .home-runtime-actions) {
+      flex-wrap: wrap;
     }
   }
 }
@@ -738,4 +747,34 @@
    would animate inherited visibility when this Header publishes readiness. */
 .site-header[data-docs-site-header]:not([data-site-menu-ready]) [data-site-menu-button] {
   display: none !important;
+}
+
+/* Bootstrap 2.3.2 navbar-static-top / navbar-inverse. Website Header owns this
+   navigation frame; component surfaces keep their public family projections.
+   Source: twbs/bootstrap v2.3.2 less/navbar.less (Apache-2.0). */
+[data-site-library-family='bootstrap-2-3-2'] .site-header {
+  background: linear-gradient(
+    var(--site-bootstrap-navbar-top),
+    var(--site-bootstrap-navbar-bottom)
+  );
+  border-bottom: 1px solid var(--site-bootstrap-navbar-border);
+  box-shadow: 0 1px 10px rgb(0 0 0 / 10%);
+  --site-header-navigation-gap: 1.25rem;
+  --site-header-brand-navigation-gap: 1.5rem;
+}
+[data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
+  text-shadow: 0 1px 0 rgb(255 255 255 / 30%);
+}
+:root[data-theme='dark'][data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+}
+/* The complete family name and status stay on one line at ordinary desktop
+   scale. Small screens and enlarged text still use the existing reflow. */
+@container docs-page (min-width: 80rem) {
+  [data-site-library-family='bootstrap-2-3-2'] .home-runtime-header {
+    grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 2.75rem 2.75rem;
+  }
+  [data-site-library-family='bootstrap-2-3-2'] .home-runtime-preferences .pui-projection-controls {
+    grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr);
+  }
 }

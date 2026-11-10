@@ -4,7 +4,7 @@ import {
   type FieldTextareaProps,
   type FieldTextareaExposes,
 } from '@proto.ui/prototypes-base/field';
-import { setupInputVisual } from '../input/visual';
+import { setupInputVisual, bootstrapLightControlInvalidPaint } from '../input/visual';
 
 // Semantic Field composition: same Base editor and same family paint setup.
 // The optional Field binding owns invalid/pending and label/description
@@ -23,6 +23,12 @@ export default definePrototype<FieldTextareaProps, FieldTextareaExposes>({
     // 64px minimum height and vertical resize; upstream reset.less/forms.less
     // set neither (upstream height is auto with no resize property).
     def.feedback.style.use(tw('min-h-16 resize-y'));
+    // Keep this Rule beside its existing public Field binding so the family
+    // source collector can retain the emitted invalid selector.
+    def.rule({
+      when: (w) => w.state(binding.state.invalid).eq(true),
+      intent: (i) => i.feedback.style.use(tw(bootstrapLightControlInvalidPaint)),
+    });
     return textarea.render;
   },
 });

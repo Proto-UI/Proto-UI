@@ -62,6 +62,11 @@ export type HookSourceSummaryContext = {
   ): HookSourceResolution;
   /** Resolve an authored producer call and its captured result. */
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
+  /** Resolve a stable synchronous authored function without executing it. */
+  resolveSourceFunction(
+    node: ts.Node,
+    source: ts.SourceFile
+  ): ts.FunctionLikeDeclaration | null;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -4239,6 +4244,16 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     registerSource,
     resolve: evaluate,
     resolveCall,
+    resolveSourceFunction: (node, source) => {
+      const resolved = functionFor(node, moduleForSource(source));
+      if (
+        !resolved ||
+        resolved.fn.asteriskToken ||
+        resolved.fn.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword)
+      )
+        return null;
+      return resolved.fn;
+    },
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
     isSameSourceBinding,

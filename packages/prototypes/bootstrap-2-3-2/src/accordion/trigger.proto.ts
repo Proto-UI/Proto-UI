@@ -16,7 +16,7 @@ export default definePrototype<AccordionTriggerProps, AccordionTriggerExposes>({
     );
     def.rule({
       when: (w) => w.state(state.hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
+      intent: (i) => i.feedback.style.use(tw('text-foreground underline')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),

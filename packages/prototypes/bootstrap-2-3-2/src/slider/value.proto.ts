@@ -6,7 +6,7 @@ export default definePrototype<SliderPartProps, SliderPartExposes>({
   name: 'bootstrap-2-3-2-slider-value',
   setup(def) {
     const inherited = asSliderValue();
-    def.feedback.style.use(tw('text-[14px] leading-[20px] tabular-nums text-[#555]'));
+    def.feedback.style.use(tw('text-[14px] leading-[20px] tabular-nums text-muted-foreground'));
     return inherited.render;
   },
 });

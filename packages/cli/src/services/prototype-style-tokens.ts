@@ -56,6 +56,7 @@ export async function collectProtoShadowStyleTokenUsage(root) {
     await applyImportBindings(file, sourceFile, scope, moduleCache, []);
     walk(sourceFile, scope, tokens, collectExposures(sourceFile), {
       occurrences,
+      sourceRoot: root,
       sourcePath: path.relative(root, file).split(path.sep).join('/'),
       templateTokens,
       nonTemplateTokens,
@@ -105,6 +106,7 @@ export async function collectProtoRootStyleTokenOccurrences(root) {
     await applyImportBindings(file, sourceFile, scope, moduleCache, []);
     walk(sourceFile, scope, new Set(), collectExposures(sourceFile), {
       occurrences,
+      sourceRoot: root,
       sourcePath: path.relative(root, file).split(path.sep).join('/'),
     });
   }
@@ -141,22 +143,28 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
     const resolved = await resolveModuleFile(path.dirname(file), specifier.text);
     if (!resolved || stack.includes(resolved)) continue;
     const clause = stmt.importClause;
-    if (!clause) continue;
+    if (!clause || clause.isTypeOnly) continue;
+    const bindings = await loadModuleBindings(
+      resolved,
+      moduleCache,
+      stack,
+      scope.sourceSummary ?? scope.functionSummary
+    );
     // A default import binds the module's default export, so the local name
     // stands for whatever that export holds. Bind it as an import: the
     // built-in hook table is a spelling fallback, and a default import that
     // is not a proven authored producer must never reach it.
     if (clause.name) {
       scope.bindings.set(clause.name.text, {
-        ...emptyValue(),
+        ...(bindings.get('default') ?? emptyValue()),
         importedBinding: true,
         defaultImport: true,
         importSpecifier: specifier.text,
       });
     }
     if (!clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) continue;
-    const bindings = await loadModuleBindings(resolved, moduleCache, stack);
     for (const element of clause.namedBindings.elements) {
+      if (element.isTypeOnly) continue;
       const importedName = (element.propertyName ?? element.name).text;
       const value = bindings.get(importedName);
       if (value)
@@ -195,7 +203,7 @@ async function resolveModuleFile(dir, specifier) {
   return null;
 }
 
-async function loadModuleBindings(file, moduleCache, stack) {
+async function loadModuleBindings(file, moduleCache, stack, sourceSummary) {
   const cached = moduleCache.get(file);
   if (cached) return cached;
   // Insert before recursing so circular imports terminate.
@@ -203,10 +211,14 @@ async function loadModuleBindings(file, moduleCache, stack) {
   moduleCache.set(file, bindings);
   const sourceFile = await parseSourceFile(file);
   const scope = createScope();
+  // Constants retain the existing token-only loader boundary. Function
+  // declarations use the shared source resolver only to prove their identity.
+  scope.functionSummary = sourceSummary;
   // Cached modules keep one immutable token graph identity across re-exports;
   // each collecting entry forks that complete graph at its import boundary.
   scope.tokenGraphTemplate = true;
   await applyImportBindings(file, sourceFile, scope, moduleCache, [...stack, file]);
+  predeclareBindings(sourceFile, scope);
   for (const stmt of sourceFile.statements) {
     if (!ts.isVariableStatement(stmt)) continue;
     for (const decl of stmt.declarationList.declarations) {
@@ -253,6 +265,10 @@ async function loadModuleBindings(file, moduleCache, stack) {
         !ts.isEmptyStatement(stmt)
   );
   for (const [name, value] of scope.bindings) {
+    if (value.sourceFunction && value.bindingNode && !value.importedBinding) {
+      const resolved = sourceSummary?.resolveSourceFunction(value.bindingNode.name, sourceFile);
+      if (resolved !== value.sourceFunction.node) value.sourceFunction = null;
+    }
     if (hasUnmodeledEffects && value.tokenGraph) {
       taintTokenGraph(value.tokenGraph);
       bindings.set(
@@ -262,6 +278,18 @@ async function loadModuleBindings(file, moduleCache, stack) {
     } else bindings.set(name, value);
   }
   for (const stmt of sourceFile.statements) {
+    if (ts.isExportAssignment(stmt) && !stmt.isExportEquals) {
+      const value = resolveBinding(stmt.expression, scope);
+      if (value.sourceFunction) bindings.set('default', value);
+      continue;
+    }
+    if (
+      ts.isFunctionDeclaration(stmt) &&
+      stmt.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword)
+    ) {
+      bindings.set('default', sourceFunctionValue(stmt, scope, stmt.name ?? stmt));
+      continue;
+    }
     if (
       !ts.isExportDeclaration(stmt) ||
       stmt.isTypeOnly ||
@@ -278,7 +306,7 @@ async function loadModuleBindings(file, moduleCache, stack) {
         continue;
       const resolved = await resolveModuleFile(path.dirname(file), stmt.moduleSpecifier.text);
       if (!resolved || [...stack, file].includes(resolved)) continue;
-      exported = await loadModuleBindings(resolved, moduleCache, [...stack, file]);
+      exported = await loadModuleBindings(resolved, moduleCache, [...stack, file], sourceSummary);
     }
     for (const element of stmt.exportClause.elements) {
       if (element.isTypeOnly) continue;
@@ -294,6 +322,9 @@ function createScope(parent = null, node = null, sourceSummary = parent?.sourceS
     bindings: new Map(),
     node,
     sourceSummary,
+    functionSummary: parent?.functionSummary ?? sourceSummary,
+    activeSourceFunctions: parent?.activeSourceFunctions ?? new Set(),
+    sourceExposures: parent?.sourceExposures ?? new WeakMap(),
     tokenGraphClones: parent?.tokenGraphClones ?? new Map(),
     // The versions of the containers this scope's owner holds. A scope chain
     // shares one tracker, so a helper inside an owner shares its owner's
@@ -511,6 +542,126 @@ function shadowBindingPattern(scope, name) {
   }
 }
 
+function sourceFunctionValue(node, scope, reference = node) {
+  const summary = scope.sourceSummary ?? scope.functionSummary;
+  const resolved = summary?.resolveSourceFunction(reference, reference.getSourceFile());
+  if (resolved !== node) return { ...emptyValue(), opaque: true };
+  const source = node.getSourceFile();
+  let exposures = scope.sourceExposures.get(source);
+  if (!exposures) {
+    exposures = collectExposures(source);
+    scope.sourceExposures.set(source, exposures);
+  }
+  return {
+    ...emptyValue(),
+    kind: 'sourceFunction',
+    sourceFunction: { node, scope, exposures },
+  };
+}
+
+function predeclareBindings(node, scope) {
+  for (const statement of node.statements) {
+    if (ts.isFunctionDeclaration(statement) && statement.name) {
+      scope.bindings.set(
+        statement.name.text,
+        sourceFunctionValue(statement, scope, statement.name)
+      );
+    } else if (
+      ts.isVariableStatement(statement) &&
+      !isVarList(statement.declarationList)
+    ) {
+      for (const declaration of statement.declarationList.declarations)
+        shadowBindingPattern(scope, declaration.name);
+    }
+  }
+}
+
+/** Function identities enter the collector through declarations and literals;
+ * aliases retain them in their lexical binding. Other callees need only the
+ * existing receiver/argument mutation analysis, not full source resolution. */
+function sourceFunctionForCall(node, scope) {
+  const target = unwrapTransparent(node.expression);
+  const callee = ts.isIdentifier(target)
+    ? lookup(target.text, scope)
+    : ts.isArrowFunction(target) || ts.isFunctionExpression(target)
+      ? sourceFunctionValue(target, scope)
+      : null;
+  const helper = callee?.sourceFunction;
+  if (
+    !helper ||
+    callee.unknownAlternative ||
+    scope.activeSourceFunctions.has(helper.node) ||
+    node.arguments.some(ts.isSpreadElement)
+  )
+    return null;
+  return helper;
+}
+
+/** Reached helper bodies use their defining scope and this call's arguments.
+ * Unresolved calls keep the existing container-withdrawal boundary below. */
+function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory) {
+  if (!helper) return;
+  const nextScope = createScope(helper.scope, helper.node, scope.sourceSummary);
+  nextScope.versions = scope.versions;
+  nextScope.activeSourceFunctions = scope.activeSourceFunctions;
+  for (const parameter of helper.node.parameters) shadowBindingPattern(nextScope, parameter.name);
+  scope.activeSourceFunctions.add(helper.node);
+  try {
+    for (const [index, parameter] of helper.node.parameters.entries()) {
+      if (parameter.dotDotDotToken) break;
+      const argument = captured[index];
+      let value = argument?.binding;
+      if (!argument && parameter.initializer) {
+        value = resolveBinding(parameter.initializer, nextScope);
+        walk(parameter.initializer, nextScope, tokens, helper.exposures, rootInventory);
+      }
+      if (!value) continue;
+      const sources = sourceValueCandidates(value);
+      const currentSources = [
+        ...new Set(
+          sources.flatMap((source) =>
+            source.kind === 'object' ? scope.versions.versions(source) : [source]
+          )
+        ),
+      ];
+      if (currentSources.some((source) => !sources.includes(source))) {
+        value = {
+          ...value,
+          sourceValue: currentSources[0],
+          sourceValues: currentSources,
+          containers: undefined,
+          semanticMap: currentSources.every(hasSourceHookProvenance)
+            ? mergeSourceSemantics(currentSources)
+            : null,
+        };
+      }
+      // A parameter name or type alone cannot expose an unknown argument as a
+      // State. Only an already proven handle can acquire a helper's exposure.
+      registerValueBinding(
+        parameter.name,
+        value,
+        nextScope,
+        bindingHasStatePath(value) || typeof value.stateName === 'string'
+          ? helper.exposures
+          : undefined,
+        parameter
+      );
+    }
+    const inventory = rootInventory
+      ? {
+          ...rootInventory,
+          sourcePath: path
+            .relative(rootInventory.sourceRoot, helper.node.getSourceFile().fileName)
+            .split(path.sep)
+            .join('/'),
+        }
+      : null;
+    walk(helper.node.body, nextScope, tokens, helper.exposures, inventory);
+  } finally {
+    scope.activeSourceFunctions.delete(helper.node);
+  }
+}
+
 function walk(node, scope, tokens, exposures, rootInventory = null) {
   if (ts.isDeleteExpression(node)) {
     const target = unwrapTransparent(node.expression);
@@ -634,6 +785,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     }
 
     if (hasStatements(node)) {
+      predeclareBindings(node, nextScope);
       // Sequential, so a legal redeclaration still registers each binding for
       // the statements that follow it. Exposures need no ordering because they
       // are collected from the whole source before the walk begins.
@@ -1056,6 +1208,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
   // receives the objects its arguments denoted while they were evaluated.
   if (ts.isCallExpression(node)) {
     walk(node.expression, scope, tokens, exposures, rootInventory);
+    const helper = sourceFunctionForCall(node, scope);
     const mutation = hookSourceCallMutation(node);
     // The receiver is evaluated before the arguments, so the container it
     // denotes is captured before they are walked: a later argument that
@@ -1082,8 +1235,14 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           ? inner.right
           : inner;
       const values = containerArgumentValues(assigned, scope);
+      const parameter = helper?.node.parameters[captured.length];
       captured.push({
         argument,
+        // Ordinary calls have no parameter environment to populate. Resolving
+        // every argument here would undo containerArgumentValues' fast path
+        // and expand source candidates even when no helper can consume them.
+        binding:
+          parameter && !parameter.dotDotDotToken ? resolveBinding(assigned, scope) : undefined,
         values,
         tokenGraph: evaluateTokenGraph(assigned, scope),
         source:
@@ -1093,14 +1252,48 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       });
       walk(argument, scope, tokens, exposures, rootInventory);
     }
-    applyCallSourceMutation(node, scope, captured, receiver, readsOnly);
-    applyTokenCallMutation(
-      node,
-      scope,
-      captured.map((entry) => entry.tokenGraph),
-      tokenReceiver,
-      readsOnly || tokenJoinReadOnly
-    );
+    // Scalar leaves cannot be changed by either mutation pass. Only a helper
+    // or a captured mutable container needs producer admission; ordinary
+    // scalar calls must not repeatedly resolve an unused source identity.
+    const tokenReadsOnly = readsOnly || tokenJoinReadOnly;
+    let sourceMutation = !readsOnly && hasMutableSourceContainer(receiver);
+    let tokenMutation =
+      !tokenReadsOnly &&
+      (tokenReceiver?.kind === 'object' ||
+        tokenReceiver?.kind === 'array' ||
+        tokenReceiver?.kind === 'union');
+    for (const entry of captured) {
+      sourceMutation ||= hasMutableSourceContainer(entry.values);
+      tokenMutation ||=
+        entry.tokenGraph?.kind === 'object' ||
+        entry.tokenGraph?.kind === 'array' ||
+        entry.tokenGraph?.kind === 'union';
+    }
+    const authoredProducer =
+      (helper !== null || sourceMutation || tokenMutation) &&
+      (scope.sourceSummary?.isAuthoredProducerCall?.(node, node.getSourceFile()) ?? false);
+    if (helper && !authoredProducer)
+      collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory);
+    if (sourceMutation)
+      applyCallSourceMutation(
+        node,
+        scope,
+        captured,
+        receiver,
+        readsOnly,
+        mutation,
+        authoredProducer
+      );
+    if (tokenMutation)
+      applyTokenCallMutation(
+        node,
+        scope,
+        captured.map((entry) => entry.tokenGraph),
+        tokenReceiver,
+        tokenReadsOnly,
+        mutation,
+        authoredProducer
+      );
     return;
   }
 
@@ -1313,10 +1506,12 @@ function registerDeclaration(decl, scope, exposures) {
     shadowBindingPattern(scope, decl.name);
     return;
   }
+  registerValueBinding(decl.name, resolveBinding(decl.initializer, scope), scope, exposures, decl);
+}
 
-  if (ts.isIdentifier(decl.name)) {
-    const binding = resolveBinding(decl.initializer, scope);
-    const local = { ...binding, importedBinding: false, bindingNode: decl };
+function registerValueBinding(name, binding, scope, exposures, bindingNode) {
+  if (ts.isIdentifier(name)) {
+    const local = { ...binding, importedBinding: false, bindingNode };
     // `const alias = controls` names the one object the container binding holds.
     // A member write through either name has to move the member the other reads,
     // so the two bindings share one member map. The spread above copies an
@@ -1324,7 +1519,8 @@ function registerDeclaration(decl, scope, exposures) {
     // one and hand it to both so a later `alias.ready = …` is visible as
     // `controls.ready` (and vice versa) instead of landing on a private copy.
     if (
-      ts.isIdentifier(unwrapTransparent(decl.initializer)) &&
+      bindingNode.initializer &&
+      ts.isIdentifier(unwrapTransparent(bindingNode.initializer)) &&
       binding.semanticMap == null &&
       local.semanticMap == null
     ) {
@@ -1332,22 +1528,22 @@ function registerDeclaration(decl, scope, exposures) {
       binding.semanticMap = shared;
       local.semanticMap = shared;
     }
-    scope.bindings.set(decl.name.text, applyExposure(decl.name.text, local, scope, exposures));
+    scope.bindings.set(name.text, applyExposure(name.text, local, scope, exposures));
     return;
   }
 
-  const destructuredValue = resolveBinding(decl.initializer, scope);
-  if (ts.isArrayBindingPattern(decl.name) || ts.isObjectBindingPattern(decl.name)) {
+  const destructuredValue = binding;
+  if (ts.isArrayBindingPattern(name) || ts.isObjectBindingPattern(name)) {
     const graph = destructuredValue.tokenGraph;
-    shadowBindingPattern(scope, decl.name);
-    bindTokenLoopPattern(decl.name, graph, scope);
+    shadowBindingPattern(scope, name);
+    bindTokenLoopPattern(name, graph, scope);
   }
 
-  if (ts.isArrayBindingPattern(decl.name)) {
+  if (ts.isArrayBindingPattern(name)) {
     const value = destructuredValue;
     if (!value.semanticMap) return;
 
-    decl.name.elements.forEach((element, index) => {
+    name.elements.forEach((element, index) => {
       if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
       const semantics = memberSemantics(value.semanticMap.get(String(index)));
       if (semantics.length > 0)
@@ -1360,11 +1556,11 @@ function registerDeclaration(decl, scope, exposures) {
     return;
   }
 
-  if (ts.isObjectBindingPattern(decl.name)) {
+  if (ts.isObjectBindingPattern(name)) {
     const value = destructuredValue;
     if (!value.semanticMap) return;
 
-    for (const element of decl.name.elements) {
+    for (const element of name.elements) {
       if (!ts.isIdentifier(element.name)) continue;
       const propertyName = element.propertyName
         ? getPropertyName(element.propertyName)
@@ -1738,6 +1934,13 @@ function receiverContainerValues(node, scope) {
   return containerArgumentValues(callee.expression, scope);
 }
 
+function hasMutableSourceContainer(values) {
+  for (const value of values) {
+    if (value?.kind === 'object') return true;
+  }
+  return false;
+}
+
 /**
  * The source graph a copy reads from, when the expression denotes exactly
  * one proven graph. A source with an unproved alternative copies a different
@@ -1943,7 +2146,15 @@ function invalidateReceiverSource(
  * or of mutable containers reachable through them, because it may have
  * replaced any of them.
  */
-function applyCallSourceMutation(node, scope, captured, receiver, readsOnly) {
+function applyCallSourceMutation(
+  node,
+  scope,
+  captured,
+  receiver,
+  readsOnly,
+  mutation,
+  authoredProducer
+) {
   if (captured.length === 0 && receiver.length === 0) return;
   // An authored asHook producer never receives the arguments of its call:
   // the runtime evaluates them for their effects and then invokes the
@@ -1952,8 +2163,7 @@ function applyCallSourceMutation(node, scope, captured, receiver, readsOnly) {
   // and the summary only recognizes `defineAsHook` declarations as producers.
   // The producer therefore cannot write to a container it was passed, so the
   // call does not withdraw it here.
-  if (scope.sourceSummary?.isAuthoredProducerCall?.(node, node.getSourceFile())) return;
-  const mutation = hookSourceCallMutation(node);
+  if (authoredProducer) return;
   const unknownCallValues = [];
   // The receiver is evaluated before the arguments, so the container it
   // denoted is the one the call wrote to before it looked at an argument.
@@ -2287,6 +2497,9 @@ function resolveExpression(node, scope) {
 function resolveExpressionBase(node, scope) {
   const snapshot = scope.expressionSnapshots?.get(node);
   if (snapshot) return snapshot;
+  if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+    return sourceFunctionValue(node, scope);
+  }
   if (ts.isStringLiteralLike(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
     return asStringValue([node.text]);
   }
@@ -4192,13 +4405,73 @@ export async function collectSourceFiles(dir) {
 // Token inventory is not a hook/state proof. Unknown alternatives keep known
 // CSS requirements, but never certify a singleton semantic name.
 function tokenUnion(values) {
-  const items = [
-    ...new Set(
-      values.flatMap((value) =>
-        value?.kind === 'union' ? value.items : [value ?? { kind: 'unknown' }]
-      )
-    ),
-  ];
+  const items = [];
+  const seen = new Set();
+  let stringGraph;
+  let stringIndex;
+  let stringValues;
+  let stringsChanged = false;
+  let fragmentGraph;
+  let fragmentIndex;
+  let fragmentPaths;
+  let fragmentsChanged = false;
+  for (const value of values) {
+    const alternatives = value?.kind === 'union' ? value.items : null;
+    const length = alternatives ? alternatives.length : 1;
+    for (let index = 0; index < length; index++) {
+      const item = alternatives ? alternatives[index] : value;
+      // Immutable token alternatives describe values, not distinct runtime
+      // containers. Replaying an assignment of the same value adds no branch.
+      // Object/array identities stay distinct because their aliases can mutate.
+      const identity =
+        !item || item.kind === 'unknown' ? null : item.kind === 'noop' ? undefined : item;
+      if (seen.has(identity)) continue;
+      seen.add(identity);
+      if (item?.kind === 'string') {
+        if (!stringGraph) {
+          stringGraph = item;
+          stringIndex = items.length;
+          items.push(item);
+        } else {
+          if (!stringValues) {
+            stringValues = new Set(stringGraph.values);
+            stringsChanged = stringValues.size !== stringGraph.values.length;
+          }
+          for (const value of item.values) {
+            if (stringValues.has(value)) continue;
+            stringValues.add(value);
+            stringsChanged = true;
+          }
+        }
+        continue;
+      }
+      if (item?.kind === 'fragments') {
+        if (!fragmentGraph) {
+          fragmentGraph = item;
+          fragmentIndex = items.length;
+          items.push(item);
+        } else {
+          if (!fragmentPaths) {
+            fragmentPaths = new Map();
+            for (const parts of fragmentGraph.paths)
+              fragmentPaths.set(JSON.stringify(parts), parts);
+            fragmentsChanged = fragmentPaths.size !== fragmentGraph.paths.length;
+          }
+          for (const parts of item.paths) {
+            const key = JSON.stringify(parts);
+            if (fragmentPaths.has(key)) continue;
+            fragmentPaths.set(key, parts);
+            fragmentsChanged = true;
+          }
+        }
+        continue;
+      }
+      items.push(item ?? { kind: 'unknown' });
+    }
+  }
+  if (stringsChanged) items[stringIndex] = { kind: 'string', values: [...stringValues] };
+  if (fragmentsChanged)
+    items[fragmentIndex] = { kind: 'fragments', paths: [...fragmentPaths.values()] };
   return items.length === 1 ? items[0] : { kind: 'union', items };
 }
 
@@ -4562,13 +4835,24 @@ function writeTokenMember(target, right, scope, uncertain, remove = false) {
   }
 }
 
-function containsTokenGraph(graph, target, seen = new Set()) {
-  if (!graph || seen.has(graph)) return false;
+function containsTokenGraph(graph, target, seen) {
+  if (!graph) return false;
   if (graph === target) return true;
+  if (!graph.members?.size && !graph.items?.length && !graph.unknownMember) return false;
+  seen ??= new Set();
+  if (seen.has(graph)) return false;
   seen.add(graph);
-  return [...(graph.members?.values() ?? []), ...(graph.items ?? []), graph.unknownMember].some(
-    (child) => containsTokenGraph(child, target, seen)
-  );
+  if (graph.members) {
+    for (const child of graph.members.values()) {
+      if (containsTokenGraph(child, target, seen)) return true;
+    }
+  }
+  if (graph.items) {
+    for (const child of graph.items) {
+      if (containsTokenGraph(child, target, seen)) return true;
+    }
+  }
+  return containsTokenGraph(graph.unknownMember, target, seen);
 }
 
 function taintTokenGraph(graph, seen = new Set()) {
@@ -4585,9 +4869,16 @@ function taintTokenGraph(graph, seen = new Set()) {
   }
 }
 
-function applyTokenCallMutation(node, scope, arguments_, receiver, readsOnly) {
-  if (scope.sourceSummary?.isAuthoredProducerCall?.(node, node.getSourceFile())) return;
-  const mutation = hookSourceCallMutation(node);
+function applyTokenCallMutation(
+  node,
+  scope,
+  arguments_,
+  receiver,
+  readsOnly,
+  mutation,
+  authoredProducer
+) {
+  if (authoredProducer) return;
   if (mutation.kind === 'copy') {
     const target = arguments_[mutation.target];
     if (target?.kind !== 'object') {

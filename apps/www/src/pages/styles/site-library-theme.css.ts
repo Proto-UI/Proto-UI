@@ -1,3 +1,4 @@
+import { renderThemeCss as renderBootstrapThemeCss } from '../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
 import { renderBrutalistThemeCss } from '../../../../../packages/prototypes/brutalist/src/theme';
 import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
 
@@ -10,6 +11,11 @@ export function GET() {
     `:root {\n${Object.entries(SHADCN_TYPOGRAPHY)
       .map(([name, value]) => `  --site-shadcn-${name}: ${value};`)
       .join('\n')}\n}`,
+    renderBootstrapThemeCss({
+      variablePrefix: 'site-bootstrap-',
+      lightSelector: ':root',
+      darkSelector: ":root.dark, :root[data-theme='dark']",
+    }),
     renderBrutalistThemeCss({
       variablePrefix: 'site-brutalist-',
       includeSelection: false,

@@ -102,22 +102,36 @@ export function appendGallerySvg(
 /** Labelled sample series only; heights mirror the page-local plan progress. */
 export function appendHomepageGallerySampleBars(slot: HTMLElement): void {
   const svg = slot.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 320 112');
+  svg.setAttribute('viewBox', '0 0 320 176');
   svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '112');
+  svg.setAttribute('height', '176');
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
-  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  for (const y of [36, 100, 166]) {
+    const line = slot.ownerDocument.createElementNS(svg.namespaceURI, 'line');
+    for (const [name, value] of Object.entries({
+      x1: '4',
+      x2: '316',
+      y1: String(y),
+      y2: String(y),
+      stroke: 'currentColor',
+      'stroke-opacity': '0.12',
+    }))
+      line.setAttribute(name, value);
+    svg.append(line);
+  }
   const factors = [0.32, 0.48, 0.56, 0.76, 0.68, 0.92];
   for (let index = 0; index < factors.length; index++) {
     const bar = slot.ownerDocument.createElementNS(svg.namespaceURI, 'rect');
-    const height = Math.max(4, Math.round(40 * factors[index]!));
-    bar.setAttribute('x', String(index * 52 + 14));
-    bar.setAttribute('width', '28');
+    const height = Math.max(4, Math.round(40 * 1.6 * factors[index]!));
+    bar.setAttribute('x', String(index * 52 + 10));
+    bar.setAttribute('width', '36');
     bar.setAttribute('rx', '6');
-    bar.setAttribute('y', String(104 - height));
+    bar.setAttribute('y', String(166 - height));
     bar.setAttribute('height', String(height));
     bar.setAttribute('fill', 'currentColor');
+    bar.setAttribute('fill-opacity', String(0.4 + index * 0.12));
     bar.setAttribute('data-gallery-bar', String(index));
     svg.append(bar);
   }

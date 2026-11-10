@@ -21,6 +21,11 @@ cases:
       - P-BOOTSTRAP-2-3-2-TREE-BASE
       - P-BOOTSTRAP-2-3-2-TOAST-BASE
     expectation: historical-recipes-preserve-owners
+  - id: T-BOOTSTRAP-2-3-2-HISTORICAL-OVERLAYS-0001-CASE-FOOTER
+    title: Passive AlertDialog footer groups commands without changing their ownership
+    covers:
+      - P-BOOTSTRAP-2-3-2-ALERT-DIALOG-FOOTER-COMPOSITION
+    expectation: grouped-actions-preserve-cancel-focus-and-control
 implementations:
   - id: bootstrap-historical-overlays-collections
     kind: module-test
@@ -29,6 +34,7 @@ implementations:
     required: true
     exercises:
       - P-BOOTSTRAP-2-3-2-ALERT-DIALOG
+      - P-BOOTSTRAP-2-3-2-ALERT-DIALOG-FOOTER
       - P-BOOTSTRAP-2-3-2-POPOVER
       - P-BOOTSTRAP-2-3-2-CAROUSEL
       - P-BOOTSTRAP-2-3-2-PROGRESS
@@ -40,3 +46,7 @@ implementations:
       - P-BOOTSTRAP-2-3-2-TOAST
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-ALERT-DIALOG-FOOTER

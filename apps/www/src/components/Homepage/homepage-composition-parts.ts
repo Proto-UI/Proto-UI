@@ -114,7 +114,7 @@ export function createHomepageCompositionParts(
     { emphasis: 'accent', icon: homepageGalleryIcon('workspace-command') }
   );
   const progress = card(
-    zh ? '给想法留一点空间' : 'Make room for an idea',
+    zh ? '下一站，完成你的想法' : 'Make room for an idea',
     zh ? '拖动或用方向键调整计划进度。' : 'Drag or use arrow keys to adjust your plan.',
     [
       p(
@@ -153,30 +153,59 @@ export function createHomepageCompositionParts(
     { icon: homepageGalleryIcon('workspace-progress') }
   );
   const analytics = card(
-    zh ? '计划节奏' : 'Plan rhythm',
-    zh
-      ? '示例数据 · 随本页进度变化，并非真实访问统计。'
-      : 'Sample data · follows this page’s plan, not live visitor statistics.',
+    zh ? '你的创作节奏' : 'Plan rhythm',
+    zh ? '六个阶段，一步一步让想法成形。' : 'Six stages. One idea taking shape.',
     [
-      box(
-        'home-gallery__chart',
-        [
-          box('home-gallery__chart-bars', [], 'gallery-rhythm-bars', {
-            'aria-hidden': 'true',
-          }),
-        ],
-        undefined,
-        zh
-          ? {
-              role: 'img',
-              'aria-label': '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
-            }
-          : {
-              role: 'img',
-              'aria-label':
-                'Six sample bars scaled by the current plan progress. The actual value is shown by the example plan progress bar on this page.',
-            }
-      ),
+      box('home-gallery__stack', [
+        box('home-gallery__metric-row', [
+          box('home-gallery__metric', ['40%'], 'gallery-rhythm-value'),
+          box('home-gallery__eyebrow', [zh ? '计划完成度' : 'Plan complete']),
+        ]),
+        box(
+          'home-gallery__chart',
+          [
+            box('home-gallery__chart-bars', [], 'gallery-rhythm-bars', {
+              'aria-hidden': 'true',
+            }),
+          ],
+          undefined,
+          zh
+            ? {
+                role: 'img',
+                'aria-label': '六个示例柱形，按当前计划进度缩放。真实进度见同页的示例计划进度条。',
+              }
+            : {
+                role: 'img',
+                'aria-label':
+                  'Six sample bars scaled by the current plan progress. The actual value is shown by the example plan progress bar on this page.',
+              }
+        ),
+        box(
+          'home-gallery__chart-labels',
+          (zh
+            ? ['想法', '提纲', '原型', '细节', '复查', '完成']
+            : ['Idea', 'Plan', 'Build', 'Refine', 'Review', 'Done']
+          ).map((label) => box('home-gallery__chart-label', [label]))
+        ),
+        p(`${family}-separator-root`),
+        box('home-gallery__stats', [
+          box('home-gallery__stat', [
+            box('home-gallery__eyebrow', [zh ? '下一步' : 'Up next']),
+            box(
+              'home-gallery__stat-value',
+              [zh ? '制作原型' : 'Build a prototype'],
+              'gallery-rhythm-next'
+            ),
+          ]),
+          box('home-gallery__stat', [
+            box('home-gallery__eyebrow', [zh ? '尚待探索' : 'Still to explore']),
+            box('home-gallery__stat-value', ['60%'], 'gallery-rhythm-remaining'),
+          ]),
+        ]),
+        box('home-gallery__eyebrow', [
+          zh ? '示例数据 · 随本页计划进度变化' : 'Sample data · linked to this page’s plan',
+        ]),
+      ]),
     ],
     'workspace-analytics',
     {

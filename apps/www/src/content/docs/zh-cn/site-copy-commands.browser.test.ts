@@ -401,24 +401,16 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
         await page.goto(`${baseUrl}/zh-cn/ui-libraries/shadcn/button/`, {
           waitUntil: 'domcontentloaded',
         });
-        // This older documentation has no Vue2 installation snippet. Expose its
-        // real WC source card as a labelled fixture; do not invent a Vue2 command.
-        if (runtime === 'vue2')
-          await page
-            .locator('[data-install-command-card]')
-            .first()
-            .evaluate((card) => {
-              const panel = card.closest<HTMLElement>('[data-adapter-panel]')!;
-              panel.style.display = '';
-              panel.dataset.copyFixture = 'wc-source-vue2-renderer';
-            });
+        // This page authors one visible WC command independently of the chosen
+        // Copy renderer. Vue2 uses that same source consumer without a panel fixture.
         const card = page.locator('[data-install-command-card]:visible').first();
         await card.waitFor();
         const root = card.locator('[data-site-copy]');
         observedRoot = root;
-        const expected = await card
-          .locator('[data-command-panel]:not([hidden]) [data-command]')
-          .textContent();
+        const source = card.locator('[data-command-panel]:not([hidden]) [data-command]');
+        const originalSource = (await source.elementHandle())!;
+        const expected = await source.textContent();
+        expect(expected?.trim()).toBeTruthy();
         for (const family of ['shadcn', 'brutalist']) {
           stage.family = family;
           stage.action = 'family input and ready';
@@ -435,13 +427,16 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
           expect(await page.evaluate(() => (window as any).__installCopyWrites.at(-1))).toBe(
             expected
           );
+          expect(await source.evaluate((node, original) => node === original, originalSource)).toBe(true);
+          expect(await source.textContent()).toBe(expected);
           const facts = await paint(button);
           expect(facts.glyph).toEqual([18, 18]);
           expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
           await evidence(page, root, `${runtime}-${family}-install`, {
             runtime,
             family,
-            sourceHostFixture: runtime === 'vue2' ? 'existing wc snippet' : false,
+            contentHost: 'wc',
+            sourceText: expected,
             familyInput: 'explicit docs consumer fixture',
             errors,
             stage: { ...stage },

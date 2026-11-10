@@ -322,9 +322,13 @@ export function createHomepageShowcase(
         // re-entering either can invalidate that callback's phase.
         // Vue's existing nextTick staging must remain ahead of TextControl's owner
         // restoration microtask, or accepted text can lose its caret position.
-        const publishProps = (ref: string, next: Record<string, unknown>) => {
+        const publishProps = (
+          ref: string,
+          next: Record<string, unknown>,
+          afterEvent = false
+        ) => {
           next = completeProps(ref, next);
-          if (runtime === 'vue' || runtime === 'vue2') {
+          if (!afterEvent && (runtime === 'vue' || runtime === 'vue2')) {
             context.api.setProps(ref, next);
             return;
           }
@@ -401,7 +405,10 @@ export function createHomepageShowcase(
         bind('settings-view', 'valueChange', ({ value }) => {
           if (value !== 'list' && value !== 'board' && value !== 'calendar') return;
           draft.view = value;
-          publishProps('settings-view', { value });
+          // Item still owns its close request after valueChange returns. Accept
+          // through the existing queue without re-entering that commit; native
+          // text feedback retains the immediate Vue publication path above.
+          publishProps('settings-view', { value }, true);
           refresh();
         });
         bind('settings-summary', 'checkedChange', ({ checked }) => {
@@ -459,7 +466,7 @@ export function createHomepageShowcase(
   const [, fields, footer] = result.demo.root.children!;
   const form: DemoNode = gallery.card(
     copy.title,
-    'Select · Switch · Textarea · Button',
+    locale === 'en' ? 'A calmer inbox, on your terms.' : '让每一条通知，都恰到好处。',
     [
       {
         kind: 'box',
@@ -494,11 +501,6 @@ export function createHomepageShowcase(
     },
     children: [
       ...gallery.columns(form, gallery.analytics),
-      {
-        kind: 'box',
-        className: 'home-gallery__fade',
-        attrs: { 'aria-hidden': 'true', 'data-gallery-fade': '' },
-      },
       {
         kind: 'box',
         className: 'home-gallery__attribution',
