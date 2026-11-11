@@ -177,7 +177,10 @@ export function createCalendarDemo(
         kind: 'proto',
         prototypeId: proto('select-trigger'),
         ref: `${field}-trigger`,
-        ...(family === 'shadcn' ? { props: { size: 'sm', appearance: 'ghost' } } : {}),
+        props: {
+          accessibleLabel: field === 'month' ? 'Month' : 'Year',
+          ...(family === 'shadcn' ? { size: 'sm', appearance: 'ghost' } : {}),
+        },
         className:
           family === 'base'
             ? 'inline-flex items-center justify-between gap-1 rounded px-1 text-sm'
@@ -192,14 +195,6 @@ export function createCalendarDemo(
           width: 'max-content',
         },
         children: [
-          {
-            // Real authored content supplies the existing Select nameFromContent
-            // protocol. The demo never writes an Adapter-owned ARIA attribute.
-            kind: 'box',
-            tag: 'span',
-            className: 'sr-only',
-            children: [field === 'month' ? 'Month ' : 'Year '],
-          },
           {
             kind: 'proto',
             prototypeId: proto('select-value'),
