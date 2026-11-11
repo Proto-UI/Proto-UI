@@ -1,0 +1,2340 @@
+{
+  "schemaVersion": 1,
+  "kind": "issue-1154-owned-container-preparation",
+  "date": "2026-11-11",
+  "repository": "github.com:Proto-UI/Proto-UI",
+  "issue": 1154,
+  "issueUrl": "https://github.com/Proto-UI/Proto-UI/issues/1154",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "status": "partial actual r1 execution; r2 source corrections ready, validation and Issue closure pending",
+  "initialPreparationStatus": "source-prepared; Main execution, independent review, integration and earned tracking remain pending",
+  "correctionR2": {
+    "schemaVersion": 1,
+    "kind": "issue-1154-bounded-correction-r2",
+    "executionMode": "human-assisted",
+    "executionModeSource": "current-user",
+    "status": "source-corrections-prepared; r2 execution not-run",
+    "currentBinding": {
+      "root": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+      "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+      "tree": "9de04fcf8b8007716f0e308533f316c77b66040e",
+      "branch": "fix/release03-issue-1154-generic-hook",
+      "index": {
+        "rawBeforeSha256": "622fa9890903de0d4b3048b0a4f7c4a37b0cd1151c6eb34f6e3d8fe821c5d322",
+        "semanticBeforeSha256": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783",
+        "stageEntries": 13086,
+        "uid": 1000,
+        "gid": 1000,
+        "collection": "First native spawn exceeded default1MiB stdout buffer; retained ENOBUFS, then collected complete raw stage bytes with repository-standard64MiB buffer. No source/index mutation."
+      },
+      "sourcePreimage": "/tmp/priority1154-r2-preimage",
+      "beforeHashes": [
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/hook-closeout-container.mjs",
+          "sha256": "55ab5f155ab5c669189f3e9a7618a9a0ce14682a944b06d3cbfa2050d7800ca2"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.mjs",
+          "sha256": "7fbaf06a7ee1b0a27d19fb60ea3866ebfb51020a8757bbe8a02bf8b465c0a3e4"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+          "sha256": "334ea1f4931a3d58b19a7155cb9b140d9f9189d6b1485be7897021f7b016e238"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+          "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "sha256": "3b3ff78d033e7ae27f08197bc6756070576d2e4dd3246b935f4737700ae2cb37"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+          "sha256": "b893296f0f101ad1592d62365e18346e6ff0f2faee8b1af35f3dd706f6950429"
+        },
+        {
+          "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/internal/records/2026-11-11-issue-1154-container-preparation.json",
+          "sha256": "e8c0b6c448c9a3a749fc1628151240024dfed1a6f14446b02058a4a35b6edfb9"
+        },
+        {
+          "path": "/workspace/repo/.git/worktrees/release03-issue-1154-wave-20261111/index",
+          "sha256": "622fa9890903de0d4b3048b0a4f7c4a37b0cd1151c6eb34f6e3d8fe821c5d322"
+        }
+      ]
+    },
+    "initialPreparationBoundary": "Existing binding/sourceBindings/runtime/genericAcceptance preparation fields retain their c212-era provenance. This r2 section binds actual b252 execution and unexecuted corrections; historical sources and old receipts are not overwritten.",
+    "actualR1": {
+      "run": "/tmp/p1154-1111/criterion1154-main-b252-run01",
+      "job": "bg_109",
+      "execution": "/tmp/p1154-1111/criterion1154-main-b252-run01/evidence/execution.json",
+      "consumer": "/tmp/p1154-1111/criterion1154-main-b252-run01/evidence/consumer-observations.json",
+      "phases": {
+        "complete": false,
+        "finishedAt": "2026-11-11T14:01:18.654Z",
+        "node": {
+          "version": "v24.22.2",
+          "executable": "/usr/local/bin/node",
+          "executableSha256": "904a6d3484241d466989f9df9ba3aab822b1496191bdb28230eb491a55c32a52",
+          "uid": 0,
+          "uidMeaning": "runtime-reported; PRoot uid0 is emulated, not host privilege"
+        },
+        "tools": {
+          "git": "git version 2.39.5",
+          "npm": "11.19.1",
+          "corepack": "0.36.0"
+        },
+        "source": {
+          "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+          "branch": "fix/release03-issue-1154-generic-hook",
+          "membershipSha256": "240320d3be03d8041aaa9cf7afca86e14bbaaf5184a61477956e82cd6404c642"
+        },
+        "phases": [
+          {
+            "id": "exact-source-copy",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "actual-container-tool-identities",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "locked-workspace-install",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "real-package-pack-and-consumer-install",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "actual-packed-cli-init-add",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "actual-generated-wc-consumer-and-generic-probes",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: packed-consumer failed; retain /evidence/logs/packed-consumer.stderr.log"
+          },
+          {
+            "id": "packed-generic-type-boundary",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: packed-types failed; retain /evidence/logs/packed-types.stderr.log"
+          },
+          {
+            "id": "unchanged-source-canonical-compiler-web-component-source-v1",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: compiler-web-component-source-v1 failed; retain /evidence/logs/compiler-web-component-source-v1.stderr.log"
+          },
+          {
+            "id": "unchanged-source-canonical-compiler-gpui-source-v1",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: compiler-gpui-source-v1 failed; retain /evidence/logs/compiler-gpui-source-v1.stderr.log"
+          },
+          {
+            "id": "disposable-agent-projection-generation",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "check:public-docs",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "check:agent-doc",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "check:agent-operations",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: pnpm-17 failed; retain /evidence/logs/pnpm-17.stderr.log"
+          },
+          {
+            "id": "bilingual-mdx-types",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: pnpm-18 failed; retain /evidence/logs/pnpm-18.stderr.log"
+          },
+          {
+            "id": "bilingual-format",
+            "status": "passed",
+            "errorSummary": null
+          },
+          {
+            "id": "rendered-bilingual-projection",
+            "status": "failed",
+            "errorSummary": "AssertionError [ERR_ASSERTION]: pnpm-20 failed; retain /evidence/logs/pnpm-20.stderr.log"
+          }
+        ],
+        "failedCommands": [
+          {
+            "label": "packed-consumer",
+            "status": 1,
+            "signal": null,
+            "error": null,
+            "timeout": 180000,
+            "stdout": "/evidence/logs/packed-consumer.stdout.log",
+            "stderr": "/evidence/logs/packed-consumer.stderr.log"
+          },
+          {
+            "label": "packed-types",
+            "status": 2,
+            "signal": null,
+            "error": null,
+            "timeout": 180000,
+            "stdout": "/evidence/logs/packed-types.stdout.log",
+            "stderr": "/evidence/logs/packed-types.stderr.log"
+          },
+          {
+            "label": "compiler-web-component-source-v1",
+            "status": 1,
+            "signal": null,
+            "error": null,
+            "timeout": 180000,
+            "stdout": "/evidence/logs/compiler-web-component-source-v1.stdout.log",
+            "stderr": "/evidence/logs/compiler-web-component-source-v1.stderr.log"
+          },
+          {
+            "label": "compiler-gpui-source-v1",
+            "status": 1,
+            "signal": null,
+            "error": null,
+            "timeout": 180000,
+            "stdout": "/evidence/logs/compiler-gpui-source-v1.stdout.log",
+            "stderr": "/evidence/logs/compiler-gpui-source-v1.stderr.log"
+          },
+          {
+            "label": "pnpm-17",
+            "status": 1,
+            "signal": null,
+            "error": null,
+            "timeout": 900000,
+            "stdout": "/evidence/logs/pnpm-17.stdout.log",
+            "stderr": "/evidence/logs/pnpm-17.stderr.log"
+          },
+          {
+            "label": "pnpm-18",
+            "status": null,
+            "signal": "SIGKILL",
+            "error": "spawnSync corepack ETIMEDOUT",
+            "timeout": 900000,
+            "stdout": "/evidence/logs/pnpm-18.stdout.log",
+            "stderr": "/evidence/logs/pnpm-18.stderr.log"
+          },
+          {
+            "label": "pnpm-20",
+            "status": null,
+            "signal": "SIGKILL",
+            "error": "spawnSync corepack ETIMEDOUT",
+            "timeout": 900000,
+            "stdout": "/evidence/logs/pnpm-20.stdout.log",
+            "stderr": "/evidence/logs/pnpm-20.stderr.log"
+          }
+        ]
+      },
+      "consumerOutcomes": {
+        "complete": false,
+        "fullGenericContractAcceptance": false,
+        "results": [
+          {
+            "id": "current-public-legacy-defineHook",
+            "criteria": ["current-public-API; not historical raw-value conformance"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "TypeError: def.state.number is not a function"
+          },
+          {
+            "id": "generated-cli-facade-helper-consumer",
+            "criteria": [
+              "issue.1154.001",
+              "issue.1154.002",
+              "T-BASE-COLLAPSIBLE-0001-CASE-UNCONTROLLED"
+            ],
+            "status": "passed",
+            "observed": {
+              "generatedFacadeImported": true,
+              "initialOpen": true,
+              "clickOpen": false,
+              "laterDefaultDidNotReset": true,
+              "imperativeOpen": true,
+              "requests": [
+                {
+                  "open": false,
+                  "reason": "pointer"
+                },
+                {
+                  "open": true,
+                  "reason": "programmatic"
+                }
+              ],
+              "meaning": "real CLI facade and existing useOpenState consumer; no full generic or native-input claim"
+            },
+            "errorSummary": null
+          },
+          {
+            "id": "unchanged-authored-raw-value-tuple-once",
+            "criteria": ["C-HOOK-0001-C", "C-HOOK-0001-D", "C-HOOK-0001-E"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "TypeError: def.state.number is not a function"
+          },
+          {
+            "id": "definition-identity-and-direct-capture",
+            "criteria": ["C-HOOK-0001-B", "C-HOOK-0001-F", "C-HOOK-0001-J"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:"
+          },
+          {
+            "id": "failed-installation-and-capture-unwind",
+            "criteria": ["C-HOOK-0001-G", "C-HOOK-0001-H"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: initializing installation must not expose an empty ready result"
+          },
+          {
+            "id": "static-module-declarations",
+            "criteria": ["C-HOOK-0001-K"],
+            "status": "passed",
+            "observed": {
+              "immutableDeclarationSurface": true,
+              "remaining": "unavailable-capability and Adapter preselection still require independent coverage"
+            },
+            "errorSummary": null
+          },
+          {
+            "id": "retired-metadata-mode",
+            "criteria": ["C-HOOK-0001-L"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Missing expected exception."
+          },
+          {
+            "id": "retired-metadata-configure",
+            "criteria": ["C-HOOK-0001-L"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Missing expected exception."
+          },
+          {
+            "id": "retired-metadata-projectHandle",
+            "criteria": ["C-HOOK-0001-L"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Missing expected exception."
+          },
+          {
+            "id": "retired-metadata-store",
+            "criteria": ["C-HOOK-0001-L"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Missing expected exception."
+          },
+          {
+            "id": "retired-metadata-instanceKey",
+            "criteria": ["C-HOOK-0001-L"],
+            "status": "failed",
+            "observed": null,
+            "errorSummary": "AssertionError [ERR_ASSERTION]: Missing expected exception."
+          }
+        ],
+        "remainingCoverage": [
+          "Adapter preselection and unavailable-capability outcomes",
+          "Logical-owner view detach/reattach independently of terminal WC removal",
+          "Complete trace invocation/reuse/failure diagnostics",
+          "Actual same-source non-Web generated consumer and independent target conformance"
+        ]
+      },
+      "compilerRefusals": {
+        "wc": {
+          "ok": false,
+          "command": "compile",
+          "diagnostics": [
+            {
+              "code": "PUI1003",
+              "category": "unsupported-input",
+              "message": "Unsupported import defineHook from @proto.ui/core.",
+              "span": {
+                "file": "hook-closeout.proto.ts",
+                "start": 9,
+                "end": 19,
+                "line": 1,
+                "column": 10,
+                "endLine": 1,
+                "endColumn": 20
+              }
+            }
+          ]
+        },
+        "gpui": {
+          "ok": false,
+          "command": "compile",
+          "diagnostics": [
+            {
+              "code": "PUI1003",
+              "category": "unsupported-input",
+              "message": "Unsupported import defineHook from @proto.ui/core.",
+              "span": {
+                "file": "hook-closeout.proto.ts",
+                "start": 9,
+                "end": 19,
+                "line": 1,
+                "column": 10,
+                "endLine": 1,
+                "endColumn": 20
+              }
+            }
+          ]
+        }
+      },
+      "classification": {
+        "legacyAndRawControls": "Actual owned fixtures called nonexistent def.state.number; runtime TypeError and TS2339 are harness-source errors. Other retained generic type, identity, reentry, metadata failures remain genuine unresolved conditions.",
+        "generatedFacade": "Packed CLI help/init/add and generated WC initialtrue -> pointerfalse -> laterdefaultnotreset -> imperative true passed. This is not full generic acceptance.",
+        "gitCheck": "check:agent-operations first emitted OK and current schema, then failed real Git status because the frozen archive lacked .git. No skip or fake commit is permitted.",
+        "docs": "Both original900000ms commands timed out before token generation completed. No actual TypeScript/Astro diagnostic is established. TraceTokenGeneration1438Stall1111 owns separate diagnosis; no replay or raised bound here.",
+        "compilers": "Both valid canonical invocations returned actual PUI1003 Unsupported import defineHook. No Core/Compiler/IR change or rerun is included."
+      },
+      "ownedProcessReadback": {
+        "path": "/tmp/p1154-1111/criterion1154-main-b252-run01-owned-process-readback.json",
+        "ownedProcesses": 0,
+        "signalSent": false,
+        "newCleanupAbstractions": false
+      }
+    },
+    "fullGenericConditions": [
+      {
+        "id": "C-HOOK-0001-A",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-A",
+        "coverage": {
+          "probes": ["current-public-legacy-defineHook"],
+          "remaining": [
+            "Independent subject/runtime-domain absence is not established by the bounded consumer alone."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "A generic hook is an ordinary Setup installation boundary in Core authoring syntax; its public def effects, resources, and lifecycle attach to the logical caller, without an independent interaction subject, component instance, template Root, or private Runtime domain. Ordinary function reuse that does not need this boundary need not use defineHook.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-B",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-B",
+        "coverage": {
+          "probes": ["definition-identity-and-direct-capture"],
+          "remaining": []
+        },
+        "fullCriterionAccepted": false,
+        "text": "Each successful defineHook construction creates an identity; aliases of that caller share it, while distinct constructions remain independent even with equal names or spec contents. The once-installation key is logical caller plus definition identity, not diagnostic name, binding spelling, parent hook frame, or options; no multiple-instance key is implicit.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-C",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-C",
+        "coverage": {
+          "probes": ["unchanged-authored-raw-value-tuple-once", "packed-generic-type-boundary"],
+          "remaining": ["Complete argument-expression evaluation-order controls."]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Setup and caller must preserve required arguments, order, and value types of the same typed argument tuple. Normal argument-expression evaluation order is unchanged; the first lawful call passes arguments to setup by reference, while later calls still evaluate their expressions normally but only reuse the result, without rerunning setup, comparing or copying arguments, implicitly merging them, or configuring the installation.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-D",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-D",
+        "coverage": {
+          "probes": ["unchanged-authored-raw-value-tuple-once"],
+          "remaining": [
+            "Readonly value descriptor; function-valued raw result; no deep freezing or implicit render for every value shape."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "The raw typed setup return value is retained in the readonly value binding of HookResult; reuse must return the same result reference and value. Value is not deep-frozen, copied, serialized, automatically projected, or merged into capture fields; a returned function is an ordinary value, not an implicit render fragment, and causes no automatic render commit.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-E",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-E",
+        "coverage": {
+          "probes": ["current-public-legacy-defineHook", "unchanged-authored-raw-value-tuple-once"],
+          "remaining": [
+            "Complete methods/event-key/disposer capture and Module conflict cases remain in the retained conformance scope."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Standard captured results, artifacts, methods, event keys, and disposers for removable effects must come from actual public def registrations; they remain separate from authored value and must not be reconstructed from a hook name, controller shape, or returned fields. Internal capture bucket structure is not public semantics; each Module retains deduplication, merge, conflict, diagnostic, and execution-order ownership.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-F",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-F",
+        "coverage": {
+          "probes": ["definition-identity-and-direct-capture"],
+          "remaining": [
+            "Observed-state authority and the complete directly introduced borrowed state set require the current canonical contract suite."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "All directly introduced named state handles are projected as Borrowed views keyed by state declaration name, not inferred from expose keys. Nested child entries retain actual raw results and caller-facing handles in invocation order without automatic flattening into parent stateHandles; equal-name distinct definitions must not be erased by name deduplication. Name-based lookup is a lookup, not installation identity.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-G",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-G",
+        "coverage": {
+          "probes": [
+            "unchanged-authored-raw-value-tuple-once",
+            "failed-installation-and-capture-unwind"
+          ],
+          "remaining": [
+            "Every callback/render/lifecycle phase guard and retained-method authority."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "A caller must run under the current logical caller's lawful Setup authority and validate phase before hook registration or capture mutation; effects of normal argument expressions are outside that guard. Setup receives only public def and typed arguments, not privileged ports. Handles or methods retained in value remain subject to each def/run API's phase, capability, and lifetime constraints; returning them does not upgrade authority.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-H",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-H",
+        "coverage": {
+          "probes": ["failed-installation-and-capture-unwind"],
+          "remaining": ["Result-completion failure distinct from setup failure."]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Installation distinguishes uninitialized, initializing, ready, and failed states. Recursive reentry into the same definition before completion must reject without publishing a placeholder or empty result; failure in setup or result completion unwinds capture scope, propagates the error, and retains failed state without retrying that installation or disguising failure as readiness. This boundary promises no independent atomic rollback; cleanup of registrations already made and caller fate after failure remain governed by existing caller and Module contracts.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-I",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-I",
+        "coverage": {
+          "probes": [],
+          "remaining": [
+            "Logical-owner detach/reattach, setup-only removal and terminal cleanup must be exercised independently; physical WC removal alone is not this proof."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Installation and resources belong to the logical caller; physical subtree detach/reattach alone neither reinstalls it nor constitutes terminal disposal, while authors may explicitly cancel their own tasks in lawful lifecycle callbacks. Existing resource owners perform terminal cleanup; captured disposers retain setup-only and Module-defined behavior, without a promise to remove non-removable declarations or a separate hook disposal domain.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-J",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-J",
+        "coverage": {
+          "probes": ["definition-identity-and-direct-capture"],
+          "remaining": ["Full identity/invocation/reuse/failure diagnostics beyond readonly trace."]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Readonly trace must diagnose definition identity, name, installation order, and invocation, reuse, or failure facts while distinguishing equal-name definitions; trace must not control installation, configuration, privilege, or business behavior, or freeze internal bucket names as semantics.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-K",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-K",
+        "coverage": {
+          "probes": ["static-module-declarations"],
+          "remaining": [
+            "Immutable effective setup/name; unavailable capability; static adoption before host preparation and no Adapter reselection."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Effective definition name, setup identity, and static Module declarations must be immutable, and caller.modules exposes a frozen declaration surface. The caller definition explicitly adopts required declarations before host preparation; arguments must not imply dynamic requirements or Setup-time Adapter reselection. Token, declaration ID, duplicate configuration, and unavailable-capability behavior follow the corresponding Module-declaration and host contracts.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-L",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-L",
+        "coverage": {
+          "probes": [
+            "retired-metadata-mode",
+            "retired-metadata-configure",
+            "retired-metadata-projectHandle",
+            "retired-metadata-store",
+            "retired-metadata-instanceKey"
+          ],
+          "remaining": [
+            "Author-owned value methods under their original authority and unchanged ordinary-asHook compatibility."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Generic defineHook accepts no mode, configure, api/store, projectHandle, or implicit instance key; authors may configure their behavior through ordinary methods on stable value or other explicit logic, with method authority still governed by G. Existing defineAsHook retains its no-argument, prototype-compatible setup, own once-identity rules, RenderFn-or-void return, and optional projectHandle; this contract does not classify collection privilege.",
+        "r2Execution": "not-run"
+      },
+      {
+        "id": "C-HOOK-0001-M",
+        "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-M",
+        "coverage": {
+          "probes": [
+            "unchanged-source-canonical-compiler-web-component-source-v1",
+            "unchanged-source-canonical-compiler-gpui-source-v1"
+          ],
+          "remaining": [
+            "Compilation or an explicit rejection is recorded honestly; neither is actual independently conformant same-source non-Web consumer execution. No GPUI build/native acceptance is prepared or claimed by this Node-only run."
+          ]
+        },
+        "fullCriterionAccepted": false,
+        "text": "Prototype/author and Compiler/target-Core realizations must be checked independently against the same exact definition before composition with identical unmodified author source and inputs; agreement does not replace contract conformance. Compiler performs source-neutral generic semantic translation, not business-state-machine copying selected by Prototype or hook business names, controller shapes, or packaged semantic tables. Unrepresentable capabilities retain actual refusals; statements, inputs, and behavioral assertions must not be removed or weakened to claim compatibility.",
+        "r2Execution": "not-run"
+      }
+    ],
+    "parentCommand": {
+      "cwd": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+      "executable": "/tmp/pui-node24-1155/node-v24.21.0-linux-x64/bin/node",
+      "args": [
+        "scripts/release/hook-closeout-container.mjs",
+        "--engine",
+        "udocker",
+        "--runtime",
+        "/tmp/p1175-1111/venv/bin/udocker",
+        "--runtime-receipt",
+        "/tmp/priority-runtime-ready-1111.json",
+        "--scope",
+        "correction-r2",
+        "--reuse-run",
+        "/tmp/p1154-1111/criterion1154-main-b252-run01",
+        "--out-dir",
+        "/tmp/p1154-1111/criterion1154-main-b252-r2-run01"
+      ],
+      "supervision": "Main uses the current agent-heavy foreground guardian; r2 run deadline1200s, original Git-dependent check900000ms and probe/type180000ms bounds unchanged.",
+      "effect": "Fresh source/Git metadata snapshot and archive readback; reuse retained packages/consumer; selected2 probes, unchanged type assertion and real Git-dependent check only."
+    },
+    "freshOutput": "/tmp/p1154-1111/criterion1154-main-b252-r2-run01",
+    "newExecutionByThisSeat": {
+      "tests": 0,
+      "builds": 0,
+      "formats": 0,
+      "installs": 0,
+      "containerLaunches": 0,
+      "commits": 0,
+      "externalWrites": 0
+    },
+    "sourceCorrections": [
+      {
+        "paths": [
+          "scripts/release/consumer-smoke/hook-closeout.mjs",
+          "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt"
+        ],
+        "change": "Numeric factory syntax .number -> .numberDiscrete. Optional probe selection records requested/executed/unmatched IDs.",
+        "authority": [
+          "packages/core/src/state.ts:numberDiscrete",
+          "packages/types/src/state.ts:NumberDiscreteStateDefineSpec"
+        ],
+        "provenance": "Both are newly authored owned evidence, not literal historical source. One identical corrected authored corpus is used for runtime/types and both existing canonical compiler consumers.",
+        "preserved": [
+          "integercount1->3",
+          "all argument/value/ref/result identity checks",
+          "name/definition identity, reentry, failure and retired-metadata assertions",
+          "generic defineHook identity",
+          "literal historical C-HOOK sources/definitions"
+        ]
+      },
+      {
+        "path": "scripts/release/hook-closeout-container.mjs",
+        "change": "Credential-free real shallow Git metadata is an explicit source-archive role, binding exact local HEAD/tree/branch, raw/complete semantic index and staged blobs. Native object identity plus complete metadata membership/mode/byte readback occurs in the fresh container.",
+        "notCopied": ["shared config/remotes/credentials/hooks/reflogs", "object alternates"],
+        "canonicalOrigin": "New minimal public https://github.com/Proto-UI/Proto-UI.git configuration is solely for the unchanged repositoryId reader; the origin is never contacted.",
+        "noFakeCommit": true
+      },
+      {
+        "path": "scripts/release/hook-closeout-container.mjs",
+        "change": "Fresh correction-r2 branch reuses actual old tarballs and installed consumer packages with byte/export/version/membership checks before/after. Fresh owned consumer/Git metadata, copied Corepack cache, offline Corepack. It runs selected2 probes, unchanged public tsc and real Git-dependent check; no passed packaging or docs/compiler replay."
+      },
+      {
+        "path": "scripts/release/hook-closeout-container.mjs",
+        "change": "Preserve native status/signal/error/timeout and stdout/stderr paths/bytecounts. Outer failures read actual execution.json phase details; consumer failures read actual observations. Detail parsing errors remain secondary to native failure."
+      },
+      {
+        "paths": [
+          "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx"
+        ],
+        "change": "State actual r1 CLI/facade success and unresolved generic/Git/timeout evidence without upgrading generic or historical acceptance."
+      }
+    ],
+    "criteria": [
+      {
+        "key": "issue.1154.001",
+        "original": "- [ ] 同步原始实现实测文档及证据（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "partial actual r1 evidence; corrected probes and complete rendering/type evidence pending"
+      },
+      {
+        "key": "issue.1154.002",
+        "original": "- [ ] 归档自有脚本并完成投影验证（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "source/archive correction prepared; actual r2 Git check, complete projections, independent review and integration pending"
+      }
+    ],
+    "insideEntrypoint": {
+      "executable": "/usr/local/bin/node",
+      "args": [
+        "--max-old-space-size=4096",
+        "/source/tree/scripts/release/hook-closeout-container.mjs",
+        "--inside",
+        "--scope",
+        "correction-r2"
+      ]
+    },
+    "expectedR2": {
+      "selectedProbes": [
+        "current-public-legacy-defineHook",
+        "unchanged-authored-raw-value-tuple-once"
+      ],
+      "types": "Same authored corpus and unchanged assertion fixture against original installed public packages. Full generic green is not assumed.",
+      "gitCheck": "Unchanged corepack pnpm@10.32.1 -s check:agent-operations with actual .git metadata and old installed dependencies.",
+      "retainedPackages": "Complete original package/tarball byte, version, export, installed-member and lockfile readback before/after; all package-producing source membership must match r1.",
+      "notRepeated": [
+        "pack",
+        "install",
+        "CLIhelp/init/add",
+        "generated facade",
+        "identity/reentry/retired probes",
+        "WC/GPUI compilers",
+        "docs types/build"
+      ]
+    },
+    "remainingAcceptance": [
+      "Fresh narrow r2 outcomes not executed by this seat.",
+      "All13 full generic conditions remain unaccepted.",
+      "Token diagnosis and full docs types/build/render evidence remain outside this correction run.",
+      "Both original Issue checkboxes remain unearned; Main owns independent review, integration and earned tracking."
+    ]
+  },
+  "methodDecision": {
+    "source": "actual current user, preserved by Main assignment",
+    "text": "1175用camofox headless模拟就可以；CLI这一块开容器测就可以；全部允许",
+    "scope": "Owned isolated CLI/container validation and setup; new current-source evidence.",
+    "oldDeferral": "Nov6 0.4 deferral remains historical and is not an execution stop.",
+    "externalWritesAuthorizedForThisSeat": false
+  },
+  "binding": {
+    "root": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+    "branch": "fix/release03-issue-1154-generic-hook",
+    "head": "c212e26aaa38c016b57b279c81509821d8999e1b",
+    "initialRetainedHead": "c60926b57595aca5d813b40bd1d166c489a5a599",
+    "advancement": "clean retained scope advanced by fast-forward; no authored commit",
+    "historicalRoot": "/workspace/worktrees/compiler-core-default-slot-20261010",
+    "historicalHead": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+    "headIsNotDirtySourceDigest": true
+  },
+  "ownership": {
+    "preparation": "ResumeContainerCli1154",
+    "validationAndIntegration": "Main",
+    "liveIssueState": "OPEN; two unchecked original criteria",
+    "newClaimOrAssigneeMutation": false,
+    "platformCiDco": "not acquired or inferred; no new commit or PR from this seat"
+  },
+  "criteria": [
+    {
+      "key": "issue.1154.001",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1154",
+      "original": "- [ ] 同步原始实现实测文档及证据（通用 hook 实现收尾）— 历史状态 pending",
+      "originalSourceEntry": "41ef0d32",
+      "originalTimestamp": "2026-10-11T13:08:00.890Z",
+      "originalPointer": "/data/phases/38/tasks/0",
+      "fullCondition": "Measured original Core/Runtime/Base results must be projected accurately in EN/ZH as-hook pages while retaining draft/planned target/native conformance. Final checks/render observations must have actual recorded results.",
+      "prepared": [
+        "Live child and parent checklist recovered.",
+        "Both reader projections now separate historical original measurements, current legacy API and unexecuted new container evidence.",
+        "Public generic conditions A–M remain individually preserved and are not replaced by ordinary asHook/facade success."
+      ],
+      "status": "prepared-not-validated",
+      "checked": false,
+      "remainingOwner": "Main",
+      "nextAction": "Execute the exact prepared source, inspect real diagnostics/observations, finalize measured prose against the resulting source/package binding, then review/integrate and read back only earned tracking."
+    },
+    {
+      "key": "issue.1154.002",
+      "source": "https://github.com/Proto-UI/Proto-UI/issues/1154",
+      "original": "- [ ] 归档自有脚本并完成投影验证（通用 hook 实现收尾）— 历史状态 pending",
+      "originalSourceEntry": "41ef0d32",
+      "originalTimestamp": "2026-10-11T13:08:00.890Z",
+      "originalPointer": "/data/phases/38/tasks/1",
+      "fullCondition": "Finalize source-bound projection evidence and owned-disposable cleanup without deleting prior evidence or stopping shared services. Historical smoke-source archival alone does not close projection verification or all cleanup.",
+      "prepared": [
+        "Current real execution entry and source/type consumer corpus are archived as reviewable repository source.",
+        "Parent-run snapshot/archive readback includes hidden membership, bytes and POSIX modes.",
+        "Container, logs, exact tarballs, generated facades and consumer work are retained by run identity."
+      ],
+      "status": "prepared-not-validated",
+      "checked": false,
+      "remainingOwner": "Main",
+      "nextAction": "Run source snapshot/archive readback and actual OCI entry, retain all failure identities plus rendered bilingual HTML, remove only the owned container after receipts, then integrate and update only earned tracking."
+    }
+  ],
+  "authority": {
+    "current": [
+      {
+        "id": "C-AS-HOOK-0001",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0001.yaml"
+      },
+      {
+        "id": "C-AS-HOOK-0004",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0004.yaml"
+      },
+      {
+        "id": "C-AS-HOOK-0005",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0005.yaml"
+      },
+      {
+        "id": "C-AS-HOOK-0006",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0006.yaml"
+      },
+      {
+        "id": "C-AS-HOOK-0007",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0007.yaml"
+      },
+      {
+        "id": "C-AS-HOOK-0008",
+        "status": "draft",
+        "path": "spec/contracts/C-AS-HOOK-0008.yaml"
+      },
+      {
+        "id": "D-AS-HOOK-DEFINE-HOOK-0001",
+        "status": "draft",
+        "path": "spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml"
+      }
+    ],
+    "legacyDefinitionFact": "Current Core exports legacy defineHook with named installation, mode/configure and captured HookResult. Draft classification is not a ban.",
+    "historicalCandidateFact": "The retained local C-HOOK-0001/T-HOOK drafts and typed raw-value realization are historical sources, absent from current public catalog. Their source and full acceptance matrix remain separate; no lifecycle promotion or source restoration is performed here.",
+    "thinCompiler": "internal/compiler/atomic-lowering-completion.md; no prototype-name dispatch, business protocol copy, opaque handle or IR interpreter is added."
+  },
+  "sourceBindings": [
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/hook-closeout-container.mjs",
+      "sha256": "90b160a6cb6eddb0e7db09d31b9e9717c8d3690c8683792873031ef823713745"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.mjs",
+      "sha256": "ff99865d7fe283d6ff5fc20de0e7350b9f735271d7ac6042ecafd0e5148d7093"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+      "sha256": "334ea1f4931a3d58b19a7155cb9b140d9f9189d6b1485be7897021f7b016e238"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+      "sha256": "287b26af270eb338f115eb90c82da5116be303c0122541ee0266801b07cd104f"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/apps/www/src/content/docs/en/specifications/as-hook.mdx",
+      "sha256": "3b3ff78d033e7ae27f08197bc6756070576d2e4dd3246b935f4737700ae2cb37"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+      "sha256": "b893296f0f101ad1592d62365e18346e6ff0f2faee8b1af35f3dd706f6950429"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/core/src/prototype.ts",
+      "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/runtime/src/kernel/as-hook.ts",
+      "sha256": "6391c8c382cb938ae5d14b6260bc17c42fc89ae0168470823360dd0977989552"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/prototypes/base/src/tools/use-open-state.ts",
+      "sha256": "ceb420a55e8493faaa02d38f8391125a1ebff4158ac5811ff2605d8ce9ab606c"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/prototypes/base/src/tools/use-escape-key.ts",
+      "sha256": "79aab292364faa4e38ca3022d1fc6a4287a4f2eb0c5138682f0ecaa244dae661"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/prototypes/base/src/behaviors/use-typeahead-navigation.ts",
+      "sha256": "ac2160ec9643ebef80c8978437c9b06bf287cd30c2020bec0f9da6a7aa20cfac"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/packages/runtime/test/contract/as-hook.v0.contract.test.ts",
+      "sha256": "cbb2f4e1d4194318f80356831934d3a1542557e55c835fcf8f1b9b6e0097200d"
+    },
+    {
+      "path": "/workspace/worktrees/release03-issue-1154-wave-20261111/internal/contracts/types/as-hook.contract.v0.type-test.ts",
+      "sha256": "882f3bcbf5c6ec4bb2e7e23e82f8b0e9d6edfd1dc520334e1318cdec9d55002b"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/core/src/prototype.ts",
+      "sha256": "618bd329841973e4a1b9f43a57578c70b79151636c31bb060fb092f30eb15bde"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/runtime/src/kernel/as-hook.ts",
+      "sha256": "34b2fcad196989acf8ee7d4d2a76adbfe53dab6126a87feffbc7a72e64e34f8d"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/prototypes/base/src/tools/use-open-state.ts",
+      "sha256": "eaee3f6345305405acbd843041ac2cb92ea2b9589240c3a5969fcb6f0175f63a"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/prototypes/base/src/tools/use-escape-key.ts",
+      "sha256": "f237b834d627b9ceaad32f853d2e06baa5fadfc9773f43a1ccb01daebb00cba4"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/prototypes/base/src/behaviors/use-typeahead-navigation.ts",
+      "sha256": "eef46bc0439954f44f519e76c1ae246effe8212ebef90db06e87c7b7f0edd925"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/packages/runtime/test/contract/as-hook.v0.contract.test.ts",
+      "sha256": "b12501ccb8ae95637132c659aa5b7af4d24f16b885f7bb45d68cb37745f3b179"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/internal/contracts/types/as-hook.contract.v0.type-test.ts",
+      "sha256": "21069dd54fd021ca8da5252e4f43da6da1f4242bff40067fcfac5687bb94cff7"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/apps/www/src/content/docs/en/specifications/as-hook.mdx",
+      "sha256": "48cbc28823f854cbf18dc6a43d2ef69f7e8d7cf64dd74059773ad4e05a043749"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+      "sha256": "57bf3d4c34490d66a218dcff4116a066601f316edaf358bd75e44c87988a89e0"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml",
+      "sha256": "9d2ea33fc3310749c860c57fd3498fcc57c986ac061d8e7f7d4a6163e7689585"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/tests/T-HOOK-0001.yaml",
+      "sha256": "58ab8715ba956164db4b3b5c1aecb234c7440d6a6284d68463810c1e0aabd8c1"
+    },
+    {
+      "path": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/tests/T-HOOK-0002.yaml",
+      "sha256": "9f87c9eecc508f1f64609f74872101fd14b08dbff2abc99349a01d8a509fb6dd"
+    }
+  ],
+  "historicalEvidence": {
+    "retainedRecord": "internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.json",
+    "originalRealization": {
+      "head": "6047ee9fb6dbf703f603ffb7832780df58c41fe7",
+      "focused": {
+        "passed": 35,
+        "failed": 0,
+        "node": "22.23.3"
+      },
+      "general": {
+        "passed": 6330,
+        "failed": 105
+      },
+      "wc": {
+        "failed": 98,
+        "recordedFrozenBaselineMatch": true
+      },
+      "meaning": "Historical record, not new current-head acceptance. Original /tmp result files were not recovered by this preparation."
+    },
+    "historicalSourceReadback": {
+      "files": 12,
+      "nineOriginalManifestHashesMatch": true,
+      "meaning": "Actual retained candidate/Core/Runtime/Base/tests/bilingual source bytes and three local draft sources hashed without modification; this is source custody, not rerun behavior."
+    },
+    "priorLocalReceipts": [
+      {
+        "path": "/tmp/i1154/types.log",
+        "sha256": "75573ac166f2e073059b32c7b7d47bae70edc558266419679a23d72f7bfba0e3"
+      },
+      {
+        "path": "/tmp/i1154/spec-projection.txt",
+        "sha256": "dc8183e37441afed5759e54b89ce6c8adc3a343a7291331521f09997dab640d6"
+      },
+      {
+        "path": "/tmp/i1154/public-docs.log",
+        "sha256": "5edbec710f44acc08d9670a5fafb65acea0f1ce4d83ce9f3fd7ed143a974f5b1"
+      },
+      {
+        "path": "/tmp/i1154/cli-build.log",
+        "sha256": "dcc81ad9cb7325462bd8a871ef3cc19880f8a0da645cb72470449b1478dfb642"
+      },
+      {
+        "path": "/tmp/i1154/ashook-contract.json",
+        "sha256": "0eacd43454b8a21c75cfa7990a495cf8fa4e28ff8bd1200ecedc74507b0be655"
+      }
+    ],
+    "priorLocalOutcomes": {
+      "ordinaryAsHook": {
+        "passed": 25,
+        "failed": 0,
+        "fullSourceBinding": "not established by the retained JSON alone"
+      },
+      "types": "Retained process failed on Node22.23.2; diagnostic detail absent.",
+      "publicDocs": "Retained ENOENT for retired PrototypeLibraryOverview.astro on Node22.23.2; not rerun to confirm.",
+      "cliBuild": "Retained @proto.ui/cli build completed62 files on Node22.23.2; not exact-version isolated consumer evidence."
+    },
+    "lastUnacknowledgedHistoricalAction": "Original five documentation/type/format checks and two1280x900 page observations have no recorded completion; no result invented.",
+    "missingHistoricalArtifacts": "Original /tmp/pui-generic-hook* result/script archive not located. Existing retained source and records are preserved. New OCI execution has its own provenance."
+  },
+  "genericAcceptance": [
+    {
+      "id": "C-HOOK-0001-A",
+      "text": "A generic hook is an ordinary Setup installation boundary in Core authoring syntax; its public def effects, resources, and lifecycle attach to the logical caller, without an independent interaction subject, component instance, template Root, or private Runtime domain. Ordinary function reuse that does not need this boundary need not use defineHook.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-A",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["current-public-legacy-defineHook"],
+        "remaining": [
+          "Independent subject/runtime-domain absence is not established by the bounded consumer alone."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-B",
+      "text": "Each successful defineHook construction creates an identity; aliases of that caller share it, while distinct constructions remain independent even with equal names or spec contents. The once-installation key is logical caller plus definition identity, not diagnostic name, binding spelling, parent hook frame, or options; no multiple-instance key is implicit.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-B",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["definition-identity-and-direct-capture"],
+        "remaining": []
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-C",
+      "text": "Setup and caller must preserve required arguments, order, and value types of the same typed argument tuple. Normal argument-expression evaluation order is unchanged; the first lawful call passes arguments to setup by reference, while later calls still evaluate their expressions normally but only reuse the result, without rerunning setup, comparing or copying arguments, implicitly merging them, or configuring the installation.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-C",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["unchanged-authored-raw-value-tuple-once", "packed-generic-type-boundary"],
+        "remaining": ["Complete argument-expression evaluation-order controls."]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-D",
+      "text": "The raw typed setup return value is retained in the readonly value binding of HookResult; reuse must return the same result reference and value. Value is not deep-frozen, copied, serialized, automatically projected, or merged into capture fields; a returned function is an ordinary value, not an implicit render fragment, and causes no automatic render commit.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-D",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["unchanged-authored-raw-value-tuple-once"],
+        "remaining": [
+          "Readonly value descriptor; function-valued raw result; no deep freezing or implicit render for every value shape."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-E",
+      "text": "Standard captured results, artifacts, methods, event keys, and disposers for removable effects must come from actual public def registrations; they remain separate from authored value and must not be reconstructed from a hook name, controller shape, or returned fields. Internal capture bucket structure is not public semantics; each Module retains deduplication, merge, conflict, diagnostic, and execution-order ownership.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-E",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["current-public-legacy-defineHook", "unchanged-authored-raw-value-tuple-once"],
+        "remaining": [
+          "Complete methods/event-key/disposer capture and Module conflict cases remain in the retained conformance scope."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-F",
+      "text": "All directly introduced named state handles are projected as Borrowed views keyed by state declaration name, not inferred from expose keys. Nested child entries retain actual raw results and caller-facing handles in invocation order without automatic flattening into parent stateHandles; equal-name distinct definitions must not be erased by name deduplication. Name-based lookup is a lookup, not installation identity.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-F",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["definition-identity-and-direct-capture"],
+        "remaining": [
+          "Observed-state authority and the complete directly introduced borrowed state set require the current canonical contract suite."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-G",
+      "text": "A caller must run under the current logical caller's lawful Setup authority and validate phase before hook registration or capture mutation; effects of normal argument expressions are outside that guard. Setup receives only public def and typed arguments, not privileged ports. Handles or methods retained in value remain subject to each def/run API's phase, capability, and lifetime constraints; returning them does not upgrade authority.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-G",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": [
+          "unchanged-authored-raw-value-tuple-once",
+          "failed-installation-and-capture-unwind"
+        ],
+        "remaining": ["Every callback/render/lifecycle phase guard and retained-method authority."]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-H",
+      "text": "Installation distinguishes uninitialized, initializing, ready, and failed states. Recursive reentry into the same definition before completion must reject without publishing a placeholder or empty result; failure in setup or result completion unwinds capture scope, propagates the error, and retains failed state without retrying that installation or disguising failure as readiness. This boundary promises no independent atomic rollback; cleanup of registrations already made and caller fate after failure remain governed by existing caller and Module contracts.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-H",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["failed-installation-and-capture-unwind"],
+        "remaining": ["Result-completion failure distinct from setup failure."]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-I",
+      "text": "Installation and resources belong to the logical caller; physical subtree detach/reattach alone neither reinstalls it nor constitutes terminal disposal, while authors may explicitly cancel their own tasks in lawful lifecycle callbacks. Existing resource owners perform terminal cleanup; captured disposers retain setup-only and Module-defined behavior, without a promise to remove non-removable declarations or a separate hook disposal domain.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-I",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": [],
+        "remaining": [
+          "Logical-owner detach/reattach, setup-only removal and terminal cleanup must be exercised independently; physical WC removal alone is not this proof."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-J",
+      "text": "Readonly trace must diagnose definition identity, name, installation order, and invocation, reuse, or failure facts while distinguishing equal-name definitions; trace must not control installation, configuration, privilege, or business behavior, or freeze internal bucket names as semantics.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-J",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["definition-identity-and-direct-capture"],
+        "remaining": ["Full identity/invocation/reuse/failure diagnostics beyond readonly trace."]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-K",
+      "text": "Effective definition name, setup identity, and static Module declarations must be immutable, and caller.modules exposes a frozen declaration surface. The caller definition explicitly adopts required declarations before host preparation; arguments must not imply dynamic requirements or Setup-time Adapter reselection. Token, declaration ID, duplicate configuration, and unavailable-capability behavior follow the corresponding Module-declaration and host contracts.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-K",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": ["static-module-declarations"],
+        "remaining": [
+          "Immutable effective setup/name; unavailable capability; static adoption before host preparation and no Adapter reselection."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-L",
+      "text": "Generic defineHook accepts no mode, configure, api/store, projectHandle, or implicit instance key; authors may configure their behavior through ordinary methods on stable value or other explicit logic, with method authority still governed by G. Existing defineAsHook retains its no-argument, prototype-compatible setup, own once-identity rules, RenderFn-or-void return, and optional projectHandle; this contract does not classify collection privilege.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-L",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": [
+          "retired-metadata-mode",
+          "retired-metadata-configure",
+          "retired-metadata-projectHandle",
+          "retired-metadata-store",
+          "retired-metadata-instanceKey"
+        ],
+        "remaining": [
+          "Author-owned value methods under their original authority and unchanged ordinary-asHook compatibility."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    },
+    {
+      "id": "C-HOOK-0001-M",
+      "text": "Prototype/author and Compiler/target-Core realizations must be checked independently against the same exact definition before composition with identical unmodified author source and inputs; agreement does not replace contract conformance. Compiler performs source-neutral generic semantic translation, not business-state-machine copying selected by Prototype or hook business names, controller shapes, or packaged semantic tables. Unrepresentable capabilities retain actual refusals; statements, inputs, and behavioral assertions must not be removed or weakened to claim compatibility.",
+      "source": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-M",
+      "status": "preserved-historical-local-draft-direction; current-source-execution-not-run",
+      "coverage": {
+        "probes": [
+          "unchanged-source-canonical-compiler-web-component-source-v1",
+          "unchanged-source-canonical-compiler-gpui-source-v1"
+        ],
+        "remaining": [
+          "Compilation or an explicit rejection is recorded honestly; neither is actual independently conformant same-source non-Web consumer execution. No GPUI build/native acceptance is prepared or claimed by this Node-only run."
+        ]
+      },
+      "executionStatus": "not-run",
+      "fullCriterionAccepted": false
+    }
+  ],
+  "preparedSources": [
+    "scripts/release/hook-closeout-container.mjs",
+    "scripts/release/consumer-smoke/hook-closeout.mjs",
+    "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+    "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+    "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+    "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx"
+  ],
+  "checksExecutedByThisSeat": [],
+  "preparedExecution": "scripts/release/hook-closeout-container.mjs --inside; Main supplies actual owned OCI image/engine and executes once.",
+  "sourceChanges": {
+    "behaviorImplementation": [],
+    "compilerOverlap": [],
+    "excluded1191Root": "/workspace/worktrees/release03-scope-entry-fallback-20261111b"
+  },
+  "closure": {
+    "issueComplete": false,
+    "commitCreated": false,
+    "pushOrGitHubWrite": false,
+    "independentReview": "pending Main",
+    "tracking": "unchanged; no checkbox success asserted"
+  },
+  "runtime": {
+    "owner": "Main",
+    "source": "Current direct Main messages; this preparation seat has not launched the runtime.",
+    "engine": "udocker1.3.17 + udockertools1.2.11, PRoot user-mode OCI execution",
+    "binary": "/tmp/p1175-1111/venv/bin/udocker",
+    "environment": {
+      "UDOCKER_DIR": "/tmp/p1154-1111/udocker",
+      "UDOCKER_TMP": "/tmp/p1154-1111/tmp",
+      "UDOCKER_NOSYSCONF": "true",
+      "UDOCKER_KEYSTORE": "/tmp/p1154-1111/keystore"
+    },
+    "image": {
+      "tag": "node:24-bookworm-slim",
+      "platform": "linux/amd64",
+      "indexDigest": "sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9",
+      "amd64ManifestDigest": "sha256:c0a93797ee78814ae6d32fcca2561fdbbe423149c3f5389aad32d86e9fd85bd4",
+      "bindingBoundary": "Base image identity. Parent apt setup changes are separate container overlay evidence, not this unmodified image digest.",
+      "providerManifestFile": "/tmp/p1154-1111/provider-manifest.json",
+      "cachedManifestSerializationSha256": "fb70709b5443e2743e4127ca21c6cd3a85f09c8d78815aec8ce27a5e5e4b0b2c",
+      "cachedManifestEqualsProviderFields": true,
+      "rawBytesEqual": false,
+      "serializationBoundary": "Provider raw manifest digest matches the Docker header. udocker reserialized JSON has different bytes/digest; complete parsed fields were actually equal in Main receipt."
+    },
+    "container": {
+      "id": "b29abe2d-1687-3ccb-81d3-52e97ac2cb14",
+      "name": "p1154-node24-1111",
+      "smoke": "Main reports genuine bg57 smoke passed",
+      "reportedNode": "v24.22.2",
+      "reportedPlatform": "linux x64",
+      "reportedUid": 0,
+      "privilege": "PRoot-emulated root; actual host uid1000; no real root privilege or kernel namespace/cgroup claim"
+    },
+    "hostNode": {
+      "path": "/tmp/pui-node24-1155/node-v24.21.0-linux-x64/bin/node",
+      "version": "v24.21.0",
+      "sha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c"
+    },
+    "setup": {
+      "gitAndCaCertificates": "completed; actual Main bg_58; full log artifact://62184",
+      "status": "ready",
+      "hostHomeOrHostenvMapped": false
+    },
+    "isolation": {
+      "userNamespaces": "Main observed unshare --user --map-root-user true -> EPERM",
+      "docker": "CLI/daemon socket not found by retained probe",
+      "sourceMount": "explicit mapped source; read-only intent, not asserted kernel enforcement under PRoot",
+      "network": "PRoot shares the host network stack; no bridge/network-namespace isolation claimed",
+      "hostHome": false,
+      "hostenv": false,
+      "hostauth": false
+    },
+    "readyReceipt": {
+      "path": "/tmp/priority-runtime-ready-1111.json",
+      "sha256": "8e939be90778d7719ab675ebfb505c5d0d03f6c44cee284480c6961d72147e6d",
+      "observedAt": "2026-11-11T10:40:57.834Z"
+    }
+  },
+  "currentFixtureRepair1112": {
+    "schemaVersion": 1,
+    "kind": "issue-1154-current-fixture-repair",
+    "date": "2026-11-12",
+    "executionMode": "human-assisted",
+    "executionModeSource": "current-user",
+    "status": "bounded source corrections prepared; new fixture execution and full acceptance not-run",
+    "boundary": "Append-only disposition. Earlier c212 preparation, R1 failures, R2 preparation fields and every historical source/hash remain historical; no former not-run/status field is rewritten.",
+    "binding": {
+      "root": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+      "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+      "tree": "9de04fcf8b8007716f0e308533f316c77b66040e",
+      "branch": "fix/release03-issue-1154-generic-hook",
+      "metadataOnly": true,
+      "fullCurrentInputBefore": {
+        "path": "/tmp/cli1154-current-fixture-repair-1112-source-before.json",
+        "sha256": "6335c2915ff7701b2333f382e968b1dec2c42333e910d5eb3c4cd07aa165b11a",
+        "members": 13090,
+        "hiddenMembers": 195
+      },
+      "indexBefore": {
+        "path": "/workspace/repo/.git/worktrees/release03-issue-1154-wave-20261111/index",
+        "rawSha256": "622fa9890903de0d4b3048b0a4f7c4a37b0cd1151c6eb34f6e3d8fe821c5d322",
+        "semanticSha256": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783",
+        "stageEntries": 13086
+      }
+    },
+    "currentApi": {
+      "authorities": [
+        {
+          "id": "C-AS-HOOK-0001",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0001.yaml"
+        },
+        {
+          "id": "C-AS-HOOK-0004",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0004.yaml"
+        },
+        {
+          "id": "C-AS-HOOK-0005",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0005.yaml"
+        },
+        {
+          "id": "C-AS-HOOK-0006",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0006.yaml"
+        },
+        {
+          "id": "C-AS-HOOK-0007",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0007.yaml"
+        },
+        {
+          "id": "C-AS-HOOK-0008",
+          "status": "draft",
+          "path": "spec/contracts/C-AS-HOOK-0008.yaml"
+        },
+        {
+          "id": "D-AS-HOOK-DEFINE-HOOK-0001",
+          "status": "draft",
+          "path": "spec/decisions/D-AS-HOOK-DEFINE-HOOK-0001.yaml"
+        }
+      ],
+      "legacy": "Core defines HookPrototype.setup(def, options, api) => RenderFn | void and HookCaller(options?) => captured HookResult. HookResult aliases AsHookResult and does not type a raw authored value. Installations are keyed by name and support legacy mode/configure.",
+      "historicalCandidate": "C-HOOK/T-HOOK generic raw-value candidate is absent from current catalog membership; its A–M conditions remain preserved historical local drafts, not current stable guarantees.",
+      "staticDeclarations": "Draft C-MODULE-DECLARATION-0001 supplies real moduleDeclaration/declareModule token identity, declaration slots and shallow freezing, plus authored-asHook publication. Current createHookCaller only publishes modules on kind=asHook; legacy HookCaller has no public modules commitment. A missing generic modules surface is an unrealized historical K target, not an established current Core regression.",
+      "staticDeclarationAuthority": {
+        "id": "C-MODULE-DECLARATION-0001",
+        "status": "draft",
+        "path": "spec/contracts/C-MODULE-DECLARATION-0001.yaml",
+        "criteria": [
+          "C-MODULE-DECLARATION-0001-A",
+          "C-MODULE-DECLARATION-0001-B",
+          "C-MODULE-DECLARATION-0001-C",
+          "C-MODULE-DECLARATION-0001-F"
+        ]
+      }
+    },
+    "actualR2": {
+      "execution": "/tmp/p1154-1111/criterion1154-main-b252-r2-run01/evidence/execution.json",
+      "executionSha256": "37b5c417c923121ef1e6d0932dcacbdb86c5b769b6b14d3497a6492ba28a24b4",
+      "consumer": "/tmp/p1154-1111/criterion1154-main-b252-r2-run01/evidence/consumer-observations.json",
+      "consumerSha256": "dd7c1bfe48ab1055d59bbe2c595aee8592d4d0570b938536dabf9d7d87db5ac2",
+      "complete": false,
+      "finishedAt": "2026-11-11T15:56:05.915Z",
+      "node": {
+        "version": "v24.22.2",
+        "executable": "/usr/local/bin/node",
+        "executableSha256": "904a6d3484241d466989f9df9ba3aab822b1496191bdb28230eb491a55c32a52",
+        "uid": 0,
+        "uidMeaning": "runtime-reported; PRoot uid0 is emulated, not host privilege"
+      },
+      "legacy": {
+        "id": "current-public-legacy-defineHook",
+        "criteria": ["current-public-API; not historical raw-value conformance"],
+        "status": "passed",
+        "observed": {
+          "installs": 1,
+          "sameResult": true,
+          "before": 1,
+          "after": 3,
+          "stateSource": "actual def.state declaration and event registration"
+        },
+        "errorSummary": null
+      },
+      "rawValue": {
+        "id": "unchanged-authored-raw-value-tuple-once",
+        "criteria": ["C-HOOK-0001-C", "C-HOOK-0001-D", "C-HOOK-0001-E"],
+        "status": "failed",
+        "observed": null,
+        "errorSummary": "Error: [AsHook] setup() must return render function or void, got: object."
+      },
+      "types": {
+        "status": 2,
+        "log": "/tmp/p1154-1111/criterion1154-main-b252-r2-run01/evidence/logs/corrected-packed-types.stdout.log",
+        "sha256": "b3259859fb9e9ab1fdc9b547ca7ed8c7fc98bffe7ec1cf6e6b3560abe399a0f7",
+        "diagnostics": [
+          "TS2322: AsHookConfigApi is not assignable to number",
+          "TS2554: Expected0-1 arguments, but got2",
+          "TS18046: value is of type unknown",
+          "TS2344: required tuple comparison is false"
+        ]
+      },
+      "gitMetadataReadback": {
+        "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+        "tree": "9de04fcf8b8007716f0e308533f316c77b66040e",
+        "branch": "fix/release03-issue-1154-generic-hook",
+        "semanticIndexSha256": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783"
+      },
+      "gitIndexAfter": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783",
+      "retainedPackages": {
+        "packages": 41,
+        "before": {
+          "packages": 41,
+          "bindingSha256": "e4bb2e8c1d0b3f16db347a63ec2cbc1e45a3adc3a7b22113d86de1ae16fcfb57",
+          "manifestSha256": "5a05e85ea7775007ebf284ead8b96d5884b5dac9e9440984ed7d4b9251f988d7",
+          "lockSha256": "abf5f77057bf813f8d446798a35bb1aca07cbd7711619447ecfe446ad4ff13ba",
+          "installedMembershipSha256": "195600a4da4a5fb868a80a985560001395021f59a966143385a7e57aed859bae"
+        },
+        "after": {
+          "packages": 41,
+          "bindingSha256": "e4bb2e8c1d0b3f16db347a63ec2cbc1e45a3adc3a7b22113d86de1ae16fcfb57",
+          "manifestSha256": "5a05e85ea7775007ebf284ead8b96d5884b5dac9e9440984ed7d4b9251f988d7",
+          "lockSha256": "abf5f77057bf813f8d446798a35bb1aca07cbd7711619447ecfe446ad4ff13ba",
+          "installedMembershipSha256": "195600a4da4a5fb868a80a985560001395021f59a966143385a7e57aed859bae"
+        }
+      },
+      "agentOperations": {
+        "log": "/tmp/p1154-1111/criterion1154-main-b252-r2-run01/evidence/logs/git-dependent-agent-operations.stdout.log",
+        "markedFailuresBeforeDeadline": [
+          "update-governed-issue-or-pull-request-metadata: gh and connector preserve the same canonical consumer outcome and idempotent no-op",
+          "post-bounded-reconciliation-comment: gh and connector preserve the same canonical consumer outcome and idempotent no-op",
+          "connector final live admission refuses permission revoked with zero writes",
+          "connector final live admission refuses head changed with zero writes",
+          "connector final live admission refuses metadata revision changed with zero writes",
+          "connector final live admission refuses actor changed with zero writes",
+          "durable owner revocation remains effective at connector final admission",
+          "update-governed-issue-or-pull-request-metadata: a lost connector response causes one read-only reconciliation and no resend",
+          "post-bounded-reconciliation-comment: a lost connector response causes one read-only reconciliation and no resend",
+          "connector refuses incomplete discussion: missing Link metadata",
+          "connector refuses incomplete discussion: skipped next page",
+          "connector refuses incomplete discussion: different collection",
+          "connector refuses incomplete discussion: repeated comment identity",
+          "connector refuses missing live permission field before any write",
+          "connector refuses unsupported action before any write",
+          "connector refuses missing API support before any write",
+          "connector refuses wrong live repository before any write",
+          "connector refuses missing live viewer before any write",
+          "connector invocation declarations reject before any bridge call",
+          "formal child CLI bridge keeps one comment attempt with a bound acknowledgment",
+          "formal child CLI bridge keeps one comment attempt with a lost acknowledgment"
+        ],
+        "terminal": {
+          "status": null,
+          "signal": "SIGKILL",
+          "error": "spawnSync corepack ETIMEDOUT",
+          "timeout": 900000
+        },
+        "classification": "Concrete named failures occurred before the terminal deadline. Successful real Git admission is not a passing Agent operations check."
+      }
+    },
+    "retainedR1": {
+      "execution": "/tmp/p1154-1111/criterion1154-main-b252-run01/evidence/execution.json",
+      "executionSha256": "0c2df86c46cf8b37a16d6e287943eb53ac34901cfd3d185db9019a2de056d8d6",
+      "consumer": "/tmp/p1154-1111/criterion1154-main-b252-run01/evidence/consumer-observations.json",
+      "source": "Original correctionR2.actualR1 and native artifacts retain the complete failures and original reported outcomes.",
+      "compilerRefusals": [
+        {
+          "profile": "web-component-source-v1",
+          "status": 1,
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import defineHook from @proto.ui/core."
+        },
+        {
+          "profile": "gpui-source-v1",
+          "status": 1,
+          "code": "PUI1003",
+          "category": "unsupported-input",
+          "message": "Unsupported import defineHook from @proto.ui/core."
+        }
+      ],
+      "documentationDeadlines": {
+        "commands": ["check:types:docs", "docs:build"],
+        "timeout": 900000,
+        "status": null,
+        "signal": "SIGKILL",
+        "error": "spawnSync corepack ETIMEDOUT",
+        "classification": "Historical token-step deadlines before the separate42e repair reported by parent; not fresh TypeScript/Astro diagnostics or post-repair results."
+      }
+    },
+    "sourceDisposition": [
+      {
+        "path": "scripts/release/consumer-smoke/hook-closeout.mjs",
+        "change": "Repair only the vacuous static Module declaration fixture using two actual public Core tokens/declarations, complete authored order, required id/token/config slots, exact declaration/token/config references and frozen array/token/declaration/top-level config surfaces; remove the unused privileged asFocusable import.",
+        "preserved": "Legacy, raw-value tuple/identity, configure-retirement, reentry, falsy failure, child capture and every other original probe remain intact."
+      },
+      {
+        "path": "scripts/release/hook-closeout-container.mjs",
+        "change": "Add explicit fixture-repair retained-input scope, reuse package/source/export/index admission and run only the changed static probe; do not repeat type/Agent operations/pack/install/Compiler/docs. New failures retain the actual observations detail report."
+      },
+      {
+        "path": "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+        "disposition": "intentionally unchanged; no legal raw-value/two-argument API correction exists within current definitions",
+        "sha256": "5eec905534391f164462bac3fb27ba21c17fce4138c586b7c9ef24d53f9e669c"
+      },
+      {
+        "path": "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+        "disposition": "intentionally unchanged; required-tuple and typed raw-value assertions express retained conditions, not an accidental legacy API invocation to rewrite",
+        "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce"
+      },
+      {
+        "paths": [
+          "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx"
+        ],
+        "change": "Append dated bilingual actual R2 disposition and static-probe limitation; retain all original historical paragraphs."
+      }
+    ],
+    "fullGenericConditions": [
+      {
+        "id": "C-HOOK-0001-A",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-A",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "partial-legacy-evidence-only",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Resolve historical generic boundary against current catalog, then independently exercise subject/resource ownership.",
+        "owner": "Main routes generic definition/Core/Runtime owner"
+      },
+      {
+        "id": "C-HOOK-0001-B",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-B",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "retained-r1-failure",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Govern and realize distinct generic definition identity without changing existing ordinary-asHook compatibility.",
+        "owner": "Main routes Core/Runtime owner"
+      },
+      {
+        "id": "C-HOOK-0001-C",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-C",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "retained-r2-runtime-and-type-failures",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Resolve and implement the typed required argument tuple and expression-order/by-reference semantics; retain unchanged authored tuple until then.",
+        "owner": "Main routes generic API definition and Core/Runtime owner"
+      },
+      {
+        "id": "C-HOOK-0001-D",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-D",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "retained-r2-runtime-and-type-failures",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Resolve generic raw return type/value retention, readonly binding, reference identity and function-as-value semantics separately from captured artifacts.",
+        "owner": "Main routes generic API definition and Core/Runtime owner"
+      },
+      {
+        "id": "C-HOOK-0001-E",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-E",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "partial-captured-state-evidence-raw-composition-blocked",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Exercise independently all retained captured-artifact/Module conditions and raw-value separation after its prerequisite is realized.",
+        "owner": "Main routes Module/Runtime consumer owner"
+      },
+      {
+        "id": "C-HOOK-0001-F",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-F",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "not-established-after-r1-identity-failure",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Preserve equal-name distinct definitions and then measure all direct borrowed/observed state and nested results under actual caller ownership.",
+        "owner": "Main routes Core/Runtime/State consumer owner"
+      },
+      {
+        "id": "C-HOOK-0001-G",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-G",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "not-established-unreachable-guards",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Exercise all retained setup/runtime/render/callback and retained-method authority controls after the generic installation boundary is resolved.",
+        "owner": "Main routes Core/Runtime consumer owner"
+      },
+      {
+        "id": "C-HOOK-0001-H",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-H",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "retained-r1-reentry-failure",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Govern and realize initializing rejection, retained failure and result-completion unwind while preserving primary falsy errors and existing Module cleanup ownership.",
+        "owner": "Main routes Core/Runtime owner"
+      },
+      {
+        "id": "C-HOOK-0001-I",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-I",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "unexecuted-independent-lifecycle-condition",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Use actual logical-owner detach/reattach, removable setup effects and terminal cleanup observations without substituting physical WC removal.",
+        "owner": "Main routes logical-lifetime consumer owner"
+      },
+      {
+        "id": "C-HOOK-0001-J",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-J",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "not-established-after-r1-identity-failure",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Measure complete readonly generic identity/reuse/failure trace once independent definition identities are supported.",
+        "owner": "Main routes Core/Runtime diagnostics owner"
+      },
+      {
+        "id": "C-HOOK-0001-K",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-K",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "vacuous-r1-pass-preserved-repair-not-run",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Main runs only the changed static probe through the new retained-input scope. Definition immutability, adoption/preselection and unavailable-capability conditions remain independent.",
+        "owner": "Main validates fixture; generic static declaration implementation remains with Core/Compiler owner"
+      },
+      {
+        "id": "C-HOOK-0001-L",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-L",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "five-retained-r1-metadata-failures",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "Resolve generic retirement/compatibility semantics and implement them through the owning API work before expecting historical retired metadata rejection.",
+        "owner": "Main routes generic API semantic/Core owner"
+      },
+      {
+        "id": "C-HOOK-0001-M",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-M",
+        "originalTextPreservation": "Complete original wording is unchanged in genericAcceptance and correctionR2.fullGenericConditions above, and repeated in the full current report.",
+        "status": "two-retained-r1-compiler-refusals",
+        "newExecution": "not-run",
+        "fullCriterionAccepted": false,
+        "next": "After independently settled generic definitions and Core realization, the Compiler owner implements source-neutral lowering and independent target/native consumers of the same authored input.",
+        "owner": "Main routes existing Compiler owner"
+      }
+    ],
+    "parentCommand": {
+      "cwd": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+      "executable": "/tmp/pui-node24-1155/node-v24.21.0-linux-x64/bin/node",
+      "args": [
+        "scripts/release/hook-closeout-container.mjs",
+        "--engine",
+        "udocker",
+        "--runtime",
+        "/tmp/p1175-1111/venv/bin/udocker",
+        "--runtime-receipt",
+        "/tmp/priority-runtime-ready-1111.json",
+        "--scope",
+        "fixture-repair",
+        "--reuse-run",
+        "/tmp/p1154-1111/criterion1154-main-b252-run01",
+        "--out-dir",
+        "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01"
+      ],
+      "supervision": "Main uses its serial agent-heavy guardian and the already prepared owned container; no setup/download. New output is required. Existing retained-run ceiling1200s and probe180000ms are unchanged.",
+      "executed": false,
+      "selectedProbes": ["static-module-declarations"],
+      "preservedHistoricalEvidence": [
+        "/tmp/p1154-1111/criterion1154-main-b252-run01/evidence/execution.json",
+        "/tmp/p1154-1111/criterion1154-main-b252-r2-run01/evidence/execution.json"
+      ],
+      "excludedReplays": [
+        "package packing",
+        "dependency or consumer installation",
+        "CLI help/init/add",
+        "unchanged legacy/raw/identity/reentry/retired probes",
+        "unchanged type assertions",
+        "WC/GPUI Compiler",
+        "Agent operations",
+        "documentation types/build/token generation"
+      ],
+      "observableAcceptance": [
+        "Fresh complete source/archive/Git metadata binding includes current dirty bytes and preserves modes/hidden membership.",
+        "One probe executes with requested=executed=[static-module-declarations] and unmatched=[].",
+        "A passing row requires the complete two-declaration authored order, own id/token/config slots, exact declaration/token/config references, exact token IDs and config slots, plus frozen array/token/declaration/top-level config surfaces under C-MODULE-DECLARATION-0001.",
+        "[INFERENCE] Current legacy HookCaller has no public modules promise; expect the historical K array requirement to fail with nonzero consumer/outer status and retained detail report. This neither proves a current Core regression nor completes the capability.",
+        "Retained41 package/tarball/export/installed-member/lock binding is equal before/after, and semantic index equals source metadata."
+      ]
+    },
+    "sourceByteClosureReport": "/tmp/cli1154-current-fixture-repair-1112.json",
+    "newExecutionByThisSeat": {
+      "builds": 0,
+      "tests": 0,
+      "typechecks": 0,
+      "linters": 0,
+      "formatters": 0,
+      "installs": 0,
+      "runtimeInvocations": 0,
+      "browserNativeInstances": 0,
+      "commits": 0,
+      "pushes": 0,
+      "externalWrites": 0
+    },
+    "criteria": [
+      {
+        "key": "issue.1154.001",
+        "original": "- [ ] 同步原始实现实测文档及证据（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "unearned; actual validation, independent review, integration and original full conditions remain required",
+        "owner": "Main"
+      },
+      {
+        "key": "issue.1154.002",
+        "original": "- [ ] 归档自有脚本并完成投影验证（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "unearned; actual validation, independent review, integration and original full conditions remain required",
+        "owner": "Main"
+      }
+    ],
+    "genuinePrerequisites": [
+      "Resolve/admit a generic API definition for the exact historical argument tuple, raw-value/function return, construction identity, failure/retired-metadata and static declaration semantics; current draft classification is not a ban on legacy defineHook.",
+      "Core/Runtime owner realizes those exact approved semantics independently of ordinary defineAsHook; no fixture cast/suppression, return-void substitution or unrelated API can supply them.",
+      "Existing Compiler owner provides source-neutral generic lowering and same-source independent target/native evidence; R1 PUI1003 remains a refusal.",
+      "Main validates only changed source/probe, then completes separately owned docs/projection and independent review/integration; both original checkboxes and all13 remain unearned."
+    ]
+  },
+  "actualFixtureR3Disposition1112": {
+    "schemaVersion": 1,
+    "kind": "issue-1154-fixture-actual-r3-disposition",
+    "date": "2026-11-12",
+    "executionMode": "human-assisted",
+    "executionModeSource": "current-user",
+    "status": "actual selected static probe failed; evidence projection appended; all original acceptance remains incomplete",
+    "historyBoundary": "Additive actual result. Prior c212 preparation, R1/R2 native results, currentFixtureRepair1112 predictions/not-run fields and earlier prepared reports remain historical and unchanged.",
+    "parentRun": {
+      "owner": "Main",
+      "job": "bg215",
+      "reportedElapsedSeconds": 249.41,
+      "reportedExitCode": 1,
+      "reportedTimeout": false,
+      "reportSource": "Current Main message; total parent job includes preparation. Native owned-udocker-run timestamps and terminal classification are retained separately below."
+    },
+    "executionReceipt": {
+      "path": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/evidence/execution.json",
+      "bytes": 3227215,
+      "sha256": "e423de765a880b4103cd5acec771cd698897ea365268d8fbc17b50b403f87c90"
+    },
+    "consumerReceipt": {
+      "path": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/evidence/consumer-observations.json",
+      "bytes": 1175,
+      "sha256": "50ac9736d555bfdb3a8789df283419d0af27ce5ac5e1caec964fc50ec9165559"
+    },
+    "execution": {
+      "scope": "fixture-repair",
+      "complete": false,
+      "finishedAt": "2026-11-11T19:40:27.083Z",
+      "node": {
+        "version": "v24.22.2",
+        "executable": "/usr/local/bin/node",
+        "executableSha256": "904a6d3484241d466989f9df9ba3aab822b1496191bdb28230eb491a55c32a52",
+        "uid": 0,
+        "uidMeaning": "runtime-reported; PRoot uid0 is emulated, not host privilege"
+      },
+      "source": {
+        "repository": "github.com:Proto-UI/Proto-UI",
+        "root": "/workspace/worktrees/release03-issue-1154-wave-20261111",
+        "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+        "tree": "9de04fcf8b8007716f0e308533f316c77b66040e",
+        "branch": "fix/release03-issue-1154-generic-hook",
+        "membershipSha256": "7ac159eabc0aaac80068e1a5e7a5798a9df7ef7e2f9d92590006d81079e9d87a"
+      },
+      "phases": [
+        {
+          "id": "exact-source-copy",
+          "status": "passed",
+          "startedAt": "2026-11-11T19:38:32.146Z",
+          "finishedAt": "2026-11-11T19:39:39.751Z"
+        },
+        {
+          "id": "exact-git-metadata-copy",
+          "status": "passed",
+          "startedAt": "2026-11-11T19:39:39.793Z",
+          "finishedAt": "2026-11-11T19:39:40.447Z"
+        },
+        {
+          "id": "actual-container-tool-identities",
+          "status": "passed",
+          "startedAt": "2026-11-11T19:39:40.498Z",
+          "finishedAt": "2026-11-11T19:39:46.329Z"
+        },
+        {
+          "id": "retained-inputs-and-corrected-source-binding",
+          "status": "passed",
+          "startedAt": "2026-11-11T19:39:46.366Z",
+          "finishedAt": "2026-11-11T19:40:13.724Z"
+        },
+        {
+          "id": "repaired-static-module-declarations",
+          "status": "failed",
+          "startedAt": "2026-11-11T19:40:13.758Z",
+          "finishedAt": "2026-11-11T19:40:25.836Z"
+        },
+        {
+          "id": "retained-package-and-index-readback",
+          "status": "passed",
+          "startedAt": "2026-11-11T19:40:25.867Z",
+          "finishedAt": "2026-11-11T19:40:27.054Z"
+        }
+      ],
+      "phaseCounts": {
+        "total": 6,
+        "passed": 5,
+        "failed": 1
+      },
+      "outerCommand": {
+        "label": "owned-udocker-run",
+        "timeout": 1230000,
+        "startedAt": "2026-11-11T19:38:14.317Z",
+        "finishedAt": "2026-11-11T19:40:27.176Z",
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "classification": "nonzero-exit",
+        "stdout": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/host-logs/owned-udocker-run.stdout.log",
+        "stderr": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/host-logs/owned-udocker-run.stderr.log",
+        "detailReport": {
+          "path": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/evidence/execution.json",
+          "exists": true,
+          "sha256": "e423de765a880b4103cd5acec771cd698897ea365268d8fbc17b50b403f87c90",
+          "complete": false
+        }
+      },
+      "consumerCommand": {
+        "label": "repaired-static-module-consumer",
+        "timeout": 180000,
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "classification": "nonzero-exit",
+        "startedAt": "2026-11-11T19:40:13.759Z",
+        "finishedAt": "2026-11-11T19:40:25.833Z"
+      },
+      "deadlines": {
+        "containerSeconds": 1200,
+        "probeMilliseconds": 180000,
+        "outerClientMilliseconds": 1230000,
+        "changed": false
+      }
+    },
+    "selection": {
+      "scope": "selected-probes-only",
+      "requested": ["static-module-declarations"],
+      "executed": ["static-module-declarations"],
+      "unmatched": []
+    },
+    "probeResults": [
+      {
+        "id": "static-module-declarations",
+        "criteria": ["C-HOOK-0001-K"],
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: retained C-HOOK-0001-K target requires a Module declaration array\n    at <anonymous> (/work/consumer/hook-closeout.mjs:324:3)\n    at probe (/work/consumer/hook-closeout.mjs:37:26)\n    at <anonymous> (/work/consumer/hook-closeout.mjs:313:7)"
+      }
+    ],
+    "readback": {
+      "gitMetadata": {
+        "head": "b25229a94251398bc2f375554fcb9622dc8e79ab",
+        "tree": "9de04fcf8b8007716f0e308533f316c77b66040e",
+        "branch": "fix/release03-issue-1154-generic-hook",
+        "semanticIndexSha256": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783"
+      },
+      "semanticIndexAfter": "5952a9885247a526711cc34144d414c6acb09fae8029a85aee3a54a47c451783",
+      "semanticIndexMatches": true,
+      "retainedPackageBefore": {
+        "packages": 41,
+        "bindingSha256": "e4bb2e8c1d0b3f16db347a63ec2cbc1e45a3adc3a7b22113d86de1ae16fcfb57",
+        "manifestSha256": "5a05e85ea7775007ebf284ead8b96d5884b5dac9e9440984ed7d4b9251f988d7",
+        "lockSha256": "abf5f77057bf813f8d446798a35bb1aca07cbd7711619447ecfe446ad4ff13ba",
+        "installedMembershipSha256": "195600a4da4a5fb868a80a985560001395021f59a966143385a7e57aed859bae"
+      },
+      "retainedPackageAfter": {
+        "packages": 41,
+        "bindingSha256": "e4bb2e8c1d0b3f16db347a63ec2cbc1e45a3adc3a7b22113d86de1ae16fcfb57",
+        "manifestSha256": "5a05e85ea7775007ebf284ead8b96d5884b5dac9e9440984ed7d4b9251f988d7",
+        "lockSha256": "abf5f77057bf813f8d446798a35bb1aca07cbd7711619447ecfe446ad4ff13ba",
+        "installedMembershipSha256": "195600a4da4a5fb868a80a985560001395021f59a966143385a7e57aed859bae"
+      },
+      "retainedPackageBindingMatches": true,
+      "reusedInput": {
+        "role": "actual-completed-r1-inputs",
+        "root": "/tmp/p1154-1111/criterion1154-main-b252-run01",
+        "receipts": [
+          {
+            "path": "evidence/execution.json",
+            "sha256": "0c2df86c46cf8b37a16d6e287943eb53ac34901cfd3d185db9019a2de056d8d6"
+          },
+          {
+            "path": "evidence/consumer-observations.json",
+            "sha256": "9511302d11de0d82cc7ef5f27c4192822c1efc511a0f539fb3fb41c4de7a56e0"
+          },
+          {
+            "path": "evidence/package-export-binding.json",
+            "sha256": "e4bb2e8c1d0b3f16db347a63ec2cbc1e45a3adc3a7b22113d86de1ae16fcfb57"
+          },
+          {
+            "path": "evidence/release/pack-manifest.json",
+            "sha256": "5a05e85ea7775007ebf284ead8b96d5884b5dac9e9440984ed7d4b9251f988d7"
+          },
+          {
+            "path": "evidence/facade-source-binding.json",
+            "sha256": "70a024861e849d920947088d5a73d8a2dc23775fa56f05f9b531fdcff5677b54"
+          },
+          {
+            "path": "work/consumer/package.json",
+            "sha256": "cd3a4ec1e69b94522bd65829dfbbcab780ee6a71a64f53b6acb3423a8c69833b"
+          },
+          {
+            "path": "work/consumer/package-lock.json",
+            "sha256": "abf5f77057bf813f8d446798a35bb1aca07cbd7711619447ecfe446ad4ff13ba"
+          },
+          {
+            "path": "work/consumer/tsconfig.json",
+            "sha256": "2cc36a447be20da81cc09902ef18b0529471b6d6fa522a193fcdf771f30f8239"
+          }
+        ],
+        "roots": ["evidence", "work/consumer"],
+        "policy": "Retained tarballs/package inputs are read and bound; new source, fixture copies, Git metadata, work and receipts belong to the fresh selected-scope run."
+      }
+    },
+    "consumerSource": [
+      {
+        "path": "hook-closeout.mjs",
+        "sha256": "1a9e8009cf973613c5c21193a2e2880fc452dd5fa1b2a7b3fa4e0f56317f3464",
+        "bytes": 13117
+      },
+      {
+        "path": "hook-closeout.types.ts",
+        "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce",
+        "bytes": 621
+      },
+      {
+        "path": "hook-closeout.proto.ts",
+        "sha256": "5eec905534391f164462bac3fb27ba21c17fce4138c586b7c9ef24d53f9e669c",
+        "bytes": 1326
+      }
+    ],
+    "disposition": {
+      "actualFailure": "The only selected probe failed at hook-closeout.mjs:324 because the historical C-HOOK-0001-K Module declaration array was absent. Later declaration/token/config identity, required slots, complete order and freezing assertions were not reached.",
+      "currentApi": "Current legacy HookCaller has no public modules commitment. This is an unrealized historical K target and does not establish a current Core regression.",
+      "oldVacuousPass": "R1 recorded passed, but comparing two absent modules values and Object.isFrozen(undefined) supplied no valid static-declaration acceptance. Its original receipt remains unchanged.",
+      "genericBoundary": "The retained raw-tuple/raw-value generic definition is absent from the current public catalog. No semantic decision, API guarantee, Core/Runtime/Compiler change, lifecycle promotion or replacement ordinary-asHook proof is introduced.",
+      "coverage": "Exactly one static probe executed. R1/R2 and other probes, types, package packing/install, CLI, Compiler profiles, Agent operations and docs build were not replayed in R3.",
+      "projectionBoundary": "R3 binds the formatted fixture source that Main executed. This new append is a fresh documentation/record projection awaiting Main independent source review and any necessary formatting verification."
+    },
+    "allThirteenConditions": [
+      {
+        "id": "C-HOOK-0001-A",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-A",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "partial-legacy-evidence-only"
+      },
+      {
+        "id": "C-HOOK-0001-B",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-B",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "retained-r1-failure"
+      },
+      {
+        "id": "C-HOOK-0001-C",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-C",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "retained-r2-runtime-and-type-failures"
+      },
+      {
+        "id": "C-HOOK-0001-D",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-D",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "retained-r2-runtime-and-type-failures"
+      },
+      {
+        "id": "C-HOOK-0001-E",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-E",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "partial-captured-state-evidence-raw-composition-blocked"
+      },
+      {
+        "id": "C-HOOK-0001-F",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-F",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "not-established-after-r1-identity-failure"
+      },
+      {
+        "id": "C-HOOK-0001-G",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-G",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "not-established-unreachable-guards"
+      },
+      {
+        "id": "C-HOOK-0001-H",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-H",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "retained-r1-reentry-failure"
+      },
+      {
+        "id": "C-HOOK-0001-I",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-I",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "unexecuted-independent-lifecycle-condition"
+      },
+      {
+        "id": "C-HOOK-0001-J",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-J",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "not-established-after-r1-identity-failure"
+      },
+      {
+        "id": "C-HOOK-0001-K",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-K",
+        "fullCriterionAccepted": false,
+        "r3Scope": "selected-only; actual failed array requirement",
+        "priorDisposition": "vacuous-r1-pass-preserved-repair-not-run"
+      },
+      {
+        "id": "C-HOOK-0001-L",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-L",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "five-retained-r1-metadata-failures"
+      },
+      {
+        "id": "C-HOOK-0001-M",
+        "originalSource": "/workspace/worktrees/compiler-core-default-slot-20261010/spec/contracts/C-HOOK-0001.yaml#C-HOOK-0001-M",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained",
+        "priorDisposition": "two-retained-r1-compiler-refusals"
+      }
+    ],
+    "originalCriteria": [
+      {
+        "key": "issue.1154.001",
+        "original": "- [ ] 同步原始实现实测文档及证据（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "incomplete; actual R3 historical K failure and all original conditions remain, with review/projection/integration pending Main",
+        "owner": "Main"
+      },
+      {
+        "key": "issue.1154.002",
+        "original": "- [ ] 归档自有脚本并完成投影验证（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false,
+        "status": "incomplete; actual R3 historical K failure and all original conditions remain, with review/projection/integration pending Main",
+        "owner": "Main"
+      }
+    ],
+    "newProjectionSource": {
+      "changedPaths": [
+        "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+        "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+        "internal/records/2026-11-11-issue-1154-container-preparation.json"
+      ],
+      "protectedPaths": [
+        "scripts/release/hook-closeout-container.mjs",
+        "scripts/release/consumer-smoke/hook-closeout.mjs",
+        "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+        "scripts/release/consumer-smoke/hook-closeout.types.ts.txt"
+      ],
+      "preimage": "/tmp/cli1154-fixture-actual-disposition-1112-preimage",
+      "beforeBindings": [
+        {
+          "path": "scripts/release/hook-closeout-container.mjs",
+          "bytes": 46742,
+          "mode": 420,
+          "sha256": "e0542df901f1cc67ac53c11f0b8e6fb1ea51272cb6fbd3461cd282675b38da4d"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.mjs",
+          "bytes": 13117,
+          "mode": 420,
+          "sha256": "1a9e8009cf973613c5c21193a2e2880fc452dd5fa1b2a7b3fa4e0f56317f3464"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+          "bytes": 1326,
+          "mode": 420,
+          "sha256": "5eec905534391f164462bac3fb27ba21c17fce4138c586b7c9ef24d53f9e669c"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+          "bytes": 621,
+          "mode": 420,
+          "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "bytes": 25591,
+          "mode": 420,
+          "sha256": "815dda1a676362f890e168aa3e346dde1df8bc0fd7a0ed7f80f687b89330922a"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+          "bytes": 24124,
+          "mode": 420,
+          "sha256": "a11dab24fc2e08214999e15aecf1fa1a2876d688eb2ff95a9309df07fa3c1330"
+        },
+        {
+          "path": "internal/records/2026-11-11-issue-1154-container-preparation.json",
+          "bytes": 93682,
+          "mode": 420,
+          "sha256": "7f3bdc08acc8eb1d0d04ef1db38a9a5ba06f06cc9f232a2541703852d1cee471"
+        }
+      ],
+      "result": "/tmp/cli1154-fixture-actual-disposition-1112.json",
+      "patch": "/tmp/cli1154-fixture-actual-disposition-1112.patch",
+      "handoff": "/tmp/cli1154-fixture-actual-disposition-1112-handoff.json"
+    },
+    "newExecutionByThisSeat": {
+      "checks": 0,
+      "tests": 0,
+      "typechecks": 0,
+      "installs": 0,
+      "formatters": 0,
+      "gitCommands": 0,
+      "containerOrRuntimeInvocations": 0,
+      "externalWrites": 0
+    },
+    "nextOwner": "Main: independent source review, necessary formatting/projection verification, integration and separately maintained Issue1154 tracking."
+  },
+  "gitCustodyWordingRepair1112": {
+    "schemaVersion": 1,
+    "kind": "issue-1154-git-custody-wording-repair",
+    "date": "2026-11-12",
+    "executionMode": "human-assisted",
+    "executionModeSource": "current-user",
+    "status": "accepted bounded provenance wording correction applied; independent delta review and parent validation pending",
+    "finding": {
+      "id": "CLI1154-ADMISSION-001",
+      "severity": "P2",
+      "source": "/tmp/cli1154-actual-fixture-independent-review-1112.json",
+      "sha256": "46fc7d368263b54fe01cd9caacd0c25efd79e127ce5be0f611ee175c651365a2",
+      "originalVerdict": "NEEDS-CHANGES",
+      "reviewer": "ReviewCli1154ActualFixtures1112",
+      "resolution": "Source wording corrected locally; no independent acceptance or formal PR approval is claimed."
+    },
+    "historyBoundary": "Append-only correction. Every prior record field, output, prepared source binding, frozen review and native R3 receipt remains unchanged. In particular, the original R3 exclusion wording is retained as historical evidence rather than rewritten.",
+    "actualBoundary": {
+      "workingTree": "The .env path is omitted from the working-tree copy only.",
+      "gitCustody": "Exact tracked Git objects and the complete semantic index are retained in the metadata mounted at /source/git-metadata and copied to /work/repo/.git. Tracked bytes may remain readable despite working-tree exclusion.",
+      "reviewerObservation": {
+        "source": "Existing independent review finding; not reproduced by this implementation seat",
+        "excludedPath": ".env.production",
+        "bytes": 24,
+        "sha256": "0c7a8ed25c44012ad3df6c4f71e5eb61fcb13b1243117c5444292d0c1d140ea9",
+        "blobReadable": true,
+        "currentWorktreeBytesEqualCopiedGitBlob": true,
+        "valuesDisclosed": false,
+        "secretLeakEstablished": false
+      },
+      "claimLimit": "The working-tree exclusion is not a whole-snapshot byte or confidentiality boundary. Sanitized operational Git configuration does not attest that tracked object contents are excluded."
+    },
+    "harnessWordingChanges": [
+      {
+        "surface": "exclusions[].role",
+        "change": "Replace not read or mounted with omitted from working-tree copy only, while tracked bytes may remain accessible in separately mounted Git metadata."
+      },
+      {
+        "surface": "portable metadata identity and role comment",
+        "change": "Distinguish the new Git configuration and omitted config/helper/remotes/hooks/reflogs from exact retained tracked objects/index; preserve the existing role discriminator and every admission condition."
+      },
+      {
+        "surface": "existing npm configuration assertion message",
+        "change": "Describe rejection from the working-tree copy; the original regular expression and rejection condition are unchanged."
+      }
+    ],
+    "executionConditions": "Only provenance strings/comments change in the harness. No consumer execution condition, selection, deadline, Git-object/index custody, input admission/rejection policy, package source, Core/Compiler/API or generic semantics changes.",
+    "preservedR3": {
+      "executionReceipt": {
+        "path": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/evidence/execution.json",
+        "bytes": 3227215,
+        "sha256": "e423de765a880b4103cd5acec771cd698897ea365268d8fbc17b50b403f87c90"
+      },
+      "consumerReceipt": {
+        "path": "/tmp/p1154-1111/criterion1154-fixture-repair-1112-run01/evidence/consumer-observations.json",
+        "bytes": 1175,
+        "sha256": "50ac9736d555bfdb3a8789df283419d0af27ce5ac5e1caec964fc50ec9165559"
+      },
+      "selection": {
+        "scope": "selected-probes-only",
+        "requested": ["static-module-declarations"],
+        "executed": ["static-module-declarations"],
+        "unmatched": []
+      },
+      "phaseCounts": {
+        "total": 6,
+        "passed": 5,
+        "failed": 1
+      },
+      "terminal": {
+        "status": 1,
+        "signal": null,
+        "timedOut": false
+      },
+      "failure": "static-module-declarations at hook-closeout.mjs:324 requires a Module declaration array; later static assertions remain unexecuted.",
+      "currentApiBoundary": "Historical K remains unrealized; current legacy HookCaller has no public modules promise. No current Core regression or capability completion is established.",
+      "runtimeReplayed": false
+    },
+    "allThirteenConditions": [
+      {
+        "id": "C-HOOK-0001-A",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-B",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-C",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-D",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-E",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-F",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-G",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-H",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-I",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-J",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-K",
+        "fullCriterionAccepted": false,
+        "r3Scope": "selected-only; actual failed array requirement"
+      },
+      {
+        "id": "C-HOOK-0001-L",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      },
+      {
+        "id": "C-HOOK-0001-M",
+        "fullCriterionAccepted": false,
+        "r3Scope": "not-selected; prior R1/R2 disposition retained"
+      }
+    ],
+    "originalCriteria": [
+      {
+        "key": "issue.1154.001",
+        "original": "- [ ] 同步原始实现实测文档及证据（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false
+      },
+      {
+        "key": "issue.1154.002",
+        "original": "- [ ] 归档自有脚本并完成投影验证（通用 hook 实现收尾）— 历史状态 pending",
+        "checked": false
+      }
+    ],
+    "sourceScope": {
+      "ownedSeven": [
+        "scripts/release/hook-closeout-container.mjs",
+        "scripts/release/consumer-smoke/hook-closeout.mjs",
+        "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+        "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+        "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+        "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+        "internal/records/2026-11-11-issue-1154-container-preparation.json"
+      ],
+      "changedPaths": [
+        "scripts/release/hook-closeout-container.mjs",
+        "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+        "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+        "internal/records/2026-11-11-issue-1154-container-preparation.json"
+      ],
+      "protectedConsumerPaths": [
+        "scripts/release/consumer-smoke/hook-closeout.mjs",
+        "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+        "scripts/release/consumer-smoke/hook-closeout.types.ts.txt"
+      ],
+      "beforeBindings": [
+        {
+          "path": "scripts/release/hook-closeout-container.mjs",
+          "mode": 420,
+          "bytes": 46742,
+          "sha256": "e0542df901f1cc67ac53c11f0b8e6fb1ea51272cb6fbd3461cd282675b38da4d"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.mjs",
+          "mode": 420,
+          "bytes": 13117,
+          "sha256": "1a9e8009cf973613c5c21193a2e2880fc452dd5fa1b2a7b3fa4e0f56317f3464"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+          "mode": 420,
+          "bytes": 1326,
+          "sha256": "5eec905534391f164462bac3fb27ba21c17fce4138c586b7c9ef24d53f9e669c"
+        },
+        {
+          "path": "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+          "mode": 420,
+          "bytes": 621,
+          "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce"
+        },
+        {
+          "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+          "mode": 420,
+          "bytes": 27324,
+          "sha256": "0f882d6d4e310eec6f9a48d85645c8c53b8a0dd93becbab5dd52bceaaf4d8955"
+        },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+          "mode": 420,
+          "bytes": 25662,
+          "sha256": "cadf1b05df1ea851525dfeab369e165d3f6bdb914c9279e4838bab1ea6b5545e"
+        },
+        {
+          "path": "internal/records/2026-11-11-issue-1154-container-preparation.json",
+          "mode": 420,
+          "bytes": 112636,
+          "sha256": "21c1f83bea17d1c6247610afc16933698ffd346b602758f30d535fdd7b12bf11"
+        }
+      ],
+      "result": "/tmp/cli1154-git-custody-wording-repair-1112.json",
+      "patch": "/tmp/cli1154-git-custody-wording-repair-1112.patch",
+      "handoff": "/tmp/cli1154-git-custody-wording-repair-1112-handoff.json"
+    },
+    "newExecutionByThisSeat": {
+      "checks": 0,
+      "tests": 0,
+      "typechecks": 0,
+      "formatters": 0,
+      "installs": 0,
+      "gitCommands": 0,
+      "containerOrRuntimeInvocations": 0,
+      "secretScans": 0,
+      "excludedFileOrBlobPayloadReads": 0,
+      "externalWrites": 0
+    },
+    "nextOwner": "Main: necessary formatting, Node parse/JSON checks and the same independent reviewer delta review. No static probe/setup replay is requested; Issue1154 maintenance remains separately owned."
+  }
+}
