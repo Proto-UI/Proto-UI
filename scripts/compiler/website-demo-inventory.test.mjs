@@ -191,7 +191,7 @@ test('every historical rejected row remains an open obligation despite new admis
   assert.equal(result[1].current.nodeAdmission, 'not-discovered-in-current-scope');
 });
 
-test('actual MDX-to-Astro wrappers retain rejected rows and observe source mutations', async () => {
+test('direct MDX and Astro wrappers retain rejected rows without the retired library overview', async () => {
   const unregister = register();
   try {
     await fixture(async (root, put) => {
@@ -225,8 +225,8 @@ test('actual MDX-to-Astro wrappers retain rejected rows and observe source mutat
       await put('apps/www/src/content/one.demo.proto.ts', 'export default null;');
       await put('apps/www/src/content/two.demo.proto.ts', 'export default null;');
       await put(
-        'apps/www/src/components/PrototypeLibraryOverview.astro',
-        '---\nconst entriesByLibrary = { fixture: [] };\n---\n'
+        'apps/www/src/content/fixture-button.demo.ts',
+        `export default { type: 'demo', root: { kind: 'proto', prototypeId: 'one' } };`
       );
       await put(
         'apps/www/src/components/site-library-family.ts',
@@ -248,6 +248,15 @@ test('actual MDX-to-Astro wrappers retain rejected rows and observe source mutat
         'apps/www/src/content/docs/en/index.mdx',
         `import Gallery from '@/components/Gallery.astro';\n\n<Gallery />\n`
       );
+      for (const locale of ['en', 'zh-cn'])
+        await put(
+          `apps/www/src/content/docs/${locale}/ui-libraries/fixture/button.mdx`,
+          `import { PrototypePreviewer } from '@/components/PrototypePreviewer';\n\n<PrototypePreviewer demoId="fixture-button" />\n`
+        );
+      await put(
+        'apps/www/src/content/docs/en/retired-overview.mdx',
+        `import Overview from '@/components/PrototypeLibraryOverview.astro';\n\n<Overview library="fixture" prototypeId="one" />\n`
+      );
       const wrapper = (id) =>
         `---\nimport PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';\n---\n<PrototypePreviewer prototypeId="${id}" />\n`;
       await put('apps/www/src/components/Gallery.astro', wrapper('one'));
@@ -255,6 +264,21 @@ test('actual MDX-to-Astro wrappers retain rejected rows and observe source mutat
       assert.deepEqual(before.pages[0].rows[0].prototypeIds, ['one']);
       assert.equal(before.prototypes[0].statuses.nodeAdmission, 'rejected');
       assert.ok(before.prototypes[0].diagnostics.every((diagnostic) => diagnostic.span));
+      for (const locale of ['en', 'zh-cn']) {
+        const route = `/${locale}/ui-libraries/fixture/button/`;
+        const [row] = before.pages.find((page) => page.route === route).rows;
+        assert.equal(row.surface, 'PrototypePreviewer');
+        assert.deepEqual(row.demoIds, ['fixture-button']);
+        assert.deepEqual(row.prototypeIds, ['one']);
+      }
+      const [retired] = before.pages.find((page) => page.route === '/en/retired-overview/').rows;
+      assert.deepEqual(retired.demoIds, []);
+      assert.deepEqual(retired.prototypeIds, []);
+      assert.ok(
+        retired.unresolved.some(
+          (row) => row.reason === 'retired-library-overview-mount' && row.libraries[0] === 'fixture'
+        )
+      );
       assert.equal(
         before.historicalEvidence.rejectedRowReconciliation.length,
         before.historicalEvidence.originalInventory.prototypes.filter(

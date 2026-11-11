@@ -6,7 +6,6 @@ import { isDeepStrictEqual } from 'node:util';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { extractOverviewEntries } from '../docs/check-public-docs.mjs';
 import { resolveProtoUiSource } from '../../apps/www/src/utils/proto-ui-source.mjs';
 
 export const HISTORICAL_INVENTORY = Object.freeze({
@@ -46,8 +45,6 @@ const STATIC_INPUT_PATHS = Object.freeze([
   'scripts/build/public-packages.mjs',
   'scripts/compiler/website-demo-inventory.mjs',
   'scripts/compiler/website-demo-migrations-829.json',
-  'scripts/docs/check-public-docs.mjs',
-  'scripts/docs/public-doc-policy.mjs',
   'tsconfig.json',
 ]);
 
@@ -1380,18 +1377,6 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
   for (const declaration of demoScan.declarations)
     if (!demoDeclarations.has(declaration.id)) demoDeclarations.set(declaration.id, declaration);
 
-  const overviewFile = path.join(www, 'src/components/PrototypeLibraryOverview.astro');
-  const libraries = new Map(
-    [...extractOverviewEntries(await readFile(overviewFile, 'utf8'), relative(overviewFile))].map(
-      ([library, entries]) => [
-        library,
-        entries
-          .map((entry) => entry.demoId)
-          .filter(Boolean)
-          .sort(),
-      ]
-    )
-  );
   const homepageCandidates = await discoverHomepagePrototypeCandidates({
     root,
     registeredPrototypeIds: new Set(prototypeRegistrations.keys()),
@@ -1696,8 +1681,15 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
           prototypeIds = new Set(),
           possiblePrototypeIds = new Set(),
           unresolved = [...mount.unresolved];
-        for (const id of attrs.get('demoId') ?? []) ids.add(id);
-        for (const id of attrs.get('prototypeId') ?? []) prototypeIds.add(id);
+        if (mount.surface === 'PrototypeLibraryOverview') {
+          unresolved.push({
+            reason: 'retired-library-overview-mount',
+            libraries: attrs.get('library') ?? [],
+          });
+        } else {
+          for (const id of attrs.get('demoId') ?? []) ids.add(id);
+          for (const id of attrs.get('prototypeId') ?? []) prototypeIds.add(id);
+        }
         if (mount.surface === 'DemoMatrix') {
           for (const id of demoDeclarations.keys()) ids.add(id);
           unresolved.push(...demoScan.unresolved);
@@ -1715,15 +1707,6 @@ export async function generateWebsiteInventory({ root = DEFAULT_ROOT, outputPath
             supportingSources: homepageCandidates.sources,
           });
           unresolved.push(...homepageCandidates.unresolved);
-        }
-        if (mount.surface === 'PrototypeLibraryOverview') {
-          const selected = attrs.get('library') ?? [];
-          if (!selected.length)
-            unresolved.push('Library selection requires a source-bound resolution.');
-          for (const library of selected) {
-            if (libraries.has(library)) for (const id of libraries.get(library)) ids.add(id);
-            else unresolved.push(`Missing library declaration: ${library}`);
-          }
         }
         for (const id of ids) {
           const demo = demoDeclarations.get(id);
