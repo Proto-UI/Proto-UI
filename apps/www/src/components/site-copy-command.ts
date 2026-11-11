@@ -235,7 +235,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
     // of the new attempt. The Clipboard owner is deliberately not replaced.
     const ownerId = `${logicalOwnerId}-attempt-${++attempt}`;
     mount.dataset.projectionOwner = ownerId;
-    return createProjectionScopeController({
+    const scope: ProjectionScopeController = createProjectionScopeController({
       initialSelection,
       async materialize(request) {
         const runtime = request.selection.runtimeId as RuntimeId;
@@ -260,7 +260,14 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
           mount,
           yieldAfterPaint: true,
           backgroundPreparation:
-            preparation && hasPendingDocsHeaderPreparation(doc) ? preparation.signal : undefined,
+            preparation &&
+            scope.getSnapshot().generation === 0 &&
+            hasPendingDocsHeaderPreparation(doc)
+              ? {
+                  signal: preparation.signal,
+                  isPending: () => hasPendingDocsHeaderPreparation(doc),
+                }
+              : undefined,
           themeSource: { scope: root, family, isCurrent: () => alive },
           ownerId,
           componentId: 'button',
@@ -335,6 +342,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
           ?.focus({ preventScroll: true });
       },
     });
+    return scope;
   };
   let controller: ProjectionScopeController | undefined;
   const failed = (error: unknown) => {

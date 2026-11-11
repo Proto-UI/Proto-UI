@@ -54,6 +54,7 @@ const faults = vi.hoisted(() => ({
   calls: [] as string[],
   holdHeader: undefined as Promise<void> | undefined,
   holdRetirement: undefined as Promise<void> | undefined,
+  holdReplacement: undefined as Promise<void> | undefined,
   preparations: [] as Array<{
     runtime: string;
     recipe: string;
@@ -84,6 +85,12 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
         options.ownerId.startsWith('site-header-surface-')
       )
         await faults.holdHeader;
+      if (
+        faults.holdReplacement &&
+        runtime === 'react' &&
+        !options.ownerId.startsWith('site-header-surface-')
+      )
+        await faults.holdReplacement;
       if (faults.failReact && runtime === 'react') throw new Error('renderer unavailable');
       const candidate = await actual.materializeProjectionCandidate(...args);
       if (runtime !== 'wc' || !options.ownerId.startsWith('site-header-surface-')) return candidate;
@@ -108,6 +115,7 @@ afterEach(async () => {
   faults.failReact = false;
   faults.holdHeader = undefined;
   faults.holdRetirement = undefined;
+  faults.holdReplacement = undefined;
   faults.calls.length = 0;
   faults.preparations.length = 0;
   vi.restoreAllMocks();
@@ -501,6 +509,56 @@ it.each(['first view', 'recovery'] as const)(
     }
   }
 );
+
+it('keeps a superseding replacement of committed Docs decorations in the foreground', async () => {
+  const code = document.createElement('div');
+  const copyRoot = document.createElement('div');
+  document.body.append(code, copyRoot);
+  const surface = initCodeSurface(code);
+  const copy = initCopyCommand(copyRoot, () => 'native source');
+  handles.push(surface, copy);
+  await Promise.all([surface.ready, copy.ready]);
+  expect(code.dataset.codeSurfaceRuntime).toBe('wc');
+  expect(copyRoot.dataset.copyRuntime).toBe('wc');
+
+  const replacement = Promise.withResolvers<void>();
+  faults.holdReplacement = replacement.promise;
+  const first = reserveDocsHeaderPreparation(document);
+  let latest: (() => void) | undefined;
+  const request = (adapter: string) =>
+    document.dispatchEvent(new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter } }));
+  try {
+    request('react');
+    expect(faults.preparations.filter(({ runtime }) => runtime === 'react')).toHaveLength(0);
+    first();
+    await vi.waitFor(() =>
+      expect(faults.preparations.filter(({ runtime }) => runtime === 'react')).toHaveLength(2)
+    );
+    expect(code.dataset.codeSurfaceRuntime).toBe('wc');
+    expect(copyRoot.dataset.copyRuntime).toBe('wc');
+
+    latest = reserveDocsHeaderPreparation(document);
+    request('vue');
+    await vi.waitFor(() =>
+      expect(faults.preparations.filter(({ runtime }) => runtime === 'vue')).toHaveLength(2)
+    );
+    expect(
+      faults.preparations
+        .filter(({ runtime }) => runtime === 'vue')
+        .map(({ recipe, background }) => ({ recipe, background }))
+        .sort((a, b) => a.recipe.localeCompare(b.recipe))
+    ).toEqual([
+      { recipe: 'website-code-surface', background: false },
+      { recipe: 'website-copy-command', background: false },
+    ]);
+    await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('vue'));
+    await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('vue'));
+  } finally {
+    replacement.resolve();
+    first();
+    latest?.();
+  }
+});
 
 it('revokes a queued Docs decoration replacement when its owner is destroyed', async () => {
   const code = document.createElement('div');

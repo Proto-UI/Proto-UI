@@ -181,7 +181,7 @@ describe('Website projection materializer', () => {
           ownerId: 'independent-owner',
           componentId: 'button',
           controls: controls(),
-          backgroundPreparation: owner.signal,
+          backgroundPreparation: { signal: owner.signal, isPending: () => true },
           themeSource: { scope: mount, family: 'shadcn', isCurrent: () => !owner.signal.aborted },
         }
       );
@@ -210,6 +210,49 @@ describe('Website projection materializer', () => {
       }
     }
   );
+
+  it('renders without another background task after the competing preparation finishes', async () => {
+    const mount = document.createElement('div');
+    document.body.append(mount);
+    const owner = new AbortController();
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'scheduler');
+    const postTask = vi.fn(async (callback: () => void) => callback());
+    Object.defineProperty(window, 'scheduler', { configurable: true, value: { postTask } });
+    let pending = true;
+    fakes.loadPrototypes.mockImplementationOnce(async () => {
+      pending = false;
+    });
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementationOnce(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'independent-owner';
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    try {
+      const candidate = await materializeProjectionCandidate(
+        { generation: 1, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+        {
+          mount,
+          ownerId: 'independent-owner',
+          componentId: 'button',
+          controls: controls(),
+          backgroundPreparation: { signal: owner.signal, isPending: () => pending },
+        }
+      );
+      expect(postTask).toHaveBeenCalledOnce();
+      expect(fakes.renderDemo).toHaveBeenCalledOnce();
+      await candidate.dispose();
+    } finally {
+      owner.abort();
+      if (descriptor) Object.defineProperty(window, 'scheduler', descriptor);
+      else Reflect.deleteProperty(window, 'scheduler');
+    }
+  });
 
   it('retains a hidden candidate and its late portal through the opted-in post-paint task', async () => {
     const mount = document.createElement('div');

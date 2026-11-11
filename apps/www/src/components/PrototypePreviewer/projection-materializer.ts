@@ -45,8 +45,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
   /** Let independent consumers finish preparation in a task after the frame. */
   yieldAfterPaint?: boolean;
-  /** Independent preparations may use lower-priority browser tasks while their owner is live. */
-  backgroundPreparation?: AbortSignal;
+  /** First-view preparation can yield while another consumer is preparing. */
+  backgroundPreparation?: Readonly<{ signal: AbortSignal; isPending(): boolean }>;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -62,9 +62,11 @@ const compositionFocusRestorers = new WeakMap<HTMLElement, (key: ProjectionFocus
 function backgroundPreparationTask(
   options: ProjectionMaterializerOptions
 ): Promise<void> | undefined {
-  const signal = options.backgroundPreparation;
-  if (!signal) return;
+  const preparation = options.backgroundPreparation;
+  if (!preparation) return;
+  const { signal } = preparation;
   signal.throwIfAborted();
+  if (!preparation.isPending()) return;
   const view = options.mount.ownerDocument.defaultView as
     | (Window & {
         scheduler?: {
@@ -373,7 +375,7 @@ export async function materializeProjectionCandidate(
 ): Promise<MaterializedProjectionCandidate> {
   const preparation = backgroundPreparationTask(options);
   if (preparation) await preparation;
-  options.backgroundPreparation?.throwIfAborted();
+  options.backgroundPreparation?.signal.throwIfAborted();
   const source = options.themeSource;
   if (!source?.isCurrent()) return prepareProjectionCandidate(request, options);
 
@@ -468,7 +470,7 @@ async function prepareProjectionCandidate(
   // framework render in the same foreground turn.
   const renderPreparation = backgroundPreparationTask(options);
   if (renderPreparation) await renderPreparation;
-  options.backgroundPreparation?.throwIfAborted();
+  options.backgroundPreparation?.signal.throwIfAborted();
 
   const host = options.mount.ownerDocument.createElement('div');
   host.className = 'pui-projection-generation';
@@ -552,7 +554,7 @@ async function prepareProjectionCandidate(
     composition.setLocked(false);
     reconcileCandidateExternalPortals();
     await nextPaint(host, options.yieldAfterPaint);
-    options.backgroundPreparation?.throwIfAborted();
+    options.backgroundPreparation?.signal.throwIfAborted();
     reconcileCandidateExternalPortals();
 
     const candidate: MaterializedProjectionCandidate = {

@@ -86,7 +86,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   };
   const createController = (initialSelection: ProjectionScopeSelection) => {
     const ownerId = `${logicalOwner}-attempt-${++attempt}`;
-    return createProjectionScopeController({
+    const scope: ProjectionScopeController = createProjectionScopeController({
       initialSelection,
       async materialize(request) {
         const family =
@@ -95,7 +95,14 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
           mount,
           yieldAfterPaint: purpose === 'code',
           backgroundPreparation:
-            preparation && hasPendingDocsHeaderPreparation(doc) ? preparation.signal : undefined,
+            preparation &&
+            scope.getSnapshot().generation === 0 &&
+            hasPendingDocsHeaderPreparation(doc)
+              ? {
+                  signal: preparation.signal,
+                  isPending: () => hasPendingDocsHeaderPreparation(doc),
+                }
+              : undefined,
           themeSource: { scope: root, family, isCurrent: isCurrentOwner },
           ownerId,
           componentId: 'button',
@@ -161,6 +168,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
         };
       },
     });
+    return scope;
   };
   let controller: ProjectionScopeController | undefined;
   const observe = (promise: Promise<unknown>, current: ProjectionScopeController) =>
