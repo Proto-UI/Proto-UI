@@ -6,6 +6,12 @@ import Toggle from '../../../../packages/prototypes/shadcn/src/toggle/toggle.pro
 import { initSiteHeaderDisclosure } from './site-header-disclosure';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
+import { initCodeSurface } from './site-code-surface';
+import { initCopyCommand } from './site-copy-command';
+import {
+  deferUntilDocsHeaderPrepared,
+  reserveDocsHeaderPreparation,
+} from './docs-header-preparation';
 
 vi.mock('./PrototypePreviewer/runtimes/react-runtime', async () => {
   const { createRequire } = await import('node:module');
@@ -43,7 +49,13 @@ vi.mock('./PrototypePreviewer/projection-theme', () => ({
     return () => {};
   },
 }));
-const faults = vi.hoisted(() => ({ failReact: false, calls: [] as string[] }));
+const faults = vi.hoisted(() => ({
+  failReact: false,
+  calls: [] as string[],
+  holdHeader: undefined as Promise<void> | undefined,
+  holdRetirement: undefined as Promise<void> | undefined,
+  preparations: [] as Array<{ runtime: string; recipe: string; headerRuntime: string | undefined }>,
+}));
 vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
   const actual = await original<typeof import('./PrototypePreviewer/projection-materializer')>();
   return {
@@ -51,10 +63,31 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
     materializeProjectionCandidate: async (
       ...args: Parameters<typeof actual.materializeProjectionCandidate>
     ) => {
-      faults.calls.push(args[0].selection.runtimeId);
-      if (faults.failReact && args[0].selection.runtimeId === 'react')
-        throw new Error('renderer unavailable');
-      return actual.materializeProjectionCandidate(...args);
+      const runtime = args[0].selection.runtimeId;
+      const options = args[1];
+      faults.calls.push(runtime);
+      faults.preparations.push({
+        runtime,
+        recipe: options.content?.recipe.id ?? '',
+        headerRuntime: document.querySelector<HTMLElement>('[data-site-header-panel]')?.dataset
+          .headerSurfaceRuntime,
+      });
+      if (
+        faults.holdHeader &&
+        runtime === 'react' &&
+        options.ownerId.startsWith('site-header-surface-')
+      )
+        await faults.holdHeader;
+      if (faults.failReact && runtime === 'react') throw new Error('renderer unavailable');
+      const candidate = await actual.materializeProjectionCandidate(...args);
+      if (runtime !== 'wc' || !options.ownerId.startsWith('site-header-surface-')) return candidate;
+      return {
+        ...candidate,
+        dispose() {
+          const pending = faults.holdRetirement;
+          return pending ? pending.then(() => candidate.dispose()) : candidate.dispose();
+        },
+      };
     },
   };
 });
@@ -67,7 +100,10 @@ afterEach(async () => {
   document.body.replaceChildren();
   localStorage.clear();
   faults.failReact = false;
+  faults.holdHeader = undefined;
+  faults.holdRetirement = undefined;
   faults.calls.length = 0;
+  faults.preparations.length = 0;
   vi.restoreAllMocks();
 });
 function fixture() {
@@ -317,6 +353,149 @@ describe('native Header content inside real family projection surfaces', () => {
     );
     expect(faults.calls).toEqual(['react', 'wc']);
   }, 20000);
+
+  it.each(['publication', 'preparation failure'] as const)(
+    'keeps independently registered Docs Copy and Code views usable until Header %s',
+    async (outcome) => {
+      const { header, panel } = fixture();
+      header.dataset.docsSiteHeader = '';
+      const code = document.createElement('div');
+      const source = document.createElement('pre');
+      source.textContent = 'native source';
+      code.append(source);
+      const copyRoot = document.createElement('div');
+      document.body.append(code, copyRoot);
+      const surface = initCodeSurface(code);
+      const copy = initCopyCommand(copyRoot, () => 'native source');
+      handles.push(surface, copy);
+      await Promise.all([surface.ready, copy.ready]);
+      const oldCopy = copyRoot.querySelector<HTMLElement>('[data-demo-ref="copy-button"]')!;
+      expect(oldCopy).toBeTruthy();
+      const docs = initDocumentationHeaderSurface(header)!;
+      handles.push(docs);
+      await vi.waitFor(() => expect(panel.dataset.headerSurfaceRuntime).toBe('wc'));
+
+      const { promise, resolve, reject } = Promise.withResolvers<void>();
+      const retirement = Promise.withResolvers<void>();
+      faults.holdHeader = promise;
+      faults.holdRetirement = retirement.promise;
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+        );
+        await vi.waitFor(() =>
+          expect(faults.calls.filter((runtime) => runtime === 'react')).toHaveLength(1)
+        );
+        await Promise.resolve();
+        expect(panel.dataset.headerSurfaceRuntime).toBe('wc');
+        expect(code.dataset.codeSurfaceRuntime).toBe('wc');
+        expect(copyRoot.dataset.copyRuntime).toBe('wc');
+        expect(oldCopy.closest('[inert]')).toBeNull();
+        expect(code.querySelector('pre')).toBe(source);
+
+        if (outcome === 'publication') resolve();
+        else reject(new Error('controlled Header preparation failure'));
+        const headerRuntime = outcome === 'publication' ? 'react' : 'wc';
+        if (outcome === 'preparation failure')
+          await vi.waitFor(() => expect(error).toHaveBeenCalled());
+        await vi.waitFor(() => expect(panel.dataset.headerSurfaceRuntime).toBe(headerRuntime));
+        await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('react'));
+        await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('react'));
+        const independent = faults.preparations.filter(
+          ({ runtime, recipe }) =>
+            runtime === 'react' &&
+            (recipe === 'website-code-surface' || recipe === 'website-copy-command')
+        );
+        expect(independent.map(({ recipe }) => recipe).sort()).toEqual([
+          'website-code-surface',
+          'website-copy-command',
+        ]);
+        expect(independent.every((call) => call.headerRuntime === headerRuntime)).toBe(true);
+        expect(code.querySelector('pre')).toBe(source);
+        expect(source.textContent).toBe('native source');
+      } finally {
+        resolve();
+        retirement.resolve();
+      }
+    },
+    15000
+  );
+});
+
+it('coalesces Docs decoration requests and respects superseding preparation and removal', async () => {
+  const retained = document.createElement('div');
+  const removed = document.createElement('div');
+  document.body.append(retained, removed);
+  const first = reserveDocsHeaderPreparation(document);
+  let latest: (() => void) | undefined;
+  try {
+    const run = vi.fn();
+    const runRemoved = vi.fn();
+    const prepare = deferUntilDocsHeaderPrepared(retained, run);
+    const wait = prepare.prepare();
+    expect(prepare.prepare()).toBe(wait);
+    const gone = deferUntilDocsHeaderPrepared(removed, runRemoved).prepare();
+    latest = reserveDocsHeaderPreparation(document);
+    first();
+    removed.remove();
+    await Promise.resolve();
+    expect(run).not.toHaveBeenCalled();
+    latest();
+    await Promise.all([wait, gone]);
+    expect(run).toHaveBeenCalledOnce();
+    expect(runRemoved).not.toHaveBeenCalled();
+  } finally {
+    first();
+    latest?.();
+  }
+});
+
+it('settles waiting Docs decoration readiness on owner destruction before Header finishes', async () => {
+  const code = document.createElement('div');
+  const copyRoot = document.createElement('div');
+  document.body.append(code, copyRoot);
+  const release = reserveDocsHeaderPreparation(document);
+  try {
+    const surface = initCodeSurface(code);
+    const copy = initCopyCommand(copyRoot, () => 'native source');
+    handles.push(surface, copy);
+    let ready = false;
+    const readiness = Promise.all([surface.ready, copy.ready]).then(() => {
+      ready = true;
+    });
+    await Promise.resolve();
+    expect(ready).toBe(false);
+    expect(faults.calls).toEqual([]);
+
+    await Promise.all([surface.destroy(), copy.destroy()]);
+    await vi.waitFor(() => expect(ready).toBe(true));
+    await readiness;
+    release();
+    await Promise.resolve();
+    expect(faults.calls).toEqual([]);
+  } finally {
+    release();
+  }
+});
+
+it('keeps local previewer Copy and Code independent of pending Docs Header preparation', async () => {
+  const previewer = document.createElement('div');
+  previewer.dataset.previewerId = 'local';
+  const code = document.createElement('div');
+  const copyRoot = document.createElement('div');
+  previewer.append(code, copyRoot);
+  document.body.append(previewer);
+  const release = reserveDocsHeaderPreparation(document);
+  try {
+    const surface = initCodeSurface(code);
+    const copy = initCopyCommand(copyRoot, () => 'native source');
+    handles.push(surface, copy);
+    await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('wc'));
+    await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('wc'));
+  } finally {
+    release();
+  }
 });
 
 it('preserves a focused native language destination when the first homepage projection replaces its fallback', async () => {

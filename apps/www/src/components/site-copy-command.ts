@@ -18,6 +18,7 @@ import {
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
+import { deferUntilDocsHeaderPrepared } from './docs-header-preparation';
 
 const COPY_GLYPHS = {
   idle: 'copy',
@@ -329,10 +330,10 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       },
     });
   };
-  let controller = createController(selection());
+  let controller: ProjectionScopeController | undefined;
   const failed = (error: unknown) => {
     if (!alive) return;
-    root.dataset.copyView = controller.getSnapshot().generation ? 'retained' : 'unavailable';
+    root.dataset.copyView = controller?.getSnapshot().generation ? 'retained' : 'unavailable';
     root.title = copyLabels(root).error;
     console.error('[SiteCopy] Copy control projection failed.', error);
   };
@@ -353,27 +354,32 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       }
     );
   };
-  const refresh = () => {
+  const prepare = () => {
     if (!alive) return;
-    owner.syncSource();
     const origin = doc.activeElement;
     if (origin && root.contains(origin)) focusRequests.set(origin, focusEpoch);
     const latest = selection();
-    const snapshot = controller.getSnapshot();
-    if (snapshot.generation === 0 && snapshot.phase === 'idle') {
-      const previous = controller;
+    const previous = controller;
+    const snapshot = previous?.getSnapshot();
+    if (!previous || (snapshot?.generation === 0 && snapshot.phase === 'idle')) {
       controller = createController(latest);
-      retire(previous);
-      void observe(controller.start(), controller);
-      return;
+      if (previous) retire(previous);
+      return observe(controller.start(), controller);
     }
-    void observe(
-      controller.request(
+    return observe(
+      previous.request(
         latest,
         root.contains(origin) ? { focusKey: 'copy', focusOrigin: origin } : {}
       ),
-      controller
+      previous
     );
+  };
+  const deferredPreparation = previewer ? undefined : deferUntilDocsHeaderPrepared(root, prepare);
+  const prepareView = deferredPreparation?.prepare ?? prepare;
+  const refresh = () => {
+    if (!alive) return;
+    owner.syncSource();
+    void prepareView();
   };
   const onPreference = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -398,10 +404,11 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   const handle: SiteCopyCommand = {
     owner,
     refresh,
-    ready: observe(controller.start(), controller),
+    ready: Promise.resolve(prepareView()),
     async destroy() {
       if (!alive) return;
       alive = false;
+      deferredPreparation?.cancel();
       handles.delete(root);
       owner.dispose();
       observer.disconnect();
@@ -409,7 +416,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       doc.removeEventListener('focusin', onFocus, true);
       previewer?.removeEventListener('runtime:changed', refresh);
       try {
-        await controller.destroy();
+        await controller?.destroy();
       } finally {
         await Promise.allSettled([...retiredControllers]);
         mount.remove();
