@@ -9,10 +9,19 @@ import type {
 import { CONTRAST_JOURNEY_TRANSFORM_ENDPOINT } from './contrast-native-journeys-plugin.mjs';
 
 type JourneyGlobal = typeof globalThis & { puiContrastJourneys: typeof JourneyAPI };
-type Observation = { achieved: boolean; [key: string]: unknown };
+type Observation = JourneyAPI.NativeJourneyObservation;
+type JourneySubjectHandle = Omit<JourneyAPI.NativeJourneySubject, 'previewer'> & {
+  previewer: ElementHandle<HTMLElement>;
+};
+type JourneyControlRecord = {
+  kind: string;
+  input: { method: string; point: JourneyAPI.NativePoint };
+  result?: Observation;
+  contentReused?: boolean;
+};
 type JourneyContext = {
   page: Page;
-  subject: JourneyAPI.NativeJourneySubject;
+  subject: JourneySubjectHandle;
   target: Locator;
   owned(prototype: string): Promise<Locator>;
   settle(): Promise<void>;
@@ -93,8 +102,9 @@ export async function runContrastDialogOutside(ctx: JourneyContext) {
       return null;
     });
     if (!interior) throw new Error('Dialog Content has no owned interior point for the broken-dismissal control.');
-    record.control = { kind: 'interior-press-must-not-dismiss',
+    const control: JourneyControlRecord = { kind: 'interior-press-must-not-dismiss',
       input: { method: 'page.mouse.move/down/up', point: interior } };
+    record.control = control;
     await page.mouse.move(interior.x, interior.y);
     await page.mouse.down(); await page.mouse.up();
     await ctx.settle();
@@ -105,7 +115,7 @@ export async function runContrastDialogOutside(ctx: JourneyContext) {
         }).puiContrastProbe.readContrastPaintedVisibility(content).classification === 'source-model-visible',
       basis: 'Interior owned-Content press must not dismiss; refusal stays recorded.',
     }), content);
-    record.control.result = controlResult;
+    control.result = controlResult;
     if (!controlResult.achieved) throw new Error('Broken-dismissal control failed: interior press dismissed or unpainted the Dialog.');
     binding = await page.evaluateHandle((input) =>
       (globalThis as JourneyGlobal).puiContrastJourneys.bindContrastDialogOutside(input),
@@ -169,12 +179,13 @@ export async function runContrastHoverBridge(ctx: JourneyContext) {
       return null;
     }, { trigger, content });
     if (!bypass) throw new Error('Hover Card has no exterior bypass point for the broken-bridge control.');
-    record.control = { kind: 'bypass-move-must-not-retain',
+    const control: JourneyControlRecord = { kind: 'bypass-move-must-not-retain',
       input: { method: 'page.mouse.move', point: bypass } };
+    record.control = control;
     await page.mouse.move(bypass.x, bypass.y, { steps: 2 });
     await (await ctx.owned('brutalist-hover-card-content')).waitFor({ state: 'hidden', timeout: 20_000 });
     const bypassClosed = await root.evaluate((element) => !element.hasAttribute('data-open'));
-    record.control.result = { achieved: bypassClosed,
+    control.result = { achieved: bypassClosed,
       basis: 'Pointer that never enters Content must not retain the card.' };
     if (!bypassClosed) throw new Error('Broken-bridge control failed: bypass move retained the Hover Card.');
     const triggerBox = await trigger.boundingBox();
@@ -183,7 +194,7 @@ export async function runContrastHoverBridge(ctx: JourneyContext) {
     const reopened = await ctx.owned('brutalist-hover-card-content');
     await reopened.waitFor({ state: 'visible', timeout: 20_000 });
     const reopenedHandle = await exact(reopened);
-    record.control.contentReused = await page.evaluate(
+    control.contentReused = await page.evaluate(
       ([a, b]) => a === b, [content, reopenedHandle]);
     content = reopenedHandle; handles.push(content);
     binding = await page.evaluateHandle((input) =>
@@ -245,7 +256,7 @@ export async function runContrastButtonKeyboard(
   let binding: JSHandle<ButtonKeyboardBinding> | undefined;
   try {
     const button = await exact(target); handles.push(button);
-    const disabled = [];
+    const disabled: ElementHandle<HTMLElement>[] = [];
     for (const ref of ['disabledSolid', 'disabledSurface']) {
       const candidate = (await ctx.owned('brutalist-button')).and(page.locator(`[data-demo-ref="${ref}"]`));
       const element = await exact(candidate); handles.push(element); disabled.push(element);

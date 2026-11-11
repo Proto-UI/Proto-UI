@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
+import { transform } from 'esbuild';
 import { Window } from 'happy-dom';
 import { contrastNativeJourneysPlugin } from './contrast-native-journeys-plugin.mjs';
 
@@ -24,15 +25,12 @@ async function load(moduleURL) {
   globalThis.innerWidth = window.innerWidth;
   globalThis.innerHeight = window.innerHeight;
   const source = await readFile(moduleURL, 'utf8');
-  // The browser probe bundle is a plain IIFE; the controlled check strips the
-  // module-only export keyword and returns the same public observer names.
-  const body = source.replace(/^export /gm, '');
-  return new Function(`${body}
-    ;return { CONTRAST_NATIVE_JOURNEY_STATES,
-      bindContrastDialogOutside, readContrastDialogOutside,
-      bindContrastHoverBridge, readContrastHoverBridge, contrastHoverLeavePoint,
-      bindContrastButtonKeyboard, beginContrastButtonKey, readContrastButtonKey,
-      readContrastDisabledButton, resetContrastButtonControlInputs };`)();
+  const { code } = await transform(source, {
+    loader: 'ts',
+    format: 'iife',
+    globalName: 'puiContrastJourneys',
+  });
+  return new Function(`${code}\nreturn puiContrastJourneys;`)();
 }
 
 const subjectLease = { owner: 'owner-852', generation: '17' };
@@ -129,7 +127,7 @@ function pointProbe(api, painted = new WeakSet(), point = null) {
   globalThis.puiContrastJourneys = api;
   window.document.elementFromPoint = (x, y) => point;
 }
-async function api() {
+async function loadApi() {
   return await load(fixturePath);
 }
 function event(window, type, init = {}) {
@@ -139,7 +137,7 @@ function event(window, type, init = {}) {
 }
 
 test('Dialog outside press requires one verified native Mask press, complete withdrawal and exact Trigger focus', async () => {
-  const api = await api();
+  const api = await loadApi();
   const { previewer, retained } = subjectDOM();
   const root = rootElement(retained, 'brutalist-dialog-root', { 'data-open': '' });
   const trigger = rootElement(retained, 'brutalist-dialog-trigger');
@@ -183,7 +181,7 @@ test('Dialog outside press requires one verified native Mask press, complete wit
 });
 
 test('Dialog outside accepts only the hit-tested owned Mask and rejects wrong focus/replacement', async () => {
-  const api = await api();
+  const api = await loadApi();
   const { previewer, retained } = subjectDOM();
   const root = rootElement(retained, 'brutalist-dialog-root', { 'data-open': '' });
   const trigger = rootElement(retained, 'brutalist-dialog-trigger');
@@ -199,7 +197,7 @@ test('Dialog outside accepts only the hit-tested owned Mask and rejects wrong fo
 });
 
 test('Hover bridge requires exact trusted Trigger leave to same owned Content enter, then retained and leave closure', async () => {
-  const api = await api();
+  const api = await loadApi();
   const { previewer, retained } = subjectDOM();
   const root = rootElement(retained, 'brutalist-hover-card-root', { 'data-open': '' });
   const trigger = rootElement(root, 'brutalist-hover-card-trigger');
@@ -236,7 +234,8 @@ test('Hover bridge requires exact trusted Trigger leave to same owned Content en
   replacement.remove();
   const foreign = rootElement(document.body, 'brutalist-hover-card-content');
   foreign.dataset.projectionOwner = 'foreign';
-  assert.equal(api.readContrastHoverBridge(binding, 'closed').achieved, false, 'foreign or duplicate leased content cannot be borrowed');
+  assert.equal(api.readContrastHoverBridge(binding, 'closed').achieved, true, 'unrelated foreign Content leaves the original withdrawal intact');
+  assert.equal(api.readContrastHoverBridge({ ...binding, content: foreign }, 'closed').achieved, false, 'foreign or duplicate leased content cannot be borrowed');
   foreign.remove();
   painted.add(content); root.setAttribute('data-open', '');
   assert.equal(api.readContrastHoverBridge(binding, 'closed').achieved, false, 'a later open cannot relabel the closed original view');
@@ -244,19 +243,22 @@ test('Hover bridge requires exact trusted Trigger leave to same owned Content en
 });
 
 test('Button Space/Enter observe outward callback exactly once, while unrelated key and disabled commands remain zero', async () => {
-  const api = await api();
+  const api = await loadApi();
   const { previewer, retained } = subjectDOM();
   const button = rootElement(retained, 'brutalist-button', { 'data-demo-ref': 'solidMain' });
   const disabledA = rootElement(retained, 'brutalist-button', { 'data-demo-ref': 'disabledSolid', 'aria-disabled': 'true' });
   const disabledB = rootElement(retained, 'brutalist-button', { 'data-demo-ref': 'disabledSurface', 'aria-disabled': 'true' });
   const painted = new WeakSet([button, disabledA, disabledB]);
   pointProbe(api, painted);
+  const buttonInstance = {};
+  const disabledAInstance = {};
+  const disabledBInstance = {};
   const session = { ref: 'solidMain', active: true, count: 0, deliveries: [], sourceBinding: { source: 'source', originalSHA: 'a', helperSHA: 'b' }, ctx: {
-    refs: { solidMain: button }, api: { getPublicInstance: (ref) => (ref === 'solidMain' ? {} : undefined) },
+    refs: { solidMain: button }, api: { getPublicInstance: (ref) => (ref === 'solidMain' ? buttonInstance : undefined) },
   } };
   globalThis[Symbol.for('proto-ui.contrast-button-commands.v1')] = new Set([session,
-    { ref: 'disabledSolid', active: true, count: 0, deliveries: [], ctx: { refs: { disabledSolid: disabledA }, api: { getPublicInstance: () => ({}) } }, sourceBinding: session.sourceBinding },
-    { ref: 'disabledSurface', active: true, count: 0, deliveries: [], ctx: { refs: { disabledSurface: disabledB }, api: { getPublicInstance: () => ({}) } }, sourceBinding: session.sourceBinding },
+    { ref: 'disabledSolid', active: true, count: 0, deliveries: [], ctx: { refs: { disabledSolid: disabledA }, api: { getPublicInstance: () => disabledAInstance } }, sourceBinding: session.sourceBinding },
+    { ref: 'disabledSurface', active: true, count: 0, deliveries: [], ctx: { refs: { disabledSurface: disabledB }, api: { getPublicInstance: () => disabledBInstance } }, sourceBinding: session.sourceBinding },
   ]);
   const binding = api.bindContrastButtonKeyboard({ subject: subject(previewer, 'button'), button, disabled: [disabledA, disabledB] });
   button.focus();

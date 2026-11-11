@@ -175,6 +175,7 @@ export async function readContrastReviewSeparation(reportPath, reviewPath = null
     if (frames.some((frame) => frame.name === name)) throw new Error(`Duplicate frame: ${name}`);
     const frame = await readFrame(dirname(reportPath), entry, report.schemaVersion);
     if (frame.image) await readBoundArtifact(dirname(reportPath), frame.image);
+    if (frame.fingerprintsFile) await readBoundArtifact(dirname(reportPath), frame.fingerprintsFile);
     const facts = frame.factsFile
       ? JSON.parse(await readBoundArtifact(dirname(reportPath), frame.factsFile))
       : frame.facts;

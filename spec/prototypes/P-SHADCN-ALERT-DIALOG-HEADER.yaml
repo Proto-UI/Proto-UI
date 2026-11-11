@@ -17,8 +17,8 @@ criteria:
       zh-CN: 导出 alertDialogHeader，名称为 shadcn-alert-dialog-header。声明既有 header role，保留匿名 slot 与空 Props、Exposes；不拥有 state、event、focus、open request、可访问控件 role 或 Base behavior hook。
   - id: P-SHADCN-ALERT-DIALOG-HEADER-LAYOUT
     text:
-      en: Use a minimum-width-zero grid group with gap-1.5 and left-aligned text. Title and Description retain their own font roles. No extra fill, border, shadow or state selector is added. This does not satisfy the upstream text-center below 40rem requirement.
-      zh-CN: 使用 min-w-0 grid 分组、gap-1.5 与左对齐文本。Title、Description 保留各自字体职责。不增加 fill、border、shadow 或 state selector；此实现不满足上游 40rem 以下 text-center 要求。
+      en: Use a minimum-width-zero grid group with gap-1.5 and left-aligned text. Keep authored Title and Description text within the Header's available inline size at narrow widths and enlarged root font sizes. Both inherit break opportunities anywhere when normal wrapping cannot fit an otherwise unbreakable token, and retain their own font roles. No extra fill, border, shadow or state selector is added. This does not satisfy the upstream text-center below 40rem requirement.
+      zh-CN: 使用 min-w-0 grid 分组、gap-1.5 与左对齐文本。在窄宽度与放大根字号下，将作者提供的 Title、Description 文本限制在 Header 的可用行内尺寸内。常规换行无法容纳不可断开的文本单元时，两者继承任意位置断行能力，并保留各自字体职责。不增加 fill、border、shadow 或 state selector；此实现不满足上游 40rem 以下 text-center 要求。
   - id: P-SHADCN-ALERT-DIALOG-HEADER-COMPOSITION
     text:
       en: The reference demo groups Title and Description under this part; their accessibility relations and inherited AlertDialog ownership remain unchanged after grouping and reopen.
@@ -33,11 +33,15 @@ verifies:
   tests: [T-SHADCN-ALERT-DIALOG-0001]
 sources:
   - path: packages/prototypes/shadcn/src/alert-dialog/header.proto.ts
+  - path: packages/prototypes/shadcn/src/alert-dialog/recipes.ts
   - path: packages/prototypes/base/src/alert-dialog/shared.ts
   - path: packages/prototypes/shadcn/test/alert-dialog.test.ts
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
   - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/alert-dialog.tsx
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Defined inherited text wrapping and inline containment for the New York Header at narrow widths and enlarged root font sizes.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added passive text grouping with source-aligned desktop spacing and explicit responsive/visual acceptance debt.

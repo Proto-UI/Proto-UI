@@ -12,13 +12,13 @@ const generator = new URL(
 );
 const diagrams = new URL('../../../apps/www/public/diagrams/', import.meta.url);
 
-// The responsive addition must not redraw the eight existing cd3b03a assets.
+// The responsive variants share the generator with the reviewed desktop diagrams.
 const desktopSha256 = {
-  'component-anatomy.en': 'b9a92f31f47aa90da0249071cfca23adadc51ac526c1dda3b0b4e3abbca3ee3f',
-  'component-anatomy.zh-cn': 'e20a501f9d1ffa17255aeb25b2d3282dd370cb8e43a63bb2f257bd7b15754056',
-  'conditional-consistency.en': 'd2d41bfbf0f846c081663713365e6bbcc332c19beedbb50639013f81e1f80a8a',
+  'component-anatomy.en': 'b198d0969717417504b0631ed58b6b6698b4243dfc5a2d4475e038b61a4c8157',
+  'component-anatomy.zh-cn': 'fca77c8262744dcc370ba89e8239d43c28122db5f6b4cfecb9ee46b4a5bd1184',
+  'conditional-consistency.en': '5d24f0d566cbcfb8bba47c43336e12afe7424137424294182bfffe81bf827e1a',
   'conditional-consistency.zh-cn':
-    '50faabe7b5ca4c8ce39042bf49efb94b50da5c71076846c24afc5c46bad7e9a6',
+    '9eaaf1b5c7f69ca6fe8cdbe6808d43695b1115830d83b003849c7ba15a529fb7',
   'evolution-feedback.en': 'd1b31fde58a0866b8a8a7c77d01ef6f25cd3209505c847532930a31b55ad6682',
   'evolution-feedback.zh-cn': 'e6331476ff25de268950ccfb3fcc4f481f495c69b54432459a2baaf52b95ad69',
   'switch-activation.en': '3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232',

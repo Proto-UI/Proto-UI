@@ -5,7 +5,6 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import type { Browser } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser } from '../../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import type {
@@ -33,7 +32,7 @@ const families = [
 }[];
 const includeWip = process.env.PUI_ASYNC_REGION_INCLUDE_WIP === '1';
 const root = fileURLToPath(new URL('../../../../', import.meta.url));
-let browser: Browser;
+let browser: Awaited<ReturnType<typeof launchBrowser>>;
 let output: string;
 let bundleSha256: string;
 

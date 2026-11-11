@@ -23,7 +23,7 @@ jobs:
           - shard: binary-and-buttons
             families: button,toggle,switch,checkbox,radio-group
           - shard: popup-boundaries
-            families: dropdown-menu,select,dialog
+            families: dropdown-menu,select,dialog,popover
           - shard: intent-and-tabs
             families: tooltip,hover-card,tabs,transition
           - shard: naming-and-disclosures
