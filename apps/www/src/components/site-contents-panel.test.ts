@@ -18,6 +18,7 @@ const rendered = vi.hoisted(() => ({
   retire: [] as Array<() => void>,
   disposals: [] as Array<() => void>,
   order: [] as string[],
+  props: [] as Array<[string, Record<string, unknown>]>,
 }));
 vi.mock('./PrototypePreviewer/projection-materializer', () => ({
   async materializeProjectionCandidate(
@@ -100,6 +101,7 @@ vi.mock('./PrototypePreviewer/projection-materializer', () => ({
         };
       },
       setProps(ref, props) {
+        rendered.props.push([ref, props]);
         if (ref !== 'contents-popover') return;
         if (props.onOpenChange) onOpenChange = props.onOpenChange as typeof onOpenChange;
         if (!Object.hasOwn(props, 'open')) return;
@@ -186,6 +188,7 @@ afterEach(async () => {
   rendered.holdLeave = false;
   rendered.finishes.length = 0;
   rendered.order.length = 0;
+  rendered.props.length = 0;
   rendered.demos.length = 0;
   vi.restoreAllMocks();
 });
@@ -246,6 +249,60 @@ describe('Contents single native tree/public Popover composition boundary', () =
     navigation!.refresh();
     expect(trigger.getAttribute('aria-controls')).toBe('owned-test-content-1');
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
+  });
+
+  it('reads clearance for the open and leaving lease and refreshes it before reopening', async () => {
+    const { command } = fixture();
+    let headerBottom = 72;
+    const header = command.closest('header')!;
+    const readHeader = vi
+      .spyOn(header, 'getBoundingClientRect')
+      .mockImplementation(() => new DOMRect(0, 0, 390, headerBottom));
+    let remeasure!: () => void;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          remeasure = callback;
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    try {
+      await publish();
+      const trigger = document.querySelector<HTMLElement>('[data-site-contents-button]')!;
+      vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 8, 44, 44));
+      remeasure();
+      expect(readHeader).not.toHaveBeenCalled();
+      rendered.props.length = 0;
+      navigation.toggle();
+      expect(rendered.props.slice(0, 2)).toEqual([
+        ['contents-panel', { sideOffset: 24 }],
+        ['contents-popover', { open: true }],
+      ]);
+
+      rendered.holdLeave = true;
+      navigation.close();
+      headerBottom = 76;
+      remeasure();
+      expect(rendered.props.at(-1)).toEqual(['contents-panel', { sideOffset: 28 }]);
+      rendered.finishes[0]!();
+      await settle();
+      readHeader.mockClear();
+      remeasure();
+      expect(readHeader).not.toHaveBeenCalled();
+
+      headerBottom = 82;
+      rendered.props.length = 0;
+      navigation.toggle();
+      expect(rendered.props.slice(0, 2)).toEqual([
+        ['contents-panel', { sideOffset: 34 }],
+        ['contents-popover', { open: true }],
+      ]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('opens a lazy slot, moves exactly the original nav, and restores its original sibling and disclosure identity', async () => {
