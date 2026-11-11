@@ -481,7 +481,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
               : undefined
           );
         },
-        setLocked(locked) {
+        setLocked(locked: boolean) {
           if (homepage && activated) {
             if (locked && current()) {
               // The page transaction locks the retained projection before it
