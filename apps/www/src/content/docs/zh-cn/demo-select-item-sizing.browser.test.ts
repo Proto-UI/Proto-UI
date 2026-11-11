@@ -10,6 +10,7 @@ import {
   sizingMotionIssues,
   type SizingMotionHandle,
   type SizingMotionResult,
+  type SizingMotionSelection,
 } from './demo-select-item-sizing-motion';
 import {
   RUNTIMES,
@@ -297,7 +298,7 @@ for (const environment of environments)
         const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
         const pointerInputs: Array<{ phase: string; value: PointerPoint }> = [];
         const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
-        const startMotion = async (trigger: Locator) => {
+        const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
           if (activeMotion.handle) throw new Error('Previous motion trace was not released');
           // Begin the open-cycle trace from an established keyboard focus state.
           // Otherwise the opening key also changes input modality, starts the
@@ -317,7 +318,7 @@ for (const environment of environments)
               { timeout: 1200 }
             )
             .toBe(true);
-          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace);
+          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace, selection);
         };
         const finishMotion = async (phase: string) => {
           if (!activeMotion.handle) throw new Error('Motion trace was not installed before action');
@@ -345,7 +346,7 @@ for (const environment of environments)
           });
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
           await page.keyboard.press('Tab');
-          await startMotion(trigger);
+          await startMotion(trigger, 'unset');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -366,7 +367,7 @@ for (const environment of environments)
           await page.keyboard.press('Enter');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await expect.poll(() => trigger.innerText()).toContain('Web Components');
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('Enter');
           await expect
             .poll(async () =>
@@ -391,7 +392,7 @@ for (const environment of environments)
             .toBe(true);
           await page.setViewportSize({ width: 390, height: 900 });
           await trigger.scrollIntoViewIfNeeded();
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -409,7 +410,7 @@ for (const environment of environments)
           // The original journey above only inspected aria-disabled. Exercise
           // the actual disabled option through trusted input, then prove the
           // same pointer can focus and commit an enabled sibling.
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await finishMotion('disabled-probe-entry');
           await page.keyboard.press('Home');
@@ -482,7 +483,7 @@ for (const environment of environments)
           // before installing the trace, as for the original first entry.
           await page.keyboard.press('Tab');
           await page.keyboard.press('Shift+Tab');
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await finishMotion('pointer-selected-reopen');
           const pointerReopen = await facts(trigger);
