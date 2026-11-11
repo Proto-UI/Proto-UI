@@ -276,14 +276,14 @@ describe('Contents single native tree/public Popover composition boundary', () =
       remeasure();
       expect(readHeader).not.toHaveBeenCalled();
       rendered.props.length = 0;
-      navigation.toggle();
+      navigation!.toggle();
       expect(rendered.props.slice(0, 2)).toEqual([
         ['contents-panel', { sideOffset: 24 }],
         ['contents-popover', { open: true }],
       ]);
 
       rendered.holdLeave = true;
-      navigation.close();
+      navigation!.close();
       headerBottom = 76;
       remeasure();
       expect(rendered.props.at(-1)).toEqual(['contents-panel', { sideOffset: 28 }]);
@@ -295,7 +295,7 @@ describe('Contents single native tree/public Popover composition boundary', () =
 
       headerBottom = 82;
       rendered.props.length = 0;
-      navigation.toggle();
+      navigation!.toggle();
       expect(rendered.props.slice(0, 2)).toEqual([
         ['contents-panel', { sideOffset: 34 }],
         ['contents-popover', { open: true }],
