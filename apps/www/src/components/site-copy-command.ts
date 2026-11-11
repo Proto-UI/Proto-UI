@@ -253,6 +253,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         );
         candidate = await materializeProjectionCandidate(request, {
           mount,
+          yieldAfterPaint: true,
           themeSource: { scope: root, family, isCurrent: () => alive },
           ownerId,
           componentId: 'button',

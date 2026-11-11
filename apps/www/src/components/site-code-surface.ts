@@ -88,6 +88,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
           request.selection.projectionFamilyId === 'brutalist' ? 'brutalist' : 'shadcn';
         return materializeProjectionCandidate(request, {
           mount,
+          yieldAfterPaint: purpose === 'code',
           themeSource: { scope: root, family, isCurrent: isCurrentOwner },
           ownerId,
           componentId: 'button',

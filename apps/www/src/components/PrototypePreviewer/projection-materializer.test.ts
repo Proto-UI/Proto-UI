@@ -148,6 +148,77 @@ describe('Website projection materializer', () => {
     expect(stopTheme).toHaveBeenCalledTimes(1);
   });
 
+  it('retains a hidden candidate and its late portal through the opted-in post-paint task', async () => {
+    const mount = document.createElement('div');
+    const retained = document.createElement('div');
+    retained.dataset.projectionGenerationHost = '1';
+    retained.dataset.projectionOwnerHost = 'paint-owner';
+    retained.dataset.projectionGenerationState = 'active';
+    mount.append(retained);
+    document.body.append(mount);
+    const setEventGateOpen = vi.fn();
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen,
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('div');
+      scope.dataset.projectionScope = 'paint-owner';
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    let frame: FrameRequestCallback | undefined;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frame = callback;
+      return 1;
+    });
+    let settled = false;
+    const pending = materializeProjectionCandidate(
+      { generation: 2, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+      {
+        mount,
+        ownerId: 'paint-owner',
+        componentId: 'button',
+        controls: controls(),
+        yieldAfterPaint: true,
+      }
+    ).then((candidate) => {
+      settled = true;
+      return candidate;
+    });
+    await vi.waitFor(() => expect(frame).toBeDefined());
+    let task: (() => void) | undefined;
+    const timer = vi.spyOn(window, 'setTimeout').mockImplementationOnce((handler) => {
+      if (typeof handler !== 'function') throw new Error('Expected a post-paint callback');
+      task = () => handler();
+      return 1;
+    });
+    frame!(0);
+    timer.mockRestore();
+    expect(task).toBeDefined();
+    const portal = document.createElement('div');
+    portal.dataset.projectionOwner = 'paint-owner';
+    portal.dataset.projectionGeneration = '2';
+    document.body.append(portal);
+    await vi.waitFor(() => expect(portal.inert).toBe(true));
+    expect(settled).toBe(false);
+    expect(retained.inert).toBe(false);
+    expect(mount.querySelector<HTMLElement>('[data-projection-generation-host="2"]')?.inert).toBe(
+      true
+    );
+    expect(setEventGateOpen).not.toHaveBeenCalled();
+
+    task!();
+    const candidate = await pending;
+    candidate.activate();
+    expect(retained.inert).toBe(true);
+    expect(portal.inert).toBe(false);
+    expect(setEventGateOpen).toHaveBeenCalledWith(true);
+    await candidate.dispose();
+  });
+
   it('seals staging portals and atomically swaps exact owner generations on activation', async () => {
     const setLocked = vi.fn();
     const setEventGateOpen = vi.fn();

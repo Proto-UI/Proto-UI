@@ -43,6 +43,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   controlIds?: readonly ProjectionControlId[];
   /** Website-owned host composition, checked against an explicit recipe. */
   content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
+  /** Let independent consumers finish preparation in a task after the frame. */
+  yieldAfterPaint?: boolean;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -55,11 +57,15 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
 // A focus lease belongs to the exact materialized composition, not a DOM role.
 const compositionFocusRestorers = new WeakMap<HTMLElement, (key: ProjectionFocusKey) => boolean>();
 
-function nextPaint(element: HTMLElement): Promise<void> {
+function nextPaint(element: HTMLElement, yieldAfterPaint = false): Promise<void> {
   return new Promise((resolve) => {
     const view = element.ownerDocument.defaultView;
-    if (view?.requestAnimationFrame) view.requestAnimationFrame(() => resolve());
-    else queueMicrotask(resolve);
+    if (view?.requestAnimationFrame) {
+      view.requestAnimationFrame(() => {
+        if (yieldAfterPaint) view.setTimeout(resolve, 0);
+        else resolve();
+      });
+    } else queueMicrotask(resolve);
   });
 }
 
@@ -515,7 +521,7 @@ async function prepareProjectionCandidate(
     // that update before activation exposes the generation.
     composition.setLocked(false);
     reconcileCandidateExternalPortals();
-    await nextPaint(host);
+    await nextPaint(host, options.yieldAfterPaint);
     reconcileCandidateExternalPortals();
 
     const candidate: MaterializedProjectionCandidate = {
