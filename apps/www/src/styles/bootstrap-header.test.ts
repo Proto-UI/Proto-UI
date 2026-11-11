@@ -5,9 +5,10 @@ import { GET } from '../pages/styles/site-library-theme.css';
 describe('Bootstrap navbar frame and family theme bank', () => {
   it('publishes distinct named light and dark navbar values without replacing Shadcn inputs', async () => {
     const css = await GET().text();
-    expect(css).toContain('--site-bootstrap-navbar-top: #ffffff');
-    expect(css).toContain('--site-bootstrap-navbar-top: #333333');
+    expect(css).toContain('--site-bootstrap-navbar-top: #006dcc');
+    expect(css).toContain('--site-bootstrap-navbar-top: #0055aa');
     expect(css).toContain('--site-bootstrap-foreground: #eeeeee');
+    expect(css).toContain('--site-bootstrap-navbar-foreground: #ffffff');
     expect(css).toContain('--site-shadcn-font-sans:');
   });
   it('uses a bounded static-top navbar frame and gives both settings sufficient desktop space', () => {

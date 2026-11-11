@@ -51,10 +51,14 @@ export function Summary() {
 | `focusVisible` | boolean | `false` |
 | `pressed` | boolean | `false` |
 | `current` | boolean | `false` |
+| `actionProfile` | `none`, `button` | `none` |
+| `colorContext` | `default`, `navbar` | `default` |
 
 `hovered`、`focusVisible`、`pressed`、`current` 都是现有语义 owner 提供的事实；Surface 不自行检测指针、焦点、键盘、选择或导航状态。它没有 exposed state、event、method、无障碍 role 或 native property。`current` 是呈现输入，不是 `aria-current` 实现；需要真实 Button 时应组合受治理的 Button 协议。
 
 移除输入后恢复默认值。`secondary` 选择家族的次级前景/背景，不通过 elevation 推断变体。默认圆角和绘制由各家族决定，共用 prop 词汇不等于外观一致。内容与布局继续归消费者；当带风格的 Text 子项需要保留外层 Surface 前景时，使用 `tone="inherit"`。
+
+Bootstrap 专属类型 `Bootstrap232SurfaceRootProps` 增加两项呈现输入。`actionProfile="button"` 选择被动 Button 绘制，交互事实仍由原生 owner 提供。`colorContext="navbar"` 仅在 `actionProfile="none"` 且 `variant="transparent"` 时，为家族蓝色导航栏上的 Surface 选择白色文字与白色焦点环；其他 variant 和 Button profile 忽略此上下文。移除输入后恢复其默认值。只在蓝色栏上的链接使用 navbar 上下文，不用于普通面板或弹层导航。这些是 draft/WIP 家族适配，不是上游 Bootstrap API，也不代表已经验证原生视觉对等。
 
 ## 观察已有 Transition
 

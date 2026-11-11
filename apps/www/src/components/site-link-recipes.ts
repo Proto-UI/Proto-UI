@@ -41,6 +41,13 @@ const initial: NativeLinkFacts = {
   pressed: false,
   current: false,
 };
+export function navbarLinkContext(link: Element): 'default' | 'navbar' {
+  return link.closest('[data-site-header]') &&
+    !link.closest('[data-site-header-panel]') &&
+    !!link.closest('.site-header-brand, [data-site-header-desktop-navigation]')
+    ? 'navbar' : 'default';
+}
+
 /** Choose a public family recipe; native anchor identity is not rewritten. */
 export function linkActionAppearance(
   family: SiteLibraryFamily,
@@ -58,8 +65,15 @@ export function linkSurfaceProps(
   family: SiteLibraryFamily,
   appearance: SiteLinkAppearance,
   emphasis: SiteLinkEmphasis,
-  facts = initial
-): SurfaceRootProps {
+  facts = initial,
+  colorContext: 'default' | 'navbar' = 'default'
+): SurfaceRootProps & { colorContext?: 'default' | 'navbar' } {
+  if (family === 'bootstrap-2-3-2' && colorContext === 'navbar' && ['brand', 'nav'].includes(appearance))
+    return {
+      variant: 'transparent', radius: 'none', border: 'none', elevation: 'none',
+      colorContext: 'navbar', focusVisible: facts.focusVisible,
+      hovered: facts.hovered, pressed: facts.pressed, current: facts.current,
+    };
   // The shared TOC range owns background selection. The native anchor and
   // Text still consume current/hover facts; this passive row keeps focus only
   // (plus the family's existing pressed feedback), never a second fill.

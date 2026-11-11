@@ -51,10 +51,14 @@ The `/surface` subpath and package root export `surfaceRoot`; `SurfaceRootProps`
 | `focusVisible` | boolean | `false` |
 | `pressed` | boolean | `false` |
 | `current` | boolean | `false` |
+| `actionProfile` | `none`, `button` | `none` |
+| `colorContext` | `default`, `navbar` | `default` |
 
 `hovered`, `focusVisible`, `pressed` and `current` are facts supplied by the existing semantic owner. Surface does not detect pointer, focus, keyboard, selection or navigation state itself. It owns no exposed state, event, method, accessible role or native property. `current` is a presentation input, not an `aria-current` implementation. A caller that needs a real Button should compose the governed Button protocol.
 
 Removing an input restores its default. `secondary` selects the family secondary foreground/background rather than deriving a variant from elevation. Default radius and paint are family-specific; a shared prop vocabulary does not imply identical appearance. Content and layout remain consumer-owned. Use Text with `tone="inherit"` when a styled Text child must retain the enclosing Surface foreground.
+
+The Bootstrap-only `Bootstrap232SurfaceRootProps` adds two presentation inputs. `actionProfile="button"` selects passive Button paint; the native owner still supplies interaction facts. `colorContext="navbar"` selects white ink and a white focus ring for a transparent Surface on the family's blue navbar, only when `actionProfile="none"`. Other variants and the Button profile ignore this context. Remove either input to restore its default. Apply the navbar context only to links on the blue frame, not ordinary panels or popup navigation. These are draft/WIP family adaptations, not an upstream Bootstrap API or a claim of verified native visual parity.
 
 ## Observe an existing Transition
 

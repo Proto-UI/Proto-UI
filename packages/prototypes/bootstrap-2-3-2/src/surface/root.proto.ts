@@ -17,6 +17,8 @@ import {
 export interface Bootstrap232SurfaceRootProps extends SurfaceRootProps {
   /** Passive ordinary Button paint. The native owner supplies interaction facts. */
   actionProfile?: 'none' | 'button';
+  /** Blue navbar transparent navigation only; ordinary surfaces retain their palette. */
+  colorContext?: 'default' | 'navbar';
 }
 export const Bootstrap232SurfaceRoot = definePrototype<
   Bootstrap232SurfaceRootProps,
@@ -27,8 +29,10 @@ export const Bootstrap232SurfaceRoot = definePrototype<
     const inherited = asSurfaceRoot();
     def.props.define({
       actionProfile: { type: 'enum', options: ['none', 'button'], empty: 'fallback' },
+      colorContext: { type: 'enum', options: ['default', 'navbar'], empty: 'fallback' },
     });
-    def.props.setDefaults({ actionProfile: 'none' });
+    def.props.setDefaults({ actionProfile: 'none', colorContext: 'default' });
+    // Presentation context is opt-in and applies only to transparent navigation.
     def.rule({
       when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('scrim')),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),
@@ -128,8 +132,17 @@ export const Bootstrap232SurfaceRoot = definePrototype<
       intent: (i) => i.feedback.style.use(tw('border-0')),
     });
     def.rule({
-      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('transparent')),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('transparent'), w.prop('colorContext').eq('default')),
       intent: (i) => i.feedback.style.use(tw('bg-transparent text-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('transparent'), w.prop('colorContext').eq('navbar')),
+      // Paired with THEME navbar-foreground in both modes; never page foreground.
+      intent: (i) => i.feedback.style.use(tw('bg-transparent text-white')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('transparent'), w.prop('colorContext').eq('navbar'), w.prop('focusVisible').eq(true)),
+      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-primary-foreground ring-offset-0')),
     });
     def.rule({
       when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('outline')),
@@ -197,7 +210,7 @@ export const Bootstrap232SurfaceRoot = definePrototype<
       intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
     });
     def.rule({
-      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('focusVisible').eq(true)),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('focusVisible').eq(true), w.not(w.all(w.prop('variant').eq('transparent'), w.prop('colorContext').eq('navbar')))),
       intent: (i) =>
         i.feedback.style.use(
           tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background')
@@ -236,7 +249,7 @@ export const Bootstrap232SurfaceRoot = definePrototype<
         w.all(
           w.prop('actionProfile').eq('none'),
           w.all(
-            w.any(w.prop('variant').eq('outline'), w.prop('variant').eq('transparent')),
+            w.any(w.prop('variant').eq('outline'), w.all(w.prop('variant').eq('transparent'), w.prop('colorContext').eq('default'))),
             w.any(w.prop('hovered').eq(true), w.prop('current').eq(true))
           )
         ),

@@ -7,8 +7,11 @@ import ShadcnSurface from '@proto.ui/prototypes-shadcn/surface';
 import BrutalistSurface from '@proto.ui/prototypes-brutalist/surface';
 import ShadcnText from '@proto.ui/prototypes-shadcn/text';
 import BrutalistText from '@proto.ui/prototypes-brutalist/text';
+import BootstrapSurface from '@proto.ui/prototypes-bootstrap-2-3-2/surface';
+import BootstrapText from '@proto.ui/prototypes-bootstrap-2-3-2/text';
 import {
   linkSurfaceProps,
+  navbarLinkContext,
   linkSurfaceLayout,
   linkTextProps,
   sidebarTextSurfaceStyle,
@@ -109,6 +112,7 @@ export function initSiteNativeControls(
   for (const [family, surface, text] of [
     ['shadcn', ShadcnSurface, ShadcnText],
     ['brutalist', BrutalistSurface, BrutalistText],
+    ['bootstrap-2-3-2', BootstrapSurface, BootstrapText],
   ] as const) {
     for (const [part, proto] of [
       ['surface', surface],
@@ -288,7 +292,7 @@ export function initSiteNativeControls(
       if (!surface) return () => {};
       const theme = batchTheme;
       const props = {
-        ...linkSurfaceProps(family, appearance, siteLinkEmphasis(link), facts),
+        ...linkSurfaceProps(family, appearance, siteLinkEmphasis(link), facts, navbarLinkContext(link)),
         surfaceStyle: {
           ...theme,
           ...linkSurfaceLayout(family, appearance, siteLinkEmphasis(link), facts, readingToc),
