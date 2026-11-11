@@ -174,6 +174,18 @@ test('unsupported, inactive, failed and unfinished observations preserve origina
   assert.deepEqual(result.audit.summary, f.report.summary);
 });
 
+test('an advertised fingerprint sidecar must match its bound bytes', async (t) => {
+  const f = await fixture(t, { schemaVersion: 2 });
+  const path = 'calibration.fingerprints.json';
+  f.frame.fingerprintsFile = await f.artifact(path, {
+    before: 'injected-state', facts: 'injected-state', after: 'injected-state',
+  });
+  await f.saveReport();
+  assert.equal((await readContrastReviewSeparation(f.reportPath)).frames.length, 1);
+  await writeFile(join(f.directory, path), '{}');
+  await assert.rejects(readContrastReviewSeparation(f.reportPath), /Artifact digest mismatch/);
+});
+
 test('annotation reuse rejects a different report even when the selected rows look identical', async (t) => {
   const f = await fixture(t);
   const review = await f.review();
