@@ -1221,6 +1221,70 @@ it('homepage keeps one active public Search session through runtime transitions 
   }
 }, 120_000);
 
+it('keeps Bootstrap Homepage Search available after selecting the WIP family', async () => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage();
+  stage(page, 'home-bootstrap-search', 'navigate');
+  try {
+    await installSuccessfulEmptySearchData(page);
+    expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+    await homeReady(page, 'shadcn', 'wc');
+    await choosePageControl(page, 'family', 'Bootstrap 2.3.2 · WIP');
+    await homeReady(page, 'bootstrap-2-3-2', 'wc');
+    await page
+      .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+      .click();
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+    expect(await (await searchPart(page, 'panel')).getAttribute('data-projection-family')).toBe(
+      'bootstrap-2-3-2'
+    );
+    await page.keyboard.press('Escape');
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+  } catch (error) {
+    await captureFailure(page);
+    throw error;
+  } finally {
+    await context.close();
+  }
+}, 60_000);
+
+it('retains Homepage Search Close focus across replacement and returns shortcut focus to the opener', async () => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage();
+  stage(page, 'home-search-shortcut-handback', 'navigate');
+  try {
+    await installSuccessfulEmptySearchData(page);
+    expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+    await homeReady(page, 'shadcn', 'wc');
+    const trigger = page.locator(
+      'site-search [data-projection-generation-state="active"] [data-open-modal]'
+    );
+    await trigger.click();
+    const editor = await searchInput(page);
+    await expect.poll(() => editor.evaluate((node) => node === document.activeElement)).toBe(true);
+    const panel = await searchPart(page, 'panel');
+    await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+    await (await searchPart(page, 'close')).focus();
+    await page.evaluate(() =>
+      document.dispatchEvent(
+        new CustomEvent('proto-adapter:change', { detail: { adapter: 'react' } })
+      )
+    );
+    await homeReady(page, 'shadcn', 'react');
+    const close = await searchPart(page, 'close');
+    await expect.poll(() => close.evaluate((node) => node === document.activeElement)).toBe(true);
+    await page.keyboard.press('Control+k');
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+    await expect.poll(() => trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+    await capture(page, 'home-search-shortcut-handback', 'returned');
+  } catch (error) {
+    await captureFailure(page);
+    throw error;
+  } finally {
+    await context.close();
+  }
+}, 60_000);
+
 it('keeps a documentation link available without JavaScript', async () => {
   const startedAt = Date.now();
   const context = await browser.newContext({ javaScriptEnabled: false });

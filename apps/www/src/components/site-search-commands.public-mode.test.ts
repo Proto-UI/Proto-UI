@@ -3,6 +3,7 @@ import { searchCommandParticipant } from './site-search-commands';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 import type { RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './PrototypePreviewer/projection-theme';
+import type { SiteLibraryFamily } from './site-library-family';
 
 // Resource boundary only: real owner/session/data/composition/materializer/loaders/adapters.
 const resource = vi.hoisted(() => ({ search: vi.fn() }));
@@ -84,7 +85,7 @@ afterEach(async () => {
   document.body.replaceChildren();
   if (errors.length) throw new AggregateError(errors, 'Search materializer test cleanup failed');
 });
-function mount(family: 'shadcn' | 'brutalist', homepage = false) {
+function mount(family: SiteLibraryFamily, homepage = false) {
   const root = document.createElement('site-search');
   root.dataset.searchComposition = 'command-dialog';
   root.dataset.searchStyle = 'rhea';
@@ -143,7 +144,7 @@ function type(input: HTMLInputElement, value: string) {
 }
 async function prepare(
   owner: ReturnType<typeof searchCommandParticipant>,
-  family: 'shadcn' | 'brutalist',
+  family: SiteLibraryFamily,
   runtime: RuntimeId,
   generation: number
 ) {
@@ -197,6 +198,54 @@ it('returns focus to the current Homepage opener after dismissing a replacement 
   close.click();
   await vi.waitFor(() => expectClosed(2));
   await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+});
+
+it('keeps Bootstrap Homepage Search materializable with the registered Dialog and Command', async () => {
+  const { owner, root } = mount('bootstrap-2-3-2', true);
+  const view = await prepare(owner, 'bootstrap-2-3-2', 'wc', 1);
+  view.activate();
+  expect(root.dataset.searchFamily).toBe('bootstrap-2-3-2');
+  owner.open();
+  await vi.waitFor(() => expect(editor(1).isConnected).toBe(true));
+  expect(surface(1, 'panel').dataset.projectionPrototype).toBe('bootstrap-2-3-2-dialog-content');
+  expect(surface(1, 'command').dataset.projectionPrototype).toBe('bootstrap-2-3-2-command-root');
+  surface(1, 'close').click();
+  await vi.waitFor(() => expectClosed(1));
+});
+
+it('returns focus to the current Homepage opener when the shortcut closes a replacement Dialog', async () => {
+  const { owner, opener } = await openHomepageReplacement();
+  owner.toggle();
+  await vi.waitFor(() => expectClosed(2));
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+});
+
+it.each([
+  { label: 'Close', ref: 'close' },
+  { label: 'Retry', ref: 'search-page-action' },
+])('carries the focused $label control through a Homepage Dialog replacement', async ({ ref }) => {
+  const { owner } = mount('shadcn', true);
+  const first = await prepare(owner, 'shadcn', 'wc', 1);
+  first.activate();
+  owner.open();
+  await vi.waitFor(() => expect(document.activeElement).toBe(editor(1)));
+  await vi.waitFor(() =>
+    expect(surface(1, 'panel').getAttribute('data-transition-state')).toBe('entered')
+  );
+  if (ref === 'search-page-action') {
+    resource.search.mockRejectedValueOnce(new Error('Controlled Search failure'));
+    type(editor(1), 'failed-query');
+    await vi.waitFor(() => expect(surface(1, ref).textContent).toBe('Retry'));
+  }
+  const oldControl = surface(1, ref);
+  oldControl.focus();
+  expect(document.activeElement).toBe(oldControl);
+  for (const candidate of first.prepared) await candidate.setLocked?.(true);
+  const second = await prepare(owner, 'shadcn', 'react', 2);
+  second.activate();
+  for (const candidate of first.prepared) await candidate.dispose();
+  await vi.waitFor(() => expect(document.activeElement).toBe(surface(2, ref)));
+  expect(oldControl.isConnected).toBe(false);
 });
 
 it('keeps newer focus when a replacement Dialog finishes leaving', async () => {

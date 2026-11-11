@@ -161,7 +161,7 @@ export function createSiteSearchComposition(options: {
           previewTheme: 'portal',
           props: { enterDuration: duration, leaveDuration: duration },
         }),
-        proto('command-dialog-content', {
+        proto(family === 'bootstrap-2-3-2' ? 'dialog-content' : 'command-dialog-content', {
           ref: 'panel',
           // One bounded inner Command shell; title/description are out of flow.
           surfaceStyle: { gridTemplateRows: 'minmax(0, 1fr)' },
@@ -410,31 +410,33 @@ export function createSiteSearchComposition(options: {
       api.setProps('command', { onInputValueChange: inputValueChange, onExecute: execute });
       api.setProps('dialog', {
         onOpenChange: (detail: { open: boolean }) => {
-          if (!current()) return;
-          const restore = !detail.open && session.read().open && prepareOpenerReturn?.(refs.panel);
-          const finish = restore ? watchOpenerReturn(restore) : undefined;
-          session.setOpen(detail.open);
-          finish?.();
+          if (current()) session.setOpen(detail.open);
         },
       });
       const paint = async () => {
         const epoch = ++paintEpoch;
         const { open, snapshot, retrying, navigation } = session.read();
         if (!live) return;
-        if (!current() || !open) {
+        const active = current();
+        if (!active || !open) {
           // Late author-slot completions from a closed generation cannot certify
           // a later reopen, even if its retained DOM box identity is unchanged.
           pendingHint = undefined;
           committedHint = undefined;
+          let finish: (() => void) | undefined;
           if (!open) {
+            const prepare = prepareOpenerReturn;
+            prepareOpenerReturn = undefined;
+            const restore = active && prepare?.(refs.panel);
+            if (restore) finish = watchOpenerReturn(restore);
             // A closed generation hands the entry policy back and drops its
             // pending restore, so a later open of this generation is a normal
             // fresh open that auto-enters the query again.
             pendingFocusRestore = null;
-            prepareOpenerReturn = undefined;
             releaseEntryPolicy();
           }
           api.setProps('dialog', { open: false });
+          finish?.();
           return;
         }
         cancelOpenerReturn?.();
