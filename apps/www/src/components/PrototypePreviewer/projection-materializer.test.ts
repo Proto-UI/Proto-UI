@@ -190,7 +190,8 @@ describe('Website projection materializer', () => {
     });
     await vi.waitFor(() => expect(frame).toBeDefined());
     let task: (() => void) | undefined;
-    const timer = vi.spyOn(window, 'setTimeout').mockImplementationOnce((handler) => {
+    const view: Window = window;
+    const timer = vi.spyOn(view, 'setTimeout').mockImplementationOnce((handler) => {
       if (typeof handler !== 'function') throw new Error('Expected a post-paint callback');
       task = () => handler();
       return 1;
