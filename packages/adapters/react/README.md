@@ -20,6 +20,8 @@ The guarantee is limited to the default getter in same-document light DOM withou
 
 For a statically declared Text Control root, the adapter mirrors the host lease's `defaultValue` patch into React's native `defaultValue` prop. Text Control remains the owner of the current editor value; this prevents React reconciliation from replacing an authored initial textarea value with an empty default while preserving dirty uncontrolled edits across later property updates. See [C-TEXT-CONTROL-0001](../../../spec/contracts/C-TEXT-CONTROL-0001.yaml), draft.
 
+The editing lease also guards the physical editor's native `defaultValue` accessor against redundant string writes from React reconciliation. Equal defaults leave selection and cursor untouched; changed defaults still reach the native setter and remain available to form reset. The lease restores the prior property binding on detach or disposal. Current-value projection continues through Text Control's existing value and composition ownership.
+
 ## Public handle identity
 
 The adapter publishes one public handle object per mounted adapter instance. React re-runs the imperative handle effect whenever a consumer supplies a new `ref` identity, so the current callback still receives the handle. The handle is allocated once and reused: `update`, `getExposes` and `invokeInCallbackScope` keep reading the live view while its identity stays stable across renders and commits.
