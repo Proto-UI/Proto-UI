@@ -19,11 +19,14 @@ it('T-COLLECTION-0002-CASE-MODULE: projects current Anatomy order and metadata w
   const a = { getExpose: () => metadata },
     b = { getExpose: () => () => ({ id: 'b' }) };
   let parts = [a, b] as Array<{ getExpose: () => unknown }>;
-  let index = 1;
+  const aInstance = {},
+    bInstance = {};
   const off = vi.fn(),
     subscribe = vi.fn(() => off);
   const anatomy = {
-    order: { partsOf: vi.fn(() => parts), indexOfSelf: () => index },
+    order: { partsOf: vi.fn(() => parts), indexOfSelf: vi.fn(() => parts.indexOf(b)) },
+    resolvePartInstance: (part: typeof a) => (part === b ? bInstance : aInstance),
+    resolveSelfInstance: () => bInstance,
     subscribeOrder: subscribe,
   };
   const module = createCollectionModule({
@@ -50,7 +53,6 @@ it('T-COLLECTION-0002-CASE-MODULE: projects current Anatomy order and metadata w
     missing: 'empty',
   });
   parts = [b, a];
-  index = 0;
   expect(provider.readItems().map((p) => p.id)).toEqual(['b', 'a']);
   expect(item.buildSnapshot({ index: 22, id: 'b' })).toEqual({
     id: 'b',
@@ -59,11 +61,11 @@ it('T-COLLECTION-0002-CASE-MODULE: projects current Anatomy order and metadata w
     first: true,
     last: false,
   });
+  expect(anatomy.order.indexOfSelf).not.toHaveBeenCalled();
   const cancel = provider.subscribe(() => {});
   cancel();
   expect(off).toHaveBeenCalledTimes(1);
   parts = [];
-  index = -1;
   expect(provider.readCount()).toBe(0);
   expect(item.readPosition()).toEqual({ index: -1, total: 0, first: false, last: false });
 });
