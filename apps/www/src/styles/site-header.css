@@ -783,7 +783,9 @@
 
 /* Native fallback ink and non-interactive labels only. Real Button/Select and
    passive Surface/Text retain their public family presentation. */
-[data-site-library-family='bootstrap-2-3-2'] .site-header > .site-header-runtime .site-header-runtime-label,
+/* Docs moves the complete Runtime preference owner between the wide toolbar
+   and compact popup. Only its wide destination sits on the blue navbar. */
+[data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-wide-preferences] .site-header-runtime-label,
 [data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-wide-preferences] .pui-projection-control-label,
 [data-site-library-family='bootstrap-2-3-2'] .site-header > .home-runtime-status {
   color: var(--site-bootstrap-navbar-foreground);
