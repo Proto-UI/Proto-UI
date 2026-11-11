@@ -133,7 +133,7 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
   it('keeps text and commands in separate reusable groups with source desktop gaps', async () => {
     const p = fixture();
     await flush();
-    for (const token of ['grid', 'gap-1.5', 'text-left', 'min-w-0'])
+    for (const token of ['grid', 'gap-1.5', 'text-left', 'min-w-0', 'wrap-anywhere'])
       expect(styleContains(p.header, token)).toBe(true);
     for (const token of ['flex', 'flex-wrap-reverse', 'gap-2', 'justify-end', 'min-w-0'])
       expect(styleContains(p.footer, token)).toBe(true);

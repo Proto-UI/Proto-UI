@@ -71,6 +71,7 @@ function frameEntry(index, name, frame, frameFile) {
       expectedArtifacts: {
         image: `${name}.png`,
         facts: `${name}.facts.json`,
+        fingerprints: `${name}.fingerprints.json`,
         mismatch: `${name}.mismatch.json`,
       },
       frameFile,

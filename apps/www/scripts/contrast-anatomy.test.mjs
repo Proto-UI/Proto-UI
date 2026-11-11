@@ -106,7 +106,7 @@ test('unchecked Indicator may be unpainted but checked/mixed Indicator and Switc
   assert.equal(compareContrastAnatomy(switchPlan, switches).achieved, false);
 });
 
-for (const family of ['select', 'dropdown-menu', 'dialog'])
+for (const family of ['select', 'dropdown-menu', 'dialog', 'popover'])
   test(`${family} derives portal subtree counts from the recipe and current trigger relation`, async () => {
     const plan = await load(family);
     const sample = model(plan, family);
@@ -124,6 +124,7 @@ for (const family of ['select', 'dropdown-menu', 'dialog'])
       }),
     };
     assert.equal(compareContrastAnatomy(plan, closed).achieved, true);
+    if (family === 'popover') assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
     trigger.ariaExpanded = 'true';
     assert.equal(compareContrastAnatomy(plan, closed).achieved, false);
     const inlineContent = sample.surfaces.find((surface) => surface.uid === content.path);
