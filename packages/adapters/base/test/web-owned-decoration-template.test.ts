@@ -47,13 +47,14 @@ describe.each(renderers)('%s owned decoration VNode materialization', (name, ren
     expect(out.type).toBe('span');
     const attrs = name === 'vue2' ? out.props.attrs : out.props;
     expect(attrs['aria-hidden']).toBe('true');
-    expect(attrs.inert).toBe(name === 'react' ? true : '');
+    expect(attrs.inert).toBe(name === 'react' ? undefined : '');
     expect(attrs.tabindex).toBeUndefined();
     const host = document.createElement('div');
     const leaf = document.createElement('span');
     host.append(leaf);
     if (name === 'vue2') out.props.hook.insert({ elm: leaf });
     else out.props.ref(leaf);
+    expect(leaf.getAttribute('inert')).toBe('');
     stage.bind(host, (b) => b[0].sink({ kind: 'tw', tokens: ['bg-black'] }));
     expect(leaf.getAttribute('data-pui-style')).toBe('bg-black');
     expect(leaf.childNodes.length).toBe(0);
