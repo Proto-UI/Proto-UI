@@ -148,6 +148,69 @@ describe('Website projection materializer', () => {
     expect(stopTheme).toHaveBeenCalledTimes(1);
   });
 
+  it.each(['theme', 'render'] as const)(
+    'revokes an independent background %s task on owner disposal',
+    async (phase) => {
+      const mount = document.createElement('div');
+      document.body.append(mount);
+      const owner = new AbortController();
+      const descriptor = Object.getOwnPropertyDescriptor(window, 'scheduler');
+      const tasks: Array<() => void> = [];
+      const postTask = vi.fn(
+        (callback: () => void, { signal }: { signal: AbortSignal }) =>
+          new Promise<void>((resolve, reject) => {
+            const abort = () => reject(signal.reason);
+            signal.addEventListener('abort', abort, { once: true });
+            tasks.push(() => {
+              signal.removeEventListener('abort', abort);
+              resolve(callback());
+            });
+          })
+      );
+      Object.defineProperty(window, 'scheduler', { configurable: true, value: { postTask } });
+      const stopTheme = vi.fn();
+      fakes.watchTheme.mockImplementation((_family, _scope, onChange) => {
+        onChange({ '--pui-background': '#fff' });
+        return stopTheme;
+      });
+      fakes.createComposition.mockReturnValue({ demo: childDemo });
+      const pending = materializeProjectionCandidate(
+        { generation: 1, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+        {
+          mount,
+          ownerId: 'independent-owner',
+          componentId: 'button',
+          controls: controls(),
+          backgroundPreparation: owner.signal,
+          themeSource: { scope: mount, family: 'shadcn', isCurrent: () => !owner.signal.aborted },
+        }
+      );
+      void pending.catch(() => {});
+      try {
+        await vi.waitFor(() => expect(tasks).toHaveLength(1));
+        expect(fakes.watchTheme).not.toHaveBeenCalled();
+        if (phase === 'render') {
+          tasks.shift()!();
+          await vi.waitFor(() => expect(tasks).toHaveLength(1));
+          expect(fakes.watchTheme).toHaveBeenCalledOnce();
+        }
+        expect(postTask).toHaveBeenLastCalledWith(expect.any(Function), {
+          priority: 'background',
+          signal: owner.signal,
+        });
+        owner.abort();
+        await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+        expect(fakes.renderDemo).not.toHaveBeenCalled();
+        expect(mount.childElementCount).toBe(0);
+        expect(stopTheme).toHaveBeenCalledTimes(phase === 'render' ? 1 : 0);
+      } finally {
+        owner.abort();
+        if (descriptor) Object.defineProperty(window, 'scheduler', descriptor);
+        else Reflect.deleteProperty(window, 'scheduler');
+      }
+    }
+  );
+
   it('retains a hidden candidate and its late portal through the opted-in post-paint task', async () => {
     const mount = document.createElement('div');
     const retained = document.createElement('div');

@@ -1,5 +1,9 @@
 const pendingPreparations = new WeakMap<Document, { waiters: Set<() => void>; release(): void }>();
 
+export function hasPendingDocsHeaderPreparation(document: Document): boolean {
+  return pendingPreparations.has(document);
+}
+
 export function reserveDocsHeaderPreparation(document: Document): () => void {
   const previous = pendingPreparations.get(document);
   const preparation = {

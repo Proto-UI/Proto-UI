@@ -10,7 +10,10 @@ import {
 } from './PrototypePreviewer/projection-scope';
 import { materializeProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
-import { deferUntilDocsHeaderPrepared } from './docs-header-preparation';
+import {
+  deferUntilDocsHeaderPrepared,
+  hasPendingDocsHeaderPreparation,
+} from './docs-header-preparation';
 
 const NO_CONTROLS: ProjectionCompositionControls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
@@ -60,6 +63,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   if (purpose === 'note') root.append(mount);
   else root.prepend(mount);
   const previewer = root.closest<Previewer>('[data-previewer-id]');
+  const preparation = purpose === 'code' && !previewer ? new AbortController() : undefined;
   let preferred: RuntimeId = 'wc';
   try {
     const stored = view.localStorage.getItem(PREFERRED_ADAPTER_KEY);
@@ -90,6 +94,8 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
         return materializeProjectionCandidate(request, {
           mount,
           yieldAfterPaint: purpose === 'code',
+          backgroundPreparation:
+            preparation && hasPendingDocsHeaderPreparation(doc) ? preparation.signal : undefined,
           themeSource: { scope: root, family, isCurrent: isCurrentOwner },
           ownerId,
           componentId: 'button',
@@ -224,6 +230,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
     async destroy() {
       if (!alive) return;
       alive = false;
+      preparation?.abort();
       deferredPreparation?.cancel();
       observer.disconnect();
       doc.removeEventListener(PREFERRED_ADAPTER_EVENT, preference);

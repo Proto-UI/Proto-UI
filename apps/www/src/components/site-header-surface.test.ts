@@ -54,7 +54,12 @@ const faults = vi.hoisted(() => ({
   calls: [] as string[],
   holdHeader: undefined as Promise<void> | undefined,
   holdRetirement: undefined as Promise<void> | undefined,
-  preparations: [] as Array<{ runtime: string; recipe: string; headerRuntime: string | undefined }>,
+  preparations: [] as Array<{
+    runtime: string;
+    recipe: string;
+    headerRuntime: string | undefined;
+    background: boolean;
+  }>,
 }));
 vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
   const actual = await original<typeof import('./PrototypePreviewer/projection-materializer')>();
@@ -69,6 +74,7 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
       faults.preparations.push({
         runtime,
         recipe: options.content?.recipe.id ?? '',
+        background: !!options.backgroundPreparation,
         headerRuntime: document.querySelector<HTMLElement>('[data-site-header-panel]')?.dataset
           .headerSurfaceRuntime,
       });
@@ -412,6 +418,7 @@ describe('native Header content inside real family projection surfaces', () => {
           'website-copy-command',
         ]);
         expect(independent.every((call) => call.headerRuntime === headerRuntime)).toBe(true);
+        expect(independent.some((call) => call.background)).toBe(false);
         expect(code.querySelector('pre')).toBe(source);
         expect(source.textContent).toBe('native source');
       } finally {
@@ -478,6 +485,12 @@ it.each(['first view', 'recovery'] as const)(
       }
       await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('wc'));
       await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('wc'));
+      expect(
+        faults.preparations
+          .filter(({ runtime, background }) => runtime === 'wc' && background)
+          .map(({ recipe }) => recipe)
+          .sort()
+      ).toEqual(['website-code-surface', 'website-copy-command']);
       const button = copyRoot.querySelector<HTMLElement>('[data-demo-ref="copy-button"]');
       expect(button).not.toBeNull();
       expect(button?.closest('[inert]')).toBeNull();
@@ -527,6 +540,7 @@ it('keeps local previewer Copy and Code independent of pending Docs Header prepa
     handles.push(surface, copy);
     await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('wc'));
     await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('wc'));
+    expect(faults.preparations.some(({ background }) => background)).toBe(false);
   } finally {
     release();
   }

@@ -18,7 +18,10 @@ import {
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
-import { deferUntilDocsHeaderPrepared } from './docs-header-preparation';
+import {
+  deferUntilDocsHeaderPrepared,
+  hasPendingDocsHeaderPreparation,
+} from './docs-header-preparation';
 
 const COPY_GLYPHS = {
   idle: 'copy',
@@ -197,6 +200,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   mount.className = 'site-copy-mount';
   root.append(mount);
   const previewer = root.closest<Previewer>('[data-previewer-id]');
+  const preparation = previewer ? undefined : new AbortController();
   let preferred: RuntimeId = 'wc';
   try {
     const stored = view.localStorage.getItem(PREFERRED_ADAPTER_KEY);
@@ -255,6 +259,8 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         candidate = await materializeProjectionCandidate(request, {
           mount,
           yieldAfterPaint: true,
+          backgroundPreparation:
+            preparation && hasPendingDocsHeaderPreparation(doc) ? preparation.signal : undefined,
           themeSource: { scope: root, family, isCurrent: () => alive },
           ownerId,
           componentId: 'button',
@@ -415,6 +421,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
     async destroy() {
       if (!alive) return;
       alive = false;
+      preparation?.abort();
       deferredPreparation?.cancel();
       handles.delete(root);
       owner.dispose();

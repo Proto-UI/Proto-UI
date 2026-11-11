@@ -45,6 +45,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
   /** Let independent consumers finish preparation in a task after the frame. */
   yieldAfterPaint?: boolean;
+  /** Independent preparations may use lower-priority browser tasks while their owner is live. */
+  backgroundPreparation?: AbortSignal;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -56,6 +58,25 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
 
 // A focus lease belongs to the exact materialized composition, not a DOM role.
 const compositionFocusRestorers = new WeakMap<HTMLElement, (key: ProjectionFocusKey) => boolean>();
+
+function backgroundPreparationTask(
+  options: ProjectionMaterializerOptions
+): Promise<void> | undefined {
+  const signal = options.backgroundPreparation;
+  if (!signal) return;
+  signal.throwIfAborted();
+  const view = options.mount.ownerDocument.defaultView as
+    | (Window & {
+        scheduler?: {
+          postTask(
+            callback: () => void,
+            options: { priority: 'background'; signal: AbortSignal }
+          ): Promise<void>;
+        };
+      })
+    | null;
+  return view?.scheduler?.postTask(() => undefined, { priority: 'background', signal });
+}
 
 function nextPaint(element: HTMLElement, yieldAfterPaint = false): Promise<void> {
   return new Promise((resolve) => {
@@ -350,6 +371,9 @@ export async function materializeProjectionCandidate(
   request: ProjectionScopeMaterializeRequest,
   options: ProjectionMaterializerOptions
 ): Promise<MaterializedProjectionCandidate> {
+  const preparation = backgroundPreparationTask(options);
+  if (preparation) await preparation;
+  options.backgroundPreparation?.throwIfAborted();
   const source = options.themeSource;
   if (!source?.isCurrent()) return prepareProjectionCandidate(request, options);
 
@@ -440,6 +464,11 @@ async function prepareProjectionCandidate(
   const prototypeIds = new Set<string>();
   collectPrototypeIds(composition.demo.root, prototypeIds);
   await Promise.all([loadPrototypes(Array.from(prototypeIds)), prepareDemoRuntime(runtimeId)]);
+  // Shared dependency completion can otherwise start every independent
+  // framework render in the same foreground turn.
+  const renderPreparation = backgroundPreparationTask(options);
+  if (renderPreparation) await renderPreparation;
+  options.backgroundPreparation?.throwIfAborted();
 
   const host = options.mount.ownerDocument.createElement('div');
   host.className = 'pui-projection-generation';
@@ -523,6 +552,7 @@ async function prepareProjectionCandidate(
     composition.setLocked(false);
     reconcileCandidateExternalPortals();
     await nextPaint(host, options.yieldAfterPaint);
+    options.backgroundPreparation?.throwIfAborted();
     reconcileCandidateExternalPortals();
 
     const candidate: MaterializedProjectionCandidate = {
