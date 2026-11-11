@@ -25,7 +25,7 @@ it('T-COLLECTION-0002-CASE-MODULE: projects current Anatomy order and metadata w
     subscribe = vi.fn(() => off);
   const anatomy = {
     order: { partsOf: vi.fn(() => parts), indexOfSelf: vi.fn(() => parts.indexOf(b)) },
-    resolvePartInstance: (part: typeof a) => (part === b ? bInstance : aInstance),
+    resolvePartInstance: (part: (typeof parts)[number]) => (part === b ? bInstance : aInstance),
     resolveSelfInstance: () => bInstance,
     subscribeOrder: subscribe,
   };
