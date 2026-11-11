@@ -131,8 +131,13 @@ describe('Website projection materializer', () => {
       }
     );
     expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    const seed = document.createElement('div');
+    seed.style.setProperty('--pui-background', initial['--pui-background']);
     expect(fakes.createComposition).toHaveBeenCalledWith(
-      expect.objectContaining({ themeSurfaceStyle: initial })
+      expect.objectContaining({
+        themeSurfaceStyle: initial,
+        scopeInlineStyle: seed.style.cssText,
+      })
     );
     expect(setThemeSurfaceStyle).toHaveBeenCalledTimes(1);
     expect(setThemeSurfaceStyle).toHaveBeenCalledWith(changed);

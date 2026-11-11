@@ -409,6 +409,11 @@ async function prepareProjectionCandidate(
   const themeSurfaceStyle =
     initialTheme ?? resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
   const childDemo = options.content?.demo ?? (await loadDemo(componentManifest.recipeId));
+  // Seed the scope in the renderer's mount so the initial theme and subtree
+  // reach ancestor observers in the same delivery.
+  const seed = options.mount.ownerDocument.createElement('div').style;
+  for (const [property, value] of Object.entries(themeSurfaceStyle))
+    seed.setProperty(property, value);
   const composition = createProjectionComposition({
     ownerId: options.ownerId,
     runtimeId,
@@ -420,6 +425,7 @@ async function prepareProjectionCandidate(
     controls: options.controls,
     controlIds: options.controlIds,
     themeSurfaceStyle,
+    scopeInlineStyle: seed.cssText,
     locked: true,
     eventGateOpen: false,
   });

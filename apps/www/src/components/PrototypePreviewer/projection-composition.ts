@@ -95,6 +95,7 @@ export type ProjectionCompositionOptions = Readonly<{
   controlIds?: readonly ProjectionControlId[];
   /** Consumer-owned theme values projected directly onto every Proto surface. */
   themeSurfaceStyle?: ProjectionThemeSurfaceStyle;
+  scopeInlineStyle?: string;
   locked?: boolean;
   /** Host generation gate; independent from physical disabled projection. */
   eventGateOpen?: boolean;
@@ -1329,6 +1330,7 @@ export function createProjectionComposition(
       className: 'pui-projection-scope',
       attrs: {
         'data-projection-scope': options.ownerId,
+        ...(options.scopeInlineStyle ? { style: options.scopeInlineStyle } : {}),
         'data-projection-family': options.projectionFamilyId,
         'data-projection-runtime': options.runtimeId,
         'data-projection-generation': String(options.generation),
