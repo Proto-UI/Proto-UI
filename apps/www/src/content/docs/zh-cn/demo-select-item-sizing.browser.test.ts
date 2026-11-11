@@ -328,17 +328,32 @@ for (const environment of environments)
         const name = `${locale}-${runtime}${environment.id === 'default' ? '' : `-${environment.id}`}`;
         let testFailed = false;
         let testError: unknown;
+        let directionInput:
+          | { documentBefore: string; articleBefore: string | null; trigger?: string }
+          | undefined;
         const secondaryErrors: Array<{ phase: string; error: unknown }> = [];
         try {
           await page.emulateMedia({ reducedMotion: environment.reducedMotion });
-          await page.evaluate((direction) => {
-            document.documentElement.dir = direction;
+          directionInput = await previewer.evaluate((node, direction) => {
+            const article = node.closest('main[dir]');
+            if (!article) throw new Error('Expected the Select preview inside its authored article');
+            const documentElement = node.ownerDocument.documentElement;
+            const documentBefore = documentElement.dir;
+            const articleBefore = article.getAttribute('dir');
+            // Starlight authors direction separately on the article and document.
+            documentElement.dir = direction;
+            article.setAttribute('dir', direction);
+            return { documentBefore, articleBefore };
           }, environment.direction);
           await ready(previewer, runtime);
           const trigger = previewer.getByRole('combobox', {
             name: 'Adapter selector',
             exact: true,
           });
+          directionInput.trigger = await trigger.evaluate((node) => getComputedStyle(node).direction);
+          expect(directionInput.trigger, 'native trigger direction before input').toBe(
+            environment.direction
+          );
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
           expect(await trigger.innerText()).toBe('Select an adapter');
           await page.keyboard.press('Tab');
@@ -562,6 +577,7 @@ for (const environment of environments)
                     runtime,
                     locale,
                     environment,
+                    directionInput,
                     observations,
                     motion,
                     pointerInputs,
