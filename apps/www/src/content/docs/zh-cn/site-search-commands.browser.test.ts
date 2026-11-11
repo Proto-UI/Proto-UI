@@ -1273,7 +1273,7 @@ it('keeps a documentation link available without JavaScript', async () => {
     ]);
     expect(destinationResponse.ok()).toBe(true);
     mark('destination-heading');
-    const heading = page.getByRole('heading', { level: 1, name: 'UI Libraries', exact: true });
+    const heading = page.getByRole('heading', { level: 1, name: 'Button', exact: true });
     expect(await heading.isVisible()).toBe(true);
     headingText = await heading.innerText();
     expect(headingText).toBe('Button');
