@@ -220,6 +220,41 @@ describe('Website projection materializer', () => {
     await candidate.dispose();
   });
 
+  it('keeps quoted owner coordinates exact when looking up external portals', async () => {
+    const ownerId = 'fixture "quoted" [owner]';
+    const mount = document.createElement('div');
+    const portal = document.createElement('div');
+    portal.dataset.projectionOwner = ownerId;
+    portal.dataset.projectionGeneration = '2';
+    const other = document.createElement('div');
+    other.dataset.projectionOwner = `${ownerId}-other`;
+    other.dataset.projectionGeneration = '2';
+    document.body.append(mount, portal, other);
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('div');
+      scope.dataset.projectionScope = ownerId;
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    const candidate = await materializeProjectionCandidate(
+      { generation: 2, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+      { mount, ownerId, componentId: 'button', controls: controls() }
+    );
+    expect(portal.inert).toBe(true);
+    expect(other.inert).toBe(false);
+    candidate.activate();
+    expect(portal.inert).toBe(false);
+    await candidate.dispose();
+    expect(portal.isConnected).toBe(false);
+    expect(other.isConnected).toBe(true);
+  });
+
   it('seals staging portals and atomically swaps exact owner generations on activation', async () => {
     const setLocked = vi.fn();
     const setEventGateOpen = vi.fn();
@@ -277,6 +312,7 @@ describe('Website projection materializer', () => {
     otherOwnerPortal.dataset.projectionOwner = 'another-owner';
     otherOwnerPortal.dataset.projectionGeneration = '2';
     document.body.appendChild(otherOwnerPortal);
+    const containmentReads = vi.spyOn(mount, 'contains');
     let settled = false;
     const pendingCandidate = materializeProjectionCandidate(
       {
@@ -390,6 +426,7 @@ describe('Website projection materializer', () => {
     expect(oldPortal.isConnected).toBe(true);
     expect(futurePortal.isConnected).toBe(true);
     expect(otherOwnerPortal.isConnected).toBe(true);
+    expect(containmentReads).not.toHaveBeenCalledWith(otherOwnerPortal);
   });
 
   it('never seals or removes an owned mount ancestor while still managing sibling portals', async () => {

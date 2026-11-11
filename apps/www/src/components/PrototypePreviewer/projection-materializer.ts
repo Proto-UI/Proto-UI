@@ -148,10 +148,11 @@ function externalProjectionPortalRoots(
     left.getAttribute('data-projection-owner') === right.getAttribute('data-projection-owner') &&
     left.getAttribute('data-projection-generation') ===
       right.getAttribute('data-projection-generation');
+  const selector = /^[A-Za-z0-9_-]+$/.test(ownerId)
+    ? `[data-projection-owner="${ownerId}"][data-projection-generation]`
+    : '[data-projection-owner][data-projection-generation]';
   const externalSurfaces = Array.from(
-    mount.ownerDocument.querySelectorAll<HTMLElement>(
-      '[data-projection-owner][data-projection-generation]'
-    )
+    mount.ownerDocument.querySelectorAll<HTMLElement>(selector)
   ).filter(
     (element) => !mount.contains(element) && !element.contains(mount) && ownsGeneration(element)
   );
