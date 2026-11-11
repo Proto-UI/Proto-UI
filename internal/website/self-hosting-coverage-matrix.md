@@ -255,7 +255,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `ce2553dfd82edfc1763107f63709f729fbccdf73e178c7729a59835456e67350` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `5d950f495c575e52862356f974cfe35d95b2d627d10a09cc33f3fb3e865b018b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `0a0a29fd6f832c1ffd76ee82e93ec59b6e10f4f1efafab6cfc7204c5f9b46533` |
-| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `bd7d9edb23757db547ffa0cd91ef033bcc5fad7df44d4cbcffe03d5ef083b80a` |
+| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `83f9ce0d2345c177d5c3d3edf6d46eb346714c463cbd82a32c19322219003545` |
 | `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `7f3eb4e9f2495c23ed217904433302b4df697f69ae0d646080a2bcfc35e73f94` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `b0947ee50577daf259f2b7ba5ae7f4c368e890d4c263d3763ee71b7d523a6613` |
