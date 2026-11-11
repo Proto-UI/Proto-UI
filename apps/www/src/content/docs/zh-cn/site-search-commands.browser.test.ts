@@ -991,8 +991,12 @@ for (const viewport of headerTriggerViewports) {
             await expect
               .poll(async () => (await page.evaluate(readSearchPublicState)).inputFocused)
               .toBe(true);
-            if (cycle === 0) await page.keyboard.press('Escape');
-            else await (await searchPart(page, 'close')).click();
+            if (cycle === 0) {
+              // Measure the resting Brutalist trigger when Escape returns focus.
+              if (family === 'brutalist')
+                await page.mouse.move(viewport.width / 2, viewport.height - 12);
+              await page.keyboard.press('Escape');
+            } else await (await searchPart(page, 'close')).click();
             await expect
               .poll(async () => (await page.evaluate(readSearchPublicState)).open)
               .toBe(false);
