@@ -2126,11 +2126,29 @@ for (const viewport of headerTriggerViewports) {
               throw new Error('Missing real menu anatomy');
             const inputStyle = getComputedStyle(node);
             const wrapperStyle = getComputedStyle(wrapper);
+            const panelStyle = getComputedStyle(panel);
+            const panelMotion = panel
+              .getAnimations()
+              .filter((animation) => animation.pending || animation.playState === 'running');
             return {
               input: node.getBoundingClientRect().toJSON(),
               shell: shell.getBoundingClientRect().toJSON(),
               wrapper: wrapper.getBoundingClientRect().toJSON(),
               panel: panel.getBoundingClientRect().toJSON(),
+              panelPaint: {
+                owner: panel.dataset.projectionOwner,
+                generation: panel.dataset.projectionGeneration,
+                scale: panelStyle.scale,
+                maxWidth: panelStyle.maxWidth,
+                maxHeight: panelStyle.maxHeight,
+                activeMotion: panelMotion.map((animation) =>
+                  animation instanceof CSSAnimation
+                    ? animation.animationName
+                    : animation instanceof CSSTransition
+                      ? animation.transitionProperty
+                      : animation.playState
+                ),
+              },
               glyph: glyph.getBoundingClientRect().toJSON(),
               footer: footer.getBoundingClientRect().toJSON(),
               body: body.getBoundingClientRect().toJSON(),
@@ -2150,7 +2168,39 @@ for (const viewport of headerTriggerViewports) {
               nativeEditorCount: panel.querySelectorAll('input').length,
             };
           });
-        const geometry = await readMenuGeometry();
+        type MenuGeometry = Awaited<ReturnType<typeof readMenuGeometry>>;
+        const settleMenuGeometry = async (initial: MenuGeometry) => {
+          const frame = (geometry: MenuGeometry) =>
+            JSON.stringify([
+              geometry.panelPaint.owner,
+              geometry.panelPaint.generation,
+              geometry.rootFont,
+              geometry.panel,
+              geometry.wrapper,
+              geometry.glyph,
+              geometry.body,
+              geometry.footer,
+            ]);
+          let current = initial;
+          let previous = frame(current);
+          // Logical entry can precede CSS zoom, and a font resize starts new
+          // size transitions. Compare the same menu after physical paint settles.
+          await expect
+            .poll(
+              async () => {
+                current = await readMenuGeometry();
+                const next = frame(current);
+                const still = next === previous && current.panelPaint.activeMotion.length === 0;
+                previous = next;
+                return still;
+              },
+              { timeout: 1000 }
+            )
+            .toBe(true);
+          return current;
+        };
+        const initialGeometry = await readMenuGeometry();
+        const geometry = await settleMenuGeometry(initialGeometry);
         const state = await page.evaluate(readSearchPublicState);
         await mkdir(evidenceDirectory, { recursive: true });
         await writeFile(
@@ -2160,6 +2210,7 @@ for (const viewport of headerTriggerViewports) {
               source,
               runtime,
               viewport,
+              initialGeometry,
               geometry,
               state,
               dataFixture: 'successful empty Pagefind boundary; real native composition',
@@ -2230,12 +2281,17 @@ for (const viewport of headerTriggerViewports) {
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '200%';
         });
-        const enlarged = await readMenuGeometry();
-        assertMenuGeometry(enlarged);
+        const enlargedInitial = await readMenuGeometry();
+        const enlarged = await settleMenuGeometry(enlargedInitial);
         await writeFile(
           path.join(evidenceDirectory, `${id}-200pct-geometry.json`),
-          JSON.stringify({ source, runtime, viewport, geometry: enlarged }, null, 2)
+          JSON.stringify(
+            { source, runtime, viewport, initialGeometry: enlargedInitial, geometry: enlarged },
+            null,
+            2
+          )
         );
+        assertMenuGeometry(enlarged);
         await capture(page, id, '200pct-menu-anatomy');
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '';
