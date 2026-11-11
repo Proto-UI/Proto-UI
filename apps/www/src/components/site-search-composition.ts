@@ -41,6 +41,8 @@ export interface SiteSearchFocusRestore {
   epoch: number;
 }
 
+type PrepareOpenerReturn = (panel: HTMLElement | undefined) => (() => void) | undefined;
+
 export function createSiteSearchComposition(options: {
   family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
   shadcnStyle: 'rhea' | 'new-york-v4';
@@ -56,7 +58,7 @@ export function createSiteSearchComposition(options: {
   takeFocusRestore(): SiteSearchFocusRestore | null;
   /** The scope's current focus epoch, used to detect newer focus intent. */
   focusEpoch(): number;
-}): { demo: DemoSpec; activate(): void } {
+}): { demo: DemoSpec; activate(prepareOpenerReturn?: PrepareOpenerReturn): void } {
   const { family, shadcnStyle, session, copy } = options;
   const initial = session.read();
   const style = family === 'shadcn' ? { styleProfile: shadcnStyle, presentation: 'menu' } : {};
@@ -145,7 +147,7 @@ export function createSiteSearchComposition(options: {
       }),
     ],
   };
-  let activateView: (() => void) | undefined;
+  let activateView: ((prepareOpenerReturn?: PrepareOpenerReturn) => void) | undefined;
   const demo: DemoSpec = {
     type: 'demo',
     root: proto('dialog-root', {
@@ -248,6 +250,8 @@ export function createSiteSearchComposition(options: {
       let pendingFocusRestore: SiteSearchFocusRestore | null = null;
       let focusRestoreArmed = false;
       let entryPolicyManual = false;
+      let prepareOpenerReturn: PrepareOpenerReturn | undefined;
+      let cancelOpenerReturn: (() => void) | undefined;
       let offPanelTransition: (() => void) | null = null;
       let panelTransitionOwner: unknown = null;
       type HintRequest = { target: HTMLElement; visible: boolean };
@@ -346,6 +350,33 @@ export function createSiteSearchComposition(options: {
         if (!targetHoldsFocus(request.ref)) return;
         pendingFocusRestore = null;
       };
+      const watchOpenerReturn = (restore: () => void) => {
+        const present = api.getPublicInstance?.('panel')?.getExposes()?.isPresent as
+          | {
+              get(): boolean;
+              subscribe(cb: (event: { type?: string; next: boolean }) => void): () => void;
+            }
+          | undefined;
+        if (!present?.subscribe) return;
+        const finish = () => {
+          if (present.get()) return;
+          // Let the presence callback finish detaching before focusing outside.
+          queueMicrotask(() => {
+            if (cancelOpenerReturn !== cancel || present.get()) return;
+            cancel();
+            if (current() && !session.read().open) restore();
+          });
+        };
+        const off = present.subscribe((event) => {
+          if (event.type === 'next' && !event.next) finish();
+        });
+        const cancel = () => {
+          cancelOpenerReturn = undefined;
+          off();
+        };
+        cancelOpenerReturn = cancel;
+        return finish;
+      };
       /** Re-check the pending restore whenever the content's own transition completes. */
       const watchPanelTransition = () => {
         const instance = api.getPublicInstance?.('panel');
@@ -379,7 +410,11 @@ export function createSiteSearchComposition(options: {
       api.setProps('command', { onInputValueChange: inputValueChange, onExecute: execute });
       api.setProps('dialog', {
         onOpenChange: (detail: { open: boolean }) => {
-          if (current()) session.setOpen(detail.open);
+          if (!current()) return;
+          const restore = !detail.open && session.read().open && prepareOpenerReturn?.(refs.panel);
+          const finish = restore ? watchOpenerReturn(restore) : undefined;
+          session.setOpen(detail.open);
+          finish?.();
         },
       });
       const paint = async () => {
@@ -396,11 +431,13 @@ export function createSiteSearchComposition(options: {
             // pending restore, so a later open of this generation is a normal
             // fresh open that auto-enters the query again.
             pendingFocusRestore = null;
+            prepareOpenerReturn = undefined;
             releaseEntryPolicy();
           }
           api.setProps('dialog', { open: false });
           return;
         }
+        cancelOpenerReturn?.();
         // Opening is independent of whether a closed host has instantiated its
         // Command subtree. Otherwise a lazy Dialog could wait forever for the
         // very identity that opening must create. Latest authored default is
@@ -682,12 +719,17 @@ export function createSiteSearchComposition(options: {
           restoreRequestedFocus();
         }
       );
-      activateView = requestPaint;
+      activateView = (prepare) => {
+        if (prepare) prepareOpenerReturn = prepare;
+        requestPaint();
+      };
       const off = session.subscribe(requestPaint);
       requestPaint();
       return () => {
         live = false;
         activateView = undefined;
+        prepareOpenerReturn = undefined;
+        cancelOpenerReturn?.();
         paintEpoch++;
         pendingHint = undefined;
         committedHint = undefined;
@@ -719,8 +761,8 @@ export function createSiteSearchComposition(options: {
   };
   return {
     demo,
-    activate() {
-      activateView?.();
+    activate(prepareOpenerReturn) {
+      activateView?.(prepareOpenerReturn);
     },
   };
 }

@@ -419,11 +419,44 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         },
       });
       const prepared = candidate;
+      let activated = false;
       return {
         ...prepared,
         activate() {
+          const previousGeneration = root.dataset.searchGeneration;
+          const replacesOpenHomepageDialog =
+            !activated &&
+            !!root.closest('[data-homepage-runtime]') &&
+            !!previousGeneration &&
+            previousGeneration !== String(request.generation) &&
+            search.session.read().open;
           prepared.activate();
-          composition.activate();
+          activated = true;
+          composition.activate(
+            replacesOpenHomepageDialog
+              ? (panel) => {
+                  const origin = document.activeElement;
+                  const epoch = focusEpoch;
+                  if (
+                    origin &&
+                    origin !== document.body &&
+                    origin !== document.documentElement &&
+                    !panel?.contains(origin)
+                  )
+                    return;
+                  return () => {
+                    const active = document.activeElement;
+                    if (
+                      epoch === focusEpoch &&
+                      (active === origin ||
+                        active === document.body ||
+                        active === document.documentElement)
+                    )
+                      focus('open');
+                  };
+                }
+              : undefined
+          );
         },
       };
     },

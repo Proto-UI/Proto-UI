@@ -84,7 +84,7 @@ afterEach(async () => {
   document.body.replaceChildren();
   if (errors.length) throw new AggregateError(errors, 'Search materializer test cleanup failed');
 });
-function mount(family: 'shadcn' | 'brutalist') {
+function mount(family: 'shadcn' | 'brutalist', homepage = false) {
   const root = document.createElement('site-search');
   root.dataset.searchComposition = 'command-dialog';
   root.dataset.searchStyle = 'rhea';
@@ -106,7 +106,12 @@ function mount(family: 'shadcn' | 'brutalist') {
   ))
     for (const token of WEBSITE_SHADCN_THEME_TOKENS)
       mount.style.setProperty(`--pui-${token}`, root.style.getPropertyValue(`--pui-${token}`));
-  document.body.append(root);
+  if (homepage) {
+    const header = document.createElement('header');
+    header.dataset.homepageRuntime = '';
+    header.append(root);
+    document.body.append(header);
+  } else document.body.append(root);
   const owner = searchCommandParticipant(root);
   owners.push(owner);
   return { root, owner };
@@ -165,6 +170,78 @@ async function prepare(
     },
   };
 }
+
+async function openHomepageReplacement() {
+  const { owner } = mount('shadcn', true);
+  const first = await prepare(owner, 'shadcn', 'wc', 1);
+  first.activate();
+  const oldOpener = first.prepared[0]!.host.querySelector<HTMLElement>('[data-open-modal]')!;
+  oldOpener.focus();
+  expect(document.activeElement).toBe(oldOpener);
+  owner.open();
+  await vi.waitFor(() => expect(editor(1).isConnected).toBe(true));
+  const second = await prepare(owner, 'shadcn', 'react', 2);
+  second.activate();
+  for (const candidate of first.prepared) await candidate.dispose();
+  const opener = second.prepared[0]!.host.querySelector<HTMLElement>('[data-open-modal]')!;
+  expect(oldOpener.isConnected).toBe(false);
+  await vi.waitFor(() => expect(editor(2).isConnected).toBe(true));
+  const close = surface(2, 'close');
+  close.focus();
+  expect(document.activeElement).toBe(close);
+  return { owner, second, opener, close };
+}
+
+it('returns focus to the current Homepage opener after dismissing a replacement Dialog', async () => {
+  const { opener, close } = await openHomepageReplacement();
+  close.click();
+  await vi.waitFor(() => expectClosed(2));
+  await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+});
+
+it('keeps newer focus when a replacement Dialog finishes leaving', async () => {
+  const { owner, opener, close } = await openHomepageReplacement();
+  const outside = document.createElement('button');
+  document.body.append(outside);
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  expect(owner.isOpen()).toBe(false);
+  expect(surface(2, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  outside.focus();
+  expect(document.activeElement).toBe(outside);
+  outside.blur();
+  expect(document.activeElement).toBe(document.body);
+  await vi.waitFor(() => expectClosed(2));
+  expect(document.activeElement).toBe(document.body);
+  expect(returned).not.toHaveBeenCalled();
+});
+
+it('does not return focus from an interrupted replacement Dialog close', async () => {
+  const { owner, opener, close } = await openHomepageReplacement();
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  expect(owner.isOpen()).toBe(false);
+  expect(surface(2, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  owner.open();
+  await vi.waitFor(() => expect(editor(2)).toBe(document.activeElement));
+  surface(2, 'close').click();
+  await vi.waitFor(() => expectClosed(2));
+  expect(returned).not.toHaveBeenCalled();
+});
+
+it('revokes pending opener focus when a closing replacement Dialog is disposed', async () => {
+  const { owner, second, opener, close } = await openHomepageReplacement();
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  expect(owner.isOpen()).toBe(false);
+  expect(surface(2, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  await second.prepared[1]!.dispose();
+  expectClosed(2);
+  expect(returned).not.toHaveBeenCalled();
+});
 describe('public-mode Search through the actual projection materializer', () => {
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
     for (const family of ['shadcn', 'brutalist'] as const) {
