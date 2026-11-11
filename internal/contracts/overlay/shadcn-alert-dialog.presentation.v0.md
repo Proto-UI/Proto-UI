@@ -31,7 +31,7 @@ Source/host-unit and document/Shadow token closure tests prove authored static i
 
 ### Planned native New York layout evidence
 
-`apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts` supplies the executable plan for the static-layout/root-font child of [#1097](https://github.com/Proto-UI/Proto-UI/issues/1097), mapped by `T-SHADCN-ALERT-DIALOG-0001-CASE-5` through `CASE-7`. It is authored and unexecuted. Its new catalog implementation remains `planned` until actual source-bound results are reviewed.
+`apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts` supplies the executable plan for the static-layout/root-font child of [#1097](https://github.com/Proto-UI/Proto-UI/issues/1097), mapped by `T-SHADCN-ALERT-DIALOG-0001-CASE-5` through `CASE-7`. The [Linux run](https://github.com/HyacinthHaru/Proto-UI/actions/runs/42956789913/job/130313754304) passed all 32 AlertDialog cases on `5a890933a5701fb2924830480c9304254e99d36e`. The enclosing browser shard later reached its deadline and exited 124. The catalog implementation remains `planned` pending review of the source-bound results.
 
 The suite renders a separate ordinary consumer of the real DemoSpec and preview renderer. It changes that consumer's public style-scope input to `new-york-v4`, adds observation refs and records the original callback while preserving its delivery. The public Rhea DemoSpec and page remain unchanged. The fixture retains the real text, parts, zero-duration inputs and inherited command owners; it supplies no replacement panel, command paint or transition.
 

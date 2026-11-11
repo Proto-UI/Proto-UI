@@ -46,7 +46,7 @@ export const ALERT_HEADER = {
   luma: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
   sera: tw('grid-rows-[auto_1fr] place-items-center gap-2 text-center'),
   rhea: tw('grid-rows-[auto_1fr] place-items-center gap-1.5 text-center'),
-  'new-york-v4': tw('gap-1.5 text-left'),
+  'new-york-v4': tw('gap-1.5 text-left wrap-anywhere'),
 } as const satisfies OverlayRecipes;
 
 export const ALERT_FOOTER = {
