@@ -1289,6 +1289,162 @@ it('retains Homepage Search Close focus across replacement and returns shortcut 
   }
 }, 60_000);
 
+it.each(['query', 'close', 'newer focus'] as const)(
+  'retains Homepage Search %s through a failure after replacement publication begins',
+  async (focusedRef) => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
+    const id = `home-search-late-rollback-${focusedRef.replace(' ', '-')}`;
+    stage(page, id, 'navigate');
+    try {
+      await installSuccessfulEmptySearchData(page);
+      expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+      await homeReady(page, 'shadcn', 'wc');
+      const trigger = page.locator(
+        'site-search [data-projection-generation-state="active"] [data-open-modal]'
+      );
+      await trigger.click();
+      const panel = await searchPart(page, 'panel');
+      await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+      const editor = await searchInput(page);
+      await editor.fill('retained search query');
+      await editor.evaluate((input: HTMLInputElement) => input.setSelectionRange(2, 9));
+      const focused = focusedRef === 'close' ? await searchPart(page, 'close') : editor;
+      await focused.focus();
+      const before = await page.evaluate(readSearchPublicState);
+      const originalPanel = await panel.elementHandle();
+      const originalEditor = await editor.elementHandle();
+      expect(originalPanel).not.toBeNull();
+      expect(originalEditor).not.toBeNull();
+      expect(await focused.evaluate((node) => node === document.activeElement)).toBe(true);
+      const home = page.locator('[data-homepage-runtime]');
+      await home.evaluate((root: HTMLElement, focusedRef) => {
+        const dataset = root.dataset;
+        const mount = root.querySelector('[data-search-dialog-mount]')!;
+        const search = mount.closest<HTMLElement>('site-search')!;
+        const descriptor = Object.getOwnPropertyDescriptor(root, 'dataset');
+        const outside = focusedRef === 'newer focus' ? document.createElement('button') : null;
+        if (outside) {
+          outside.id = 'search-rollback-newer-focus';
+          outside.textContent = 'Unrelated focus destination';
+          document.body.append(outside);
+        }
+        let newerFocusLanded = false;
+        Object.defineProperty(root, 'dataset', {
+          configurable: true,
+          value: new Proxy(dataset, {
+            set(subject, key, value) {
+              if (outside && key === 'runtimeState' && value === 'loading') {
+                outside.focus();
+                newerFocusLanded = document.activeElement === outside;
+              }
+              if (key !== 'runtime' || value !== 'react' || dataset.runtimeState !== 'ready')
+                return Reflect.set(subject, key, value, subject);
+              const active = mount.querySelector<HTMLElement>(
+                '[data-projection-generation-state="active"]'
+              );
+              let speculativeFocusLanded = false;
+              if (active && focusedRef === 'close') {
+                // The lazy React editor can still be mounting at this
+                // synchronous publication boundary. Give the already
+                // activated owner's native content carrier a real focus event.
+                const carrier = active.querySelector<HTMLElement>(
+                  '.pui-projection-content[data-projection-owner][data-projection-generation]'
+                );
+                if (carrier) {
+                  carrier.tabIndex = -1;
+                  carrier.focus();
+                  speculativeFocusLanded = carrier === document.activeElement;
+                }
+              }
+              Object.assign(window, {
+                __puiSearchLateRollback: {
+                  generation: active?.dataset.projectionGenerationHost,
+                  active: !!active && !active.inert,
+                  searchRuntime: search.dataset.searchRuntime,
+                  newerFocusLanded,
+                  speculativeFocusLanded,
+                },
+              });
+              if (descriptor) Object.defineProperty(root, 'dataset', descriptor);
+              else Reflect.deleteProperty(root, 'dataset');
+              throw new Error('Controlled Homepage publication failure after Search activation');
+            },
+          }),
+        });
+      }, focusedRef);
+      stage(page, id, 'rollback');
+      await page.evaluate(() =>
+        document.dispatchEvent(
+          new CustomEvent('proto-adapter:change', { detail: { adapter: 'react' } })
+        )
+      );
+      await expect.poll(() => home.getAttribute('data-runtime-state')).toBe('error');
+      const fault = await page.evaluate(
+        () => (window as Window & { __puiSearchLateRollback?: unknown }).__puiSearchLateRollback
+      );
+      await writeFile(
+        path.join(evidenceDirectory, `${id}-fault.json`),
+        JSON.stringify({ source, fault, previousGeneration: before.generation }, null, 2)
+      );
+      expect(fault).toMatchObject({
+        generation: expect.any(String),
+        active: true,
+        searchRuntime: 'react',
+        newerFocusLanded: focusedRef === 'newer focus',
+        speculativeFocusLanded: focusedRef === 'close',
+      });
+      expect(fault).not.toMatchObject({ generation: before.generation });
+      expect(await home.getAttribute('data-runtime')).toBe('wc');
+      expect(
+        await page.evaluate(async () => {
+          const resource = performance
+            .getEntriesByType('resource')
+            .find(({ name }) =>
+              new URL(name).pathname.endsWith('/components/site-search-commands.ts')
+            );
+          if (!resource) throw new Error('Missing active Search participant module');
+          const browserImport = new Function('url', 'return import(url)') as (
+            url: string
+          ) => Promise<typeof import('../../../components/site-search-commands')>;
+          const { searchCommandParticipant } = await browserImport(resource.name);
+          return searchCommandParticipant(
+            document.querySelector<HTMLElement>('site-search')!
+          ).isOpen();
+        })
+      ).toBe(true);
+      await expect
+        .poll(() => page.evaluate(readSearchPublicState))
+        .toMatchObject({
+          generation: before.generation,
+          open: true,
+          query: 'retained search query',
+        });
+      expect(await panel.evaluate((node, old) => node === old, originalPanel)).toBe(true);
+      expect(await editor.evaluate((node, old) => node === old, originalEditor)).toBe(true);
+      expect(
+        await editor.evaluate((node: HTMLInputElement) => [node.selectionStart, node.selectionEnd])
+      ).toEqual([2, 9]);
+      const target =
+        focusedRef === 'newer focus' ? page.locator('#search-rollback-newer-focus') : focused;
+      await expect
+        .poll(() => target.evaluate((node) => node === document.activeElement))
+        .toBe(true);
+      await capture(page, id, 'retained');
+      await page.keyboard.press('Control+k');
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+      await trigger.click();
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+    } catch (error) {
+      await captureFailure(page);
+      throw error;
+    } finally {
+      await context.close();
+    }
+  },
+  60_000
+);
+
 it('keeps a documentation link available without JavaScript', async () => {
   const startedAt = Date.now();
   const context = await browser.newContext({ javaScriptEnabled: false });

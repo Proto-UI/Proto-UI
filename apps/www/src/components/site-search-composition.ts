@@ -49,6 +49,7 @@ export function createSiteSearchComposition(options: {
   session: SiteSearchSession;
   copy: SiteSearchCopy;
   isCurrent(): boolean;
+  retainsOpenWhileLocked?(): boolean;
   onFailure(error: unknown): void;
   /**
    * Pending bounded focus restore for the generation being opened.  The scope
@@ -423,6 +424,9 @@ export function createSiteSearchComposition(options: {
         const { open, snapshot, retrying, navigation } = session.read();
         if (!live) return;
         const active = current();
+        // A retained Homepage view can be locked during both preparation and
+        // rollback. Its native editor and selection still belong to this view.
+        if (!active && open && options.retainsOpenWhileLocked?.()) return;
         if (!active || !open) {
           // Late author-slot completions from a closed generation cannot certify
           // a later reopen, even if its retained DOM box identity is unchanged.

@@ -105,16 +105,31 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   const homepage = !!root.closest('[data-homepage-runtime]');
   let focusEpoch = 0;
   let dialogFocusEpoch = 0;
-  const onFocus = (event: FocusEvent) => {
-    focusEpoch++;
-    if (homepage && event.target !== document.body && event.target !== document.documentElement)
-      dialogFocusEpoch++;
-  };
-  document.addEventListener('focusin', onFocus, true);
   let rememberedDialogFocus: {
     candidate: MaterializedProjectionCandidate;
     request: SiteSearchFocusRestore;
+    replacement?: { owner: string; generation: string };
   } | null = null;
+  const onFocus = (event: FocusEvent) => {
+    focusEpoch++;
+    if (!homepage || event.target === document.body || event.target === document.documentElement)
+      return;
+    const replacement = rememberedDialogFocus?.replacement;
+    if (replacement && event.target instanceof view.HTMLElement) {
+      const scope = event.target.closest<HTMLElement>(
+        '[data-projection-owner][data-projection-generation]'
+      );
+      // Focus inside the speculative Dialog is part of its activation.
+      // Until the old view retires, it cannot invalidate rollback focus.
+      if (
+        scope?.dataset.projectionOwner === replacement.owner &&
+        scope.dataset.projectionGeneration === replacement.generation
+      )
+        return;
+    }
+    dialogFocusEpoch++;
+  };
+  document.addEventListener('focusin', onFocus, true);
   let dialogCloseEpoch = 0;
   const offDialogFocus =
     homepage && search
@@ -402,6 +417,8 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       const focusCloseEpoch = dialogCloseEpoch;
       let pendingFocusRestore = rememberedDialogFocus?.request ?? null;
       let candidate: MaterializedProjectionCandidate | undefined;
+      let activated = false;
+      let locked = false;
       const current = () =>
         !!candidate &&
         candidate.host.dataset.projectionGenerationState === 'active' &&
@@ -412,6 +429,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         session: search.session,
         copy: search.copy,
         isCurrent: current,
+        retainsOpenWhileLocked: () => homepage && activated && locked,
         onFailure: (error) => {
           if (current()) search.fail(error);
         },
@@ -444,7 +462,6 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         },
       });
       const prepared = candidate;
-      let activated = false;
       return {
         ...prepared,
         activate() {
@@ -455,8 +472,12 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
             !!previousGeneration &&
             previousGeneration !== String(request.generation) &&
             search.session.read().open;
+          if (replacesOpenHomepageDialog && rememberedDialogFocus)
+            rememberedDialogFocus.replacement = {
+              owner: ownerId,
+              generation: String(request.generation),
+            };
           prepared.activate();
-          if (!activated && homepage) rememberedDialogFocus = null;
           activated = true;
           composition.activate(
             replacesOpenHomepageDialog
@@ -484,9 +505,9 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
               : undefined
           );
         },
-        setLocked(locked: boolean) {
+        setLocked(nextLocked: boolean) {
           if (homepage && activated) {
-            if (locked && current()) {
+            if (nextLocked && current()) {
               // The page transaction locks the retained projection before it
               // prepares the replacement. Read its owned focus before inert
               // can move focus back to the document.
@@ -507,21 +528,25 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                   : null;
             }
           }
+          locked = nextLocked;
           const retainedFocus = locked ? null : rememberedDialogFocus;
           const result = prepared.setLocked?.(locked);
-          if (retainedFocus?.candidate !== prepared) return result;
-          const restore = () => {
-            if (rememberedDialogFocus !== retainedFocus) return;
+          if (locked || !homepage || !activated) return result;
+          const resume = () => {
+            if (!alive || !prepared.host.isConnected || !current()) return;
+            composition.activate();
+            if (retainedFocus?.candidate !== prepared || rememberedDialogFocus !== retainedFocus)
+              return;
             rememberedDialogFocus = null;
-            if (
-              alive &&
-              prepared.host.isConnected &&
-              document.activeElement !== retainedFocus.request.origin
-            )
+            if (document.activeElement !== retainedFocus.request.origin)
               composition.restoreFocus(retainedFocus.request);
           };
-          if (result) return result.then(restore);
-          restore();
+          if (result) return result.then(resume);
+          resume();
+        },
+        dispose() {
+          if (rememberedDialogFocus?.candidate === prepared) rememberedDialogFocus = null;
+          return prepared.dispose();
         },
       };
     },
