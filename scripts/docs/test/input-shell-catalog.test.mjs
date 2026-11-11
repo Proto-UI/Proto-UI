@@ -30,8 +30,7 @@ async function inventory(catalog, releaseVersion = '0.2.0', extraExports = {}) {
       ],
     ]),
     catalog,
-    overviewEntries: new Map([['shadcn', []]]),
-    sidebarSlugs: [library.overviewSlug],
+    sidebarSlugs: [],
   });
 }
 
@@ -95,10 +94,9 @@ test('draft shell ownership fixes only its missing-family classification, not un
   assert.match(unrelated[0], /P-SHADCN-UNCATALOGED-SENTINEL/);
 });
 
-test('family availability still requires overview and sidebar projections, even while draft', async () => {
+test('family availability still requires a sidebar detail route, even while draft', async () => {
   const shell = await entity(shellId);
   const errors = await inventory([shell], shell.since);
-  assert.equal(errors.length, 2);
-  assert.match(errors[0], /absent from the shadcn overview inventory/);
-  assert.match(errors[1], /absent from primary sidebar slug ui-libraries\/shadcn\/input-shell/);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /absent from primary sidebar slug ui-libraries\/shadcn\/input-shell/);
 });

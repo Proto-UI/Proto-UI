@@ -8,7 +8,6 @@ import {
   checkLibraryInventory,
   checkLocalizedRoutes,
   checkScaffolding,
-  extractOverviewEntries,
   extractSidebarSlugs,
   findStaleReleaseClaims,
 } from '../check-public-docs.mjs';
@@ -88,11 +87,13 @@ test('an unclassified released family gap points to catalog remediation', () => 
       {
         id: 'test',
         packageName: '@proto.ui/prototypes-test',
-        overviewSlug: 'ui-libraries/test',
         detailPrefix: 'ui-libraries/test',
         catalogPrefix: 'P-TEST-',
         exportClassifications: {
-          '.': { kind: 'library-root', reason: 'The overview represents the root barrel.' },
+          '.': {
+            kind: 'library-root',
+            reason: 'The root barrel aggregates the component families.',
+          },
         },
       },
     ],
@@ -103,7 +104,6 @@ test('an unclassified released family gap points to catalog remediation', () => 
       ],
     ]),
     catalog: [],
-    overviewEntries: new Map([['test', []]]),
     sidebarSlugs: ['ui-libraries/test'],
   });
 
@@ -112,7 +112,7 @@ test('an unclassified released family gap points to catalog remediation', () => 
   assert.match(errors[0], /P-TEST-NEW-FAMILY/);
 });
 
-test('a released family missing from overview and sidebar fails both projections', () => {
+test('a released family with the wrong sidebar route fails the canonical projection', () => {
   const errors = checkLibraryInventory({
     releaseVersion: '0.2.0',
     bom: { packages: [{ name: '@proto.ui/prototypes-test' }] },
@@ -120,11 +120,13 @@ test('a released family missing from overview and sidebar fails both projections
       {
         id: 'test',
         packageName: '@proto.ui/prototypes-test',
-        overviewSlug: 'ui-libraries/test',
         detailPrefix: 'ui-libraries/test',
         catalogPrefix: 'P-TEST-',
         exportClassifications: {
-          '.': { kind: 'library-root', reason: 'The overview represents the root barrel.' },
+          '.': {
+            kind: 'library-root',
+            reason: 'The root barrel aggregates the component families.',
+          },
         },
       },
     ],
@@ -135,51 +137,15 @@ test('a released family missing from overview and sidebar fails both projections
       ],
     ]),
     catalog: [{ id: 'P-TEST-BUTTON', since: '0.2.0-rc.1', status: 'draft' }],
-    overviewEntries: new Map([['test', []]]),
-    sidebarSlugs: ['ui-libraries/test'],
-  });
-
-  assert.equal(errors.length, 2);
-  assert.match(errors[0], /absent from the test overview inventory/);
-  assert.match(errors[1], /absent from primary sidebar slug ui-libraries\/test\/button/);
-});
-
-test('a released family with the wrong overview href fails the link projection', async () => {
-  const source = await fs.readFile(path.join(FIXTURES, 'wrong-overview-link.astro'), 'utf8');
-  const overviewEntries = extractOverviewEntries(source, 'wrong-overview-link.astro');
-  const errors = checkLibraryInventory({
-    releaseVersion: '0.2.0',
-    bom: { packages: [{ name: '@proto.ui/prototypes-test' }] },
-    libraries: [
-      {
-        id: 'test',
-        packageName: '@proto.ui/prototypes-test',
-        overviewSlug: 'ui-libraries/test',
-        detailPrefix: 'ui-libraries/test',
-        catalogPrefix: 'P-TEST-',
-        exportClassifications: {
-          '.': { kind: 'library-root', reason: 'The overview represents the root barrel.' },
-        },
-      },
-    ],
-    manifests: new Map([
-      [
-        '@proto.ui/prototypes-test',
-        { exports: { '.': './dist/index.js', './button': './dist/button.js' } },
-      ],
-    ]),
-    catalog: [{ id: 'P-TEST-BUTTON', since: '0.2.0-rc.1', status: 'draft' }],
-    overviewEntries,
-    sidebarSlugs: ['ui-libraries/test', 'ui-libraries/test/button'],
+    sidebarSlugs: ['ui-libraries/test/wrong'],
   });
 
   assert.equal(errors.length, 1);
-  assert.match(errors[0], /links to \.\/wrong\//);
-  assert.match(errors[0], /expected localized relative href \.\/button\//);
+  assert.match(errors[0], /absent from primary sidebar slug ui-libraries\/test\/button/);
 });
 
 test('reasoned non-component and overview-only exports pass intentionally', () => {
-  const errors = checkLibraryInventory({
+  const input = {
     releaseVersion: '0.2.0',
     bom: { packages: [{ name: '@proto.ui/prototypes-icons' }] },
     libraries: [
@@ -212,11 +178,13 @@ test('reasoned non-component and overview-only exports pass intentionally', () =
       ],
     ]),
     catalog: [{ id: 'P-ICONS-ICON', since: '0.2.0-rc.1', status: 'draft' }],
-    overviewEntries: new Map(),
     sidebarSlugs: ['ui-libraries/icons'],
-  });
+  };
 
-  assert.deepEqual(errors, []);
+  assert.deepEqual(checkLibraryInventory(input), []);
+  const missingOverview = checkLibraryInventory({ ...input, sidebarSlugs: [] });
+  assert.equal(missingOverview.length, 1);
+  assert.match(missingOverview[0], /overview route ui-libraries\/icons is missing/);
 });
 
 test('public scaffolding reports the source file and marker', async () => {
@@ -255,21 +223,18 @@ test('public spec lifecycle guides expose the activation-history boundary', () =
   ]);
 });
 
-test('Shadcn Input remains reachable from both website navigation projections', async () => {
+test('the Shadcn Input sidebar route opens its real demo in both locales', async () => {
   const root = new URL('../../../', import.meta.url);
-  const overview = await fs.readFile(
-    new URL('apps/www/src/components/PrototypeLibraryOverview.astro', root),
-    'utf8'
-  );
-  const entries = extractOverviewEntries(overview, 'PrototypeLibraryOverview.astro').get('shadcn');
-  assert.equal(entries.filter((entry) => entry.id === 'input').length, 1);
-  assert.equal(entries.find((entry) => entry.id === 'input').href, './input/');
-  assert.match(
-    overview.slice(overview.indexOf('  shadcn:'), overview.indexOf('  brutalist:')),
-    /demoId: 'demo-shadcn-input'/
-  );
+  const slug = 'ui-libraries/shadcn/input';
   const config = await fs.readFile(new URL('apps/www/astro.config.mjs', root), 'utf8');
-  assert.ok(extractSidebarSlugs(config).includes('ui-libraries/shadcn/input'));
+  assert.ok(extractSidebarSlugs(config).includes(slug));
+  for (const locale of publicDocPolicy.locales) {
+    const source = await fs.readFile(
+      new URL(`apps/www/src/content/docs/${locale}/${slug}.mdx`, root),
+      'utf8'
+    );
+    assert.match(source, /<PrototypePreviewer\s+demoId="demo-shadcn-input"/);
+  }
 });
 
 test('both general Feedback references explain the bounded selection exception', async () => {
