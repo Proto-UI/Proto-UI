@@ -1054,17 +1054,14 @@ for (const width of [1280, 1440, 2048]) {
             };
             const selectors = ['family', 'runtime'].map((name) => {
               const trigger = select(name);
-              const label = trigger
-                .closest('[data-projection-control]')!
-                .querySelector<HTMLElement>('.pui-projection-control-label')!;
+              const control = trigger.closest('[data-projection-control]')!;
               const value = trigger.querySelector<HTMLElement>(
                 '[data-projection-prototype$="select-value"]'
               );
               return {
                 name,
                 trigger: rect(trigger),
-                label: rect(label),
-                labelText: label.textContent?.trim(),
+                hasVisualLabel: !!control.querySelector('.pui-projection-control-label'),
                 expectedLabel: (home as HTMLElement).dataset[`${name}Label`],
                 value: value ? rect(value) : null,
                 text: trigger.textContent,
@@ -1114,10 +1111,9 @@ for (const width of [1280, 1440, 2048]) {
             expect(Math.abs(selector.trigger.center - geometry.search.center)).toBeLessThanOrEqual(
               1
             );
-            // The approved Header composition keeps labels accessible, not a
-            // separate visible row above 36px controls. Assert exact authored AX name.
+            // The Trigger owns the authored AX name without a separate visual label row.
+            expect(selector.hasVisualLabel).toBe(false);
             expect(selector.expectedLabel).toBeTruthy();
-            expect(selector.labelText).toBe(selector.expectedLabel);
             expect(
               await page
                 .locator(
@@ -1520,6 +1516,7 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
               'site-search [data-projection-generation-state="active"] [data-open-modal]'
             )!;
             const label = header.querySelector<HTMLElement>('.site-header-runtime-label')!;
+            const settings = header.querySelector<HTMLDetailsElement>('[data-site-header-panel]')!;
             const text = document.createRange();
             text.selectNodeContents(value);
             return {
@@ -1535,9 +1532,11 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
               searchRole: search.getAttribute('role'),
               searchDisabled: search.getAttribute('aria-disabled'),
               overflow: document.documentElement.scrollWidth - innerWidth,
-              sidebarTop: parseFloat(
-                getComputedStyle(document.querySelector('.mobile-sidebar-pane')!).top
-              ),
+              settings: {
+                ...rect(settings),
+                open: settings.open,
+                ownsSelect: settings.contains(select),
+              },
             };
           });
           // Save the actual measured geometry even when the assertion below fails.
@@ -1553,19 +1552,32 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
           expect(geometry.textWidth - geometry.value.width).toBeLessThanOrEqual(1);
           expect(geometry.select.scrollWidth - geometry.select.clientWidth).toBeLessThanOrEqual(1);
           expect(geometry.overflow).toBeLessThanOrEqual(1);
-          expect(Math.abs(geometry.select.height - (width < 768 ? 44 : 36))).toBeLessThanOrEqual(1);
+          expect(Math.abs(geometry.select.height - 44)).toBeLessThanOrEqual(1);
           expect(Math.abs(geometry.search.height - 44)).toBeLessThanOrEqual(1);
           expect(geometry.searchRole).toBe('button');
           expect(geometry.searchDisabled).toBe('false');
+          expect(
+            await selector
+              .and(page.getByRole('combobox', { name: '选择适配器', exact: true }))
+              .count()
+          ).toBe(1);
           if (width < 1100) {
             expect(geometry.labelDisplay).not.toBe('none');
             expect(geometry.label.bottom).toBeLessThanOrEqual(geometry.select.y + 1);
             expect(geometry.search.bottom).toBeLessThanOrEqual(geometry.label.y + 1);
-            expect(Math.abs(geometry.sidebarTop - geometry.header.bottom)).toBeLessThanOrEqual(1);
           } else {
             expect(Math.abs(geometry.select.center - geometry.search.center)).toBeLessThanOrEqual(
               1
             );
+          }
+          if (width < 768) {
+            expect(geometry.settings.open).toBe(true);
+            expect(geometry.settings.ownsSelect).toBe(true);
+            expect(
+              Math.abs(geometry.settings.top - geometry.header.bottom - 5)
+            ).toBeLessThanOrEqual(1);
+            expect(geometry.settings.left).toBeGreaterThanOrEqual(-1);
+            expect(geometry.settings.right).toBeLessThanOrEqual(width + 1);
           }
         }
         expect(errors).toEqual([]);
