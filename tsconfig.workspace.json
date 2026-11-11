@@ -4,6 +4,7 @@
     "apps/www",
     "node_modules",
     "dist",
+    "scripts/analysis/invisible-consumption/starter",
     "scripts/release/consumer-smoke",
     "packages/compiler/test/fixtures/differential-browser"
   ]

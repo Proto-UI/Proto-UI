@@ -8,8 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   installSizingMotionTrace,
   sizingMotionIssues,
+  sizingItemSizeIssues,
   type SizingMotionHandle,
   type SizingMotionResult,
+  type SizingMotionSelection,
 } from './demo-select-item-sizing-motion';
 import {
   RUNTIMES,
@@ -177,38 +179,43 @@ async function facts(trigger: Locator) {
   });
 }
 type Facts = Awaited<ReturnType<typeof facts>>;
-function assertGeometry(value: Facts, runtime: string, environment: Environment) {
+function assertGeometry(
+  value: Facts,
+  runtime: string,
+  environment: Environment,
+  selection: SizingMotionSelection
+) {
   expect(value.runtime).toBe(runtime);
   expect(value.expanded).toBe('true');
   expect(value.reducedMotion).toBe(environment.reducedMotion);
   for (const box of [value.trigger, value.content, value.surface, value.viewport, ...value.items])
     expect(box.direction, `${box.prototype} actual direction`).toBe(environment.direction);
   expect(value.trigger.rect.height).toBeGreaterThan(0);
-  // #1330: the popup matches the Trigger. Rows are full-width flow children
-  // inside group padding (rhea p-1 is 4px each side), not the retired row lease.
-  expect(
-    Math.abs(value.surface.rect.width - value.trigger.rect.width),
-    'surface width matches trigger'
-  ).toBeLessThanOrEqual(0.5);
-  expect(
-    Math.abs(value.surface.rect.left - value.trigger.rect.left),
-    'surface aligns to trigger'
-  ).toBeLessThanOrEqual(0.5);
-  for (const item of value.items) {
+  const selected = value.items.filter((item) => item.selected === 'true');
+  expect(selected).toHaveLength(selection === 'unset' ? 0 : 1);
+  // Initial unset value aligns the first enabled record without selecting it.
+  const aligned =
+    selection === 'unset' ? value.items.find((item) => item.disabled === 'false') : selected[0];
+  expect(aligned?.disabled, 'alignment row is enabled').toBe('false');
+  for (const edge of ['left', 'right', 'top', 'bottom'] as const)
     expect(
-      Math.abs(item.rect.height - value.trigger.rect.height),
-      `${item.text} border-box height`
+      Math.abs(aligned!.rect[edge] - value.trigger.rect[edge]),
+      `aligned row ${edge} replaces trigger`
     ).toBeLessThanOrEqual(0.5);
-    const insetLeft = item.rect.left - value.trigger.rect.left;
-    const insetRight = value.trigger.rect.right - item.rect.right;
-    expect(Math.abs(insetLeft - insetRight), `${item.text} row inset symmetry`).toBeLessThanOrEqual(
-      0.5
-    );
-    expect(insetLeft, `${item.text} row inset`).toBeGreaterThanOrEqual(-0.5);
-    expect(insetLeft, `${item.text} row inset`).toBeLessThanOrEqual(4.5);
+  // All four registered owned rows, including disabled siblings, share size.
+  // Only the aligned row above must replace the Trigger's position.
+  expect(
+    sizingItemSizeIssues(value.trigger.rect, value.items.map((item) => item.rect)),
+    'every current same-list row matches Trigger width and height'
+  ).toEqual([]);
+  for (const item of value.items) {
     expect(
       item.scrollWidth - item.clientWidth,
       `${item.text} horizontal text overflow`
+    ).toBeLessThanOrEqual(1);
+    expect(
+      item.scrollHeight - item.clientHeight,
+      `${item.text} vertical text overflow`
     ).toBeLessThanOrEqual(1);
   }
   for (const [label, box] of [
@@ -218,7 +225,7 @@ function assertGeometry(value: Facts, runtime: string, environment: Environment)
     expect(box.scrollWidth - box.clientWidth, `${label} horizontal overflow`).toBeLessThanOrEqual(
       1
     );
-  // The popup is the Trigger's width. Do not treat a wider decorative frame as success.
+  // Chrome is outside the matched row; still forbid viewport clipping.
   expect(value.surface.rect.left).toBeGreaterThanOrEqual(-0.5);
   expect(value.surface.rect.right).toBeLessThanOrEqual(value.browser.width + 0.5);
   const focused = value.items.filter((item) => item.focused);
@@ -297,7 +304,7 @@ for (const environment of environments)
         const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
         const pointerInputs: Array<{ phase: string; value: PointerPoint }> = [];
         const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
-        const startMotion = async (trigger: Locator) => {
+        const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
           if (activeMotion.handle) throw new Error('Previous motion trace was not released');
           // Begin the open-cycle trace from an established keyboard focus state.
           // Otherwise the opening key also changes input modality, starts the
@@ -317,7 +324,7 @@ for (const environment of environments)
               { timeout: 1200 }
             )
             .toBe(true);
-          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace);
+          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace, selection);
         };
         const finishMotion = async (phase: string) => {
           if (!activeMotion.handle) throw new Error('Motion trace was not installed before action');
@@ -332,20 +339,36 @@ for (const environment of environments)
         const name = `${locale}-${runtime}${environment.id === 'default' ? '' : `-${environment.id}`}`;
         let testFailed = false;
         let testError: unknown;
+        let directionInput:
+          | { documentBefore: string; articleBefore: string | null; trigger?: string }
+          | undefined;
         const secondaryErrors: Array<{ phase: string; error: unknown }> = [];
         try {
           await page.emulateMedia({ reducedMotion: environment.reducedMotion });
-          await page.evaluate((direction) => {
-            document.documentElement.dir = direction;
+          directionInput = await previewer.evaluate((node, direction) => {
+            const article = node.closest('main[dir]');
+            if (!article) throw new Error('Expected the Select preview inside its authored article');
+            const documentElement = node.ownerDocument.documentElement;
+            const documentBefore = documentElement.dir;
+            const articleBefore = article.getAttribute('dir');
+            // Starlight authors direction separately on the article and document.
+            documentElement.dir = direction;
+            article.setAttribute('dir', direction);
+            return { documentBefore, articleBefore };
           }, environment.direction);
           await ready(previewer, runtime);
           const trigger = previewer.getByRole('combobox', {
             name: 'Adapter selector',
             exact: true,
           });
+          directionInput.trigger = await trigger.evaluate((node) => getComputedStyle(node).direction);
+          expect(directionInput.trigger, 'native trigger direction before input').toBe(
+            environment.direction
+          );
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+          expect(await trigger.innerText()).toBe('Select an adapter');
           await page.keyboard.press('Tab');
-          await startMotion(trigger);
+          await startMotion(trigger, 'unset');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -355,7 +378,14 @@ for (const environment of environments)
           await finishMotion('first-entry');
           const first = await facts(trigger);
           observations.push({ phase: 'first-entry', value: first });
-          assertGeometry(first, runtime, environment);
+          assertGeometry(first, runtime, environment, 'unset');
+          expect(first.items.map((item) => item.selected)).toEqual([
+            'false',
+            'false',
+            'false',
+            'false',
+          ]);
+          expect(first.trigger.text).toBe('Select an adapter');
           if (output) await page.screenshot({ path: path.join(output, `${name}-first.png`) });
           await page.keyboard.press('End');
           await expect
@@ -363,10 +393,18 @@ for (const environment of environments)
               (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
             )
             .toEqual(['Web Components']);
+          const navigated = await facts(trigger);
+          expect(navigated.items.map((item) => item.selected)).toEqual([
+            'false',
+            'false',
+            'false',
+            'false',
+          ]);
+          expect(navigated.trigger.text).toBe('Select an adapter');
           await page.keyboard.press('Enter');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await expect.poll(() => trigger.innerText()).toContain('Web Components');
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('Enter');
           await expect
             .poll(async () =>
@@ -376,7 +414,7 @@ for (const environment of environments)
           await finishMotion('selected-reopen');
           const reopen = await facts(trigger);
           observations.push({ phase: 'selected-reopen', value: reopen });
-          assertGeometry(reopen, runtime, environment);
+          assertGeometry(reopen, runtime, environment, 'selected');
           expect(reopen.items.map((item) => item.selected)).toEqual([
             'false',
             'false',
@@ -391,7 +429,7 @@ for (const environment of environments)
             .toBe(true);
           await page.setViewportSize({ width: 390, height: 900 });
           await trigger.scrollIntoViewIfNeeded();
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
@@ -401,7 +439,7 @@ for (const environment of environments)
           await finishMotion('narrow-reopen');
           const narrow = await facts(trigger);
           observations.push({ phase: 'narrow-reopen', value: narrow });
-          assertGeometry(narrow, runtime, environment);
+          assertGeometry(narrow, runtime, environment, 'selected');
           if (output) await page.screenshot({ path: path.join(output, `${name}-narrow.png`) });
           await page.keyboard.press('Escape');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
@@ -409,7 +447,7 @@ for (const environment of environments)
           // The original journey above only inspected aria-disabled. Exercise
           // the actual disabled option through trusted input, then prove the
           // same pointer can focus and commit an enabled sibling.
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await finishMotion('disabled-probe-entry');
           await page.keyboard.press('Home');
@@ -426,7 +464,7 @@ for (const environment of environments)
             .toEqual(['Web Components']);
           const navigation = await facts(trigger);
           observations.push({ phase: 'disabled-keyboard-skip', value: navigation });
-          assertGeometry(navigation, runtime, environment);
+          assertGeometry(navigation, runtime, environment, 'selected');
 
           const assertDisabledDidNotCommit = async (phase: string) => {
             // Retain a later observation without calling two frames a React
@@ -482,12 +520,12 @@ for (const environment of environments)
           // before installing the trace, as for the original first entry.
           await page.keyboard.press('Tab');
           await page.keyboard.press('Shift+Tab');
-          await startMotion(trigger);
+          await startMotion(trigger, 'selected');
           await trigger.press('ArrowDown');
           await finishMotion('pointer-selected-reopen');
           const pointerReopen = await facts(trigger);
           observations.push({ phase: 'pointer-selected-reopen', value: pointerReopen });
-          assertGeometry(pointerReopen, runtime, environment);
+          assertGeometry(pointerReopen, runtime, environment, 'selected');
           expect(pointerReopen.items.map((item) => item.selected)).toEqual([
             'false', 'true', 'false', 'false',
           ]);
@@ -550,6 +588,7 @@ for (const environment of environments)
                     runtime,
                     locale,
                     environment,
+                    directionInput,
                     observations,
                     motion,
                     pointerInputs,

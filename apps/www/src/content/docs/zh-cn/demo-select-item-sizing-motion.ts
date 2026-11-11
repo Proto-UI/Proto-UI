@@ -297,6 +297,25 @@ export function installSizingMotionTrace(
   return handle;
 }
 
+/** Size-only oracle for every collected same-owner row, including disabled rows.
+ * Position remains the alignment row's separate contract. No filtering by selection. */
+export function sizingItemSizeIssues(
+  trigger: { width: number; height: number },
+  items: ReadonlyArray<{ width: number; height: number }>
+): string[] {
+  const issues: string[] = [];
+  for (const [index, item] of items.entries()) {
+    for (const axis of ['width', 'height'] as const) {
+      if (
+        !Number.isFinite(trigger[axis]) ||
+        !Number.isFinite(item[axis]) ||
+        Math.abs(item[axis] - trigger[axis]) > 0.5
+      ) issues.push(`item ${index} ${axis} does not match Trigger`);
+    }
+  }
+  return issues;
+}
+
 /** Independent checks on the retained whole trajectory, not a selected successful frame. */
 export function sizingMotionIssues(result: SizingMotionResult, runtime: string): string[] {
   const issues: string[] = [];
@@ -353,6 +372,12 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       !near(aligned.layoutHeight, sample.trigger.layoutHeight)
     )
       issues.push('layout mismatch during motion');
+    // Layout boxes are scale-independent. Retain the separate per-row paint
+    // equation below rather than comparing animated painted boxes to Trigger.
+    issues.push(...sizingItemSizeIssues(
+      { width: sample.trigger.layoutWidth, height: sample.trigger.layoutHeight },
+      sample.items.map((item) => ({ width: item.layoutWidth, height: item.layoutHeight }))
+    ));
     if (
       !near(sample.content.layoutWidth, sample.surface.layoutWidth) ||
       sample.surface.layoutWidth < sample.trigger.layoutWidth - 0.5

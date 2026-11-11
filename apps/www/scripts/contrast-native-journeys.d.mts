@@ -1,11 +1,7 @@
-import type { ContrastProjectionExpectation } from './contrast-probe.browser';
-import type { DemoSetupContext } from '../src/components/PrototypePreviewer/demo-types';
+import type { ContrastAuditSubject } from './contrast-probe.browser';
+import type { DemoPublicInstance, DemoSetupContext } from '../src/components/PrototypePreviewer/demo-types';
 
-export interface NativeJourneySubject {
-  previewer: Element | HTMLElement;
-  previewerId: string;
-  expected: ContrastProjectionExpectation;
-}
+export type NativeJourneySubject = ContrastAuditSubject;
 export interface NativeJourneyObservation {
   achieved: boolean;
   [key: string]: unknown;
@@ -20,15 +16,27 @@ export interface ButtonCommandSource {
 export interface InputRecord {
   event: Event;
   type: string;
-  target?: string;
-  key?: string;
-  button?: number;
-  x?: number;
-  y?: number;
+}
+export interface PointerInputRecord extends InputRecord {
+  event: PointerEvent;
+  button: number;
+  x: number;
+  y: number;
+}
+export interface PointerJournalRecord extends PointerInputRecord {
+  target: string;
   at: number;
-  exactTarget?: boolean;
-  hitIsTarget?: boolean;
-  hitDisabled?: boolean;
+  exactTarget: boolean;
+  hitIsTarget: boolean;
+}
+export interface ButtonKeyRecord extends InputRecord {
+  event: KeyboardEvent;
+  key: string;
+  at: number;
+  exactTarget: boolean;
+}
+export interface DisabledButtonPointerRecord extends PointerInputRecord {
+  hitDisabled: boolean;
 }
 export interface NativeJourneyBinding {
   subject: NativeJourneySubject;
@@ -45,7 +53,7 @@ export interface DialogOutsideBinding extends NativeJourneyBinding {
   contentId: string;
   point: { side: string; x: number; y: number } | null;
   beforeAccepted: boolean;
-  inputs: { records: InputRecord[]; dispose(): void };
+  inputs: { records: PointerJournalRecord[]; dispose(): void };
 }
 export interface HoverBridgeBinding extends NativeJourneyBinding {
   root: HTMLElement;
@@ -55,7 +63,7 @@ export interface HoverBridgeBinding extends NativeJourneyBinding {
   point: NativePoint;
   beforeAccepted: boolean;
   retainedAccepted: boolean;
-  inputs: { records: InputRecord[]; dispose(): void };
+  inputs: { records: PointerJournalRecord[]; dispose(): void };
 }
 export interface ButtonCommandSession {
   ref: string;
@@ -63,16 +71,23 @@ export interface ButtonCommandSession {
   count: number;
   deliveries: Array<{ index: number; at: number; payload: unknown }>;
   sourceBinding: ButtonCommandSource;
-  ctx: DemoSetupContext;
+  ctx: DemoSetupContext & {
+    api: DemoSetupContext['api'] & Required<Pick<DemoSetupContext['api'], 'getPublicInstance'>>;
+  };
+}
+export interface ButtonCommandBinding {
+  session: ButtonCommandSession;
+  instance: DemoPublicInstance;
+  element: HTMLElement;
 }
 export interface ButtonKeyboardBinding extends NativeJourneyBinding {
   button: HTMLElement;
   disabled: HTMLElement[];
-  commands: { session: ButtonCommandSession };
-  disabledCommands: Array<{ session: ButtonCommandSession }>;
-  inputs: InputRecord[];
+  commands: ButtonCommandBinding;
+  disabledCommands: ButtonCommandBinding[];
+  inputs: ButtonKeyRecord[];
   tabVisits: Array<{ disabledFocused: boolean; buttonFocused: boolean }>;
-  disabledPointer: InputRecord[];
+  disabledPointer: DisabledButtonPointerRecord[];
   disabledPoint: NativePoint | null;
   tabExited: boolean;
 }

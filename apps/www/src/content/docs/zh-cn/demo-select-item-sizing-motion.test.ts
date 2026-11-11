@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   installSizingMotionTrace,
   sizingMotionIssues,
+  sizingItemSizeIssues,
   type SizingMotionSelection,
   type SizingMotionTrigger,
 } from './demo-select-item-sizing-motion';
@@ -554,5 +555,50 @@ describe('exact trace handles survive later locator changes', () => {
     expect(sizingMotionIssues(await newHandle.done, 'wc')).toEqual([]);
     expect(f.frames.size).toBe(0);
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+
+describe('all sibling sizes, not only the alignment row', () => {
+  for (const selection of ['unset', 'selected'] as const)
+    for (const row of [{ index: 1, disabled: false }, { index: 3, disabled: true }])
+      for (const axis of ['width', 'height'] as const)
+        it(`${selection}: rejects only row ${row.index} disabled=${row.disabled} ${axis} drift`, async () => {
+          const f = fixture(selection);
+          f.items[row.index].setAttribute('aria-disabled', String(row.disabled));
+          f.open();
+          f.settle();
+          const result = await f.done;
+          expect(sizingMotionIssues(result, 'wc')).toEqual([]);
+          // Corrupt one non-aligned row in only the early frame. Adjust its
+          // painted size consistently, so the old scale equation still passes.
+          // Matching final frames and the aligned row must not hide this drift.
+          const sample = result.samples[0];
+          expect(sample.alignedIndex).toBe(0);
+          expect(sample.disabledIndices.includes(row.index)).toBe(row.disabled);
+          const item = sample.items[row.index];
+          const layoutAxis = axis === 'width' ? 'layoutWidth' : 'layoutHeight';
+          item[layoutAxis] -= 2;
+          item[axis] = item[layoutAxis] * sample.surface.transform[0];
+          expect(sizingMotionIssues(result, 'wc')).toEqual([
+            `item ${row.index} ${axis} does not match Trigger`,
+          ]);
+        });
+
+  it('uses the same all-row size oracle for settled browser rectangles without matching sibling positions', () => {
+    const trigger = { width: 224, height: 36, left: 10, top: 100 };
+    const items = Array.from({ length: 4 }, (_, index) => ({
+      width: 224, height: 36, left: 10, top: 100 + index * 36,
+    }));
+    expect(sizingItemSizeIssues(trigger, items)).toEqual([]);
+    for (const index of [1, 3]) {
+      for (const axis of ['width', 'height'] as const) {
+        const altered = items.map((item) => ({ ...item }));
+        altered[index][axis] -= 2;
+        expect(sizingItemSizeIssues(trigger, altered)).toEqual([
+          `item ${index} ${axis} does not match Trigger`,
+        ]);
+      }
+    }
   });
 });

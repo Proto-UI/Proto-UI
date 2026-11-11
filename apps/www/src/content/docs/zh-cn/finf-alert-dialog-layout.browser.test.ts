@@ -401,7 +401,7 @@ async function settledLayout(panel: Locator, samples: AlertDialogLayout[]) {
     consecutive = settled && current === previous ? consecutive + 1 : settled ? 1 : 0;
     previous = current;
     return consecutive;
-  }, { timeout: 1000, intervals: [16, 32, 64] }).toBeGreaterThanOrEqual(3);
+  }, { timeout: 1000 }).toBeGreaterThanOrEqual(3);
   return samples[samples.length - 1]!;
 }
 function assertGeometry(actual: AlertDialogLayout, root: number) {

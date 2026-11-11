@@ -269,6 +269,7 @@ verifies:
       anchors: [C-AS-FOCUS-ENTRY-0001-I]
   modules:
     - id: M-FOCUS-0001
+      since: 0.3.0-alpha.1
       anchors: [M-FOCUS-0001-H]
 revisions:
   - version: 0.3.0-alpha.1

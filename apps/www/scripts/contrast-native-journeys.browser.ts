@@ -1,6 +1,24 @@
 // Issue #852 audit observers, self-contained for the esbuild IIFE bundle.
 // Retained objects identify physical targets; IDs describe those targets and
 // never authorize borrowing a replacement.
+import type {
+  ButtonCommandBinding,
+  ButtonCommandSession,
+  ButtonKeyboardBinding,
+  ButtonKeyStep,
+  DialogOutsideBinding,
+  HoverBridgeBinding,
+  InputRecord,
+  NativeJourneyBinding,
+  NativeJourneyObservation,
+  NativeJourneySubject,
+  NativePoint,
+  PointerJournalRecord,
+  bindContrastButtonKeyboard as BindContrastButtonKeyboard,
+  bindContrastDialogOutside as BindContrastDialogOutside,
+  bindContrastHoverBridge as BindContrastHoverBridge,
+} from './contrast-native-journeys.mjs';
+
 export const CONTRAST_NATIVE_JOURNEY_STATES = {
   dialog: ['outside-pointer-before', 'outside-pointer-closed'],
   button: [
@@ -12,74 +30,85 @@ export const CONTRAST_NATIVE_JOURNEY_STATES = {
 
 
 const commandRegistryKey = Symbol.for('proto-ui.contrast-button-commands.v1');
+type JourneyGlobal = typeof globalThis & {
+  puiContrastProbe?: Pick<
+    typeof import('./contrast-probe.browser'),
+    'readContrastAuditSubject' | 'readContrastPaintedVisibility'
+  >;
+  [commandRegistryKey]?: Set<ButtonCommandSession>;
+};
+type JourneyLease = Omit<NativeJourneyBinding, 'dispose'>;
+type JournalPointerEvent = 'pointerdown' | 'pointerup' | 'pointerenter' | 'pointerleave';
 
 function probe() {
-  if (!globalThis.puiContrastProbe) throw new Error('Native journey needs the canonical probe.');
-  return globalThis.puiContrastProbe;
+  const { puiContrastProbe } = globalThis as JourneyGlobal;
+  if (!puiContrastProbe) throw new Error('Native journey needs the canonical probe.');
+  return puiContrastProbe;
 }
-function owned(element, owner, generation, prototype) {
+function owned(element: Element | null | undefined, owner: string, generation: string, prototype: string) {
   return !!element && element.hasAttribute('data-pui-root') &&
     element.getAttribute('data-projection-owner') === owner &&
     element.getAttribute('data-projection-generation') === generation &&
     element.getAttribute('data-projection-prototype') === prototype;
 }
-function matches(owner, generation, prototype) {
+function matches(owner: string, generation: string, prototype: string) {
   return [...document.querySelectorAll('[data-pui-root]')].filter((element) =>
     owned(element, owner, generation, prototype));
 }
-function unique(element, binding, prototype) {
+function unique(element: Element, binding: JourneyLease, prototype: string) {
   const candidates = matches(binding.owner, binding.generation, prototype);
   return element?.isConnected && owned(element, binding.owner, binding.generation, prototype) &&
     candidates.length === 1 && candidates[0] === element;
 }
-function targetCurrent(element, binding, prototype) {
+function targetCurrent(element: Element, binding: JourneyLease, prototype: string) {
   return element?.isConnected && owned(element, binding.owner, binding.generation, prototype) &&
     !element.hasAttribute('data-pui-view-detached') &&
     !element.hasAttribute('data-pui-view-pending');
 }
-function leaseCurrent(binding) {
+function leaseCurrent(binding: JourneyLease) {
   const current = probe().readContrastAuditSubject(binding.subject);
   return current.observation.achieved && current.owner === binding.owner &&
     current.generation === binding.generation;
 }
-function visibility(element) {
+function visibility(element: Element) {
   return probe().readContrastPaintedVisibility(element);
 }
-function rootTargetCurrent(element, binding, prototype) {
+function rootTargetCurrent(element: Element, binding: JourneyLease, prototype: string) {
   return element?.isConnected && owned(element, binding.owner, binding.generation, prototype);
 }
-function painted(element) {
+function painted(element: Element) {
   const result = visibility(element);
   return result.visible && result.classification === 'source-model-visible';
 }
-function withdrawn(element) {
+function withdrawn(element: Element) {
   return !element.isConnected ||
     (element.hasAttribute('data-pui-view-detached') && !visibility(element).visible);
 }
-function noReplacement(element, binding, prototype) {
+function noReplacement(element: Element, binding: JourneyLease, prototype: string) {
   return matches(binding.owner, binding.generation, prototype).every((value) => value === element) &&
     (!element.isConnected || owned(element, binding.owner, binding.generation, prototype));
 }
-function relationship(trigger, content, id) {
+function relationship(trigger: Element, content: Element, id: string) {
   return !!id && content.id === id && trigger.getAttribute('aria-controls') === id &&
     [...document.querySelectorAll('[id]')].filter((element) => element.id === id).length === 1;
 }
-function lease(subject) {
+function lease(subject: NativeJourneySubject): JourneyLease {
   const current = probe().readContrastAuditSubject(subject);
   if (!current.observation.achieved || !current.owner || !current.generation)
     throw new Error('Native journey selected subject is unavailable.');
   return { subject, owner: current.owner, generation: current.generation };
 }
-function inputFact(record) {
+function inputFact<T extends InputRecord>(record: T) {
   const { event, ...fact } = record;
   return { ...fact, trusted: event.isTrusted, defaultPrevented: event.defaultPrevented };
 }
-function pointerJournal(targets) {
-  const records = [];
-  const bindings = [];
+function pointerJournal(targets: [name: string, target: HTMLElement | Document, types: JournalPointerEvent[]][]) {
+  const records: PointerJournalRecord[] = [];
+  const bindings: (() => void)[] = [];
   for (const [name, target, types] of targets) {
     for (const type of types) {
-      const listener = (event) => {
+      const listener: EventListener = (input) => {
+        const event = input as PointerEvent;
         const hit = document.elementFromPoint(event.clientX, event.clientY);
         records.push({ event, target: name, type, button: event.button,
           x: event.clientX, y: event.clientY, at: performance.now(),
@@ -93,11 +122,11 @@ function pointerJournal(targets) {
   }
   return { records, dispose() { for (const off of bindings) off(); } };
 }
-function eventAt(record, point) {
+function eventAt(record: NativePoint, point: NativePoint) {
   // Native device coordinates may round a fractional CSS location.
   return Math.abs(record.x - point.x) <= 1 && Math.abs(record.y - point.y) <= 1;
 }
-function outsidePoint(content, mask) {
+function outsidePoint(content: Element, mask: Element) {
   const rect = content.getBoundingClientRect();
   const points = [0.25, 0.5, 0.75].flatMap((fraction) => [
     { side: 'top', x: rect.left + rect.width * fraction, y: rect.top - 1 },
@@ -109,17 +138,18 @@ function outsidePoint(content, mask) {
     point.y < innerHeight && document.elementFromPoint(point.x, point.y) === mask) ?? null;
 }
 
-export function bindContrastDialogOutside({ subject, root, trigger, content, mask }) {
-  const binding = { ...lease(subject), root, trigger, content, mask, contentId: content.id,
-    beforeAccepted: false };
-  binding.point = outsidePoint(content, mask);
-  binding.inputs = pointerJournal([
-    ['mask', mask, ['pointerdown']], ['document', document, ['pointerup']],
-  ]);
-  binding.dispose = () => binding.inputs.dispose();
+export function bindContrastDialogOutside({ subject, root, trigger, content, mask }: Parameters<typeof BindContrastDialogOutside>[0]): DialogOutsideBinding {
+  const binding: DialogOutsideBinding = { ...lease(subject), root, trigger, content, mask, contentId: content.id,
+    beforeAccepted: false,
+    point: outsidePoint(content, mask),
+    inputs: pointerJournal([
+      ['mask', mask, ['pointerdown']], ['document', document, ['pointerup']],
+    ]),
+    dispose: () => binding.inputs.dispose(),
+  };
   return binding;
 }
-export function readContrastDialogOutside(binding, phase) {
+export function readContrastDialogOutside(binding: DialogOutsideBinding, phase: string): NativeJourneyObservation {
   const { root, trigger, content, mask, point, owner, generation } = binding;
   const identity = leaseCurrent(binding) && rootTargetCurrent(root, binding, 'brutalist-dialog-root') &&
     unique(trigger, binding, 'brutalist-dialog-trigger') &&
@@ -155,21 +185,21 @@ export function readContrastDialogOutside(binding, phase) {
   };
 }
 
-export function bindContrastHoverBridge({ subject, root, trigger, content }) {
+export function bindContrastHoverBridge({ subject, root, trigger, content }: Parameters<typeof BindContrastHoverBridge>[0]): HoverBridgeBinding {
   const rect = content.getBoundingClientRect();
-  const binding = { ...lease(subject), root, trigger, content,
+  const binding: HoverBridgeBinding = { ...lease(subject), root, trigger, content,
     activeElement: document.activeElement,
     point: { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 },
     beforeAccepted: false, retainedAccepted: false,
+    inputs: pointerJournal([
+      ['trigger', trigger, ['pointerleave']],
+      ['content', content, ['pointerenter', 'pointerleave']],
+    ]),
+    dispose: () => binding.inputs.dispose(),
   };
-  binding.inputs = pointerJournal([
-    ['trigger', trigger, ['pointerleave']],
-    ['content', content, ['pointerenter', 'pointerleave']],
-  ]);
-  binding.dispose = () => binding.inputs.dispose();
   return binding;
 }
-export function readContrastHoverBridge(binding, phase) {
+export function readContrastHoverBridge(binding: HoverBridgeBinding, phase: string): NativeJourneyObservation {
   const { root, trigger, content, owner, generation, point } = binding;
   const identity = leaseCurrent(binding) && rootTargetCurrent(root, binding, 'brutalist-hover-card-root') &&
     unique(trigger, binding, 'brutalist-hover-card-trigger') &&
@@ -205,7 +235,7 @@ export function readContrastHoverBridge(binding, phase) {
     basis: 'Current one-Root zero-delay recipe: one native Trigger-to-Content move, exact owned painted Content retention, then native leave and complete original view withdrawal. No focus or Escape substitute.',
   };
 }
-export function contrastHoverLeavePoint(binding) {
+export function contrastHoverLeavePoint(binding: HoverBridgeBinding) {
   return [
     { x: 0, y: 0 }, { x: innerWidth - 1, y: 0 },
     { x: 0, y: innerHeight - 1 }, { x: innerWidth - 1, y: innerHeight - 1 },
@@ -215,8 +245,8 @@ export function contrastHoverLeavePoint(binding) {
   }) ?? null;
 }
 
-function bindCommands(element) {
-  const sessions = [...(globalThis[commandRegistryKey] ?? [])].filter((session) =>
+function bindCommands(element: HTMLElement): ButtonCommandBinding {
+  const sessions = [...((globalThis as JourneyGlobal)[commandRegistryKey] ?? [])].filter((session) =>
     session.active && session.ctx.refs[session.ref] === element);
   if (sessions.length !== 1) throw new Error('Exact Button has no unique public command observer.');
   const session = sessions[0];
@@ -224,50 +254,51 @@ function bindCommands(element) {
   if (!instance) throw new Error('Button public instance is unavailable.');
   return { session, instance, element };
 }
-function commandsCurrent(binding) {
+function commandsCurrent(binding: ButtonCommandBinding) {
   const { session, instance, element } = binding;
   return session.active && session.ctx.refs[session.ref] === element &&
     session.ctx.api.getPublicInstance(session.ref) === instance;
 }
-function scrollSnapshot(element) {
+function scrollSnapshot(element: HTMLElement) {
   const elements = new Set([document.scrollingElement]);
-  for (let current = element; current; current = current.parentElement) elements.add(current);
-  return [...elements].filter(Boolean).map((element) => ({
+  for (let current: HTMLElement | null = element; current; current = current.parentElement) elements.add(current);
+  return [...elements].filter((element): element is Element => !!element).map((element) => ({
     element, left: element.scrollLeft, top: element.scrollTop,
   }));
 }
-export function bindContrastButtonKeyboard({ subject, button, disabled }) {
-  const binding = { ...lease(subject), button, disabled,
+export function bindContrastButtonKeyboard({ subject, button, disabled }: Parameters<typeof BindContrastButtonKeyboard>[0]): ButtonKeyboardBinding {
+  const binding: ButtonKeyboardBinding = { ...lease(subject), button, disabled,
     commands: bindCommands(button), disabledCommands: disabled.map(bindCommands), inputs: [],
     tabVisits: [], disabledPointer: [], disabledPoint: null, tabExited: false,
+    dispose: () => {
+      document.removeEventListener('keydown', listener, true);
+      document.removeEventListener('keyup', listener, true);
+      document.removeEventListener('focusin', focus, true);
+      document.removeEventListener('pointerdown', pointer, true);
+      document.removeEventListener('pointerup', pointer, true);
+    },
   };
-  const listener = (event) => binding.inputs.push({
+  const listener = (event: KeyboardEvent) => binding.inputs.push({
     event, type: event.type, key: event.key, at: performance.now(),
     exactTarget: event.composedPath()[0] === button,
   });
   document.addEventListener('keydown', listener, true);
   document.addEventListener('keyup', listener, true);
+  const disabledTargets: readonly (Element | null)[] = disabled;
   const focus = () => binding.tabVisits.push({
-    disabledFocused: disabled.includes(document.activeElement),
+    disabledFocused: disabledTargets.includes(document.activeElement),
     buttonFocused: document.activeElement === button,
   });
   document.addEventListener('focusin', focus, true);
-  const pointer = (event) => binding.disabledPointer.push({
+  const pointer = (event: PointerEvent) => binding.disabledPointer.push({
     event, type: event.type, button: event.button, x: event.clientX, y: event.clientY,
     hitDisabled: disabled.some((element) => element.contains(document.elementFromPoint(event.clientX, event.clientY))),
   });
   document.addEventListener('pointerdown', pointer, true);
   document.addEventListener('pointerup', pointer, true);
-  binding.dispose = () => {
-    document.removeEventListener('keydown', listener, true);
-    document.removeEventListener('keyup', listener, true);
-    document.removeEventListener('focusin', focus, true);
-    document.removeEventListener('pointerdown', pointer, true);
-    document.removeEventListener('pointerup', pointer, true);
-  };
   return binding;
 }
-function buttonIdentity(binding) {
+function buttonIdentity(binding: ButtonKeyboardBinding) {
   const { button, disabled } = binding;
   const physical = [button, ...disabled];
   return leaseCurrent(binding) && physical.every((element) =>
@@ -280,22 +311,24 @@ function buttonIdentity(binding) {
     disabled.every((element) => element.getAttribute('aria-disabled') === 'true' ||
       element.hasAttribute('disabled'));
 }
-export function beginContrastButtonKey(binding, key) {
+export function beginContrastButtonKey(binding: ButtonKeyboardBinding, key: string): ButtonKeyStep {
   const step = { key, inputIndex: binding.inputs.length,
     count: binding.commands.session.count,
     disabledCounts: binding.disabledCommands.map(({ session }) => session.count),
     scroll: scrollSnapshot(binding.button),
   };
-  step.before = {
-    achieved: buttonIdentity(binding) && document.activeElement === binding.button &&
-      painted(binding.button) && binding.disabled.every(painted),
-    owner: binding.owner, generation: binding.generation, key,
-    commandCount: step.count, disabledCounts: step.disabledCounts,
-    criterion: 'P-BASE-BUTTON-KEYBOARD-ACTIVATION / CLICK-SIGNAL (draft)',
+  return {
+    ...step,
+    before: {
+      achieved: buttonIdentity(binding) && document.activeElement === binding.button &&
+        painted(binding.button) && binding.disabled.every(painted),
+      owner: binding.owner, generation: binding.generation, key,
+      commandCount: step.count, disabledCounts: step.disabledCounts,
+      criterion: 'P-BASE-BUTTON-KEYBOARD-ACTIVATION / CLICK-SIGNAL (draft)',
+    },
   };
-  return step;
 }
-export function readContrastButtonKey({ binding, step }) {
+export function readContrastButtonKey({ binding, step }: { binding: ButtonKeyboardBinding; step: ButtonKeyStep }): NativeJourneyObservation {
   const inputs = binding.inputs.slice(step.inputIndex).map(inputFact);
   const delta = binding.commands.session.count - step.count;
   const nativeKeys = inputs.length === 2 && inputs[0].type === 'keydown' &&
@@ -320,18 +353,20 @@ export function readContrastButtonKey({ binding, step }) {
     basis: 'Exactly one outward public consumer onClick per native key on the retained physical Button; DOM clicks are not counted as commands. Space must prevent its own host default and preserve real scroll offsets; unrelated a must not be cancelled.',
   };
 }
-export function readContrastDisabledButton(binding, phase) {
+export function readContrastDisabledButton(binding: ButtonKeyboardBinding, phase: string): NativeJourneyObservation {
   const pointer = binding.disabledPointer.map(inputFact);
+  const point = binding.disabledPoint;
   const nativePointer = pointer.length === 2 && pointer[0].type === 'pointerdown' &&
-    pointer[1].type === 'pointerup' && !!binding.disabledPoint &&
-    pointer.every((input) => input.trusted && input.button === 0 && eventAt(input, binding.disabledPoint));
+    pointer[1].type === 'pointerup' && !!point &&
+    pointer.every((input) => input.trusted && input.button === 0 && eventAt(input, point));
   const tabInputs = binding.inputs.map(inputFact);
   const nativeTabs = tabInputs.length >= 2 && tabInputs.length % 2 === 0 &&
     tabInputs.every((input, index) => input.key === 'Tab' && input.trusted &&
       input.type === (index % 2 === 0 ? 'keydown' : 'keyup'));
+  const disabledTargets: readonly (Element | null)[] = binding.disabled;
   return {
     achieved: buttonIdentity(binding) && binding.disabledCommands.every(({ session }) => session.count === 0) &&
-      !binding.disabled.includes(document.activeElement) &&
+      !disabledTargets.includes(document.activeElement) &&
       (phase === 'pointer' ? nativePointer : phase === 'tab' && nativeTabs &&
         binding.tabVisits.length > 0 && binding.tabVisits.every((visit) => !visit.disabledFocused) &&
         binding.tabExited === true),
@@ -342,7 +377,7 @@ export function readContrastDisabledButton(binding, phase) {
     boundary: 'Authored disabled Buttons receive a native pointer attempt at their actual bounds and are skipped by a bounded native Tab traversal. If the host makes them unreachable, no targeted native disabled key delivery is claimed; independent semantic disabled press.commit rejection remains required.',
   };
 }
-export function resetContrastButtonControlInputs(binding) {
+export function resetContrastButtonControlInputs(binding: ButtonKeyboardBinding) {
   binding.inputs.length = 0;
   binding.disabledPointer.length = 0;
   binding.tabVisits.length = 0;
