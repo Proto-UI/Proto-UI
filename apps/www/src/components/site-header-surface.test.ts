@@ -451,29 +451,63 @@ it('coalesces Docs decoration requests and respects superseding preparation and 
   }
 });
 
-it('settles waiting Docs decoration readiness on owner destruction before Header finishes', async () => {
+it.each(['first view', 'recovery'] as const)(
+  'prepares a Docs Copy and Code $reason while Header preparation is still pending',
+  async (reason) => {
+    const code = document.createElement('div');
+    const copyRoot = document.createElement('div');
+    document.body.append(code, copyRoot);
+    const release = reserveDocsHeaderPreparation(document);
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      if (reason === 'recovery') {
+        faults.failReact = true;
+        localStorage.setItem(PREFERRED_ADAPTER_KEY, 'react');
+      }
+      const surface = initCodeSurface(code);
+      const copy = initCopyCommand(copyRoot, () => 'native source');
+      handles.push(surface, copy);
+      if (reason === 'recovery') {
+        await vi.waitFor(() => expect(copyRoot.dataset.copyView).toBe('unavailable'));
+        await vi.waitFor(() => expect(code.dataset.codeSurfaceView).toBe('unavailable'));
+        expect(error).toHaveBeenCalled();
+        faults.failReact = false;
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'wc' } })
+        );
+      }
+      await vi.waitFor(() => expect(copyRoot.dataset.copyRuntime).toBe('wc'));
+      await vi.waitFor(() => expect(code.dataset.codeSurfaceRuntime).toBe('wc'));
+      const button = copyRoot.querySelector<HTMLElement>('[data-demo-ref="copy-button"]');
+      expect(button).not.toBeNull();
+      expect(button?.closest('[inert]')).toBeNull();
+      await Promise.all([surface.ready, copy.ready]);
+    } finally {
+      faults.failReact = false;
+      release();
+    }
+  }
+);
+
+it('revokes a queued Docs decoration replacement when its owner is destroyed', async () => {
   const code = document.createElement('div');
   const copyRoot = document.createElement('div');
   document.body.append(code, copyRoot);
+  const surface = initCodeSurface(code);
+  const copy = initCopyCommand(copyRoot, () => 'native source');
+  handles.push(surface, copy);
+  await Promise.all([surface.ready, copy.ready]);
+  expect(faults.calls).toEqual(['wc', 'wc']);
   const release = reserveDocsHeaderPreparation(document);
   try {
-    const surface = initCodeSurface(code);
-    const copy = initCopyCommand(copyRoot, () => 'native source');
-    handles.push(surface, copy);
-    let ready = false;
-    const readiness = Promise.all([surface.ready, copy.ready]).then(() => {
-      ready = true;
-    });
-    await Promise.resolve();
-    expect(ready).toBe(false);
-    expect(faults.calls).toEqual([]);
-
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
+    expect(faults.calls).toEqual(['wc', 'wc']);
     await Promise.all([surface.destroy(), copy.destroy()]);
-    await vi.waitFor(() => expect(ready).toBe(true));
-    await readiness;
     release();
     await Promise.resolve();
-    expect(faults.calls).toEqual([]);
+    expect(faults.calls).toEqual(['wc', 'wc']);
   } finally {
     release();
   }

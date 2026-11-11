@@ -188,9 +188,10 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   };
   const deferredPreparation =
     purpose === 'code' && !previewer ? deferUntilDocsHeaderPrepared(root, prepare) : undefined;
-  const prepareSurface = deferredPreparation?.prepare ?? prepare;
   const refresh = () => {
-    void prepareSurface();
+    if (deferredPreparation && controller?.getSnapshot().phase === 'ready')
+      void deferredPreparation.prepare();
+    else void prepare();
   };
   const preference = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -218,7 +219,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
     // source owner before the materializer tests the theme watch's ownership.
     ready: Promise.resolve().then(() => {
       if (!isCurrentOwner()) return;
-      return controller ? observe(controller.start(), controller) : prepareSurface();
+      return controller ? observe(controller.start(), controller) : prepare();
     }),
     async destroy() {
       if (!alive) return;

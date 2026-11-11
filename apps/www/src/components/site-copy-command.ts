@@ -375,11 +375,18 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
     );
   };
   const deferredPreparation = previewer ? undefined : deferUntilDocsHeaderPrepared(root, prepare);
-  const prepareView = deferredPreparation?.prepare ?? prepare;
   const refresh = () => {
     if (!alive) return;
     owner.syncSource();
-    void prepareView();
+    // Only a usable retained command can wait for unrelated Header work.
+    if (
+      deferredPreparation &&
+      controller?.getSnapshot().phase === 'ready' &&
+      activeCandidate?.host.isConnected &&
+      !activeCandidate.host.inert
+    )
+      void deferredPreparation.prepare();
+    else void prepare();
   };
   const onPreference = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -404,7 +411,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   const handle: SiteCopyCommand = {
     owner,
     refresh,
-    ready: Promise.resolve(prepareView()),
+    ready: Promise.resolve(prepare()),
     async destroy() {
       if (!alive) return;
       alive = false;

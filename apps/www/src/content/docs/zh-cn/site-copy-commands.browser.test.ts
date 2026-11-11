@@ -348,6 +348,57 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
       await context.close();
     }
   }, 60_000);
+  it('activates the first Copy on a new Docs source while Header preparation stays pending', async () => {
+    const context = await browser.newContext({
+      permissions: ['clipboard-read', 'clipboard-write'],
+    });
+    const page = await context.newPage();
+    const errors = await observeCopyPage(page);
+    const name = 'first-copy-during-header-preparation';
+    const root = page.locator('#copy-added-during-header-preparation');
+    try {
+      await page.goto(`${baseUrl}${EC_ROUTE}`, { waitUntil: 'domcontentloaded' });
+      await ready(page.locator('.expressive-code [data-site-copy]').first(), 'wc', 'shadcn');
+      await page.evaluate(async () => {
+        const resource = performance
+          .getEntriesByType('resource')
+          .find(({ name }) =>
+            new URL(name).pathname.endsWith('/components/docs-header-preparation.ts')
+          );
+        if (!resource) throw new Error('Missing active Docs Header preparation module');
+        const browserImport = new Function('url', 'return import(url)') as (
+          url: string
+        ) => Promise<typeof import('../../../components/docs-header-preparation')>;
+        const { reserveDocsHeaderPreparation } = await browserImport(resource.name);
+        // Hold the real document reservation. The real page observer discovers
+        // this newly visible source and must render its first Copy independently.
+        const release = reserveDocsHeaderPreparation(document);
+        window.addEventListener('pagehide', release, { once: true });
+        const code = document.createElement('div');
+        const source = document.createElement('pre');
+        source.textContent = 'source added while Header is pending';
+        const copy = document.createElement('div');
+        copy.id = 'copy-added-during-header-preparation';
+        copy.dataset.siteCopy = '';
+        copy.dataset.siteCopyText = source.textContent;
+        code.append(source, copy);
+        document.querySelector('main')!.append(code);
+      });
+      await expect.poll(() => root.getAttribute('data-copy-view'), { timeout: 5000 }).toBe('ready');
+      const button = root.locator('[data-demo-ref="copy-button"]');
+      await button.click();
+      await expect.poll(() => button.getAttribute('data-copy-state')).toBe('success');
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+        'source added while Header is pending'
+      );
+      await evidence(page, root, name, { outcome: 'passed', errors });
+    } catch (error) {
+      await recordFailure(page, root, name, 'held Header preparation', errors, error);
+      throw error;
+    } finally {
+      await context.close();
+    }
+  }, 60_000);
   it('leaves exact selectable source available without JavaScript', async () => {
     const context = await browser.newContext({
       javaScriptEnabled: false,
@@ -427,7 +478,9 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
           expect(await page.evaluate(() => (window as any).__installCopyWrites.at(-1))).toBe(
             expected
           );
-          expect(await source.evaluate((node, original) => node === original, originalSource)).toBe(true);
+          expect(await source.evaluate((node, original) => node === original, originalSource)).toBe(
+            true
+          );
           expect(await source.textContent()).toBe(expected);
           const facts = await paint(button);
           expect(facts.glyph).toEqual([18, 18]);
