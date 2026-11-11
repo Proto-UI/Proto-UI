@@ -3,6 +3,7 @@
 // boundaries; they do not create a component count table or public API.
 const presence = new Map([
   ['P-BASE-DIALOG-CONTENT', 'expanded'],
+  ['P-BASE-POPOVER-CONTENT', 'expanded'],
   ['P-BASE-DIALOG-MASK', 'expanded-mask'],
   ['P-BASE-DROPDOWN-MENU-CONTENT', 'expanded'],
   ['P-BASE-SELECT-CONTENT', 'expanded'],
@@ -335,6 +336,13 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     }
     accept(instance, candidates, required, instance.policy);
     const content = matched.get(instance.path);
+    if (
+      instance.basePrototypeId === 'P-BASE-POPOVER-CONTENT' &&
+      !paintRequired &&
+      content &&
+      !knownHidden(content)
+    )
+      reject(instance, 'Closed Popover must have hidden or detached content.');
     // One collector observation contains this document's current lease and
     // one uid per physical root. Check only the target reached by this relation;
     // another prototype cannot hide a distinct physical target with that ID.

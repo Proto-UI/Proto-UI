@@ -542,9 +542,8 @@ async function anatomyObservation(page: Page, item: Case, state: string): Promis
     caseSubject(page)
   );
   const requirePrimaryOpen =
-    (item.family === 'popover' && state === 'open') ||
-    (['tooltip', 'hover-card'].includes(item.family) &&
-      ['hover', 'hover-open', 'keyboard-focus', 'focus-open'].includes(state));
+    ['tooltip', 'hover-card'].includes(item.family) &&
+    ['hover', 'hover-open', 'keyboard-focus', 'focus-open'].includes(state);
   return {
     ...compareContrastAnatomy(plan, observed, { requirePrimaryOpen }),
     owner: observed.owner,
