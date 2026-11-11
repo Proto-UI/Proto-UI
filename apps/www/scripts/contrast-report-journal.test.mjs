@@ -249,10 +249,18 @@ describe('contrast report journal', () => {
     const name = 'button-react-light-interrupted';
     await journal.beginFrame(name, { status: 'attempting', requestedState: 'interrupted' });
     await writeFile(path.join(output, `${name}.png`), 'partial-attempt-png', { flag: 'wx' });
+    await writeFile(path.join(output, `${name}.facts.json`), '{}\n', { flag: 'wx' });
+    const fingerprints = JSON.stringify({ before: '{}', facts: '{}', after: '{}' }, null, 2) + '\n';
+    await writeFile(path.join(output, `${name}.fingerprints.json`), fingerprints, { flag: 'wx' });
     const replay = await readContrastReportJournal(output);
     assert.equal(replay.frames[0].status, 'attempting');
     assert.equal(replay.frames[0].expectedArtifacts.image, `${name}.png`);
     assert.equal(replay.frames[0].expectedArtifacts.facts, `${name}.facts.json`);
+    assert.equal(replay.frames[0].expectedArtifacts.fingerprints, `${name}.fingerprints.json`);
+    assert.equal(
+      await readFile(path.join(output, replay.frames[0].expectedArtifacts.fingerprints), 'utf8'),
+      fingerprints
+    );
     assert.equal(replay.cases[0].status, 'running');
     assert.equal(replay.completedAt, undefined);
   });
