@@ -23,6 +23,47 @@ type Enhancement = {
   media: HTMLImageElement | SVGSVGElement;
 };
 
+const PREVIEW_MEDIA = 'img, svg';
+const PREVIEW_SOURCE = 'img, svg, picture, source, figcaption';
+const PREVIEW_ADMISSION_ATTRIBUTES = new Set([
+  'aria-hidden',
+  'hidden',
+  'inert',
+  'contenteditable',
+  'role',
+  'tabindex',
+  'data-doc-flow',
+  'data-image-preview',
+  'data-docs-image-trigger',
+  'data-diagram-open',
+  'data-previewer-id',
+  'data-prototype-previewer',
+]);
+
+function affectsPreviewInventory(record: MutationRecord): boolean {
+  const target = record.target as Element;
+  if (target.closest('svg')) return true;
+  if (record.type === 'childList') {
+    return (
+      !!target.closest('picture, figcaption, button[data-diagram-open]') ||
+      [...record.addedNodes, ...record.removedNodes].some(
+        (node) =>
+          node.nodeType === 1 &&
+          ((node as Element).matches(PREVIEW_SOURCE) ||
+            !!(node as Element).querySelector(PREVIEW_SOURCE))
+      )
+    );
+  }
+  const attribute = record.attributeName;
+  // HTML inline paint can change active geometry without changing admission.
+  if (!attribute || attribute === 'style') return false;
+  return (
+    target.matches(PREVIEW_SOURCE) ||
+    ((PREVIEW_ADMISSION_ATTRIBUTES.has(attribute) || /^on/i.test(attribute)) &&
+      !!target.querySelector(PREVIEW_MEDIA))
+  );
+}
+
 /** Media selection/loading is application data. PUI owns modal presence,
  * dismissal, keyboard activation, focus scope/restoration and transition clocks.
  */
@@ -316,7 +357,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       return false;
     });
     for (const body of doc.querySelectorAll<HTMLElement>('[data-doc-flow]')) {
-      for (const media of body.querySelectorAll<HTMLImageElement | SVGSVGElement>('img, svg')) {
+      for (const media of body.querySelectorAll<HTMLImageElement | SVGSVGElement>(PREVIEW_MEDIA)) {
         if (
           !(media instanceof HTMLImageElement || media instanceof SVGSVGElement) ||
           !isPreviewCandidate(media, body) ||
@@ -385,14 +426,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   createDialog();
   scan();
   const contentObserver = new MutationObserver((records) => {
-    // HTML inline paint can move the active origin but does not change
-    // admission. Inline SVG still validates every authored attribute.
-    if (
-      records.some(
-        (record) => record.attributeName !== 'style' || (record.target as Element).closest('svg')
-      )
-    )
-      scan();
+    if (records.some(affectsPreviewInventory)) scan();
     geometry();
   });
   for (const body of doc.querySelectorAll('[data-doc-flow]'))
