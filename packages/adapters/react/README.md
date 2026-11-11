@@ -22,6 +22,8 @@ For a statically declared Text Control root, the adapter mirrors the host lease'
 
 The editing lease also guards the physical editor's native `defaultValue` accessor against redundant string writes from React reconciliation. Equal defaults leave selection and cursor untouched; changed defaults still reach the native setter and remain available to form reset. The lease restores the prior property binding on detach or disposal. Current-value projection continues through Text Control's existing value and composition ownership.
 
+The same Text Control patch owns the native form submission `name`. The adapter retains its string value in React's native `name` prop so an ordinary input commit preserves it. A new string updates the name; an explicit empty string clears submission participation, while an omitted name leaves the retained projection unchanged. The logical view keeps that projection across detach and remount, and React unmount discards it with the component. The projection reads the Module patch rather than the reconciled DOM.
+
 ## Public handle identity
 
 The adapter publishes one public handle object per mounted adapter instance. React re-runs the imperative handle effect whenever a consumer supplies a new `ref` identity, so the current callback still receives the handle. The handle is allocated once and reused: `update`, `getExposes` and `invokeInCallbackScope` keep reading the live view while its identity stays stable across renders and commits.

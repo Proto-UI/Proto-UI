@@ -315,7 +315,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
-  setTextControlDefaultValue: (value: string) => void;
+  setTextControlDefaultValue: (value: string | undefined, name: string | undefined) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
   isEntryAcquisitionReady: (target: HTMLElement) => boolean;
@@ -625,10 +625,12 @@ export function createReactModules<Props extends PropsBaseType>(args: {
 
 function createReactTextControlHost(
   getTarget: Parameters<typeof createWebTextControlHost>[0],
-  setDefaultValue: (value: string) => void
+  projectNativeProps: (defaultValue: string | undefined, name: string | undefined) => void
 ): TextControlHost {
-  const projectDefaultValue = (patch: TextControlPatch) => {
-    if (typeof patch.defaultValue === 'string') setDefaultValue(patch.defaultValue);
+  const projectPatch = (patch: TextControlPatch) => {
+    if (typeof patch.defaultValue === 'string' || typeof patch.name === 'string') {
+      projectNativeProps(patch.defaultValue, patch.name);
+    }
   };
 
   return {
@@ -640,11 +642,11 @@ function createReactTextControlHost(
       try {
         const attachedLease = createWebTextControlHost(() => target).attach(connection);
         lease = attachedLease;
-        projectDefaultValue(connection.patch);
+        projectPatch(connection.patch);
         return {
           update(patch) {
             attachedLease.update(patch);
-            projectDefaultValue(patch);
+            projectPatch(patch);
           },
           snapshot: () => attachedLease.snapshot(),
           dispose() {
