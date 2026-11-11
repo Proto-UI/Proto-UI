@@ -257,6 +257,47 @@ describe('independent lifecycle positive controls', () => {
 });
 
 describe('source sibling order and immediate owner replacement', () => {
+  it('ignores renderer-owned Copy and Code children but reconciles their native caption parent', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const caption = document.createElement('figcaption');
+    const source = document.createTextNode('Native caption');
+    const copy = document.createElement('div');
+    copy.className = 'site-copy-mount';
+    const code = document.createElement('div');
+    code.className = 'site-code-surface-mount';
+    caption.append(source, copy);
+    flow.append(caption, code);
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    expect(caption.getAttribute('data-typography-runtime')).toBeNull();
+
+    const queries = vi.spyOn(root, 'querySelectorAll');
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(flow, { childList: true, subtree: true });
+    });
+    const copyLabel = document.createElement('label');
+    copyLabel.textContent = 'Copy status';
+    const codeLabel = copyLabel.cloneNode(true) as HTMLElement;
+    copy.append(copyLabel);
+    code.append(codeLabel);
+    await delivered;
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith(expect.stringContaining('[data-site-typography]'));
+    expect(copyLabel.getAttribute('data-typography-runtime')).toBeNull();
+    expect(codeLabel.getAttribute('data-typography-runtime')).toBeNull();
+
+    copy.remove();
+    await vi.waitFor(() => expect(caption.getAttribute('data-typography-runtime')).toBe('wc'));
+    expect(caption.querySelector('[data-site-typography-slot]')?.firstChild).toBe(source);
+  });
+
   it('reconciles a source addition whose observer ran during empty-scope preparation', async () => {
     document.body.innerHTML = '<main data-site-family-scope><div data-doc-flow></div></main>';
     const root = document.querySelector('main')!;

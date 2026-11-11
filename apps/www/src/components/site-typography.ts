@@ -48,6 +48,13 @@ const activeViews = new WeakMap<HTMLElement, View>();
 const selectionContainers = new WeakMap<Node, { native: HTMLElement; slot: HTMLElement }>();
 let serial = 0;
 
+export function isWithinCodeOrCopyProjectionMount(node: Node): boolean {
+  return (
+    node.nodeType === 1 &&
+    !!(node as Element).closest('div.site-code-surface-mount, div.site-copy-mount')
+  );
+}
+
 /** Inventory uses native semantics, never discovers text by replacing HTML.
  * Existing Proto component content is deliberately not wrapped a second time. */
 export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false): Target[] {
@@ -62,6 +69,7 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
     const explicit = native.dataset.siteTypography;
     const explicitRole = explicit !== undefined && ROLES.has(explicit);
     if (
+      (docsOnly && isWithinCodeOrCopyProjectionMount(native)) ||
       (native.closest(COMPONENT_OWNED) &&
         !(explicitRole && native.matches('output[data-home-demo-status]'))) ||
       native.closest('[data-site-typography-batch]')

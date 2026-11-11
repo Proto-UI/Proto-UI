@@ -3,7 +3,7 @@ import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';
-import { siteTypographyParticipant } from './site-typography';
+import { isWithinCodeOrCopyProjectionMount, siteTypographyParticipant } from './site-typography';
 
 type DocumentationTypographyHandle = { destroy(): Promise<void>; ready: Promise<unknown> };
 const documents = new WeakMap<
@@ -112,7 +112,17 @@ export function initDocumentationTypography(doc: Document = document) {
   };
   const observer = new view.MutationObserver((records) => {
     if (!root.isConnected) void handle.destroy();
-    else if (records.some((record) => root.contains(record.target))) refresh();
+    else if (
+      records.some(
+        ({ target, type }) =>
+          root.contains(target) &&
+          (type !== 'childList' || !isWithinCodeOrCopyProjectionMount(target))
+      )
+    ) {
+      // The generated children cannot change the native source inventory.
+      // Inserting or removing a mount still notifies its authored parent.
+      refresh();
+    }
   });
   // Watching only root cannot observe root's own removal from its parent.
   // Document remains stable across owner/body replacements and view swaps.
