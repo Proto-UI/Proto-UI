@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { searchCommandParticipant } from './site-search-commands';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
+import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import type { RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './PrototypePreviewer/projection-theme';
 import type { SiteLibraryFamily } from './site-library-family';
@@ -247,6 +248,85 @@ it.each([
   await vi.waitFor(() => expect(document.activeElement).toBe(surface(2, ref)));
   expect(oldControl.isConnected).toBe(false);
 });
+
+it.each([
+  { label: 'cancellation', cancel: true, newerFocus: false, close: false },
+  { label: 'preparation failure', cancel: false, newerFocus: false, close: false },
+  { label: 'newer focus', cancel: true, newerFocus: true, close: false },
+  { label: 'session close', cancel: true, newerFocus: false, close: true },
+])(
+  'restores retained Homepage Search focus only when eligible after $label',
+  async ({ cancel, newerFocus, close }) => {
+    const { owner, root } = mount('shadcn', true);
+    const failure = new Error('Controlled replacement preparation failure');
+    let preparing = false;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const controller = createProjectionScopeController({
+      initialSelection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+      async materialize(request) {
+        if (request.generation !== 1) {
+          preparing = true;
+          await gate;
+          throw failure;
+        }
+        const { prepared } = await prepare(owner, 'shadcn', 'wc', request.generation);
+        return {
+          activate() {
+            for (const candidate of prepared) candidate.activate();
+          },
+          async setLocked(locked) {
+            for (const candidate of prepared) await candidate.setLocked?.(locked);
+          },
+          async dispose() {
+            for (const candidate of prepared) await candidate.dispose();
+          },
+        };
+      },
+      prepareCommit: owner.prepareCommit,
+    });
+    try {
+      await controller.start();
+      owner.open();
+      await vi.waitFor(() => expect(document.activeElement).toBe(editor(1)));
+      const panel = surface(1, 'panel');
+      await vi.waitFor(() => expect(panel.getAttribute('data-transition-state')).toBe('entered'));
+      const retained = surface(1, 'close');
+      retained.focus();
+      expect(document.activeElement).toBe(retained);
+      const change = controller.request({ runtimeId: 'react' }).catch((error) => error);
+      await vi.waitFor(() => expect(preparing).toBe(true));
+      // Happy DOM does not displace focus on inert. Model the platform fallback
+      // while keeping the real retained projection, lock, and public control.
+      retained.blur();
+      expect(document.activeElement).toBe(document.body);
+      if (newerFocus) {
+        const outside = document.createElement('button');
+        document.body.append(outside);
+        outside.focus();
+        expect(document.activeElement).toBe(outside);
+        outside.blur();
+      }
+      if (close) owner.toggle();
+      if (cancel) await controller.cancelPending();
+      release();
+      if (cancel) expect(await change).toMatchObject({ generation: 1, phase: 'ready' });
+      else expect(await change).toBe(failure);
+      expect(root.dataset.searchRuntime).toBe('wc');
+      expect(controller.getSnapshot()).toMatchObject({ generation: 1, phase: 'ready' });
+      if (close) await vi.waitFor(() => expectClosed(1));
+      else expect(surface(1, 'panel')).toBe(panel);
+      await vi.waitFor(() =>
+        expect(document.activeElement).toBe(newerFocus || close ? document.body : retained)
+      );
+    } finally {
+      release();
+      await controller.destroy();
+    }
+  }
+);
 
 it('keeps newer focus when a replacement Dialog finishes leaving', async () => {
   const { owner, opener, close } = await openHomepageReplacement();

@@ -111,7 +111,10 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       dialogFocusEpoch++;
   };
   document.addEventListener('focusin', onFocus, true);
-  let rememberedDialogFocus: SiteSearchFocusRestore | null = null;
+  let rememberedDialogFocus: {
+    candidate: MaterializedProjectionCandidate;
+    request: SiteSearchFocusRestore;
+  } | null = null;
   let dialogCloseEpoch = 0;
   const offDialogFocus =
     homepage && search
@@ -397,7 +400,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       if (!search || !dialogMount) throw new Error('Public Search owner is missing');
       const family = request.selection.projectionFamilyId as SiteLibraryFamily;
       const focusCloseEpoch = dialogCloseEpoch;
-      let pendingFocusRestore = rememberedDialogFocus;
+      let pendingFocusRestore = rememberedDialogFocus?.request ?? null;
       let candidate: MaterializedProjectionCandidate | undefined;
       const current = () =>
         !!candidate &&
@@ -497,11 +500,28 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                 control?.dataset.projectionOwner === ownerId &&
                 control.dataset.projectionGeneration === String(request.generation) &&
                 control.dataset.demoRef
-                  ? { ref: control.dataset.demoRef, origin, epoch: dialogFocusEpoch }
+                  ? {
+                      candidate: prepared,
+                      request: { ref: control.dataset.demoRef, origin, epoch: dialogFocusEpoch },
+                    }
                   : null;
-            } else if (!locked) rememberedDialogFocus = null;
+            }
           }
-          return prepared.setLocked?.(locked);
+          const retainedFocus = locked ? null : rememberedDialogFocus;
+          const result = prepared.setLocked?.(locked);
+          if (retainedFocus?.candidate !== prepared) return result;
+          const restore = () => {
+            if (rememberedDialogFocus !== retainedFocus) return;
+            rememberedDialogFocus = null;
+            if (
+              alive &&
+              prepared.host.isConnected &&
+              document.activeElement !== retainedFocus.request.origin
+            )
+              composition.restoreFocus(retainedFocus.request);
+          };
+          if (result) return result.then(restore);
+          restore();
         },
       };
     },
@@ -548,6 +568,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       alive = false;
       callbacks = null;
       offDialogFocus?.();
+      rememberedDialogFocus = null;
       search?.dispose();
       subscribers.clear();
       focusTargets.clear();

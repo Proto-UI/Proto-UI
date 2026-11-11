@@ -58,7 +58,11 @@ export function createSiteSearchComposition(options: {
   takeFocusRestore(): SiteSearchFocusRestore | null;
   /** The scope's current focus epoch, used to detect newer focus intent. */
   focusEpoch(): number;
-}): { demo: DemoSpec; activate(prepareOpenerReturn?: PrepareOpenerReturn): void } {
+}): {
+  demo: DemoSpec;
+  activate(prepareOpenerReturn?: PrepareOpenerReturn): void;
+  restoreFocus(request: SiteSearchFocusRestore): void;
+} {
   const { family, shadcnStyle, session, copy } = options;
   const initial = session.read();
   const style = family === 'shadcn' ? { styleProfile: shadcnStyle, presentation: 'menu' } : {};
@@ -148,6 +152,7 @@ export function createSiteSearchComposition(options: {
     ],
   };
   let activateView: ((prepareOpenerReturn?: PrepareOpenerReturn) => void) | undefined;
+  let restoreViewFocus: ((request: SiteSearchFocusRestore) => void) | undefined;
   const demo: DemoSpec = {
     type: 'demo',
     root: proto('dialog-root', {
@@ -725,11 +730,22 @@ export function createSiteSearchComposition(options: {
         if (prepare) prepareOpenerReturn = prepare;
         requestPaint();
       };
+      restoreViewFocus = (request) => {
+        if (!current() || !session.read().open) return;
+        pendingFocusRestore = request;
+        try {
+          restoreRequestedFocus();
+        } catch (error) {
+          pendingFocusRestore = null;
+          console.error('[SiteSearch] Failed to restore retained Dialog focus.', error);
+        }
+      };
       const off = session.subscribe(requestPaint);
       requestPaint();
       return () => {
         live = false;
         activateView = undefined;
+        restoreViewFocus = undefined;
         prepareOpenerReturn = undefined;
         cancelOpenerReturn?.();
         paintEpoch++;
@@ -765,6 +781,9 @@ export function createSiteSearchComposition(options: {
     demo,
     activate(prepareOpenerReturn) {
       activateView?.(prepareOpenerReturn);
+    },
+    restoreFocus(request) {
+      restoreViewFocus?.(request);
     },
   };
 }
