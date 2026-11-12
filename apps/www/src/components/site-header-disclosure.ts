@@ -138,8 +138,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
     const rightEdge = (viewport?.offsetLeft ?? 0) + (viewport?.width ?? window.innerWidth) - 8;
     const bottomEdge = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8;
-    const rtl = window.getComputedStyle(root).direction === 'rtl';
     const mobile = !!compact?.matches;
+    const rtl = !mobile && window.getComputedStyle(root).direction === 'rtl';
     const availableWidth = mobile
       ? rightEdge - leftEdge
       : Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge);
@@ -153,9 +153,12 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     };
     for (const [name, value] of Object.entries(values))
       if (panel.style.getPropertyValue(name) !== value) panel.style.setProperty(name, value);
-    const width = panel.getBoundingClientRect().width;
-    const aligned = mobile ? leftEdge : rtl ? anchor.left : anchor.right - width;
-    const left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
+    let left = leftEdge;
+    if (!mobile) {
+      const width = panel.getBoundingClientRect().width;
+      const aligned = rtl ? anchor.left : anchor.right - width;
+      left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
+    }
     const value = `${(left - header.left) / scaleX - root.clientLeft}px`;
     if (panel.style.getPropertyValue('--site-header-panel-left') !== value)
       panel.style.setProperty('--site-header-panel-left', value);
