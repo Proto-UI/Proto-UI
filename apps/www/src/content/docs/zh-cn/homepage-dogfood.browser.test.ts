@@ -2442,7 +2442,28 @@ for (const family of ['shadcn', 'brutalist'] as const) {
             )
             .toBe(true);
           const expectedToken = family === 'shadcn' ? 'ring-3' : 'ring-2';
-          await expect.poll(() => trigger.getAttribute('data-pui-style')).toContain(expectedToken);
+          if (family === 'brutalist' && control === 'runtime') {
+            // Elevated Brutalist transitions the shadow after publishing its ring token.
+            // Use the original poll window for the visual state that the capture asserts.
+            await expect
+              .poll(() =>
+                trigger.evaluate(
+                  (node, restingShadow) => ({
+                    tokens: node.getAttribute('data-pui-style') ?? '',
+                    painted:
+                      node === node.ownerDocument.activeElement &&
+                      node.matches(':focus-visible') &&
+                      getComputedStyle(node).boxShadow !== restingShadow,
+                  }),
+                  unfocused.shadow
+                )
+              )
+              .toEqual({ tokens: expect.stringContaining(expectedToken), painted: true });
+          } else {
+            await expect
+              .poll(() => trigger.getAttribute('data-pui-style'))
+              .toContain(expectedToken);
+          }
           const facts = await trigger.evaluate(measureHeaderPreferenceFocusRing);
           records.push({ stage, facts });
           await save(stage, { unfocused, focused: facts });
