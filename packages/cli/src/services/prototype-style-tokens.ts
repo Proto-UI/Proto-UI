@@ -566,10 +566,7 @@ function predeclareBindings(node, scope) {
         statement.name.text,
         sourceFunctionValue(statement, scope, statement.name)
       );
-    } else if (
-      ts.isVariableStatement(statement) &&
-      !isVarList(statement.declarationList)
-    ) {
+    } else if (ts.isVariableStatement(statement) && !isVarList(statement.declarationList)) {
       for (const declaration of statement.declarationList.declarations)
         shadowBindingPattern(scope, declaration.name);
     }
@@ -597,13 +594,95 @@ function sourceFunctionForCall(node, scope) {
   return helper;
 }
 
+const sourceFunctionRegions = new WeakMap();
+
+function nodeWithin(node, ancestor) {
+  for (let current = node; current; current = current.parent) {
+    if (current === ancestor) return true;
+  }
+  return false;
+}
+
+/** Cache syntax, never a closure's values or a call's source-graph proof. */
+function sourceFunctionRegion(node) {
+  let region = node;
+  for (let parent = node.parent; parent; parent = parent.parent) {
+    if (ts.isFunctionLike(parent)) region = parent;
+  }
+  let result = sourceFunctionRegions.get(region);
+  if (result) return result;
+  result = { node: region, names: new Set(), style: false };
+  const visit = (current) => {
+    if (ts.isIdentifier(current)) result.names.add(current.text);
+    if (
+      ts.isCallExpression(current) &&
+      ((ts.isIdentifier(current.expression) && current.expression.text === 'tw') ||
+        isPropertyNamed(current.expression, 'rule') ||
+        isFeedbackStyleUseCall(current) ||
+        isFeedbackStyleTwCall(current))
+    )
+      result.style = true;
+    ts.forEachChild(current, visit);
+  };
+  visit(region);
+  sourceFunctionRegions.set(region, result);
+  return result;
+}
+
+function carriesHelperEffects(value) {
+  return (
+    value?.sourceFunction ||
+    bindingHasStatePath(value) ||
+    value?.tokenGraph?.kind === 'object' ||
+    value?.tokenGraph?.kind === 'array' ||
+    value?.tokenGraph?.kind === 'union'
+  );
+}
+
+/**
+ * The lexical walk already visits every body in a closed, style-free region.
+ * Replaying its sibling calls enumerates paths through a runtime callback
+ * graph without adding a token or an externally visible binding write.
+ * A capture, borrowed container or callback prevents that proof. In
+ * particular, neither declaration identity nor a previous call can certify
+ * the current closure/arguments: inspect their live bindings on every call.
+ */
+function sourceFunctionNeedsReplay(helper, captured) {
+  const region = sourceFunctionRegion(helper.node);
+  if (region.style || captured.some((entry) => carriesHelperEffects(entry.binding))) return true;
+  for (let current = helper.scope; current; current = current.parent) {
+    if (current.borrowedSourceFunctionRegion === region.node) return true;
+  }
+  for (const name of region.names) {
+    const owner = scopeDeclaring(name, helper.scope);
+    if (!owner) continue;
+    const binding = owner.bindings.get(name);
+    if (!nodeWithin(owner.node, region.node) && binding.sourceFunction?.node !== region.node)
+      return true;
+    if (binding.sourceFunction && !nodeWithin(binding.sourceFunction.node, region.node))
+      return true;
+    // A nested sibling may reach a callback/container borrowed by the outer
+    // invocation, even when this particular call has no arguments.
+    if (
+      binding.bindingNode &&
+      ts.isParameter(binding.bindingNode) &&
+      binding.bindingNode.parent === region.node &&
+      carriesHelperEffects(binding)
+    )
+      return true;
+  }
+  return false;
+}
+
 /** Reached helper bodies use their defining scope and this call's arguments.
  * Unresolved calls keep the existing container-withdrawal boundary below. */
 function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory) {
-  if (!helper) return;
+  if (!helper || !sourceFunctionNeedsReplay(helper, captured)) return;
   const nextScope = createScope(helper.scope, helper.node, scope.sourceSummary);
   nextScope.versions = scope.versions;
   nextScope.activeSourceFunctions = scope.activeSourceFunctions;
+  if (captured.some((entry) => carriesHelperEffects(entry.binding)))
+    nextScope.borrowedSourceFunctionRegion = sourceFunctionRegion(helper.node).node;
   for (const parameter of helper.node.parameters) shadowBindingPattern(nextScope, parameter.name);
   scope.activeSourceFunctions.add(helper.node);
   try {
