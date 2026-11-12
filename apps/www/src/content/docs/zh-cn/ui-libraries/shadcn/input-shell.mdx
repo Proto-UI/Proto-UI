@@ -1,0 +1,203 @@
+---
+title: 'Input Shell'
+description: '围绕单个独立拥有的行内编辑器提供 draft Shadcn 被动外框。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Input Shell 将输入框的外层呈现与编辑协议分开。`inputShell` 拥有边框、背景、圆角和可选的 focus ring；唯一的子控件保留编辑、焦点、disabled/read-only 行为与交互所有权。普通文本输入使用 `inputShellControl`，Command 组合则使用现有的 Command Input。
+
+这些是 **0.3 workspace 中的 draft API**，从 `0.3.0-alpha.1` 起编目。本页说明当前 workspace 导出，不代表已发布的 `0.2.0` API 或稳定可用性。Input Shell 是有界的呈现组合，不引入 Base InputGroup 身份，也没有实现上游完整的 InputGroup API。
+
+## 现有的单编辑器示例
+
+已注册 demo 组合了真实 shell、普通编辑器与公开 fact binder。它的配方省略 `styleProfile`，所以没有外层 scope 时，shell 与编辑器采用 New York 兼容基线。可用 Tab 进入编辑器，再使用示例中的禁用切换按钮观察 `focusVisible` 与 `disabled` 投射。按钮和 fact 读数由示例所有；shell 不增加动作，也不执行搜索。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## 公开导入与组成
+
+```ts
+import {
+  inputShell,
+  inputShellControl,
+  bindInputShellControl,
+  INPUT_SHELL_PROJECTED_STYLES,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+import type {
+  InputShellProps,
+  InputShellControlProps,
+  InputShellControlExposes,
+  InputShellOwner,
+  InputShellTarget,
+  InputShellControlInstance,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+```
+
+包根也导出这些名称。请使用从源码构建的 workspace 包和匹配的 Adapter；本页没有为这些 helper 指定 `@latest` CLI 安装目标。
+
+| 入口 | 职责 |
+| --- | --- |
+| `inputShell`（`shadcn-input-shell`） | 无 role、不可聚焦、只有一个内容 slot 的 Root，不创建编辑器、键盘处理器或独立交互状态。 |
+| `inputShellControl`（`shadcn-input-shell-control`） | 通过 `asInputRoot` 派生的普通单行编辑器。renderer 返回 `null`，唯一物理编辑面由宿主提供。 |
+| `bindInputShellControl(owner, target, control)` | 仅将真实控件的公开 `focusVisible`、`disabled` facts 投射到 shell，并具有显式 view 生命周期。 |
+
+恰好包含一个行内编辑器是调用方的义务，不是运行时对子节点数量的强制检查。shell 不通过 DOM 查询发现控件，也不在多个控件之间仲裁。
+
+## 组合普通输入框
+
+下面的 Web Component 示例将真实 Adapter 实例作为绑定身份。请在浏览器中加载匹配的生成 Proto UI 样式和 consumer 主题后，向已连接的 `host` 挂载。view 退役时调用返回的清理函数。
+
+外层 [Style Scope](/zh-cn/ui-libraries/shadcn/style-scope/) 让 shell 与编辑器采用同一 profile。直接在 `inputShell` 上设置 `styleProfile` 只选择 shell 自身的呈现：shell 不为子控件发布公共样式 scope。应使用外层 scope，或为两部分分别显式设置。
+
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import {
+  inputShell,
+  inputShellControl,
+  bindInputShellControl,
+  type InputShellProps,
+  type InputShellOwner,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+
+const Scope = AdaptToWebComponent(styleScope);
+const Shell = AdaptToWebComponent(inputShell);
+const Control = AdaptToWebComponent(inputShellControl);
+
+export function mountTitleInput(host: HTMLElement) {
+  const scope = new Scope();
+  const shell = new Shell();
+  const control = new Control();
+  const shellProps: InputShellProps = {
+    styleProfile: 'inherit',
+    focusIndicator: 'ring',
+  };
+
+  setElementProps(scope, { styleProfile: 'rhea' });
+  setElementProps(shell, shellProps);
+  setElementProps(control, {
+    ariaLabel: '笔记标题',
+    placeholder: '未命名笔记',
+    defaultValue: '',
+  });
+  shell.append(control);
+  scope.append(shell);
+  host.append(scope);
+
+  let current = true;
+  const disposers = new Set<() => void>();
+  const owner: InputShellOwner = {
+    isCurrent: () => current,
+    onDispose(dispose) {
+      disposers.add(dispose);
+      return () => {
+        disposers.delete(dispose);
+      };
+    },
+  };
+
+  bindInputShellControl(
+    owner,
+    {
+      instance: shell,
+      setFacts(facts) {
+        setElementProps(shell, { ...shellProps, ...facts });
+      },
+    },
+    control
+  );
+
+  return () => {
+    if (!current) return;
+    current = false;
+    try {
+      for (const dispose of [...disposers]) dispose();
+    } finally {
+      disposers.clear();
+      scope.remove();
+    }
+  };
+}
+```
+
+`setElementProps` 会替换整组 authored props，所以 `setFacts` 每次写入都将两个 facts 与 `shellProps` 合并，保留 `styleProfile` 和 `focusIndicator`。框架集成即使提供 prop patch 合并，也必须保持这项所有权区分。
+
+请在**控件**上设置 `disabled` 与 `readOnly`；只修改 shell 的被动 `disabled` 输入不能禁用编辑器。无障碍命名与描述也应交给控件；标注 shell 不等于为编辑器提供标签。
+
+## Props 与继承的编辑器 API
+
+| Shell prop       | 类型                    | 默认值    |
+| ---------------- | ----------------------- | --------- |
+| `styleProfile`   | `ShadcnStyleChoice`     | `inherit` |
+| `focusVisible`   | 来自控件的 boolean fact | `false`   |
+| `disabled`       | 来自控件的 boolean fact | `false`   |
+| `focusIndicator` | `ring` 或 `none`        | `ring`    |
+
+`InputShellControlProps` 为 `InputRootProps & ShadcnStyleProps`，`InputShellControlExposes` 为 `InputRootExposes`。shell 不引入 value prop 或 value event。编辑器保留 [Base Input](/zh-cn/ui-libraries/base/input/) 协议：
+
+- `value` 选择受控所有权，`defaultValue` 初始化非受控值；编辑与 IME 归一化仍由 Base Input 负责。
+- live 文本属性包括 `placeholder`、`required`、`name`、`autoComplete`、`minLength`、`maxLength`、`inputMode` 和 `enterKeyHint`；命名使用 `ariaLabel`、`labelledBy`、`describedBy`。
+- 公开 facts 包括 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`；方法仍为 `focusSelf` 与 `blurSelf`。
+- 事件仍为 `valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`；binder 不拦截或替换这些事件。
+
+当前 Web 编辑器仍是唯一的 host-owned `input[type="text"]`。shell 不增加任意 native `type`、validation state、Form 提交流程、selection API 或第二编辑器。若使用独立 Label association，它属于控件协议；shell 不增加 ControlLabel 配对。另一个[独立 Shadcn Input](/zh-cn/ui-libraries/shadcn/input/) 保留自己的视觉配方，并不要求使用此 shell。
+
+## Profile 与配方
+
+两部分都默认 `inherit`：本地显式选择优先，其次是最近的共享 scope，最后是 `new-york-v4`。`new-york` 归一化为 `new-york-v4`；改回 `inherit` 会撤回显式覆盖。profile 更新必须保留编辑器节点、值、选区与焦点。
+
+**draft 定义中的配方边界为 New York 和 Rhea**：
+
+| 配方 | 外层 shell | 普通内层编辑器 |
+| --- | --- | --- |
+| `new-york-v4` / `new-york` | `h-9`、`rounded-md`、`border-input`、`shadow-xs`，color/box-shadow 过渡；dark mode 使用 `bg-input/30`。键盘焦点采用 `border-ring ring-3 ring-ring/50`。 | `h-9`、`px-3 py-1`，没有内层边框、圆角、阴影或 ring。 |
+| `rhea` | `h-8`、主题 `radius-2xl`、静止时透明边框、`bg-input/50`、200ms color/box-shadow 过渡。键盘焦点采用 `border-ring ring-3 ring-ring/30`。 | `h-8`、`px-2.5 py-1`，同样是透明、无边框的内层编辑面。 |
+
+这两种配方的编辑器使用 base 字号，在 `viewport.width >= 768` 时改为 small 字号。选区使用 primary/primary-foreground，placeholder 使用 muted-foreground。disabled opacity 由编辑器所有，shell 不再叠加一次变暗。这些是配方事实，不是不受主题、字体或宿主影响的固定像素测量。
+
+当前存在源码与定义之间的差异：`INPUT_SHELL_PROJECTED_STYLES` 导出全部九个 `SHADCN_STYLE_IDS`，`visual.ts` 也包含额外的 Vega、Nova、Maia、Lyra、Mira、Luma、Sera 分支；但两个 draft prototype 定义仍将家族限制为 New York/Rhea，并要求其他已知 profile 报错。这些额外源码分支尚不是已协调的支持保证，本页示例保持在定义的两种 profile 内。未知 ID 由共享样式归一化拒绝。导出列表不是验收矩阵。
+
+## 与 Command 组合
+
+Command 使用它现有的 `commandInput`，不使用 `inputShellControl`。在 Command Root 下，让 Command Content 与输入区域并列；将单编辑器 shell 放在可选的公开 `commandInputWrapper` 内。用相同 helper 绑定真实 Command Input 的公开 facts，并设置 `focusIndicator: 'none'`；普通 Input 使用 `ring`。
+
+私有 grouped-paint context 让 Command Input 撤回原先的独立 border/ring；它不是公开 Context key，也不是 InstanceAssociations 协议。显式启用的 Command menu InputWrapper 可以拥有边框、inset 与 shell 外部的被动 glyph，此时内部 shell 仍只是透明的单编辑器容器，不再增加第二层边框或 inset。这并未增加 Input Shell addon 或点击聚焦行为。query、过滤、导航、active descendant、IME 与执行仍由 Base Command 和应用所有，具体协议见 [Command](/zh-cn/ui-libraries/shadcn/command/)。
+
+## 绑定生命周期与隔离
+
+只有真实公开实例就绪后才能调用 binder。`target.instance` 必须是真实的被动 shell 实例，`control` 必须是真实公开控件实例，不能用新 wrapper 身份代替。控件必须通过公开的 `get()`、`subscribe()` 提供 boolean `focusVisible`、`disabled` facts；缺失或格式错误会报错。
+
+owner 提供 `isCurrent()` 与 `onDispose(dispose)`，后者返回用于取消注册该回调的函数。同一个真实 shell 或 control 最多有一个活跃绑定。返回句柄提供 `sync()`、`replace(nextControl)` 和幂等的 `dispose()`。替换会分离旧来源；无效或重复的替换会退役整个绑定。disposal 尝试所有 unsubscribe，使旧回调失效并禁止后续写入。当前来源发出终止性的公开 StateEvent `disconnect` 时，绑定直接退役，不再读取已不可用的 facts；旧来源的 disconnect 不能退役替换后的来源。可重复的 view detach 本身不是该终止事件。绑定必须随 view 一同退役，旧 owner 不得复用已经销毁的 target。
+
+profile 选择与 fact 绑定通过公开 Props、Context、Exposes 完成，不从 DOM 祖先推导状态，也不维护第二份编辑器状态 store。家族拥有自己的呈现 token；consumer 仍拥有主题变量、字体、外层布局和显式 surface 覆盖。请加载匹配的生成样式产物，不要用页面 selector 或全局 reset 修补组件。
+
+## 边界与证据
+
+参考来自 MIT 归属的 [shadcn/ui revision `3d98900e`](https://github.com/shadcn-ui/ui/tree/3d98900e9b73c45f035f8109e9d41ba6a51685e7)，包括 Command/InputGroup 源码与 Rhea 样式。这是独立且有界的 Proto UI 投射。addon、addon-click focus、嵌套按钮排除、invalid 聚合、多控件、textarea/block 对齐、InputGroupButton，以及完整 InputGroup/cmdk 一致性，都不在其定义范围内。
+
+`T-SHADCN-INPUT-SHELL-0001` 将 binder 测试、部分真实 consumer 流程、原生测量和 catalog coverage，与仍缺失的完整 direct-boundary 及继承编辑器 conformance 分开。现有 fixture 和历史 capture 不构成当前候选的新验收，也不能证明完整 Base Input coverage、非 Web 支持或浏览器 UI zoom 行为。preview 引用已有组合示例，其存在不代表这些验收要求已经通过。
+
+## 参考
+
+以下 draft 定义治理本页。公开实现位于 `packages/prototypes/shadcn/src/input-shell/`；组合背景保留在 `internal/contracts/command/shadcn-input-shell.presentation.v0.md`。
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-INPUT-SHELL.yaml',
+    'P-SHADCN-INPUT-SHELL-CONTROL.yaml',
+    'P-BASE-INPUT.yaml',
+    'P-SHADCN-STYLE-SCOPE.yaml',
+  ]}
+/>
+
+<SpecEntityLinks directory="spec/tests" files={['T-SHADCN-INPUT-SHELL-0001.yaml']} />
+
+<SpecEntityLinks directory="spec/contracts" files={['C-PROTOTYPE-STYLE-CLOSURE-0001.yaml']} />

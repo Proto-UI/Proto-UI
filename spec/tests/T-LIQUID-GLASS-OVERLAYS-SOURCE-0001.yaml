@@ -30,6 +30,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-OVERLAYS-SOURCE-0001-CASE-OVERLAYS
+      - T-LIQUID-GLASS-OVERLAYS-SOURCE-0001-CASE-SEARCH-NAV
     exercises:
       - P-LIQUID-GLASS-SLIDER
       - P-LIQUID-GLASS-SLIDER-THUMB

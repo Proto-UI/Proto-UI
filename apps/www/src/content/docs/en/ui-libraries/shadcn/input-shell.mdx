@@ -1,0 +1,203 @@
+---
+title: 'Input Shell'
+description: 'A draft passive Shadcn frame around one independently owned inline editor.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Input Shell separates an input's outer frame from its editing protocol. `inputShell` owns the border, background, radius and optional focus ring. Its single child keeps editing, focus, disabled/read-only behavior and interaction ownership. Use `inputShellControl` for an ordinary text input, or the existing Command Input for a Command composition.
+
+These are **draft 0.3 workspace APIs**, cataloged since `0.3.0-alpha.1`. This page describes the current workspace exports, not the published `0.2.0` API or stable availability. Input Shell is a bounded presentation composition; it introduces no Base InputGroup identity and does not implement the complete upstream InputGroup API.
+
+## Existing single-editor example
+
+The registered demo composes the real shell, ordinary editor and public fact binder. Its recipe omits `styleProfile`, so the unscoped shell and editor use their New York compatibility baseline. Tab into the editor and use the demo's disabled toggle to inspect the projected `focusVisible` and `disabled` facts. The toggle and fact readout belong to the example; the shell adds neither an action nor search execution.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-shell"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## Public imports and parts
+
+```ts
+import {
+  inputShell,
+  inputShellControl,
+  bindInputShellControl,
+  INPUT_SHELL_PROJECTED_STYLES,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+import type {
+  InputShellProps,
+  InputShellControlProps,
+  InputShellControlExposes,
+  InputShellOwner,
+  InputShellTarget,
+  InputShellControlInstance,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+```
+
+These names are also exported by the package root. Use the source-built workspace package and a matching Adapter; this page does not prescribe an `@latest` CLI install target for these helpers.
+
+| Entry | Responsibility |
+| --- | --- |
+| `inputShell` (`shadcn-input-shell`) | Roleless, non-focusable Root with one content slot. It creates no editor, keyboard handler or independent interaction state. |
+| `inputShellControl` (`shadcn-input-shell-control`) | Ordinary single-line editor derived through `asInputRoot`. Its renderer returns `null`; the host provides the one physical editing surface. |
+| `bindInputShellControl(owner, target, control)` | Projects only the real control's public `focusVisible` and `disabled` facts into the shell, with explicit view lifetime. |
+
+Exactly one inline editor is a caller obligation, not runtime child-count enforcement. The shell does not discover a control through DOM queries or arbitrate between multiple controls.
+
+## Compose an ordinary input
+
+The Web Component example below uses real Adapter instances as binding identities. Run it in a browser with a connected `host`, after loading the matching generated Proto UI styles and the consumer's theme. Call the returned cleanup when that view retires.
+
+An outer [Style Scope](/en/ui-libraries/shadcn/style-scope/) keeps the shell and editor on the same profile. A `styleProfile` set directly on `inputShell` selects only the shell's paint: the shell does not publish a public style scope for its child. Use an enclosing scope, or explicitly configure both parts.
+
+```ts
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import {
+  inputShell,
+  inputShellControl,
+  bindInputShellControl,
+  type InputShellProps,
+  type InputShellOwner,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+
+const Scope = AdaptToWebComponent(styleScope);
+const Shell = AdaptToWebComponent(inputShell);
+const Control = AdaptToWebComponent(inputShellControl);
+
+export function mountTitleInput(host: HTMLElement) {
+  const scope = new Scope();
+  const shell = new Shell();
+  const control = new Control();
+  const shellProps: InputShellProps = {
+    styleProfile: 'inherit',
+    focusIndicator: 'ring',
+  };
+
+  setElementProps(scope, { styleProfile: 'rhea' });
+  setElementProps(shell, shellProps);
+  setElementProps(control, {
+    ariaLabel: 'Note title',
+    placeholder: 'Untitled note',
+    defaultValue: '',
+  });
+  shell.append(control);
+  scope.append(shell);
+  host.append(scope);
+
+  let current = true;
+  const disposers = new Set<() => void>();
+  const owner: InputShellOwner = {
+    isCurrent: () => current,
+    onDispose(dispose) {
+      disposers.add(dispose);
+      return () => {
+        disposers.delete(dispose);
+      };
+    },
+  };
+
+  bindInputShellControl(
+    owner,
+    {
+      instance: shell,
+      setFacts(facts) {
+        setElementProps(shell, { ...shellProps, ...facts });
+      },
+    },
+    control
+  );
+
+  return () => {
+    if (!current) return;
+    current = false;
+    try {
+      for (const dispose of [...disposers]) dispose();
+    } finally {
+      disposers.clear();
+      scope.remove();
+    }
+  };
+}
+```
+
+`setElementProps` replaces the authored prop set, so `setFacts` merges the two facts with `shellProps` on every write. This retains `styleProfile` and `focusIndicator`. Framework integrations must preserve the same distinction even when their own prop API merges patches.
+
+Set `disabled` and `readOnly` on the **control**. Setting the shell's passive `disabled` input cannot disable the editor. Put accessible naming and description on the control as well; a label on the shell is not an editor label.
+
+## Props and inherited editor API
+
+| Shell prop       | Type                          | Default   |
+| ---------------- | ----------------------------- | --------- |
+| `styleProfile`   | `ShadcnStyleChoice`           | `inherit` |
+| `focusVisible`   | boolean fact from the control | `false`   |
+| `disabled`       | boolean fact from the control | `false`   |
+| `focusIndicator` | `ring` or `none`              | `ring`    |
+
+`InputShellControlProps` is `InputRootProps & ShadcnStyleProps`; `InputShellControlExposes` is `InputRootExposes`. The shell introduces no value prop or value event. The editor retains the [Base Input](/en/ui-libraries/base/input/) protocol:
+
+- `value` selects controlled ownership; `defaultValue` initializes the uncontrolled value. Editing and IME normalization remain Base Input responsibilities.
+- Live text props include `placeholder`, `required`, `name`, `autoComplete`, `minLength`, `maxLength`, `inputMode` and `enterKeyHint`. Naming uses `ariaLabel`, `labelledBy` and `describedBy`.
+- Public facts include `value`, `disabled`, `readOnly`, `focused`, `focusVisible` and `composing`. Methods remain `focusSelf` and `blurSelf`.
+- Events remain `valueChange`, `change`, `compositionStart`, `compositionUpdate` and `compositionEnd`. The binder does not intercept or replace them.
+
+The current Web editor remains one host-owned `input[type="text"]`. The shell adds no arbitrary native `type`, validation state, Form submission workflow, selection API or second editor. An independent Label association, when used, belongs to the control's protocol; the shell adds no ControlLabel pairing. The separate [standalone Shadcn Input](/en/ui-libraries/shadcn/input/) keeps its own visual recipe and does not require this shell.
+
+## Profiles and recipes
+
+Both parts default to `inherit`: explicit local choice wins, then the nearest shared scope, then `new-york-v4`. `new-york` normalizes to `new-york-v4`; switching back to `inherit` withdraws an explicit override. A profile update must preserve the editor node, value, selection and focus.
+
+The **defined draft recipe boundary is New York and Rhea**:
+
+| Recipe | Outer shell | Ordinary inner editor |
+| --- | --- | --- |
+| `new-york-v4` / `new-york` | `h-9`, `rounded-md`, `border-input`, `shadow-xs`, color/box-shadow transition; `bg-input/30` in dark mode. Keyboard focus uses `border-ring ring-3 ring-ring/50`. | `h-9`, `px-3 py-1`; no inner border, radius, shadow or ring. |
+| `rhea` | `h-8`, theme `radius-2xl`, transparent resting border, `bg-input/50`, 200ms color/box-shadow transition. Keyboard focus uses `border-ring ring-3 ring-ring/30`. | `h-8`, `px-2.5 py-1`; the same transparent, borderless inner surface. |
+
+For those two recipes the editor uses base text, switching to small text at `viewport.width >= 768`. Selection uses primary/primary-foreground and placeholder paint uses muted-foreground. Disabled opacity belongs to the editor, so the shell does not dim it a second time. These are recipe facts, not fixed pixel measurements independent of theme, font or host.
+
+There is a current source/definition gap: `INPUT_SHELL_PROJECTED_STYLES` exports all nine `SHADCN_STYLE_IDS`, and `visual.ts` contains additional Vega, Nova, Maia, Lyra, Mira, Luma and Sera branches. The two draft prototype definitions still restrict the family to New York/Rhea and require other known profiles to fail. Those additional source branches are not a reconciled support guarantee; the examples here stay within the defined two-profile boundary. Unknown IDs are rejected by shared style normalization. The exported list is not an acceptance matrix.
+
+## Compose with Command
+
+Command uses its existing `commandInput` instead of `inputShellControl`. Keep Command Content beside the input region under Command Root; put the one-editor shell inside the optional public `commandInputWrapper`. Bind the actual Command Input's public facts through the same helper and use `focusIndicator: 'none'`. Ordinary Input uses `ring`.
+
+The private grouped-paint context lets Command Input withdraw its standalone border/ring. It is not a public Context key or an InstanceAssociations protocol. An explicitly opted-in Command menu InputWrapper can own the border, inset and a passive glyph outside the shell; the enclosed shell then remains transparent single-editor containment without a second border or inset. This does not add Input Shell addons or click-to-focus behavior. Query, filtering, navigation, active descendant, IME and execution stay with Base Command and the application. See [Command](/en/ui-libraries/shadcn/command/) for that protocol.
+
+## Binding lifetime and isolation
+
+Call the binder only after the real public instances exist. `target.instance` must be the actual passive shell instance and `control` must be the actual public control instance, not a new wrapper identity. The control must expose boolean `focusVisible` and `disabled` facts with public `get()` and `subscribe()` methods; missing or malformed facts are errors.
+
+The owner provides `isCurrent()` and `onDispose(dispose)`, whose return value unregisters that callback. There can be at most one active binding per real shell or control. The returned handle provides `sync()`, `replace(nextControl)` and idempotent `dispose()`. Replacement detaches the previous source; an invalid or duplicate replacement retires the binding. Disposal attempts every unsubscribe, invalidates stale callbacks and prevents later writes. A terminal public StateEvent `disconnect` retires the current source without rereading unavailable facts; a previous source's disconnect cannot retire a replacement. Repeatable view detach is not itself that terminal event. Retire the binding with the view and never reuse a destroyed target through its old owner.
+
+Profile selection and fact binding operate through public Props, Context and Exposes. They do not infer state from DOM ancestry or maintain a second editor state store. The family owns its presentation tokens; the consumer still owns theme variables, fonts, outer layout and explicit surface overrides. Load the matching generated style artifact rather than repairing the component with page selectors or a global reset.
+
+## Limits and evidence
+
+The reference is the MIT-attributed [shadcn/ui revision `3d98900e`](https://github.com/shadcn-ui/ui/tree/3d98900e9b73c45f035f8109e9d41ba6a51685e7), including its Command/InputGroup sources and Rhea style. This is an independent, bounded Proto UI projection. Addons, addon-click focus, nested-button exclusions, invalid aggregation, multiple controls, textarea/block alignment, InputGroupButton and full InputGroup/cmdk parity are outside its definition.
+
+`T-SHADCN-INPUT-SHELL-0001` distinguishes binder tests, selected real-consumer flows, native measurements and catalog coverage from missing complete direct-boundary and inherited-editor conformance. Existing fixtures and historical captures do not establish fresh candidate acceptance, full Base Input coverage, non-Web support or browser UI zoom behavior. The preview references the existing authored composition; its presence does not establish that those acceptance requirements have passed.
+
+## References
+
+The draft definitions below govern this page. The public implementation is `packages/prototypes/shadcn/src/input-shell/`; composition rationale is retained in `internal/contracts/command/shadcn-input-shell.presentation.v0.md`.
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-SHADCN-INPUT-SHELL.yaml',
+    'P-SHADCN-INPUT-SHELL-CONTROL.yaml',
+    'P-BASE-INPUT.yaml',
+    'P-SHADCN-STYLE-SCOPE.yaml',
+  ]}
+/>
+
+<SpecEntityLinks directory="spec/tests" files={['T-SHADCN-INPUT-SHELL-0001.yaml']} />
+
+<SpecEntityLinks directory="spec/contracts" files={['C-PROTOTYPE-STYLE-CLOSURE-0001.yaml']} />

@@ -4,7 +4,7 @@ title: Bootstrap Tabs draft projection coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Historical nav recipe reconciliation and passive Indicator facts.
 cases:
   - id: T-BOOTSTRAP-2-3-2-TABS-0001-CASE-RECIPE
@@ -24,6 +24,9 @@ implementations:
     status: planned
     path: packages/prototypes/bootstrap-2-3-2/test/tabs-draft-projection.test.ts
     required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-TABS-0001-CASE-RECIPE
+      - T-BOOTSTRAP-2-3-2-TABS-0001-CASE-INDICATOR
     exercises:
       - P-BOOTSTRAP-2-3-2-TABS
       - P-BOOTSTRAP-2-3-2-TABS-LIST

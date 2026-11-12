@@ -4,7 +4,7 @@ title: Shadcn editor and form policy profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Input, Textarea, Field, Fieldset, Form, Input OTP and Number Field nine-profile consumer coverage.
 cases:
   - id: T-SHADCN-EDITOR-PROFILES-0001-CASE-EDITORS
@@ -28,6 +28,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/editor-profile-consumers-r90.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-EDITOR-PROFILES-0001-CASE-EDITORS
     exercises:
       - P-SHADCN-INPUT
       - P-SHADCN-TEXTAREA
@@ -39,6 +41,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/form-policy-profile-consumers-r90.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-EDITOR-PROFILES-0001-CASE-POLICY
     exercises:
       - P-SHADCN-FIELD
       - P-SHADCN-FIELDSET
@@ -50,6 +54,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/numeric-profile-consumers-r90.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-EDITOR-PROFILES-0001-CASE-EDITORS
     exercises:
       - P-SHADCN-INPUT-OTP
       - P-SHADCN-NUMBER-FIELD

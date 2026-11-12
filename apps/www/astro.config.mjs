@@ -388,6 +388,18 @@ export default defineConfig({
               translations: { en: 'Base', 'zh-CN': 'Base' },
               items: [
                 {
+                  label: 'Text',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/base/text',
+                },
+                {
+                  label: 'Surface',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Surface', 'zh-CN': 'Surface' },
+                  slug: 'ui-libraries/base/surface',
+                },
+                {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/base/button',
@@ -412,6 +424,12 @@ export default defineConfig({
                   badge: earlyDraftBadge,
                   translations: { en: 'Collapsible', 'zh-CN': 'Collapsible' },
                   slug: 'ui-libraries/base/collapsible',
+                },
+                {
+                  label: 'Accordion',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Accordion', 'zh-CN': 'Accordion' },
+                  slug: 'ui-libraries/base/accordion',
                 },
                 {
                   label: 'Hover Card',
@@ -983,6 +1001,42 @@ export default defineConfig({
                   translations: { en: 'Transition', 'zh-CN': 'Transition' },
                   slug: 'ui-libraries/shadcn/transition',
                 },
+                {
+                  label: 'Text',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/shadcn/text',
+                },
+                {
+                  label: 'Surface',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Surface', 'zh-CN': 'Surface' },
+                  slug: 'ui-libraries/shadcn/surface',
+                },
+                {
+                  label: 'Collapsible',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Collapsible', 'zh-CN': 'Collapsible' },
+                  slug: 'ui-libraries/shadcn/collapsible',
+                },
+                {
+                  label: 'Accordion',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Accordion', 'zh-CN': 'Accordion' },
+                  slug: 'ui-libraries/shadcn/accordion',
+                },
+                {
+                  label: 'Style Scope',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Style Scope', 'zh-CN': 'Style Scope' },
+                  slug: 'ui-libraries/shadcn/style-scope',
+                },
+                {
+                  label: 'Input Shell',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Input Shell', 'zh-CN': 'Input Shell' },
+                  slug: 'ui-libraries/shadcn/input-shell',
+                },
               ],
             },
             {
@@ -1315,6 +1369,36 @@ export default defineConfig({
                   badge: earlyDraftBadge,
                   translations: { en: 'Transition', 'zh-CN': 'Transition' },
                   slug: 'ui-libraries/brutalist/components/transition',
+                },
+                {
+                  label: 'Text',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/brutalist/components/text',
+                },
+                {
+                  label: 'Surface',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Surface', 'zh-CN': 'Surface' },
+                  slug: 'ui-libraries/brutalist/components/surface',
+                },
+                {
+                  label: 'Spinner',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Spinner', 'zh-CN': 'Spinner' },
+                  slug: 'ui-libraries/brutalist/components/spinner',
+                },
+                {
+                  label: 'Collapsible',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Collapsible', 'zh-CN': 'Collapsible' },
+                  slug: 'ui-libraries/brutalist/components/collapsible',
+                },
+                {
+                  label: 'Accordion',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Accordion', 'zh-CN': 'Accordion' },
+                  slug: 'ui-libraries/brutalist/accordion',
                 },
               ],
             },

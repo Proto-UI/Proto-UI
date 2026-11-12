@@ -1177,6 +1177,7 @@ function writeMatrix(
     '| Interactive or integration source | Owning matrix row | Source SHA-256 |',
     '| --- | --- | --- |',
     `| \`apps/www/src/components/override/Header.astro\` | \`www.shell.primary-nav\`, \`www.shell.header-separators\` | \`${sourceScanDigest(root, 'apps/www/src/components/override/Header.astro')}\` |`,
+    `| \`apps/www/src/components/LucideIconGallery.astro\` | \`www.gallery.lucide-card-grid\`, \`www.gallery.prototype-library-cards\` | \`${sourceScanDigest(root, 'apps/www/src/components/LucideIconGallery.astro')}\` |`,
   ].join('\n');
   const absolutePath = path.join(root, config.relativePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
@@ -1314,6 +1315,10 @@ function writeValidMatrices(
     [
       'apps/www/src/components/override/Header.astro',
       ['www.shell.primary-nav', 'www.shell.header-separators'],
+    ],
+    [
+      'apps/www/src/components/LucideIconGallery.astro',
+      ['www.gallery.lucide-card-grid', 'www.gallery.prototype-library-cards'],
     ],
     ...websiteBindings,
   ];

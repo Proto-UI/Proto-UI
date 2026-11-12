@@ -32,6 +32,10 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/draft-passive-projections.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-REGIONS
+      - T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-TABLE
+      - T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-IMAGE-TRANSITION
     exercises:
       - P-LIQUID-GLASS-ASYNC-REGION
       - P-LIQUID-GLASS-LIVE-REGION
