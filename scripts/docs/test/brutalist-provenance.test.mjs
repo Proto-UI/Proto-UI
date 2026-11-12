@@ -7,8 +7,8 @@ const pin = '3306a802724874a85f93079702b2795370a279d4';
 
 for (const path of [
   'packages/prototypes/brutalist/README.md',
-  'apps/www/src/content/docs/en/ui-libraries/brutalist/index.mdx',
-  'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/index.mdx',
+  'apps/www/src/content/docs/en/ui-libraries/brutalist/design-contract.mdx',
+  'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/design-contract.mdx',
   'internal/governance/package-surface-map.md',
   'internal/governance/package-surface-map.zh-CN.md',
 ]) {

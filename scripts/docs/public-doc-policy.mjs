@@ -21,20 +21,17 @@ export const publicDocPolicy = {
     markers: ['写作提示', 'Coming soon'],
     exceptions: [],
   },
-  overviewInventory: 'apps/www/src/components/PrototypeLibraryOverview.astro',
   libraries: [
     {
       id: 'base',
       packageName: '@proto.ui/prototypes-base',
-      overviewSlug: 'ui-libraries/base',
       detailPrefix: 'ui-libraries/base',
       catalogPrefix: 'P-BASE-',
       familyAliases: { dropdown: 'dropdown-menu' },
       exportClassifications: {
         '.': {
           kind: 'library-root',
-          reason:
-            'The root export aggregates the library and is represented by the overview route.',
+          reason: 'The root export aggregates the documented component families.',
         },
         './behaviors': {
           kind: 'non-component',
@@ -54,15 +51,13 @@ export const publicDocPolicy = {
     {
       id: 'shadcn',
       packageName: '@proto.ui/prototypes-shadcn',
-      overviewSlug: 'ui-libraries/shadcn',
       detailPrefix: 'ui-libraries/shadcn',
       catalogPrefix: 'P-SHADCN-',
       familyAliases: { dropdown: 'dropdown-menu' },
       exportClassifications: {
         '.': {
           kind: 'library-root',
-          reason:
-            'The root export aggregates the library and is represented by the overview route.',
+          reason: 'The root export aggregates the documented component families.',
         },
         './component-presets': {
           kind: 'non-component',
@@ -73,15 +68,13 @@ export const publicDocPolicy = {
     {
       id: 'brutalist',
       packageName: '@proto.ui/prototypes-brutalist',
-      overviewSlug: 'ui-libraries/brutalist',
       detailPrefix: 'ui-libraries/brutalist/components',
       catalogPrefix: 'P-BRUTALIST-',
       familyAliases: { dropdown: 'dropdown-menu' },
       exportClassifications: {
         '.': {
           kind: 'library-root',
-          reason:
-            'The root export aggregates the library and is represented by the overview route.',
+          reason: 'The root export aggregates the documented component families.',
         },
         './theme': {
           kind: 'non-component',

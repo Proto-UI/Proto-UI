@@ -23,8 +23,7 @@ const inventory = (catalog) =>
     libraries: [library],
     manifests: new Map([[library.packageName, { exports }]]),
     catalog,
-    overviewEntries: new Map([['base', []]]),
-    sidebarSlugs: [library.overviewSlug],
+    sidebarSlugs: [],
   });
 
 test('the Web materializer is excluded without exempting Virtual List or other components', async () => {
@@ -44,10 +43,9 @@ test('the Web materializer is excluded without exempting Virtual List or other c
   assert.match(errors[1], /\.\/button: unclassified family\/export.*P-BASE-BUTTON\./);
 });
 
-test('a cataloged Virtual List still requires its overview and sidebar projections', () => {
+test('a cataloged Virtual List still requires its sidebar detail route', () => {
   const errors = inventory([{ id: 'P-BASE-VIRTUAL-LIST', since: '0.2.0', status: 'draft' }]);
-  assert.equal(errors.length, 3);
-  assert.match(errors[0], /\.\/virtual-list:.*absent from the base overview inventory/);
-  assert.match(errors[1], /\.\/virtual-list:.*absent from primary sidebar slug/);
-  assert.match(errors[2], /\.\/button: unclassified family\/export.*P-BASE-BUTTON\./);
+  assert.equal(errors.length, 2);
+  assert.match(errors[0], /\.\/virtual-list:.*absent from primary sidebar slug/);
+  assert.match(errors[1], /\.\/button: unclassified family\/export.*P-BASE-BUTTON\./);
 });

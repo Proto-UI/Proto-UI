@@ -208,7 +208,7 @@ function plannedStates(family: string): string[] {
     states.push(`${target.state}-and-pointer-held`);
   if (family === 'tooltip') states.push('hover-open', 'focus-open');
   if (family === 'hover-card') states.push('hover-open', 'focus-open');
-  if (['dropdown-menu', 'select', 'dialog'].includes(family)) states.push('open');
+  if (['dropdown-menu', 'select', 'dialog', 'popover'].includes(family)) states.push('open');
   if (['dropdown-menu', 'select'].includes(family))
     states.push('item-focus-first', 'item-focus-last');
   if (family === 'dropdown-menu')
@@ -632,6 +632,11 @@ async function capture(
     }
     const after = await fingerprint(page);
     frame.afterFingerprintDigest = digest(after);
+    const fingerprintsJSON =
+      JSON.stringify({ before, facts: stateFingerprint, after }, null, 2) + '\n';
+    const fingerprintsPath = `${name}.fingerprints.json`;
+    await writeFile(join(output, fingerprintsPath), fingerprintsJSON, { flag: 'wx' });
+    frame.fingerprintsFile = { path: fingerprintsPath, digest: digest(fingerprintsJSON) };
     const projectionAfter = await projectionObservation(page, item);
     frame.projectionAfter = projectionAfter;
     const anatomyAfter = passiveFamilies.has(item.family)
@@ -682,7 +687,11 @@ async function capture(
     if (!(frame.targetObservation as Observation).achieved)
       throw new Error(`Requested target predicate not achieved: ${state}.`);
     if (physicalTarget && !(frame.primaryPaint as Observation).achieved) {
-      const known = classifyKnownUnsupportedContrastFrame(item, frame);
+      const known = classifyKnownUnsupportedContrastFrame(item, frame, {
+        image: png,
+        facts: factsJSON,
+        fingerprints: fingerprintsJSON,
+      });
       if (!known)
         throw new Error('Interactive family primary target is not supported painted content.');
       frame.status = 'known-unsupported';
@@ -734,6 +743,7 @@ function primary(previewer: Locator, family: string): Locator | null {
       'dropdown-menu': '[data-projection-prototype="brutalist-dropdown-trigger"][data-pui-root]',
       select: '[data-projection-prototype="brutalist-select-trigger"][data-pui-root]',
       dialog: '[data-projection-prototype="brutalist-dialog-trigger"][data-pui-root]',
+      popover: '[data-projection-prototype="brutalist-popover-trigger"][data-pui-root]',
       'hover-card': '[data-projection-prototype="brutalist-hover-card-trigger"][data-pui-root]',
       textarea: 'textarea',
       'scroll-area': '[data-demo-ref="scrollViewport"]',
@@ -2513,6 +2523,24 @@ try {
             closedBaseline: baseline,
             sameLease,
             input: 'Native Shift+Tab after native Tab closed the seeded trigger; pointer outside.',
+          };
+        });
+      }
+      if (family === 'popover') {
+        await target.press('Enter');
+        const content = await owned(page, 'brutalist-popover-content');
+        await content.waitFor({ state: 'visible' });
+        await settle(page);
+        await capture(page, item, 'open', async () => {
+          const portal = await targetObservation(content);
+          const id = await content.getAttribute('id');
+          return {
+            achieved:
+              portal.achieved &&
+              !!id &&
+              (await target.getAttribute('aria-controls')) === id &&
+              (await target.getAttribute('aria-expanded')) === 'true',
+            portal,
           };
         });
       }

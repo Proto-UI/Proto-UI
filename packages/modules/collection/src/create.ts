@@ -110,14 +110,13 @@ class CollectionModuleImpl extends ModuleBase {
     const config = this.itemConfig;
     if (!config) return DEFAULT_POSITION;
 
-    const index = this.anatomy.order.indexOfSelf(config.family as AnatomyFamily, config.role, {
-      missing: 'null',
-    });
     const parts = this.anatomy.order.partsOf(config.family as AnatomyFamily, config.role, {
       missing: 'null',
     });
-    if (index == null || parts == null) return DEFAULT_POSITION;
+    if (parts == null) return DEFAULT_POSITION;
 
+    const self = this.anatomy.resolveSelfInstance();
+    const index = parts.findIndex((part) => this.anatomy.resolvePartInstance(part) === self);
     const total = parts.length;
     return {
       index,

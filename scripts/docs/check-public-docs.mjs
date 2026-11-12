@@ -281,7 +281,6 @@ export function checkLibraryInventory({
   libraries,
   manifests,
   catalog,
-  overviewEntries,
   sidebarSlugs,
 }) {
   const errors = [];
@@ -302,7 +301,7 @@ export function checkLibraryInventory({
       );
       continue;
     }
-    if (!sidebar.has(library.overviewSlug)) {
+    if (library.overviewSlug && !sidebar.has(library.overviewSlug)) {
       errors.push(
         `${library.packageName}: overview route ${library.overviewSlug} is missing from the primary sidebar.`
       );
@@ -340,23 +339,7 @@ export function checkLibraryInventory({
         continue;
       }
       if (!entityAvailableInRelease(entity, releaseVersion)) continue;
-      const entries = overviewEntries.get(library.id) ?? [];
-      const overviewEntry = entries.find((entry) => entry.id === family);
-      if (!overviewEntry) {
-        errors.push(
-          `${library.packageName} ${exportName}: released family ${family} (${catalogId}) is absent from the ${library.id} overview inventory in apps/www/src/components/PrototypeLibraryOverview.astro.`
-        );
-      }
       const expectedSlug = `${library.detailPrefix}/${family}`;
-      if (overviewEntry) {
-        const relativeDetail = path.posix.relative(`${library.overviewSlug}/`, `${expectedSlug}/`);
-        const expectedHref = `./${relativeDetail}${relativeDetail.endsWith('/') ? '' : '/'}`;
-        if (overviewEntry.href !== expectedHref) {
-          errors.push(
-            `${library.packageName} ${exportName}: overview entry ${family} links to ${overviewEntry.href ?? 'no href'}, expected localized relative href ${expectedHref} for ${expectedSlug}.`
-          );
-        }
-      }
       if (!sidebar.has(expectedSlug)) {
         errors.push(
           `${library.packageName} ${exportName}: released family ${family} (${catalogId}) is absent from primary sidebar slug ${expectedSlug}.`
@@ -498,11 +481,6 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
     })
   );
 
-  const overviewPath = path.join(root, policy.overviewInventory);
-  const overviewEntries = extractOverviewEntries(
-    await fs.readFile(overviewPath, 'utf8'),
-    policy.overviewInventory
-  );
   errors.push(
     ...checkLibraryInventory({
       releaseVersion: releaseTruth.stable.release.version,
@@ -510,7 +488,6 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
       libraries: policy.libraries,
       manifests: await loadLibraryManifests(root, releaseTruth.bom, policy.libraries),
       catalog: await loadCatalog(root),
-      overviewEntries,
       sidebarSlugs,
     })
   );
