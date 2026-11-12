@@ -1,6 +1,8 @@
+import { spawnSync } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -144,6 +146,167 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).toContain('data-[outer-flag]:opacity-50');
     expect(tokens).toContain('data-[outer-flag]:bg-primary');
     expect(tokens).not.toContain('data-[caller-flag]:bg-primary');
+  });
+
+  it('delivers conditional CSS after a closed finite mutual callback graph', async () => {
+    const entry = path.join(dir, 'entry.proto.ts');
+    const tasks = Array.from(
+      { length: 12 },
+      (_, index) => `
+      function task${index}() {
+        if (visited.has(${index})) return;
+        visited.add(${index});
+        ${Array.from({ length: 12 }, (_, next) => `task${next}();`).join('\n')}
+      }
+    `
+    ).join('\n');
+    await writeFile(
+      entry,
+      `
+      import { definePrototype, tw } from '@proto.ui/core';
+      export function traverse() {
+        const visited = new Set();
+        ${tasks}
+        task0();
+        return visited.size;
+      }
+      definePrototype({ name: 'graph-consumer', setup(def) {
+        const first = def.state.bool('firstFlag', false);
+        const second = def.state.bool('secondFlag', false);
+        def.expose.state('firstPublic', first);
+        def.expose.state('secondPublic', second);
+        paint(first, 'opacity-50');
+        paint(second, 'opacity-100');
+        function paint(handle, token) {
+          def.rule({ when: w => w.state(handle).eq(true),
+            intent: i => i.feedback.style.use(tw(token)) });
+        }
+      }});
+    `
+    );
+    const root = process.cwd();
+    const collector = pathToFileURL(
+      path.join(root, 'packages/cli/src/services/prototype-style-tokens.ts')
+    ).href;
+    const renderer = pathToFileURL(
+      path.join(root, 'packages/cli/src/services/proto-style-css.ts')
+    ).href;
+    // The old path enumeration must fail inside its own process rather than
+    // blocking the test runner. This is a termination bound, not a benchmark.
+    const child = spawnSync(
+      process.execPath,
+      [
+        '--import',
+        'tsx',
+        '--input-type=module',
+        '--eval',
+        `
+      import { collectProtoStyleTokensFromFiles } from ${JSON.stringify(collector)};
+      import { renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss } from ${JSON.stringify(renderer)};
+      const tokens = await collectProtoStyleTokensFromFiles([${JSON.stringify(entry)}]);
+      console.log(JSON.stringify({ tokens,
+        documentCss: renderProtoStyleTokenCss(tokens),
+        shadowCss: renderProtoShadowStyleTokenCss(tokens) }));
+    `,
+      ],
+      { cwd: root, encoding: 'utf8', timeout: 30_000, killSignal: 'SIGKILL' }
+    );
+    expect(child.error, child.stderr).toBeUndefined();
+    expect(child.status, `${child.stdout}\n${child.stderr}`).toBe(0);
+    const result = JSON.parse(child.stdout);
+    expect(result.tokens).toEqual([
+      'data-[first-flag]:opacity-50',
+      'data-[second-flag]:opacity-100',
+      'opacity-100',
+      'opacity-50',
+    ]);
+    for (const css of [result.documentCss, result.shadowCss]) {
+      expect(css).toContain('[data-pui-style~="data-[first-flag]:opacity-50"]');
+      expect(css).toContain('[data-pui-style~="data-[second-flag]:opacity-100"]');
+      expect(css).toContain('opacity: 0.5;');
+      expect(css).toContain('opacity: 1;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+    }
+  }, 40_000);
+
+  it('replays style-free forwarding regions for distinct callback and State arguments', async () => {
+    await writeFile(
+      path.join(dir, 'forward.ts'),
+      `
+      export function forward(writer, target, handle, token) {
+        const retained = writer;
+        writer = undefined;
+        function relay() { retained(target, handle, token); }
+        relay();
+      }
+    `
+    );
+    const entry = path.join(dir, 'entry.proto.ts');
+    await writeFile(
+      entry,
+      `
+      import { definePrototype, tw } from '@proto.ui/core';
+      import { forward } from './forward';
+      definePrototype({ name: 'callback-consumer', setup(def) {
+        const first = def.state.bool('firstFlag', false);
+        const second = def.state.bool('secondFlag', false);
+        def.expose.state('firstPublic', first);
+        def.expose.state('secondPublic', second);
+        forward(paint, def, first, 'opacity-50');
+        forward(paint, def, second, 'opacity-100');
+        forward(unknown, def, first, 'opacity-0');
+        function paint(target, handle, token) {
+          target.rule({ when: w => w.state(handle).eq(true),
+            intent: i => i.feedback.style.use(tw(token)) });
+        }
+      }});
+    `
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).toEqual([
+      'data-[first-flag]:opacity-50',
+      'data-[second-flag]:opacity-100',
+      'opacity-100',
+      'opacity-50',
+    ]);
+  });
+
+  it('retains borrowed-container writes and external captures across later graph replacements', async () => {
+    await writeFile(
+      path.join(dir, 'replace.ts'),
+      `
+      export function replace(target, token) {
+        const retained = target;
+        target = undefined;
+        function write() { retained.root = token; }
+        write();
+      }
+    `
+    );
+    const entry = path.join(dir, 'entry.ts');
+    await writeFile(
+      entry,
+      `
+      import { replace } from './replace';
+      let captured = 'm-2';
+      function changeCapture() { captured = 'm-4'; }
+      changeCapture();
+      tw(captured);
+      const table = { root: 'p-2' };
+      replace(table, 'p-4');
+      tw(table.root);
+      table.root = 'p-6';
+      replace(table, 'p-8');
+      tw(table.root);
+    `
+    );
+    expect(await collectProtoStyleTokensFromFiles([entry])).toEqual([
+      'm-2',
+      'm-4',
+      'p-2',
+      'p-4',
+      'p-6',
+      'p-8',
+    ]);
   });
 
   it.each([
@@ -299,13 +462,16 @@ describe('collectProtoStyleTokens', () => {
   it.each(['', ' as const', ' as const satisfies Readonly<Record<string, string>>'])(
     'collects finite string-map choices through erased type syntax %s',
     async (annotation) => {
-      await writeFile(path.join(dir, 'paint.ts'), `
+      await writeFile(
+        path.join(dir, 'paint.ts'),
+        `
         import { tw } from '@proto.ui/core';
         const masks = { rest: 'bg-black/50', dark: 'bg-black/80' }${annotation};
         export function paint() {
           for (const profile of ['rest', 'dark'] as const) tw(masks[profile]);
         }
-      `);
+      `
+      );
       expect(await collectProtoStyleTokens(dir)).toEqual(['bg-black/50', 'bg-black/80']);
     }
   );
