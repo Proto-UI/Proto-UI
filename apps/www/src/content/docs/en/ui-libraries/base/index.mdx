@@ -1,0 +1,38 @@
+---
+title: 'Base'
+description: 'Choose a portable interaction protocol, then read its anatomy, inputs and Web host example.'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+Base provides interaction protocols without a visual language. Start with the family that owns the action or value you need, then compose its documented parts. Shadcn and Brutalist project these protocols into a visual language.
+
+## Install and render
+
+For the published 0.2.0 Web Component baseline, initialize an existing bundler application and add Button:
+
+```sh
+npx @proto.ui/cli@0.2.0 init
+npx @proto.ui/cli@0.2.0 add wc base-button
+```
+
+The equivalent pnpm invocation is:
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init
+pnpm dlx @proto.ui/cli@0.2.0 add wc base-button
+```
+
+The CLI installs `@proto.ui/prototypes-base` and the chosen Adapter at its own exact version. Import the generated style entry and host facade as shown in [Quick Start](/en/start-here/quick-start/), then use the complete [Button example](./button/). React and Vue 3 use `react` and `vue` in place of `wc`. Vue 2.6 belongs to the workspace 0.3 line; these stable commands do not install it.
+
+## Find a protocol
+
+This is the current workspace export index. A linked family page documents its compound parts together. Read that page's API, lifecycle and host limits; a source export or a Preview selector does not establish a tested package or host combination. Newer workspace exports are not added retroactively to the 0.2.0 package.
+
+<PrototypeDocumentationIndex library="base" />
+
+## Delivery and evidence
+
+The website previews use this repository's source. The stable npm baseline and the current workspace can differ. Base protocol entities remain subject to their recorded lifecycle; publication alone does not activate a draft protocol.
+
+[Documentation coverage and historical evidence](/en/build/prototypes/documentation-coverage/) explains the distinction between a family, its parts, an export and a generated facade. The original acceptance conditions remain tracked in [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042).

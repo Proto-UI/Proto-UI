@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import baseManifest from '../../../../packages/prototypes/base/package.json';
+import shadcnManifest from '../../../../packages/prototypes/shadcn/package.json';
+import brutalistManifest from '../../../../packages/prototypes/brutalist/package.json';
+import { publicDocPolicy } from '../../../../scripts/docs/public-doc-policy.mjs';
+
+interface Props {
+  library: 'base' | 'shadcn' | 'brutalist';
+}
+
+const { library } = Astro.props;
+const locale = Astro.url.pathname.startsWith('/zh-cn/') ? 'zh-cn' : 'en';
+const zh = locale === 'zh-cn';
+const manifests = { base: baseManifest, shadcn: shadcnManifest, brutalist: brutalistManifest };
+const policy = publicDocPolicy.libraries.find((entry) => entry.id === library);
+if (!policy?.detailPrefix) {
+  throw new Error(`[PrototypeDocumentationIndex] Missing detail-route policy for ${library}.`);
+}
+const aliases: Readonly<Record<string, string>> = policy.familyAliases ?? {};
+const classifications: Readonly<Partial<Record<string, { kind: string; reason: string }>>> =
+  policy.exportClassifications ?? {};
+const libraryPrefix = `ui-libraries/${library}`;
+const documents = await getCollection('docs', ({ id }) =>
+  id.startsWith(`${locale}/${libraryPrefix}/`)
+);
+const documentsById = new Map(documents.map((entry) => [entry.id, entry]));
+
+// Package exports select the families; the existing collection supplies actual
+// localized titles and routes. This reader projection is not a second catalog.
+const entries = Object.keys(manifests[library].exports)
+  .filter((exportName) => !classifications[exportName])
+  .sort()
+  .map((exportName) => {
+    if (!exportName.startsWith('./') || exportName.includes('*')) {
+      throw new Error(
+        `[PrototypeDocumentationIndex] Unclassified export ${policy.packageName} ${exportName}.`
+      );
+    }
+    const subpath = exportName.slice(2);
+    const family = aliases[subpath] ?? subpath;
+    // Most Brutalist guides live under components; existing direct family
+    // guides, including Accordion, retain their own authored route.
+    const document =
+      documentsById.get(`${locale}/${policy.detailPrefix}/${family}`) ??
+      documentsById.get(`${locale}/${libraryPrefix}/${family}`);
+    const catalogId = `${policy.catalogPrefix}${family.toUpperCase().replace(/[^A-Z0-9]+/g, '-')}`;
+    return {
+      label:
+        document?.data.title ??
+        family
+          .split('-')
+          .map((word) => word[0].toUpperCase() + word.slice(1))
+          .join(' '),
+      href: document
+        ? `/${document.id}/`
+        : `https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/${catalogId}.yaml`,
+      sourceOnly: !document,
+    };
+  });
+---
+
+<ul>
+  {
+    entries.map((entry) => (
+      <li>
+        <a href={entry.href}>{entry.label}</a>
+        {entry.sourceOnly && (
+          <span>
+            {' '}
+            —{' '}
+            {zh
+              ? '工作区协议定义；公开 Usage 与宿主证据仍未闭合'
+              : 'workspace protocol; public Usage and host evidence remain open'}
+          </span>
+        )}
+      </li>
+    ))
+  }
+</ul>

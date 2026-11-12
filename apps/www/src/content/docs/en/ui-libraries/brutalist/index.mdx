@@ -1,0 +1,36 @@
+---
+title: 'Brutalist'
+description: 'Find Brutalist components, their Base interaction owners and complete family documentation.'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+Brutalist is Proto UI's neo-brutalist visual family. Its components retain the documented Base interaction protocols while providing their own borders, shadows, spacing and motion. Read the [design contract](./design-contract/) alongside the component you use.
+
+## Install and use
+
+For the published 0.2.0 Web Component baseline in an existing application:
+
+```sh
+npx @proto.ui/cli@0.2.0 init --prototypes brutalist
+npx @proto.ui/cli@0.2.0 add wc brutalist-button
+```
+
+With pnpm:
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init --prototypes brutalist
+pnpm dlx @proto.ui/cli@0.2.0 add wc brutalist-button
+```
+
+The selected package is `@proto.ui/prototypes-brutalist`; the CLI also installs its matching Adapter and generates local facades. Import the generated styles once as described in [Quick Start](/en/start-here/quick-start/), then follow [Button's usage](./components/button/). React and Vue 3 select `react` or `vue` instead of `wc`. Vue 2.6 belongs to the workspace 0.3 line rather than this stable install recipe.
+
+## Find a component
+
+This current workspace export index links to each family's real documentation route. A compound family documents its parts together. Draft workspace additions are not evidence that an identically named export exists in the older 0.2.0 package; read the family's delivery and host limits.
+
+<PrototypeDocumentationIndex library="brutalist" />
+
+## Evidence and lifecycle
+
+Source previews, published-package consumption, motion/accessibility acceptance and lifecycle admission are separate results. The [coverage index](/en/build/prototypes/documentation-coverage/) preserves the historical checkpoints; [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) retains the full public documentation acceptance conditions.

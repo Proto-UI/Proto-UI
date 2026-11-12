@@ -22,7 +22,19 @@ export default withShadcnRheaDemo({
         kind: 'proto',
         prototypeId: 'shadcn-button',
         props: { size: 'icon', variant: 'outline' },
-        children: ['+'],
+        children: [
+          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['+'] },
+          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Add'] },
+        ],
+      },
+      {
+        kind: 'proto',
+        prototypeId: 'shadcn-button',
+        props: { size: 'icon-compact', variant: 'outline' },
+        children: [
+          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['+'] },
+          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Add'] },
+        ],
       },
     ],
   },
