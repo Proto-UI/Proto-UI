@@ -169,7 +169,6 @@ it('replaces alignment readiness after view retirement while logical selection s
   expect(applied).toBe(2);
 });
 
-
 type TestContent = HTMLElement & {
   getExposes(): {
     snapshot(): { phase: string; diagnostic: string; value: string };
@@ -220,7 +219,7 @@ it('sizes every registered sibling, including disabled rows, without changing th
   expect(rowValue(first.blockTarget)).toBe('beta');
   expect(first.sizeMatch!.reference).toBe(first.blockReference);
   expect(first.sizeMatch!.targets[1]).toBe(first.blockTarget);
-  setElementProps(root, { value: 'gamma' });
+  setElementProps(root, { open: true, value: 'gamma' });
   await flush();
   const current = bindings.at(-1)!;
   expect(current).not.toBe(first);
@@ -255,7 +254,7 @@ it('refreshes all-row targets after sibling registration, scalar updates and rem
   const registered = bindings.at(-1)!;
   expect(targetValues(registered)).toEqual(['alpha', 'beta', 'gamma', 'delta']);
   expectWithdrawnBefore(registered);
-  setElementProps(rows[2], { textValue: 'Gamma renamed', disabled: true });
+  setElementProps(rows[2], { value: 'gamma', textValue: 'Gamma renamed', disabled: true });
   await flush();
   const updated = bindings.at(-1)!;
   expect(updated).not.toBe(registered);
@@ -276,12 +275,12 @@ it('refreshes all-row targets after sibling registration, scalar updates and rem
 it('withdraws the whole row lease on close and does not reuse the old delivery on reopen', async () => {
   const { root } = await mountRows();
   const retired = bindings.at(-1)!;
-  setElementProps(root, { open: false });
+  setElementProps(root, { open: false, value: 'beta' });
   await flush();
   expect(registrations.at(-1)).toBeNull();
   retired.onAlignment({ status: 'applied' });
   expect(applied).toBe(0);
-  setElementProps(root, { open: true });
+  setElementProps(root, { open: true, value: 'beta' });
   await flush();
   const current = bindings.at(-1)!;
   expect(current).not.toBe(retired);
@@ -298,7 +297,9 @@ it('retains named size conflict instead of accepting stale success or automatica
   failed.onAlignment({ status: 'unavailable', reason: 'size-conflict' });
   expect(registrations.at(-1)).toBeNull();
   expect(content.getExposes().snapshot()).toMatchObject({
-    phase: 'geometry-unavailable', diagnostic: 'select.geometry.size-conflict', value: 'beta',
+    phase: 'geometry-unavailable',
+    diagnostic: 'select.geometry.size-conflict',
+    value: 'beta',
   });
   failed.onAlignment({ status: 'applied' });
   expect(applied).toBe(0);
