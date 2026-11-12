@@ -2425,6 +2425,66 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('stops entry projection at an eligible descendant and resolves ordered focus on request', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async () => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-entry-presence',
+            setup(def: any) {
+              const entry = p.asFocusEntry();
+              entry.configure({ strategy: 'descendant-first', fallback: 'self' });
+              def.expose('enter', () => entry.focus());
+              return (r: any) => r.slot();
+            },
+          }),
+          { shadow: true }
+        );
+        const host = new C() as HTMLElement & { getExposes(): { enter(): void } };
+        host.innerHTML =
+          '<button id="ordinary">Ordinary</button><button id="positive" tabindex="1">Positive</button>';
+        document.body.append(host);
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const ordinary = host.querySelector<HTMLButtonElement>('#ordinary')!;
+        const positive = host.querySelector<HTMLButtonElement>('#positive')!;
+        const native = window.getComputedStyle;
+        let laterReads = 0;
+        window.getComputedStyle = (element, pseudo) => {
+          if (element === positive) laterReads++;
+          return native.call(window, element, pseudo);
+        };
+        const settle = () =>
+          new Promise<void>((resolve) => queueMicrotask(() => queueMicrotask(resolve)));
+        try {
+          ordinary.style.color = 'red';
+          await settle();
+          const projected = { laterReads, tabindex: host.getAttribute('tabindex') };
+          host.getExposes().enter();
+          const requested = document.activeElement?.id;
+          positive.blur();
+          ordinary.hidden = true;
+          positive.hidden = true;
+          await settle();
+          return { projected, requested, fallback: host.getAttribute('tabindex') };
+        } finally {
+          window.getComputedStyle = native;
+        }
+      });
+      expect(result).toEqual({
+        projected: { laterReads: 0, tabindex: null },
+        requested: 'positive',
+        fallback: '0',
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
   it('samples descendant entry after neighboring mutation callbacks finish', async () => {
     const page = await browser.newPage();
     try {

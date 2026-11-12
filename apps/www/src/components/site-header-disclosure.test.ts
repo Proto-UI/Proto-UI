@@ -609,15 +609,18 @@ describe('compact navigation viewport and history', () => {
       vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
       vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(16, 0, width - 32, 56));
       vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(width - 68, 6, 44, 44));
-      vi.spyOn(panel, 'getBoundingClientRect').mockImplementation(
-        () =>
-          new DOMRect(
-            0,
-            0,
-            parseFloat(panel.style.getPropertyValue('--site-header-panel-max-width')),
-            783
-          )
-      );
+      const panelBox = vi
+        .spyOn(panel, 'getBoundingClientRect')
+        .mockImplementation(
+          () =>
+            new DOMRect(
+              0,
+              0,
+              parseFloat(panel.style.getPropertyValue('--site-header-panel-max-width')),
+              783
+            )
+        );
+      const computedStyle = vi.spyOn(window, 'getComputedStyle');
       disclosure!.enhance();
       disclosure!.toggle();
       expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('-8px');
@@ -634,6 +637,10 @@ describe('compact navigation viewport and history', () => {
       window.dispatchEvent(new Event('resize'));
       expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
       expect(panel.style.getPropertyValue('--site-header-panel-max-height')).toBe('731px');
+      expect({
+        panelWidthReads: panelBox.mock.calls.length,
+        rootStyleReads: computedStyle.mock.calls.filter(([element]) => element === root).length,
+      }).toEqual({ panelWidthReads: 0, rootStyleReads: 0 });
     });
   }
   it('closes on Back/Forward and restored pages without adding history entries', () => {
