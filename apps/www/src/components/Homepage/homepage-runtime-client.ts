@@ -874,12 +874,11 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
   };
   document.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
   const stopThemes = (['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const).map((family) =>
-    watchProjectionThemeSurfaceStyle(family, root, () => {
+    watchProjectionThemeSurfaceStyle(family, root, (theme) => {
       if (destroyed || family !== activeFamily) return;
       // All participants share the page's theme input. Nested language/social
       // mounts inherit a retained Surface's explicit old theme until this
       // transaction finishes, so they must never become theme sources.
-      const theme = resolveProjectionThemeSurfaceStyle(family, root);
       for (const candidate of activeCandidates) candidate.setThemeSurfaceStyle(theme);
     })
   );

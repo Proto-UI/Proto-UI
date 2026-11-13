@@ -704,12 +704,17 @@ it('reads one page-owned theme before updating nested language/social candidates
   const shadcnWatch = fakes.watchTheme.mock.calls.find(([family]) => family === 'shadcn')!;
   for (const next of [true, false, true]) {
     dark = next;
-    shadcnWatch[2]();
-    for (const candidate of candidates)
+    const theme = fakes.resolveTheme('shadcn', root);
+    fakes.resolveTheme.mockClear();
+    shadcnWatch[2](theme);
+    expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    for (const candidate of candidates) {
       expect(candidate.setThemeSurfaceStyle).toHaveBeenLastCalledWith({
         '--pui-background': dark ? '#111' : '#fff',
         '--pui-foreground': dark ? '#fff' : '#111',
       });
+      expect(candidate.setThemeSurfaceStyle.mock.lastCall?.[0]).toBe(theme);
+    }
     expect(handle!.getSnapshot().generation).toBe(generation);
   }
 });
