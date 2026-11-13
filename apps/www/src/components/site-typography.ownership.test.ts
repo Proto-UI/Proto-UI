@@ -279,14 +279,20 @@ describe('source sibling order and immediate owner replacement', () => {
     expect(hint.firstChild).toBe(hintSource);
     expect(hint.hasAttribute('data-typography-owner')).toBe(false);
 
+    const queries = vi.spyOn(root, 'querySelectorAll');
     const projectedTabs = document.createElement('div');
     projectedTabs.dataset.codeExampleTabsProjection = 'shadcn';
     example.append(projectedTabs);
     projectedTabs.append(hint);
     await settle();
+    expect(queries).not.toHaveBeenCalledWith(expect.stringContaining('[data-site-typography]'));
     expect(articleText.dataset.typographyGeneration).toBe(generation);
     expect(hint.firstChild).toBe(hintSource);
     expect(hint.parentElement).toBe(projectedTabs);
+
+    flow.append(hint);
+    await vi.waitFor(() => expect(hint.dataset.typographyRuntime).toBe('wc'));
+    expect(hint.querySelector('[data-site-typography-slot]')?.firstChild).toBe(hintSource);
   });
 
   it('ignores renderer-owned Copy and Code children but reconciles their native caption parent', async () => {

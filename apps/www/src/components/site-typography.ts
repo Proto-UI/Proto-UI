@@ -21,7 +21,7 @@ import { isRuntimeId } from './PrototypePreviewer/runtimes/ids';
 const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
 const COMPONENT_OWNED =
-  '[data-previewer-id],[data-code-example],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template';
+  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template';
 const PASSIVE_HEADER_FRAME =
   '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"],[data-projection-prototype="bootstrap-2-3-2-surface-root"])';
 const MARKERS = [
@@ -48,10 +48,12 @@ const activeViews = new WeakMap<HTMLElement, View>();
 const selectionContainers = new WeakMap<Node, { native: HTMLElement; slot: HTMLElement }>();
 let serial = 0;
 
-export function isWithinCodeOrCopyProjectionMount(node: Node): boolean {
+export function isWithinOwnedCodeContent(node: Node): boolean {
   return (
     node.nodeType === 1 &&
-    !!(node as Element).closest('div.site-code-surface-mount, div.site-copy-mount')
+    !!(node as Element).closest(
+      '[data-code-example], div.site-code-surface-mount, div.site-copy-mount'
+    )
   );
 }
 
@@ -69,7 +71,7 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
     const explicit = native.dataset.siteTypography;
     const explicitRole = explicit !== undefined && ROLES.has(explicit);
     if (
-      (docsOnly && isWithinCodeOrCopyProjectionMount(native)) ||
+      (docsOnly && isWithinOwnedCodeContent(native)) ||
       (native.closest(COMPONENT_OWNED) &&
         !(explicitRole && native.matches('output[data-home-demo-status]'))) ||
       native.closest('[data-site-typography-batch]')
