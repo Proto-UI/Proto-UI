@@ -173,6 +173,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (pending) window?.cancelAnimationFrame(pending.frame);
   };
   const schedulePosition = () => {
+    if (compact?.matches) return;
     const button = activeButton();
     const lease = button && buttonLeases.get(button);
     if (destroyed || !open || !button || !lease) return;
@@ -184,7 +185,13 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     pending.frame = window.requestAnimationFrame(() => {
       if (pendingPosition !== pending) return;
       pendingPosition = null;
-      if (destroyed || !open || activeButton() !== button || buttonLeases.get(button) !== lease)
+      if (
+        destroyed ||
+        !open ||
+        compact?.matches ||
+        activeButton() !== button ||
+        buttonLeases.get(button) !== lease
+      )
         return;
       positionPanel();
     });

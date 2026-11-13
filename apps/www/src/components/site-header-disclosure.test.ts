@@ -654,6 +654,44 @@ describe('compact navigation viewport and history', () => {
       }).toEqual({ anchorReads: 0, panelWidthReads: 0, rootStyleReads: 0 });
     });
   }
+  it('ignores compact Button movement but follows a desktop anchor after the breakpoint', async () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => frames.delete(id));
+    const { root, button, panel } = fixture();
+    vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
+    vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+    vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+    const anchor = vi
+      .spyOn(button, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(280, 6, 44, 44));
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 300));
+    disclosure!.enhance();
+    disclosure!.toggle();
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+
+    const settle = () => button.dispatchEvent(new Event('transitionend'));
+    settle();
+    expect(frames.size).toBe(0);
+    button.setAttribute('data-hovered', '');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(frames.size).toBe(0);
+
+    Object.assign(query, { matches: false });
+    query.dispatchEvent(new Event('change'));
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('55px');
+    anchor.mockReturnValue(new DOMRect(280, 10, 44, 44));
+    settle();
+    expect(frames.size).toBe(1);
+    const [id, callback] = [...frames][0]!;
+    frames.delete(id);
+    callback(0);
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('59px');
+  });
   it('closes on Back/Forward and restored pages without adding history entries', () => {
     const { panel } = fixture();
     const push = vi.spyOn(history, 'pushState');
