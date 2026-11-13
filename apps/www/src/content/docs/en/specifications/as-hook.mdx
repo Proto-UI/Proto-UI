@@ -167,7 +167,7 @@ asHook is inheritance-like: the caller declares that it is a kind of interaction
 
 Compositional logic reuse is closer to a `useXxx` hook. If a helper is only an ordinary function wrapper, prototype authors can write the function themselves. A governed hook API becomes useful only when it needs trace, capture, setup guards, artifacts, disposers, or conflict diagnostics.
 
-The naming and API boundary for `defineHook` / `defineUseHook` remains unresolved and is not part of the current core asHook contract.
+The public Core package already exports `defineHook`, and existing Base helpers use it. The draft decision `D-AS-HOOK-DEFINE-HOOK-0001` leaves its classification and stabilization alongside `defineUseHook` unresolved; that decision does not prohibit the implemented API or make it part of the core asHook contract. The current legacy implementation uses named installations and `mode` / `configure`; it must not be confused with the historical generic candidate's typed raw `value` and definition identity.
 
 ## Definition And Naming
 
@@ -310,7 +310,7 @@ The following items are recorded as debt or governed design space, but are not s
 | --- | --- |
 | caller binding name validation | `spec.name` and `asXxx` caller binding are separate; tooling should validate the binding later |
 | ordinary configurable authored asHooks | Implementation support exists, but option identity, configuration merge, and conflict diagnostics remain governed |
-| `defineHook` / `defineUseHook` | Whether Proto UI needs a separate use-style hook API remains unresolved |
+| `defineHook` / `defineUseHook` | `defineHook` is implemented; classification and stabilization of a separate use-style API remain unresolved |
 | capture bucket shape | Current runtime buckets are implementation details and are not public semantics |
 | privileged asHook details | Defined by secondary scopes such as focus, overlay, and boundary |
 
@@ -329,6 +329,40 @@ asHook test entities are organized around core behavior, result capture, and pri
 | `T-AS-HOOK-PRIVILEGED-0001` | privileged module-port capability, privileged trace, rollback boundary |
 
 Current runtime contract tests cover core asHook behavior. Focus, boundary, overlay, and hit-participation tests carry the minimum privileged API boundary.
+
+## Implementation Evidence And Limits
+
+The retained 2026-10-11 generic-hook source record reports 35 passing original Runtime and Base helper cases on Node 22.23.3, plus separate type, capture-failure, and ordinary-projection checks. Those results belong to that historical source candidate. Its broader run also retained 105 general failures and 98 WC failures matching the frozen baseline; the focused result was never an all-suite pass. See the source accounting in [the retained reconciliation record](https://github.com/Proto-UI/Proto-UI/blob/main/internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.json).
+
+Issue [#1154](https://github.com/Proto-UI/Proto-UI/issues/1154) keeps documentation synchronization and owned-script archival with projection verification as separate conditions. New current-source container evidence must bind its exact source, release tarballs, package exports, generated CLI facade, and isolated consumer. An ordinary asHook test or a working facade does not establish the retained generic candidate's raw-value, typed-argument, identity, failure, or non-Web composition conditions.
+
+The first bounded current-source run completed real package packing, installation, and CLI help/init/add. Its generated WC Collapsible consumer started open, closed on the pointer request, ignored a later default change, and reopened through the public method. The generic conditions remain unaccepted: the run retained identity, failure, metadata, and compiler-import refusals, alongside a numeric-factory typo in the newly authored probes and the archive's missing Git metadata prerequisite.
+
+The owned probes and Git archive preparation are being corrected for a narrow rerun using those unchanged packed packages. The documentation type/build attempts reached their original deadlines before token generation completed; their logs do not establish a TypeScript or Astro error. Corrected-probe, Git-dependent-check, and rendered-page acceptance remain pending. No draft contract or target profile is promoted by this evidence accounting.
+
+### 2026-11-12 Disposition
+
+The subsequent bounded R2 run passed the corrected legacy `defineHook` consumer: setup ran once, repeated calls returned the same captured result, and its declared numeric state changed from 1 to 3 through the registered event. This result establishes that existing consumer behavior for the retained packages. It does not establish the historical candidate's typed raw-value API.
+
+The intended two-argument raw-value consumer still failed with `[AsHook] setup() must return render function or void, got: object.` Its packed TypeScript check also retained the incompatible `AsHookConfigApi` / numeric argument, the caller's 0–1 argument limit, and the unknown `value` type. Current `HookPrototype` defines `setup(def, options, api) => RenderFn | void`; its caller accepts one optional options value and returns a synthesized `HookResult`. Changing the fixture to that legacy shape would remove the intended tuple and raw-value conditions. Those source and type assertions remain intact. A separately resolved generic API definition, its Core/Runtime realization, and source-neutral Compiler support are prerequisites for that capability. The equal-name identity, reentry/failure, and retired metadata assertions, including `configure`, also remain unmet historical-candidate conditions.
+
+R2 copied and read back real Git metadata successfully. Its Agent operations check then emitted named connector failures before reaching the original 900000 ms deadline with `SIGKILL`; successful Git admission does not make that check pass. The earlier documentation type/build deadlines predate the separately reported token-generation repair and remain historical outcomes, with no post-repair rendered-page result established here. Both R1 Compiler profiles retained `PUI1003: Unsupported import defineHook from @proto.ui/core.`
+
+Source review found that R1's reported static-declaration pass was vacuous: both compared `modules` values were absent, and `Object.isFrozen(undefined)` is true. The repaired probe uses two real public Core declarations and requires their complete authored order, exact declaration/token/config references, required fields, and frozen array, token, declaration, and top-level config surfaces, following the draft `C-MODULE-DECLARATION-0001` substrate. Publishing these declarations from `defineHook` is the retained historical K target; current legacy `HookCaller` has no public `modules` commitment. The expected new failure therefore identifies an unmet historical capability, with no new execution or current Core regression established. A new fixture-only container entry reuses the retained packages and runs only this changed probe. All 13 retained generic conditions and both original #1154 checkboxes remain unearned pending their actual validation and integration; this disposition does not promote any draft contract or target profile.
+
+#### Actual Bounded R3 Result
+
+Main subsequently executed the fixture-only R3 run against the retained installed packages. Its requested and executed probe lists were both exactly `['static-module-declarations']`, with no unmatched selector. The probe failed at consumer line 324 with `retained C-HOOK-0001-K target requires a Module declaration array`. The container command exited 1 with no signal or timeout; the existing 1200-second container and 180000 ms probe deadlines were unchanged.
+
+Five of the six execution phases passed, including source and real Git metadata admission, retained-input binding, and the final package/index readback. All 41 retained packages kept their tarball, export, installed-membership, and lockfile bindings; the semantic index matched before and after. The static probe stopped at the missing array, so its later order, exact declaration/token/config identity, required-field, and freezing assertions were not reached. This is an actual failure of the historical K target. Current legacy `HookCaller` has no public `modules` commitment, so this result does not establish a current Core regression. R1's vacuous reported pass remains preserved as history and supplies no static-declaration acceptance.
+
+R3 did not rerun R1/R2 or the other probes, type checks, Compiler profiles, or documentation builds. The authored raw-tuple and type fixtures retained their exact R2 bytes. Their historical generic definition remains absent from the current catalog; no new API semantics are introduced by this result. All 13 original generic conditions and both original #1154 checkboxes remain incomplete, with source review, applicable projection validation, and integration still owned separately by Main.
+
+#### Git Metadata Custody Clarification
+
+Independent review `CLI1154-ADMISSION-001` established that `.env.production` was omitted from the working-tree copy while its tracked bytes remained readable through the admitted Git objects and semantic index. That complete metadata is mounted at `/source/git-metadata` and copied into `/work/repo/.git`. The reviewer reported only the 24-byte size and matching hash; no values were disclosed and no secret leak was established. The exclusion therefore describes the working-tree copy, not absence of those bytes from the whole mounted snapshot. The harness now states that boundary and distinguishes newly configured Git settings from retained tracked contents.
+
+This correction changes provenance wording only. It changes no consumer execution condition, Git-object/index custody, or admission/rejection policy. The original R3 receipts retain five passing phases and the historical K array failure; they were not rewritten or replayed. All 13 generic conditions and both original #1154 checkboxes remain incomplete.
 
 ## Relationship To Other Specifications
 
