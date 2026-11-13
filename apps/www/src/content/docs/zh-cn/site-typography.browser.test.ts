@@ -303,12 +303,18 @@ function assertSourceIntegrity(measured: Awaited<ReturnType<typeof sourceIntegri
     expect(node.nestedFocusable).toBe(0);
   }
 }
-function narrowHomepageHeading(family: 'shadcn' | 'brutalist', textPercent: number) {
+function narrowHomepageHeading(
+  family: 'shadcn' | 'brutalist',
+  locale: keyof typeof SLOGANS,
+  textPercent: number
+) {
   const scale = textPercent / 100;
+  const shadcn = family === 'shadcn';
+  const leading = shadcn ? (locale === 'zh-cn' ? 37.5 : 33) : 30;
   return {
-    token: family === 'shadcn' ? 'text-3xl' : 'text-2xl',
-    size: (family === 'shadcn' ? 30 : 24) * scale,
-    lineHeight: `${(family === 'shadcn' ? 33 : 30) * scale}px`,
+    token: shadcn ? 'text-3xl' : 'text-2xl',
+    size: (shadcn ? 30 : 24) * scale,
+    lineHeight: `${leading * scale}px`,
   };
 }
 
@@ -615,7 +621,7 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                     await page.evaluate((percent) => {
                       document.documentElement.style.fontSize = `${percent}%`;
                     }, textPercent);
-                    const expectedHeading = narrowHomepageHeading(family, textPercent);
+                    const expectedHeading = narrowHomepageHeading(family, locale, textPercent);
                     const headingSamples: unknown[] = [];
                     state.expectedHeading = expectedHeading;
                     state.headingSamples = headingSamples;
@@ -720,11 +726,9 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                       galleryText,
                       galleryLabels,
                     });
-                    // WC retains the two closed authored Accordion bodies; the three
-                    // framework adapters withdraw them. All 37/35 owners remain exact.
-                    expect(galleryText).toHaveLength(
-                      { wc: 37, react: 35, vue: 35, vue2: 35 }[runtime]
-                    );
+                    // The expanded gallery adds 15 authored Text owners. WC
+                    // also retains the two closed authored Accordion bodies.
+                    expect(galleryText).toHaveLength(runtime === 'wc' ? 52 : 50);
                     expect(galleryLabels).toHaveLength(4);
                     expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);
                     for (let index = 0; index < labelNames.length; index++) {
@@ -981,7 +985,7 @@ describe.sequential('document reading native fallback', () => {
   for (const [name, route, titleSize, titleLeading] of [
     ['shadcn', '/zh-cn/start-here/quick-start/', '30px', '37.5px'],
     ['brutalist', '/en/ui-libraries/brutalist/components/button/', '36px', '44px'],
-    ['homepage', '/zh-cn/', '30px', '33px'],
+    ['homepage', '/zh-cn/', '30px', '37.5px'],
   ] as const) {
     it(`${name}: retains its own no-JavaScript heading scale`, async () => {
       await runCase(
