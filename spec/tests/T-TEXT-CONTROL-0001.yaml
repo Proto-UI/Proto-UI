@@ -120,7 +120,73 @@ cases:
       - M-TEXT-CONTROL-0001-C
       - C-CORE-SYNTAX-0007-A
     expectation: cancel-boundary-enforced
+openQuestions:
+  - id: T-TEXT-CONTROL-0001-Q-NATIVE-FULL-WIDTH-EVIDENCE
+    question:
+      en: Which exact-source native evidence completes the original full editor width matrix?
+    context:
+      en: >-
+        Planned provenance and Adapter transport suites do not prove layout. The Input/Textarea browser suite authors four runtimes, 100/200 percent fonts, three parent widths, reset and no-reset, and padded/gapped siblings. The real homepage CommandInput consumer has separate four-runtime narrow-parent geometry/editing assertions at both font scales, but does not implement the same reset/no-reset and padded-sibling matrix. That original CommandInput obligation and fresh source-bound execution/acceptance remain pending. Consuming implementations exercise the width Decision without adding a normative verifies claim.
+
+
+    blocks:
+      - implementation:T-TEXT-CONTROL-0001#native-width-provenance
+      - implementation:T-TEXT-CONTROL-0001#native-width-adapter-transport
+      - implementation:T-TEXT-CONTROL-0001#four-web-native-editor-width
+      - implementation:T-TEXT-CONTROL-0001#website-command-input-native-width
+      - criterion:D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001#D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH
+      - criterion:C-HOST-SURFACE-PROJECTION-0001#C-HOST-SURFACE-PROJECTION-0001-C
+      - criterion:C-TEXT-CONTROL-0001#C-TEXT-CONTROL-0001-G
+      - activation:T-TEXT-CONTROL-0001
 implementations:
+  - id: native-width-provenance
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/native-text-layout.test.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-0001-CASE-NATIVE-FULL-WIDTH]
+    exercises: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001, C-HOST-SURFACE-PROJECTION-0001]
+    notes:
+      - >-
+        Authored unit assertions cover canonical lowered width conditions, owned withdrawal, overlapping external boundary contributions and rejection of unknown/unsafe selector inference. These are bounded provenance assertions, not native geometry or a fresh result.
+
+
+  - id: native-width-adapter-transport
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/native-text-layout.integration.test.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-0001-CASE-NATIVE-FULL-WIDTH]
+    exercises: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001, M-TEXT-CONTROL-0001, HC-TEXT-CONTROL-0001]
+    notes:
+      - >-
+        Authored simulated-DOM Adapter assertions retain single/multiline editor paint, bounded boundary width and owned cleanup. Rule/runtime withdrawal also retains the single-line editor, value, focus and selection. This source does not establish native layout acceptance.
+
+
+  - id: four-web-native-editor-width
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/native-text-width.browser.test.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-0001-CASE-NATIVE-FULL-WIDTH]
+    exercises: [M-TEXT-CONTROL-0001, HC-TEXT-CONTROL-0001]
+    notes:
+      - >-
+        Existing authored Input/Textarea matrix uses WC, React, Vue 3 and Vue 2, 100/200 percent fonts, 144/224/360px parents, reset/no-reset, plain and padded/gapped sibling layouts, placeholder/long-value/disabled/readOnly variants and real keyboard editing. CommandInput is absent from this matrix; execution and full-case acceptance remain pending.
+
+
+  - id: website-command-input-native-width
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts
+    required: true
+    consumesCases: [T-TEXT-CONTROL-0001-CASE-NATIVE-FULL-WIDTH]
+    exercises: [P-SHADCN-COMMAND]
+    notes:
+      - >-
+        The actual CommandInput narrow-parent case authors four-runtime geometry and editing at 100/200 percent fonts for Shadcn and Brutalist consumers. It is a narrower real route, not the original complete reset/no-reset and padded/gapped sibling matrix. No fresh result or complete native-width acceptance is claimed.
+
+
   - id: module-text-control-web-contract
     kind: module-test
     status: passing

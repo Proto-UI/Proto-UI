@@ -4,7 +4,7 @@ title: Shadcn Tabs draft projection coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Tabs profiles, owned line decoration and passive Indicator facts on real consumers.
 cases:
   - id: T-SHADCN-TABS-PROJECTION-0001-CASE-PROFILES
@@ -25,6 +25,9 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/tabs-draft-projection.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-TABS-PROJECTION-0001-CASE-PROFILES
+      - T-SHADCN-TABS-PROJECTION-0001-CASE-INDICATOR
     exercises:
       - P-SHADCN-TABS
       - P-SHADCN-TABS-LIST

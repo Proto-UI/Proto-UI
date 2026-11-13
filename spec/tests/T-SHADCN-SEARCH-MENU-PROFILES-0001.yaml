@@ -74,6 +74,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/search-menu-profiles-r91.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-PROFILES
     exercises:
       - P-SHADCN-AUTOCOMPLETE
       - P-SHADCN-COMBOBOX

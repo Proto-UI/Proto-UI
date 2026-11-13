@@ -4,7 +4,7 @@ title: Shadcn command profile transitions
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Button, Toggle, Surface and Text nine-style selection, precedence and withdrawal.
 cases:
   - id: T-SHADCN-COMMAND-PROFILES-0001-CASE-SELECTION
@@ -21,6 +21,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/command-profile-transitions.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-COMMAND-PROFILES-0001-CASE-SELECTION
     exercises:
       - P-SHADCN-BUTTON
       - P-SHADCN-TOGGLE

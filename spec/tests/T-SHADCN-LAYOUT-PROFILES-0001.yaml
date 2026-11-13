@@ -4,7 +4,7 @@ title: Shadcn layout and collection profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Accordion, Collapsible, Carousel, Resizable, Scroll Area, Progress, Meter, Label, Separator, Message Scroller, Virtual List and scalar Slider profile coverage.
 cases:
   - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-PROFILES
@@ -25,12 +25,31 @@ cases:
       - P-SHADCN-MESSAGE-SCROLLER-ADMISSION
       - P-SHADCN-RESIZABLE-ADMISSION
     expectation: explicit-capability-gaps-preserved
+openQuestions:
+  - id: T-SHADCN-LAYOUT-PROFILES-0001-Q-BOUNDARY-EVIDENCE
+    question:
+      en: Which exact-source evidence completes all four original layout boundary obligations?
+    context:
+      en: >-
+        The r91 suite is the planned fulfillment route, not complete native acceptance. Preserve measured Accordion motion, scalar physical travel alignment, Message Scroller eligibility and Resizable physical hit expansion as separate remaining obligations. Existing profile, paused-follow and scalar-preview assertions do not retire them or revise CASE-BOUNDARIES.
+
+
+    blocks:
+      - implementation:T-SHADCN-LAYOUT-PROFILES-0001#shadcn-layout-profiles-r91
+      - criterion:P-SHADCN-SLIDER#P-SHADCN-SLIDER-ADMISSION
+      - criterion:P-SHADCN-SCROLL-AREA#P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY
+      - criterion:P-SHADCN-MESSAGE-SCROLLER#P-SHADCN-MESSAGE-SCROLLER-ADMISSION
+      - criterion:P-SHADCN-RESIZABLE#P-SHADCN-RESIZABLE-ADMISSION
+      - activation:T-SHADCN-LAYOUT-PROFILES-0001
 implementations:
   - id: shadcn-layout-profiles-r91
     kind: module-test
     status: planned
     path: packages/prototypes/shadcn/test/layout-profiles-r91.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-LAYOUT-PROFILES-0001-CASE-PROFILES
+      - T-SHADCN-LAYOUT-PROFILES-0001-CASE-BOUNDARIES
     exercises:
       - P-SHADCN-ACCORDION
       - P-SHADCN-COLLAPSIBLE
@@ -46,6 +65,9 @@ implementations:
       - P-SHADCN-SLIDER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+      - >-
+        Both original cases name this intended suite. Its owner-preservation, controlled-refusal, passive Resizable decoration, paused Message follow and scalar display-preview assertions do not complete CASE-BOUNDARIES. Measured Accordion motion, native scalar travel alignment, complete Message Scroller follow eligibility and physical Resizable expanded-hit acquisition remain required acceptance obligations; the original covers and expectation are unchanged.
+
 
 exercises:
   prototypes:

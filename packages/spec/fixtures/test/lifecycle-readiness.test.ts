@@ -1197,6 +1197,51 @@ describe('ordinary lifecycle targets and authoring', () => {
 });
 
 describe('ordinary lifecycle reporting', () => {
+  it('represents required missing evidence without a path while retaining readiness gaps', () => {
+    const test = validateSpecEntity({
+      ...testEntity('missing'),
+      implementations: [
+        {
+          id: 'runtime',
+          kind: 'runtime-test',
+          status: 'missing',
+          required: true,
+          consumesCases: [caseId],
+        },
+      ],
+    });
+    expect(test.implementations[0].path).toBeUndefined();
+    expect(test.implementations[0]).toMatchObject({
+      status: 'missing',
+      required: true,
+      consumesCases: [caseId],
+    });
+    const workspace = createSpecWorkspace([contract(), test]);
+    const report = getSpecLifecycleReport(workspace, version, plan());
+    const testRow = report.rows.find((row) => row.entityId === testId)!;
+    expect(testRow.gaps).toContainEqual(expect.objectContaining({ code: 'case-needs-evidence' }));
+    expect(testRow.gaps).toContainEqual(
+      expect.objectContaining({ code: 'required-evidence-incomplete' })
+    );
+    const contractRow = report.rows.find((row) => row.entityId === contractId)!;
+    expect(contractRow.gaps).toContainEqual(
+      expect.objectContaining({ code: 'criterion-needs-evidence' })
+    );
+    expect(contractRow.gaps).toContainEqual(
+      expect.objectContaining({ code: 'required-evidence-incomplete' })
+    );
+    // A complete remain-draft inventory preserves the gaps; it does not admit the slice.
+    expect(checkSpecLifecycleDispositions(report)).toEqual([]);
+    const promotion = getSpecLifecycleReport(workspace, version, plan(undefined, 'promote'));
+    expect(checkSpecLifecycleDispositions(promotion)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'promotion-evidence-incomplete', entityId: testId }),
+        expect.objectContaining({ code: 'promotion-evidence-incomplete', entityId: contractId }),
+      ])
+    );
+    expect(workspace.entities.every((entity) => entity.status === 'draft')).toBe(true);
+  });
+
   it('does not count a pathless passing record as case, criterion, or promotion evidence', () => {
     const test = testEntity('passing');
     test.implementations[0].path = undefined;

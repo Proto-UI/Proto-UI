@@ -24,6 +24,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/tabs-draft-projection.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-TABS-0001-CASE-NAVIGATION
+      - T-LIQUID-GLASS-TABS-0001-CASE-INDICATOR
     exercises:
       - P-LIQUID-GLASS-TABS
       - P-LIQUID-GLASS-TABS-LIST

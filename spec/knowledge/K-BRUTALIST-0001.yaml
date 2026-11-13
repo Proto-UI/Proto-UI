@@ -25,8 +25,8 @@ sources:
   - path: packages/prototypes/brutalist/THIRD_PARTY_NOTICES.md
   - path: docs/superpowers/specs/2026-07-24-brutalist-design-system-design.md
   - path: internal/records/2026-07-27-brutalist-button-foundation-review.zh-CN.md
-  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/index.mdx
-  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/index.mdx
+  - path: apps/www/src/content/docs/en/ui-libraries/brutalist/design-contract.mdx
+  - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/design-contract.mdx
 relates:
   prototypes: [P-BRUTALIST-BUTTON]
 revisions:

@@ -1,0 +1,127 @@
+---
+title: 'Style Scope'
+description: 'Share a draft Shadcn presentation profile without taking ownership of control behavior.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Style Scope carries a Shadcn presentation choice through the existing logical Context tree. Use it to select a profile for a group of compatible family components instead of repeating `styleProfile` on every part. Each consumer keeps its own behavior, public state and physical host identity.
+
+This is a **draft 0.3 workspace API**, cataloged since `0.3.0-alpha.1`. This page describes the current workspace package, not the published `0.2.0` API or a stable promise of family-wide style support. A recognized profile name does not mean every Shadcn component implements that profile.
+
+## Use a scope
+
+Import the prototype from the public `@proto.ui/prototypes-shadcn/style-scope` subpath and adapt it with the same Adapter as its children. The package root also exports `styleScope` and its alias `shadcnStyleScope`.
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import { ShadcnCardRoot, ShadcnCardContent } from '@proto.ui/prototypes-shadcn/card';
+
+const adapt = createReactAdapter(React);
+const StyleScope = adapt(styleScope);
+const Card = adapt(ShadcnCardRoot);
+const CardContent = adapt(ShadcnCardContent);
+
+export function ProjectCards() {
+  return (
+    <StyleScope styleProfile="rhea">
+      <Card>
+        <CardContent>Inherits Rhea from the outer scope.</CardContent>
+      </Card>
+      <StyleScope styleProfile="new-york">
+        <Card>
+          <CardContent>Inherits New York from the nearer scope.</CardContent>
+        </Card>
+      </StyleScope>
+      <Card styleProfile="new-york-v4">
+        <CardContent>This explicit Card choice takes precedence.</CardContent>
+      </Card>
+    </StyleScope>
+  );
+}
+```
+
+Card supports the two profiles used here. Its Root also establishes a style scope for its descendants. A composite Root that publishes a scope can therefore determine the nearest choice for its parts and other nested family consumers. The consumer owns outer layout; Style Scope supplies no Card layout or page spacing.
+
+<h2 id="card-contract">Existing scoped Card example</h2>
+
+This reuses the registered Card demo. Its authored recipe wraps the Card in `styleScope` with `styleProfile: 'rhea'`; the Card and Text parts remain real package prototypes. It illustrates one scoped composition, not a profile switcher or acceptance evidence for every consumer and host.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Selection and inheritance
+
+`styleProfile` is optional and defaults to **`inherit`**. Resolution is:
+
+1. The consumer's explicit concrete `styleProfile`.
+2. The nearest logical style scope with an effective concrete choice.
+3. That consumer's own compatibility baseline.
+
+`new-york` is an alias for `new-york-v4`. Setting a previously explicit consumer or nested scope to `inherit` withdraws its selection and resumes inheritance. A scope inherits strictly from its ancestors, excluding its own provider. If neither the scope nor an ancestor chooses a concrete profile, it publishes `{ style: null }`. This preserves each leaf's existing baseline; it does not make every unscoped component New York.
+
+| Selection | Meaning |
+| --- | --- |
+| `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea` | The eight recognized current style IDs. Actual recipe support belongs to each consumer. |
+| `new-york-v4` | The separate legacy compatibility profile. |
+| `new-york` | An explicit alias, normalized to `new-york-v4`. |
+| `inherit` or omission | No explicit selection; use the nearest scope, then the leaf baseline. |
+
+The membership is pinned to the [shadcn/ui source revision `3d98900e`](https://github.com/shadcn-ui/ui/tree/3d98900e9b73c45f035f8109e9d41ba6a51685e7). Proto UI is an independent implementation. Recognizing those source IDs does not claim complete upstream appearance or API parity.
+
+## Public authoring API
+
+The `/style-scope` subpath exports the following helpers and types in addition to `styleScope`:
+
+| Export | Use |
+| --- | --- |
+| `setupShadcnStyleScope(def)` | Called during a composite prototype's setup to publish its effective choice and inherit from ancestors. |
+| `setupShadcnStyleSelection(def, compatibilityStyle, options?)` | Called during a consumer's setup to derive a visual State for existing Rules. `options.supportedStyles` can restrict that consumer's implemented profiles. |
+| `SHADCN_STYLE_SCOPE` | The singleton Context key carrying `{ style: ShadcnStyleId \| null }`. Import this exact key; a new key with the same diagnostic name is a different channel. |
+| `SHADCN_STYLE_IDS` | The canonical membership list, including the separate `new-york-v4` entry. |
+| `normalizeShadcnStyle(value)` | Canonicalizes known IDs and the alias, returns `null` for `undefined`, `null` or `inherit`, and throws for unknown IDs. |
+| `ShadcnStyleId`, `ShadcnStyleChoice` | Canonical IDs, and the selectable union including `new-york` and `inherit`, respectively. |
+| `ShadcnStyleProps`, `ShadcnStyleContext` | The optional `styleProfile` prop shape and the JSON Context value shape. |
+
+For example, normalization is available from the subpath:
+
+```ts
+import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
+
+const legacy = normalizeShadcnStyle('new-york'); // 'new-york-v4'
+const inherited = normalizeShadcnStyle('inherit'); // null
+```
+
+A consumer uses the derived selection in `def.rule` conditions and ordinary Feedback style contributions. An inactive profile's contribution withdraws through the existing style merge. The helper's `supportedStyles` option rejects a recognized but unsupported choice instead of silently substituting another profile. Check the chosen component's own definition and documentation before selecting a profile; this carrier does not add a missing recipe.
+
+## Ownership and style isolation
+
+Style Scope carries only selection. It creates no value, open, checked, query or focus authority, no editor, and no new behavior event. A presentation-only change must preserve the consumer instance, Base state handles, edited value, selection and focus. Do not implement a profile change by changing a component's key or rebuilding its editor.
+
+The scope is a logical family Context boundary, not a CSS reset, Shadow DOM boundary or global theme store. It does not inspect DOM classes, install a document-wide stylesheet, or select a profile for unrelated families. [Input Shell](/en/ui-libraries/shadcn/input-shell/) and other consumers resolve their own visual choices through this channel; neutral atoms retain their public semantics.
+
+Load the matching generated Proto UI style artifact through the host's normal integration. Theme activation and variable values, fonts, outer layout and explicit surface overrides remain consumer-owned. When using named CSS layers, establish the required order before the first relevant layer declaration: generated theme defaults, reset/base, `proto-ui`, then explicit consumer layers. Adding a later stylesheet cannot reorder layers that already exist. Style Scope does not replace this host integration or justify page CSS that repairs missing prototype paint.
+
+## Current limits
+
+The draft transport evidence includes a bounded real Base Tabs canary: it checks selection precedence, contribution withdrawal, terminal cleanup, and preservation of selected value, state handles, focus and live nodes. Its Nova/Rhea radius checks and test-only compatibility radius are not a complete production Tabs recipe or a family-wide no-reset result.
+
+Context subscriptions follow the existing Props and lifecycle ownership. Creation, mount and actual update callbacks re-read the current scope. Arbitrary ancestry-only reparenting, provider removal without an update notification, and a live view's detach/remount do not have a general transport guarantee. A portal must use its logical owner's scope rather than its physical mount container; native portal behavior is not accepted by this slice.
+
+Complete consumer mappings, IME and selection continuity, browser/assistive-technology behavior and cross-Adapter acceptance require their own evidence. The previews on this page do not promote the draft lifecycle or establish those results.
+
+## References
+
+This page projects `P-SHADCN-STYLE-SCOPE`. The public implementation is `packages/prototypes/shadcn/src/style-scope/`; its bounded transport coverage is mapped by `T-SHADCN-STYLE-SCOPE-0001`.
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-STYLE-SCOPE.yaml']} />
+
+<SpecEntityLinks directory="spec/tests" files={['T-SHADCN-STYLE-SCOPE-0001.yaml']} />
+
+<SpecEntityLinks directory="spec/contracts" files={['C-PROTOTYPE-STYLE-CLOSURE-0001.yaml']} />

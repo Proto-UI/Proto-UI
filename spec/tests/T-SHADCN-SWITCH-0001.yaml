@@ -51,7 +51,61 @@ cases:
     title: generated convenience facades mount replaceable default Thumb parts only after Root context exists
     covers: [P-SHADCN-SWITCH-COMPONENT-PRESET, D-COMPONENT-PRESET-MATERIALIZATION-0001-F]
     expectation: shadcn-switch-generated-facades-support-context-safe-default-replacement-and-omission
+openQuestions:
+  - id: T-SHADCN-SWITCH-0001-Q-SHARED-PROFILES-NATIVE
+    question:
+      en: Which exact-source native evidence completes the full NY/Rhea shared-profile case?
+    context:
+      en: >-
+        Synthetic scope/Root precedence, retained checked/Thumb identity, hit-marker withdrawal and reentrant lease accounting are narrower than physical acquisition. The public Rhea four-runtime consumer and New York WC document/shadow motion suite do not establish four-runtime NY/Rhea switching, actual Root ownership and bounded hit-envelope behavior together. Native expanded-hit acquisition, NY/detach/disposal withdrawal, clipping/overlap, disabled/readOnly, pointer/touch, focus and cancellation acceptance remain pending. P-SHADCN-SWITCH's existing native and compatibility blockers remain in force.
+
+
+    blocks:
+      - implementation:T-SHADCN-SWITCH-0001#shadcn-switch-shared-profiles
+      - implementation:T-SHADCN-SWITCH-0001#shadcn-switch-hit-lease
+      - implementation:T-SHADCN-SWITCH-0001#website-shadcn-switch-rhea-native
+      - implementation:T-SHADCN-SWITCH-0001#prototypes-shadcn-switch-new-york-browser
+      - criterion:P-SHADCN-SWITCH#P-SHADCN-SWITCH-SHARED-PROFILES
+      - criterion:P-SHADCN-SWITCH#P-SHADCN-SWITCH-RHEA-SURFACE
+      - criterion:P-SHADCN-SWITCH#P-SHADCN-SWITCH-RHEA-HIT-LEASE
+      - activation:T-SHADCN-SWITCH-0001
 implementations:
+  - id: shadcn-switch-shared-profiles
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-style-profile.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-SHARED-PROFILES]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - >-
+        Existing simulated-WC bodies assert scope/explicit/inherit precedence, retained checked and caller Thumb identity, NY/Rhea paint withdrawal and the Rhea-only hit marker. Marker presence is not physical expanded-hit acquisition; no fresh native acceptance is claimed.
+
+
+  - id: shadcn-switch-hit-lease
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-hit-lease.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-SHARED-PROFILES]
+    exercises: [P-SHADCN-SWITCH]
+    notes:
+      - >-
+        Existing helper assertions cover reentrant acquisition/release and duplicate-registration accounting. They do not render a Root, exercise native hit geometry or establish the full four-runtime NY/Rhea consumer case.
+
+
+  - id: website-shadcn-switch-rhea-native
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-SHARED-PROFILES]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - >-
+        The actual public Rhea consumer authors four-runtime default/sm geometry and native input/pressed-state assertions. It does not supply the complete NY/Rhea switching and expanded-hit-envelope matrix. Execution remains separately source-bound and pending.
+
+
   - id: t-shadcn-switch-0001-size-lifecycle
     kind: module-test
     status: planned
@@ -75,10 +129,16 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/switch-motion.browser.test.ts
     required: true
-    consumesCases: [T-SHADCN-SWITCH-0001-CASE-FAMILY-AND-VISUALS]
+    consumesCases:
+      - T-SHADCN-SWITCH-0001-CASE-FAMILY-AND-VISUALS
+      - T-SHADCN-SWITCH-0001-CASE-SHARED-PROFILES
     exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
     notes:
       - New York default/sm root-16/root-32 browser evidence must be collected afresh for document and shadow surfaces; source/token assertions are not rendered geometry or native activation acceptance.
+      - >-
+        For SHARED-PROFILES this existing route is limited to New York WC document/shadow at 16/32px root fonts. It does not establish Rhea switching or React/Vue/Vue2 native hit behavior, and cannot complete the original four-runtime shared-profile expectation.
+
+
   - id: prototypes-shadcn-switch-root-contract
     kind: module-test
     status: planned

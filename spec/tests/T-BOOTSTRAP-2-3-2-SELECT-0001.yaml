@@ -4,7 +4,7 @@ title: Bootstrap complete Select coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Eleven-part anatomy, item-aligned containment, group naming, contentless separator and Field trigger.
 cases:
   - id: T-BOOTSTRAP-2-3-2-SELECT-0001-CASE-ANATOMY
@@ -24,6 +24,9 @@ implementations:
     status: planned
     path: packages/prototypes/bootstrap-2-3-2/test/select-complete-projection.test.ts
     required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-SELECT-0001-CASE-ANATOMY
+      - T-BOOTSTRAP-2-3-2-SELECT-0001-CASE-FIELD
     exercises:
       - P-BOOTSTRAP-2-3-2-SELECT
       - P-BOOTSTRAP-2-3-2-SELECT-ALIGNMENT-PARTS

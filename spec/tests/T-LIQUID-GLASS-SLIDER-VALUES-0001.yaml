@@ -18,6 +18,8 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/slider-values-projection.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-SLIDER-VALUES-0001-CASE-ANATOMY
     exercises:
       - P-LIQUID-GLASS-SLIDER-VALUES
       - P-LIQUID-GLASS-SLIDER
