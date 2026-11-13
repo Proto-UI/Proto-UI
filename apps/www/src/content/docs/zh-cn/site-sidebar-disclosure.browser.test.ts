@@ -107,7 +107,11 @@ for (const locale of ['zh-cn', 'en'])
         expect(initial.filter((x) => x.managed).every((x) => x.open === x.current)).toBe(true);
         expect(initial.filter((x) => !x.managed).every((x) => x.open)).toBe(true);
         if (width < 1024) {
-          const opener = page.locator('[data-site-contents-command]').getByRole('button');
+          // This journey starts with the published Contents owner. The SSR
+          // fallback can stay connected after it hands off to that Trigger.
+          const opener = page
+            .locator('[data-site-contents-command] [data-projection-generation-state="active"]')
+            .getByRole('button');
           await opener.click();
         }
         const other = page
