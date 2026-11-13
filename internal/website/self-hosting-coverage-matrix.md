@@ -214,7 +214,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `790a774f44646bb2793e03b7851eea3673b1efe61c80d97fecd20b38f1bc7cb0` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `d2fabc42580014e9a1cdb52be5207d1931ca5823d6019822b17f0b3f18d5cb0e` |
-| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `a0078822b5098849a7d982d69b5b9703b2f2e1a5e8161b0a661c87c4afc1e52f` |
+| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `e9636489c0f58ab117e36bb47b97cd55c32a6ca13b8999fe7ec9276b7fad0196` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `37ddf520355c6ab533383ff914f6744bd74722c2f095ce7a73350b0e462871f9` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `376b4407e8f93385a57979fc44ea96790a78e7c84b4f3b5a9e71371a30525102` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `066158b499aa59e26f754a7d45ca5bb20c569130b0c66b2b038627be332f2da7` |

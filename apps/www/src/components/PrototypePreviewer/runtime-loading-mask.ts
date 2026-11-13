@@ -1,6 +1,5 @@
 import {
   applyProjectionThemeSurfaceStyle,
-  resolveProjectionThemeSurfaceStyle,
   watchProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { renderDemo } from './demo-renderer';
@@ -125,7 +124,6 @@ export function createRuntimeLoadingMask(options: {
       await rendered?.destroy();
       stopTheme?.();
       stopTheme = undefined;
-      applyProjectionThemeSurfaceStyle(mount, resolveProjectionThemeSurfaceStyle(family, root));
       stopTheme = watchProjectionThemeSurfaceStyle(family, root, (theme) => {
         if (alive && currentRevision === revision) applyProjectionThemeSurfaceStyle(mount, theme);
       });

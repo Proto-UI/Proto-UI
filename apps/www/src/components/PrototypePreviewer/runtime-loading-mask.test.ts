@@ -114,6 +114,28 @@ for (const family of ['shadcn', 'brutalist'] as const) {
   });
 }
 
+it('reads the initial Shadcn source once and retains live theme changes', async () => {
+  const read = vi.spyOn(window, 'getComputedStyle');
+  const f = fixture();
+  try {
+    await f.mask.ready;
+    f.mask.setState('loading', 'react', true);
+    const mount = f.root.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
+    expect(mount.hidden).toBe(false);
+    expect(mount.style.getPropertyValue('--pui-background')).toBe('#ffffff');
+    expect(read.mock.calls.filter(([element]) => element === f.root)).toHaveLength(1);
+
+    f.root.style.setProperty('--pui-background', '#123456');
+    await vi.waitFor(() =>
+      expect(mount.style.getPropertyValue('--pui-background')).toBe('#123456')
+    );
+    expect(read.mock.calls.filter(([element]) => element === f.root)).toHaveLength(2);
+  } finally {
+    await f.mask.destroy();
+    read.mockRestore();
+  }
+});
+
 it('projects the independent Brutalist theme onto the stable lane and follows live color mode', async () => {
   const f = fixture('brutalist');
   await f.mask.ready;
