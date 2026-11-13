@@ -122,6 +122,7 @@ export function createRuntimeLoadingMask(options: {
       context = undefined;
       sync();
       await rendered?.destroy();
+      if (!alive || currentRevision !== revision) return;
       stopTheme?.();
       stopTheme = undefined;
       stopTheme = watchProjectionThemeSurfaceStyle(family, root, (theme) => {

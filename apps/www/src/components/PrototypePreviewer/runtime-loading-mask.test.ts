@@ -2,6 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createRuntimeLoadingMask } from './runtime-loading-mask';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './projection-theme';
 import { BRUTALIST_THEME } from '../../../../../packages/prototypes/brutalist/src/theme';
+import { renderDemo } from './demo-renderer';
+
+vi.mock('./demo-renderer', async (original) => {
+  const current = await original<typeof import('./demo-renderer')>();
+  return { ...current, renderDemo: vi.fn(current.renderDemo) };
+});
 
 afterEach(() => document.body.replaceChildren());
 function fixture(family: 'shadcn' | 'brutalist' = 'shadcn') {
@@ -113,6 +119,50 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     });
   });
 }
+
+it('does not install a new theme watcher after disposal during old render cleanup', async () => {
+  const render = vi.mocked(renderDemo);
+  const original = render.getMockImplementation()!;
+  let release!: () => void;
+  const cleanupGate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const oldCleanup = vi.fn();
+  render.mockImplementationOnce(async (options) => {
+    const result = await original(options);
+    return {
+      async destroy() {
+        oldCleanup();
+        await cleanupGate;
+        await result.destroy();
+      },
+    };
+  });
+  const f = fixture();
+  let retirement: Promise<void> | undefined;
+  const observe = vi.spyOn(MutationObserver.prototype, 'observe');
+  try {
+    await f.mask.ready;
+    f.setFamily('brutalist');
+    f.mask.setState('loading', 'react', true);
+    await vi.waitFor(() => expect(oldCleanup).toHaveBeenCalledTimes(1));
+    retirement = f.mask.destroy();
+    const ownerWatches = () =>
+      observe.mock.calls.filter(
+        ([node, options]) => node === f.root && options?.attributeFilter?.includes('data-theme')
+      );
+    const installs = ownerWatches().length;
+    release();
+    await retirement;
+
+    expect(ownerWatches()).toHaveLength(installs);
+    expect(f.root.querySelector('[data-runtime-loading-mask]')).toBeNull();
+  } finally {
+    release();
+    await (retirement ?? f.mask.destroy());
+    observe.mockRestore();
+  }
+});
 
 it('reads the initial Shadcn source once and retains live theme changes', async () => {
   const read = vi.spyOn(window, 'getComputedStyle');
