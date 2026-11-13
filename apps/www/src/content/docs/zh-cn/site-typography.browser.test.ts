@@ -275,9 +275,13 @@ async function sourceIntegrity(page: Page) {
         return count;
       })(),
       originalTextNodeCount: texts.length,
-      carrierCount: native.querySelectorAll('[data-site-typography-carrier]').length,
-      surfaceCount: native.querySelectorAll('[data-typography-prototype][data-pui-root]').length,
-      invalidBlocks: native.querySelectorAll('div,section,p,h1,h2,h3,fieldset').length,
+      carrierCount: native.querySelectorAll(':scope > [data-site-typography-carrier]').length,
+      surfaceCount: native.querySelectorAll(
+        ':scope > [data-site-typography-carrier] [data-typography-prototype][data-pui-root]'
+      ).length,
+      invalidBlocks: native.querySelectorAll(
+        ':scope > [data-site-typography-carrier] :is(div,section,p,h1,h2,h3,fieldset)'
+      ).length,
       nestedFocusable: native.querySelectorAll(
         '[data-site-typography-carrier] [tabindex], [data-site-typography-carrier] [role="button"]'
       ).length,
@@ -291,8 +295,10 @@ function assertSourceIntegrity(measured: Awaited<ReturnType<typeof sourceIntegri
     expect(node.originalSources).toBe(true);
     expect(node.text).toBe(node.expected);
     expect(node.textNodeCount).toBe(node.originalTextNodeCount);
-    expect(node.carrierCount).toBe(1);
-    expect(node.surfaceCount).toBe(1);
+    // The rich LI keeps its authored P, which owns its own Text projection.
+    const expectedOwners = node.id === 'native-rich-item' ? 0 : 1;
+    expect(node.carrierCount).toBe(expectedOwners);
+    expect(node.surfaceCount).toBe(expectedOwners);
     expect(node.invalidBlocks).toBe(0);
     expect(node.nestedFocusable).toBe(0);
   }
@@ -405,8 +411,15 @@ describe.sequential('native SiteTypography rendered evidence', () => {
               ).toBe(role);
             }
             expect(
-              await page.locator('#native-rich-item [data-typography-prototype]').count()
+              await page.locator('#native-rich-item > [data-site-typography-carrier]').count()
             ).toBe(0);
+            expect(
+              await page
+                .locator(
+                  '#native-rich-copy > [data-site-typography-carrier] [data-typography-prototype]'
+                )
+                .count()
+            ).toBe(1);
             record.documentOwners = {
               listPaint: await typographyPaint(page, '#native-item'),
               tableHeadPaint: await typographyPaint(page, '#native-head'),
