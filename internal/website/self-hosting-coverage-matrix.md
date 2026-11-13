@@ -210,7 +210,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f9e18f47c7711d553647fc0bf4aed7c5b52788c9191276822dec6c50b184571a` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7` |
-| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `3aeb35ac682e39c3d963d1d595257344f5015c38402c64f4f6e501d3378ded72` |
+| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `09448a12ec077bc9b0929b18e59771e47f165e2ac5131cca9baa94e59c4108f7` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `790a774f44646bb2793e03b7851eea3673b1efe61c80d97fecd20b38f1bc7cb0` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `d2fabc42580014e9a1cdb52be5207d1931ca5823d6019822b17f0b3f18d5cb0e` |

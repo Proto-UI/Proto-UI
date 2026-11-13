@@ -172,6 +172,9 @@ describe('PrototypePreviewer fixed-family projection', () => {
     init(root);
     await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
 
+    const origin = document.createElement('button');
+    root.querySelector('.host')!.append(origin);
+    origin.focus();
     candidates[0]!.setLocked.mockClear();
     latestControls().runtime.onValueChange('react');
     expect(candidates[0]!.setLocked).toHaveBeenCalledWith(true);
@@ -193,11 +196,29 @@ describe('PrototypePreviewer fixed-family projection', () => {
       expect.anything(),
       'runtime-select',
       2,
-      document.body
+      origin
     );
 
     document.removeEventListener('proto-adapter:change', adapterChange);
     await previewerApi(root).destroy();
+  });
+
+  it('does not restore Runtime focus when a newer outside owner already has it', async () => {
+    const root = createRoot();
+    const outside = document.createElement('button');
+    root.after(outside);
+    init(root);
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+    outside.focus();
+
+    try {
+      latestControls().runtime.onValueChange('react');
+      await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe('react'));
+      expect(projection.restoreFocus).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      await previewerApi(root).destroy();
+    }
   });
 
   it('seals the current generation before a preference event can reenter Runtime switching', async () => {
@@ -329,6 +350,9 @@ describe('PrototypePreviewer fixed-family projection', () => {
     init(root);
     await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
 
+    const origin = document.createElement('button');
+    root.querySelector('.host')!.append(origin);
+    origin.focus();
     latestControls().runtime.onValueChange('react');
     await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe('react'));
 
