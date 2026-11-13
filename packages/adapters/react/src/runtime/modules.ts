@@ -131,6 +131,9 @@ import {
   createWebTextControlHost,
   TEXT_CONTROL_HOST_CAP,
   TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+  type TextControlHost,
+  type TextControlHostLease,
+  type WebTextControl,
 } from '@proto.ui/module-text-control';
 import {
   createWebImageViewHost,
@@ -312,7 +315,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
-  setTextControlDefaultValue: (value: string) => void;
+  setTextControlDefaultValue: (value: string | undefined, name: string | undefined) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
   isEntryAcquisitionReady: (target: HTMLElement) => boolean;
@@ -622,26 +625,85 @@ export function createReactModules<Props extends PropsBaseType>(args: {
 
 function createReactTextControlHost(
   getTarget: Parameters<typeof createWebTextControlHost>[0],
-  setDefaultValue: (value: string) => void
-) {
-  const host = createWebTextControlHost(getTarget);
-  const projectDefaultValue = (patch: TextControlPatch) => {
-    if (typeof patch.defaultValue === 'string') setDefaultValue(patch.defaultValue);
+  projectNativeProps: (defaultValue: string | undefined, name: string | undefined) => void
+): TextControlHost {
+  const projectPatch = (patch: TextControlPatch) => {
+    if (typeof patch.defaultValue === 'string' || typeof patch.name === 'string') {
+      projectNativeProps(patch.defaultValue, patch.name);
+    }
   };
 
   return {
-    attach(connection: Parameters<typeof host.attach>[0]) {
-      const lease = host.attach(connection);
-      projectDefaultValue(connection.patch);
-      return {
-        update(patch: TextControlPatch) {
-          lease.update(patch);
-          projectDefaultValue(patch);
-        },
-        snapshot: () => lease.snapshot(),
-        dispose: () => lease.dispose(),
-      };
+    attach(connection) {
+      const target = getTarget();
+      if (!target) throw new Error('[React Adapter] Text Control target is unavailable.');
+      const releaseDefaultValue = bindReactTextControlDefaultValue(target);
+      let lease: TextControlHostLease | undefined;
+      try {
+        const attachedLease = createWebTextControlHost(() => target).attach(connection);
+        lease = attachedLease;
+        projectPatch(connection.patch);
+        return {
+          update(patch) {
+            attachedLease.update(patch);
+            projectPatch(patch);
+          },
+          snapshot: () => attachedLease.snapshot(),
+          dispose() {
+            try {
+              attachedLease.dispose();
+            } finally {
+              releaseDefaultValue();
+            }
+          },
+        };
+      } catch (error) {
+        try {
+          lease?.dispose();
+        } catch {
+          // Preserve the original attach failure while releasing both resources.
+        }
+        try {
+          releaseDefaultValue();
+        } catch {
+          // A secondary binding release failure cannot replace the thrown value.
+        }
+        throw error;
+      }
     },
+  };
+}
+
+function bindReactTextControlDefaultValue(target: WebTextControl): () => void {
+  const previous = Object.getOwnPropertyDescriptor(target, 'defaultValue');
+  let descriptor = previous;
+  for (
+    let prototype = Object.getPrototypeOf(target);
+    !descriptor && prototype;
+    prototype = Object.getPrototypeOf(prototype)
+  ) {
+    descriptor = Object.getOwnPropertyDescriptor(prototype, 'defaultValue');
+  }
+  if (!descriptor?.get || !descriptor.set) {
+    throw new Error('[React Adapter] Text Control requires a native defaultValue accessor.');
+  }
+  const { get, set, enumerable } = descriptor;
+  // React 18/19 can rewrite defaultValue on an otherwise unrelated host commit.
+  // Keep the Web lease's unchanged-value rule at this renderer boundary too:
+  // even an equal native textarea defaultValue write can collapse its selection.
+  const setDefaultValue = function (this: WebTextControl, value: unknown) {
+    if (typeof value !== 'string' || get.call(this) !== value) set.call(this, value);
+  };
+  Object.defineProperty(target, 'defaultValue', {
+    configurable: true,
+    enumerable,
+    get,
+    set: setDefaultValue,
+  });
+  return () => {
+    if (Object.getOwnPropertyDescriptor(target, 'defaultValue')?.set !== setDefaultValue) return;
+    if (previous) Object.defineProperty(target, 'defaultValue', previous);
+    else Reflect.deleteProperty(target, 'defaultValue');
   };
 }
 

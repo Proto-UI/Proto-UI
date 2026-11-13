@@ -18,7 +18,7 @@ Label 当前仍是 **draft**。shadcn 投影复用独立的 Base Label 协议；
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-此例将当前 Label 投影与真实、视觉中性的 Base 控件配对，以隔离验证关联协议。On/Off 只订阅控件公开状态，没有第二套 value，也没有替 Label 转发 click 的页面监听器。Input 与 Textarea 是实际原生编辑器；此基准不声称已验证其他设计体系的控件投影。
+此例将 Shadcn Label 与 Shadcn Checkbox、Switch、Radio Group Item、Input、Textarea 配对，并使用本家族的 Indicator 与 Thumb 部件。可操作标签使用公开默认值；仅命名的示例显式设置 `activation={false}`。On/Off 读取目标的公开状态；Requests 记录受控 Checkbox 的普通 `checkedChange` 提案次数，应用所有者仍保持 `checked={false}`。Label 不转发 DOM click，也不拥有另一套控件值。Input 与 Textarea 仍由原生编辑器承载；只读示例可以通过 Label 获得焦点，文字保持不变。禁用选项保留名称，但拒绝激活和聚焦。
 
 ## 分开声明名称和激活
 
@@ -70,7 +70,4 @@ Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-LABEL.yaml', 'P-BASE-LABEL.yaml']} />
