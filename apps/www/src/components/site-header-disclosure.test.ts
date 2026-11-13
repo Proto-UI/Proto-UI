@@ -692,6 +692,44 @@ describe('compact navigation viewport and history', () => {
     callback(0);
     expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('59px');
   });
+  it('remeasures a compact panel for Header resize without reading it for a Button-only resize', () => {
+    let deliver!: (entries: Pick<ResizeObserverEntry, 'target'>[]) => void;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: typeof deliver) {
+          deliver = callback;
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+    );
+    try {
+      const { root, button, panel } = fixture();
+      vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+      vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+      const header = vi
+        .spyOn(root, 'getBoundingClientRect')
+        .mockReturnValue(new DOMRect(0, 0, 360, 56));
+      disclosure!.enhance();
+      disclosure!.toggle();
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+      header.mockClear();
+
+      deliver([{ target: button }]);
+      expect(header).not.toHaveBeenCalled();
+
+      header.mockReturnValue(new DOMRect(0, 0, 360, 100));
+      vi.mocked(Object.getOwnPropertyDescriptor(root, 'offsetHeight')!.get!).mockReturnValue(100);
+      deliver([{ target: button }, { target: root }]);
+      expect(header).toHaveBeenCalledOnce();
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
+    } finally {
+      disclosure?.destroy();
+      vi.unstubAllGlobals();
+    }
+  });
   it('closes on Back/Forward and restored pages without adding history entries', () => {
     const { panel } = fixture();
     const push = vi.spyOn(history, 'pushState');

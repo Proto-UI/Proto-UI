@@ -245,7 +245,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `262b743f2f8a8176c14431b234e9cbd2a9cfe20fd13cda70ff00d9934e8b8f58` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
-| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `5628ada1ac3a2470e4361be53a2b95ec0c11cfe776885c91f106b1a64d569c7d` |
+| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `de015b1ba532fcd04dbba06b845328b8c6ff2ea970a14f76cc0730cd756506d1` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `6ab5b4dc199f7a712d8058e621b3e91518cc2fa06fac25adfab1ab7b79dbace9` |
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `9403e6e3ed6909f9d416bf8fcc1626d4417da0de817c7993ee45f3f94615241f` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `196800157f8382e4a57c633953948498c521bdbd12c3447875a7c9c930fabcd8` |

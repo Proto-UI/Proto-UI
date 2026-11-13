@@ -199,10 +199,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const geometryObserver =
     typeof window?.ResizeObserver === 'function'
       ? new window.ResizeObserver((entries) => {
-          // Panel content/scroll extent can change independently of the toolbar.
-          // It never supplies the sticky Header height or creates a feedback loop.
-          if (!entries || entries.some((entry) => entry.target === root)) measureHeader();
-          positionPanel();
+          const headerResized = !entries || entries.some((entry) => entry.target === root);
+          if (headerResized) measureHeader();
+          // Compact placement uses the Header and viewport, not Button or
+          // panel size. A Button that changes Header size also delivers its entry.
+          if (headerResized || !compact?.matches) positionPanel();
         })
       : null;
   geometryObserver?.observe(root);
