@@ -5,6 +5,18 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers listbox semantics, asFocusRoving ownership, Transition-bound Overlay presence, anchored Portal positioning, keyboard navigation, typeahead, and dismissal.
 cases:
+  - id: T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-ITEM-SIZE
+    title: All current registered sibling rows share the Trigger size lease without changing alignment selection
+    covers: [P-BASE-SELECT-CONTENT-UNIFORM-ITEM-SIZE, P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT]
+    expectation: ordered-all-row-targets-include-disabled-and-unset-keeps-enabled-alignment-without-commit
+    notes:
+      - Logical binding tests do not establish actual browser dimensions, RTL, zoom, wrapping, paint or four-runtime conformance.
+  - id: T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-SIZE-BOUNDARY
+    title: Row replacement and size failure cannot preserve stale all-row delivery or silently choose popper
+    covers: [P-BASE-SELECT-CONTENT-UNIFORM-ITEM-SIZE, P-BASE-SELECT-CONTENT-PRESENTATION-ADMISSION]
+    expectation: old-target-lease-retires-and-host-size-conflict-remains-named-unavailability
+    notes:
+      - A supplied unavailable callback verifies consumer handling, not actual long-label overflow detection by a native host.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
     title: One Content owner separates logical open from complete composition presentation
     covers:
@@ -42,10 +54,15 @@ cases:
 implementations:
   - id: prototypes-base-select-current-request-lease
     kind: module-test
-    status: passing
+    status: needs-review
     path: packages/prototypes/base/test/select-alignment-controller.test.ts
     required: true
-    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION]
+    consumesCases:
+      - T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
+      - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-ITEM-SIZE
+      - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-SIZE-BOUNDARY
+    notes:
+      - The new multi-row cases are implemented but not executed on this candidate; prior passing metadata does not certify the changed behavior.
     exercises: [P-BASE-SELECT-CONTENT]
   - id: prototypes-base-select-alignment-owner
     kind: module-test
@@ -112,6 +129,9 @@ verifies:
     - id: P-BASE-SELECT-CONTENT
       anchors:
         [
+          P-BASE-SELECT-CONTENT-UNIFORM-ITEM-SIZE,
+          P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT,
+          P-BASE-SELECT-CONTENT-PRESENTATION-ADMISSION,
           P-BASE-SELECT-CONTENT-A11Y,
           P-BASE-SELECT-CONTENT-FOCUS-ROVING,
           P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE,
@@ -121,6 +141,9 @@ verifies:
         ]
 exercises: { prototypes: [P-BASE-SELECT-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Map the current-user uniform sibling-size direction to multi-row binding and named-failure boundaries; require fresh execution and keep native geometry evidence separate.
   - version: 0.3.0-alpha.1
     change: removed
     summary: Removed the real-Content popper size gate case together with the retired match-trigger size policy; popper composition now completes on current semantics alone.

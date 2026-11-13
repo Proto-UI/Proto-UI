@@ -8,6 +8,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   installSizingMotionTrace,
   sizingMotionIssues,
+  sizingItemSizeIssues,
   type SizingMotionHandle,
   type SizingMotionResult,
   type SizingMotionSelection,
@@ -201,10 +202,20 @@ function assertGeometry(
       Math.abs(aligned!.rect[edge] - value.trigger.rect[edge]),
       `aligned row ${edge} replaces trigger`
     ).toBeLessThanOrEqual(0.5);
+  // All four registered owned rows, including disabled siblings, share size.
+  // Only the aligned row above must replace the Trigger's position.
+  expect(
+    sizingItemSizeIssues(value.trigger.rect, value.items.map((item) => item.rect)),
+    'every current same-list row matches Trigger width and height'
+  ).toEqual([]);
   for (const item of value.items) {
     expect(
       item.scrollWidth - item.clientWidth,
       `${item.text} horizontal text overflow`
+    ).toBeLessThanOrEqual(1);
+    expect(
+      item.scrollHeight - item.clientHeight,
+      `${item.text} vertical text overflow`
     ).toBeLessThanOrEqual(1);
   }
   for (const [label, box] of [
