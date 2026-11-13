@@ -360,10 +360,11 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       for (const media of body.querySelectorAll<HTMLImageElement | SVGSVGElement>(PREVIEW_MEDIA)) {
         if (
           !(media instanceof HTMLImageElement || media instanceof SVGSVGElement) ||
-          !isPreviewCandidate(media, body) ||
-          !readPreviewSource(media)
+          !isPreviewCandidate(media, body)
         )
           continue;
+        const source = readPreviewSource(media);
+        if (!source) continue;
         const legacy = media.closest('button[data-diagram-open]');
         const original = legacy ?? media.closest('picture') ?? media;
         // Only migrate the known one-image legacy trigger, never unrelated actions.
@@ -389,7 +390,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         surface.style.pointerEvents = 'none';
         const binding = new AbortController();
         trigger.dataset.docsImageTrigger = '';
-        const name = `${labels.open}: ${readPreviewSource(media)!.alt}`;
+        const name = `${labels.open}: ${source.alt}`;
         trigger.title = name;
         // Button owns nameFromContent. Supply real label content instead of
         // writing an aria-label that its accessibility projection clears.

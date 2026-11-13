@@ -225,7 +225,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/adapter-preference.ts` | `www.demo.runtime-select`, `www.shell.adapter-select` | `f7101a19317c58dcc0901172e7da9afe71086a8544c6e9db9570fbbe5d8d38f8` |
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `633770a9da7279618a88f53af9a0cb9d69058e238fe14b88f93d1f795b0629ad` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `1c983f2780d83f4a4e8cd83ef45bb36e01e873510638ecadbe5ada6966943bd6` |
-| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `e70dd55bf8aa3c18beb24b79172365d5b0351a9495e74d9d49b929228bd1e712` |
+| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `f404732aae9830832165a820877d209082befe0aac3f4f64290b1e22129d2c85` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `be46b5e43f8604df479dcf59c4f10fc3d75301efc8fb48674ede91765e59de58` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `9bae80be9b490ab0f5e5da698d7b5f863fb16b42c3c37697ee42e6f335b7f8c3` |
 | `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9f14efcd4e059a441b798c3f9ff074f7546c5f3e85f95ec13abeba6e73c120cf` |
