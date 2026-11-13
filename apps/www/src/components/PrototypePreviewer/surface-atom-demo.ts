@@ -25,12 +25,19 @@ export function createSurfaceAtomDemo(
     root: {
       kind: 'box',
       className: 'flex max-w-xl flex-col gap-4 p-2',
-      children: cases.map(({ label, props }) => ({
-        kind: 'proto',
+      children: [...cases.map(({ label, props }) => ({
+        kind: 'proto' as const,
         prototypeId,
         props,
-        children: [{ kind: 'box', className: 'p-4', children: [label] }],
-      })),
+        children: [{ kind: 'box' as const, className: 'p-4', children: [label] }],
+      })), ...(family === 'bootstrap-2-3-2' ? [{
+        kind: 'box' as const, className: 'bg-[#0044cc] p-4',
+        children: [false, true].map((focusVisible) => ({
+          kind: 'proto' as const, prototypeId,
+          props: { variant: 'transparent', colorContext: 'navbar', border: 'none', focusVisible },
+          children: [focusVisible ? 'Blue navbar · supplied focus' : 'Blue navbar · rest'],
+        })),
+      }] : [])],
     },
   };
 }

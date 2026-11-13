@@ -749,10 +749,12 @@
   display: none !important;
 }
 
-/* Bootstrap 2.3.2 navbar-static-top / navbar-inverse. Website Header owns this
+/* User-directed accessible blue adaptation of Bootstrap 2.3.2 navbar-static-top.
+   Website Header owns this
    navigation frame; component surfaces keep their public family projections.
    Source: twbs/bootstrap v2.3.2 less/navbar.less (Apache-2.0). */
 [data-site-library-family='bootstrap-2-3-2'] .site-header {
+  color: var(--site-bootstrap-navbar-foreground);
   background: linear-gradient(
     var(--site-bootstrap-navbar-top),
     var(--site-bootstrap-navbar-bottom)
@@ -763,7 +765,7 @@
   --site-header-brand-navigation-gap: 1.5rem;
 }
 [data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
-  text-shadow: 0 1px 0 rgb(255 255 255 / 30%);
+  text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
 }
 :root[data-theme='dark'][data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
@@ -777,4 +779,23 @@
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-preferences .pui-projection-controls {
     grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr);
   }
+}
+
+/* Native fallback ink and non-interactive labels only. Real Button/Select and
+   passive Surface/Text retain their public family presentation. */
+/* Docs moves the complete Runtime preference owner between the wide toolbar
+   and compact popup. Only its wide destination sits on the blue navbar. */
+[data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-wide-preferences] .site-header-runtime-label,
+[data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-wide-preferences] .pui-projection-control-label,
+[data-site-library-family='bootstrap-2-3-2'] .site-header > .home-runtime-status {
+  color: var(--site-bootstrap-navbar-foreground);
+}
+[data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-panel-content] {
+  color: var(--site-bootstrap-foreground);
+}
+
+[data-site-library-family='bootstrap-2-3-2'] .site-header-brand a:not([data-site-link-enhanced]):focus-visible,
+[data-site-library-family='bootstrap-2-3-2'] [data-site-header-desktop-navigation] a:not([data-site-link-enhanced]):focus-visible {
+  outline: 2px solid var(--site-bootstrap-navbar-foreground);
+  outline-offset: 2px;
 }

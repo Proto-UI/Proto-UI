@@ -24,12 +24,13 @@ describe('Bootstrap readable page adaptation', () => {
       for (const background of [
         palette.background,
         palette.secondary,
-        palette['navbar-top'],
-        palette['navbar-bottom'],
         palette.muted,
       ]) {
         expect(contrast(palette.foreground, background)).toBeGreaterThanOrEqual(4.5);
         expect(contrast(palette['muted-foreground'], background)).toBeGreaterThanOrEqual(4.5);
+      }
+      for (const background of [palette['navbar-top'], palette['navbar-bottom']]) {
+        expect(contrast(palette['navbar-foreground'], background)).toBeGreaterThanOrEqual(4.5);
       }
     });
   }
@@ -43,7 +44,7 @@ describe('Bootstrap readable page adaptation', () => {
     expect(contrast(THEME.light['accent-foreground'], THEME.light.accent)).toBeGreaterThanOrEqual(
       4.5
     );
-    expect(renderThemeCss()).toContain('--pui-navbar-border: #080808');
+    expect(renderThemeCss()).toContain('--pui-navbar-border: #002b60');
   });
   it('keeps composed light and dark surface pairs semantic', () => {
     const popover = readFileSync(
