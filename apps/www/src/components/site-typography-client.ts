@@ -91,12 +91,13 @@ export function initDocumentationTypography(doc: Document = document) {
       return;
     }
     const selection = { runtimeId: runtime, projectionFamilyId: family() };
+    const sourceChanged = participant.needsRefresh();
     if (
-      participant.needsRefresh() ||
+      sourceChanged ||
       snapshot.selection.runtimeId !== runtime ||
       snapshot.selection.projectionFamilyId !== selection.projectionFamilyId
     )
-      void observe(controller.request(selection, { force: participant.needsRefresh() }));
+      void observe(controller.request(selection, { force: sourceChanged }));
   };
   const preference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;

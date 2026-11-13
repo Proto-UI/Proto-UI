@@ -12,6 +12,7 @@ import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-prefer
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 const preparation = vi.hoisted(() => ({
   hold: null as null | { reached(): void; gate: Promise<void> },
+  readRefresh: vi.fn(),
 }));
 vi.mock('./site-typography', async (original) => {
   const actual = await original<typeof import('./site-typography')>();
@@ -21,6 +22,10 @@ vi.mock('./site-typography', async (original) => {
       const participant = actual.siteTypographyParticipant(...args);
       return {
         ...participant,
+        needsRefresh() {
+          preparation.readRefresh();
+          return participant.needsRefresh();
+        },
         async materialize(request: Parameters<typeof participant.materialize>[0]) {
           const candidate = await participant.materialize(request);
           const held = preparation.hold;
@@ -257,6 +262,35 @@ describe('independent lifecycle positive controls', () => {
 });
 
 describe('source sibling order and immediate owner replacement', () => {
+  it('scans native source once when scheduling a Docs replacement', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    let release!: () => void;
+    let reached!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const prepared = new Promise<void>((resolve) => (reached = resolve));
+    preparation.hold = { gate, reached };
+    preparation.readRefresh.mockClear();
+    const paragraph = document.createElement('p');
+    const source = document.createTextNode('Appended native paragraph');
+    paragraph.append(source);
+    flow.append(paragraph);
+    try {
+      await prepared;
+      expect(preparation.readRefresh).toHaveBeenCalledOnce();
+    } finally {
+      release();
+      preparation.hold = null;
+    }
+    await vi.waitFor(() =>
+      expect(paragraph.querySelector('[data-site-typography-slot]')?.firstChild).toBe(source)
+    );
+  });
+
   it('keeps a CodeExample tab hint in its native owner without replacing the Docs generation', async () => {
     const root = fixture();
     const flow = root.querySelector('[data-doc-flow]')!;
