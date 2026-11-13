@@ -257,6 +257,38 @@ describe('independent lifecycle positive controls', () => {
 });
 
 describe('source sibling order and immediate owner replacement', () => {
+  it('keeps a CodeExample tab hint in its native owner without replacing the Docs generation', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const articleText = root.querySelector('#body')!;
+    const example = document.createElement('section');
+    example.dataset.codeExample = '';
+    const hint = document.createElement('p');
+    hint.dataset.codeHostOverflow = '';
+    const hintSource = document.createTextNode('Scroll to see all hosts');
+    hint.append(hintSource);
+    example.append(hint);
+    flow.append(example);
+
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    const generation = articleText.dataset.typographyGeneration;
+    expect(generation).toBeTruthy();
+    expect(hint.firstChild).toBe(hintSource);
+    expect(hint.hasAttribute('data-typography-owner')).toBe(false);
+
+    const projectedTabs = document.createElement('div');
+    projectedTabs.dataset.codeExampleTabsProjection = 'shadcn';
+    example.append(projectedTabs);
+    projectedTabs.append(hint);
+    await settle();
+    expect(articleText.dataset.typographyGeneration).toBe(generation);
+    expect(hint.firstChild).toBe(hintSource);
+    expect(hint.parentElement).toBe(projectedTabs);
+  });
+
   it('ignores renderer-owned Copy and Code children but reconciles their native caption parent', async () => {
     const root = fixture();
     const flow = root.querySelector('[data-doc-flow]')!;
