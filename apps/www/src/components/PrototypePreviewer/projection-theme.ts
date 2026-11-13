@@ -139,7 +139,11 @@ export function applyProjectionThemeSurfaceStyle(
     if (!nextProperties.has(property)) element.style.removeProperty(property);
   }
   for (const [property, value] of Object.entries(theme)) {
-    element.style.setProperty(property, value);
+    if (
+      element.style.getPropertyValue(property) !== value ||
+      element.style.getPropertyPriority(property)
+    )
+      element.style.setProperty(property, value);
   }
   appliedThemeProperties.set(element, nextProperties);
 }
