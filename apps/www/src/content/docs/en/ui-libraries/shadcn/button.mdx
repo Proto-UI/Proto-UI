@@ -9,17 +9,9 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import CodeExample from '@/components/CodeExample.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
-import { getCode } from '@/utils/conversionUtils';
+import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-export const exampleFiles = (id) => ({
-  wc: [{ name: 'button.html', lang: 'html', code: getCode('wc', id, codeMap) }],
-  react: [{ name: 'button.tsx', lang: 'tsx', code: getCode('react', id, codeMap) }],
-  vue: [{ name: 'button.vue', lang: 'vue', code: getCode('vue', id, codeMap) }],
-  vue2: [{ name: 'button.vue', lang: 'vue', code: getCode('vue2', id, codeMap) }],
-});
-
-Buttons trigger actions. The same prototype runs in every supported Web host; use the runtime selector to compare it without changing the interaction contract.
+Buttons trigger actions. This is Proto UI's unofficial Shadcn projection over Base Button. The previews use current workspace source in WC, React, Vue 3 and Vue 2.6; their package-install and visual acceptance results are separate.
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -28,14 +20,40 @@ Buttons trigger actions. The same prototype runs in every supported Web host; us
   toolbar={false}
   codePanel={false}
 />
+<CodeExample label="Button overview code" files={exampleFiles('demo-button')} />
 
 ## Install
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-button" manager="npm" />
+First [initialize an existing application](/en/start-here/quick-start/). The published stable 0.2.0 baseline uses:
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-button" manager="npm" />
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+Replace `wc` with `react` or `vue` for those stable hosts. The CLI installs `@proto.ui/prototypes-shadcn` and the corresponding Adapter at its own exact version and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named style profiles shown below require matching workspace 0.3 CLI/Adapter/Prototype source. Stable `@latest` does not establish that delivery; the workspace `0.3.0-alpha.1` manifest does not establish registry publication.
+
+## Usage and presentation
+
+Each Code panel includes registration/imports and the application's example stylesheet. Keep the generated `proto-ui-style.css` import in one application entry. WC uses the generated `proto-ui-shadcn-button` tag; React exports a named example to render from the existing app, and Vue examples are single-file components. Adjust relative paths to the initialized project's layout. The small layout and visually hidden-label rules are application-owned and do not require Tailwind.
+
+The examples request `styleProfile="rhea"` explicitly, matching the preview's public Shadcn style scope. Current source recognizes `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea` and `new-york-v4`; `new-york` is the legacy alias. Omission or `inherit` uses the nearest scope and then the Button's Rhea fallback. These examples demonstrate Rhea, not visual acceptance of every profile or component.
 
 ## Examples
+
+### Variant matrix
+
+All six current variants are shown together. `link` is a visual command variant; it does not supply an `href` or navigation behavior.
+
+<PrototypePreviewer
+  demoId="demo-button-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="All Button variants code" files={exampleFiles('demo-button-variants')} />
 
 ### Default
 
@@ -96,6 +114,8 @@ Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
 
 Use `sm`, `default`, `lg`, `icon` or the compact `icon-compact` extension. `icon-compact` is a fixed 1.75rem square, including when `wrap` is enabled.
 
+Both icon-size examples keep “Add” as visually hidden content and hide the decorative plus from the accessibility tree. The Button emits its ordinary `click` signal; the consuming application owns the action. A glyph alone is not an accessible label.
+
 <PrototypePreviewer
   demoId="demo-button-sizes"
   initialRuntime="wc"
@@ -118,11 +138,28 @@ Disabled buttons suppress activation and keep their disabled semantics across ho
 />
 <CodeExample label="Disabled button code" files={exampleFiles('demo-button-disabled')} />
 
+## Navigation, groups and busy state
+
+Use a native anchor for navigation, preserving its actual URL and full text: [Read Quick Start](/en/start-here/quick-start/). The equivalent application composition is:
+
+```html
+<a href="/en/start-here/quick-start/">Read Quick Start</a>
+```
+
+Do not put an anchor inside Button or invent `asChild`, `href`, `loading` or `isLoading` props. Base remains the activation and disabled owner. For a real asynchronous action, the application owns pending state, drives `disabled`, keeps a meaningful name and reports progress/completion. A spinner alone is not a busy-state or activation guard.
+
+Ordinary layout can group independent actions. Use the documented [Toolbar](../toolbar/) when its keyboard model is the intended composition. A dedicated Button Group API, loading/spinner composition, icon-and-text matrix, all-profile evidence and native-link visual comparison are still separate conditions in [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042); this pilot does not claim them complete.
+
 ## API Reference
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice (see Usage)',
+      default: 'inherit → nearest scope → rhea',
+    },
     {
       name: 'variant',
       type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
@@ -134,7 +171,9 @@ Disabled buttons suppress activation and keep their disabled semantics across ho
   ]}
 />
 
-## References
+## Lifecycle and evidence
+
+`P-SHADCN-BUTTON` and `P-BASE-BUTTON` remain draft. The existing previews and source are not fresh package, browser, focus, screen-reader or full upstream-parity evidence. Preserve the original [documentation checkpoints](/en/build/prototypes/documentation-coverage/) and [Button implementation evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/test/button.test.ts) with their actual revisions. Runtime switching and narrow/mobile/enlarged-text acceptance still require candidate-bound observation.
 
 <SpecEntityLinks
   directory="spec/prototypes"
