@@ -180,8 +180,11 @@ function resolveBoundary(
 function preserveSelection(document: Document, move: () => void): void {
   const focus = document.activeElement as HTMLElement | null;
   const selection = document.getSelection();
-  const anchor = captureBoundary(selection?.anchorNode ?? null, selection?.anchorOffset ?? 0);
-  const extent = captureBoundary(selection?.focusNode ?? null, selection?.focusOffset ?? 0);
+  const anchorNode = selection?.anchorNode;
+  const focusNode = selection?.focusNode;
+  const anchor =
+    selection && anchorNode ? captureBoundary(anchorNode, selection.anchorOffset) : null;
+  const extent = selection && focusNode ? captureBoundary(focusNode, selection.focusOffset) : null;
   move();
   if (focus?.isConnected && document.activeElement !== focus) focus.focus({ preventScroll: true });
   const nextAnchor = resolveBoundary(anchor);

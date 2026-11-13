@@ -624,6 +624,32 @@ it('discovers native note-title intent before any asynchronous Surface bootstrap
 // endpoints remain identical. Happy DOM does not model those browser steps;
 // the controlled side effect below makes that source ownership boundary red.
 describe('startup typography and independent native selection owners', () => {
+  it('preserves the native owner without reading offsets for an empty selection', async () => {
+    const root = fixture();
+    const source = root.querySelector('#body')!.firstChild!;
+    const command = document.createElement('button');
+    command.textContent = 'Header command';
+    root.prepend(command);
+    const candidate = await siteTypographyParticipant(root).materialize(request('react', 1));
+    candidates.push(candidate);
+    command.focus();
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    expect(selection.anchorNode).toBeNull();
+    expect(selection.focusNode).toBeNull();
+    const anchorOffset = vi.spyOn(selection, 'anchorOffset', 'get');
+    const focusOffset = vi.spyOn(selection, 'focusOffset', 'get');
+
+    candidate.activate();
+    expect(root.querySelector('#body [data-site-typography-slot]')!.firstChild).toBe(source);
+    await candidate.dispose();
+    expect(root.querySelector('#body')!.firstChild).toBe(source);
+    expect(document.activeElement).toBe(command);
+    expect(selection.anchorNode).toBeNull();
+    expect(selection.focusNode).toBeNull();
+    expect([anchorOffset.mock.calls.length, focusOffset.mock.calls.length]).toEqual([0, 0]);
+  });
+
   for (const focusOwner of ['button', 'a'] as const)
     it(`does not reapply a retained code selection while ${focusOwner} owns focus`, async () => {
       const root = fixture();
