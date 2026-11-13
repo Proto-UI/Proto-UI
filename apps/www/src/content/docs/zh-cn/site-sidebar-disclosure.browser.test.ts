@@ -289,6 +289,11 @@ it('no-JS SSR scopes current-only defaults to UI Libraries and preserves other n
       .first();
     await group.locator(':scope > summary').click();
     expect(await group.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
+    // The first leaf also belongs to a nested native disclosure.
+    const family = group.locator(':scope > ul > li > details').first();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(false);
+    await family.locator(':scope > summary').click();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
     const link = group.locator('a[href]').first();
     expect(await link.isVisible()).toBe(true);
   } finally {
