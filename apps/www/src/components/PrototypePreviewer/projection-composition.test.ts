@@ -1154,6 +1154,52 @@ describe('Website projection composition', () => {
       (cleanup as () => void)();
     }
   });
+  it('restamps changed projection coordinates without rewriting identical attributes', () => {
+    const theme = { '--pui-background': '#fff' };
+    const composition = createProjectionComposition({
+      ownerId: 'restamp-owner',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 9,
+      componentId: 'button',
+      childDemo: {
+        type: 'demo',
+        root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'content-button' },
+      },
+      controls: controls(),
+      controlIds: [],
+      themeSurfaceStyle: theme,
+    });
+    const { host, refs } = mountDemoTree(composition.demo);
+    const marker = refs['content-button']!;
+    const boundary = document.createElement('div');
+    boundary.setAttribute('data-pui-root', '');
+    marker.replaceWith(boundary);
+    boundary.append(marker);
+    const cleanup = composition.demo.setup?.({
+      host,
+      refs,
+      api: { call: () => undefined, getExposes: () => undefined, setProps: () => undefined },
+    });
+    const observer = new MutationObserver(() => {});
+    try {
+      boundary.removeAttribute('data-projection-prototype');
+      observer.observe(boundary, { attributes: true, subtree: true });
+      composition.setThemeSurfaceStyle({ '--pui-background': '#111' });
+      expect(marker.style.getPropertyValue('--pui-background')).toBe('#111');
+      expect(boundary.getAttribute('data-projection-prototype')).toBe('shadcn-button');
+      expect(
+        observer
+          .takeRecords()
+          .filter(({ attributeName }) => attributeName?.startsWith('data-projection-'))
+          .map(({ target, attributeName }) => [target === boundary, attributeName])
+      ).toEqual([[true, 'data-projection-prototype']]);
+    } finally {
+      observer.disconnect();
+      (cleanup as () => void)();
+    }
+  });
+
   it('stamps SVG Prototype surfaces with generation identity and theme values', async () => {
     const componentFamily = PROJECTION_FAMILY_MANIFESTS.shadcn.families.toggle;
     const childDemo = await loadDemo(componentFamily.recipeId);
