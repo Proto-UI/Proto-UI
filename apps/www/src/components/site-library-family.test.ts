@@ -50,6 +50,34 @@ describe('website library family scope', () => {
     ).toBe(true);
   });
 
+  it('emits family mutations only for scope markers whose value changes', () => {
+    const attr = 'data-site-library-family';
+    const html = document.documentElement;
+    const current = document.querySelector<HTMLElement>('main')!;
+    html.setAttribute(attr, 'shadcn');
+    const stale = document.createElement('section');
+    stale.dataset.siteFamilyScope = '';
+    stale.setAttribute(attr, 'brutalist');
+    document.body.append(stale);
+    const observer = new MutationObserver(() => {});
+    observer.observe(html, { attributes: true, subtree: true, attributeFilter: [attr] });
+    try {
+      applySiteLibraryFamily(document, 'shadcn');
+      expect(observer.takeRecords().map(({ target }) => target)).toEqual([stale]);
+      expect(stale.getAttribute(attr)).toBe('shadcn');
+
+      applySiteLibraryFamily(document, 'brutalist');
+      expect(observer.takeRecords().map(({ target }) => target)).toEqual([html, current, stale]);
+      expect([html, current, stale].map((scope) => scope.getAttribute(attr))).toEqual([
+        'brutalist',
+        'brutalist',
+        'brutalist',
+      ]);
+    } finally {
+      observer.disconnect();
+    }
+  });
+
   it('updates only application scope markers on successful commit and can restore them', () => {
     document.documentElement.style.setProperty('--pui-background', 'canonical-shadcn');
     localStorage.setItem('preferred-prototypes-adapter', 'vue2');
