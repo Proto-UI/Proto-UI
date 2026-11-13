@@ -335,7 +335,8 @@ export function siteTypographyParticipant(
         // previews and portals; no second system-font override after staging.
         for (const view of views) applyProjectionThemeSurfaceStyle(view.surface, theme);
       };
-      const restoreNative = () =>
+      const restoreNative = () => {
+        if (!views.some((view) => activeViews.get(view.native) === view)) return;
         preserveSelection(document, () => {
           for (const view of views) {
             if (activeViews.get(view.native) !== view) continue;
@@ -347,6 +348,7 @@ export function siteTypographyParticipant(
             for (const marker of MARKERS) view.native.removeAttribute(marker);
           }
         });
+      };
       const dispose = async () => {
         if (disposed) return;
         disposed = true;

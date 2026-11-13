@@ -624,6 +624,33 @@ it('discovers native note-title intent before any asynchronous Surface bootstrap
 // endpoints remain identical. Happy DOM does not model those browser steps;
 // the controlled side effect below makes that source ownership boundary red.
 describe('startup typography and independent native selection owners', () => {
+  it('reads document selection only when a disposing batch still owns native text', async () => {
+    const root = fixture();
+    const body = root.querySelector('#body')!;
+    const source = body.firstChild!;
+    const participant = siteTypographyParticipant(root);
+    const first = await participant.materialize(request('wc', 1));
+    const second = await participant.materialize(request('wc', 2, 'brutalist'));
+    const cancelled = await participant.materialize(request('wc', 3));
+    candidates.push(first, second, cancelled);
+    first.activate();
+    second.activate();
+    const selection = document.getSelection()!;
+    selection.setBaseAndExtent(source, 3, source, 3);
+    const readSelection = vi.spyOn(document, 'getSelection');
+
+    await cancelled.dispose();
+    await first.dispose();
+    expect(readSelection).not.toHaveBeenCalled();
+    expect(body.querySelector('[data-site-typography-slot]')!.firstChild).toBe(source);
+
+    await second.dispose();
+    expect(readSelection).toHaveBeenCalledTimes(1);
+    expect(body.firstChild).toBe(source);
+    expect(selection.anchorNode).toBe(source);
+    expect(selection.anchorOffset).toBe(3);
+  });
+
   it('preserves the native owner without reading offsets for an empty selection', async () => {
     const root = fixture();
     const source = root.querySelector('#body')!.firstChild!;
