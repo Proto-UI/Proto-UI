@@ -648,9 +648,10 @@ describe('compact navigation viewport and history', () => {
       expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
       expect(panel.style.getPropertyValue('--site-header-panel-max-height')).toBe('731px');
       expect({
+        anchorReads: vi.mocked(button.getBoundingClientRect).mock.calls.length,
         panelWidthReads: panelBox.mock.calls.length,
         rootStyleReads: computedStyle.mock.calls.filter(([element]) => element === root).length,
-      }).toEqual({ panelWidthReads: 0, rootStyleReads: 0 });
+      }).toEqual({ anchorReads: 0, panelWidthReads: 0, rootStyleReads: 0 });
     });
   }
   it('closes on Back/Forward and restored pages without adding history entries', () => {

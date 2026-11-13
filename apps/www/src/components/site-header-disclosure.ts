@@ -127,9 +127,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const positionPanel = () => {
     const button = activeButton();
     if (destroyed || !enhanced || !open || !panel || !button || !window) return;
-    const anchor = button.getBoundingClientRect();
+    const mobile = !!compact?.matches;
+    const anchor = mobile ? null : button.getBoundingClientRect();
     const header = root.getBoundingClientRect();
-    if (anchor.width <= 0 || header.width <= 0) return;
+    if (header.width <= 0 || (anchor && anchor.width <= 0)) return;
     // Rects include zoom/transforms; absolute offsets use the containing block's
     // layout pixels. Use the actual current Button, not the header's far edge.
     const scaleX = root.offsetWidth > 0 ? header.width / root.offsetWidth : 1;
@@ -138,14 +139,13 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
     const rightEdge = (viewport?.offsetLeft ?? 0) + (viewport?.width ?? window.innerWidth) - 8;
     const bottomEdge = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8;
-    const mobile = !!compact?.matches;
-    const rtl = !mobile && window.getComputedStyle(root).direction === 'rtl';
-    const availableWidth = mobile
-      ? rightEdge - leftEdge
-      : Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge);
+    const rtl = anchor !== null && window.getComputedStyle(root).direction === 'rtl';
+    const availableWidth = anchor
+      ? Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge)
+      : rightEdge - leftEdge;
     // A mobile navigation panel belongs below the complete header, independent
     // of the trigger's hover translation or wrapped toolbar rows.
-    const top = (mobile ? header.bottom : anchor.bottom) + 5 * scaleY;
+    const top = (anchor?.bottom ?? header.bottom) + 5 * scaleY;
     const values: Record<string, string> = {
       '--site-header-panel-max-width': `${Math.max(0, Math.min(rightEdge - leftEdge, availableWidth)) / scaleX}px`,
       '--site-header-panel-top': `${(top - header.top) / scaleY - root.clientTop}px`,
@@ -154,7 +154,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     for (const [name, value] of Object.entries(values))
       if (panel.style.getPropertyValue(name) !== value) panel.style.setProperty(name, value);
     let left = leftEdge;
-    if (!mobile) {
+    if (anchor) {
       const width = panel.getBoundingClientRect().width;
       const aligned = rtl ? anchor.left : anchor.right - width;
       left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
