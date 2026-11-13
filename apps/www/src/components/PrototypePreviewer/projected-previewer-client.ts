@@ -344,15 +344,18 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       let watcherPublished = false;
 
       try {
-        candidate.setThemeSurfaceStyle(
-          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
-        );
-        if (!previousStopThemeWatcher) {
+        if (previousStopThemeWatcher) {
+          candidate.setThemeSurfaceStyle(
+            resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
+          );
+        } else {
           preparedStopThemeWatcher = watchProjectionThemeSurfaceStyle(
             projectionFamilyId,
             root,
             (theme) => {
-              if (
+              if (!preparedStopThemeWatcher) {
+                candidate.setThemeSurfaceStyle(theme);
+              } else if (
                 watcherPublished &&
                 stopThemeWatcher === preparedStopThemeWatcher &&
                 activeCandidate
