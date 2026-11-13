@@ -651,7 +651,7 @@ describe('startup typography and independent native selection owners', () => {
     expect(selection.anchorOffset).toBe(3);
   });
 
-  it('preserves the native owner without reading offsets for an empty selection', async () => {
+  it('preserves the native owner without reading the other boundary for an empty selection', async () => {
     const root = fixture();
     const source = root.querySelector('#body')!.firstChild!;
     const command = document.createElement('button');
@@ -664,6 +664,8 @@ describe('startup typography and independent native selection owners', () => {
     selection.removeAllRanges();
     expect(selection.anchorNode).toBeNull();
     expect(selection.focusNode).toBeNull();
+    const anchorNode = vi.spyOn(selection, 'anchorNode', 'get');
+    const focusNode = vi.spyOn(selection, 'focusNode', 'get');
     const anchorOffset = vi.spyOn(selection, 'anchorOffset', 'get');
     const focusOffset = vi.spyOn(selection, 'focusOffset', 'get');
 
@@ -672,6 +674,7 @@ describe('startup typography and independent native selection owners', () => {
     await candidate.dispose();
     expect(root.querySelector('#body')!.firstChild).toBe(source);
     expect(document.activeElement).toBe(command);
+    expect([anchorNode.mock.calls.length, focusNode.mock.calls.length]).toEqual([2, 0]);
     expect(selection.anchorNode).toBeNull();
     expect(selection.focusNode).toBeNull();
     expect([anchorOffset.mock.calls.length, focusOffset.mock.calls.length]).toEqual([0, 0]);

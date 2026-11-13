@@ -183,9 +183,10 @@ function preserveSelection(document: Document, move: () => void): void {
   const focus = document.activeElement as HTMLElement | null;
   const selection = document.getSelection();
   const anchorNode = selection?.anchorNode;
-  const focusNode = selection?.focusNode;
   const anchor =
     selection && anchorNode ? captureBoundary(anchorNode, selection.anchorOffset) : null;
+  // Restoration requires both endpoints, even when the selection is collapsed.
+  const focusNode = anchor ? selection?.focusNode : null;
   const extent = selection && focusNode ? captureBoundary(focusNode, selection.focusOffset) : null;
   move();
   if (focus?.isConnected && document.activeElement !== focus) focus.focus({ preventScroll: true });
