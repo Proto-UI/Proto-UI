@@ -102,11 +102,43 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   const subscribers = new Set<() => void>();
   const publishState = () => subscribers.forEach((paint) => paint());
   const focusTargets = new Set<{ command: SearchCommand; active(): boolean; focus(): void }>();
+  const homepage = !!root.closest('[data-homepage-runtime]');
   let focusEpoch = 0;
-  const onFocus = () => {
+  let dialogFocusEpoch = 0;
+  let rememberedDialogFocus: {
+    candidate: MaterializedProjectionCandidate;
+    request: SiteSearchFocusRestore;
+    replacement?: { owner: string; generation: string };
+  } | null = null;
+  const onFocus = (event: FocusEvent) => {
     focusEpoch++;
+    if (!homepage || event.target === document.body || event.target === document.documentElement)
+      return;
+    const replacement = rememberedDialogFocus?.replacement;
+    if (replacement && event.target instanceof view.HTMLElement) {
+      const scope = event.target.closest<HTMLElement>(
+        '[data-projection-owner][data-projection-generation]'
+      );
+      // Focus inside the speculative Dialog is part of its activation.
+      // Until the old view retires, it cannot invalidate rollback focus.
+      if (
+        scope?.dataset.projectionOwner === replacement.owner &&
+        scope.dataset.projectionGeneration === replacement.generation
+      )
+        return;
+    }
+    dialogFocusEpoch++;
   };
   document.addEventListener('focusin', onFocus, true);
+  let dialogCloseEpoch = 0;
+  const offDialogFocus =
+    homepage && search
+      ? search.session.subscribe(() => {
+          if (!rememberedDialogFocus || search.session.read().open) return;
+          dialogCloseEpoch++;
+          rememberedDialogFocus = null;
+        })
+      : undefined;
   const rememberedFocus = new Map<
     number,
     { command: SearchCommand; origin: Element | null; epoch: number }
@@ -382,7 +414,11 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     ) {
       if (!search || !dialogMount) throw new Error('Public Search owner is missing');
       const family = request.selection.projectionFamilyId as SiteLibraryFamily;
+      const focusCloseEpoch = dialogCloseEpoch;
+      let pendingFocusRestore = rememberedDialogFocus?.request ?? null;
       let candidate: MaterializedProjectionCandidate | undefined;
+      let activated = false;
+      let locked = false;
       const current = () =>
         !!candidate &&
         candidate.host.dataset.projectionGenerationState === 'active' &&
@@ -393,11 +429,18 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         session: search.session,
         copy: search.copy,
         isCurrent: current,
+        retainsOpenWhileLocked: () => homepage && activated && locked,
         onFailure: (error) => {
           if (current()) search.fail(error);
         },
-        focusEpoch: options?.focusEpoch ?? (() => 0),
-        takeFocusRestore: options?.takeFocusRestore ?? (() => null),
+        focusEpoch: options?.focusEpoch ?? (() => dialogFocusEpoch),
+        takeFocusRestore:
+          options?.takeFocusRestore ??
+          (() => {
+            const pending = pendingFocusRestore;
+            pendingFocusRestore = null;
+            return focusCloseEpoch === dialogCloseEpoch ? pending : null;
+          }),
       });
       const ids = new Set<string>();
       collectPrototypeIds(composition.demo.root, ids);
@@ -422,8 +465,88 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       return {
         ...prepared,
         activate() {
+          const previousGeneration = root.dataset.searchGeneration;
+          const replacesOpenHomepageDialog =
+            !activated &&
+            homepage &&
+            !!previousGeneration &&
+            previousGeneration !== String(request.generation) &&
+            search.session.read().open;
+          if (replacesOpenHomepageDialog && rememberedDialogFocus)
+            rememberedDialogFocus.replacement = {
+              owner: ownerId,
+              generation: String(request.generation),
+            };
           prepared.activate();
-          composition.activate();
+          activated = true;
+          composition.activate(
+            replacesOpenHomepageDialog
+              ? (panel) => {
+                  const origin = document.activeElement;
+                  const epoch = focusEpoch;
+                  if (
+                    origin &&
+                    origin !== document.body &&
+                    origin !== document.documentElement &&
+                    !panel?.contains(origin)
+                  )
+                    return;
+                  return () => {
+                    const active = document.activeElement;
+                    if (
+                      epoch === focusEpoch &&
+                      (active === origin ||
+                        active === document.body ||
+                        active === document.documentElement)
+                    )
+                      focus('open');
+                  };
+                }
+              : undefined
+          );
+        },
+        setLocked(nextLocked: boolean) {
+          if (homepage && activated) {
+            if (nextLocked && current()) {
+              // The page transaction locks the retained projection before it
+              // prepares the replacement. Read its owned focus before inert
+              // can move focus back to the document.
+              const origin = document.activeElement;
+              const control =
+                origin instanceof view.HTMLElement
+                  ? origin.closest<HTMLElement>('[data-demo-ref]')
+                  : null;
+              rememberedDialogFocus =
+                search.session.read().open &&
+                control?.dataset.projectionOwner === ownerId &&
+                control.dataset.projectionGeneration === String(request.generation) &&
+                control.dataset.demoRef
+                  ? {
+                      candidate: prepared,
+                      request: { ref: control.dataset.demoRef, origin, epoch: dialogFocusEpoch },
+                    }
+                  : null;
+            }
+          }
+          locked = nextLocked;
+          const retainedFocus = locked ? null : rememberedDialogFocus;
+          const result = prepared.setLocked?.(locked);
+          if (locked || !homepage || !activated) return result;
+          const resume = () => {
+            if (!alive || !prepared.host.isConnected || !current()) return;
+            composition.activate();
+            if (retainedFocus?.candidate !== prepared || rememberedDialogFocus !== retainedFocus)
+              return;
+            rememberedDialogFocus = null;
+            if (document.activeElement !== retainedFocus.request.origin)
+              composition.restoreFocus(retainedFocus.request);
+          };
+          if (result) return result.then(resume);
+          resume();
+        },
+        dispose() {
+          if (rememberedDialogFocus?.candidate === prepared) rememberedDialogFocus = null;
+          return prepared.dispose();
         },
       };
     },
@@ -469,6 +592,8 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     dispose() {
       alive = false;
       callbacks = null;
+      offDialogFocus?.();
+      rememberedDialogFocus = null;
       search?.dispose();
       subscribers.clear();
       focusTargets.clear();

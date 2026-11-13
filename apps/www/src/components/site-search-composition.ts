@@ -41,12 +41,15 @@ export interface SiteSearchFocusRestore {
   epoch: number;
 }
 
+type PrepareOpenerReturn = (panel: HTMLElement | undefined) => (() => void) | undefined;
+
 export function createSiteSearchComposition(options: {
   family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2';
   shadcnStyle: 'rhea' | 'new-york-v4';
   session: SiteSearchSession;
   copy: SiteSearchCopy;
   isCurrent(): boolean;
+  retainsOpenWhileLocked?(): boolean;
   onFailure(error: unknown): void;
   /**
    * Pending bounded focus restore for the generation being opened.  The scope
@@ -56,7 +59,11 @@ export function createSiteSearchComposition(options: {
   takeFocusRestore(): SiteSearchFocusRestore | null;
   /** The scope's current focus epoch, used to detect newer focus intent. */
   focusEpoch(): number;
-}): { demo: DemoSpec; activate(): void } {
+}): {
+  demo: DemoSpec;
+  activate(prepareOpenerReturn?: PrepareOpenerReturn): void;
+  restoreFocus(request: SiteSearchFocusRestore): void;
+} {
   const { family, shadcnStyle, session, copy } = options;
   const initial = session.read();
   const style = family === 'shadcn' ? { styleProfile: shadcnStyle, presentation: 'menu' } : {};
@@ -145,7 +152,8 @@ export function createSiteSearchComposition(options: {
       }),
     ],
   };
-  let activateView: (() => void) | undefined;
+  let activateView: ((prepareOpenerReturn?: PrepareOpenerReturn) => void) | undefined;
+  let restoreViewFocus: ((request: SiteSearchFocusRestore) => void) | undefined;
   const demo: DemoSpec = {
     type: 'demo',
     root: proto('dialog-root', {
@@ -159,7 +167,7 @@ export function createSiteSearchComposition(options: {
           previewTheme: 'portal',
           props: { enterDuration: duration, leaveDuration: duration },
         }),
-        proto('command-dialog-content', {
+        proto(family === 'bootstrap-2-3-2' ? 'dialog-content' : 'command-dialog-content', {
           ref: 'panel',
           // One bounded inner Command shell; title/description are out of flow.
           surfaceStyle: { gridTemplateRows: 'minmax(0, 1fr)' },
@@ -248,6 +256,8 @@ export function createSiteSearchComposition(options: {
       let pendingFocusRestore: SiteSearchFocusRestore | null = null;
       let focusRestoreArmed = false;
       let entryPolicyManual = false;
+      let prepareOpenerReturn: PrepareOpenerReturn | undefined;
+      let cancelOpenerReturn: (() => void) | undefined;
       let offPanelTransition: (() => void) | null = null;
       let panelTransitionOwner: unknown = null;
       type HintRequest = { target: HTMLElement; visible: boolean };
@@ -346,6 +356,33 @@ export function createSiteSearchComposition(options: {
         if (!targetHoldsFocus(request.ref)) return;
         pendingFocusRestore = null;
       };
+      const watchOpenerReturn = (restore: () => void) => {
+        const present = api.getPublicInstance?.('panel')?.getExposes()?.isPresent as
+          | {
+              get(): boolean;
+              subscribe(cb: (event: { type?: string; next: boolean }) => void): () => void;
+            }
+          | undefined;
+        if (!present?.subscribe) return;
+        const finish = () => {
+          if (present.get()) return;
+          // Let the presence callback finish detaching before focusing outside.
+          queueMicrotask(() => {
+            if (cancelOpenerReturn !== cancel || present.get()) return;
+            cancel();
+            if (current() && !session.read().open) restore();
+          });
+        };
+        const off = present.subscribe((event) => {
+          if (event.type === 'next' && !event.next) finish();
+        });
+        const cancel = () => {
+          cancelOpenerReturn = undefined;
+          off();
+        };
+        cancelOpenerReturn = cancel;
+        return finish;
+      };
       /** Re-check the pending restore whenever the content's own transition completes. */
       const watchPanelTransition = () => {
         const instance = api.getPublicInstance?.('panel');
@@ -386,12 +423,21 @@ export function createSiteSearchComposition(options: {
         const epoch = ++paintEpoch;
         const { open, snapshot, retrying, navigation } = session.read();
         if (!live) return;
-        if (!current() || !open) {
+        const active = current();
+        // A retained Homepage view can be locked during both preparation and
+        // rollback. Its native editor and selection still belong to this view.
+        if (!active && open && options.retainsOpenWhileLocked?.()) return;
+        if (!active || !open) {
           // Late author-slot completions from a closed generation cannot certify
           // a later reopen, even if its retained DOM box identity is unchanged.
           pendingHint = undefined;
           committedHint = undefined;
+          let finish: (() => void) | undefined;
           if (!open) {
+            const prepare = prepareOpenerReturn;
+            prepareOpenerReturn = undefined;
+            const restore = active && prepare?.(refs.panel);
+            if (restore) finish = watchOpenerReturn(restore);
             // A closed generation hands the entry policy back and drops its
             // pending restore, so a later open of this generation is a normal
             // fresh open that auto-enters the query again.
@@ -399,8 +445,10 @@ export function createSiteSearchComposition(options: {
             releaseEntryPolicy();
           }
           api.setProps('dialog', { open: false });
+          finish?.();
           return;
         }
+        cancelOpenerReturn?.();
         // Opening is independent of whether a closed host has instantiated its
         // Command subtree. Otherwise a lazy Dialog could wait forever for the
         // very identity that opening must create. Latest authored default is
@@ -682,12 +730,28 @@ export function createSiteSearchComposition(options: {
           restoreRequestedFocus();
         }
       );
-      activateView = requestPaint;
+      activateView = (prepare) => {
+        if (prepare) prepareOpenerReturn = prepare;
+        requestPaint();
+      };
+      restoreViewFocus = (request) => {
+        if (!current() || !session.read().open) return;
+        pendingFocusRestore = request;
+        try {
+          restoreRequestedFocus();
+        } catch (error) {
+          pendingFocusRestore = null;
+          console.error('[SiteSearch] Failed to restore retained Dialog focus.', error);
+        }
+      };
       const off = session.subscribe(requestPaint);
       requestPaint();
       return () => {
         live = false;
         activateView = undefined;
+        restoreViewFocus = undefined;
+        prepareOpenerReturn = undefined;
+        cancelOpenerReturn?.();
         paintEpoch++;
         pendingHint = undefined;
         committedHint = undefined;
@@ -719,8 +783,11 @@ export function createSiteSearchComposition(options: {
   };
   return {
     demo,
-    activate() {
-      activateView?.();
+    activate(prepareOpenerReturn) {
+      activateView?.(prepareOpenerReturn);
+    },
+    restoreFocus(request) {
+      restoreViewFocus?.(request);
     },
   };
 }

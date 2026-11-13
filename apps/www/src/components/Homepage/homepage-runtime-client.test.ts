@@ -453,6 +453,29 @@ describe('Search participates in the existing homepage generation', () => {
     root.append(search);
     return { root, search, dialog: search.querySelector('dialog')! };
   }
+  function withPublicSearch() {
+    const root = fixture(true);
+    const search = document.createElement('site-search');
+    search.dataset.searchComposition = 'command-dialog';
+    search.dataset.pagefindBundle = '/pagefind/';
+    search.dataset.searchCopy = JSON.stringify({
+      title: 'Search documents',
+      description: 'Search and open a document',
+      placeholder: 'Search',
+      hint: 'Type to search',
+      loading: 'Loading',
+      empty: 'No results',
+      error: 'Unavailable',
+      retry: 'Retry',
+      more: 'More',
+      close: 'Close search',
+      count: '{count} documents',
+    });
+    search.innerHTML =
+      '<div data-search-composition-mount><div data-search-command-mount="open"></div><div data-search-dialog-mount></div></div>';
+    root.append(search);
+    return { root, search };
+  }
   it('uses one generation for all commands and preserves the native service DOM through library/runtime changes', async () => {
     const { root, search, dialog } = withSearch();
     handle = initHomepageRuntime(root);
@@ -508,6 +531,82 @@ describe('Search participates in the existing homepage generation', () => {
     }
     expect(error).toHaveBeenCalled();
   });
+
+  it('commits the public Search opener and Dialog with the same Homepage generation', async () => {
+    const { root, search } = withPublicSearch();
+    const dialog = deferred<ReturnType<typeof candidate>>();
+    fakes.materialize.mockImplementation(async (request, options) =>
+      request.selection.runtimeId === 'react' &&
+      options.content.recipe.id === 'website-search-command-dialog'
+        ? dialog.promise
+        : candidate()
+    );
+    handle = initHomepageRuntime(root);
+    await settle();
+    const generation = root.dataset.runtimeGeneration;
+    const initial = fakes.materialize.mock.calls.findIndex(
+      ([, options]) => options.mount === search.querySelector('[data-search-dialog-mount]')
+    );
+    expect(initial).toBeGreaterThanOrEqual(0);
+    const initialDialog = await fakes.materialize.mock.results[initial]!.value;
+    expect(initialDialog.activate).toHaveBeenCalledOnce();
+    fakes.materialize.mock.calls[0]![1].controls.runtime.onValueChange('react');
+    await settle();
+    expect(root.dataset.runtimeState).toBe('loading');
+    expect(search.dataset.searchGeneration).toBe(generation);
+    expect(initialDialog.dispose).not.toHaveBeenCalled();
+    const next = candidate();
+    dialog.resolve(next);
+    await settle();
+    const searchCalls = fakes.materialize.mock.calls.filter(
+      ([request, options]) =>
+        request.selection.runtimeId === 'react' && search.contains(options.mount)
+    );
+    expect(searchCalls.map(([, options]) => options.content.recipe.id)).toEqual([
+      'website-search-open',
+      'website-search-command-dialog',
+    ]);
+    expect(searchCalls[0]![0]).toBe(searchCalls[1]![0]);
+    expect(root.dataset.runtimeState).toBe('ready');
+    expect(search.dataset.searchRuntime).toBe('react');
+    expect(search.dataset.searchGeneration).toBe(root.dataset.runtimeGeneration);
+    expect(next.activate).toHaveBeenCalledOnce();
+    expect(initialDialog.dispose).toHaveBeenCalledOnce();
+  });
+
+  it.each(['website-search-open', 'website-search-command-dialog'])(
+    'keeps the committed public Search generation when %s fails to prepare',
+    async (failingRecipe) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { root, search } = withPublicSearch();
+      handle = initHomepageRuntime(root);
+      await settle();
+      const generation = root.dataset.runtimeGeneration;
+      const initial = fakes.materialize.mock.calls.findIndex(
+        ([, options]) => options.content.recipe.id === 'website-search-command-dialog'
+      );
+      expect(initial).toBeGreaterThanOrEqual(0);
+      const initialDialog = await fakes.materialize.mock.results[initial]!.value;
+      const staged: ReturnType<typeof candidate>[] = [];
+      fakes.materialize.mockImplementation(async (_request, options) => {
+        if (options.content.recipe.id === failingRecipe)
+          throw new Error('Search preparation failed');
+        const next = candidate();
+        staged.push(next);
+        return next;
+      });
+      fakes.materialize.mock.calls[0]![1].controls.runtime.onValueChange('react');
+      await settle();
+      expect(root.dataset.runtimeState).toBe('error');
+      expect(search.dataset.searchGeneration).toBe(generation);
+      expect(search.dataset.searchRuntime).toBe('wc');
+      expect(initialDialog.dispose).not.toHaveBeenCalled();
+      for (const item of staged) {
+        expect(item.activate).not.toHaveBeenCalled();
+        expect(item.dispose).toHaveBeenCalledOnce();
+      }
+    }
+  );
 });
 
 describe('pending homepage runtime preference intent', () => {

@@ -548,9 +548,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           })
         );
       if (headerSurface) work.push(headerSurface.materialize(request));
-      // Search contributes to this exact request. Its native dialog and Pagefind
-      // owner stay mounted while all three command views commit with the page.
+      // Homepage commits the public Search Dialog and opener in the same generation.
       const searchWork = search?.materialize(request);
+      const searchDialogWork =
+        search?.root.dataset.searchComposition === 'command-dialog'
+          ? search.materializeDialog(request)
+          : undefined;
       let preparedTypography: MaterializedProjectionCandidate | undefined;
       const typographyWork = typography.materialize(request).then((candidate) => {
         preparedTypography = candidate;
@@ -559,6 +562,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       const outcomes = await Promise.allSettled([
         ...work,
         ...(searchWork ? [searchWork] : []),
+        ...(searchDialogWork ? [searchDialogWork] : []),
         typographyWork,
       ]);
       const candidates = outcomes.flatMap((outcome) =>

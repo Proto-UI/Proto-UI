@@ -83,7 +83,6 @@ function renderChild(
       ref,
       'data-pui-owned-decoration': '',
       'aria-hidden': 'true',
-      inert: true,
       style: { pointerEvents: 'none' },
     });
   }
