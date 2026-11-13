@@ -55,6 +55,7 @@ type Case = {
   group: string;
   family: Family;
   component: string;
+  runtime?: RuntimeId;
   run: (journey: Journey) => Promise<void>;
 };
 
@@ -799,7 +800,10 @@ async function runCase(testCase: Case) {
       viewport: page.viewportSize(),
       hostClock: HOST_CLOCK,
       environment,
-      runtime: testCase.component === 'runtime-tabs' ? Object.keys(RUNTIME_LABELS) : 'react',
+      runtime:
+        testCase.component === 'runtime-tabs'
+          ? Object.keys(RUNTIME_LABELS)
+          : (testCase.runtime ?? 'react'),
       presetCheck: process.env.PUI_FINF_PRESET_CHECK ?? 'unknown',
       browser: browser.version(),
       references: references(testCase.family, testCase.component),
@@ -969,8 +973,8 @@ async function checkboxGroupJourney({ page, previewer, family, capture }: Journe
 async function calendarJourney(journey: Journey, state: CalendarState) {
   const { page, previewer, capture } = journey;
   await selectRealRuntime(page, previewer, 'react', '[role="gridcell"]', 42);
-  const month = previewer.getByRole('combobox', { name: /Month/ });
-  const year = previewer.getByRole('combobox', { name: /Year/ });
+  const month = previewer.getByRole('combobox', { name: 'Month', exact: true });
+  const year = previewer.getByRole('combobox', { name: 'Year', exact: true });
   await month.waitFor({ state: 'visible' });
   await year.waitFor({ state: 'visible' });
   if (state === 'month-menu') {
@@ -1091,6 +1095,8 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
   // Hidden-selector failures remain red and have already produced state captures.
   expect(await previewer.getByRole('columnheader').count()).toBe(7);
   expect(await previewer.locator('[role="gridcell"]:visible').count()).toBe(35);
+  expect(await month.count()).toBe(1);
+  expect(await year.count()).toBe(1);
   expect(await month.textContent()).toContain(state.includes('focus') ? '11月' : '10月');
   const visibleDay = previewer.locator('[role="gridcell"]:visible').first();
   const dimensions = await visibleDay.boundingBox();
@@ -1113,6 +1119,71 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
     },
     previewer
   );
+}
+
+async function calendarCaptionJourney(journey: Journey, runtime: RuntimeId) {
+  const { page, previewer, capture } = journey;
+  await selectRealRuntime(page, previewer, runtime, '[role="gridcell"]', 42);
+  const month = previewer.getByRole('combobox', { name: 'Month', exact: true });
+  const year = previewer.getByRole('combobox', { name: 'Year', exact: true });
+  await month.waitFor({ state: 'visible' });
+  await year.waitFor({ state: 'visible' });
+  const monthControls = await month.getAttribute('aria-controls');
+  const yearControls = await year.getAttribute('aria-controls');
+  expect(monthControls).toBeTruthy();
+  expect(yearControls).toBeTruthy();
+  expect(monthControls).not.toBe(yearControls);
+  const caption = async (state: string) => {
+    // Role/name locators use the browser's accessible-name computation. The
+    // selected text and owned controls relations remain separate observations.
+    expect(await previewer.getByRole('combobox').count()).toBe(2);
+    expect(await month.count()).toBe(1);
+    expect(await year.count()).toBe(1);
+    expect(await month.getAttribute('aria-controls')).toBe(monthControls);
+    expect(await year.getAttribute('aria-controls')).toBe(yearControls);
+    await capture(
+      state,
+      {
+        runtime,
+        aria: await previewer.ariaSnapshot(),
+        month: await month.textContent(),
+        year: await year.textContent(),
+        monthControls,
+        yearControls,
+      },
+      previewer
+    );
+  };
+  await caption('caption-october-2026');
+  for (const [trigger, controls, current, key, next] of [
+    [month, monthControls, '10月', 'ArrowDown', '11月'],
+    [year, yearControls, '2026', 'ArrowUp', '2025'],
+  ] as const) {
+    await keyboardReach(page, trigger);
+    await page.keyboard.press('ArrowDown');
+    const listbox = page.getByRole('listbox');
+    await listbox.waitFor({ state: 'visible' });
+    expect(await listbox.getAttribute('id')).toBe(controls);
+    await expect
+      .poll(() => hasFocus(listbox.getByRole('option', { name: current, exact: true })))
+      .toBe(true);
+    await page.keyboard.press(key);
+    const option = listbox.getByRole('option', { name: next, exact: true });
+    await expect.poll(() => hasFocus(option)).toBe(true);
+    await page.keyboard.press('Enter');
+    await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+    await expect.poll(() => hasFocus(trigger)).toBe(true);
+    await expect.poll(() => trigger.textContent()).toBe(next);
+    await caption(`caption-selected-${next}`);
+  }
+  const date = previewer.getByRole('gridcell', {
+    name: 'Saturday, November 1, 2025',
+    exact: true,
+  });
+  await date.waitFor({ state: 'visible' });
+  await date.click();
+  await expect.poll(() => date.getAttribute('aria-selected')).toBe('true');
+  await caption('caption-november-2025-date-selected');
 }
 
 async function drawerJourney({ page, previewer, capture }: Journey) {
@@ -1524,6 +1595,14 @@ const cases: Case[] = [
     component: 'calendar',
     run: (journey: Journey) => calendarJourney(journey, state),
   })),
+  ...(['wc', 'react', 'vue', 'vue2'] as const).map((runtime) => ({
+    id: `shadcn-calendar-caption-${runtime}`,
+    group: 'calendar',
+    family: 'shadcn' as const,
+    component: 'calendar',
+    runtime,
+    run: (journey: Journey) => calendarCaptionJourney(journey, runtime),
+  })),
   {
     id: 'shadcn-drawer',
     group: 'modal-overlays',
@@ -1573,11 +1652,12 @@ beforeAll(async () => {
     revision,
     tree,
     requestedGroup: requestedGroup ?? 'all',
-    cases: selectedCases.map(({ id, group, family, component }) => ({
+    cases: selectedCases.map(({ id, group, family, component, runtime }) => ({
       id,
       group,
       family,
       component,
+      runtime: component === 'runtime-tabs' ? Object.keys(RUNTIME_LABELS) : (runtime ?? 'react'),
       route: routeFor(family, component === 'runtime-tabs' ? 'form' : component),
     })),
     phase: 'Planned at setup; each terminal case receipt is the result authority.',

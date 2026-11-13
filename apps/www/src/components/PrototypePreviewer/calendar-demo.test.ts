@@ -192,15 +192,18 @@ describe('Real family Calendar caption demos', () => {
         expect(host.querySelector('[aria-label="Previous month"]')).not.toBeNull();
         expect(host.querySelector('[aria-label="Next month"]')).not.toBeNull();
         await vi.waitFor(() => {
-          expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent).toMatch(
-            /^Month\s+\S/
-          );
+          expect(
+            host.querySelector('[data-demo-ref="month-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Month');
+          expect(
+            host.querySelector('[data-demo-ref="year-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Year');
           expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
-            `Year ${today.slice(0, 4)}`
+            today.slice(0, 4)
           );
         });
-        // Content is a naming input, not proof of the real browser's computed
-        // combobox name. That accessibility-tree check remains a separate gate.
+        // These are real Adapter projections in Happy DOM. Computed accessible
+        // names and physical input remain separate real-browser checks.
         expect(host.querySelectorAll('select')).toHaveLength(0);
 
         // The semantic hidden contract removes unused capacity from both the
@@ -266,11 +269,14 @@ describe('Real family Calendar caption demos', () => {
           expect(read('calendar', 'month')).toBe('1800-01');
           expect(read('year-select')).toBe('1800');
           expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
-            'Year 1800'
-          );
-          expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent).toContain(
             '1800'
           );
+          expect(
+            host.querySelector('[data-demo-ref="year-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Year');
+          expect(
+            host.querySelector('[data-demo-ref="month-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Month');
         });
         // Multi-profile family prototype loading pushed the real render past
         // the 20s bound.
@@ -392,7 +398,7 @@ it('mounts all 101 Shadcn year options, opens from the keyboard, selects a year 
   if (Number(year) >= 2007 && Number(year) <= 2107)
     expect(yearOptions.some((option) => option.textContent?.trim() === '2007')).toBe(true);
   expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent?.trim()).toBe(
-    `Month ${new Date().getMonth() + 1}月`
+    `${new Date().getMonth() + 1}月`
   );
   expect(
     Array.from(host.querySelectorAll('[role="columnheader"]')).map((node) =>
