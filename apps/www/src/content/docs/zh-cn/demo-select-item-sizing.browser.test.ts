@@ -205,7 +205,10 @@ function assertGeometry(
   // All four registered owned rows, including disabled siblings, share size.
   // Only the aligned row above must replace the Trigger's position.
   expect(
-    sizingItemSizeIssues(value.trigger.rect, value.items.map((item) => item.rect)),
+    sizingItemSizeIssues(
+      value.trigger.rect,
+      value.items.map((item) => item.rect)
+    ),
     'every current same-list row matches Trigger width and height'
   ).toEqual([]);
   for (const item of value.items) {
@@ -293,342 +296,379 @@ async function optionPoint(trigger: Locator, index: number): Promise<PointerPoin
 
 for (const environment of environments)
   for (const locale of ['en', 'zh-cn'])
-  describe.sequential(`${locale} actual styled Select consumer${environment.id === 'default' ? '' : ` (${environment.id})`}`, () => {
-    for (const runtime of RUNTIMES)
-      it(`${runtime}: first entry, selection, reopen and narrow geometry`, async () => {
-        const { context, page, previewer } = await openRoute(browser, baseUrl, route(locale), {
-          width: 1180,
-          height: 900,
-        });
-        const observations: Array<{ phase: string; value: Facts }> = [];
-        const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
-        const pointerInputs: Array<{ phase: string; value: PointerPoint }> = [];
-        const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
-        const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
-          if (activeMotion.handle) throw new Error('Previous motion trace was not released');
-          // Begin the open-cycle trace from an established keyboard focus state.
-          // Otherwise the opening key also changes input modality, starts the
-          // focus ring and immediately reverses it as focus moves to an option.
-          await expect
-            .poll(
-              () =>
-                trigger.evaluate(
-                  (node) =>
-                    node.ownerDocument.activeElement === node &&
-                    node
-                      .getAnimations()
-                      .every(
-                        (animation) => !animation.pending && animation.playState === 'finished'
-                      )
-                ),
-              { timeout: 1200 }
-            )
-            .toBe(true);
-          activeMotion.handle = await trigger.evaluateHandle(installSizingMotionTrace, selection);
-        };
-        const finishMotion = async (phase: string) => {
-          if (!activeMotion.handle) throw new Error('Motion trace was not installed before action');
-          // Do not resolve the Locator again: its DOM owner may have changed.
-          // Keep the original trace and its invalid-owner/interrupted result.
-          const value = await activeMotion.handle.evaluate((handle) => handle.done);
-          motion.push({ phase, value });
-          await activeMotion.handle.dispose();
-          activeMotion.handle = null;
-          expect(sizingMotionIssues(value, runtime), `${phase} full motion trajectory`).toEqual([]);
-        };
-        const name = `${locale}-${runtime}${environment.id === 'default' ? '' : `-${environment.id}`}`;
-        let testFailed = false;
-        let testError: unknown;
-        let directionInput:
-          | { documentBefore: string; articleBefore: string | null; trigger?: string }
-          | undefined;
-        const secondaryErrors: Array<{ phase: string; error: unknown }> = [];
-        try {
-          await page.emulateMedia({ reducedMotion: environment.reducedMotion });
-          directionInput = await previewer.evaluate((node, direction) => {
-            const article = node.closest('main[dir]');
-            if (!article) throw new Error('Expected the Select preview inside its authored article');
-            const documentElement = node.ownerDocument.documentElement;
-            const documentBefore = documentElement.dir;
-            const articleBefore = article.getAttribute('dir');
-            // Starlight authors direction separately on the article and document.
-            documentElement.dir = direction;
-            article.setAttribute('dir', direction);
-            return { documentBefore, articleBefore };
-          }, environment.direction);
-          await ready(previewer, runtime);
-          const trigger = previewer.getByRole('combobox', {
-            name: 'Adapter selector',
-            exact: true,
-          });
-          directionInput.trigger = await trigger.evaluate((node) => getComputedStyle(node).direction);
-          expect(directionInput.trigger, 'native trigger direction before input').toBe(
-            environment.direction
-          );
-          expect(await trigger.getAttribute('aria-expanded')).toBe('false');
-          expect(await trigger.innerText()).toBe('Select an adapter');
-          await page.keyboard.press('Tab');
-          await startMotion(trigger, 'unset');
-          await trigger.press('ArrowDown');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['React']);
-          await finishMotion('first-entry');
-          const first = await facts(trigger);
-          observations.push({ phase: 'first-entry', value: first });
-          assertGeometry(first, runtime, environment, 'unset');
-          expect(first.items.map((item) => item.selected)).toEqual([
-            'false',
-            'false',
-            'false',
-            'false',
-          ]);
-          expect(first.trigger.text).toBe('Select an adapter');
-          if (output) await page.screenshot({ path: path.join(output, `${name}-first.png`) });
-          await page.keyboard.press('End');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['Web Components']);
-          const navigated = await facts(trigger);
-          expect(navigated.items.map((item) => item.selected)).toEqual([
-            'false',
-            'false',
-            'false',
-            'false',
-          ]);
-          expect(navigated.trigger.text).toBe('Select an adapter');
-          await page.keyboard.press('Enter');
-          await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-          await expect.poll(() => trigger.innerText()).toContain('Web Components');
-          await startMotion(trigger, 'selected');
-          await trigger.press('Enter');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['Web Components']);
-          await finishMotion('selected-reopen');
-          const reopen = await facts(trigger);
-          observations.push({ phase: 'selected-reopen', value: reopen });
-          assertGeometry(reopen, runtime, environment, 'selected');
-          expect(reopen.items.map((item) => item.selected)).toEqual([
-            'false',
-            'false',
-            'true',
-            'false',
-          ]);
-          await page.keyboard.press('Escape');
-          await expect
-            .poll(() =>
-              trigger.evaluate((element) => element.ownerDocument.activeElement === element)
-            )
-            .toBe(true);
-          await page.setViewportSize({ width: 390, height: 900 });
-          await trigger.scrollIntoViewIfNeeded();
-          await startMotion(trigger, 'selected');
-          await trigger.press('ArrowDown');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['Web Components']);
-          await finishMotion('narrow-reopen');
-          const narrow = await facts(trigger);
-          observations.push({ phase: 'narrow-reopen', value: narrow });
-          assertGeometry(narrow, runtime, environment, 'selected');
-          if (output) await page.screenshot({ path: path.join(output, `${name}-narrow.png`) });
-          await page.keyboard.press('Escape');
-          await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-
-          // The original journey above only inspected aria-disabled. Exercise
-          // the actual disabled option through trusted input, then prove the
-          // same pointer can focus and commit an enabled sibling.
-          await startMotion(trigger, 'selected');
-          await trigger.press('ArrowDown');
-          await finishMotion('disabled-probe-entry');
-          await page.keyboard.press('Home');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['React']);
-          await page.keyboard.press('End');
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['Web Components']);
-          const navigation = await facts(trigger);
-          observations.push({ phase: 'disabled-keyboard-skip', value: navigation });
-          assertGeometry(navigation, runtime, environment, 'selected');
-
-          const assertDisabledDidNotCommit = async (phase: string) => {
-            // Retain a later observation without calling two frames a React
-            // commit barrier. The following enabled handoff must also reach
-            // its changed DOM invariant while selection remains unchanged.
-            await page.evaluate(() => {
-              const { promise, resolve } = Promise.withResolvers<void>();
-              requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-              return promise;
+    describe.sequential(
+      `${locale} actual styled Select consumer${environment.id === 'default' ? '' : ` (${environment.id})`}`,
+      () => {
+        for (const runtime of RUNTIMES)
+          it(`${runtime}: first entry, selection, reopen and narrow geometry`, async () => {
+            const { context, page, previewer } = await openRoute(browser, baseUrl, route(locale), {
+              width: 1180,
+              height: 900,
             });
-            const value = await facts(trigger);
-            observations.push({ phase, value });
-            expect(value.runtime).toBe(runtime);
-            expect(value.expanded).toBe('true');
-            expect(value.items[3].disabled).toBe('true');
-            expect(value.items[3].focused).toBe(false);
-            expect(value.items.map((item) => item.selected)).toEqual([
-              'false', 'false', 'true', 'false',
-            ]);
-            expect(await trigger.innerText()).toContain('Web Components');
-            return value;
-          };
-          const disabledMove = await optionPoint(trigger, 3);
-          pointerInputs.push({ phase: 'disabled-pointer-move', value: disabledMove });
-          await page.mouse.move(disabledMove.x, disabledMove.y);
-          await assertDisabledDidNotCommit('disabled-pointer-move');
-          const disabledClick = await optionPoint(trigger, 3);
-          pointerInputs.push({ phase: 'disabled-pointer-click', value: disabledClick });
-          await page.mouse.click(disabledClick.x, disabledClick.y);
-          await assertDisabledDidNotCommit('disabled-pointer-click');
-          if (output)
-            await page.screenshot({ path: path.join(output, `${name}-disabled.png`) });
-
-          const enabledMove = await optionPoint(trigger, 1);
-          pointerInputs.push({ phase: 'enabled-pointer-move', value: enabledMove });
-          await page.mouse.move(enabledMove.x, enabledMove.y);
-          await expect
-            .poll(async () =>
-              (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
-            )
-            .toEqual(['Vue']);
-          const hover = await facts(trigger);
-          observations.push({ phase: 'enabled-pointer-move', value: hover });
-          expect(hover.items.map((item) => item.selected)).toEqual([
-            'false', 'false', 'true', 'false',
-          ]);
-          const enabledClick = await optionPoint(trigger, 1);
-          pointerInputs.push({ phase: 'enabled-pointer-click', value: enabledClick });
-          await page.mouse.click(enabledClick.x, enabledClick.y);
-          await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-          await expect.poll(async () => (await trigger.innerText()).trim()).toBe('Vue');
-          // Re-enter keyboard modality through actual sequential navigation
-          // before installing the trace, as for the original first entry.
-          await page.keyboard.press('Tab');
-          await page.keyboard.press('Shift+Tab');
-          await startMotion(trigger, 'selected');
-          await trigger.press('ArrowDown');
-          await finishMotion('pointer-selected-reopen');
-          const pointerReopen = await facts(trigger);
-          observations.push({ phase: 'pointer-selected-reopen', value: pointerReopen });
-          assertGeometry(pointerReopen, runtime, environment, 'selected');
-          expect(pointerReopen.items.map((item) => item.selected)).toEqual([
-            'false', 'true', 'false', 'false',
-          ]);
-          expect(pointerReopen.items.filter((item) => item.focused).map((item) => item.text)).toEqual(['Vue']);
-          if (output)
-            await page.screenshot({ path: path.join(output, `${name}-pointer-reopen.png`) });
-          await page.keyboard.press('Escape');
-          await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-          await expect
-            .poll(() => trigger.evaluate((node) => node.ownerDocument.activeElement === node))
-            .toBe(true);
-        } catch (error) {
-          testFailed = true;
-          testError = error;
-          if (output) {
+            const observations: Array<{ phase: string; value: Facts }> = [];
+            const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
+            const pointerInputs: Array<{ phase: string; value: PointerPoint }> = [];
+            const activeMotion: { handle: JSHandle<SizingMotionHandle> | null } = { handle: null };
+            const startMotion = async (trigger: Locator, selection: SizingMotionSelection) => {
+              if (activeMotion.handle) throw new Error('Previous motion trace was not released');
+              // Begin the open-cycle trace from an established keyboard focus state.
+              // Otherwise the opening key also changes input modality, starts the
+              // focus ring and immediately reverses it as focus moves to an option.
+              await expect
+                .poll(
+                  () =>
+                    trigger.evaluate(
+                      (node) =>
+                        node.ownerDocument.activeElement === node &&
+                        node
+                          .getAnimations()
+                          .every(
+                            (animation) => !animation.pending && animation.playState === 'finished'
+                          )
+                    ),
+                  { timeout: 1200 }
+                )
+                .toBe(true);
+              activeMotion.handle = await trigger.evaluateHandle(
+                installSizingMotionTrace,
+                selection
+              );
+            };
+            const finishMotion = async (phase: string) => {
+              if (!activeMotion.handle)
+                throw new Error('Motion trace was not installed before action');
+              // Do not resolve the Locator again: its DOM owner may have changed.
+              // Keep the original trace and its invalid-owner/interrupted result.
+              const value = await activeMotion.handle.evaluate((handle) => handle.done);
+              motion.push({ phase, value });
+              await activeMotion.handle.dispose();
+              activeMotion.handle = null;
+              expect(sizingMotionIssues(value, runtime), `${phase} full motion trajectory`).toEqual(
+                []
+              );
+            };
+            const name = `${locale}-${runtime}${environment.id === 'default' ? '' : `-${environment.id}`}`;
+            let testFailed = false;
+            let testError: unknown;
+            let directionInput:
+              | { documentBefore: string; articleBefore: string | null; trigger?: string }
+              | undefined;
+            const secondaryErrors: Array<{ phase: string; error: unknown }> = [];
             try {
-              await page.screenshot({ path: path.join(output, `${name}-failure.png`) });
-            } catch (error) {
-              secondaryErrors.push({ phase: 'failure-screenshot', error });
-            }
-            try {
+              await page.emulateMedia({ reducedMotion: environment.reducedMotion });
+              directionInput = await previewer.evaluate((node, direction) => {
+                const article = node.closest('main[dir]');
+                if (!article)
+                  throw new Error('Expected the Select preview inside its authored article');
+                const documentElement = node.ownerDocument.documentElement;
+                const documentBefore = documentElement.dir;
+                const articleBefore = article.getAttribute('dir');
+                // Starlight authors direction separately on the article and document.
+                documentElement.dir = direction;
+                article.setAttribute('dir', direction);
+                return { documentBefore, articleBefore };
+              }, environment.direction);
+              await ready(previewer, runtime);
               const trigger = previewer.getByRole('combobox', {
                 name: 'Adapter selector',
                 exact: true,
               });
-              observations.push({ phase: 'failure', value: await facts(trigger) });
-            } catch (error) {
-              secondaryErrors.push({ phase: 'failure-facts', error });
-            }
-          }
-        } finally {
-          try {
-            const unfinished = await activeMotion.handle?.evaluate((handle) => {
-              handle.stop();
-              return handle.done;
-            });
-            if (
-              unfinished &&
-              !motion.some((entry) => entry.value.startedAt === unfinished.startedAt)
-            )
-              motion.push({ phase: 'interrupted', value: unfinished });
-          } catch (error) {
-            secondaryErrors.push({ phase: 'motion-cleanup', error });
-          } finally {
-            try {
-              await activeMotion.handle?.dispose();
-            } catch (error) {
-              secondaryErrors.push({ phase: 'motion-handle-dispose', error });
-            }
-            activeMotion.handle = null;
-          }
-          try {
-            if (output)
-              await writeFile(
-                path.join(output, `${name}.json`),
-                JSON.stringify(
-                  {
-                    source,
-                    sourceTree,
-                    runtime,
-                    locale,
-                    environment,
-                    directionInput,
-                    observations,
-                    motion,
-                    pointerInputs,
-                    failure: testFailed ? String(testError) : null,
-                    secondaryErrors: secondaryErrors.map(({ phase, error }) => ({
-                      phase,
-                      error: String(error),
-                    })),
-                    firstVisibleFrames:
-                      'pre-action bounded rAF trace; early frames retained separately from settled assertions',
-                    remaining: [
-                      'first-visible frame capture',
-                      '200% text/long content',
-                      'animation cancellation/interruption',
-                      'Root disabled and live Item disabled updates',
-                      'compiled/AT',
-                      'other environment cases require their own results',
-                      'other website controls',
-                    ],
-                  },
-                  null,
-                  2
-                )
+              directionInput.trigger = await trigger.evaluate(
+                (node) => getComputedStyle(node).direction
               );
-          } catch (error) {
-            secondaryErrors.push({ phase: 'evidence-write', error });
-          }
-          try {
-            await context.close();
-          } catch (error) {
-            secondaryErrors.push({ phase: 'context-close', error });
-          }
-        }
-        if (testFailed || secondaryErrors.length)
-          throw new AggregateError(
-            [
-              ...(testFailed ? [testError] : []),
-              ...secondaryErrors.map(({ phase, error }) => new Error(phase, { cause: error })),
-            ],
-            `${name}: assertion/evidence/cleanup failure`
-          );
-      }, 120_000);
-  });
+              expect(directionInput.trigger, 'native trigger direction before input').toBe(
+                environment.direction
+              );
+              expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+              expect(await trigger.innerText()).toBe('Select an adapter');
+              await page.keyboard.press('Tab');
+              await startMotion(trigger, 'unset');
+              await trigger.press('ArrowDown');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['React']);
+              await finishMotion('first-entry');
+              const first = await facts(trigger);
+              observations.push({ phase: 'first-entry', value: first });
+              assertGeometry(first, runtime, environment, 'unset');
+              expect(first.items.map((item) => item.selected)).toEqual([
+                'false',
+                'false',
+                'false',
+                'false',
+              ]);
+              expect(first.trigger.text).toBe('Select an adapter');
+              if (output) await page.screenshot({ path: path.join(output, `${name}-first.png`) });
+              await page.keyboard.press('End');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Web Components']);
+              const navigated = await facts(trigger);
+              expect(navigated.items.map((item) => item.selected)).toEqual([
+                'false',
+                'false',
+                'false',
+                'false',
+              ]);
+              expect(navigated.trigger.text).toBe('Select an adapter');
+              await page.keyboard.press('Enter');
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+              await expect.poll(() => trigger.innerText()).toContain('Web Components');
+              await startMotion(trigger, 'selected');
+              await trigger.press('Enter');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Web Components']);
+              await finishMotion('selected-reopen');
+              const reopen = await facts(trigger);
+              observations.push({ phase: 'selected-reopen', value: reopen });
+              assertGeometry(reopen, runtime, environment, 'selected');
+              expect(reopen.items.map((item) => item.selected)).toEqual([
+                'false',
+                'false',
+                'true',
+                'false',
+              ]);
+              await page.keyboard.press('Escape');
+              await expect
+                .poll(() =>
+                  trigger.evaluate((element) => element.ownerDocument.activeElement === element)
+                )
+                .toBe(true);
+              await page.setViewportSize({ width: 390, height: 900 });
+              await trigger.scrollIntoViewIfNeeded();
+              await startMotion(trigger, 'selected');
+              await trigger.press('ArrowDown');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Web Components']);
+              await finishMotion('narrow-reopen');
+              const narrow = await facts(trigger);
+              observations.push({ phase: 'narrow-reopen', value: narrow });
+              assertGeometry(narrow, runtime, environment, 'selected');
+              if (output) await page.screenshot({ path: path.join(output, `${name}-narrow.png`) });
+              await page.keyboard.press('Escape');
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+
+              // The original journey above only inspected aria-disabled. Exercise
+              // the actual disabled option through trusted input, then prove the
+              // same pointer can focus and commit an enabled sibling.
+              await startMotion(trigger, 'selected');
+              await trigger.press('ArrowDown');
+              await finishMotion('disabled-probe-entry');
+              await page.keyboard.press('Home');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['React']);
+              await page.keyboard.press('End');
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Web Components']);
+              const navigation = await facts(trigger);
+              observations.push({ phase: 'disabled-keyboard-skip', value: navigation });
+              assertGeometry(navigation, runtime, environment, 'selected');
+
+              const assertDisabledDidNotCommit = async (phase: string) => {
+                // Retain a later observation without calling two frames a React
+                // commit barrier. The following enabled handoff must also reach
+                // its changed DOM invariant while selection remains unchanged.
+                await page.evaluate(() => {
+                  const { promise, resolve } = Promise.withResolvers<void>();
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+                  return promise;
+                });
+                const value = await facts(trigger);
+                observations.push({ phase, value });
+                expect(value.runtime).toBe(runtime);
+                expect(value.expanded).toBe('true');
+                expect(value.items[3].disabled).toBe('true');
+                expect(value.items[3].focused).toBe(false);
+                expect(value.items.map((item) => item.selected)).toEqual([
+                  'false',
+                  'false',
+                  'true',
+                  'false',
+                ]);
+                expect(await trigger.innerText()).toContain('Web Components');
+                return value;
+              };
+              const disabledMove = await optionPoint(trigger, 3);
+              pointerInputs.push({ phase: 'disabled-pointer-move', value: disabledMove });
+              await page.mouse.move(disabledMove.x, disabledMove.y);
+              await assertDisabledDidNotCommit('disabled-pointer-move');
+              const disabledClick = await optionPoint(trigger, 3);
+              pointerInputs.push({ phase: 'disabled-pointer-click', value: disabledClick });
+              await page.mouse.click(disabledClick.x, disabledClick.y);
+              await assertDisabledDidNotCommit('disabled-pointer-click');
+              if (output)
+                await page.screenshot({ path: path.join(output, `${name}-disabled.png`) });
+
+              const enabledMove = await optionPoint(trigger, 1);
+              pointerInputs.push({ phase: 'enabled-pointer-move', value: enabledMove });
+              await page.mouse.move(enabledMove.x, enabledMove.y);
+              await expect
+                .poll(async () =>
+                  (await facts(trigger)).items
+                    .filter((item) => item.focused)
+                    .map((item) => item.text)
+                )
+                .toEqual(['Vue']);
+              const hover = await facts(trigger);
+              observations.push({ phase: 'enabled-pointer-move', value: hover });
+              expect(hover.items.map((item) => item.selected)).toEqual([
+                'false',
+                'false',
+                'true',
+                'false',
+              ]);
+              const enabledClick = await optionPoint(trigger, 1);
+              pointerInputs.push({ phase: 'enabled-pointer-click', value: enabledClick });
+              await page.mouse.click(enabledClick.x, enabledClick.y);
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+              await expect.poll(async () => (await trigger.innerText()).trim()).toBe('Vue');
+              // Re-enter keyboard modality through actual sequential navigation
+              // before installing the trace, as for the original first entry.
+              await page.keyboard.press('Tab');
+              await page.keyboard.press('Shift+Tab');
+              await startMotion(trigger, 'selected');
+              await trigger.press('ArrowDown');
+              await finishMotion('pointer-selected-reopen');
+              const pointerReopen = await facts(trigger);
+              observations.push({ phase: 'pointer-selected-reopen', value: pointerReopen });
+              assertGeometry(pointerReopen, runtime, environment, 'selected');
+              expect(pointerReopen.items.map((item) => item.selected)).toEqual([
+                'false',
+                'true',
+                'false',
+                'false',
+              ]);
+              expect(
+                pointerReopen.items.filter((item) => item.focused).map((item) => item.text)
+              ).toEqual(['Vue']);
+              if (output)
+                await page.screenshot({ path: path.join(output, `${name}-pointer-reopen.png`) });
+              await page.keyboard.press('Escape');
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+              await expect
+                .poll(() => trigger.evaluate((node) => node.ownerDocument.activeElement === node))
+                .toBe(true);
+            } catch (error) {
+              testFailed = true;
+              testError = error;
+              if (output) {
+                try {
+                  await page.screenshot({ path: path.join(output, `${name}-failure.png`) });
+                } catch (error) {
+                  secondaryErrors.push({ phase: 'failure-screenshot', error });
+                }
+                try {
+                  const trigger = previewer.getByRole('combobox', {
+                    name: 'Adapter selector',
+                    exact: true,
+                  });
+                  observations.push({ phase: 'failure', value: await facts(trigger) });
+                } catch (error) {
+                  secondaryErrors.push({ phase: 'failure-facts', error });
+                }
+              }
+            } finally {
+              try {
+                const unfinished = await activeMotion.handle?.evaluate((handle) => {
+                  handle.stop();
+                  return handle.done;
+                });
+                if (
+                  unfinished &&
+                  !motion.some((entry) => entry.value.startedAt === unfinished.startedAt)
+                )
+                  motion.push({ phase: 'interrupted', value: unfinished });
+              } catch (error) {
+                secondaryErrors.push({ phase: 'motion-cleanup', error });
+              } finally {
+                try {
+                  await activeMotion.handle?.dispose();
+                } catch (error) {
+                  secondaryErrors.push({ phase: 'motion-handle-dispose', error });
+                }
+                activeMotion.handle = null;
+              }
+              try {
+                if (output)
+                  await writeFile(
+                    path.join(output, `${name}.json`),
+                    JSON.stringify(
+                      {
+                        source,
+                        sourceTree,
+                        runtime,
+                        locale,
+                        environment,
+                        directionInput,
+                        observations,
+                        motion,
+                        pointerInputs,
+                        failure: testFailed ? String(testError) : null,
+                        secondaryErrors: secondaryErrors.map(({ phase, error }) => ({
+                          phase,
+                          error: String(error),
+                        })),
+                        firstVisibleFrames:
+                          'pre-action bounded rAF trace; early frames retained separately from settled assertions',
+                        remaining: [
+                          'first-visible frame capture',
+                          '200% text/long content',
+                          'animation cancellation/interruption',
+                          'Root disabled and live Item disabled updates',
+                          'compiled/AT',
+                          'other environment cases require their own results',
+                          'other website controls',
+                        ],
+                      },
+                      null,
+                      2
+                    )
+                  );
+              } catch (error) {
+                secondaryErrors.push({ phase: 'evidence-write', error });
+              }
+              try {
+                await context.close();
+              } catch (error) {
+                secondaryErrors.push({ phase: 'context-close', error });
+              }
+            }
+            if (testFailed || secondaryErrors.length)
+              throw new AggregateError(
+                [
+                  ...(testFailed ? [testError] : []),
+                  ...secondaryErrors.map(({ phase, error }) => new Error(phase, { cause: error })),
+                ],
+                `${name}: assertion/evidence/cleanup failure`
+              );
+          }, 120_000);
+      }
+    );

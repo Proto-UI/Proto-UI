@@ -7,7 +7,8 @@ summary: Covers listbox semantics, asFocusRoving ownership, Transition-bound Ove
 cases:
   - id: T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-ITEM-SIZE
     title: All current registered sibling rows share the Trigger size lease without changing alignment selection
-    covers: [P-BASE-SELECT-CONTENT-UNIFORM-ITEM-SIZE, P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT]
+    covers:
+      [P-BASE-SELECT-CONTENT-UNIFORM-ITEM-SIZE, P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT]
     expectation: ordered-all-row-targets-include-disabled-and-unset-keeps-enabled-alignment-without-commit
     notes:
       - Logical binding tests do not establish actual browser dimensions, RTL, zoom, wrapping, paint or four-runtime conformance.

@@ -310,7 +310,8 @@ export function sizingItemSizeIssues(
         !Number.isFinite(trigger[axis]) ||
         !Number.isFinite(item[axis]) ||
         Math.abs(item[axis] - trigger[axis]) > 0.5
-      ) issues.push(`item ${index} ${axis} does not match Trigger`);
+      )
+        issues.push(`item ${index} ${axis} does not match Trigger`);
     }
   }
   return issues;
@@ -374,10 +375,12 @@ export function sizingMotionIssues(result: SizingMotionResult, runtime: string):
       issues.push('layout mismatch during motion');
     // Layout boxes are scale-independent. Retain the separate per-row paint
     // equation below rather than comparing animated painted boxes to Trigger.
-    issues.push(...sizingItemSizeIssues(
-      { width: sample.trigger.layoutWidth, height: sample.trigger.layoutHeight },
-      sample.items.map((item) => ({ width: item.layoutWidth, height: item.layoutHeight }))
-    ));
+    issues.push(
+      ...sizingItemSizeIssues(
+        { width: sample.trigger.layoutWidth, height: sample.trigger.layoutHeight },
+        sample.items.map((item) => ({ width: item.layoutWidth, height: item.layoutHeight }))
+      )
+    );
     if (
       !near(sample.content.layoutWidth, sample.surface.layoutWidth) ||
       sample.surface.layoutWidth < sample.trigger.layoutWidth - 0.5

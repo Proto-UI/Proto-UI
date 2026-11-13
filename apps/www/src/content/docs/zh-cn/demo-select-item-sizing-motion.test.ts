@@ -558,10 +558,12 @@ describe('exact trace handles survive later locator changes', () => {
   });
 });
 
-
 describe('all sibling sizes, not only the alignment row', () => {
   for (const selection of ['unset', 'selected'] as const)
-    for (const row of [{ index: 1, disabled: false }, { index: 3, disabled: true }])
+    for (const row of [
+      { index: 1, disabled: false },
+      { index: 3, disabled: true },
+    ])
       for (const axis of ['width', 'height'] as const)
         it(`${selection}: rejects only row ${row.index} disabled=${row.disabled} ${axis} drift`, async () => {
           const f = fixture(selection);
@@ -588,7 +590,10 @@ describe('all sibling sizes, not only the alignment row', () => {
   it('uses the same all-row size oracle for settled browser rectangles without matching sibling positions', () => {
     const trigger = { width: 224, height: 36, left: 10, top: 100 };
     const items = Array.from({ length: 4 }, (_, index) => ({
-      width: 224, height: 36, left: 10, top: 100 + index * 36,
+      width: 224,
+      height: 36,
+      left: 10,
+      top: 100 + index * 36,
     }));
     expect(sizingItemSizeIssues(trigger, items)).toEqual([]);
     for (const index of [1, 3]) {
