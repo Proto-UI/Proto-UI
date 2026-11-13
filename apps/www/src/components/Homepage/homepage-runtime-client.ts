@@ -814,6 +814,17 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         console.error('[HomepageRuntime] Failed to restore retained preview.', error);
       });
   }
+  const selectorFocusRequest = (focusKey: string) => {
+    const active = document.activeElement;
+    if (!active) return undefined;
+    const portal = active.closest('[data-projection-owner][data-projection-generation]');
+    const ownsFocus =
+      selectorGroup.mount.contains(active) ||
+      (portal?.getAttribute('data-projection-owner') === selectorGroup.ownerId &&
+        portal.getAttribute('data-projection-generation') ===
+          String(controller.getSnapshot().generation));
+    return ownsFocus ? { focusKey, focusOrigin: active } : undefined;
+  };
   function requestRuntime(runtime: RuntimeId): void {
     if (destroyed || runtime === desiredRuntime) return;
     desiredRuntime = runtime;
@@ -823,8 +834,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         { runtimeId: runtime, projectionFamilyId: desiredFamily },
         {
           force: desiredComponent !== committedComponent,
-          focusKey: PROJECTION_FOCUS_KEYS.runtime,
-          focusOrigin: document.activeElement,
+          ...selectorFocusRequest(PROJECTION_FOCUS_KEYS.runtime),
         }
       )
     );
@@ -839,8 +849,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         { runtimeId: desiredRuntime, projectionFamilyId: family },
         {
           force: desiredComponent !== committedComponent,
-          focusKey: PROJECTION_FOCUS_KEYS.family,
-          focusOrigin: document.activeElement,
+          ...selectorFocusRequest(PROJECTION_FOCUS_KEYS.family),
         }
       )
     );
