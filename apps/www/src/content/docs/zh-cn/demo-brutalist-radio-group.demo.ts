@@ -2,7 +2,12 @@ import type { DemoNode, DemoSpec } from '../../../components/PrototypePreviewer/
 
 // Visible captions stay inside each radio item so inherited Base
 // nameFromContent derives the same accessible name across the Web runtimes.
-function option(value: string, label: string, props: Record<string, unknown> = {}): DemoNode {
+function option(
+  group: string,
+  value: string,
+  label: string,
+  props: Record<string, unknown> = {}
+): DemoNode {
   return {
     kind: 'box',
     className: 'flex items-center gap-3',
@@ -10,7 +15,7 @@ function option(value: string, label: string, props: Record<string, unknown> = {
       {
         kind: 'proto',
         prototypeId: 'brutalist-radio-group-item',
-        ref: `density-${value}`,
+        ref: `${group}-${value}`,
         props: { value, ...props },
         children: [
           { kind: 'proto', prototypeId: 'brutalist-radio-group-indicator' },
@@ -46,13 +51,13 @@ export default {
     className: 'flex flex-col gap-6',
     children: [
       group('Density preference', 'comfortable', [
-        option('default', 'Default'),
-        option('comfortable', 'Comfortable'),
-        option('compact', 'Compact', { disabled: true }),
+        option('density', 'default', 'Default'),
+        option('density', 'comfortable', 'Comfortable'),
+        option('density', 'compact', 'Compact', { disabled: true }),
       ]),
       group('No initial selection', '', [
-        option('default', 'Default'),
-        option('comfortable', 'Comfortable'),
+        option('empty', 'default', 'Default'),
+        option('empty', 'comfortable', 'Comfortable'),
       ]),
     ],
   },
