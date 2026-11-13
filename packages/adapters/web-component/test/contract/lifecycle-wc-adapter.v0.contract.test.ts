@@ -92,6 +92,35 @@ describe('contract: adapter-web-component / lifecycle (v0)', () => {
     expect(calls).toEqual(['unmounted']);
   });
 
+  it('does not restore style from a superseded disconnect checkpoint', async () => {
+    const disposed: string[] = [];
+    const tag = 'x-wc-life-contract-stale-disconnect';
+    AdaptToWebComponent({
+      name: tag,
+      setup(def) {
+        def.feedback.style.use({ kind: 'tw', tokens: ['inline-flex'] } as any);
+        def.lifecycle.onBeforeDispose(() => disposed.push('disposed'));
+        return (r) => [r.el('div', 'ok')];
+      },
+    });
+    const el = document.createElement(tag);
+    document.body.append(el);
+    await Promise.resolve();
+    expect(el.getAttribute('data-pui-style')).toBe('inline-flex');
+
+    el.remove();
+    document.body.append(el);
+    expect(el.getAttribute('data-pui-style')).toBe('inline-flex');
+    const betweenCheckpoints = Promise.resolve().then(() => el.getAttribute('data-pui-style'));
+    el.remove();
+    expect(el.hasAttribute('data-pui-style')).toBe(false);
+
+    expect(await betweenCheckpoints).toBeNull();
+    await Promise.resolve();
+    expect(el.hasAttribute('data-pui-style')).toBe(false);
+    expect(disposed).toEqual(['disposed']);
+  });
+
   it('register=false returns a usable custom element class without auto-defining it', async () => {
     const P: Prototype = {
       name: 'x-wc-life-contract-4',
