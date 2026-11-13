@@ -167,7 +167,7 @@ asHook 的语义更接近继承：调用者声明自己是某类交互主体，�
 
 组合式逻辑复用更接近 `useXxx` 风格 hook。若一个 helper 只是普通函数封装，原型作者可以自行编写函数；只有当它需要 trace、capture、setup guard、artifacts、disposers 或冲突诊断时，才值得成为受治理 API。
 
-`defineHook` / `defineUseHook` 的命名与 API 边界仍是断口，不属于当前 asHook 核心契约。
+公开 Core 包已经导出 `defineHook`，现有 Base helper 也在使用它。draft 决策 `D-AS-HOOK-DEFINE-HOOK-0001` 尚未确定它与 `defineUseHook` 的分类和稳定化边界；这不构成对现有 API 的禁止，也不把它纳入 asHook 核心契约。当前 legacy 实现使用按名称安装及 `mode` / `configure`，不能与历史 generic candidate 的类型化原始 `value`、definition identity 混为一谈。
 
 ## 定义与命名
 
@@ -310,7 +310,7 @@ trace 不是原型作者可写状态，也不是 runtime 行为通路。诊断�
 | --- | --- |
 | caller binding name validation | `spec.name` 与 `asXxx` caller binding 分离；后续由 tooling 检查 |
 | ordinary configurable authored asHook | 实现已有能力，但参数 identity、配置合并与冲突诊断仍待治理 |
-| `defineHook` / `defineUseHook` | 是否需要独立 use-style hook API 仍待讨论 |
+| `defineHook` / `defineUseHook` | `defineHook` 已有实现；独立 use-style API 的分类与稳定化仍待讨论 |
 | capture bucket shape | 当前 runtime bucket 是实现细节，不固化为公开语义 |
 | 特权 asHook 细则 | 由 focus、overlay、boundary 等二级 scope 分别定义 |
 
@@ -329,6 +329,40 @@ asHook 的测试实体按核心行为、结果捕获、特权能力三组组织�
 | `T-AS-HOOK-PRIVILEGED-0001` | 特权 asHook 的 module-port capability、privileged trace、rollback boundary |
 
 当前 runtime 合约测试承接核心 asHook 行为；focus、boundary、overlay、hit-participation 等特权 asHook 测试承接 privileged API 的最低边界。
+
+## 实现证据与边界
+
+保留的 2026-10-11 generic-hook 源记录报告：原始 Runtime 与 Base helper 的 35 项检查在 Node 22.23.3 上通过，另有类型、capture 失败和普通投影检查。这些结果只属于当时的源码 candidate。其较大范围运行还保留了 105 项 general 失败，以及与冻结 baseline 对应的 98 项 WC 失败；局部通过从未代表全套通过。完整来源核算见[保留的 reconciliation record](https://github.com/Proto-UI/Proto-UI/blob/main/internal/records/2026-11-10-finf-1157-adjacent-source-reconciliation.json)。
+
+Issue [#1154](https://github.com/Proto-UI/Proto-UI/issues/1154) 分别保留“实测文档同步”和“自有脚本归档及投影验证”两个条件。新增当前源码容器证据必须绑定确切源码、release tarball、package exports、真实 CLI 生成的 facade 和隔离消费者。普通 asHook 测试或 facade 可用，不能证明历史 generic candidate 的原始 value、类型化参数、identity、失败处理或非 Web 组合条件。
+
+首轮有界当前源码运行已完成真实 package 打包、安装及 CLI help/init/add。其生成的 WC Collapsible 消费者初始展开，经指针请求收起，之后改变 default 不会重置状态，并能通过公开方法重新展开。generic 条件仍未验收：运行保留了 identity、失败处理、metadata 和 Compiler import 拒绝，同时暴露了新编写探测的数字 factory 拼写错误，以及归档缺少 Git metadata 的前置条件问题。
+
+自有探测与 Git 归档准备正在修正，后续窄范围运行将复用这些字节未变的已打包 package。文档类型检查与构建都在 token 生成完成前达到原有 deadline；日志尚不能证明 TypeScript 或 Astro 错误。修正探测、依赖 Git 的检查及页面渲染验收仍待执行，证据核算不会提升 draft 契约或目标 profile 的 lifecycle。
+
+### 2026-11-12 处置
+
+后续有界 R2 运行已通过修正后的 legacy `defineHook` 消费者：setup 只执行一次，重复调用取得同一个 captured result，声明的数字 state 经已注册事件从 1 变为 3。这个结果只证明保留 package 的这一既有消费者行为，不代表历史 candidate 的类型化原始 value API 已验收。
+
+预期的双参数原始 value 消费者仍实际报错：`[AsHook] setup() must return render function or void, got: object.` 已打包 TypeScript 检查也保留了 `AsHookConfigApi` 与数字参数不兼容、caller 只接受 0–1 个参数，以及 `value` 类型为 unknown 的诊断。当前 `HookPrototype` 定义的是 `setup(def, options, api) => RenderFn | void`；其 caller 接受一个可选 options 值，并返回合成的 `HookResult`。把 fixture 改成这种 legacy 形态会删掉预期的 tuple 与原始 value 条件，因此原有源码和类型断言保持完整。这一能力仍以前置的 generic API 定义决议、Core/Runtime 实现及与源码名称无关的 Compiler 支持为条件。同名不同定义的 identity、重入/失败以及包含 `configure` 的 retired metadata 断言，也仍是未满足的历史 candidate 条件。
+
+R2 已成功复制并读回真实 Git metadata。随后 Agent operations 检查先输出了具名 connector 失败，再在原有 900000 ms deadline 以 `SIGKILL` 结束；Git 前置条件通过不代表该检查通过。早先的文档类型检查与构建 deadline 发生在另行报告的 token 生成修复之前，仍属于历史结果；这里没有新增修复后的页面渲染通过记录。R1 的两个 Compiler profile 均保留 `PUI1003: Unsupported import defineHook from @proto.ui/core.`。
+
+源码审查还发现 R1 报告的静态声明通过是空值比较：两侧 `modules` 都不存在，而 `Object.isFrozen(undefined)` 为 true。修正后的探测使用两个真实公开 Core declaration，按 draft `C-MODULE-DECLARATION-0001` substrate 检查完整 authored 顺序、declaration/token/config 的精确引用、必要字段，以及数组、token、declaration 和顶层 config 的冻结边界。由 `defineHook` 发布这些 declaration 属于保留的历史 K 目标；当前 legacy `HookCaller` 并没有公开 `modules` 承诺。因此预期的新失败说明历史能力尚未具备，不构成新增运行结果或当前 Core regression 结论。新增的 fixture-only 容器入口复用保留 package，只运行这个已改动的探测。全部 13 项保留的 generic 条件及 #1154 的两个原始 checkbox，仍须等待对应的真实验证与集成后才能取得验收；本次处置不会提升 draft 契约或目标 profile 的 lifecycle。
+
+#### 实际有界 R3 结果
+
+Main 随后针对保留的已安装 package 实际执行了 fixture-only R3 运行。requested 与 executed 探测列表均严格为 `['static-module-declarations']`，没有 unmatched selector。探测在消费者第 324 行报错：`retained C-HOOK-0001-K target requires a Module declaration array`。容器命令 exit 1，没有 signal，也没有 timeout；原有 1200 秒容器 deadline 和 180000 ms 探测 deadline 均未改变。
+
+六个执行 phase 中有五个通过，包括源码与真实 Git metadata 准入、保留输入绑定，以及最终 package/index 读回。保留的 41 个 package 的 tarball、export、安装成员和 lockfile 绑定均保持不变，前后 semantic index 一致。静态探测在数组缺失处停止，后续顺序、declaration/token/config 精确 identity、必要字段和冻结断言尚未执行。这是历史 K 目标的真实失败；当前 legacy `HookCaller` 没有公开 `modules` 承诺，因此该结果不能证明当前 Core regression。R1 的空值比较通过仍按历史原样保留，不能提供静态声明验收。
+
+R3 没有重跑 R1/R2，也没有重跑其余探测、类型检查、Compiler profile 或文档构建。authored raw-tuple 与类型 fixture 继续保持 R2 的精确字节。其历史 generic 定义仍未进入当前 catalog，本次结果不引入新的 API 语义。原始 13 项 generic 条件及 #1154 的两个原始 checkbox 仍未完成，源码 review、适用的投影验证和集成继续由 Main 分别负责。
+
+#### Git Metadata 保管边界纠正
+
+独立 review `CLI1154-ADMISSION-001` 确认：`.env.production` 没有进入 working-tree copy，但其已跟踪字节仍可经准入的 Git objects 和 semantic index 读取。完整 metadata 挂载于 `/source/git-metadata`，并复制到 `/work/repo/.git`。Reviewer 仅报告了 24 字节长度及匹配的 hash，没有披露值，也没有建立 secret leak 结论。因此，该排除描述的是 working-tree copy，不代表整份已挂载 snapshot 中不存在这些字节。Harness 现已明确这一边界，并区分新配置的 Git settings 与保留的 tracked contents。
+
+本次只纠正 provenance wording，不改变消费者的任何执行条件、Git-object/index custody 或准入/拒绝策略。原始 R3 receipt 的五个 phase 通过和历史 K 数组失败均保持不变，没有重写或重跑。全部 13 项 generic 条件及 #1154 的两个原始 checkbox 仍未完成。
 
 ## 与其他规范的关系
 

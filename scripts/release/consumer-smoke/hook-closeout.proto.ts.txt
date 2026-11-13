@@ -1,0 +1,35 @@
+import { defineHook, definePrototype } from '@proto.ui/core';
+
+// One unchanged authored input is used by the installed-package Adapter and the
+// canonical compiler probes. It exercises the retained generic direction; it
+// does not declare that this direction is implemented by the current packages.
+export const useCount = defineHook({
+  name: 'issue-1154-generic-count',
+  setup(def, seed: { count: number; label: string }, increment: number) {
+    const count = def.state.numberDiscrete('count', seed.count);
+    def.expose.state('publicCount', count);
+    def.event.on('key.down', (_run, event) => {
+      if (event.key === 'Enter') count.set(count.get() + increment);
+    });
+    return { seed, count };
+  },
+});
+
+const counter = definePrototype({
+  name: 'issue-1154-authored-counter',
+  setup(def) {
+    const seed = { count: 1, label: 'first' };
+    const first = useCount(seed, 2);
+    const repeated = useCount({ count: 100, label: 'later' }, 9);
+    def.expose.method('snapshot', () => ({
+      sameResult: first === repeated,
+      sameValue: first.value === repeated.value,
+      firstReference: first.value.seed === seed,
+      count: first.value.count.get(),
+      label: first.value.seed.label,
+    }));
+    return (renderer) => renderer.el('span', first.value.seed.label);
+  },
+});
+
+export default counter;
