@@ -213,8 +213,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   window?.visualViewport?.addEventListener('resize', positionPanel);
   window?.visualViewport?.addEventListener('scroll', positionPanel);
   const syncButton = (button: HTMLElement) => {
-    button.setAttribute('aria-expanded', String(open));
-    if (panel?.id) button.setAttribute('aria-controls', panel.id);
+    const expanded = String(open);
+    if (button.getAttribute('aria-expanded') !== expanded)
+      button.setAttribute('aria-expanded', expanded);
+    if (panel?.id && button.getAttribute('aria-controls') !== panel.id)
+      button.setAttribute('aria-controls', panel.id);
   };
   const sync = () => {
     const focused = document.activeElement as HTMLElement | null;
@@ -228,7 +231,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       (focusInPreferences || ownsSelectPopup(focused))
     )
       open = true;
-    root.dataset.siteMenuOpen = String(open);
+    const expanded = String(open);
+    if (root.dataset.siteMenuOpen !== expanded) root.dataset.siteMenuOpen = expanded;
     root.toggleAttribute('data-site-menu-ready', enhanced);
     if (desktopNavigation) desktopNavigation.hidden = !!compact?.matches;
     if (navigation) navigation.hidden = !compact?.matches || (enhanced && !open);

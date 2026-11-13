@@ -386,6 +386,48 @@ describe('shared website navigation disclosure', () => {
 });
 
 describe('actual Header Button anchoring', () => {
+  it('publishes a replacement without rewriting unchanged disclosure attributes', () => {
+    const { root, button, panel } = fixture();
+    vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+    const height = vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+    const header = vi
+      .spyOn(root, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 360, 56));
+    disclosure!.enhance();
+    disclosure!.toggle();
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+
+    const staged = document.createElement('div');
+    staged.dataset.projectionGenerationState = 'staging';
+    const next = document.createElement('button');
+    staged.append(next);
+    root.append(staged);
+    disclosure!.bindButton(next);
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+
+    const rootWrite = vi.spyOn(root, 'setAttribute');
+    const buttonWrite = vi.spyOn(next, 'setAttribute');
+    button.remove();
+    staged.dataset.projectionGenerationState = 'active';
+    header.mockReturnValue(new DOMRect(0, 0, 360, 100));
+    height.mockReturnValue(100);
+    disclosure!.enhance();
+
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
+    expect(root.dataset.siteMenuOpen).toBe('true');
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+    expect({
+      open: rootWrite.mock.calls.filter(([name]) => name === 'data-site-menu-open'),
+      relationships: buttonWrite.mock.calls,
+    }).toEqual({ open: [], relationships: [] });
+
+    disclosure!.close();
+    expect(root.dataset.siteMenuOpen).toBe('false');
+    expect(next.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.hidden).toBe(true);
+  });
   it('keeps the current binding when an older lease for the same Button retires', () => {
     const { root, button, panel } = fixture(false);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
