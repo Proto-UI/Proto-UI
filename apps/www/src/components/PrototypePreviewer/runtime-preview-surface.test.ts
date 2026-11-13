@@ -5,9 +5,11 @@ import {
   runtimePreviewRecipe,
 } from './runtime-preview-surface';
 import { collectPrototypeIds, type DemoSetupContext, type DemoSpec } from './demo-types';
+import { assertProjectionRecipeClosure } from './projection-composition';
 import { PROJECTION_FAMILY_MANIFESTS, type ProjectionFamilyManifest } from './projection-families';
 import { registerPrototype } from './registry';
 import { renderDemo } from './demo-renderer';
+import bootstrapDialog from '../../content/docs/demo-bootstrap-2-3-2-dialog.demo';
 import Toggle from '../../../../../packages/prototypes/shadcn/src/toggle/toggle.proto';
 
 // Exercise the real adapters with the repository's installed framework versions.
@@ -87,6 +89,13 @@ describe('RuntimeBox canvas composition', () => {
     const ids = new Set<string>();
     collectPrototypeIds(createRuntimePreviewSurface(child, 'shadcn').demo.root, ids);
     expect([...ids]).toEqual(['original-component']);
+  });
+
+  it('admits the authored Bootstrap Dialog with its complete runtime recipe', () => {
+    const family = 'bootstrap-2-3-2';
+    const surface = createRuntimePreviewSurface(bootstrapDialog, family);
+    const recipe = runtimePreviewRecipe(family, 'dialog');
+    assertProjectionRecipeClosure(surface.demo.root, recipe.prototypeIds, recipe.id);
   });
 
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
