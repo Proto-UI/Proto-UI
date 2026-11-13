@@ -1207,6 +1207,9 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `     
         return false;
       } else if (frame.kind === 'mount') {
         mounted = true;
+        // The published mount may predate an explicit update intent. Only
+        // after its acknowledgement may that dirty intent enter update flow.
+        if (dirty) updateQueued = true;
 ${usesStyle ? `        ${p}Style.mount();` : ''}
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
       } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);

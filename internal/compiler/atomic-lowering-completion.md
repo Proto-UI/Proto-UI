@@ -41,6 +41,8 @@ All rows below require exact source/head, owner, applicable definitions, impleme
 
 For each implemented row, cross all admitted operation families with positive controls, semantic negative controls and actual generated consumers. Include source/component/export rename controls, required-helper removal mutations, reordered/double-evaluated side effects, identity and lifecycle interruptions. Preserve original evidence bindings: old fixed-source executions do not certify a new combined source tree. Framework/library dependencies must be disclosed; ordinary target APIs are not a hidden Proto interpreter.
 
+For React source owners, include a Props watcher that explicitly requests an update after a mount frame has been published but before its commit acknowledgement. Assert the original mount completes before the coalesced update, the current input reaches the retained view, and a detached update is consumed by remount without an unconditional extra update. The consumer regression in `packages/compiler/test/react-source.test.ts` covers this ordering; its source alone is not an executed result.
+
 ## Delivery discipline
 
 Use bounded claimed work and normal repository handoffs. Preserve original authorship, DCO, failed checks and review independence. Static candidate preparation is not executed acceptance. New fixed-source execution, deployment and protection changes retain their existing permission boundaries. Updating this engineering standard does not waive any of them or authorize takeover of [#902](https://github.com/Proto-UI/Proto-UI/issues/902)'s frozen source bank.
