@@ -1,0 +1,17 @@
+import { useCount } from './hook-closeout.proto.js';
+
+type Equal<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type Assert<T extends true> = T;
+
+type RequiredTuple = Assert<
+  Equal<Parameters<typeof useCount>, [seed: { count: number; label: string }, increment: number]>
+>;
+const seed = { count: 1, label: 'typed' };
+const result = useCount(seed, 2);
+const originalSeed: typeof seed = result.value.seed;
+const label: string = originalSeed.label;
+const count: number = result.value.count.get();
+
+export type PreservedRequiredTuple = RequiredTuple;
+export { label, count };

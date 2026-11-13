@@ -388,6 +388,11 @@ export default defineConfig({
               translations: { en: 'Base', 'zh-CN': 'Base' },
               items: [
                 {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/base',
+                },
+                {
                   label: 'Text',
                   badge: earlyDraftBadge,
                   translations: { en: 'Text', 'zh-CN': 'Text' },
@@ -703,6 +708,11 @@ export default defineConfig({
               label: 'Shadcn',
               translations: { en: 'Shadcn', 'zh-CN': 'Shadcn' },
               items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/shadcn',
+                },
                 {
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
@@ -1054,6 +1064,11 @@ export default defineConfig({
               label: 'Brutalist',
               translations: { en: 'Brutalist', 'zh-CN': 'Brutalist' },
               items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/brutalist',
+                },
                 {
                   label: 'Design Contract',
                   translations: { en: 'Design Contract', 'zh-CN': '设计合约' },

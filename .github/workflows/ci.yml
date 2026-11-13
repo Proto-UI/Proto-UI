@@ -629,13 +629,15 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Restore the exact browser font package only
+        id: browser-font-cache
         timeout-minutes: 1
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
           key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
       - name: Install real CJK fallback for typography glyph evidence
         # Fail setup before a slow mirror consumes the browser execution budget.
+        id: prepare-browser-fonts
         timeout-minutes: 3
         env:
           FONT_EVIDENCE_DIR: ${{ runner.temp }}/runtime-ci/font-preparation
@@ -669,6 +671,15 @@ jobs:
           path: ${{ runner.temp }}/runtime-ci
           if-no-files-found: error
           retention-days: 14
+      - name: Save the verified browser font package
+        # Later browser failures still leave a verified package available.
+        if: ${{ !cancelled() && steps.prepare-browser-fonts.outcome == 'success' && steps.browser-font-cache.outputs.cache-hit != 'true' }}
+        timeout-minutes: 1
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ${{ steps.browser-font-cache.outputs.cache-primary-key }}
 
   # Preserve the existing required check name. Missing, skipped, failed, cancelled
   # or zero-test workers cannot turn this aggregate green.
