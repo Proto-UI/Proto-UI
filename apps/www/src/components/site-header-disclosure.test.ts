@@ -491,7 +491,9 @@ describe('actual Header Button anchoring', () => {
     vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
     vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
-    vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(300, 6, 44, 44));
+    const previousRect = vi
+      .spyOn(button, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(300, 6, 44, 44));
     vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 400));
     disclosure!.enhance();
     disclosure!.toggle();
@@ -501,12 +503,20 @@ describe('actual Header Button anchoring', () => {
     const next = document.createElement('button');
     nextHost.append(next);
     root.append(nextHost);
-    vi.spyOn(next, 'getBoundingClientRect').mockReturnValue(new DOMRect(280, 28, 44, 44));
+    const nextRect = vi
+      .spyOn(next, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(280, 28, 44, 44));
+    previousRect.mockClear();
     disclosure!.bindButton(next);
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+    expect(previousRect).not.toHaveBeenCalled();
+    expect(nextRect).not.toHaveBeenCalled();
     expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('55px');
     button.remove();
     nextHost.dataset.projectionGenerationState = 'active';
     disclosure!.enhance();
+    expect(nextRect).toHaveBeenCalledTimes(1);
     expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('77px');
     expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('44px');
     disclosure!.destroy();

@@ -204,6 +204,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   window?.addEventListener('scroll', positionPanel, true);
   window?.visualViewport?.addEventListener('resize', positionPanel);
   window?.visualViewport?.addEventListener('scroll', positionPanel);
+  const syncButton = (button: HTMLElement) => {
+    button.setAttribute('aria-expanded', String(open));
+    if (panel?.id) button.setAttribute('aria-controls', panel.id);
+  };
   const sync = () => {
     const focused = document.activeElement as HTMLElement | null;
     const focusInPreferences = !!focused && !!preferences?.contains(focused);
@@ -230,10 +234,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       !focused.closest('[hidden], [inert]')
     )
       focused.focus({ preventScroll: true });
-    for (const button of buttons) {
-      button.setAttribute('aria-expanded', String(open));
-      if (panel?.id) button.setAttribute('aria-controls', panel.id);
-    }
+    for (const button of buttons) syncButton(button);
     measureLayout();
   };
   const close = (restoreFocus = false) => {
@@ -422,7 +423,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
           'class',
         ],
       });
-      sync();
+      // A staged Button needs the current relationship. Publication measures
+      // the panel against it after it becomes the active owner.
+      if (activeButton() === button) sync();
+      else syncButton(button);
       return () => {
         lease.observer?.disconnect();
         button.removeEventListener('transitionend', lease.settle);
