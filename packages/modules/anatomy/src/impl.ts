@@ -347,13 +347,21 @@ export class AnatomyModuleImpl extends ModuleBase {
     cb: (ctx: AnatomyOrderCallbackCtx, parts: readonly AnatomyPartView[]) => void
   ): Unsubscribe {
     this.ensureSetup('def.anatomy.subscribeParts');
-    let previousSignature = this.computeRoleOrderSignature(family, role);
+    const readOrderedRole = () => {
+      const domain = this.resolveCurrentDomain(family, false);
+      return domain.rootInstance
+        ? this.sortClaims(domain.claims.filter((claim) => claim.role === role))
+        : null;
+    };
+    const signature = (claims: ClaimRecord[] | null) =>
+      claims?.map((claim) => this.getIdentityId(claim.instance)).join('|') ?? 'missing-domain';
+    let previousSignature = signature(readOrderedRole());
     const unsubscribe = this.subscribeOrder(family, (ctx) => {
-      const nextSignature = this.computeRoleOrderSignature(family, role);
+      const claims = readOrderedRole();
+      const nextSignature = signature(claims);
       if (nextSignature === previousSignature) return;
       previousSignature = nextSignature;
-      const parts = this.tryOrderedPartsOf(family, role) ?? [];
-      cb(ctx, parts);
+      cb(ctx, claims?.map((claim) => this.toPartView(claim)) ?? []);
     });
     return () => {
       this.ensureSetup('def.anatomy.subscribeParts.unsubscribe');
@@ -903,13 +911,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!domain.rootInstance) return 'missing-domain';
     const ordered = this.sortClaims(domain.claims);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
-  }
-
-  private computeRoleOrderSignature(family: AnatomyFamily, role: string): string {
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims.filter((claim) => claim.role === role));
-    return ordered.map((claim) => this.getIdentityId(claim.instance)).join('|');
   }
 
   private getIdentityId(value: unknown): number {

@@ -46,6 +46,56 @@ describe('Anatomy catalog boundaries', () => {
     }
   });
 
+  it('delivers the same ordered role projection used to detect a membership change', () => {
+    const family = createAnatomyFamily('role-snapshot', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: '*' } },
+      },
+    });
+    const root = {},
+      first = {},
+      second = {};
+    const getParent = vi.fn((instance: unknown) => (instance === root ? null : root));
+    const modules = [root, first, second].map((instance, id) => {
+      const caps = makeCaps({
+        instance,
+        getParent,
+        getPrototype: () => ({ name: 'part' }),
+      });
+      return new AnatomyModuleImpl(caps, 'part', { has: () => true, get: () => id } as any);
+    });
+    const [rootImpl, firstImpl, secondImpl] = modules;
+    try {
+      rootImpl.claim(family, { role: 'root' });
+      firstImpl.claim(family, { role: 'item' });
+      const readsAtDispatch: unknown[] = [];
+      const seen = vi.fn((_ctx, parts) =>
+        parts.map((part: { getExpose(key: string): unknown }) => part.getExpose('id'))
+      );
+      rootImpl.port.setOrderCallbackDispatcher((fn) => {
+        getParent.mockClear();
+        fn('runtime');
+        readsAtDispatch.push(...getParent.mock.calls.map(([instance]) => instance));
+      });
+      rootImpl.subscribeParts(family, 'item', seen);
+      expect(seen).not.toHaveBeenCalled();
+
+      secondImpl.claim(family, { role: 'item' });
+      secondImpl.port.syncStructure();
+      expect(seen).toHaveBeenCalledTimes(1);
+      expect(seen.mock.results[0]?.value).toEqual([1, 2]);
+      expect(readsAtDispatch).toHaveLength(2);
+      expect(readsAtDispatch[0]).toBe(first);
+      expect(readsAtDispatch[1]).toBe(second);
+
+      secondImpl.dispose();
+      expect(seen.mock.results[1]?.value).toEqual([1]);
+    } finally {
+      modules.reverse().forEach((impl) => impl.dispose());
+    }
+  });
+
   it('T-ANATOMY-0004-CASE-HOST: isolates nearest domains and uses stable fallback without host targets', () => {
     const family = createAnatomyFamily('identity', {
       roles: {
