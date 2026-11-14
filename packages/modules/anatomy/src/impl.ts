@@ -831,9 +831,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (this.observedOrderRoots.has(family)) return;
     if (!this.caps.has(ANATOMY_ORDER_OBSERVER_CAP)) return;
 
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return;
-    const target = this.getObservedRootTarget(family);
+    const rootInstance = this.findDomainRoot(this.getSelfToken(), family);
+    if (!rootInstance) return;
+    const target = CENTER.getClaim(rootInstance, family)?.getRootTarget(rootInstance);
     if (!target) return;
 
     let byRoot = AnatomyModuleImpl.sharedOrderObservers.get(family);
@@ -842,7 +842,7 @@ export class AnatomyModuleImpl extends ModuleBase {
       AnatomyModuleImpl.sharedOrderObservers.set(family, byRoot);
     }
 
-    let entry = byRoot.get(domain.rootInstance);
+    let entry = byRoot.get(rootInstance);
     if (!entry) {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
@@ -852,11 +852,11 @@ export class AnatomyModuleImpl extends ModuleBase {
         }
       });
       entry = { off, listeners };
-      byRoot.set(domain.rootInstance, entry);
+      byRoot.set(rootInstance, entry);
     }
 
     entry.listeners.add(this);
-    this.observedOrderRoots.set(family, domain.rootInstance);
+    this.observedOrderRoots.set(family, rootInstance);
   }
 
   private teardownOrderObserver(family: AnatomyFamily): void {
@@ -929,14 +929,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     const next = this.nextIdentityId++;
     this.primitiveIds.set(value, next);
     return next;
-  }
-
-  private getObservedRootTarget(family: AnatomyFamily): AnatomyRootTarget | null {
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return null;
-    const rootClaim = CENTER.getClaim(domain.rootInstance, family);
-    if (!rootClaim) return null;
-    return rootClaim.getRootTarget(rootClaim.instance);
   }
 
   private sortClaims(claims: ClaimRecord[]): ClaimRecord[] {

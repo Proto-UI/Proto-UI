@@ -53,3 +53,59 @@ describe('Anatomy scope-only queries', () => {
     expect(getParent.mock.calls.map(([token]) => token)).toEqual([current.token]);
   });
 });
+
+describe('Anatomy order observer attachment', () => {
+  it('observes the current logical root without reading foreign memberships', () => {
+    const family = createAnatomyFamily('order-observer-locality', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: '*' } },
+      },
+    });
+    const root = {};
+    const item = {};
+    const foreignRoot = {};
+    const foreignItem = {};
+    const target = document.createElement('div');
+    const parents = new Map([
+      [item, root],
+      [foreignItem, foreignRoot],
+    ]);
+    const getParent = vi.fn((instance: unknown) => parents.get(instance as object) ?? null);
+    const stop = vi.fn();
+    const observe = vi.fn(() => stop);
+    const create = (instance: object, role: string) => {
+      const impl = new AnatomyModuleImpl(
+        makeCaps({
+          instance,
+          getParent,
+          getPrototype: () => ({ name: 'part', setup() {} }),
+          getRootTarget: (token) => (token === root ? target : null),
+          orderObserver: observe,
+        }),
+        'part',
+        { get: () => undefined, getAll: () => ({}), has: () => false, keys: () => [] } as any
+      );
+      live.push(impl);
+      impl.claim(family, { role });
+      return impl;
+    };
+    create(root, 'root');
+    create(foreignRoot, 'root');
+    create(foreignItem, 'item');
+    const current = create(item, 'item');
+    const notify = vi.fn();
+    current.port.subscribeOrder(family, notify);
+
+    getParent.mockClear();
+    current.onMountPhase('mounted', 1);
+    expect(observe).toHaveBeenCalledOnce();
+    expect(observe).toHaveBeenCalledWith(target, expect.any(Function));
+    expect(getParent).toHaveBeenCalledTimes(1);
+    expect(getParent.mock.calls[0]?.[0]).toBe(item);
+    expect(notify).not.toHaveBeenCalled();
+
+    current.onMountPhase('detached', 1);
+    expect(stop).toHaveBeenCalledOnce();
+  });
+});
