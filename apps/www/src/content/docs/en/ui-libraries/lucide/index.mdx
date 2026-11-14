@@ -5,6 +5,8 @@ description: 'A searchable Lucide prototype icon grid with per-icon loading and 
 
 import LucideIconGallery from '@/components/LucideIconGallery.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { lucideIconFiles } from '@/content/docs/demo_components/lucideIconCode';
 
 Proto UI generates Lucide icon prototypes from `lucide-static`. This is the library’s primary working page: search icons directly, open a card to inspect its import path, and copy either an `asHook` or inline `render` snippet.
 
@@ -12,9 +14,50 @@ Icons use independent entry points for on-demand imports. The grid renders in ba
 
 <LucideIconGallery locale="en" />
 
-## API
+## Install
 
-Lucide icons are workspace source generated from `lucide-static`. They do not have props; each icon is a prototype that renders an SVG. Copy the `asHook` or `render` snippet from any icon card to use it.
+For the published 0.2.0 Web Component baseline in an existing bundler application:
+
+```sh
+npm install @proto.ui/prototypes-lucide@0.2.0 @proto.ui/adapter-web-component@0.2.0
+```
+
+Or use pnpm:
+
+```sh
+pnpm add @proto.ui/prototypes-lucide@0.2.0 @proto.ui/adapter-web-component@0.2.0
+```
+
+React and Vue 3 applications select `@proto.ui/adapter-react@0.2.0` or `@proto.ui/adapter-vue@0.2.0` instead and keep their framework installed. Vue 2.6 (`>=2.6.0 <2.7`) uses the matching workspace 0.3 `@proto.ui/adapter-vue2` source; it is not part of the stable 0.2.0 package set. The gallery uses current workspace source, and its generated baseline does not prove that a newer registry version is available.
+
+## Use one icon
+
+Import a fixed glyph from its public entrypoint. These complete application components use the same public Adapter creation APIs as the CLI. Keep the existing framework's mount entry; for WC, add the paragraph to the existing document and load the module once. No theme or Tailwind setup is required for this SVG example.
+
+<CodeExample files={lucideIconFiles} initialHost="wc" label="Lucide Check icon host usage" />
+
+The example shows a check with “Saved”; the application controls their layout. The ordinary host wrapper hides the decorative icon, while the visible text carries the meaning. The gallery is a source preview, not a four-Adapter execution receipt; exercise the selected package set before treating the example as tested.
+
+## Props and authoring
+
+The name-based `lucideIcon` / `asLucideIcon` entry accepts `name` (default `circle`). Every fixed-glyph prototype, such as `lucideCheckIcon`, retains its glyph and accepts the shared visual props:
+
+| Prop          | Type                   | Default        |
+| ------------- | ---------------------- | -------------- |
+| `size`        | positive finite number | `24`           |
+| `strokeWidth` | positive finite number | `2`            |
+| `stroke`      | string                 | `currentColor` |
+| `fill`        | string                 | `none`         |
+
+An invalid name falls back to `circle`; non-finite or non-positive dimensions fall back to their defaults. The SVG uses `viewBox="0 0 24 24"`. A fixed glyph does not accept a changing `name`.
+
+For Prototype authoring, `renderLucideCheckIcon(renderer, { size: 18 })` appends the SVG to an existing renderer; `asLucideCheckIcon()` is the fixed-glyph hook. Gallery `render` fragments belong inside a Prototype render callback. They are not a standalone React/Vue component or a complete application by themselves.
+
+The current icon protocol has no `decorative`, accessible-label, `title` or `role` prop. Put meaningful text or an accessible name on the owning control and handle decorative visibility at the host boundary; a rendered SVG alone does not settle accessibility.
+
+## Source and evidence
+
+`P-LUCIDE-ICON` remains draft and represents one protocol shared by all generated glyphs. The current source derives from `lucide-static@1.8.0`; Proto UI is an unofficial consumption layer. Preserve the [Lucide/Feather notices](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/lucide/THIRD_PARTY_NOTICES.md), [source manifest](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/lucide/src/manifest.generated.ts) and [existing evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-LUCIDE-ICON-0001.yaml). Source availability, registry installation and current native/assistive-technology acceptance are separate results.
 
 ## References
 

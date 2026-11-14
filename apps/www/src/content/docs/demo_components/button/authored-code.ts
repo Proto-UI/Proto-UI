@@ -1,0 +1,722 @@
+// Author-authored host snippets for the public Button examples.
+// The existing generate-code CLI emits buttonCode.ts from this explicit source.
+// These literal examples do not claim automatic lowering of DemoSpec.setup.
+import { formatCode } from '../../../../utils/conversionUtils';
+import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
+
+export const codeMap: Record<RuntimeId, Record<string, string>> = {
+  wc: {
+    'demo-button-default': formatCode(`
+<div class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button id="default-button">Default</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const button = document.querySelector('#default-button');
+  if (!(button instanceof HTMLElement)) throw new Error('Missing #default-button');
+  setElementProps(button, { styleProfile: 'rhea' });
+</script>
+    `),
+    'demo-button-destructive': formatCode(`
+<div class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button id="destructive-button">Destructive</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const button = document.querySelector('#destructive-button');
+  if (!(button instanceof HTMLElement)) throw new Error('Missing #destructive-button');
+  setElementProps(button, { styleProfile: 'rhea', variant: 'destructive' });
+</script>
+    `),
+    'demo-button-disabled': formatCode(`
+<div class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button id="disabled-button">Disabled</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const button = document.querySelector('#disabled-button');
+  if (!(button instanceof HTMLElement)) throw new Error('Missing #disabled-button');
+  setElementProps(button, { styleProfile: 'rhea', disabled: true });
+</script>
+    `),
+    'demo-button-ghost': formatCode(`
+<div id="ghost-demo" class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button>Ghost</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Disabled ghost</proto-ui-shadcn-button>
+  <div role="status" aria-live="polite">Enabled activations: 0; disabled activations: 0</div>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const demo = document.querySelector('#ghost-demo');
+  if (!(demo instanceof HTMLElement)) throw new Error('Missing #ghost-demo');
+  const buttons = demo.querySelectorAll('proto-ui-shadcn-button');
+  const counts = [0, 0];
+  buttons.forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing Ghost Button');
+    setElementProps(button, { styleProfile: 'rhea', variant: 'ghost', disabled: index === 1 });
+    button.addEventListener('click', (event) => {
+      if (!(event instanceof CustomEvent) || event.target !== button) return;
+      counts[index]++;
+      demo.querySelector('[role="status"]').textContent =
+        'Enabled activations: ' + counts[0] + '; disabled activations: ' + counts[1];
+    });
+  });
+</script>
+    `),
+    'demo-button-outline': formatCode(`
+<div class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button id="outline-button">Outline</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const button = document.querySelector('#outline-button');
+  if (!(button instanceof HTMLElement)) throw new Error('Missing #outline-button');
+  setElementProps(button, { styleProfile: 'rhea', variant: 'outline' });
+</script>
+    `),
+    'demo-button-secondary': formatCode(`
+<div class="flex flex-wrap items-center gap-3">
+  <proto-ui-shadcn-button id="secondary-button">Secondary</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const button = document.querySelector('#secondary-button');
+  if (!(button instanceof HTMLElement)) throw new Error('Missing #secondary-button');
+  setElementProps(button, { styleProfile: 'rhea', variant: 'secondary' });
+</script>
+    `),
+    'demo-button-sizes': formatCode(`
+<div id="button-sizes-demo" class="flex flex-wrap items-center justify-center gap-3">
+  <proto-ui-shadcn-button>Small</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Large</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
+  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const props = [
+    { styleProfile: 'rhea', size: 'sm' },
+    { styleProfile: 'rhea', size: 'default' },
+    { styleProfile: 'rhea', size: 'lg' },
+    { styleProfile: 'rhea', size: 'icon', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'icon-compact', variant: 'outline' },
+  ];
+  document.querySelectorAll('#button-sizes-demo proto-ui-shadcn-button').forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing size Button');
+    setElementProps(button, props[index]);
+  });
+</script>
+    `),
+    'demo-button-states': formatCode(`
+<div id="button-states-demo" class="flex flex-wrap items-center justify-center gap-3">
+  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Disabled</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Disabled outline</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const props = [
+    { styleProfile: 'rhea' },
+    { styleProfile: 'rhea', disabled: true },
+    { styleProfile: 'rhea', variant: 'outline', disabled: true },
+    { styleProfile: 'rhea', variant: 'ghost', size: 'icon' },
+  ];
+  document.querySelectorAll('#button-states-demo proto-ui-shadcn-button').forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing state Button');
+    setElementProps(button, props[index]);
+  });
+</script>
+    `),
+    'demo-button-variants': formatCode(`
+<div id="button-variants-demo" class="flex flex-wrap items-center justify-center gap-3">
+  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Secondary</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Outline</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Ghost</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Destructive</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Link</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const props = [
+    { styleProfile: 'rhea', variant: 'default' },
+    { styleProfile: 'rhea', variant: 'secondary' },
+    { styleProfile: 'rhea', variant: 'outline' },
+    { styleProfile: 'rhea', variant: 'ghost' },
+    { styleProfile: 'rhea', variant: 'destructive' },
+    { styleProfile: 'rhea', variant: 'link' },
+  ];
+  document.querySelectorAll('#button-variants-demo proto-ui-shadcn-button').forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing variant Button');
+    setElementProps(button, props[index]);
+  });
+</script>
+    `),
+    'demo-button': formatCode(`
+<div id="button-demo" class="flex flex-wrap items-center justify-center gap-3">
+  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+  <div>
+    <proto-ui-shadcn-button>Default2</proto-ui-shadcn-button>
+  </div>
+  <proto-ui-shadcn-button>Outline</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Destructive</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Disabled</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const props = [
+    { styleProfile: 'rhea' },
+    { styleProfile: 'rhea' },
+    { styleProfile: 'rhea', variant: 'outline' },
+    { styleProfile: 'rhea', variant: 'destructive' },
+    { styleProfile: 'rhea', variant: 'ghost', size: 'icon' },
+    { styleProfile: 'rhea', disabled: true },
+  ];
+  document.querySelectorAll('#button-demo proto-ui-shadcn-button').forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing example Button');
+    setElementProps(button, props[index]);
+  });
+</script>
+    `),
+    'demo-button-secondary-example': formatCode(`
+<div id="button-secondary-demo" class="flex flex-wrap items-center justify-center gap-3">
+  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Secondary</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Outline</proto-ui-shadcn-button>
+</div>
+<script type="module">
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+  const props = [
+    { styleProfile: 'rhea' },
+    { styleProfile: 'rhea', variant: 'secondary' },
+    { styleProfile: 'rhea', variant: 'outline' },
+  ];
+  document.querySelectorAll('#button-secondary-demo proto-ui-shadcn-button').forEach((button, index) => {
+    if (!(button instanceof HTMLElement)) throw new Error('Missing secondary example Button');
+    setElementProps(button, props[index]);
+  });
+</script>
+    `),
+  },
+  react: {
+    'demo-button-default': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonDefaultDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-destructive': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonDestructiveDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-disabled': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonDisabledDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-ghost': formatCode(`
+import { useState } from 'react';
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonGhostDemo() {
+  const [enabled, setEnabled] = useState(0);
+  const [disabled, setDisabled] = useState(0);
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea" variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
+      <div role="status" aria-live="polite">Enabled activations: {enabled}; disabled activations: {disabled}</div>
+    </div>
+  );
+}
+    `),
+    'demo-button-outline': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonOutlineDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-secondary': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonSecondaryDemo() {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-sizes': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonSizesDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon" variant="outline">
+        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+      </ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline">
+        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+      </ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-states': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonStatesDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline" disabled>
+        Disabled outline
+      </ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">
+        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+      </ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-variants': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonVariantsDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <div>
+        <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
+      </div>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">
+        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+      </ShadcnButton>
+      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+    </div>
+  );
+}
+    `),
+    'demo-button-secondary-example': formatCode(`
+import { ShadcnButton } from '../proto-ui/components/react';
+
+export function DemoButtonSecondaryExampleDemo() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    </div>
+  );
+}
+    `),
+  },
+  vue: {
+    'demo-button-default': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-destructive': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-disabled': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-ghost': formatCode(`
+<script setup lang="ts">
+import { ref } from 'vue';
+import { ShadcnButton } from '../proto-ui/components/vue';
+const enabled = ref(0);
+const disabled = ref(0);
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" :disabled="true" @click="disabled++">Disabled ghost</ShadcnButton>
+    <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
+  </div>
+</template>
+    `),
+    'demo-button-outline': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-secondary': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-sizes': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-states': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" :disabled="true">Disabled outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-variants': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <div>
+      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
+    </div>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+  </div>
+</template>
+    `),
+    'demo-button-secondary-example': formatCode(`
+<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+  </div>
+</template>
+    `),
+  },
+  vue2: {
+    'demo-button-default': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-destructive': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-disabled': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-ghost': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" :disabled="true" @click="disabled++">Disabled ghost</ShadcnButton>
+    <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+export default {
+  components: { ShadcnButton },
+  data() { return { enabled: 0, disabled: 0 }; },
+};
+</script>
+    `),
+    'demo-button-outline': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-secondary': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center gap-3">
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-sizes': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-states': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" :disabled="true">Disabled outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-variants': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="link">Link</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <div>
+      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
+    </div>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+    'demo-button-secondary-example': formatCode(`
+<template>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="secondary">Secondary</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+  </div>
+</template>
+
+<script>
+import { ShadcnButton } from '../proto-ui/components/vue2';
+
+export default {
+  components: {
+    ShadcnButton,
+  },
+};
+</script>
+    `),
+  },
+};

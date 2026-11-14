@@ -9,17 +9,9 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import CodeExample from '@/components/CodeExample.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
-import { getCode } from '@/utils/conversionUtils';
+import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-export const exampleFiles = (id) => ({
-  wc: [{ name: 'button.html', lang: 'html', code: getCode('wc', id, codeMap) }],
-  react: [{ name: 'button.tsx', lang: 'tsx', code: getCode('react', id, codeMap) }],
-  vue: [{ name: 'button.vue', lang: 'vue', code: getCode('vue', id, codeMap) }],
-  vue2: [{ name: 'button.vue', lang: 'vue', code: getCode('vue2', id, codeMap) }],
-});
-
-按钮用于触发操作。同一个原型可以在所有受支持的 Web 宿主中运行；使用运行时选择器切换实现，交互契约不变。
+按钮用于触发操作。这是 Proto UI 基于 Base Button 维护的非官方 Shadcn 投射。预览使用当前工作区的 WC、React、Vue 3 与 Vue 2.6 源码；包安装与视觉验收结果分别记录。
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -28,14 +20,40 @@ export const exampleFiles = (id) => ({
   toolbar={false}
   codePanel={false}
 />
+<CodeExample label="按钮总览代码" files={exampleFiles('demo-button')} />
 
 ## 安装
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-button" manager="npm" />
+先[初始化已有应用](/zh-cn/start-here/quick-start/)。已发布的稳定版 0.2.0 基线使用：
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，生成对应宿主的 facade。
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-button" manager="npm" />
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+稳定版 React、Vue 3 分别把 `wc` 换为 `react`、`vue`。CLI 按自身精确版本安装 `@proto.ui/prototypes-shadcn` 与对应 Adapter，并生成本地 facade。Vue 2.6（`>=2.6.0 <2.7`）与下面的命名 style profile 需要配套的工作区 0.3 CLI/Adapter/Prototype 源码。稳定版 `@latest` 不能证明这些能力已交付，工作区 `0.3.0-alpha.1` manifest 也不能证明 registry 已发布。
+
+## 用法与呈现
+
+每个 Code 面板都包含注册或 import 与应用示例样式表。生成的 `proto-ui-style.css` 应在应用入口导入一次。WC 使用生成的 `proto-ui-shadcn-button` 标签；React 导出具名示例供已有应用渲染，Vue 示例是单文件组件。相对路径应与初始化后的项目布局一致。少量布局与隐藏标签样式由应用拥有，不要求额外配置 Tailwind。
+
+示例显式请求 `styleProfile="rhea"`，与预览的公开 Shadcn style scope 选择一致。当前源码识别 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`，`new-york` 是旧风格别名。省略或使用 `inherit` 时先读取最近 scope，再回退到 Button 的 Rhea 配方。这些示例展示 Rhea，不代表每个 profile 或组件都已完成视觉验收。
 
 ## 示例
+
+### Variant 矩阵
+
+下面一起展示当前六种 variant。`link` 是命令按钮的视觉 variant，不提供 `href` 或导航行为。
+
+<PrototypePreviewer
+  demoId="demo-button-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+<CodeExample label="全部按钮 variant 代码" files={exampleFiles('demo-button-variants')} />
 
 ### 默认
 
@@ -96,6 +114,8 @@ export const exampleFiles = (id) => ({
 
 可以使用 `sm`、`default`、`lg`、`icon` 或扩展的 `icon-compact`。`icon-compact` 固定为 1.75rem 正方形，启用 `wrap` 后也不会改变。
 
+两个图标尺寸示例都保留视觉隐藏的“Add”内容，并把装饰性加号从可访问树中隐藏。Button 发出通常的 `click` signal，具体动作由消费应用拥有。仅有 glyph 不能提供可访问名称。
+
 <PrototypePreviewer
   demoId="demo-button-sizes"
   initialRuntime="wc"
@@ -118,11 +138,28 @@ export const exampleFiles = (id) => ({
 />
 <CodeExample label="禁用按钮代码" files={exampleFiles('demo-button-disabled')} />
 
+## 导航、分组与 busy 状态
+
+导航使用原生 anchor，保留真实 URL 与完整文本：[阅读快速开始](/zh-cn/start-here/quick-start/)。等价的应用组合为：
+
+```html
+<a href="/zh-cn/start-here/quick-start/">阅读快速开始</a>
+```
+
+不要把 anchor 放进 Button，也不要发明 `asChild`、`href`、`loading` 或 `isLoading` prop。Base 始终拥有激活与禁用。真实异步动作由应用维护 pending 状态、驱动 `disabled`、保留有意义的名称并报告进度与完成；仅显示 spinner 既不是 busy 状态，也不是激活门控。
+
+普通布局可以把独立动作排列成组；需要相应键盘模型时采用文档中的 [Toolbar](../toolbar/)。专门的 Button Group API、loading/spinner 组合、图标与文本矩阵、全 profile 证据和原生链接视觉对比仍是 [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) 的独立条件，本试点不声称已完成这些条件。
+
 ## API
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice（见用法）',
+      default: 'inherit → 最近 scope → rhea',
+    },
     {
       name: 'variant',
       type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
@@ -134,7 +171,9 @@ export const exampleFiles = (id) => ({
   ]}
 />
 
-## 参考
+## 生命周期与证据
+
+`P-SHADCN-BUTTON` 与 `P-BASE-BUTTON` 保持 draft。既有预览与源码不是新的包、浏览器、焦点、屏幕阅读器或完整上游对齐证据。[文档检查点](/zh-cn/build/prototypes/documentation-coverage/)与 [Button 实现证据](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/test/button.test.ts)保留其实际 revision。运行时切换、窄屏、移动端与文字放大仍需要绑定候选源码的观察。
 
 <SpecEntityLinks
   directory="spec/prototypes"

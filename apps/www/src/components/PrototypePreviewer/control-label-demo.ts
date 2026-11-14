@@ -3,7 +3,7 @@ import type { DemoChild, DemoNode, DemoSpec, DemoSetupContext } from './demo-typ
 /** App Maker composition only: every association lowers through the public channel. */
 export function createControlLabelDemo(
   labelPrototypeId: string,
-  family: 'base' | 'shadcn' | 'bootstrap-2-3-2' | 'liquid-glass' = 'base'
+  family: 'base' | 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass' = 'base'
 ): DemoSpec {
   const proto = (
     prototypeId: string,
@@ -19,8 +19,14 @@ export function createControlLabelDemo(
     children,
     ...(key ? { associations: { controlLabel: key } } : {}),
   });
-  const label = (text: string, key: string, activation = true) =>
-    proto(labelPrototypeId, `label-${key}`, { naming: true, activation }, [text], key);
+  const label = (text: string, key: string, activation?: boolean) =>
+    proto(
+      labelPrototypeId,
+      `label-${key}`,
+      activation === undefined ? {} : { activation },
+      [text],
+      key
+    );
   const stateText = (ref: string): DemoNode => ({
     kind: 'box',
     tag: 'span',
@@ -98,6 +104,22 @@ export function createControlLabelDemo(
           [],
           'textarea'
         ),
+        label('Read-only project name', 'readonly-input'),
+        proto(
+          `${family}-input-root`,
+          'readonly-input',
+          { defaultValue: 'Published project', readOnly: true },
+          [],
+          'readonly-input'
+        ),
+        label('Read-only project notes', 'readonly-textarea'),
+        proto(
+          `${family}-textarea-root`,
+          'readonly-textarea',
+          { defaultValue: 'This note stays unchanged.', readOnly: true, rows: 2 },
+          [],
+          'readonly-textarea'
+        ),
         row([
           proto(
             `${family}-checkbox-root`,
@@ -119,6 +141,12 @@ export function createControlLabelDemo(
           ),
           label('Controlled choice (owner keeps it off)', 'controlled'),
           ...externalState('controlled'),
+          {
+            kind: 'box',
+            tag: 'span',
+            ref: 'controlled-requests',
+            children: ['Requests: 0'],
+          },
         ]),
         row([
           proto(
@@ -144,8 +172,19 @@ export function createControlLabelDemo(
   };
 }
 
-// Read-only App Maker presentation. There is no click forwarding or value setter.
+// Observe state and outward proposals; the controlled owner deliberately keeps
+// checked=false. Label still invokes only the target's own activation operation.
 function setupControlLabelDemo({ refs, api }: DemoSetupContext) {
+  let active = true;
+  let requests = 0;
+  api.setProps('controlled', {
+    checked: false,
+    onCheckedChange: () => {
+      if (!active) return;
+      requests++;
+      refs['controlled-requests'].textContent = `Requests: ${requests}`;
+    },
+  });
   const off: Array<() => void> = [];
   for (const name of [
     'checkbox',
@@ -169,6 +208,7 @@ function setupControlLabelDemo({ refs, api }: DemoSetupContext) {
     if (unsubscribe) off.push(unsubscribe);
   }
   return () => {
+    active = false;
     for (const unsubscribe of off) unsubscribe();
   };
 }

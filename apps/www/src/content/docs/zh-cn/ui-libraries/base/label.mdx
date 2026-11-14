@@ -15,7 +15,7 @@ Label 当前仍是 **draft**。Base Label 提供独立的命名与激活关联�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-此例将当前 Label 投影与真实、视觉中性的 Base 控件配对，以隔离验证关联协议。On/Off 只订阅控件公开状态，没有第二套 value，也没有替 Label 转发 click 的页面监听器。Input 与 Textarea 是实际原生编辑器；此基准不声称已验证其他设计体系的控件投影。
+此例将 Base Label 与 Base Checkbox、Switch、Radio Group Item、Input、Textarea 配对。可操作标签使用公开默认值；仅命名的示例显式设置 `activation={false}`。On/Off 读取目标的公开状态；Requests 记录受控 Checkbox 的普通 `checkedChange` 提案次数，应用所有者仍保持 `checked={false}`。Label 不转发 DOM click，也不拥有另一套控件值。Input 与 Textarea 仍由原生编辑器承载；只读示例可以通过 Label 获得焦点，文字保持不变。禁用选项保留名称，但拒绝激活和聚焦。
 
 ## 分开声明名称和激活
 
@@ -47,8 +47,6 @@ WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, 
 Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。
 
 ## API
-
-Label 是工作区源码，没有公开的 `proto-ui add` 目标。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
