@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import { loadPrototype, loadPrototypes, prototypeModules } from './prototype-modules';
 import { getPrototype } from './registry';
@@ -33,4 +33,33 @@ describe.each(['shadcn', 'brutalist'] as const)('%s Command loader closure', (fa
     expect(prototypeModules).not.toHaveProperty(missing);
     await expect(loadPrototype(missing)).rejects.toThrow(missing);
   });
+});
+
+it('shares in-flight registration for the same Accordion Prototype', async () => {
+  const id = 'base-accordion-trigger';
+  const loader = vi.spyOn(prototypeModules, id);
+  try {
+    await expect(Promise.all([loadPrototype(id), loadPrototype(id)])).resolves.toEqual([
+      true,
+      true,
+    ]);
+    expect(loader).toHaveBeenCalledOnce();
+    expect(getPrototype(id).name).toBe(id);
+  } finally {
+    loader.mockRestore();
+  }
+});
+
+it('releases failed registration so the next caller can try again', async () => {
+  const id = 'base-accordion-heading';
+  const loader = vi.spyOn(prototypeModules, id).mockRejectedValueOnce(new Error('first load'));
+  try {
+    const outcomes = await Promise.allSettled([loadPrototype(id), loadPrototype(id)]);
+    expect(outcomes.map((outcome) => outcome.status)).toEqual(['rejected', 'rejected']);
+    await expect(loadPrototype(id)).resolves.toBe(true);
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(getPrototype(id).name).toBe(id);
+  } finally {
+    loader.mockRestore();
+  }
 });

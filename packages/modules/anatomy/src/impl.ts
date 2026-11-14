@@ -347,13 +347,21 @@ export class AnatomyModuleImpl extends ModuleBase {
     cb: (ctx: AnatomyOrderCallbackCtx, parts: readonly AnatomyPartView[]) => void
   ): Unsubscribe {
     this.ensureSetup('def.anatomy.subscribeParts');
-    let previousSignature = this.computeRoleOrderSignature(family, role);
+    const readOrderedRole = () => {
+      const domain = this.resolveCurrentDomain(family, false);
+      return domain.rootInstance
+        ? this.sortClaims(domain.claims.filter((claim) => claim.role === role))
+        : null;
+    };
+    const signature = (claims: ClaimRecord[] | null) =>
+      claims?.map((claim) => this.getIdentityId(claim.instance)).join('|') ?? 'missing-domain';
+    let previousSignature = signature(readOrderedRole());
     const unsubscribe = this.subscribeOrder(family, (ctx) => {
-      const nextSignature = this.computeRoleOrderSignature(family, role);
+      const claims = readOrderedRole();
+      const nextSignature = signature(claims);
       if (nextSignature === previousSignature) return;
       previousSignature = nextSignature;
-      const parts = this.tryOrderedPartsOf(family, role) ?? [];
-      cb(ctx, parts);
+      cb(ctx, claims?.map((claim) => this.toPartView(claim)) ?? []);
     });
     return () => {
       this.ensureSetup('def.anatomy.subscribeParts.unsubscribe');
@@ -823,9 +831,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (this.observedOrderRoots.has(family)) return;
     if (!this.caps.has(ANATOMY_ORDER_OBSERVER_CAP)) return;
 
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return;
-    const target = this.getObservedRootTarget(family);
+    const rootInstance = this.findDomainRoot(this.getSelfToken(), family);
+    if (!rootInstance) return;
+    const target = CENTER.getClaim(rootInstance, family)?.getRootTarget(rootInstance);
     if (!target) return;
 
     let byRoot = AnatomyModuleImpl.sharedOrderObservers.get(family);
@@ -834,7 +842,7 @@ export class AnatomyModuleImpl extends ModuleBase {
       AnatomyModuleImpl.sharedOrderObservers.set(family, byRoot);
     }
 
-    let entry = byRoot.get(domain.rootInstance);
+    let entry = byRoot.get(rootInstance);
     if (!entry) {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
@@ -844,11 +852,11 @@ export class AnatomyModuleImpl extends ModuleBase {
         }
       });
       entry = { off, listeners };
-      byRoot.set(domain.rootInstance, entry);
+      byRoot.set(rootInstance, entry);
     }
 
     entry.listeners.add(this);
-    this.observedOrderRoots.set(family, domain.rootInstance);
+    this.observedOrderRoots.set(family, rootInstance);
   }
 
   private teardownOrderObserver(family: AnatomyFamily): void {
@@ -905,13 +913,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
   }
 
-  private computeRoleOrderSignature(family: AnatomyFamily, role: string): string {
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims.filter((claim) => claim.role === role));
-    return ordered.map((claim) => this.getIdentityId(claim.instance)).join('|');
-  }
-
   private getIdentityId(value: unknown): number {
     if (value && typeof value === 'object') {
       const obj = value as object;
@@ -928,14 +929,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     const next = this.nextIdentityId++;
     this.primitiveIds.set(value, next);
     return next;
-  }
-
-  private getObservedRootTarget(family: AnatomyFamily): AnatomyRootTarget | null {
-    const domain = this.resolveCurrentDomain(family, false);
-    if (!domain.rootInstance) return null;
-    const rootClaim = CENTER.getClaim(domain.rootInstance, family);
-    if (!rootClaim) return null;
-    return rootClaim.getRootTarget(rootClaim.instance);
   }
 
   private sortClaims(claims: ClaimRecord[]): ClaimRecord[] {

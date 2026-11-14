@@ -4,6 +4,7 @@ import type {
   DemoNode,
   DemoSpec,
 } from '../../../components/PrototypePreviewer/demo-types';
+import { createDynamicChildrenModel } from '../../../components/PrototypePreviewer/demo-dynamic-children';
 import radioGroupDemoDefinition from './demo-brutalist-radio-group.demo';
 
 type DemoBoxNode = Extract<DemoNode, { kind: 'box' }>;
@@ -26,6 +27,11 @@ function textContent(node: DemoChild): string {
 }
 
 describe('Brutalist Radio Group demo contract', () => {
+  it('admits both authored groups in the same renderer', () => {
+    const model = createDynamicChildrenModel(radioGroupDemo);
+    model.dispose();
+  });
+
   it('keeps single Base selection with visible in-item captions', () => {
     const nodes = collectNodes(radioGroupDemo.root);
     const roots = nodes.filter(

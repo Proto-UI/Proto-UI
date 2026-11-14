@@ -18,6 +18,10 @@ import {
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
 import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
+import {
+  deferUntilDocsHeaderPrepared,
+  hasPendingDocsHeaderPreparation,
+} from './docs-header-preparation';
 
 const COPY_GLYPHS = {
   idle: 'copy',
@@ -196,6 +200,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   mount.className = 'site-copy-mount';
   root.append(mount);
   const previewer = root.closest<Previewer>('[data-previewer-id]');
+  const preparation = previewer ? undefined : new AbortController();
   let preferred: RuntimeId = 'wc';
   try {
     const stored = view.localStorage.getItem(PREFERRED_ADAPTER_KEY);
@@ -230,7 +235,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
     // of the new attempt. The Clipboard owner is deliberately not replaced.
     const ownerId = `${logicalOwnerId}-attempt-${++attempt}`;
     mount.dataset.projectionOwner = ownerId;
-    return createProjectionScopeController({
+    const scope: ProjectionScopeController = createProjectionScopeController({
       initialSelection,
       async materialize(request) {
         const runtime = request.selection.runtimeId as RuntimeId;
@@ -253,6 +258,16 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
         );
         candidate = await materializeProjectionCandidate(request, {
           mount,
+          yieldAfterPaint: true,
+          backgroundPreparation:
+            preparation &&
+            scope.getSnapshot().generation === 0 &&
+            hasPendingDocsHeaderPreparation(doc)
+              ? {
+                  signal: preparation.signal,
+                  isPending: () => hasPendingDocsHeaderPreparation(doc),
+                }
+              : undefined,
           themeSource: { scope: root, family, isCurrent: () => alive },
           ownerId,
           componentId: 'button',
@@ -327,11 +342,12 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
           ?.focus({ preventScroll: true });
       },
     });
+    return scope;
   };
-  let controller = createController(selection());
+  let controller: ProjectionScopeController | undefined;
   const failed = (error: unknown) => {
     if (!alive) return;
-    root.dataset.copyView = controller.getSnapshot().generation ? 'retained' : 'unavailable';
+    root.dataset.copyView = controller?.getSnapshot().generation ? 'retained' : 'unavailable';
     root.title = copyLabels(root).error;
     console.error('[SiteCopy] Copy control projection failed.', error);
   };
@@ -352,27 +368,39 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       }
     );
   };
-  const refresh = () => {
+  const prepare = () => {
     if (!alive) return;
-    owner.syncSource();
     const origin = doc.activeElement;
     if (origin && root.contains(origin)) focusRequests.set(origin, focusEpoch);
     const latest = selection();
-    const snapshot = controller.getSnapshot();
-    if (snapshot.generation === 0 && snapshot.phase === 'idle') {
-      const previous = controller;
+    const previous = controller;
+    const snapshot = previous?.getSnapshot();
+    if (!previous || (snapshot?.generation === 0 && snapshot.phase === 'idle')) {
       controller = createController(latest);
-      retire(previous);
-      void observe(controller.start(), controller);
-      return;
+      if (previous) retire(previous);
+      return observe(controller.start(), controller);
     }
-    void observe(
-      controller.request(
+    return observe(
+      previous.request(
         latest,
         root.contains(origin) ? { focusKey: 'copy', focusOrigin: origin } : {}
       ),
-      controller
+      previous
     );
+  };
+  const deferredPreparation = previewer ? undefined : deferUntilDocsHeaderPrepared(root, prepare);
+  const refresh = () => {
+    if (!alive) return;
+    owner.syncSource();
+    // Only a usable retained command can wait for unrelated Header work.
+    if (
+      deferredPreparation &&
+      controller?.getSnapshot().phase === 'ready' &&
+      activeCandidate?.host.isConnected &&
+      !activeCandidate.host.inert
+    )
+      void deferredPreparation.prepare();
+    else void prepare();
   };
   const onPreference = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -397,10 +425,12 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
   const handle: SiteCopyCommand = {
     owner,
     refresh,
-    ready: observe(controller.start(), controller),
+    ready: Promise.resolve(prepare()),
     async destroy() {
       if (!alive) return;
       alive = false;
+      preparation?.abort();
+      deferredPreparation?.cancel();
       handles.delete(root);
       owner.dispose();
       observer.disconnect();
@@ -408,7 +438,7 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       doc.removeEventListener('focusin', onFocus, true);
       previewer?.removeEventListener('runtime:changed', refresh);
       try {
-        await controller.destroy();
+        await controller?.destroy();
       } finally {
         await Promise.allSettled([...retiredControllers]);
         mount.remove();

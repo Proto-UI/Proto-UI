@@ -183,7 +183,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `1e9535ee22abb05f75f4fc1f0a422abc553128aee238588fe1809a0983f69cbb` |
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
-| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `bf962d6f5ceeaa072fc9867727d4b3c5765a0471823f0745b1e1665e03f88593` |
+| `apps/www/src/components/Homepage/homepage-runtime-client.ts` | `www.content.typography-presentation`, `www.demo.home-demo-select`, `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure`, `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.hero-hash-scroll`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `a653d6e45c54de213e846a6ce4a3f80c140669c13b93131b6eb177c808d5cbd0` |
 | `apps/www/src/components/Homepage/homepage-showcase.ts` | `www.demo.home-demo-select` | `67b5f3f2efec90c021c3c3de6a19779d58af1d2502747d022a26c16595ea13a8` |
 | `apps/www/src/components/Homepage/homepage-text.ts` | `www.demo.home-demo-select` | `78a78f1eefc5140a676bb9ff6577684b0af3cb6921e638e022bdae53d8c48346` |
 | `apps/www/src/components/InstallCommandCard.astro` | `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.install-manager-tabs` | `549885c121d579a41e0a5d28aa3a6bfc9032f73f004fc94d7431648e96f3e23d` |
@@ -210,11 +210,11 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f9e18f47c7711d553647fc0bf4aed7c5b52788c9191276822dec6c50b184571a` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7` |
-| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `a9d57ca9d09ef6c73160bdad92cfddb5a449432d657ad4df549ad894fdf37913` |
+| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `09448a12ec077bc9b0929b18e59771e47f165e2ac5131cca9baa94e59c4108f7` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `790a774f44646bb2793e03b7851eea3673b1efe61c80d97fecd20b38f1bc7cb0` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a` |
-| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `0e66a95c763857d27f6282f6c6ba92fc7a930edf309c4cdabc49e5c7ee249ac3` |
-| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `a0078822b5098849a7d982d69b5b9703b2f2e1a5e8161b0a661c87c4afc1e52f` |
+| `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `d2fabc42580014e9a1cdb52be5207d1931ca5823d6019822b17f0b3f18d5cb0e` |
+| `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `37ddf520355c6ab533383ff914f6744bd74722c2f095ce7a73350b0e462871f9` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `376b4407e8f93385a57979fc44ea96790a78e7c84b4f3b5a9e71371a30525102` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `066158b499aa59e26f754a7d45ca5bb20c569130b0c66b2b038627be332f2da7` |
@@ -225,7 +225,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/adapter-preference.ts` | `www.demo.runtime-select`, `www.shell.adapter-select` | `f7101a19317c58dcc0901172e7da9afe71086a8544c6e9db9570fbbe5d8d38f8` |
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `633770a9da7279618a88f53af9a0cb9d69058e238fe14b88f93d1f795b0629ad` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `1c983f2780d83f4a4e8cd83ef45bb36e01e873510638ecadbe5ada6966943bd6` |
-| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `e70dd55bf8aa3c18beb24b79172365d5b0351a9495e74d9d49b929228bd1e712` |
+| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `f404732aae9830832165a820877d209082befe0aac3f4f64290b1e22129d2c85` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `be46b5e43f8604df479dcf59c4f10fc3d75301efc8fb48674ede91765e59de58` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `9bae80be9b490ab0f5e5da698d7b5f863fb16b42c3c37697ee42e6f335b7f8c3` |
 | `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9f14efcd4e059a441b798c3f9ff074f7546c5f3e85f95ec13abeba6e73c120cf` |
@@ -245,7 +245,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `262b743f2f8a8176c14431b234e9cbd2a9cfe20fd13cda70ff00d9934e8b8f58` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
-| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `31d46949e1ad738b7fb9b813a5bec13ae0fc88cdcc9a9d88a17ba08ff74b88d9` |
+| `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `9d597364cb274a62613d9c0e252f7f4ef15eb333c0f0ed999dea3c0e6241e0f7` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `6ab5b4dc199f7a712d8058e621b3e91518cc2fa06fac25adfab1ab7b79dbace9` |
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `9403e6e3ed6909f9d416bf8fcc1626d4417da0de817c7993ee45f3f94615241f` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `196800157f8382e4a57c633953948498c521bdbd12c3447875a7c9c930fabcd8` |
@@ -255,8 +255,8 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `ce2553dfd82edfc1763107f63709f729fbccdf73e178c7729a59835456e67350` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `5d950f495c575e52862356f974cfe35d95b2d627d10a09cc33f3fb3e865b018b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `0a0a29fd6f832c1ffd76ee82e93ec59b6e10f4f1efafab6cfc7204c5f9b46533` |
-| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `bd7d9edb23757db547ffa0cd91ef033bcc5fad7df44d4cbcffe03d5ef083b80a` |
-| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `7f3eb4e9f2495c23ed217904433302b4df697f69ae0d646080a2bcfc35e73f94` |
+| `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `47b13667f6a8374b9ec9b3181700cac87f765410933c6f7f430e072108ecf8ca` |
+| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `68972340f1b074e57f771905d75ceec346a227c3ae5bd838f92ab414cfd9936e` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `b0947ee50577daf259f2b7ba5ae7f4c368e890d4c263d3763ee71b7d523a6613` |
 | `apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts` | `www.demo.authored-controllers` | `4c4cc768a6b41b05a881bf109752e658a6daa42d6525f3c4d72e55b84d808d14` |

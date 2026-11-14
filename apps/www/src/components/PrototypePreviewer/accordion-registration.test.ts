@@ -25,12 +25,11 @@ describe('Accordion actual DemoSpec registration', () => {
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       const ids = [...new Set(prototypes(demo.root))].sort();
-      expect(ids).toEqual(
-        ['root', 'item', 'heading', 'trigger', 'content']
-          .map((role) => `${family}-accordion-${role}`)
-          .concat(`${family}-button`)
-          .sort()
-      );
+      const expected = ['root', 'item', 'heading', 'trigger', 'content']
+        .map((role) => `${family}-accordion-${role}`)
+        .concat(`${family}-button`);
+      if (family === 'shadcn') expected.push('shadcn-style-scope');
+      expect(ids).toEqual(expected.sort());
       for (const id of ids) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);

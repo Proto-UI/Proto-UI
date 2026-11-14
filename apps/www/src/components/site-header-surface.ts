@@ -14,6 +14,7 @@ import {
 } from './PrototypePreviewer/projection-materializer';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';
+import { reserveDocsHeaderPreparation } from './docs-header-preparation';
 
 const controls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
@@ -162,13 +163,38 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
   const retired = new Set<Promise<void>>();
   const contentsPanel = contentsPanelParticipant(header);
   const contents = contentsPanel ? null : contentsCommandParticipant(header);
+  type PreferencePreparation = {
+    event: Event;
+    runtime: RuntimeId;
+    started: boolean;
+    release(): void;
+    scheduled?: boolean;
+  };
+  let preferencePreparation: PreferencePreparation | undefined;
+  const releasePreparation = (preparation: PreferencePreparation) => {
+    if (preferencePreparation === preparation) preferencePreparation = undefined;
+    preparation.release();
+  };
+  const releasePreparationAfterTask = (preparation: PreferencePreparation | undefined) => {
+    if (!preparation || preparation.scheduled) return;
+    preparation.scheduled = true;
+    if (document.defaultView)
+      document.defaultView.setTimeout(() => releasePreparation(preparation), 0);
+    else releasePreparation(preparation);
+  };
   let attempt = 0;
   const create = () => {
     const participant = headerSurfaceParticipant(header)!;
     const namespace = `docs-${++attempt}`;
+    const preparations = new Map<number, PreferencePreparation>();
     return createProjectionScopeController({
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
+        const preparation =
+          preferencePreparation?.started &&
+          preferencePreparation.runtime === request.selection.runtimeId
+            ? preferencePreparation
+            : undefined;
         const outcomes = await Promise.allSettled([
           participant.materialize(request),
           ...(contents ? [contents.materialize(request, namespace)] : []),
@@ -194,6 +220,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           await Promise.allSettled(candidates.map((candidate) => candidate.dispose()));
           throw error;
         }
+        if (preparation) preparations.set(request.generation, preparation);
         return {
           activate() {
             candidates.forEach((candidate) => candidate.activate());
@@ -202,6 +229,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
             candidates.forEach((candidate) => candidate.setLocked?.(locked));
           },
           async dispose() {
+            preparations.delete(request.generation);
             stop();
             // Keep the actual public Trigger alive until Popover close and
             // native-tree handback finish; framework teardown must not win that race.
@@ -222,6 +250,8 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         };
       },
       prepareCommit(commit) {
+        const preparation = preparations.get(commit.generation);
+        preparations.delete(commit.generation);
         const publications = [participant.prepareCommit(commit)];
         try {
           if (contents) publications.push(contents.prepareCommit(commit));
@@ -233,6 +263,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         return {
           publish() {
             publications.forEach((publication) => publication.publish());
+            releasePreparationAfterTask(preparation);
           },
           rollback() {
             [...publications].reverse().forEach((publication) => publication.rollback());
@@ -250,10 +281,36 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           error
         );
     });
+  const reservePreference = (event: Event) => {
+    const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
+    if (
+      !alive ||
+      !header.isConnected ||
+      document.querySelector('[data-docs-site-header]') !== header ||
+      !isRuntimeId(next)
+    )
+      return;
+    const snapshot = controller.getSnapshot();
+    if (snapshot.phase === 'ready' && snapshot.selection.runtimeId === next) return;
+    const preparation: PreferencePreparation = {
+      event,
+      runtime: next,
+      started: false,
+      release: reserveDocsHeaderPreparation(document),
+    };
+    preferencePreparation = preparation;
+    // Another listener may stop the dispatch before our normal handler.
+    queueMicrotask(() => {
+      if (!preparation.started) releasePreparation(preparation);
+    });
+  };
   const onPreference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (!alive || !isRuntimeId(next)) return;
+    const preparation = preferencePreparation?.event === event ? preferencePreparation : undefined;
+    if (preparation) preparation.started = true;
     runtime = next;
+    let pending: Promise<unknown>;
     if (controller.getSnapshot().generation === 0 && controller.getSnapshot().phase === 'idle') {
       const previous = controller;
       controller = create();
@@ -266,8 +323,14 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           console.error('[SiteHeader] Retired projection cleanup failed.', error);
         }
       );
-      observe(controller.start());
-    } else observe(controller.request({ runtimeId: runtime, projectionFamilyId: family }));
+      pending = controller.start();
+    } else pending = controller.request({ runtimeId: runtime, projectionFamilyId: family });
+    if (preparation)
+      void pending.then(
+        () => releasePreparationAfterTask(preparation),
+        () => releasePreparationAfterTask(preparation)
+      );
+    observe(pending);
   };
   const observer = new MutationObserver(() => {
     if (!header.isConnected) void handle.destroy();
@@ -280,8 +343,10 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         contentsPanel?.revoke();
         contents?.revoke();
         observer.disconnect();
+        document.removeEventListener(PREFERRED_ADAPTER_EVENT, reservePreference, true);
         document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
         document.removeEventListener('astro:before-swap', onSwap);
+        if (preferencePreparation) releasePreparation(preferencePreparation);
         try {
           await controller.destroy();
           await Promise.allSettled([...retired]);
@@ -307,6 +372,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
   };
   documentationOwners.set(header, handle);
   observer.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener(PREFERRED_ADAPTER_EVENT, reservePreference, true);
   document.addEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
   document.addEventListener('astro:before-swap', onSwap);
   observe(controller.start());

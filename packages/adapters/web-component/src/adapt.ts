@@ -1354,15 +1354,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const instanceToken = this._instanceToken;
 
       queueMicrotask(async () => {
-        if (this._instanceToken !== instanceToken) return;
-        if (this._disconnectVersion !== disconnectVersion) {
-          if (this._pendingOwnedTokens?.length) {
-            this._applier?.apply(this._pendingOwnedTokens);
-          }
-          this._hostDisplay?.sync();
-          this._pendingOwnedTokens = null;
+        // Reconnect restores its own style synchronously. A superseded
+        // checkpoint must not consume the snapshot of a later disconnect.
+        if (this._instanceToken !== instanceToken || this._disconnectVersion !== disconnectVersion)
           return;
-        }
         // Revoke material at the existing disconnect checkpoint. Removing a
         // live destination is outside continuity guarantees; do not relocate a
         // focused subtree or add a second close owner to recover it.

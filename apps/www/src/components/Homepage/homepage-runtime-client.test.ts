@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { assertDemoSpec, type DemoSpec } from '../PrototypePreviewer/demo-types';
+import { PROJECTION_FOCUS_KEYS } from '../PrototypePreviewer/projection-composition';
 const fakes = vi.hoisted(() => ({
   materialize: vi.fn(),
   restoreFocus: vi.fn(),
@@ -107,6 +108,9 @@ describe('Homepage page-owned runtime', () => {
     await settle();
     const old = fakes.materialize.mock.results.map((result) => result.value);
     const controls = fakes.materialize.mock.calls[0]![1].controls;
+    const origin = document.createElement('button');
+    root.querySelector('[data-homepage-mount]')!.append(origin);
+    origin.focus();
     controls.runtime.onValueChange('react');
     await settle();
     expect(root.dataset.runtime).toBe('react');
@@ -121,6 +125,51 @@ describe('Homepage page-owned runtime', () => {
     controls.runtime.onValueChange('vue2');
     await settle();
     expect(handle!.getSnapshot().selection.runtimeId).toBe('vue2');
+  });
+
+  it('commits a deferred page control change without restoring newer outside focus', async () => {
+    const root = fixture();
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    handle = initHomepageRuntime(root);
+    await settle();
+    outside.focus();
+
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    controls.family.onValueChange('brutalist');
+    await settle();
+    expect(root.dataset.family).toBe('brutalist');
+    expect(fakes.restoreFocus).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(outside);
+
+    controls.runtime.onValueChange('react');
+    await settle();
+    expect(root.dataset.runtime).toBe('react');
+    expect(fakes.restoreFocus).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(outside);
+  });
+
+  it('retains owned focus restoration for a portaled page selector surface', async () => {
+    const root = fixture();
+    handle = initHomepageRuntime(root);
+    await settle();
+    const mount = root.querySelector<HTMLElement>('[data-homepage-mount]')!;
+    const option = document.createElement('button');
+    option.dataset.projectionOwner = mount.dataset.projectionOwner;
+    option.dataset.projectionGeneration = String(handle!.getSnapshot().generation);
+    document.body.append(option);
+    option.focus();
+
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    controls.family.onValueChange('brutalist');
+    await settle();
+    expect(root.dataset.family).toBe('brutalist');
+    expect(fakes.restoreFocus).toHaveBeenCalledWith(
+      mount,
+      PROJECTION_FOCUS_KEYS.family,
+      handle!.getSnapshot().generation,
+      option
+    );
   });
 
   it('keeps the prior whole page on partial materialization failure and disposes prepared siblings', async () => {
@@ -190,6 +239,9 @@ describe('Homepage page-owned runtime', () => {
     assertDemoSpec(task.demo);
     expect(task.recipe.prototypeIds).toContain('shadcn-textarea-root');
     expect(task.recipe.prototypeIds).toContain('shadcn-switch-root');
+    const origin = document.createElement('button');
+    root.querySelector('[data-homepage-mount]')!.append(origin);
+    origin.focus();
     controls.family.onValueChange('brutalist');
     await settle();
     expect(root.dataset.family).toBe('brutalist');
@@ -704,12 +756,17 @@ it('reads one page-owned theme before updating nested language/social candidates
   const shadcnWatch = fakes.watchTheme.mock.calls.find(([family]) => family === 'shadcn')!;
   for (const next of [true, false, true]) {
     dark = next;
-    shadcnWatch[2]();
-    for (const candidate of candidates)
+    const theme = fakes.resolveTheme('shadcn', root);
+    fakes.resolveTheme.mockClear();
+    shadcnWatch[2](theme);
+    expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    for (const candidate of candidates) {
       expect(candidate.setThemeSurfaceStyle).toHaveBeenLastCalledWith({
         '--pui-background': dark ? '#111' : '#fff',
         '--pui-foreground': dark ? '#fff' : '#111',
       });
+      expect(candidate.setThemeSurfaceStyle.mock.lastCall?.[0]).toBe(theme);
+    }
     expect(handle!.getSnapshot().generation).toBe(generation);
   }
 });

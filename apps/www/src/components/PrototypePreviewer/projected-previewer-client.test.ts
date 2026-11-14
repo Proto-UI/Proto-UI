@@ -106,7 +106,10 @@ describe('PrototypePreviewer fixed-family projection', () => {
       });
     projection.restoreFocus.mockReset();
     projection.resolveTheme.mockReset().mockReturnValue({ '--pui-background': '#fff' });
-    projection.watchTheme.mockReset().mockReturnValue(vi.fn());
+    projection.watchTheme.mockReset().mockImplementation((family, scope, onChange) => {
+      onChange(projection.resolveTheme(family, scope));
+      return vi.fn();
+    });
     codePanel.refresh.mockReset();
   });
 
@@ -169,6 +172,9 @@ describe('PrototypePreviewer fixed-family projection', () => {
     init(root);
     await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
 
+    const origin = document.createElement('button');
+    root.querySelector('.host')!.append(origin);
+    origin.focus();
     candidates[0]!.setLocked.mockClear();
     latestControls().runtime.onValueChange('react');
     expect(candidates[0]!.setLocked).toHaveBeenCalledWith(true);
@@ -190,11 +196,29 @@ describe('PrototypePreviewer fixed-family projection', () => {
       expect.anything(),
       'runtime-select',
       2,
-      document.body
+      origin
     );
 
     document.removeEventListener('proto-adapter:change', adapterChange);
     await previewerApi(root).destroy();
+  });
+
+  it('does not restore Runtime focus when a newer outside owner already has it', async () => {
+    const root = createRoot();
+    const outside = document.createElement('button');
+    root.after(outside);
+    init(root);
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+    outside.focus();
+
+    try {
+      latestControls().runtime.onValueChange('react');
+      await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe('react'));
+      expect(projection.restoreFocus).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(outside);
+    } finally {
+      await previewerApi(root).destroy();
+    }
   });
 
   it('seals the current generation before a preference event can reenter Runtime switching', async () => {
@@ -326,6 +350,9 @@ describe('PrototypePreviewer fixed-family projection', () => {
     init(root);
     await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
 
+    const origin = document.createElement('button');
+    root.querySelector('.host')!.append(origin);
+    origin.focus();
     latestControls().runtime.onValueChange('react');
     await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe('react'));
 
@@ -420,10 +447,36 @@ describe('PrototypePreviewer fixed-family projection', () => {
     await previewerApi(root).destroy();
   });
 
+  it('uses the first watcher sample and still reads live theme on replacement', async () => {
+    const root = createRoot();
+    const observedTheme = { '--pui-background': '#222' };
+    projection.watchTheme.mockImplementation((family, scope, onChange) => {
+      expect(scope).toBe(root);
+      projection.resolveTheme.mockReturnValue(observedTheme);
+      onChange(projection.resolveTheme(family, scope));
+      return vi.fn();
+    });
+    init(root);
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+
+    expect(projection.resolveTheme.mock.calls.filter(([, scope]) => scope === root)).toHaveLength(
+      1
+    );
+    expect(candidates[0]!.setThemeSurfaceStyle.mock.calls).toEqual([[observedTheme]]);
+    const replacementTheme = { '--pui-background': '#333' };
+    projection.resolveTheme.mockReturnValue(replacementTheme);
+    await previewerApi(root).switchRuntime('react');
+
+    expect(projection.watchTheme).toHaveBeenCalledTimes(1);
+    expect(candidates[1]!.setThemeSurfaceStyle.mock.calls).toEqual([[replacementTheme]]);
+    await previewerApi(root).destroy();
+  });
+
   it('routes theme updates to the currently active candidate without rematerializing', async () => {
     let onThemeChange!: (theme: Record<string, string>) => void;
-    projection.watchTheme.mockImplementation((_family, _document, onChange) => {
+    projection.watchTheme.mockImplementation((family, scope, onChange) => {
       onThemeChange = onChange;
+      onChange(projection.resolveTheme(family, scope));
       return vi.fn();
     });
     const root = createRoot();

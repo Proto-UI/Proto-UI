@@ -117,7 +117,8 @@ export function sampleWebComponentScopeTargets(
   direction: 'next' | 'prev' = 'next',
   radioFocusOrder?: (radio: HTMLInputElement) => number,
   recentFocusTarget?: () => Element | null,
-  includeBrowsingContexts = false
+  includeBrowsingContexts = false,
+  stopAtOrdinaryDescendant = false
 ) {
   const activeTarget = deepestActiveElement(container.ownerDocument);
   const recentTarget = recentFocusTarget?.() ?? null;
@@ -130,7 +131,10 @@ export function sampleWebComponentScopeTargets(
     return { targets: [], activeTarget, recentTarget: recentFocusTarget?.() ?? null };
   }
   const visited = new Set<Element>();
+  let findingOrdinaryDescendant = stopAtOrdinaryDescendant;
+  let ordinaryDescendant: HTMLElement | undefined;
   function visitNode(node: Node, entries: Entry[]) {
+    if (ordinaryDescendant) return;
     if (isElementNode(node)) visit(node, entries);
     else {
       const projection = getWebComponentPortalProjectionForOrigin(node);
@@ -230,6 +234,18 @@ export function sampleWebComponentScopeTargets(
       });
     } else if (target || el === activeTarget || el === recentTarget)
       entries.push({ element: el, target: !!target, priority: el.tabIndex });
+    // Projection needs existence only. Named radios can still be excluded by
+    // an eligible checked peer outside the region, so keep those in the full pass.
+    if (
+      findingOrdinaryDescendant &&
+      target &&
+      el !== container &&
+      !el.shadowRoot?.delegatesFocus &&
+      !(isHtmlTag(el, 'input') && el.type === 'radio' && el.name)
+    ) {
+      ordinaryDescendant = el;
+      return;
+    }
     if (isHtmlTag(el, 'slot')) {
       logicalSlotNodes(el).forEach((node) => visitNode(node, children));
     } else if (isHtmlTag(el, 'details') && !el.open) {
@@ -240,6 +256,8 @@ export function sampleWebComponentScopeTargets(
     else [...el.childNodes].forEach((child) => visitNode(child, children));
   }
   visit(container, scope);
+  if (ordinaryDescendant) return { targets: [ordinaryDescendant], activeTarget, recentTarget };
+  findingOrdinaryDescendant = false;
   const flatten = (entries: Entry[], output: Entry[] = []) => {
     entries.sort(
       (a, b) => (a.priority > 0 ? a.priority : Infinity) - (b.priority > 0 ? b.priority : Infinity)
@@ -341,6 +359,21 @@ export function sampleWebComponentScopeTargets(
       ? { recentInsertionIndex: insertionIndex(recent) }
       : {}),
   };
+}
+
+export function hasWebComponentScopeDescendant(
+  container: HTMLElement,
+  isNativelyFocusable: (target: HTMLElement) => boolean
+): boolean {
+  return sampleWebComponentScopeTargets(
+    container,
+    isNativelyFocusable,
+    'next',
+    undefined,
+    undefined,
+    true,
+    true
+  ).targets.some((target) => target !== container);
 }
 
 // Native unchecked radio groups remember the last focused member. Capture

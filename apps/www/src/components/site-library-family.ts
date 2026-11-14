@@ -33,9 +33,10 @@ export function siteControlTags(family: SiteLibraryFamily) {
 
 /** Call only at the active page scope's successful projection commit. */
 export function applySiteLibraryFamily(doc: Document, family: SiteLibraryFamily): void {
-  doc.documentElement.dataset.siteLibraryFamily = family;
-  // The SSR marker supports no-script rendering and must follow client commits.
+  if (doc.documentElement.dataset.siteLibraryFamily !== family)
+    doc.documentElement.dataset.siteLibraryFamily = family;
+  // A same-family commit still reconciles any newly mounted or stale scopes.
   doc.querySelectorAll<HTMLElement>('[data-site-family-scope]').forEach((scope) => {
-    scope.dataset.siteLibraryFamily = family;
+    if (scope.dataset.siteLibraryFamily !== family) scope.dataset.siteLibraryFamily = family;
   });
 }

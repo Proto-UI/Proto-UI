@@ -100,6 +100,14 @@ describe('documentation image viewer PUI integration', () => {
     expect(document.querySelector('figure > img')).not.toBeNull();
     expect(document.querySelector('[data-docs-image-trigger]')).toBeNull();
   });
+  it('uses one native media source read when admitting an image', async () => {
+    const source = vi.spyOn(HTMLImageElement.prototype, 'currentSrc', 'get');
+    await fixture();
+    expect(document.querySelector('[data-docs-image-trigger]')?.getAttribute('title')).toBe(
+      'Enlarge image: Example diagram'
+    );
+    expect(source).toHaveBeenCalledOnce();
+  });
   it('keeps HTML style changes out of the media inventory scan', async () => {
     const { trigger } = await fixture();
     await (
@@ -121,6 +129,39 @@ describe('documentation image viewer PUI integration', () => {
     await settle();
     expect(queries).not.toHaveBeenCalledWith('[data-doc-flow]');
     expect(figure.querySelector('[data-docs-image-trigger]')).toBe(trigger);
+  });
+  it('skips inventory reads for unrelated content and still responds to admission changes', async () => {
+    const { trigger } = await fixture();
+    const flow = document.querySelector('[data-doc-flow]')!;
+    const articleControl = document.createElement('div');
+    flow.append(articleControl);
+    await (
+      window as unknown as {
+        happyDOM: { waitUntilComplete(): Promise<void> };
+      }
+    ).happyDOM.waitUntilComplete();
+    const queries = vi.spyOn(document, 'querySelectorAll');
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(flow, { attributes: true, childList: true, subtree: true });
+    });
+    articleControl.append(document.createElement('button'));
+    articleControl.setAttribute('data-projection-state', 'ready');
+    trigger.closest('figure')!.setAttribute('data-projection-state', 'ready');
+    await delivered;
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith('[data-doc-flow]');
+
+    const figure = trigger.closest('figure')!;
+    figure.setAttribute('aria-hidden', 'true');
+    await vi.waitFor(() => expect(figure.querySelector('[data-docs-image-trigger]')).toBeNull());
+    figure.removeAttribute('aria-hidden');
+    await vi.waitFor(() =>
+      expect(figure.querySelector('[data-docs-image-trigger]')).not.toBeNull()
+    );
   });
   it('revalidates SVG admission when a descendant gains inline style', async () => {
     await fixture();
