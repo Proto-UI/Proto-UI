@@ -121,6 +121,37 @@ describe('shared website navigation disclosure', () => {
     expect(navigation.hidden).toBe(true);
   });
 
+  it('does not rewrite unchanged visibility while publishing a replacement Header', () => {
+    const { root, button, navigation, desktopNavigation, settings, panel } = fixture();
+    disclosure!.enhance();
+    disclosure!.toggle();
+    const staged = document.createElement('div');
+    staged.dataset.projectionGenerationState = 'prepared';
+    const replacement = document.createElement('button');
+    staged.append(replacement);
+    root.append(staged);
+    const unbind = disclosure!.bindButton(replacement);
+    button.remove();
+    staged.dataset.projectionGenerationState = 'active';
+    const observer = new MutationObserver(() => {});
+    for (const element of [navigation, desktopNavigation, settings, panel])
+      observer.observe(element, { attributes: true, attributeFilter: ['hidden'] });
+    try {
+      disclosure!.enhance();
+      expect(observer.takeRecords()).toEqual([]);
+      expect(desktopNavigation.hidden).toBe(true);
+      expect([navigation.hidden, settings.hidden, panel.hidden]).toEqual([false, false, false]);
+      expect(replacement.getAttribute('aria-expanded')).toBe('true');
+
+      disclosure!.close(true);
+      expect([navigation.hidden, settings.hidden, panel.hidden]).toEqual([true, true, true]);
+      expect(document.activeElement).toBe(replacement);
+    } finally {
+      observer.disconnect();
+      unbind();
+    }
+  });
+
   it('retains open state and rebinds return focus across a runtime generation', async () => {
     const { root, button } = fixture();
     disclosure!.enhance();
