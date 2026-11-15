@@ -1,0 +1,31 @@
+id: T-REACT-HOST-PROPS-0001
+type: test
+title: React host-looking input diagnostic evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Focused real Adapter harness coverage; generic DOM forwarding remains deliberately unavailable.
+summary: Checks actionable diagnostics without overriding semantic role/state or logging values.
+cases:
+  - id: T-REACT-HOST-PROPS-0001-CASE-CLASSIFICATION
+    title: Preserve declared prototype Props and explicit Adapter channels
+    covers: [C-REACT-HOST-PROPS-0001-CLASSIFICATION]
+    expectation: no-implicit-host-forwarding-or-owned-aria-override
+  - id: T-REACT-HOST-PROPS-0001-CASE-DIAGNOSTIC
+    title: Diagnose undeclared keys once and suppress production output
+    covers: [C-REACT-HOST-PROPS-0001-DIAGNOSTIC]
+    expectation: actionable-key-only-warning-with-instance-deduplication
+implementations:
+  - id: react-host-props-harness
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/react/test/host-prop-diagnostics.test.ts
+    required: true
+    consumesCases:
+      [T-REACT-HOST-PROPS-0001-CASE-CLASSIFICATION, T-REACT-HOST-PROPS-0001-CASE-DIAGNOSTIC]
+verifies:
+  contracts: [C-REACT-HOST-PROPS-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Record focused Adapter diagnostic, declared-key, update, production and semantic-state assertions.
+tags: [react, props, accessibility, test]

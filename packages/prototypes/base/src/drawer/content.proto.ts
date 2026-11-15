@@ -129,24 +129,6 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   const scroll = asScrollSurface<DrawerContentProps>();
   scroll.configure({ axes: 'vertical', projection: 'system' });
   def.feedback.style.use(tw('fixed min-w-0 min-h-0 content-start wrap-anywhere'));
-  def.rule({
-    when: (w) => w.state(side).eq('left'),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw(
-          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] h-[var(--proto-ui-available-region-height,100vh)]'
-        )
-      ),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('right'),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw(
-          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_+_var(--proto-ui-available-region-width,100vw)/2_-_min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] h-[var(--proto-ui-available-region-height,100vh)]'
-        )
-      ),
-  });
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
 

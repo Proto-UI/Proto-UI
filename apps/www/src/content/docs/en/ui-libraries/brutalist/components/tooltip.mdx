@@ -22,6 +22,28 @@ Brutalist Tooltip publishes four Base Tooltip projection entries: Group inherits
 
 Group, Root, and Trigger are current draft transparent projections with cataloged Brutalist package identities; they add no second props, state, timing, event, accessibility, or visual owner. Only Content adds the 5px rounded neutral surface. The interactive demo uses one real Group to compose two uncontrolled sibling Tooltips and can switch among Web Components, React, and Vue. While Content stays mounted through its renderer-owned portal, changing the documentation host from Light to Dark repaints the same surface through `--pui-foreground` and `--pui-secondary-background`.
 
+## Tooltip on a Button
+
+A focusable command and Tooltip should share one subject. Compose the draft `useTooltipTrigger()` authored hook with the command behavior, adapt the resulting prototype, and place that component directly inside Tooltip Root alongside Content. Do not wrap a separately focusable Button in the standalone Trigger: that creates two Tab stops.
+
+```ts
+import { definePrototype } from '@proto.ui/core';
+import { asButton, type ButtonProps, type ButtonExposes } from '@proto.ui/prototypes-base/button';
+import { useTooltipTrigger } from '@proto.ui/prototypes-base/tooltip';
+
+export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
+  name: 'app-tooltip-button',
+  setup() {
+    asButton();
+    useTooltipTrigger();
+  },
+});
+```
+
+Button retains its role, name, click signal, disabled state and single focus owner. Tooltip adds hover/focus intent and the owned `aria-describedby` relation. Disabling Tooltip Root suppresses Tooltip while leaving the command available; disabling the command suppresses both. `useTooltipTrigger` takes no options and adds no outward exposes. It requires an existing focusable subject. Standalone `asTooltipTrigger` retains its original focus behavior and exposes.
+
+For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
+
 ## API
 
 Tooltip is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
@@ -37,4 +59,3 @@ Tooltip is workspace source. There is no public `proto-ui add` target. Passing `
 />
 
 These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `top`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`. Group defaults `openDelay` to `700`, `closeDelay` to `100` and `skipDelay` to `300`.
-

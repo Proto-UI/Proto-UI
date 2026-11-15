@@ -1,3 +1,4 @@
+import { diagnoseHostProps } from './host-prop-diagnostics';
 import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
@@ -110,6 +111,7 @@ export type { ReactAdapterHandle } from './types';
 
 export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    /** Explicit semantic associations, including accessible Label pairing; never generic DOM attribute forwarding. */
     instanceAssociations?: InstanceAssociations;
     dir?: 'ltr' | 'rtl' | 'auto';
     children?: any;
@@ -275,6 +277,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      const warnedHostPropsRef = runtime.useRef(new Set<string>());
       // React reconciles native defaults and an input's submission name. Keep
       // both aligned with the Text Control patch that owns the physical editor.
       const [textControlDefaultValue, setTextControlDefaultValue] = runtime.useState<
@@ -558,6 +561,9 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         );
         const previousRawProps = deliveredRawPropsRef.current;
         deliveredRawPropsRef.current = nextRawProps;
+        const declaredProps = ownerRef.current?.session?.kernel?.run?.props.get();
+        if (declaredProps)
+          diagnoseHostProps(proto.name, nextRawProps, declaredProps, warnedHostPropsRef.current);
         if (previousRawProps && hasSameRawProps(previousRawProps, nextRawProps)) return;
 
         for (const cb of subsRef.current) cb();
@@ -1029,6 +1035,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           const { kernel } = hostSession;
           if (kernel && kernel.run) {
             (kernel.run as any).host = { get: () => rootRef.current };
+            diagnoseHostProps(
+              proto.name,
+              rawPropsSource.get(),
+              kernel.run.props.get(),
+              warnedHostPropsRef.current
+            );
           }
           releaseNativeReadiness.publish();
         } catch (error) {

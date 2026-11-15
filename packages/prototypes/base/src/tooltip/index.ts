@@ -29,7 +29,7 @@ export type {
 export { TOOLTIP_CONTEXT, TOOLTIP_FAMILY, TOOLTIP_GROUP_CONTEXT } from './shared';
 export { asTooltipGroup, default as tooltipGroup } from './group.proto';
 export { asTooltipRoot, default as tooltipRoot } from './root.proto';
-export { asTooltipTrigger, default as tooltipTrigger } from './trigger.proto';
+export { asTooltipTrigger, useTooltipTrigger, default as tooltipTrigger } from './trigger.proto';
 export { asTooltipContent, default as tooltipContent } from './content.proto';
 
 export default tooltipRoot;

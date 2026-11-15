@@ -79,6 +79,7 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/test/component-consumer-repairs.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
   'packages/compiler/test/focus-scope-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',

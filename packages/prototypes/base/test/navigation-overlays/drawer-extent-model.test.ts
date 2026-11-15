@@ -42,14 +42,18 @@ it.each([true, 'bad', {}, [NaN], [Infinity], [0], [-1], [1.5], [0.5, NaN]])(
     expect(model({ snapPoints })).toMatchObject({ status: 'invalid', reason: 'snap-points' });
   }
 );
-it.each(['left', 'right'])('leaves legacy horizontal mode bounded separately: %s', (side) => {
-  expect(model({ side })).toMatchObject({
-    status: 'ready',
-    mode: 'fraction',
-    points: [1],
-    selection: 1,
-  });
-});
+it.each(['left', 'right'])(
+  'retains horizontal fractional mode with the neutral compatibility cap: %s',
+  (side) => {
+    expect(model({ side })).toMatchObject({
+      status: 'ready',
+      mode: 'fraction',
+      points: [1],
+      selection: 1,
+      maximum: { unit: 'root-text', value: 20 },
+    });
+  }
+);
 it('uses the supplied root-text family ceiling without knowing a family name', () => {
   expect(model({}, { unit: 'available-minus-root-text', value: 6 })).toMatchObject({
     maximum: { unit: 'available-minus-root-text', value: 6 },

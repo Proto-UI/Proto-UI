@@ -28,6 +28,12 @@ The same Text Control patch owns the native form submission `name`. The adapter 
 
 The adapter publishes one public handle object per mounted adapter instance. React re-runs the imperative handle effect whenever a consumer supplies a new `ref` identity, so the current callback still receives the handle. The handle is allocated once and reused: `update`, `getExposes` and `invokeInCallbackScope` keep reading the live view while its identity stays stable across renders and commits.
 
+## Component props and accessible names
+
+React facade inputs follow the prototype's declared API. They do not extend all HTML attributes. `className` / `hostClassName` / `surfaceClassName`, their `style` counterparts, and `dir` have explicit Adapter channels. Generic `aria-*`, `data-*`, `title`, `id`, `role` and `tabIndex` inputs are not implicitly forwarded. Development builds warn once per undeclared key and logical instance; the warning omits prop values. A declared prototype prop with one of those names still belongs to that prototype. A custom `getProps` mapping may consume an input into the prototype's documented props. Prototype-owned roles and ARIA state remain authoritative.
+
+For an icon-only Button, Toggle or Toggle Group Item, create a stable `createControlLabelRef()` from `@proto.ui/core` and pass `instanceAssociations={{ controlLabel: ref }}` to both the control and an independent Label. The rendered Label supplies the accessible name. Label activation reuses the command's ordinary operation; `activation={false}` makes the Label naming-only. The same existing association also supports Checkbox, Switch, Radio Group Item, Input and Textarea. The opaque reference never enters portable Props. Use a native application wrapper for application metadata, and the documented component API for semantic input. See the draft [Control Label contract](../../../spec/contracts/C-CONTROL-LABEL-0001.yaml) and [host-input diagnostic contract](../../../spec/contracts/C-REACT-HOST-PROPS-0001.yaml).
+
 ## Package Role
 
 Adapter package intended to be used together with Proto UI prototypes and the shared runtime stack.
