@@ -1,204 +1,82 @@
 ---
 title: 'Button'
-description: 'Base Button 的 command 语义、公开表面、证据与当前边界。'
+description: 'Base Button 的命令语义、完整宿主用法、交付与当前边界。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import CodeExample from '@/components/CodeExample.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import { baseButtonFiles } from '@/content/docs/demo_components/button/baseButtonCode';
 
-Base Button 是用于一次离散 action 的可聚焦 command control。它拥有 activation、disabled gate、focus、瞬时交互事实与 `click` outward signal；它刻意不拥有视觉语言。
+Base Button 是触发一次离散动作的可聚焦命令控件。它拥有激活、禁用门控、焦点、瞬时交互事实与向外发出的 `click` signal，视觉呈现由应用提供。
+
+## 预览
+
+每个宿主运行同一个组合，包含“Run action”与“Disabled”。网站预览使用工作区源码；其中 Vue 2 是 Vue 2.6 源码 profile，不属于下面的稳定版 0.2.0 安装路径。
 
 <PrototypePreviewer
   demoId="demo-base-button"
   initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue']}
+  runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
 
-## Protocol 边界
-
-`P-BASE-BUTTON` 为同一个 protocol 编目了两个 authoring entries：
-
-- direct `base-button` Prototype，由 `@proto.ui/prototypes-base/button` 导出为 `button`；
-- authored `asButton()` hook，供需要保留 Button 语义的 derived Prototype 使用。
-
-当前 props 只有 `disabled`。它 expose `disabled`、`hovered`、`focused`、`focusVisible` 和表示“正被按住”的 `pressed` facts；`focusSelf()` 请求焦点，成功 activation 后发出 `click`。这个 signal 是 protocol output，不是 props callback，也不承诺以原生 DOM `click` 实现。
-
-## 交互与可访问性
-
-Button 通过官方 trigger route 处理指针与键盘 activation。Space 参与 press lifecycle 并阻止滚动默认行为；Enter activation 服从宿主 trigger path。disabled Button 拒绝 activation 和主动 focus 请求，不发出 `click`，并清理瞬时交互状态。
-
-Web profile 投射 command-control accessibility，并以 authored content 作为 accessible name。Form submission、`type`、`name`、command integration 与视觉 variant 不属于当前 Base guarantee。
-
 ## 安装
 
-<div data-adapter-panel="wc">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add wc base-button" manager="npm" />
-</div>
+先[初始化已有应用](/zh-cn/start-here/quick-start/)。已发布 0.2.0 的 Web Component 基线使用：
 
-<div data-adapter-panel="react" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add react base-button" manager="npm" />
-</div>
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc base-button" manager="npm" />
 
-<div data-adapter-panel="vue" style="display:none;">
-  <InstallCommandCard command="npx @proto.ui/cli@latest add vue base-button" manager="npm" />
-</div>
+使用 pnpm 时执行：
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 add wc base-button
+```
+
+稳定版 React、Vue 3 分别把 `wc` 换为 `react`、`vue`。CLI 按自身精确版本安装 `@proto.ui/prototypes-base` 与对应的 `@proto.ui/adapter-web-component`、`@proto.ui/adapter-react` 或 `@proto.ui/adapter-vue`，并生成本地 `BaseButton` 导出或 `proto-ui-base-button` 自定义元素。
+
+Vue 2 示例要求配套的工作区 0.3 CLI/Adapter 源码与 Vue `>=2.6.0 <2.7`。已发布稳定版 CLI 不接受 `vue2`；不能换成 `@latest` 就假定安装结果与源码预览一致。工作区 manifest 的版本不能证明 registry 已发布。
 
 ## 用法
 
-Base Button 不携带视觉语言；外观由消费组合提供。以下示例使用最小化的边框与内边距布局，以便聚焦协议表面。
+从对应宿主的已有 bundler 应用开始，复制下面的文件，并保留应用原有的框架挂载入口。Web Component 的 HTML 应加入现有文档，`src/main.ts` 只加载一次。注册 import 使用 CLI 生成的标签，而不是网站预览私有的 `wc-base-button` 标签。
 
-### 默认
+两个控件与预览的组合一致。小型样式表由应用拥有，不依赖 Tailwind 设置；应用如果已导入 `proto-ui-style.css`，请把它保留在一个入口。
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-base-button class="rounded border px-3 py-2 text-sm font-medium">Run action</wc-base-button>
-</div>
-    `}
-  />
-</div>
+<CodeExample files={baseButtonFiles} initialHost="wc" label="Base Button 完整宿主用法" />
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BaseButton } from '../proto-ui/components/react';
+用 Tab 聚焦“Run action”，再通过 Enter、Space 或指针激活。“Disabled”必须抑制激活与主动焦点请求；仅用 CSS 降低透明度不会禁用控件。可访问名称来自内容文本。
 
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BaseButton className="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
+## 协议与事件
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BaseButton class="rounded border px-3 py-2 text-sm font-medium">Run action</BaseButton>
-  </div>
-</template>
+`P-BASE-BUTTON` 为同一协议记录两个 authoring entry：
 
-<script setup>
-import { BaseButton } from '../proto-ui/components/vue';
-</script>
-    `}
-  />
-</div>
+- direct `base-button` Prototype，由 `@proto.ui/prototypes-base/button` 导出为 `button`；
+- authored `asButton()` hook，供需要 Button 语义的派生 Prototype 使用。
 
-### 禁用
+当前 Base prop 只有 `disabled`。公开事实包括 `disabled`、`hovered`、`focused`、`focusVisible` 与表示“正被按住”的 `pressed`；`focusSelf()` 请求焦点。成功激活后发出 `click` outward signal。框架 facade 将这个 signal 翻译为自己的监听语法：React 使用 `onClick`，Vue 使用 `@click`；它不是 Prototype 的 `onClick` prop。Web Component facade 以自定义事件投射 signal，与原生 DOM 输入分别处理。
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-3">
-  <wc-base-button class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</wc-base-button>
-</div>
-    `}
-  />
-</div>
+Space 参与按压生命周期并阻止滚动默认行为。禁用 Button 会清理瞬时交互状态，不发出激活 signal。表单提交、`type`、`name`、loading 状态与视觉 variant 不属于当前 Base 保证。应用拥有的 busy 行为必须更新真实 `disabled` 输入并提供可理解的进度或状态；仅显示 spinner 或降低透明度不够。
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { BaseButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <BaseButton className="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-base-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-3">
-    <BaseButton class="rounded border px-3 py-2 text-sm opacity-50" disabled>Disabled</BaseButton>
-  </div>
-</template>
-
-<script setup>
-import { BaseButton } from '../proto-ui/components/vue';
-</script>
-    `}
-  />
-</div>
-
-<AdapterPanelScript />
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/button`，CLI registry 提供 `base-button`。聚焦证据是 `T-BASE-BUTTON-0001` 和 `packages/prototypes/base/test/as-button.test.ts`。本页 Preview 通过 Web Component、React 与 Vue Adapter 运行同一个 Web host profile。
-
-## Lifecycle
-
-`P-BASE-BUTTON` 当前是 **draft**。Package 发布使实现可被消费，但不会把 draft protocol 变成冻结的兼容性保证。
-
-## 参考
-
-- [P-BASE-BUTTON](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-BUTTON.yaml)
-- [Button source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
-- [Button evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
-- 风格化投射：[Shadcn Button](/zh-cn/ui-libraries/shadcn/button/) 与 [Brutalist Button](/zh-cn/ui-libraries/brutalist/components/button/)
+导航应使用带真实 `href` 的原生 anchor。不要把 anchor 嵌入 Button，也不要用点击回调代替其导航。风格化投射另见 [Shadcn Button](/zh-cn/ui-libraries/shadcn/button/) 与 [Brutalist Button](/zh-cn/ui-libraries/brutalist/components/button/)。
 
 ## API
 
-Button 是工作区源码，没有公开的 `proto-ui add` 目标。
-
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-  ]}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
 />
 
-这些属性属于 Root。
+## 交付、生命周期与证据
 
-## 参考
+稳定版 0.2.0 包导出 `@proto.ui/prototypes-base/button`，其 CLI 提供 `base-button`。网站的四宿主源码预览与旧稳定版包是两个交付表面。`P-BASE-BUTTON` 保持 **draft**；发布既不冻结协议，也不能证明当前浏览器或辅助技术验收通过。
+
+- [Button 源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/button)
+- [协议证据：T-BASE-BUTTON-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)
+- [既有 Button 测试](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/as-button.test.ts)
+- [历史文档证据](/zh-cn/build/prototypes/documentation-coverage/)
+- [完整文档验收条件：#1042](https://github.com/Proto-UI/Proto-UI/issues/1042)
 
 <SpecEntityLinks directory="spec/prototypes" files={['P-BASE-BUTTON.yaml']} />

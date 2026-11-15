@@ -1,0 +1,36 @@
+---
+title: 'Brutalist'
+description: '查找 Brutalist 组件、其 Base 交互所有者与完整家族文档。'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+Brutalist 是 Proto UI 的 neo-brutalism 视觉家族。组件保留文档规定的 Base 交互协议，同时提供自身的边框、阴影、间距与动效。采用组件时一并阅读[设计契约](./design-contract/)。
+
+## 安装与使用
+
+在已有应用中使用已发布 0.2.0 Web Component 基线：
+
+```sh
+npx @proto.ui/cli@0.2.0 init --prototypes brutalist
+npx @proto.ui/cli@0.2.0 add wc brutalist-button
+```
+
+使用 pnpm 时执行：
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init --prototypes brutalist
+pnpm dlx @proto.ui/cli@0.2.0 add wc brutalist-button
+```
+
+所选包为 `@proto.ui/prototypes-brutalist`；CLI 同时安装配套 Adapter 并生成本地 facade。按[快速开始](/zh-cn/start-here/quick-start/)导入一次生成的样式，再采用 [Button 用法](./components/button/)。React 与 Vue 3 分别把 `wc` 换为 `react`、`vue`。Vue 2.6 属于工作区 0.3 开发线，不属于这个稳定版安装配方。
+
+## 查找组件
+
+以下当前工作区导出索引指向每个家族真实存在的文档路由，复合家族会一起说明其部件。工作区 draft 增量不能证明旧版 0.2.0 包中已有同名导出；使用前阅读对应家族的交付与宿主限制。
+
+<PrototypeDocumentationIndex library="brutalist" />
+
+## 证据与生命周期
+
+源码预览、已发布包消费、动效与可访问性验收、生命周期接纳分别记录。[覆盖索引](/zh-cn/build/prototypes/documentation-coverage/)保留历史检查点，[#1042](https://github.com/Proto-UI/Proto-UI/issues/1042)保留公开文档完整验收条件。

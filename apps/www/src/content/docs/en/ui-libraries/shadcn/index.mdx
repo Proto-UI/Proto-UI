@@ -1,0 +1,38 @@
+---
+title: 'Shadcn'
+description: 'Browse Proto UI’s Shadcn projections and choose an example with an explicit delivery and style boundary.'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+This is Proto UI's unofficial Shadcn projection. Base owns interaction; the styled family supplies presentation and documented visual inputs. It is not an official shadcn/ui distribution.
+
+## Install and use
+
+For an existing application, the published 0.2.0 path is:
+
+```sh
+npx @proto.ui/cli@0.2.0 init
+npx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+With pnpm:
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init
+pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+The CLI installs `@proto.ui/prototypes-shadcn` and the selected Adapter at its exact version and creates local host facades. Load the generated stylesheet once. [Quick Start](/en/start-here/quick-start/) gives the application setup; [Button](./button/) pairs previews with host code. Replace `wc` with `react` or `vue` for those stable hosts. Vue 2.6 and the current named style profiles require the matching workspace 0.3 source; `@latest` is not proof of that delivery.
+
+## Choose a family
+
+These links reflect current workspace exports, including draft additions. Each family page owns its anatomy, props, events and supported host boundaries. Profile selection is component-specific: the presence of a style ID does not mean every component implements that visual recipe. Source protocol links below expose remaining public Usage debt.
+
+<PrototypeDocumentationIndex library="shadcn" />
+
+## Source and compatibility
+
+The website's source previews are separate from the published 0.2.0 package. Follow each page's pinned upstream references, compatibility omissions and lifecycle; a current recipe does not revise earlier evidence. For example, Button's visual `link` variant retains command semantics, while native navigation belongs to an anchor.
+
+See [documentation coverage and historical evidence](/en/build/prototypes/documentation-coverage/) and the complete documentation acceptance conditions in [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042).

@@ -26,6 +26,8 @@ Update `scripts/docs/public-doc-policy.mjs` in the same review as the route or p
 - A historical release route belongs in `release.archivedRoutes` with its locales and a reason. Do not add a global prerelease-string ignore: current pages may still discuss historical releases when the wording is explicitly historical.
 - A deliberate scaffolding phrase belongs in `scaffolding.exceptions` with an exact locale, slug, marker, and reason. Prefer replacing public scaffolding whenever possible.
 
+The Base, Shadcn and Brutalist entry pages use `PrototypeDocumentationIndex.astro` to derive reader links from the current package exports, the existing policy classifications/aliases, and the localized documentation collection. Missing public guides remain explicit protocol-source links and Usage/host evidence gaps. This projection does not supply a second catalog or replace the direct detail-route gate; a source-only link cannot satisfy a required sidebar route. Lucide retains its existing searchable gallery, direct interaction owners and source-bound evidence.
+
 Focused fixtures live under `scripts/docs/test/fixtures`; run them with:
 
 ```sh

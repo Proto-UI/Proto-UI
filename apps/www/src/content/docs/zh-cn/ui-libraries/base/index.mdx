@@ -1,0 +1,38 @@
+---
+title: 'Base'
+description: '选择可移植交互协议，继续阅读其 anatomy、输入与 Web 宿主用法。'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+Base 提供不携带视觉语言的交互协议。先选择拥有目标动作或值的家族，再按文档组合其部件。Shadcn 与 Brutalist 在这些协议上投射各自的视觉语言。
+
+## 安装并渲染
+
+下面是在已有 bundler 应用中使用已发布 0.2.0 Web Component 基线的命令：
+
+```sh
+npx @proto.ui/cli@0.2.0 init
+npx @proto.ui/cli@0.2.0 add wc base-button
+```
+
+使用 pnpm 时执行：
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init
+pnpm dlx @proto.ui/cli@0.2.0 add wc base-button
+```
+
+CLI 会按自身的精确版本安装 `@proto.ui/prototypes-base` 与所选 Adapter。按[快速开始](/zh-cn/start-here/quick-start/)导入生成的样式入口与宿主 facade，再采用完整的 [Button 用法](./button/)。React 与 Vue 3 分别把 `wc` 换为 `react`、`vue`。Vue 2.6 属于工作区 0.3 开发线，以上稳定版命令不能安装它。
+
+## 查找协议
+
+以下是当前工作区的导出索引。家族页会一起说明其复合部件。使用前阅读该页的 API、生命周期与宿主限制；源码导出或 Preview 选择器不代表相应包与宿主组合已经验证。较新的工作区导出不会追溯加入 0.2.0 包。
+
+<PrototypeDocumentationIndex library="base" />
+
+## 交付与证据
+
+网站预览使用本仓库源码，npm 稳定版与当前工作区可能不同。Base 协议的生命周期以对应实体为准，包发布不会自动激活 draft 协议。
+
+[文档覆盖与历史证据](/zh-cn/build/prototypes/documentation-coverage/)解释家族、部件、导出与生成 facade 的区别。[#1042](https://github.com/Proto-UI/Proto-UI/issues/1042)保留完整验收条件。

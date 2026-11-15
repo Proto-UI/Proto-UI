@@ -5,6 +5,8 @@ description: '可检索、按图标加载并可直接复制使用片段的 Lucid
 
 import LucideIconGallery from '@/components/LucideIconGallery.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { lucideIconFiles } from '@/content/docs/demo_components/lucideIconCode';
 
 Proto UI 从 `lucide-static` 生成 Lucide 图标原型。这是该图标库的主要工作页面：可直接检索图标，打开图标卡片查看导入路径，并复制 `asHook` 或内联 `render` 片段。
 
@@ -12,9 +14,50 @@ Proto UI 从 `lucide-static` 生成 Lucide 图标原型。这是该图标库的�
 
 <LucideIconGallery locale="zh-cn" />
 
-## API
+## 安装
 
-Lucide 图标是从 `lucide-static` 生成的工作区源码。它们没有属性；每个图标都是一个渲染 SVG 的原型。从任意图标卡片复制 `asHook` 或 `render` 代码片段即可使用。
+在已有 bundler 应用中使用已发布 0.2.0 Web Component 基线：
+
+```sh
+npm install @proto.ui/prototypes-lucide@0.2.0 @proto.ui/adapter-web-component@0.2.0
+```
+
+也可以使用 pnpm：
+
+```sh
+pnpm add @proto.ui/prototypes-lucide@0.2.0 @proto.ui/adapter-web-component@0.2.0
+```
+
+React 与 Vue 3 应用分别改用 `@proto.ui/adapter-react@0.2.0`、`@proto.ui/adapter-vue@0.2.0`，并保留已安装的框架。Vue 2.6（`>=2.6.0 <2.7`）使用配套的工作区 0.3 `@proto.ui/adapter-vue2` 源码，不属于稳定版 0.2.0 包集合。图标库使用当前工作区源码，其生成基线不能证明 registry 已提供更新版本。
+
+## 使用一个图标
+
+通过公开入口导入固定 glyph。以下完整应用组件使用与 CLI 相同的公开 Adapter 创建 API。保留框架原有挂载入口；WC 把段落加入现有文档并加载一次模块。这个 SVG 示例不要求主题或 Tailwind 设置。
+
+<CodeExample files={lucideIconFiles} initialHost="wc" label="Lucide Check 图标宿主用法" />
+
+示例同时显示 check 和“Saved”，具体布局由应用控制。普通宿主 wrapper 隐藏装饰性图标，可见文本表达含义。图标库是源码预览，不是四个 Adapter 的执行回执；把所选包集合实际运行后，才能称为已经测试的示例。
+
+## 属性与原型编写
+
+按名称选择的 `lucideIcon` / `asLucideIcon` 入口接受 `name`，默认 `circle`。`lucideCheckIcon` 等固定 glyph 原型保留自身图形，并接受共享的视觉属性：
+
+| 属性          | 类型     | 默认值         |
+| ------------- | -------- | -------------- |
+| `size`        | 有限正数 | `24`           |
+| `strokeWidth` | 有限正数 | `2`            |
+| `stroke`      | string   | `currentColor` |
+| `fill`        | string   | `none`         |
+
+无效名称回退到 `circle`；非有限值或非正数尺寸回退到各自默认值。SVG 使用 `viewBox="0 0 24 24"`，固定 glyph 不接受可变 `name`。
+
+编写 Prototype 时，`renderLucideCheckIcon(renderer, { size: 18 })` 向现有 renderer 追加 SVG，`asLucideCheckIcon()` 是固定 glyph hook。卡片中的 `render` 片段属于 Prototype 的 render callback，本身不是独立的 React/Vue 组件，也不是完整应用。
+
+当前图标协议没有 `decorative`、accessible label、`title` 或 `role` prop。有意义的文本或可访问名称属于拥有图标的控件，装饰性图标的可见性由宿主边界处理；SVG 渲染成功不能证明可访问性已完成。
+
+## 来源与证据
+
+`P-LUCIDE-ICON` 保持 draft，全部生成 glyph 共享这个协议。当前源码派生自 `lucide-static@1.8.0`，Proto UI 是非官方消费层。请保留 [Lucide/Feather 声明](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/lucide/THIRD_PARTY_NOTICES.md)、[来源 manifest](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/lucide/src/manifest.generated.ts)与[既有证据](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-LUCIDE-ICON-0001.yaml)。源码可用、registry 安装与当前原生或辅助技术验收分别记录。
 
 ## 参考
 

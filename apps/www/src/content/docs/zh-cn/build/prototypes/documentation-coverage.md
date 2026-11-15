@@ -5,6 +5,14 @@ description: '查找已实现原型家族的文档，区分导出、实验与待
 
 本索引将实现家族对应到读者文档。家族页同时记录其组成部件；源码文件、生成图标、authoring `asHook`、CLI facade 与编目身份不是同一种计数单位。选择 API 前应阅读对应页面的生命周期与宿主边界。包已发布不等于 draft `P-*` 实体已经转为 active。
 
+## 当前库入口
+
+当前工作区导出请从 [Base](/zh-cn/ui-libraries/base/)、[Shadcn](/zh-cn/ui-libraries/shadcn/)、[Brutalist](/zh-cn/ui-libraries/brutalist/) 与 [Lucide](/zh-cn/ui-libraries/lucide/) 进入。前三者渲染共享的当前导出索引，Lucide 保留生成的可搜索图标库。入口区分已发布 0.2.0 安装基线与工作区 0.3 源码，并链接各家族真实的详情路由。
+
+Shadcn Input Shell 与 Style Scope 目前链接到 draft 协议源码，其完整公开 Usage 与宿主证据仍未闭合。索引保留这些源码导出，不把它们静默算作完整详情页。其他库入口仍是实验范围，不属于四家族 0.3 承诺。
+
+下方表格与分支检查点保留 **2026-10-04 的历史盘点**，包括当时缺失的 Base Input 路由。当前 Base Input 指南见[这里](/zh-cn/ui-libraries/base/input/)。旧测试结果、失败、hash 与源码身份继续保留在[当日审计](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/docs/prototype-coverage-audit-2026-10-04.md)，不转称为后续源码树的验收。[#1042](https://github.com/Proto-UI/Proto-UI/issues/1042)及其保留的[验收载体 #1323](https://github.com/Proto-UI/Proto-UI/issues/1323)继续记录路由、宿主、包、响应式与可访问性条件；静态路由目录不能满足这些执行条件。
+
 ## 如何阅读清单
 
 源码目录为 `packages/prototypes/<library>/src/<family>`。下面的部件标签标识源码文件，不定义新的导出命名：`overlay` 实现文档中的 Mask；Transition 的 `as-transition` 与 `transition` 属于同一协议。实际 import 以详情页和包导出为准。复合部件共用家族页，不以只有一句话的独立页制造虚假覆盖。
