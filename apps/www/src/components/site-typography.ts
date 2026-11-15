@@ -407,6 +407,12 @@ export function siteTypographyParticipant(
                   ref: `surface-${index}`,
                   props: {
                     ...siteTextRecipe(role, family, isCompact, context, heroScale, heroLanguage),
+                    // This native status sits on the Bootstrap navbar, whose
+                    // ink must reach its real Text owner after passive refresh.
+                    ...(family === 'bootstrap-2-3-2' &&
+                    native.matches('.site-header > output[data-homepage-runtime-status]')
+                      ? { tone: 'inherit' as const }
+                      : {}),
                   },
                   surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role, context) },
                   children: [

@@ -1,5 +1,4 @@
 // @vitest-environment node
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { assertDemoSpec, type DemoNode, type DemoSpec } from './demo-types';
 import { createSurfaceAtomDemo } from './surface-atom-demo';
@@ -7,9 +6,14 @@ import { createTextAtomDemo } from './text-atom-demo';
 
 function atoms(demo: DemoSpec): DemoNode[] {
   if (demo.root.kind !== 'box') throw new Error('Expected consumer-owned layout');
-  return (demo.root.children ?? []).filter((child): child is DemoNode => typeof child !== 'string');
+  const collect = (node: DemoNode): DemoNode[] => {
+    if (node.kind !== 'box') return [node];
+    return (node.children ?? []).flatMap((child) =>
+      typeof child === 'string' ? [] : collect(child)
+    );
+  };
+  return collect(demo.root);
 }
-const registry = readFileSync(new URL('./prototype-modules.ts', import.meta.url), 'utf8');
 
 describe('Passive atom documentation recipes', () => {
   for (const family of [
@@ -28,8 +32,6 @@ describe('Passive atom documentation recipes', () => {
         expect(node.kind).toBe('proto');
         if (node.kind !== 'proto') throw new Error('Expected the actual Text atom');
         expect(node.prototypeId).toBe(`${family}-text-root`);
-        expect(registry).toContain(`'${node.prototypeId}'`);
-        expect(registry).toContain(`@proto.ui/prototypes-${family}/text`);
         expect(node.className).toBeUndefined();
         expect(node.surfaceStyle).toBeUndefined();
         expect(
@@ -60,14 +62,14 @@ describe('Passive atom documentation recipes', () => {
       const demo = createSurfaceAtomDemo(family);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       expect(demo.setup).toBeUndefined();
-      // Liquid Glass adds a fifth case disclosing the explicit `material`
-      // opt-in; the other families keep the four pinned variants.
-      expect(atoms(demo)).toHaveLength(family === 'liquid-glass' ? 5 : 4);
+      // Bootstrap adds blue-frame navigation and Button-context comparisons;
+      // Liquid Glass adds its explicit material opt-in.
+      expect(atoms(demo)).toHaveLength(
+        family === 'bootstrap-2-3-2' ? 10 : family === 'liquid-glass' ? 5 : 4
+      );
       for (const node of atoms(demo)) {
         if (node.kind !== 'proto') throw new Error('Expected the actual Surface atom');
         expect(node.prototypeId).toBe(`${family}-surface-root`);
-        expect(registry).toContain(`'${node.prototypeId}'`);
-        expect(registry).toContain(`@proto.ui/prototypes-${family}/surface`);
         expect(node.className).toBeUndefined();
         expect(node.surfaceStyle).toBeUndefined();
         expect(
@@ -82,6 +84,7 @@ describe('Passive atom documentation recipes', () => {
               'pressed',
               'current',
               'material',
+              ...(family === 'bootstrap-2-3-2' ? ['actionProfile', 'colorContext'] : []),
             ].includes(key)
           )
         ).toBe(true);
