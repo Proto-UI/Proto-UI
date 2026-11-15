@@ -348,7 +348,7 @@ export function createVue2OwnerModules<Props extends PropsBaseType>(
     ])
     .use('anatomy', [
       [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
-      [ANATOMY_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
+      [ANATOMY_PARENT_CAP, getLogicalParent],
       [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
       [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
     ])
@@ -615,7 +615,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     ])
     .use('anatomy', [
       [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
-      [ANATOMY_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
+      [ANATOMY_PARENT_CAP, getLogicalParent],
       [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
       [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
       [ANATOMY_ORDER_OBSERVER_CAP, createDomOrderObserver],

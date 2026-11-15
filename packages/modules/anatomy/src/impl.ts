@@ -67,10 +67,16 @@ type ClaimRecord = {
   invoke: AnatomyOrderCallbackDispatcher;
 };
 
-// One synchronous notification may check the same host order for many owners.
-// Keep only host comparisons here: each owner still resolves its current domain
-// and targets. The cache never survives a notification or an author callback.
+// Share reads only within one synchronous notification. A parent-getter identity
+// identifies one logical host tree; independent bridges must not share domains.
+// Each recipient still resolves its own current root and reads current targets.
+// No cached read survives a notification or an author callback.
 type OrderComparisons = Map<AnatomyRootTarget, Map<AnatomyRootTarget, number>>;
+type DomainClaims = Map<AnatomyInstanceToken, ClaimRecord[]>;
+type OrderNotificationReads = {
+  comparisons: OrderComparisons;
+  domains: Map<AnatomyParentGetter, DomainClaims>;
+};
 
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
 
@@ -822,10 +828,10 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
-    const comparisons: OrderComparisons = new Map();
+    const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
     for (const impl of AnatomyModuleImpl.liveInstances) {
       if (!impl.orderListeners.has(family)) continue;
-      impl.emitOrderChangeIfNeeded(family, comparisons);
+      impl.emitOrderChangeIfNeeded(family, reads);
     }
   }
 
@@ -860,9 +866,9 @@ export class AnatomyModuleImpl extends ModuleBase {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
       const off = observer(target, () => {
-        const comparisons: OrderComparisons = new Map();
+        const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
         for (const impl of listeners) {
-          impl.emitOrderChangeIfNeeded(family, comparisons);
+          impl.emitOrderChangeIfNeeded(family, reads);
         }
       });
       entry = { off, listeners };
@@ -904,9 +910,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     return this.orderVersionByFamily.get(family) ?? 0;
   }
 
-  private emitOrderChangeIfNeeded(family: AnatomyFamily, comparisons?: OrderComparisons): void {
+  private emitOrderChangeIfNeeded(family: AnatomyFamily, reads?: OrderNotificationReads): void {
     const prev = this.orderSignatureByFamily.get(family);
-    const next = this.computeOrderSignature(family, comparisons);
+    const next = this.computeOrderSignature(family, reads);
     if (typeof prev !== 'undefined' && prev === next) return;
 
     this.orderSignatureByFamily.set(family, next);
@@ -915,23 +921,25 @@ export class AnatomyModuleImpl extends ModuleBase {
 
     const listeners = this.orderListeners.get(family);
     if (!listeners || listeners.size === 0) return;
-    // Callback scopes may synchronously move, replace or retire host targets,
-    // including through a nested notification. Later recipients must compare
-    // the resulting host order afresh even when logical identities survive.
-    comparisons?.clear();
+    // Callback scopes may synchronously reparent, mount or retire claims and
+    // move or replace host targets, including through a nested notification.
+    // Later recipients must read the resulting structure and order afresh.
+    reads?.comparisons.clear();
+    reads?.domains.clear();
     try {
       this.orderDispatch((ctx) => {
         for (const listener of listeners) listener(ctx);
       });
     } finally {
-      comparisons?.clear();
+      reads?.comparisons.clear();
+      reads?.domains.clear();
     }
   }
 
-  private computeOrderSignature(family: AnatomyFamily, comparisons?: OrderComparisons): string {
-    const domain = this.resolveCurrentDomain(family, false);
+  private computeOrderSignature(family: AnatomyFamily, reads?: OrderNotificationReads): string {
+    const domain = this.resolveCurrentDomain(family, false, reads?.domains);
     if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims, comparisons);
+    const ordered = this.sortClaims(domain.claims, reads?.comparisons);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
   }
 
@@ -1121,7 +1129,8 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private resolveCurrentDomain(
     family: AnatomyFamily,
-    strict = true
+    strict = true,
+    domains?: Map<AnatomyParentGetter, DomainClaims>
   ): {
     rootInstance: AnatomyInstanceToken | null;
     claims: ClaimRecord[];
@@ -1138,9 +1147,29 @@ export class AnatomyModuleImpl extends ModuleBase {
       );
     }
 
-    const claims = CENTER.listClaims(family).filter(
-      (claim) => this.findDomainRoot(claim.instance, family, getParent) === rootInstance
-    );
+    let claims: ClaimRecord[];
+    if (domains) {
+      let byRoot = domains.get(getParent);
+      if (!byRoot) {
+        byRoot = new Map();
+        // This cache belongs to this family notification only. Preserve the
+        // registration order inside each root, including stable host fallback.
+        for (const claim of CENTER.listClaims(family)) {
+          const root = this.findDomainRoot(claim.instance, family, getParent);
+          if (!root) continue;
+          let members = byRoot.get(root);
+          if (!members) byRoot.set(root, (members = []));
+          members.push(claim);
+        }
+        domains.set(getParent, byRoot);
+      }
+      claims = byRoot.get(rootInstance) ?? [];
+    } else {
+      // Public queries must observe mutations immediately, even inside callbacks.
+      claims = CENTER.listClaims(family).filter(
+        (claim) => this.findDomainRoot(claim.instance, family, getParent) === rootInstance
+      );
+    }
     const rootClaim =
       claims.find((claim) => claim.role === 'root' && claim.instance === rootInstance) ?? null;
     return {
