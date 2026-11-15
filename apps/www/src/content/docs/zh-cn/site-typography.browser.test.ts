@@ -275,9 +275,13 @@ async function sourceIntegrity(page: Page) {
         return count;
       })(),
       originalTextNodeCount: texts.length,
-      carrierCount: native.querySelectorAll('[data-site-typography-carrier]').length,
-      surfaceCount: native.querySelectorAll('[data-typography-prototype][data-pui-root]').length,
-      invalidBlocks: native.querySelectorAll('div,section,p,h1,h2,h3,fieldset').length,
+      carrierCount: native.querySelectorAll(':scope > [data-site-typography-carrier]').length,
+      surfaceCount: native.querySelectorAll(
+        ':scope > [data-site-typography-carrier] [data-typography-prototype][data-pui-root]'
+      ).length,
+      invalidBlocks: native.querySelectorAll(
+        ':scope > [data-site-typography-carrier] :is(div,section,p,h1,h2,h3,fieldset)'
+      ).length,
       nestedFocusable: native.querySelectorAll(
         '[data-site-typography-carrier] [tabindex], [data-site-typography-carrier] [role="button"]'
       ).length,
@@ -291,18 +295,26 @@ function assertSourceIntegrity(measured: Awaited<ReturnType<typeof sourceIntegri
     expect(node.originalSources).toBe(true);
     expect(node.text).toBe(node.expected);
     expect(node.textNodeCount).toBe(node.originalTextNodeCount);
-    expect(node.carrierCount).toBe(1);
-    expect(node.surfaceCount).toBe(1);
+    // The rich LI keeps its authored P, which owns its own Text projection.
+    const expectedOwners = node.id === 'native-rich-item' ? 0 : 1;
+    expect(node.carrierCount).toBe(expectedOwners);
+    expect(node.surfaceCount).toBe(expectedOwners);
     expect(node.invalidBlocks).toBe(0);
     expect(node.nestedFocusable).toBe(0);
   }
 }
-function narrowHomepageHeading(family: 'shadcn' | 'brutalist', textPercent: number) {
+function narrowHomepageHeading(
+  family: 'shadcn' | 'brutalist',
+  locale: keyof typeof SLOGANS,
+  textPercent: number
+) {
   const scale = textPercent / 100;
+  const shadcn = family === 'shadcn';
+  const leading = shadcn ? (locale === 'zh-cn' ? 37.5 : 33) : 30;
   return {
-    token: family === 'shadcn' ? 'text-3xl' : 'text-2xl',
-    size: (family === 'shadcn' ? 30 : 24) * scale,
-    lineHeight: `${(family === 'shadcn' ? 33 : 30) * scale}px`,
+    token: shadcn ? 'text-3xl' : 'text-2xl',
+    size: (shadcn ? 30 : 24) * scale,
+    lineHeight: `${leading * scale}px`,
   };
 }
 
@@ -405,8 +417,15 @@ describe.sequential('native SiteTypography rendered evidence', () => {
               ).toBe(role);
             }
             expect(
-              await page.locator('#native-rich-item [data-typography-prototype]').count()
+              await page.locator('#native-rich-item > [data-site-typography-carrier]').count()
             ).toBe(0);
+            expect(
+              await page
+                .locator(
+                  '#native-rich-copy > [data-site-typography-carrier] [data-typography-prototype]'
+                )
+                .count()
+            ).toBe(1);
             record.documentOwners = {
               listPaint: await typographyPaint(page, '#native-item'),
               tableHeadPaint: await typographyPaint(page, '#native-head'),
@@ -602,7 +621,7 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                     await page.evaluate((percent) => {
                       document.documentElement.style.fontSize = `${percent}%`;
                     }, textPercent);
-                    const expectedHeading = narrowHomepageHeading(family, textPercent);
+                    const expectedHeading = narrowHomepageHeading(family, locale, textPercent);
                     const headingSamples: unknown[] = [];
                     state.expectedHeading = expectedHeading;
                     state.headingSamples = headingSamples;
@@ -707,11 +726,9 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                       galleryText,
                       galleryLabels,
                     });
-                    // WC retains the two closed authored Accordion bodies; the three
-                    // framework adapters withdraw them. All 37/35 owners remain exact.
-                    expect(galleryText).toHaveLength(
-                      { wc: 37, react: 35, vue: 35, vue2: 35 }[runtime]
-                    );
+                    // The expanded gallery adds 15 authored Text owners. WC
+                    // also retains the two closed authored Accordion bodies.
+                    expect(galleryText).toHaveLength(runtime === 'wc' ? 52 : 50);
                     expect(galleryLabels).toHaveLength(4);
                     expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);
                     for (let index = 0; index < labelNames.length; index++) {
@@ -968,7 +985,7 @@ describe.sequential('document reading native fallback', () => {
   for (const [name, route, titleSize, titleLeading] of [
     ['shadcn', '/zh-cn/start-here/quick-start/', '30px', '37.5px'],
     ['brutalist', '/en/ui-libraries/brutalist/components/button/', '36px', '44px'],
-    ['homepage', '/zh-cn/', '30px', '33px'],
+    ['homepage', '/zh-cn/', '30px', '37.5px'],
   ] as const) {
     it(`${name}: retains its own no-JavaScript heading scale`, async () => {
       await runCase(

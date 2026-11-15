@@ -646,8 +646,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         sibling.textContent = 'Original home sibling';
         home.append(tree, sibling);
         const host = document.createElement('div');
-        host.style.cssText =
-          'position:fixed;left:16px;top:300px;width:240px;z-index:2147483000';
+        host.style.cssText = 'position:fixed;left:16px;top:300px;width:240px;z-index:2147483000';
         const shadow = host.attachShadow({ mode: 'open' });
         const content = document.createElement('div');
         content.style.cssText =
@@ -704,7 +703,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               viewportBottom: bottom,
               rowTop: row.top,
               rowBottom: row.bottom,
-              visible: row.width > 0 && row.height > 0 && row.top >= top - 1 && row.bottom <= bottom + 1,
+              visible:
+                row.width > 0 && row.height > 0 && row.top >= top - 1 && row.bottom <= bottom + 1,
               nearestBottom: Math.abs(row.bottom - bottom) <= 1,
               trustedManualInput:
                 manualInputs.length > 0 &&
@@ -1335,10 +1335,18 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             });
             await page.keyboard.press('Escape');
             const closeDeadline = performance.now() + 1000;
-            await expect.poll(() => command.getAttribute('aria-expanded')).toBe('false');
-            expect(await command.evaluate((element) => document.activeElement === element)).toBe(
-              true
-            );
+            let focusRestoredAtCollapse = false;
+            await expect
+              .poll(async () => {
+                const collapsed = await command.evaluate((element) => ({
+                  expanded: element.getAttribute('aria-expanded'),
+                  focused: document.activeElement === element,
+                }));
+                focusRestoredAtCollapse = collapsed.focused;
+                return collapsed.expanded;
+              })
+              .toBe('false');
+            expect(focusRestoredAtCollapse).toBe(true);
             // The website retains its native tree through the public leave barrier.
             // Lease completion shares the original close budget, without a fixed sleep.
             const remainingCloseMs = closeDeadline - performance.now();
@@ -1358,32 +1366,38 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 { timeout: remainingCloseMs }
               )
               .toBe(true);
-            const closeObservation = await page.evaluate(() => {
-              const state = window as typeof window & {
-                __contentsTakeCloseObservation?: () => CloseObservation;
-              };
-              return state.__contentsTakeCloseObservation!();
-            });
-            closeObservations.push({ family, runtime, action, observation: closeObservation });
-            expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
-            expect(
-              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree')
-            ).toBeNull();
-            expect(
-              await page.evaluate(() => {
-                const state = window as typeof window & {
-                  __contentsOriginalTree?: Element;
-                  __contentsOriginalParent?: Node | null;
-                  __contentsOriginalNextSibling?: Node | null;
-                };
-                const tree = state.__contentsOriginalTree;
-                return (
-                  !!tree &&
-                  tree.parentNode === state.__contentsOriginalParent &&
-                  tree.nextSibling === state.__contentsOriginalNextSibling
-                );
-              })
-            ).toBe(true);
+            const [closeObservation, homeTreeCount, popoverMarker, hasOriginalPosition] =
+              await Promise.all([
+                page
+                  .evaluate(() => {
+                    const state = window as typeof window & {
+                      __contentsTakeCloseObservation?: () => CloseObservation;
+                    };
+                    return state.__contentsTakeCloseObservation!();
+                  })
+                  .then((observation) => {
+                    closeObservations.push({ family, runtime, action, observation });
+                    return observation;
+                  }),
+                page.locator('.docs-shell nav.docs-sidebar').count(),
+                page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree'),
+                page.evaluate(() => {
+                  const state = window as typeof window & {
+                    __contentsOriginalTree?: Element;
+                    __contentsOriginalParent?: Node | null;
+                    __contentsOriginalNextSibling?: Node | null;
+                  };
+                  const tree = state.__contentsOriginalTree;
+                  return (
+                    !!tree &&
+                    tree.parentNode === state.__contentsOriginalParent &&
+                    tree.nextSibling === state.__contentsOriginalNextSibling
+                  );
+                }),
+              ]);
+            expect(homeTreeCount).toBe(1);
+            expect(popoverMarker).toBeNull();
+            expect(hasOriginalPosition).toBe(true);
             expect(closeObservation.initialMarker).not.toBeNull();
             expect(closeObservation.events).toEqual([
               { kind: 'home-inserted', siblingMatches: true },
@@ -2442,7 +2456,28 @@ for (const family of ['shadcn', 'brutalist'] as const) {
             )
             .toBe(true);
           const expectedToken = family === 'shadcn' ? 'ring-3' : 'ring-2';
-          await expect.poll(() => trigger.getAttribute('data-pui-style')).toContain(expectedToken);
+          if (family === 'brutalist' && control === 'runtime') {
+            // Elevated Brutalist transitions the shadow after publishing its ring token.
+            // Use the original poll window for the visual state that the capture asserts.
+            await expect
+              .poll(() =>
+                trigger.evaluate(
+                  (node, restingShadow) => ({
+                    tokens: node.getAttribute('data-pui-style') ?? '',
+                    painted:
+                      node === node.ownerDocument.activeElement &&
+                      node.matches(':focus-visible') &&
+                      getComputedStyle(node).boxShadow !== restingShadow,
+                  }),
+                  unfocused.shadow
+                )
+              )
+              .toEqual({ tokens: expect.stringContaining(expectedToken), painted: true });
+          } else {
+            await expect
+              .poll(() => trigger.getAttribute('data-pui-style'))
+              .toContain(expectedToken);
+          }
           const facts = await trigger.evaluate(measureHeaderPreferenceFocusRing);
           records.push({ stage, facts });
           await save(stage, { unfocused, focused: facts });

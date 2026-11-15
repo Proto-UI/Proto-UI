@@ -95,6 +95,7 @@ export type ProjectionCompositionOptions = Readonly<{
   controlIds?: readonly ProjectionControlId[];
   /** Consumer-owned theme values projected directly onto every Proto surface. */
   themeSurfaceStyle?: ProjectionThemeSurfaceStyle;
+  scopeInlineStyle?: string;
   locked?: boolean;
   /** Host generation gate; independent from physical disabled projection. */
   eventGateOpen?: boolean;
@@ -938,14 +939,15 @@ export function createProjectionComposition(
           continue;
         }
         for (const [name, value] of Object.entries(coordinateAttrs)) {
-          element.setAttribute(name, value);
+          if (element.getAttribute(name) !== value) element.setAttribute(name, value);
         }
         if (themeSurfaceStyle) {
           applyProjectionThemeSurfaceStyle(element, themeSurfaceStyle);
         }
         for (const [prototypeMarker, prototypeId] of prototypeMarkers) {
           if (!element.classList.contains(prototypeMarker)) continue;
-          element.setAttribute('data-projection-prototype', prototypeId);
+          if (element.getAttribute('data-projection-prototype') !== prototypeId)
+            element.setAttribute('data-projection-prototype', prototypeId);
           // Normalized surface classes can live on a native editor inside
           // its logical WC boundary. Identity remains on that Proto root;
           // never copy visual classes/styles to the infrastructure wrapper.
@@ -966,8 +968,9 @@ export function createProjectionComposition(
               (generation === null || generation === String(options.generation))
             ) {
               for (const [name, value] of Object.entries(coordinateAttrs))
-                boundary.setAttribute(name, value);
-              boundary.setAttribute('data-projection-prototype', prototypeId);
+                if (boundary.getAttribute(name) !== value) boundary.setAttribute(name, value);
+              if (boundary.getAttribute('data-projection-prototype') !== prototypeId)
+                boundary.setAttribute('data-projection-prototype', prototypeId);
             }
           }
           break;
@@ -1329,6 +1332,7 @@ export function createProjectionComposition(
       className: 'pui-projection-scope',
       attrs: {
         'data-projection-scope': options.ownerId,
+        ...(options.scopeInlineStyle ? { style: options.scopeInlineStyle } : {}),
         'data-projection-family': options.projectionFamilyId,
         'data-projection-runtime': options.runtimeId,
         'data-projection-generation': String(options.generation),

@@ -153,6 +153,28 @@ describe('Website projection theme inputs', () => {
     }
   });
 
+  it('only writes changed live theme declarations and still reclaims owned priority', () => {
+    const surface = document.createElement('div');
+    const theme = { '--pui-background': '#fff', '--pui-foreground': '#111' } as const;
+    applyProjectionThemeSurfaceStyle(surface, theme);
+    const write = vi.spyOn(surface.style, 'setProperty');
+
+    applyProjectionThemeSurfaceStyle(surface, theme);
+    expect(write).not.toHaveBeenCalled();
+
+    surface.style.setProperty('--pui-background', '#fff', 'important');
+    surface.style.setProperty('--pui-foreground', '#777');
+    write.mockClear();
+    applyProjectionThemeSurfaceStyle(surface, theme);
+    expect(write.mock.calls).toEqual([
+      ['--pui-background', '#fff'],
+      ['--pui-foreground', '#111'],
+    ]);
+    expect(surface.style.getPropertyPriority('--pui-background')).toBe('');
+    expect(surface.style.getPropertyValue('--pui-foreground')).toBe('#111');
+    write.mockRestore();
+  });
+
   it('applies a closed theme copy and removes properties retired from its owned shape', () => {
     const surface = document.createElement('div');
     applyProjectionThemeSurfaceStyle(surface, {

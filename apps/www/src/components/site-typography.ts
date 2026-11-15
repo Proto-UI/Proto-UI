@@ -48,6 +48,15 @@ const activeViews = new WeakMap<HTMLElement, View>();
 const selectionContainers = new WeakMap<Node, { native: HTMLElement; slot: HTMLElement }>();
 let serial = 0;
 
+export function isWithinOwnedCodeContent(node: Node): boolean {
+  return (
+    node.nodeType === 1 &&
+    !!(node as Element).closest(
+      '[data-code-example], div.site-code-surface-mount, div.site-copy-mount'
+    )
+  );
+}
+
 /** Inventory uses native semantics, never discovers text by replacing HTML.
  * Existing Proto component content is deliberately not wrapped a second time. */
 export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false): Target[] {
@@ -62,6 +71,7 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
     const explicit = native.dataset.siteTypography;
     const explicitRole = explicit !== undefined && ROLES.has(explicit);
     if (
+      (docsOnly && isWithinOwnedCodeContent(native)) ||
       (native.closest(COMPONENT_OWNED) &&
         !(explicitRole && native.matches('output[data-home-demo-status]'))) ||
       native.closest('[data-site-typography-batch]')
@@ -172,8 +182,12 @@ function resolveBoundary(
 function preserveSelection(document: Document, move: () => void): void {
   const focus = document.activeElement as HTMLElement | null;
   const selection = document.getSelection();
-  const anchor = captureBoundary(selection?.anchorNode ?? null, selection?.anchorOffset ?? 0);
-  const extent = captureBoundary(selection?.focusNode ?? null, selection?.focusOffset ?? 0);
+  const anchorNode = selection?.anchorNode;
+  const anchor =
+    selection && anchorNode ? captureBoundary(anchorNode, selection.anchorOffset) : null;
+  // Restoration requires both endpoints, even when the selection is collapsed.
+  const focusNode = anchor ? selection?.focusNode : null;
+  const extent = selection && focusNode ? captureBoundary(focusNode, selection.focusOffset) : null;
   move();
   if (focus?.isConnected && document.activeElement !== focus) focus.focus({ preventScroll: true });
   const nextAnchor = resolveBoundary(anchor);
@@ -322,7 +336,8 @@ export function siteTypographyParticipant(
         // previews and portals; no second system-font override after staging.
         for (const view of views) applyProjectionThemeSurfaceStyle(view.surface, theme);
       };
-      const restoreNative = () =>
+      const restoreNative = () => {
+        if (!views.some((view) => activeViews.get(view.native) === view)) return;
         preserveSelection(document, () => {
           for (const view of views) {
             if (activeViews.get(view.native) !== view) continue;
@@ -334,6 +349,7 @@ export function siteTypographyParticipant(
             for (const marker of MARKERS) view.native.removeAttribute(marker);
           }
         });
+      };
       const dispose = async () => {
         if (disposed) return;
         disposed = true;

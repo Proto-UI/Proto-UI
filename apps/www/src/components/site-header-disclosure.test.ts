@@ -121,6 +121,37 @@ describe('shared website navigation disclosure', () => {
     expect(navigation.hidden).toBe(true);
   });
 
+  it('does not rewrite unchanged visibility while publishing a replacement Header', () => {
+    const { root, button, navigation, desktopNavigation, settings, panel } = fixture();
+    disclosure!.enhance();
+    disclosure!.toggle();
+    const staged = document.createElement('div');
+    staged.dataset.projectionGenerationState = 'prepared';
+    const replacement = document.createElement('button');
+    staged.append(replacement);
+    root.append(staged);
+    const unbind = disclosure!.bindButton(replacement);
+    button.remove();
+    staged.dataset.projectionGenerationState = 'active';
+    const observer = new MutationObserver(() => {});
+    for (const element of [navigation, desktopNavigation, settings, panel])
+      observer.observe(element, { attributes: true, attributeFilter: ['hidden'] });
+    try {
+      disclosure!.enhance();
+      expect(observer.takeRecords()).toEqual([]);
+      expect(desktopNavigation.hidden).toBe(true);
+      expect([navigation.hidden, settings.hidden, panel.hidden]).toEqual([false, false, false]);
+      expect(replacement.getAttribute('aria-expanded')).toBe('true');
+
+      disclosure!.close(true);
+      expect([navigation.hidden, settings.hidden, panel.hidden]).toEqual([true, true, true]);
+      expect(document.activeElement).toBe(replacement);
+    } finally {
+      observer.disconnect();
+      unbind();
+    }
+  });
+
   it('retains open state and rebinds return focus across a runtime generation', async () => {
     const { root, button } = fixture();
     disclosure!.enhance();
@@ -386,6 +417,48 @@ describe('shared website navigation disclosure', () => {
 });
 
 describe('actual Header Button anchoring', () => {
+  it('publishes a replacement without rewriting unchanged disclosure attributes', () => {
+    const { root, button, panel } = fixture();
+    vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+    const height = vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+    const header = vi
+      .spyOn(root, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(0, 0, 360, 56));
+    disclosure!.enhance();
+    disclosure!.toggle();
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+
+    const staged = document.createElement('div');
+    staged.dataset.projectionGenerationState = 'staging';
+    const next = document.createElement('button');
+    staged.append(next);
+    root.append(staged);
+    disclosure!.bindButton(next);
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+
+    const rootWrite = vi.spyOn(root, 'setAttribute');
+    const buttonWrite = vi.spyOn(next, 'setAttribute');
+    button.remove();
+    staged.dataset.projectionGenerationState = 'active';
+    header.mockReturnValue(new DOMRect(0, 0, 360, 100));
+    height.mockReturnValue(100);
+    disclosure!.enhance();
+
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
+    expect(root.dataset.siteMenuOpen).toBe('true');
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+    expect({
+      open: rootWrite.mock.calls.filter(([name]) => name === 'data-site-menu-open'),
+      relationships: buttonWrite.mock.calls,
+    }).toEqual({ open: [], relationships: [] });
+
+    disclosure!.close();
+    expect(root.dataset.siteMenuOpen).toBe('false');
+    expect(next.getAttribute('aria-expanded')).toBe('false');
+    expect(panel.hidden).toBe(true);
+  });
   it('keeps the current binding when an older lease for the same Button retires', () => {
     const { root, button, panel } = fixture(false);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
@@ -491,7 +564,9 @@ describe('actual Header Button anchoring', () => {
     vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
     vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
-    vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(300, 6, 44, 44));
+    const previousRect = vi
+      .spyOn(button, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(300, 6, 44, 44));
     vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 400));
     disclosure!.enhance();
     disclosure!.toggle();
@@ -501,12 +576,20 @@ describe('actual Header Button anchoring', () => {
     const next = document.createElement('button');
     nextHost.append(next);
     root.append(nextHost);
-    vi.spyOn(next, 'getBoundingClientRect').mockReturnValue(new DOMRect(280, 28, 44, 44));
+    const nextRect = vi
+      .spyOn(next, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(280, 28, 44, 44));
+    previousRect.mockClear();
     disclosure!.bindButton(next);
+    expect(next.getAttribute('aria-expanded')).toBe('true');
+    expect(next.getAttribute('aria-controls')).toBe(panel.id);
+    expect(previousRect).not.toHaveBeenCalled();
+    expect(nextRect).not.toHaveBeenCalled();
     expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('55px');
     button.remove();
     nextHost.dataset.projectionGenerationState = 'active';
     disclosure!.enhance();
+    expect(nextRect).toHaveBeenCalledTimes(1);
     expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('77px');
     expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('44px');
     disclosure!.destroy();
@@ -609,15 +692,18 @@ describe('compact navigation viewport and history', () => {
       vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
       vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(16, 0, width - 32, 56));
       vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(width - 68, 6, 44, 44));
-      vi.spyOn(panel, 'getBoundingClientRect').mockImplementation(
-        () =>
-          new DOMRect(
-            0,
-            0,
-            parseFloat(panel.style.getPropertyValue('--site-header-panel-max-width')),
-            783
-          )
-      );
+      const panelBox = vi
+        .spyOn(panel, 'getBoundingClientRect')
+        .mockImplementation(
+          () =>
+            new DOMRect(
+              0,
+              0,
+              parseFloat(panel.style.getPropertyValue('--site-header-panel-max-width')),
+              783
+            )
+        );
+      const computedStyle = vi.spyOn(window, 'getComputedStyle');
       disclosure!.enhance();
       disclosure!.toggle();
       expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('-8px');
@@ -634,8 +720,89 @@ describe('compact navigation viewport and history', () => {
       window.dispatchEvent(new Event('resize'));
       expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
       expect(panel.style.getPropertyValue('--site-header-panel-max-height')).toBe('731px');
+      expect({
+        anchorReads: vi.mocked(button.getBoundingClientRect).mock.calls.length,
+        panelWidthReads: panelBox.mock.calls.length,
+        rootStyleReads: computedStyle.mock.calls.filter(([element]) => element === root).length,
+      }).toEqual({ anchorReads: 0, panelWidthReads: 0, rootStyleReads: 0 });
     });
   }
+  it('ignores compact Button movement but follows a desktop anchor after the breakpoint', async () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++nextFrame, callback);
+      return nextFrame;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => frames.delete(id));
+    const { root, button, panel } = fixture();
+    vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
+    vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+    vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+    const anchor = vi
+      .spyOn(button, 'getBoundingClientRect')
+      .mockReturnValue(new DOMRect(280, 6, 44, 44));
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 300));
+    disclosure!.enhance();
+    disclosure!.toggle();
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+
+    const settle = () => button.dispatchEvent(new Event('transitionend'));
+    settle();
+    expect(frames.size).toBe(0);
+    button.setAttribute('data-hovered', '');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(frames.size).toBe(0);
+
+    Object.assign(query, { matches: false });
+    query.dispatchEvent(new Event('change'));
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('55px');
+    anchor.mockReturnValue(new DOMRect(280, 10, 44, 44));
+    settle();
+    expect(frames.size).toBe(1);
+    const [id, callback] = [...frames][0]!;
+    frames.delete(id);
+    callback(0);
+    expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('59px');
+  });
+  it('remeasures a compact panel for Header resize without reading it for a Button-only resize', () => {
+    let deliver!: (entries: Pick<ResizeObserverEntry, 'target'>[]) => void;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: typeof deliver) {
+          deliver = callback;
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+    );
+    try {
+      const { root, button, panel } = fixture();
+      vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
+      vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+      const header = vi
+        .spyOn(root, 'getBoundingClientRect')
+        .mockReturnValue(new DOMRect(0, 0, 360, 56));
+      disclosure!.enhance();
+      disclosure!.toggle();
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+      header.mockClear();
+
+      deliver([{ target: button }]);
+      expect(header).not.toHaveBeenCalled();
+
+      header.mockReturnValue(new DOMRect(0, 0, 360, 100));
+      vi.mocked(Object.getOwnPropertyDescriptor(root, 'offsetHeight')!.get!).mockReturnValue(100);
+      deliver([{ target: button }, { target: root }]);
+      expect(header).toHaveBeenCalledOnce();
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
+    } finally {
+      disclosure?.destroy();
+      vi.unstubAllGlobals();
+    }
+  });
   it('closes on Back/Forward and restored pages without adding history entries', () => {
     const { panel } = fixture();
     const push = vi.spyOn(history, 'pushState');

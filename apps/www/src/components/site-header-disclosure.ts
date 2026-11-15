@@ -127,9 +127,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const positionPanel = () => {
     const button = activeButton();
     if (destroyed || !enhanced || !open || !panel || !button || !window) return;
-    const anchor = button.getBoundingClientRect();
+    const mobile = !!compact?.matches;
+    const anchor = mobile ? null : button.getBoundingClientRect();
     const header = root.getBoundingClientRect();
-    if (anchor.width <= 0 || header.width <= 0) return;
+    if (header.width <= 0 || (anchor && anchor.width <= 0)) return;
     // Rects include zoom/transforms; absolute offsets use the containing block's
     // layout pixels. Use the actual current Button, not the header's far edge.
     const scaleX = root.offsetWidth > 0 ? header.width / root.offsetWidth : 1;
@@ -138,14 +139,13 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const leftEdge = (viewport?.offsetLeft ?? 0) + 8;
     const rightEdge = (viewport?.offsetLeft ?? 0) + (viewport?.width ?? window.innerWidth) - 8;
     const bottomEdge = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8;
-    const rtl = window.getComputedStyle(root).direction === 'rtl';
-    const mobile = !!compact?.matches;
-    const availableWidth = mobile
-      ? rightEdge - leftEdge
-      : Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge);
+    const rtl = anchor !== null && window.getComputedStyle(root).direction === 'rtl';
+    const availableWidth = anchor
+      ? Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge)
+      : rightEdge - leftEdge;
     // A mobile navigation panel belongs below the complete header, independent
     // of the trigger's hover translation or wrapped toolbar rows.
-    const top = (mobile ? header.bottom : anchor.bottom) + 5 * scaleY;
+    const top = (anchor?.bottom ?? header.bottom) + 5 * scaleY;
     const values: Record<string, string> = {
       '--site-header-panel-max-width': `${Math.max(0, Math.min(rightEdge - leftEdge, availableWidth)) / scaleX}px`,
       '--site-header-panel-top': `${(top - header.top) / scaleY - root.clientTop}px`,
@@ -153,9 +153,12 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     };
     for (const [name, value] of Object.entries(values))
       if (panel.style.getPropertyValue(name) !== value) panel.style.setProperty(name, value);
-    const width = panel.getBoundingClientRect().width;
-    const aligned = mobile ? leftEdge : rtl ? anchor.left : anchor.right - width;
-    const left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
+    let left = leftEdge;
+    if (anchor) {
+      const width = panel.getBoundingClientRect().width;
+      const aligned = rtl ? anchor.left : anchor.right - width;
+      left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
+    }
     const value = `${(left - header.left) / scaleX - root.clientLeft}px`;
     if (panel.style.getPropertyValue('--site-header-panel-left') !== value)
       panel.style.setProperty('--site-header-panel-left', value);
@@ -170,6 +173,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (pending) window?.cancelAnimationFrame(pending.frame);
   };
   const schedulePosition = () => {
+    if (compact?.matches) return;
     const button = activeButton();
     const lease = button && buttonLeases.get(button);
     if (destroyed || !open || !button || !lease) return;
@@ -181,7 +185,13 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     pending.frame = window.requestAnimationFrame(() => {
       if (pendingPosition !== pending) return;
       pendingPosition = null;
-      if (destroyed || !open || activeButton() !== button || buttonLeases.get(button) !== lease)
+      if (
+        destroyed ||
+        !open ||
+        compact?.matches ||
+        activeButton() !== button ||
+        buttonLeases.get(button) !== lease
+      )
         return;
       positionPanel();
     });
@@ -189,10 +199,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const geometryObserver =
     typeof window?.ResizeObserver === 'function'
       ? new window.ResizeObserver((entries) => {
-          // Panel content/scroll extent can change independently of the toolbar.
-          // It never supplies the sticky Header height or creates a feedback loop.
-          if (!entries || entries.some((entry) => entry.target === root)) measureHeader();
-          positionPanel();
+          const headerResized = !entries || entries.some((entry) => entry.target === root);
+          if (headerResized) measureHeader();
+          // Compact placement uses the Header and viewport, not Button or
+          // panel size. A Button that changes Header size also delivers its entry.
+          if (headerResized || !compact?.matches) positionPanel();
         })
       : null;
   geometryObserver?.observe(root);
@@ -201,10 +212,18 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   window?.addEventListener('scroll', positionPanel, true);
   window?.visualViewport?.addEventListener('resize', positionPanel);
   window?.visualViewport?.addEventListener('scroll', positionPanel);
+  const syncButton = (button: HTMLElement) => {
+    const expanded = String(open);
+    if (button.getAttribute('aria-expanded') !== expanded)
+      button.setAttribute('aria-expanded', expanded);
+    if (panel?.id && button.getAttribute('aria-controls') !== panel.id)
+      button.setAttribute('aria-controls', panel.id);
+  };
   const sync = () => {
     const focused = document.activeElement as HTMLElement | null;
     const focusInPreferences = !!focused && !!preferences?.contains(focused);
-    const compactLayout = enhanced && !!compact?.matches;
+    const isCompact = !!compact?.matches;
+    const compactLayout = enhanced && isCompact;
     // A breakpoint cannot hide the settings currently being used, including a
     // portaled Select. Preserve that interaction by revealing its destination.
     if (
@@ -213,12 +232,16 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       (focusInPreferences || ownsSelectPopup(focused))
     )
       open = true;
-    root.dataset.siteMenuOpen = String(open);
+    const expanded = String(open);
+    if (root.dataset.siteMenuOpen !== expanded) root.dataset.siteMenuOpen = expanded;
     root.toggleAttribute('data-site-menu-ready', enhanced);
-    if (desktopNavigation) desktopNavigation.hidden = !!compact?.matches;
-    if (navigation) navigation.hidden = !compact?.matches || (enhanced && !open);
-    if (panel) panel.hidden = enhanced && !open;
-    if (settings) settings.hidden = enhanced && !open;
+    const hidePanel = enhanced && !open;
+    const hideNavigation = !isCompact || hidePanel;
+    if (desktopNavigation && desktopNavigation.hidden !== isCompact)
+      desktopNavigation.hidden = isCompact;
+    if (navigation && navigation.hidden !== hideNavigation) navigation.hidden = hideNavigation;
+    if (panel && panel.hidden !== hidePanel) panel.hidden = hidePanel;
+    if (settings && settings.hidden !== hidePanel) settings.hidden = hidePanel;
     if (enhanced) movePreferences(compactLayout);
     if (
       focusInPreferences &&
@@ -227,10 +250,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       !focused.closest('[hidden], [inert]')
     )
       focused.focus({ preventScroll: true });
-    for (const button of buttons) {
-      button.setAttribute('aria-expanded', String(open));
-      if (panel?.id) button.setAttribute('aria-controls', panel.id);
-    }
+    for (const button of buttons) syncButton(button);
     measureLayout();
   };
   const close = (restoreFocus = false) => {
@@ -419,7 +439,10 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
           'class',
         ],
       });
-      sync();
+      // A staged Button needs the current relationship. Publication measures
+      // the panel against it after it becomes the active owner.
+      if (activeButton() === button) sync();
+      else syncButton(button);
       return () => {
         lease.observer?.disconnect();
         button.removeEventListener('transitionend', lease.settle);

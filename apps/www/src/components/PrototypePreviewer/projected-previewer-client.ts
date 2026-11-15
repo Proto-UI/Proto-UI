@@ -179,7 +179,9 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     if (runtimeId === desiredRuntimeId && controller.getSnapshot().phase !== 'idle') {
       return Promise.resolve(controller.getSnapshot());
     }
-    const focusOrigin = requestOptions.restoreFocus ? root.ownerDocument.activeElement : null;
+    const active = root.ownerDocument.activeElement;
+    const focusOrigin =
+      requestOptions.restoreFocus && active && mount.contains(active) ? active : null;
 
     desiredRuntimeId = runtimeId;
     const revision = ++desiredIntentRevision;
@@ -195,9 +197,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       }
       return controller.request(
         { runtimeId },
-        requestOptions.restoreFocus
-          ? { focusKey: PROJECTION_FOCUS_KEYS.runtime, focusOrigin }
-          : undefined
+        focusOrigin ? { focusKey: PROJECTION_FOCUS_KEYS.runtime, focusOrigin } : undefined
       );
     };
     const snapshot = controller.getSnapshot();
@@ -344,15 +344,18 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       let watcherPublished = false;
 
       try {
-        candidate.setThemeSurfaceStyle(
-          resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
-        );
-        if (!previousStopThemeWatcher) {
+        if (previousStopThemeWatcher) {
+          candidate.setThemeSurfaceStyle(
+            resolveProjectionThemeSurfaceStyle(projectionFamilyId, root)
+          );
+        } else {
           preparedStopThemeWatcher = watchProjectionThemeSurfaceStyle(
             projectionFamilyId,
             root,
             (theme) => {
-              if (
+              if (!preparedStopThemeWatcher) {
+                candidate.setThemeSurfaceStyle(theme);
+              } else if (
                 watcherPublished &&
                 stopThemeWatcher === preparedStopThemeWatcher &&
                 activeCandidate
