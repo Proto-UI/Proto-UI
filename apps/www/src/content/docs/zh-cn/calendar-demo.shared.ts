@@ -179,7 +179,7 @@ export function createCalendarDemo(
         ref: `${field}-trigger`,
         props: {
           accessibleLabel: field === 'month' ? 'Month' : 'Year',
-          ...(family === 'shadcn' ? { size: 'sm', appearance: 'ghost' } : {}),
+          ...(family === 'shadcn' ? { size: 'sm', appearance: 'default' } : {}),
         },
         className:
           family === 'base'
