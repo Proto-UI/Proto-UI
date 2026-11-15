@@ -1,9 +1,30 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../src/focus-scope-targets';
 import { createWebComponentPortalMount } from '../src/portal-mount';
+
+function overrideActiveElement(doc: Document) {
+  const ownDescriptor = Object.getOwnPropertyDescriptor(doc, 'activeElement');
+  let activeElement = doc.activeElement;
+  // Inject only this fixture's host fact. Restore an absent own property by
+  // deletion so the inherited native getter is not wrapped or restored as a spy.
+  Object.defineProperty(doc, 'activeElement', {
+    configurable: true,
+    get: () => activeElement,
+  });
+  return {
+    set(value: Element) {
+      activeElement = value;
+    },
+    restore() {
+      if (ownDescriptor) Object.defineProperty(doc, 'activeElement', ownDescriptor);
+      else Reflect.deleteProperty(doc, 'activeElement');
+    },
+  };
+}
+
 describe('WC scope sequential target sample', () => {
   it('excludes iframe browsing contexts from scope traversal while preserving explicit entry opt-in', () => {
     const scope = document.createElement('div');
@@ -829,9 +850,9 @@ describe('WC scope sequential target sample', () => {
     const portal = createWebComponentPortalMount();
     portal.mount(projected);
     const history = observeWebComponentRadioFocus(scope);
-    const activeElement = vi.spyOn(document, 'activeElement', 'get');
+    const activeElement = overrideActiveElement(document);
     const dispatchPhysicalFocus = (target: Element) => {
-      activeElement.mockReturnValue(target);
+      activeElement.set(target);
       const event = new FocusEvent('focusin', { bubbles: true, composed: true });
       Object.defineProperty(event, 'composedPath', {
         configurable: true,
@@ -853,7 +874,7 @@ describe('WC scope sequential target sample', () => {
       dispatchPhysicalFocus(unrelated);
       expect(history.recent()).toBe(shadowTarget);
     } finally {
-      activeElement.mockRestore();
+      activeElement.restore();
       history.dispose();
       portal.unmount(projected);
       scope.remove();
@@ -872,8 +893,8 @@ describe('WC scope sequential target sample', () => {
     foreignDocument.adoptNode(scope);
     foreignDocument.body.append(scope);
     (history as typeof history & { rebind?: () => void }).rebind?.();
-    const activeElement = vi.spyOn(foreignDocument, 'activeElement', 'get');
-    activeElement.mockReturnValue(target);
+    const activeElement = overrideActiveElement(foreignDocument);
+    activeElement.set(target);
     const event = new FocusEvent('focusin', { bubbles: true, composed: true });
     Object.defineProperty(event, 'composedPath', {
       configurable: true,
@@ -890,7 +911,7 @@ describe('WC scope sequential target sample', () => {
       foreignDocument.dispatchEvent(event);
       expect(history.recent()).toBe(target);
     } finally {
-      activeElement.mockRestore();
+      activeElement.restore();
       history.dispose();
       scope.remove();
     }
