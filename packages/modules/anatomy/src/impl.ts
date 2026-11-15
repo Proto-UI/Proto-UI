@@ -1099,7 +1099,8 @@ export class AnatomyModuleImpl extends ModuleBase {
     profile: string | null;
   } {
     const instance = this.getSelfToken();
-    const rootInstance = this.findDomainRoot(instance, family);
+    const getParent = this.getParentGetter();
+    const rootInstance = this.findDomainRoot(instance, family, getParent);
     if (!rootInstance) {
       if (!strict) return { rootInstance: null, claims: [], profile: null };
       throw anatomyError(
@@ -1109,7 +1110,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
 
     const claims = CENTER.listClaims(family).filter(
-      (claim) => this.findDomainRoot(claim.instance, family) === rootInstance
+      (claim) => this.findDomainRoot(claim.instance, family, getParent) === rootInstance
     );
     const rootClaim =
       claims.find((claim) => claim.role === 'root' && claim.instance === rootInstance) ?? null;
@@ -1122,9 +1123,9 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private findDomainRoot(
     instance: AnatomyInstanceToken,
-    family: AnatomyFamily
+    family: AnatomyFamily,
+    getParent = this.getParentGetter()
   ): AnatomyInstanceToken | null {
-    const getParent = this.getParentGetter();
     let cur: AnatomyInstanceToken | null = instance;
     while (cur) {
       if (CENTER.isRetiredBoundary(cur, family)) return null;

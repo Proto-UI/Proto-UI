@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAnatomyFamily } from '@proto.ui/core';
+import { ANATOMY_PARENT_CAP } from '../src/caps';
 import { AnatomyModuleImpl } from '../src/impl';
 import { makeCaps } from './utils/fake-caps';
 
@@ -51,6 +52,61 @@ describe('Anatomy scope-only queries', () => {
     getParent.mockClear();
     expect(current.impl.port.resolveDomainScope(family)).toBeNull();
     expect(getParent.mock.calls.map(([token]) => token)).toEqual([current.token]);
+  });
+
+  it('uses one logical parent capability for an ordered parts read', () => {
+    const family = createAnatomyFamily('order-query-ancestry', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: '*' } },
+      },
+    });
+    const parents = new Map<object, object | null>();
+    const getParent = (token: unknown) => parents.get(token as object) ?? null;
+    const create = (name: string, parent: object | null, role: string) => {
+      const token = { name };
+      parents.set(token, parent);
+      const caps = makeCaps({
+        instance: token,
+        getParent,
+        getPrototype: () => ({ name, setup() {} }),
+      });
+      const getCap = vi.spyOn(caps, 'get');
+      const impl = new AnatomyModuleImpl(caps, name, {
+        get: () => undefined,
+        getAll: () => ({}),
+        has: () => false,
+        keys: () => [],
+      } as any);
+      live.push(impl);
+      impl.claim(family, { role });
+      return { token, impl, getCap };
+    };
+    const outer = create('outer', null, 'root');
+    const nested = create('nested', outer.token, 'root');
+    const wrapper = {};
+    parents.set(wrapper, nested.token);
+    const first = create('first', wrapper, 'item');
+    create('second', wrapper, 'item');
+    const foreign = create('foreign', null, 'root');
+    create('foreign-item', foreign.token, 'item');
+
+    nested.getCap.mockClear();
+    expect(nested.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(2);
+    expect(nested.getCap.mock.calls.filter(([cap]) => cap === ANATOMY_PARENT_CAP)).toHaveLength(1);
+
+    parents.set(wrapper, outer.token);
+    expect(nested.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(0);
+    expect(outer.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(2);
+
+    parents.set(wrapper, nested.token);
+    nested.impl.dispose();
+    expect(outer.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(0);
+    expect(first.impl.tryOrderedPartsOf(family, 'item')).toBeNull();
+
+    parents.set(wrapper, outer.token);
+    expect(first.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(2);
+    expect(foreign.impl.tryOrderedPartsOf(family, 'item')).toHaveLength(1);
   });
 });
 
