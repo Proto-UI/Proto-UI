@@ -24,6 +24,7 @@ export function enhanceCodeExampleTabs(options: {
 }): TabProjection {
   const { list, tabs, panels, onSelect } = options;
   const doc = list.ownerDocument;
+  const view = doc.defaultView;
   const active = doc.activeElement;
   if (list.contains(active) || panels.some((panel) => panel.contains(active))) {
     return { select() {}, destroy() {} };
@@ -120,6 +121,20 @@ export function enhanceCodeExampleTabs(options: {
   const strip = list.parentElement?.hasAttribute('data-code-toolbar') ? list.parentElement : list;
   const previousHidden = strip.hidden;
   const reveal = () => revealCodeExampleTab(triggers[value], projectedList);
+  let revealFrame: number | undefined;
+  const scheduleReveal = () => {
+    if (destroyed || revealFrame !== undefined) return;
+    if (typeof view?.requestAnimationFrame !== 'function') {
+      reveal();
+      return;
+    }
+    // Selection still commits in its original microtask. Read layout after all
+    // owners have published, instead of forcing layout between their writes.
+    revealFrame = view.requestAnimationFrame(() => {
+      revealFrame = undefined;
+      if (!destroyed) reveal();
+    });
+  };
   const onFocus = (event: Event) => {
     const index = triggers.findIndex((trigger) => trigger.contains(event.target as Node));
     if (index >= 0) revealCodeExampleTab(triggers[index], projectedList);
@@ -129,8 +144,9 @@ export function enhanceCodeExampleTabs(options: {
     : null;
   const hintMarker = hint ? doc.createComment('code-example-host-hint') : null;
   const updateOverflow = () => {
+    if (destroyed) return;
     if (hint) hint.hidden = projectedList.scrollWidth <= projectedList.clientWidth + 1;
-    reveal();
+    scheduleReveal();
   };
   const resize =
     typeof doc.defaultView?.ResizeObserver === 'function'
@@ -147,7 +163,7 @@ export function enhanceCodeExampleTabs(options: {
           ...rootProps(),
           surfaceStyle: { display: 'block', minWidth: '0', width: '100%' },
         });
-        reveal();
+        scheduleReveal();
       }
     });
   };
@@ -162,6 +178,8 @@ export function enhanceCodeExampleTabs(options: {
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
+    if (revealFrame !== undefined) view?.cancelAnimationFrame?.(revealFrame);
+    revealFrame = undefined;
     root.removeEventListener('valueChange', change);
     projectedList.removeEventListener('focusin', onFocus);
     resize?.disconnect();
