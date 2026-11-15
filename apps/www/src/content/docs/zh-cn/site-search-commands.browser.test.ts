@@ -65,6 +65,7 @@ const diagnosticPages = new Map<
     requests: unknown[];
     lateObservation?: { budgetMs: number; elapsedMs: number; ready: boolean };
     startupProfileRecorded?: boolean;
+    originalFailure?: { name?: string; message: string; stack?: string };
   }
 >();
 function stage(page: Page, id: string, step: string) {
@@ -112,9 +113,35 @@ function stage(page: Page, id: string, step: string) {
   });
   diagnosticPages.set(page, entry);
 }
-async function captureFailure(page: Page) {
+async function captureFailure(page: Page, failure?: unknown) {
   const entry = diagnosticPages.get(page);
   if (!entry) return;
+  if (failure !== undefined && !entry.originalFailure) {
+    entry.originalFailure =
+      failure instanceof Error
+        ? { name: failure.name, message: failure.message, stack: failure.stack }
+        : { message: String(failure) };
+    const receipt = {
+      source,
+      id: entry.id,
+      stage: entry.stage,
+      at: new Date().toISOString(),
+      error: entry.originalFailure,
+    };
+    // Vitest defers the file's failed assertions until it finishes. Preserve
+    // the first error before any screenshot/late probe, including on CI cutoff.
+    console.error('[Search failure]', JSON.stringify(receipt));
+    await mkdir(evidenceDirectory, { recursive: true })
+      .then(() =>
+        writeFile(
+          path.join(evidenceDirectory, `${entry.id}-original-failure.json`),
+          JSON.stringify(receipt, null, 2)
+        )
+      )
+      .catch((error) =>
+        console.warn('[Search evidence] original error artifact unavailable', error)
+      );
+  }
   await capture(page, entry.id, `failure-${entry.stage}`).catch((error) =>
     console.warn('[Search evidence] failure capture unavailable', error)
   );
@@ -746,7 +773,7 @@ describe.sequential('Search family Button commands', () => {
             }
             expect(errors).toEqual([]);
           } catch (error) {
-            await captureFailure(page);
+            await captureFailure(page, error);
             throw error;
           } finally {
             await context.close();
@@ -1008,7 +1035,7 @@ for (const viewport of headerTriggerViewports) {
           }
           expect(diagnosticPages.get(page)!.errors).toEqual([]);
         } catch (error) {
-          await captureFailure(page);
+          await captureFailure(page, error);
           throw error;
         } finally {
           await context.close();
@@ -1218,7 +1245,7 @@ it('homepage keeps one active public Search session through runtime transitions 
     }
     await capture(page, 'home-open-runtime', 'final');
   } catch (error) {
-    await captureFailure(page);
+    await captureFailure(page, error);
     throw error;
   } finally {
     await context.close();
@@ -1245,7 +1272,7 @@ it('keeps Bootstrap Homepage Search available after selecting the WIP family', a
     await page.keyboard.press('Escape');
     await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
   } catch (error) {
-    await captureFailure(page);
+    await captureFailure(page, error);
     throw error;
   } finally {
     await context.close();
@@ -1282,7 +1309,7 @@ it('retains Homepage Search Close focus across replacement and returns shortcut 
     await expect.poll(() => trigger.evaluate((node) => node === document.activeElement)).toBe(true);
     await capture(page, 'home-search-shortcut-handback', 'returned');
   } catch (error) {
-    await captureFailure(page);
+    await captureFailure(page, error);
     throw error;
   } finally {
     await context.close();
@@ -1436,7 +1463,7 @@ it.each(['query', 'close', 'newer focus'] as const)(
       await trigger.click();
       await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
     } catch (error) {
-      await captureFailure(page);
+      await captureFailure(page, error);
       throw error;
     } finally {
       await context.close();
@@ -1504,7 +1531,7 @@ it('keeps a documentation link available without JavaScript', async () => {
   } catch (error) {
     outcome = 'failed';
     mark('failure');
-    await captureFailure(page);
+    await captureFailure(page, error);
     throw error;
   } finally {
     await mkdir(evidenceDirectory, { recursive: true });
@@ -2111,7 +2138,7 @@ for (const width of [320, 390]) {
         await capture(page, id, 'menu-and-heading');
         expect(errors).toEqual([]);
       } catch (error) {
-        await captureFailure(page);
+        await captureFailure(page, error);
         throw error;
       } finally {
         await context.close();
@@ -2287,7 +2314,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           .toBe(false);
         expect(errors).toEqual([]);
       } catch (error) {
-        await captureFailure(page);
+        await captureFailure(page, error);
         throw error;
       } finally {
         await context.close();
@@ -2539,7 +2566,7 @@ for (const viewport of headerTriggerViewports) {
           .toBe(true);
         expect(diagnosticPages.get(page)!.errors).toEqual([]);
       } catch (error) {
-        await captureFailure(page);
+        await captureFailure(page, error);
         throw error;
       } finally {
         await context.close();
@@ -2636,7 +2663,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         // controlled Pagefind404. Only exact same-origin console provenance is.
         expect(unexpectedErrors).toEqual([]);
       } catch (error) {
-        await captureFailure(page);
+        await captureFailure(page, error);
         throw error;
       } finally {
         await context.close();

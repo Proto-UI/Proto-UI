@@ -113,7 +113,7 @@
     "test:public-docs": "node --test scripts/docs/test/*.test.mjs apps/www/scripts/contrast-provenance.test.mjs apps/www/scripts/contrast-report-journal.test.mjs apps/www/scripts/contrast-probe-serialization.test.mjs apps/www/scripts/contrast-audit-plan.test.mjs apps/www/scripts/contrast-anatomy.test.mjs apps/www/scripts/runtime-retry-urls.test.mjs apps/www/scripts/generate-cli-init-docs.test.mjs",
     "test:types": "echo \"[types] checking type contracts...\" && tsc -p internal/contracts/types/tsconfig.json && echo \"[types] OK\"",
     "test:web-conformance": "vitest run packages/web-conformance/test",
-    "test:runtime": "node --test scripts/test/run-runtime-tests.test.mjs scripts/test/happy-dom-mutation-keepalive.test.mjs scripts/analysis/shadow-s4-paint-cleanup.test.mjs && node scripts/test/run-runtime-tests.mjs",
+    "test:runtime": "node --test scripts/test/run-runtime-tests.test.mjs scripts/test/wc-native-isolation.test.mjs scripts/test/happy-dom-mutation-keepalive.test.mjs scripts/analysis/shadow-s4-paint-cleanup.test.mjs && node scripts/test/run-runtime-tests.mjs",
     "styles:variant-order:generate": "node --import tsx scripts/styles/generate-lowered-variant-order.ts",
     "check:styles:variant-order": "node --import tsx scripts/styles/generate-lowered-variant-order.ts --check",
     "agent:review:smoke": "node scripts/agent-operations/smoke-live-review-input.mjs",

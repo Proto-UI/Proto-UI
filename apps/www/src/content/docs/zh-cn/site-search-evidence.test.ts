@@ -35,11 +35,79 @@ describe('Search cold-start evidence boundary', () => {
     expect(source).toContain('connected: button.isConnected');
     expect(source).toContain("inertAncestor: button.closest('[inert]')");
     expect(source).toContain("viewPending: button.hasAttribute('data-pui-view-pending')");
-    expect(source).toContain('await captureFailure(page);\n            throw error;');
+    expect(source).toContain('await captureFailure(page, error);\n            throw error;');
   });
 });
 
 describe('Search evidence controls without a browser or socket', () => {
+  it('retains the first original assertion before failing diagnostics and does not replace it', async () => {
+    const start = source.indexOf('async function captureFailure(');
+    const end = source.indexOf('\nafterEach(', start);
+    const compiled = transformSync(source.slice(start, end), { loader: 'ts' }).code;
+    const original = new Error('original locator assertion');
+    const later = new Error('later diagnostic failure');
+    const entry: {
+      id: string;
+      stage: string;
+      originalFailure?: { message: string; stack?: string };
+    } = { id: 'controlled-case', stage: 'open-dialog' };
+    const page = {
+      locator: () => ({ count: async () => 1 }),
+      isClosed: () => true,
+    };
+    const events: string[] = [];
+    const receipts: unknown[] = [];
+    const paths: string[] = [];
+    const captureFailure = new Function(
+      'diagnosticPages',
+      'source',
+      'console',
+      'mkdir',
+      'writeFile',
+      'path',
+      'evidenceDirectory',
+      'capture',
+      `${compiled}; return captureFailure;`
+    )(
+      new Map([[page, entry]]),
+      { sha: 'a'.repeat(40), dirty: true },
+      {
+        error: (_tag: string, receipt: string) => {
+          events.push('original-error');
+          receipts.push(JSON.parse(receipt));
+        },
+        warn: () => events.push('diagnostic-warning'),
+      },
+      async () => {},
+      async (file: string) => {
+        paths.push(file);
+        throw new Error('controlled artifact write failure');
+      },
+      { join: (...parts: string[]) => parts.join('/') },
+      '/evidence',
+      async () => {
+        events.push('screenshot');
+        throw new Error('controlled screenshot failure');
+      }
+    );
+    await captureFailure(page, original);
+    await captureFailure(page, later);
+    expect(events[0]).toBe('original-error');
+    expect(events.filter((event) => event === 'original-error')).toHaveLength(1);
+    expect(receipts).toEqual([
+      expect.objectContaining({
+        source: { sha: 'a'.repeat(40), dirty: true },
+        id: 'controlled-case',
+        stage: 'open-dialog',
+        error: { name: original.name, message: original.message, stack: original.stack },
+      }),
+    ]);
+    expect(paths).toEqual(['/evidence/controlled-case-original-failure.json']);
+    expect(entry.originalFailure?.message).toBe(original.message);
+    expect(entry.originalFailure?.stack).toBe(original.stack);
+    expect(events.filter((event) => event === 'screenshot')).toHaveLength(2);
+  });
+
   it('puts full CI evidence under its uploaded root and keeps isolated fallback', () => {
     expect(searchEvidenceDirectory('/runner/runtime-ci', '/runner/temp')).toBe(
       '/runner/runtime-ci/search-commands'
@@ -183,6 +251,20 @@ function startupHarness() {
   const root = {
     isConnected: true,
     dataset: { searchView: undefined as string | undefined, searchGeneration: '1' },
+    dialogHosts: null as Array<{ dataset: Record<string, string> }> | null,
+    querySelector(selector: string) {
+      if (selector !== '[data-search-dialog-mount]')
+        throw new Error(`Unexpected root selector: ${selector}`);
+      return this.dialogHosts === null
+        ? null
+        : {
+            querySelectorAll: (hostSelector: string) => {
+              if (hostSelector !== '[data-projection-generation-host]')
+                throw new Error(`Unexpected dialog selector: ${hostSelector}`);
+              return this.dialogHosts;
+            },
+          };
+    },
     querySelectorAll(selector: string) {
       if (selector === '[data-search-command-mount]') return [mount];
       if (selector === '[data-projection-generation-host]') return [host];
@@ -555,6 +637,29 @@ it('samples the exact startup target after the original ready timestamp and leav
   const evidence = await read({ startedAt: 0 });
   expect(evidence.observedReadyAt).toBe(999);
   expect(searchReadinessWasOnTime(evidence)).toBe(true);
+});
+
+it('observes an absent or independently active dialog generation without substituting the opener', () => {
+  const h = startupHarness();
+  expect(h.trace.snapshot().targetArrival.errors).toBe(0);
+  expect(h.trace.snapshot().targetArrival.observations[0].dialogGeneration).toBeNull();
+  Object.assign(h.button, { role: 'button', disabled: 'false', inert: false, pending: false });
+  h.host.dataset.projectionGenerationState = 'active';
+  h.host.inert = false;
+  h.mount.dataset.projectionOwner = h.host.dataset.projectionOwnerHost;
+  h.root.dataset.searchView = 'ready';
+  h.root.dialogHosts = [
+    { dataset: { projectionGenerationState: 'retired', projectionGenerationHost: '2' } },
+    { dataset: { projectionGenerationState: 'active', projectionGenerationHost: '3' } },
+  ];
+  h.mutationObservers[0].callback();
+  const arrival = h.trace.snapshot().targetArrival;
+  expect(arrival.errors).toBe(0);
+  expect(arrival.firstFullyReady).toMatchObject({
+    generation: '1',
+    currentGeneration: '1',
+    dialogGeneration: '3',
+  });
 });
 
 it('does not use a first target arrival from a retired owner to admit a late current generation', async () => {

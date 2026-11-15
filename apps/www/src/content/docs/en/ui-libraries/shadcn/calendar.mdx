@@ -25,6 +25,8 @@ The Shadcn demo restores the upstream example’s current-year-minus-100 through
 
 The page selects Rhea's 32px date/navigation cells (`h-8 w-8`) and `p-3` layout at a 16px root font, from the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css). The separate [base-nova registry](https://ui.shadcn.com/r/styles/base-nova/calendar.json), observed on 2026-10-10, retains its 28px/p-2 compatibility recipe. Neither recipe is enlarged merely to match a screenshot. Actual focus and selection remain independent Base facts; this is not complete react-day-picker compatibility or native visual acceptance.
 
+The Rhea month/year selectors use the supported default appearance and small size, with the complete public Select Content, Surface, Viewport and ItemText composition. The public parts own popup paint and scrolling, while preserving all 101 year options.
+
 ## Verification boundary
 
 This remains WIP. Calendar behavior has focused actual-host tests including WC, React, Vue and Vue2; public Props/Exposes/AsHook domains are checked independently. The current CLI collector misses some legitimate inherited Calendar/nested Button state tokens, so stateful generated CSS and browser visual fidelity are not accepted. Compiler interpretation is a separate owner’s responsibility, not a reason to constrain valid Prototype semantics. Native GPUI/Qt, compiled and packed parity, exact-commit browser evidence and independent acceptance remain open.

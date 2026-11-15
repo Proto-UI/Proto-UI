@@ -157,8 +157,21 @@ function mockedCase(
 describe('Finf representative evidence harness, no native browser', () => {
   it('registers the existing suite with one official owner and five representative groups plus separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
-    expect(manifest.cases).toHaveLength(34);
-    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(34);
+    expect(manifest.cases).toHaveLength(38);
+    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(38);
+    expect(
+      manifest.cases.filter((entry) => entry.group === 'calendar').map(({ id }) => id)
+    ).toEqual([
+      'shadcn-calendar-rest',
+      'shadcn-calendar-month-menu',
+      'shadcn-calendar-year-scroll',
+      'shadcn-calendar-focus-only',
+      'shadcn-calendar-selected-focused',
+      'shadcn-calendar-caption-wc',
+      'shadcn-calendar-caption-react',
+      'shadcn-calendar-caption-vue',
+      'shadcn-calendar-caption-vue2',
+    ]);
     const counts = Object.fromEntries(
       workflow.jobs['representative-features'].strategy.matrix.group.map((group: string) => [
         group,
@@ -167,7 +180,7 @@ describe('Finf representative evidence harness, no native browser', () => {
     );
     expect(counts).toEqual({
       forms: 12,
-      calendar: 5,
+      calendar: 9,
       'disclosure-overlays': 8,
       'modal-overlays': 5,
       'runtime-tabs': 4,
@@ -289,7 +302,7 @@ describe('Finf representative evidence harness, no native browser', () => {
     const steps = workflow.jobs['representative-features'].steps;
     const presets = steps.find((step: any) => step.id === 'presets');
     expect(presets['continue-on-error']).toBeUndefined();
-    const capture = steps.find((step: any) => step.env?.PUI_FINF_FEATURE_GROUP);
+    const capture = steps.find((step: any) => step.id === 'capture');
     expect(capture.if).toContain('!cancelled()');
     expect(capture.if).not.toContain('steps.presets.outcome');
     expect(capture.env.PUI_FINF_PRESET_CHECK).toBe('${{ steps.presets.outcome }}');
@@ -1040,7 +1053,7 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     ): unknown;
   };
   const capture = workflow.jobs['representative-features'].steps.find(
-    (step: { env?: { PUI_FINF_FEATURE_GROUP?: string } }) => step.env?.PUI_FINF_FEATURE_GROUP
+    (step: { id?: string }) => step.id === 'capture'
   );
 
   it('owns the exact Card suite once and rejects missing or duplicate whole-inventory registration', () => {
