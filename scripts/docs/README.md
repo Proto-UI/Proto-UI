@@ -6,20 +6,21 @@ Run the deterministic, offline gate from the repository root:
 corepack pnpm@10.32.1 check:public-docs
 ```
 
-The check derives the current stable release from the newest active `stable` entity under `spec/versions/**` and follows that entity's `package-bom.json` source. It does not own a version constant and does not contact npm or GitHub.
+The check derives the current stable release from the newest active `stable` entity under `spec/versions/**` and follows that entity's `package-bom.json` source. It also reads the current workspace version from `VERSION`, so available draft families receive navigation coverage before the next stable publication. It does not own a version constant and does not contact npm or GitHub.
 
 It validates four projections:
 
 - every literal primary sidebar slug in `apps/www/astro.config.mjs` resolves in both `en` and `zh-cn`;
-- README and primary routes do not present a prerelease from the current stable line as the current install/release, while explicitly archived routes remain readable;
-- package exports from released Base, Shadcn, Brutalist, and Lucide packages are classified against catalog lifecycle and sidebar routes;
+- README and primary routes do not recommend a prerelease as the current install/release; explicit draft workspace availability, unavailable-export evidence, and archived routes retain their distinct meanings;
+- package exports from Base, Shadcn, Brutalist, and Lucide packages are classified against catalog lifecycle and availability in the stable release or current workspace, with direct sidebar detail routes or an explicitly reasoned shared overview;
 - primary routes do not expose configured authoring markers such as `写作提示` or `Coming soon`.
 
 ## Intentional changes and exceptions
 
 Update `scripts/docs/public-doc-policy.mjs` in the same review as the route or package change. Every exception must identify one exact export or route and include a durable reason.
 
-- A new component-family export normally needs a matching catalog root entity, a bilingual detail route, and its primary sidebar slug. Its catalog `since` version determines when stable-release coverage begins.
+- A new component-family export normally needs a matching catalog root entity, a bilingual detail route, and a primary sidebar slug. Its catalog `since` and removal versions determine availability in the governed stable release or current workspace. Direct route checks do not depend on the retired `PrototypeLibraryOverview.astro` component.
+- Use a library's `familyRoutes` mapping when a family's real detail route differs from its default route prefix; for example, Brutalist Form uses `ui-libraries/brutalist/form`.
 - A helper, behavior, preset, theme, manifest, or aggregate export belongs in `exportClassifications` with `kind: 'non-component'` and a reason.
 - A deliberately searchable or generated family such as Lucide may use `kind: 'overview-only'`, but must name the shared catalog entity and explain why one page represents the family.
 - A localized route fallback belongs in `navigation.fallbacks` with the exact locale/slug and a reason.

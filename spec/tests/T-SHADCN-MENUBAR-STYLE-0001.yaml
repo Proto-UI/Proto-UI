@@ -37,7 +37,33 @@ verifies:
         - P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
         - P-SHADCN-MENUBAR-BASE-OWNERSHIP
         - P-SHADCN-MENUBAR-REMAINING-CLOSURE
+openQuestions:
+  - id: T-SHADCN-MENUBAR-STYLE-0001-Q-NATIVE-ACCEPTANCE
+    question:
+      en: Which native evidence completes Menubar ownership and the remaining family closure?
+    context:
+      en: >-
+        The real public Rhea browser consumer authors four-runtime light/dark physical paint, keyboard focus/navigation, Escape restoration and pointer selection at both font scales. New York native parity, controlled refusal, disabled/touch behavior, complete submenu behavior and assistive-technology acceptance remain pending. Its narrower scope cannot establish the original full native case or complete-family acceptance; synthetic existing-part style tests remain separate.
+
+
+    blocks:
+      - implementation:T-SHADCN-MENUBAR-STYLE-0001#website-shadcn-menubar-rhea-native
+      - criterion:P-SHADCN-MENUBAR#P-SHADCN-MENUBAR-BASE-OWNERSHIP
+      - criterion:P-SHADCN-MENUBAR#P-SHADCN-MENUBAR-REMAINING-CLOSURE
+      - activation:T-SHADCN-MENUBAR-STYLE-0001
 implementations:
+  - id: website-shadcn-menubar-rhea-native
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-MENUBAR-STYLE-0001-CASE-NATIVE]
+    exercises: [P-SHADCN-MENUBAR]
+    notes:
+      - >-
+        Existing authored Rhea public-consumer assertions cover WC, React, Vue 3 and Vue 2, light/dark paint, both font scales, real keyboard entry/navigation, Escape focus restoration and pointer selection. No fresh result is claimed. New York, controlled/disabled/touch, complete submenu and AT evidence remain required; NATIVE is not assigned to the synthetic existing-part implementation.
+
+
   - id: shadcn-menubar-existing-part-projection
     kind: module-test
     status: active

@@ -1,0 +1,127 @@
+---
+title: 'Style Scope'
+description: '共享 draft Shadcn 外观选择，同时保留控件自身的行为所有权。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Style Scope 通过现有的逻辑 Context 树传递 Shadcn 外观选择。需要为一组兼容的家族组件选择同一 profile 时，可以使用它，避免在每个 part 上重复传递 `styleProfile`。各 consumer 仍保留自己的行为、公开状态与物理宿主身份。
+
+这是 **0.3 workspace 中的 draft API**，从 `0.3.0-alpha.1` 起编目。本页说明当前 workspace 包，不代表已发布的 `0.2.0` API，也不承诺整个家族已稳定支持全部样式。一个 profile 名称可被识别，不等于每个 Shadcn 组件都实现了该 profile。
+
+## 使用作用域
+
+从公开的 `@proto.ui/prototypes-shadcn/style-scope` 子路径导入 prototype，并使用与子组件相同的 Adapter 进行适配。包根也导出 `styleScope` 及其别名 `shadcnStyleScope`。
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import { ShadcnCardRoot, ShadcnCardContent } from '@proto.ui/prototypes-shadcn/card';
+
+const adapt = createReactAdapter(React);
+const StyleScope = adapt(styleScope);
+const Card = adapt(ShadcnCardRoot);
+const CardContent = adapt(ShadcnCardContent);
+
+export function ProjectCards() {
+  return (
+    <StyleScope styleProfile="rhea">
+      <Card>
+        <CardContent>继承外层作用域的 Rhea。</CardContent>
+      </Card>
+      <StyleScope styleProfile="new-york">
+        <Card>
+          <CardContent>继承更近作用域的 New York。</CardContent>
+        </Card>
+      </StyleScope>
+      <Card styleProfile="new-york-v4">
+        <CardContent>这张 Card 的显式选择优先。</CardContent>
+      </Card>
+    </StyleScope>
+  );
+}
+```
+
+Card 支持这里使用的两种 profile；它的 Root 也会为后代建立样式作用域。因此，提供作用域的复合 Root 可以成为其 parts 和其他嵌套家族 consumer 最近的选择来源。外层布局仍由 consumer 所有，Style Scope 不提供 Card 布局或页面间距。
+
+<h2 id="card-contract">现有的 scoped Card 示例</h2>
+
+这里复用已注册的 Card demo。它的实际配方用 `styleProfile: 'rhea'` 的 `styleScope` 包裹 Card，Card 与 Text parts 仍是包内真实 prototype。该示例展示一种作用域组合，不是 profile 切换器，也不是全部 consumer 与宿主的验收证据。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 选择与继承
+
+`styleProfile` 可选，默认值为 **`inherit`**。解析顺序是：
+
+1. consumer 自己显式指定的具体 `styleProfile`。
+2. 最近的逻辑样式作用域提供的有效具体选择。
+3. 该 consumer 自己的兼容基线。
+
+`new-york` 是 `new-york-v4` 的别名。把先前有显式选择的 consumer 或嵌套作用域改为 `inherit`，就会撤回本地选择并恢复继承。作用域严格从祖先继承，排除自身的 provider。如果它和祖先都没有选择具体 profile，就发布 `{ style: null }`，保留各叶节点原有的基线；这不会把所有未指定样式的组件都变成 New York。
+
+| 选择 | 含义 |
+| --- | --- |
+| `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` | 八个可识别的当前样式 ID；具体配方是否支持，由各 consumer 决定。 |
+| `new-york-v4` | 独立的 legacy 兼容 profile。 |
+| `new-york` | 显式别名，归一化为 `new-york-v4`。 |
+| `inherit` 或省略 | 不作显式选择，先取最近作用域，再取叶节点基线。 |
+
+这份成员集合绑定到 [shadcn/ui 源码 revision `3d98900e`](https://github.com/shadcn-ui/ui/tree/3d98900e9b73c45f035f8109e9d41ba6a51685e7)。Proto UI 是独立实现；识别这些源码 ID 不代表已完整复现上游外观或 API。
+
+## 公开 authoring API
+
+除了 `styleScope`，`/style-scope` 子路径还导出以下 helper 与类型：
+
+| 导出 | 用途 |
+| --- | --- |
+| `setupShadcnStyleScope(def)` | 在复合 prototype 的 setup 阶段调用，发布自身有效选择并从祖先继承。 |
+| `setupShadcnStyleSelection(def, compatibilityStyle, options?)` | 在 consumer 的 setup 阶段调用，派生供现有 Rule 使用的视觉 State；`options.supportedStyles` 可限制该 consumer 已实现的 profile。 |
+| `SHADCN_STYLE_SCOPE` | 承载 `{ style: ShadcnStyleId \| null }` 的单例 Context key。必须导入这个 key；用同一诊断名称新建的 key 是另一个 channel。 |
+| `SHADCN_STYLE_IDS` | 规范 ID 列表，包含独立的 `new-york-v4` 条目。 |
+| `normalizeShadcnStyle(value)` | 归一化已知 ID 与别名；`undefined`、`null` 或 `inherit` 返回 `null`，未知 ID 抛错。 |
+| `ShadcnStyleId`、`ShadcnStyleChoice` | 前者是规范 ID，后者额外包含 `new-york` 与 `inherit`。 |
+| `ShadcnStyleProps`、`ShadcnStyleContext` | 分别描述可选 `styleProfile` prop 与 JSON Context 值。 |
+
+例如，归一化函数从子路径导入：
+
+```ts
+import { normalizeShadcnStyle } from '@proto.ui/prototypes-shadcn/style-scope';
+
+const legacy = normalizeShadcnStyle('new-york'); // 'new-york-v4'
+const inherited = normalizeShadcnStyle('inherit'); // null
+```
+
+consumer 在 `def.rule` 条件中使用派生选择，并通过普通 Feedback 贡献样式。不再活跃的 profile 贡献会经现有 style merge 撤回。helper 的 `supportedStyles` 选项会拒绝已知但不受该 consumer 支持的选择，不会悄悄替换成另一种 profile。选择之前，应查看具体组件的定义与文档；这个 carrier 不会补齐缺失配方。
+
+## 所有权与样式隔离
+
+Style Scope 只传递选择，不成为 value、open、checked、query 或 focus 的所有者，不创建编辑器，也不增加行为事件。仅修改外观时，必须保留 consumer 实例、Base 状态句柄、已编辑值、选区与焦点。不要通过修改组件 key 或重建编辑器来切换 profile。
+
+这个 scope 是逻辑家族 Context 边界，不是 CSS reset、Shadow DOM 边界或全局主题 store。它不读取 DOM class，不安装 document-wide stylesheet，也不为其他家族选择 profile。[Input Shell](/zh-cn/ui-libraries/shadcn/input-shell/) 等 consumer 通过这个 channel 解析各自的视觉选择；中性原子仍保留公开语义。
+
+请按宿主的正常集成方式加载匹配的生成 Proto UI 样式产物。主题激活与变量值、字体、外层布局和显式 surface 覆盖仍由 consumer 所有。使用具名 CSS layer 时，必须在首次声明相关 layer 前建立所需顺序：生成主题默认值、reset/base、`proto-ui`、显式 consumer layer。之后加载的 stylesheet 不能重新排列已经建立的 layer。Style Scope 不替代这项宿主集成，也不能成为用页面 CSS 修补 prototype 缺失外观的理由。
+
+## 当前边界
+
+draft transport 证据包含一个有界的真实 Base Tabs canary，检查选择优先级、样式贡献撤回、终止清理，以及 selected value、状态句柄、焦点与实际节点的保留。其中 Nova/Rhea 的 radius 检查和仅供测试的兼容 radius，不构成完整的生产 Tabs 配方，也不是整个家族的无重置验收。
+
+Context 订阅遵循现有 Props 与生命周期所有权。创建、mount 和实际 update 回调会重新读取当前作用域。任意仅改变祖先关系的 reparent、没有 update 通知的 provider 移除，以及仍存活 view 的 detach/remount，目前都没有通用 transport 保证。Portal 必须继承逻辑 owner 的 scope，而不是物理挂载容器的 scope；本切片没有接纳原生 portal 行为。
+
+完整 consumer 映射、IME 与选区连续性、浏览器/辅助技术行为及跨 Adapter 验收，都需要各自的证据。本页 preview 不会提升 draft 生命周期，也不建立这些验收结论。
+
+## 参考
+
+本页投射 `P-SHADCN-STYLE-SCOPE`。公开实现位于 `packages/prototypes/shadcn/src/style-scope/`，有界 transport coverage 由 `T-SHADCN-STYLE-SCOPE-0001` 映射。
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-STYLE-SCOPE.yaml']} />
+
+<SpecEntityLinks directory="spec/tests" files={['T-SHADCN-STYLE-SCOPE-0001.yaml']} />
+
+<SpecEntityLinks directory="spec/contracts" files={['C-PROTOTYPE-STYLE-CLOSURE-0001.yaml']} />
