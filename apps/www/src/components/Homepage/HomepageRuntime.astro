@@ -8,6 +8,9 @@ const locale = Astro.locals.starlightRoute.locale || 'en';
 const zh = locale === 'zh-cn';
 const path = (pathname: string) =>
   localizedUrl(new URL(pathname, Astro.url), locale, context.trailingSlash).pathname;
+const brandUrl = new URL(Astro.locals.starlightRoute.siteTitleHref, Astro.url);
+const brandIsCurrent =
+  brandUrl.origin === Astro.url.origin && brandUrl.pathname === Astro.url.pathname;
 const localeOptions = Object.entries(config.locales ?? {}).map(([value, option]) => ({
   value,
   label: option.label || value,
@@ -49,7 +52,7 @@ const actions = [
       actions={[
         {
           text: 'Proto UI',
-          attrs: { 'data-home-brand': '' },
+          attrs: { 'data-home-brand': '', 'aria-current': brandIsCurrent ? 'page' : undefined },
           link: Astro.locals.starlightRoute.siteTitleHref,
           variant: 'minimal',
         },
