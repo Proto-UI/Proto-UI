@@ -108,3 +108,107 @@ export function hasPackage(
     optDeps?.[packageName]
   );
 }
+
+const dependencyFields = [
+  'dependencies',
+  'devDependencies',
+  'peerDependencies',
+  'optionalDependencies',
+] as const;
+
+/** Read-only admission before add installs packages or changes project files.
+ * Exact declarations may precede the project's first install. Local sources and
+ * npm aliases additionally need installed identity; their spec alone cannot
+ * prove that the package under the official name belongs to this release.
+ */
+export function assertRequiredProtoUiRelease({
+  cwd,
+  projectPkg,
+  requiredPackages,
+  packageManager,
+}: {
+  cwd: string;
+  projectPkg: Record<string, unknown>;
+  requiredPackages: readonly string[];
+  packageManager: PackageManager;
+}): void {
+  const issues: string[] = [];
+  const affected = new Set<string>();
+
+  for (const packageName of new Set(requiredPackages)) {
+    if (!packageName.startsWith('@proto.ui/')) continue;
+    const declarations = dependencyFields.flatMap((field) => {
+      const values = projectPkg[field] as Record<string, unknown> | undefined;
+      return values && Object.hasOwn(values, packageName)
+        ? [{ field, value: values[packageName] }]
+        : [];
+    });
+    // A missing declaration remains add's ordinary exact-install/no-install path.
+    if (!declarations.length) continue;
+
+    const report = (detail: string) => {
+      affected.add(packageName);
+      issues.push(`${packageName}: ${detail}`);
+    };
+    let requiresInstalledIdentity = false;
+    for (const { field, value } of declarations) {
+      if (value === CLI_RELEASE_VERSION) continue;
+      if (
+        typeof value === 'string' &&
+        (/^(?:file|link|workspace):.+/.test(value) ||
+          value === `npm:${packageName}@${CLI_RELEASE_VERSION}`)
+      ) {
+        requiresInstalledIdentity = true;
+        continue;
+      }
+      report(`${field} declares ${JSON.stringify(value)}; expected ${CLI_RELEASE_VERSION}`);
+    }
+
+    let installed: { name?: unknown; version?: unknown } | null = null;
+    try {
+      // Follow consumer node_modules ancestors, including hoisted/symlinked
+      // packages, without executing exports. NODE_PATH/global CommonJS lookup
+      // paths do not prove installation for the generated ESM consumer.
+      for (let directory = path.resolve(cwd); ; directory = path.dirname(directory)) {
+        try {
+          const manifest: unknown = JSON.parse(
+            readFileSync(path.join(directory, 'node_modules', packageName, 'package.json'), 'utf8')
+          );
+          if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
+            throw new Error('Invalid package metadata');
+          }
+          installed = manifest;
+          break;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+        }
+        if (path.dirname(directory) === directory) break;
+      }
+      if (installed) {
+        if (installed.name !== packageName || installed.version !== CLI_RELEASE_VERSION) {
+          report(
+            `installed identity is ${JSON.stringify(installed.name)}@${JSON.stringify(installed.version)}; expected ${packageName}@${CLI_RELEASE_VERSION}`
+          );
+        }
+      } else if (requiresInstalledIdentity) {
+        report('local source or npm alias has no installed package identity to verify');
+      }
+    } catch {
+      report('installed package metadata is unreadable or invalid');
+    }
+  }
+
+  if (issues.length) {
+    const command = formatInstallCommand(
+      packageManager,
+      [...affected].map((name) => toExactProtoUiInstallSpec(name)),
+      { exact: true }
+    );
+    throw new Error(
+      `Proto UI release mismatch: this CLI requires ${CLI_RELEASE_VERSION}.\n` +
+        issues.map((issue) => `  - ${issue}`).join('\n') +
+        `\nAlign required packages with "${command}" and remove conflicting declarations from other dependency sections before retrying.` +
+        '\nLocal sources and npm aliases must already resolve to the expected official package name and exact version. No project files were changed.'
+    );
+  }
+}

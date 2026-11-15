@@ -8,6 +8,7 @@ import {
   resolveGeneratedSourceLanguage,
 } from '../services/project-language.js';
 import {
+  assertRequiredProtoUiRelease,
   detectPackageManager,
   formatInstallCommand,
   hasPackage,
@@ -79,12 +80,13 @@ export async function runAddCommand(argv: string[]): Promise<void> {
   });
 
   const packageManager = await detectPackageManager(cwd);
-  ensureRuntimePackages({ adapter, projectPkg, packageManager });
-
-  const noInstall = options.install === false || options['no-install'] === true;
   const requiredPackages = [adapter.packageName, componentEntry.packageName].filter(
     (pkg, index, list) => list.indexOf(pkg) === index
   );
+  assertRequiredProtoUiRelease({ cwd, projectPkg, requiredPackages, packageManager });
+  ensureRuntimePackages({ adapter, projectPkg, packageManager });
+
+  const noInstall = options.install === false || options['no-install'] === true;
   const missingPackages = requiredPackages.filter((pkg) => !hasPackage(projectPkg, pkg));
   const missingInstallSpecs = missingPackages.map((pkg) => toExactProtoUiInstallSpec(pkg));
 

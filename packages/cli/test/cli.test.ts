@@ -842,6 +842,42 @@ describe('@proto.ui/cli', () => {
     expect(config.components.react).toEqual(['shadcn-button']);
   });
 
+  it.each([{ flags: [] }, { flags: ['--no-install'] }])(
+    'rejects an existing conflicting release before any consumer mutation with flags $flags',
+    async ({ flags }) => {
+      const cwd = await createTempProject('pui-cli-release-mismatch', {
+        name: 'pui-cli-release-mismatch',
+        private: true,
+        dependencies: {
+          react: '^19.0.0',
+          '@proto.ui/adapter-react': cliVersion,
+          '@proto.ui/prototypes-shadcn': cliVersion,
+        },
+        devDependencies: { '@proto.ui/adapter-react': '0.2.0' },
+      });
+      try {
+        expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+        const configPath = path.join(cwd, 'proto-ui/config.json');
+        const packagePath = path.join(cwd, 'package.json');
+        const beforeConfig = await fs.readFile(configPath, 'utf8');
+        const beforePackage = await fs.readFile(packagePath, 'utf8');
+        const result = runCli(cwd, ['add', 'react', 'shadcn-button', '--no-interactive', ...flags]);
+        expect(result.status).toBe(1);
+        expect(result.stderr).toContain('Proto UI release mismatch');
+        expect(result.stderr).toContain('devDependencies declares "0.2.0"');
+        expect(result.stderr).toContain(`@proto.ui/adapter-react@${cliVersion}`);
+        expect(result.stdout).not.toContain('installed');
+        expect(result.stdout).not.toContain('generated');
+        expect(await fs.readFile(configPath, 'utf8')).toBe(beforeConfig);
+        expect(await fs.readFile(packagePath, 'utf8')).toBe(beforePackage);
+        expect(await fs.readdir(path.join(cwd, 'proto-ui/components'))).toEqual([]);
+        await expect(fs.access(path.join(cwd, 'package-lock.json'))).rejects.toThrow();
+      } finally {
+        await fs.rm(cwd, { recursive: true, force: true });
+      }
+    }
+  );
+
   it('generates JavaScript Vue 2 facades without TypeScript syntax when the project has no TypeScript capability', async () => {
     const cwd = await createTempProject('pui-cli-add-vue2', {
       name: 'pui-cli-add-vue2',
