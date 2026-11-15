@@ -51,6 +51,17 @@ cases:
       - A-WEB-COMPONENT-0001-ANATOMY
     expectation: anatomy-adapter-conforms
 implementations:
+  - id: anatomy-runtime-order-comparison-cost
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-HOST
+      - T-ANATOMY-0004-CASE-ORDER
+      - T-ANATOMY-0004-CASE-LIFETIME
+    notes:
+      - Actual Runtime sessions verify bounded duplicate host-order comparisons within one synchronous notification, fresh public queries, callback reentry, target replacement, portal membership and nested-domain retirement. Comparison counts are implementation cost controls, not native elapsed-time acceptance or a new public capability.
   - id: anatomy-web-component-rejected-adoption
     kind: adapter-test
     status: passing
@@ -168,6 +179,9 @@ verifies:
 sources:
   - path: packages/adapters/base/test/fixtures/anatomy-conformance.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Mapped synchronous notification comparison reuse and fresh-query reentry controls without changing Anatomy semantics or promoting its lifecycle.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added WC accepted and rejected adoption controls across retained L1 view hiding without changing logical lifetime semantics.

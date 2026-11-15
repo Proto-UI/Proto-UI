@@ -67,6 +67,11 @@ type ClaimRecord = {
   invoke: AnatomyOrderCallbackDispatcher;
 };
 
+// One synchronous notification may check the same host order for many owners.
+// Keep only host comparisons here: each owner still resolves its current domain
+// and targets. The cache never survives a notification or an author callback.
+type OrderComparisons = Map<AnatomyRootTarget, Map<AnatomyRootTarget, number>>;
+
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
 
 const ORDER_FOLLOWING = typeof Node !== 'undefined' ? Node.DOCUMENT_POSITION_FOLLOWING : 4;
@@ -817,9 +822,10 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
+    const comparisons: OrderComparisons = new Map();
     for (const impl of AnatomyModuleImpl.liveInstances) {
       if (!impl.orderListeners.has(family)) continue;
-      impl.emitOrderChangeIfNeeded(family);
+      impl.emitOrderChangeIfNeeded(family, comparisons);
     }
   }
 
@@ -854,8 +860,9 @@ export class AnatomyModuleImpl extends ModuleBase {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
       const off = observer(target, () => {
+        const comparisons: OrderComparisons = new Map();
         for (const impl of listeners) {
-          impl.emitOrderChangeIfNeeded(family);
+          impl.emitOrderChangeIfNeeded(family, comparisons);
         }
       });
       entry = { off, listeners };
@@ -897,9 +904,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     return this.orderVersionByFamily.get(family) ?? 0;
   }
 
-  private emitOrderChangeIfNeeded(family: AnatomyFamily): void {
+  private emitOrderChangeIfNeeded(family: AnatomyFamily, comparisons?: OrderComparisons): void {
     const prev = this.orderSignatureByFamily.get(family);
-    const next = this.computeOrderSignature(family);
+    const next = this.computeOrderSignature(family, comparisons);
     if (typeof prev !== 'undefined' && prev === next) return;
 
     this.orderSignatureByFamily.set(family, next);
@@ -908,15 +915,23 @@ export class AnatomyModuleImpl extends ModuleBase {
 
     const listeners = this.orderListeners.get(family);
     if (!listeners || listeners.size === 0) return;
-    this.orderDispatch((ctx) => {
-      for (const listener of listeners) listener(ctx);
-    });
+    // Callback scopes may synchronously move, replace or retire host targets,
+    // including through a nested notification. Later recipients must compare
+    // the resulting host order afresh even when logical identities survive.
+    comparisons?.clear();
+    try {
+      this.orderDispatch((ctx) => {
+        for (const listener of listeners) listener(ctx);
+      });
+    } finally {
+      comparisons?.clear();
+    }
   }
 
-  private computeOrderSignature(family: AnatomyFamily): string {
+  private computeOrderSignature(family: AnatomyFamily, comparisons?: OrderComparisons): string {
     const domain = this.resolveCurrentDomain(family, false);
     if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims);
+    const ordered = this.sortClaims(domain.claims, comparisons);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
   }
 
@@ -938,27 +953,34 @@ export class AnatomyModuleImpl extends ModuleBase {
     return next;
   }
 
-  private sortClaims(claims: ClaimRecord[]): ClaimRecord[] {
+  private sortClaims(claims: ClaimRecord[], comparisons?: OrderComparisons): ClaimRecord[] {
     return claims
       .map((claim, index) => ({ claim, index }))
       .sort((left, right) => {
-        const cmp = this.compareClaims(left.claim, right.claim);
+        const cmp = this.compareClaims(left.claim, right.claim, comparisons);
         if (cmp !== 0) return cmp;
         return left.index - right.index;
       })
       .map((entry) => entry.claim);
   }
 
-  private compareClaims(a: ClaimRecord, b: ClaimRecord): number {
+  private compareClaims(a: ClaimRecord, b: ClaimRecord, comparisons?: OrderComparisons): number {
     const aTarget = a.getRootTarget(a.instance);
     const bTarget = b.getRootTarget(b.instance);
     if (!aTarget || !bTarget || aTarget === bTarget) return 0;
     if (typeof aTarget.compareDocumentPosition !== 'function') return 0;
 
+    const cached = comparisons?.get(aTarget)?.get(bTarget);
+    if (cached !== undefined) return cached;
+
     const pos = aTarget.compareDocumentPosition(bTarget as AnatomyRootTarget);
-    if (pos & ORDER_FOLLOWING) return -1;
-    if (pos & ORDER_PRECEDING) return 1;
-    return 0;
+    const result = pos & ORDER_FOLLOWING ? -1 : pos & ORDER_PRECEDING ? 1 : 0;
+    if (comparisons) {
+      let targets = comparisons.get(aTarget);
+      if (!targets) comparisons.set(aTarget, (targets = new Map()));
+      targets.set(bTarget, result);
+    }
+    return result;
   }
 
   private computeDiagnostics(family: AnatomyFamily): AnatomyDiagnostic[] {
