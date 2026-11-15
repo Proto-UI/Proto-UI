@@ -1,6 +1,8 @@
 import { copyFileSync, mkdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
-import ts from 'typescript';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 const inside = (root, file) => {
   const name = relative(root, file);
@@ -66,6 +68,9 @@ export function protoSourceEntries(pkg) {
 export function protoSourceFiles(pkg) {
   const entries = protoSourceEntries(pkg);
   if (!entries.length) return [];
+  // Planning and manifest inspection run before dependency installation. Only
+  // an actual source-closure build needs the parser; a missing parser still fails.
+  const ts = require('typescript');
   const root = realpathSync(pkg.dir);
   const seen = new Set();
   function visit(filename) {

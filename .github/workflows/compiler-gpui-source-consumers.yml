@@ -3,18 +3,13 @@ name: Compiler GPUI source consumers
 on:
   workflow_dispatch:
   workflow_call:
-  pull_request:
-    paths:
-      - 'packages/compiler/**'
-      - 'packages/prototypes/base/src/transition/**'
-      - '.github/workflows/compiler-gpui-source-consumers.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: compiler-gpui-consumers-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: compiler-gpui-consumers-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   native-consumer:
@@ -28,12 +23,14 @@ jobs:
       CARGO_BUILD_JOBS: '1'
       CARGO_PROFILE_DEV_DEBUG: '0'
       CARGO_PROFILE_TEST_DEBUG: '0'
-      CARGO_TARGET_DIR: ${{ runner.temp }}/gpui-consumer-target
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Configure the Cargo target after runner allocation
+        id: configure-cargo
+        run: printf 'CARGO_TARGET_DIR=%s/gpui-consumer-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -74,7 +71,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: compiler-gpui-source-${{ runner.os }}-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          name: compiler-gpui-source-${{ runner.os }}-${{ github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/gpui-evidence
           include-hidden-files: true
           if-no-files-found: error
