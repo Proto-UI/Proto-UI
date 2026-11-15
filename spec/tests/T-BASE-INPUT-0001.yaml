@@ -18,7 +18,20 @@ cases:
     title: State and event types preserve the single-line protocol boundary
     covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME]
     expectation: input-state-and-event-types-are-normalized
+  - id: T-BASE-INPUT-0001-CASE-VIEW-COMPOSITION
+    title: Retired editing views cannot retain or resume composition
+    covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, C-TEXT-CONTROL-0001-F]
+    expectation: A real RuntimeSession detach clears the exposed composing fact while preserving controlled owner values or dirty uncontrolled values. Rejoining accepts fresh input without synthesizing compositionEnd. Synchronous value/composing observers or compositionStart/valueChange handlers may detach and rejoin; the retired callback cannot resume state writes or emit an undelivered tail into the new view.
 implementations:
+  - id: prototypes-base-input-composition-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/text-control-composition-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-VIEW-COMPOSITION]
+    exercises: [P-BASE-INPUT]
+    notes:
+      - Eighteen Input cases use the actual Base, Shadcn and Brutalist prototypes, RuntimeSession and Web TextControl host in happy-dom. Injected composition events establish lifecycle behavior, not native IME or assistive-technology acceptance.
   - id: prototypes-base-input-contract
     kind: module-test
     status: passing
@@ -35,6 +48,9 @@ exercises:
 sources:
   - path: packages/prototypes/base/test/input.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added source-bound editing-view retirement and synchronous reentry coverage across Base, Shadcn and Brutalist Input.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added focused Base Input executable evidence for the accepted first slice.

@@ -128,6 +128,8 @@ export function setupTextareaRoot(
   def.lifecycle.onUnmounted(() => {
     currentView = null;
     viewEpoch++;
+    // A later view retains value ownership, not the retired host's IME session.
+    composing.set(false, 'reason: textarea view composition retired');
   });
   def.lifecycle.onBeforeDispose(() => {
     currentView = null;
@@ -212,7 +214,9 @@ export function setupTextareaRoot(
   control.on('input', (run, event) => {
     const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea input value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     composing.set(event.composing, 'reason: textarea input composing');
+    if (currentView !== run || viewEpoch !== epoch) return;
     const detail: TextareaValueChangeDetail = Object.freeze({
       value: event.value,
       composing: event.composing,
@@ -225,6 +229,7 @@ export function setupTextareaRoot(
   control.on('change', (run, event) => {
     const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea change value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     run.expose.emit('change', Object.freeze({ value: event.value }));
     if (binding && currentView === run && epoch === viewEpoch) reportField('change');
   });
@@ -241,8 +246,9 @@ export function setupTextareaRoot(
     run.expose.emit(eventName, detail);
   };
   control.on('compositionstart', (run, event) => {
-    composing.set(true, 'reason: textarea composition start');
     const epoch = viewEpoch;
+    composing.set(true, 'reason: textarea composition start');
+    if (currentView !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionStart', event);
     if (binding && currentView === run && epoch === viewEpoch) reportField();
   });
@@ -250,9 +256,11 @@ export function setupTextareaRoot(
     emitComposition(run, 'compositionUpdate', event);
   });
   control.on('compositionend', (run, event) => {
-    composing.set(false, 'reason: textarea composition end');
-    value.set(control.snapshot()?.value ?? event.value, 'reason: textarea composition end value');
     const epoch = viewEpoch;
+    composing.set(false, 'reason: textarea composition end');
+    if (currentView !== run || viewEpoch !== epoch) return;
+    value.set(control.snapshot()?.value ?? event.value, 'reason: textarea composition end value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionEnd', event);
     if (binding && currentView === run && epoch === viewEpoch) reportField('compositionend');
   });

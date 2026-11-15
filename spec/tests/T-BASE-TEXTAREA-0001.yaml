@@ -56,7 +56,22 @@ cases:
       - P-BASE-TEXTAREA-AUTHORING-ENTRIES
       - P-BASE-TEXTAREA-BOUNDARY
     expectation: direct-and-authored-textarea-entries-share-one-protocol-and-module-requirement
+  - id: T-BASE-TEXTAREA-0001-CASE-VIEW-COMPOSITION
+    title: Retired editing views cannot retain or resume composition
+    covers:
+      - P-BASE-TEXTAREA-VALUE-OWNERSHIP
+      - P-BASE-TEXTAREA-EVENTS-AND-IME
+    expectation: Detach clears the exposed composing fact without resetting controlled ownership or dirty uncontrolled values. Rejoining accepts fresh input without a synthetic compositionEnd. Synchronous state observers and outward callbacks may replace the view, and the retired callback cannot resume state writes or emit an undelivered tail into its successor.
 implementations:
+  - id: prototypes-base-textarea-composition-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/text-control-composition-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-TEXTAREA-0001-CASE-VIEW-COMPOSITION]
+    exercises: [P-BASE-TEXTAREA]
+    notes:
+      - Eighteen Textarea cases use the actual Base, Shadcn and Brutalist prototypes, RuntimeSession and Web TextControl host in happy-dom. Injected composition events establish lifecycle behavior, not native IME or assistive-technology acceptance.
   - id: prototypes-base-textarea-contract
     kind: module-test
     status: passing
@@ -127,6 +142,9 @@ sources:
   - path: packages/adapters/web-component/test/text-control.integration.test.ts
   - path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added source-bound editing-view retirement and synchronous reentry coverage across Base, Shadcn and Brutalist Textarea.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Normalized private text-control focus ingress to declared focus/blur callback types while retaining physical focusin/focusout only as native context.

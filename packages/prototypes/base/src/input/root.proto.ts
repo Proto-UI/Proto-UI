@@ -74,6 +74,8 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   const describedBy = def.state.string('inputDescribedBy', '');
   const focused = focusable.focused;
   const focusVisible = focusable.focusVisible;
+  let currentView: RunHandle<InputRootProps> | null = null;
+  let viewEpoch = 0;
 
   def.expose.state('value', value);
   def.expose.state('disabled', disabled);
@@ -86,7 +88,8 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   });
   def.expose.method('blurSelf', () => focusable.blur());
   asControlLabel().target((_, request) => {
-    if (!disabled.get() && request.isCurrent()) focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (!disabled.get() && request.isCurrent())
+      focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
   });
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('change', { payload: 'json' });
@@ -128,6 +131,19 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     value.set(control.snapshot()?.value ?? '', 'reason: input sync value');
   };
   def.lifecycle.onCreated((run) => sync(run.props.get()));
+  def.lifecycle.onMounted((run) => {
+    currentView = run;
+  });
+  def.lifecycle.onUnmounted(() => {
+    currentView = null;
+    viewEpoch++;
+    // The Text Control lease retires the IME session, while its logical value survives.
+    composing.set(false, 'reason: input view composition retired');
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    currentView = null;
+    viewEpoch++;
+  });
   def.props.watch(
     [
       'value',
@@ -150,8 +166,11 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   );
 
   control.on('input', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: input value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     composing.set(event.composing, 'reason: input composing');
+    if (currentView !== run || viewEpoch !== epoch) return;
     const detail: InputValueChangeDetail = Object.freeze({
       value: event.value,
       composing: event.composing,
@@ -161,7 +180,9 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     run.expose.emit('valueChange', detail);
   });
   control.on('change', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: input change value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     run.expose.emit('change', Object.freeze({ value: event.value }));
   });
   const emitComposition = (
@@ -173,13 +194,18 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     run.expose.emit(eventName, detail);
   };
   control.on('compositionstart', (run, event) => {
+    const epoch = viewEpoch;
     composing.set(true, 'reason: input composition start');
+    if (currentView !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionStart', event);
   });
   control.on('compositionupdate', (run, event) => emitComposition(run, 'compositionUpdate', event));
   control.on('compositionend', (run, event) => {
+    const epoch = viewEpoch;
     composing.set(false, 'reason: input composition end');
+    if (currentView !== run || viewEpoch !== epoch) return;
     value.set(control.snapshot()?.value ?? event.value, 'reason: input composition end value');
+    if (currentView !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionEnd', event);
   });
   return () => null;

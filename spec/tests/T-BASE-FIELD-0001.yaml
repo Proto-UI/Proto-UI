@@ -78,6 +78,10 @@ cases:
       - C-FIELD-0001-VALUES
       - C-FIELD-0001-ASYNC
     expectation: Sparse value/initialValue/errors arrays, including inherited slots, fail without changing canonical state. The same pending id accepts a subsequent valid result. Payload fields/items are captured once; thrown read errors retain identity and newer reentrant reports/requests win.
+  - id: T-BASE-FIELD-0001-CASE-COMPOSITION-RETIREMENT
+    title: A rejoined Field control cannot inherit a retired composition
+    covers: [C-FIELD-0001-OWNER, C-FIELD-0001-ANATOMY, C-FIELD-0001-VALIDATION, C-FIELD-0001-ASYNC]
+    expectation: Field Control and Field Textarea clear their exposed and reported composition facts when their view retires, retain canonical values and become eligible for a fresh external validation after rejoining. Context synchronization during unmount cannot reinstate composition on an inactive lease. If a composing observer replaces the view during composition start/end, the old callback cannot overwrite the successor value/report or emit its retired tail. No compositionEnd is invented for detach.
 verifies:
   contracts:
     - C-FIELD-0001
@@ -114,6 +118,14 @@ exercises:
     - P-LIQUID-GLASS-FIELD-ERROR
     - P-LIQUID-GLASS-FIELD-VALIDITY
 implementations:
+  - id: field-composition-retirement
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/notification-retirement-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-FIELD-0001-CASE-COMPOSITION-RETIREMENT]
+    notes:
+      - Six focused RuntimeSession cases cover Field Control and Field Textarea detach/rejoin and synchronous composition start/end reentry. The fixture injects normalized TextControl events and does not establish native IME or visual acceptance.
   - id: field-in-form-owner-feedback
     kind: runtime-test
     status: passing
@@ -269,6 +281,9 @@ openQuestions:
     blocks:
       - activation:T-BASE-FIELD-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added Field editor view-retirement and reentrant composition evidence while preserving separate native acceptance gates.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded distinct synthetic-DOM and native-browser acceptance evidence without representing unrun native work as passing.

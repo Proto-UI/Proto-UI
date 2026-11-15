@@ -115,6 +115,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
   def.lifecycle.onUnmounted(() => {
     viewEpoch++;
     resetRun = null;
+    composing.set(false, 'reason: field control view composition retired');
   });
   let minLength = -1,
     maxLength = -1;
@@ -247,18 +248,25 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     run.expose.emit(eventName, detail);
   };
   control.on('compositionstart', (run, event) => {
+    const epoch = viewEpoch;
     composing.set(true, 'reason: field control composition start');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     binding.report({ value: value.get(), composing: true, reason: 'sync' });
+    if (resetRun !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionStart', event);
   });
   control.on('compositionupdate', (run, event) => emitComposition(run, 'compositionUpdate', event));
   control.on('compositionend', (run, event) => {
+    const epoch = viewEpoch;
     composing.set(false, 'reason: field control composition end');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     value.set(
       control.snapshot()?.value ?? event.value,
       'reason: field control composition end value'
     );
+    if (resetRun !== run || viewEpoch !== epoch) return;
     emitComposition(run, 'compositionEnd', event);
+    if (resetRun !== run || viewEpoch !== epoch) return;
     binding.report({
       value: value.get(),
       // A synchronous owner callback may already have started a newer composition.
