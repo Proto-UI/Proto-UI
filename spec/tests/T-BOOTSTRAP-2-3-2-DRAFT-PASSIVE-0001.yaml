@@ -4,7 +4,7 @@ title: Bootstrap passive atoms coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Semantic-only regions, Image, Transition and passive Table coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-REGIONS
@@ -32,6 +32,10 @@ implementations:
     status: planned
     path: packages/prototypes/bootstrap-2-3-2/test/draft-passive-projections.test.ts
     required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-REGIONS
+      - T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-TABLE
+      - T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-IMAGE-TRANSITION
     exercises:
       - P-BOOTSTRAP-2-3-2-ASYNC-REGION
       - P-BOOTSTRAP-2-3-2-LIVE-REGION

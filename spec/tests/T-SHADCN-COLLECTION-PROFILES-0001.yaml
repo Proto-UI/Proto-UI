@@ -4,7 +4,7 @@ title: Shadcn collection profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Calendar, DatePicker, DataTable, ToggleGroup, Toolbar and Tree nine-profile coverage on real consumers.
 cases:
   - id: T-SHADCN-COLLECTION-PROFILES-0001-CASE-PROFILES
@@ -22,6 +22,8 @@ implementations:
     status: planned
     path: packages/prototypes/shadcn/test/collection-profiles-r91.test.ts
     required: true
+    consumesCases:
+      - T-SHADCN-COLLECTION-PROFILES-0001-CASE-PROFILES
     exercises:
       - P-SHADCN-CALENDAR
       - P-SHADCN-DATE-PICKER
