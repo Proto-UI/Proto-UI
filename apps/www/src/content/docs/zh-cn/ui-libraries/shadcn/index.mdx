@@ -1,0 +1,38 @@
+---
+title: 'Shadcn'
+description: '浏览 Proto UI 的 Shadcn 投射，按明确的交付与 style 边界选择示例。'
+---
+
+import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
+
+这是 Proto UI 维护的非官方 Shadcn 投射。交互由 Base 拥有，风格家族提供呈现与明确记录的视觉输入。它不是官方 shadcn/ui 发行包。
+
+## 安装与使用
+
+在已有应用中，已发布 0.2.0 的用法为：
+
+```sh
+npx @proto.ui/cli@0.2.0 init
+npx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+使用 pnpm 时执行：
+
+```sh
+pnpm dlx @proto.ui/cli@0.2.0 init
+pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
+```
+
+CLI 按自身精确版本安装 `@proto.ui/prototypes-shadcn` 与所选 Adapter，并生成本地宿主 facade。应用应导入一次生成的样式表。[快速开始](/zh-cn/start-here/quick-start/)说明应用设置，[Button](./button/)把预览与宿主代码配对。稳定版 React、Vue 3 分别使用 `react`、`vue`。Vue 2.6 与当前命名 style profile 需要配套的工作区 0.3 源码；`@latest` 不能证明已经交付这些能力。
+
+## 选择家族
+
+以下索引对应当前工作区导出，也包含 draft 增量。各家族页拥有其 anatomy、props、events 与受支持宿主边界。Profile 支持逐组件决定：某个 style ID 存在，不表示每个组件均实现了对应视觉配方。下面的协议源码链接明确保留尚未闭合的公开 Usage 条件。
+
+<PrototypeDocumentationIndex library="shadcn" />
+
+## 来源与兼容性
+
+网站的源码预览与已发布 0.2.0 包分别记录。以各页的固定上游引用、兼容性省略与生命周期为准，当前配方不会改写旧证据。例如 Button 的视觉 `link` variant 保留命令语义，原生导航由 anchor 拥有。
+
+参阅[文档覆盖与历史证据](/zh-cn/build/prototypes/documentation-coverage/)及 [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) 中保留的完整验收条件。

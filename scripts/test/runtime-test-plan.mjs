@@ -137,6 +137,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts',

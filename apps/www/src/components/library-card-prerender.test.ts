@@ -11,8 +11,18 @@ import { libraryActionAppearanceForFamily } from './library-card-prototypes';
 const frontmatter = readFileSync('apps/www/src/components/LibraryCardPart.astro', 'utf8').split(
   '---'
 )[1]!;
-const declarations = frontmatter.slice(frontmatter.indexOf('const { part'));
-const javascript = ts.transpileModule(declarations, {
+const source = ts.createSourceFile(
+  'LibraryCardPart.frontmatter.ts',
+  frontmatter,
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.TS
+);
+const declarations = ts.factory.updateSourceFile(
+  source,
+  source.statements.filter((statement) => !ts.isImportDeclaration(statement))
+);
+const javascript = ts.transpileModule(ts.createPrinter().printFile(declarations), {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
 }).outputText;
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
