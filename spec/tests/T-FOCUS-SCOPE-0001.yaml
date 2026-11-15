@@ -213,6 +213,15 @@ implementations:
     consumesCases: [T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS]
     notes:
       - Deterministic Happy DOM completion boundaries cover input type, details open state, image-map association changes and observation cleanup; this is not cross-platform browser certification.
+  - id: wc-entry-invalidation-coalescing
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS]
+    notes:
+      - Seven Happy DOM controls cover merging pending DOM and stylesheet refreshes, stylesheet-only invalidation, later checkpoints, reentrant stylesheet writes, disable and target replacement. Explicit delivery of real pending MutationObserver records models the permitted checkpoint order; it is not native scheduling or timing-budget evidence.
+      - The original paired cost cases distinguish two dependency graph rebuilds from one without caching current CSS or changing entry eligibility. A stylesheet notification with no pending entry sample adds one microtask before projection; direct focus resolution and synchronous role disable remain unchanged.
   - id: wc-native-scope-order-browser
     kind: adapter-test
     status: passing
