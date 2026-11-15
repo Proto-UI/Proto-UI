@@ -89,7 +89,7 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
         vi.useFakeTimers();
         const f = createSelect(family, full, value);
         await settle();
-        const focus = vi.spyOn(f.items[target], 'focus');
+        const focus = vi.spyOn(f.items[target] as HTMLElement, 'focus');
         f.trigger.focus();
         f.root.getExposes().requestOpen({
           open: true,
@@ -138,7 +138,7 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
       f.trigger.click();
       await settle();
       expect(document.activeElement).toBe(f.items[0]);
-      const focus = vi.spyOn(f.items[3], 'focus');
+      const focus = vi.spyOn(f.items[3] as HTMLElement, 'focus');
       f.items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'g', bubbles: true }));
       await settle();
       expect(document.activeElement).toBe(f.items[3]);
@@ -153,7 +153,7 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
     vi.useFakeTimers();
     const f = createSelect(family, false, 'gamma', 'item-aligned');
     await settle();
-    const focus = vi.spyOn(f.items[3], 'focus');
+    const focus = vi.spyOn(f.items[3] as HTMLElement, 'focus');
     f.trigger.click();
     await settle();
     expect(document.activeElement).toBe(f.items[3]);

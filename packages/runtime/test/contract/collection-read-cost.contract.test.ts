@@ -30,9 +30,10 @@ async function fixture(count: number) {
   let provider!: CollectionHandles;
   let providerRun!: RunHandle<Record<string, unknown>>;
   const items: CollectionItemHandles[] = [];
-  const metadata = tokens.map((_, index) =>
-    Object.freeze({ id: `item-${index}`, text: `Item ${index}`, index: 999, total: 999 })
-  );
+  const metadata: Readonly<{ id: string; text: string; index: number; total: number }>[] =
+    tokens.map((_, index) =>
+      Object.freeze({ id: `item-${index}`, text: `Item ${index}`, index: 999, total: 999 })
+    );
   const targets = new Map<object, object>();
   for (const token of [rootToken, ...tokens]) {
     targets.set(token, {
