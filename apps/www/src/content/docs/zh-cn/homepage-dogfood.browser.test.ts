@@ -1335,10 +1335,18 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             });
             await page.keyboard.press('Escape');
             const closeDeadline = performance.now() + 1000;
-            await expect.poll(() => command.getAttribute('aria-expanded')).toBe('false');
-            expect(await command.evaluate((element) => document.activeElement === element)).toBe(
-              true
-            );
+            let focusRestoredAtCollapse = false;
+            await expect
+              .poll(async () => {
+                const collapsed = await command.evaluate((element) => ({
+                  expanded: element.getAttribute('aria-expanded'),
+                  focused: document.activeElement === element,
+                }));
+                focusRestoredAtCollapse = collapsed.focused;
+                return collapsed.expanded;
+              })
+              .toBe('false');
+            expect(focusRestoredAtCollapse).toBe(true);
             // The website retains its native tree through the public leave barrier.
             // Lease completion shares the original close budget, without a fixed sleep.
             const remainingCloseMs = closeDeadline - performance.now();
@@ -1358,30 +1366,35 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 { timeout: remainingCloseMs }
               )
               .toBe(true);
-            const closeObservation = await page.evaluate(() => {
-              const state = window as typeof window & {
-                __contentsTakeCloseObservation?: () => CloseObservation;
-              };
-              return state.__contentsTakeCloseObservation!();
-            });
-            closeObservations.push({ family, runtime, action, observation: closeObservation });
-            const [homeTreeCount, popoverMarker, hasOriginalPosition] = await Promise.all([
-              page.locator('.docs-shell nav.docs-sidebar').count(),
-              page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree'),
-              page.evaluate(() => {
-                const state = window as typeof window & {
-                  __contentsOriginalTree?: Element;
-                  __contentsOriginalParent?: Node | null;
-                  __contentsOriginalNextSibling?: Node | null;
-                };
-                const tree = state.__contentsOriginalTree;
-                return (
-                  !!tree &&
-                  tree.parentNode === state.__contentsOriginalParent &&
-                  tree.nextSibling === state.__contentsOriginalNextSibling
-                );
-              }),
-            ]);
+            const [closeObservation, homeTreeCount, popoverMarker, hasOriginalPosition] =
+              await Promise.all([
+                page
+                  .evaluate(() => {
+                    const state = window as typeof window & {
+                      __contentsTakeCloseObservation?: () => CloseObservation;
+                    };
+                    return state.__contentsTakeCloseObservation!();
+                  })
+                  .then((observation) => {
+                    closeObservations.push({ family, runtime, action, observation });
+                    return observation;
+                  }),
+                page.locator('.docs-shell nav.docs-sidebar').count(),
+                page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree'),
+                page.evaluate(() => {
+                  const state = window as typeof window & {
+                    __contentsOriginalTree?: Element;
+                    __contentsOriginalParent?: Node | null;
+                    __contentsOriginalNextSibling?: Node | null;
+                  };
+                  const tree = state.__contentsOriginalTree;
+                  return (
+                    !!tree &&
+                    tree.parentNode === state.__contentsOriginalParent &&
+                    tree.nextSibling === state.__contentsOriginalNextSibling
+                  );
+                }),
+              ]);
             expect(homeTreeCount).toBe(1);
             expect(popoverMarker).toBeNull();
             expect(hasOriginalPosition).toBe(true);
