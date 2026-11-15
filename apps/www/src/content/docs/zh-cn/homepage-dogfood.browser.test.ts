@@ -1365,12 +1365,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               return state.__contentsTakeCloseObservation!();
             });
             closeObservations.push({ family, runtime, action, observation: closeObservation });
-            expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
-            expect(
-              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree')
-            ).toBeNull();
-            expect(
-              await page.evaluate(() => {
+            const [homeTreeCount, popoverMarker, hasOriginalPosition] = await Promise.all([
+              page.locator('.docs-shell nav.docs-sidebar').count(),
+              page.locator('nav.docs-sidebar').getAttribute('data-site-contents-popover-tree'),
+              page.evaluate(() => {
                 const state = window as typeof window & {
                   __contentsOriginalTree?: Element;
                   __contentsOriginalParent?: Node | null;
@@ -1382,8 +1380,11 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                   tree.parentNode === state.__contentsOriginalParent &&
                   tree.nextSibling === state.__contentsOriginalNextSibling
                 );
-              })
-            ).toBe(true);
+              }),
+            ]);
+            expect(homeTreeCount).toBe(1);
+            expect(popoverMarker).toBeNull();
+            expect(hasOriginalPosition).toBe(true);
             expect(closeObservation.initialMarker).not.toBeNull();
             expect(closeObservation.events).toEqual([
               { kind: 'home-inserted', siblingMatches: true },
