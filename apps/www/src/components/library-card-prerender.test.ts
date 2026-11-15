@@ -11,8 +11,18 @@ import { libraryActionAppearanceForFamily } from './library-card-prototypes';
 const frontmatter = readFileSync('apps/www/src/components/LibraryCardPart.astro', 'utf8').split(
   '---'
 )[1]!;
-const declarations = frontmatter.slice(frontmatter.indexOf('const { part'));
-const javascript = ts.transpileModule(declarations, {
+const source = ts.createSourceFile(
+  'LibraryCardPart.frontmatter.ts',
+  frontmatter,
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.TS
+);
+const declarations = ts.factory.updateSourceFile(
+  source,
+  source.statements.filter((statement) => !ts.isImportDeclaration(statement))
+);
+const javascript = ts.transpileModule(ts.createPrinter().printFile(declarations), {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
 }).outputText;
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
@@ -20,7 +30,8 @@ const evaluateSnapshot = new AsyncFunction(
   'Astro',
   'snapshotLibraryPart',
   'createHash',
-  javascript + '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope, layout: typeof layout === "undefined" ? undefined : layout };'
+  javascript +
+    '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope, layout: typeof layout === "undefined" ? undefined : layout };'
 );
 const snapshot = (part: string, props: Record<string, unknown>) =>
   evaluateSnapshot({ props: { part, props } }, snapshotLibraryPart, createHash) as Promise<{
@@ -30,6 +41,23 @@ const snapshot = (part: string, props: Record<string, unknown>) =>
     snapshotId: string;
     snapshotScope: string;
   }>;
+
+it('prerenders mutually exclusive Rhea light/dark endpoints without retaining the prior scheme', async () => {
+  const ids: string[] = [];
+  for (const colorScheme of ['light', 'dark', 'light'] as const) {
+    const result = await evaluateSnapshot(
+      { props: { part: 'shadcn-card', props: { styleProfile: 'rhea' }, colorScheme } },
+      snapshotLibraryPart,
+      createHash
+    );
+    expect(result.tokens.filter((token: string) => token.startsWith('ring-foreground/'))).toEqual([
+      colorScheme === 'dark' ? 'ring-foreground/10' : 'ring-foreground/5',
+    ]);
+    ids.push(result.snapshotId);
+  }
+  expect(ids[0]).not.toBe(ids[1]);
+  expect(ids[2]).toBe(ids[0]);
+});
 
 it('prerenders the actual Rhea action recipe and all native-state CSS with its layout', async () => {
   const action = libraryActionAppearanceForFamily('shadcn');
@@ -57,12 +85,12 @@ it('prerenders the actual Rhea action recipe and all native-state CSS with its l
     '--pui-ring-width: 3px;',
     '--pui-translate-y: 1px;',
     'outline-color: Highlight',
-  ]) expect(css).toContain(declaration);
+  ])
+    expect(css).toContain(declaration);
   expect(css).not.toContain('0 1px 2px');
   const selectors = [...css.matchAll(/(:where\([^{}]+\))\s*\{/g)].map((rule) => rule[1]!);
   expect(selectors.length).toBeGreaterThan(0);
   expect(selectors.every((selector) => selector.includes(result.snapshotId))).toBe(true);
-
 });
 
 it('binds each real Card token set to a deterministic, exact snapshot host', async () => {
