@@ -1,3 +1,4 @@
+import { ordinaryValueChildren } from './value-children';
 import type { CompilerDiagnostic, ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
 
 type Binding = { fn: FunctionIR; scope: Scope };
@@ -67,9 +68,22 @@ export function unsupportedCheckedHelperParameters(
     closure,
     () => undefined,
     (value) =>
-      value.parameters.some((parameter) => parameter.default || parameter.callback)
+      value.parameters.some(
+        (parameter) =>
+          parameter.default ||
+          (typeof parameter.type !== 'string' && parameter.type.kind === 'callable')
+      )
         ? 'Checked callback parameters and per-call parameter defaults'
         : undefined
+  );
+}
+
+/** The private Dart experiment has not implemented the ordinary ValueIR additions. */
+export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) =>
+    ['call', 'narrow', 'element', 'intrinsic', 'object-spread', 'member-write'].includes(value.kind)
+      ? 'Ordinary callable / structural value expressions'
+      : undefined
   );
 }
 
@@ -110,6 +124,11 @@ function unsupportedSourceExpressions(
         message: `${feature} are not implemented by ${target}.`,
         span: value.span,
       });
+    const ordinary = ordinaryValueChildren(value);
+    if (ordinary) {
+      ordinary.forEach((child) => expression(child, scope));
+      return;
+    }
     switch (value.kind) {
       case 'reference': {
         const binding = scope.get(value.name);
@@ -126,8 +145,13 @@ function unsupportedSourceExpressions(
         return;
       }
       case 'authored-hook': {
+        for (const argument of value.arguments ?? []) expression(argument, scope);
         const hook = hooks.get(value.hookId);
-        if (hook) fn(hook.setup, new Map(moduleScope));
+        if (hook) {
+          fn(hook.setup, new Map(moduleScope));
+          if (hook.projectHandle) fn(hook.projectHandle, new Map(moduleScope));
+          if (hook.configure) fn(hook.configure, new Map(moduleScope));
+        }
         return;
       }
       case 'member':
@@ -146,11 +170,6 @@ function unsupportedSourceExpressions(
       case 'lexical-write':
         expression(value.cell, scope);
         expression(value.value, scope);
-        return;
-      case 'conditional':
-        expression(value.condition, scope);
-        expression(value.whenTrue, scope);
-        expression(value.whenFalse, scope);
         return;
       case 'binary':
         expression(value.left, scope);
@@ -175,11 +194,15 @@ function unsupportedSourceExpressions(
     }
   }
   function statements(body: readonly StatementIR[], scope: Scope): void {
+    // Bind the closed lexical graph before visiting bodies; initialization stays in source order.
+    for (const statement of body)
+      if (statement.kind === 'const' && statement.value.kind === 'function')
+        scope.set(statement.name, { fn: statement.value.function, scope });
     for (const statement of body) {
       switch (statement.kind) {
         case 'const': {
           if (statement.value.kind === 'function') {
-            scope.set(statement.name, { fn: statement.value.function, scope: new Map(scope) });
+            scope.set(statement.name, { fn: statement.value.function, scope });
             // Qt/Dart currently print these declarations even when not called.
             // Reject new unsupported members rather than emit an invalid getter.
             if (closure === 'emitted-declarations') fn(statement.value.function, scope);

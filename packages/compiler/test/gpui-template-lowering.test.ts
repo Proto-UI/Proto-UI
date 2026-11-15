@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import { emitGpuiSource } from '../src/gpui-source';
-import type { ExpressionIR, GeneratedModule, PrototypeIR } from '../src/ir';
+import type { ExpressionIR, GeneratedModule, PrototypeIR, ValueType } from '../src/ir';
 
 const wrap = (body: string, name = 'unrelated-native-component') =>
   `import {definePrototype,tw} from '@proto.ui/core'; export default definePrototype({name:${JSON.stringify(name)},setup(def){${body}}});`;
@@ -80,6 +80,32 @@ function parse(body: string, fileName = 'native-template.proto.ts', name?: strin
   expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   return parsed.value;
+}
+/**
+ * These historical controls deliberately edit the legacy checked-IR ABI. The
+ * current frontend adds binding/callable metadata that would become stale after
+ * those edits. Keep their original ingress contract explicit; actual ordinary
+ * source/capture/default behavior is covered by the separate Cargo consumers.
+ */
+function legacyCheckedIr(ir: PrototypeIR): PrototypeIR {
+  return JSON.parse(
+    JSON.stringify(ir, (key, value) => {
+      if (key === 'bindingId' || key === 'captures') return undefined;
+      if ((key === 'type' || key === 'returnType') && value && typeof value === 'object') {
+        if (value.kind === 'callable') return 'function';
+        if (value.kind === 'object') return 'module-config';
+      }
+      if (value?.kind === 'call' && value.callee.kind === 'reference' && !value.optional)
+        return {
+          kind: 'helper-call',
+          name: value.callee.name,
+          arguments: value.arguments,
+          type: value.type,
+          span: value.span,
+        };
+      return value;
+    })
+  ) as PrototypeIR;
 }
 function emitIR(ir: PrototypeIR, options: EmissionOptions = {}): GeneratedModule {
   const checked = validateIR(ir);
@@ -234,7 +260,7 @@ function nativeParameterIr(predicate: boolean): PrototypeIR {
     : "return r=>{const child=r.el('span','x');const helper=()=>child;return helper();};";
   const parsed = parsePrototype(wrap(source), { fileName: 'native-parameter-ir-base.proto.ts' });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const ir = parsed.value;
+  const ir = legacyCheckedIr(parsed.value);
   const returned = ir.setup.body.find((statement) => statement.kind === 'return');
   if (returned?.kind !== 'return' || returned.value?.kind !== 'function')
     throw new Error('Expected renderer');
@@ -317,6 +343,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     const nativeRoot = owner.slice(begin, end);
     expect(nativeRoot).not.toContain('renderer');
     expect(nativeRoot).not.toContain('.call(');
+    expect(nativeRoot).not.toContain('.call_authored(');
     const parameter = nativeRoot.match(
       /pub fn (?:paint_)?native_root\(\s*([A-Za-z_][A-Za-z_0-9]*)\s*:\s*&NativeSnapshot/
     );
@@ -343,7 +370,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     const owner = ownerSource(module);
     expect(owner).toContain('slot_count:1');
     expect(owner).toContain('count.saturating_add(child.slot_count).min(2)');
-    expect(owner).toContain('self.slot_count <= 1');
+    expect(owner).toContain('if self.slot_count>1{value_error(');
     const validation = owner.indexOf('result.assert_children()');
     const commit = owner.indexOf('o.projection=Some(result)', validation);
     expect(validation).toBeGreaterThanOrEqual(0);
@@ -374,7 +401,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     const owner = ownerSource(module);
     expect(owner).toContain('pub fn assert_native_slot_children');
     expect(owner).toContain('child.assert_children()');
-    expect(owner).toContain('child.slot_count == 0');
+    expect(owner).toContain('if child.slot_count!=0{value_error(');
     const begin = module.code.indexOf('pub fn set_slot(');
     const end = module.code.indexOf('pub fn set_parent(', begin);
     expect(begin).toBeGreaterThanOrEqual(0);
@@ -403,7 +430,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     (_label, body) => {
       const module = emit(body);
       expect(module.code).toMatch(/NativeCallable\s*\{\s*identity\s*:\s*Rc::new\(\(\)\)/);
-      expect(module.code).toMatch(/\(v_[0-9a-f]+\.call\)\(/);
+      expect(module.code).toMatch(/\(v_[0-9a-f]+(?:\.read\(\))?\.call\)\(/);
       expect(module.code).not.toContain('Value::NativeSnapshot');
     }
   );
@@ -450,7 +477,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
       { fileName: 'finite-callable-wrapper-ir-base.proto.ts' }
     );
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    const ir = parsed.value;
+    const ir = legacyCheckedIr(parsed.value);
     for (const name of ['id', 'wrapper']) {
       const declared = ir.setup.body.find(
         (statement) => statement.kind === 'const' && statement.name === name
@@ -516,7 +543,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
       { fileName: 'scalar-context-ir-base.proto.ts' }
     );
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    const ir = parsed.value;
+    const ir = legacyCheckedIr(parsed.value);
     const returned = ir.setup.body.find((statement) => statement.kind === 'return');
     if (returned?.kind !== 'return' || returned.value?.kind !== 'function')
       throw new Error('Expected renderer');
@@ -530,7 +557,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     const compiled = emitRecorded(ir);
     expect(compiled.ok, JSON.stringify(compiled)).toBe(true);
     if (!compiled.ok) return;
-    expect(compiled.value.code).toContain('v_74657874.call(vec![])');
+    expect(compiled.value.code).toContain('v_74657874.call_authored(vec![])');
     expect(compiled.value.code).not.toContain('(v_74657874.call)()');
   });
 
@@ -542,7 +569,7 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
       { fileName: 'setup-context-factory-ir-base.proto.ts' }
     );
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    const ir = parsed.value;
+    const ir = legacyCheckedIr(parsed.value);
     const factory = ir.setup.body.find(
       (statement) => statement.kind === 'const' && statement.name === 'factory'
     );
@@ -674,9 +701,11 @@ function assertNativeRecordGraph(module: GeneratedModule): void {
 function recordForwardIr(mode: 'single' | 'mixed' | 'optional', nativeFirst: boolean): PrototypeIR {
   // This baseline is legal ordinary source. Only semantic formal admission is
   // exercised by the explicit mutation; no unsupported frontend annotation is hidden.
-  const ir = parse(
-    "const flag=def.state.bool('flag',true);return r=>{const child=r.el('span','x');const holder={child};const ordinary={state:flag};const forward=()=>holder;const first=forward();const second=forward();if(!first||!second)return null;return child;};",
-    'native-record-forward-ir-base.proto.ts'
+  const ir = legacyCheckedIr(
+    parse(
+      "const flag=def.state.bool('flag',true);return r=>{const child=r.el('span','x');const holder={child};const ordinary={state:flag};const forward=()=>holder;const first=forward();const second=forward();if(!first||!second)return null;return child;};",
+      'native-record-forward-ir-base.proto.ts'
+    )
   );
   const returned = ir.setup.body.find((statement) => statement.kind === 'return');
   if (returned?.kind !== 'return' || returned.value?.kind !== 'function')
@@ -691,11 +720,16 @@ function recordForwardIr(mode: 'single' | 'mixed' | 'optional', nativeFirst: boo
   fn.parameters = [
     { name: 'config', type: 'module-config', ...(mode === 'optional' ? { optional: true } : {}) },
   ];
+  const resultType: ValueType =
+    mode === 'optional'
+      ? { kind: 'value-union', members: ['module-config', 'void'] }
+      : 'module-config';
+  fn.returnType = resultType;
   fn.body = [
     {
       kind: 'return',
       span: fn.span,
-      value: { kind: 'reference', name: 'config', type: 'module-config', span: fn.span },
+      value: { kind: 'reference', name: 'config', type: resultType, span: fn.span },
     },
   ];
   const native: ExpressionIR = {
@@ -718,6 +752,22 @@ function recordForwardIr(mode: 'single' | 'mixed' | 'optional', nativeFirst: boo
       throw new Error('Expected forwarding call');
     const nativeCall = mode === 'single' || (index === 0) === nativeFirst;
     declaration.value.arguments = nativeCall ? [native] : mode === 'optional' ? [] : [ordinary];
+    declaration.value.type = resultType;
+  }
+  if (mode === 'optional') {
+    function mark(value: unknown): void {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) {
+        value.forEach(mark);
+        return;
+      }
+      const node = value as Record<string, unknown>;
+      if (node.kind === 'reference' && (node.name === 'first' || node.name === 'second'))
+        node.type = resultType;
+      for (const [key, child] of Object.entries(node))
+        if (key !== 'type' && key !== 'span') mark(child);
+    }
+    mark(body);
   }
   return ir;
 }
@@ -824,7 +874,7 @@ function sharedSetupRecordIr(nested: boolean): PrototypeIR {
   const parsed = parsePrototype(source, { fileName: 'shared-setup-render-record.proto.ts' });
   expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const ir = parsed.value;
+  const ir = legacyCheckedIr(parsed.value);
   const identity = ir.setup.body.find(
     (statement) => statement.kind === 'const' && statement.name === 'identity'
   );
@@ -924,7 +974,8 @@ describe('GPUI native-record cross-category operand preservation (new v9)', () =
         );
         assertNativeRecordGraph(module);
         const recordCall = '(v_7265636f7264.call)()';
-        const other = otherKind === 'snapshot' ? '(v_6368696c64.call)()' : 'v_6368696c64.clone()';
+        const other =
+          otherKind === 'snapshot' ? '(v_6368696c64.read().call)()' : 'v_6368696c64.read()';
         expect(
           oneOrderedBlock(
             module.code,
@@ -943,9 +994,11 @@ describe('GPUI native-record cross-category operand preservation (new v9)', () =
 // settled native-record ABI, not the caller's same-spelled ordinary local.
 it('settles nested captured record formals in either call order without caller shadow capture (checked IR)', () => {
   for (const nativeFirst of [true, false]) {
-    const ir = parse(
-      "const flag=def.state.bool('flag',true);return r=>{const config='caller-shadow';const child=r.el('span','x');const holder={child};const ordinary={state:flag};const forward=()=>{const read=()=>holder;return read();};const first=forward();const second=forward();if(config!=='caller-shadow'||!first||!second)return null;return child;};",
-      'captured-record-formal-ir-base.proto.ts'
+    const ir = legacyCheckedIr(
+      parse(
+        "const flag=def.state.bool('flag',true);return r=>{const config='caller-shadow';const child=r.el('span','x');const holder={child};const ordinary={state:flag};const forward=()=>{const read=()=>holder;return read();};const first=forward();const second=forward();if(config!=='caller-shadow'||!first||!second)return null;return child;};",
+        'captured-record-formal-ir-base.proto.ts'
+      )
     );
     const returned = ir.setup.body.find((statement) => statement.kind === 'return');
     if (returned?.kind !== 'return' || returned.value?.kind !== 'function')

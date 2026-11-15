@@ -1,7 +1,9 @@
+import { pruneDeadValues } from './demand-pruning';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
   unsupportedPointerFacts,
+  unsupportedDartOrdinaryValues,
 } from './pointer-facts-admission';
 import { createHash } from 'node:crypto';
 import { validateIR } from './ir-validation';
@@ -31,7 +33,7 @@ export function emitFlutterSource(
 ): CompileResult<GeneratedModule> {
   const checked = validateIR(input);
   if (!checked.ok) return checked;
-  const ir = checked.value;
+  const ir = pruneDeadValues(checked.value);
   const moduleParts = partitionModuleBindings(ir);
   const controlLabelDiagnostics = unsupportedControlLabel(
     ir,
@@ -45,6 +47,8 @@ export function emitFlutterSource(
     'emitted-declarations'
   );
   if (helperDiagnostics.length) return { ok: false, diagnostics: helperDiagnostics };
+  const ordinaryDiagnostics = unsupportedDartOrdinaryValues(ir);
+  if (ordinaryDiagnostics.length) return { ok: false, diagnostics: ordinaryDiagnostics };
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'flutter-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const component = options.componentName ?? 'CompiledComponent';
@@ -246,9 +250,8 @@ export function emitFlutterSource(
     return typeName(type);
   }
   function typeName(name: string): string {
-    if (name === 'transition') return 'NativeTransition';
     if (name === 'state-disconnect') return 'NativeStateWatchEvent<Object?>';
-    if (name === 'binding-disposer' || name === 'transition-action') return 'void Function()';
+    if (name === 'binding-disposer') return 'void Function()';
     if (name === 'boundary-outside-event') return 'NativeBoundaryOutsideEvent';
     if (name === 'boundary-sample') return 'NativeBoundarySample';
     if (name === 'collection-item') return 'NativeCollectionItem<GeneratedResolvedProps>';
@@ -309,7 +312,6 @@ export function emitFlutterSource(
         'table-cell-list': 'List<NativeTableCell>',
         'table-diagnostic-list': 'List<NativeTableDiagnostic>',
         'a11y-ref-list': 'List<NativeA11yRef>',
-        'transition-controls': 'NativeTransitionControls',
         'action': 'void Function()',
         'a11y-ref': 'NativeA11yRef',
       } as Record<string, string>
@@ -526,7 +528,7 @@ export function emitFlutterSource(
           ? `!nativeTruthy(${expr(value.operand, depth)})`
           : `(${value.operator === '-' ? '-' : ''}nativeNumber(${expr(value.operand, depth)}))`;
       case 'conditional':
-        return `(${expr(value.condition, depth)} ? ${expr(value.whenTrue, depth)} : ${expr(value.whenFalse, depth)})`;
+        return `(${expr(value.condition, depth)} ? ${expr(value.then, depth)} : ${expr(value.otherwise, depth)})`;
       case 'binary': {
         const left = expr(value.left, depth),
           right = expr(value.right, depth);
@@ -618,8 +620,6 @@ export function emitFlutterSource(
             return `_owner.install('asHitParticipation', () => _owner.hitParticipation ??= NativeHitParticipation(_owner))`;
           case 'hook.asTableStructure':
             return `_owner.install('asTableStructure', () => _owner.declareTableStructure(${args[0]}))`;
-          case 'hook.asTransition':
-            return `_owner.install('asTransition', () => _owner.declareTransition())`;
           case 'run.update':
             return `${receiver}.update()`;
           case 'props.define':
@@ -807,6 +807,7 @@ export function emitFlutterSource(
         }
       }
     }
+    throw new Error('Private Dart admission omitted an unsupported ordinary value');
   }
   function configuration(value: ExpressionIR, depth: number): string {
     if (value.kind === 'record')

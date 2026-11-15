@@ -48,9 +48,6 @@ export async function startNativeWcFixture() {
     'Component.ts',
     '.proto-ui/context/scope-v1.ts',
     '.proto-ui/style/native-v1.ts',
-    '.proto-ui/interaction/native-v1.ts',
-    '.proto-ui/interaction/ownership-v1.ts',
-    '.proto-ui/interaction/adapter-modules-v1.ts',
     '.proto-ui/web-component/browser-v1.ts',
   ]);
   const inventory: { logicalPath: string; exportPath: string; contents: string }[] = [];
@@ -88,6 +85,8 @@ export async function startNativeWcFixture() {
         throw new Error('Generated export escaped allowlist root');
       inventory.push({ logicalPath, exportPath, contents: f.contents });
     }
+    if (seen.size !== allowedSourcePaths.size)
+      throw new Error('Generated native browser closure is incomplete');
   }
   // Validate the complete two-host inventory before any generated artifact is written.
   if (new Set(inventory.map((f) => f.exportPath)).size !== inventory.length)

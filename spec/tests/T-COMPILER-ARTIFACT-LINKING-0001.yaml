@@ -1,0 +1,92 @@
+id: T-COMPILER-ARTIFACT-LINKING-0001
+type: test
+title: Independent library linking and ordinary native component consumers
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Local artifact and simulated-DOM evidence requires independent review and native-browser acceptance before activation.
+cases:
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-OWNER
+    title: Explicit source aliases and library re-exports resolve one owner
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-OWNERSHIP]
+    expectation: Independently published and read artifacts share actual Context, A11y, Anatomy and Focus objects; missing exports and cycles reject before output.
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-PRIVATE
+    title: Equal private declarations remain distinct
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-PRIVATE]
+    expectation: Equal source IDs, debug names and contracts produce distinct objects and private consumers cannot observe another library's provider.
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-ABI
+    title: Incompatible contracts and support fail at link time
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-ABI]
+    expectation: Kind, Context schema, Focus metadata, support version and implementation fingerprint mismatches diagnose before native import.
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-CONSUMER
+    title: Ordinary framework imports preserve transport and ownership
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-CONSUMER]
+    expectation: React, Vue 3, Vue 2 and registered Web Components update, isolate private identities and dispose normally through native wrappers; React portals and Anatomy/Focus composition remain intact. Importing an unresolved external declaration throws.
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-PROVENANCE
+    title: Publication records original and actual linked contents
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-PROVENANCE]
+    expectation: Deterministic links retain source provenance and actual file hashes, reject modified files and unsafe paths, and never overwrite a prior output.
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-CASE-LEGACY
+    title: Verified historical native protocols have an explicit migration boundary
+    covers: [C-COMPILER-ARTIFACT-LINKING-0001-ABI, C-COMPILER-ARTIFACT-LINKING-0001-CONSUMER]
+    expectation: Exact published IR6 ControlLabel and ordinary artifacts migrate and compose with current components; actual legacy native Transition use requires source recompilation before any output write, without rejecting an ordinary same-named method.
+implementations:
+  - id: artifact-linking
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/src/artifact-linking.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-OWNER,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-PRIVATE,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-ABI,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-PROVENANCE,
+      ]
+  - id: linked-consumers
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/artifact-linking-consumer.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-OWNER,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-PRIVATE,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-ABI,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-CONSUMER,
+      ]
+    notes:
+      - Tests use independently compiled, written and read libraries followed by the public linker and ordinary ESM imports; they do not merge support files in a test loader.
+      - Execution uses happy-dom with the actual framework packages; this is not native-browser acceptance or SSR hydration evidence.
+  - id: published-artifact-migration
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/native-support-published-migration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-LEGACY,
+        T-COMPILER-ARTIFACT-LINKING-0001-CASE-PROVENANCE,
+      ]
+    notes:
+      - Fixed old compiler CLI captures remain byte-exact; new output is compiled independently and linked through the production migration API and CLI.
+      - Ordinary Vue2 imports exercise old/current pairing in both directions, association rebinding and repeated mount; this remains simulated-DOM evidence.
+verifies:
+  contracts:
+    - id: C-COMPILER-ARTIFACT-LINKING-0001
+      anchors:
+        [
+          C-COMPILER-ARTIFACT-LINKING-0001-OWNERSHIP,
+          C-COMPILER-ARTIFACT-LINKING-0001-PRIVATE,
+          C-COMPILER-ARTIFACT-LINKING-0001-ABI,
+          C-COMPILER-ARTIFACT-LINKING-0001-CONSUMER,
+          C-COMPILER-ARTIFACT-LINKING-0001-PROVENANCE,
+        ]
+openQuestions:
+  - id: T-COMPILER-ARTIFACT-LINKING-0001-Q-INDEPENDENT-AND-NATIVE
+    question: Independent review, complete native-browser composition and separately linked SSR hydration remain distinct acceptance work.
+    blocks: [activation:T-COMPILER-ARTIFACT-LINKING-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bind explicit library identity, ABI, provenance and ordinary consumer cases to executable evidence without stable activation.
+tags: [compiler, linking, conformance, identity]

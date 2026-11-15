@@ -2,10 +2,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import sourceConfig from '../../../../../vitest.config';
-import {
-  transformWithEsbuild,
-  type Plugin,
-} from '../../../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { transformWithEsbuild, type Plugin } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
@@ -39,10 +36,13 @@ const emitted: Plugin = {
   resolveId(id, importer) {
     if (importer && id.startsWith('.')) {
       const support = supportingModules.get(importer);
-      const specifier = support?.specifier ??
+      const specifier =
+        support?.specifier ??
         (importer.startsWith('\0') && importer.endsWith('.tsx') ? importer.slice(1, -4) : null);
       if (specifier && supportingFiles.has(specifier)) {
-        const file = path.posix.normalize(path.posix.join(path.posix.dirname(support?.file ?? 'GeneratedButton.tsx'), id));
+        const file = path.posix.normalize(
+          path.posix.join(path.posix.dirname(support?.file ?? 'GeneratedButton.tsx'), id)
+        );
         const files = supportingFiles.get(specifier)!;
         for (const candidate of [file, `${file}.ts`, `${file}.tsx`]) {
           const resolved = files.get(candidate);
@@ -58,7 +58,8 @@ const emitted: Plugin = {
     if (support) {
       if (support.file.endsWith('.css')) return support.contents;
       return transformWithEsbuild(support.contents, support.file, {
-        loader: support.file.endsWith('.tsx') ? 'tsx' : 'ts', sourcemap: true,
+        loader: support.file.endsWith('.tsx') ? 'tsx' : 'ts',
+        sourcemap: true,
       });
     }
     if (!id.startsWith('\0') || !id.endsWith('.tsx')) return null;
@@ -68,7 +69,8 @@ const emitted: Plugin = {
     const result = await compileFile(sources[specifier], {
       root: repository,
       componentName: 'GeneratedButton',
-      profile: specifier === 'virtual:update-intent-source' ? 'react-dom-source-v1' : 'react-runtime-v1',
+      profile:
+        specifier === 'virtual:update-intent-source' ? 'react-dom-source-v1' : 'react-runtime-v1',
     });
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     const files = new Map<string, string>();
@@ -120,13 +122,15 @@ const emitted: Plugin = {
       generatedSha256: createHash('sha256').update(code).digest('hex'),
       mutant: code !== result.value.output.code,
       supportingFiles: (result.value.output.supportingFiles ?? []).map((file) => ({
-        path: file.path, kind: file.kind,
+        path: file.path,
+        kind: file.kind,
         sha256: createHash('sha256').update(file.contents).digest('hex'),
       })),
     };
     return transformWithEsbuild(
       `${code}\nexport const __puiBrowserFixtureCompilation = ${JSON.stringify(compilation)};\n`,
-      'GeneratedButton.tsx', { loader: 'tsx', sourcemap: true }
+      'GeneratedButton.tsx',
+      { loader: 'tsx', sourcemap: true }
     );
   },
 };

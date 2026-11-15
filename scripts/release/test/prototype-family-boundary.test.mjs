@@ -69,7 +69,7 @@ const BRUTALIST_FAMILIES = new Set([
 ]);
 
 test('prototype packages expose side-effect-free family entry points', () => {
-  assertFamilyExports(BASE_ROOT, BASE_FAMILIES);
+  assertFamilyExports(BASE_ROOT, BASE_FAMILIES, { transition: './src/transition/index.ts' });
   assertFamilyExports(SHADCN_ROOT, SHADCN_FAMILIES);
   assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);
 });
@@ -199,11 +199,12 @@ test('packed Button boundary allows its shared style-selection support but rejec
   );
 });
 
-function assertFamilyExports(packageRoot, families) {
+function assertFamilyExports(packageRoot, families, protoSources = {}) {
   const manifest = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
   assert.equal(manifest.sideEffects, false, `${manifest.name} must declare sideEffects=false`);
   for (const family of families) {
     assert.deepEqual(manifest.exports[`./${family}`], {
+      ...(Object.hasOwn(protoSources, family) ? { proto: protoSources[family] } : {}),
       types: `./dist/${family}/index.d.ts`,
       import: `./dist/${family}/index.js`,
       default: `./dist/${family}/index.js`,

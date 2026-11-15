@@ -3,7 +3,7 @@ import { mkdir, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createServer as createViteServer } from '../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { createServer as createViteServer } from 'vite';
 import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import type { Browser } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { buttonCases, evaluateButtonCase } from '../src/conformance/button-cases';

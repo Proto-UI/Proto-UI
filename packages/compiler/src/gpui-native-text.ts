@@ -45,7 +45,7 @@ pub fn text_on(owner:&OwnerWeak,kind:Value,callback:Value)->Value{
     disposer(owner,active,true)
 }
 pub fn text_sync(owner:&OwnerWeak,patch:Value)->Value{
-    let owner=runtime(owner);let Value::Record(entries)=patch else{panic!("TextControl patch required")};
+    let owner=runtime(owner);let Value::Record(entries)=patch else{panic!("TextControl patch required")};let entries=entries.fields.borrow();
     let mut o=owner.borrow_mut();let text=&mut o.modules.text;
     assert!(text.declared,"TextControl is not declared");
     let rows=entries.get("rows");let wrap=entries.get("wrap");
@@ -121,7 +121,7 @@ fn text_event(owner:&OwnerRef,kind:&str,value:&str,composing:bool,data:Option<&s
     for index in 0..listeners {
         if owner.borrow().disposed||!owner.borrow().mounted||!owner.borrow().present||owner.borrow().modules.text.lease_epoch!=epoch{break}
         let callback=owner.borrow().modules.text.listeners.get(index).filter(|listener|listener.active.get()&&listener.kind==kind).map(|listener|listener.callback.clone());
-        if let Some(callback)=callback{invoke(owner,"text-event",&callback,vec![capability(&Rc::downgrade(owner)),event.clone()]);}
+        if let Some(callback)=callback{if native_host_callback(owner,"text-event",||invoke(owner,"text-event",&callback,vec![capability(&Rc::downgrade(owner)),event.clone()])).is_none(){break}}
     }
     if controlled&&(kind=="input"&&!composing||kind=="compositionend") {
         let weak=Rc::downgrade(owner);window.defer(cx,move|window,cx|{

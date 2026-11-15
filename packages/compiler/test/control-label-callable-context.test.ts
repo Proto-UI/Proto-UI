@@ -1,21 +1,28 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import type { FunctionIR, PrototypeIR } from '../src/ir';
 
-function source(body: string): string {
+function source(
+  body: string,
+  effect = 'def.props.setDefaults({enabled:true})',
+  after = ''
+): string {
   return `import {definePrototype} from '@proto.ui/core';
     export default definePrototype({name:'checked-callback-lifetime',setup(def){
       def.props.define({enabled:{type:'boolean',default:false}});
       const defer=(effect:()=>void)=>{${body}};
-      defer(()=>def.props.setDefaults({enabled:true}));
+      defer(()=>{${effect};});${after}
     }});`;
 }
 
 function parsed(input: string): PrototypeIR {
   const result = parsePrototype(input);
   if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-  return result.value;
+  const portable = validateIR(JSON.parse(JSON.stringify(result.value)));
+  if (!portable.ok) throw new Error(JSON.stringify(portable.diagnostics));
+  return portable.value;
 }
 
 function functions(ir: PrototypeIR): FunctionIR[] {
@@ -31,84 +38,136 @@ function functions(ir: PrototypeIR): FunctionIR[] {
   return result;
 }
 
-describe('checked helper callable lifetime', () => {
+const deferredBodies = [
+  'def.lifecycle.onMounted(()=>effect());',
+  'const alias=effect;def.lifecycle.onMounted(()=>alias());',
+  'const wrapper=()=>effect();def.lifecycle.onMounted(()=>wrapper());',
+  'const wrapper=()=>effect();const alias=wrapper;def.lifecycle.onMounted(()=>alias());',
+  'def.lifecycle.onMounted(()=>{const wrapper=()=>effect();wrapper();});',
+  'const box={effect};def.lifecycle.onMounted(()=>box.effect());',
+  'const factory=()=>()=>effect();const later=factory();def.lifecycle.onMounted(later);',
+  'const select=(fn:()=>void)=>fn;const later=select(effect);def.lifecycle.onMounted(later);',
+  'const later=(next:()=>void=effect)=>next();def.lifecycle.onMounted(()=>later());',
+  'def.lifecycle.onMounted(()=>forward());const forward=()=>effect();',
+];
+
+describe('ordinary callable execution contexts', () => {
+  it.each(deferredBodies)(
+    'rejects a known setup effect reached from a registered callback: %s',
+    (body) => {
+      expect(parsePrototype(source(body))).toMatchObject({
+        ok: false,
+        diagnostics: [
+          { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+        ],
+      });
+    }
+  );
+
+  it.each(deferredBodies)(
+    'permits deferred pure callable capture through the same transport: %s',
+    (body) => {
+      parsed(source(body, 'const ignored=1'));
+    }
+  );
+
   it.each([
-    'def.lifecycle.onMounted(()=>effect());',
-    'const alias=effect; def.lifecycle.onMounted(()=>alias());',
-    'const wrapper=()=>effect(); def.lifecycle.onMounted(()=>wrapper());',
-    'const wrapper=()=>effect(); const alias=wrapper; def.lifecycle.onMounted(()=>alias());',
-    'def.lifecycle.onMounted(()=>{const wrapper=()=>effect(); wrapper();});',
-    'def.lifecycle.onMounted(()=>{}); return renderer=>{effect(); return renderer.slot();};',
     'return effect;',
-    'const wrapper=()=>effect(); return wrapper;',
-    'return true ? effect : () => {};',
-  ])('rejects deferred callable capture or return: %s', (body) => {
-    expect(parsePrototype(source(body))).toMatchObject({
-      ok: false,
-      diagnostics: [
-        { code: 'PUI1007', message: expect.stringMatching(/callable parameters cannot/) },
-      ],
-    });
+    'return ()=>effect();',
+    'return true?effect:()=>{};',
+    'const result=()=>effect();return {result};',
+  ])('does not execute an ordinary closure merely because it is returned: %s', (body) => {
+    parsed(source(body));
   });
 
-  it('rejects a concise returned helper which closes over a callable parameter', () => {
-    const input = source('effect();').replace(
-      'const defer=(effect:()=>void)=>{effect();}',
-      'const defer=(effect:()=>void)=>()=>effect()'
+  it('checks returned closures when they are actually called in render', () => {
+    const input = source('return ()=>effect();').replace(
+      'defer(()=>{def.props.setDefaults({enabled:true});});',
+      'const later=defer(()=>{def.props.setDefaults({enabled:true});});return ()=>{later();return "rendered";};'
     );
     expect(parsePrototype(input)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI1007', message: expect.stringMatching(/returned function/) }],
+      diagnostics: [{ code: 'PUI1007', message: 'props.setDefaults is not permitted in render.' }],
     });
   });
 
-  it.each([
-    { declaration: '', invoke: 'effect' },
-    { declaration: 'const alias=effect;', invoke: 'alias' },
-    { declaration: 'const wrapper=()=>effect();', invoke: 'wrapper' },
-    { declaration: 'const wrapper=()=>effect(); const alias=wrapper;', invoke: 'alias' },
-  ])('validates imported IR capture through $invoke', ({ declaration, invoke }) => {
-    const ir = structuredClone(
-      parsed(source(`${declaration} ${invoke}(); def.lifecycle.onMounted(()=>{});`))
+  it('does not replace a lexical capture with a same-name caller binding', () => {
+    parsed(
+      source(
+        'const wrap=()=>{const effect=()=>{};return ()=>effect();};def.lifecycle.onMounted(wrap());'
+      )
     );
-    const helper = functions(ir).find((fn) =>
-      fn.parameters.some((parameter) => parameter.callback)
-    )!;
-    const mounted = functions(ir).find((fn) => fn.context === 'mounted')!;
-    const index = helper.body.findIndex(
-      (statement) =>
-        statement.kind === 'effect' &&
-        statement.expression.kind === 'helper-call' &&
-        statement.expression.name === invoke
+  });
+
+  it('keeps independently supplied callback effects in separate call frames', () => {
+    const input = source(
+      'def.lifecycle.onMounted(()=>effect());',
+      'const ignored=1',
+      'defer(()=>def.props.setDefaults({enabled:true}));'
     );
-    mounted.body.push(...helper.body.splice(index, 1));
-    expect(validateIR(ir)).toMatchObject({
+    expect(parsePrototype(input)).toMatchObject({
       ok: false,
       diagnostics: [
-        {
-          code: 'PUI2002',
-          message: expect.stringMatching(/callable parameters cannot be captured/),
-        },
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
       ],
     });
   });
 
-  it('validates imported IR callable returns', () => {
-    const ir = structuredClone(parsed(source('effect();')));
+  it('preserves later-field overwrite when following a spread callback record', () => {
+    parsed(
+      source(
+        'const first={effect};const last={effect:()=>{}};const copy={...first,...last};def.lifecycle.onMounted(()=>copy.effect());'
+      )
+    );
+  });
+
+  it('checks a synchronous parameter default at the actual call phase', () => {
+    const input = `import{definePrototype}from'@proto.ui/core';export default definePrototype({name:'default-phase',setup(def){def.props.define({enabled:{type:'boolean',default:false}});const configure=()=>{def.props.setDefaults({enabled:true});return 1;};const read=(value=configure())=>value;def.lifecycle.onMounted(()=>{read();});}});`;
+    expect(parsePrototype(input)).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+      ],
+    });
+    parsed(input.replace('read();', 'read(1);'));
+  });
+
+  it('rederives a transported callable effect from valid portable identities', () => {
+    const ir = parsed(source('effect();def.lifecycle.onMounted(()=>{});'));
     const helper = functions(ir).find((fn) =>
-      fn.parameters.some((parameter) => parameter.callback)
+      fn.parameters.some((parameter) => parameter.name === 'effect')
     )!;
-    helper.returnType = 'function';
-    helper.body = [
-      {
-        kind: 'return',
-        value: { kind: 'reference', name: 'effect', type: 'function', span: helper.span },
-        span: helper.span,
-      },
+    const mounted = functions(ir).find((fn) => fn.context === 'mounted')!;
+    const index = helper.body.findIndex(
+      (statement) => statement.kind === 'effect' && statement.expression.kind === 'call'
+    );
+    expect(index).toBeGreaterThanOrEqual(0);
+    const parameter = helper.parameters[0];
+    mounted.body.push(...helper.body.splice(index, 1));
+    mounted.captures = [
+      { bindingId: parameter.bindingId!, name: parameter.name, storage: 'value' },
     ];
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI2002', message: expect.stringMatching(/returned function/) }],
+      diagnostics: [
+        { code: 'PUI2002', message: 'props.setDefaults is not permitted in callback.' },
+      ],
+    });
+  });
+
+  it('keeps raw capture methods callable during projection and checks their later invocations', () => {
+    const input = `import{definePrototype,defineAsHook}from'@proto.ui/core';const install=defineAsHook({name:'raw-method',setup(def){const flag=def.state.bool('flag',false);def.expose.method('prime',()=>flag.setDefault(true));},projectHandle(capture){const prime=capture.getMethod('prime');prime?.();return {prime:()=>prime?.()};}});export default definePrototype({name:'owner',setup(def){const controls=install();}});`;
+    parsed(input);
+    expect(
+      parsePrototype(
+        input.replace(
+          'const controls=install();',
+          'const controls=install();def.lifecycle.onMounted(()=>controls.prime());'
+        )
+      )
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1007', message: 'state.setDefault is not permitted in callback.' }],
     });
   });
 

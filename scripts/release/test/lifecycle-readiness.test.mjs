@@ -253,17 +253,19 @@ test('authoring preserves identities across deletion, replacement, and file move
     assert.match(promotedMove.stderr, /new admission revision/);
     assert.match(promotedMove.stderr, /historical activation requires/);
     const draft = parse(original);
+    // Exercise current admission evidence separately from the historical
+    // activation rejection above, even after the release train advances.
     writeFileSync(
       movedPath,
       JSON.stringify({
         ...draft,
         status: 'active',
-        activeSince: '0.3.0-alpha.1',
+        activeSince: version,
         lifecycleRationale: 'The proposed admission was reviewed.',
         revisions: [
           ...(draft.revisions ?? []),
           {
-            version: '0.3.0-alpha.1',
+            version,
             change: 'admitted',
             summary: 'Admission was reviewed.',
           },
@@ -315,8 +317,8 @@ test('authoring preserves identities across deletion, replacement, and file move
       type: 'contract',
       title: 'New admission',
       status: 'active',
-      since: '0.3.0-alpha.1',
-      activeSince: '0.3.0-alpha.1',
+      since: version,
+      activeSince: version,
       lifecycleRationale: 'The initial admission was reviewed.',
     };
     const newPath = path.join(fixture, 'spec/contracts/C-REVIEW-UNTRACKED-0001.yaml');
@@ -336,7 +338,7 @@ test('authoring preserves identities across deletion, replacement, and file move
         type: 'test',
         title: 'Admission evidence',
         status: 'draft',
-        since: '0.3.0-alpha.1',
+        since: version,
         lifecycleRationale: 'The execution map remains under review.',
         verifies: { contracts: [newActive.id] },
         cases: [

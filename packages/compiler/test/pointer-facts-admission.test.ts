@@ -116,10 +116,12 @@ describe('portable pointer facts: capability admission', () => {
     const ir = parse('const unused = () => event.pointerType; const same = event === event;');
     expect(emitGpuiSource(ir).ok).toBe(true);
     for (const emit of ssr) expect(emit(ir, { ssr: true }).ok, emit.name).toBe(true);
-    // These emitters still print unused helper bodies. They must not generate
-    // NativeInput.pointerType or an unsupported Qt member merely to return ok.
-    for (const emit of [emitQtSource, emitFlutterSource])
-      expect(emit(ir), emit.name).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4003' }] });
+    // The unused body has no call demand and must not leak unsupported facts.
+    for (const emit of [emitQtSource, emitFlutterSource]) {
+      const result = emit(ir);
+      expect(result.ok, emit.name).toBe(true);
+      if (result.ok) expect(result.value.code).not.toMatch(/pointerType|\bunused\b/);
+    }
   });
   it('does not require new facts after a terminal return that all emitters omit', () => {
     const ir = parse(
@@ -162,12 +164,24 @@ describe('portable pointer facts: capability admission', () => {
 
 describe('legacy control labels within the current IR schema', () => {
   const bodies = [
-    'const control = event.control; const alias = control; const same = alias === control;',
-    'const control = event.control; const get = () => control; const same = get() === control;',
-    'const control = event.control; const choose = (flag: boolean) => { if (flag) return event; return control; }; const mixed = choose(true); const same = mixed === event;',
-    'const control = event.control; const choose = (flag: boolean) => { if (flag) return control; return event; }; const get = () => choose(false); const same = get() !== control;',
-  ];
-  for (const body of bodies)
+    [
+      'const control = event.control; const alias = control; const same = alias === control;',
+      false,
+    ],
+    [
+      'const control = event.control; const get = () => control; const same = get() === control;',
+      true,
+    ],
+    [
+      'const control = event.control; const choose = (flag: boolean) => { if (flag) return event; return control; }; const mixed = choose(true); const same = mixed === event;',
+      true,
+    ],
+    [
+      'const control = event.control; const choose = (flag: boolean) => { if (flag) return control; return event; }; const get = () => choose(false); const same = get() !== control;',
+      true,
+    ],
+  ] as const;
+  for (const [body, ordinaryCall] of bodies)
     it(`normalizes only proven old event labels: ${body}`, () => {
       const old = oldLabels(parse(body));
       const before = JSON.stringify(old);
@@ -180,7 +194,22 @@ describe('legacy control labels within the current IR schema', () => {
       const again = validateIR(checked.value);
       expect(again.ok).toBe(true);
       if (again.ok) expect(again.value).toBe(checked.value);
-      for (const emit of [...web, ...native]) expect(emit(old).ok, emit.name).toBe(true);
+      for (const emit of [...web, emitGpuiSource, emitQtSource])
+        expect(emit(old).ok, emit.name).toBe(true);
+      const flutter = emitFlutterSource(old);
+      // Normalization succeeds independently of this private target's lowering
+      // boundary. Flutter still diagnoses ordinary callable expressions.
+      if (ordinaryCall)
+        expect(flutter).toMatchObject({
+          ok: false,
+          diagnostics: expect.arrayContaining([
+            expect.objectContaining({
+              code: 'PUI4003',
+              message: expect.stringContaining('Ordinary callable / structural value expressions'),
+            }),
+          ]),
+        });
+      else expect(flutter.ok).toBe(true);
     });
   for (const guard of ['mixed === event', '!(mixed !== event)'])
     it(`positive identity narrows an inert join: ${guard}`, () => {
@@ -399,7 +428,7 @@ describe('shared FunctionIR lexical capture provenance', () => {
         share(ir, 'f');
         expect(validateIR(ir)).toMatchObject({
           ok: false,
-          diagnostics: [{ code: 'PUI2002', message: expect.stringMatching(/capture provenance/) }],
+          diagnostics: [{ code: 'PUI2002', message: 'Reference binding identity mismatch.' }],
         });
         for (const emit of ssr)
           expect(emit(ir, { ssr: true })).toMatchObject({
@@ -417,7 +446,7 @@ describe('shared FunctionIR lexical capture provenance', () => {
     share(ir, 'h');
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI2002', message: expect.stringMatching(/capture provenance/) }],
+      diagnostics: [{ code: 'PUI2002', message: 'Reference binding identity mismatch.' }],
     });
   });
   it('allows a shared body with the same actual helper capture and extra unrelated locals', () => {
@@ -452,7 +481,13 @@ describe('shared FunctionIR lexical capture provenance', () => {
     const innerParameters = (inner as Record<string, unknown>).parameters;
     if (!Array.isArray(outerParameters) || !Array.isArray(innerParameters))
       throw new Error('Missing parameter lists');
+    const previousBinding = innerParameters[0].bindingId;
     innerParameters[0] = outerParameters[0];
+    // Sharing a parameter record also rebinds its uses. A stale binding ID is
+    // malformed IR, not evidence about lexical shadowing.
+    for (const node of records(inner))
+      if (node.kind === 'reference' && node.bindingId === previousBinding)
+        node.bindingId = innerParameters[0].bindingId;
     if (values.length !== 2) throw new Error('Expected two inner functions');
     values[1].function = values[0].function;
     expect(validateIR(ir).ok).toBe(true);

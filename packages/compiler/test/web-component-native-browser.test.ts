@@ -278,10 +278,12 @@ describe('ordinary browser output representation', () => {
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
       const emitted = emitWebComponentSource(parsed.value);
       if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-      expect(emitted.value.code).not.toContain("from './.proto-ui/web-component/ssr-v1'");
-      expect(emitted.value.supportingFiles?.map((file) => file.path)).not.toContain(
-        '.proto-ui/web-component/ssr-v1.ts'
-      );
+      expect(emitted.value.code).not.toMatch(/from ['"]\.\/\.proto-ui\/web-component\/ssr-/);
+      expect(
+        (emitted.value.supportingFiles ?? []).some((file) =>
+          file.path.startsWith('.proto-ui/web-component/ssr-')
+        )
+      ).toBe(false);
       expect(emitted.value.code).not.toMatch(
         /presentationElement|presentationChildren|type Presentation/
       );

@@ -4,9 +4,10 @@ import type { ContextKeyIR } from './context-declarations';
 import type { SourceMapV3 } from './source-map';
 import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
+import type { ObservableSemantics } from './observable-semantics';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
-export const IR_VERSION = 6 as const;
+export const IR_VERSION = 7 as const;
 
 export interface SourceSpan {
   file: string;
@@ -72,7 +73,6 @@ export const MODULE_CAPABILITY_TYPES = [
   'text-control',
   'image-view',
   'table-structure',
-  'transition',
   'scroll-axis',
   'scroll-follow',
   'table-states',
@@ -103,14 +103,30 @@ export const MODULE_CAPABILITY_TYPES = [
   'state-next:number',
   'state-next:string',
   'state-disconnect',
-  'transition-controls',
-  'transition-action',
   'observed:number',
   'observed:string',
+  'delay-task',
+  'presence-owner',
+  'presentation-owner-ref',
+  'presentation-owner-writer',
+  'presentation-view-binding',
 ] as const;
 export type ModuleCapabilityType = (typeof MODULE_CAPABILITY_TYPES)[number];
+/** Ordinary lexical values retain structure without becoming public JSON data. */
+export type StructuredValueType =
+  | { kind: 'callable'; parameters: ParameterIR[]; returnType: ValueType }
+  | {
+      kind: 'object';
+      fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[];
+      index?: ValueType;
+    }
+  | { kind: 'value-union'; members: ValueType[] }
+  | { kind: 'cell'; value: ValueType };
+export type CaptureValueType = { kind: 'capture'; hookId: string };
 export type ValueType =
   | DataType
+  | StructuredValueType
+  | CaptureValueType
   | `lexical:${PrimitiveType}`
   | ModuleCapabilityType
   | `nullable:${ModuleCapabilityType}`
@@ -158,7 +174,9 @@ export type CompilerProfile =
   | 'web-component-ssr-v1';
 
 export function isDataValueType(type: ValueType): type is DataType {
-  return typeof type !== 'string' || ['boolean', 'number', 'string', 'null', 'void'].includes(type);
+  return typeof type === 'string'
+    ? ['boolean', 'number', 'string', 'null', 'void'].includes(type)
+    : ['literal', 'record', 'array', 'union'].includes(type.kind);
 }
 
 /** Compiler-private storage identity, never a semantic State or public capability. */
@@ -169,11 +187,42 @@ export function lexicalValueType(type: ValueType): PrimitiveType | undefined {
   return undefined;
 }
 
+export function lexicalStoredType(type: ValueType): ValueType | undefined {
+  return typeof type !== 'string' && type.kind === 'cell' ? type.value : lexicalValueType(type);
+}
+
+/** The setup boundary adapts a checked callable to render; creation alone does not. */
+export function isSetupResultType(type: ValueType): boolean {
+  if (type === 'function' || type === 'void') return true;
+  if (typeof type === 'string') return false;
+  if (type.kind === 'value-union' || type.kind === 'union')
+    return type.members.every(isSetupResultType);
+  return (
+    type.kind === 'callable' &&
+    type.parameters.length <= 1 &&
+    (type.parameters.length === 0 || type.parameters[0].type === 'render')
+  );
+}
+
 /** Public identity-bearing snapshots are not JSON and do not grant setup or Run authority. */
 export function isPublicValueType(type: ValueType): boolean {
   if (isDataValueType(type)) return true;
+  if (typeof type !== 'string') {
+    if (type.kind === 'object')
+      return (
+        type.index === undefined && type.fields.every((field) => isPublicValueType(field.type))
+      );
+    if (type.kind === 'callable')
+      return (
+        type.parameters.every((parameter) => isPublicValueType(parameter.type)) &&
+        isPublicValueType(type.returnType)
+      );
+    if (type.kind === 'value-union') return type.members.every(isPublicValueType);
+    return false;
+  }
   const name = type.replace(/^(nullable|optional):/, '');
   return [
+    'context-key',
     'a11y-ref',
     'a11y-ref-list',
     'table-snapshot',
@@ -185,8 +234,7 @@ export function isPublicValueType(type: ValueType): boolean {
     'table-diagnostic-list',
     'collection-snapshot',
     'collection-snapshot-list',
-    'transition-controls',
-    'transition-action',
+    'presentation-owner-ref',
   ].includes(name);
 }
 
@@ -206,8 +254,8 @@ export interface ParameterIR {
   name: string;
   type: ValueType;
   optional?: boolean;
-  /** Checked synchronous callable parameter; never an opaque host function. */
-  callback?: { parameters: ParameterIR[]; returnType: ValueType };
+  bindingId?: string;
+  /** Evaluated at invocation, left to right, only for missing/undefined arguments. */
   default?: ExpressionIR;
 }
 export interface FunctionIR {
@@ -216,6 +264,7 @@ export interface FunctionIR {
   phase: Phase;
   context: FunctionContext;
   returnType: ValueType;
+  captures?: { bindingId: string; name: string; storage: 'value' | 'cell' }[];
   span: SourceSpan;
 }
 interface ExpressionBase {
@@ -226,7 +275,8 @@ export type ExpressionIR = ExpressionBase &
   (
     | { kind: 'literal'; value: Primitive }
     | { kind: 'undefined' }
-    | { kind: 'reference'; name: string }
+    | { kind: 'narrow'; value: ExpressionIR }
+    | { kind: 'reference'; name: string; bindingId?: string }
     | { kind: 'lexical-cell'; value: ExpressionIR }
     | { kind: 'lexical-read'; cell: ExpressionIR }
     | { kind: 'lexical-write'; cell: ExpressionIR; value: ExpressionIR }
@@ -240,13 +290,29 @@ export type ExpressionIR = ExpressionBase &
         receiver: ExpressionIR;
         states: readonly { id: string; value: ExpressionIR }[];
       }
-    | {
-        kind: 'conditional';
-        condition: ExpressionIR;
-        whenTrue: ExpressionIR;
-        whenFalse: ExpressionIR;
-      }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
+    | { kind: 'member-write'; object: ExpressionIR; property: string; value: ExpressionIR }
+    | { kind: 'element'; object: ExpressionIR; index: ExpressionIR; optional: boolean }
+    | { kind: 'conditional'; condition: ExpressionIR; then: ExpressionIR; otherwise: ExpressionIR }
+    | { kind: 'call'; callee: ExpressionIR; arguments: ExpressionIR[]; optional: boolean }
+    | {
+        kind: 'intrinsic';
+        name:
+          | 'number.isFinite'
+          | 'object.freeze'
+          | 'object.hasOwn'
+          | 'array.every'
+          | 'typeof'
+          | 'error';
+        arguments: ExpressionIR[];
+      }
+    | {
+        kind: 'object-spread';
+        parts: (
+          | { kind: 'spread'; value: ExpressionIR }
+          | { kind: 'entry'; key: string; value: ExpressionIR }
+        )[];
+      }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
     | {
         kind: 'binary';
@@ -274,15 +340,17 @@ export type ExpressionIR = ExpressionBase &
         kind: 'operation';
         operation: Operation;
         receiver?: ExpressionIR;
+        /** Nullish receiver returns undefined without evaluating arguments. */
+        optional?: boolean;
         arguments: ExpressionIR[];
       }
     | { kind: 'helper-call'; name: string; arguments: ExpressionIR[] }
-    | { kind: 'authored-hook'; hookId: string }
+    | { kind: 'authored-hook'; hookId: string; arguments?: ExpressionIR[] }
     | { kind: 'function'; function: FunctionIR }
   );
 
 export type StatementIR =
-  | { kind: 'const'; name: string; value: ExpressionIR; span: SourceSpan }
+  | { kind: 'const'; name: string; bindingId?: string; value: ExpressionIR; span: SourceSpan }
   | { kind: 'effect'; expression: ExpressionIR; span: SourceSpan }
   | {
       kind: 'if';
@@ -337,8 +405,20 @@ export type ExposureIR =
 export interface AuthoredHookIR {
   id: string;
   name: string;
+  kind?: 'as-hook' | 'hook';
+  mode?: 'once' | 'multiple' | 'configurable';
+  /** Caller input, retained even when setup/configure omit their options parameter. */
+  optionsType?: ValueType;
   setup: FunctionIR;
+  projectHandle?: FunctionIR;
+  configure?: FunctionIR;
+  capture?: HookCaptureIR;
   span: SourceSpan;
+}
+export interface HookCaptureIR {
+  states: { name: string; type: ValueType; valueType?: DataType }[];
+  methods: { name: string; type: Extract<ValueType, { kind: 'callable' }> }[];
+  children: { id: string; name: string }[];
 }
 
 export interface PrototypeIR {
@@ -380,6 +460,8 @@ export interface ParseOptions {
   exportName?: string;
   /** Explicit local source graph. Imports are parsed, never executed. Keys are normalized relative source paths. */
   files?: Readonly<Record<string, string>>;
+  /** Bare source import identities resolved by the file loader into the closed graph. */
+  sourceImports?: Readonly<Record<string, string>>;
 }
 
 export interface GeneratedModule {
@@ -400,6 +482,15 @@ export interface GeneratedModule {
     source: PrototypeIR['source'];
     irVersion: typeof IR_VERSION;
     backend: CompilerProfile;
+    /** Reconstructable compile-time support selection, checked against emitted file bytes. */
+    nativeSupport?: { version: 2; id: string; features: readonly string[] };
+    /** Statically selected package exports and the package manifests that selected them. */
+    sourceResolution?: {
+      version: 1;
+      imports: Readonly<Record<string, string>>;
+      packages: readonly { manifest: string; sha256: string }[];
+    };
+    observableSemantics?: ObservableSemantics;
     /** Explicit consumer CSS dependency, only for the internal WC SSR experiment. */
     styleEnvironment?: {
       id: string;

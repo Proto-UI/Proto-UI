@@ -1,5 +1,7 @@
 # GPUI native-template consumer definitions
 
+This directory retains the historical source/SDK `0.1` fixtures and their original execution records. The current SDK `0.2` consumer, safe `Result` APIs, immutable published-host build and actual native tests are documented in [gpui-ordinary-values](../gpui-ordinary-values/README.md). These historical consumers are not silently rewritten to the new ABI, and their earlier results do not establish current native acceptance.
+
 ## Current status — 2026-10-31 23:14 UTC
 
 **The bounded TypeScript/emitter stage has been executed; Cargo and Rust have not.** Exact base `8b634445ddb17ee2e2b28176202e99ccfdd9c4cd` plus the reviewed product source and fixture-only correction reached the results below. This is not native acceptance, full GPUI completion, or permission for a native run.
