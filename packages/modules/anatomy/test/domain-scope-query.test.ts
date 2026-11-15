@@ -110,6 +110,54 @@ describe('Anatomy scope-only queries', () => {
   });
 });
 
+describe('Anatomy claim inventory', () => {
+  it('preserves instance order across late claims and terminal retirement', () => {
+    const roles = {
+      root: { cardinality: { min: 1, max: 1 } },
+      item: { cardinality: { min: 0, max: '*' as const } },
+    };
+    const family = createAnatomyFamily('ordered-claim-inventory', { roles });
+    const other = createAnatomyFamily('other-claim-inventory', { roles });
+    const parents = new Map<object, object | null>();
+    const getParent = (token: unknown) => parents.get(token as object) ?? null;
+    const create = (name: string, parent: object | null) => {
+      const token = { name };
+      parents.set(token, parent);
+      const impl = new AnatomyModuleImpl(
+        makeCaps({
+          instance: token,
+          getParent,
+          getPrototype: () => ({ name: 'part', setup() {} }),
+        }),
+        'part',
+        { get: () => undefined, getAll: () => ({}), has: () => false, keys: () => [] } as any
+      );
+      live.push(impl);
+      return { token, impl };
+    };
+    const root = create('root', null);
+    root.impl.claim(family, { role: 'root' });
+    root.impl.claim(other, { role: 'root' });
+    const first = create('first', root.token);
+    first.impl.claim(other, { role: 'item' });
+    const second = create('second', root.token);
+    second.impl.claim(family, { role: 'item' });
+
+    const ordered = (current: typeof family) =>
+      root.impl.tryOrderedPartsOf(current, 'item')?.map(root.impl.port.resolvePartInstance);
+    expect(ordered(family)).toEqual([second.token]);
+    expect(ordered(other)).toEqual([first.token]);
+
+    first.impl.claim(family, { role: 'item' });
+    expect(ordered(family)).toEqual([first.token, second.token]);
+    expect(ordered(other)).toEqual([first.token]);
+
+    first.impl.dispose();
+    expect(ordered(family)).toEqual([second.token]);
+    expect(ordered(other)).toEqual([]);
+  });
+});
+
 describe('Anatomy order observer attachment', () => {
   it('observes the current logical root without reading foreign memberships', () => {
     const family = createAnatomyFamily('order-observer-locality', {
