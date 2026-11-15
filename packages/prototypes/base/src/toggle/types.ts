@@ -1,6 +1,7 @@
 import type { ObservedStateHandle } from '@proto.ui/core';
 import { ExposeEvent, ExposeMethod, ExposeState, FocusRequestOptions, State } from '@proto.ui/core';
 
+/** Independent accessible naming uses Adapter InstanceAssociations.controlLabel, outside portable Props. */
 export interface ToggleProps {
   active?: boolean;
   defaultActive?: boolean;

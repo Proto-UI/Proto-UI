@@ -38,7 +38,7 @@ Exactly one live Label and one live target are supported per reference. Missing/
 
 Import from `@proto.ui/prototypes-liquid-glass/label`. This package remains unpublished workspace source. A workspace consumer can import the source Prototype and pass it to a Web adapter directly. Internal facade code generation has an explicit workspace mode; no public CLI workspace-mode flag is claimed here. The installed-consumer CLI refuses this entry before attempting an npm install. This limit does not waive source/runtime/visual testing.
 
-The first target set is Checkbox, Switch, Radio Group Item, Input and Textarea. Form submission, validation, multiple-label ordering and native-platform/assistive-technology certification are not provided by this association. Browser acceptance is tracked separately from source and synthetic host tests.
+The target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item. Icon-only commands can use an independent Label through the same association. Button keeps its click signal; Toggle keeps activeChange; Toggle Group Item delegates selection to its Group. Form submission, validation, multiple-label ordering and native-platform/assistive-technology certification are not provided by this association. Browser acceptance is tracked separately from source and synthetic host tests.
 
 - [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 - [P-LIQUID-GLASS-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-LIQUID-GLASS-LABEL.yaml)

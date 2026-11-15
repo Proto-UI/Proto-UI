@@ -1,6 +1,6 @@
-import type { DefHandle } from '@proto.ui/core';
+import type { DefHandle, RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, tw } from '@proto.ui/core';
-import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asControlLabel, asFocusable, asTrigger } from '@proto.ui/hooks';
 import type { ButtonAsHookContract, ButtonExposes, ButtonProps, ButtonStateHandles } from './types';
 
 export type { ButtonProps, ButtonExposes, ButtonStateHandles, ButtonAsHookContract } from './types';
@@ -88,6 +88,19 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-CONTENT-LABEL-SOURCE
   accessible.nameFromContent();
 
+  const activate = (run: RunHandle<ButtonProps>, isCurrent: () => boolean = () => true) => {
+    if (disabled.get() || !isCurrent()) return;
+    pressed.set(false, 'reason: button activation => pressed');
+    if (disabled.get() || !isCurrent()) return;
+    run.expose.emit('click');
+  };
+  asControlLabel().target<ButtonProps>((run, request) => {
+    const isCurrent = () => !disabled.get() && request.isCurrent();
+    if (!isCurrent()) return;
+    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (isCurrent()) activate(run, isCurrent);
+  });
+
   // P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-KEYBOARD-SPACE-PREVENT-DEFAULT,
   // HC-DEFAULT-ACTION-0001: prevention is requested through the portable
   // control facade, never through a raw host preventDefault function.
@@ -132,12 +145,11 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-ROLE-COMMAND, P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
   def.event.on('press.commit', (run) => {
     pressed.set(false, 'reason: button press.commit => pressed');
-    if (disabled.get()) return;
-    run.expose.emit('click');
+    activate(run);
   });
 
   /*
-   * TODO(P-BASE-BUTTON-PROP-LABEL-DEFERRED): keep accessible naming out of core props once a11y syntax exists.
+   * P-BASE-BUTTON-PROP-LABEL-DEFERRED: independent naming uses InstanceAssociations.controlLabel.
    * TODO(P-BASE-BUTTON-A11Y-ENHANCEMENT): practice optional a11y enhancements through the future a11y syntax.
    */
 }

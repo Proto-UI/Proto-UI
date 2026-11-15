@@ -1,6 +1,6 @@
-import type { DefHandle } from '@proto.ui/core';
+import type { DefHandle, RunHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype } from '@proto.ui/core';
-import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { asAccessible, asControlLabel, asFocusable, asTrigger } from '@proto.ui/hooks';
 import type { ToggleAsHookContract, ToggleExposes, ToggleProps, ToggleStateHandles } from './types';
 
 export type { ToggleProps, ToggleExposes, ToggleStateHandles, ToggleAsHookContract } from './types';
@@ -63,6 +63,22 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   accessible.action('activate', { event: 'activeChange' });
 
   let controlled = false;
+
+  const activate = (run: RunHandle<ToggleProps>, isCurrent: () => boolean = () => true) => {
+    if (disabled.get() || !isCurrent()) return;
+    pressed.set(false, 'reason: toggle activation => pressed');
+    if (disabled.get() || !isCurrent()) return;
+    const nextActive = !active.get();
+    if (!controlled) active.set(nextActive, 'reason: toggle activation => active');
+    if (disabled.get() || !isCurrent()) return;
+    run.expose.emit('activeChange', { active: nextActive });
+  };
+  asControlLabel().target<ToggleProps>((run, request) => {
+    const isCurrent = () => !disabled.get() && request.isCurrent();
+    if (!isCurrent()) return;
+    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (isCurrent()) activate(run, isCurrent);
+  });
 
   const clearTransientInteraction = (reason: string) => {
     hovered.set(false, reason);
@@ -147,13 +163,7 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   // P-BASE-TOGGLE-UNCONTROLLED-UPDATES-ACTIVE, P-BASE-TOGGLE-CONTROLLED-EMITS-NEXT
   def.event.on('press.commit', (run) => {
     pressed.set(false, 'reason: toggle press.commit => pressed');
-    if (disabled.get()) return;
-
-    const nextActive = !active.get();
-    if (!controlled) {
-      active.set(nextActive, 'reason: toggle press.commit => active');
-    }
-    run.expose.emit('activeChange', { active: nextActive });
+    activate(run);
   });
 }
 
@@ -162,7 +172,7 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
  * - P-BASE-TOGGLE-SINGLE-SUBJECT: absence of group membership and collection syntax is the implementation.
  * - P-BASE-TOGGLE-NO-ANATOMY-PARTS: absence of anatomy roles is the implementation.
  * - P-BASE-TOGGLE-CLICK-DEFERRED: absence of a `click` expose event is the implementation.
- * - P-BASE-TOGGLE-PROP-LABEL-DEFERRED: accessible naming uses content/a11y projection; no `label` prop is accepted.
+ * - P-BASE-TOGGLE-PROP-LABEL-DEFERRED: naming uses content or InstanceAssociations.controlLabel; no `label` prop is accepted.
  * - P-BASE-TOGGLE-NO-FORM-INTEGRATION: no form props or form submission surface are accepted.
  * - P-BASE-TOGGLE-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
  */

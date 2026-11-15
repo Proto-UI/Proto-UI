@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { createControlLabelRef } from '@proto.ui/core';
 import { checkboxRoot } from '../../../prototypes/base/src/checkbox';
 import { switchRoot } from '../../../prototypes/base/src/switch';
+import button from '../../../prototypes/base/src/button';
+import toggle from '../../../prototypes/base/src/toggle';
+import { toggleGroupRoot, toggleGroupItem } from '../../../prototypes/base/src/toggle-group';
 import { radioGroupRoot, radioGroupItem } from '../../../prototypes/base/src/radio-group';
 import labelRoot from '../../../prototypes/base/src/label';
 import { createMountedReactAdapter, createMountedReactAdapterInto } from './utils/fake-react';
@@ -31,6 +34,136 @@ function pointerClick(el: HTMLElement) {
   );
 }
 describe('react explicit instance-associated Label', () => {
+  it.each([button, toggle])(
+    'retires $name label activation when focus detaches the Label',
+    async (proto) => {
+      const instanceAssociations = { controlLabel: createControlLabelRef() };
+      const signals: unknown[] = [];
+      const target = createMountedReactAdapter(proto, {
+        instanceAssociations,
+        onClick: () => signals.push('click'),
+        onActiveChange: (value: unknown) => signals.push(value),
+      });
+      const label = createMountedReactAdapter(labelRoot, { instanceAssociations });
+      try {
+        for (let i = 0; i < 8; i++) await Promise.resolve();
+        target.root!.addEventListener('focus', () => label.root!.remove());
+        pointerClick(label.root!);
+        expect(signals).toEqual([]);
+        if (proto === toggle) expect(target.ref.current.getExposes().active.get()).toBe(false);
+      } finally {
+        label.unmount();
+        target.unmount();
+      }
+    }
+  );
+
+  it('retains accepted Toggle state but retires outward notification after Label removal', async () => {
+    const instanceAssociations = { controlLabel: createControlLabelRef() };
+    const changes: unknown[] = [];
+    const target = createMountedReactAdapter(toggle, {
+      instanceAssociations,
+      onActiveChange: (event: unknown) => changes.push(event),
+    });
+    const label = createMountedReactAdapter(labelRoot, { instanceAssociations });
+    try {
+      for (let i = 0; i < 8; i++) await Promise.resolve();
+      const active = target.ref.current.getExposes().active;
+      const off = active.subscribe(() => label.root!.remove());
+      try {
+        pointerClick(label.root!);
+        expect(active.get()).toBe(true);
+        expect(changes).toEqual([]);
+      } finally {
+        off();
+      }
+    } finally {
+      label.unmount();
+      target.unmount();
+    }
+  });
+
+  it.each([button, toggle])(
+    'names icon-only $name and reuses its activation owner',
+    async (proto) => {
+      const instanceAssociations = { controlLabel: createControlLabelRef() };
+      const clicks: unknown[] = [],
+        changes: unknown[] = [];
+      const props = {
+        instanceAssociations,
+        onClick: () => clicks.push('click'),
+        onActiveChange: (e: unknown) => changes.push(e),
+      };
+      const target = createMountedReactAdapter(proto, props);
+      const label = createMountedReactAdapter(labelRoot, { instanceAssociations });
+      try {
+        label.root!.textContent = 'Save document';
+        for (let i = 0; i < 8; i++) await Promise.resolve();
+        expect(target.root!.getAttribute('aria-labelledby')).toBe(label.root!.id);
+        expect(label.root!.id).not.toBe('');
+        expect(target.root!.getAttribute('role')).toBe('button');
+        pointerClick(label.root!);
+        expect(document.activeElement).toBe(target.root);
+        if (proto === button) expect(clicks).toEqual(['click']);
+        else {
+          expect(changes).toEqual([{ active: true }]);
+          expect(target.root!.getAttribute('aria-pressed')).toBe('true');
+          target.update({ ...props, active: false });
+          pointerClick(label.root!);
+          expect(changes).toEqual([{ active: true }, { active: true }]);
+          expect(target.root!.getAttribute('aria-pressed')).toBe('false');
+        }
+        target.update({ ...props, disabled: true });
+        pointerClick(label.root!);
+        expect(clicks).toHaveLength(proto === button ? 1 : 0);
+        expect(changes).toHaveLength(proto === toggle ? 2 : 0);
+        expect(target.root!.getAttribute('aria-labelledby')).toBe(label.root!.id);
+        label.unmount();
+        for (let i = 0; i < 8; i++) await Promise.resolve();
+        expect(target.root!.hasAttribute('aria-labelledby')).toBe(false);
+      } finally {
+        label.unmount();
+        target.unmount();
+      }
+    }
+  );
+
+  it('names an icon-only Toggle Group item without replacing group selection ownership', async () => {
+    const instanceAssociations = { controlLabel: createControlLabelRef() };
+    const changes: unknown[] = [];
+    const onValueChange = (event: unknown) => changes.push(event);
+    const group = createMountedReactAdapter(toggleGroupRoot, { multiple: true, onValueChange });
+    const host = document.createElement('span');
+    group.root!.append(host);
+    const item = createMountedReactAdapterInto(toggleGroupItem, host, {
+      value: 'bold',
+      instanceAssociations,
+    });
+    const label = createMountedReactAdapter(labelRoot, { instanceAssociations });
+    try {
+      label.root!.textContent = 'Bold';
+      for (let i = 0; i < 8; i++) await Promise.resolve();
+      expect(item.root!.getAttribute('aria-labelledby')).toBe(label.root!.id);
+      expect(label.root!.id).not.toBe('');
+      pointerClick(label.root!);
+      expect(changes).toEqual([{ value: ['bold'] }]);
+      expect(item.root!.getAttribute('aria-pressed')).toBe('true');
+      expect(document.activeElement).toBe(item.root);
+      group.update({ multiple: true, value: [], onValueChange });
+      pointerClick(label.root!);
+      expect(changes).toEqual([{ value: ['bold'] }, { value: ['bold'] }]);
+      expect(item.root!.getAttribute('aria-pressed')).toBe('false');
+      group.update({ multiple: true, value: [], disabled: true, onValueChange });
+      pointerClick(label.root!);
+      expect(changes).toHaveLength(2);
+      expect(item.root!.getAttribute('aria-labelledby')).toBe(label.root!.id);
+    } finally {
+      label.unmount();
+      item.unmount();
+      group.unmount();
+    }
+  });
+
   it.each([checkboxRoot, switchRoot])(
     'names and activates $name across independent sibling roots',
     async (proto) => {

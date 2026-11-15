@@ -44,6 +44,9 @@ cases:
       - P-BASE-RADIO-GROUP-ITEM-EXTERNAL-LABEL
       - P-BASE-INPUT-EXTERNAL-LABEL
       - P-BASE-TEXTAREA-EXTERNAL-LABEL
+      - P-BASE-BUTTON-EXTERNAL-LABEL
+      - P-BASE-TOGGLE-EXTERNAL-LABEL
+      - P-BASE-TOGGLE-GROUP-EXTERNAL-LABEL
       - M-CONTROL-LABEL-0001-REQUEST
       - M-CONTROL-LABEL-0001-NAME
       - HC-CONTROL-LABEL-0001-CALLBACK
@@ -99,6 +102,17 @@ cases:
 
 
 implementations:
+  - id: command-label-native-consumers
+    kind: runtime-test
+    status: active
+    path: apps/www/test/component-consumer-repairs.browser.test.ts
+    required: true
+    consumesCases: [T-CONTROL-LABEL-0001-CASE-TARGETS]
+    notes:
+      [
+        Bounded real Chromium consumer coverage across React/WC and Base/Shadcn/Brutalist; Vue/Vue2,
+        native platform and full lifecycle admission remain separate.,
+      ]
   - id: control-label-view-discovery
     kind: module-test
     status: passing
@@ -274,6 +288,9 @@ verifies:
   hostCaps:
     - HC-CONTROL-LABEL-0001
   prototypes:
+    - P-BASE-BUTTON
+    - P-BASE-TOGGLE
+    - P-BASE-TOGGLE-GROUP
     - P-BASE-LABEL
     - P-SHADCN-LABEL
     - P-BRUTALIST-LABEL
