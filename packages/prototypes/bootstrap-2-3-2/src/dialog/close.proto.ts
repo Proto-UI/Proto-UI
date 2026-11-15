@@ -5,9 +5,9 @@ import {
   type DialogCloseExposes,
 } from '@proto.ui/prototypes-base/dialog';
 
-// A command wrapper for an authored family Button, not Bootstrap's .close icon.
-// Applying the icon's opacity here also fades every nested action. CloseIcon owns
-// that separate presentation; Base retains sole ownership of the close request.
+// An unstyled command owner, distinct from Bootstrap's .close icon. Authored
+// content may use passive family Surface/Text appearance, never a second Button
+// owner. CloseIcon owns icon paint; Base owns focus, input and the close request.
 export default definePrototype<DialogCloseProps, DialogCloseExposes>({
   name: 'bootstrap-2-3-2-dialog-close',
   setup() {
