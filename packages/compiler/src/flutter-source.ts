@@ -386,6 +386,14 @@ export function emitFlutterSource(
   function style(handle: { tokens: readonly string[] }): string {
     return `NativeStyleHandle(<String>[${handle.tokens.map(quote).join(', ')}], <String>[${handle.tokens.map((token) => quote(getSemanticGroupKeyV0(token))).join(', ')}])`;
   }
+  function truthy(value: ExpressionIR, depth: number): string {
+    const expression = expr(value, depth);
+    // Dart cannot pass a void operation as an Object? argument. Preserve the
+    // authored effect once, then use the false result of its undefined value.
+    return value.type === 'void' && value.kind !== 'undefined'
+      ? `(() { ${expression}; return false; })()`
+      : `nativeTruthy(${expression})`;
+  }
   function expr(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
       case 'undefined':
@@ -523,10 +531,10 @@ export function emitFlutterSource(
       }
       case 'unary':
         return value.operator === '!'
-          ? `!nativeTruthy(${expr(value.operand, depth)})`
+          ? `!${truthy(value.operand, depth)}`
           : `(${value.operator === '-' ? '-' : ''}nativeNumber(${expr(value.operand, depth)}))`;
       case 'conditional':
-        return `(${expr(value.condition, depth)} ? ${expr(value.whenTrue, depth)} : ${expr(value.whenFalse, depth)})`;
+        return `(${truthy(value.condition, depth)} ? ${expr(value.whenTrue, depth)} : ${expr(value.whenFalse, depth)})`;
       case 'binary': {
         const left = expr(value.left, depth),
           right = expr(value.right, depth);
@@ -881,7 +889,7 @@ export function emitFlutterSource(
         };
         result += `${indent}try {\n${branch(statement.body)}${indent}}${caught ? ` on _PuiThrown${caught.name ? ' catch (caughtValue)' : ''} {\n${caught.name ? `${indent}  final ${id(caught.name)} = caughtValue.value;\n` : ''}${branch(caught.body, caught.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
       } else
-        result += `${indent}if (nativeTruthy(${expr(statement.condition, depth)})) {\n${statements(statement.then, depth + 1, returnType)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, returnType)}${indent}}` : ''}\n`;
+        result += `${indent}if (${truthy(statement.condition, depth)}) {\n${statements(statement.then, depth + 1, returnType)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1, returnType)}${indent}}` : ''}\n`;
     }
     helperBindings = previousBindings;
     localTypes = previousTypes;
