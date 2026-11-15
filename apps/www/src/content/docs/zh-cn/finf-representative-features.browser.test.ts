@@ -205,9 +205,44 @@ async function settledPaint(locator: Locator) {
 
 function createCalendarCloseProbe(element: Element, key: string) {
   const document = element.ownerDocument;
+  const inspectSubject = (subject: Element | null, includeStyle = false) => {
+    if (!subject) return null;
+    const ancestors = [];
+    for (let current: Element | null = subject; current; current = current.parentElement) {
+      // Style reads are post-assertion diagnostics; the input/commit observer
+      // only reads attributes and cannot force layout in the measured window.
+      const style = includeStyle ? document.defaultView?.getComputedStyle(current) : null;
+      ancestors.push({
+        tag: current.tagName.toLowerCase(),
+        id: current.id,
+        ref: current.getAttribute('data-demo-ref'),
+        role: current.getAttribute('role'),
+        hidden: current.hasAttribute('hidden'),
+        inert: current.hasAttribute('inert') || (current as HTMLElement).inert === true,
+        ariaHidden: current.getAttribute('aria-hidden'),
+        display: style?.display ?? null,
+        visibility: style?.visibility ?? null,
+      });
+    }
+    return {
+      connected: subject.isConnected,
+      tag: subject.tagName.toLowerCase(),
+      id: subject.id,
+      ref: subject.getAttribute('data-demo-ref'),
+      role: subject.getAttribute('role'),
+      label: subject.getAttribute('aria-label'),
+      labelledBy: subject.getAttribute('aria-labelledby'),
+      controls: subject.getAttribute('aria-controls'),
+      expanded: subject.getAttribute('aria-expanded'),
+      ancestors,
+    };
+  };
   const installedAt = performance.now();
   let keyAt: number | null = null;
+  let keyExpanded: string | null = null;
   let closedAt: number | null = null;
+  let keySubject: ReturnType<typeof inspectSubject> = null;
+  let firstFalseSubject: ReturnType<typeof inspectSubject> = null;
   const events: Array<{
     at: number;
     kind: 'keydown' | 'expanded';
@@ -218,7 +253,9 @@ function createCalendarCloseProbe(element: Element, key: string) {
   const onKey = (event: KeyboardEvent) => {
     if (!event.isTrusted || event.key !== key || keyAt !== null) return;
     keyAt = performance.now();
-    events.push({ at: keyAt, kind: 'keydown', expanded: element.getAttribute('aria-expanded') });
+    keyExpanded = element.getAttribute('aria-expanded');
+    keySubject = inspectSubject(element);
+    events.push({ at: keyAt, kind: 'keydown', expanded: keyExpanded });
   };
   const observer = new MutationObserver((records) => {
     const at = performance.now();
@@ -229,8 +266,12 @@ function createCalendarCloseProbe(element: Element, key: string) {
           ? records[index + 1].oldValue
           : element.getAttribute('aria-expanded');
       events.push({ at, kind: 'expanded', previous, expanded });
-      if (keyAt !== null && closedAt === null && previous === 'true' && expanded === 'false')
+      // Accessibility projection may withdraw the old attribute before
+      // applying the new one, including across observer delivery batches.
+      if (keyAt !== null && keyExpanded === 'true' && closedAt === null && expanded === 'false') {
         closedAt = at;
+        firstFalseSubject = inspectSubject(element);
+      }
     }
   });
   observer.observe(element, {
@@ -240,18 +281,25 @@ function createCalendarCloseProbe(element: Element, key: string) {
   });
   document.addEventListener('keydown', onKey, true);
   return {
-    stop() {
+    stop(currentElement: Element | null = null) {
       observer.disconnect();
       document.removeEventListener('keydown', onKey, true);
       return {
         clock: 'page performance.now; trusted keydown and MutationObserver delivery',
+        timeOrigin: performance.timeOrigin,
         installedAt,
         observedAt: performance.now(),
         keyAt,
+        keyExpanded,
         closedAt,
         closeAfterKeyMs: keyAt !== null && closedAt !== null ? closedAt - keyAt : null,
         initialExpanded,
         expanded: element.getAttribute('aria-expanded'),
+        keySubject,
+        firstFalseSubject,
+        observedSubject: inspectSubject(element, true),
+        currentSubject: inspectSubject(currentElement, true),
+        sameCurrentElement: currentElement === null ? null : currentElement === element,
         events,
       };
     },
@@ -265,21 +313,103 @@ async function closeCalendarPopup(
   state: string
 ) {
   const probe = await trigger.evaluateHandle(createCalendarCloseProbe, key);
+  type CapturedError = { name: string; message: string; stack?: string; cause?: CapturedError };
+  const describeError = (error: unknown, depth = 0): CapturedError => {
+    const value = error as Error & { cause?: unknown };
+    return {
+      name: value?.name ?? typeof error,
+      message: value?.message ?? String(error),
+      ...(value?.stack ? { stack: value.stack } : {}),
+      ...(value?.cause !== undefined && depth < 2
+        ? { cause: describeError(value.cause, depth + 1) }
+        : {}),
+    };
+  };
+  const reads: Array<{
+    startedAt: number;
+    settledAt: number | null;
+    status: 'pending' | 'resolved' | 'rejected';
+    value?: string | null;
+    error?: CapturedError;
+  }> = [];
+  const nodeTrace = {
+    clock: 'Node performance.now; timeOrigin maps timestamps to epoch milliseconds',
+    timeOrigin: performance.timeOrigin,
+    keyStartedAt: performance.now(),
+    keyReturnedAt: null as number | null,
+    pollStartedAt: null as number | null,
+    assertionFinishedAt: null as number | null,
+    assertionError: null as CapturedError | null,
+    reads,
+  };
   let failure: unknown;
   try {
     await page.keyboard.press(key);
+    nodeTrace.keyReturnedAt = performance.now();
     // Retain the original 1000 ms assertion and its starting point. The page
     // clock below diagnoses input/commit latency without granting extra time.
-    await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+    nodeTrace.pollStartedAt = performance.now();
+    await expect
+      .poll(async () => {
+        const read: (typeof reads)[number] = {
+          startedAt: performance.now(),
+          settledAt: null,
+          status: 'pending',
+        };
+        reads.push(read);
+        try {
+          const value = await trigger.getAttribute('aria-expanded');
+          read.value = value;
+          read.status = 'resolved';
+          return value;
+        } catch (error) {
+          read.status = 'rejected';
+          read.error = describeError(error);
+          throw error;
+        } finally {
+          read.settledAt = performance.now();
+        }
+      })
+      .toBe('false');
   } catch (error) {
     failure = error;
+    nodeTrace.assertionError = describeError(error);
+  } finally {
+    nodeTrace.assertionFinishedAt = performance.now();
   }
+  let currentElement: Awaited<ReturnType<Locator['elementHandle']>> = null;
+  let currentLocatorError: CapturedError | null = null;
   try {
-    const observation = await probe.evaluate((current) => current.stop());
-    await capture(state, { key, assertionPassed: !failure, close: observation }, previewer);
+    // This bounded lookup is only a post-assertion identity diagnostic. It uses
+    // the exact role/name locator and cannot turn a timed-out assertion green.
+    try {
+      currentElement = await trigger.elementHandle({ timeout: 1000 });
+    } catch (error) {
+      currentLocatorError = describeError(error);
+    }
+    const observation = await probe.evaluate(
+      (current, resolved) => current.stop(resolved),
+      currentElement
+    );
+    await capture(
+      state,
+      {
+        key,
+        assertionPassed: !failure,
+        close: observation,
+        currentLocatorError,
+        nodeTrace: {
+          ...nodeTrace,
+          capturedAt: performance.now(),
+          reads: reads.map((read) => ({ ...read })),
+        },
+      },
+      previewer
+    );
   } catch (error) {
     failure ??= error;
   } finally {
+    await currentElement?.dispose().catch((error) => (failure ??= error));
     await probe.dispose().catch((error) => (failure ??= error));
   }
   if (failure) throw failure;
