@@ -36,6 +36,13 @@ cases:
     title: Selected-option entry waits for a stable synchronously mounted collection across adapters
     covers: [P-BASE-SELECT-CONTENT-A11Y, P-BASE-SELECT-CONTENT-FOCUS-ROVING]
     expectation: select-entry-focus-never-falls-back-before-the-current-item-mount-turn-stabilizes
+  - id: T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
+    title: Popper entry and keyboard typeahead allow the host to reveal the focused option
+    covers: [P-BASE-SELECT-CONTENT-A11Y, P-BASE-SELECT-CONTENT-KEYBOARD]
+    expectation: popper-focus-does-not-suppress-native-scroll-and-item-aligned-policy-is-preserved
+    notes:
+      - Covers selected and enabled boundary entry, reopen, and uncommitted typeahead across Base, Shadcn and Brutalist with complete and legacy parts.
+      - Host focus options under Happy DOM establish policy delivery, not actual browser clipping, scroll offsets or assistive-technology acceptance.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     title: Content retains leave view and portals a collision-aware Trigger-anchored surface
     covers: [P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE, P-BASE-SELECT-CONTENT-POSITION]
@@ -53,6 +60,15 @@ cases:
     covers: [P-BASE-SELECT-CONTENT-DISMISS, P-BASE-SELECT-CONTENT-DEFERRED-SURFACES]
     expectation: select-dismiss-paths-close-once-without-accidental-selection
 implementations:
+  - id: prototypes-base-select-popper-focus-scroll
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/select-popper-focus-scroll.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL]
+    exercises: [P-BASE-SELECT-CONTENT]
+    notes:
+      - Real Web Component Adapter focus calls exercise all three 0.3 families; native Calendar current-year visibility remains a separate browser journey.
   - id: prototypes-base-select-current-request-lease
     kind: module-test
     status: needs-review
@@ -142,6 +158,9 @@ verifies:
         ]
 exercises: { prototypes: [P-BASE-SELECT-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Add mode-specific host focus scroll policy regression evidence for popper selected entry, reopen and typeahead without altering item-aligned positioning.
   - version: 0.3.0-alpha.1
     change: extended
     summary: Map the current-user uniform sibling-size direction to multi-row binding and named-failure boundaries; require fresh execution and keep native geometry evidence separate.

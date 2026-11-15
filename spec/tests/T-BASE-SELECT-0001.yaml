@@ -35,7 +35,20 @@ cases:
     title: Current authoring entries do not claim deferred select extensions
     covers: [P-BASE-SELECT-DEFERRED-EXTENSIONS]
     expectation: select-current-scope-excludes-form-groups-search-and-virtualization
+  - id: T-BASE-SELECT-0001-CASE-FINITE-COLLECTION
+    title: A complete 101-option structure keeps per-item text association and singleton guards
+    covers: [P-BASE-SELECT-ANATOMY, P-BASE-SELECT-ROLE-SELECT-ONLY]
+    expectation: finite-101-option-collection-is-valid-and-duplicate-trigger-remains-invalid
+    notes:
+      - Actual Runtime and Anatomy diagnostics verify finite structural admission; this is not a browser performance, geometry or virtualization claim.
 implementations:
+  - id: prototypes-base-select-finite-collection
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/select-alignment-parts.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-0001-CASE-FINITE-COLLECTION]
+    exercises: [P-BASE-SELECT]
   - id: prototypes-base-select-repeated-open-boundaries
     kind: module-test
     status: planned
@@ -105,9 +118,14 @@ verifies:
           P-BASE-SELECT-REQUESTS,
           P-BASE-SELECT-SELECTION-INVARIANT,
           P-BASE-SELECT-TEXT-DERIVATION,
+          P-BASE-SELECT-ANATOMY,
+          P-BASE-SELECT-ROLE-SELECT-ONLY,
         ]
 exercises: { prototypes: [P-BASE-SELECT] }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Verify 101 current Item and ItemText parts without the unsupported numeric cap while retaining singleton diagnostics.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Root ownership, request, selection invariant, text derivation, anatomy, and scope coverage.

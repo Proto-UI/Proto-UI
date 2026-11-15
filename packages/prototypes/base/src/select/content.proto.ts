@@ -174,7 +174,11 @@ function setupSelectContent(
       getNavigationEntries(run).filter((entry: any) => !!entry.snapshot && !!entry.focusSelf),
     getCurrentIndex: (_run, entries) => entries.findIndex((entry: any) => entry.focused),
     getText: (entry: any) => String(entry.snapshot?.textValue || entry.snapshot?.value || ''),
-    onMatch: (_run, entry: any) => entry.focusSelf?.({ reason: 'keyboard', preventScroll: true }),
+    onMatch: (run, entry: any) =>
+      entry.focusSelf?.({
+        reason: 'keyboard',
+        preventScroll: run.props.get().position === 'item-aligned',
+      }),
   });
 
   const focusValue = (
@@ -198,7 +202,10 @@ function setupSelectContent(
   const resolveOpenFocusAction = (run: any, ctx: SelectContextValue, defer = true) => {
     const options = {
       defer,
-      preventScroll: true,
+      // Popper has no alignment-owned scroll request. Let the host reveal its
+      // selected/boundary option; item-aligned already positions that row and
+      // must keep the scroll offset established by its geometry lease.
+      preventScroll: run.props.get().position === 'item-aligned',
       reason: ctx.requestFocusReason ?? ('programmatic' as const),
     };
     if (focusValue(run, ctx.value, options)) return;

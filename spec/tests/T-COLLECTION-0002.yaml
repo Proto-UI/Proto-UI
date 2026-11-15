@@ -18,6 +18,16 @@ cases:
       - M-COLLECTION-0001-B
       - M-COLLECTION-0001-E
     expectation: collection-runtime-conforms
+  - id: T-COLLECTION-0002-CASE-READ-COST
+    title: Provider structural reads avoid redundant per-item ordering and unused metadata
+    covers:
+      - M-COLLECTION-0001-C
+      - M-COLLECTION-0001-D
+      - M-COLLECTION-0001-E
+    expectation: provider-orders-once-and-count-sync-does-not-read-unused-metadata
+    notes:
+      - A controlled Runtime host counts order comparisons and metadata reads while retaining complete current provider and item snapshots, reorder, and live metadata.
+      - The comparison bound for an already ordered input detects redundant whole-collection work; it is not a browser latency or native interaction budget.
   - id: T-COLLECTION-0002-CASE-ADAPTER
     title: Collection adapter conformance
     covers:
@@ -52,6 +62,13 @@ implementations:
     required: true
     consumesCases:
       - T-COLLECTION-0002-CASE-RUNTIME
+  - id: collection-runtime-read-cost
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/collection-read-cost.contract.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-0002-CASE-READ-COST
   - id: collection-existing-hooks
     kind: module-test
     status: passing
@@ -125,6 +142,9 @@ verifies:
 sources:
   - path: packages/adapters/base/test/fixtures/collection-conformance.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Guard metadata-only provider composition and structural count synchronization against repeated full-domain ordering while preserving live public snapshots.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Mapped bounded Collection module, privileged-hook and real Adapter evidence.
