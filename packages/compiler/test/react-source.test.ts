@@ -3,6 +3,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -144,6 +145,66 @@ describe('checked semantics to native React DOM source', () => {
     expect(() => heldState.get()).toThrow(/terminal disposal/);
     expect(() => heldState.subscribe(() => undefined)).toThrow(/terminal disposal/);
     expect(() => handle.update()).toThrow(/terminal disposal/);
+  });
+
+  it('retains explicit watcher updates until a pending mount is acknowledged without adding an update to every mount', async () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+    export default definePrototype({name:'pending-input-owner',setup(def){
+      def.props.define({seed:{type:'number',default:1},present:{type:'boolean',default:true}});
+      const count=def.state.numberDiscrete('count',0);
+      def.expose.state('count',count);
+      def.expose.event('created',{payload:'void'});
+      def.expose.event('mounted',{payload:'void'});
+      def.expose.event('updated',{payload:'void'});
+      def.expose.event('unmounted',{payload:'void'});
+      def.lifecycle.onCreated(run=>{count.set(run.props.get().seed ?? 0);run.expose.emit('created');});
+      def.lifecycle.onMounted(run=>{run.expose.emit('mounted');});
+      def.lifecycle.onUpdated(run=>{run.expose.emit('updated');});
+      def.lifecycle.onUnmounted(run=>{run.expose.emit('unmounted');});
+      def.props.watch(['seed'],(run,next)=>{count.set(next.seed ?? 0);run.update();run.update();});
+      def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present ?? false);});
+      return r=>r.el('output',count.get());
+    }});`;
+    const { CompiledComponent } = await loadNative(source);
+    const { host, root } = mountHost();
+    const ref = React.createRef<NativeHandle>();
+    const lifecycle: string[] = [];
+    const mounts: { text: string | null; value: number; node: Element | null }[] = [];
+    const props = {
+      ref, seed: 1, present: true,
+      onCreated: () => lifecycle.push('created'),
+      onMounted: () => {
+        lifecycle.push('mounted');
+        mounts.push({ text: host.textContent, value: ref.current!.getExposes().count.get(), node: host.querySelector('output') });
+      },
+      onUpdated: () => lifecycle.push('updated'),
+      onUnmounted: () => lifecycle.push('unmounted'),
+    };
+    await React.act(async () => {
+      // Commit the empty shell, then let its mount frame publish. Keep React's
+      // frame acknowledgement pending until the new host props join the commit.
+      flushSync(() => root.render(React.createElement(CompiledComponent, props)));
+      await Promise.resolve();
+      expect(host.textContent).toBe('');
+      expect(lifecycle).toEqual(['created']);
+      flushSync(() => root.render(React.createElement(CompiledComponent, { ...props, seed: 2 })));
+    });
+    const state = ref.current!.getExposes().count;
+    expect(mounts[0]).toMatchObject({ text: '1', value: 2 });
+    expect(host.textContent).toBe('2');
+    expect(host.querySelector('output')).toBe(mounts[0].node);
+    expect(lifecycle).toEqual(['created', 'mounted', 'updated']);
+
+    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ...props, seed: 2, present: false })); });
+    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ...props, seed: 3, present: false })); });
+    expect(host.textContent).toBe('');
+    expect(state.get()).toBe(3);
+    expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted']);
+    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ...props, seed: 3 })); });
+    expect(host.textContent).toBe('3');
+    expect(ref.current!.getExposes().count).toBe(state);
+    expect(mounts[1]).toMatchObject({ text: '3', value: 3 });
+    expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted', 'mounted']);
   });
 
   it('runs setup/created exactly once through StrictMode replay and never starts an abandoned shell', async () => {
