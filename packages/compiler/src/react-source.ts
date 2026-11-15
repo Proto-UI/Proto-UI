@@ -263,7 +263,8 @@ export function emitReactSource(
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
-        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        const cell = expression(value.cell, depth),
+          operator = value.delta === 1 ? '++' : '--';
         return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -383,10 +384,12 @@ export function emitReactSource(
   const propSchemas = ir.props
     .map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.type)},`)
     .join('\n');
-  const hookDefinitions = statements(moduleParts.owned, 1) + ir.hooks
-    .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
-    .map(
-      (hook) => `  const ${hooks.get(hook.id)} = () => {
+  const hookDefinitions =
+    statements(moduleParts.owned, 1) +
+    ir.hooks
+      .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
+      .map(
+        (hook) => `  const ${hooks.get(hook.id)} = () => {
     if (${p}HookResults.has(${JSON.stringify(hook.name)})) return ${p}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
     ${p}HookResults.set(${JSON.stringify(hook.name)}, undefined);
     (${fn(hook.setup, 2)})(${p}Def);
@@ -394,8 +397,8 @@ export function emitReactSource(
     ${p}HookResults.set(${JSON.stringify(hook.name)}, result);
     return result;
   };`
-    )
-    .join('\n');
+      )
+      .join('\n');
 
   const code = `// Editable generated React DOM source. Profile: ${profile}.
 // Inline owner lowering and emitted shared checked-data/Context helpers v1; no Proto-UI Runtime/Core/Adapter dependencies.
@@ -1207,6 +1210,9 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `     
         return false;
       } else if (frame.kind === 'mount') {
         mounted = true;
+        // The published mount may predate an explicit update intent. Only
+        // after its acknowledgement may that dirty intent enter update flow.
+        if (dirty) updateQueued = true;
 ${usesStyle ? `        ${p}Style.mount();` : ''}
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
       } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);
