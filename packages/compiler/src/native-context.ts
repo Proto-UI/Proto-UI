@@ -9,12 +9,18 @@ export function buildNativeContextArtifacts(ir: PrototypeIR): {
   keys: ReadonlyMap<string, { name: string; file: string }>;
   scopeFile: string;
 } {
-  const keys = new Map(ir.contextKeys.map((key) => {
-    const hash = createHash('sha256').update(key.id).digest('hex');
-    return [key.id, { name: `__puiContextKey_${hash}`, file: `./.proto-ui/context/key-${hash}.ts` }] as const;
-  }));
+  const keys = new Map(
+    ir.contextKeys.map((key) => {
+      const hash = createHash('sha256').update(key.id).digest('hex');
+      return [
+        key.id,
+        { name: `__puiContextKey_${hash}`, file: `./.proto-ui/context/key-${hash}.ts` },
+      ] as const;
+    })
+  );
   const files = ir.contextKeys.map((key) => ({
-    path: keys.get(key.id)!.file.slice(2), kind: 'source' as const,
+    path: keys.get(key.id)!.file.slice(2),
+    kind: 'source' as const,
     contents: `// Source declaration ${JSON.stringify(key.id)}\n// Checked value schema ${JSON.stringify(key.type)}\nexport const key = Object.freeze({ debugName: ${JSON.stringify(key.name)} });\n`,
   }));
   files.push({ path: scopeFile, kind: 'source', contents: nativeContextScopeSource });
@@ -27,11 +33,13 @@ export function emitNativeContextValidation(
   keyNames: ReadonlyMap<string, string>,
   acceptsName: string
 ): string {
-  const checks = ir.contextKeys.map((key) => {
-    const name = keyNames.get(key.id);
-    if (!name) throw new Error(`Missing native Context key import: ${key.id}`);
-    return `key === ${name} ? ${acceptsName}(${JSON.stringify(key.type)}, value) : `;
-  }).join('');
+  const checks = ir.contextKeys
+    .map((key) => {
+      const name = keyNames.get(key.id);
+      if (!name) throw new Error(`Missing native Context key import: ${key.id}`);
+      return `key === ${name} ? ${acceptsName}(${JSON.stringify(key.type)}, value) : `;
+    })
+    .join('');
   return `(key: object, value: unknown): boolean => ${checks}false`;
 }
 
@@ -96,7 +104,7 @@ type RecordEntry = {
   subscriptions: Map<object, { mode: 'required' | 'optional'; callbacks: Callback[] }>;
 };
 const live = new Map<ContextScope, RecordEntry>();
-const notifications: { record: RecordEntry; callback: Callback; next: unknown; prev: unknown }[] = [];
+const notifications: { record: RecordEntry; provider: RecordEntry; key: object; callback: Callback; next: unknown; prev: unknown }[] = [];
 let dispatching = false;
 function resolve(record: RecordEntry, key: object): RecordEntry | null {
   let current: RecordEntry | undefined = record;
@@ -145,20 +153,25 @@ export function createContextScope(options: {
       const subscription = participant.subscriptions.get(key);
       if (!subscription || !participant.isAlive() || resolve(participant, key) !== bound) continue;
       for (const callback of subscription.callbacks) if (callback.active)
-        notifications.push({ record: participant, callback, next: value, prev });
+        notifications.push({ record: participant, provider: bound, key, callback, next: value, prev });
     }
     if (dispatching) return;
     dispatching = true;
+    let failed = false;
     let failure: unknown;
     try {
       for (let index = 0; index < notifications.length; ++index) {
         const task = notifications[index];
         if (!task.callback.active || !live.has(task.record.scope) || !task.record.isAlive()) continue;
-        try { task.record.invoke(() => task.callback.call(task.next, task.prev)); }
-        catch (error) { failure ??= error; }
+        try {
+          if (resolve(task.record, task.key) !== task.provider) continue;
+          task.record.invoke(() => task.callback.call(task.next, task.prev));
+        } catch (error) {
+          if (!failed) { failed = true; failure = error; }
+        }
       }
     } finally { notifications.length = 0; dispatching = false; }
-    if (failure !== undefined) throw failure;
+    if (failed) throw failure;
   }
   const scope: ContextScope = {
     provide(key, value) {

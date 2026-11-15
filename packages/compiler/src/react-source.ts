@@ -1340,7 +1340,8 @@ ${
   // Suspense can disconnect layout effects without unmounting the owner shell.
   // Passive cleanup identifies shell unmount; same-turn StrictMode replay cancels disposal.
   ${p}React.useEffect(() => {
-    const owner = ownerRef.current${ssr ? ';\n    if (!owner) return' : '!'};
+    const owner = ownerRef.current;
+    if (!owner) return;
     owner.connect();
     return () => { owner.disconnect(); };
   }, [${ssr ? 'parentReady' : ''}]);

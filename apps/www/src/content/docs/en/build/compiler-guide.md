@@ -95,6 +95,8 @@ The GPUI source owner interprets `void` setup as the defined anonymous slot insi
 
 The frontend reads a closed, root-contained TypeScript source graph without importing or evaluating the author program. It admits checked data, primitive/control-flow callbacks, static helpers and authored hooks, explicit updates, named State and typed exposes, Props and Context reads/watchers, one-Root templates, serializable Rule conditions and style intent, and the declared native event/focus/accessibility slice. Unsupported syntax, phase/capture authority, operations, target versions and missing host capabilities are diagnostics, not silent bridges.
 
+Public atomic hook imports and operation lowering use one admission table. Every exported `asHook` has an explicit disposition, including renamed imports and local re-exports. `asControlLabel`, `asAxisInput`, `asContextMenuInput` and `asNativeLink` remain unsupported, with a diagnostic naming the missing capability lowering at the author import. Admission of another hook does not admit every method or every target: an unsupported capability call names its actual callee and source range. These diagnostics do not establish implementation or conformance for an unsupported capability.
+
 Static helper parameters may use supported local record aliases with optional fields and finite literal unions. A direct literal argument such as `{ entry: 'manual' }` retains its value when checked against that parameter; incompatible literal values and forged IR are still rejected. The source frontend and IR validator apply the same data compatibility rule without evaluating author code.
 
 Private scalar `let` bindings have ordinary lexical lifetime and assignment semantics. Closures share their storage, while a `const` alias snapshots the current scalar value. A write schedules no render and sends no State notification. JavaScript targets use native `let`; GPUI retains captured cells with native reference ownership and ends each borrow before calling authored code. Pure scalar module initializers and reached named source helpers preserve a separate module lifetime across component instances. Helpers resolve their defining module's bindings; caller-local names cannot supply their captures. Module cells belong to one generated artifact (and the UI thread for GPUI); separately compiled artifacts do not acquire a shared source-module registry. Source graph, export and top-level execution checks remain closed, and compilation never executes an initializer or an uncalled function body.
@@ -102,6 +104,8 @@ Private scalar `let` bindings have ordinary lexical lifetime and assignment sema
 Private synchronous `try`/`catch`/`finally` and `throw` retain the original admitted thrown data, including `undefined`, `null`, `false`, zero, empty strings and record/array identity. Catch bindings stay opaque: a TypeScript assertion grants no public data, State or execution authority. An authored finalizer runs in source order, and its return or throw replaces the earlier authored completion. GPUI requires `panic=unwind` for emitted source exceptions and recognizes only its own thrown-value marker; unrelated native failures retain their original payload after cleanup. Caught data fields and scalar/list members are available, while JavaScript prototype property names remain outside this bounded GPUI access surface.
 
 Context failure delivery preserves each committed update, drains the remaining eligible callbacks, resets dispatch state, then rethrows the primary authored value even when it is falsy. Required disconnected Context reads/updates and strict missing Anatomy domains retain distinguishable error codes for authored catch discrimination. These source-lowering boundaries do not establish new native acceptance or replace the unchanged actual public GPUI composition consumer.
+
+The generated Web Context helper records the provider identity for each queued transition and rechecks the recipient's current ancestry before delivery. Rebinding during an earlier callback cannot deliver an old provider's queued transition to the new binding. Error presence is tracked separately from the thrown value, so `throw undefined` and `throw null` remain failures and later callback errors cannot replace the first value.
 
 This lexical lowering leaves the ordinary `defineHook` facade's admission unresolved. `D-AS-HOOK-DEFINE-HOOK-0001` places its capture, store and configurable authoring surface outside the core authored-asHook contract; the legacy parameterized-asHook note remains a proposal. The existing ordinary facade and its public consumers remain valid implementation evidence. Compiler support needs an independently governed boundary and real consumer evidence. An import whitelist or substitution with an atomic or authored asHook does not supply that support.
 
@@ -112,6 +116,35 @@ State writes and feedback projection do not themselves request a template render
 In the private Vue 2 client profile, ordinary framework repaints retain the last authored commit while native slots stay live. A declared Text Control owns its native editor value after the initial mount. Uncontrolled edits survive framework repaints and later default-value changes; controlled edits remain proposals, and unrelated updates preserve active composition. Recreating the view binds a new physical editor to the retained logical value. These boundaries do not establish browser IME fidelity, internal SSR/hydration migration, complete generated typing for every admitted program, or full reached-support and production-cost acceptance; those remain separately tracked in [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055).
 
 The private Vue 2 emitter keeps client render-call annotations inside the client branch. SSR output retains its separate renderer path; the bounded annotation regression checks preserve all other SSR diagnostics and do not establish complete SSR typing or hydration acceptance.
+
+The complete generated Vue 2 pointer consumer and its supporting module graph now pass the existing strict TypeScript check with `checkJs: true` and `skipLibCheck: false`. The emitter registers exact owned/observed State handles with their external views and validates the interactive HTML Root before using it. This is bounded evidence for the exercised client program; the historical consumer measurement below still did not check JavaScript bodies, and complete typing for other programs and SSR remains separate work.
+
+### Multi-entry native Web output
+
+Components that share a source Context declaration need one generated module graph. The private project API can compile all entries from one source root and publish their sources and shared supporting modules together:
+
+```ts
+import { compileProject, writeProjectCompilation } from './packages/compiler/src/index.ts';
+
+const compiled = await compileProject({
+  root: '.',
+  entries: ['src/provider.proto.ts', 'src/consumer.proto.ts'],
+  profile: 'react-dom-source-v1',
+});
+if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+
+const written = await writeProjectCompilation(compiled.value, '.cache/context-assembly', {
+  sourcePaths: {
+    'src/provider.proto.ts': 'Provider.tsx',
+    'src/consumer.proto.ts': 'Consumer.tsx',
+  },
+});
+if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+```
+
+Choose a fresh output directory and a unique flat source filename for every entry. React uses `.tsx`, Vue 3 and Web Component use `.ts`, and Vue 2 uses `.js`. The planner coalesces supporting files only when their paths, kinds and bytes agree; conflicting helpers, mismatched source snapshots, ambiguous paths and incomplete entry mappings fail before publication. Each entry retains its source map and provenance manifest, and `provenance.json` records the complete project artifact set. `projectCompilationArtifacts` exposes the same plan and `diffProjectCompilation` compares it with consumer-owned output without writing.
+
+An ordinary React consumer can import `CompiledComponent as Provider` from `Provider.tsx` and `CompiledComponent as Consumer` from `Consumer.tsx`. Both then import the same physical Context key, scope and React transport modules, retaining source declaration reference identity through native composition. Independently published directories remain separate graphs even when their source bytes and debug names match. This workflow does not introduce a shared source-module registry, bridge Runtime/Adapter instances, or change the single-entry CLI. The React consumer regression exercises aliases, nearest providers, explicit updates and terminal cleanup; the artifact planner is also exercised for the other three Web source profiles.
 
 ### Local commands and consumer ownership
 

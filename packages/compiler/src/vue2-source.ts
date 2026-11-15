@@ -204,8 +204,7 @@ export function emitVue2Source(
     else if (node.kind === 'lexical-write') {
       inspect(node.cell);
       inspect(node.value);
-    }
-    else if (node.kind === 'binary') {
+    } else if (node.kind === 'binary') {
       inspect(node.left);
       inspect(node.right);
     } else if (node.kind === 'array') node.elements.forEach(inspect);
@@ -222,8 +221,7 @@ export function emitVue2Source(
         inspectBody(statement.body);
         if (statement.catch) inspectBody(statement.catch.body);
         if (statement.finally) inspectBody(statement.finally);
-      }
-      else if (statement.kind === 'if') {
+      } else if (statement.kind === 'if') {
         inspect(statement.condition);
         inspectBody(statement.then);
         inspectBody(statement.otherwise);
@@ -358,7 +356,8 @@ export function emitVue2Source(
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
-        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        const cell = expression(value.cell, depth),
+          operator = value.delta === 1 ? '++' : '--';
         return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -442,7 +441,9 @@ export function emitVue2Source(
           try {
             if (name) nativeScope = nativeScope.parameter(name, undefined, nativeScope, null);
             return body(items, depth + 1, new Set(deadBindings));
-          } finally { nativeScope = saved; }
+          } finally {
+            nativeScope = saved;
+          }
         };
         output += `${origin}${indent}try {\n${branch(statement.body)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${branch(statement.catch.body, statement.catch.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
         if (terminates([statement])) break;
@@ -475,8 +476,12 @@ export function emitVue2Source(
     statements.some(
       (statement) =>
         statement.kind === 'return' ||
-        (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise))) ||
-        (statement.kind === 'try' && (canReturn(statement.body) || (statement.catch !== undefined && canReturn(statement.catch.body)) || (statement.finally !== undefined && canReturn(statement.finally))))
+        (statement.kind === 'if' &&
+          (canReturn(statement.then) || canReturn(statement.otherwise))) ||
+        (statement.kind === 'try' &&
+          (canReturn(statement.body) ||
+            (statement.catch !== undefined && canReturn(statement.catch.body)) ||
+            (statement.finally !== undefined && canReturn(statement.finally))))
     );
   let opaqueDeclaration = false;
   for (const statement of ir.setup.body) {
@@ -547,12 +552,14 @@ export function emitVue2Source(
     .join('\n')
     .replace(/\*\//g, '*\\/');
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
-  const hooks = body(moduleParts.owned, 1) + (reachedHooks.size
-    ? `  const ${prefix}HookResults = new Map();\n` +
-      ir.hooks
-        .filter((hook) => reachedHooks.has(hook.id))
-        .map(
-          (hook) => `  const ${aliases.get(hook.id)} = () => {
+  const hooks =
+    body(moduleParts.owned, 1) +
+    (reachedHooks.size
+      ? `  const ${prefix}HookResults = new Map();\n` +
+        ir.hooks
+          .filter((hook) => reachedHooks.has(hook.id))
+          .map(
+            (hook) => `  const ${aliases.get(hook.id)} = () => {
     if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
     (${fn(hook.setup, 1)})(${prefix}Owner.def);
@@ -560,9 +567,9 @@ export function emitVue2Source(
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
     return result;
   };`
-        )
-        .join('\n')
-    : '');
+          )
+          .join('\n')
+      : '');
   const styleImport = usesStyle
     ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n`
     : '';
@@ -930,7 +937,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let pending = null;
   /** @type {PUIRenderedCommit | null} */
   let renderedCommit = null;
-  ${styled || interactive ? `/** @type {${atomicInteractive ? 'HTMLElement' : 'Element'} | null} */ let activeRoot = null;` : ''}
+  ${styled || interactive ? `/** @type {${interactive ? 'HTMLElement' : 'Element'} | null} */ let activeRoot = null;` : ''}
   ${interactive ? 'let activeEpoch = -1;' : ''}
   ${ssr ? '' : '/** @type {PUINativePaint | null} */'}
   let template = null;
@@ -956,7 +963,19 @@ ${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = 
   const eventDeclarations = Object.create(null);
   /** @type {Record<PUILifecycleKind, Array<PUILifecycleCallback<typeof run>>>} */
   const lifecycle = { ${lifecycleKeys.map((key) => `${JSON.stringify(key)}: []`).join(', ')} };
-${stateful ? '  /** @type {Array<() => void>} */\n  const notifications = [];\n' : ''}  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
+${stateful ? '  /** @type {Array<() => void>} */\n  const notifications = [];\n' : ''}  ${
+    interactive
+      ? `/** @type {WeakMap<object, PUIExternalState<unknown>>} */
+  const observedExternals = new WeakMap();
+  /** @template T @param {{ get: () => T }} state @returns {PUIExternalState<T>} */
+  function externalState(state) {
+    const external = observedExternals.get(state);
+    if (!external) throw new Error('[State] handle does not belong to this generated owner.');
+    // Registration binds this exact handle to its same-value external view.
+    return /** @type {PUIExternalState<T>} */ (external);
+  }`
+      : ''
+  }
 ${stateful ? '  let notifying = false;\n' : ''}${
     portal
       ? `  let portalAnchor = null, portalRoot = null;
@@ -1221,20 +1240,23 @@ ${context.owner}
     invoke: (fn) => invoke(fn),
     getRun: () => run,
     getResolvedProps: () => resolved,
-    subscribeState: (state, fn) => (state.external ?? observedExternals.get(state) ?? state).subscribe(fn),
+    subscribeState: (state, fn) => externalState(state).subscribe(fn),
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
     declarations: ${declarations}, tableFamily: ${tableFamily},
     getExposes: () => exposed,
     registerExpose: (key, value) => {
       setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration: ' + key);
-      if (value?.external) exposed[key] = value.external;
-      else if (typeof value === 'function') exposed[key] = (...args) => { publicAlive(); return invoke(() => value(...args)); };
-      else if (key === 'controls' && value) exposed[key] = Object.fromEntries(Object.entries(value).map(([name, action]) => [name, (...args) => { publicAlive(); return invoke(() => action(...args)); }]));
+      if (value !== null && typeof value === 'object' && observedExternals.has(value)) exposed[key] = observedExternals.get(value);
+      else if (typeof value === 'function') exposed[key] = (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); });
+      else if (key === 'controls' && value !== null && typeof value === 'object') exposed[key] = Object.fromEntries(Object.entries(/** @type {Record<string, unknown>} */ (value)).map(([name, action]) => {
+        if (typeof action !== 'function') throw new TypeError('[Expose] a control action must be callable.');
+        return [name, (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => action(...args)); })];
+      }));
       else exposed[key] = value;
     },
     createOwnedState: (name, value, spec) => createState(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec),
-    watchState: (state, fn) => { setupOnly(); return state.external.subscribe(event => invoke(() => fn(run, event))); },
+    watchState: (state, fn) => { setupOnly(); return externalState(state).subscribe(event => invoke(() => fn(run, event))); },
     isPropProvided: key => PUIOwn(raw, key),
     declareTransition(hooks) {
       def.props.define({open:{type:'boolean'},defaultOpen:{type:'boolean',default:false},appear:{type:'boolean',default:false},enterDuration:{type:'number',default:300},leaveDuration:{type:'number',default:200},interrupt:{type:'enum',options:['reverse','wait','immediate'],default:'reverse'}});
@@ -1245,15 +1267,17 @@ ${context.owner}
     setPresent, requestHostUpdate: force,
     emit: (key) => run.expose.emit(key),
     registerGenericObservedState: (handle) => {
+      /** @type {Set<(event: PUIStateEvent<ReturnType<typeof handle.get>>) => void>} */
       const subscribers = new Set();
       const off = handle.subscribe((event) => {
         ${refresh}
         notifications.push(() => { for (const subscriber of Array.from(subscribers)) if (subscribers.has(subscriber)) subscriber(event); });
         if (notifying) return;
         notifying = true;
-        try { while (notifications.length) notifications.shift()(); }
+        try { while (notifications.length) notifications.shift()?.(); }
         finally { notifying = false; }
       });
+      /** @type {PUIExternalState<ReturnType<typeof handle.get>>} */
       const external = Object.freeze({
         get: () => { publicAlive(); return handle.get(); },
         subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },
@@ -1325,6 +1349,7 @@ ${
         finally { subscribers.clear(); }
       },
     };
+    ${interactive ? 'observedExternals.set(handle, handle.external);' : ''}
     states.push(handle);
     return handle;
   };
@@ -1459,11 +1484,17 @@ ${
     vm.$nextTick(() => {
       if (terminal || commit.epoch !== epoch || commit.version !== commitVersion || vm.$el !== target || commit.vnode.elm !== target) return;
       if (!present || !hostActive) return;
+      ${
+        interactive
+          ? `const elementType = target.ownerDocument.defaultView?.HTMLElement;
+      if (!elementType || !(target instanceof elementType)) throw new Error('[Vue2 native] interaction Root must be an HTML element.');`
+          : ''
+      }
       ${portal ? 'syncPortal(target, interaction.portalTarget());' : ''}
       const kind = commit.kind;
       if (kind === 'mount' && !viewActive) {
         viewActive = true;
-        ${styled || interactive ? `activeRoot = ${atomicInteractive ? '/** @type {HTMLElement} */ (target)' : 'target'};` : ''}
+        ${styled || interactive ? 'activeRoot = target;' : ''}
         ${
           interactive
             ? `activeEpoch = epoch;
@@ -1483,7 +1514,7 @@ ${
         ${
           interactive
             ? `if (activeRoot !== target || activeEpoch !== epoch) {
-          activeRoot = ${atomicInteractive ? '/** @type {HTMLElement} */ (target)' : 'target'}; activeEpoch = epoch;
+          activeRoot = target; activeEpoch = epoch;
           interaction.mount();
         }
         if (terminal || commit.epoch !== epoch || !present || !hostActive) return;`
