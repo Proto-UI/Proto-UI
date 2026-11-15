@@ -62,9 +62,14 @@ criteria:
     text:
       en: The bounded ordinary split Web profile supports vertical system Scroll on the current inner surface containing paint and slot content. Boundary placement remains separate. One exclusive policy lease preflights all overflow/projection writes, preserves foreign replacements and priorities, and attempts every cleanup. Unready or replaced surfaces and document epochs revoke old facts and observers before teardown. Raw overflow tokens do not acquire a style role from this semantic declaration.
       zh-CN: 有界普通 split Web profile 在含 paint 和 slot 内容的当前内表面支持纵向 system Scroll，boundary placement 仍独立。唯一独占 policy lease 整体预检 overflow/projection 写入，保留外部替换及优先级，并尝试全部清理。未就绪、换表面或换文档代际在清理前撤销旧 facts 和 observer。该语义声明不为原始 overflow token 授予 style role。
+  - id: HC-SCROLL-SURFACE-0001-TARGET-REVEAL
+    text:
+      en: The optional reveal operation must obey C-SCROLL-TARGET-REVEAL-0001, recheck both physical binding and Module-provided target authority after measurement, move only its owned vertical surface, and preserve input focus and ancestor offsets. A valid reveal also supersedes an older pending end movement when no immediate movement is needed; an invalid reveal cannot cancel that request.
+      zh-CN: 可选 reveal 操作必须遵守 C-SCROLL-TARGET-REVEAL-0001，在测量后复核物理 binding 与 Module 提供的 target 权限，只移动本纵向 surface，保留输入焦点和祖先 offset。有效 reveal 即使无需立即移动也必须取代较早待应用的 end 移动；无效 reveal 不得取消该请求。
 satisfies:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-SCROLL-COMPOSED-CONTROL-0001
 requires:
@@ -76,6 +81,7 @@ relates:
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - T-SCROLL-COMPOSED-CHROME-0001
     - T-SCROLL-COMPOSED-CONTROL-0001
@@ -84,6 +90,9 @@ sources:
   - path: packages/modules/scroll/src/caps.ts
   - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added a bounded optional vertical reveal operation with current logical authority, minimal own-surface movement and ordered end-request cancellation.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added host-bounded end proximity, coalesced layout-ready following, evidence-based interruption, resume, and exact stale-callback cleanup.

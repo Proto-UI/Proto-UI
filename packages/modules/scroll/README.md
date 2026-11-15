@@ -27,6 +27,20 @@ The handle exposes per-axis `atEnd` plus read-only `endFollow.state` and `endFol
 
 The policy is off by default. The host owns proximity, layout observation, coalescing, input interruption, and direct end movement. Message counts, unread state, focus, announcements, visual-anchor preservation, and virtualization remain separate owners.
 
+## Target reveal (draft Web runtime)
+
+The draft `C-SCROLL-TARGET-REVEAL-0001` profile adds a vertical request through the same handle. The caller passes the current `AnatomyFamily` and `AnatomyPartView` obtained from its logical composition:
+
+```ts
+scroll.request({ kind: 'reveal', axis: 'vertical', family, part });
+```
+
+The target must be a current descendant in the same family whose nearest ancestor with the surface's role is this surface. The Module validates this membership and the mounted lease; the Web host resolves the physical target and performs the nearest movement within that surface. It preserves input focus, horizontal position and ancestor scroll positions. Scroll padding and target scroll margins affect the preferred alignment, which is clamped to the native range. A row taller than the viewport can expose its nearest edge without becoming fully visible.
+
+Unavailable, pending, unsupported or retired targets are rejected. Reveal requests are never queued or replayed onto a later view. A `dispatched` outcome confirms current host delivery; it does not guarantee visibility through external clipping. Callers still own a usable bounded layout and the decision to request reveal after an accepted navigation change.
+
+This profile currently covers the Web runtime path. Compiler lowering, non-Web hosts and horizontal reveal require separate implementation and acceptance evidence. `T-SCROLL-TARGET-REVEAL-0001` distinguishes model regressions from the native Search consumer journeys; the draft status is not a cross-target compatibility guarantee.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.
