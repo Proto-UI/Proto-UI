@@ -143,13 +143,26 @@ for (const shadow of [false, true]) {
       expect(child).not.toBeNull();
       expect(child?.childNodes.length).toBe(0);
     });
-    it('does not reinterpret an explicit undefined capture as an omitted child', () => {
-      const parsed = parsePrototype(
-        "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-explicit-undefined',setup(){return r=>r.el('div',undefined);}});",
-        { fileName: 'independent.proto.ts' }
-      );
-      expect(parsed.ok).toBe(false);
-      if (!parsed.ok) expect(parsed.diagnostics.some((d) => d.code === 'PUI1005')).toBe(true);
+    it('rejects an explicit undefined child at the template argument boundary', () => {
+      const source =
+        "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-explicit-undefined',setup(){return r=>r.el('div',undefined);}});";
+      // C-TEMPLATE-0004-E forbids undefined in child position. Since d0161c84d,
+      // the literal is a known void value for exception flow, not an unresolved
+      // capture. Keep the rejection and require its actual semantic cause and
+      // original child span; an unrelated parser failure cannot satisfy this.
+      const start = source.lastIndexOf('undefined');
+      expect(parsePrototype(source, { fileName: 'independent.proto.ts' })).toMatchObject({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'PUI1006',
+            category: 'unsupported-input',
+            message:
+              'Element props accept only one style handle; children must be template nodes, text, finite numbers, arrays or null.',
+            span: { file: 'independent.proto.ts', start, end: start + 'undefined'.length },
+          },
+        ],
+      });
     });
     it('retains both occurrences of one authored template value', () => {
       const host = create(aliasSource, shadow);
