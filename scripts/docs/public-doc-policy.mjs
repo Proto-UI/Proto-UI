@@ -71,6 +71,18 @@ export const publicDocPolicy = {
       detailPrefix: 'ui-libraries/brutalist/components',
       catalogPrefix: 'P-BRUTALIST-',
       familyAliases: { dropdown: 'dropdown-menu' },
+      familyRoutes: {
+        accordion: 'ui-libraries/brutalist/accordion',
+        field: 'ui-libraries/brutalist/field',
+        fieldset: 'ui-libraries/brutalist/fieldset',
+        form: 'ui-libraries/brutalist/form',
+        'checkbox-group': 'ui-libraries/brutalist/checkbox-group',
+        progress: 'ui-libraries/brutalist/progress',
+        meter: 'ui-libraries/brutalist/meter',
+        slider: 'ui-libraries/brutalist/slider',
+        'number-field': 'ui-libraries/brutalist/number-field',
+        'input-otp': 'ui-libraries/brutalist/input-otp',
+      },
       exportClassifications: {
         '.': {
           kind: 'library-root',

@@ -26,7 +26,10 @@ export default withShadcnRheaDemo({
         kind: 'proto',
         prototypeId: 'shadcn-button',
         props: { variant: 'ghost', size: 'icon' },
-        children: ['+'],
+        children: [
+          { kind: 'box', tag: 'span', attrs: { 'aria-hidden': 'true' }, children: ['+'] },
+          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Add'] },
+        ],
       },
       {
         kind: 'proto',

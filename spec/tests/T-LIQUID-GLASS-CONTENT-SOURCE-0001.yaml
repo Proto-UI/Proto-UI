@@ -38,6 +38,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/liquid-content-source-r91.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-CONTENT-SOURCE-0001-CASE-CONTENT
+      - T-LIQUID-GLASS-CONTENT-SOURCE-0001-CASE-FACTS
     exercises:
       - P-LIQUID-GLASS-SCROLL-AREA
       - P-LIQUID-GLASS-SCROLL-AREA-VIEWPORT

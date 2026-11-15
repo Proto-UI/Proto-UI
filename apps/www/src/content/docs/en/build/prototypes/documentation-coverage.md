@@ -5,6 +5,14 @@ description: 'Find the documentation for implemented prototype families and dist
 
 This index maps implementation families to their reader-facing documentation. A family page covers its constituent parts; a file, a generated icon, an authored `asHook`, a CLI facade, and a catalog identity are not interchangeable units. Read each page's lifecycle and host limits before choosing an API. Package publication does not automatically activate a draft `P-*` entity.
 
+## Current library entry points
+
+For current workspace exports, use [Base](/en/ui-libraries/base/), [Shadcn](/en/ui-libraries/shadcn/), [Brutalist](/en/ui-libraries/brutalist/) and [Lucide](/en/ui-libraries/lucide/). The first three render the shared current export index; Lucide retains its generated searchable catalog. These entry pages distinguish the published 0.2.0 install baseline from workspace 0.3 source and link each family's real detail route.
+
+Shadcn Input Shell and Style Scope currently link to their draft source protocols because complete public Usage and host evidence remain open. Their source exports are retained in the index; they are not silently counted as complete detail pages. Other library entries remain experimental and are outside the four-family 0.3 commitment.
+
+The tables and branch checkpoints below retain the **2026-10-04 historical inventory**, including its then-missing Base Input route. The current Base Input guide is [here](/en/ui-libraries/base/input/). Earlier test results, failures, hashes and source identities remain in [the dated audit](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/docs/prototype-coverage-audit-2026-10-04.md); they are not acceptance of a later source tree. [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) and its retained [acceptance carrier #1323](https://github.com/Proto-UI/Proto-UI/issues/1323) preserve the route, host, package, responsive and accessibility conditions. A static route index does not satisfy those execution conditions.
+
 ## How to read the inventory
 
 The source directory is `packages/prototypes/<library>/src/<family>`. Part labels below identify source files, not a new export naming convention: `overlay` implements the documented Mask identity; Transition's `as-transition` and `transition` belong to one protocol. The detail page and package export define the actual import. Compound parts share a family page rather than getting superficial one-line pages.

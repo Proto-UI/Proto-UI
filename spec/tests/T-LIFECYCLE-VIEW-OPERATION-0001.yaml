@@ -70,7 +70,33 @@ cases:
     title: Aborted transport preserves error and unchanged operation
     covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
     expectation: same-error-original-parent-still-current-no-move-reactions
+openQuestions:
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-Q-FOUR-WEB-CONSUMER
+    question:
+      en: Where is the complete four-Web consumer source-withdrawal acceptance evidence?
+    context:
+      en: >-
+        The required consumer suite is absent. Complete actual WC, React, Vue 3 and Vue 2 source withdrawal without focus stealing and with retained-destination roving ownership unchanged. Runtime identity, WC physical withdrawal/transport and synthetic framework replacement suites cover narrower obligations. The menu consumer captures and checks the initiating operation in packages/prototypes/base/src/menu-primitives/family.ts; source presence is not the missing four-host consumer result. Required missing evidence still blocks readiness, even when an honest remain-draft disposition inventory is complete.
+
+
+    blocks:
+      - implementation:T-LIFECYCLE-VIEW-OPERATION-0001#four-web-consumer-conformance
+      - activation:T-LIFECYCLE-VIEW-OPERATION-0001
 implementations:
+  - id: four-web-consumer-conformance
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-CONSUMER]
+    notes:
+      - >-
+        No complete consumer suite or executable path is declared. This required missing record retains the original actual-four-host source-withdrawal, no-focus-steal and unchanged retained-destination-roving expectation; it records absence and supplies no passing evidence.
+
+
+      - >-
+        Existing Runtime capture/invalidation, native WC physical withdrawal/transport and synthetic React/Vue/Vue2 view-replacement tests are narrower and do not establish this full case.
+
+
   - id: runtime-source-view-operation
     kind: runtime-test
     status: planned

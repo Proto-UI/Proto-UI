@@ -1,7 +1,15 @@
 import { loadSpecWorkspaceFromDirectory } from '@proto.ui/spec-engine/node';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { existsSync, realpathSync, statSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import path from 'node:path';
 
 const REPO_ROOT = process.cwd();
@@ -73,9 +81,8 @@ function resolves(value: string, requireFile = false): boolean {
 }
 
 /**
- * The one status that declares a future target rather than current evidence.
- * `missing` is deliberately not exempt: whether it carries no-file semantics is
- * a schema and lifecycle question, not something this check may decide.
+ * Planned records declare future targets rather than current evidence. Missing
+ * records declare absence only when the path is omitted, checked separately.
  */
 const DECLARED_ABSENT: ReadonlySet<string> = new Set(['planned']);
 
@@ -100,9 +107,10 @@ export function collectEvidenceGaps(entities: readonly Entity[]): {
 
     for (const implementation of entity.implementations ?? []) {
       if (implementation.status && DECLARED_ABSENT.has(implementation.status)) continue;
-      // An implementation that claims current evidence has to name a file in
-      // this repository. Skipping an absent or remote path would let it satisfy
-      // the case-consumption invariant below with no executable behind it.
+      if (implementation.status === 'missing' && implementation.path === undefined) continue;
+      // Every other record must name a repository file. A missing record with a
+      // declared path still has to resolve; case consumption alone does not
+      // establish passing evidence or lifecycle readiness.
       if (!isRepositoryPath(implementation.path) || !resolves(implementation.path, true)) {
         missingImplementations.push(
           `${entity.id}: ${implementation.id} -> ${implementation.path ?? '(no path)'}`
@@ -123,6 +131,22 @@ export function collectEvidenceGaps(entities: readonly Entity[]): {
 }
 
 describe('catalog evidence integrity', () => {
+  let untrackedDirectory: string | undefined;
+  let untrackedPath: string;
+
+  beforeAll(() => {
+    const cacheDirectory = path.join(REPO_ROOT, '.cache');
+    mkdirSync(cacheDirectory, { recursive: true });
+    untrackedDirectory = mkdtempSync(path.join(cacheDirectory, 'catalog-evidence-'));
+    const filePath = path.join(untrackedDirectory, 'untracked.test.ts');
+    writeFileSync(filePath, 'export {};\n');
+    untrackedPath = path.relative(REPO_ROOT, filePath).split(path.sep).join('/');
+  });
+
+  afterAll(() => {
+    if (untrackedDirectory) rmSync(untrackedDirectory, { recursive: true, force: true });
+  });
+
   it('separates a resolvable citation from one that only looks like evidence', () => {
     const gaps = collectEvidenceGaps([
       {
@@ -135,9 +159,9 @@ describe('catalog evidence integrity', () => {
           { path: '../package.json' },
           // Exists in this checkout and nowhere else.
           { path: path.join(REPO_ROOT, 'package.json') },
-          // Generated and Git-ignored: present for its author, absent from a
-          // fresh checkout.
-          { path: 'internal/agent/PROJECT-UNDERSTANDING.zh-CN.md' },
+          // The suite creates this real file under the ignored cache before
+          // collection, so rejection must enforce repository tracking.
+          { path: untrackedPath },
           // A portable remote citation is not this check's to resolve.
           { path: 'https://www.w3.org/TR/wai-aria-1.2/' },
           // A machine-local URL is not auditable from another checkout.
@@ -164,13 +188,19 @@ describe('catalog evidence integrity', () => {
             status: 'planned',
             consumesCases: ['C-FIXTURE-0001-CASE-C'],
           },
-          // `missing` is a real status, and it is not exempt: only `planned`
-          // is a declared future target under the current boundary.
+          // A missing record that names a path still has a citation to validate.
           {
             id: 'gap',
             path: 'packages/never-written.test.ts',
             status: 'missing',
             consumesCases: ['C-FIXTURE-0001-CASE-D'],
+          },
+          // Explicit absence accounts for a case without inventing a file or
+          // claiming execution. Lifecycle readiness still requires passing evidence.
+          {
+            id: 'missing-pathless',
+            status: 'missing',
+            consumesCases: ['C-FIXTURE-0001-CASE-I'],
           },
           {
             id: 'escapes',
@@ -204,6 +234,7 @@ describe('catalog evidence integrity', () => {
           { id: 'C-FIXTURE-0001-CASE-F' },
           { id: 'C-FIXTURE-0001-CASE-G' },
           { id: 'C-FIXTURE-0001-CASE-H' },
+          { id: 'C-FIXTURE-0001-CASE-I' },
           { id: 'C-FIXTURE-0001-CASE-ORPHAN' },
         ],
       },
@@ -213,7 +244,7 @@ describe('catalog evidence integrity', () => {
       'C-FIXTURE-0001: spec/nothing-here.md',
       'C-FIXTURE-0001: ../package.json',
       `C-FIXTURE-0001: ${path.join(REPO_ROOT, 'package.json')}`,
-      'C-FIXTURE-0001: internal/agent/PROJECT-UNDERSTANDING.zh-CN.md',
+      `C-FIXTURE-0001: ${untrackedPath}`,
       'C-FIXTURE-0001: file:///home/alice/evidence.md',
     ]);
     expect(gaps.missingImplementations).toEqual([
@@ -225,6 +256,44 @@ describe('catalog evidence integrity', () => {
       'C-FIXTURE-0001: remote -> https://example.test/suite.ts',
     ]);
     expect(gaps.orphanCases).toEqual(['C-FIXTURE-0001: C-FIXTURE-0001-CASE-ORPHAN']);
+  });
+
+  it.each([
+    ['empty', ''],
+    ['null', null],
+    ['whitespace', '   '],
+    ['remote', 'https://example.test/suite.ts'],
+    ['machine-local URL', 'file:///home/alice/evidence.ts'],
+    ['escaping', '../package.json'],
+    ['absolute', path.join(REPO_ROOT, 'package.json')],
+    ['directory', 'packages'],
+    ['nonexistent', 'packages/never-written.test.ts'],
+    // Resolve after beforeAll has created the owned file.
+    ['untracked', () => untrackedPath],
+  ])('rejects a missing record with a %s path', (_kind, declaredPath) => {
+    const implementationPath = typeof declaredPath === 'function' ? declaredPath() : declaredPath;
+    const gaps = collectEvidenceGaps([
+      {
+        id: 'T-MISSING-FIXTURE-0001',
+        implementations: [
+          {
+            id: 'missing',
+            status: 'missing',
+            // Exercise malformed raw input too: null is schema-invalid, not omitted.
+            path: implementationPath as string,
+            consumesCases: ['T-MISSING-FIXTURE-0001-CASE-ONE'],
+          },
+        ],
+        cases: [{ id: 'T-MISSING-FIXTURE-0001-CASE-ONE' }],
+      },
+    ]);
+    expect(gaps).toEqual({
+      missingSources: [],
+      missingImplementations: [
+        `T-MISSING-FIXTURE-0001: missing -> ${implementationPath ?? '(no path)'}`,
+      ],
+      orphanCases: [],
+    });
   });
 
   it('leaves no cited evidence path unresolved across the catalog', async () => {
