@@ -346,6 +346,112 @@ it('keeps newer focus when a replacement Dialog finishes leaving', async () => {
   expect(returned).not.toHaveBeenCalled();
 });
 
+it.each(['query', 'close', 'newer focus'] as const)(
+  'restores the retained Homepage Search after a late publication failure with %s focus',
+  async (focusedRef) => {
+    const { owner, root } = mount('shadcn', true);
+    const failure = new Error('Controlled failure after replacement Search publication');
+    let preparing = false;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const controller = createProjectionScopeController({
+      initialSelection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+      async materialize(request) {
+        if (request.generation === 2) {
+          preparing = true;
+          await gate;
+        }
+        const { prepared } = await prepare(
+          owner,
+          'shadcn',
+          request.selection.runtimeId as RuntimeId,
+          request.generation
+        );
+        return {
+          activate() {
+            for (const candidate of prepared) candidate.activate();
+          },
+          async setLocked(locked) {
+            for (const candidate of prepared) await candidate.setLocked?.(locked);
+          },
+          async dispose() {
+            for (const candidate of prepared) await candidate.dispose();
+          },
+        };
+      },
+      prepareCommit(request) {
+        const publication = owner.prepareCommit(request);
+        return {
+          publish() {
+            publication.publish();
+            if (request.generation !== 2) return;
+            expect(root.dataset.searchRuntime).toBe('react');
+            if (focusedRef === 'close') {
+              const carrier = root.querySelector<HTMLElement>(
+                '[data-search-dialog-mount] [data-projection-generation-state="active"] .pui-projection-content'
+              )!;
+              carrier.tabIndex = -1;
+              carrier.focus();
+              expect(document.activeElement).toBe(carrier);
+            }
+            throw failure;
+          },
+          rollback: publication.rollback,
+        };
+      },
+    });
+    try {
+      await controller.start();
+      owner.open();
+      await vi.waitFor(() => expect(document.activeElement).toBe(editor(1)));
+      const retainedPanel = surface(1, 'panel');
+      await vi.waitFor(() =>
+        expect(retainedPanel.getAttribute('data-transition-state')).toBe('entered')
+      );
+      const retainedEditor = editor(1);
+      type(retainedEditor, 'retained search query');
+      retainedEditor.setSelectionRange(2, 9);
+      const retainedFocus = focusedRef === 'close' ? surface(1, 'close') : retainedEditor;
+      retainedFocus.focus();
+      let expectedFocus: HTMLElement = retainedFocus;
+      const replacement = controller.request({ runtimeId: 'react' }).catch((error) => error);
+      await vi.waitFor(() => expect(preparing).toBe(true));
+      // Happy DOM does not move focus away from an inert host. Model that
+      // platform fallback, as in the preparation-failure cases above.
+      retainedFocus.blur();
+      if (focusedRef === 'newer focus') {
+        expectedFocus = document.createElement('button');
+        document.body.append(expectedFocus);
+        expectedFocus.focus();
+      }
+      release();
+      expect(await replacement).toBe(failure);
+      expect(controller.getSnapshot()).toMatchObject({ generation: 1, phase: 'ready' });
+      expect(root.dataset.searchRuntime).toBe('wc');
+      expect(owner.isOpen()).toBe(true);
+      expect(surface(1, 'panel')).toBe(retainedPanel);
+      expect(editor(1)).toBe(retainedEditor);
+      expect(retainedEditor.value).toBe('retained search query');
+      expect([retainedEditor.selectionStart, retainedEditor.selectionEnd]).toEqual([2, 9]);
+      await vi.waitFor(() => {
+        expect(retainedPanel.inert).toBe(false);
+        expect(retainedPanel.getAttribute('aria-hidden')).not.toBe('true');
+        expect(retainedPanel.style.visibility).not.toBe('hidden');
+        expect(document.activeElement).toBe(expectedFocus);
+      });
+      owner.toggle();
+      await vi.waitFor(() => expectClosed(1));
+      owner.open();
+      await vi.waitFor(() => expect(document.activeElement).toBe(retainedEditor));
+    } finally {
+      release();
+      await controller.destroy();
+    }
+  }
+);
+
 it('does not return focus from an interrupted replacement Dialog close', async () => {
   const { owner, opener, close } = await openHomepageReplacement();
   const returned = vi.fn();

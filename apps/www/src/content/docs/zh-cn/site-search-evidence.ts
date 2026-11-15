@@ -9,6 +9,106 @@ export function searchEvidenceDirectory(runtimeRoot: string | undefined, runnerT
   );
 }
 
+/** Self-contained browser callback. Vite's SSR transform must not own this import. */
+export async function readIndependentPagefindQueries(emptyQuery: string) {
+  const url = new URL('/pagefind/pagefind.js', location.origin);
+  const load = new Function('url', 'return import(url)') as (url: string) => Promise<{
+    options(options: { baseUrl: string }): Promise<void>;
+    search(query: string): Promise<{ results: unknown[] }>;
+  }>;
+  const pagefind = await load(url.href);
+  await pagefind.options({ baseUrl: '/' });
+  const observations: Array<{ query: string; count: number }> = [];
+  for (const query of [emptyQuery, 'Button', 'zxqv948271605emptycontract']) {
+    const found = await pagefind.search(query);
+    observations.push({ query, count: found.results.length });
+  }
+  return observations;
+}
+
+/** Both timestamps come from one page clock, never from a renewed Node-side wait. */
+export function homepageRollbackWasOnTime(
+  evidence: { faultAt?: number | null; errorAt?: number | null },
+  budgetMs = 1000
+) {
+  const { faultAt, errorAt } = evidence;
+  return (
+    typeof faultAt === 'number' &&
+    Number.isFinite(faultAt) &&
+    typeof errorAt === 'number' &&
+    Number.isFinite(errorAt) &&
+    errorAt >= faultAt &&
+    errorAt - faultAt <= budgetMs
+  );
+}
+
+/** A native reveal receipt keeps ordinary containment and oversized edge alignment distinct. */
+export function searchRevealMatchesViewport(
+  bounds: {
+    viewportTop: number;
+    viewportBottom: number;
+    targetTop: number;
+    targetBottom: number;
+  },
+  nearestEdge: 'start' | 'end',
+  native?: {
+    physicalViewportTop: number;
+    physicalViewportBottom: number;
+    physicalTargetTop: number;
+    physicalTargetBottom: number;
+    scrollTop: number;
+    maxScrollTop: number;
+  }
+) {
+  const { viewportTop, viewportBottom, targetTop, targetBottom } = bounds;
+  if (![viewportTop, viewportBottom, targetTop, targetBottom].every(Number.isFinite)) return false;
+  const viewportHeight = viewportBottom - viewportTop;
+  const targetHeight = targetBottom - targetTop;
+  if (viewportHeight <= 0 || targetHeight <= 0) return false;
+  if (targetHeight <= viewportHeight) {
+    const contained = targetTop >= viewportTop - 1 && targetBottom <= viewportBottom + 1;
+    if (!native) return contained;
+    const {
+      physicalViewportTop,
+      physicalViewportBottom,
+      physicalTargetTop,
+      physicalTargetBottom,
+      scrollTop,
+      maxScrollTop,
+    } = native;
+    if (
+      !Object.values(native).every(Number.isFinite) ||
+      maxScrollTop < 0 ||
+      scrollTop < 0 ||
+      scrollTop > maxScrollTop ||
+      physicalViewportBottom <= physicalViewportTop ||
+      physicalTargetBottom <= physicalTargetTop ||
+      viewportTop < physicalViewportTop ||
+      viewportBottom > physicalViewportBottom ||
+      physicalTargetTop < physicalViewportTop - 1 ||
+      physicalTargetBottom > physicalViewportBottom + 1
+    )
+      return false;
+    if (contained) return true;
+    // The preferred inset can extend beyond the actual native scroll range.
+    // Admit only that impossible movement at the corresponding exact boundary,
+    // while the whole ordinary row still fits the physical client viewport.
+    return (
+      (scrollTop === 0 && targetTop < viewportTop && targetBottom <= viewportBottom + 1) ||
+      (scrollTop === maxScrollTop &&
+        targetBottom > viewportBottom &&
+        targetTop >= viewportTop - 1)
+    );
+  }
+  // An oversized row cannot be fully contained. Intersection alone would hide
+  // an overscroll: the edge nearest before the real key must also align.
+  return (
+    targetTop < viewportBottom &&
+    targetBottom > viewportTop &&
+    Math.abs(nearestEdge === 'start' ? targetTop - viewportTop : targetBottom - viewportBottom) <= 1
+  );
+}
+
 export type PendingSearchRequest = { url: string; type: string };
 
 // Log enough to distinguish pending scripts, fonts and other requests without
@@ -34,19 +134,20 @@ export function summarizePendingRequests(requests: Iterable<PendingSearchRequest
   return { pendingCount, byType, samples };
 }
 
-export type SearchGetterSample = {
+export type SearchGetterSample<T = string | null> = {
   startedAt: number;
   settledAt?: number;
-  value?: string | null;
+  value?: T;
   error?: string;
+  cause?: string;
 };
 
 /** Observe the original call without adding a wait, retry or locator option. */
-export function traceSearchGetter(
-  samples: SearchGetterSample[],
-  read: () => Promise<string | null>
-): Promise<string | null> {
-  const sample: SearchGetterSample = { startedAt: Date.now() };
+export function traceSearchGetter<T>(
+  samples: SearchGetterSample<T>[],
+  read: () => Promise<T>
+): Promise<T> {
+  const sample: SearchGetterSample<T> = { startedAt: Date.now() };
   if (samples.length < 32) samples.push(sample);
   return read().then(
     (value) => {
@@ -56,7 +157,8 @@ export function traceSearchGetter(
     },
     (error) => {
       sample.settledAt = Date.now();
-      sample.error = String(error).slice(0, 400);
+      sample.error = String(error);
+      if (error instanceof Error && error.cause !== undefined) sample.cause = String(error.cause);
       throw error;
     }
   );

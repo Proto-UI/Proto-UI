@@ -122,23 +122,28 @@ export function createSiteSearchComposition(options: {
       },
     ],
   };
+  const keyboardHint: DemoNode = {
+    kind: 'box',
+    tag: 'div',
+    ref: 'keyboard-hint',
+    // Hints may wrap at enlarged text sizes. They share the outer scrollport
+    // with status/actions so the fixed dismissal cannot consume the result view.
+    className:
+      family === 'shadcn'
+        ? 'flex shrink-0 min-w-0 items-center gap-2 p-2 text-xs text-muted-foreground'
+        : 'flex shrink-0 min-w-0 items-center gap-2 p-2',
+    dynamicChildren: { prototypeIds: [] },
+    children: [],
+  };
   const footer: DemoNode = {
     kind: 'box',
     ref: 'dismissal',
     tag: 'div',
     className:
       family === 'shadcn'
-        ? 'flex min-h-11 shrink-0 min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/50 px-4 text-xs text-muted-foreground'
+        ? 'flex min-h-11 shrink-0 min-w-0 items-center justify-end border-t border-border bg-muted/50 px-4 text-xs text-muted-foreground'
         : 'flex shrink-0 min-w-0 items-center justify-end p-2',
     children: [
-      {
-        kind: 'box',
-        tag: 'div',
-        ref: 'keyboard-hint',
-        className: 'flex min-w-0 items-center gap-2',
-        dynamicChildren: { prototypeIds: [] },
-        children: [],
-      },
       proto('dialog-close', {
         ref: 'close',
         surfaceStyle: {
@@ -196,19 +201,22 @@ export function createSiteSearchComposition(options: {
                   tag: 'div',
                   ref: 'scroll-body',
                   // Error/loading text and actions may wrap at enlarged text sizes.
-                  // This middle region contains status/actions overflow; the family list
-                  // retains its own scrolling limit. Dismissal remains outside both.
+                  // This middle region contains status/actions overflow. Cap the
+                  // list at its viewport instead of shrinking it behind a wrapped
+                  // status block; dismissal stays outside this outer scrollport.
                   className:
                     family === 'shadcn'
-                      ? 'min-h-0 min-w-0 flex-1 basis-80 overflow-y-auto px-2 pb-2'
-                      : 'min-h-0 min-w-0 flex-1 overflow-y-auto',
+                      ? 'flex flex-col min-h-0 min-w-0 flex-1 basis-80 overflow-y-auto px-2 pb-2'
+                      : 'flex flex-col min-h-0 min-w-0 flex-1 overflow-y-auto px-2 pb-2',
+                  // Side and bottom gutters expose the outer scrollport to both
+                  // wheel input and touch gestures while the inner list scrolls.
                   // Preferred menu list height yields to the bounded Dialog on
                   // short/enlarged viewports; it is not a mandatory clipping min.
                   children: [
                     proto('command-content', {
                       props: style,
                       ref: 'list',
-                      surfaceStyle: family === 'shadcn' ? { maxHeight: '100%' } : undefined,
+                      surfaceStyle: { flex: '0 0 auto', minHeight: '0', maxHeight: '100%' },
                       children: [
                         {
                           kind: 'box',
@@ -227,6 +235,7 @@ export function createSiteSearchComposition(options: {
                       ],
                     }),
                     statusAndActions,
+                    keyboardHint,
                   ],
                 },
                 footer,
