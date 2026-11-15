@@ -2,6 +2,14 @@ name: Finf representative feature screenshots
 on:
   workflow_dispatch:
     inputs:
+      feature_group:
+        description: Representative feature group; all preserves the complete inventory
+        required: true
+        type: choice
+        default: all
+        options:
+          - all
+          - calendar
       popover_evidence:
         description: Popover evidence selection; fault modes intentionally fail
         required: true
@@ -51,23 +59,45 @@ jobs:
           - shadcn-card
           - brutalist-switch-consumer
         # Preserve the full group inventory above for all/reusable invocations.
-        # Only an explicitly recognized manual selection excludes other groups.
+        # Reusable calls retain their caller's event and workflow ref. Only this
+        # workflow's direct dispatch may apply its manual selectors.
+        # Calendar takes precedence over Popover filtering. Invalid manual inputs
+        # retain one job so the validation step rejects them before setup.
         exclude: >-
-          ${{ github.event_name == 'workflow_dispatch' && contains(fromJSON('["normal","wrong-width","nonsettling"]'), inputs.popover_evidence) && fromJSON('[{"group":"forms"},{"group":"calendar"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || fromJSON('[]') }}
+          ${{ github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository)) && inputs.feature_group != 'all' && fromJSON('[{"group":"forms"},{"group":"disclosure-overlays"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository)) && inputs.popover_evidence != 'all' && fromJSON('[{"group":"forms"},{"group":"calendar"},{"group":"modal-overlays"},{"group":"runtime-tabs"},{"group":"slider"},{"group":"dropdown"},{"group":"liquid-dropdown"},{"group":"popover-title"},{"group":"popover-navigation"},{"group":"drawer-intrinsic"},{"group":"drawer-command-density"},{"group":"popover-command-density"},{"group":"neo-popover-title"},{"group":"resident-motion-capability"},{"group":"shadcn-toggle"},{"group":"shadcn-switch-consumer"},{"group":"shadcn-drawer-presence"},{"group":"shadcn-card"},{"group":"brutalist-switch-consumer"}]') || fromJSON('[]') }}
+
 
     steps:
-      - name: Validate manual Popover evidence selection
+      - name: Validate manual feature evidence selection
         id: popover_dispatch
         env:
-          PUI_FINF_POPOVER_REQUEST: ${{ github.event_name == 'workflow_dispatch' && inputs.popover_evidence || 'all' }}
-          PUI_FINF_POPOVER_GROUP: ${{ matrix.group }}
+          PUI_FINF_FEATURE_REQUEST: ${{ !(github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository))) && 'all' || inputs.feature_group }}
+          PUI_FINF_POPOVER_REQUEST: ${{ !(github.event_name == 'workflow_dispatch' && startsWith(github.workflow_ref, format('{0}/.github/workflows/finf-representative-features-evidence.yml@', github.repository))) && 'all' || inputs.popover_evidence }}
+          PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
         run: |
           set -euo pipefail
+          case "$PUI_FINF_FEATURE_REQUEST" in
+            all) ;;
+            calendar)
+              if [ "$PUI_FINF_POPOVER_REQUEST" != all ]; then
+                printf 'Calendar selection requires popover_evidence=all: %s\n' "$PUI_FINF_POPOVER_REQUEST" >&2
+                exit 2
+              fi
+              if [ "$PUI_FINF_FEATURE_GROUP" != calendar ]; then
+                printf 'Calendar selection reached unexpected group: %s\n' "$PUI_FINF_FEATURE_GROUP" >&2
+                exit 2
+              fi
+              ;;
+            *)
+              printf 'Unknown manual feature group: %s\n' "$PUI_FINF_FEATURE_REQUEST" >&2
+              exit 2
+              ;;
+          esac
           case "$PUI_FINF_POPOVER_REQUEST" in
             all) ;;
             normal|wrong-width|nonsettling)
-              if [ "$PUI_FINF_POPOVER_GROUP" != disclosure-overlays ]; then
-                printf 'Targeted Popover selection reached unexpected group: %s\n' "$PUI_FINF_POPOVER_GROUP" >&2
+              if [ "$PUI_FINF_FEATURE_GROUP" != disclosure-overlays ]; then
+                printf 'Targeted Popover selection reached unexpected group: %s\n' "$PUI_FINF_FEATURE_GROUP" >&2
                 exit 2
               fi
               ;;
