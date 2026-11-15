@@ -1,11 +1,20 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { checkWcNativeIsolation } from './wc-native-isolation.mjs';
+import { checkWcNativeIsolation, inspectWcNativeIsolation } from './wc-native-isolation.mjs';
 
 const namespaces = (file) => (file.endsWith('/user') ? 'user:[1]' : 'net:[2]');
 
@@ -16,13 +25,20 @@ test('preparation requires a distinct user/network namespace and loopback withou
     searchPath: '/test/bin',
     run(command, args, options) {
       assert.equal(command, 'unshare');
-      assert.deepEqual(args.slice(0, 5), ['--user', '--map-root-user', '--net', 'sh', '-c']);
-      assert.deepEqual(args.slice(-3), ['sh', 'user:[1]', 'net:[2]']);
-      assert.match(args[5], /readlink \/proc\/self\/ns\/user/);
-      assert.match(args[5], /readlink \/proc\/self\/ns\/net/);
-      assert.match(args[5], /ip link set lo up/);
-      assert.match(args[5], /ip -o link show \| wc -l/);
-      assert.match(args[5], /ip -6 route show default/);
+      assert.deepEqual(args.slice(0, 6), [
+        '--user',
+        '--map-current-user',
+        '--net',
+        '--keep-caps',
+        'sh',
+        '-c',
+      ]);
+      assert.deepEqual(args.slice(7, 10), ['sh', 'user:[1]', 'net:[2]']);
+      assert.match(args[6], /ip link set lo up/);
+      assert.match(args[6], /test "\$\(id -u\)" -ne 0/);
+      assert.match(args[6], /exec setpriv --bounding-set=-all --inh-caps=-all --ambient-caps=-all/);
+      assert.equal(args[10], process.execPath);
+      assert.equal(args[11], fileURLToPath(new URL('./wc-native-isolation.mjs', import.meta.url)));
       assert.deepEqual(options.env, { PATH: '/test/bin', LANG: 'C' });
       assert.equal(options.timeout, 10_000);
       return { status: 0, stdout: 'PROTO_UI_WC_NATIVE_ISOLATION_READY\n', stderr: '' };
@@ -106,3 +122,126 @@ test(
     }
   }
 );
+
+const emptyCapabilities = ['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb']
+  .map((key) => `${key}:\t0000000000000000`)
+  .join('\n');
+const executionEnvironment = {
+  expectedUserNamespace: 'user:[1]',
+  expectedNetworkNamespace: 'net:[2]',
+  platform: 'linux',
+  uid: 1001,
+  readNamespace: (file) => (file.endsWith('/user') ? 'user:[3]' : 'net:[4]'),
+  readStatus: () => emptyCapabilities,
+  run: (_command, args) => ({
+    status: 0,
+    stdout: args[0] === '-j' ? JSON.stringify([{ ifname: 'lo', flags: ['LOOPBACK', 'UP'] }]) : '',
+  }),
+};
+
+test('browser execution verifies non-root identity, all capability sets and the actual isolated network', () => {
+  const receipt = inspectWcNativeIsolation(executionEnvironment);
+  assert.equal(receipt.outcome, 'ready');
+  assert.equal(receipt.uid, 1001);
+  assert.equal(receipt.browserJourneysExecuted, 0);
+  assert.equal(receipt.phase, 'browser-execution-preflight');
+});
+
+test(
+  'the native execution CLI refuses the original namespaces without spawning the test program',
+  { skip: process.platform !== 'linux' },
+  () => {
+    const directory = mkdtempSync(path.join(os.tmpdir(), 'wc-native-refusal-'));
+    try {
+      const vitestDirectory = path.join(directory, 'node_modules', 'vitest');
+      mkdirSync(vitestDirectory, { recursive: true });
+      // This observable marker would expose an unrestricted fall-through.
+      writeFileSync(
+        path.join(vitestDirectory, 'vitest.mjs'),
+        "import { writeFileSync } from 'node:fs'; writeFileSync('browser-started', 'unexpected');\n"
+      );
+      const evidence = path.join(directory, 'evidence');
+      const result = spawnSync(
+        process.execPath,
+        [
+          fileURLToPath(new URL('./wc-native-isolation.mjs', import.meta.url)),
+          evidence,
+          '--run-native',
+          readlinkSync('/proc/self/ns/user'),
+          readlinkSync('/proc/self/ns/net'),
+        ],
+        { cwd: directory, env: { PATH: process.env.PATH }, encoding: 'utf8' }
+      );
+      assert.equal(result.status, 1);
+      assert.equal(existsSync(path.join(directory, 'browser-started')), false);
+      const receipt = JSON.parse(readFileSync(path.join(evidence, 'isolation-execution.json')));
+      assert.equal(receipt.outcome, 'blocked');
+      assert.equal(receipt.phase, 'browser-execution-preflight');
+      assert.equal(receipt.browserJourneysExecuted, 0);
+      assert.match(receipt.error, /namespaces must differ|non-root Linux browser/);
+      assert.equal(existsSync(path.join(evidence, 'browser-vitest.json')), false);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  }
+);
+
+for (const [name, override] of [
+  ['root identity', { uid: 0 }],
+  ['missing original namespace', { expectedUserNamespace: undefined }],
+  [
+    'original user namespace',
+    { readNamespace: (f) => (f.endsWith('/user') ? 'user:[1]' : 'net:[4]') },
+  ],
+  [
+    'original network namespace',
+    { readNamespace: (f) => (f.endsWith('/user') ? 'user:[3]' : 'net:[2]') },
+  ],
+  ...['CapInh', 'CapPrm', 'CapEff', 'CapBnd', 'CapAmb'].map((key) => [
+    `retained ${key}`,
+    {
+      readStatus: () =>
+        emptyCapabilities.replace(`${key}:\t0000000000000000`, `${key}:\t0000000000000001`),
+    },
+  ]),
+  ['missing capability facts', { readStatus: () => '' }],
+  [
+    'extra network interface',
+    {
+      run: () => ({
+        status: 0,
+        stdout: JSON.stringify([{ ifname: 'lo', flags: ['UP'] }, { ifname: 'eth0' }]),
+      }),
+    },
+  ],
+  [
+    'inactive loopback',
+    { run: () => ({ status: 0, stdout: JSON.stringify([{ ifname: 'lo', flags: ['LOOPBACK'] }]) }) },
+  ],
+  [
+    'IPv4 default route',
+    {
+      run: (c, a) =>
+        a[0] === 'route'
+          ? { status: 0, stdout: 'default via 192.0.2.1' }
+          : executionEnvironment.run(c, a),
+    },
+  ],
+  [
+    'IPv6 default route',
+    {
+      run: (c, a) =>
+        a[0] === '-6'
+          ? { status: 0, stdout: 'default via 2001:db8::1' }
+          : executionEnvironment.run(c, a),
+    },
+  ],
+  ['network inspection failure', { run: () => ({ status: 1, stderr: 'inspection denied' }) }],
+]) {
+  test(`execution preflight refuses ${name} before starting browser journeys`, () => {
+    const receipt = inspectWcNativeIsolation({ ...executionEnvironment, ...override });
+    assert.equal(receipt.outcome, 'blocked');
+    assert.equal(receipt.browserJourneysExecuted, 0);
+    assert.ok(receipt.error);
+  });
+}
