@@ -21,6 +21,14 @@ const exportsByPath: Readonly<Record<string, { path: string; kind: string }>> = 
     path: 'helpers/interaction/adapter-modules-v1.ts',
     kind: 'source',
   },
+  '.proto-ui/interaction/ownership-v1.ts': {
+    path: 'helpers/interaction/ownership-v1.ts',
+    kind: 'source',
+  },
+  '.proto-ui/interaction/control-label-v1.ts': {
+    path: 'helpers/interaction/control-label-v1.ts',
+    kind: 'source',
+  },
   '.proto-ui/web-component/ssr-v1.ts': { path: 'helpers/web-component/ssr-v1.ts', kind: 'source' },
 });
 
@@ -59,6 +67,8 @@ export async function writeButtonSsrEvidenceArtifacts(
     'Component.css',
     'Component.environment.css',
     'provenance.json',
+    '.proto-ui/interaction/ownership-v1.ts',
+    '.proto-ui/interaction/control-label-v1.ts',
   ])
     if (!seen.has(required)) throw new Error('Generated evidence omits: ' + required);
   // Validate the whole input before creating any export file.

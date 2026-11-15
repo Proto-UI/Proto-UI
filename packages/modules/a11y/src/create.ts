@@ -176,14 +176,30 @@ class A11yModuleImpl extends ModuleBase {
       this.clearRelationWatch(key);
       this.applyProjection();
     },
-    claimControlLabelName: (target) => {
+    claimControlLabelName: (target, view) => {
       this.sys.ensureNotDisposed('a11y.port.claimControlLabelName');
-      if (!isA11ySemanticObjectRef(target))
+      const projector = this.activeProjector;
+      if (!isA11ySemanticObjectRef(target) && !(view && projector?.acquireControlLabelSource))
         throw new TypeError('[A11y] invalid Label semantic reference');
       const canName = () =>
         !this.hasAuthoredControlLabelName() && this.activeProjector?.hasAuthoredName?.() === false;
       if (this.controlLabelName || !canName()) return null;
-      const contribution = { target };
+      let source =
+        view && projector?.acquireControlLabelSource
+          ? projector.acquireControlLabelSource(target, view)
+          : null;
+      if (view && projector?.acquireControlLabelSource && !source) return null;
+      const releaseSource = () => {
+        const retired = source;
+        source = null;
+        retired?.dispose();
+      };
+      // Acquiring a host source may call a host hook. A newer name owner wins.
+      if (this.controlLabelName || !canName() || projector !== this.activeProjector) {
+        releaseSource();
+        return null;
+      }
+      const contribution = { target: source?.objectRef ?? (target as A11ySemanticObjectRef) };
       this.controlLabelName = contribution;
       try {
         this.applyProjection();
@@ -198,14 +214,40 @@ class A11yModuleImpl extends ModuleBase {
             // The original projection failure remains the observable error.
           }
         }
+        try {
+          releaseSource();
+        } catch {
+          // Keep the first projection failure if releasing its source also fails.
+        }
         throw error;
       }
       return {
-        isActive: () => this.controlLabelName === contribution && canName(),
+        isActive: () =>
+          this.controlLabelName === contribution &&
+          projector === this.activeProjector &&
+          canName() &&
+          (source?.isActive() ?? true),
         dispose: () => {
-          if (this.controlLabelName !== contribution) return;
-          this.controlLabelName = null;
-          this.applyProjection();
+          let failed = false;
+          let firstError: unknown;
+          if (this.controlLabelName === contribution) {
+            this.controlLabelName = null;
+            try {
+              this.applyProjection();
+            } catch (error) {
+              failed = true;
+              firstError = error;
+            }
+          }
+          try {
+            releaseSource();
+          } catch (error) {
+            if (!failed) {
+              failed = true;
+              firstError = error;
+            }
+          }
+          if (failed) throw firstError;
         },
       };
     },

@@ -1,5 +1,15 @@
-import { unsupportedPointerFacts } from './pointer-facts-admission';
-import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
+import {
+  unsupportedControlLabel,
+  unsupportedControlLabelAnatomy,
+  unsupportedPointerFacts,
+} from './pointer-facts-admission';
+import {
+  nativeShape,
+  NativeLexicalScope,
+  moduleLexicalScope,
+  type NativeShape,
+} from './template-shape';
 import { partitionModuleBindings } from './source-module-bindings';
 import { dataTypeEqual, formatDataType } from './data-types';
 import { isDataValueType } from './ir';
@@ -8,8 +18,7 @@ import { FOCUS_OPTIONS_TYPE, OPERATION_RULES } from './operations';
 import { checkTargetOperations, resolveTargetProfile } from './targets';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
-import { nativeInteractionArtifact } from './native-interaction';
-import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { nativeInteractionArtifacts } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import {
   ssrStyleDependencies,
@@ -24,6 +33,7 @@ import type {
   CompileResult,
   ExpressionIR,
   FunctionIR,
+  ParameterIR,
   GeneratedModule,
   PrototypeIR,
   StatementIR,
@@ -100,6 +110,8 @@ export function emitWebComponentSource(
     className?: string;
     tagName?: string;
     ssr?: boolean;
+    /** Internal hydration experiment; public SSR profile admission remains disabled. */
+    controlLabelHydration?: 'client-only';
     shadow?: boolean;
     styleEnvironment?: SsrStyleEnvironment;
   } = {}
@@ -108,7 +120,28 @@ export function emitWebComponentSource(
   if (!checked.ok) return checked;
   const ir = checked.value;
   const moduleParts = partitionModuleBindings(ir);
+  if (
+    options.controlLabelHydration !== undefined &&
+    (!options.ssr || options.controlLabelHydration !== 'client-only')
+  )
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI3301',
+          category: 'unsupported-input',
+          message:
+            'The client-only ControlLabel hydration option requires the explicit internal SSR experiment.',
+          span: ir.setup.span,
+        },
+      ],
+    };
+  const clientOnlyControlLabel = options.controlLabelHydration === 'client-only';
   if (options.ssr) {
+    const controlLabelDiagnostics = clientOnlyControlLabel
+      ? unsupportedControlLabelAnatomy(ir, 'web-component-source client-only hydration')
+      : unsupportedControlLabel(ir, 'web-component-source SSR');
+    if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'web-component-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   }
@@ -116,6 +149,7 @@ export function emitWebComponentSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const reachedFunctions = new Set(admitted.value.functions);
   const reachedHooks = new Set(admitted.value.authoredHooks);
   const interacting =
@@ -163,6 +197,8 @@ export function emitWebComponentSource(
     (options.ssr &&
       [
         'createHydrationOwner',
+        'assertNoInstanceAssociations',
+        'validateNativeInstanceAssociations',
         'hydrationBinding',
         'hydrationArtifacts',
         'hydrationCssText',
@@ -447,6 +483,15 @@ export function emitWebComponentSource(
     })(${expr(node.receiver!, depth)}, ${args.map((arg) => expr(arg, depth)).join(', ')})`;
   }
 
+  function parameters(values: readonly ParameterIR[]): string {
+    return values
+      .map(
+        (value) =>
+          `${value.name}${value.optional && !value.default ? '?' : ''}: ${value.callback ? `(${parameters(value.callback.parameters)}) => ${typeName(value.callback.returnType)}` : typeName(value.type)}${value.default ? ` = ${expr(value.default, 0)}` : ''}`
+      )
+      .join(', ');
+  }
+
   function fn(node: FunctionIR, depth: number): string {
     const savedNativeScope = nativeScope;
     for (const parameter of node.parameters)
@@ -459,7 +504,7 @@ export function emitWebComponentSource(
     try {
       const renderer =
         !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      return `(${node.parameters.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ')}) => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+      return `(${parameters(node.parameters)}) => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
     } finally {
       nativeScope = savedNativeScope;
     }
@@ -480,7 +525,8 @@ export function emitWebComponentSource(
       case 'lexical-write':
         return `(${expr(node.cell, depth)} = ${expr(node.value, depth)})`;
       case 'lexical-update': {
-        const cell = expr(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        const cell = expr(node.cell, depth),
+          operator = node.delta === 1 ? '++' : '--';
         return `(${node.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -498,6 +544,8 @@ export function emitWebComponentSource(
         return `(${expr(node.object, depth)}${node.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
       case 'unary':
         return `(${node.operator}${expr(node.operand, depth)})`;
+      case 'conditional':
+        return `(${expr(node.condition, depth)} ? ${expr(node.whenTrue, depth)} : ${expr(node.whenFalse, depth)})`;
       case 'binary':
         return `(${expr(node.left, depth)} ${node.operator} ${expr(node.right, depth)})`;
       case 'array':
@@ -529,7 +577,9 @@ export function emitWebComponentSource(
     nativeRenderer?: string
   ): string {
     const indent = '  '.repeat(depth);
-    const terminator = body.findIndex((statement) => statement.kind === 'return' || statement.kind === 'throw');
+    const terminator = body.findIndex(
+      (statement) => statement.kind === 'return' || statement.kind === 'throw'
+    );
     const deadBindings = new Set<string>();
     return body
       .slice(0, terminator < 0 ? body.length : terminator + 1)
@@ -569,7 +619,9 @@ export function emitWebComponentSource(
               try {
                 if (name) nativeScope = nativeScope.parameter(name, undefined, nativeScope, null);
                 return statements(items, depth + 1, nativeRenderer);
-              } finally { nativeScope = saved; }
+              } finally {
+                nativeScope = saved;
+              }
             };
             return `${origin}${indent}try {\n${branch(statement.body)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${branch(statement.catch.body, statement.catch.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
           }
@@ -663,8 +715,7 @@ export function emitWebComponentSource(
       ...context.files,
       ...staticDeclarations.files,
       ...(styled ? [nativeStyleArtifact] : []),
-      nativeInteractionArtifact,
-      nativeAdapterModulesArtifact,
+      ...nativeInteractionArtifacts('full', { controlLabel }),
     ];
     const ownerCode = nativeHelpers(
       prefix,
@@ -674,7 +725,9 @@ export function emitWebComponentSource(
       outwardEvents,
       true,
       JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
-      staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'
+      staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined',
+      false,
+      controlLabel
     );
     const binding = '__PUI_SSR_ARTIFACT_BINDING__';
     const artifacts = {
@@ -682,7 +735,9 @@ export function emitWebComponentSource(
       helpers: hash(
         JSON.stringify(helpers) +
           ownerCode +
-          JSON.stringify(webComponentSsrSupport({ className, tagName, binding: '' }).files)
+          JSON.stringify(
+            webComponentSsrSupport({ className, tagName, binding: '', controlLabel }).files
+          )
       ),
       css: hash(cssText),
       environment: environment ? hash(environment.cssText) : '',
@@ -700,6 +755,7 @@ export function emitWebComponentSource(
       artifacts,
       cssText,
       environmentCssText: environment?.cssText,
+      controlLabel,
     });
     const code = `// web-component-ssr-v1: direct semantic statements; no browser globals at module evaluation.
 // Helper cost: guarded owner, presentation serialization/adoption, per-request Context and AX intent.
@@ -712,8 +768,9 @@ type ${prefix}PropsSnapshot = {\n${resolvedProps}\n};
 export type GeneratedExposes = {\n${exposes}\n};
 ${ownerCode}
 export type HydrationOwner = ${prefix}Owner;
-export function createHydrationOwner(port: HostPort, raw: Record<string, unknown>): ${prefix}Owner {
-  const owner = ${prefix}CreateOwner(port);
+export function createHydrationOwner(port: HostPort, raw: Record<string, unknown>${controlLabel ? ', getAssociations?: () => unknown' : ''}): ${prefix}Owner {
+  assertNoInstanceAssociations(raw, 'hydration props');
+${controlLabel ? "  if (port.server && getAssociations !== undefined) throw new TypeError('[ControlLabel SSR] instance associations are supported only after client hydration');\n" : ''}  const owner = ${prefix}CreateOwner(port${controlLabel ? ', getAssociations ?? (() => undefined)' : ''});
   const ${prefix}Def = owner.def;
 ${styled ? `  const ${prefix}Style = owner.style;\n  const ${prefix}OwnerProps = owner.props;\n` : ''}${interacting ? `  const ${prefix}Interaction = owner.interaction;\n` : ''}${hookCode}
   try {
@@ -789,6 +846,7 @@ ${context ? '// Context cost: shared reference-key modules, owner scopes, checke
 // setPresent detaches only the view; explicit dispose permanently closes this element.
 ${contextImports}
 ${staticImports}
+${controlLabel ? `import {validateNativeInstanceAssociations as ${prefix}ValidateAssociations} from './.proto-ui/interaction/control-label-v1';` : ''}
 ${statements(moduleParts.shared, 0)}
 import { createNativeBrowserPort, type NativeBrowserPort as BrowserPort, type NativeBrowserPort as HostPort, type NativeFrameBuilder } from './.proto-ui/web-component/browser-v1';
 const ${prefix}PropTypes = ${JSON.stringify(Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type])))};
@@ -803,13 +861,25 @@ ${resolvedProps}
 export type GeneratedExposes = {
 ${exposes}
 };
-${nativeHelpers(prefix, contextValidation, styled, interacting, outwardEvents, true, JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))), staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined', true)}
+${nativeHelpers(prefix, contextValidation, styled, interacting, outwardEvents, true, JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))), staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined', true, controlLabel)}
 export class ${className} extends HTMLElement {
   private ${prefix}Owner: ${prefix}Owner | null = null;
   private ${prefix}Port: BrowserPort | null = null;
   private ${prefix}Raw: Record<string, unknown> = {};
   private ${prefix}Disconnect = 0;
   private ${prefix}Closed = false;
+  private ${prefix}Associations: Readonly<{ controlLabel?: object | null }> | undefined;
+  get instanceAssociations(): Readonly<{ controlLabel?: object | null }> | undefined { return this.${prefix}Associations; }
+  set instanceAssociations(value: Readonly<{ controlLabel?: object | null }> | undefined) {
+    if (this.${prefix}Closed) throw new Error('Custom element is disposed');
+${controlLabel ? `    const accepted = ${prefix}ValidateAssociations(value);` : emitUndeclaredInstanceAssociations('value', `${prefix}InputAssociations`)}
+    this.${prefix}Associations = ${controlLabel ? 'accepted' : 'value'};
+${controlLabel ? `    this.${prefix}Owner?.interaction.refresh();` : ''}
+  }
+  static get observedAttributes(): string[] { return ['instance-associations', 'instanceassociations']; }
+  attributeChangedCallback(name: string, _previous: string | null, value: string | null): void {
+    if (value !== null) throw new TypeError('[InstanceAssociations] use the instanceAssociations property, not an attribute string');
+  }
   get logicalOwner(): symbol | null { return this.${prefix}Owner?.identity ?? null; }
   get viewEpoch(): number { return this.${prefix}Owner?.epoch ?? 0; }
   get present(): boolean { return this.${prefix}Owner?.view ?? false; }
@@ -830,7 +900,7 @@ export class ${className} extends HTMLElement {
     }
     const port = createNativeBrowserPort(this, ${options.shadow ? 'true' : 'false'});
     this.${prefix}Port = port;
-    const owner = ${prefix}CreateOwner(port);
+    const owner = ${prefix}CreateOwner(port${controlLabel ? `, () => this.${prefix}Associations` : ''});
     this.${prefix}Owner = owner;
     const ${prefix}Def = owner.def;
 ${styled ? `    const ${prefix}Style = owner.style;\n    const ${prefix}OwnerProps = owner.props;\n` : ''}
@@ -858,6 +928,7 @@ ${hookCode}    try {
   }
   setProps(next: GeneratedProps & Record<string, unknown>): void {
     if (this.${prefix}Closed) throw new Error('Custom element is disposed');
+    if (Object.prototype.hasOwnProperty.call(next, 'instanceAssociations')) throw new TypeError('[InstanceAssociations] use the instanceAssociations property, outside Props');
     this.${prefix}Raw = { ...next };
     if (this.${prefix}Owner) { this.${prefix}Owner.hydrate(this.${prefix}Raw); }
   }
@@ -894,8 +965,7 @@ export default ${className};
         ...context.files,
         ...staticDeclarations.files,
         ...(styled ? [nativeStyleArtifact] : []),
-        nativeInteractionArtifact,
-        nativeAdapterModulesArtifact,
+        ...nativeInteractionArtifacts('full', { controlLabel }),
         webComponentBrowserSupport,
       ],
       dependencies: [...selected.value.dependencies],
@@ -917,7 +987,8 @@ function nativeHelpers(
   ssr = false,
   declarations = '[]',
   tableFamily = 'undefined',
-  nativeBrowser = false
+  nativeBrowser = false,
+  controlLabel = false
 ): string {
   const context = !!contextValidation;
   const contextTypes = context
@@ -962,7 +1033,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
 type ${p}Owner = {identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
-function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}): ${p}Owner {
+function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
   interacting
@@ -1004,6 +1075,7 @@ ${
     invoke: <T>(callback: () => T): T => invoke(callback, [], false) as T,
     getRun() { ensure(); if (!currentRun) throw new Error('Interaction requires a live callback scope'); return currentRun; },
     getResolvedProps: () => resolved,
+${controlLabel ? '    getAssociations,\n' : ''}
     getRoot: () => view && !disposing${ssr ? ' && !host.server' : ''} ? ${ssr ? 'host.root' : 'physicalRoot'} : null,
     getHost: () => ${ssr ? 'host.host' : 'host'},
     identity: context, getLogicalParent: () => ${ssr ? 'host.parentContext()' : `${p}ContextParent(host)`},

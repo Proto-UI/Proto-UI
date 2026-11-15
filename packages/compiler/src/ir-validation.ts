@@ -22,6 +22,7 @@ import {
 } from './ir';
 import {
   OPERATION_RULES,
+  checkedCallbackMatches,
   operationCallbackRule,
   operationArgumentRule,
   operationResultType,
@@ -94,6 +95,7 @@ const CONTEXTS = new Set([
   'state-watch',
   'collection-meta',
   'positioning',
+  'control-label-target',
   'created',
   'mounted',
   'updated',
@@ -357,6 +359,9 @@ const EXPRESSION_FIELDS = [
   'cell',
   'delta',
   'prefix',
+  'condition',
+  'whenTrue',
+  'whenFalse',
 ];
 /** Validate the complete data graph before any semantic read or normalization.
  * In particular, unused fields cannot smuggle an accessor into a later copy.
@@ -409,6 +414,7 @@ const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   member: ['object', 'property', 'optional'],
   unary: ['operator', 'operand'],
   binary: ['operator', 'left', 'right'],
+  conditional: ['condition', 'whenTrue', 'whenFalse'],
   array: ['elements'],
   record: ['entries'],
   function: ['function'],
@@ -439,6 +445,8 @@ interface Parameter {
   type: ValueType;
   optional?: boolean;
   origin: object;
+  callback?: { parameters: Parameter[]; returnType: ValueType };
+  default?: ExpressionIR;
 }
 interface Binding {
   type: ValueType;
@@ -446,6 +454,7 @@ interface Binding {
   helper?: FunctionIR;
   helperOrigin?: object;
   keyId?: string;
+  callableOrigins?: ReadonlySet<object>;
 }
 type Scope = Map<string, Binding>;
 
@@ -458,14 +467,27 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     // Target walkers memoize by FunctionIR identity. A shared function must not
     // denote different lexical helper closures in different occurrences.
     const provenCaptures = new Map<object, ReadonlyMap<string, Binding>>();
+    const callableCaptures = new Map<object, ReadonlySet<object>>();
     const captureFrames: {
       outer: Scope;
       parameters: ReadonlySet<string>;
       captures: Map<string, Binding>;
+      callableParameters: ReadonlySet<object>;
+      callableCaptures: Set<object>;
+      blockedCallables: ReadonlySet<object>;
     }[] = [];
-    function readBinding(name: string, scope: Scope): Binding | undefined {
+    function readBinding(name: string, scope: Scope, location?: SourceSpan): Binding | undefined {
       const binding = scope.get(name),
         frame = captureFrames[captureFrames.length - 1];
+      if (frame)
+        for (const origin of binding?.callableOrigins ?? []) {
+          if (frame.blockedCallables.has(origin))
+            bad(
+              'Checked callable parameters cannot be captured by a registered callback or renderer.',
+              location
+            );
+          if (!frame.callableParameters.has(origin)) frame.callableCaptures.add(origin);
+        }
       const captured = frame?.outer.get(name);
       // Parameters/local declarations may shadow an outer name. Aliases preserve
       // their value origin; record the immutable entry binding, not local narrowing.
@@ -478,6 +500,25 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       )
         frame.captures.set(name, captured);
       return binding;
+    }
+    function checkCallableReturn(value: unknown, scope: Scope, location: SourceSpan): void {
+      if (!value || typeof value !== 'object') return;
+      const node = value as ExpressionIR;
+      if (node.kind === 'conditional') {
+        checkCallableReturn(node.whenTrue, scope, location);
+        checkCallableReturn(node.whenFalse, scope, location);
+      } else if (node.kind === 'binary' && ['&&', '||', '??'].includes(node.operator)) {
+        checkCallableReturn(node.left, scope, location);
+        checkCallableReturn(node.right, scope, location);
+      }
+      const origins =
+        node.kind === 'reference'
+          ? scope.get(node.name)?.callableOrigins
+          : node.kind === 'function'
+            ? callableCaptures.get(node.function)
+            : undefined;
+      if (origins?.size)
+        bad('Checked callable parameters cannot escape through a returned function.', location);
     }
     function sameCapture(a: Binding, b: Binding): boolean {
       if (!sameType(a.type, b.type) || a.keyId !== b.keyId) return false;
@@ -662,11 +703,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     for (const requirement of array(root.requirements)) text(requirement);
     const active = new Set<object>();
-    function parameters(value: unknown): Parameter[] {
+    function parameters(value: unknown, signature = false): Parameter[] {
       const names = new Set<string>();
       let optionalSeen = false;
       return array(value).map((item) => {
-        const param = object(item, ['name', 'type', 'optional']);
+        const param = object(item, ['name', 'type', 'optional', 'callback', 'default']);
+        if (signature && param.default !== undefined)
+          bad('Callback signature parameters cannot contain executable defaults.');
         if (
           !validIdentifier(param.name) ||
           names.has(param.name) ||
@@ -681,6 +724,20 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           name: param.name,
           type: valueType(param.type),
           origin: param,
+          ...(param.callback !== undefined
+            ? (() => {
+                if (param.type !== 'function')
+                  bad('Callable signatures require a function parameter.');
+                const signature = object(param.callback, ['parameters', 'returnType']);
+                return {
+                  callback: {
+                    parameters: parameters(signature.parameters, true),
+                    returnType: valueType(signature.returnType),
+                  },
+                };
+              })()
+            : {}),
+          ...(param.default !== undefined ? { default: param.default as ExpressionIR } : {}),
           ...(param.optional === true ? { optional: true } : {}),
         };
       });
@@ -710,23 +767,85 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (context === 'setup' && declaredReturn !== 'function' && declaredReturn !== 'void')
         bad('Setup must return a render function or void.', location);
       const scope = new Map(outer);
-      for (const parameter of params)
-        scope.set(parameter.name, {
-          type:
-            parameter.optional && isDataValueType(parameter.type)
-              ? parseDataType({ kind: 'union', members: [parameter.type, 'void'] })
-              : parameter.type,
-          origin: parameter.origin,
-        });
+      for (const parameter of params) scope.delete(parameter.name);
       const returns: ValueType[] = [],
         captures = new Map<string, Binding>();
+      const blockedCallables = new Set(captureFrames[captureFrames.length - 1]?.blockedCallables);
+      if (context !== 'helper')
+        for (const binding of outer.values())
+          for (const origin of binding.callableOrigins ?? []) blockedCallables.add(origin);
+      const callableOrigins = new Set<object>();
       captureFrames.push({
         outer,
         parameters: new Set(params.map((parameter) => parameter.name)),
         captures,
+        callableParameters: new Set(params.map((parameter) => parameter.origin)),
+        callableCaptures: callableOrigins,
+        blockedCallables,
       });
       let terminal: boolean;
       try {
+        for (const parameter of params) {
+          if (
+            parameter.optional &&
+            !parameter.default &&
+            [
+              'function',
+              'def',
+              'run',
+              'render',
+              'event',
+              'control-label',
+              'control-label-handle',
+              'control-label-request',
+            ].includes(String(parameter.type))
+          )
+            bad('Optional semantic helper parameters require a checked default.', location);
+          if (parameter.default) {
+            if (!parameter.optional || context !== 'helper')
+              bad('Defaults require an optional helper parameter.', location);
+            const initial = expression(
+              parameter.default,
+              scope,
+              phase,
+              context,
+              parameter.type === 'function'
+            );
+            if (!assignable(initial, parameter.type))
+              bad('Default parameter type mismatch.', location);
+            if (parameter.callback) {
+              const value = parameter.default;
+              const target =
+                value.kind === 'function'
+                  ? value.function
+                  : value.kind === 'reference'
+                    ? scope.get(value.name)?.helper
+                    : undefined;
+              if (!checkedCallbackMatches(target, parameter.callback))
+                bad('Default callback requires a compatible checked signature.', location);
+            }
+          }
+          scope.set(parameter.name, {
+            type:
+              parameter.optional && !parameter.default && isDataValueType(parameter.type)
+                ? parseDataType({ kind: 'union', members: [parameter.type, 'void'] })
+                : parameter.type,
+            origin: parameter.origin,
+            ...(parameter.callback
+              ? {
+                  helper: {
+                    ...parameter.callback,
+                    body: [],
+                    phase,
+                    context: 'helper' as const,
+                    span: location,
+                  },
+                  helperOrigin: parameter.origin,
+                  callableOrigins: new Set([parameter.origin]),
+                }
+              : {}),
+          });
+        }
         terminal = statements(func.body, scope, phase, context, returns);
       } finally {
         captureFrames.pop();
@@ -742,6 +861,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       )
         bad('Shared IR function has inconsistent lexical capture provenance.', location);
       provenCaptures.set(func, captures);
+      callableCaptures.set(func, callableOrigins);
       if (!terminal) returns.push('void');
       // IR5 producers historically labelled control values as event. Normalize only
       // a result proven by this function's validated body, never from a supplied label.
@@ -760,9 +880,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (priorReturn !== undefined && !sameType(priorReturn, declaredReturn))
         bad('Shared IR function has inconsistent result provenance.', location);
       provenReturns.set(func, declaredReturn);
-      return (replacements.has(func)
+      const result = (replacements.has(func)
         ? { ...func, returnType: declaredReturn }
         : func) as unknown as FunctionIR;
+      callableCaptures.set(result, callableOrigins);
+      return result;
     }
     function helperContext(helper: FunctionIR, context: FunctionContext, phase: Phase): void {
       const inspect = (value: unknown): void => {
@@ -784,6 +906,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         for (const [key, child] of Object.entries(node))
           if (key !== 'span' && key !== 'type') inspect(child);
       };
+      helper.parameters.forEach((parameter) => {
+        if (parameter.default) inspect(parameter.default);
+      });
       inspect(helper.body);
     }
     function expression(
@@ -818,12 +943,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'reference':
             if (!validIdentifier(node.name) || !scope.has(node.name))
               bad('Unbound IR reference.', location);
-            type = readBinding(node.name, scope)!.type;
+            type = readBinding(node.name, scope, location)!.type;
             if (lexicalValueType(type) && lexical !== 'reference')
               bad('Lexical storage identities cannot escape through value references.', location);
             break;
           case 'lexical-cell': {
-            if (lexical !== 'create') bad('Lexical storage must be declared by a binding.', location);
+            if (lexical !== 'create')
+              bad('Lexical storage must be declared by a binding.', location);
             const initial = expression(node.value, scope, phase, context);
             if (initial !== 'boolean' && initial !== 'number' && initial !== 'string')
               bad('Lexical storage requires a scalar data initializer.', location);
@@ -834,16 +960,32 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'lexical-write':
           case 'lexical-update': {
             const target = object(node.cell, EXPRESSION_FIELDS);
-            if (target.kind !== 'reference') bad('Lexical access needs a declared storage binding.', location);
-            const storage = expression(target, scope, phase, context, false, undefined, 'reference');
+            if (target.kind !== 'reference')
+              bad('Lexical access needs a declared storage binding.', location);
+            const storage = expression(
+              target,
+              scope,
+              phase,
+              context,
+              false,
+              undefined,
+              'reference'
+            );
             const scalar = lexicalValueType(storage);
             if (!scalar) bad('Lexical access cannot mutate a value or semantic handle.', location);
             if (node.kind === 'lexical-write') {
               const value = expression(node.value, scope, phase, context);
               if (!assignable(value, scalar)) bad('Lexical write type mismatch.', location);
             } else if (node.kind === 'lexical-update') {
-              if (scalar !== 'number' || (node.delta !== 1 && node.delta !== -1) || typeof node.prefix !== 'boolean')
-                bad('Lexical update requires a number, unit delta and explicit prefix flag.', location);
+              if (
+                scalar !== 'number' ||
+                (node.delta !== 1 && node.delta !== -1) ||
+                typeof node.prefix !== 'boolean'
+              )
+                bad(
+                  'Lexical update requires a number, unit delta and explicit prefix flag.',
+                  location
+                );
             }
             type = scalar;
             break;
@@ -995,6 +1137,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             type = dataAction(location, () => inferBinaryType(String(node.operator), left, right));
             break;
           }
+          case 'conditional': {
+            expression(node.condition, scope, phase, context);
+            const branch = (truth: boolean): Scope => {
+              const next = new Map(scope);
+              for (const [name, refined] of conditionRefinements(
+                node.condition as ExpressionIR,
+                truth
+              ))
+                if (next.has(name)) next.set(name, { ...next.get(name)!, type: refined });
+              return next;
+            };
+            const a = expression(node.whenTrue, branch(true), phase, context);
+            const b = expression(node.whenFalse, branch(false), phase, context);
+            if (sameType(a, b)) type = a;
+            else if (eventValueJoin([a, b]) !== undefined) type = eventValueJoin([a, b])!;
+            else if (isDataValueType(a) && isDataValueType(b))
+              type = parseDataType({ kind: 'union', members: [a, b] });
+            else bad('Conditional branches require compatible checked types.', location);
+            break;
+          }
           case 'member': {
             const owner = expression(node.object, scope, phase, context),
               key = text(node.property);
@@ -1020,7 +1182,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             break;
           case 'helper-call': {
             if (!validIdentifier(node.name)) bad('Invalid helper name.', location);
-            const helper = readBinding(node.name, scope)?.helper;
+            const helper = readBinding(node.name, scope, location)?.helper;
             if (!helper) bad('Unknown or recursive helper call.', location);
             const args = array(node.arguments),
               required = helper.parameters.filter((param) => !param.optional).length;
@@ -1029,11 +1191,35 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             args.forEach((argument, index) => {
               // Validate the entire expression and its declared type before
               // using literal contents as evidence for the helper parameter.
-              const actual = expression(argument, scope, phase, context);
+              const actual = expression(
+                argument,
+                scope,
+                phase,
+                context,
+                !!helper.parameters[index].callback
+              );
+              const signature = helper.parameters[index].callback;
+              if (signature) {
+                const value = argument as ExpressionIR;
+                const target =
+                  value.kind === 'function'
+                    ? value.function
+                    : value.kind === 'reference'
+                      ? readBinding(value.name, scope, location)?.helper
+                      : undefined;
+                if (!checkedCallbackMatches(target, signature))
+                  bad('Helper callback requires a compatible checked signature.', location);
+                if (target && context !== 'helper') helperContext(target, context, phase);
+              }
               const expected = helper.parameters[index].type;
               if (
                 !assignable(actual, expected) &&
-                !assignable(argumentData(argument as ExpressionIR) ?? actual, expected)
+                !assignable(
+                  actual === 'props'
+                    ? { kind: 'record', fields: [...props].map(([name, type]) => ({ name, type })) }
+                    : (argumentData(argument as ExpressionIR) ?? actual),
+                  expected
+                )
               )
                 bad('Helper argument type mismatch.', location);
             });
@@ -1201,14 +1387,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               if (!validIdentifier(node.name) || scope.has(node.name))
                 bad('Invalid/rebound local identifier.', location);
               const val = object(node.value, EXPRESSION_FIELDS),
-                type = expression(val, scope, phase, context, val.kind === 'function', undefined, 'create');
+                type = expression(
+                  val,
+                  scope,
+                  phase,
+                  context,
+                  val.kind === 'function',
+                  undefined,
+                  'create'
+                );
               const alias = val.kind === 'reference' ? scope.get(String(val.name)) : undefined;
               scope.set(node.name, {
                 ...alias,
                 type,
                 origin: alias?.origin ?? node,
                 ...(val.kind === 'function'
-                  ? { helper: fn(val.function, scope), helperOrigin: val.function as object }
+                  ? {
+                      helper: fn(val.function, scope),
+                      helperOrigin: val.function as object,
+                      callableOrigins: callableCaptures.get(val.function as object),
+                    }
                   : {}),
               });
               break;
@@ -1243,6 +1441,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                   ? 'void'
                   : expression(node.value, scope, phase, context, phase === 'setup')
               );
+              checkCallableReturn(node.value, scope, location);
               terminal = true;
               break;
             case 'throw': {
@@ -1256,7 +1455,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               if (node.catch === undefined && node.finally === undefined)
                 bad('Try requires catch or finally.', location);
               const branchReturns: ValueType[] = [];
-              const bodyTerminal = statements(node.body, new Map(scope), phase, context, branchReturns);
+              const bodyTerminal = statements(
+                node.body,
+                new Map(scope),
+                phase,
+                context,
+                branchReturns
+              );
               let catchTerminal = true;
               if (node.catch !== undefined) {
                 const caught = object(node.catch, ['name', 'body']);
@@ -1269,8 +1474,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 catchTerminal = statements(caught.body, catchScope, phase, context, branchReturns);
               }
               const finalReturns: ValueType[] = [];
-              const finalTerminal = node.finally === undefined ? false :
-                statements(node.finally, new Map(scope), phase, context, finalReturns);
+              const finalTerminal =
+                node.finally === undefined
+                  ? false
+                  : statements(node.finally, new Map(scope), phase, context, finalReturns);
               if (!finalTerminal) reachableReturns.push(...branchReturns);
               reachableReturns.push(...finalReturns);
               terminal ||= finalTerminal || (bodyTerminal && catchTerminal);
@@ -1289,13 +1496,22 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     if (root.moduleBindings !== undefined) {
       for (const value of array(root.moduleBindings)) {
         const binding = object(value, ['kind', 'name', 'value', 'span']);
-        if (binding.kind !== 'const') bad('Module scope admits only static bindings.', span(binding.span));
+        if (binding.kind !== 'const')
+          bad('Module scope admits only static bindings.', span(binding.span));
         const initializer = object(binding.value, EXPRESSION_FIELDS);
-        const scalar = initializer.kind === 'lexical-cell'
-          ? object(initializer.value, EXPRESSION_FIELDS) : initializer;
-        if (initializer.kind !== 'function' && scalar.kind !== 'literal' &&
-            !(scalar.kind === 'unary' && (scalar.operator === '+' || scalar.operator === '-') &&
-              object(scalar.operand, EXPRESSION_FIELDS).kind === 'literal'))
+        const scalar =
+          initializer.kind === 'lexical-cell'
+            ? object(initializer.value, EXPRESSION_FIELDS)
+            : initializer;
+        if (
+          initializer.kind !== 'function' &&
+          scalar.kind !== 'literal' &&
+          !(
+            scalar.kind === 'unary' &&
+            (scalar.operator === '+' || scalar.operator === '-') &&
+            object(scalar.operand, EXPRESSION_FIELDS).kind === 'literal'
+          )
+        )
           bad('Module initializers cannot execute authored code.', span(binding.span));
       }
       statements(root.moduleBindings, moduleScope, 'setup', 'helper', []);

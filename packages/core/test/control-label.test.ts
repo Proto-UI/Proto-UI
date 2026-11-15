@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   CONTROL_LABEL_SELECTION_POLICIES,
   createControlLabelRef,
@@ -14,6 +14,18 @@ describe('explicit label text-selection policy vocabulary', () => {
 });
 
 describe('dedicated typed instance-association input', () => {
+  it('shares nominal admission across independently loaded compatible Core copies', async () => {
+    const first = createControlLabelRef();
+    vi.resetModules();
+    const secondCore = await import('../src/control-label');
+    const second = secondCore.createControlLabelRef();
+    expect(secondCore.isControlLabelRef(first)).toBe(true);
+    expect(isControlLabelRef(second)).toBe(true);
+    expect(secondCore.isControlLabelRef({ ...first })).toBe(false);
+    expect(isControlLabelRef(Object.create(first))).toBe(false);
+    expect(Reflect.ownKeys(first)).toEqual(['toJSON']);
+    expect(Object.isFrozen(first)).toBe(true);
+  });
   it.each([undefined, {}])(
     'does not turn an inherited reference into an explicit association: %j',
     (input) => {

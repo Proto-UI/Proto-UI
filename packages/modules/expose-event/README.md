@@ -10,8 +10,14 @@ The legacy `EVENT_EMIT_CAP` name and the former exports from `@proto.ui/module-e
 
 ## Install
 
+<!-- proto-ui-release-status:start -->
+
+> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+
+<!-- proto-ui-release-status:end -->
+
 ```bash
-npm install @proto.ui/module-expose-event@0.3.0-alpha.1
+npm install @proto.ui/module-expose-event@0.3.0-alpha.2
 ```
 
 ## Related Internal Packages

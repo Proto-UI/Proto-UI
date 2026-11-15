@@ -23,7 +23,7 @@ export function buildNativeContextArtifacts(ir: PrototypeIR): {
     kind: 'source' as const,
     contents: `// Source declaration ${JSON.stringify(key.id)}\n// Checked value schema ${JSON.stringify(key.type)}\nexport const key = Object.freeze({ debugName: ${JSON.stringify(key.name)} });\n`,
   }));
-  files.push({ path: scopeFile, kind: 'source', contents: nativeContextScopeSource });
+  files.push(nativeContextScopeArtifact);
   return { files, keys, scopeFile: `./${scopeFile}` };
 }
 
@@ -225,3 +225,10 @@ export function createContextScope(options: {
   return Object.freeze(scope);
 }
 `;
+
+/** Canonical current bytes, shared by emission and explicit directory migration. */
+export const nativeContextScopeArtifact = {
+  path: scopeFile,
+  kind: 'source' as const,
+  contents: nativeContextScopeSource,
+};

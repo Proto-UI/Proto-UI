@@ -149,7 +149,16 @@ for (const shadow of [false, true]) {
         { fileName: 'independent.proto.ts' }
       );
       expect(parsed.ok).toBe(false);
-      if (!parsed.ok) expect(parsed.diagnostics.some((d) => d.code === 'PUI1005')).toBe(true);
+      if (!parsed.ok)
+        expect(
+          parsed.diagnostics.some(
+            (d) =>
+              d.code === 'PUI1006' &&
+              d.message.includes(
+                'children must be template nodes, text, finite numbers, arrays or null.'
+              )
+          )
+        ).toBe(true);
     });
     it('retains both occurrences of one authored template value', () => {
       const host = create(aliasSource, shadow);

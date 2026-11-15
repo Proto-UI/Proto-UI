@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
+import { parse } from 'yaml';
 import { ROOT_DIR, getAllPackages } from './lib.mjs';
 import { validatePreservedReadmeMetadata } from './readme-metadata.mjs';
 
@@ -7,6 +8,19 @@ const REPO_URL = 'https://github.com/Proto-UI/Proto-UI';
 const REPO_GIT_URL = 'git+https://github.com/Proto-UI/Proto-UI.git';
 const BUGS_URL = 'https://github.com/Proto-UI/Proto-UI/issues';
 const RELEASE_VERSION = readFileSync(join(ROOT_DIR, 'VERSION'), 'utf8').trim();
+const releaseEntities = readdirSync(join(ROOT_DIR, 'spec/versions'))
+  .filter((file) => file.endsWith('.yaml'))
+  .map((file) => parse(readFileSync(join(ROOT_DIR, 'spec/versions', file), 'utf8')))
+  .filter((entity) => entity?.type === 'version' && entity.release?.version === RELEASE_VERSION);
+if (releaseEntities.length !== 1 || !['draft', 'active'].includes(releaseEntities[0].status)) {
+  throw new Error(`VERSION ${RELEASE_VERSION} must have one draft or active V entity`);
+}
+const RELEASE_NOTICE =
+  releaseEntities[0].status === 'draft'
+    ? `> **Unpublished release preparation:** \`${RELEASE_VERSION}\` has not been published. The command below is an example for use after publication; it is not currently an installable version.`
+    : '';
+const RELEASE_NOTICE_START = '<!-- proto-ui-release-status:start -->';
+const RELEASE_NOTICE_END = '<!-- proto-ui-release-status:end -->';
 
 const PACKAGE_RULES = {
   '@proto.ui/core': {
@@ -22,6 +36,7 @@ const PACKAGE_RULES = {
     purpose:
       'Implements the runtime execution flow that adapters can host under the Proto UI contracts.',
     role: 'Runtime package that coordinates setup, rendering, lifecycle, module orchestration, and host execution boundaries.',
+    preserveReadme: true,
   },
   '@proto.ui/types': {
     description: 'Shared type definitions for Proto UI packages.',
@@ -88,6 +103,7 @@ const PACKAGE_RULES = {
     purpose:
       'Provides boundary judgments such as click-outside and focus-outside so prototypes can react to interactions that happen beyond their own region.',
     role: 'Adapter-facing module package used by the Proto UI runtime and adapter layer.',
+    preserveReadme: true,
   },
   '@proto.ui/module-collection': {
     description: 'Proto UI module that projects explicit ordered collection item sets.',
@@ -99,7 +115,7 @@ const PACKAGE_RULES = {
     // Contributor-authored README states the non-ownership boundary; preserve it.
     preserveReadme: true,
   },
-  '@proto.ui/module-context': moduleRule('context capability'),
+  '@proto.ui/module-context': { ...moduleRule('context capability'), preserveReadme: true },
   '@proto.ui/module-control-label': {
     description: 'Proto UI explicit independent control-label association protocol.',
     kind: 'module',
@@ -126,7 +142,7 @@ const PACKAGE_RULES = {
     ...moduleRule('web state expose capability'),
     preserveReadme: true,
   },
-  '@proto.ui/module-feedback': moduleRule('feedback capability'),
+  '@proto.ui/module-feedback': { ...moduleRule('feedback capability'), preserveReadme: true },
   '@proto.ui/module-focus': { ...moduleRule('focus capability'), preserveReadme: true },
   '@proto.ui/module-hit-participation': {
     description: 'Proto UI module that provides hit-participation capability.',
@@ -148,7 +164,7 @@ const PACKAGE_RULES = {
     preserveReadme: true,
     extraKeywords: ['native', 'link', 'native-link'],
   },
-  '@proto.ui/module-overlay': moduleRule('overlay capability'),
+  '@proto.ui/module-overlay': { ...moduleRule('overlay capability'), preserveReadme: true },
   '@proto.ui/module-positioning': {
     description: 'Proto UI module for host-mediated anchored positioning.',
     kind: 'module',
@@ -200,8 +216,14 @@ const PACKAGE_RULES = {
       'Owns the host boundary for a semantic plain-text, line-mode-aware, host-owned editing requirement: stable controlled or uncontrolled value ownership, normalized input/change/IME composition events, live property projection, and physical focus access. Adapters select the physical host editor; the current Web profile resolves single-line declarations to `HTMLInputElement` and multiline declarations to `HTMLTextAreaElement`.',
     role: 'Adapter-facing dependency used by Base Textarea and the official Web Component, React, Vue, and Vue 2 adapters.',
     // Contributor-authored README documents the host-boundary contract, non-goals,
-    // exports, and the draft rc.7 publication status; preserve it.
+    // exports, and catalog boundaries; only release metadata is synchronized.
     preserveReadme: true,
+    readmeReplacements: [
+      [
+        '`0.2.0-rc.7` is published for reproducible prerelease trials. The stable `0.2.0` package is under review and is not installable until publication completes.',
+        'Stable `0.2.0` publication is recorded in [V-PROTO-UI-0008](../../../spec/versions/V-PROTO-UI-0008.yaml). The example below follows the current workspace release train.',
+      ],
+    ],
     extraKeywords: ['text-control', 'textarea'],
   },
   '@proto.ui/module-image-view': {
@@ -245,6 +267,7 @@ const PACKAGE_RULES = {
     purpose:
       'Provides command line tooling for initializing Proto UI workspaces and generating framework integration assets.',
     role: 'CLI package used by applications and maintainers to scaffold Proto UI configuration and generated files.',
+    preserveReadme: true,
   },
   '@proto.ui/prototypes-base': {
     description: 'Base Proto UI prototype library for reusable interaction prototypes.',
@@ -276,6 +299,16 @@ const PACKAGE_RULES = {
     // Contributor-authored README documents families, boundaries, imports, and
     // provenance; metadata sync must not replace it with the generated readme.
     preserveReadme: true,
+    readmeReplacements: [
+      [
+        '> **Release status:** public `0.2.0-rc.7` package published on npm under `next`. The stable `0.2.0` release train is under review and is not installable until publication completes.',
+        '> **Release status:** Stable `0.2.0` publication is recorded in [V-PROTO-UI-0008](../../../spec/versions/V-PROTO-UI-0008.yaml). Current workspace source changes do not imply publication of a later release.',
+      ],
+      [
+        'The published rc.7 package and the prepared 0.2.0 stable package include:',
+        'The published rc.7 and 0.2.0 stable packages include:',
+      ],
+    ],
   },
   '@proto.ui/prototypes-lucide': {
     description: 'Lucide-based Proto UI icon prototype library and svg render helpers.',
@@ -285,7 +318,7 @@ const PACKAGE_RULES = {
       'Provides a standalone `lucide-icon` prototype, per-icon static entrypoints for tree-shaking, a compatibility `renderLucideIcon()` helper, and generated manifest/snippets/loaders for docs and lazy-loading scenarios.',
     role: 'Prototype-oriented icon utilities for Proto UI render templates.',
     // Contributor-authored README keeps Lucide/Feather attribution, generation
-    // guidance, and consumption/license notes; preserve it byte-for-byte.
+    // guidance, and consumption/license notes; preserve all authored prose.
     preserveReadme: true,
     extraKeywords: ['icon', 'svg'],
   },
@@ -306,15 +339,22 @@ if (missingRules.length > 0) {
   );
 }
 
+const readmes = new Map();
 for (const pkg of packages) {
   const rule = PACKAGE_RULES[pkg.name];
-  if (!rule.preserveReadme) continue;
-  validatePreservedReadmeMetadata({
-    packageName: pkg.name,
-    version: RELEASE_VERSION,
-    internalDeps: pkg.internalDeps,
-    contents: readFileSync(join(pkg.dir, 'README.md'), 'utf8'),
-  });
+  const contents = projectReadmeReleaseMetadata(
+    rule.preserveReadme ? readFileSync(join(pkg.dir, 'README.md'), 'utf8') : buildReadme(pkg, rule),
+    rule
+  );
+  if (rule.preserveReadme) {
+    validatePreservedReadmeMetadata({
+      packageName: pkg.name,
+      version: RELEASE_VERSION,
+      internalDeps: pkg.internalDeps,
+      contents,
+    });
+  }
+  readmes.set(pkg.name, contents);
 }
 
 for (const pkg of packages) {
@@ -343,11 +383,9 @@ for (const pkg of packages) {
   };
 
   writeFileSync(pkg.manifestPath, `${JSON.stringify(nextManifest, null, 2)}\n`);
-  // Rules may opt out of generated READMEs to keep curated, contributor-authored
-  // package documentation intact while manifest metadata still round-trips.
-  if (!rule.preserveReadme) {
-    writeFileSync(join(pkg.dir, 'README.md'), buildReadme(pkg, rule));
-  }
+  // Preserved READMEs retain their authored prose; only the bounded release
+  // metadata above is projected, independently of package publication.
+  writeFileSync(join(pkg.dir, 'README.md'), readmes.get(pkg.name));
 }
 
 rootPackage.scripts = {
@@ -389,6 +427,23 @@ function buildKeywords(pkg, rule) {
   if (rule.style) keywords.add(String(rule.style).toLowerCase().replace(/\s+/g, '-'));
   for (const keyword of rule.extraKeywords ?? []) keywords.add(keyword);
   return Array.from(keywords);
+}
+
+function projectReadmeReleaseMetadata(contents, rule) {
+  for (const [previous, current] of rule.readmeReplacements ?? []) {
+    contents = contents.replace(previous, current);
+  }
+  // The marker owns exactly this paragraph. Strip it before reinsertion so a
+  // version/status change and an ordinary repeated sync are both idempotent.
+  contents = contents.replace(
+    /<!-- proto-ui-release-status:start -->\n[\s\S]*?<!-- proto-ui-release-status:end -->\n\n/g,
+    ''
+  );
+  if (!RELEASE_NOTICE) return contents;
+  return contents.replace(
+    /^(## Install[^\S\n]*\n\n)/m,
+    `$1${RELEASE_NOTICE_START}\n\n${RELEASE_NOTICE}\n\n${RELEASE_NOTICE_END}\n\n`
+  );
 }
 
 function buildReadme(pkg, rule) {

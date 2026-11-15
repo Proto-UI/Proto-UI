@@ -7,6 +7,60 @@ lifecycleRationale:
   en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
 summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and real browser admission.
 cases:
+  - id: T-CONTROL-LABEL-0001-CASE-PRIVATE-SSR
+    title: Private client-only hydration preserves dormant server declarations and real client pairs
+    covers:
+      - C-CONTROL-LABEL-0001-LOWERING
+      - C-CONTROL-LABEL-0001-BOUNDS
+      - C-CONTROL-LABEL-0001-INTEROP
+      - C-CONTROL-LABEL-0001-NAME
+      - C-CONTROL-LABEL-0001-ACTIVATION
+    expectation: The explicit private Web Component client-only experiment retains unpaired server Button behavior and the original first frame, then uses the real emitted ControlLabel helper and dedicated client input for hydration pairing and rebinding. Server Props, options, markup and carriers cannot transport association identities, and implicit Anatomy pairing remains diagnosed. Public SSR profiles and direct SSR without this private option retain their existing unsupported boundary.
+  - id: T-CONTROL-LABEL-0001-CASE-COMPILED-ADMISSION
+    title: Actual Button, Toggle and Label definitions produce checked standalone Web source
+    covers:
+      - C-CONTROL-LABEL-0001-LOWERING
+      - C-CONTROL-LABEL-0001-BOUNDS
+    expectation: The complete official Button, Toggle and Label sources compile through all four Web profiles and every reached generated source file passes strict checking against real host declarations. IR schema 6 rejects old schema 5 inputs. Existing unsupported Toggle Group Root and Item language is diagnosed explicitly and is not counted as successful component lowering.
+  - id: T-CONTROL-LABEL-0001-CASE-COMPILED-CONSUMER
+    title: Independent generated graphs and Runtime Adapters share public references and target ownership
+    covers:
+      - C-CONTROL-LABEL-0001-IDENTITY
+      - C-CONTROL-LABEL-0001-INTEROP
+      - C-CONTROL-LABEL-0001-NAME-INTEROP
+      - C-CONTROL-LABEL-0001-DOMAIN
+      - C-CONTROL-LABEL-0001-NAME
+      - C-CONTROL-LABEL-0001-ACTIVATION
+      - C-CONTROL-LABEL-0001-FOCUS
+      - C-CONTROL-LABEL-0001-OWNED-NAME
+      - P-BASE-BUTTON-EXTERNAL-LABEL
+      - P-BASE-TOGGLE-EXTERNAL-LABEL
+      - P-BASE-LABEL-ACTION
+    expectation: Ordinary generated imports and the public factory connect actual Label to Button or Toggle across independent output directories and both mixed Runtime directions. Naming, single activation, disabled and controlled ownership, public focus and pressed state, reference replacement, focus reentry and disposal remain observable through the consumer interface. Distinct references never pair by position; ordinary Vue2 Observer metadata is accepted without admitting forged metadata or unknown keys.
+  - id: T-CONTROL-LABEL-0001-CASE-COMPILED-NATIVE
+    title: Actual generated and mixed Runtime consumers retain browser input and accessible naming
+    covers:
+      - C-CONTROL-LABEL-0001-INPUT
+      - C-CONTROL-LABEL-0001-NAME
+      - C-CONTROL-LABEL-0001-ACTIVATION
+      - C-CONTROL-LABEL-0001-FOCUS
+      - C-CONTROL-LABEL-0001-WEB
+      - P-BASE-BUTTON-EXTERNAL-LABEL
+      - P-BASE-TOGGLE-EXTERNAL-LABEL
+    expectation: Normal sandboxed Chromium pointer and keyboard input reaches the same target operation exactly once, preserves browser-computed naming and disabled or controlled ownership, and rejects a retired focus-reentry request. The bounded four-profile Button and Toggle matrix records source and generated hashes; collection or bundling alone does not satisfy native execution.
+  - id: T-CONTROL-LABEL-0001-CASE-INTEROP
+    title: Compatible implementation copies share exact nominal admission and one pair domain
+    covers:
+      - C-CONTROL-LABEL-0001-INTEROP
+      - M-CONTROL-LABEL-0001-INTEROP
+    expectation: factory-references-cross-module-copies-with-shared-duplicate-arbitration-and-current-owner-routing
+  - id: T-CONTROL-LABEL-0001-CASE-NAME-INTEROP
+    title: Target-owned naming translates the current foreign Label view and retains generated IDs
+    covers:
+      - C-CONTROL-LABEL-0001-NAME-INTEROP
+      - C-CONTROL-LABEL-0001-NAME
+      - C-CONTROL-LABEL-0001-OWNED-NAME
+    expectation: real-label-idref-with-exact-local-reuse-ambiguous-view-rejection-and-cross-implementation-id-lifetime
   - id: T-CONTROL-LABEL-0001-CASE-IDENTITY
     title: Opaque identity and explicit channel preserve JSON Props
     covers:
@@ -102,6 +156,67 @@ cases:
 
 
 implementations:
+  - id: control-label-private-client-hydration
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/control-label-ssr.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-PRIVATE-SSR
+    notes:
+      - Sixteen executed happy-dom cases pair the actual independently compiled Label with the real hydrated Button before and after adoption, then check disabled ownership, rebinding, clearing, disposal and strict client/server/carrier negative inputs. No Prototype substitution or no-op association facade is used.
+      - The existing forty Button SSR behavior cases and eight server/evidence/type cases also pass, including actual Node execution without browser globals and the complete generated helper closure. This private compatibility repair does not admit public SSR profiles or server-side association serialization.
+  - id: control-label-actual-source-admission
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/control-label-source-admission.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-COMPILED-ADMISSION
+    notes:
+      - Executed 29 cases comprise twelve actual component/profile admissions, four complete strict generated-graph checks, eight precise unsupported Toggle Group diagnostics and five IR schema/version guards. No helper or dependency diagnostics are filtered, and generated components do not import a Proto Runtime to interpret unsupported operations.
+      - The same-compiler source-baseline comparison established that Toggle Group language admission was already absent before ControlLabel composition; explicit rejection is retained as a boundary and does not claim Group support.
+  - id: control-label-ordinary-generated-consumers
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/control-label-consumer-source.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-COMPILED-CONSUMER
+    notes:
+      - Executed 55 happy-dom cases use ordinary imports of the actual compiled Label, Button and Toggle with the public Core factory across React, Vue, Vue2 and Web Component. The matrix includes eight Runtime/Runtime harness controls, three compiled or mixed composition directions, and seven genuine Vue2 reactive-wrapper or strict negative-input cases.
+      - This is generated component and real framework integration evidence, with independent output graphs and unchanged semantic assertions. Native input, other prototypes, unsupported Group compilation and OS assistive-technology acceptance remain separate.
+  - id: control-label-generated-native-consumers
+    kind: adapter-test
+    status: passing
+    path: packages/compiler/test/control-label-native.browser.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-COMPILED-NATIVE
+    notes:
+      - Twenty-four actual Chromium cases passed for four Web profiles, Button or Toggle, and compiled/compiled plus both mixed Runtime directions, using a normal uid-1000 process with chromiumSandbox enabled. Pointer, keyboard, browser-computed naming, controlled/disabled ownership, rebinding and focus-reentry assertions all executed.
+      - The source-bound provisional candidate run retains compiler and harness manifests, loaded source and generated graph hashes, native event traces, screenshots and first-failure-preserving results. Final verification must rerun the frozen integrated candidate; this bounded result does not certify OS assistive technology or Toggle Group.
+  - id: control-label-native-helper
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/control-label-native.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-INTEROP
+      - T-CONTROL-LABEL-0001-CASE-NAME-INTEROP
+      - T-CONTROL-LABEL-0001-CASE-PAIR
+      - T-CONTROL-LABEL-0001-CASE-IDENTITY
+    notes:
+      - Executed emitted-helper DOM-harness evidence covers independent helper copies, duplicate pairing, physical scope, source ID collisions and recovery, shared generated-ID receipts, reentrant disposal and strict association validation. Four-backend compiled components and native-browser admission remain separate.
+  - id: control-label-vue2-reactive-channel
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/instance-associations.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-IDENTITY
+    notes:
+      - Five executed cases accept only the actual owning Vue2 Observer metadata and retain strict Core rejection of fake, stolen, enumerable or accessor metadata, unknown keys and symbols, while preserving the original association getter receiver and error.
   - id: command-label-native-consumers
     kind: runtime-test
     status: active
@@ -146,6 +261,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-IDENTITY
+      - T-CONTROL-LABEL-0001-CASE-INTEROP
   - id: control-label-pairing
     kind: module-test
     status: passing
@@ -153,6 +269,16 @@ implementations:
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-PAIR
+      - T-CONTROL-LABEL-0001-CASE-INTEROP
+  - id: control-label-foreign-name-source
+    kind: module-test
+    status: passing
+    path: packages/modules/a11y/test/control-label-source.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-NAME-INTEROP
+    notes:
+      - Six executed DOM-harness tests cover real source views and generated-ID writer/retainer ownership; this does not substitute for four-backend compiler consumers or native assistive-technology evidence.
   - id: control-label-pointer-intent
     kind: module-test
     status: passing
@@ -211,8 +337,11 @@ implementations:
     path: packages/adapters/vue2/test/control-label.integration.test.ts
     required: true
     consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-IDENTITY
       - T-CONTROL-LABEL-0001-CASE-TARGETS
       - T-CONTROL-LABEL-0001-CASE-PAIR
+    notes:
+      - The executed reactive-wrapper case clears and rebinds a normal Vue.observable association object, preserving real sibling naming and activation without requiring Object.freeze.
   - id: control-label-native
     kind: adapter-test
     status: planned
@@ -307,6 +436,9 @@ verifies:
     - A-VUE-3-0001
     - A-VUE-2-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added executed owning-layer, emitted-helper, actual-source, ordinary generated/Runtime and bounded 24-case native consumer evidence, plus private client-only hydration compatibility and strict server transport rejection. Group, public SSR, final frozen-candidate verification and stable admission remain separate boundaries.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added default-on, opt-out and default-restoration coverage for all Label projections and associated targets, plus the real Shadcn Radio visible-label consumer.

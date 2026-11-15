@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +28,8 @@ function fixture() {
     copy(`scripts/release/${file}`);
   copy('package.json');
   copy('VERSION');
+  cpSync(join(ROOT, 'spec/versions'), join(root, 'spec/versions'), { recursive: true });
+  symlinkSync(join(ROOT, 'node_modules'), join(root, 'node_modules'), 'dir');
   for (const name of modules) {
     copy(`packages/modules/${name}/package.json`);
     copy(`packages/modules/${name}/README.md`);

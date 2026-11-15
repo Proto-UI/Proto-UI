@@ -27,10 +27,7 @@ export const HOOK_ADMISSION = {
   asHitParticipation: { status: 'admitted', operation: 'hook.asHitParticipation' },
   asCollection: { status: 'admitted', operation: 'hook.asCollection' },
   asCollectionItem: { status: 'admitted', operation: 'hook.asCollectionItem' },
-  asControlLabel: {
-    status: 'unsupported',
-    reason: 'Control Label association and activation lowering is not implemented.',
-  },
+  asControlLabel: { status: 'admitted', operation: 'hook.asControlLabel' },
   asAxisInput: {
     status: 'unsupported',
     reason: 'Axis Input capability lowering is not implemented.',

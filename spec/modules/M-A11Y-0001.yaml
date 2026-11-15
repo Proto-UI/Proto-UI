@@ -5,6 +5,9 @@ status: draft
 since: 0.1.0
 summary: The a11y module provides asAccessible declarations, opaque logical identity, direct-ref transport and a separate same-domain part relationship service with bounded view leases.
 criteria:
+  - id: M-A11Y-0001-CONTROL-LABEL-SOURCE
+    text:
+      en: A derived ControlLabel name remains an A11y-owned relation contribution. Its target projector may acquire a bounded semantic source from the authorized pair's opaque source identity and current physical view, using the target's own registry. Acquisition must not replace an authored name or a reentrant successor; release withdraws the relation before retiring its source lease and preserves the first error. This bridge does not alter public semantic-reference admission.
   - id: M-A11Y-0001-PART-RELATIONSHIPS
     text:
       en: Part declarations bind a protocol key to the current Anatomy claim. A11y derives the opaque domain and source role, resolves the full tuple, retains logical membership across view detach, and publishes epoch-bound relationships and bounded diagnostics. State owns mutable keys; Anatomy owns structural facts; hosts own physical identity and projection.
@@ -35,8 +38,13 @@ sources:
   - path: packages/modules/a11y/src/create.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
+  - path: packages/modules/a11y/src/generated-id.ts
+  - path: packages/modules/a11y/test/control-label-source.test.ts
   - path: packages/modules/a11y/test/web-reference.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added target-owned ControlLabel source leases for compatible foreign physical views and shared generated-ID receipts without globalizing the A11y semantic registry.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added exact family/domain/role/key resolution, instance-owned observation, epoch transport and bounded projector handoff while keeping registry and host facts off the author handle.

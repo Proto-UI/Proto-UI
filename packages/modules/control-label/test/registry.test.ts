@@ -75,10 +75,25 @@ describe('explicit Control Label pairing', () => {
   it('names the real Label and routes one request to the target owner', () => {
     const f = fixture();
     expect(f.name).toHaveBeenCalledOnce();
-    expect(f.name).toHaveBeenCalledWith(f.label.semanticRef);
+    expect(f.name).toHaveBeenCalledWith(f.label.semanticRef, f.label.view());
     f.labelLease.requestActivation();
     expect(f.activate).toHaveBeenCalledTimes(1);
     expect(f.activate.mock.calls[0]![0]()).toBe(true);
+  });
+  it('shares pairing and duplicate arbitration across separately loaded implementations', async () => {
+    const f = fixture();
+    vi.resetModules();
+    const secondRegistry = await import('../src/registry');
+    const secondTarget = secondRegistry.bindControlLabel({ ...f.target, owner: {} });
+    f.labelLease.requestActivation();
+    expect(f.activate).not.toHaveBeenCalled();
+    expect(f.label.diagnostic).toHaveBeenLastCalledWith('duplicate-binding');
+    f.targetLease.dispose();
+    f.labelLease.requestActivation();
+    expect(f.activate).toHaveBeenCalledOnce();
+    expect(f.activate.mock.calls[0]![0]()).toBe(true);
+    secondTarget.dispose();
+    f.labelLease.dispose();
   });
   it('keeps naming independent from activation', () => {
     const f = fixture();

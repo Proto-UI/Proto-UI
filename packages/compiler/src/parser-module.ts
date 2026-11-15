@@ -11,6 +11,7 @@ import {
 } from './source-resolution';
 import {
   STATIC_CAPABILITY_FACTORIES,
+  STATIC_CORE_VALUES,
   STATIC_MODULE_FACTORIES,
   STATIC_PACKAGE_CAPABILITIES,
   extractModuleDeclaration,
@@ -105,6 +106,7 @@ export function propertyName(node: ts.PropertyName): string {
 export class SourceGraph {
   readonly modules = new Map<string, SourceModule>();
   readonly sources: Record<string, string>;
+  readonly typeSources = new Map<string, ts.SourceFile>();
   private readonly loading = new Set<string>();
   private readonly exportReads = new Map<SourceModule, ts.ExportAssignment>();
 
@@ -239,7 +241,9 @@ export class SourceGraph {
             );
           if (
             specifier === '@proto.ui/core'
-              ? !Object.hasOwn(FACTORIES, exported) && !Object.hasOwn(CORE_DECLARATIONS, exported)
+              ? !Object.hasOwn(FACTORIES, exported) &&
+                !Object.hasOwn(CORE_DECLARATIONS, exported) &&
+                !Object.hasOwn(STATIC_CORE_VALUES, exported)
               : specifier === '@proto.ui/hooks'
                 ? hook?.status !== 'admitted'
                 : Object.hasOwn(PACKAGED_HOOKS, specifier)
@@ -274,7 +278,10 @@ export class SourceGraph {
             if (!declaration.initializer)
               rejectNode(declaration, 'PUI1004', 'A declaration requires an initializer.');
             const value = declaration.initializer;
-            if (scalarInitializer(value)) {
+            if (
+              scalarInitializer(value) ||
+              (!mutable && (ts.isArrowFunction(value) || ts.isFunctionExpression(value)))
+            ) {
               const name = identifier(declaration.name);
               this.add(result, name, value, statement);
               if (mutable) result.mutableBindings.add(name);

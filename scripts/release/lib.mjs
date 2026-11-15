@@ -485,7 +485,7 @@ export function stagePackage(pkg, options) {
     }
 
     const maxAttempts = Math.max(1, Number(maxPublishRetries) + 1);
-    for (let attempt = 1; publishResult === null && attempt <= maxAttempts; attempt += 1) {
+    for (let attempt = 1; publishResult?.code !== 0 && attempt <= maxAttempts; attempt += 1) {
       const result = spawnSync('npm', publishArgs, {
         cwd: stageDir,
         encoding: 'utf8',

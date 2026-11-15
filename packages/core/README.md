@@ -12,17 +12,25 @@ Core package for defining prototypes, handles, template primitives, and protocol
 
 ## Install
 
+<!-- proto-ui-release-status:start -->
+
+> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+
+<!-- proto-ui-release-status:end -->
+
 ```bash
-npm install @proto.ui/core@0.3.0-alpha.1
+npm install @proto.ui/core@0.3.0-alpha.2
 ```
 
 ## Internal Structure
 
 - `src/a11y.ts`
 - `src/anatomy.ts`
+- `src/axis-input.ts`
 - `src/boundary.ts`
 - `src/caps/`
 - `src/collection.ts`
+- `src/context-menu-input.ts`
 - `src/context.ts`
 - `src/control-label.ts`
 - `src/delay.ts`
@@ -34,12 +42,16 @@ npm install @proto.ui/core@0.3.0-alpha.1
 - `src/image-view.ts`
 - `src/index.ts`
 - `src/internal.ts`
+- `src/material-contact.ts`
 - `src/material.ts`
 - `src/module/`
 - `src/move.ts`
+- `src/native-link.ts`
 - `src/overlay.ts`
 - `src/positioning.ts`
+- `src/presence-presentation.ts`
 - `src/prototype.ts`
+- `src/resident-motion.ts`
 - `src/scroll.ts`
 - `src/spec/`
 - `src/state.ts`

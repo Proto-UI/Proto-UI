@@ -1,4 +1,8 @@
-import { unsupportedPointerFacts } from './pointer-facts-admission';
+import {
+  unsupportedCheckedHelperParameters,
+  unsupportedControlLabel,
+  unsupportedPointerFacts,
+} from './pointer-facts-admission';
 import { createHash } from 'node:crypto';
 import { validateIR } from './ir-validation';
 import {
@@ -29,6 +33,18 @@ export function emitFlutterSource(
   if (!checked.ok) return checked;
   const ir = checked.value;
   const moduleParts = partitionModuleBindings(ir);
+  const controlLabelDiagnostics = unsupportedControlLabel(
+    ir,
+    'flutter-source',
+    'emitted-declarations'
+  );
+  if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
+  const helperDiagnostics = unsupportedCheckedHelperParameters(
+    ir,
+    'flutter-source',
+    'emitted-declarations'
+  );
+  if (helperDiagnostics.length) return { ok: false, diagnostics: helperDiagnostics };
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'flutter-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const component = options.componentName ?? 'CompiledComponent';
@@ -401,7 +417,8 @@ export function emitFlutterSource(
       case 'lexical-write':
         return `(${expr(value.cell, depth)} = ${expr(value.value, depth)})`;
       case 'lexical-update': {
-        const cell = expr(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        const cell = expr(value.cell, depth),
+          operator = value.delta === 1 ? '++' : '--';
         return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -508,6 +525,8 @@ export function emitFlutterSource(
         return value.operator === '!'
           ? `!nativeTruthy(${expr(value.operand, depth)})`
           : `(${value.operator === '-' ? '-' : ''}nativeNumber(${expr(value.operand, depth)}))`;
+      case 'conditional':
+        return `(${expr(value.condition, depth)} ? ${expr(value.whenTrue, depth)} : ${expr(value.whenFalse, depth)})`;
       case 'binary': {
         const left = expr(value.left, depth),
           right = expr(value.right, depth);
@@ -835,15 +854,17 @@ export function emitFlutterSource(
       } else if (statement.kind === 'effect')
         result += `${indent}${expr(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
-        result += returnType === 'void' && statement.value
-          ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
-          : `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
+        result +=
+          returnType === 'void' && statement.value
+            ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
+            : `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
         break;
       } else if (statement.kind === 'throw') {
         usesExceptions = true;
-        result += statement.value.type === 'void' && statement.value.kind !== 'undefined'
-          ? `${indent}${expr(statement.value, depth)};\n${indent}throw const _PuiThrown(NativeVoid());\n`
-          : `${indent}throw _PuiThrown(nativeValue(${expr(statement.value, depth)}));\n`;
+        result +=
+          statement.value.type === 'void' && statement.value.kind !== 'undefined'
+            ? `${indent}${expr(statement.value, depth)};\n${indent}throw const _PuiThrown(NativeVoid());\n`
+            : `${indent}throw _PuiThrown(nativeValue(${expr(statement.value, depth)}));\n`;
         break;
       } else if (statement.kind === 'try') {
         usesExceptions = true;
@@ -852,8 +873,11 @@ export function emitFlutterSource(
           const outer = localTypes;
           localTypes = new Map(outer);
           if (name) localTypes.set(name, 'exception');
-          try { return statements(items, depth + 1, returnType); }
-          finally { localTypes = outer; }
+          try {
+            return statements(items, depth + 1, returnType);
+          } finally {
+            localTypes = outer;
+          }
         };
         result += `${indent}try {\n${branch(statement.body)}${indent}}${caught ? ` on _PuiThrown${caught.name ? ' catch (caughtValue)' : ''} {\n${caught.name ? `${indent}  final ${id(caught.name)} = caughtValue.value;\n` : ''}${branch(caught.body, caught.name)}${indent}}` : ''}${statement.finally ? ` finally {\n${branch(statement.finally)}${indent}}` : ''}\n`;
       } else
@@ -949,9 +973,11 @@ export function emitFlutterSource(
     orderedHooks.push(hook);
   }
   ir.hooks.forEach(orderHook);
-  const hookAssignments = statements(moduleParts.owned, 3, 'void') + orderedHooks
-    .map((hook) => `      final ${hooks.get(hook.id)} = ${fn(hook.setup, 3)};`)
-    .join('\n');
+  const hookAssignments =
+    statements(moduleParts.owned, 3, 'void') +
+    orderedHooks
+      .map((hook) => `      final ${hooks.get(hook.id)} = ${fn(hook.setup, 3)};`)
+      .join('\n');
   const setupCode =
     ir.setup.returnType === 'void'
       ? `      (${fn(ir.setup, 3)})(${ir.setup.parameters.length ? '_owner' : ''});\n      _owner.renderer = (frame) => frame.slot();`
@@ -967,7 +993,9 @@ export '.proto_ui/flutter_native.dart';
 ${[...shapes.keys()].map((hash) => `import '.proto_ui/data_${hash}.dart';\nexport '.proto_ui/data_${hash}.dart';`).join('\n')}
 ${ir.contextKeys.map((key) => `import '${keys.get(key.id)!.path}';`).join('\n')}
 ${ir.staticDeclarations.map((declaration) => `import '${staticCapabilities.get(declaration.id)!.path}';`).join('\n')}
-${usesExceptions ? `class _PuiThrown {
+${
+  usesExceptions
+    ? `class _PuiThrown {
   const _PuiThrown(this.value);
   final Object? value;
 }
@@ -988,7 +1016,9 @@ Object? _puiCaughtMember(Object? value, String key, bool optional) {
 ${[...shapes].map(([hash, shape]) => `  if (value is NativeData_${hash}) {\n    switch (key) {\n${shape.fields.map((field) => `      case ${quote(field.name)}: return nativeValue(value.${publicName(field.name)});`).join('\n')}\n    }\n  }`).join('\n')}
   return const NativeVoid();
 }
-` : ''}${moduleCode}
+`
+    : ''
+}${moduleCode}
 
 class GeneratedProps {
   GeneratedProps({${ir.props.map((p) => `NativeProvided<${data(p.type)}> ${publicName(p.name)} = const NativeProvided.absent()`).join(', ')}${ir.props.length ? ', ' : ''}Map<String, Object?> extra = const {}})

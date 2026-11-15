@@ -9,6 +9,7 @@ import {
 import { isAssignable } from './data-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
 import { nativeImageViewArtifact } from './native-image-view';
+import { nativeControlLabelArtifact } from './native-control-label';
 import { NativeLexicalScope, moduleLexicalScope } from './template-shape';
 import { interactionValueAlternatives } from './interaction-value-shape';
 import type { TargetOperationAnalysis } from './targets';
@@ -231,12 +232,16 @@ export function validateNativeInteraction(
       else if (value.kind === 'member') expression(value.object);
       else if (value.kind === 'unary') expression(value.operand);
       else if (value.kind === 'lexical-cell') expression(value.value);
-      else if (value.kind === 'lexical-read' || value.kind === 'lexical-update') expression(value.cell);
+      else if (value.kind === 'lexical-read' || value.kind === 'lexical-update')
+        expression(value.cell);
       else if (value.kind === 'lexical-write') {
         expression(value.cell);
         expression(value.value);
-      }
-      else if (value.kind === 'binary') {
+      } else if (value.kind === 'conditional') {
+        expression(value.condition);
+        expression(value.whenTrue);
+        expression(value.whenFalse);
+      } else if (value.kind === 'binary') {
         expression(value.left);
         expression(value.right);
       } else if (value.kind === 'array') value.elements.forEach(expression);
@@ -278,6 +283,7 @@ export function validateNativeInteraction(
         }
       }
     }
+    for (const parameter of fn.parameters) if (parameter.default) expression(parameter.default);
     statements(fn.body);
   }
   const moduleScope = moduleLexicalScope(ir);
@@ -845,13 +851,18 @@ export function selectNativeSupport(
 }
 
 export function nativeInteractionArtifacts(
-  selection: 'text-single' | 'text-multiline' | 'image' | 'full'
+  selection: 'text-single' | 'text-multiline' | 'image' | 'full',
+  options: { controlLabel?: boolean } = {}
 ) {
   const ownership = nativeOwnershipArtifact(nativeInteractionArtifact.contents);
+  if (options.controlLabel && selection !== 'full')
+    throw new Error('ControlLabel requires its admitted full native capability closure.');
   if (selection === 'image') return [ownership, nativeImageViewArtifact];
   if (selection !== 'full')
     return [ownership, nativeTextControlArtifact(selection === 'text-single')];
-  let source = nativeInteractionArtifact.contents;
+  let source = options.controlLabel
+    ? nativeControlLabelInteractionSource(nativeInteractionArtifact.contents)
+    : nativeInteractionArtifact.contents;
   const roots = nativeSourceSection(source, 'type RootOwner =', '/** Mark ONLY');
   source = replaceNativeSource(
     source,
@@ -868,6 +879,90 @@ export function nativeInteractionArtifacts(
       kind: 'source' as const,
       contents: source,
     },
-    nativeAdapterModulesWithOwnership(),
+    nativeAdapterModulesWithOwnership(options),
+    ...(options.controlLabel ? [nativeControlLabelArtifact] : []),
   ];
+}
+
+/** Insert only the reached atomic ControlLabel capability into the native owner. */
+function nativeControlLabelInteractionSource(source: string): string {
+  source =
+    "import { createNativeControlLabel } from './control-label-v1';\nimport type { NativeControlLabel } from './adapter-modules-v1';\n" +
+    source;
+  source = replaceNativeSource(
+    source,
+    '  asTrigger(): void; asFocusable(): NativeFocus; asAccessible(): NativeAccessible;',
+    '  asTrigger(): void; asFocusable(): NativeFocus; asAccessible(): NativeAccessible; asControlLabel(): NativeControlLabel<Run>;'
+  );
+  source = replaceNativeSource(
+    source,
+    "'setFocusDisabled' | 'canFocus' | 'adoptControlState'>;",
+    "'setFocusDisabled' | 'canFocus' | 'adoptControlState' | 'hasAuthoredControlLabelName' | 'beginControlLabelName' | 'controlLabelAnatomyScope' | 'subscribeControlLabelAnatomy'>;"
+  );
+  source = replaceNativeSource(
+    source,
+    '  identity?: object;',
+    '  identity?: object;\n  getAssociations?(): unknown;'
+  );
+  source = replaceNativeSource(
+    source,
+    '    declarations: options.declarations ?? [],',
+    '    declarations: options.declarations ?? [],\n    controlLabel: Boolean(options.getAssociations),'
+  );
+  source = replaceNativeSource(
+    source,
+    '  const accessible: NativeAccessible = Object.freeze({ ...accessibleBase, ...modules.accessible });',
+    `  const accessible: NativeAccessible = Object.freeze({ ...accessibleBase, ...modules.accessible });
+  const controlLabel = options.getAssociations ? createNativeControlLabel<Run>({
+    identity, ensureSetup: options.ensureSetup, isAlive: () => !disposed && options.isAlive(), isSetupComplete: options.isSetupComplete, isReady: options.isReady,
+    getRoot: options.getRoot, getAssociations: options.getAssociations ?? (() => undefined), getRun: options.getRun, invoke: options.invoke,
+    hasAuthoredName: () => modules.hasAuthoredControlLabelName!(), beginNameProjection: () => modules.beginControlLabelName!(), resolveAnatomy: (pair, kind) => modules.controlLabelAnatomyScope!(pair, kind),
+    subscribeAnatomy: callback => modules.subscribeControlLabelAnatomy!(callback),
+  }) : null;`
+  );
+  source = replaceNativeSource(
+    source,
+    "    asAccessible() { options.ensureSetup('hook.asAccessible'); return accessible; },",
+    "    asAccessible() { options.ensureSetup('hook.asAccessible'); return accessible; },\n    asControlLabel() { options.ensureSetup('hook.asControlLabel'); if (!controlLabel) throw new Error('[ControlLabel] undeclared native association channel'); return controlLabel.facade; },"
+  );
+  source = replaceNativeSource(
+    source,
+    '    refresh() { modules.refresh(); refresh();',
+    '    refresh() { modules.refresh(); refresh(); controlLabel?.refresh();'
+  );
+  source = replaceNativeSource(
+    source,
+    '    mount() { mount(); modules.mount(); },',
+    '    mount() { mount(); modules.mount(); controlLabel?.mount(); },'
+  );
+  source = replaceNativeSource(
+    source,
+    '    unmount() { try { modules.unmount(); } finally { unmount(); } },',
+    `    unmount() {
+      let failed = false, failure: unknown;
+      for (const cleanup of [() => controlLabel?.unmount(), () => modules.unmount(), unmount]) try { cleanup(); } catch (error) { if (!failed) { failed = true; failure = error; } }
+      if (failed) throw failure;
+    },`
+  );
+  const disposal = nativeSourceSection(
+    source,
+    '    dispose() {\n      if (disposed) return;',
+    '\n  };\n}'
+  );
+  source = replaceNativeSource(
+    source,
+    disposal,
+    `    dispose() {
+      if (disposed) return;
+      disposed = true;
+      let failed = false, failure: unknown;
+      const attempt = (cleanup: () => void) => { try { cleanup(); } catch (error) { if (!failed) { failed = true; failure = error; } } };
+      attempt(() => controlLabel?.dispose());
+      attempt(() => modules.unmount()); attempt(unmount); attempt(() => modules.dispose());
+      for (const off of subscriptions.splice(0)) attempt(off);
+      registrations.length = 0; states.clear(); actions.clear(); focused.clear(); focusVisible.clear(); focusable.clear(); hasPendingFocus = false;
+      if (failed) throw failure;
+    },`
+  );
+  return source;
 }

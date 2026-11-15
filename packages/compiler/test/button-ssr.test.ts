@@ -159,6 +159,7 @@ describe('experimental source-generated Button SSR', () => {
     const compilation = await compileButtonSsrFixture();
     const paintAsEnvironment = emitWebComponentSource(compilation.ir, {
       ssr: true,
+      controlLabelHydration: 'client-only',
       styleEnvironment: {
         id: 'not-an-environment',
         cssText: buttonSsrConsumerThemePaint.cssText,
@@ -184,7 +185,11 @@ describe('experimental source-generated Button SSR', () => {
                   ? buttonSsrStyleEnvironment.cssText.replace(/--pui-radius:\s*[^;]+;/, '')
                   : ':root { --unrelated: 1; }',
             };
-      const output = emitWebComponentSource(compilation.ir, { ssr: true, styleEnvironment });
+      const output = emitWebComponentSource(compilation.ir, {
+        ssr: true,
+        controlLabelHydration: 'client-only',
+        styleEnvironment,
+      });
       expect(output).toMatchObject({
         ok: false,
         diagnostics: [
@@ -201,6 +206,7 @@ describe('experimental source-generated Button SSR', () => {
     const compilation = await compileButtonSsrFixture();
     const output = emitWebComponentSource(compilation.ir, {
       ssr: true,
+      controlLabelHydration: 'client-only',
       styleEnvironment: {
         id: 'cyclic-theme',
         cssText:
@@ -482,6 +488,7 @@ describe('experimental source-generated Button SSR', () => {
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     const emitted = emitWebComponentSource(result.value.ir, {
       ssr: true,
+      controlLabelHydration: 'client-only',
       tagName: fixture.tagName,
       className: 'CompiledButton',
       styleEnvironment: buttonSsrStyleEnvironment,

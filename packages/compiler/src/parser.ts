@@ -6,6 +6,7 @@ import { admittedHookOperation } from './hook-admission';
 
 import {
   OPERATION_RULES,
+  checkedCallbackMatches,
   PACKAGED_HOOKS,
   operationCallbackRule,
   operationArgumentRule,
@@ -47,6 +48,7 @@ import { extractContextKeyDeclaration, type ContextKeyIR } from './context-decla
 import { parseSourceDataType } from './source-types';
 import {
   extractStaticCapability,
+  STATIC_CORE_VALUES,
   extractModuleDeclaration,
   tableStructureFamily,
 } from './static-declarations';
@@ -87,6 +89,8 @@ interface Binding {
   keyId?: string;
   stateId?: string;
   style?: StyleTokenHandle;
+  uninitialized?: true;
+  callableOrigins?: ReadonlySet<object>;
 }
 type Scope = Map<string, Binding>;
 const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
@@ -94,7 +98,39 @@ const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
   run: 'RunHandle',
   render: 'RendererHandle',
   event: 'ProtoEventPayload',
+  'control-label-request': 'ControlLabelRequest',
 };
+
+function coreTypeReference(module: SourceModule, node: ts.TypeNode, exported: string): boolean {
+  if (
+    !ts.isTypeReferenceNode(node) ||
+    !ts.isIdentifier(node.typeName) ||
+    node.typeArguments?.length
+  )
+    return false;
+  const name = node.typeName.text;
+  if (
+    module.file.statements.some(
+      (statement) =>
+        (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
+        statement.name.text === name
+    )
+  )
+    return false;
+  return module.file.statements.some(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === '@proto.ui/core' &&
+      statement.importClause?.namedBindings &&
+      ts.isNamedImports(statement.importClause.namedBindings) &&
+      statement.importClause.namedBindings.elements.some(
+        (binding) =>
+          binding.name.text === name &&
+          (binding.propertyName?.text ?? binding.name.text) === exported
+      )
+  );
+}
 
 function sameType(a: ValueType, b: ValueType): boolean {
   return a === b || (isDataValueType(a) && isDataValueType(b) && dataTypeEqual(a, b));
@@ -138,6 +174,50 @@ class Frontend {
   private readonly moduleValues = new Map<string, Binding & { name: string }>();
   private readonly moduleHelpers = new Map<string, { name: string; fn: FunctionIR }>();
   private readonly sourceNames = new Set<string>();
+  // Callable parameters are checked for synchronous helper invocation. Their
+  // actual bodies have no declared authority in a later registered callback.
+  private readonly callableCaptures = new WeakMap<FunctionIR, ReadonlySet<object>>();
+  private readonly callableFrames: {
+    parameters: ReadonlySet<object>;
+    captures: Set<object>;
+    blocked: ReadonlySet<object>;
+  }[] = [];
+
+  private readCallable(binding: Binding | undefined, node: ts.Node): void {
+    const frame = this.callableFrames[this.callableFrames.length - 1];
+    if (!frame) return;
+    for (const origin of binding?.callableOrigins ?? []) {
+      if (frame.blocked.has(origin))
+        rejectNode(
+          node,
+          'PUI1007',
+          'Checked callable parameters cannot be captured by a registered callback or renderer.'
+        );
+      if (!frame.parameters.has(origin)) frame.captures.add(origin);
+    }
+  }
+
+  private checkCallableReturn(value: ExpressionIR, scope: Scope, node: ts.Node): void {
+    if (value.kind === 'conditional') {
+      this.checkCallableReturn(value.whenTrue, scope, node);
+      this.checkCallableReturn(value.whenFalse, scope, node);
+    } else if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator)) {
+      this.checkCallableReturn(value.left, scope, node);
+      this.checkCallableReturn(value.right, scope, node);
+    }
+    const origins =
+      value.kind === 'reference'
+        ? scope.get(value.name)?.callableOrigins
+        : value.kind === 'function'
+          ? this.callableCaptures.get(value.function)
+          : undefined;
+    if (origins?.size)
+      rejectNode(
+        node,
+        'PUI1007',
+        'Checked callable parameters cannot escape through a returned function.'
+      );
+  }
 
   constructor(
     input: string,
@@ -177,6 +257,8 @@ class Frontend {
       }
       ts.forEachChild(part, inspect);
     };
+    for (const parameter of node.parameters)
+      if (parameter.initializer) inspect(parameter.initializer);
     if (node.body) inspect(node.body);
     return phase;
   }
@@ -221,9 +303,51 @@ class Frontend {
         if (activationImport && !shadowsActivationImport && !parameter.type.typeArguments?.length)
           return FOCUS_ACTIVATION_OPTIONS_TYPE;
 
+        const semanticImport = module.file.statements.some(
+          (statement) =>
+            ts.isImportDeclaration(statement) &&
+            ts.isStringLiteral(statement.moduleSpecifier) &&
+            statement.moduleSpecifier.text === '@proto.ui/core' &&
+            statement.importClause?.namedBindings &&
+            ts.isNamedImports(statement.importClause.namedBindings) &&
+            statement.importClause.namedBindings.elements.some(
+              (binding) =>
+                binding.name.text === name &&
+                Object.values(CAPABILITY_ANNOTATIONS).includes(
+                  binding.propertyName?.text ?? binding.name.text
+                )
+            )
+        );
+        const shadowed = module.file.statements.some(
+          (statement) =>
+            (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
+            statement.name.text === name
+        );
+        if (semanticImport && !shadowed) {
+          const imported = module.file.statements
+            .flatMap((statement) =>
+              ts.isImportDeclaration(statement) &&
+              ts.isStringLiteral(statement.moduleSpecifier) &&
+              statement.moduleSpecifier.text === '@proto.ui/core' &&
+              statement.importClause?.namedBindings &&
+              ts.isNamedImports(statement.importClause.namedBindings)
+                ? [...statement.importClause.namedBindings.elements]
+                : []
+            )
+            .find((binding) => binding.name.text === name)!;
+          const semantic = Object.entries(CAPABILITY_ANNOTATIONS).find(
+            ([, annotation]) => annotation === (imported.propertyName?.text ?? imported.name.text)
+          )?.[0] as ValueType | undefined;
+          if (
+            semantic &&
+            (expected === semantic || (expected === undefined && this.context === 'helper'))
+          )
+            return semantic;
+        }
         if (expected && typeof expected === 'string' && CAPABILITY_ANNOTATIONS[expected] === name)
           return expected;
       }
+      if (ts.isFunctionTypeNode(parameter.type)) return 'function';
       return parseSourceDataType(module, parameter.type);
     }
     if (expected !== undefined && expected !== 'unknown') return expected;
@@ -265,38 +389,131 @@ class Frontend {
       rejectNode(node, 'PUI1004', 'Async/generator/external functions are unsupported.');
     const previousContext = this.context;
     this.context = context;
+    const blocked = new Set(this.callableFrames[this.callableFrames.length - 1]?.blocked);
+    if (context !== 'helper')
+      for (const binding of outer.values())
+        for (const origin of binding.callableOrigins ?? []) blocked.add(origin);
+    const callableFrame = {
+      parameters: new Set<object>(node.parameters),
+      captures: new Set<object>(),
+      blocked,
+    };
+    this.callableFrames.push(callableFrame);
     try {
       const scope = new Map(outer);
       const names = new Set<string>();
+      // Parameter defaults cannot fall back to an outer binding shadowed by a
+      // current or later parameter. Later-parameter closure defaults stay unsupported.
+      for (const parameter of node.parameters)
+        scope.set(identifier(parameter.name), { type: 'unknown', uninitialized: true });
       const parameters: ParameterIR[] = node.parameters.map((parameter, index) => {
-        if (parameter.dotDotDotToken || parameter.initializer)
-          rejectNode(parameter, 'PUI1004', 'Rest and default callback parameters are unsupported.');
+        if (parameter.dotDotDotToken || (parameter.initializer && context !== 'helper'))
+          rejectNode(
+            parameter,
+            'PUI1004',
+            'Rest parameters and defaults on registered callbacks are unsupported.'
+          );
         const name = identifier(parameter.name);
         if (names.has(name)) rejectNode(parameter, 'PUI1005', `Duplicate parameter ${name}.`);
         names.add(name);
         const type = this.parameterType(module, parameter, expected[index], node.body);
         const optional =
           !!parameter.questionToken ||
+          !!parameter.initializer ||
           (!parameter.type && isDataValueType(type) && dataTypeEqual(type, FOCUS_OPTIONS_TYPE));
+        if (
+          optional &&
+          !parameter.initializer &&
+          [
+            'function',
+            'def',
+            'run',
+            'render',
+            'event',
+            'control-label',
+            'control-label-handle',
+            'control-label-request',
+          ].includes(String(type))
+        )
+          rejectNode(
+            parameter,
+            'PUI1006',
+            'Optional semantic helper parameters require a checked default.'
+          );
+        const callback =
+          parameter.type && ts.isFunctionTypeNode(parameter.type)
+            ? {
+                parameters: parameter.type.parameters.map((param) => {
+                  if (param.initializer || param.dotDotDotToken)
+                    rejectNode(
+                      param,
+                      'PUI1004',
+                      'Callback signatures cannot contain parameter initializers or rest parameters.'
+                    );
+                  return {
+                    name: identifier(param.name),
+                    type: this.parameterType(module, param),
+                    ...(param.questionToken ? { optional: true } : {}),
+                  };
+                }),
+                returnType: parseSourceDataType(module, parameter.type.type),
+              }
+            : undefined;
+        const initial = parameter.initializer
+          ? this.expression(module, parameter.initializer, scope, phase)
+          : undefined;
+        if (initial && !assignable(initial.type, type))
+          rejectNode(parameter, 'PUI1006', 'Default parameter type mismatch.');
+        if (initial && callback) {
+          const fn =
+            initial.kind === 'function'
+              ? initial.function
+              : initial.kind === 'reference'
+                ? scope.get(initial.name)?.helper
+                : undefined;
+          if (!checkedCallbackMatches(fn, callback))
+            rejectNode(
+              parameter,
+              'PUI1006',
+              'Default callback does not satisfy its checked signature.'
+            );
+        }
+        const callable = callback
+          ? {
+              ...callback,
+              body: [],
+              phase,
+              context: 'helper' as const,
+              span: sourceSpan(parameter),
+            }
+          : undefined;
         scope.set(name, {
-          type: optional && isDataValueType(type) ? union([type, 'void'], parameter) : type,
+          type:
+            optional && !initial && isDataValueType(type) ? union([type, 'void'], parameter) : type,
+          ...(callable
+            ? { helper: callable, phase, callableOrigins: new Set<object>([parameter]) }
+            : {}),
         });
-        return { name, type, ...(optional ? { optional: true } : {}) };
+        return {
+          name,
+          type,
+          ...(optional ? { optional: true } : {}),
+          ...(callback ? { callback } : {}),
+          ...(initial ? { default: initial } : {}),
+        };
       });
       if (
         context === 'setup' &&
         (parameters.length > 1 || (parameters.length === 1 && parameters[0].type !== 'def'))
       )
         rejectNode(node, 'PUI1006', 'Setup accepts at most one definition handle parameter.');
-      const body = ts.isBlock(node.body)
-        ? this.statements(module, node.body.statements, scope, phase)
-        : [
-            {
-              kind: 'return' as const,
-              value: this.expression(module, node.body, scope, phase),
-              span: sourceSpan(node.body),
-            },
-          ];
+      let body: StatementIR[];
+      if (ts.isBlock(node.body)) body = this.statements(module, node.body.statements, scope, phase);
+      else {
+        const value = this.expression(module, node.body, scope, phase);
+        this.checkCallableReturn(value, scope, node.body);
+        body = [{ kind: 'return', value, span: sourceSpan(node.body) }];
+      }
       const returns: ValueType[] = [];
       const gather = (items: readonly StatementIR[]): boolean => {
         for (const statement of items) {
@@ -324,7 +541,14 @@ class Frontend {
       };
       if (!gather(body)) returns.push('void');
       let returnType: ValueType = returns.length ? union(returns, node) : 'void';
-      if (node.type) {
+      if (
+        node.type &&
+        !(
+          context === 'setup' &&
+          coreTypeReference(module, node.type, 'RenderFn') &&
+          returnType === 'function'
+        )
+      ) {
         const declared = parseSourceDataType(module, node.type);
         if (returns.length && !assignable(returnType, declared))
           rejectNode(node.type, 'PUI1006', 'Function return does not satisfy its declared type.');
@@ -332,8 +556,11 @@ class Frontend {
       }
       if (context === 'setup' && returnType !== 'function' && returnType !== 'void')
         rejectNode(node, 'PUI1006', 'Setup must return a render function or void.');
-      return { parameters, body, phase, context, returnType, span: sourceSpan(node) };
+      const result = { parameters, body, phase, context, returnType, span: sourceSpan(node) };
+      this.callableCaptures.set(result, callableFrame.captures);
+      return result;
     } finally {
+      this.callableFrames.pop();
       this.context = previousContext;
     }
   }
@@ -371,7 +598,12 @@ class Frontend {
               'helper'
             );
             this.activeHelpers.delete(name);
-            scope.set(name, { type: 'function', helper: fn, phase: fn.phase });
+            scope.set(name, {
+              type: 'function',
+              helper: fn,
+              phase: fn.phase,
+              callableOrigins: this.callableCaptures.get(fn),
+            });
             value = { kind: 'function', type: 'function', function: fn, span: sourceSpan(init) };
           } else {
             value = this.expression(module, init, scope, phase);
@@ -521,12 +753,15 @@ class Frontend {
             },
             span,
           });
-        } else
+        } else {
+          const value = this.expression(module, node.expression, scope, phase);
+          this.checkCallableReturn(value, scope, node.expression);
           output.push({
             kind: 'return',
-            value: this.expression(module, node.expression, scope, phase),
+            value,
             span,
           });
+        }
       } else if (!ts.isEmptyStatement(node))
         rejectNode(node, 'PUI1004', `Unsupported ${ts.SyntaxKind[node.kind]} statement.`);
     }
@@ -583,6 +818,13 @@ class Frontend {
     }
     if (ts.isIdentifier(node)) {
       const binding = scope.get(node.text);
+      if (binding?.uninitialized)
+        rejectNode(
+          node,
+          'PUI1006',
+          'Default expressions cannot access the current or a later parameter.'
+        );
+      this.readCallable(binding, node);
       if (binding?.lexical)
         return {
           kind: 'lexical-read',
@@ -596,6 +838,54 @@ class Frontend {
           : { kind: 'reference', name: node.text, type: binding.type, span };
       if (module.declarations.has(node.text) || module.imports.has(node.text)) {
         const resolved = this.graph.resolveBinding(module, node.text);
+        if (
+          resolved.module === null &&
+          resolved.imported.module === '@proto.ui/core' &&
+          Object.hasOwn(STATIC_CORE_VALUES, resolved.name)
+        ) {
+          const data = (value: import('./ir').StaticValue): ExpressionIR => {
+            if (Array.isArray(value)) {
+              const elements = value.map(data);
+              return {
+                kind: 'array',
+                elements,
+                type: {
+                  kind: 'array',
+                  element: parseDataType({
+                    kind: 'union',
+                    members: elements.map((element) => element.type),
+                  }),
+                },
+                span,
+              };
+            }
+            if (value !== null && typeof value === 'object') {
+              const entries = Object.entries(value).map(([key, value]) => ({
+                key,
+                value: data(value),
+              }));
+              return {
+                kind: 'record',
+                entries,
+                type: {
+                  kind: 'record',
+                  fields: entries.map((entry) => ({
+                    name: entry.key,
+                    type: entry.value.type as DataType,
+                  })),
+                },
+                span,
+              };
+            }
+            return {
+              kind: 'literal',
+              value: value as import('./ir').Primitive,
+              type: value === null ? 'null' : (typeof value as ValueType),
+              span,
+            };
+          };
+          return data(STATIC_CORE_VALUES[resolved.name]);
+        }
         if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
           const binding = this.moduleValue(
             resolved.module,
@@ -633,10 +923,44 @@ class Frontend {
         `Unresolved capture ${node.text}; only declared lexical values and semantic handles are admitted.`
       );
     }
-    if (ts.isArrayLiteralExpression(node)) {
-      const elements = node.elements.map((element) =>
-        this.expression(module, element, scope, phase)
+    if (ts.isConditionalExpression(node)) {
+      const condition = this.expression(module, node.condition, scope, phase);
+      const branch = (truth: boolean) => {
+        const next = new Map(scope);
+        for (const [name, type] of conditionRefinements(condition, truth))
+          if (next.has(name)) next.set(name, { ...next.get(name)!, type });
+        return next;
+      };
+      const whenTrue = this.expression(module, node.whenTrue, branch(true), phase, argumentRule);
+      const whenFalse = this.expression(module, node.whenFalse, branch(false), phase, argumentRule);
+      return {
+        kind: 'conditional',
+        condition,
+        whenTrue,
+        whenFalse,
+        type: union([whenTrue.type, whenFalse.type], node),
+        span,
+      };
+    }
+    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+      const fn = this.function(
+        module,
+        node,
+        scope,
+        this.helperPhase(module, node, scope),
+        [],
+        'helper'
       );
+      return { kind: 'function', type: 'function', function: fn, span };
+    }
+    if (ts.isArrayLiteralExpression(node)) {
+      const elements = node.elements.flatMap((element) => {
+        if (!ts.isSpreadElement(element)) return [this.expression(module, element, scope, phase)];
+        const spread = this.expression(module, element.expression, scope, phase);
+        if (spread.kind !== 'array')
+          rejectNode(element, 'PUI1004', 'Array spread currently requires a checked static array.');
+        return spread.elements;
+      });
       const elementTypes = elements.map((element) => element.type);
       if (!elementTypes.every(isDataValueType)) {
         if (elementTypes.every((type) => type === 'a11y-ref'))
@@ -978,6 +1302,9 @@ class Frontend {
       for (const [key, child] of Object.entries(record))
         if (key !== 'span' && key !== 'type') inspect(child);
     };
+    fn.parameters.forEach((parameter) => {
+      if (parameter.default) inspect(parameter.default);
+    });
     inspect(fn.body);
   }
 
@@ -989,6 +1316,7 @@ class Frontend {
       const name = node.expression.text,
         binding = scope.get(name);
       if (binding) {
+        this.readCallable(binding, node.expression);
         if (
           [
             'style-disposer',
@@ -1040,10 +1368,33 @@ class Frontend {
         if (args.length < required || args.length > binding.helper.parameters.length)
           rejectNode(node, 'PUI1006', `Helper ${name} argument count mismatch.`);
         args.forEach((argument, index) => {
+          const signature = binding.helper!.parameters[index].callback;
+          const fn =
+            argument.kind === 'function'
+              ? argument.function
+              : argument.kind === 'reference'
+                ? scope.get(argument.name)?.helper
+                : undefined;
+          if (signature && !checkedCallbackMatches(fn, signature))
+            rejectNode(
+              node.arguments[index],
+              'PUI1006',
+              'Helper callback requires a compatible checked signature.'
+            );
+          if (signature && fn && this.context !== 'helper')
+            this.enforceHelperContext(fn, this.context, phase);
           const expected = binding.helper!.parameters[index].type;
           if (
             !assignable(argument.type, expected) &&
-            !assignable(argumentData(argument) ?? argument.type, expected)
+            !assignable(
+              argument.type === 'props'
+                ? {
+                    kind: 'record',
+                    fields: [...this.props].map(([name, prop]) => ({ name, type: prop.type })),
+                  }
+                : (argumentData(argument) ?? argument.type),
+              expected
+            )
           )
             rejectNode(node.arguments[index], 'PUI1006', 'Helper argument type mismatch.');
         });
@@ -1060,7 +1411,12 @@ class Frontend {
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
       const resolved = this.graph.resolveBinding(module, name);
-      if (resolved.module && ts.isFunctionDeclaration(resolved.node)) {
+      if (
+        resolved.module &&
+        (ts.isFunctionDeclaration(resolved.node) ||
+          ts.isArrowFunction(resolved.node) ||
+          ts.isFunctionExpression(resolved.node))
+      ) {
         const args = node.arguments.map((argument) =>
           this.expression(module, argument, scope, phase)
         );
@@ -1103,6 +1459,21 @@ class Frontend {
         if (args.length < required || args.length > helper.fn.parameters.length)
           rejectNode(node, 'PUI1006', 'Module helper argument count mismatch.');
         args.forEach((argument, index) => {
+          const signature = helper!.fn.parameters[index].callback;
+          const fn =
+            argument.kind === 'function'
+              ? argument.function
+              : argument.kind === 'reference'
+                ? scope.get(argument.name)?.helper
+                : undefined;
+          if (signature && !checkedCallbackMatches(fn, signature))
+            rejectNode(
+              node.arguments[index],
+              'PUI1006',
+              'Helper callback requires a compatible checked signature.'
+            );
+          if (signature && fn && this.context !== 'helper')
+            this.enforceHelperContext(fn, this.context, phase);
           if (
             !assignable(argument.type, helper!.fn.parameters[index].type) &&
             !assignable(argumentData(argument) ?? argument.type, helper!.fn.parameters[index].type)
@@ -1169,7 +1540,8 @@ class Frontend {
       }
       if (ts.isIdentifier(root) && scope.has(root.text)) {
         const value = scope.get(root.text)!;
-        const fullPath = paths.join('.');
+        const fullPath =
+          value.type === 'render' && paths.join('.') === 'r.slot' ? 'slot' : paths.join('.');
         const family = stateValue(value.type) ? 'state:boolean' : value.type;
         const match = Object.entries(OPERATION_RULES).find(
           ([, rule]) => rule.path === fullPath && sameType(rule.receiver, family)
@@ -1441,9 +1813,37 @@ class Frontend {
         if (entry.value.kind !== 'record')
           rejectNode(node, 'PUI1006', 'Prop schema must be a literal record.');
         const item = entry.value.entries.find((value) => value.key === 'type');
-        const type = item?.value.kind === 'literal' ? item.value.value : undefined;
-        if (type !== 'boolean' && type !== 'number' && type !== 'string')
-          rejectNode(node, 'PUI1006', 'Only declared primitive props are currently admitted.');
+        const declaredKind = item?.value.kind === 'literal' ? item.value.value : undefined;
+        let type: DataType;
+        if (declaredKind === 'enum') {
+          const options = entry.value.entries.find((field) => field.key === 'options')?.value;
+          if (
+            options?.kind !== 'array' ||
+            !options.elements.length ||
+            options.elements.some(
+              (option) => option.kind !== 'literal' || typeof option.value !== 'string'
+            )
+          )
+            rejectNode(node, 'PUI1006', 'Enum props require a nonempty checked string array.');
+          type = parseDataType({
+            kind: 'union',
+            members: options.elements.map((option) => ({
+              kind: 'literal',
+              value: (option as Extract<ExpressionIR, { kind: 'literal' }>).value,
+            })),
+          });
+        } else if (
+          declaredKind === 'boolean' ||
+          declaredKind === 'number' ||
+          declaredKind === 'string'
+        )
+          type = declaredKind;
+        else
+          rejectNode(
+            node,
+            'PUI1006',
+            'Props require a checked primitive or enum data declaration.'
+          );
         const prior = this.props.get(entry.key);
         if (prior && !sameType(prior.type, type))
           rejectNode(node, 'PUI1006', `Conflicting prop type ${entry.key}.`);
@@ -1578,12 +1978,18 @@ class Frontend {
       if (exposure.kind === 'event' && this.eventKinds.get(name) !== 'void')
         exposure.payload = union(values, descriptor.setup) as DataType;
     }
-    const sourceFiles = [...this.graph.modules]
+    const sourceFiles = [
+      ...new Map(
+        [...this.graph.modules]
+          .map(([name, module]) => [name, module.file] as [string, ts.SourceFile])
+          .concat([...this.graph.typeSources])
+      ),
+    ]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([file, value]) => ({
         file,
-        content: value.file.text,
-        sha256: createHash('sha256').update(value.file.text).digest('hex'),
+        content: value.text,
+        sha256: createHash('sha256').update(value.text).digest('hex'),
       }));
     return {
       schemaVersion: IR_VERSION,

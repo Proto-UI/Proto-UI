@@ -130,11 +130,18 @@ criteria:
         The a11y semantic object may carry a portable heading level. A snapshot projects level only when the resolved role is heading and level is an integer from 1 through 6; the Web adapter projects it as aria-level. Static, initial state-backed, and final-setup declarations containing 0, negatives, fractions, NaN, or Infinity must fail closed and be rejected. After setup, an invalid state-backed runtime value remains owned by State; A11y must not mutate, veto, or roll back that source, must omit level from the snapshot so the Web adapter removes stale aria-level, and must restore projection after a later valid value. A non-heading role, target replacement, detach, or disposal must clear aria-level from the previous physical target; an invalid runtime level must not rewrite the independently governed role.
 
 
+  - id: C-A11Y-0001-GENERATED-ID-LEASE
+    text:
+      en: A compatible Web projection that uses another implementation's live generated physical ID retains its ownership receipt before publishing the IDREF. The generator and retainers release only their own receipts; the last release restores the original physical attribute only when the current ID is still the owned generated value. Consumer replacements survive cleanup. Physical generated-ID lifetime may be shared without sharing semantic registries, admitting a foreign semantic reference, or deriving host identity from protocol keys.
+      zh-CN: 兼容的 Web 投影使用另一实现仍存活的生成 ID 时，必须在发布 IDREF 前取得该物理 ID 的保留凭据。生成者和保留者仅释放各自凭据；最后一次释放只有在当前 ID 仍是所拥有的生成值时才恢复原属性，消费者后续替换必须保留。共享生成 ID 生命周期不要求共享语义 registry、接纳外部语义引用或从 protocol key 推导宿主 identity。
+
 sources:
   - path: internal/records/2026-06-30-a11y-module-planning-for-button.zh-CN.md
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/create.ts
   - path: packages/modules/a11y/src/web.ts
+  - path: packages/modules/a11y/src/generated-id.ts
+  - path: packages/modules/a11y/test/control-label-source.test.ts
   - path: packages/runtime/test/contract/a11y.v0.contract.test.ts
   - path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
   - path: packages/modules/a11y/test/web-reference.test.ts
@@ -159,6 +166,9 @@ verifies:
   tests:
     - T-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Required compatible Web projections to retain generated physical IDs until all live owners release their receipts while preserving consumer replacements and independent semantic registries.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Define optional State-backed applicability for setup state bindings with snapshot omission and existing ownership and lifecycle preservation.

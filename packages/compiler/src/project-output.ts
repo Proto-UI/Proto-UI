@@ -11,6 +11,8 @@ import {
 import { compilationArtifacts } from './compile';
 import { generatedSourcePath } from './emitter-map';
 import { IR_VERSION, type CompileResult } from './ir';
+import { checkTargetOperations, TARGET_PROFILES } from './targets';
+import { nativeInteractionArtifacts } from './native-interaction';
 import type { SuccessfulProjectGeneration } from './project';
 
 export interface ProjectArtifactOptions {
@@ -92,10 +94,74 @@ export function projectCompilationArtifacts(
   }
   const invalidNames = validateArtifacts(reserved);
   if (invalidNames) return reject(invalidNames);
+  // One project has one reached support closure. Upgrade only bytes emitted by
+  // this compiler, retaining the ordinary conflicting/tampered artifact rejection.
+  let controlLabel = false;
+  for (const entry of entries) {
+    const admitted = checkTargetOperations(entry.compilation.ir, TARGET_PROFILES[profile]);
+    if (!admitted.ok) return admitted;
+    controlLabel ||= admitted.value.operations.includes('hook.asControlLabel');
+  }
+  const baseNative = nativeInteractionArtifacts('full');
+  const pairedNative = controlLabel
+    ? nativeInteractionArtifacts('full', { controlLabel: true })
+    : [];
+  const sharedNativePaths = new Set(baseNative.map((file) => file.path));
   const reservedPaths = new Set(reserved.map((artifact) => artifact.path));
   const artifacts = new Map<string, OutputArtifact>();
   for (let index = 0; index < entries.length; index++) {
-    const { compilation } = entries[index];
+    let { compilation } = entries[index];
+    const supporting = compilation.output.supportingFiles;
+    if (
+      controlLabel &&
+      supporting?.some((file) => file.path === '.proto-ui/interaction/native-v1.ts')
+    ) {
+      const full = supporting.filter((file) => sharedNativePaths.has(file.path));
+      const canonical = [baseNative, pairedNative].some((candidate) => {
+        const required = candidate.filter((file) => sharedNativePaths.has(file.path));
+        return (
+          full.length === required.length &&
+          required.every((target) =>
+            full.some(
+              (file) =>
+                file.path === target.path &&
+                file.kind === target.kind &&
+                file.contents === target.contents
+            )
+          )
+        );
+      });
+      if (!canonical)
+        return reject(
+          'Project contains unknown or modified native support; cannot unify reached capabilities.',
+          entries[index].entry,
+          'output-conflict'
+        );
+      const enabledPaths = new Set(pairedNative.map((file) => file.path));
+      for (const file of supporting) {
+        const canonical = pairedNative.find((target) => target.path === file.path);
+        if (
+          canonical &&
+          !sharedNativePaths.has(file.path) &&
+          (file.kind !== canonical.kind || file.contents !== canonical.contents)
+        )
+          return reject(
+            'Project contains modified ControlLabel support.',
+            file.path,
+            'output-conflict'
+          );
+      }
+      compilation = {
+        ...compilation,
+        output: {
+          ...compilation.output,
+          supportingFiles: [
+            ...supporting.filter((file) => !enabledPaths.has(file.path)),
+            ...pairedNative,
+          ],
+        },
+      };
+    }
     const record = entryRecords[index];
     const candidates = compilationArtifacts(compilation, record);
     const invalid = validateArtifacts(candidates);

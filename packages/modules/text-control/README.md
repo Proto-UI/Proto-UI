@@ -12,10 +12,16 @@ Adapter-facing dependency used by Base Textarea, the admitted Base Input prerequ
 
 ## Install
 
-`0.2.0-rc.7` is published for reproducible prerelease trials. The stable `0.2.0` package is under review and is not installable until publication completes.
+<!-- proto-ui-release-status:start -->
+
+> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+
+<!-- proto-ui-release-status:end -->
+
+Stable `0.2.0` publication is recorded in [V-PROTO-UI-0008](../../../spec/versions/V-PROTO-UI-0008.yaml). The example below follows the current workspace release train.
 
 ```bash
-npm install @proto.ui/module-text-control@0.3.0-alpha.1
+npm install @proto.ui/module-text-control@0.3.0-alpha.2
 ```
 
 ## Main exports

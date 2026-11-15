@@ -13,6 +13,10 @@ criteria:
   - id: C-CONTROL-LABEL-0001-IDENTITY
     text:
       en: Only the public factory creates an admitted opaque reference. A plain lookalike, cloned object, string, DOM node or serialized attribute must be rejected with an explicit diagnostic. Creating or sharing a reference does not itself create a binding or discover another component.
+  - id: C-CONTROL-LABEL-0001-INTEROP
+    text:
+      en: Compatible implementations in one ECMAScript realm, including independently emitted native graphs and Runtime Adapters, admit the same exact public-factory reference and participate in one pair-ownership domain. Nominal admission and duplicate arbitration must not depend on which bundle loaded the factory or participant. The v1 realm ABI uses immutable, non-replaceable global data properties at Symbol.for('@proto.ui/control-label/ref/v1') and Symbol.for('@proto.ui/control-label/pairs/v1'). The former exposes version 1, create and is operations with private nominal membership; the latter exposes version 1 and bind with private pair state. No mutable registry, arbitrary-object admission operation or serializable structural brand is exposed. Incompatible occupied ABI slots are explicit errors. This mechanism is an implementation interoperability boundary, not a security boundary or cross-realm serialization guarantee; it does not recover references created by an incompatible older private authority or widen Anatomy domain matching.
+      zh-CN: 同一 ECMAScript realm 中的兼容实现，包括独立生成的原生组件图与 Runtime Adapter，必须接纳同一个公共工厂引用并共享唯一配对所有权域。nominal admission 与重复参与者仲裁不依赖工厂或参与者来自哪个 bundle。v1 realm ABI 在两个固定 Symbol.for 键上提供不可替换的只读服务，私有集合与配对状态不得暴露为可变 registry，也不提供任意对象注册或可序列化结构品牌。已占用且不兼容的 ABI 必须显式报错；该机制不构成安全边界，不承诺跨 realm 序列化，也不恢复旧版私有 authority 创建的引用或扩大 Anatomy 匹配域。
   - id: C-CONTROL-LABEL-0001-DOMAIN
     text:
       en: The shared reference defines the sole logical pair-authorization domain, so explicitly paired siblings need not share an Anatomy family. Both current views must additionally belong to the same host accessibility tree scope. No relation is inferred by position, DOM order, nearest control, name or framework root. Existing kind:part relationships remain constrained to their original same-Anatomy domain; this contract uses the separate direct semantic-object-reference path and does not widen part lookup.
@@ -46,6 +50,9 @@ criteria:
   - id: C-CONTROL-LABEL-0001-WEB
     text:
       en: The first Web projection requires connected participants in the same Document and getRootNode tree scope. It uses the existing A11y semantic-reference and IDREF ownership projection for naming, plus a narrowly scoped input-intent host bridge for activation. Scope observers are shared, include shadow-tree containment changes, and retire only their own subscriptions. Cross-document and cross-shadow-root associations are unsupported and diagnosed even when an App Maker shares a reference. View identity and callback epoch are rechecked before every target effect.
+  - id: C-CONTROL-LABEL-0001-NAME-INTEROP
+    text:
+      en: A shared pair passes the Label's opaque semantic identity and current physical view to the target-owned naming operation. When compatible implementations use distinct A11y identity registries, the target host may translate that exact current view into a bounded local semantic source lease. It must reuse an unambiguous exact local binding, reject an ambiguous or foreign-tree binding, and otherwise relate to the same rendered Label without copying content. Alias projection and generated-ID receipts retire with the target relation or view; a generated ID stays valid while another compatible live projection retains it, and last release preserves a consumer replacement. This privileged bridge does not admit foreign objects to the public A11y author API or expose host facts through ControlLabelRef, Props or Context.
   - id: C-CONTROL-LABEL-0001-BOUNDS
     text:
       en: This module does not own Form, submission, validation or error summaries. Its bounded anatomy bridge may be consumed by an independent Field protocol; it admits no multiple-label ordering, arbitrary action dispatch, native selection model or platform-wide support claim. Missing host capability is an explicit unsupported state, not success. Passing instance-association input or rendering label text alone does not certify a working association.
@@ -82,6 +89,7 @@ sources:
   - path: packages/core/src/a11y.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
+  - path: packages/modules/a11y/src/generated-id.ts
   - path: internal/records/2026-10-06-control-label-boundary.md
 openQuestions:
   - id: C-CONTROL-LABEL-0001-Q-EVIDENCE
@@ -89,6 +97,9 @@ openQuestions:
       en: Does the completed slice satisfy paired real input, naming, reentrancy, duplicate binding and remount evidence across all four Web adapters?
     blocks: [activation:C-CONTROL-LABEL-0001]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Defined same-realm nominal reference and pair interoperability across native output graphs and Runtime Adapters, with target-owned semantic source translation and bounded generated-ID lifetime; retained draft admission and existing Label behavior.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Extend explicit target participation to Button, Toggle and Toggle Group Item while retaining the same naming, activation and lifecycle owners.

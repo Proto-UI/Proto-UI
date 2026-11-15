@@ -14,6 +14,12 @@ statement:
 
 
 criteria:
+  - id: HC-A11Y-0001-CONTROL-LABEL-SOURCE
+    text:
+      en: The target Web projector can translate an authorized ControlLabel source identity and current same-document, same-tree view into a local semantic source lease. It reuses an exact unambiguous local binding, refuses a conflicting binding, and otherwise projects only the actual Label view through a fresh private alias. The lease exposes a local objectRef, isActive and dispose; target detach or disposal retires owned aliases. The target's existing authored-name and IDREF ownership checks remain authoritative.
+  - id: HC-A11Y-0001-GENERATED-ID-ABI
+    text:
+      en: Compatible Web projections share the immutable version-1 service at the non-replaceable global data property Symbol.for('@proto.ui/a11y/generated-id/v1'). Its own(element,id,baseline) operation creates or joins a generated-ID lifetime after the current physical ID is written; retain(element,id) returns a receipt only for an existing current generated-ID lifetime. Receipts expose idempotent dispose; the private registry is never exposed. Last release clears the entry before restoring an unchanged owned value, and an incompatible occupied service slot fails explicitly. This physical lease service neither admits nor resolves A11y semantic references.
   - id: HC-A11Y-0001-A
     text:
       zh-CN: host-cap 必须允许 adapter 接收完整 a11y IR。
@@ -46,6 +52,9 @@ relates:
     - id: C-A11Y-PART-RELATIONSHIP-0001
       since: 0.3.0-alpha.1
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Specified the bounded target-owned ControlLabel source bridge and shared generated-ID lease ABI for native-output and Runtime projection interoperability.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added epoch-aware part relationship projection, non-destructive ID observation and binding readiness for identity transfer before reveal.

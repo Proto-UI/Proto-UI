@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { IR_VERSION } from '../src/ir';
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
@@ -159,7 +160,7 @@ describe('portable pointer facts: capability admission', () => {
       expect(parsePrototype(source(body)).ok).toBe(false));
 });
 
-describe('IR5 legacy control identity compatibility', () => {
+describe('legacy control labels within the current IR schema', () => {
   const bodies = [
     'const control = event.control; const alias = control; const same = alias === control;',
     'const control = event.control; const get = () => control; const same = get() === control;',
@@ -175,7 +176,7 @@ describe('IR5 legacy control identity compatibility', () => {
       expect(JSON.stringify(old)).toBe(before);
       if (!checked.ok) return;
       expect(checked.value).not.toBe(old);
-      expect(checked.value.schemaVersion).toBe(5);
+      expect(checked.value.schemaVersion).toBe(IR_VERSION);
       const again = validateIR(checked.value);
       expect(again.ok).toBe(true);
       if (again.ok) expect(again.value).toBe(checked.value);

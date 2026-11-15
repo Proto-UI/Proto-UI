@@ -1,3 +1,5 @@
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
+
 interface SsrOptions {
   className: string;
   tagName: string;
@@ -5,6 +7,8 @@ interface SsrOptions {
   artifacts?: { source: string; helpers: string; css: string; environment: string };
   environmentCssText?: string;
   cssText?: string;
+  /** Private experiment: declarations are dormant on the server; live pairs are client-only. */
+  controlLabel?: boolean;
 }
 
 /** Ordinary presentation nodes, not semantic IR. Server owns no DOM objects or browser globals. */
@@ -16,8 +20,9 @@ export function webComponentSsrSupport(options: SsrOptions) {
     artifacts = { source: '', helpers: '', css: '', environment: '' },
     environmentCssText = '',
     cssText = '',
+    controlLabel = false,
   } = options;
-  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
+  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner, assertNoInstanceAssociations} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
 }
@@ -28,7 +33,8 @@ export function renderWithScope<T>(props: GeneratedProps & Record<string, unknow
 `;
   const client = `// Browser-only entry. Import Component.ts on the server, never this module.
 import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, hydrationEnvironmentCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
-import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, assertNoInstanceAssociations, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+${controlLabel ? "import {validateNativeInstanceAssociations} from './.proto-ui/interaction/control-label-v1';\n" : ''}
 export {HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export class ${className} extends HTMLElement {
   private owner: HydrationOwner | null = null;
@@ -42,11 +48,22 @@ export class ${className} extends HTMLElement {
   private initializedCarrier = false;
   private acceptedMode: 'light' | 'shadow' | null = null;
   private failedCarrier: Carrier | null = null;
+  private associations: Readonly<{controlLabel?: object | null}> | undefined;
   hydrationStatus: 'pending' | 'adopted' | 'recovered' | 'client' | 'mismatch' = 'pending';
   hydrationDiagnostic: HydrationMismatch | null = null;
   get logicalOwner(): symbol | null { return this.owner?.identity ?? null; }
   get viewEpoch(): number { return this.owner?.epoch ?? 0; }
   get present(): boolean { return this.owner?.view ?? false; }
+  get instanceAssociations(): Readonly<{controlLabel?: object | null}> | undefined { return this.associations; }
+  set instanceAssociations(value: Readonly<{controlLabel?: object | null}> | undefined) {
+    if (this.closed) throw new Error('Custom element is disposed');
+${controlLabel ? '    const accepted = validateNativeInstanceAssociations(value);\n' : emitUndeclaredInstanceAssociations('value', 'PUIInputAssociations')}
+    this.associations = ${controlLabel ? 'accepted' : 'value'};
+${controlLabel ? '    this.owner?.interaction.refresh();\n' : ''}  }
+  static get observedAttributes(): string[] { return ['instance-associations', 'instanceassociations']; }
+  attributeChangedCallback(_name: string, _previous: string | null, value: string | null): void {
+    if (value !== null) throw new TypeError('[InstanceAssociations] use the instanceAssociations property, not an attribute string');
+  }
   connectedCallback(): void {
     ++this.disconnectVersion;
     if (this.closed) return;
@@ -76,7 +93,7 @@ export class ${className} extends HTMLElement {
       const pending = this.hasRaw ? this.raw : null;
       const initial = carrier && !this.recovering ? decodeRaw(carrier.raw) : this.raw;
       if (!pending) this.raw = {...initial};
-      const owner = createHydrationOwner(port, initial);
+      const owner = createHydrationOwner(port, initial${controlLabel ? ', () => this.associations' : ''});
       this.owner = owner;
       try { owner.validateHydration(); owner.reconcile(); }
       catch (error) { this.owner = null; try { owner.dispose(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'Hydration and cleanup failed'); } throw error; }
@@ -109,6 +126,7 @@ export class ${className} extends HTMLElement {
   }
   setProps(next: GeneratedProps & Record<string, unknown>): void {
     if (this.closed) throw new Error('Custom element is disposed');
+    assertNoInstanceAssociations(next, 'Props');
     this.hasRaw = true; this.raw = {...next};
     if (this.owner) this.owner.hydrate(this.raw);
   }
@@ -126,7 +144,7 @@ export class ${className} extends HTMLElement {
   recover(next?: GeneratedProps & Record<string, unknown>): void {
     if (this.closed) throw new Error('Custom element is disposed');
     if (this.hydrationStatus !== 'mismatch') throw new Error('Recovery requires a diagnosed hydration mismatch');
-    if (next) { this.raw = {...next}; this.hasRaw = true; }
+    if (next) { assertNoInstanceAssociations(next, 'Props'); this.raw = {...next}; this.hasRaw = true; }
     this.carrier = this.failedCarrier;
     this.recovering = true;
     if (this.isConnected) this.connectedCallback();
@@ -195,6 +213,18 @@ export type HostPort = {
 };
 export type ServerParent = {readonly context: ContextScope | null; readonly alive: boolean};
 export type ServerOptions = {mode?: 'light' | 'shadow'; slotHtml?: string | ((parent: ServerParent) => string); signal?: AbortSignal; parent?: ServerParent; rootAttributes?: Record<string, string>};
+/** The identity channel is never portable Props, markup, or a server carrier. */
+export function assertNoInstanceAssociations(input: unknown, subject: string): void {
+  if (!input || typeof input !== 'object') return;
+  for (const key of ['instanceAssociations', 'instance-associations', 'instanceassociations'])
+    if (Object.prototype.hasOwnProperty.call(input, key))
+      throw new TypeError('[InstanceAssociations] ' + subject + ' cannot carry instance associations; SSR association transport is unsupported, use the dedicated client property');
+}
+function checkServerAssociationInputs(props: unknown, options: ServerOptions): void {
+  assertNoInstanceAssociations(props, 'Props');
+  assertNoInstanceAssociations(options, 'ServerOptions');
+  assertNoInstanceAssociations(options.rootAttributes, 'Root attributes');
+}
 export class HydrationMismatch extends Error {
   readonly code = 'PUI_WC_HYDRATION_MISMATCH';
   constructor(readonly reason: string, readonly path = 'Root') { super('WC hydration mismatch at ' + path + ': ' + reason); this.name = 'HydrationMismatch'; }
@@ -274,6 +304,8 @@ export function decodeRaw(data: RawData): Record<string, unknown> {
   }
   const raw = Object.create(null) as Record<string, unknown>;
   for (const [key, value] of data) {
+    if (['instanceAssociations', 'instance-associations', 'instanceassociations'].includes(key))
+      throw new HydrationMismatch('instance associations cannot enter serialized Props');
     if (Object.hasOwn(raw, key)) throw new HydrationMismatch('duplicate raw Prop key');
     raw[key] = value.kind === 'undefined' ? undefined : decode(value.value);
   }
@@ -281,6 +313,11 @@ export function decodeRaw(data: RawData): Record<string, unknown> {
 }
 export function checkCarrier(carrier: Carrier, binding: string, tag: string, artifacts?: ArtifactVersions): void {
   try { checkData(carrier); } catch { throw new HydrationMismatch('carrier contains non-transport data'); }
+  try {
+    assertNoInstanceAssociations(carrier, 'Carrier');
+    assertNoInstanceAssociations(carrier?.attributes, 'Root attributes');
+    assertNoInstanceAssociations(carrier?.baselines, 'Root baselines');
+  } catch { throw new HydrationMismatch('instance association carrier transport is unsupported'); }
   if (!carrier || typeof carrier !== 'object') throw new HydrationMismatch('invalid carrier');
   if (carrier.version !== 1 || carrier.profile !== 'web-component-ssr-v1' || carrier.binding !== binding || carrier.tagName !== tag)
     throw new HydrationMismatch('source/profile/tag binding differs');
@@ -333,6 +370,7 @@ function serialize(children: Presentation[], mode: 'light' | 'shadow', slotHtml:
 }
 export type ServerPort = HostPort & {presentation: Presentation[]; control: ControlProjection | null; attributes: Record<string, string>; interactionAttributes: Record<string, string | null>; present: boolean; parent: ServerParent; emissions: {key: string; payload: unknown; options?: CustomEventInit}[]; close(): void};
 export function createServerPort(options: ServerOptions): ServerPort {
+  checkServerAssociationInputs(undefined, options);
   let alive = true, context: ContextScope | null = null;
   if (options.parent && !options.parent.alive) throw new Error('Server logical parent is disposed');
   const parent: ServerParent = {get context() { if (!alive) throw new Error('Server owner is disposed'); return context; }, get alive() { return alive; }};
@@ -352,6 +390,7 @@ export function createServerPort(options: ServerOptions): ServerPort {
   return port;
 }
 export function finishServer(port: ServerPort, props: Record<string, unknown>, options: ServerOptions, binding: string, tagName: string, artifacts: ArtifactVersions): {html: string; carrier: Carrier} {
+  checkServerAssociationInputs(props, options);
   const mode = options.mode ?? 'light';
   if (mode !== 'light' && mode !== 'shadow') throw new TypeError('Invalid server rendering mode');
   const instanceId = 'pui-' + globalThis.crypto.randomUUID();
@@ -392,6 +431,7 @@ export function finishServer(port: ServerPort, props: Record<string, unknown>, o
 }
 type ServerOwner = {serialize(): void; dispose(): void};
 export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPort, raw: Record<string, unknown>) => O, props: Record<string, unknown>, options: ServerOptions, binding: string, tag: string, consume: (result: {html: string; carrier: Carrier}, parent: ServerParent) => T, artifacts: ArtifactVersions): T {
+  checkServerAssociationInputs(props, options);
   options.signal?.throwIfAborted();
   encodeRaw(props); // No non-data inputs or accessor side effects enter generated setup.
   const port = createServerPort(options);
