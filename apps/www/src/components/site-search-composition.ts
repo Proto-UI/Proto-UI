@@ -200,6 +200,7 @@ export function createSiteSearchComposition(options: {
                     proto('command-content', {
                       props: style,
                       ref: 'list',
+                      surfaceStyle: family === 'shadcn' ? { maxHeight: '100%' } : undefined,
                       children: [
                         {
                           kind: 'box',

@@ -1365,10 +1365,15 @@ describe('bounded CI runtime shards (no browser or server)', () => {
       (step) => step.name === 'Install real CJK fallback for typography glyph evidence'
     );
     assert.equal(fontSteps.length, 1);
+    const save = browser.steps.find(
+      (step) => step.name === 'Save the verified browser font package'
+    );
+    assert.ok(save, 'A later browser failure must not prevent retention of verified font bytes');
     // The shared helper verifies the exact package, selected face and glyphs;
     // a cache never bypasses those checks or grants more browser execution time.
     assert.deepEqual(fontSteps[0], {
       name: 'Install real CJK fallback for typography glyph evidence',
+      id: 'prepare-browser-fonts',
       'timeout-minutes': 3,
       env: { FONT_EVIDENCE_DIR: '${{ runner.temp }}/runtime-ci/font-preparation' },
       run: 'bash apps/www/scripts/prepare-homepage-composition-fonts.sh',
@@ -1378,8 +1383,9 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     );
     assert.deepEqual(cache, {
       name: 'Restore the exact browser font package only',
+      id: 'browser-font-cache',
       'timeout-minutes': 1,
-      uses: 'actions/cache@v4',
+      uses: 'actions/cache/restore@v4',
       with: {
         path: '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb',
         key: 'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c',
@@ -1391,6 +1397,22 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     );
     assert.ok(run);
     assert.ok(browser.steps.indexOf(fontSteps[0]) < browser.steps.indexOf(run));
+    assert.ok(browser.steps.indexOf(run) < browser.steps.indexOf(save));
+    const upload = browser.steps.find(
+      (step) => step.name === 'Preserve source-bound shard selection, results and failure output'
+    );
+    assert.ok(upload && browser.steps.indexOf(upload) < browser.steps.indexOf(save));
+    assert.deepEqual(save, {
+      name: 'Save the verified browser font package',
+      if: "${{ !cancelled() && steps.prepare-browser-fonts.outcome == 'success' && steps.browser-font-cache.outputs.cache-hit != 'true' }}",
+      'timeout-minutes': 1,
+      'continue-on-error': true,
+      uses: 'actions/cache/save@v4',
+      with: {
+        path: cache.with.path,
+        key: '${{ steps.browser-font-cache.outputs.cache-primary-key }}',
+      },
+    });
     assert.equal(run.if, undefined);
     assert.equal(run['continue-on-error'], undefined);
     assert.match(run.run, /^set -euo pipefail$/m);

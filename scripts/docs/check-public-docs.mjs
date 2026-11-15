@@ -203,63 +203,6 @@ export async function checkLocalizedRoutes({ root, slugs, locales, fallbacks = [
   return { errors, sources };
 }
 
-function propertyName(node) {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node)) return node.text;
-  return undefined;
-}
-
-function objectStringProperty(node, name) {
-  for (const property of node.properties) {
-    if (!ts.isPropertyAssignment(property) || propertyName(property.name) !== name) continue;
-    if (ts.isStringLiteral(property.initializer)) return property.initializer.text;
-  }
-  return undefined;
-}
-
-export function extractOverviewEntries(source, sourcePath) {
-  const opening = source.indexOf('---');
-  const closing = source.indexOf('---', opening + 3);
-  if (opening !== 0 || closing === -1)
-    throw new Error(`${sourcePath}: expected an Astro frontmatter script.`);
-  const script = source.slice(opening + 3, closing);
-  const sourceFile = ts.createSourceFile(
-    sourcePath,
-    script,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS
-  );
-  let initializer;
-  for (const statement of sourceFile.statements) {
-    if (!ts.isVariableStatement(statement)) continue;
-    for (const declaration of statement.declarationList.declarations) {
-      if (ts.isIdentifier(declaration.name) && declaration.name.text === 'entriesByLibrary') {
-        initializer = declaration.initializer;
-      }
-    }
-  }
-  if (!initializer || !ts.isObjectLiteralExpression(initializer)) {
-    throw new Error(
-      `${sourcePath}: could not find the static entriesByLibrary overview inventory.`
-    );
-  }
-  const result = new Map();
-  for (const libraryProperty of initializer.properties) {
-    if (!ts.isPropertyAssignment(libraryProperty)) continue;
-    const library = propertyName(libraryProperty.name);
-    if (!library || !ts.isArrayLiteralExpression(libraryProperty.initializer)) continue;
-    const entries = [];
-    for (const element of libraryProperty.initializer.elements) {
-      if (!ts.isObjectLiteralExpression(element)) continue;
-      const id = objectStringProperty(element, 'id');
-      const href = objectStringProperty(element, 'href');
-      if (id) entries.push({ id, href });
-    }
-    result.set(library, entries);
-  }
-  return result;
-}
-
 function catalogIdFor(library, exportName) {
   const subpath = exportName.slice(2);
   const family = library.familyAliases?.[subpath] ?? subpath;

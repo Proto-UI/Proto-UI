@@ -208,6 +208,29 @@ implementations:
       - T-CONTROL-LABEL-0001-CASE-NATIVE
     notes:
       - Native candidate execution and revision-bound captures remain pending; no synthetic fixture is substituted.
+  - id: control-label-public-recipe-consumer
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-control-label.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-PAIR
+      - T-CONTROL-LABEL-0001-CASE-TARGETS
+    notes:
+      - The actual Base, Shadcn and Brutalist recipes render twice through WC to check independent naming/proposal ownership and retired-pair cleanup. Input is synthetic host-unit input; current-candidate execution remains pending.
+      - The fixture supplies the emitted relative/inline-flex root rules required by the real Rhea HitParticipation host. Both Switch views must acquire distinct live inset reservations; retiring the first must release only its reservation. The retained pre-stylesheet logs contain real principal-box rejections and are not passing evidence.
+  - id: control-label-family-consumer-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-control-label.browser.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-NATIVE
+      - T-CONTROL-LABEL-0001-CASE-TARGETS
+      - T-CONTROL-LABEL-0001-CASE-PROJECTIONS
+    notes:
+      - Twelve planned public-page journeys cover Base, Shadcn and Brutalist across WC, React, Vue and Vue 2 with real Checkbox, Switch, Radio Item, Input and Textarea targets. Read-only editors retain focus and native selection while rejecting editing; disabled naming, controlled direct/Label/keyboard proposals, copyable content and runtime remount captures remain separate from complete lifecycle and OS assistive-technology acceptance.
+      - Canonical browser-plan registration and parent-owned candidate execution are required; the fixture's source presence is not a passing result. Historical Base-target and failed native packets retain their original source and scope.
   - id: control-label-shadcn-radio-native
     kind: adapter-test
     status: planned
