@@ -1,4 +1,5 @@
 ---
+import HomepageGhostCard from '../Homepage/HomepageGhostCard.astro';
 interface Props {
   id?: string;
   class?: string;
@@ -42,30 +43,18 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   data-status-ready={copy.ready}
   data-status-error={copy.error}
 >
-  <div class="home-demo-previewer__backdrop" aria-hidden="true" inert>
-    {
-      ['left', 'right'].map((side) => (
-        <div class:list={['home-demo-previewer__rail', `home-demo-previewer__rail--${side}`]}>
-          {[0, 1, 2].map((index) => (
-            <svg
-              viewBox="0 0 288 248"
-              fill="none"
-              focusable="false"
-              class:list={{ 'home-demo-previewer__ghost--tall': index === 1 }}
-            >
-              <rect x="1" y="1" width="286" height="246" rx="22" stroke="currentColor" />
-              <g fill="currentColor" opacity="0.4">
-                <rect x="24" y="26" width={index === 1 ? 158 : 112} height="13" rx="6" />
-                <rect x="24" y="54" width="204" height="9" rx="4" />
-                <rect x="24" y="84" width="240" height={index === 0 ? 64 : 98} rx="10" />
-                <rect x="24" y="198" width="104" height="25" rx="12" />
-                <rect x="140" y="198" width="124" height="25" rx="12" />
-              </g>
-            </svg>
-          ))}
-        </div>
-      ))
-    }
+  <div class="home-demo-previewer__viewport" aria-hidden="true" inert>
+    <div class="home-demo-previewer__backdrop">
+      {
+        ['left', 'right'].map((side) => (
+          <div class:list={['home-demo-previewer__rail', `home-demo-previewer__rail--${side}`]}>
+            {[0, 1, 2].map((index) => (
+              <HomepageGhostCard tall={index === 1} />
+            ))}
+          </div>
+        ))
+      }
+    </div>
   </div>
   <noscript>
     <p data-home-demo-nojs>
@@ -87,6 +76,9 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
 <style>
   /* App-owned layout only. Text and Interactive surfaces belong to the selected PUI library. */
   .home-demo-previewer {
+    --homepage-gallery-column-gap: 2rem;
+    --homepage-gallery-row-gap: 1.25rem;
+    --homepage-gallery-wide-columns: 5;
     position: relative;
     width: min(100%, 104rem);
     margin: 0 auto;
@@ -95,42 +87,62 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   /* Decorative continuation is clipped independently, never the live controls
      or their focus outlines. These are deliberately inert artwork, not demos. */
-  .home-demo-previewer__backdrop {
+  .home-demo-previewer__viewport {
+    --homepage-gallery-paint-gutter: 1rem;
+    --homepage-gallery-viewport-outset: max(0px, calc((100vw - 100% - 2rem) / 2));
     display: none;
     position: absolute;
-    inset-block: 0;
-    left: 50%;
-    width: calc(100vw - 2rem);
-    transform: translateX(-50%);
+    inset-block-start: calc(-1 * var(--homepage-gallery-paint-gutter));
+    inset-inline: 0;
+    height: 100%;
+    box-sizing: content-box;
+    /* Padding expands the clipping box to the viewport; equal negative margins
+       preserve its content width as the live stage's exact rail reference. */
+    padding-inline: var(--homepage-gallery-viewport-outset);
+    margin-inline: calc(-1 * var(--homepage-gallery-viewport-outset));
+    padding-block-start: var(--homepage-gallery-paint-gutter);
     overflow: clip;
+    /* Preserve viewport clearance when enlarged text leaves no outward room. */
+    clip-path: inset(0 max(0px, calc((100% - 100vw + 2rem) / 2)) 0);
     pointer-events: none;
     user-select: none;
+  }
+  .home-demo-previewer__backdrop {
+    position: relative;
+    width: 100%;
+    height: 100%;
     color: var(--color-muted-foreground);
     opacity: 0.18;
-    mask-image: linear-gradient(to bottom, transparent, black 5%, black 65%, transparent);
   }
   .home-demo-previewer__rail {
+    /* The padded mask admits outside family paint. Equal negative margins
+       retain card tracks; fade stops remain at 65%/100% of their content height. */
+    mask-image: linear-gradient(
+      to bottom,
+      black,
+      black calc(65% - var(--homepage-gallery-paint-gutter) * 0.3),
+      transparent calc(100% - var(--homepage-gallery-paint-gutter))
+    );
+    box-sizing: content-box;
+    padding: var(--homepage-gallery-paint-gutter);
+    margin: calc(-1 * var(--homepage-gallery-paint-gutter));
     position: absolute;
-    top: 1.5rem;
+    top: 0;
     display: grid;
-    gap: 2rem;
-    width: 18rem;
+    gap: var(--homepage-gallery-row-gap);
+    width: calc(
+      (100% - (var(--homepage-gallery-wide-columns) - 1) * var(--homepage-gallery-column-gap)) /
+        var(--homepage-gallery-wide-columns)
+    );
   }
   .home-demo-previewer__rail--left {
-    right: calc(50% + 54rem);
+    inset-inline-end: calc(100% + var(--homepage-gallery-column-gap));
   }
   .home-demo-previewer__rail--right {
-    left: calc(50% + 54rem);
-  }
-  .home-demo-previewer__rail svg {
-    width: 100%;
-    height: auto;
-  }
-  .home-demo-previewer__rail .home-demo-previewer__ghost--tall {
-    height: 21rem;
+    inset-inline-start: calc(100% + var(--homepage-gallery-column-gap));
   }
   @media (min-width: 116rem) {
-    .home-demo-previewer__backdrop {
+    .home-demo-previewer__viewport {
       display: block;
     }
   }
@@ -225,8 +237,6 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   }
   .home-demo-previewer :global(.home-gallery) {
     /* App-owned rhythm only. Component paint, radii and elevation stay in Proto UI. */
-    --homepage-gallery-column-gap: 2rem;
-    --homepage-gallery-row-gap: 1.25rem;
     --homepage-gallery-compact-row-gap: 0.875rem;
     position: relative;
     columns: 18rem;
@@ -332,7 +342,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   @media (min-width: 108rem) {
     .home-demo-previewer :global(.home-gallery) {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(var(--homepage-gallery-wide-columns), minmax(0, 1fr));
       align-items: start;
     }
     .home-demo-previewer :global(.home-gallery__column) {
