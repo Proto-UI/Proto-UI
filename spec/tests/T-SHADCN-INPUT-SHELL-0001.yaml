@@ -34,7 +34,7 @@ cases:
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-CATALOG
     title: Actual public export has real draft owners without a policy exemption
     covers: [P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY, P-SHADCN-INPUT-SHELL-CONTROL-BOUNDARY]
-    expectation: The real manifest entry resolves to the bounded draft Root identity, its separate Control owns the correct source and inherits Base Input, and both retain reciprocal P/T mappings. Removing the Root restores the exact missing-family diagnostic; unrelated missing exports still fail. At a release that includes this family, missing overview and sidebar still fail.
+    expectation: The real manifest entry resolves to the bounded draft Root identity, its separate Control owns the correct source and inherits Base Input, and both retain reciprocal P/T mappings. Removing the Root restores the exact missing-family diagnostic; unrelated missing exports still fail. Availability in the governed stable release or current workspace requires a primary sidebar route and both localized detail pages. Direct navigation coverage does not require the retired library-overview component.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-BOUNDARIES
     title: Complete passive and direct profile-boundary coverage
     covers:
@@ -107,8 +107,8 @@ implementations:
     consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-CATALOG]
     exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
     notes:
-      - New focused metadata regression is unexecuted; it does not replace schema/graph validation or review public API semantics.
-      - The test:public-docs glob includes this file, but CI runs check:public-docs first under fail-fast. Unrelated catalog drift prevents reaching this test while that gate fails; collection is not execution. No checker, workflow or step order is changed to bypass the failure.
+      - Parent job bg_20 executed this regression in the three-file public-docs selection with 20 passing tests under Node24.21.0. The source was the uncommitted docs candidate on98ac19762f08351684d801db8006ca7c71fb6f30; this is focused execution evidence, not committed-head CI or public API conformance. Catalog implementation remains planned pending review.
+      - The test:public-docs glob includes this file. Parent job bg_20 also passed check:public-docs with302 bilingual primary routes and4library inventories. CI still runs that gate first under fail-fast; collection or an earlier local result does not establish a later workflow pass. No workflow or step order is changed to bypass failure.
   - id: direct-boundary-conformance
     kind: adapter-test
     status: missing
@@ -138,6 +138,9 @@ sources:
   - path: .github/workflows/shadcn-command-style.yml
   - path: scripts/prototypes/shadcn-command-evidence-oracle.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Follow direct bilingual navigation for stable and workspace-available families after library-overview retirement; record bounded parent execution without lifecycle promotion or complete conformance claims.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Mapped bounded existing evidence separately from missing direct-boundary and inherited-editor conformance; no fresh passing or stable claim.

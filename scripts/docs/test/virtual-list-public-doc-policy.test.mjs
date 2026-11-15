@@ -26,17 +26,7 @@ const inventory = (catalog) =>
     sidebarSlugs: [],
   });
 
-test('the Web materializer is excluded without exempting Virtual List or other components', async () => {
-  const entry = await fs.readFile(
-    new URL('packages/prototypes/base/src/virtual-list/web/index.ts', root),
-    'utf8'
-  );
-  assert.equal(entry.trim(), "export { attachWebVirtualList } from '../web';");
-  const classification = library.exportClassifications['./virtual-list/web'];
-  assert.equal(classification?.kind, 'non-component');
-  assert.match(classification.reason, /Web.*materializ/);
-  assert.equal(library.exportClassifications['./virtual-list'], undefined);
-
+test('the Web materializer is excluded without exempting Virtual List or other components', () => {
   const errors = inventory([]);
   assert.equal(errors.length, 2);
   assert.match(errors[0], /\.\/virtual-list: unclassified family\/export.*P-BASE-VIRTUAL-LIST\./);

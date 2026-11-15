@@ -4,7 +4,7 @@ title: Bootstrap control projections coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Radio Group selection/duplicate/disabled, Field relations/labels and readOnly/disabled restore.
 cases:
   - id: T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001-CASE-RADIO
@@ -25,6 +25,9 @@ implementations:
     status: planned
     path: packages/prototypes/bootstrap-2-3-2/test/draft-control-projections.test.ts
     required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001-CASE-RADIO
+      - T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001-CASE-FIELD
     exercises:
       - P-BOOTSTRAP-2-3-2-RADIO-GROUP
       - P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM
