@@ -187,6 +187,104 @@ async function paint(locator: Locator) {
   });
 }
 
+async function settledPaint(locator: Locator) {
+  // Keep the normal 1000 ms assertion budget. A focus event can resolve before
+  // its 200 ms ring transition; observe the native animation endpoint instead
+  // of sampling its interpolated spread or making a screenshot finish it.
+  await expect
+    .poll(() =>
+      locator.evaluate((element) =>
+        element
+          .getAnimations()
+          .some((animation) => animation.pending || animation.playState === 'running')
+      )
+    )
+    .toBe(false);
+  return paint(locator);
+}
+
+function createCalendarCloseProbe(element: Element, key: string) {
+  const document = element.ownerDocument;
+  const installedAt = performance.now();
+  let keyAt: number | null = null;
+  let closedAt: number | null = null;
+  const events: Array<{
+    at: number;
+    kind: 'keydown' | 'expanded';
+    previous?: string | null;
+    expanded: string | null;
+  }> = [];
+  const initialExpanded = element.getAttribute('aria-expanded');
+  const onKey = (event: KeyboardEvent) => {
+    if (!event.isTrusted || event.key !== key || keyAt !== null) return;
+    keyAt = performance.now();
+    events.push({ at: keyAt, kind: 'keydown', expanded: element.getAttribute('aria-expanded') });
+  };
+  const observer = new MutationObserver((records) => {
+    const at = performance.now();
+    for (let index = 0; index < records.length; index++) {
+      const previous = records[index].oldValue;
+      const expanded =
+        index + 1 < records.length
+          ? records[index + 1].oldValue
+          : element.getAttribute('aria-expanded');
+      events.push({ at, kind: 'expanded', previous, expanded });
+      if (keyAt !== null && closedAt === null && previous === 'true' && expanded === 'false')
+        closedAt = at;
+    }
+  });
+  observer.observe(element, {
+    attributes: true,
+    attributeOldValue: true,
+    attributeFilter: ['aria-expanded'],
+  });
+  document.addEventListener('keydown', onKey, true);
+  return {
+    stop() {
+      observer.disconnect();
+      document.removeEventListener('keydown', onKey, true);
+      return {
+        clock: 'page performance.now; trusted keydown and MutationObserver delivery',
+        installedAt,
+        observedAt: performance.now(),
+        keyAt,
+        closedAt,
+        closeAfterKeyMs: keyAt !== null && closedAt !== null ? closedAt - keyAt : null,
+        initialExpanded,
+        expanded: element.getAttribute('aria-expanded'),
+        events,
+      };
+    },
+  };
+}
+
+async function closeCalendarPopup(
+  { page, previewer, capture }: Journey,
+  trigger: Locator,
+  key: 'Escape' | 'Enter',
+  state: string
+) {
+  const probe = await trigger.evaluateHandle(createCalendarCloseProbe, key);
+  let failure: unknown;
+  try {
+    await page.keyboard.press(key);
+    // Retain the original 1000 ms assertion and its starting point. The page
+    // clock below diagnoses input/commit latency without granting extra time.
+    await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+  } catch (error) {
+    failure = error;
+  }
+  try {
+    const observation = await probe.evaluate((current) => current.stop());
+    await capture(state, { key, assertionPassed: !failure, close: observation }, previewer);
+  } catch (error) {
+    failure ??= error;
+  } finally {
+    await probe.dispose().catch((error) => (failure ??= error));
+  }
+  if (failure) throw failure;
+}
+
 export type PopoverFrame = {
   contentId: string | null;
   openSequence: number;
@@ -602,7 +700,10 @@ async function selectRealRuntime(
 ) {
   const tab = await runtimeTab(previewer, runtime);
   await tab.waitFor({ state: 'visible' });
-  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
+  // Even the initially selected runtime is a real user selection. Clicking its
+  // tab gives the following Tab journey the same native starting point across
+  // hosts instead of starting WC at the document's many navigation links.
+  await tab.click();
   await waitForRealRuntime(previewer, runtime, readySelector, count);
   await expect
     .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'))
@@ -681,13 +782,13 @@ async function runCase(testCase: Case) {
     if (crop)
       await crop.screenshot({
         path: path.join(output, file),
-        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
+        animations: ['popover', 'calendar'].includes(testCase.component) ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     else
       await page.screenshot({
         path: path.join(output, file),
-        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
+        animations: ['popover', 'calendar'].includes(testCase.component) ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     let capturedObservation = observation;
@@ -987,13 +1088,15 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
     });
     expect(await options.count()).toBe(12);
     expect(await options.allTextContents()).toContain('10月');
-    await page.keyboard.press('Escape');
-    await expect.poll(() => month.getAttribute('aria-expanded')).toBe('false');
+    await closeCalendarPopup(journey, month, 'Escape', 'month-escape-close');
   } else if (state === 'year-scroll') {
     await year.click();
     const options = page.getByRole('option');
     await options.first().waitFor({ state: 'attached' });
     const current = page.getByRole('option', { name: '2026', exact: true });
+    // Attached options may still be waiting for the public Focus owner to
+    // admit initial entry. Observe that real focus before testing its reveal.
+    await expect.poll(() => hasFocus(current)).toBe(true);
     const scroll = () =>
       current.evaluate((element) => {
         let ancestor = element.parentElement;
@@ -1044,9 +1147,9 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
       exact: true,
     });
     await expect.poll(() => hasFocus(target)).toBe(true);
-    const focusOnly = await paint(target);
+    const focusOnly = await settledPaint(target);
     if (state === 'selected-focused') await target.click();
-    const actual = await paint(target);
+    const actual = await settledPaint(target);
     await capture(
       state,
       {
@@ -1170,8 +1273,7 @@ async function calendarCaptionJourney(journey: Journey, runtime: RuntimeId) {
     await page.keyboard.press(key);
     const option = listbox.getByRole('option', { name: next, exact: true });
     await expect.poll(() => hasFocus(option)).toBe(true);
-    await page.keyboard.press('Enter');
-    await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+    await closeCalendarPopup(journey, trigger, 'Enter', `caption-${next}-enter-close`);
     await expect.poll(() => hasFocus(trigger)).toBe(true);
     await expect.poll(() => trigger.textContent()).toBe(next);
     await caption(`caption-selected-${next}`);

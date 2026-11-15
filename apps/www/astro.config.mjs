@@ -168,6 +168,7 @@ const whitepaperRedirects = {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.proto-ui.com',
+  devToolbar: { enabled: process.env.PROTO_UI_BROWSER_TEST !== '1' },
   build: { inlineStylesheets: 'never' },
   redirects: {
     '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',

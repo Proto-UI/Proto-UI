@@ -472,7 +472,9 @@ async function spawnServer(
       // images. Without this flag every browser suite fails before it can
       // collect any evidence, which silently removes the matrix from CI.
       shell: process.platform === 'win32',
-      env: process.env,
+      // Astro's development toolbar is not part of the tested website. Its
+      // fixed mobile overlay otherwise intercepts real Select option clicks.
+      env: { ...process.env, PROTO_UI_BROWSER_TEST: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     }
   );
@@ -567,7 +569,8 @@ export async function launchBrowser(): Promise<Browser> {
   return chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
-    args: ['--disable-dev-shm-usage', '--no-sandbox'],
+    chromiumSandbox: true,
+    args: ['--disable-dev-shm-usage'],
   });
 }
 

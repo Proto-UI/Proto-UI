@@ -73,7 +73,7 @@ function mockedCase(
     screenshotFailure?: boolean;
     navigationFailure?: Error;
     diagnosticFailure?: boolean;
-    component?: 'form' | 'popover';
+    component?: 'form' | 'popover' | 'calendar';
     journey?: (capture: HarnessCapture) => Promise<void>;
     screenshotEffect?: (options: HarnessScreenshot) => void;
     imageBytes?: (file: string) => Buffer;
@@ -342,6 +342,157 @@ describe('Finf representative evidence harness, no native browser', () => {
     expect(journey).toContain('element.isConnected)).toBe(true)');
     expect(journey).not.toContain('data-projection-generation');
     expect(journey).not.toContain('dispatchEvent');
+  });
+
+  it.each([true, false])(
+    'selects the actual runtime tab before keyboard navigation even when selected=%s',
+    async (alreadySelected) => {
+      let selected = alreadySelected;
+      let focused = false;
+      const tab = {
+        waitFor: vi.fn(),
+        getAttribute: vi.fn(async () => String(selected)),
+        click: vi.fn(async () => {
+          selected = true;
+          focused = true;
+        }),
+      };
+      const ready = vi.fn();
+      const select = execute(`${statements(['selectRealRuntime'])}; selectRealRuntime;`, {
+        runtimeTab: async () => tab,
+        waitForRealRuntime: ready,
+        expect,
+      });
+      await select({}, {}, 'wc', '[role="gridcell"]', 42);
+      expect(tab.click).toHaveBeenCalledOnce();
+      expect(focused).toBe(true);
+      expect(ready).toHaveBeenCalledOnce();
+    }
+  );
+
+  it('samples Calendar paint only after native pending and running transitions finish', async () => {
+    let frame = 0;
+    const observations = [
+      [{ pending: true, playState: 'running' }],
+      [{ pending: false, playState: 'running' }],
+      [{ pending: false, playState: 'finished' }],
+    ];
+    const element = { getAnimations: () => observations[Math.min(frame, 2)] };
+    const locator = {
+      evaluate: async (read: (element: unknown) => unknown) => {
+        const result = read(element);
+        frame++;
+        return result;
+      },
+    };
+    const paint = vi.fn(async () => ({ shadow: '0px 0px 0px 3px', frame }));
+    const settledPaint = execute(`${statements(['settledPaint'])}; settledPaint;`, {
+      expect,
+      paint,
+    });
+    await expect(settledPaint(locator)).resolves.toEqual({
+      shadow: '0px 0px 0px 3px',
+      frame: 3,
+    });
+    expect(paint).toHaveBeenCalledOnce();
+  });
+
+  it('keeps a nonsettling Calendar transition red without capturing an invented endpoint', async () => {
+    const locator = {
+      evaluate: async (read: (element: unknown) => unknown) =>
+        read({ getAnimations: () => [{ pending: false, playState: 'running' }] }),
+    };
+    const paint = vi.fn();
+    const settledPaint = execute(`${statements(['settledPaint'])}; settledPaint;`, {
+      expect,
+      paint,
+    });
+    await expect(settledPaint(locator)).rejects.toThrow();
+    expect(paint).not.toHaveBeenCalled();
+  });
+
+  it('captures Calendar native transitions without screenshot-driven completion', async () => {
+    const fixture = mockedCase({ component: 'calendar' });
+    await fixture.run();
+    for (const [options] of fixture.page.screenshot.mock.calls)
+      expect(options.animations).toBe('allow');
+  });
+
+  it.each([true, false])(
+    'records Calendar key-to-close time only for trusted input (trusted=%s)',
+    (isTrusted) => {
+      let now = 10;
+      let expanded = 'true';
+      let onKey!: (event: { key: string; isTrusted: boolean }) => void;
+      let onMutation!: (records: Array<{ oldValue: string }>) => void;
+      const removeEventListener = vi.fn();
+      const disconnect = vi.fn();
+      const element = {
+        ownerDocument: {
+          addEventListener: (_type: string, listener: typeof onKey) => (onKey = listener),
+          removeEventListener,
+        },
+        getAttribute: () => expanded,
+      };
+      const createProbe = execute(
+        `${statements(['createCalendarCloseProbe'])}; createCalendarCloseProbe;`,
+        {
+          performance: { now: () => now },
+          MutationObserver: class {
+            constructor(listener: typeof onMutation) {
+              onMutation = listener;
+            }
+            observe() {}
+            disconnect = disconnect;
+          },
+        }
+      );
+      const probe = createProbe(element, 'Enter');
+      now = 20;
+      onKey({ key: 'ArrowDown', isTrusted: true });
+      onKey({ key: 'Enter', isTrusted });
+      now = 37;
+      expanded = 'false';
+      onMutation([{ oldValue: 'true' }]);
+      now = 50;
+      const observation = probe.stop();
+      expect(observation).toMatchObject({
+        installedAt: 10,
+        keyAt: isTrusted ? 20 : null,
+        closedAt: isTrusted ? 37 : null,
+        closeAfterKeyMs: isTrusted ? 17 : null,
+        initialExpanded: 'true',
+        expanded: 'false',
+      });
+      expect(observation.events.at(-1)).toMatchObject({
+        at: 37,
+        kind: 'expanded',
+        previous: 'true',
+        expanded: 'false',
+      });
+      expect(disconnect).toHaveBeenCalledOnce();
+      expect(removeEventListener).toHaveBeenCalledWith('keydown', onKey, true);
+    }
+  );
+
+  it('keeps the original Calendar close failure when timing capture also fails', async () => {
+    const failure = new Error('native close assertion failed');
+    const probe = { evaluate: vi.fn(async () => ({})), dispose: vi.fn(async () => {}) };
+    const trigger = { evaluateHandle: vi.fn(async () => probe) };
+    const journey = {
+      page: { keyboard: { press: vi.fn(async () => Promise.reject(failure)) } },
+      previewer: {},
+      capture: vi.fn(async () => {
+        throw new Error('screenshot unavailable');
+      }),
+    };
+    const close = execute(`${statements(['closeCalendarPopup'])}; closeCalendarPopup;`, {
+      createCalendarCloseProbe: stub,
+      expect,
+    });
+    await expect(close(journey, trigger, 'Escape', 'close-timing')).rejects.toBe(failure);
+    expect(journey.capture).toHaveBeenCalledOnce();
+    expect(probe.dispose).toHaveBeenCalledOnce();
   });
 
   it('keeps Calendar retained capacity distinct from five visible weeks and preserves actual Close', () => {
