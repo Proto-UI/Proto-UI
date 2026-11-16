@@ -2542,7 +2542,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
                   pixels(style.borderBottomWidth) -
                   Math.max(
                     0,
-                    node.offsetHeight -
+                    (node as HTMLElement).offsetHeight -
                       node.clientHeight -
                       pixels(style.borderTopWidth) -
                       pixels(style.borderBottomWidth)
