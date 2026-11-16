@@ -1629,18 +1629,25 @@ function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(),
   return safe;
 }
 
-function inspectedHelperReferences(helper, scope) {
+function decorationHelperBinding(helper) {
+  if (ts.isFunctionDeclaration(helper)) return helper.name ? helper : undefined;
+  if (!ts.isArrowFunction(helper) && !ts.isFunctionExpression(helper)) return undefined;
+  const expression = outerStyleExpression(helper);
+  return isConstStyleBinding(expression.parent, expression) ? expression.parent : undefined;
+}
+
+function inspectedHelperReferences(helper, binding, statement, scope) {
   const cache = scope.decorationHelperUses;
   const cached = cache?.get(helper);
   if (cached) return cached;
   const source = helper.getSourceFile();
-  const exported = helper.modifiers?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword);
+  const exported = statement.modifiers?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword);
   const files = exported ? scope.decorationSourceFiles : [source];
   const helperOrigin = styleHandleOrigin(helper);
   if (!files?.some((file) => file.fileName === source.fileName)) return [];
   const references = [];
   for (const file of files) {
-    const names = new Set(file.fileName === source.fileName ? [helper.name.text] : []);
+    const names = new Set(file.fileName === source.fileName ? [binding.name.text] : []);
     const namespaces = new Set();
     if (exported) {
       for (const declaration of file.statements) {
@@ -1700,9 +1707,9 @@ function inspectedHelperReferences(helper, scope) {
 }
 
 function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new Set()) {
+  const binding = decorationHelperBinding(helper);
   if (
-    !ts.isFunctionDeclaration(helper) ||
-    !helper.name ||
+    !binding ||
     !helper.body ||
     helper.asteriskToken ||
     helper.modifiers?.some((item) => item.kind === ts.SyntaxKind.AsyncKeyword) ||
@@ -1713,7 +1720,8 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
   if (active.has(origin)) return false;
   active.add(origin);
   try {
-    const references = inspectedHelperReferences(helper, scope);
+    const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+    const references = inspectedHelperReferences(helper, binding, statement, scope);
     const receivesDefinition = parameterName(helper) === receiver;
     const callers = new Map();
     for (const reference of references) {
@@ -1730,7 +1738,7 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
       if (
         receivesDefinition
           ? !provided || !ts.isIdentifier(provided)
-          : helper.parent !== owner.body ||
+          : statement.parent !== owner.body ||
             helper.parameters.some(
               (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver
             )
@@ -1778,8 +1786,9 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   let declarationOwner = callback;
   let definition = receiver;
   if (
-    !isCanonicalPrototypeSetup(callback, false) &&
-    (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))
+    (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) &&
+    ts.isPropertyAssignment(callback.parent) &&
+    getPropertyName(callback.parent.name) === 'intent'
   ) {
     if (
       parameterName(callback) !== receiver ||
@@ -1788,9 +1797,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
       receiver === 'tw'
     )
       return false;
-    const intent = callback.parent;
-    if (!ts.isPropertyAssignment(intent) || getPropertyName(intent.name) !== 'intent') return false;
-    const config = intent.parent;
+    const config = callback.parent.parent;
     const rule = config.parent;
     if (
       !ts.isObjectLiteralExpression(config) ||

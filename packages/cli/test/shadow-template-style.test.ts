@@ -369,6 +369,53 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it.each(['(definition) =>', 'function (definition)'])(
+    'follows an imported synchronous helper declared as %s',
+    async (prefix) => {
+      const { artifact } = await generate(
+        `
+        import { definePrototype } from '@proto.ui/core';
+        import { add as prepare } from './paint';
+        const delegate = definition => prepare(definition);
+        definePrototype({ name: 'function-valued-decoration-helper', setup(def) {
+          const target = delegate(def);
+          return r => r.decoration(target);
+        }});
+      `,
+        {
+          'paint.ts': `
+          import { tw } from '@proto.ui/core';
+          export const add = ${prefix} {
+            const target = definition.feedback.style.declareDecoration();
+            definition.feedback.style.to(target).use(tw('p-[10%]'));
+            return target;
+          };
+        `,
+        }
+      );
+      expect(artifact.cssText).toContain('padding: 10%;');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+    }
+  );
+
+  it('retains preflight when a function-valued helper escapes setup', async () => {
+    await expect(
+      generate(`
+        import { definePrototype, tw } from '@proto.ui/core';
+        const add = definition => {
+          const target = definition.feedback.style.declareDecoration();
+          definition.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        };
+        definePrototype({ name: 'escaping-decoration-helper', setup(def) {
+          const target = add(def);
+          register(add);
+          return r => r.decoration(target);
+        }});
+      `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it.each(['(def) =>', 'function (def)'])(
     'accepts the canonical function-valued setup form %s',
     async (prefix) => {
