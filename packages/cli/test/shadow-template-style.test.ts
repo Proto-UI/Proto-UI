@@ -494,6 +494,22 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it.each([
+    '(def.feedback.style.declareDecoration())',
+    '(def.feedback.style.declareDecoration() as ReturnType<typeof def.feedback.style.declareDecoration>)',
+  ])('recognizes the declared decoration through %s', async (initializer) => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'wrapped-decoration-target', setup(def) {
+        const target = ${initializer};
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
   it('keeps both conditional handle alternatives on the targeted decoration', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';

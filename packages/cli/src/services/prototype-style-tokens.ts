@@ -1604,7 +1604,7 @@ function isOperationInCallback(callback, call) {
 function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper) {
   let safe = true;
   function check(node) {
-    if (!safe || node === helper) return;
+    if (!safe || node === helper || ts.isTypeNode(node)) return;
     if (ts.isIdentifier(node)) {
       if (node.text === receiver && !allowedArguments.has(node)) {
         let access = node;
@@ -1876,13 +1876,15 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   const binding = scopeDeclaring(target.text, scope)?.bindings.get(
     target.text
   )?.decorationTargetDeclaration;
+  const initializer = binding?.initializer && unwrapTransparent(binding.initializer);
   if (
     !binding ||
     !binding.initializer ||
     !isConstStyleBinding(binding, binding.initializer) ||
     ts.findAncestor(binding, ts.isFunctionLike) !== declarationOwner ||
-    !ts.isCallExpression(binding.initializer) ||
-    feedbackStyleReceiver(binding.initializer.expression, 'declareDecoration') !== definition
+    !initializer ||
+    !ts.isCallExpression(initializer) ||
+    feedbackStyleReceiver(initializer.expression, 'declareDecoration') !== definition
   )
     return false;
 
