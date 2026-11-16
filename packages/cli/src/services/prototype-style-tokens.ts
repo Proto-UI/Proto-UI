@@ -1607,12 +1607,26 @@ function isOperationInCallback(callback, call) {
   );
 }
 
-function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper) {
+function isDirectHelperReceiverArgument(node, summary) {
+  const call = node.parent;
+  if (!summary || !ts.isCallExpression(call) || !ts.isIdentifier(call.expression)) return false;
+  const index = call.arguments.indexOf(node);
+  if (index < 0 || call.arguments.slice(0, index).some(ts.isSpreadElement)) return false;
+  const helper = summary.resolveSourceFunction(call.expression, call.getSourceFile());
+  const receiver = helper && parameterName(helper, index);
+  return !!receiver && receiverUsesAreDirect(helper, receiver);
+}
+
+function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper, summary) {
   let safe = true;
   function check(node) {
     if (!safe || node === helper || ts.isTypeNode(node)) return;
     if (ts.isIdentifier(node)) {
-      if (node.text === receiver && !allowedArguments.has(node)) {
+      if (
+        node.text === receiver &&
+        !allowedArguments.has(node) &&
+        !isDirectHelperReceiverArgument(node, summary)
+      ) {
         let access = node;
         while (
           (ts.isPropertyAccessExpression(access.parent) ||
@@ -1861,7 +1875,16 @@ function hasVerifiedDecorationHelperCalls(
     return (
       callers.size > 0 &&
       [...callers].every(([owner, facts]) => {
-        if (!receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper)) return false;
+        if (
+          !receiverUsesAreDirect(
+            owner,
+            facts.definition,
+            facts.arguments,
+            helper,
+            scope.sourceSummary
+          )
+        )
+          return false;
         return facts.targets.every((target) => {
           // A parameter is still unresolved even when it belongs to this caller.
           const reachedOrigin = target?.owner === owner && !target.parameter;
@@ -2044,7 +2067,13 @@ function isOwnedDecorationStyleArgument(argument, scope) {
 
   // A sibling statement may rebind the Rule intent or setup receiver. Prove
   // each access independently of the number of operations recorded.
-  return receiverUsesAreDirect(declarationOwner, definition);
+  return receiverUsesAreDirect(
+    declarationOwner,
+    definition,
+    undefined,
+    undefined,
+    scope.sourceSummary
+  );
 }
 
 function isCanonicalStyleHandle(node, scope) {

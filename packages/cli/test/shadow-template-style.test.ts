@@ -555,6 +555,37 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it.each([
+    ['paint(def, target);', false],
+    ['paint(def, target); escape(def);', true],
+  ])('checks Rule spec and helper receiver use together: %s', async (calls, escaped) => {
+    const result = generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function paint(receiver, leaf) {
+        receiver.feedback.style.to(leaf).use(tw('p-[10%]'));
+      }
+      function escape(receiver) { consume(receiver); }
+      definePrototype({ name: 'setup-rule-and-helper', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        ${calls}
+        const active = def.state.bool('active', false);
+        const spec = {
+          when: w => w.state(active).eq(true),
+          intent(i) { i.feedback.style.to(target).use(tw('p-[10%]')); },
+        };
+        def.rule(spec);
+        return r => r.decoration(target);
+      }});
+    `);
+    if (escaped) {
+      await expect(result).rejects.toThrow(/verified length recipe/);
+      return;
+    }
+    const { artifact } = await result;
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
   it('follows inline spread arrays into the targeted rest argument', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
