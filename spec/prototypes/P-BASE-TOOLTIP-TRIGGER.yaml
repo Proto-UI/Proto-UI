@@ -8,6 +8,12 @@ statement:
   zh-CN: Tooltip Trigger 拥有自身 hover、focus 与 disabled facts，但不拥有 open 或 activation。它不得自行投射 button role 或 press action，并必须保留应用 surface 的 accessible name 与 activation。Tooltip open 时，Trigger 通过 additive describedBy relation 引用 Content identity；关闭时只移除 Tooltip 自身拥有的 IDREF，不得覆盖宿主既有 relation。
   en: Tooltip Trigger owns its hover, focus, and disabled facts but owns neither open state nor activation. It must not independently project a button role or press action and must preserve the accessible name and activation of the application surface. While Tooltip is open, Trigger references Content identity through an additive describedBy relation; on close it removes only the IDREF owned by Tooltip without replacing an existing host relation.
 criteria:
+  - id: P-BASE-TOOLTIP-TRIGGER-NESTED-FOCUS-OWNER
+    text:
+      zh-CN: '独立 Trigger 包裹一个已经可聚焦的后代时，Trigger 不得成为额外的顺序 tab 停靠点；它必须把顺序导航参与让给该后代，并通过冒泡的 focus 事件继续发布 focus 与 blur intent，同时保留自身 hover、disabled 与 relation ownership。同一节点上的 useTooltipTrigger 组合仍是控件自身 accessible name 与 describedby 的唯一路径。'
+      en: 'When a standalone Trigger wraps an already-focusable descendant, the Trigger must not become an additional sequential tab stop; it must defer sequential navigation participation to that descendant and keep publishing focus and blur intent through the bubbled focus events, while keeping its own hover, disabled and relation ownership. The same-node useTooltipTrigger composition remains the only path for the control own accessible name and describedby.'
+    dependsOn:
+      contracts: [C-AS-FOCUSABLE-0001, C-A11Y-0001]
   - id: P-BASE-TOOLTIP-TRIGGER-SAME-NODE
     text:
       en: The draft useTooltipTrigger authored hook adds Tooltip participation to one already-focusable command subject. It claims the existing trigger anatomy role, observes the subject's existing focus and pointer intent, and appends the same owned description relation. It declares no outward exposes, activation, accessible name or role and does not configure, disable or replace the command's focus owner or disabled defaults. Tooltip Root disabled withdraws Tooltip intent without disabling the command; the command's own disabled Prop also suppresses Tooltip intent. The application must supply the command/focus behavior on this same subject rather than nesting two focusable triggers. Standalone Trigger and asTooltipTrigger retain their original exposes and focus ownership.
@@ -44,6 +50,9 @@ dependsOn:
   contracts: [C-AS-FOCUSABLE-0001, C-STATE-INTERACTION-0001, C-A11Y-0001]
 verifies: { tests: [T-BASE-TOOLTIP-0001] }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: 'Catalog the standalone Trigger nested focus owner: a wrapped focusable descendant keeps the sequential tab stop while the Trigger still publishes focus intent.'
   - version: 0.3.0-alpha.1
     change: revised
     summary: Add bounded same-subject Tooltip participation for an existing command through useTooltipTrigger, preserving standalone focus and expose compatibility.

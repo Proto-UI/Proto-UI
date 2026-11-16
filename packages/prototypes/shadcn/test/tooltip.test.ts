@@ -5,6 +5,10 @@ import {
   renderProtoShadowStyleTokenCss,
 } from '../../../cli/src/services/proto-style-css';
 import { styleContains } from '../../test-utils/style';
+import { definePrototype } from '@proto.ui/core';
+import { useTooltipTrigger } from '@proto.ui/prototypes-base/tooltip';
+import shadcnButton from '../src/button';
+import type { ShadcnButtonExposes, ShadcnButtonProps } from '../src/button/types';
 import * as ShadcnPackage from '../src';
 import * as tooltipFamily from '../src/tooltip';
 import type {
@@ -305,5 +309,95 @@ describe('prototypes/shadcn: tooltip', () => {
     content.remove();
     await advance(0);
     expect(trigger.hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  it('composes one focus target and owned description on a shadcn Button', async () => {
+    vi.useFakeTimers();
+    const TooltipButton = AdaptToWebComponent(
+      definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
+        name: 'test-shadcn-tooltip-button',
+        setup(def) {
+          const render = shadcnButton.setup(def);
+          useTooltipTrigger();
+          return render;
+        },
+      })
+    );
+    const root = new TooltipRootElement();
+    const button = new TooltipButton();
+    const content = new TooltipContentElement();
+    setElementProps(root, { openDelay: 0, closeDelay: 0 });
+    button.textContent = 'Save';
+    content.append(document.createTextNode('Save this document'));
+    root.append(button, content);
+    document.body.append(root);
+    await flush();
+
+    expect(button.getAttribute('role')).toBe('button');
+    expect(root.querySelectorAll('[tabindex="0"]')).toHaveLength(1);
+
+    button.focus();
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+    expect(button.getAttribute('aria-describedby')).toBe(content.id);
+
+    button.blur();
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+    expect(button.hasAttribute('aria-describedby')).toBe(false);
+
+    button.dispatchEvent(new Event('pointerenter'));
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+    expect(button.getAttribute('aria-describedby')).toBe(content.id);
+
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+    );
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+  });
+
+  it('does not add a second tab stop when the standalone Trigger wraps a focusable control', async () => {
+    vi.useFakeTimers();
+    const root = new TooltipRootElement();
+    const trigger = new TooltipTriggerElement();
+    const content = new TooltipContentElement();
+    const button = document.createElement('button');
+    button.textContent = 'Save';
+    trigger.appendChild(button);
+    setElementProps(root, { openDelay: 0, closeDelay: 0 });
+    root.append(trigger, content);
+    document.body.append(root);
+    await flush();
+
+    // The trigger defers sequential navigation to the wrapped focusable child.
+    expect(trigger.getAttribute('tabindex')).not.toBe('0');
+    // The only sequential tab stop is the native button.
+    button.focus();
+    expect(document.activeElement).toBe(button);
+
+    // The child's focus opens the tooltip through the bubbled focusin path.
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+
+    button.blur();
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+
+    trigger.dispatchEvent(new Event('pointerenter'));
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+
+    trigger.dispatchEvent(new Event('pointerleave'));
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+  });
+
+  it('keeps the standalone Trigger focusable when no focusable descendant exists', async () => {
+    const { trigger } = appendTooltip(document.body, { defaultOpen: true });
+    await flush();
+    expect(trigger.getAttribute('tabindex')).toBe('0');
+    expect(trigger.getAttribute('role')).toBeNull();
   });
 });

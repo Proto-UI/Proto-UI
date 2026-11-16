@@ -42,6 +42,10 @@ cases:
         P-BASE-TOOLTIP-CONTENT-DEFERRED-ARROW,
       ]
     expectation: tooltip-content-wires-existing-overlay-transition-and-positioning-capabilities
+  - id: T-BASE-TOOLTIP-0001-CASE-NESTED-FOCUS-OWNER
+    title: a standalone Trigger wrapping a focusable control keeps one tab stop and still publishes focus intent
+    covers: [P-BASE-TOOLTIP-TRIGGER-NESTED-FOCUS-OWNER]
+    expectation: standalone-trigger-wrapping-a-focusable-control-keeps-one-tab-stop-and-still-publishes-focus-intent
 implementations:
   - id: tooltip-button-composition
     kind: runtime-test
@@ -72,6 +76,7 @@ implementations:
     path: packages/prototypes/base/test/tooltip.test.ts
     required: true
     consumesCases:
+      - T-BASE-TOOLTIP-0001-CASE-NESTED-FOCUS-OWNER
       - T-BASE-TOOLTIP-0001-CASE-DELAYS
       - T-BASE-TOOLTIP-0001-CASE-CONTROLLED-ESCAPE
       - T-BASE-TOOLTIP-0001-CASE-A11Y

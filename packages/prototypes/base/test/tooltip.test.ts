@@ -245,4 +245,38 @@ describe('prototypes/base: tooltip group', () => {
     expect(first.root.getExposes().open.get()).toBe(true);
     expect(requests.at(-1)).toMatchObject({ open: false, reason: 'group.other-open' });
   });
+
+  it('keeps one sequential tab stop when a standalone Trigger wraps a focusable control', async () => {
+    // T-BASE-TOOLTIP-0001-CASE-NESTED-FOCUS-OWNER
+    vi.useFakeTimers();
+    const root = new TooltipRootElement();
+    const trigger = new TooltipTriggerElement();
+    const content = new TooltipContentElement();
+    const button = document.createElement('button');
+    button.textContent = 'Save';
+    trigger.appendChild(button);
+    setElementProps(root, { openDelay: 0, closeDelay: 0 });
+    root.append(trigger, content);
+    document.body.append(root);
+    await advance(0);
+
+    // The wrapped control keeps the sequential tab stop; the Trigger does not add one.
+    expect(trigger.getAttribute('tabindex')).not.toBe('0');
+    button.focus();
+    expect(document.activeElement).toBe(button);
+
+    // The descendant focus still publishes Tooltip intent.
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+    button.blur();
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+
+    trigger.dispatchEvent(new Event('pointerenter'));
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(true);
+    trigger.dispatchEvent(new Event('pointerleave'));
+    await advance(0);
+    expect(root.getExposes().open.get()).toBe(false);
+  });
 });

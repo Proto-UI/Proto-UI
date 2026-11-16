@@ -19,6 +19,9 @@ import type {
   TooltipTriggerProps,
 } from './types';
 
+const FOCUSABLE_DESCENDANT_SELECTOR =
+  'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
+
 function setupTooltipIntent(
   def: Omit<DefHandle<TooltipTriggerProps>, 'expose'>,
   ownsFocus = false
@@ -86,6 +89,31 @@ function setupTooltipIntent(
       event.next ? 'trigger.focus' : 'trigger.blur'
     );
   });
+
+  // A standalone trigger wrapping an already-focusable control must not add a
+  // second tab stop, and the wrapped control's focus must still open the
+  // tooltip. focus/focusout do not bubble, so the bubbled focusin/focusout
+  // host events observe the descendant focus, while navigation participation
+  // is deferred to the control that already owns focus.
+  if (ownsFocus) {
+    def.event.on('host:focusin', (run) => {
+      updateTooltipInteraction(
+        run,
+        { triggerFocused: !disabled.get() },
+        'trigger.focus'
+      );
+    });
+    def.event.on('host:focusout', (run) => {
+      updateTooltipInteraction(run, { triggerFocused: false }, 'trigger.blur');
+    });
+    def.lifecycle.onMounted((run) => {
+      const el = run.host?.get();
+      if (!(el instanceof HTMLElement)) return;
+      if (el.querySelector(FOCUSABLE_DESCENDANT_SELECTOR)) {
+        focusable.setNavParticipation('none');
+      }
+    });
+  }
   return { disabled, hovered, focused, focusVisible, focusable };
 }
 
