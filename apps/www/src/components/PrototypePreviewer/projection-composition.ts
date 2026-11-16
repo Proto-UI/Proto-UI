@@ -1037,6 +1037,13 @@ export function createProjectionComposition(
           if (locked || !eventGateOpen) return;
           const control = options.controls[id] as ProjectionControlConfig<string>;
           if (!control.options.some((option) => option.value === value && !option.disabled)) return;
+          const open = context.api.getExposes(rootRef)?.open as { get(): boolean } | undefined;
+          if (open?.get() === false) {
+            // A closed Select has no Item close to finish. Enter the switch in
+            // this stack so the old generation's portals are locked at once.
+            control.onValueChange(value);
+            return;
+          }
           // Item finishes its public close-on-select and Trigger handback after
           // valueChange returns. Replacing or disabling its owner inside that
           // signal would cancel the close request and lose its focus origin.
