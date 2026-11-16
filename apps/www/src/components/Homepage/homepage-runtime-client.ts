@@ -431,6 +431,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
   let pendingRuntimePreference: Readonly<{ runtime: RuntimeId }> | undefined;
   let activeCandidates: MaterializedProjectionCandidate[] = [];
   let activeTypography: MaterializedProjectionCandidate | undefined;
+  // A control switch request is applied after the control's own close
+  // handback, so the outgoing generation's open portals are sealed in the
+  // request's own turn. The page transaction owns every participant, so one
+  // request seals the candidates this control does not own.
+  const sealOutgoingPortals = (): void => {
+    for (const candidate of activeCandidates) candidate.sealExternalPortals?.();
+  };
   let typographyEpoch = 0;
   let failedTypographyRevision: number | undefined;
   let typographyRefresh: Promise<void> | undefined;
@@ -523,6 +530,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           componentId: 'button',
           controls: controls(family),
           controlIds: group.runtime ? ['runtime', 'family'] : [],
+          sealOutgoingPortals,
           content: {
             demo: createHomepageContent(
               group,
@@ -545,6 +553,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
             componentId: component,
             controls: controls(family),
             controlIds: [],
+            sealOutgoingPortals,
             content: demo.createContent(
               family,
               runtime,
@@ -886,6 +895,11 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     if (detail?.source === root || !isRuntimeId(detail?.adapter) || destroyed) return;
     pendingRuntimePreference = undefined;
     if (detail.adapter === desiredRuntime) return;
+    // The runtime switch request is applied asynchronously, so the outgoing
+    // generation's open portals are sealed in this event's own turn. A popup
+    // that stays interactive until the deferred request lands is a reachable
+    // stale surface of the generation that is leaving.
+    sealOutgoingPortals();
     desiredRuntime = detail.adapter;
     observe(
       controller.request(
