@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const readyMarker = 'PROTO_UI_WC_NATIVE_ISOLATION_READY';
+export const WC_NATIVE_BROWSER_SUITE =
+  'packages/compiler/test/web-component-native.browser.test.ts';
 const probe = `set -eu
 test "$(id -u)" -ne 0
 ip link set lo up
@@ -199,7 +201,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
           [
             'node_modules/vitest/vitest.mjs',
             'run',
-            'packages/compiler/test/web-component-native.browser.test.ts',
+            WC_NATIVE_BROWSER_SUITE,
             '--maxWorkers=1',
             '--minWorkers=1',
             '--reporter=default',
