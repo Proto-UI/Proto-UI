@@ -1,0 +1,29 @@
+id: T-BASE-TOGGLE-GROUP-0001
+type: test
+title: Base Toggle Group item contract tests
+status: draft
+since: 0.3.0-alpha.2
+summary: Contract test coverage for the Base Toggle Group item protocol, including the governed accessible-name route and its content-derived default.
+cases:
+  - id: T-BASE-TOGGLE-GROUP-0001-CASE-A11Y-LABEL
+    title: a non-empty a11yLabel names the Toggle Group item and an absent label keeps the content-derived name
+    covers: [P-BASE-TOGGLE-GROUP-ITEM-PROP-A11Y-LABEL]
+    expectation: explicit-a11y-label-names-the-toggle-group-item-and-an-absent-label-keeps-the-content-derived-name
+implementations:
+  - id: prototypes-base-toggle-group-item-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/selection-activate.test.ts
+    required: true
+    consumesCases: [T-BASE-TOGGLE-GROUP-0001-CASE-A11Y-LABEL]
+    exercises: [P-BASE-TOGGLE-GROUP]
+    notes:
+      - Covers the item accessible-name route through the direct base Toggle Group item protocol.
+      - Module results do not establish rendered host, assistive-technology or stable-admission evidence.
+exercises:
+  prototypes:
+    - P-BASE-TOGGLE-GROUP
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Cataloged the Base Toggle Group item accessible-name route with executable module coverage.

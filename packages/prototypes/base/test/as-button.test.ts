@@ -108,7 +108,7 @@ describe('prototypes/base: asButton', () => {
     expect(exposes.onClick).toBeUndefined();
     expect(ctx.getA11ySnapshot()).toMatchObject({
       role: 'button',
-      name: { kind: 'content' },
+      name: { kind: 'text', value: '' },
       states: { disabled: false },
       actions: { activate: { event: 'click' } },
     });
@@ -224,5 +224,44 @@ describe('prototypes/base: asButton', () => {
 
     expect(asHookCtx.emitted).toEqual(['click']);
     expect(directCtx.emitted).toEqual(['click']);
+  });
+
+  it('uses the explicit a11yLabel as the accessible name when provided', () => {
+    // T-BASE-BUTTON-0001-CASE-A11Y-LABEL
+    const P: Prototype<{ a11yLabel?: string }> = definePrototype({
+      name: 'x-base-button-a11y-label-explicit',
+      setup() {
+        asButton();
+        return (r) => r.el('button');
+      },
+    });
+
+    const ctx = createHost({ a11yLabel: 'Delete' });
+    executeWithHost(P as any, ctx.host as any);
+
+    expect(ctx.getA11ySnapshot()).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: 'Delete' },
+    });
+  });
+
+  it('falls back to content-derived naming when a11yLabel is absent', () => {
+    // T-BASE-BUTTON-0001-CASE-A11Y-LABEL
+    const P: Prototype<{ a11yLabel?: string }> = definePrototype({
+      name: 'x-base-button-a11y-label-content-fallback',
+      setup() {
+        asButton();
+        return (r) => r.el('button', 'Save');
+      },
+    });
+
+    const ctx = createHost({});
+    executeWithHost(P as any, ctx.host as any);
+
+    // No aria-label is projected; the browser derives the name from content.
+    expect(ctx.getA11ySnapshot()).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: '' },
+    });
   });
 });

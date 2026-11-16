@@ -1123,19 +1123,6 @@
       ]
     },
     {
-      "file": "packages/prototypes/base/src/toggle-group/item.proto.ts",
-      "entries": [
-        {
-          "kind": "asHook",
-          "name": "as-toggle-group-item"
-        },
-        {
-          "kind": "prototype",
-          "name": "base-toggle-group-item"
-        }
-      ]
-    },
-    {
       "file": "packages/prototypes/base/src/toolbar/button.proto.ts",
       "entries": [
         {

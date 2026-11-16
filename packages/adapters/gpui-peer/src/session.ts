@@ -333,10 +333,15 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     }
     const name = snapshot.name
       ? snapshot.name.kind === 'text'
-        ? ({
-            kind: 'text',
-            value: typeof snapshot.name.value === 'string' ? snapshot.name.value : '',
-          } as const)
+        ? (() => {
+            const text = typeof snapshot.name.value === 'string' ? snapshot.name.value : '';
+            // An empty explicit name means no authored name. The wire keeps its
+            // content-derived form so an unnamed control is still named from
+            // its content by the host, exactly as before the explicit route.
+            return text
+              ? ({ kind: 'text', value: text } as const)
+              : ({ kind: 'content' } as const);
+          })()
         : ({ kind: 'content' } as const)
       : undefined;
     return {

@@ -125,7 +125,7 @@ describe('prototypes/brutalist: toggle', () => {
     expect(context.getExposes().active.get()).toBe(false);
     expect(context.a11ySnapshots.at(-1)).toMatchObject({
       role: 'button',
-      name: { kind: 'content' },
+      name: { kind: 'text', value: '' },
       states: { pressed: false, disabled: false },
       actions: { activate: { event: 'activeChange' } },
     });

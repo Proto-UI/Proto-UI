@@ -304,3 +304,37 @@ it('Calendar unavailable and hidden capacity remain inert through the same click
   expect(f.value()).toBe(test.initial);
   expect(f.requests).toEqual([]);
 });
+
+// T-BASE-TOGGLE-GROUP-0001-CASE-A11Y-LABEL
+it('ToggleGroup Item uses the explicit a11yLabel as its accessible name when provided', async () => {
+  const h = portableHarness();
+  const root = h.make(toggleGroupRoot, null, {});
+  await root.session.mount();
+  const child = h.make(toggleGroupItem, root.target, { value: 'a', a11yLabel: 'Align left' });
+  await child.session.mount();
+  try {
+    expect(child.semantics).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: 'Align left' },
+    });
+  } finally {
+    await h.dispose();
+  }
+});
+
+// T-BASE-TOGGLE-GROUP-0001-CASE-A11Y-LABEL
+it('ToggleGroup Item falls back to content-derived naming when a11yLabel is absent', async () => {
+  const h = portableHarness();
+  const root = h.make(toggleGroupRoot, null, {});
+  await root.session.mount();
+  const child = h.make(toggleGroupItem, root.target, { value: 'a' });
+  await child.session.mount();
+  try {
+    expect(child.semantics).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: '' },
+    });
+  } finally {
+    await h.dispose();
+  }
+});

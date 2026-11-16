@@ -70,6 +70,10 @@ cases:
       - P-BASE-TOGGLE-NO-FORM-INTEGRATION
       - P-BASE-TOGGLE-NO-VISUAL-VARIANT-CORE
     expectation: toggle-a11y-and-deferred-surfaces-remain-explicit
+  - id: T-BASE-TOGGLE-0001-CASE-A11Y-LABEL
+    title: a non-empty a11yLabel names the Toggle and an absent label keeps the content-derived name
+    covers: [P-BASE-TOGGLE-PROP-A11Y-LABEL]
+    expectation: explicit-a11y-label-names-the-toggle-and-an-absent-label-keeps-the-content-derived-name
 implementations:
   - id: prototypes-base-toggle-transient-cleanup
     kind: module-test
@@ -93,6 +97,7 @@ implementations:
       - T-BASE-TOGGLE-0001-CASE-DISABLED-GATING
       - T-BASE-TOGGLE-0001-CASE-INTERACTION-FOCUS-KEYBOARD
       - T-BASE-TOGGLE-0001-CASE-A11Y-AND-DEFERRED-SURFACES
+      - T-BASE-TOGGLE-0001-CASE-A11Y-LABEL
     exercises:
       - P-BASE-TOGGLE
     notes:

@@ -57,6 +57,10 @@ The root package export remains available for compatibility. Compound anatomy pa
 - `src/tooltip/`
 - `src/transition/`
 
+## Accessible Naming
+
+Button, Toggle, Toggle Group Item, and Toggle Group Root accept an optional `a11yLabel: string` prop (default `''`). When a non-empty value is provided, that text becomes the control's accessible name. When absent or empty, the control falls back to its existing content-derived naming. This lets an icon-only control be named by its author without requiring hidden text. The prop does not change role, tabindex, activation, or owned ARIA state semantics.
+
 ## Behavior Authoring Constraints
 
 - Behavior-layer helpers in `src/behaviors/` own interaction semantics, but they should depend on public hook/runtime surfaces instead of internal ports.

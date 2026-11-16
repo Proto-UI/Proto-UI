@@ -32,8 +32,9 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
   def.props.define({
     value: { type: 'string', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    a11yLabel: { type: 'string', empty: 'fallback' },
   });
-  def.props.setDefaults({ value: '', disabled: false });
+  def.props.setDefaults({ value: '', disabled: false, a11yLabel: '' });
   asTrigger();
   const focus = asFocusable<ToggleGroupItemProps>();
   focus.configure({ disabled: false });
@@ -43,9 +44,11 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
   def.expose.state('disabled', disabled);
   def.expose.state('focused', focus.focused);
   def.expose.state('focusVisible', focus.focusVisible);
+  const a11yLabel = def.state.string('a11yLabel', '');
   const a11y = asAccessible();
   a11y.role('button');
-  a11y.nameFromContent();
+  // P-BASE-TOGGLE-GROUP-ITEM-PROP-A11Y-LABEL: explicit name wins; empty falls back to content-derived.
+  a11y.name(a11yLabel);
   a11y.state('pressed', active);
   a11y.action('activate');
   a11y.state('disabled', disabled);
@@ -71,6 +74,7 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
     const off = ctx.disabled || !!run.props.get().disabled;
     disabled.set(off, 'reason: toggle group item disabled');
     active.set(ctx.value.includes(run.props.get().value), 'reason: toggle group item selected');
+    a11yLabel.set(run.props.get().a11yLabel ?? '', 'reason: toggle group item accessible name sync');
     focus.setDisabled(off);
     focus.setNavParticipation(!off && ctx.current === id ? 'auto' : 'none');
     focus.setRovingStatus({ active: ctx.current === id, selected: active.get() });

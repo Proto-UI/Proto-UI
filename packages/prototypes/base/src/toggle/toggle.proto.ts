@@ -17,10 +17,12 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
     active: { type: 'boolean', empty: 'fallback' },
     defaultActive: { type: 'boolean', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    a11yLabel: { type: 'string', empty: 'fallback' },
   });
   def.props.setDefaults({
     defaultActive: false,
     disabled: false,
+    a11yLabel: '',
   });
 
   // P-BASE-TOGGLE-ACTIVE-EXPOSE, P-BASE-TOGGLE-ACTIVE-SCOPED-NAME
@@ -32,6 +34,8 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   const hovered = def.state.bool('hovered', false);
   // P-BASE-TOGGLE-PRESS-LIFECYCLE
   const pressed = def.state.bool('pressed', false);
+  // P-BASE-TOGGLE-ACCESSIBLE-NAME, P-BASE-TOGGLE-PROP-A11Y-LABEL
+  const a11yLabel = def.state.string('a11yLabel', '');
   // P-BASE-TOGGLE-FOCUSABLE, P-BASE-TOGGLE-DISABLED-REJECT-FOCUS
   const focusable = asFocusable<ToggleProps>();
   focusable.configure({ disabled: false });
@@ -56,7 +60,8 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   // P-BASE-TOGGLE-ACCESSIBLE-ROLE
   accessible.role('button');
   // P-BASE-TOGGLE-ACCESSIBLE-NAME
-  accessible.nameFromContent();
+  // P-BASE-TOGGLE-PROP-A11Y-LABEL: explicit name wins; empty falls back to content-derived.
+  accessible.name(a11yLabel);
   // P-BASE-TOGGLE-A11Y-PRESSED
   accessible.state('pressed', active);
   accessible.state('disabled', disabled);
@@ -107,6 +112,7 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
       'reason: toggle initialize active'
     );
     syncDisabled(!!run.props.get().disabled);
+    a11yLabel.set(run.props.get().a11yLabel ?? '', 'reason: toggle accessible name sync');
   });
 
   // P-BASE-TOGGLE-CONTROLLED-ACTIVE
@@ -117,8 +123,9 @@ function setupToggle(def: DefHandle<ToggleProps, ToggleExposes>): void {
   });
 
   // P-BASE-TOGGLE-DISABLED-EXPOSE, P-BASE-TOGGLE-DISABLED-CLEAR-TRANSIENT
-  def.props.watch(['disabled'], (_run, next) => {
+  def.props.watch(['disabled', 'a11yLabel'], (_run, next) => {
     syncDisabled(!!next.disabled);
+    a11yLabel.set(next.a11yLabel ?? '', 'reason: toggle accessible name sync');
   });
 
   // P-BASE-TOGGLE-KEYBOARD-ACTIVATION, P-BASE-TOGGLE-KEYBOARD-SPACE-PREVENT-DEFAULT

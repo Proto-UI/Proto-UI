@@ -49,6 +49,7 @@ Config v1 supports one enabled style preset. `proto-ui add` rejects a Brutalist 
 | `color`    | `main` \| `mint` \| `lavender` \| `coral` \| `sky` | `main` (solid only) |
 | `size`     | `default` \| `sm` \| `lg` \| `icon`                | `default`           |
 | `disabled` | `boolean`                                          | `false`             |
+| `a11yLabel` | `string`                                           | `''`                |
 
 Every fill co-selects its foreground. Solid accents keep black text in both Light and Dark. There is no `outline` variant: structural 2px borders are part of the shared grammar.
 

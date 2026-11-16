@@ -72,6 +72,10 @@ cases:
       - P-BASE-BUTTON-FORM-EXTENSION
       - P-BASE-BUTTON-A11Y-ENHANCEMENT
     expectation: deferred-button-surfaces-remain-explicit
+  - id: T-BASE-BUTTON-0001-CASE-A11Y-LABEL
+    title: a non-empty a11yLabel names the Button and an absent label keeps the content-derived name
+    covers: [P-BASE-BUTTON-PROP-A11Y-LABEL]
+    expectation: explicit-a11y-label-names-the-button-and-an-absent-label-keeps-the-content-derived-name
 implementations:
   - id: prototypes-base-button-selection
     kind: module-test
@@ -105,6 +109,7 @@ implementations:
       - T-BASE-BUTTON-0001-CASE-KEYBOARD-SPACE
       - T-BASE-BUTTON-0001-CASE-AUTHORING-ENTRIES
       - T-BASE-BUTTON-0001-CASE-DEFERRED-SURFACES
+      - T-BASE-BUTTON-0001-CASE-A11Y-LABEL
     exercises:
       - P-BASE-BUTTON
     notes:

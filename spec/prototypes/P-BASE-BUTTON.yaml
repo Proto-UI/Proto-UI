@@ -90,6 +90,15 @@ criteria:
         - C-STATE-INTERACTION-0001
         - C-EXPOSE-STATE-0001
         - C-A11Y-0001
+  - id: P-BASE-BUTTON-PROP-A11Y-LABEL
+    text:
+      zh-CN: 'Button 必须接受 host-neutral `a11yLabel` props input，默认值为空字符串；提供非空 `a11yLabel` 时它就是 Button 的 accessible name，未提供或为空时 accessible name 仍由 authored content 推导。独立 Label 关联是另一条通道，本 Prop 不取代它。'
+      en: 'Button must accept a host-neutral `a11yLabel` props input whose default is the empty string; a provided non-empty `a11yLabel` is the Button accessible name, and when it is absent or empty the accessible name remains derived from the authored content. The independent Label association is a separate channel and is not replaced by this Prop.'
+    dependsOn:
+      contracts:
+        - C-PROPS-0001
+        - C-PROPS-0003
+        - C-A11Y-0001
   - id: P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
     text:
       zh-CN: 当 `disabled` 为 true 时，Button 不得完成 activation，也不得发出 `click` signal。
@@ -351,6 +360,9 @@ verifies:
   tests:
     - T-BASE-BUTTON-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Catalog the governed host-neutral a11yLabel naming Prop; the content-derived accessible name remains the default and the independent Label association stays a separate channel.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.

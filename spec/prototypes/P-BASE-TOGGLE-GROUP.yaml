@@ -32,6 +32,20 @@ criteria:
   - id: P-BASE-TOGGLE-GROUP-NOTIFICATION-ORDER
     text:
       en: Accepted notifications deferred within one finite Root publication chain retain their queue order. A valueChange callback may enter another accepted request, but its notification joins the same queue behind already queued work. Each delivery rechecks its originating owner and view epoch. This is a local proposal-notification rule, not a global Context order, latest-value-only policy or guarantee for author-created infinite reentry.
+  - id: P-BASE-TOGGLE-GROUP-ITEM-PROP-A11Y-LABEL
+    text:
+      zh-CN: 'Toggle Group item 必须接受 host-neutral `a11yLabel` props input，默认值为空字符串；提供非空 `a11yLabel` 时它就是该 item 的 accessible name，未提供或为空时 accessible name 仍由 authored content 推导。Toggle Group Root 仍是选择与命名 fallback 的 owner。'
+      en: 'A Toggle Group item must accept a host-neutral `a11yLabel` props input whose default is the empty string; a provided non-empty `a11yLabel` is that item accessible name, and when it is absent or empty the accessible name remains derived from the authored content. The Toggle Group Root remains the owner of selection and of the naming fallback.'
+    dependsOn:
+      contracts:
+        - C-PROPS-0001
+        - C-PROPS-0003
+        - C-A11Y-0001
+    references:
+      prototypes:
+        - id: P-BASE-BUTTON
+          anchors:
+            - P-BASE-BUTTON-PROP-A11Y-LABEL
 openQuestions:
   - id: P-BASE-TOGGLE-GROUP-Q-ADMISSION
     question:
@@ -40,6 +54,7 @@ openQuestions:
       - activation:P-BASE-TOGGLE-GROUP
 sources:
   - path: packages/prototypes/base/src/toggle-group/root.proto.ts
+  - path: packages/prototypes/base/src/toggle-group/item.proto.ts
   - path: packages/prototypes/base/src/toggle-group/types.ts
   - path: packages/prototypes/shadcn/src/toggle-group/root.proto.ts
   - path: packages/prototypes/brutalist/src/toggle-group/root.proto.ts
@@ -58,9 +73,13 @@ dependsOn:
     - C-CONTEXT-0010
 verifies:
   tests:
+    - T-BASE-TOGGLE-GROUP-0001
     - T-TOGGLE-GROUP-ORIENTATION-0001
     - T-TOGGLE-GROUP-REQUEST-RETIREMENT-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Catalog the governed host-neutral a11yLabel naming Prop for the Toggle Group item; the Root keeps selection and naming-fallback ownership.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.

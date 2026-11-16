@@ -110,7 +110,7 @@ describe('prototypes/base: toggle', () => {
     expect(exposes.click).toBeUndefined();
     expect(ctx.getA11ySnapshot()).toMatchObject({
       role: 'button',
-      name: { kind: 'content' },
+      name: { kind: 'text', value: '' },
       states: { pressed: true, disabled: false },
       actions: { activate: { event: 'activeChange' } },
     });
@@ -214,5 +214,27 @@ describe('prototypes/base: toggle', () => {
       })
     );
     expect(preventDefaultCalls).toEqual(['space']);
+  });
+
+  it('uses the explicit a11yLabel as the accessible name when provided', () => {
+    // T-BASE-TOGGLE-0001-CASE-A11Y-LABEL
+    const ctx = createHost({ a11yLabel: 'Bold' });
+    executeWithHost(toggle as any, ctx.host as any);
+
+    expect(ctx.getA11ySnapshot()).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: 'Bold' },
+    });
+  });
+
+  it('falls back to content-derived naming when a11yLabel is absent', () => {
+    // T-BASE-TOGGLE-0001-CASE-A11Y-LABEL
+    const ctx = createHost({});
+    executeWithHost(toggle as any, ctx.host as any);
+
+    expect(ctx.getA11ySnapshot()).toMatchObject({
+      role: 'button',
+      name: { kind: 'text', value: '' },
+    });
   });
 });

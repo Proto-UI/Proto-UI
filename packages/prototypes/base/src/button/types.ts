@@ -1,10 +1,12 @@
 import type { ObservedStateHandle } from '@proto.ui/core';
 import { ExposeEvent, ExposeMethod, ExposeState, FocusRequestOptions, State } from '@proto.ui/core';
 
-/** Independent accessible naming uses Adapter InstanceAssociations.controlLabel, outside portable Props. */
+/** Explicit accessible naming uses the `a11yLabel` prop; Adapter InstanceAssociations.controlLabel remains independent. */
 export interface ButtonProps {
   // P-BASE-BUTTON-PROP-DISABLED
   disabled?: boolean;
+  // P-BASE-BUTTON-PROP-A11Y-LABEL
+  a11yLabel?: string;
   // P-BASE-BUTTON-PROP-NO-EVENT-CALLBACK: click is exposed as a signal, not accepted as props.
 }
 

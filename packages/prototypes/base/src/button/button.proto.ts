@@ -17,15 +17,19 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   // P-BASE-BUTTON-PROP-DISABLED
   def.props.define({
     disabled: { type: 'boolean', empty: 'fallback' },
+    a11yLabel: { type: 'string', empty: 'fallback' },
   });
   def.props.setDefaults({
     disabled: false,
+    a11yLabel: '',
   });
 
   // P-BASE-BUTTON-DISABLED-EXPOSE
   const disabled = def.state.bool('disabled', false);
   def.expose.state('disabled', disabled);
   accessible.state('disabled', disabled);
+  // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-PROP-A11Y-LABEL
+  const a11yLabel = def.state.string('a11yLabel', '');
 
   // P-BASE-BUTTON-POINTER-HOVER
   const hovered = def.state.bool('hovered', false);
@@ -72,9 +76,11 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   };
   def.lifecycle.onCreated((run) => {
     syncDisabled(run.props.get().disabled);
+    a11yLabel.set(run.props.get().a11yLabel ?? '', 'reason: button accessible name sync');
   });
-  def.props.watch(['disabled'], (_run, next) => {
+  def.props.watch(['disabled', 'a11yLabel'], (_run, next) => {
     syncDisabled(next.disabled);
+    a11yLabel.set(next.a11yLabel ?? '', 'reason: button accessible name sync');
   });
 
   // P-BASE-BUTTON-CLICK-SIGNAL, P-BASE-BUTTON-CLICK-PROTOCOL-NAME
@@ -86,7 +92,8 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
   accessible.role('button');
 
   // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-CONTENT-LABEL-SOURCE
-  accessible.nameFromContent();
+  // P-BASE-BUTTON-PROP-A11Y-LABEL: explicit name wins; empty falls back to content-derived.
+  accessible.name(a11yLabel);
 
   const activate = (run: RunHandle<ButtonProps>, isCurrent: () => boolean = () => true) => {
     if (disabled.get() || !isCurrent()) return;
@@ -148,10 +155,7 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
     activate(run);
   });
 
-  /*
-   * P-BASE-BUTTON-PROP-LABEL-DEFERRED: independent naming uses InstanceAssociations.controlLabel.
-   * TODO(P-BASE-BUTTON-A11Y-ENHANCEMENT): practice optional a11y enhancements through the future a11y syntax.
-   */
+  // P-BASE-BUTTON-PROP-LABEL-DEFERRED: independent naming uses InstanceAssociations.controlLabel.
 }
 
 /*
