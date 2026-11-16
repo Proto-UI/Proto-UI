@@ -4,6 +4,7 @@ import type {
   DemoNode,
   DemoKeyedChild,
   DemoPublicInstance,
+  DemoChildrenCommit,
 } from './PrototypePreviewer/demo-types';
 import type { SiteSearchSession } from './site-search-session';
 
@@ -122,23 +123,28 @@ export function createSiteSearchComposition(options: {
       },
     ],
   };
+  const keyboardHint: DemoNode = {
+    kind: 'box',
+    tag: 'div',
+    ref: 'keyboard-hint',
+    // Hints may wrap at enlarged text sizes. They share the outer scrollport
+    // with status/actions so the fixed dismissal cannot consume the result view.
+    className:
+      family === 'shadcn'
+        ? 'flex shrink-0 min-w-0 items-center gap-2 p-2 text-xs text-muted-foreground'
+        : 'flex shrink-0 min-w-0 items-center gap-2 p-2',
+    dynamicChildren: { prototypeIds: [] },
+    children: [],
+  };
   const footer: DemoNode = {
     kind: 'box',
     ref: 'dismissal',
     tag: 'div',
     className:
       family === 'shadcn'
-        ? 'flex min-h-11 shrink-0 min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/50 px-4 text-xs text-muted-foreground'
+        ? 'flex min-h-11 shrink-0 min-w-0 items-center justify-end border-t border-border bg-muted/50 px-4 text-xs text-muted-foreground'
         : 'flex shrink-0 min-w-0 items-center justify-end p-2',
     children: [
-      {
-        kind: 'box',
-        tag: 'div',
-        ref: 'keyboard-hint',
-        className: 'flex min-w-0 items-center gap-2',
-        dynamicChildren: { prototypeIds: [] },
-        children: [],
-      },
       proto('dialog-close', {
         ref: 'close',
         surfaceStyle: {
@@ -196,19 +202,22 @@ export function createSiteSearchComposition(options: {
                   tag: 'div',
                   ref: 'scroll-body',
                   // Error/loading text and actions may wrap at enlarged text sizes.
-                  // This middle region contains status/actions overflow; the family list
-                  // retains its own scrolling limit. Dismissal remains outside both.
+                  // This middle region contains status/actions overflow. Cap the
+                  // list at its viewport instead of shrinking it behind a wrapped
+                  // status block; dismissal stays outside this outer scrollport.
                   className:
                     family === 'shadcn'
-                      ? 'min-h-0 min-w-0 flex-1 basis-80 overflow-y-auto px-2 pb-2'
-                      : 'min-h-0 min-w-0 flex-1 overflow-y-auto',
+                      ? 'flex flex-col min-h-0 min-w-0 flex-1 basis-80 overflow-y-auto px-2 pb-2'
+                      : 'flex flex-col min-h-0 min-w-0 flex-1 overflow-y-auto px-2 pb-2',
+                  // Side and bottom gutters expose the outer scrollport to both
+                  // wheel input and touch gestures while the inner list scrolls.
                   // Preferred menu list height yields to the bounded Dialog on
                   // short/enlarged viewports; it is not a mandatory clipping min.
                   children: [
                     proto('command-content', {
                       props: style,
                       ref: 'list',
-                      surfaceStyle: family === 'shadcn' ? { maxHeight: '100%' } : undefined,
+                      surfaceStyle: { flex: '0 0 auto', minHeight: '0', maxHeight: '100%' },
                       children: [
                         {
                           kind: 'box',
@@ -227,6 +236,7 @@ export function createSiteSearchComposition(options: {
                       ],
                     }),
                     statusAndActions,
+                    keyboardHint,
                   ],
                 },
                 footer,
@@ -264,8 +274,114 @@ export function createSiteSearchComposition(options: {
       type HintRequest = { target: HTMLElement; visible: boolean };
       let committedHint: HintRequest | undefined;
       let pendingHint: HintRequest | undefined;
-      let binding: ReturnType<typeof bindInputShellControl> | undefined;
+      type InputBinding = {
+        shell: DemoPublicInstance;
+        control: DemoPublicInstance;
+        binding?: ReturnType<typeof bindInputShellControl>;
+        retired: boolean;
+      };
+      let inputBinding: InputBinding | undefined;
       const current = () => live && options.isCurrent();
+      let dialogProjection: { owner: DemoPublicInstance | undefined; open: boolean } | undefined;
+      const setDialogOpen = (open: boolean) => {
+        const owner = api.getPublicInstance?.('dialog');
+        if (owner && dialogProjection?.owner === owner && dialogProjection.open === open) return;
+        // Reserve before the synchronous public write, which may publish a new
+        // instance or a newer controlled open/close request reentrantly.
+        const request = { owner, open };
+        dialogProjection = request;
+        try {
+          api.setProps('dialog', { open });
+        } catch (error) {
+          if (dialogProjection === request) dialogProjection = undefined;
+          throw error;
+        }
+        if (
+          dialogProjection === request &&
+          (!live || !owner || api.getPublicInstance?.('dialog') !== owner)
+        )
+          dialogProjection = undefined;
+      };
+      type AuthorSlot = 'results' | 'actions';
+      type Publication = {
+        command: DemoPublicInstance;
+        target: HTMLElement | undefined;
+        content: string;
+        promise: Promise<DemoChildrenCommit>;
+      };
+      const publications: Partial<Record<AuthorSlot, Publication>> = {};
+      let actionBinding:
+        | {
+            owner: DemoPublicInstance | undefined;
+            action: 'retry' | 'more';
+          }
+        | undefined;
+      const clearPublications = () => {
+        delete publications.results;
+        delete publications.actions;
+        actionBinding = undefined;
+      };
+      const publicationIsCurrent = (slot: AuthorSlot, request: Publication) =>
+        publications[slot] === request &&
+        api.getPublicInstance?.('command') === request.command &&
+        refs[slot] === request.target &&
+        publications[slot] === request;
+      const publishChildren = (
+        slot: AuthorSlot,
+        children: readonly DemoKeyedChild[],
+        command: DemoPublicInstance
+      ): Publication => {
+        // These two recipe-owned trees contain only JSON-like authored data.
+        // Compare values: Session deliberately publishes fresh row snapshots.
+        const content = JSON.stringify(children);
+        const target = refs[slot];
+        const previous = publications[slot];
+        if (
+          target &&
+          previous?.target === target &&
+          previous.command === command &&
+          previous.content === content
+        )
+          return previous;
+        let resolve!: (outcome: DemoChildrenCommit) => void;
+        let reject!: (error: unknown) => void;
+        const promise = new Promise<DemoChildrenCommit>((yes, no) => {
+          resolve = yes;
+          reject = no;
+        });
+        const request: Publication = { command, target, content, promise };
+        // One latest publication replaces both old pending and acknowledged
+        // content. In particular A -> pending B -> A must overwrite B.
+        publications[slot] = request;
+        const fail = (error: unknown) => {
+          if (publications[slot] === request) delete publications[slot];
+          reject(error);
+        };
+        try {
+          void api.setChildren!(slot, children).then((outcome) => {
+            if (publications[slot] !== request) return resolve('superseded');
+            if (
+              !current() ||
+              !session.read().open ||
+              api.getPublicInstance?.('command') !== command ||
+              publications[slot] !== request
+            ) {
+              if (publications[slot] === request) delete publications[slot];
+              return resolve('superseded');
+            }
+            // A fresh successful host/ref commit certifies the current author
+            // box, which may replace a preparing ref during framework commit.
+            // Reuse and paint continuations stay pinned to this acknowledged
+            // identity; an old acknowledgement cannot admit a later box.
+            if (outcome === 'committed') request.target = refs[slot];
+            else delete publications[slot];
+            resolve(outcome);
+          }, fail);
+        } catch (error) {
+          fail(error);
+        }
+        return request;
+      };
       /**
        * Focus the control the user held across a generation swap.
        *
@@ -420,8 +536,7 @@ export function createSiteSearchComposition(options: {
           if (current()) session.setOpen(detail.open);
         },
       });
-      const paint = async () => {
-        const epoch = ++paintEpoch;
+      const paint = async (epoch: number) => {
         const { open, snapshot, retrying, navigation } = session.read();
         if (!live) return;
         const active = current();
@@ -433,6 +548,7 @@ export function createSiteSearchComposition(options: {
           // a later reopen, even if its retained DOM box identity is unchanged.
           pendingHint = undefined;
           committedHint = undefined;
+          clearPublications();
           let finish: (() => void) | undefined;
           if (!open) {
             const prepare = prepareOpenerReturn;
@@ -445,7 +561,7 @@ export function createSiteSearchComposition(options: {
             pendingFocusRestore = null;
             releaseEntryPolicy();
           }
-          api.setProps('dialog', { open: false });
+          setDialogOpen(false);
           finish?.();
           return;
         }
@@ -468,7 +584,7 @@ export function createSiteSearchComposition(options: {
             api.setProps('panel', { focusEntry: 'manual' });
           }
         }
-        api.setProps('dialog', { open: true });
+        setDialogOpen(true);
         // The content may still be detached, so its activation can happen
         // after this paint.  The restore waits for the content's own presented
         // boundary and for the target this generation owns.
@@ -603,8 +719,15 @@ export function createSiteSearchComposition(options: {
         // submit or cache an undefined target during that preparation window.
         const preparedHintTarget = refs['keyboard-hint'];
         if (preparedHintTarget) syncHint(preparedHintTarget);
-        const committed = await api.setChildren!('results', rows);
-        if (!current() || !session.read().open || epoch !== paintEpoch || committed !== 'committed')
+        const resultsPublication = publishChildren('results', rows, command);
+        const committed = await resultsPublication.promise;
+        if (
+          !current() ||
+          !session.read().open ||
+          epoch !== paintEpoch ||
+          committed !== 'committed' ||
+          !publicationIsCurrent('results', resultsPublication)
+        )
           return;
         // Public Prototype identity can publish before all author-box refs.
         // Only the current committed author-slot transaction admits DOM attributes;
@@ -618,6 +741,12 @@ export function createSiteSearchComposition(options: {
         // The committed transaction also admits author refs that published after
         // the public instance. This independent hint transaction never gates results.
         if (committedHintTarget !== preparedHintTarget) syncHint(committedHintTarget);
+        if (
+          !current() ||
+          epoch !== paintEpoch ||
+          !publicationIsCurrent('results', resultsPublication)
+        )
+          return;
         resultsTarget.setAttribute('aria-label', groupLabel);
         refs.status.textContent =
           snapshot.phase === 'loading'
@@ -657,38 +786,78 @@ export function createSiteSearchComposition(options: {
               },
             ]
           : [];
-        const actionCommit = await api.setChildren!('actions', actions);
+        const actionsPublication = publishChildren('actions', actions, command);
+        const actionCommit = await actionsPublication.promise;
         if (
           !current() ||
           !session.read().open ||
           epoch !== paintEpoch ||
           actionCommit !== 'committed' ||
-          !action
+          !publicationIsCurrent('actions', actionsPublication)
         )
           return;
+        if (!action) {
+          actionBinding = undefined;
+          return;
+        }
+        const currentAction = api.getPublicInstance?.('search-page-action');
         if (action === 'retry' && !retrying && !snapshot.query.trim()) {
-          const currentAction = api.getPublicInstance?.('search-page-action');
           if (currentAction && currentAction !== focusedFailureAction) {
             focusedFailureAction = currentAction;
             api.call('search-page-action', 'focusSelf');
           }
         }
-        api.setProps('search-page-action', {
-          onClick: () => {
-            if (!current()) return;
-            if (action === 'retry') session.retry();
-            else session.loadMore();
-            // The invoked action may disappear after a successful retry/final page.
-            // Return editing focus through the real public control, not DOM queries.
-            queueMicrotask(() => {
-              if (current() && session.read().open) api.call('query', 'focusSelf');
-            });
-          },
-        });
+        if (
+          !current() ||
+          !session.read().open ||
+          epoch !== paintEpoch ||
+          api.getPublicInstance?.('search-page-action') !== currentAction ||
+          !publicationIsCurrent('actions', actionsPublication)
+        )
+          return;
+        if (
+          currentAction &&
+          actionBinding?.owner === currentAction &&
+          actionBinding.action === action
+        )
+          return;
+        const actionRequest: NonNullable<typeof actionBinding> = { owner: currentAction, action };
+        actionBinding = actionRequest;
+        try {
+          api.setProps('search-page-action', {
+            onClick: () => {
+              if (
+                !current() ||
+                !session.read().open ||
+                actionBinding !== actionRequest ||
+                api.getPublicInstance?.('search-page-action') !== actionRequest.owner
+              )
+                return;
+              if (action === 'retry') session.retry();
+              else session.loadMore();
+              // The invoked action may disappear after a successful retry/final page.
+              // Return editing focus through the real public control, not DOM queries.
+              queueMicrotask(() => {
+                if (current() && session.read().open) api.call('query', 'focusSelf');
+              });
+            },
+          });
+        } catch (error) {
+          if (actionBinding === actionRequest) actionBinding = undefined;
+          throw error;
+        }
+        if (
+          actionBinding === actionRequest &&
+          (!live || api.getPublicInstance?.('search-page-action') !== currentAction)
+        )
+          actionBinding = undefined;
       };
       const requestPaint = () => {
-        void paint().catch((error) => {
-          if (live) options.onFailure(error);
+        const epoch = ++paintEpoch;
+        void paint(epoch).catch((error) => {
+          // Several paints can await one author commit. Only the current paint
+          // reports its failure; an older continuation cannot fail newer work.
+          if (live && epoch === paintEpoch) options.onFailure(error);
         });
       };
       if (!api.subscribePublicInstances)
@@ -701,28 +870,62 @@ export function createSiteSearchComposition(options: {
           ? ['command', 'query-shell', 'query', 'panel', 'close']
           : ['command', 'panel', 'close'],
         (instances) => {
-          // A portal/ref replacement retires its old facts binding first.
-          binding?.dispose();
-          binding = undefined;
-          if (family === 'shadcn' && instances['query-shell'] && instances.query) {
-            binding = bindInputShellControl(
-              {
-                isCurrent: () => live,
-                onDispose(dispose) {
-                  disposers.add(dispose);
-                  return () => {
-                    disposers.delete(dispose);
-                  };
-                },
-              },
-              {
-                instance: instances['query-shell'],
-                setFacts(facts) {
-                  if (live) api.setProps('query-shell', facts);
-                },
-              },
-              instances.query
-            );
+          const shell = instances['query-shell'];
+          const control = instances.query;
+          if (
+            family === 'shadcn' &&
+            (inputBinding?.shell !== shell || inputBinding?.control !== control)
+          ) {
+            const previous = inputBinding;
+            inputBinding = undefined;
+            previous?.binding?.dispose();
+            // Disposing old facts can synchronously publish a newer pair.
+            if (
+              live &&
+              !inputBinding &&
+              shell &&
+              control &&
+              api.getPublicInstance?.('query-shell') === shell &&
+              api.getPublicInstance?.('query') === control
+            ) {
+              const request: InputBinding = { shell, control, retired: false };
+              inputBinding = request;
+              try {
+                const binding = bindInputShellControl(
+                  {
+                    isCurrent: () => live && inputBinding === request,
+                    onDispose(dispose) {
+                      disposers.add(dispose);
+                      return () => {
+                        disposers.delete(dispose);
+                        // Keep a terminal pair as a tombstone: an unrelated panel
+                        // notification must not read or revive disconnected facts.
+                        request.retired = true;
+                      };
+                    },
+                  },
+                  {
+                    instance: shell,
+                    setFacts(facts) {
+                      if (
+                        live &&
+                        inputBinding === request &&
+                        api.getPublicInstance?.('query-shell') === shell &&
+                        api.getPublicInstance?.('query') === control &&
+                        inputBinding === request
+                      )
+                        api.setProps('query-shell', facts);
+                    },
+                  },
+                  control
+                );
+                if (live && inputBinding === request && !request.retired) request.binding = binding;
+                else binding.dispose();
+              } catch (error) {
+                if (inputBinding === request) inputBinding = undefined;
+                throw error;
+              }
+            }
           }
           if (current()) requestPaint();
           // The target may publish after the open transition, so the pending
@@ -756,12 +959,14 @@ export function createSiteSearchComposition(options: {
         paintEpoch++;
         pendingHint = undefined;
         committedHint = undefined;
+        clearPublications();
+        dialogProjection = undefined;
         pendingFocusRestore = null;
         const errors: unknown[] = [];
         for (const stop of [
           off,
           offInstances,
-          () => binding?.dispose(),
+          () => inputBinding?.binding?.dispose(),
           () => offPanelTransition?.(),
         ]) {
           try {

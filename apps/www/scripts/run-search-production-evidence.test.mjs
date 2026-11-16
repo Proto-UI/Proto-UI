@@ -174,6 +174,8 @@ test('build, exact preview, directly owned Chrome and mandatory two-case suite c
   );
   assert.ok(f.readies.every((entry) => entry.server === f.children[1]));
   assert.equal(spawns[2][1], '/owned/chrome');
+  assert.ok(!spawns[2][2].includes('--no-sandbox'));
+  assert.ok(!spawns[2][2].includes('--disable-setuid-sandbox'));
   for (const arg of [
     '--remote-debugging-port=0',
     '--remote-debugging-address=127.0.0.1',

@@ -287,15 +287,47 @@ export function initSiteCodeSurfaces(doc: Document = document): () => void {
     roots.delete(root);
     void handle?.destroy().catch((error) => console.error('[CodeSurface] Cleanup failed.', error));
   };
-  const scan = () => {
+  const selector = '[data-site-code-surface], .starlight-aside--note';
+  const removeDisconnected = () => {
     for (const root of roots.keys()) if (!root.isConnected) remove(root);
-    for (const root of doc.querySelectorAll<HTMLElement>(
-      '[data-site-code-surface], .starlight-aside--note'
-    )) {
+  };
+  const discover = (scope: Document | Element) => {
+    if (
+      scope instanceof doc.defaultView!.HTMLElement &&
+      scope.matches(selector) &&
+      !roots.has(scope)
+    )
+      activation.add(scope);
+    for (const root of scope.querySelectorAll<HTMLElement>(selector)) {
       if (!roots.has(root)) activation.add(root);
     }
   };
-  const observer = new doc.defaultView!.MutationObserver(scan);
+  const scan = () => {
+    removeDisconnected();
+    discover(doc);
+  };
+  const observer = new doc.defaultView!.MutationObserver((records) => {
+    removeDisconnected();
+    const added = new Set<Element>();
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (
+          node instanceof doc.defaultView!.Element &&
+          node.isConnected &&
+          node.ownerDocument === doc
+        )
+          added.add(node);
+      }
+    }
+    // A batch can add both an ancestor and its descendants, in either order.
+    // Discover each current subtree once, without revisiting the document for
+    // unrelated Search or projection-internal child mutations.
+    for (const scope of added) {
+      let ancestor = scope.parentElement;
+      while (ancestor && !added.has(ancestor)) ancestor = ancestor.parentElement;
+      if (!ancestor) discover(scope);
+    }
+  });
   let disposed = false;
   const dispose = () => {
     if (disposed) return;

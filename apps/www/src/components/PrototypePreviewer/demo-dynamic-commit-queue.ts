@@ -31,10 +31,14 @@ export function createDynamicCommitQueue(
   let disposed = false;
   let running = false;
   let scheduled = false;
+  let cancelPendingTask: (() => void) | undefined;
   const current = () => !disposed && live();
   const dispose = () => {
     if (disposed) return;
     disposed = true;
+    const cancel = cancelPendingTask;
+    cancelPendingTask = undefined;
+    cancel?.();
     model.dispose();
     for (const request of queued.values()) request.resolve('disposed');
     queued.clear();
@@ -72,6 +76,23 @@ export function createDynamicCommitQueue(
           const result = transaction.commit();
           if (result === 'committed') onCommitted?.(transaction);
           request.resolve(result);
+          if (current()) {
+            // This slot's host/ref commit is complete. Let input and other host
+            // tasks run before another transaction, including one enqueued by
+            // this acknowledgement's continuation. Reserve the lane even when
+            // it is currently empty; the acknowledgement itself is not delayed.
+            // Resumption repeats the current-lease and admission checks.
+            await new Promise<void>((resolve) => {
+              const timer = setTimeout(() => {
+                cancelPendingTask = undefined;
+                resolve();
+              }, 0);
+              cancelPendingTask = () => {
+                clearTimeout(timer);
+                resolve();
+              };
+            });
+          }
         } catch (error) {
           if (hostStarted) dispose();
           else transaction?.cancel();

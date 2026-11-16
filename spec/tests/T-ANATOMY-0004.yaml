@@ -51,6 +51,17 @@ cases:
       - A-WEB-COMPONENT-0001-ANATOMY
     expectation: anatomy-adapter-conforms
 implementations:
+  - id: anatomy-runtime-domain-read-cost
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-HOST
+      - T-ANATOMY-0004-CASE-ORDER
+      - T-ANATOMY-0004-CASE-LIFETIME
+    notes:
+      - Actual Runtime sessions verify bounded repeated parent reads within one synchronous family notification, isolation between different parent bridges, fresh public queries, callback reparenting, nested notifications, portal membership and retirement followed by adoption. Parent-read counts control implementation cost; they do not establish native elapsed-time acceptance or a new public capability.
   - id: anatomy-runtime-order-comparison-cost
     kind: runtime-test
     status: passing
@@ -181,7 +192,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
-    summary: Mapped synchronous notification comparison reuse and fresh-query reentry controls without changing Anatomy semantics or promoting its lifecycle.
+    summary: Mapped synchronous notification comparison and logical-domain read reuse, bridge isolation and fresh-query reentry controls without changing Anatomy semantics or promoting its lifecycle.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added WC accepted and rejected adoption controls across retained L1 view hiding without changing logical lifetime semantics.

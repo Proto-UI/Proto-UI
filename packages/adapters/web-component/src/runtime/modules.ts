@@ -2506,7 +2506,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             });
             if (view)
               stopEntryStyleWatch = watchEntryStyleInvalidation(view, (inlineOnly) => {
-                if (!inlineOnly) refreshTree();
+                // DOM and stylesheet invalidation can share one observer
+                // checkpoint. Use the same pending sample instead of rebuilding
+                // the dependency graph once here and again for the DOM signal.
+                if (!inlineOnly) scheduleEntrySample(true);
                 else if (hasExternalStyleInputs) projectCurrent();
               });
             observeTree();

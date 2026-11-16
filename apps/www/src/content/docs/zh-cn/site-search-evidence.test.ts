@@ -12,12 +12,201 @@ import {
   type SearchGetterSample,
   searchEvidenceDirectory,
   summarizePendingRequests,
+  homepageRollbackWasOnTime,
+  searchRevealMatchesViewport,
+  readIndependentPagefindQueries,
 } from './site-search-evidence';
 
 const source = readFileSync(
   'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
   'utf8'
 );
+
+describe('independent Pagefind browser callback transport', () => {
+  it('runs the actual Vitest-transformed callback without SSR import globals', async () => {
+    const pagefind = {
+      options: vi.fn(async () => {}),
+      search: vi.fn(async (query: string) => ({
+        results: Array.from({ length: query === 'empty-control' ? 0 : query === 'Button' ? 4 : 2 }),
+      })),
+    };
+    const load = vi.fn(async () => pagefind);
+    const constructorCalls: string[][] = [];
+    const observations = await runInNewContext(
+      `(${readIndependentPagefindQueries.toString()})('empty-control')`,
+      {
+        URL,
+        location: { origin: 'http://127.0.0.1:4397' },
+        Function: function (...source: string[]) {
+          constructorCalls.push(source);
+          return load;
+        },
+      }
+    );
+    expect(constructorCalls).toEqual([['url', 'return import(url)']]);
+    expect(load).toHaveBeenCalledWith('http://127.0.0.1:4397/pagefind/pagefind.js');
+    expect(pagefind.options).toHaveBeenCalledWith({ baseUrl: '/' });
+    expect(observations).toEqual([
+      { query: 'empty-control', count: 0 },
+      { query: 'Button', count: 4 },
+      { query: 'zxqv948271605emptycontract', count: 2 },
+    ]);
+  });
+
+  it('propagates a real index failure instead of turning it into an empty observation', async () => {
+    const failure = new Error('index unavailable');
+    await expect(
+      runInNewContext(`(${readIndependentPagefindQueries.toString()})('empty-control')`, {
+        URL,
+        location: { origin: 'http://127.0.0.1:4397' },
+        Function: function () {
+          return async () => {
+            throw failure;
+          };
+        },
+      })
+    ).rejects.toBe(failure);
+  });
+});
+
+describe('Search native reveal geometry oracle', () => {
+  const viewport = { viewportTop: 100, viewportBottom: 180 };
+
+  it('requires ordinary rows to remain completely inside the actual Content viewport', () => {
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 110, targetBottom: 150 }, 'start')
+    ).toBe(true);
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 90, targetBottom: 130 }, 'start')
+    ).toBe(false);
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 160, targetBottom: 200 }, 'end')
+    ).toBe(false);
+  });
+
+  it('accepts an oversized row only at the nearest leading or trailing edge', () => {
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 100, targetBottom: 390 }, 'start')
+    ).toBe(true);
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: -110, targetBottom: 180 }, 'end')
+    ).toBe(true);
+  });
+
+  const clampedViewport = {
+    physicalViewportTop: 110.5,
+    physicalViewportBottom: 321,
+    physicalTargetTop: 251.5,
+    physicalTargetBottom: 321.5,
+    scrollTop: 1001,
+    maxScrollTop: 1001,
+  };
+  const trailingRow = {
+    viewportTop: 118.5,
+    viewportBottom: 315,
+    targetTop: 251.5,
+    targetBottom: 321.5,
+  };
+  const leadingRow = { ...trailingRow, targetTop: 110.5, targetBottom: 180.5 };
+  const leadingNative = {
+    ...clampedViewport,
+    physicalTargetTop: leadingRow.targetTop,
+    physicalTargetBottom: leadingRow.targetBottom,
+  };
+
+  it('admits an unreachable trailing inset only at the native maximum with full physical visibility', () => {
+    expect(searchRevealMatchesViewport(trailingRow, 'start', clampedViewport)).toBe(true);
+  });
+
+  it('admits an unreachable leading inset only at zero with full physical visibility', () => {
+    expect(
+      searchRevealMatchesViewport(leadingRow, 'end', { ...leadingNative, scrollTop: 0 })
+    ).toBe(true);
+  });
+
+  it('rejects the same inset violation away from the corresponding native boundary', () => {
+    expect(
+      searchRevealMatchesViewport(trailingRow, 'start', { ...clampedViewport, scrollTop: 995 })
+    ).toBe(false);
+    expect(searchRevealMatchesViewport(leadingRow, 'end', leadingNative)).toBe(false);
+    expect(
+      searchRevealMatchesViewport(trailingRow, 'start', { ...clampedViewport, scrollTop: 0 })
+    ).toBe(false);
+  });
+
+  it('rejects physical clipping even when the scroll position is at its maximum', () => {
+    expect(
+      searchRevealMatchesViewport(
+        { ...trailingRow, targetBottom: 329 },
+        'start',
+        { ...clampedViewport, physicalTargetBottom: 329 }
+      )
+    ).toBe(false);
+  });
+
+  it('does not apply range-clamp admission to a misaligned oversized row', () => {
+    expect(
+      searchRevealMatchesViewport(
+        { ...trailingRow, targetTop: 60, targetBottom: 350 },
+        'start',
+        clampedViewport
+      )
+    ).toBe(false);
+  });
+
+  it.each([
+    { ...clampedViewport, scrollTop: Number.NaN },
+    { ...clampedViewport, maxScrollTop: -1 },
+    { ...clampedViewport, physicalViewportBottom: Number.POSITIVE_INFINITY },
+    { ...clampedViewport, physicalViewportTop: 130 },
+  ])('rejects invalid physical or range evidence %j', (native) => {
+    expect(searchRevealMatchesViewport(trailingRow, 'start', native)).toBe(false);
+  });
+
+  it('rejects the observed 64px overscroll even though the oversized row covers the viewport', () => {
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 36, targetBottom: 326 }, 'start')
+    ).toBe(false);
+  });
+
+  it('does not accept the wrong edge or an offscreen oversized row', () => {
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: -110, targetBottom: 180 }, 'start')
+    ).toBe(false);
+    expect(
+      searchRevealMatchesViewport({ ...viewport, targetTop: 200, targetBottom: 490 }, 'start')
+    ).toBe(false);
+  });
+
+  it.each([
+    { viewportTop: 100, viewportBottom: 100, targetTop: 100, targetBottom: 390 },
+    { viewportTop: 100, viewportBottom: 180, targetTop: 100, targetBottom: 100 },
+    { viewportTop: 100, viewportBottom: 180, targetTop: Number.NaN, targetBottom: 390 },
+  ])('rejects unavailable or invalid native geometry %j', (bounds) => {
+    expect(searchRevealMatchesViewport(bounds, 'start')).toBe(false);
+  });
+});
+
+describe('Homepage rollback page-clock budget', () => {
+  it('measures recovery after the publication fault independently of cold preparation', () => {
+    expect(homepageRollbackWasOnTime({ faultAt: 5_000, errorAt: 5_500 })).toBe(true);
+    expect(homepageRollbackWasOnTime({ faultAt: 5_000, errorAt: 6_000 })).toBe(true);
+  });
+
+  it('rejects late recovery even when the observer returns after it already completed', () => {
+    expect(homepageRollbackWasOnTime({ faultAt: 5_000, errorAt: 6_001 })).toBe(false);
+  });
+
+  it.each([
+    {},
+    { faultAt: 5_000 },
+    { faultAt: 5_000, errorAt: 4_999 },
+    { faultAt: Number.NaN, errorAt: 5_000 },
+    { faultAt: 5_000, errorAt: Number.POSITIVE_INFINITY },
+  ])('rejects incomplete or invalid evidence %j', (evidence) => {
+    expect(homepageRollbackWasOnTime(evidence)).toBe(false);
+  });
+});
 
 describe('Search cold-start evidence boundary', () => {
   it('uses the full CI artifact root without changing the original readiness gate', () => {

@@ -1,4 +1,11 @@
-import type { DemoChild, DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { ExposedStateHandle } from '@proto.ui/core';
+import { bootstrap232ActionAppearance } from '@proto.ui/prototypes-bootstrap-2-3-2/surface';
+import type {
+  DemoChild,
+  DemoNode,
+  DemoSetupContext,
+  DemoSpec,
+} from '@/components/PrototypePreviewer/demo-types';
 
 type Family = 'bootstrap-2-3-2' | 'liquid-glass';
 type ProtoNode = Extract<DemoNode, { kind: 'proto' }>;
@@ -18,21 +25,119 @@ function portal(node: ProtoNode): ProtoNode {
   return { ...node, previewTheme: 'portal' };
 }
 
+function bindDialogCloseAppearance({ api }: DemoSetupContext): () => void {
+  if (!api.subscribePublicInstances || !api.getPublicInstance)
+    throw new Error('Dialog Close appearance requires public instance subscriptions');
+  let live = true;
+  let generation = 0;
+  let releaseFacts = () => {};
+  const releaseInstances = api.subscribePublicInstances(
+    ['close', 'closeAppearance'],
+    (instances) => {
+      const currentGeneration = ++generation;
+      releaseFacts();
+      const close = instances.close;
+      const surface = instances.closeAppearance;
+      if (!live || currentGeneration !== generation || !close || !surface) return;
+      let active = true;
+      const subscriptions: Array<() => void> = [];
+      const release = () => {
+        active = false;
+        for (const off of subscriptions.splice(0)) off();
+      };
+      releaseFacts = release;
+      const current = () =>
+        live &&
+        active &&
+        currentGeneration === generation &&
+        api.getPublicInstance!('close') === close &&
+        api.getPublicInstance!('closeAppearance') === surface;
+      const exposes = close.getExposes();
+      const facts = Object.fromEntries(
+        (['disabled', 'hovered', 'pressed', 'focusVisible'] as const).map((key) => {
+          const state = exposes?.[key] as ExposedStateHandle<boolean> | undefined;
+          if (!state?.get || !state.subscribe)
+            throw new Error(`Dialog Close public ${key} state is unavailable`);
+          return [key, state];
+        })
+      ) as Record<'disabled' | 'hovered' | 'pressed' | 'focusVisible', ExposedStateHandle<boolean>>;
+      let previous = '';
+      let scheduled = false;
+      const paint = () => {
+        if (!current()) return;
+        const disabled = facts.disabled.get();
+        const hovered = !disabled && facts.hovered.get();
+        const pressed = !disabled && facts.pressed.get();
+        const focusVisible = !disabled && facts.focusVisible.get();
+        const next = `${hovered}/${pressed}/${focusVisible}`;
+        if (!current() || next === previous) return;
+        previous = next;
+        api.setProps('closeAppearance', { hovered, pressed, focusVisible });
+      };
+      const requestPaint = () => {
+        if (!current() || scheduled) return;
+        scheduled = true;
+        // Public facts may arrive inside a framework commit. Project their
+        // latest snapshot after that commit, without another input/state owner.
+        queueMicrotask(() => {
+          scheduled = false;
+          paint();
+        });
+      };
+      for (const state of Object.values(facts)) {
+        const off = state.subscribe((event) => {
+          if (event.type === 'disconnect') release();
+          else requestPaint();
+        });
+        if (current()) subscriptions.push(off);
+        else off();
+      }
+      requestPaint();
+    }
+  );
+  return () => {
+    live = false;
+    generation++;
+    releaseInstances();
+    releaseFacts();
+  };
+}
+
 export function createFamilyDialogDemo(family: Family): DemoSpec {
   const title = part(family, 'dialog', 'title', 'title', {}, ['Project details']);
   const description = part(family, 'dialog', 'description', 'description', {}, [
     'This modal contains project information. Close it, press Escape, or use the mask, then reopen to exercise the same dialog owner.',
   ]);
   const closeLabel = 'Close project details';
+  const closeAppearance = bootstrap232ActionAppearance({ emphasis: 'secondary' });
   const contents: DemoNode[] =
     family === 'bootstrap-2-3-2'
       ? [
           part(family, 'dialog', 'header', 'header', {}, [title]),
           description,
           part(family, 'dialog', 'footer', 'footer', {}, [
-            part(family, 'dialog', 'close', 'close', {}, [
-              { kind: 'proto', prototypeId: 'bootstrap-2-3-2-button', children: [closeLabel] },
-            ]),
+            {
+              ...part(family, 'dialog', 'close', 'close', {}, [
+                {
+                  ...part(
+                    family,
+                    'surface',
+                    'root',
+                    'closeAppearance',
+                    { ...closeAppearance.surface },
+                    [
+                      part(family, 'text', 'root', 'closeLabel', { ...closeAppearance.text }, [
+                        closeLabel,
+                      ]),
+                    ]
+                  ),
+                  // Close owns input and focus. These children provide only the
+                  // existing family Button shell, typography and slot geometry.
+                  surfaceStyle: { ...closeAppearance.layout, pointerEvents: 'none' },
+                },
+              ]),
+              surfaceStyle: { display: 'inline-flex' },
+            },
           ]),
           part(family, 'dialog', 'close-icon', 'closeIcon'),
         ]
@@ -50,6 +155,7 @@ export function createFamilyDialogDemo(family: Family): DemoSpec {
         ]),
       ],
     },
+    ...(family === 'bootstrap-2-3-2' ? { setup: bindDialogCloseAppearance } : {}),
   };
 }
 
