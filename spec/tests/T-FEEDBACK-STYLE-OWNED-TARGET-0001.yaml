@@ -204,6 +204,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Registered planned fail-closed tests without converting design intent into passing implementation evidence.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Mapped explicit split Root binding, native slot preservation and fail-closed reuse to the WC tests.
 tags:
   - feedback
   - style

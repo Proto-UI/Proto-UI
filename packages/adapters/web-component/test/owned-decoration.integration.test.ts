@@ -163,55 +163,66 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(host.shadowRoot!.childNodes).toHaveLength(0);
   });
 
-  it.each(['move surface', 'remove text', 'edit text', 'rename slot', 'reorder slot'] as const)(
-    'rejects invalid split decoration reuse after %s',
-    (mutation) => {
-      const C = AdaptToWebComponent(
-        definePrototype({
-          name: `owned-decoration-split-reuse-${++id}`,
-          setup(def) {
-            const target = def.feedback.style.declareDecoration();
-            return (r) => [r.decoration(target), 'Template text', r.slot()];
-          },
-        }),
-        {
-          shadow: {
-            mode: 'open',
-            presentation: 'split',
-            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
-          },
-        }
-      );
-      const host = new C();
-      const caller = document.createTextNode('Caller text');
-      host.append(caller);
-      document.body.append(host);
-      const surface = host.shadowRoot!.querySelector('[part="surface"]')!;
-      const text = Array.from(surface.childNodes).find((node) => node.nodeType === 3)! as Text;
-      const leaf = surface.querySelector('[data-pui-owned-decoration]')!;
-      expect(text.data).toBe('Template text');
-      caller.data = 'Updated caller text';
-      expect(() => host.update()).not.toThrow();
-      expect(surface.contains(text)).toBe(true);
-      const slot = surface.querySelector('slot')!;
-      expect(slot.assignedNodes()).toEqual([caller]);
-      expect(surface.contains(leaf)).toBe(true);
-      const destination = document.createElement('div');
-      document.body.append(destination);
-      if (mutation === 'move surface') destination.append(surface);
-      if (mutation === 'remove text') text.remove();
-      if (mutation === 'edit text') text.data = 'External edit';
-      if (mutation === 'rename slot') slot.name = 'elsewhere';
-      if (mutation === 'reorder slot') surface.prepend(slot);
-      expect(() => host.update()).toThrow(
-        mutation === 'move surface'
-          ? 'stale decoration blueprint lease'
-          : 'decoration physical blueprint changed'
-      );
-      expect(surface.contains(leaf)).toBe(true);
-      expect(caller.data).toBe('Updated caller text');
-    }
-  );
+  it.each([
+    'move surface',
+    'remove text',
+    'edit text',
+    'rename slot',
+    'reorder slot',
+    'remove paint tokens',
+    'add inline paint',
+  ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
+    const C = AdaptToWebComponent(
+      definePrototype({
+        name: `owned-decoration-split-reuse-${++id}`,
+        setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('opacity-50'));
+          return (r) => [r.decoration(target), 'Template text', r.slot()];
+        },
+      }),
+      {
+        shadow: {
+          mode: 'open',
+          presentation: 'split',
+          styleArtifact: renderProtoShadowSplitStyleArtifact(['opacity-50']),
+        },
+      }
+    );
+    const host = new C();
+    const caller = document.createTextNode('Caller text');
+    host.append(caller);
+    document.body.append(host);
+    const surface = host.shadowRoot!.querySelector('[part="surface"]')!;
+    const text = Array.from(surface.childNodes).find((node) => node.nodeType === 3)! as Text;
+    const leaf = surface.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+    expect(leaf.getAttribute('data-pui-style')).toBe('opacity-50');
+    expect(text.data).toBe('Template text');
+    caller.data = 'Updated caller text';
+    expect(() => host.update()).not.toThrow();
+    expect(surface.contains(text)).toBe(true);
+    const slot = surface.querySelector('slot')!;
+    expect(slot.assignedNodes()).toEqual([caller]);
+    expect(surface.contains(leaf)).toBe(true);
+    const destination = document.createElement('div');
+    document.body.append(destination);
+    if (mutation === 'move surface') destination.append(surface);
+    if (mutation === 'remove text') text.remove();
+    if (mutation === 'edit text') text.data = 'External edit';
+    if (mutation === 'rename slot') slot.name = 'elsewhere';
+    if (mutation === 'reorder slot') surface.prepend(slot);
+    if (mutation === 'remove paint tokens') leaf.removeAttribute('data-pui-style');
+    if (mutation === 'add inline paint') leaf.style.setProperty('opacity', '1');
+    const expected =
+      mutation === 'move surface'
+        ? 'stale decoration blueprint lease'
+        : mutation === 'remove paint tokens' || mutation === 'add inline paint'
+          ? 'decoration physical leaf changed'
+          : 'decoration physical blueprint changed';
+    expect(() => host.update()).toThrow(expected);
+    expect(surface.contains(leaf)).toBe(true);
+    expect(caller.data).toBe('Updated caller text');
+  });
 
   it('rejects a duplicate split decoration before publishing the new view', () => {
     const C = AdaptToWebComponent(

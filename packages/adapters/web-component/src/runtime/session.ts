@@ -10,6 +10,7 @@ import type { RuntimeCheckpoint, RuntimeLifecycleEvent } from '@proto.ui/runtime
 import { type PropsBaseType } from '@proto.ui/types';
 
 import { commitChildren } from '../commit';
+import { hasCurrentOwnedDecorationPaint } from '../owned-decoration';
 import { SlotProjector } from '../slot-projector';
 import type { ShadowInnerSurface } from '../shadow-inner-surface';
 
@@ -239,6 +240,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
             !leaf.hasAttribute('data-pui-owned-decoration') ||
             leaf.getAttribute('aria-hidden') !== 'true' ||
             !leaf.hasAttribute('inert') ||
+            (shadowViewTarget && !hasCurrentOwnedDecorationPaint(leaf)) ||
             leaf.style.getPropertyValue('pointer-events') !== 'none' ||
             leaf.style.getPropertyPriority('pointer-events') !== 'important'
           )
