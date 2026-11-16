@@ -177,6 +177,7 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'conceal surface with display',
     'conceal surface with visibility',
     'conceal surface with zero opacity',
+    'conceal surface with variable opacity',
     'remove split marker',
   ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
     const C = AdaptToWebComponent(
@@ -239,7 +240,23 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
         : mutation === 'remove paint tokens' || mutation === 'add inline paint'
           ? 'decoration physical leaf changed'
           : 'decoration physical blueprint changed';
-    expect(() => host.update()).toThrow(expected);
+    if (mutation === 'conceal surface with variable opacity') {
+      const { style } = surface as HTMLElement;
+      style.setProperty('--split-opacity', '0');
+      style.opacity = 'var(--split-opacity)';
+      // The DOM test environment exposes the declaration without resolving var().
+      const window = host.ownerDocument.defaultView!;
+      const computed = window.getComputedStyle(surface);
+      Object.defineProperty(computed, 'opacity', { value: '0' });
+      const readStyle = vi.spyOn(window, 'getComputedStyle').mockReturnValueOnce(computed);
+      try {
+        expect(() => host.update()).toThrow(expected);
+      } finally {
+        readStyle.mockRestore();
+      }
+    } else {
+      expect(() => host.update()).toThrow(expected);
+    }
     expect(surface.contains(leaf)).toBe(true);
     expect(caller.data).toBe('Updated caller text');
   });

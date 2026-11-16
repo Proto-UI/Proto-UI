@@ -30,11 +30,18 @@ type DecorationTreeRecord = {
 
 function captureSplitSurfaceIdentity(surface: HTMLElement): string {
   const { style } = surface;
+  let opacity = Number.parseFloat(style.opacity);
+  if (style.opacity && Number.isNaN(opacity)) {
+    // Custom properties and calculated values need the used CSS declaration.
+    opacity = Number.parseFloat(
+      surface.ownerDocument.defaultView?.getComputedStyle(surface).opacity ?? ''
+    );
+  }
   const concealed =
     style.display === 'none' ||
     style.visibility === 'hidden' ||
     style.visibility === 'collapse' ||
-    Number.parseFloat(style.opacity) === 0 ||
+    opacity === 0 ||
     style.getPropertyValue('content-visibility') === 'hidden';
   return JSON.stringify([
     ...['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
