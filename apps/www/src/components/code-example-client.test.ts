@@ -188,6 +188,220 @@ describe('CodeExample client', () => {
     localStorage.clear();
   });
 
+  describe('deferred host enhancement', () => {
+    it('keeps a host without file controls native and admits a file Tree when one is selected', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      root
+        .querySelector('[data-code-host-panel][data-code-host="react"] [data-code-file-tabs]')!
+        .remove();
+      localStorage.setItem(PREFERRED_ADAPTER_KEY, 'react');
+      initCodeExamples(root);
+      finishTasks();
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs']);
+      root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="wc"]')!.click();
+      finishTasks();
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
+    });
+
+    it('follows a host selection made synchronously during a whole Tree acquisition', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      vi.mocked(enhanceCodeExampleTree).mockImplementationOnce(({ list }) => {
+        const projection = recordProjection('tree', list);
+        root
+          .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
+          .click();
+        return projection;
+      });
+      initCodeExamples(root);
+      finishTasks();
+      expect(selectedHost(root)).toBe('react');
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree', 'tree']);
+      expect(
+        acquired
+          .slice(1)
+          .map(({ list }) => list.closest<HTMLElement>('[data-code-host-panel]')?.dataset.codeHost)
+      ).toEqual(['wc', 'react']);
+      for (const { projection } of acquired) expect(projection.destroy).not.toHaveBeenCalled();
+    });
+
+    it('acquires host controls and only the currently selected file Tree', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      const sources = [...root.querySelectorAll('[data-code-file-panel]')];
+      initCodeExamples(root);
+      runNextTask();
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs']);
+      runNextTask();
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
+      expect(
+        acquired[1].list.closest<HTMLElement>('[data-code-host-panel]')?.dataset.codeHost
+      ).toBe('wc');
+      expect(tasks.size).toBe(0);
+      expect([...root.querySelectorAll('[data-code-file-panel]')]).toEqual(sources);
+      expect(
+        root.querySelector('[data-code-host-panel][data-code-host="react"] [role="tablist"]')
+      ).not.toBeNull();
+    });
+
+    it('rechecks the selected host after the outer Tabs acquire', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      initCodeExamples(root);
+      runNextTask();
+      document.dispatchEvent(
+        new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+      );
+      finishTasks();
+      const trees = acquired.filter(({ kind }) => kind === 'tree');
+      expect(trees).toHaveLength(1);
+      expect(trees[0].list.closest<HTMLElement>('[data-code-host-panel]')?.dataset.codeHost).toBe(
+        'react'
+      );
+      expect(selectedHost(root)).toBe('react');
+    });
+
+    it('drops superseded hidden work and enhances a later selected host once', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      initCodeExamples(root);
+      finishTasks();
+      const host = (name: string) =>
+        root.querySelector<HTMLButtonElement>(`[data-code-host-tab][data-code-host="${name}"]`)!;
+      host('react').click();
+      host('wc').click();
+      finishTasks();
+      expect(acquired.filter(({ kind }) => kind === 'tree')).toHaveLength(1);
+      host('react').click();
+      const file = root.querySelector<HTMLButtonElement>(
+        '[data-code-host-panel][data-code-host="react"] [data-code-file-index="1"]'
+      )!;
+      file.click();
+      finishTasks();
+      expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree', 'tree']);
+      expect(acquired[2].selected).toBe(file);
+      host('wc').click();
+      host('react').click();
+      finishTasks();
+      expect(acquired).toHaveLength(3);
+      expect(selectedFile(root, 'react')).toBe('1');
+    });
+
+    it('cancels deferred work on teardown before another host can acquire', () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      initCodeExamples(root);
+      finishTasks();
+      root
+        .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
+        .click();
+      const late = [...tasks.values()];
+      document.dispatchEvent(new Event('astro:before-swap'));
+      expect(tasks.size).toBe(0);
+      for (const callback of late) callback();
+      expect(acquired).toHaveLength(2);
+      for (const { projection } of acquired) expect(projection.destroy).toHaveBeenCalledOnce();
+      expect(root.dataset.codeExampleInit).toBeUndefined();
+    });
+  });
+
+  describe('native reveal phase', () => {
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    beforeEach(() => {
+      frames.clear();
+      nextFrame = 0;
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+        const id = nextFrame++;
+        frames.set(id, callback);
+        return id;
+      });
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+        frames.delete(id);
+      });
+    });
+    const frame = () => {
+      const callbacks = [...frames.values()];
+      frames.clear();
+      for (const callback of callbacks) callback(performance.now());
+    };
+    const geometry = () => {
+      const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+      const list = root.querySelector<HTMLElement>('[data-code-host-tabs]')!;
+      const tabs = [...list.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+      const read = vi
+        .spyOn(root, 'getBoundingClientRect')
+        .mockReturnValue(new DOMRect(0, 0, 100, 44));
+      const reads = tabs.map((tab, i) =>
+        vi.spyOn(tab, 'getBoundingClientRect').mockReturnValue(new DOMRect(i * 150, 0, 100, 44))
+      );
+      root.scrollTop = 23;
+      return { root, list, tabs, read, reads };
+    };
+
+    it('commits native selection immediately and coalesces only its latest geometry', () => {
+      const { root, tabs, read, reads } = geometry();
+      initCodeExamples(root);
+      for (const index of [1, 0, 1]) tabs[index].click();
+      expect(selectedHost(root)).toBe('react');
+      expect(read).not.toHaveBeenCalled();
+      expect(frames.size).toBe(1);
+      frame();
+      expect(read).toHaveBeenCalledOnce();
+      expect(reads[0]).not.toHaveBeenCalled();
+      expect(reads[1]).toHaveBeenCalledOnce();
+      expect(root.scrollLeft).toBe(150);
+      expect(root.scrollTop).toBe(23);
+    });
+
+    it('never reads layout for a hidden source list when its queued reveal runs', () => {
+      const { root, tabs, read } = geometry();
+      initCodeExamples(root);
+      tabs[1].click();
+      root.hidden = true;
+      frame();
+      expect(read).not.toHaveBeenCalled();
+      expect(root.scrollLeft).toBe(0);
+    });
+
+    it.each(['destroy', 'adopt'] as const)('retires queued geometry after %s', (mode) => {
+      const { root, tabs, read } = geometry();
+      initCodeExamples(root);
+      tabs[1].click();
+      const late = [...frames.values()];
+      if (mode === 'destroy') document.dispatchEvent(new Event('astro:before-swap'));
+      else {
+        const other = document.implementation.createHTMLDocument('other');
+        other.body.append(other.adoptNode(root));
+      }
+      for (const callback of late) callback(performance.now());
+      expect(read).not.toHaveBeenCalled();
+      expect(root.scrollLeft).toBe(0);
+      if (mode === 'destroy') expect(frames.size).toBe(0);
+    });
+
+    it('reveals keyboard focus synchronously and cancels its older pending geometry', () => {
+      const { root, tabs, read } = geometry();
+      initCodeExamples(root);
+      tabs[0].focus();
+      press(tabs[0], 'ArrowRight');
+      expect(document.activeElement).toBe(tabs[1]);
+      expect(selectedHost(root)).toBe('react');
+      expect(read).toHaveBeenCalledOnce();
+      expect(root.scrollLeft).toBe(150);
+      frame();
+      expect(read).toHaveBeenCalledOnce();
+    });
+
+    it('uses immediate native reveal when animation frames are unavailable', () => {
+      vi.stubGlobal('requestAnimationFrame', undefined);
+      const { root, tabs, read } = geometry();
+      initCodeExamples(root);
+      read.mockClear();
+      tabs[1].click();
+      expect(selectedHost(root)).toBe('react');
+      expect(read).toHaveBeenCalledOnce();
+      expect(root.scrollLeft).toBe(150);
+      expect(root.scrollTop).toBe(23);
+      expect(frames.size).toBe(0);
+    });
+  });
+
   it('uses a supported stored host and retains SSR fallback for unsupported values', () => {
     const root = document.querySelector<HTMLElement>('[data-code-example]')!;
     localStorage.setItem(PREFERRED_ADAPTER_KEY, 'react');
@@ -381,7 +595,7 @@ describe('CodeExample client', () => {
     expect(selectedFile(roots[0], 'react')).toBe('1');
     runNextTask();
     expect(acquired).toHaveLength(1);
-    expect(acquired[0].kind).toBe('tree');
+    expect(acquired[0].kind).toBe('tabs');
     expect(tasks.size).toBe(1);
     for (let turn = 0; tasks.size; turn++) {
       if (turn === 20) throw new Error('CodeExample groups did not finish.');
@@ -389,17 +603,22 @@ describe('CodeExample client', () => {
       runNextTask();
       expect(acquired.length - count).toBeLessThanOrEqual(1);
     }
-    expect(acquired).toHaveLength(6);
+    expect(acquired).toHaveLength(4);
     for (const root of roots) {
       const groups = acquired.filter(({ list }) => root.contains(list));
-      expect(groups.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
-      expect(groups[2].selected?.dataset.codeHost).toBe(selectedHost(root));
+      expect(groups.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
+      expect(groups[0].selected?.dataset.codeHost).toBe(selectedHost(root));
     }
+    expect(acquired.find(({ list }) => list.contains(selectedReactFile))).toBeUndefined();
+    expect(roots.map(selectedHost)).toEqual(['wc', 'react']);
+    expect(selectedFile(roots[0], 'react')).toBe('1');
+    roots[0]
+      .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
+      .click();
+    finishTasks();
     expect(acquired.find(({ list }) => list.contains(selectedReactFile))?.selected).toBe(
       selectedReactFile
     );
-    expect(roots.map(selectedHost)).toEqual(['wc', 'react']);
-    expect(selectedFile(roots[0], 'react')).toBe('1');
   });
 
   it('preserves current choices through complete idle groups and retires a partial owner before replacement', () => {
@@ -422,12 +641,12 @@ describe('CodeExample client', () => {
     expect(acquired).toEqual([]);
     runNextTask(idleTasks);
     expect(acquired).toHaveLength(1);
-    expect(acquired[0].kind).toBe('tree');
+    expect(acquired[0].kind).toBe('tabs');
     runNextTask(idleTasks);
     expect(acquired).toHaveLength(2);
     expect(acquired[1].kind).toBe('tree');
     expect(acquired[1].selected).toBe(reactFile);
-    expect(idleTasks.size).toBe(1);
+    expect(idleTasks.size).toBe(0);
     const released: number[] = [];
     for (const [index, { projection }] of acquired.entries())
       vi.mocked(projection.destroy).mockImplementation(() => {
@@ -444,9 +663,9 @@ describe('CodeExample client', () => {
     react.click();
     reactFile.click();
     finishTasks(idleTasks);
-    expect(acquired.slice(2).map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(acquired.slice(2).map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
     expect(acquired[3].selected).toBe(reactFile);
-    expect(acquired[4].selected).toBe(react);
+    expect(acquired[2].selected).toBe(react);
     expect(released).toEqual([1, 0]);
     for (const { projection } of acquired.slice(0, 2))
       expect(projection.destroy).toHaveBeenCalledTimes(1);
@@ -476,7 +695,7 @@ describe('CodeExample client', () => {
     expect(root.dataset.codeExampleInit).toBeUndefined();
     initCodeExamples(root);
     finishTasks();
-    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
   });
 
   it('keeps zero-handle timer fallback ownership when idle support appears before teardown', () => {
@@ -501,7 +720,7 @@ describe('CodeExample client', () => {
     expect(root.dataset.codeExampleInit).toBeUndefined();
     initCodeExamples(root);
     finishTasks(idleTasks);
-    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
   });
 
   it('prepares current native state before insertion and enhances only after connection', () => {
@@ -514,7 +733,7 @@ describe('CodeExample client', () => {
     expect(acquired).toEqual([]);
     document.body.append(root);
     finishTasks();
-    expect(acquired).toHaveLength(3);
+    expect(acquired).toHaveLength(2);
     expect(selectedHost(root)).toBe('react');
   });
 
@@ -528,12 +747,13 @@ describe('CodeExample client', () => {
     });
     initCodeExamples(document);
     runNextTask();
-    expect(acquired).toHaveLength(1);
+    runNextTask();
+    expect(acquired).toHaveLength(2);
     expect(selectedFile(root, 'wc')).toBe('1');
-    expect(acquired[0].projection.select).toHaveBeenCalledTimes(1);
-    expect(acquired[0].projection.select).toHaveBeenCalledWith(1);
+    expect(acquired[1].projection.select).toHaveBeenCalledTimes(1);
+    expect(acquired[1].projection.select).toHaveBeenCalledWith(1);
     finishTasks();
-    expect(acquired.map(({ kind }) => kind)).toEqual(['tree', 'tree', 'tabs']);
+    expect(acquired.map(({ kind }) => kind)).toEqual(['tabs', 'tree']);
     expect(selectedFile(root, 'wc')).toBe('1');
   });
 
@@ -550,7 +770,7 @@ describe('CodeExample client', () => {
     root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!.click();
     expect(selectedHost(root)).toBe('react');
     finishTasks();
-    expect(acquired).toHaveLength(3);
+    expect(acquired).toHaveLength(2);
   });
 
   it('releases acquired groups in reverse order and ignores retired gestures and callbacks', () => {
@@ -569,7 +789,7 @@ describe('CodeExample client', () => {
       });
     }
     document.dispatchEvent(new Event('astro:before-swap'));
-    expect(released).toEqual([2, 1, 0]);
+    expect(released).toEqual([1, 0]);
     expect(tasks.size).toBe(0);
     if (!lateSelect) throw new Error('Expected the acquired host selection callback.');
     lateSelect(1);
@@ -629,15 +849,16 @@ describe('CodeExample client', () => {
         return projection;
       });
       initCodeExamples(document);
+      runNextTask();
       if (fails) expect(() => runNextTask()).toThrow(error);
       else runNextTask();
-      expect(acquired).toHaveLength(1);
-      expect(acquired[0].projection.destroy).toHaveBeenCalledTimes(1);
+      expect(acquired).toHaveLength(2);
+      for (const { projection } of acquired) expect(projection.destroy).toHaveBeenCalledTimes(1);
       expect(tasks.size).toBe(0);
       expect(root.dataset.codeExampleInit).toBe(fails ? '1' : undefined);
       initCodeExamples(document);
       finishTasks();
-      expect(acquired).toHaveLength(fails ? 1 : 4);
+      expect(acquired).toHaveLength(fails ? 2 : 4);
     }
   );
 
@@ -646,7 +867,7 @@ describe('CodeExample client', () => {
     const [first, second] = [...document.querySelectorAll<HTMLElement>('[data-code-example]')];
     initCodeExamples(document);
     for (let turn = 0; acquired.filter(({ list }) => first.contains(list)).length < 2; turn++) {
-      if (turn === 20) throw new Error('Expected two acquired file groups.');
+      if (turn === 20) throw new Error('Expected host controls and the current file group.');
       runNextTask();
     }
     const retiring = acquired.filter(({ list }) => first.contains(list));
@@ -658,6 +879,7 @@ describe('CodeExample client', () => {
     vi.mocked(retiring[1].projection.destroy).mockImplementationOnce(() => {
       throw undefined;
     });
+    first.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!.click();
     first.remove();
     let failure: unknown;
     for (let turn = 0; tasks.size && !(failure instanceof AggregateError); turn++) {
@@ -676,9 +898,8 @@ describe('CodeExample client', () => {
     expect(first.dataset.codeExampleInit).toBe('1');
     finishTasks();
     expect(acquired.filter(({ list }) => second.contains(list)).map(({ kind }) => kind)).toEqual([
-      'tree',
-      'tree',
       'tabs',
+      'tree',
     ]);
     second
       .querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="react"]')!
@@ -689,8 +910,8 @@ describe('CodeExample client', () => {
   it('preserves a scheduling failure while releasing every pending owner', () => {
     document.body.innerHTML = exampleMarkup('first') + exampleMarkup('second');
     const roots = [...document.querySelectorAll<HTMLElement>('[data-code-example]')];
-    vi.mocked(enhanceCodeExampleTree).mockImplementationOnce(({ list }) => {
-      const projection = recordProjection('tree', list);
+    vi.mocked(enhanceCodeExampleTabs).mockImplementationOnce(({ list }) => {
+      const projection = recordProjection('tabs', list);
       vi.mocked(projection.destroy).mockImplementationOnce(() => {
         throw undefined;
       });
@@ -717,6 +938,6 @@ describe('CodeExample client', () => {
     expect(releasedRoot.dataset.codeExampleInit).toBeUndefined();
     initCodeExamples(document);
     finishTasks();
-    expect(acquired).toHaveLength(4);
+    expect(acquired).toHaveLength(3);
   });
 });

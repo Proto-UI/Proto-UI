@@ -11,6 +11,7 @@ afterEach(() => {
   document.body.replaceChildren();
   localStorage.removeItem(PREFERRED_ADAPTER_KEY);
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 function fixture() {
   document.body.innerHTML = `<section data-code-example><nav aria-label="Files">
@@ -165,9 +166,10 @@ it('composes queued real host Tabs and file Tree without duplicating source or r
   expect(root.querySelector<HTMLElement>('#panel-react')!.hidden).toBe(false);
   expect(root.querySelector<HTMLElement>('#source-react-1')!.hidden).toBe(false);
   await vi.waitFor(() => {
-    expect(root.querySelectorAll('[data-code-example-tree]')).toHaveLength(2);
+    expect(root.querySelectorAll('[data-code-example-tree]')).toHaveLength(1);
     expect(root.querySelector('[data-code-example-tabs-projection]')).not.toBeNull();
   });
+  expect(wc.querySelector('[data-code-example-tree]')).toBeNull();
   expect(
     root
       .querySelector('#panel-react [data-code-tree-path="index.html"]')
@@ -180,6 +182,7 @@ it('composes queued real host Tabs and file Tree without duplicating source or r
   hostRoot.dispatchEvent(new CustomEvent('valueChange', { detail: { value: '0' } }));
   await Promise.resolve();
   expect(wc.hidden).toBe(false);
+  await vi.waitFor(() => expect(wc.querySelector('[data-code-example-tree]')).not.toBeNull());
   const tree = wc.querySelector('[data-code-example-tree]')!;
   tree.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'index.html' } }));
   await Promise.resolve();
@@ -208,7 +211,7 @@ it('keeps a focused source in place when the queued real groups reach their nati
   source.tabIndex = 0;
   source.focus();
   expect(document.activeElement).toBe(source);
-  // Observe the real final group attempt: its legitimate focus guard creates
+  // Observe the real host group attempt: its legitimate focus guard creates
   // no projected host node that could otherwise supply a completion signal.
   await vi.waitFor(() => expect(hostAttempt).toHaveReturnedTimes(1));
   expect(document.activeElement).toBe(source);
@@ -217,6 +220,118 @@ it('keeps a focused source in place when the queued real groups reach their nati
   expect(root.querySelector('[data-code-example-tabs-projection]')).toBeNull();
   expect(root.querySelector<HTMLElement>('[data-code-toolbar]')!.hidden).toBe(false);
   expect(wc.querySelector<HTMLElement>('[data-code-file-tabs]')!.hidden).toBe(false);
+});
+
+describe('CodeExample late file Tree inside real host Tabs', () => {
+  const idleClock = () => {
+    let next = 0;
+    const pending = new Map<number, IdleRequestCallback>();
+    vi.stubGlobal('requestIdleCallback', (callback: IdleRequestCallback) => {
+      const id = next++;
+      pending.set(id, callback);
+      return id;
+    });
+    vi.stubGlobal('cancelIdleCallback', (id: number) => {
+      pending.delete(id);
+    });
+    return {
+      pending,
+      run() {
+        const entry = pending.entries().next().value;
+        if (!entry) throw new Error('Expected one pending CodeExample projection.');
+        pending.delete(entry[0]);
+        entry[1]({ didTimeout: false, timeRemaining: () => 0 });
+      },
+    };
+  };
+
+  it('acquires later Trees under transported hosts and restores every source on teardown', async () => {
+    const clock = idleClock();
+    const { root, wc, sources } = codeExampleFixture();
+    const react = root.querySelector<HTMLElement>('#panel-react')!;
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-code-file-panel]')];
+    const parents = panels.map((panel) => panel.parentNode);
+    initCodeExamples(root);
+    clock.run();
+    const host = root.querySelector<HTMLElement>('[data-code-example-tabs-projection]')!;
+    expect(host).not.toBeNull();
+    expect(wc.parentElement?.getAttribute('role')).toBe('tabpanel');
+    expect(root.querySelectorAll('[data-code-example-tree]')).toHaveLength(0);
+    clock.run();
+    const wcTree = wc.querySelector('[data-code-example-tree]');
+    expect(wcTree).not.toBeNull();
+    expect(react.querySelector('[data-code-example-tree]')).toBeNull();
+    host.dispatchEvent(new CustomEvent('valueChange', { detail: { value: '1' } }));
+    await Promise.resolve();
+    const file = react.querySelector<HTMLElement>('#file-react-1')!;
+    file.click();
+    clock.run();
+    expect(
+      react.querySelector('[data-code-tree-path="index.html"]')?.getAttribute('aria-selected')
+    ).toBe('true');
+    expect(wc.querySelector('[data-code-example-tree]')).toBe(wcTree);
+    expect(panels.map((panel) => panel.parentNode)).toEqual(parents);
+    expect([...root.querySelectorAll('pre')]).toEqual(sources);
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(clock.pending.size).toBe(0);
+    expect(
+      root.querySelector('[data-code-example-tabs-projection], [data-code-example-tree]')
+    ).toBeNull();
+    expect(wc.parentElement).toBe(root);
+    expect(react.parentElement).toBe(root);
+    expect(panels.map((panel) => panel.parentNode)).toEqual(parents);
+    expect(panels.map((panel) => panel.getAttribute('role'))).toEqual(Array(4).fill('tabpanel'));
+    expect([...root.querySelectorAll('pre')]).toEqual(sources);
+  });
+
+  it('rolls back a deferred Tree admission failure without losing outer Tabs or native file selection', async () => {
+    const clock = idleClock();
+    const { root, sources } = codeExampleFixture();
+    initCodeExamples(root);
+    clock.run();
+    clock.run();
+    const host = root.querySelector<HTMLElement>('[data-code-example-tabs-projection]')!;
+    host.dispatchEvent(new CustomEvent('valueChange', { detail: { value: '1' } }));
+    await Promise.resolve();
+    const original = Element.prototype.getAttribute;
+    vi.spyOn(Element.prototype, 'getAttribute').mockImplementation(function (this: Element, name) {
+      if (name === 'role' && this.localName.endsWith('tree-item') && this.closest('#panel-react'))
+        return null;
+      return original.call(this, name);
+    });
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    clock.run();
+    expect(errors).toHaveBeenCalledOnce();
+    const react = root.querySelector<HTMLElement>('#panel-react')!;
+    expect(react.querySelector('[data-code-example-tree]')).toBeNull();
+    expect(react.querySelector<HTMLElement>('[data-code-file-tabs]')!.hidden).toBe(false);
+    expect(root.querySelector('[data-code-example-tabs-projection]')).toBe(host);
+    react.querySelector<HTMLElement>('#file-react-1')!.click();
+    expect(react.querySelector<HTMLElement>('#source-react-1')!.hidden).toBe(false);
+    expect([...root.querySelectorAll('pre')]).toEqual(sources);
+    expect(clock.pending.size).toBe(0);
+    document.dispatchEvent(new Event('astro:before-swap'));
+    expect(react.parentElement).toBe(root);
+    expect([...root.querySelectorAll('pre')]).toEqual(sources);
+  });
+
+  it('retains focus and source identity when focus enters after outer admission but before Tree acquisition', () => {
+    const clock = idleClock();
+    const { root, wc } = codeExampleFixture();
+    initCodeExamples(root);
+    clock.run();
+    const source = wc.querySelector('pre')!;
+    const parent = source.parentNode;
+    source.tabIndex = 0;
+    source.focus();
+    clock.run();
+    expect(document.activeElement).toBe(source);
+    expect(source.parentNode).toBe(parent);
+    expect(wc.querySelector('[data-code-example-tree]')).toBeNull();
+    expect(wc.querySelector<HTMLElement>('[data-code-file-tabs]')!.hidden).toBe(false);
+    expect(root.querySelector('[data-code-example-tabs-projection]')).not.toBeNull();
+    expect(clock.pending.size).toBe(0);
+  });
 });
 
 it('groups nested layout without replacing Tree semantics and uses upstream folder indentation', async () => {

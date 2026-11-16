@@ -199,6 +199,7 @@ it('reveals clipped tabs using only the strip horizontal scroll', () => {
 });
 
 it('keeps the overflow hint beside the real host list and restores its original position', () => {
+  const clock = frameClock();
   const { root, list, tabs, panels } = fixture();
   list.dataset.codeHostTabs = '';
   const hint = document.createElement('p');
@@ -210,6 +211,7 @@ it('keeps the overflow hint beside the real host list and restores its original 
   projections.push(projection);
   const projectedList = root.querySelector('[data-code-example-tablist="host"]')!;
   expect(projectedList.nextSibling).toBe(hint);
+  clock.frame();
   expect(hint.hidden).toBe(true); // zero-width unit fixture has no measured overflow
   projection.destroy();
   expect(hint.parentElement).toBe(root);
@@ -218,6 +220,44 @@ it('keeps the overflow hint beside the real host list and restores its original 
 });
 
 describe('CodeExample selection and native layout phases', () => {
+  it('defers initial overflow geometry until the same reveal frame', () => {
+    const clock = frameClock();
+    const { root, list, tabs, panels } = fixture();
+    list.dataset.codeHostTabs = '';
+    const hint = document.createElement('p');
+    hint.dataset.codeHostOverflow = '';
+    list.parentElement!.after(hint);
+    const reads: string[] = [];
+    const oldScrollWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollWidth'
+    )?.get;
+    const oldClientWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'clientWidth'
+    )?.get;
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
+      this: HTMLElement
+    ) {
+      if (!this.hasAttribute('data-code-example-tablist')) return oldScrollWidth?.call(this) ?? 0;
+      reads.push('scrollWidth');
+      return 300;
+    });
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: HTMLElement
+    ) {
+      if (!this.hasAttribute('data-code-example-tablist')) return oldClientWidth?.call(this) ?? 0;
+      reads.push('clientWidth');
+      return 100;
+    });
+    projections.push(enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} }));
+    expect(root.querySelector('[data-code-example-tablist]')?.getAttribute('role')).toBe('tablist');
+    expect(reads).toEqual([]);
+    clock.frame();
+    expect(reads).toEqual(['scrollWidth', 'clientWidth']);
+    expect(hint.hidden).toBe(false);
+  });
+
   it('commits both real owners before reading their reveal geometry', async () => {
     const clock = frameClock();
     const first = fixture('first-');
