@@ -25,7 +25,7 @@ import type { RuleCondition } from './rule-declarations';
 import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { flutterNativeSource } from './flutter-native-host';
 import { partitionModuleBindings } from './source-module-bindings';
-import { callableValue } from './value-types';
+import { callableValue, valueAlternatives } from './value-types';
 
 /** Checked statements become ordinary Dart; the supporting host has no semantic IR. */
 export function emitFlutterSource(
@@ -625,7 +625,10 @@ export function emitFlutterSource(
             : call;
         };
         const callee = `nativeValue(${expr(value.callee, depth)})`;
-        if (!value.optional) return invoke(callee);
+        const mayBeNullish = valueAlternatives(value.callee.type).some(
+          (member) => member === 'null' || member === 'void'
+        );
+        if (!value.optional || !mayBeNullish) return invoke(callee);
         const result = value.type === 'void' ? 'NativeVoid' : type(value.type);
         const absent =
           value.type === 'void' ? 'const NativeVoid()' : 'const NativeOptional<Never>.absent()';

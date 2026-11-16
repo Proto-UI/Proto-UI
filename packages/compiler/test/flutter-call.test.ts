@@ -14,6 +14,14 @@ function emit(body: string) {
 }
 
 describe('direct Dart ordinary calls', () => {
+  it('retains a definite callable result when the source uses optional-call syntax', () => {
+    const emitted = emit(`const read = () => 1; def.expose.value('value', read?.());`);
+    if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
+    // Empty generic arguments are invalid Dart. A non-null callable keeps its
+    // checked number result; optional syntax does not add an undefined branch.
+    expect(emitted.value.code).not.toContain('nativeOptionalResult<>');
+  });
+
   for (const [label, body] of [
     [
       'local closure and immutable alias',

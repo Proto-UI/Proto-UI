@@ -86,3 +86,19 @@ PROTO_UI_DART_EVIDENCE_DIR=/absolute/path/to/evidence \
 The independent pre-repair review, baseline and candidate emissions, local
 red/green results and source receipts are retained by the parent continuation.
 The author of this repair does not approve it independently.
+
+## Independent review correction before native execution
+
+Root review found that optional-call syntax on a definitely non-null callable
+retains its original checked result type. The first repair instead treated every
+`?.()` as possibly absent. The actual `call-arguments` output contained
+`nativeOptionalResult<>` inside a `nativeProject<Object?, double>` branch, which
+is invalid Dart. This was a source defect found before native execution, not an
+SDK problem.
+
+The emitter now uses the checked callee's null/undefined alternatives to decide
+whether a short-circuit branch is needed, matching `checkedCall`. The new
+generation assertion failed on the first repair (twelve passes, one failure)
+and passed after this correction. The existing native `alias?.(...)` case is
+retained to verify its actual result and argument trace with Dart. The original
+repair commit and failed generation evidence remain preserved.
