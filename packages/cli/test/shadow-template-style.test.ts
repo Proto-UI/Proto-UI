@@ -119,6 +119,55 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it.each([
+    "def.feedback.style.to(target).use(tw('p-[10%]'));",
+    "def.rule({when: w => w.state(active).eq(true), intent: i => i.feedback.style.to(target).use(tw('p-[10%]'))});",
+  ])('compiles targeted decoration paint as Template CSS: %s', async (contribution) => {
+    const { artifact, documentCss } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', false);
+        def.feedback.style.use(tw('p-2'));
+        ${contribution}
+        return r => [r.decoration(target), r.slot()];
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).toContain('[data-pui-style~="p-[10%]"]');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+    expect(artifact.cssText).toContain('[data-pui-split-root-style~="p-2"]');
+    expect(documentCss).toContain('[data-pui-style~="p-[10%]"]');
+  });
+
+  it('still preflights tokens independently used on Root and an owned decoration', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'root-and-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        def.feedback.style.use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('treats lookalike targeted calls with a rebound receiver as unclassified', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'lookalike', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def = other;
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('accepts a direct single-return renderer without writes', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';

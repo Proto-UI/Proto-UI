@@ -1250,7 +1250,8 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       for (const token of value.strings.flatMap(splitTokens)) {
         tokens.add(token);
         if (rootInventory?.templateTokens) {
-          if (isTemplateStyleCall(node)) rootInventory.templateTokens.add(token);
+          if (isTemplateStyleCall(node) || isOwnedDecorationStyleCall(node))
+            rootInventory.templateTokens.add(token);
           else {
             rootInventory.nonTemplateTokens.add(token);
             if (!isFeedbackStyleTwCall(node)) rootInventory.unclassifiedTokens.add(token);
@@ -1451,37 +1452,7 @@ function isTemplateStyleCall(node) {
     render.parent.parent !== setup.body
   )
     return false;
-  if (getPropertyName(setup.name) !== 'setup') return false;
-  const config = setup.parent;
-  const definition = config.parent;
-  if (
-    !ts.isObjectLiteralExpression(config) ||
-    !ts.isCallExpression(definition) ||
-    definition.arguments[0] !== config ||
-    !ts.isIdentifier(definition.expression) ||
-    definition.expression.text !== 'definePrototype' ||
-    ts.findAncestor(definition.parent, ts.isFunctionLike)
-  )
-    return false;
-  const source = node.getSourceFile();
-  for (const name of ['definePrototype', 'tw']) {
-    if (
-      !source.statements.some(
-        (statement) =>
-          ts.isImportDeclaration(statement) &&
-          statement.moduleSpecifier.text === '@proto.ui/core' &&
-          !statement.importClause?.isTypeOnly &&
-          ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
-          statement.importClause.namedBindings.elements.some(
-            (binding) =>
-              !binding.isTypeOnly &&
-              binding.name.text === name &&
-              (binding.propertyName ?? binding.name).text === name
-          )
-      )
-    )
-      return false;
-  }
+  if (!isCanonicalPrototypeSetup(setup)) return false;
 
   let safe = true;
   function check(current) {
@@ -1518,6 +1489,157 @@ function isTemplateStyleCall(node) {
     ts.forEachChild(current, checkTw);
   }
   checkTw(setup);
+  return safe;
+}
+
+function isCanonicalPrototypeSetup(setup) {
+  if (!ts.isMethodDeclaration(setup)) return false;
+  if (getPropertyName(setup.name) !== 'setup') return false;
+  const config = setup.parent;
+  const definition = config.parent;
+  if (
+    !ts.isObjectLiteralExpression(config) ||
+    !ts.isCallExpression(definition) ||
+    definition.arguments[0] !== config ||
+    !ts.isIdentifier(definition.expression) ||
+    definition.expression.text !== 'definePrototype' ||
+    ts.findAncestor(definition.parent, ts.isFunctionLike)
+  )
+    return false;
+  const source = setup.getSourceFile();
+  for (const name of ['definePrototype', 'tw']) {
+    if (
+      !source.statements.some(
+        (statement) =>
+          ts.isImportDeclaration(statement) &&
+          statement.moduleSpecifier.text === '@proto.ui/core' &&
+          !statement.importClause?.isTypeOnly &&
+          ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
+          statement.importClause.namedBindings.elements.some(
+            (binding) =>
+              !binding.isTypeOnly &&
+              binding.name.text === name &&
+              (binding.propertyName ?? binding.name).text === name
+          )
+      )
+    )
+      return false;
+  }
+
+  return true;
+}
+
+function parameterName(callback) {
+  const parameter = callback.parameters[0];
+  return parameter &&
+    !parameter.initializer &&
+    !parameter.dotDotDotToken &&
+    ts.isIdentifier(parameter.name)
+    ? parameter.name.text
+    : undefined;
+}
+
+function feedbackStyleReceiver(method, name) {
+  if (!memberIs(method, name)) return undefined;
+  const style = memberOwner(method);
+  const feedback = style && memberIs(style, 'style') ? memberOwner(style) : undefined;
+  const receiver = feedback && memberIs(feedback, 'feedback') ? memberOwner(feedback) : undefined;
+  return receiver && ts.isIdentifier(receiver) ? receiver.text : undefined;
+}
+
+function directBodyCall(callback, call) {
+  return (
+    callback.body === call ||
+    (ts.isExpressionStatement(call.parent) && callback.body === call.parent.parent)
+  );
+}
+
+function isOwnedDecorationStyleCall(node) {
+  const use = node.parent;
+  if (!ts.isCallExpression(use) || use.arguments[0] !== node || !memberIs(use.expression, 'use'))
+    return false;
+  const selection = memberOwner(use.expression);
+  if (!selection || !ts.isCallExpression(selection)) return false;
+  const receiver = feedbackStyleReceiver(selection.expression, 'to');
+  const target = selection.arguments[0];
+  if (!receiver || !target || !ts.isIdentifier(target) || selection.arguments.length !== 1)
+    return false;
+
+  const callback = ts.findAncestor(use, ts.isFunctionLike);
+  if (!callback || parameterName(callback) !== receiver || !directBodyCall(callback, use))
+    return false;
+  let setup = callback;
+  if (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) {
+    if (ts.isBlock(callback.body) && callback.body.statements.length !== 1) return false;
+    if (
+      callback.parameters.length !== 1 ||
+      parameterName(callback) === target.text ||
+      parameterName(callback) === 'tw'
+    )
+      return false;
+    const intent = callback.parent;
+    if (!ts.isPropertyAssignment(intent) || getPropertyName(intent.name) !== 'intent') return false;
+    const config = intent.parent;
+    const rule = config.parent;
+    if (
+      !ts.isObjectLiteralExpression(config) ||
+      !ts.isCallExpression(rule) ||
+      rule.arguments[0] !== config ||
+      !memberIs(rule.expression, 'rule')
+    )
+      return false;
+    setup = ts.findAncestor(rule, ts.isFunctionLike);
+    const ruleReceiver = memberOwner(rule.expression);
+    if (
+      !setup ||
+      !ruleReceiver ||
+      !ts.isIdentifier(ruleReceiver) ||
+      ruleReceiver.text !== parameterName(setup) ||
+      !directBodyCall(setup, rule)
+    )
+      return false;
+  }
+
+  if (!isCanonicalPrototypeSetup(setup) || !setup.body || !ts.isBlock(setup.body)) return false;
+  const definition = parameterName(setup);
+  const isDeclaredTarget = setup.body.statements.some(
+    (statement) =>
+      ts.isVariableStatement(statement) &&
+      Boolean(statement.declarationList.flags & ts.NodeFlags.Const) &&
+      statement.declarationList.declarations.some(
+        (binding) =>
+          ts.isIdentifier(binding.name) &&
+          binding.name.text === target.text &&
+          binding.initializer &&
+          ts.isCallExpression(binding.initializer) &&
+          feedbackStyleReceiver(binding.initializer.expression, 'declareDecoration') === definition
+      )
+  );
+  if (!isDeclaredTarget) return false;
+
+  // Keep the Root preflight for rebound or escaped definition receivers and
+  // for a shadowing binding of the canonical tw import.
+  let safe = true;
+  function check(current) {
+    if (!safe) return;
+    if (ts.isIdentifier(current)) {
+      const parent = current.parent;
+      if (current.text === definition && current !== setup.parameters[0].name) {
+        let access = current;
+        while (ts.isPropertyAccessExpression(access.parent) && access.parent.expression === access)
+          access = access.parent;
+        if (
+          access === current ||
+          !ts.isCallExpression(access.parent) ||
+          access.parent.expression !== access
+        )
+          safe = false;
+      }
+      if (current.text === 'tw' && parent.name === current) safe = false;
+    }
+    ts.forEachChild(current, check);
+  }
+  check(setup.body);
   return safe;
 }
 
