@@ -86,9 +86,16 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
           if (!hasLayout(this)) return 0;
           return this.offsetWidth - (hasRole(this, 'surface') ? 2 : 0);
         });
+        let rejectItemWidth = false;
+        let conflictingReads = 0;
         vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
           this: HTMLElement
         ) {
+          if (rejectItemWidth && hasLayout(this) && hasRole(this, 'item')) {
+            conflictingReads++;
+            // Bound the failing control so repeated re-admission can finish.
+            if (conflictingReads <= 8) return this.clientWidth + 20;
+          }
           return this.clientWidth;
         });
         vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
@@ -226,6 +233,28 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
           expect(refs.content.getExposes().transitionState.get()).toBe('entered');
           expect(content()?.getAttribute('role')).toBe('listbox');
           expect(document.querySelectorAll('[data-pui-portal-mount]')).toHaveLength(1);
+
+          if (position === 'item-aligned') {
+            rejectItemWidth = true;
+            await act(async () => {
+              window.dispatchEvent(new Event('resize'));
+            });
+            await settle();
+            expect(conflictingReads).toBe(1);
+            expect(refs.root.getExposes().open.get()).toBe(true);
+            expect(refs.content.getExposes().alignmentDiagnostic.get()).toBe(
+              'select.geometry.size-conflict'
+            );
+            expect(refs.content.getExposes().transitionState.get()).toBe('closed');
+            expect(document.querySelectorAll('[data-pui-portal-mount]')).toHaveLength(0);
+
+            rejectItemWidth = false;
+            await request(false);
+            await request(true);
+            expect(refs.content.getExposes().alignmentDiagnostic.get()).toBe('');
+            expect(refs.content.getExposes().transitionState.get()).toBe('entered');
+            expect(document.querySelectorAll('[data-pui-portal-mount]')).toHaveLength(1);
+          }
         } finally {
           await act(async () => root.unmount());
           host.remove();
