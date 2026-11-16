@@ -9,6 +9,7 @@ const settle = async () => {
     window as unknown as { happyDOM: { waitUntilComplete(): Promise<void> } }
   ).happyDOM.waitUntilComplete();
 };
+let authorSerial = 0;
 
 afterEach(async () => {
   document.body.replaceChildren();
@@ -20,6 +21,7 @@ function entryFixture() {
   const nativeObserver = window.MutationObserver;
   const observers: DeliveryObserver[] = [];
   const observations: Array<{ node: Node; options?: MutationObserverInit }> = [];
+  const delivered: MutationRecord[] = [];
   class DeliveryObserver extends nativeObserver {
     constructor(private readonly callback: MutationCallback) {
       super(callback);
@@ -29,8 +31,10 @@ function entryFixture() {
       observations.push({ node, options });
       super.observe(node, options);
     }
-    deliverPendingRecords() {
+    deliverPendingRecords(normalize?: (record: MutationRecord) => void) {
       const records = this.takeRecords();
+      for (const record of records) normalize?.(record);
+      delivered.push(...records);
       if (records.length) this.callback(records, this);
     }
   }
@@ -38,9 +42,11 @@ function entryFixture() {
     (callback) => new DeliveryObserver(callback)
   );
   const target = document.createElement('div');
+  const ancestor = document.createElement('div');
   const style = document.createElement('style');
   style.textContent = '.entry-refresh-button { visibility: visible; }';
-  document.body.append(style, target);
+  ancestor.append(target);
+  document.body.append(style, ancestor);
   const modules = createWebComponentModules({
     el: target,
     surfaceProjection: createHostSurfaceProjection(target),
@@ -69,14 +75,16 @@ function entryFixture() {
   setEntry(target, config, true);
   return {
     target,
+    ancestor,
     style,
     observations,
+    delivered,
     setEntry: (next: HTMLElement, enabled: boolean) => setEntry(next, config, enabled),
     // Happy DOM normally delivers observers through its task manager. Deliver
     // its real pending records explicitly to exercise the browser's allowed
     // same-checkpoint CSSOM/DOM ordering, without inventing mutation facts.
-    deliver: () => {
-      for (const observer of [...observers]) observer.deliverPendingRecords();
+    deliver: (normalize?: (record: MutationRecord) => void) => {
+      for (const observer of [...observers]) observer.deliverPendingRecords(normalize);
     },
     rebuilds: (node = target) =>
       observations.filter(
@@ -88,6 +96,138 @@ function entryFixture() {
 }
 
 describe('WC entry dependency refresh coalescing', () => {
+  it.each([
+    ['descendant', 'class'],
+    ['descendant', 'style'],
+    ['ancestor', 'class'],
+    ['ancestor', 'style'],
+  ] as const)('does not rebuild for an unchanged %s %s attribute', async (location, attribute) => {
+    const fixture = entryFixture();
+    try {
+      const button = document.createElement('button');
+      button.tabIndex = 0;
+      fixture.target.append(button);
+      const subject = location === 'descendant' ? button : fixture.ancestor;
+      const value = attribute === 'class' ? 'entry-refresh-button' : 'visibility: visible;';
+      subject.setAttribute(attribute, value);
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+      fixture.observations.length = 0;
+      for (let i = 0; i < 3; i += 1) subject.setAttribute(attribute, value);
+      fixture.deliver();
+      expect(
+        fixture.delivered.filter(
+          (record) => record.target === subject && record.attributeName === attribute
+        )
+      ).toHaveLength(3);
+      await settle();
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+      expect(fixture.rebuilds()).toBe(0);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  it('keeps later changed records when an attribute returns to its original value', async () => {
+    const fixture = entryFixture();
+    try {
+      const button = document.createElement('button');
+      button.tabIndex = 0;
+      button.className = 'entry-refresh-button';
+      fixture.target.append(button);
+      await settle();
+      fixture.observations.length = 0;
+      button.className = 'transient-entry-class';
+      button.className = 'entry-refresh-button';
+      fixture.deliver();
+      expect(
+        fixture.delivered.filter(
+          (record) => record.target === button && record.attributeName === 'class'
+        )
+      ).toHaveLength(2);
+      await settle();
+      expect(fixture.rebuilds()).toBe(1);
+      expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  it('compares a namespaced attribute against its own current value', async () => {
+    const fixture = entryFixture();
+    const namespace = 'urn:proto-ui:entry-refresh-test';
+    const normalizeNamespace = (record: MutationRecord) => {
+      if (record.target === fixture.ancestor && record.attributeName === 'entry:input') {
+        // Happy DOM omits attributeNamespace and uses the qualified name.
+        // Keep its real mutation/oldValue, but model the browser's namespace
+        // metadata explicitly. This is host-model evidence, not Chromium.
+        Object.defineProperties(record, {
+          attributeName: { value: 'input' },
+          attributeNamespace: { value: namespace },
+        });
+      }
+    };
+    try {
+      fixture.ancestor.setAttribute('input', 'different-unqualified-value');
+      fixture.ancestor.setAttributeNS(namespace, 'entry:input', 'original');
+      await settle();
+      fixture.observations.length = 0;
+      fixture.ancestor.setAttributeNS(namespace, 'entry:input', 'original');
+      fixture.deliver(normalizeNamespace);
+      expect(fixture.delivered.some((record) => record.attributeNamespace === namespace)).toBe(
+        true
+      );
+      await settle();
+      expect(fixture.rebuilds()).toBe(0);
+
+      fixture.ancestor.setAttributeNS(namespace, 'entry:input', 'changed');
+      fixture.deliver(normalizeNamespace);
+      await settle();
+      expect(fixture.rebuilds()).toBe(1);
+    } finally {
+      fixture.dispose();
+    }
+  });
+
+  it.each(['disabled', 'style'] as const)(
+    'retains a real %s change made by an author callback during an unchanged write',
+    async (effect) => {
+      const fixture = entryFixture();
+      let armed = false;
+      let callbacks = 0;
+      const button = document.createElement('button');
+      button.tabIndex = 0;
+      class AuthorElement extends HTMLElement {
+        static observedAttributes = ['class'];
+        attributeChangedCallback() {
+          if (!armed) return;
+          callbacks += 1;
+          if (effect === 'disabled') button.disabled = true;
+          else button.style.visibility = 'hidden';
+        }
+      }
+      const name = `entry-refresh-author-${++authorSerial}`;
+      customElements.define(name, AuthorElement);
+      const author = document.createElement(name);
+      author.className = 'same-author-input';
+      fixture.target.append(button, author);
+      try {
+        await settle();
+        expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+        fixture.observations.length = 0;
+        armed = true;
+        author.setAttribute('class', 'same-author-input');
+        expect(callbacks).toBe(1);
+        fixture.deliver();
+        await settle();
+        expect(fixture.rebuilds()).toBe(1);
+        expect(fixture.target.tabIndex).toBe(0);
+      } finally {
+        fixture.dispose();
+      }
+    }
+  );
+
   it.each(['dom-first', 'cssom-first'] as const)(
     'rebuilds once for a shared %s invalidation checkpoint',
     async (order) => {

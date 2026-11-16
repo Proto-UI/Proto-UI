@@ -1886,6 +1886,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 subtree: true,
                 characterData: true,
                 attributes: true,
+                attributeOldValue: true,
                 attributeFilter: [
                   'tabindex',
                   'disabled',
@@ -2052,6 +2053,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 entryResizeObserver?.observe(externalAncestor);
                 entryObserver?.observe(externalAncestor, {
                   attributes: true,
+                  attributeOldValue: true,
                 });
                 const externalRoot = externalAncestor.getRootNode();
                 if (
@@ -2092,7 +2094,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                     parent,
                     filtered && observedRoots.has(parent)
                       ? { ...options, attributeFilter: undefined }
-                      : { childList: true, attributes: true }
+                      : { childList: true, attributes: true, attributeOldValue: true }
                   );
               }
               // A filtered position can be gated by selectors above its
@@ -2114,7 +2116,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                       ancestor,
                       observedRoots.has(ancestor)
                         ? { ...options, attributeFilter: undefined }
-                        : { attributes: true }
+                        : { attributes: true, attributeOldValue: true }
                     );
                 }
               }
@@ -2134,6 +2136,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   subtree: true,
                   characterData: true,
                   attributes: true,
+                  attributeOldValue: true,
                 });
               };
               // The positional subject can also change its own membership,
@@ -2489,14 +2492,25 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             entryObserver = new Observer((records) => {
               if (!isCurrentEntryObservation()) return;
               if (
-                records.some(
-                  (record) =>
+                records.some((record) => {
+                  if (record.type !== 'attributes') return true;
+                  const current = (record.target as Element).getAttributeNS(
+                    record.attributeNamespace,
+                    record.attributeName!
+                  );
+                  // Same-valued writes do not change this selector input.
+                  // Check each record: a later B -> A in an A -> B -> A batch
+                  // or an author callback's separate mutation still refreshes.
+                  if (record.oldValue === current) return false;
+                  return (
                     record.target !== target ||
+                    record.attributeNamespace !== null ||
                     record.attributeName !== 'tabindex' ||
-                    target.getAttribute('tabindex') !== projectedTargetTabIndex
-                )
+                    current !== projectedTargetTabIndex
+                  );
+                })
               ) {
-                // Ignore only the Adapter's currently projected target value.
+                // Ignore unchanged attributes and the Adapter's projected target value.
                 // A delegated surface can also receive an author/runtime write;
                 // a different value must be resampled and restored exactly once.
                 // New native descendants can own open roots. A single DOM
