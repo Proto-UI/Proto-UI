@@ -458,8 +458,6 @@ export function emitVueSource(
         );
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(node.condition, depth)} ? ${expression(node.then, depth)} : ${expression(node.otherwise, depth)})`;
       case 'binary':
         return `(${expression(node.left, depth)} ${node.operator} ${expression(node.right, depth)})`;
       case 'array':

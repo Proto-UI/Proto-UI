@@ -342,8 +342,6 @@ export function emitReactSource(
         );
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(value.condition, depth)} ? ${expression(value.then, depth)} : ${expression(value.otherwise, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':

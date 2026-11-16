@@ -257,8 +257,6 @@ export function emitQtSource(
       }
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(node.condition, depth)} ? ${expression(node.then, depth)} : ${expression(node.otherwise, depth)})`;
       case 'binary':
         return node.operator === '??'
           ? `(function(${p}Optional) { return ${p}Optional == null ? ${expression(node.right, depth)} : ${p}Optional; })(${expression(node.left, depth)})`
