@@ -107,6 +107,12 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   let latestMaterializationGeneration = 0;
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let stopThemeWatcher: (() => void) | null = null;
+  // A control switch request is applied after the control's own close
+  // handback, so the outgoing generation's open portals are sealed in the
+  // request's own turn.
+  const sealOutgoingPortals = (): void => {
+    activeCandidate?.sealExternalPortals?.();
+  };
   const candidateByGeneration = new Map<number, MaterializedProjectionCandidate>();
   const codeHighlights: Record<string, string> = root.dataset.codeHighlights
     ? JSON.parse(root.dataset.codeHighlights)
@@ -284,6 +290,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         componentId,
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
+        sealOutgoingPortals,
         content: {
           demo: surface.demo,
           recipe: runtimePreviewRecipe(projectionFamilyId, componentId),
@@ -465,6 +472,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     ) {
       return;
     }
+    sealOutgoingPortals();
     void requestRuntime(runtimeId);
   };
   root.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);

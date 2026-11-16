@@ -665,6 +665,48 @@ describe('Website projection composition', () => {
     expect(composition.restoreFocus(PROJECTION_FOCUS_KEYS.runtime)).toBe(false);
   });
 
+  it('seals the outgoing generation portals in the request turn and keeps a repeated value unsealed', async () => {
+    const requests: string[] = [];
+    const sealOutgoingPortals = vi.fn();
+    const composition = createProjectionComposition({
+      ownerId: 'seal-request-owner',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 3,
+      componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
+      childDemo: {
+        type: 'demo',
+        root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Child'] },
+      },
+      controls: controls(requests),
+      controlIds: ['family'],
+      sealOutgoingPortals,
+    });
+    const { host, refs } = mountDemoTree(composition.demo);
+    const api: DemoRuntimeApi = {
+      call: () => undefined,
+      getExposes: () => undefined,
+      setProps: () => undefined,
+    };
+    const cleanup = composition.demo.setup?.({ host, refs, api });
+    const familyRoot = refs['__pui_projection__family_root']!;
+
+    familyRoot.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'brutalist' } }));
+    expect(sealOutgoingPortals).toHaveBeenCalledTimes(1);
+    expect(requests).toEqual([]);
+
+    await Promise.resolve();
+    expect(requests).toEqual(['family:brutalist']);
+
+    familyRoot.dispatchEvent(new CustomEvent('valueChange', { detail: { value: 'shadcn' } }));
+    expect(sealOutgoingPortals).toHaveBeenCalledTimes(1);
+    await Promise.resolve();
+    expect(requests).toEqual(['family:brutalist', 'family:shadcn']);
+
+    (cleanup as () => void)();
+  });
+
   it.each(['wc', 'react'] as const)(
     'finishes real Item close and Trigger handback before accepting %s',
     async (requestedValue) => {
