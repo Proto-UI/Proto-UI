@@ -9,6 +9,12 @@ import {
   createDefaultWebPreferenceSource,
   readWebPreference,
 } from '../platform/web-preference-source';
+const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
+
+export function hasOwnedWebPresenceZeroOpacity(element: Element): boolean {
+  return zeroOpacityOwners.get(element)?.() ?? false;
+}
+
 export type WebPresencePresentationOptions = {
   /** Native host adoption signal. Cleanup belongs to this physical view. */
   subscribeDocumentChange?: (
@@ -164,15 +170,26 @@ function createDocumentPresenceSink(
   const owned = (name: string, value: { value: string; priority: string }) =>
     el.style.getPropertyValue(name) === value.value &&
     el.style.getPropertyPriority(name) === value.priority;
+  const ownsZeroOpacity = () => {
+    const opacity = writes.get('opacity');
+    return (
+      live() && !!opacity && Number.parseFloat(opacity.value) === 0 && owned('opacity', opacity)
+    );
+  };
+  const clearZeroOpacityOwner = () => {
+    if (zeroOpacityOwners.get(el) === ownsZeroOpacity) zeroOpacityOwners.delete(el);
+  };
   const detectLoss = () => {
     for (const [name, value] of writes)
       if (!owned(name, value)) {
         lost.add(name);
         writes.delete(name);
         baseline.delete(name);
+        if (name === 'opacity') clearZeroOpacityOwner();
       }
   };
   const clear = () => {
+    clearZeroOpacityOwner();
     translation?.release();
     translation = null;
     for (const [name, value] of writes)
@@ -197,6 +214,11 @@ function createDocumentPresenceSink(
       value: el.style.getPropertyValue(name),
       priority: el.style.getPropertyPriority(name),
     });
+    if (name === 'opacity') {
+      if (Number.parseFloat(value) === 0 && ownsZeroOpacity())
+        zeroOpacityOwners.set(el, ownsZeroOpacity);
+      else clearZeroOpacityOwner();
+    }
     return true;
   };
   const px = (value: string | undefined) =>

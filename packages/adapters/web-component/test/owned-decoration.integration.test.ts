@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
-import { AdaptToWebComponent } from '../src';
+import { asTransition, type TransitionProps } from '@proto.ui/prototypes-base/transition';
+import { AdaptToWebComponent, setElementProps } from '../src';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import type { PropsBaseType } from '@proto.ui/types';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
@@ -425,6 +426,117 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       readStyle.mockRestore();
     }
   });
+
+  it('allows equal split reuse while Presence owns inline zero opacity', async () => {
+    const matchMedia = window.matchMedia.bind(window);
+    const media = vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      const list = matchMedia(query);
+      Object.defineProperty(list, 'matches', { value: query.includes(': no-preference)') });
+      return list;
+    });
+    let nextFrame = 0;
+    const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation(() => ++nextFrame);
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+    try {
+      const C = AdaptToWebComponent(
+        definePrototype<TransitionProps>({
+          name: `owned-presence-zero-opacity-${++id}`,
+          setup(def) {
+            const transition = asTransition();
+            transition.configure({
+              enterDuration: 500,
+              completion: { kind: 'presentation', timeoutMs: 1000 },
+            });
+            def.feedback.style.presence({
+              owner: transition.presentationOwner,
+              closed: { opacity: 0 },
+              entered: { opacity: 1 },
+              easing: [0.32, 0.72, 0, 1],
+            });
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.slot()];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const caller = document.createTextNode('Caller');
+      host.append(caller);
+      setElementProps(host, { open: false });
+      document.body.append(host);
+      for (let i = 0; i < 12; i++) await settle();
+      setElementProps(host, { open: true });
+      for (let i = 0; i < 12; i++) await settle();
+      const surface = host.shadowRoot!.querySelector<HTMLElement>('[part="surface"]')!;
+      const slot = surface.querySelector('slot')!;
+      expect(surface.style.getPropertyValue('opacity')).toBe('0');
+      expect(() => host.update()).not.toThrow();
+      expect(slot.assignedNodes()).toEqual([caller]);
+      host.remove();
+    } finally {
+      media.mockRestore();
+      raf.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+
+  it.each(['input value', 'text content'] as const)(
+    'rejects a split connection reaction that resets caller %s in place',
+    (mutation) => {
+      const tag = `pui-decoration-caller-state-${++id}`;
+      let changed = false;
+      customElements.define(
+        tag,
+        class extends HTMLElement {
+          connectedCallback() {
+            const owner = (this.getRootNode() as ShadowRoot).host;
+            if (!owner) return;
+            if (mutation === 'input value') {
+              const input = owner.querySelector('input')!;
+              input.value = 'Reset';
+            } else {
+              const leaf = owner.querySelector('span')!.firstChild as Text;
+              leaf.data = 'Reset';
+            }
+            changed = true;
+          }
+        }
+      );
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-caller-state-${id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.slot(), r.el(tag, {})];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const wrapper = document.createElement('div');
+      const input = document.createElement('input');
+      input.value = 'Caller input';
+      const text = document.createElement('span');
+      text.textContent = 'Caller text';
+      wrapper.append(input, text);
+      host.append(wrapper);
+      expect(() => document.body.append(host)).toThrow('decoration caller projection changed');
+      expect(changed).toBe(true);
+      expect(host.firstChild).toBe(wrapper);
+    }
+  );
 
   it.each(['remove', 'replace'] as const)(
     'rejects a split connection reaction that can %s a caller before acknowledgement',

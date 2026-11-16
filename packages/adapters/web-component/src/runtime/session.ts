@@ -1,6 +1,9 @@
 import type { RuntimeHost } from '@proto.ui/runtime';
 import { withWebComponentOwnedRelocation } from '../owned-relocation';
-import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
+import {
+  createWebOwnedDecorationPortalGate,
+  hasOwnedWebPresenceZeroOpacity,
+} from '@proto.ui/adapter-base';
 import type { OwnedDecorationBinding } from '@proto.ui/module-feedback';
 import { equalOwnedTemplateBlueprint, type InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
@@ -45,6 +48,7 @@ function isSplitNodeConcealed(node: Element, visibilityOwner?: HTMLElement): boo
     if (
       declaration?.getPropertyValue('display') === 'none' ||
       (Number.parseFloat(declaration?.getPropertyValue('opacity') ?? '') === 0 &&
+        !hasOwnedWebPresenceZeroOpacity(node) &&
         (declaration === style || !hasOwnedSplitZeroOpacity(node))) ||
       declaration?.getPropertyValue('content-visibility') === 'hidden'
     )
@@ -88,6 +92,47 @@ function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean 
     childNodes.length === expected.length &&
     expected.every((child, index) => childNodes[index] === child)
   );
+}
+
+function captureCallerControlState(node: Element): readonly (string | number | boolean | null)[] {
+  if (node.localName === 'select') {
+    const select = node as HTMLSelectElement;
+    return [select.value, ...Array.from(select.options, (option) => option.selected)];
+  }
+  const control = node as HTMLInputElement | HTMLTextAreaElement;
+  return [
+    control.value,
+    control.selectionStart,
+    control.selectionEnd,
+    control.selectionDirection,
+    ...(node.localName === 'input'
+      ? [(control as HTMLInputElement).checked, (control as HTMLInputElement).indeterminate]
+      : []),
+  ];
+}
+
+function captureSplitCallerProjection(host: HTMLElement): () => boolean {
+  const children = Array.from(host.childNodes);
+  const text = children.map((node) => node.textContent);
+  const selector = 'input, textarea, select';
+  const controls = children
+    .flatMap((node) => {
+      if (node.nodeType !== 1) return [];
+      const element = node as Element;
+      const descendants = Array.from(element.querySelectorAll(selector));
+      return element.matches(selector) ? [element, ...descendants] : descendants;
+    })
+    .map((node) => ({ node, state: captureCallerControlState(node) }));
+  return () =>
+    hasSameChildren(host, children) &&
+    children.every((node, index) => node.textContent === text[index]) &&
+    controls.every(({ node, state }) => {
+      if (!host.contains(node)) return false;
+      const current = captureCallerControlState(node);
+      return (
+        current.length === state.length && current.every((value, index) => value === state[index])
+      );
+    });
 }
 
 function captureSplitAttributes(element: Element, decoration: boolean): string {
@@ -260,9 +305,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         : undefined;
     // A staged child may run a constructor or connected reaction. The
     // caller still owns this light-DOM sequence until acknowledgement.
-    const callersAtStaging = splitRoot ? Array.from(host.childNodes) : undefined;
+    const callerProjectionIsCurrent = splitRoot ? captureSplitCallerProjection(host) : undefined;
     const assertCallerProjection = () => {
-      if (callersAtStaging && !hasSameChildren(host, callersAtStaging))
+      if (callerProjectionIsCurrent && !callerProjectionIsCurrent())
         throw new Error('[WC Adapter] decoration caller projection changed');
     };
     const stagedChildren = splitRoot ? new Map<Node, ChildNode[]>() : undefined;
