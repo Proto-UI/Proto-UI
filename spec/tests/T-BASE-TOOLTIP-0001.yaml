@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.7
 summary: Covers Root ownership, delayed and immediate interaction, controlled Escape requests, disabled state, semantics, additive description relation, Overlay, Transition, and positioning wiring.
 cases:
+  - id: T-BASE-TOOLTIP-0001-CASE-SAME-NODE
+    title: One command subject owns focus and activation while Tooltip contributes description
+    covers:
+      [
+        P-BASE-TOOLTIP-TRIGGER-SAME-NODE,
+        P-BASE-TOOLTIP-TRIGGER-HOST-SEMANTICS,
+        P-BASE-TOOLTIP-TRIGGER-DESCRIPTION,
+      ]
+    expectation: one-native-tab-stop-and-command-signal-with-additive-tooltip-description
   - id: T-BASE-TOOLTIP-0001-CASE-DELAYS
     title: Pointer delay is cancellable while focus opens immediately and close remains hoverable
     covers: [P-BASE-TOOLTIP-DELAYS, P-BASE-TOOLTIP-CONTENT-HOVERABLE]
@@ -34,6 +43,29 @@ cases:
       ]
     expectation: tooltip-content-wires-existing-overlay-transition-and-positioning-capabilities
 implementations:
+  - id: tooltip-button-composition
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/tooltip-button.test.ts
+    required: true
+    consumesCases: [T-BASE-TOOLTIP-0001-CASE-SAME-NODE]
+    notes:
+      [
+        Synthetic host composition evidence; actual native input is separately exercised by the browser implementation.,
+      ]
+  - id: tooltip-button-native-consumers
+    kind: runtime-test
+    status: passing
+    path: apps/www/test/component-consumer-repairs.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-TOOLTIP-0001-CASE-SAME-NODE]
+    notes:
+      [
+        Actual Chromium Tab/Shift+Tab,
+        hover,
+        focus,
+        Escape and single command signals across Base/Shadcn/Brutalist in React and Web Components. OS assistive technology remains separate.,
+      ]
   - id: prototypes-base-tooltip-contract
     kind: module-test
     status: passing
@@ -63,6 +95,7 @@ verifies:
     - id: P-BASE-TOOLTIP-TRIGGER
       anchors:
         [
+          P-BASE-TOOLTIP-TRIGGER-SAME-NODE,
           P-BASE-TOOLTIP-TRIGGER-INTERACTION,
           P-BASE-TOOLTIP-TRIGGER-HOST-SEMANTICS,
           P-BASE-TOOLTIP-TRIGGER-DESCRIPTION,

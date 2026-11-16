@@ -10,22 +10,61 @@ afterEach(() => {
   for (const projection of projections.splice(0).reverse()) projection.destroy();
   document.body.replaceChildren();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
-function fixture() {
-  document.body.innerHTML = `<section data-code-example>
+function fixture(prefix = '') {
+  const root = document.createElement('section');
+  root.dataset.codeExample = '';
+  root.innerHTML = `
     <div data-code-toolbar><div role="tablist" aria-label="Host">
-      <button id="a" role="tab" aria-selected="true">React</button>
-      <button id="b" role="tab" aria-selected="false">Web Components</button>
+      <button id="${prefix}a" role="tab" aria-selected="true">React</button>
+      <button id="${prefix}b" role="tab" aria-selected="false">Web Components</button>
     </div></div>
-    <section role="tabpanel" aria-labelledby="a"><pre>exact react source</pre></section>
-    <section role="tabpanel" aria-labelledby="b" hidden><pre>exact wc source</pre></section>
-  </section>`;
-  const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    <section role="tabpanel" aria-labelledby="${prefix}a"><pre>exact react source</pre></section>
+    <section role="tabpanel" aria-labelledby="${prefix}b" hidden><pre>exact wc source</pre></section>`;
+  document.body.append(root);
   const list = root.querySelector<HTMLElement>('[role="tablist"]')!;
   const tabs = [...list.querySelectorAll<HTMLElement>('[role="tab"]')];
   const panels = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
   return { root, list, tabs, panels };
+}
+
+function frameClock() {
+  let nextId = 0;
+  const pending = new Map<number, FrameRequestCallback>();
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    const id = ++nextId;
+    pending.set(id, callback);
+    return id;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+    pending.delete(id);
+  });
+  return {
+    pending,
+    frame() {
+      const callbacks = [...pending.values()];
+      pending.clear();
+      for (const callback of callbacks) callback(performance.now());
+    },
+  };
+}
+
+function nativeGeometry(root: HTMLElement, observeRead = () => {}) {
+  const viewport = root.querySelector<HTMLElement>('[data-code-example-tablist]')!;
+  const triggers = [...root.querySelectorAll<HTMLElement>('[data-code-example-projected-tab]')];
+  const viewportRead = vi.spyOn(viewport, 'getBoundingClientRect').mockImplementation(() => {
+    observeRead();
+    return new DOMRect(10, 20, 100, 44);
+  });
+  const targetReads = triggers.map((trigger, index) =>
+    vi
+      .spyOn(trigger, 'getBoundingClientRect')
+      .mockImplementation(() => new DOMRect(10 + index * 200, 20, 100, 44))
+  );
+  viewport.scrollTop = 29;
+  return { viewport, triggers, viewportRead, targetReads };
 }
 
 describe('CodeExample real legacy Tabs enhancement', () => {
@@ -160,6 +199,7 @@ it('reveals clipped tabs using only the strip horizontal scroll', () => {
 });
 
 it('keeps the overflow hint beside the real host list and restores its original position', () => {
+  const clock = frameClock();
   const { root, list, tabs, panels } = fixture();
   list.dataset.codeHostTabs = '';
   const hint = document.createElement('p');
@@ -171,9 +211,163 @@ it('keeps the overflow hint beside the real host list and restores its original 
   projections.push(projection);
   const projectedList = root.querySelector('[data-code-example-tablist="host"]')!;
   expect(projectedList.nextSibling).toBe(hint);
+  clock.frame();
   expect(hint.hidden).toBe(true); // zero-width unit fixture has no measured overflow
   projection.destroy();
   expect(hint.parentElement).toBe(root);
   expect(hint.nextSibling).toBe(originalNext);
   expect(hint.hidden).toBe(false);
+});
+
+describe('CodeExample selection and native layout phases', () => {
+  it('defers initial overflow geometry until the same reveal frame', () => {
+    const clock = frameClock();
+    const { root, list, tabs, panels } = fixture();
+    list.dataset.codeHostTabs = '';
+    const hint = document.createElement('p');
+    hint.dataset.codeHostOverflow = '';
+    list.parentElement!.after(hint);
+    const reads: string[] = [];
+    const oldScrollWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'scrollWidth'
+    )?.get;
+    const oldClientWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'clientWidth'
+    )?.get;
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
+      this: HTMLElement
+    ) {
+      if (!this.hasAttribute('data-code-example-tablist')) return oldScrollWidth?.call(this) ?? 0;
+      reads.push('scrollWidth');
+      return 300;
+    });
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+      this: HTMLElement
+    ) {
+      if (!this.hasAttribute('data-code-example-tablist')) return oldClientWidth?.call(this) ?? 0;
+      reads.push('clientWidth');
+      return 100;
+    });
+    projections.push(enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} }));
+    expect(root.querySelector('[data-code-example-tablist]')?.getAttribute('role')).toBe('tablist');
+    expect(reads).toEqual([]);
+    clock.frame();
+    expect(reads).toEqual(['scrollWidth', 'clientWidth']);
+    expect(hint.hidden).toBe(false);
+  });
+
+  it('commits both real owners before reading their reveal geometry', async () => {
+    const clock = frameClock();
+    const first = fixture('first-');
+    const second = fixture('second-');
+    const owners = [first, second].map(({ list, tabs, panels }) =>
+      enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} })
+    );
+    projections.push(...owners);
+    clock.frame();
+    const selected = () =>
+      [first, second].map(({ root }) =>
+        root.querySelector('[data-code-example-projected-tab="1"]')?.getAttribute('aria-selected')
+      );
+    const atRead: Array<Array<string | null | undefined>> = [];
+    const geometry = [first, second].map(({ root }) =>
+      nativeGeometry(root, () => atRead.push(selected()))
+    );
+    owners.forEach((owner) => owner.select(1));
+    await Promise.resolve();
+    // The existing publication microtasks still commit selection immediately;
+    // layout no longer forces a read between independent owners' DOM writes.
+    expect(selected()).toEqual(['true', 'true']);
+    expect(atRead).toEqual([]);
+    clock.frame();
+    expect(atRead).toEqual([
+      ['true', 'true'],
+      ['true', 'true'],
+    ]);
+    for (const { viewport } of geometry) {
+      expect(viewport.scrollLeft).toBe(200);
+      expect(viewport.scrollTop).toBe(29);
+    }
+  });
+
+  it('reveals only the latest committed selection once in a frame', async () => {
+    const clock = frameClock();
+    const { root, list, tabs, panels } = fixture();
+    const owner = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+    projections.push(owner);
+    clock.frame();
+    const { viewport, triggers, viewportRead, targetReads } = nativeGeometry(root);
+    for (const index of [1, 0, 1]) {
+      owner.select(index);
+      await Promise.resolve();
+      expect(triggers[index].getAttribute('aria-selected')).toBe('true');
+    }
+    expect(viewportRead).not.toHaveBeenCalled();
+    clock.frame();
+    expect(viewportRead).toHaveBeenCalledOnce();
+    expect(targetReads[0]).not.toHaveBeenCalled();
+    expect(targetReads[1]).toHaveBeenCalledOnce();
+    expect(viewport.scrollLeft).toBe(200);
+    expect(viewport.scrollTop).toBe(29);
+  });
+
+  it('reveals an actual focused tab synchronously without waiting for a frame', () => {
+    const clock = frameClock();
+    const { root, list, tabs, panels } = fixture();
+    const owner = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+    projections.push(owner);
+    clock.frame();
+    const { viewport, triggers, viewportRead } = nativeGeometry(root);
+    triggers[1].focus({ preventScroll: true });
+    expect(document.activeElement).toBe(triggers[1]);
+    expect(viewportRead).toHaveBeenCalledOnce();
+    expect(viewport.scrollLeft).toBe(200);
+    expect(viewport.scrollTop).toBe(29);
+  });
+
+  it('cancels a retired owner and lets a fresh owner reveal after reconnection', async () => {
+    const clock = frameClock();
+    const { root, list, tabs, panels } = fixture();
+    const first = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+    projections.push(first);
+    clock.frame();
+    const old = nativeGeometry(root);
+    first.select(1);
+    await Promise.resolve();
+    expect(old.triggers[1].getAttribute('aria-selected')).toBe('true');
+    expect(old.viewportRead).not.toHaveBeenCalled();
+    const retiredCallbacks = [...clock.pending.values()];
+    first.destroy();
+    expect(clock.pending.size).toBe(0);
+    const next = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+    projections.push(next);
+    const current = nativeGeometry(root);
+    next.select(1);
+    await Promise.resolve();
+    for (const callback of retiredCallbacks) callback(performance.now());
+    expect(old.viewportRead).not.toHaveBeenCalled();
+    expect(current.viewportRead).not.toHaveBeenCalled();
+    clock.frame();
+    expect(current.triggers[1].getAttribute('aria-selected')).toBe('true');
+    expect(current.viewportRead).toHaveBeenCalledOnce();
+    expect(current.viewport.scrollLeft).toBe(200);
+    expect(current.viewport.scrollTop).toBe(29);
+  });
+
+  it('keeps the existing immediate reveal fallback when animation frames are unavailable', async () => {
+    vi.stubGlobal('requestAnimationFrame', undefined);
+    vi.stubGlobal('cancelAnimationFrame', undefined);
+    const { root, list, tabs, panels } = fixture();
+    const owner = enhanceCodeExampleTabs({ list, tabs, panels, onSelect() {} });
+    projections.push(owner);
+    const { viewport, triggers, viewportRead } = nativeGeometry(root);
+    owner.select(1);
+    await Promise.resolve();
+    expect(triggers[1].getAttribute('aria-selected')).toBe('true');
+    expect(viewportRead).toHaveBeenCalledOnce();
+    expect(viewport.scrollLeft).toBe(200);
+    expect(viewport.scrollTop).toBe(29);
+  });
 });

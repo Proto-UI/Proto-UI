@@ -6,7 +6,7 @@ import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
-export const IR_VERSION = 5 as const;
+export const IR_VERSION = 6 as const;
 
 export interface SourceSpan {
   file: string;
@@ -50,6 +50,9 @@ export interface StaticCapabilityIR {
   span: SourceSpan;
 }
 export const MODULE_CAPABILITY_TYPES = [
+  'control-label',
+  'control-label-handle',
+  'control-label-request',
   'focus-entry',
   'focus-roving',
   'focus-scope',
@@ -203,6 +206,9 @@ export interface ParameterIR {
   name: string;
   type: ValueType;
   optional?: boolean;
+  /** Checked synchronous callable parameter; never an opaque host function. */
+  callback?: { parameters: ParameterIR[]; returnType: ValueType };
+  default?: ExpressionIR;
 }
 export interface FunctionIR {
   parameters: ParameterIR[];
@@ -233,6 +239,12 @@ export type ExpressionIR = ExpressionBase &
         declaration: RuleDeclarationIR;
         receiver: ExpressionIR;
         states: readonly { id: string; value: ExpressionIR }[];
+      }
+    | {
+        kind: 'conditional';
+        condition: ExpressionIR;
+        whenTrue: ExpressionIR;
+        whenFalse: ExpressionIR;
       }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
@@ -291,13 +303,17 @@ export type StatementIR =
 
 /** Abrupt completion in this synchronous statement subset, including throws. */
 export function statementsTerminate(body: readonly StatementIR[]): boolean {
-  return body.some((statement) =>
-    statement.kind === 'return' || statement.kind === 'throw' ||
-    (statement.kind === 'if' && statementsTerminate(statement.then) && statementsTerminate(statement.otherwise)) ||
-    (statement.kind === 'try' && (
-      (statement.finally !== undefined && statementsTerminate(statement.finally)) ||
-      (statementsTerminate(statement.body) && (!statement.catch || statementsTerminate(statement.catch.body)))
-    ))
+  return body.some(
+    (statement) =>
+      statement.kind === 'return' ||
+      statement.kind === 'throw' ||
+      (statement.kind === 'if' &&
+        statementsTerminate(statement.then) &&
+        statementsTerminate(statement.otherwise)) ||
+      (statement.kind === 'try' &&
+        ((statement.finally !== undefined && statementsTerminate(statement.finally)) ||
+          (statementsTerminate(statement.body) &&
+            (!statement.catch || statementsTerminate(statement.catch.body)))))
   );
 }
 

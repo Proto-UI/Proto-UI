@@ -10,7 +10,12 @@ import {
   gpuiNativeSdkFiles,
 } from './gpui-native-sdk';
 import type { DataType } from './data-types';
-import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
+import {
+  nativeShape,
+  NativeLexicalScope,
+  moduleLexicalScope,
+  type NativeShape,
+} from './template-shape';
 import { isDataValueType, isPublicValueType, lexicalValueType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
 import { partitionModuleBindings } from './source-module-bindings';
@@ -244,9 +249,18 @@ export function emitGpuiSource(
     'subscription.release',
   ]);
   const exceptionPrototypeMembers: Readonly<Record<string, boolean>> = {
-    ['__proto__']: true, constructor: true, toString: true, toLocaleString: true, valueOf: true,
-    hasOwnProperty: true, isPrototypeOf: true, propertyIsEnumerable: true,
-    __defineGetter__: true, __defineSetter__: true, __lookupGetter__: true, __lookupSetter__: true,
+    ['__proto__']: true,
+    constructor: true,
+    toString: true,
+    toLocaleString: true,
+    valueOf: true,
+    hasOwnProperty: true,
+    isPrototypeOf: true,
+    propertyIsEnumerable: true,
+    __defineGetter__: true,
+    __defineSetter__: true,
+    __lookupGetter__: true,
+    __lookupSetter__: true,
   };
   function inspect(value: unknown, enclosingSpan = ir.setup.span): void {
     if (Array.isArray(value)) {
@@ -259,10 +273,16 @@ export function emitGpuiSource(
     // Carry the nearest real IR owner (e.g. the typed parameter), never invent one.
     const span = node.span ?? enclosingSpan;
     if (node.kind === 'function' && !reached.has(node.function)) return;
-    if (node.kind === 'member' && node.object.type === 'exception' && Object.hasOwn(exceptionPrototypeMembers, node.property))
+    if (
+      node.kind === 'member' &&
+      node.object.type === 'exception' &&
+      Object.hasOwn(exceptionPrototypeMembers, node.property)
+    )
       diagnostics.push({
-        code: 'PUI_GPUI_EXCEPTION_PROPERTY', category: 'unsupported-input',
-        message: 'GPUI caught values expose data fields and scalar/list members; JavaScript prototype reflection has no admitted native lowering.',
+        code: 'PUI_GPUI_EXCEPTION_PROPERTY',
+        category: 'unsupported-input',
+        message:
+          'GPUI caught values expose data fields and scalar/list members; JavaScript prototype reflection has no admitted native lowering.',
         span,
       });
     if (node.kind === 'literal' && typeof node.value === 'string' && hasLoneSurrogate(node.value)) {
@@ -393,7 +413,9 @@ export function emitGpuiSource(
   }
   const moduleScope = moduleLexicalScope(ir);
   const moduleParts = partitionModuleBindings(ir);
-  const moduleBindings = new Map(moduleParts.shared.map((binding) => [binding.name, binding.value]));
+  const moduleBindings = new Map(
+    moduleParts.shared.map((binding) => [binding.name, binding.value])
+  );
   let templateScope = moduleScope;
   const functionDeclarations = new Map<FunctionIR, NativeLexicalScope>();
   const cellDepths = new Map<ExpressionIR, number>();
@@ -433,7 +455,8 @@ export function emitGpuiSource(
       if (value?.kind === 'lexical-cell' && lexicalDepth > cellDepths.get(value)!)
         capturedCells.add(value);
     } else if (node.kind === 'lexical-cell') indexExpression(node.value, scope);
-    else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') indexExpression(node.cell, scope);
+    else if (node.kind === 'lexical-read' || node.kind === 'lexical-update')
+      indexExpression(node.cell, scope);
     else if (node.kind === 'lexical-write') {
       indexExpression(node.cell, scope);
       indexExpression(node.value, scope);
@@ -466,7 +489,13 @@ export function emitGpuiSource(
       } else if (statement.kind === 'throw') indexExpression(statement.value, scope);
       else if (statement.kind === 'try') {
         indexBody(statement.body, scope);
-        if (statement.catch) indexBody(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope);
+        if (statement.catch)
+          indexBody(
+            statement.catch.body,
+            statement.catch.name
+              ? scope.parameter(statement.catch.name, undefined, scope, null)
+              : scope
+          );
         if (statement.finally) indexBody(statement.finally, scope);
       } else {
         indexExpression(statement.condition, scope);
@@ -500,7 +529,10 @@ export function emitGpuiSource(
   }
   const nativeReturns = new Map<FunctionIR, boolean>();
   const activeNativeReturns = new Set<FunctionIR>();
-  const functionResults = new Map<FunctionIR, { value?: ExpressionIR; scope: NativeLexicalScope }[]>();
+  const functionResults = new Map<
+    FunctionIR,
+    { value?: ExpressionIR; scope: NativeLexicalScope }[]
+  >();
   function returnedValues(fn: FunctionIR): { value?: ExpressionIR; scope: NativeLexicalScope }[] {
     const known = functionResults.get(fn);
     if (known) return known;
@@ -509,15 +541,25 @@ export function emitGpuiSource(
       let scope = initial;
       for (const statement of body) {
         if (statement.kind === 'const') scope = scope.bind(statement.name, statement.value);
-        else if (statement.kind === 'return') { results.push({ value: statement.value, scope }); return true; }
-        else if (statement.kind === 'throw') return true;
+        else if (statement.kind === 'return') {
+          results.push({ value: statement.value, scope });
+          return true;
+        } else if (statement.kind === 'throw') return true;
         else if (statement.kind === 'if') {
-          const then = collect(statement.then, scope), otherwise = collect(statement.otherwise, scope);
+          const then = collect(statement.then, scope),
+            otherwise = collect(statement.otherwise, scope);
           if (then && otherwise) return true;
         } else if (statement.kind === 'try') {
           const start = results.length;
           const tried = collect(statement.body, scope);
-          const caught = statement.catch ? collect(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope) : true;
+          const caught = statement.catch
+            ? collect(
+                statement.catch.body,
+                statement.catch.name
+                  ? scope.parameter(statement.catch.name, undefined, scope, null)
+                  : scope
+              )
+            : true;
           const end = results.length;
           const finalized = statement.finally ? collect(statement.finally, scope) : false;
           if (finalized) results.splice(start, end - start);
@@ -659,7 +701,8 @@ export function emitGpuiSource(
           inspect(node.left, scope);
           inspect(node.right, scope);
         } else if (node.kind === 'lexical-cell') inspect(node.value, scope);
-        else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') inspect(node.cell, scope);
+        else if (node.kind === 'lexical-read' || node.kind === 'lexical-update')
+          inspect(node.cell, scope);
         else if (node.kind === 'lexical-write') {
           inspect(node.cell, scope);
           inspect(node.value, scope);
@@ -689,7 +732,14 @@ export function emitGpuiSource(
           } else if (statement.kind === 'throw') inspect(statement.value, scope);
           else if (statement.kind === 'try') {
             body(fn, statement.body, scope);
-            if (statement.catch) body(fn, statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope);
+            if (statement.catch)
+              body(
+                fn,
+                statement.catch.body,
+                statement.catch.name
+                  ? scope.parameter(statement.catch.name, undefined, scope, null)
+                  : scope
+              );
             if (statement.finally) body(fn, statement.finally, scope);
           } else {
             inspect(statement.condition, scope);
@@ -704,7 +754,10 @@ export function emitGpuiSource(
           fn.body,
           parameterScope(fn, functionDeclarations.get(fn) ?? NativeLexicalScope.empty())
         );
-        if (!nativeRecordReturns.has(fn) && returnedValues(fn).some(({ value, scope }) => !!value && recordAbi(value, scope))) {
+        if (
+          !nativeRecordReturns.has(fn) &&
+          returnedValues(fn).some(({ value, scope }) => !!value && recordAbi(value, scope))
+        ) {
           nativeRecordReturns.add(fn);
           changed = true;
         }
@@ -955,7 +1008,14 @@ impl __PuiNativeRecordValue {
               else if (statement.kind === 'try') {
                 const start = found.length;
                 const tried = returns(statement.body, current);
-                const caught = statement.catch ? returns(statement.catch.body, statement.catch.name ? current.parameter(statement.catch.name, undefined, current, null) : current) : true;
+                const caught = statement.catch
+                  ? returns(
+                      statement.catch.body,
+                      statement.catch.name
+                        ? current.parameter(statement.catch.name, undefined, current, null)
+                        : current
+                    )
+                  : true;
                 const end = found.length;
                 const finalized = statement.finally ? returns(statement.finally, current) : false;
                 if (finalized) found.splice(start, end - start);
@@ -1072,8 +1132,8 @@ impl __PuiNativeRecordValue {
     const recordReturn = nativeRecordReturns.has(fn);
     const savedTemplateScope = templateScope;
     templateScope = parameterScope(fn, functionDeclarations.get(fn) ?? templateScope);
-    const moduleBody = fn.context === 'setup'
-      ? statements(moduleParts.owned, scope, depth + 1, false) : '';
+    const moduleBody =
+      fn.context === 'setup' ? statements(moduleParts.owned, scope, depth + 1, false) : '';
     if (fn.context === 'setup') moduleParts.owned.forEach((binding) => scope.add(binding.name));
     const body = statements(
       fn.body,
@@ -1088,7 +1148,10 @@ impl __PuiNativeRecordValue {
     const functionUses = uses;
     uses = parentUses;
     const captures = [...environment]
-      .filter((name) => functionUses.names.has(name) && !parameterNames.has(name) && !moduleBindings.has(name))
+      .filter(
+        (name) =>
+          functionUses.names.has(name) && !parameterNames.has(name) && !moduleBindings.has(name)
+      )
       .map((name) => {
         uses.names.add(name);
         return `let ${local(name)} = ${local(name)}.clone();`;
@@ -1225,6 +1288,8 @@ impl __PuiNativeRecordValue {
           ? `Value::boolean(!(${operand}).truthy())`
           : `Value::number(${node.operator === '-' ? '-' : ''}(${operand}).scalar_number())`;
       }
+      case 'conditional':
+        return `{ if (${expression(node.condition, environment, depth)}).truthy() { ${expression(node.whenTrue, environment, depth)} } else { ${expression(node.whenFalse, environment, depth)} }`;
       case 'binary': {
         if (['&&', '||', '??'].includes(node.operator) && snapshotAbi(node)) {
           const left = snapshotExpression(node.left, environment, depth),
@@ -1713,18 +1778,36 @@ impl __PuiNativeRecordValue {
       } else if (statement.kind === 'effect') {
         const value = statement.expression;
         if (value.kind === 'lexical-write')
-          code += value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
-            ? `${indent}{ let value = ${expression(value.value, scope, depth)}; ${local(value.cell.name)}.with(|cell| *cell.borrow_mut() = value); }\n`
-            : `${indent}{ let value = ${expression(value.value, scope, depth)}; *(${expression(value.cell, scope, depth)}).borrow_mut() = value; }\n`;
+          code +=
+            value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
+              ? `${indent}{ let value = ${expression(value.value, scope, depth)}; ${local(value.cell.name)}.with(|cell| *cell.borrow_mut() = value); }\n`
+              : `${indent}{ let value = ${expression(value.value, scope, depth)}; *(${expression(value.cell, scope, depth)}).borrow_mut() = value; }\n`;
         else if (value.kind === 'lexical-update')
-          code += value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
-            ? `${indent}${local(value.cell.name)}.with(|cell| { let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); });\n`
-            : `${indent}{ let cell = ${expression(value.cell, scope, depth)}; let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); }\n`;
+          code +=
+            value.cell.kind === 'reference' && moduleBindings.has(value.cell.name)
+              ? `${indent}${local(value.cell.name)}.with(|cell| { let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); });\n`
+              : `${indent}{ let cell = ${expression(value.cell, scope, depth)}; let next = cell.borrow().scalar_number() ${value.delta === 1 ? '+' : '-'} 1.0; *cell.borrow_mut() = Value::number(next); }\n`;
         else code += `${indent}${expression(value, scope, depth)};\n`;
-      }
-      else if (statement.kind === 'return') {
-        const value = discardReturn ? '()' : statement.value ? (rendererResult && statement.value.type === 'function' ? rendererEntry(statement.value, scope, depth) : nativeReturn ? snapshotExpression(statement.value, scope, depth) : recordReturn ? recordExpression(statement.value, scope, depth) : statement.value.type === 'function' ? callableValue(statement.value, scope, depth) : expression(statement.value, scope, depth)) : nativeReturn ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)' : recordReturn ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)' : 'Value::Undefined';
-        if (discardReturn && statement.value) code += `${indent}let _ = ${expression(statement.value, scope, depth)};\n`;
+      } else if (statement.kind === 'return') {
+        const value = discardReturn
+          ? '()'
+          : statement.value
+            ? rendererResult && statement.value.type === 'function'
+              ? rendererEntry(statement.value, scope, depth)
+              : nativeReturn
+                ? snapshotExpression(statement.value, scope, depth)
+                : recordReturn
+                  ? recordExpression(statement.value, scope, depth)
+                  : statement.value.type === 'function'
+                    ? callableValue(statement.value, scope, depth)
+                    : expression(statement.value, scope, depth)
+            : nativeReturn
+              ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)'
+              : recordReturn
+                ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)'
+                : 'Value::Undefined';
+        if (discardReturn && statement.value)
+          code += `${indent}let _ = ${expression(statement.value, scope, depth)};\n`;
         code += `${indent}return ${completion ? `std::ops::ControlFlow${discardReturn ? '::<(), ()>' : ''}::Break(${value})` : value};\n`;
         templateScope = savedTemplateScope;
         return code;
@@ -1735,8 +1818,14 @@ impl __PuiNativeRecordValue {
         return code;
       } else if (statement.kind === 'try') {
         emitsExceptions = true;
-        const finalOverrides = statement.finally !== undefined && statementsTerminate(statement.finally);
-        const branch = (items: readonly StatementIR[], level: number, name?: string, discard = discardReturn): string => {
+        const finalOverrides =
+          statement.finally !== undefined && statementsTerminate(statement.finally);
+        const branch = (
+          items: readonly StatementIR[],
+          level: number,
+          name?: string,
+          discard = discardReturn
+        ): string => {
           const outer = templateScope;
           const next = new Set(scope);
           if (name) {
@@ -1744,14 +1833,34 @@ impl __PuiNativeRecordValue {
             templateScope = templateScope.parameter(name, undefined, templateScope, null);
           }
           try {
-            return statements(items, next, level, false, nativeReturn, rendererResult, recordReturn, true, discard) +
-              (statementsTerminate(items) ? '' : `${'    '.repeat(level)}std::ops::ControlFlow${discard ? '::<(), ()>' : ''}::Continue(())\n`);
-          } finally { templateScope = outer; }
+            return (
+              statements(
+                items,
+                next,
+                level,
+                false,
+                nativeReturn,
+                rendererResult,
+                recordReturn,
+                true,
+                discard
+              ) +
+              (statementsTerminate(items)
+                ? ''
+                : `${'    '.repeat(level)}std::ops::ControlFlow${discard ? '::<(), ()>' : ''}::Continue(())\n`)
+            );
+          } finally {
+            templateScope = outer;
+          }
         };
         const level = depth + (statement.finally ? 2 : 1);
         const pad = '    '.repeat(level);
         const caught = statement.catch;
-        const returnAbi = nativeReturn ? 'native::gpui_native_owner::NativeSnapshot' : recordReturn ? '__PuiNativeRecordValue' : 'Value';
+        const returnAbi = nativeReturn
+          ? 'native::gpui_native_owner::NativeSnapshot'
+          : recordReturn
+            ? '__PuiNativeRecordValue'
+            : 'Value';
         const bodyFlow = `std::ops::ControlFlow<${discardReturn || finalOverrides ? '()' : returnAbi}>`;
         const finalFlow = `std::ops::ControlFlow<${discardReturn ? '()' : returnAbi}>`;
         const operation = caught
@@ -1935,20 +2044,33 @@ impl __PuiNativeRecordValue {
         : `        image_declaration(&owner, ${staticValue(declaration.config, declaration.span)});`
     )
     .join('\n');
-  const moduleCode = moduleParts.shared.map((binding) => {
-    const value = binding.value;
-    if (value.kind === 'lexical-cell')
-      return `std::thread_local! { static ${local(binding.name)}: std::cell::RefCell<Value> = std::cell::RefCell::new(${expression(value.value, new Set(), 0)}); }`;
-    let type = 'Value';
-    if (value.kind === 'function' && typedFunction(value.function)) {
-      const fn = value.function;
-      const parameters = fn.parameters.map((_, index) => nativeFunctionParameter(fn, index)
-        ? 'native::gpui_native_owner::NativeSnapshot' : nativeRecordParameter(fn, index) ? '__PuiNativeRecordValue' : 'Value').join(', ');
-      const result = returnsNative(fn) ? 'native::gpui_native_owner::NativeSnapshot' : nativeRecordReturns.has(fn) ? '__PuiNativeRecordValue' : 'Value';
-      type = `native::gpui_native_owner::NativeCallable<dyn Fn(${parameters}) -> ${result}>`;
-    }
-    return `std::thread_local! { static ${local(binding.name)}: ${type} = ${expression(value, new Set(), 0)}; }`;
-  }).join('\n');
+  const moduleCode = moduleParts.shared
+    .map((binding) => {
+      const value = binding.value;
+      if (value.kind === 'lexical-cell')
+        return `std::thread_local! { static ${local(binding.name)}: std::cell::RefCell<Value> = std::cell::RefCell::new(${expression(value.value, new Set(), 0)}); }`;
+      let type = 'Value';
+      if (value.kind === 'function' && typedFunction(value.function)) {
+        const fn = value.function;
+        const parameters = fn.parameters
+          .map((_, index) =>
+            nativeFunctionParameter(fn, index)
+              ? 'native::gpui_native_owner::NativeSnapshot'
+              : nativeRecordParameter(fn, index)
+                ? '__PuiNativeRecordValue'
+                : 'Value'
+          )
+          .join(', ');
+        const result = returnsNative(fn)
+          ? 'native::gpui_native_owner::NativeSnapshot'
+          : nativeRecordReturns.has(fn)
+            ? '__PuiNativeRecordValue'
+            : 'Value';
+        type = `native::gpui_native_owner::NativeCallable<dyn Fn(${parameters}) -> ${result}>`;
+      }
+      return `std::thread_local! { static ${local(binding.name)}: ${type} = ${expression(value, new Set(), 0)}; }`;
+    })
+    .join('\n');
   const setupCallable = functionValue(ir.setup, new Set(), 2);
   const nativeRecords = nativeRecordTypes();
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.

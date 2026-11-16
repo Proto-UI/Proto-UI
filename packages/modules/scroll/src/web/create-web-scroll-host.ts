@@ -8,7 +8,7 @@ import type {
   ScrollEndFollowRequestStatus,
   ScrollEndFollowState,
   ScrollProjectionPreference,
-  ScrollSurfaceRequest,
+  ScrollSurfacePositionRequest,
   ScrollSurfaceSnapshot,
 } from '@proto.ui/core';
 import type {
@@ -19,6 +19,7 @@ import type {
 } from '../caps';
 import { createReaderContactSession } from './reader-contact-session';
 import { createScrollPolicyLease } from './scroll-policy-lease';
+import { revealWebScrollTarget } from './target-reveal';
 
 export type WebScrollSurfaceHostOptions = Readonly<{
   moveGestureHost: MoveGestureHost;
@@ -87,7 +88,7 @@ function axisSnapshot(
   });
 }
 
-function resolveRequestOffset(target: HTMLElement, request: ScrollSurfaceRequest): number {
+function resolveRequestOffset(target: HTMLElement, request: ScrollSurfacePositionRequest): number {
   const horizontal = request.axis === 'horizontal';
   const viewport = horizontal ? target.clientWidth : target.clientHeight;
   const extent = horizontal ? target.scrollWidth : target.scrollHeight;
@@ -105,7 +106,7 @@ function resolveRequestOffset(target: HTMLElement, request: ScrollSurfaceRequest
 
 function requestReachesEnd(
   target: HTMLElement,
-  request: ScrollSurfaceRequest,
+  request: ScrollSurfacePositionRequest,
   endThreshold: number
 ): boolean {
   const horizontal = request.axis === 'horizontal';
@@ -115,7 +116,7 @@ function requestReachesEnd(
   return range - resolveRequestOffset(target, request) <= endThreshold;
 }
 
-function applyRequest(target: HTMLElement, request: ScrollSurfaceRequest): void {
+function applyRequest(target: HTMLElement, request: ScrollSurfacePositionRequest): void {
   const horizontal = request.axis === 'horizontal';
   const next = resolveRequestOffset(target, request);
   if (request.kind === 'to-end') {
@@ -563,7 +564,7 @@ export function createWebScrollSurfaceHost(
         options.onPolicyLost?.();
         return false;
       };
-      const executeRequest = (request: ScrollSurfaceRequest) => {
+      const executeRequest = (request: ScrollSurfacePositionRequest) => {
         if (!policyCurrent()) return;
         const followAxis = configuredFollowAxis();
         if (request.kind === 'to-end') {
@@ -1147,6 +1148,21 @@ export function createWebScrollSurfaceHost(
         request(request) {
           if (disposed) return;
           executeRequest(request);
+        },
+        reveal(subject, axis, isCurrentTarget) {
+          if (axis !== 'vertical' || !isAxisEnabled(axis)) return false;
+          const current = () => policyCurrent() && isCurrentTarget() && policyCurrent();
+          const accepted = revealWebScrollTarget(target, subject, current, () => {
+            if (scheduledEnd?.axis === axis) cancelScheduledEnd(true);
+          });
+          if (!accepted || !current()) return false;
+          if (configuredFollowAxis() === axis) {
+            const atEnd = isAxisAtEnd(axis);
+            requestedDepartureAxis = atEnd ? null : axis;
+            endFollowState = atEnd ? 'following' : 'paused';
+          }
+          publish();
+          return current();
         },
         dispose,
       };

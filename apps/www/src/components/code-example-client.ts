@@ -87,7 +87,8 @@ function childPanels(root: HTMLElement, dataAttribute: string): HTMLElement[] {
 function activateTab(
   tabs: readonly HTMLElement[],
   active: HTMLElement,
-  panels: readonly HTMLElement[]
+  panels: readonly HTMLElement[],
+  reveal: (tab: HTMLElement, viewport: HTMLElement) => void
 ): void {
   const controls = active.getAttribute('aria-controls');
   for (const tab of tabs) {
@@ -97,7 +98,7 @@ function activateTab(
   }
   for (const panel of panels) panel.hidden = panel.id !== controls;
   const strip = active.parentElement?.parentElement;
-  if (strip && !strip.hidden) revealCodeExampleTab(active, strip);
+  if (strip && !strip.hidden) reveal(active, strip);
 }
 
 function installHorizontalActivation(
@@ -161,7 +162,8 @@ function initCodeExample(root: HTMLElement): void {
   let initializing = true;
   let projecting = false;
   let cleanupFailed = false;
-  let cursor = 0;
+  const attemptedProjections = new Set<HTMLElement>();
+  const revealFrames = new Map<HTMLElement, { tab: HTMLElement; frame: number }>();
   let hostTabs: HTMLElement[] = [];
   const hostPanels = childPanels(root, 'data-code-host-panel');
   const fileGroups: Array<{ panel: HTMLElement; list: HTMLElement }> = [];
@@ -179,6 +181,36 @@ function initCodeExample(root: HTMLElement): void {
     controllers.get(root) === controller &&
     root.ownerDocument === doc &&
     (initializing || root.isConnected);
+  const canReveal = (tab: HTMLElement, viewport: HTMLElement) =>
+    ownsRoot() &&
+    tab.ownerDocument === doc &&
+    tab.isConnected &&
+    root.contains(tab) &&
+    tab.parentElement?.parentElement === viewport &&
+    tab.getAttribute('aria-selected') === 'true' &&
+    !tab.closest('[hidden], [inert]');
+  const requestReveal = (tab: HTMLElement, viewport: HTMLElement) => {
+    const view = doc.defaultView;
+    const pending = revealFrames.get(viewport);
+    if (tab.contains(doc.activeElement) || typeof view?.requestAnimationFrame !== 'function') {
+      if (pending) view?.cancelAnimationFrame?.(pending.frame);
+      revealFrames.delete(viewport);
+      if (canReveal(tab, viewport)) revealCodeExampleTab(tab, viewport);
+      return;
+    }
+    if (pending) {
+      pending.tab = tab;
+      return;
+    }
+    const request = { tab, frame: 0 };
+    request.frame = view.requestAnimationFrame(() => {
+      // A cancelled callback must not consume a replacement owner's frame.
+      if (revealFrames.get(viewport) !== request) return;
+      revealFrames.delete(viewport);
+      if (canReveal(request.tab, viewport)) revealCodeExampleTab(request.tab, viewport);
+    });
+    revealFrames.set(viewport, request);
+  };
   const releaseClaim = () => {
     if (initializing || projecting || cleanupFailed || controllers.get(root) !== controller) return;
     controllers.delete(root);
@@ -194,6 +226,8 @@ function initCodeExample(root: HTMLElement): void {
       projectionTask = undefined;
     }
     lifetime.abort();
+    for (const { frame } of revealFrames.values()) doc.defaultView?.cancelAnimationFrame?.(frame);
+    revealFrames.clear();
     const failures: unknown[] = [];
     for (const projection of [...projections.values()].reverse()) {
       try {
@@ -217,7 +251,7 @@ function initCodeExample(root: HTMLElement): void {
     const filePanels = filePanelsByHost.get(panel) ?? [];
     projections.get(fileList)?.select(tabsIn(fileList).indexOf(tab));
     if (!ownsRoot()) return;
-    activateTab(tabsIn(fileList), tab, filePanels);
+    activateTab(tabsIn(fileList), tab, filePanels, requestReveal);
     const visiblePanel = filePanels.find((candidate) => !candidate.hidden);
     if (visiblePanel) refreshCodePanel(visiblePanel);
   }
@@ -225,7 +259,7 @@ function initCodeExample(root: HTMLElement): void {
   function selectHost(tab: HTMLElement, isLocal: boolean): void {
     if (!ownsRoot()) return;
     if (isLocal) localOverride = true;
-    activateTab(hostTabs, tab, hostPanels);
+    activateTab(hostTabs, tab, hostPanels, requestReveal);
     projections.get(hostList)?.select(hostTabs.indexOf(tab));
     if (!ownsRoot()) return;
     const panel = hostPanels.find((candidate) => !candidate.hidden);
@@ -235,7 +269,16 @@ function initCodeExample(root: HTMLElement): void {
       '[data-code-example-command] [data-code-shell]'
     );
     if (command) refreshCodePanel(command);
+    if (!initializing && ownsRoot() && hasPendingProjection()) {
+      pendingProjections.add(controller);
+      scheduleProjection();
+    }
   }
+
+  const pendingFileGroup = () =>
+    fileGroups.find(({ panel, list }) => !panel.hidden && !attemptedProjections.has(list));
+  const hasPendingProjection = () =>
+    !attemptedProjections.has(hostList) || pendingFileGroup() !== undefined;
 
   const controller: CodeExampleController = {
     syncGlobalHost(host) {
@@ -248,9 +291,12 @@ function initCodeExample(root: HTMLElement): void {
         destroy();
         return false;
       }
-      // Finish inner Trees before the outer Tabs transport their source owners.
-      const group = fileGroups[cursor++];
+      // Host controls admit first. Unvisited host panels retain fully usable
+      // native file controls; acquire their Tree only when they become current.
+      const group = attemptedProjections.has(hostList) ? pendingFileGroup() : undefined;
+      if (attemptedProjections.has(hostList) && !group) return false;
       const list = group?.list ?? hostList;
+      attemptedProjections.add(list);
       const panels = group ? (filePanelsByHost.get(group.panel) ?? []) : hostPanels;
       if (!root.contains(list) || panels.some((panel) => !root.contains(panel))) {
         destroy();
@@ -299,7 +345,7 @@ function initCodeExample(root: HTMLElement): void {
         destroy();
         return false;
       }
-      return cursor <= fileGroups.length;
+      return hasPendingProjection();
     },
     destroy,
   };

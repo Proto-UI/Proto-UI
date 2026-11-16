@@ -9,6 +9,9 @@
     "paths": {
       "@/*": ["apps/www/src/*"],
       "@proto.ui/adapter-base/web-material": ["packages/adapters/base/src/material/index.ts"],
+      "@proto.ui/adapter-base/internal/instance-associations": [
+        "packages/adapters/base/src/host/instance-associations.ts"
+      ],
       "@proto.ui/module-feedback/internal/*": ["packages/modules/feedback/src/material/*"],
       "@proto.ui/core/internal": ["packages/core/src/internal.ts"],
       "@proto.ui/module-*": ["packages/modules/*/src"],

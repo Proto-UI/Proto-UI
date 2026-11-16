@@ -103,6 +103,30 @@ function pointer(target: HTMLElement, type: string, y: number) {
     })
   );
 }
+it.each(
+  families.flatMap((family) =>
+    ['left', 'right'].map((side) => [family.drawerContent.name, side, family] as const)
+  )
+)('%s resolves %s horizontal extent and attachment together', async (_name, side, family) => {
+  const p = fixture(family, { side, maxExtent: { unit: 'logical', value: 280 } });
+  await flush();
+  expect(p.content.style.width).toBe('280px');
+  expect(p.content.style.left).toBe(side === 'right' ? '390px' : '0px');
+  expect(p.content.style.getPropertyValue('translate')).toBe(
+    side === 'right' ? '-100% 0px' : '0px 0px'
+  );
+  setElementProps(p.content, {
+    side,
+    maxExtent: { unit: 'available', value: 0.5 },
+    snapPoints: [0.5, 1],
+    snapPoint: 0.5,
+  });
+  await flush();
+  expect(p.content.style.width).toBe('97.5px');
+  setElementProps(p.content, { side });
+  await flush();
+  expect(p.content.style.width).toBe('320px');
+});
 it.each(families.map((family) => [family.drawerContent.name, family] as const))(
   '%s defaults to intrinsic height and decorative auto handle',
   async (_name, family) => {

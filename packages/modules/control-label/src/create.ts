@@ -139,13 +139,15 @@ class ControlLabelModuleImpl extends ModuleBase {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    this.release();
+    const anatomyOffs = this.anatomyOffs.splice(0);
+    const anatomyLease = this.anatomyLease;
+    // Retire every owned slot before invoking foreign cleanup. Terminal
+    // reentry cannot acquire resources or leave a second disposal to finish.
     this.ref = null;
     this.activate = null;
-    for (const off of this.anatomyOffs.splice(0)) off();
-    this.anatomyLease?.dispose();
     this.anatomyLease = null;
     this.anatomyScope = null;
+    attemptAllCleanups([() => this.release(), ...anatomyOffs, () => anatomyLease?.dispose()]);
   }
   private setDiagnostic(code: string | null): void {
     if (code === this.diagnostic) return;
@@ -162,11 +164,7 @@ class ControlLabelModuleImpl extends ModuleBase {
     // Clear both owned slots before any disposer can install a newer lease.
     this.binding = null;
     this.host = null;
-    try {
-      binding?.dispose();
-    } finally {
-      host?.dispose();
-    }
+    attemptAllCleanups([() => binding?.dispose(), () => host?.dispose()]);
     return retiredGeneration;
   }
   private refresh(): void {
@@ -243,7 +241,7 @@ class ControlLabelModuleImpl extends ModuleBase {
         view: () =>
           generation === this.generation && this.present && !this.disposed ? host.view() : null,
         options: () => this.options,
-        name: (label) => this.a11y.claimControlLabelName(label),
+        name: (label, view) => this.a11y.claimControlLabelName(label, view),
         activate: (isCurrent, source) => {
           if (!isCurrent() || !this.activate) return;
           if (!this.caps.has(CONTROL_LABEL_RUN_IN_CALLBACK_CAP)) {
@@ -279,6 +277,21 @@ class ControlLabelModuleImpl extends ModuleBase {
       throw error;
     }
   }
+}
+function attemptAllCleanups(actions: readonly (() => void)[]): void {
+  let failed = false;
+  let firstError: unknown;
+  for (const action of actions) {
+    try {
+      action();
+    } catch (error) {
+      if (!failed) {
+        failed = true;
+        firstError = error;
+      }
+    }
+  }
+  if (failed) throw firstError;
 }
 export function createControlLabelModule(ctx: ModuleFactoryArgs) {
   return createModule<'control-label', 'instance', ControlLabelFacade, ControlLabelPort>({

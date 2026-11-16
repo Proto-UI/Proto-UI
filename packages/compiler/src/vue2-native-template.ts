@@ -1,6 +1,11 @@
 import type { ExpressionIR, FunctionIR, ParameterIR, PrototypeIR, StatementIR } from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
-import { nativeShape, NativeLexicalScope, moduleLexicalScope, type NativeShape } from './template-shape';
+import {
+  nativeShape,
+  NativeLexicalScope,
+  moduleLexicalScope,
+  type NativeShape,
+} from './template-shape';
 
 type Operation = Extract<ExpressionIR, { kind: 'operation' }>;
 
@@ -77,8 +82,10 @@ export function collectVue2IdentityOnlyFunctions(
     }
     active.add(fn);
     let scope = declaration;
-    for (const parameter of fn.parameters)
+    for (const parameter of fn.parameters) {
+      if (parameter.default) expression(parameter.default, scope, 'other');
       scope = scope.parameter(parameter.name, undefined, declaration, null);
+    }
     try {
       statements(fn.body, scope);
     } finally {
@@ -112,6 +119,11 @@ export function collectVue2IdentityOnlyFunctions(
         for (const argument of value.arguments) expression(argument, scope, 'other');
         return;
       }
+      case 'conditional':
+        expression(value.condition, scope, 'other');
+        expression(value.whenTrue, scope, use);
+        expression(value.whenFalse, scope, use);
+        return;
       case 'binary': {
         const operandUse =
           value.operator === '===' || value.operator === '!==' ? 'identity' : 'other';
@@ -195,7 +207,11 @@ export function collectVue2IdentityOnlyFunctions(
         case 'try': {
           statements(statement.body, scope);
           const caught = statement.catch;
-          if (caught) statements(caught.body, caught.name ? scope.parameter(caught.name, undefined, scope, null) : scope);
+          if (caught)
+            statements(
+              caught.body,
+              caught.name ? scope.parameter(caught.name, undefined, scope, null) : scope
+            );
           if (statement.finally) statements(statement.finally, scope);
           break;
         }
@@ -331,7 +347,10 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     }
     if (value.kind !== 'helper-call') return [];
     const binding = scope.lookup(value.name);
-    const callees = binding?.value ? targets(binding.value, binding.environment) : [];
+    const callees = targets(
+      { kind: 'reference', name: value.name, type: 'function', span: value.span },
+      scope
+    );
     // Resolve arguments before entering a result-producing body: a finite
     // wrapper(wrapper(draw)) is not recursive authored execution.
     const arguments_ = value.arguments.map((argument) =>
@@ -355,7 +374,14 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
             else if (statement.kind === 'try') {
               const start = result.length;
               const tried = returns(statement.body, current);
-              const caught = statement.catch ? returns(statement.catch.body, statement.catch.name ? current.parameter(statement.catch.name, undefined, current, null) : current) : true;
+              const caught = statement.catch
+                ? returns(
+                    statement.catch.body,
+                    statement.catch.name
+                      ? current.parameter(statement.catch.name, undefined, current, null)
+                      : current
+                  )
+                : true;
               const end = result.length;
               const finalized = statement.finally ? returns(statement.finally, current) : false;
               if (finalized) result.splice(start, end - start);
@@ -385,7 +411,12 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   ) {
     let local = definition;
     for (const [index, parameter] of fn.parameters.entries()) {
-      const actual = args?.[index];
+      const supplied = args?.[index];
+      const actual =
+        supplied?.kind === 'undefined'
+          ? (parameter.default ?? supplied)
+          : (supplied ?? parameter.default);
+      const argumentScope = actual === supplied ? caller : local;
       const formal: ExpressionIR = {
         kind: 'reference',
         name: parameter.name,
@@ -395,17 +426,17 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       local = local.parameter(
         parameter.name,
         actual,
-        caller,
+        argumentScope,
         args
           ? actual
-            ? nativeShape(actual, caller)
+            ? nativeShape(actual, argumentScope)
             : { kind: 'undefined' }
           : nativeShape(formal, NativeLexicalScope.empty())
       );
       if (parameter.type === 'function' && args) {
         callableParameters.set(
           local.lookup(parameter.name)!,
-          callableArguments?.[index] ?? (actual ? targets(actual, caller) : [])
+          callableArguments?.[index] ?? (actual ? targets(actual, argumentScope) : [])
         );
       }
     }
@@ -492,7 +523,10 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       case 'helper-call': {
         value.arguments.forEach((argument) => expression(argument, scope));
         const binding = scope.lookup(value.name);
-        const callees = binding?.value ? targets(binding.value, binding.environment) : [];
+        const callees = targets(
+          { kind: 'reference', name: value.name, type: 'function', span: value.span },
+          scope
+        );
         if (!callees.length)
           throw new Error(`Vue2 native context traversal lost helper ${value.name}.`);
         for (const target of callees) {
@@ -501,6 +535,11 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
         }
         return;
       }
+      case 'conditional':
+        expression(value.condition, scope);
+        expression(value.whenTrue, scope);
+        expression(value.whenFalse, scope);
+        return;
       case 'function':
         // Helpers are visited at their calls, not with a fictitious legacy
         // formal that would poison all later concrete contexts.
@@ -588,7 +627,15 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
         return true;
       } else if (statement.kind === 'try') {
         const tried = statements(statement.body, scope, setup);
-        const caught = statement.catch ? statements(statement.catch.body, statement.catch.name ? scope.parameter(statement.catch.name, undefined, scope, null) : scope, setup) : true;
+        const caught = statement.catch
+          ? statements(
+              statement.catch.body,
+              statement.catch.name
+                ? scope.parameter(statement.catch.name, undefined, scope, null)
+                : scope,
+              setup
+            )
+          : true;
         const finalized = statement.finally ? statements(statement.finally, scope, setup) : false;
         if (finalized || (tried && caught)) return true;
       } else {

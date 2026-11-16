@@ -20,6 +20,17 @@ cases:
     covers: [C-DRAWER-AUTO-CONSUMER-0001-EVIDENCE]
     expectation: all-public-demo-inputs-are-valid-and-mode-distinct
 implementations:
+  - id: horizontal-drawer-native-consumers
+    kind: runtime-test
+    status: active
+    path: apps/www/test/component-consumer-repairs.browser.test.ts
+    required: true
+    consumesCases: [T-DRAWER-AUTO-CONSUMER-0001-CASE-RUNTIME]
+    notes:
+      [
+        Bounded real Chromium consumer coverage across React/WC and Base/Shadcn/Brutalist; Vue/Vue2,
+        native platform and full lifecycle admission remain separate.,
+      ]
   - id: drawer-auto-runtime
     kind: runtime-test
     status: passing

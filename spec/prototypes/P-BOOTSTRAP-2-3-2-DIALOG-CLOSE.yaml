@@ -4,23 +4,23 @@ title: Bootstrap 2.3.2 Dialog Close Dialog projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+  en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Dialog part over P-BASE-DIALOG-CLOSE with the pinned modal vocabulary.
 statement:
-    en: The Prototype invokes asDialogClose() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
+  en: The Prototype invokes asDialogClose() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-BASE
     text:
-            en: Invoke asDialogClose() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+      en: Invoke asDialogClose() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-VISUAL
     text:
-            en: 'Close is an unstyled command wrapper for an authored family Button and requests close only. The separate CloseIcon owns the icon presentation; wrapping an action must not reduce its opacity or override its typography.'
+      en: 'Close is an unstyled command owner that preserves Base focus, input and close requests. Authored content may compose passive family Surface/Text appearance driven by the Close public interaction facts; it must not introduce a nested Button or another focus/activation owner. The separate CloseIcon owns the icon presentation. Close must not reduce the opacity or override the typography of its passive content.'
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-CLOSURE
     text:
-            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+      en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-BOUNDARY
     text:
-            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+      en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001
@@ -42,6 +42,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Bootstrap 2.3.2 Dialog Close Dialog projection cataloged as a draft family projection over the implemented source slice.
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Clarified passive authored appearance under the existing Base command owner; removed misleading nested-Button wording without changing the inherited protocol or draft lifecycle.
 tags:
   - prototype
   - bootstrap-2-3-2

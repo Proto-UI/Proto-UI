@@ -4,7 +4,7 @@ title: Bootstrap overlay projections coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+  en: Focused module and four-host recipe cases provide bounded source and simulated-host evidence; browser pixels, native input, assistive technology and independent acceptance remain separate admission requirements.
 summary: Dialog, Hover Card, Tooltip and Drawer controlled/refusal, slot, disabled and recipe coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-PROTOCOL
@@ -30,10 +30,17 @@ cases:
       - P-BOOTSTRAP-2-3-2-DIALOG-FOOTER-COMPOSITION
       - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-ICON-BASE
     expectation: passive-slots-and-accessible-close-dismissal
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-CLOSE-OWNER
+    title: The real four-host Dialog recipe retains one Close command and passive appearance
+    covers:
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-BASE
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-VISUAL
+      - P-BOOTSTRAP-2-3-2-SURFACE-PASSIVE
+    expectation: Close owns physical role, focus and keyboard/pointer activation; its public facts drive passive feedback, own/root disabled suppress input and feedback, controlled refusal persists, and retired subscriptions and queued callbacks cannot write.
 implementations:
   - id: bootstrap-draft-overlay-projections
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/bootstrap-2-3-2/test/draft-overlay-projections.test.ts
     required: true
     consumesCases:
@@ -57,7 +64,22 @@ implementations:
       - P-BOOTSTRAP-2-3-2-DRAWER-HEADER
       - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER
     notes:
-      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+      - Executed on 2026-11-15 with 11 passing cases; the Close fixture uses passive content and retains opaque-slot and dismissal assertions. See internal/records/2026-11-15-dialog-close-recipe-ownership.md for source-bound evidence and limits.
+  - id: bootstrap-dialog-close-recipe
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/dialog-close-recipe.test.ts
+    required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-CLOSE-OWNER
+    exercises:
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE
+      - P-BOOTSTRAP-2-3-2-SURFACE
+      - P-BOOTSTRAP-2-3-2-TEXT
+    notes:
+      - Executed on 2026-11-15 with all 16 cases passing across WC, React, Vue 3 and Vue 2; source-bound receipt and earlier failures are recorded in internal/records/2026-11-15-dialog-close-recipe-ownership.md.
+      - Actual shared recipe, prototypes, adapters and installed WC/React/Vue/Vue2 runtimes run in HappyDOM; only network loaders use installed framework modules.
+      - Synthetic DOM input, public-state facts and rendered feedback-token attributes do not establish native Tab, hit testing, CSS pixels or assistive-technology behavior.
 
 exercises:
   prototypes:
@@ -71,6 +93,8 @@ exercises:
     - P-BOOTSTRAP-2-3-2-DIALOG-MASK
     - P-BOOTSTRAP-2-3-2-DIALOG-TITLE
     - P-BOOTSTRAP-2-3-2-DIALOG-TRIGGER
+    - P-BOOTSTRAP-2-3-2-SURFACE
+    - P-BOOTSTRAP-2-3-2-TEXT
     - P-BOOTSTRAP-2-3-2-DRAWER
     - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER
     - P-BOOTSTRAP-2-3-2-DRAWER-HEADER

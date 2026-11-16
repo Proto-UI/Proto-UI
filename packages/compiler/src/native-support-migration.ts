@@ -11,19 +11,21 @@ import {
 } from './source-resolution';
 import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { nativeContextScopeArtifact } from './native-context';
 import {
   validateArtifacts,
   writeArtifactSet,
   type ExclusiveOutputFile,
   type OutputArtifact,
 } from './artifact-output';
-import { IR_VERSION, type CompileResult } from './ir';
+import type { CompileResult } from './ir';
 
 const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
 const shaPattern = /^[0-9a-f]{64}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 64 * 1024 * 1024;
-const CONTEXT_SCOPE_SHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
+const LEGACY_CONTEXT_SCOPE_SHA256 =
+  '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
 const LEGACY = new Map([
   [
     nativeInteractionArtifact.path,
@@ -150,7 +152,10 @@ function verifyManifest(id: string, anchor: string, snapshot: Snapshot): Verifie
     record(value) &&
       value.profile === 'vue2-source-v1' &&
       value.backend === value.profile &&
-      value.irVersion === IR_VERSION &&
+      // These are already emitted directories, not an external IR admission
+      // path. Preserve their original provenance and recognize only the two
+      // compiler generations whose native artifact ABIs are checked below.
+      (value.irVersion === 5 || value.irVersion === 6) &&
       Array.isArray(value.artifacts),
     'Unknown migration provenance/profile/version'
   );
@@ -251,8 +256,14 @@ async function normalizeInteraction(
       ...nativeInteractionArtifacts('full'),
     ];
   }
-  for (const selection of ['full', 'text-single', 'text-multiline', 'image'] as const) {
-    const expected = nativeInteractionArtifacts(selection);
+  for (const [selection, controlLabel] of [
+    ['full', false],
+    ['full', true],
+    ['text-single', false],
+    ['text-multiline', false],
+    ['image', false],
+  ] as const) {
+    const expected = nativeInteractionArtifacts(selection, { controlLabel });
     if (
       selected.length === expected.length &&
       expected.every((target) =>
@@ -268,21 +279,25 @@ async function normalizeInteraction(
   }
   throw new Error('Unknown or modified native support ABI; migration refuses to guess');
 }
-/** Validate the existing Context ABI without evaluating any supplied source. */
-function validateContext(artifacts: readonly OutputArtifact[]): void {
+/** Recognize exact Context ABIs, then emit one current shared scope identity. */
+async function normalizeContext(artifacts: readonly OutputArtifact[]): Promise<OutputArtifact[]> {
   const selected = artifacts.filter((file) => file.path.startsWith('.proto-ui/context/'));
-  if (!selected.length) return;
+  if (!selected.length) return [...artifacts];
   required(
-    selected.some((file) => file.path === '.proto-ui/context/scope-v1.ts'),
+    selected.some((file) => file.path === nativeContextScopeArtifact.path),
     'Context keys lack their known scope module'
   );
+  let legacyScope: OutputArtifact | undefined;
   for (const file of selected) {
     required(file.kind === 'source', 'Unknown Context artifact kind');
-    if (file.path === '.proto-ui/context/scope-v1.ts') {
-      required(
-        hash(file.contents) === CONTEXT_SCOPE_SHA256,
-        'Unknown or modified Context scope ABI'
-      );
+    if (file.path === nativeContextScopeArtifact.path) {
+      if (file.contents !== nativeContextScopeArtifact.contents) {
+        required(
+          hash(file.contents) === LEGACY_CONTEXT_SCOPE_SHA256,
+          'Unknown or modified Context scope ABI'
+        );
+        legacyScope = file;
+      }
       continue;
     }
     const lines = file.contents.split('\n');
@@ -315,6 +330,19 @@ function validateContext(artifacts: readonly OutputArtifact[]): void {
       'Unknown or modified Context key source identity'
     );
   }
+  if (legacyScope) {
+    // This exact payload predates queued-provider revalidation. Do not rebuild
+    // it with the current emitter or reinterpret the trusted original manifest.
+    const { legacyNativeContextScopeArtifact } = await import('./native-context-legacy');
+    required(
+      hash(legacyNativeContextScopeArtifact.contents) === LEGACY_CONTEXT_SCOPE_SHA256 &&
+        legacyScope.contents === legacyNativeContextScopeArtifact.contents,
+      'Legacy Context migration source anchor changed'
+    );
+  }
+  return artifacts.map((file) =>
+    file.path === nativeContextScopeArtifact.path ? nativeContextScopeArtifact : file
+  );
 }
 /** Reuse the compiler's source-edge resolver; this is artifact linkage, not DSL admission. */
 function validateSharedImports(
@@ -393,8 +421,8 @@ async function assemble(inputs: VerifiedInput[]): Promise<OutputArtifact[]> {
     }
   const normalized = await Promise.all(
     inputs.map(async (input) => {
-      validateContext(input.artifacts);
-      return { input, artifacts: await normalizeInteraction(input.artifacts) };
+      const context = await normalizeContext(input.artifacts);
+      return { input, artifacts: await normalizeInteraction(context) };
     })
   );
   for (const { artifacts } of normalized)

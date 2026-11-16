@@ -110,6 +110,7 @@ if (args.includes('--descendant')) {
   }
 } else if (args.includes('astro')) {
   record('server-start');
+  record('browser-test-mode ' + process.env.PROTO_UI_BROWSER_TEST);
   const port = Number(args[args.indexOf('--port') + 1]);
   require('node:http').createServer((_request, response) => {
     response.writeHead(process.env.PUI_STARTUP_MODE === 'unready' ? 503 : 200);
@@ -253,6 +254,7 @@ describe('documentation server startup ownership', () => {
       const events = await control.events();
       expect(events).toContain('generation-complete');
       expect(events).toContain('server-start');
+      expect(events).toContain('browser-test-mode 1');
       expect(events.indexOf('generation-complete')).toBeLessThan(events.indexOf('server-start'));
       await stopServer();
       await expect(fetch(`${url}/ready`)).rejects.toThrow();

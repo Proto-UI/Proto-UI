@@ -16,13 +16,6 @@ import type { DrawerContentProps, DrawerContentExposes } from './types';
 import { drawerExtentModel } from './extent-model';
 export { drawerExtentModel } from './extent-model';
 
-/** Legacy horizontal point normalization; vertical input uses the strict extent model. */
-export function drawerSnapPoints(input: readonly number[] | undefined): number[] {
-  const points = Array.isArray(input)
-    ? [...new Set(input.filter((point) => Number.isFinite(point) && point > 0 && point <= 1))]
-    : [];
-  return points.length ? points.sort((a, b) => a - b) : [1];
-}
 function nearest(points: number[], value: number): number {
   const finite = Number.isFinite(value) ? value : points[points.length - 1];
   return points.reduce((best, point) =>
@@ -118,7 +111,7 @@ export function setupDrawerSnap(
       registering = false;
     }
   };
-  const vertical = def.state.bool('verticalExtent', true);
+  const layoutEnabled = def.state.bool('availableExtent', true);
   const extent = def.state.enum('extentMode', 'intrinsic', {
     options: ['intrinsic', 'fraction'] as const,
   });
@@ -142,7 +135,7 @@ export function setupDrawerSnap(
     clamp: true,
   });
   const layout: AvailableLayoutBinding = {
-    enabled: vertical,
+    enabled: layoutEnabled,
     edge,
     extent,
     fraction: dragProgress,
@@ -304,10 +297,10 @@ export function setupDrawerSnap(
       ...raw,
       side: nextSide,
       minExtent: raw.minExtent == null ? props.minExtent : raw.minExtent,
-      maxExtent: raw.maxExtent == null ? props.maxExtent : raw.maxExtent,
+      maxExtent: raw.maxExtent == null ? (horizontal ? undefined : props.maxExtent) : raw.maxExtent,
     });
     contactRevision++;
-    if (!validSide || (!horizontal && model.status === 'invalid')) {
+    if (!validSide || model.status === 'invalid') {
       extentValid.set(false, 'reason: rejected drawer extent input');
       cancel();
       if (!accepted)
@@ -319,20 +312,7 @@ export function setupDrawerSnap(
     const previousMode = extent.get();
     side.set(nextSide, 'reason: drawer accepted edge');
     edge.set(nextSide, 'reason: drawer accepted layout edge');
-    vertical.set(!horizontal, 'reason: drawer vertical layout boundary');
-    if (horizontal) {
-      points = drawerSnapPoints(props.snapPoints);
-      controlled = run.props.isProvided('snapPoint');
-      extent.set('fraction', 'reason: drawer legacy horizontal snap');
-      snapPoint.set(
-        nearest(
-          points,
-          (controlled ? props.snapPoint : created ? props.defaultSnapPoint : snapPoint.get()) ??
-            points[points.length - 1]
-        ),
-        'reason: drawer snap owner'
-      );
-    } else if (model.status === 'ready') {
+    if (model.status === 'ready') {
       extent.set(model.mode, 'reason: drawer accepted extent mode');
       points = model.mode === 'intrinsic' ? [1] : model.points;
       controlled = model.controlled;

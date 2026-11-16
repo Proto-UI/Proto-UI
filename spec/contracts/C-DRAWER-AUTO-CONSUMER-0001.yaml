@@ -1,6 +1,6 @@
 id: C-DRAWER-AUTO-CONSUMER-0001
 type: contract
-title: Drawer valid vertical content-fit consumer
+title: Drawer valid content-fit and fractional consumer
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: Portable integration now includes logical Content admission; native geometry and modal/focus acceptance remain separate.
@@ -11,8 +11,8 @@ statement:
 criteria:
   - id: C-DRAWER-AUTO-CONSUMER-0001-LAYOUT
     text:
-      en: Valid top/bottom input consumes the extent model and shared available-layout binding. Intrinsic extent fits content within minimum and the current safe maximum; explicit snap fractions use the full capped extent without the former implicit 0.85 multiplier. Base defaults to available one. Neo 3306a802 and the retained Shadcn compatibility recipe use available-minus-root-text six through family prop defaults; the latter is not the current New York 02cad611 max-h-80vh target. Left/right retain legacy presentation. Content remains the project-authored vertical scrollport; New York DrawerContent itself declares no overflow utility.
-      zh-CN: 有效 top/bottom 输入消费尺寸模型及共享 available-layout binding。intrinsic 在最小值与当前安全上限内适配内容；显式 snap 比例以完整安全上限为分母，移除旧隐式 0.85。Base 默认 available one；Neo 固定参考及 Shadcn 保留的兼容配方由 family props 提供 available-minus-root-text six，后者不等价于当前 New York 02cad611 的 max-h-80vh。left/right 保留旧呈现。Content 的纵向滚动区域是本项目组合；New York DrawerContent 本身未声明 overflow utility。
+      en: Valid input on all four edges consumes the extent model and shared available-layout binding. Intrinsic extent fits content within minimum and the current safe maximum; explicit snap fractions use the full capped extent without the former implicit 0.85 multiplier. Base defaults to available one. Neo 3306a802 and the retained Shadcn compatibility recipe use available-minus-root-text six through family prop defaults; the latter is not the current New York 02cad611 max-h-80vh target. Left/right retain fractional mode and default to a twenty-root-text-unit maximum; explicit maxExtent controls the full capped width. The same shared layout owner projects width, attached-edge placement and drag preview so a separate stylesheet width is not a sizing input. Content remains the project-authored vertical scrollport; New York DrawerContent itself declares no overflow utility.
+      zh-CN: 四方向的有效输入消费尺寸模型及共享 available-layout binding。intrinsic 在最小值与当前安全上限内适配内容；显式 snap 比例以完整安全上限为分母，移除旧隐式 0.85。Base 默认 available one；Neo 固定参考及 Shadcn 保留的兼容配方由 family props 提供 available-minus-root-text six，后者不等价于当前 New York 02cad611 的 max-h-80vh。left/right 保留 fraction 模式并默认最大宽度 root-text twenty；显式 maxExtent 控制完整受限宽度。同一共享布局 owner 投影宽度、边缘定位及拖动预览，独立样式宽度不作为尺寸输入。Content 的纵向滚动区域是本项目组合；New York DrawerContent 本身未声明 overflow utility。
   - id: C-DRAWER-AUTO-CONSUMER-0001-HANDLE
     text:
       en: Intrinsic Handle is an aria-hidden pointer affordance, excluded from keyboard focus, with no separator range or Enter/Space close action. Fraction mode retains named separator and existing resize keys. Switching a focused Handle to intrinsic withdraws focus as well as range fields. Intrinsic drag changes outward displacement rather than content extent, using cancel-on-extent-change; snap retains preserve-start resizing. Mode, accepted configuration, invalid updates and disabled state cancel active contacts and release capture. Controlled refusal restores the accepted owner presentation.
@@ -39,6 +39,9 @@ openQuestions:
     question: Which exact-source native receipts establish short/long geometry, safety cap, scrolling and Close reachability across supported runtimes?
     blocks: [activation:C-DRAWER-AUTO-CONSUMER-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Route horizontal Content through the same available-layout owner, preserving default width while admitting explicit neutral maximum and coherent edge attachment.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Integrate the valid-input path while retaining the failing initial-invalid family boundary and native acceptance gaps.

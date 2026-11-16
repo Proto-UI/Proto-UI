@@ -37,6 +37,28 @@ Content 选择 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
 
+## 在 Button 上使用 Tooltip
+
+可聚焦命令与 Tooltip 应共用一个 subject。将 draft authored hook `useTooltipTrigger()` 与命令行为组合，适配生成的原型，再把该组件直接放在 Tooltip Root 内与 Content 并列。不要用独立 Trigger 包裹另一个可聚焦 Button，否则会产生两个 Tab 停靠点。
+
+```ts
+import { definePrototype } from '@proto.ui/core';
+import { asButton, type ButtonProps, type ButtonExposes } from '@proto.ui/prototypes-base/button';
+import { useTooltipTrigger } from '@proto.ui/prototypes-base/tooltip';
+
+export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
+  name: 'app-tooltip-button',
+  setup() {
+    asButton();
+    useTooltipTrigger();
+  },
+});
+```
+
+Button 保留 role、name、click signal、disabled state 与唯一焦点 owner；Tooltip 只追加 hover/focus intent 与自有 `aria-describedby` 关联。禁用 Tooltip Root 只关闭 Tooltip，命令仍可操作；禁用命令则同时抑制两者。`useTooltipTrigger` 没有 options，也不新增 outward exposes，要求同一 subject 已有焦点能力。独立 `asTooltipTrigger` 保留原焦点行为与 exposes。
+
+复用已有样式原型时，可在 `definePrototype` 中保留该原型的静态 `modules` 声明，调用其 `setup(def)`，再调用 `useTooltipTrigger()`，最后返回之前保存的 render function。这保留 family Button 呈现并只创建一个宿主；与下方独立 Trigger demo 的 passive action-body 样式工作分别追踪。
+
 ## API
 
 Root 传入 `open` 进入受控模式。Root 未自设延时时使用 Group 的延时。

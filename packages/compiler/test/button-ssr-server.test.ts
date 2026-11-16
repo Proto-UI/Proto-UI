@@ -69,6 +69,7 @@ describe('Button SSR generated server artifact', () => {
       nativeStyleArtifact.contents = original + '\n// Explicit negative-control helper revision.\n';
       const output = emitWebComponentSource(compilation.ir, {
         ssr: true,
+        controlLabelHydration: 'client-only',
         tagName: 'pui-ssr-button',
         className: 'CompiledButton',
         styleEnvironment: buttonSsrStyleEnvironment,
@@ -105,6 +106,7 @@ describe('Button SSR generated server artifact', () => {
     ]) {
       const result = emitWebComponentSource(compilation.ir, {
         ssr: true,
+        controlLabelHydration: 'client-only',
         tagName: 'pui-ssr-button',
         className: 'CompiledButton',
         styleEnvironment,
@@ -129,8 +131,14 @@ describe('Button SSR generated server artifact', () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'button-ssr-evidence-'));
     try {
       const index = await writeButtonSsrEvidenceArtifacts(fixture, directory);
-      expect(index).toHaveLength(10);
-      expect(index.filter((file) => file.path.startsWith('.proto-ui/'))).toHaveLength(5);
+      expect(index).toHaveLength(12);
+      expect(index.filter((file) => file.path.startsWith('.proto-ui/'))).toHaveLength(7);
+      expect(index.map((file) => file.path)).toEqual(
+        expect.arrayContaining([
+          '.proto-ui/interaction/ownership-v1.ts',
+          '.proto-ui/interaction/control-label-v1.ts',
+        ])
+      );
       const reconstructed = [];
       for (const entry of index) {
         expect(entry.exportPath.split('/').every((segment) => !segment.startsWith('.'))).toBe(true);

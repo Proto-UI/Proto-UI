@@ -55,7 +55,11 @@ export type NativeTableRow = Readonly<{ ref: object; index: number; cells: reado
 export type NativeTableDiagnostic = Readonly<{ code: string; ref?: object; row?: number; headerKey?: string }>;
 export type NativeTableSnapshot = Readonly<{ root: object; caption: object | undefined; rowCount: number; columnCount: number; rows: readonly NativeTableRow[]; valid: boolean; diagnostics: readonly NativeTableDiagnostic[] }>;
 export interface NativeAccessibleExtension { readonly objectRef: object; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
-export type NativeModuleCapability<Kind extends string, Run = unknown> = Kind extends 'transition-controls' ? NativeTransition['controls'] : Kind extends 'transition-action' | 'binding-disposer' ? () => void : Kind extends 'collection-snapshot' ? NativeConfig : Kind extends 'collection-snapshot-list' ? readonly NativeConfig[] : Kind extends 'focus-entry' ? NativeFocusEntry : Kind extends 'focus-roving' ? NativeFocusRoving : Kind extends 'focus-scope' ? NativeFocusScope : Kind extends 'anatomy-family' ? NativeAnatomyFamily : Kind extends 'anatomy-part' ? NativeAnatomyPart : Kind extends 'anatomy-parts' ? readonly NativeAnatomyPart[] : Kind extends 'anatomy-order' ? NativeAnatomyOrder : Kind extends 'collection' ? NativeCollection : Kind extends 'collection-item' ? NativeCollectionItem : Kind extends 'boundary' ? NativeBoundary<Run> : Kind extends 'hit-participation' ? NativeHitParticipation : Kind extends 'positioning' ? NativePositioning : Kind extends 'overlay' ? NativeOverlay : Kind extends 'scroll' ? NativeScroll : Kind extends 'scroll-axis' ? NativeScrollAxis : Kind extends 'scroll-follow' ? NativeScroll['endFollow'] : Kind extends 'text-control' ? NativeTextControl<Run> : Kind extends 'image-view' ? NativeImageView<Run> : Kind extends 'transition' ? NativeTransition : Kind extends 'table-structure' ? NativeTableStructure : Kind extends 'table-states' ? NativeTableStructure['states'] : Kind extends 'table-snapshot' ? NativeTableSnapshot : Kind extends 'table-row' ? NativeTableRow : Kind extends 'table-cell' ? NativeTableCell : Kind extends 'table-diagnostic' ? NativeTableDiagnostic : Kind extends 'table-row-list' ? readonly NativeTableRow[] : Kind extends 'table-cell-list' ? readonly NativeTableCell[] : Kind extends 'table-diagnostic-list' ? readonly NativeTableDiagnostic[] : Kind extends 'a11y-ref-list' ? readonly object[] : Kind extends 'subscription-disposer' ? () => void : Kind extends 'host-target' ? Element : Kind extends 'focus-scope-key' | 'focus-roving-key' | 'a11y-ref' ? object : NativeConfig;
+export type NativeControlLabelAnatomyPair = Readonly<{ family: NativeAnatomyFamily; labelRole: string; targetRole: string }>;
+export type NativeControlLabelRequest = Readonly<{ source: 'pointer' | 'accessibility'; isCurrent(): boolean }>;
+export type NativeControlLabelHandle = Readonly<{ sync(options: Readonly<{ naming: boolean; activation: boolean }>): void }>;
+export type NativeControlLabel<Run = unknown> = Readonly<{ label(pair?: NativeControlLabelAnatomyPair): NativeControlLabelHandle; target(activate: (run: Run, request: NativeControlLabelRequest) => void, pair?: NativeControlLabelAnatomyPair): NativeControlLabelHandle }>;
+export type NativeModuleCapability<Kind extends string, Run = unknown> = Kind extends 'control-label' ? NativeControlLabel<Run> : Kind extends 'control-label-handle' ? NativeControlLabelHandle : Kind extends 'control-label-request' ? NativeControlLabelRequest : Kind extends 'transition-controls' ? NativeTransition['controls'] : Kind extends 'transition-action' | 'binding-disposer' ? () => void : Kind extends 'collection-snapshot' ? NativeConfig : Kind extends 'collection-snapshot-list' ? readonly NativeConfig[] : Kind extends 'focus-entry' ? NativeFocusEntry : Kind extends 'focus-roving' ? NativeFocusRoving : Kind extends 'focus-scope' ? NativeFocusScope : Kind extends 'anatomy-family' ? NativeAnatomyFamily : Kind extends 'anatomy-part' ? NativeAnatomyPart : Kind extends 'anatomy-parts' ? readonly NativeAnatomyPart[] : Kind extends 'anatomy-order' ? NativeAnatomyOrder : Kind extends 'collection' ? NativeCollection : Kind extends 'collection-item' ? NativeCollectionItem : Kind extends 'boundary' ? NativeBoundary<Run> : Kind extends 'hit-participation' ? NativeHitParticipation : Kind extends 'positioning' ? NativePositioning : Kind extends 'overlay' ? NativeOverlay : Kind extends 'scroll' ? NativeScroll : Kind extends 'scroll-axis' ? NativeScrollAxis : Kind extends 'scroll-follow' ? NativeScroll['endFollow'] : Kind extends 'text-control' ? NativeTextControl<Run> : Kind extends 'image-view' ? NativeImageView<Run> : Kind extends 'transition' ? NativeTransition : Kind extends 'table-structure' ? NativeTableStructure : Kind extends 'table-states' ? NativeTableStructure['states'] : Kind extends 'table-snapshot' ? NativeTableSnapshot : Kind extends 'table-row' ? NativeTableRow : Kind extends 'table-cell' ? NativeTableCell : Kind extends 'table-diagnostic' ? NativeTableDiagnostic : Kind extends 'table-row-list' ? readonly NativeTableRow[] : Kind extends 'table-cell-list' ? readonly NativeTableCell[] : Kind extends 'table-diagnostic-list' ? readonly NativeTableDiagnostic[] : Kind extends 'a11y-ref-list' ? readonly object[] : Kind extends 'subscription-disposer' ? () => void : Kind extends 'host-target' ? Element : Kind extends 'focus-scope-key' | 'focus-roving-key' | 'a11y-ref' ? object : NativeConfig;
 export interface NativeModuleCapabilities<Run = unknown> {
   anatomy: NativeAnatomy<Run>; accessible: NativeAccessibleExtension; positioning: NativePositioning;
   asFocusEntry(): NativeFocusEntry; asFocusRoving(): NativeFocusRoving; asFocusScope(): NativeFocusScope; asCollection(): NativeCollection; asCollectionItem(): NativeCollectionItem;
@@ -1594,8 +1598,48 @@ export function nativeOwnershipArtifact(interactionSource: string) {
       roots,
   };
 }
-export function nativeAdapterModulesWithOwnership() {
+export function nativeAdapterModulesWithOwnership(options: { controlLabel?: boolean } = {}) {
   let source: string = nativeAdapterModulesArtifact.contents;
+  if (options.controlLabel) {
+    source = replaceNativeSource(
+      source,
+      'export interface NativeAdapterModuleOptions<Run> {',
+      'export interface NativeAdapterModuleOptions<Run> {\n  controlLabel?: boolean;'
+    );
+    source = replaceNativeSource(
+      source,
+      '  let accessibleTree: NativeConfig = {};',
+      '  let accessibleTree: NativeConfig = {};\n  let controlLabelProjection: object | null = null;'
+    );
+    source = replaceNativeSource(
+      source,
+      '    for (const [kind, relation] of relations) {',
+      `    for (const [kind, relation] of relations) {
+      const authoredTarget = readValue(relation.target);
+      if (kind === 'labelledBy' && controlLabelProjection && (authoredTarget == null || typeof authoredTarget === 'string' && !authoredTarget.trim())) continue;`
+    );
+    source = replaceNativeSource(
+      source,
+      'export interface NativeModuleCapabilities<Run = unknown> {',
+      `export interface NativeModuleCapabilities<Run = unknown> {
+  hasAuthoredControlLabelName?(): boolean;
+  beginControlLabelName?(): () => void;
+  controlLabelAnatomyScope?(pair: NativeControlLabelAnatomyPair, kind: 'label' | 'target'): object | null;
+  subscribeControlLabelAnatomy?(callback: () => void): () => void;`
+    );
+    source = replaceNativeSource(
+      source,
+      '  const capabilities: NativeModuleCapabilities<Run> = {',
+      `  const capabilities: NativeModuleCapabilities<Run> = {
+    ...(options.controlLabel ? {
+    hasAuthoredControlLabelName() { const name = readValue(accessibleName), target = readValue(relations.get('labelledBy')?.target); return typeof name === 'string' && name.trim().length > 0 || (typeof target === 'string' ? target.trim().length > 0 : target != null) || Boolean(options.getAttributeBaseline?.('aria-label')?.trim()); },
+    beginControlLabelName() { const lease = {}; controlLabelProjection = lease; try { projectModuleAttributes(); } catch (error) { if (controlLabelProjection === lease) controlLabelProjection = null; throw error; } return () => { if (controlLabelProjection === lease) controlLabelProjection = null; }; },
+    controlLabelAnatomyScope(pair: NativeControlLabelAnatomyPair, kind: 'label' | 'target') { const expected = kind === 'label' ? pair.labelRole : pair.targetRole; return claims.get(pair.family)?.role === expected ? domain(pair.family, false)?.identity ?? null : null; },
+    subscribeControlLabelAnatomy(callback: () => void) { topologySubscribers.add(callback); return () => topologySubscribers.delete(callback); },
+    } : {}),`
+    );
+  }
+
   for (const start of [
     'type Claim =',
     'type Owner =',

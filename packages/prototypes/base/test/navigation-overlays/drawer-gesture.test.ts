@@ -146,11 +146,14 @@ describe.each(families.map((family) => [family.drawerContent.name, family] as co
           expect(styles).not.toContain('0.85');
           expect(styles).not.toContain('--proto-ui-available-region');
         } else {
-          expect(styles).toContain(
-            'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]'
+          expect(p.content.style.maxWidth).toBe('320px');
+          expect(p.content.style.width).toBe('160px');
+          expect(p.content.style.height).toBe('800px');
+          expect(p.content.style.left).toBe(side === 'left' ? '0px' : '390px');
+          expect(p.content.style.getPropertyValue('translate')).toBe(
+            side === 'left' ? '0px 0px' : '-100% 0px'
           );
-          expect(styles).toContain('--proto-ui-available-region-center-x');
-          expect(styles).toContain('--proto-ui-available-region-center-y');
+          expect(styles).not.toContain('--proto-ui-available-region');
         }
         expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.5');
         p.close.click();
@@ -340,7 +343,7 @@ import {
   renderProtoStyleTokenCss,
   renderProtoShadowStyleTokenCss,
 } from '../../../../cli/src/services/proto-style-css';
-it('keeps horizontal compatibility tokens while vertical geometry moves to neutral layout intent', async () => {
+it('keeps extent geometry in the shared layout owner on all four edges', async () => {
   const collected = await collectProtoStyleTokens(
     path.resolve(process.cwd(), 'packages/prototypes/base/src/drawer')
   );
@@ -348,16 +351,7 @@ it('keeps horizontal compatibility tokens while vertical geometry moves to neutr
     throw new Error('Drawer collector returned a non-string token');
   }
   const tokens = collected;
-  const recipes = [
-    'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
-    'h-[var(--proto-ui-available-region-height,100vh)]',
-    'content-start',
-    'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)]',
-    'top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)]',
-    'left-[calc(var(--proto-ui-available-region-center-x,50vw)_+_var(--proto-ui-available-region-width,100vw)/2_-_min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
-    'bottom-1',
-    'right-1',
-  ];
+  const recipes = ['content-start', 'bottom-1', 'right-1'];
   for (const recipe of recipes) expect(tokens).toContain(recipe);
   expect(tokens).not.toContain('overflow-y-auto');
   expect(tokens).not.toContain('overflow-x-hidden');
@@ -367,9 +361,7 @@ it('keeps horizontal compatibility tokens while vertical geometry moves to neutr
   for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
     expect(css.match(/Unsupported Proto UI style tokens:[\s\S]*?\*\//)?.[0]).toBeUndefined();
     expect(css).not.toContain('0.85');
-    expect(css).toContain(
-      'width: calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress));'
-    );
+    expect(css).not.toContain('--proto-ui-available-region');
     expect(css).not.toContain('overflow-y: auto;');
     expect(css).toContain('align-content: flex-start;');
   }

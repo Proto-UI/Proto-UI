@@ -154,7 +154,9 @@ function setup(def: DefHandle<FieldControlBindingProps>, optional = false) {
             normalized.initialValue === undefined ? normalized.value : normalized.initialValue
           ),
       focused: normalized.focused ?? report.focused,
-      composing: normalized.composing ?? report.composing,
+      // A Context sync can reenter while unmount notifications drain. Its old
+      // editor fact cannot restart composition on an inactive control lease.
+      composing: active && (normalized.composing ?? report.composing),
     };
     hasInitial = true;
     notify(reason);
@@ -203,7 +205,8 @@ function setup(def: DefHandle<FieldControlBindingProps>, optional = false) {
   });
   def.lifecycle.onUnmounted(() => {
     active = false;
-    report.focused = false;
+    // Focus and IME belong to the retired view; keep only its canonical value/baseline.
+    report = { ...report, focused: false, composing: false };
     notify('sync');
   });
   def.lifecycle.onBeforeDispose(() => {

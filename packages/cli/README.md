@@ -12,9 +12,21 @@ CLI package used by applications and maintainers to scaffold Proto UI configurat
 
 ## Install
 
+<!-- proto-ui-release-status:start -->
+
+> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+
+<!-- proto-ui-release-status:end -->
+
 ```bash
-npm install @proto.ui/cli@0.3.0-alpha.1
+npm install @proto.ui/cli@0.3.0-alpha.2
 ```
+
+## Required package versions
+
+`proto-ui add` uses the CLI's exact release version for the selected Adapter and Prototype packages. Before installing or writing configuration and facades, it checks every existing declaration of those packages, including development, peer and optional dependencies. A different version, a dist-tag, a semver range, conflicting declarations, or a stale installed version produces an error with an exact installation command. The command leaves the consumer unchanged on this rejection.
+
+An exact registry declaration can precede the project's first install. A local `file:`, `link:` or `workspace:` dependency, or an exact npm alias of the same official package, must already have installed metadata with the expected package name and version. Metadata is read without executing package code. `--no-install` still supports generating a facade before missing dependencies are installed; it retains these checks for packages already declared by the project. Framework packages keep their own version requirements.
 
 ## Authored hook state selectors
 

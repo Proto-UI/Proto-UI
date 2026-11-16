@@ -55,6 +55,7 @@ type Case = {
   group: string;
   family: Family;
   component: string;
+  runtime?: RuntimeId;
   run: (journey: Journey) => Promise<void>;
 };
 
@@ -184,6 +185,234 @@ async function paint(locator: Locator) {
       ariaChecked: element.getAttribute('aria-checked'),
     };
   });
+}
+
+async function settledPaint(locator: Locator) {
+  // Keep the normal 1000 ms assertion budget. A focus event can resolve before
+  // its 200 ms ring transition; observe the native animation endpoint instead
+  // of sampling its interpolated spread or making a screenshot finish it.
+  await expect
+    .poll(() =>
+      locator.evaluate((element) =>
+        element
+          .getAnimations()
+          .some((animation) => animation.pending || animation.playState === 'running')
+      )
+    )
+    .toBe(false);
+  return paint(locator);
+}
+
+function createCalendarCloseProbe(element: Element, key: string) {
+  const document = element.ownerDocument;
+  const inspectSubject = (subject: Element | null, includeStyle = false) => {
+    if (!subject) return null;
+    const ancestors = [];
+    for (let current: Element | null = subject; current; current = current.parentElement) {
+      // Style reads are post-assertion diagnostics; the input/commit observer
+      // only reads attributes and cannot force layout in the measured window.
+      const style = includeStyle ? document.defaultView?.getComputedStyle(current) : null;
+      ancestors.push({
+        tag: current.tagName.toLowerCase(),
+        id: current.id,
+        ref: current.getAttribute('data-demo-ref'),
+        role: current.getAttribute('role'),
+        hidden: current.hasAttribute('hidden'),
+        inert: current.hasAttribute('inert') || (current as HTMLElement).inert === true,
+        ariaHidden: current.getAttribute('aria-hidden'),
+        display: style?.display ?? null,
+        visibility: style?.visibility ?? null,
+      });
+    }
+    return {
+      connected: subject.isConnected,
+      tag: subject.tagName.toLowerCase(),
+      id: subject.id,
+      ref: subject.getAttribute('data-demo-ref'),
+      role: subject.getAttribute('role'),
+      label: subject.getAttribute('aria-label'),
+      labelledBy: subject.getAttribute('aria-labelledby'),
+      controls: subject.getAttribute('aria-controls'),
+      expanded: subject.getAttribute('aria-expanded'),
+      ancestors,
+    };
+  };
+  const installedAt = performance.now();
+  let keyAt: number | null = null;
+  let keyExpanded: string | null = null;
+  let closedAt: number | null = null;
+  let keySubject: ReturnType<typeof inspectSubject> = null;
+  let firstFalseSubject: ReturnType<typeof inspectSubject> = null;
+  const events: Array<{
+    at: number;
+    kind: 'keydown' | 'expanded';
+    previous?: string | null;
+    expanded: string | null;
+  }> = [];
+  const initialExpanded = element.getAttribute('aria-expanded');
+  const onKey = (event: KeyboardEvent) => {
+    if (!event.isTrusted || event.key !== key || keyAt !== null) return;
+    keyAt = performance.now();
+    keyExpanded = element.getAttribute('aria-expanded');
+    keySubject = inspectSubject(element);
+    events.push({ at: keyAt, kind: 'keydown', expanded: keyExpanded });
+  };
+  const observer = new MutationObserver((records) => {
+    const at = performance.now();
+    for (let index = 0; index < records.length; index++) {
+      const previous = records[index].oldValue;
+      const expanded =
+        index + 1 < records.length
+          ? records[index + 1].oldValue
+          : element.getAttribute('aria-expanded');
+      events.push({ at, kind: 'expanded', previous, expanded });
+      // Accessibility projection may withdraw the old attribute before
+      // applying the new one, including across observer delivery batches.
+      if (keyAt !== null && keyExpanded === 'true' && closedAt === null && expanded === 'false') {
+        closedAt = at;
+        firstFalseSubject = inspectSubject(element);
+      }
+    }
+  });
+  observer.observe(element, {
+    attributes: true,
+    attributeOldValue: true,
+    attributeFilter: ['aria-expanded'],
+  });
+  document.addEventListener('keydown', onKey, true);
+  return {
+    stop(currentElement: Element | null = null) {
+      observer.disconnect();
+      document.removeEventListener('keydown', onKey, true);
+      return {
+        clock: 'page performance.now; trusted keydown and MutationObserver delivery',
+        timeOrigin: performance.timeOrigin,
+        installedAt,
+        observedAt: performance.now(),
+        keyAt,
+        keyExpanded,
+        closedAt,
+        closeAfterKeyMs: keyAt !== null && closedAt !== null ? closedAt - keyAt : null,
+        initialExpanded,
+        expanded: element.getAttribute('aria-expanded'),
+        keySubject,
+        firstFalseSubject,
+        observedSubject: inspectSubject(element, true),
+        currentSubject: inspectSubject(currentElement, true),
+        sameCurrentElement: currentElement === null ? null : currentElement === element,
+        events,
+      };
+    },
+  };
+}
+
+async function closeCalendarPopup(
+  { page, previewer, capture }: Journey,
+  trigger: Locator,
+  key: 'Escape' | 'Enter',
+  state: string
+) {
+  const probe = await trigger.evaluateHandle(createCalendarCloseProbe, key);
+  type CapturedError = { name: string; message: string; stack?: string; cause?: CapturedError };
+  const describeError = (error: unknown, depth = 0): CapturedError => {
+    const value = error as Error & { cause?: unknown };
+    return {
+      name: value?.name ?? typeof error,
+      message: value?.message ?? String(error),
+      ...(value?.stack ? { stack: value.stack } : {}),
+      ...(value?.cause !== undefined && depth < 2
+        ? { cause: describeError(value.cause, depth + 1) }
+        : {}),
+    };
+  };
+  const reads: Array<{
+    startedAt: number;
+    settledAt: number | null;
+    status: 'pending' | 'resolved' | 'rejected';
+    value?: string | null;
+    error?: CapturedError;
+  }> = [];
+  const nodeTrace = {
+    clock: 'Node performance.now; timeOrigin maps timestamps to epoch milliseconds',
+    timeOrigin: performance.timeOrigin,
+    keyStartedAt: performance.now(),
+    keyReturnedAt: null as number | null,
+    pollStartedAt: null as number | null,
+    assertionFinishedAt: null as number | null,
+    assertionError: null as CapturedError | null,
+    reads,
+  };
+  let failure: unknown;
+  try {
+    await page.keyboard.press(key);
+    nodeTrace.keyReturnedAt = performance.now();
+    // Retain the original 1000 ms assertion and its starting point. The page
+    // clock below diagnoses input/commit latency without granting extra time.
+    nodeTrace.pollStartedAt = performance.now();
+    await expect
+      .poll(async () => {
+        const read: (typeof reads)[number] = {
+          startedAt: performance.now(),
+          settledAt: null,
+          status: 'pending',
+        };
+        reads.push(read);
+        try {
+          const value = await trigger.getAttribute('aria-expanded');
+          read.value = value;
+          read.status = 'resolved';
+          return value;
+        } catch (error) {
+          read.status = 'rejected';
+          read.error = describeError(error);
+          throw error;
+        } finally {
+          read.settledAt = performance.now();
+        }
+      })
+      .toBe('false');
+  } catch (error) {
+    failure = error;
+    nodeTrace.assertionError = describeError(error);
+  } finally {
+    nodeTrace.assertionFinishedAt = performance.now();
+  }
+  let currentElement: Awaited<ReturnType<Locator['elementHandle']>> = null;
+  let currentLocatorError: CapturedError | null = null;
+  try {
+    // This bounded lookup is only a post-assertion identity diagnostic. It uses
+    // the exact role/name locator and cannot turn a timed-out assertion green.
+    try {
+      currentElement = await trigger.elementHandle({ timeout: 1000 });
+    } catch (error) {
+      currentLocatorError = describeError(error);
+    }
+    const observation = await probe.evaluate(
+      (current, resolved) => current.stop(resolved),
+      currentElement
+    );
+    await capture(
+      state,
+      {
+        key,
+        assertionPassed: !failure,
+        close: observation,
+        currentLocatorError,
+        nodeTrace: {
+          ...nodeTrace,
+          capturedAt: performance.now(),
+          reads: reads.map((read) => ({ ...read })),
+        },
+      },
+      previewer
+    );
+  } catch (error) {
+    failure ??= error;
+  } finally {
+    await currentElement?.dispose().catch((error) => (failure ??= error));
+    await probe.dispose().catch((error) => (failure ??= error));
+  }
+  if (failure) throw failure;
 }
 
 export type PopoverFrame = {
@@ -601,7 +830,10 @@ async function selectRealRuntime(
 ) {
   const tab = await runtimeTab(previewer, runtime);
   await tab.waitFor({ state: 'visible' });
-  if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
+  // Even the initially selected runtime is a real user selection. Clicking its
+  // tab gives the following Tab journey the same native starting point across
+  // hosts instead of starting WC at the document's many navigation links.
+  await tab.click();
   await waitForRealRuntime(previewer, runtime, readySelector, count);
   await expect
     .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'))
@@ -680,13 +912,13 @@ async function runCase(testCase: Case) {
     if (crop)
       await crop.screenshot({
         path: path.join(output, file),
-        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
+        animations: ['popover', 'calendar'].includes(testCase.component) ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     else
       await page.screenshot({
         path: path.join(output, file),
-        animations: testCase.component === 'popover' ? 'allow' : 'disabled',
+        animations: ['popover', 'calendar'].includes(testCase.component) ? 'allow' : 'disabled',
         timeout: 10_000,
       });
     let capturedObservation = observation;
@@ -799,7 +1031,10 @@ async function runCase(testCase: Case) {
       viewport: page.viewportSize(),
       hostClock: HOST_CLOCK,
       environment,
-      runtime: testCase.component === 'runtime-tabs' ? Object.keys(RUNTIME_LABELS) : 'react',
+      runtime:
+        testCase.component === 'runtime-tabs'
+          ? Object.keys(RUNTIME_LABELS)
+          : (testCase.runtime ?? 'react'),
       presetCheck: process.env.PUI_FINF_PRESET_CHECK ?? 'unknown',
       browser: browser.version(),
       references: references(testCase.family, testCase.component),
@@ -969,8 +1204,8 @@ async function checkboxGroupJourney({ page, previewer, family, capture }: Journe
 async function calendarJourney(journey: Journey, state: CalendarState) {
   const { page, previewer, capture } = journey;
   await selectRealRuntime(page, previewer, 'react', '[role="gridcell"]', 42);
-  const month = previewer.getByRole('combobox', { name: /Month/ });
-  const year = previewer.getByRole('combobox', { name: /Year/ });
+  const month = previewer.getByRole('combobox', { name: 'Month', exact: true });
+  const year = previewer.getByRole('combobox', { name: 'Year', exact: true });
   await month.waitFor({ state: 'visible' });
   await year.waitFor({ state: 'visible' });
   if (state === 'month-menu') {
@@ -983,13 +1218,15 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
     });
     expect(await options.count()).toBe(12);
     expect(await options.allTextContents()).toContain('10月');
-    await page.keyboard.press('Escape');
-    await expect.poll(() => month.getAttribute('aria-expanded')).toBe('false');
+    await closeCalendarPopup(journey, month, 'Escape', 'month-escape-close');
   } else if (state === 'year-scroll') {
     await year.click();
     const options = page.getByRole('option');
     await options.first().waitFor({ state: 'attached' });
     const current = page.getByRole('option', { name: '2026', exact: true });
+    // Attached options may still be waiting for the public Focus owner to
+    // admit initial entry. Observe that real focus before testing its reveal.
+    await expect.poll(() => hasFocus(current)).toBe(true);
     const scroll = () =>
       current.evaluate((element) => {
         let ancestor = element.parentElement;
@@ -1040,9 +1277,9 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
       exact: true,
     });
     await expect.poll(() => hasFocus(target)).toBe(true);
-    const focusOnly = await paint(target);
+    const focusOnly = await settledPaint(target);
     if (state === 'selected-focused') await target.click();
-    const actual = await paint(target);
+    const actual = await settledPaint(target);
     await capture(
       state,
       {
@@ -1091,6 +1328,8 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
   // Hidden-selector failures remain red and have already produced state captures.
   expect(await previewer.getByRole('columnheader').count()).toBe(7);
   expect(await previewer.locator('[role="gridcell"]:visible').count()).toBe(35);
+  expect(await month.count()).toBe(1);
+  expect(await year.count()).toBe(1);
   expect(await month.textContent()).toContain(state.includes('focus') ? '11月' : '10月');
   const visibleDay = previewer.locator('[role="gridcell"]:visible').first();
   const dimensions = await visibleDay.boundingBox();
@@ -1113,6 +1352,70 @@ async function calendarJourney(journey: Journey, state: CalendarState) {
     },
     previewer
   );
+}
+
+async function calendarCaptionJourney(journey: Journey, runtime: RuntimeId) {
+  const { page, previewer, capture } = journey;
+  await selectRealRuntime(page, previewer, runtime, '[role="gridcell"]', 42);
+  const month = previewer.getByRole('combobox', { name: 'Month', exact: true });
+  const year = previewer.getByRole('combobox', { name: 'Year', exact: true });
+  await month.waitFor({ state: 'visible' });
+  await year.waitFor({ state: 'visible' });
+  const monthControls = await month.getAttribute('aria-controls');
+  const yearControls = await year.getAttribute('aria-controls');
+  expect(monthControls).toBeTruthy();
+  expect(yearControls).toBeTruthy();
+  expect(monthControls).not.toBe(yearControls);
+  const caption = async (state: string) => {
+    // Role/name locators use the browser's accessible-name computation. The
+    // selected text and owned controls relations remain separate observations.
+    expect(await previewer.getByRole('combobox').count()).toBe(2);
+    expect(await month.count()).toBe(1);
+    expect(await year.count()).toBe(1);
+    expect(await month.getAttribute('aria-controls')).toBe(monthControls);
+    expect(await year.getAttribute('aria-controls')).toBe(yearControls);
+    await capture(
+      state,
+      {
+        runtime,
+        aria: await previewer.ariaSnapshot(),
+        month: await month.textContent(),
+        year: await year.textContent(),
+        monthControls,
+        yearControls,
+      },
+      previewer
+    );
+  };
+  await caption('caption-october-2026');
+  for (const [trigger, controls, current, key, next] of [
+    [month, monthControls, '10月', 'ArrowDown', '11月'],
+    [year, yearControls, '2026', 'ArrowUp', '2025'],
+  ] as const) {
+    await keyboardReach(page, trigger);
+    await page.keyboard.press('ArrowDown');
+    const listbox = page.getByRole('listbox');
+    await listbox.waitFor({ state: 'visible' });
+    expect(await listbox.getAttribute('id')).toBe(controls);
+    await expect
+      .poll(() => hasFocus(listbox.getByRole('option', { name: current, exact: true })))
+      .toBe(true);
+    await page.keyboard.press(key);
+    const option = listbox.getByRole('option', { name: next, exact: true });
+    await expect.poll(() => hasFocus(option)).toBe(true);
+    await closeCalendarPopup(journey, trigger, 'Enter', `caption-${next}-enter-close`);
+    await expect.poll(() => hasFocus(trigger)).toBe(true);
+    await expect.poll(() => trigger.textContent()).toBe(next);
+    await caption(`caption-selected-${next}`);
+  }
+  const date = previewer.getByRole('gridcell', {
+    name: 'Saturday, November 1, 2025',
+    exact: true,
+  });
+  await date.waitFor({ state: 'visible' });
+  await date.click();
+  await expect.poll(() => date.getAttribute('aria-selected')).toBe('true');
+  await caption('caption-november-2025-date-selected');
 }
 
 async function drawerJourney({ page, previewer, capture }: Journey) {
@@ -1524,6 +1827,14 @@ const cases: Case[] = [
     component: 'calendar',
     run: (journey: Journey) => calendarJourney(journey, state),
   })),
+  ...(['wc', 'react', 'vue', 'vue2'] as const).map((runtime) => ({
+    id: `shadcn-calendar-caption-${runtime}`,
+    group: 'calendar',
+    family: 'shadcn' as const,
+    component: 'calendar',
+    runtime,
+    run: (journey: Journey) => calendarCaptionJourney(journey, runtime),
+  })),
   {
     id: 'shadcn-drawer',
     group: 'modal-overlays',
@@ -1573,11 +1884,12 @@ beforeAll(async () => {
     revision,
     tree,
     requestedGroup: requestedGroup ?? 'all',
-    cases: selectedCases.map(({ id, group, family, component }) => ({
+    cases: selectedCases.map(({ id, group, family, component, runtime }) => ({
       id,
       group,
       family,
       component,
+      runtime: component === 'runtime-tabs' ? Object.keys(RUNTIME_LABELS) : (runtime ?? 'react'),
       route: routeFor(family, component === 'runtime-tabs' ? 'form' : component),
     })),
     phase: 'Planned at setup; each terminal case receipt is the result authority.',

@@ -14,11 +14,33 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
     it.each(['popper', 'item-aligned'] as const)(
       'reopens retained %s Content after its prior portal view retires',
       async (position) => {
-        // Happy DOM has no layout. Supply bounded geometry for the alignment owner;
-        // native geometry remains covered by the original browser journeys.
+        // Happy DOM has no layout. Supply bounded layout facts, including the
+        // size lease's actual writes/readback, rather than zero-width boxes.
+        // This is lifecycle evidence, not native geometry or CSS evidence.
+        const hasRole = (element: HTMLElement, role: string) =>
+          element.classList.contains(`test-select-retained-${role}`);
+        // Retired views use actual display:none host CSS, so they have no box.
+        const hasLayout = (element: HTMLElement) => {
+          if (!element.isConnected) return false;
+          for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+            if (getComputedStyle(node).display === 'none') return false;
+          }
+          return true;
+        };
+        const priorOffsetParent = Object.getOwnPropertyDescriptor(
+          HTMLElement.prototype,
+          'offsetParent'
+        );
+        Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+          configurable: true,
+          get(this: HTMLElement) {
+            return this.parentElement;
+          },
+        });
         vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
           this: HTMLElement
         ) {
+          if (!hasLayout(this)) return new DOMRect();
           const name = this.className;
           const rect: [number, number, number, number] = name.includes('retained-trigger')
             ? [180, 240, 180, 36]
@@ -31,21 +53,68 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
                   : [0, 0, 180, 32];
           return new DOMRect(...rect);
         });
+        vi.spyOn(HTMLElement.prototype, 'offsetLeft', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          if (!hasLayout(this)) return 0;
+          if (hasRole(this, 'trigger')) return 180;
+          if (hasRole(this, 'value') || hasRole(this, 'item-text')) return 13;
+          return hasRole(this, 'item') ? 4 : 0;
+        });
+        for (const property of ['clientLeft', 'clientTop'] as const) {
+          vi.spyOn(HTMLElement.prototype, property, 'get').mockImplementation(function (
+            this: HTMLElement
+          ) {
+            if (!hasLayout(this)) return 0;
+            return hasRole(this, 'surface') ? 1 : 0;
+          });
+        }
+        vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          if (!hasLayout(this)) return 0;
+          if (hasRole(this, 'surface'))
+            return Number.parseFloat(this.parentElement?.style.minWidth ?? '') || 180;
+          if (hasRole(this, 'viewport')) return this.parentElement!.offsetWidth - 2;
+          if (hasRole(this, 'item'))
+            return Number.parseFloat(this.style.width) || this.parentElement!.offsetWidth - 8;
+          return hasRole(this, 'value') || hasRole(this, 'item-text') ? 50 : 180;
+        });
+        vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          if (!hasLayout(this)) return 0;
+          return this.offsetWidth - (hasRole(this, 'surface') ? 2 : 0);
+        });
+        vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          return this.clientWidth;
+        });
         vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
           this: HTMLElement
         ) {
-          return this.className.includes('retained-viewport')
-            ? 104
-            : this.className.includes('retained-surface')
-              ? 106
-              : 32;
+          if (!hasLayout(this)) return 0;
+          if (hasRole(this, 'item')) return Number.parseFloat(this.style.height) || 32;
+          if (hasRole(this, 'trigger')) return 36;
+          return hasRole(this, 'viewport') ? 108 : hasRole(this, 'surface') ? 110 : 32;
         });
-        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(104);
-        vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(104);
+        vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          if (!hasLayout(this)) return 0;
+          return hasRole(this, 'item') ? this.offsetHeight : 108;
+        });
+        vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(function (
+          this: HTMLElement
+        ) {
+          return this.clientHeight;
+        });
         vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (
           this: HTMLElement
         ) {
-          return this.className.includes('retained-item') ? 4 : 0;
+          if (!hasLayout(this)) return 0;
+          return hasRole(this, 'item') ? 4 : 0;
         });
         const adapt = createReactAdapter({ ...React, createPortal });
         const Root = adapt(prototypes.selectRoot);
@@ -109,17 +178,23 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
                     Surface,
                     {
                       hostClassName: 'test-select-retained-surface',
-                      style: { border: '1px solid black', padding: '0px' },
+                      // Happy DOM does not supply browser-used zero defaults.
+                      // Neutral fixture chrome keeps the real geometry guard meaningful.
+                      style: { border: '1px solid black', padding: '0px', margin: '0px' },
                     },
                     React.createElement(
                       Viewport,
-                      { hostClassName: 'test-select-retained-viewport', style: { padding: '4px' } },
+                      {
+                        hostClassName: 'test-select-retained-viewport',
+                        style: { padding: '4px', border: '0px', margin: '0px' },
+                      },
                       React.createElement(
                         Item,
                         {
                           value: 'alpha',
                           textValue: 'Alpha',
                           hostClassName: 'test-select-retained-item',
+                          style: { margin: '0px', padding: '0px', border: '0px' },
                         },
                         React.createElement(
                           ItemText,
@@ -136,6 +211,7 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
           await settle();
           await request(true);
           expect(content()?.getAttribute('role')).toBe('listbox');
+          expect(refs.content.getExposes().alignmentDiagnostic.get()).toBe('');
           expect(refs.content.getExposes().transitionState.get()).toBe('entered');
           expect(document.querySelectorAll('[data-pui-portal-mount]')).toHaveLength(1);
 
@@ -146,6 +222,7 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
           await request(true);
           expect(refs.root.getExposes().open.get()).toBe(true);
           expect(refs.content.getExposes().open.get()).toBe(true);
+          expect(refs.content.getExposes().alignmentDiagnostic.get()).toBe('');
           expect(refs.content.getExposes().transitionState.get()).toBe('entered');
           expect(content()?.getAttribute('role')).toBe('listbox');
           expect(document.querySelectorAll('[data-pui-portal-mount]')).toHaveLength(1);
@@ -153,6 +230,9 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
           await act(async () => root.unmount());
           host.remove();
           vi.restoreAllMocks();
+          if (priorOffsetParent)
+            Object.defineProperty(HTMLElement.prototype, 'offsetParent', priorOffsetParent);
+          else Reflect.deleteProperty(HTMLElement.prototype, 'offsetParent');
         }
       }
     );

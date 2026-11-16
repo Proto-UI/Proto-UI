@@ -1,10 +1,28 @@
 /** Only display:none and the HTML hidden attribute defer first activation.
  * Offscreen, transparent and hover-revealed controls remain eager. */
 export function isFirstActivationVisible(root: HTMLElement): boolean {
+  return readFirstActivationVisible(root);
+}
+
+function readFirstActivationVisible(
+  root: HTMLElement,
+  display?: Map<HTMLElement, boolean>
+): boolean {
   const view = root.ownerDocument.defaultView;
   if (!view || !root.isConnected || root.closest('[hidden]')) return false;
-  for (let element: HTMLElement | null = root; element; element = element.parentElement) {
-    if (view.getComputedStyle(element).display === 'none') return false;
+  const ancestors: HTMLElement[] = [];
+  for (let element: HTMLElement | null = root; element; element = element.parentElement)
+    ancestors.push(element);
+  // An ancestor can reject a whole hidden subtree without computing each
+  // descendant's style. Preserve the existing parentElement boundary.
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const element = ancestors[index]!;
+    let visible = display?.get(element);
+    if (visible === undefined) {
+      visible = view.getComputedStyle(element).display !== 'none';
+      display?.set(element, visible);
+    }
+    if (!visible) return false;
   }
   return true;
 }
@@ -20,11 +38,20 @@ export function createHiddenFirstActivation(
   let disposed = false;
   let observing = false;
   let resizeFrame = 0;
-  const tryActivate = (root: HTMLElement) => {
+  const tryActivate = (root: HTMLElement, display = new Map<HTMLElement, boolean>()) => {
+    if (disposed) return;
     if (!root.isConnected) pending.delete(root);
-    else if (isFirstActivationVisible(root)) {
+    else if (readFirstActivationVisible(root, display)) {
       pending.delete(root);
-      activate(root);
+      // Only hidden-root reads can share facts. An activation may synchronously
+      // change styles, move roots, dispose this gate or reenter add(); no later
+      // read may reuse a fact from before that application callback.
+      display.clear();
+      try {
+        activate(root);
+      } finally {
+        display.clear();
+      }
     }
   };
   const observeAncestors = () => {
@@ -37,6 +64,7 @@ export function createHiddenFirstActivation(
     for (const node of ancestors)
       visibility.observe(node, {
         attributes: true,
+        attributeOldValue: true,
         attributeFilter: ['hidden', 'style', 'class'],
       });
     if (pending.size && !observing) {
@@ -53,15 +81,25 @@ export function createHiddenFirstActivation(
   };
   const visibility = new view.MutationObserver((records) => {
     if (disposed) return;
+    // DOM setters can notify even when the attribute keeps its value. These
+    // records cannot reveal a pending root and need no computed-style flush.
+    const changed = records.filter(
+      (record) =>
+        record.oldValue !==
+        (record.target as Element).getAttributeNS(record.attributeNamespace, record.attributeName!)
+    );
+    if (!changed.length) return;
     const previous = pending.size;
+    const display = new Map<HTMLElement, boolean>();
     for (const root of pending) {
-      if (records.some((record) => record.target.contains(root))) tryActivate(root);
+      if (changed.some((record) => record.target.contains(root))) tryActivate(root, display);
     }
     if (pending.size !== previous) observeAncestors();
   });
   const structure = new view.MutationObserver((records) => {
     if (disposed) return;
     let changed = false;
+    const display = new Map<HTMLElement, boolean>();
     for (const root of pending) {
       if (!root.isConnected) {
         pending.delete(root);
@@ -69,7 +107,7 @@ export function createHiddenFirstActivation(
       } else if (
         records.some((record) => Array.from(record.addedNodes).some((node) => node.contains(root)))
       ) {
-        tryActivate(root);
+        tryActivate(root, display);
         changed = true;
       }
     }
@@ -81,7 +119,8 @@ export function createHiddenFirstActivation(
       resizeFrame = 0;
       if (disposed) return;
       const previous = pending.size;
-      for (const root of pending) tryActivate(root);
+      const display = new Map<HTMLElement, boolean>();
+      for (const root of pending) tryActivate(root, display);
       if (pending.size !== previous) observeAncestors();
     });
   };

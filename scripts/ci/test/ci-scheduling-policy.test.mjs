@@ -231,6 +231,55 @@ jobs: {}
   }
 });
 
+test('a nested cycle rejects a missing browser source even when its job is conditional', (t) => {
+  const suite = 'apps/www/test/current.browser.test.ts';
+  const dir = fixtureWorkflowDir({
+    'ci.yml': ciSkeleton.replace(
+      'jobs:\n',
+      `jobs:\n  production:\n    if: "github.event_name != 'pull_request'"\n    uses: ./.github/workflows/production.yml\n`
+    ),
+    'production.yml': `
+on:
+  workflow_call:
+permissions: { contents: read }
+jobs:
+  native:
+    uses: ./.github/workflows/native.yml
+`,
+    'native.yml': `
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions: { contents: read }
+jobs:
+  native:
+    if: false
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - run: corepack pnpm@10.32.1 exec vitest run ${suite}
+`,
+  });
+  const sourceRoot = mkdtempSync(path.join(os.tmpdir(), 'pui-ci-source-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  t.after(() => rmSync(sourceRoot, { recursive: true, force: true }));
+  const failures = () =>
+    collectViolations(dir, sourceRoot).filter((v) => v.rule === 'cycle-browser-source-missing');
+  const expected = [
+    {
+      file: `${WORKFLOW_DIR}/native.yml`,
+      rule: 'cycle-browser-source-missing',
+      detail: `job 'native' references missing browser suite '${suite}'`,
+    },
+  ];
+  assert.deepEqual(failures(), expected);
+  mkdirSync(path.dirname(path.join(sourceRoot, suite)), { recursive: true });
+  writeFileSync(path.join(sourceRoot, suite), '// Current native test source\n');
+  assert.deepEqual(failures(), []);
+  rmSync(path.join(sourceRoot, suite));
+  assert.deepEqual(failures(), expected);
+});
+
 const workflowDirectory = path.join(repoRoot, WORKFLOW_DIR);
 const sizingWorkflow = 'select-item-sizing-evidence.yml';
 
@@ -368,5 +417,3 @@ test('removing serial admission or failure continuation is rejected', () => {
     );
   }
 });
-
-

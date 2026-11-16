@@ -20,8 +20,14 @@ import { isRuntimeId } from './PrototypePreviewer/runtimes/ids';
 
 const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
+const DOCS_SEMANTIC_TARGETS =
+  'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption,li,dt,dd,summary,th,td,caption,blockquote';
 const COMPONENT_OWNED =
   '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-primary-nav-link],pre,code,script,style,template';
+const CODE_OWNED = '[data-code-example], div.site-code-surface-mount, div.site-copy-mount';
+const PROTOTYPE_OWNED = '[data-pui-root],[data-pui-style]';
+const TYPOGRAPHY_SOURCE =
+  '[data-typography-owner],[data-site-typography-carrier],[data-site-typography-slot]';
 const PASSIVE_HEADER_FRAME =
   '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"],[data-projection-prototype="bootstrap-2-3-2-surface-root"])';
 const MARKERS = [
@@ -49,12 +55,69 @@ const selectionContainers = new WeakMap<Node, { native: HTMLElement; slot: HTMLE
 let serial = 0;
 
 export function isWithinOwnedCodeContent(node: Node): boolean {
-  return (
-    node.nodeType === 1 &&
-    !!(node as Element).closest(
-      '[data-code-example], div.site-code-surface-mount, div.site-copy-mount'
+  return node.nodeType === 1 && !!(node as Element).closest(CODE_OWNED);
+}
+
+function excludedTypographyOwner(native: Element, docsOnly: boolean): Element | null {
+  const explicit = native.getAttribute('data-site-typography');
+  const explicitRole = explicit !== null && ROLES.has(explicit);
+  const code = docsOnly ? native.closest(CODE_OWNED) : null;
+  if (code) return code;
+  const component = native.closest(COMPONENT_OWNED);
+  if (component && !(explicitRole && native.matches('output[data-home-demo-status]')))
+    return component;
+  const batch = native.closest('[data-site-typography-batch]');
+  if (batch) return batch;
+  const prototype = native.closest(PROTOTYPE_OWNED);
+  // Only the existing passive Header frame is allowed to contain explicitly
+  // marked native labels. An explicit marker never bypasses another actual
+  // component's text owner or a preview/example island.
+  if (
+    prototype &&
+    !(
+      explicitRole &&
+      native.closest('[data-site-header-panel-content]') &&
+      prototype.matches(PASSIVE_HEADER_FRAME)
     )
-  );
+  )
+    return prototype;
+  return null;
+}
+
+/** A private Proto update cannot change the native typography inventory unless
+ * it crosses an admitted source boundary. Keep those cases conservatively dirty;
+ * this filters notifications, never caches the collector's target identities. */
+export function isPrivateTypographyMutation(record: MutationRecord): boolean {
+  if (isWithinOwnedCodeContent(record.target)) return true;
+  if (record.target.nodeType !== 1) return false;
+  const target = record.target as Element;
+  const owner = excludedTypographyOwner(target, true);
+  // Preserve other component exclusions' explicit native-label exceptions.
+  // Only actual Proto owners add a new filtering boundary here.
+  if (!owner?.matches(PROTOTYPE_OWNED)) return false;
+  if (
+    target.closest(PASSIVE_HEADER_FRAME) ||
+    target.closest(TYPOGRAPHY_SOURCE) ||
+    // Existing borrowed source may be deeper than this mutation's target, and
+    // its Header frame may have lost admission before this childList record.
+    owner.querySelector(TYPOGRAPHY_SOURCE)
+  )
+    return false;
+  // An outer paragraph/list item/explicit target can gain or lose eligibility
+  // when an inline component adds block content, even though the component's
+  // own labels remain excluded. Check every documentation candidate kind.
+  if (owner.parentElement?.closest(`[data-site-typography],${DOCS_SEMANTIC_TARGETS}`)) return false;
+  if (record.type === 'childList') {
+    const sourceBoundary = `${PASSIVE_HEADER_FRAME},${TYPOGRAPHY_SOURCE}`;
+    for (const node of [...record.addedNodes, ...record.removedNodes]) {
+      if (node.nodeType !== 1) continue;
+      const element = node as Element;
+      // Current ancestry alone cannot describe a removed or moved owner, or a
+      // newly inserted Header frame whose native labels are explicitly admitted.
+      if (element.matches(sourceBoundary) || element.querySelector(sourceBoundary)) return false;
+    }
+  }
+  return true;
 }
 
 /** Inventory uses native semantics, never discovers text by replacing HTML.
@@ -63,33 +126,13 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
   const candidates = Array.from(
     root.querySelectorAll<HTMLElement>(
       docsOnly
-        ? '[data-site-typography], [data-doc-flow] :is(h1,h2,h3,h4,h5,h6,p,label,legend,figcaption,li,dt,dd,summary,th,td,caption,blockquote)'
+        ? `[data-site-typography], [data-doc-flow] :is(${DOCS_SEMANTIC_TARGETS})`
         : `[data-site-typography],${SEMANTIC_TARGETS}`
     )
   );
   return candidates.flatMap((native): Target[] => {
     const explicit = native.dataset.siteTypography;
-    const explicitRole = explicit !== undefined && ROLES.has(explicit);
-    if (
-      (docsOnly && isWithinOwnedCodeContent(native)) ||
-      (native.closest(COMPONENT_OWNED) &&
-        !(explicitRole && native.matches('output[data-home-demo-status]'))) ||
-      native.closest('[data-site-typography-batch]')
-    )
-      return [];
-    const prototypeOwner = native.closest('[data-pui-root],[data-pui-style]');
-    // Only the existing passive Header frame is allowed to contain explicitly
-    // marked native labels. An explicit marker never bypasses another actual
-    // component's text owner or a preview/example island.
-    if (
-      prototypeOwner &&
-      !(
-        explicitRole &&
-        native.closest('[data-site-header-panel-content]') &&
-        prototypeOwner.matches(PASSIVE_HEADER_FRAME)
-      )
-    )
-      return [];
+    if (excludedTypographyOwner(native, docsOnly)) return [];
     const tag = native.localName;
     const role =
       explicit && ROLES.has(explicit)

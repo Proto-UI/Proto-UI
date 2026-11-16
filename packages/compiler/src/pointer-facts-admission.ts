@@ -11,28 +11,103 @@ export function unsupportedPointerFacts(
   target: string,
   closure: 'reached' | 'emitted-declarations' = 'reached'
 ): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(ir, target, closure, (value) =>
+    (value.kind === 'member' &&
+      value.object.type === 'event' &&
+      ['pointerType', 'pointerButtons'].includes(value.property)) ||
+    (value.kind === 'operation' &&
+      value.operation === 'eventControl.requestDefaultActionPrevention')
+      ? 'Portable pointer facts / control-alias operations'
+      : undefined
+  );
+}
+
+/** A generated native ControlLabel host exists only for the four browser profiles. */
+export function unsupportedControlLabel(
+  ir: PrototypeIR,
+  target: string,
+  closure: 'reached' | 'emitted-declarations' = 'reached'
+): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(ir, target, closure, (value) =>
+    value.kind === 'operation' &&
+    (value.operation === 'hook.asControlLabel' ||
+      value.operation.startsWith('controlLabel.') ||
+      value.operation.startsWith('controlLabelRequest.'))
+      ? 'ControlLabel operations'
+      : undefined
+  );
+}
+
+/** Server markup cannot claim an anatomy-derived ControlLabel pair before hydration. */
+export function unsupportedControlLabelAnatomy(
+  ir: PrototypeIR,
+  target: string
+): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(ir, target, 'reached', (value) => {
+    if (value.kind !== 'operation') return undefined;
+    const pair =
+      value.operation === 'controlLabel.label'
+        ? value.arguments[0]
+        : value.operation === 'controlLabel.target'
+          ? value.arguments[1]
+          : undefined;
+    return pair && pair.kind !== 'undefined' ? 'ControlLabel anatomy pairing' : undefined;
+  });
+}
+
+/** Direct Qt/Dart entry points must not discard new executable parameter semantics. */
+export function unsupportedCheckedHelperParameters(
+  ir: PrototypeIR,
+  target: string,
+  closure: 'reached' | 'emitted-declarations' = 'reached'
+): CompilerDiagnostic[] {
+  return unsupportedSourceExpressions(
+    ir,
+    target,
+    closure,
+    () => undefined,
+    (value) =>
+      value.parameters.some((parameter) => parameter.default || parameter.callback)
+        ? 'Checked callback parameters and per-call parameter defaults'
+        : undefined
+  );
+}
+
+function unsupportedSourceExpressions(
+  ir: PrototypeIR,
+  target: string,
+  closure: 'reached' | 'emitted-declarations',
+  unsupported: (value: ExpressionIR) => string | undefined,
+  unsupportedFunction: (value: FunctionIR) => string | undefined = () => undefined
+): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
   const functions = new Set<FunctionIR>();
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   function fn(value: FunctionIR, outer: Scope): void {
     if (functions.has(value)) return;
     functions.add(value);
-    const scope = new Map(outer);
-    for (const parameter of value.parameters) scope.set(parameter.name, undefined);
-    statements(value.body, scope);
-  }
-  function expression(value: ExpressionIR, scope: Scope): void {
-    if (
-      (value.kind === 'member' &&
-        value.object.type === 'event' &&
-        ['pointerType', 'pointerButtons'].includes(value.property)) ||
-      (value.kind === 'operation' &&
-        value.operation === 'eventControl.requestDefaultActionPrevention')
-    )
+    const feature = unsupportedFunction(value);
+    if (feature)
       diagnostics.push({
         code: 'PUI4003',
         category: 'unsupported-input',
-        message: `Portable pointer facts / control-alias operations are not implemented by ${target}.`,
+        message: `${feature} are not implemented by ${target}.`,
+        span: value.span,
+      });
+    const scope = new Map(outer);
+    for (const parameter of value.parameters) {
+      if (parameter.default) expression(parameter.default, scope);
+      scope.set(parameter.name, undefined);
+    }
+    statements(value.body, scope);
+  }
+  function expression(value: ExpressionIR, scope: Scope): void {
+    const feature = unsupported(value);
+    if (feature)
+      diagnostics.push({
+        code: 'PUI4003',
+        category: 'unsupported-input',
+        message: `${feature} are not implemented by ${target}.`,
         span: value.span,
       });
     switch (value.kind) {
@@ -71,6 +146,11 @@ export function unsupportedPointerFacts(
       case 'lexical-write':
         expression(value.cell, scope);
         expression(value.value, scope);
+        return;
+      case 'conditional':
+        expression(value.condition, scope);
+        expression(value.whenTrue, scope);
+        expression(value.whenFalse, scope);
         return;
       case 'binary':
         expression(value.left, scope);
@@ -136,6 +216,7 @@ export function unsupportedPointerFacts(
   const moduleScope: Scope = new Map();
   statements(ir.moduleBindings ?? [], moduleScope);
   fn(ir.setup, moduleScope);
-  if (closure === 'emitted-declarations') for (const hook of ir.hooks) fn(hook.setup, new Map(moduleScope));
+  if (closure === 'emitted-declarations')
+    for (const hook of ir.hooks) fn(hook.setup, new Map(moduleScope));
   return diagnostics;
 }

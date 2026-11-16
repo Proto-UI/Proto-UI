@@ -369,6 +369,18 @@ function copyThemeSurfaceStyle(
   return Object.freeze(Object.fromEntries(entries)) as ProjectionThemeSurfaceStyle;
 }
 
+function sameThemeSurfaceStyle(
+  first: ProjectionThemeSurfaceStyle | undefined,
+  second: ProjectionThemeSurfaceStyle | undefined
+): boolean {
+  if (first === second) return true;
+  const entries = Object.entries(first ?? {});
+  const current = new Map(Object.entries(second ?? {}));
+  return (
+    entries.length === current.size && entries.every(([key, value]) => current.get(key) === value)
+  );
+}
+
 function assertReservedRefsAvailable(node: DemoChild): void {
   if (typeof node === 'string' || node.kind === 'text') return;
   if (node.ref?.startsWith(REF_PREFIX)) {
@@ -1075,30 +1087,31 @@ export function createProjectionComposition(
         }
       }
 
-      const committedDynamic = new Map<
-        string,
-        { sequence: number; children: readonly DemoKeyedChild[] }
-      >();
+      type DynamicCommit = { sequence: number; children: readonly DemoKeyedChild[] };
+      const committedDynamic = new Map<string, DynamicCommit>();
       clearDynamicChildren = () => committedDynamic.clear();
       let nextDynamicSequence = 0;
-      const applyDynamicTheme = () => {
+      const applyDynamicTheme = (entries: Iterable<[string, DynamicCommit]> = committedDynamic) => {
         if (activeContext !== context) return;
-        const apply = (node: DemoChild) => {
-          if (activeContext !== context || typeof node === 'string' || node.kind === 'text') return;
-          if (node.kind === 'proto') {
-            const authored = mergeSurfaceStyle(
-              node.surfaceStyle,
-              node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
-            );
-            context.api.setSurfaceStyle!(
-              node.ref!,
-              mergeSurfaceStyle(authored, themeSurfaceStyle ?? {}) ?? {}
-            );
-          }
-          for (const nested of node.children ?? []) apply(nested);
-        };
-        for (const value of committedDynamic.values())
+        for (const [slotRef, value] of entries) {
+          const current = () =>
+            activeContext === context && committedDynamic.get(slotRef) === value;
+          const apply = (node: DemoChild) => {
+            if (!current() || typeof node === 'string' || node.kind === 'text') return;
+            if (node.kind === 'proto') {
+              const authored = mergeSurfaceStyle(
+                node.surfaceStyle,
+                node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
+              );
+              context.api.setSurfaceStyle!(
+                node.ref!,
+                mergeSurfaceStyle(authored, themeSurfaceStyle ?? {}) ?? {}
+              );
+            }
+            for (const nested of node.children ?? []) apply(nested);
+          };
           for (const child of value.children) apply(child.node);
+        }
       };
       applyActiveDynamicTheme = applyDynamicTheme;
       const childRefs = context.api.setChildren
@@ -1216,12 +1229,13 @@ export function createProjectionComposition(
                   assertReservedRefsAvailable(node);
                   return { key, node: dynamicProjectionRefs(slotRef, key, node) };
                 });
+                const projectedTheme = themeSurfaceStyle;
                 const projected = children.map(({ key, node }) => ({
                   key,
                   node: cloneProjectedChild(
                     node,
                     coordinateAttrs,
-                    themeSurfaceStyle ?? {},
+                    projectedTheme ?? {},
                     allowedPrototypeIds,
                     componentRootPrototypeId
                   ),
@@ -1231,9 +1245,15 @@ export function createProjectionComposition(
                 const status = await context.api.setChildren!(slotRef, projected);
                 if (status === 'committed' && activeContext === context) {
                   // A newer rejected request must not erase the last successful tree.
-                  if (sequence > (committedDynamic.get(slotRef)?.sequence ?? 0))
-                    committedDynamic.set(slotRef, { sequence, children });
-                  applyDynamicTheme();
+                  if (sequence > (committedDynamic.get(slotRef)?.sequence ?? 0)) {
+                    const committed = { sequence, children };
+                    committedDynamic.set(slotRef, committed);
+                    // The committed nodes already carry their projected theme.
+                    // Only a theme change while that commit was pending needs
+                    // a catch-up, and only for this newly accepted slot.
+                    if (!sameThemeSurfaceStyle(projectedTheme, themeSurfaceStyle))
+                      applyDynamicTheme([[slotRef, committed]]);
+                  }
                   stampProjectionSurfaces();
                 }
                 return status;

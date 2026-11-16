@@ -13,6 +13,7 @@ import {
 import type { EffectsPort } from '@proto.ui/core';
 import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
+import { normalizeVue2InstanceAssociations } from './instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
@@ -419,7 +420,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             proto,
             schedule,
             rawPropsSource,
-            getInstanceAssociations: () => vm.instanceAssociations ?? {},
+            getInstanceAssociations: () => readVue2InstanceAssociations(vm),
             viewOperations: { capture: () => state.owner.captureViewOperation() },
             wiring,
             eventGate: {
@@ -989,7 +990,7 @@ function initSession<Props extends PropsBaseType>(
         proto: targetProto,
         schedule: targetOptions.schedule,
         rawPropsSource: state.rawPropsSource!,
-        getInstanceAssociations: () => vm.instanceAssociations ?? {},
+        getInstanceAssociations: () => readVue2InstanceAssociations(vm),
         viewOperations: { capture: () => state.owner.captureViewOperation() },
         wiring,
         eventGate: {
@@ -1065,12 +1066,16 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 function notifyPropsChange(vm: any, autoUpdate: boolean) {
   const state = getState(vm);
   if (!state.rawPropsSource) return;
-  state.controller?.applyInstanceAssociations(vm.instanceAssociations ?? {});
+  state.controller?.applyInstanceAssociations(readVue2InstanceAssociations(vm));
   const nextHostProps = state.rawPropsSource.get();
   if (state.lastHostProps && shallowEqualHostProps(state.lastHostProps, nextHostProps)) return;
   state.lastHostProps = nextHostProps;
   for (const cb of state.subs) cb();
   if (autoUpdate) state.controller?.update();
+}
+
+function readVue2InstanceAssociations(vm: any): InstanceAssociations {
+  return normalizeVue2InstanceAssociations(vm.instanceAssociations, vm.$options?._base?.observable);
 }
 
 function trackFocusIngress(vm: any, event: RuntimeLifecycleEvent) {

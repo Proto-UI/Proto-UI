@@ -646,8 +646,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         sibling.textContent = 'Original home sibling';
         home.append(tree, sibling);
         const host = document.createElement('div');
-        host.style.cssText =
-          'position:fixed;left:16px;top:300px;width:240px;z-index:2147483000';
+        host.style.cssText = 'position:fixed;left:16px;top:300px;width:240px;z-index:2147483000';
         const shadow = host.attachShadow({ mode: 'open' });
         const content = document.createElement('div');
         content.style.cssText =
@@ -704,7 +703,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               viewportBottom: bottom,
               rowTop: row.top,
               rowBottom: row.bottom,
-              visible: row.width > 0 && row.height > 0 && row.top >= top - 1 && row.bottom <= bottom + 1,
+              visible:
+                row.width > 0 && row.height > 0 && row.top >= top - 1 && row.bottom <= bottom + 1,
               nearestBottom: Math.abs(row.bottom - bottom) <= 1,
               trustedManualInput:
                 manualInputs.length > 0 &&

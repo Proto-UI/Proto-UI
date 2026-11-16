@@ -70,9 +70,3 @@ jobs:
     needs: site-startup-theme
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/select-item-sizing-evidence.yml
-  library-card-font-boundary:
-    needs: select-item-sizing
-    if: ${{ !cancelled() }}
-    uses: ./.github/workflows/library-card-evidence.yml
-    with:
-      supplemental-only: true

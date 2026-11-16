@@ -1,0 +1,139 @@
+id: T-SCROLL-TARGET-REVEAL-0001
+type: test
+title: Current logical target reveal admission and bounded Web movement
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Module and modeled Web-host regression evidence is kept separate from actual Search browser acceptance. Compiler, non-Web and horizontal reveal profiles are not certified by this test entity.
+  zh-CN: Module 与模拟 Web host 的回归证据独立于真实 Search 浏览器验收；本测试实体不认证 compiler、非 Web 或横向 reveal profile。
+summary: Verifies current same-surface Anatomy identity, synchronous retirement, no replay, minimal vertical movement, physical insets and preservation of focus and outer scroll ownership.
+cases:
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-IDENTITY
+    title: only a current same-family descendant belongs to this surface
+    covers:
+      - C-SCROLL-TARGET-REVEAL-0001-IDENTITY
+      - C-AS-SCROLL-SURFACE-0001-TARGET-REVEAL
+      - M-SCROLL-0001-TARGET-REVEAL
+    expectation: current-descendant-delivered-and-stale-foreign-fabricated-self-sibling-or-unclaimed-surface-rejected
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-LIFETIME
+    title: resolution and host-call reentry cannot transfer authority to a later view
+    covers:
+      - C-SCROLL-TARGET-REVEAL-0001-LIFETIME
+      - M-SCROLL-0001-TARGET-REVEAL
+    expectation: target-claim-and-view-retirement-reject-without-movement-or-replay-and-normal-requests-retain-their-queue
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-NEAREST
+    title: one vertical surface applies only the necessary bounded movement
+    covers:
+      - C-SCROLL-TARGET-REVEAL-0001-HOST
+      - HC-SCROLL-SURFACE-0001-TARGET-REVEAL
+    expectation: nearest-edge-movement-native-range-clamping-and-no-movement-for-contained-or-covering-targets
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-INSETS
+    title: viewport border and independent scroll padding and target margins remain effective
+    covers: [C-SCROLL-TARGET-REVEAL-0001-HOST]
+    expectation: independent-pixel-and-percentage-padding-and-pixel-margin-enter-minimal-movement-with-authored-scroll-behavior-restored-and-unsupported-computed-values-rejected
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-HOST-RETIREMENT
+    title: disconnected unrendered foreign and retired targets cannot move a connected surface
+    covers:
+      - C-SCROLL-TARGET-REVEAL-0001-HOST
+      - C-SCROLL-TARGET-REVEAL-0001-LIFETIME
+      - HC-SCROLL-SURFACE-0001-TARGET-REVEAL
+    expectation: host-rejects-invalid-target-and-rechecks-binding-and-logical-authority-after-geometry-before-writing
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-OWNERSHIP
+    title: reveal preserves input focus horizontal position and outer scroll offsets
+    covers: [C-SCROLL-TARGET-REVEAL-0001-HOST]
+    expectation: only-the-owned-vertical-scroll-offset-changes-and-host-facts-reflect-that-offset
+  - id: T-SCROLL-TARGET-REVEAL-0001-CASE-CONSUMER
+    title: the current Search keyboard target is visible in a bounded list while input keeps focus
+    covers:
+      - C-SCROLL-TARGET-REVEAL-0001-CONSUMER
+      - P-BASE-COMMAND-TARGET-REVEAL
+    expectation: current-open-view-keyboard-navigation-reveals-the-active-result-and-retired-pointer-only-disabled-read-only-or-composing-intent-does-not
+implementations:
+  - id: scroll-target-reveal-module
+    kind: module-test
+    status: passing
+    path: packages/modules/scroll/test/target-reveal.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-IDENTITY
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-LIFETIME
+    notes:
+      - Fake Anatomy and host ports exercise observable dispatch rejection, target and view replacement, host-call reentry, unsupported capability and attachment ordering. They do not prove browser layout.
+      - The original implementation forwarded reveal as an ordinary request, admitted retired or foreign identity and queued an acquiring target; the preserved red run demonstrates these violations.
+  - id: scroll-target-reveal-web-host
+    kind: adapter-test
+    status: passing
+    path: packages/modules/scroll/test/web-target-reveal.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-NEAREST
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-INSETS
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-HOST-RETIREMENT
+      - T-SCROLL-TARGET-REVEAL-0001-CASE-OWNERSHIP
+    notes:
+      - Happy DOM receives explicit viewport and target measurements. Offset, focus, ancestor ownership and lifetime assertions are modeled host evidence, not native layout or input evidence.
+      - A still-connected target loses its logical authority during measurement and must not receive a physical write.
+      - The bound host wrapper must forward reveal and its current-target guard while retiring an old still-connected surface after target replacement.
+      - Controlled animation-frame delivery verifies that an accepted already-visible target cancels an older pending end request. Ordinary end requests and requests followed by an invalid reveal still reach the end. This does not claim native frame scheduling.
+      - Fractional used border-box and content-box measurements must not turn integer offsetHeight rounding into a false scale. A distant oversized target aligns to the nearest edge at both unit and doubled scale, and a repeated request is stable. The preserved old-helper failures overshot by about 64 pixels.
+  - id: search-target-reveal-consumer-guards
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/search-target-reveal.test.ts
+    required: true
+    consumesCases: [T-SCROLL-TARGET-REVEAL-0001-CASE-CONSUMER]
+    notes:
+      - Search-mode and styled-family coverage, keyboard-only intent, input focus, disabled, read-only, composition and retired-view controls are exercised by the separately owned Search regression suite. Its 54 cases pass independently of the retained host-fixture setup failures.
+  - id: search-current-interaction-reentry
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/search-navigation-reentry.test.ts
+    required: true
+    consumesCases: [T-SCROLL-TARGET-REVEAL-0001-CASE-CONSUMER]
+    notes:
+      - Real public openChange callbacks, controlled owner props and Collection metadata getters exercise newer keyboard, pointer and query ownership. An older navigation or publication must not overwrite the accepted active item or filtered collection.
+      - Normal controlled-open acceptance with the same query still enters the boundary item; an owner replacing the query retires the earlier navigation. Fixtures verify actual Runtime and Web Component delivery and complete disposal, without inferring native geometry, physical input or compiler support.
+      - Query completion, selection candidate reads and selection notification tails cannot replay older work after a newer accepted interaction. Invalid nested selection does not cancel a valid selection. A controlled selected-label acknowledgment still closes and restores editor focus, while a different owner query keeps the new editing flow open.
+      - Enter-only delivery preserves the keyboard active item. Known mouse movement with no buttons may activate a visible item without selecting its value or moving focus; unknown, touch, pen, pressed, disabled and read-only movement does not take ownership. The preserved native resize failure remains separate from these injected event controls.
+  - id: search-target-reveal-native-consumer
+    kind: runtime-test
+    status: failing
+    path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+    required: true
+    consumesCases: [T-SCROLL-TARGET-REVEAL-0001-CASE-CONSUMER]
+    notes:
+      - The retained browser failure selected the final result but left its bounds outside the Search scroll body. Final candidate browser acceptance remains separate from the Module and host model tests.
+      - Passing a modeled host operation does not prove visibility through an independently scrolling or clipping ancestor; the actual consumer must supply a bounded list layout.
+verifies:
+  contracts:
+    - C-SCROLL-TARGET-REVEAL-0001
+    - id: C-AS-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.2
+      anchors: [C-AS-SCROLL-SURFACE-0001-TARGET-REVEAL]
+  prototypes:
+    - id: P-BASE-COMMAND
+      since: 0.3.0-alpha.2
+      anchors: [P-BASE-COMMAND-TARGET-REVEAL]
+  modules:
+    - id: M-SCROLL-0001
+      since: 0.3.0-alpha.2
+      anchors: [M-SCROLL-0001-TARGET-REVEAL]
+  hostCaps:
+    - id: HC-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.2
+      anchors: [HC-SCROLL-SURFACE-0001-TARGET-REVEAL]
+exercises:
+  modules:
+    - id: M-SCROLL-0001
+      since: 0.3.0-alpha.2
+      anchors: [M-SCROLL-0001-TARGET-REVEAL]
+    - M-ANATOMY-0001
+  hostCaps:
+    - id: HC-SCROLL-SURFACE-0001
+      since: 0.3.0-alpha.2
+      anchors: [HC-SCROLL-SURFACE-0001-TARGET-REVEAL]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Mapped red-to-green target identity, lifecycle and vertical host movement evidence while keeping actual Search and additional-profile admission distinct.
+tags: [scroll, anatomy, target-reveal, lifecycle, test]

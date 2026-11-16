@@ -163,3 +163,331 @@ describe('dynamic host commit serialization', () => {
     await expect(queue.setChildren('one', rows('retry'))).resolves.toBe('disposed');
   });
 });
+
+// Real timer tasks, not mocked time or Promise-only flushing. These prove an
+// opportunity for unrelated host work; they do not simulate native user input.
+const hostTask = <T>(read: () => T): Promise<T> =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        resolve(read());
+      } catch (error) {
+        reject(error);
+      }
+    }, 0);
+  });
+
+describe('dynamic host commit task boundaries', () => {
+  it('lets an independent host task observe a complete acknowledgement before the next queued commit', async () => {
+    const state = model();
+    const commits: string[] = [];
+    let acknowledged = false;
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.slotRef);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first')).then((outcome) => {
+        acknowledged = outcome === 'committed';
+        return outcome;
+      });
+      const second = queue.setChildren('two', rows('second'));
+      const observed = hostTask(() => ({
+        acknowledged,
+        commits: [...commits],
+        one: state.getCommitted('one').map((entry) => entry.key),
+        two: state.getCommitted('two').map((entry) => entry.key),
+      }));
+      const [firstOutcome, secondOutcome, observation] = await Promise.all([
+        first,
+        second,
+        observed,
+      ]);
+      expect(observation).toEqual({
+        acknowledged: true,
+        commits: ['one'],
+        one: ['first'],
+        two: [],
+      });
+      expect([firstOutcome, secondOutcome]).toEqual(['committed', 'committed']);
+      expect(commits).toEqual(['one', 'two']);
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('keeps work queued so a host task can supersede it without interrupting the committed slot', async () => {
+    const state = model();
+    const commits: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.entries[0].key);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const pending = queue.setChildren('two', rows('old'));
+      const { latest } = await hostTask(() => ({
+        latest: queue.setChildren('two', rows('latest')),
+      }));
+      expect(await Promise.all([first, pending, latest])).toEqual([
+        'committed',
+        'superseded',
+        'committed',
+      ]);
+      expect(commits).toEqual(['first', 'latest']);
+      expect(state.getCommitted('one')[0].key).toBe('first');
+      expect(state.getCommitted('two')[0].key).toBe('latest');
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('retires queued work from a host task without starting another host mutation', async () => {
+    const state = model();
+    const commits: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.slotRef);
+      }
+    );
+    const first = queue.setChildren('one', rows('first'));
+    const pending = queue.setChildren('two', rows('second'));
+    await hostTask(() => queue.dispose());
+    expect(await Promise.all([first, pending])).toEqual(['committed', 'disposed']);
+    expect(commits).toEqual(['one']);
+    expect(state.getCommitted('one')).toEqual([]);
+    expect(state.getCommitted('two')).toEqual([]);
+    await expect(queue.setChildren('two', rows('retry'))).resolves.toBe('disposed');
+  });
+
+  it('rechecks the live lease after a host task before admitting another queued slot', async () => {
+    const state = model();
+    let live = true;
+    const commit = vi.fn(async () => {});
+    const queue = createDynamicCommitQueue(state, () => live, commit);
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const pending = queue.setChildren('two', rows('second'));
+      await hostTask(() => {
+        live = false;
+      });
+      expect(await Promise.all([first, pending])).toEqual(['committed', 'disposed']);
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(state.getCommitted('one')).toEqual([]);
+      expect(state.getCommitted('two')).toEqual([]);
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('finishes an isolated commit without adding a host-task delay to its acknowledgement', async () => {
+    const state = model();
+    const order: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async () => {
+        order.push('host');
+      }
+    );
+    try {
+      const committed = queue.setChildren('one', rows('first')).then((outcome) => {
+        order.push('ack');
+        return outcome;
+      });
+      const task = hostTask(() => order.push('task'));
+      expect(await committed).toBe('committed');
+      await task;
+      expect(order).toEqual(['host', 'ack', 'task']);
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('does not acknowledge or replace a started host commit while that commit is pending', async () => {
+    const state = model();
+    const blocked = gate();
+    const started = gate();
+    const commits: string[] = [];
+    let firstAcknowledged = false;
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.entries[0].key);
+        if (commits.length === 1) {
+          started.resolve();
+          await blocked.promise;
+        }
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first')).then((outcome) => {
+        firstAcknowledged = true;
+        return outcome;
+      });
+      await started.promise;
+      const pending = queue.setChildren('two', rows('second'));
+      const observation = await hostTask(() => ({
+        firstAcknowledged,
+        commits: [...commits],
+        one: state.getCommitted('one'),
+        two: state.getCommitted('two'),
+      }));
+      blocked.resolve();
+      expect(await Promise.all([first, pending])).toEqual(['committed', 'committed']);
+      expect(observation).toEqual({
+        firstAcknowledged: false,
+        commits: ['first'],
+        one: [],
+        two: [],
+      });
+    } finally {
+      blocked.resolve();
+      queue.dispose();
+    }
+  });
+
+  it('rejects invalid task-originated data without discarding the valid queued request', async () => {
+    const state = model();
+    const commits: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.entries[0].key);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const pending = queue.setChildren('two', rows('valid'));
+      const { invalid } = await hostTask(() => ({
+        invalid: queue
+          .setChildren('two', [rows('duplicate')[0], rows('duplicate')[0]])
+          .catch((error: unknown) => error),
+      }));
+      expect(await invalid).toMatchObject({ message: expect.stringContaining('duplicate key') });
+      expect(await Promise.all([first, pending])).toEqual(['committed', 'committed']);
+      expect(commits).toEqual(['first', 'valid']);
+      expect(state.getCommitted('two')[0].key).toBe('valid');
+    } finally {
+      queue.dispose();
+    }
+  });
+});
+
+describe('dynamic host commits enqueued by acknowledgement continuations', () => {
+  it('gives a host task an opportunity before work appended by an acknowledgement continuation', async () => {
+    const state = model();
+    const commits: string[] = [];
+    let acknowledged = false;
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.slotRef);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const second = first.then(() => {
+        acknowledged = true;
+        return queue.setChildren('two', []);
+      });
+      const observed = hostTask(() => ({ acknowledged, commits: [...commits] }));
+      const [firstOutcome, secondOutcome, observation] = await Promise.all([
+        first,
+        second,
+        observed,
+      ]);
+      expect(observation).toEqual({ acknowledged: true, commits: ['one'] });
+      expect([firstOutcome, secondOutcome]).toEqual(['committed', 'committed']);
+      expect(commits).toEqual(['one', 'two']);
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('allows a host task to retire work appended after the first acknowledgement', async () => {
+    const state = model();
+    const commits: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.slotRef);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const second = first.then(() => queue.setChildren('two', rows('second')));
+      await hostTask(() => queue.dispose());
+      expect(await Promise.all([first, second])).toEqual(['committed', 'disposed']);
+      expect(commits).toEqual(['one']);
+      expect(state.getCommitted('one')).toEqual([]);
+      expect(state.getCommitted('two')).toEqual([]);
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('coalesces continuation work with a newer task request while preserving the acknowledged commit', async () => {
+    const state = model();
+    const commits: string[] = [];
+    const queue = createDynamicCommitQueue(
+      state,
+      () => true,
+      async (tx) => {
+        commits.push(tx.entries[0].key);
+      }
+    );
+    try {
+      const first = queue.setChildren('one', rows('first'));
+      const continuation = first.then(() => queue.setChildren('one', rows('older')));
+      const { latest } = await hostTask(() => ({
+        latest: queue.setChildren('one', rows('latest')),
+      }));
+      expect(await Promise.all([first, continuation, latest])).toEqual([
+        'committed',
+        'superseded',
+        'committed',
+      ]);
+      expect(commits).toEqual(['first', 'latest']);
+      expect(state.getCommitted('one')[0].key).toBe('latest');
+    } finally {
+      queue.dispose();
+    }
+  });
+
+  it('releases an idle continuation timer when its queue is disposed after acknowledgement', async () => {
+    const state = model();
+    // Observe real timer allocation/retirement; do not replace the scheduler or
+    // move its callback ahead of the acknowledgement microtask.
+    const schedule = vi.spyOn(globalThis, 'setTimeout');
+    const cancel = vi.spyOn(globalThis, 'clearTimeout');
+    const commit = vi.fn(async () => {});
+    const queue = createDynamicCommitQueue(state, () => true, commit);
+    try {
+      expect(await queue.setChildren('one', rows('first'))).toBe('committed');
+      expect(schedule).toHaveBeenCalledTimes(1);
+      const timer = schedule.mock.results[0].value;
+      queue.dispose();
+      expect(cancel).toHaveBeenCalledWith(timer);
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(state.getCommitted('one')).toEqual([]);
+      await expect(queue.setChildren('two', rows('later'))).resolves.toBe('disposed');
+    } finally {
+      queue.dispose();
+      schedule.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+});

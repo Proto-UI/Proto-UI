@@ -120,6 +120,8 @@ export function nativeShape(
         kind: value.value === null ? 'null' : typeof value.value === 'boolean' ? 'invalid' : 'text',
       };
     if (value.kind === 'array') return collect(value.elements, scope, 'array');
+    if (value.kind === 'conditional')
+      return collect([value.whenTrue, value.whenFalse], scope, 'union');
     if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator))
       return collect([value.left, value.right], scope, 'union');
     if (
@@ -140,18 +142,23 @@ export function nativeShape(
       const target = dereference(binding.value, binding.environment);
       if (target?.value.kind !== 'function') return null;
       const fn = target.value.function;
-      const shapes = value.arguments.map((argument) => analyze(argument, scope));
       if (activeCalls.has(value)) return null;
       activeCalls.add(value);
       try {
         // Start from the function definition, never inherit caller parameters.
         let local = target.scope;
         fn.parameters.forEach((parameter, index) => {
+          const supplied = value.arguments[index];
+          const actual =
+            supplied?.kind === 'undefined'
+              ? (parameter.default ?? supplied)
+              : (supplied ?? parameter.default);
+          const environment = actual === supplied ? scope : local;
           local = local.parameter(
             parameter.name,
-            value.arguments[index],
-            scope,
-            index < shapes.length ? shapes[index] : { kind: 'undefined' }
+            actual,
+            environment,
+            actual ? analyze(actual, environment) : { kind: 'undefined' }
           );
         });
         const returns: NativeShape[] = [];
@@ -191,11 +198,15 @@ export function nativeShape(
         return true;
       } else if (statement.kind === 'throw') return true;
       else if (statement.kind === 'try') {
-        const branchReturns: NativeShape[] = [], finalReturns: NativeShape[] = [];
+        const branchReturns: NativeShape[] = [],
+          finalReturns: NativeShape[] = [];
         const tried = body(statement.body, scope, branchReturns);
         const catchScope = statement.catch?.name
-          ? scope.parameter(statement.catch.name, undefined, scope, null) : scope;
-        const caught = statement.catch ? body(statement.catch.body, catchScope, branchReturns) : true;
+          ? scope.parameter(statement.catch.name, undefined, scope, null)
+          : scope;
+        const caught = statement.catch
+          ? body(statement.catch.body, catchScope, branchReturns)
+          : true;
         const finalized = statement.finally ? body(statement.finally, scope, finalReturns) : false;
         if (finalized === null || (!finalized && (tried === null || caught === null))) return null;
         if (!finalized) returns.push(...branchReturns);

@@ -102,6 +102,9 @@ export function emitReact(
     const nativeTypes: Readonly<Record<string, string>> = {
       focus: 'FocusableHandle',
       accessible: 'AccessibleHandle',
+      'control-label': 'ControlLabelFacade',
+      'control-label-handle': 'ControlLabelHandle',
+      'control-label-request': 'ControlLabelRequest',
       'focus-entry': 'FocusEntryHandle',
       'focus-scope': 'FocusScopeHandle',
       'focus-roving': 'FocusRovingHandle',
@@ -155,7 +158,10 @@ export function emitReact(
   }
   function parameters(values: readonly ParameterIR[]): string {
     return values
-      .map((value) => `${value.name}${value.optional ? '?' : ''}: ${typeName(value.type)}`)
+      .map(
+        (value) =>
+          `${value.name}${value.optional && !value.default ? '?' : ''}: ${value.callback ? `(${parameters(value.callback.parameters)}) => ${typeName(value.callback.returnType)}` : typeName(value.type)}${value.default ? ` = ${expression(value.default, 0)}` : ''}`
+      )
       .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
@@ -176,7 +182,8 @@ export function emitReact(
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
-        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        const cell = expression(value.cell, depth),
+          operator = value.delta === 1 ? '++' : '--';
         return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -214,6 +221,8 @@ export function emitReact(
         return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
+      case 'conditional':
+        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -278,12 +287,14 @@ export function emitReact(
       return `  ${JSON.stringify(value.name)}: ${type};`;
     })
     .join('\n');
-  const hookCode = statements(ir.moduleBindings ?? [], 0) + ir.hooks
-    .map(
-      (hook) =>
-        `const ${hooks.get(hook.id)} = ${core}.defineAsHook<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(hook.name)},\n  setup: ${fn(hook.setup, 1)},\n});\n`
-    )
-    .join('\n');
+  const hookCode =
+    statements(ir.moduleBindings ?? [], 0) +
+    ir.hooks
+      .map(
+        (hook) =>
+          `const ${hooks.get(hook.id)} = ${core}.defineAsHook<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(hook.name)},\n  setup: ${fn(hook.setup, 1)},\n});\n`
+      )
+      .join('\n');
   const contextImports = [
     ...ir.contextKeys.map(
       (key) =>

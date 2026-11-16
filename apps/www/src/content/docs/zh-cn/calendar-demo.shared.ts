@@ -166,6 +166,25 @@ export function createCalendarDemo(
     String(firstYear + index).padStart(4, '0')
   );
   const proto = (part: string) => `${family}-${part}`;
+  const selectItems = (field: 'month' | 'year'): DemoNode[] =>
+    (field === 'month' ? months : years).map((label, index) => ({
+      kind: 'proto',
+      prototypeId: proto('select-item'),
+      props: {
+        value: field === 'month' ? String(index + 1) : label,
+        textValue: label,
+      },
+      ...(family === 'base'
+        ? {
+            className:
+              'block cursor-pointer rounded px-2 py-1 text-sm data-[active]:bg-slate-100 data-[selected]:font-semibold',
+          }
+        : {}),
+      children:
+        family === 'shadcn'
+          ? [{ kind: 'proto', prototypeId: proto('select-item-text'), children: [label] }]
+          : [label],
+    }));
   const select = (field: 'month' | 'year'): DemoNode => ({
     kind: 'proto',
     prototypeId: proto('select-root'),
@@ -177,7 +196,10 @@ export function createCalendarDemo(
         kind: 'proto',
         prototypeId: proto('select-trigger'),
         ref: `${field}-trigger`,
-        ...(family === 'shadcn' ? { props: { size: 'sm', appearance: 'ghost' } } : {}),
+        props: {
+          accessibleLabel: field === 'month' ? 'Month' : 'Year',
+          ...(family === 'shadcn' ? { size: 'sm' } : {}),
+        },
         className:
           family === 'base'
             ? 'inline-flex items-center justify-between gap-1 rounded px-1 text-sm'
@@ -192,14 +214,6 @@ export function createCalendarDemo(
           width: 'max-content',
         },
         children: [
-          {
-            // Real authored content supplies the existing Select nameFromContent
-            // protocol. The demo never writes an Adapter-owned ARIA attribute.
-            kind: 'box',
-            tag: 'span',
-            className: 'sr-only',
-            children: [field === 'month' ? 'Month ' : 'Year '],
-          },
           {
             kind: 'proto',
             prototypeId: proto('select-value'),
@@ -228,26 +242,30 @@ export function createCalendarDemo(
         surfaceStyle: {
           'max-height': '224px',
           'min-width': field === 'month' ? '112px' : '80px',
-          'overflow-y': 'auto',
+          ...(family === 'shadcn' ? {} : { 'overflow-y': 'auto' }),
         },
         ...(family === 'base'
           ? { className: 'z-50 rounded border bg-white p-1 text-slate-900 shadow-md' }
           : {}),
-        children: (field === 'month' ? months : years).map((label, index) => ({
-          kind: 'proto' as const,
-          prototypeId: proto('select-item'),
-          props: {
-            value: field === 'month' ? String(index + 1) : label,
-            textValue: label,
-          },
-          ...(family === 'base'
-            ? {
-                className:
-                  'block cursor-pointer rounded px-2 py-1 text-sm data-[active]:bg-slate-100 data-[selected]:font-semibold',
-              }
-            : {}),
-          children: [label],
-        })),
+        // Modern Shadcn profiles require these public owners: Surface paints,
+        // Viewport scrolls, and ItemText participates in Select alignment.
+        children:
+          family === 'shadcn'
+            ? [
+                {
+                  kind: 'proto',
+                  prototypeId: proto('select-surface'),
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: proto('select-viewport'),
+                      surfaceStyle: { 'max-height': '224px', 'overflow-y': 'auto' },
+                      children: selectItems(field),
+                    },
+                  ],
+                },
+              ]
+            : selectItems(field),
       },
     ],
   });

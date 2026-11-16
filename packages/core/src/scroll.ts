@@ -1,5 +1,5 @@
 import type { ContextKey, JsonObject, PropsBaseType } from '@proto.ui/types';
-import type { AnatomyFamily } from './anatomy';
+import type { AnatomyFamily, AnatomyPartView } from './anatomy';
 import type { ObservedStateHandle } from './state';
 
 export type ScrollAxis = 'horizontal' | 'vertical';
@@ -60,12 +60,21 @@ export type ScrollSurfaceSnapshot = Readonly<{
   endFollow: ScrollEndFollowSnapshot;
 }>;
 
-export type ScrollSurfaceRequest =
+export type ScrollSurfacePositionRequest =
   | Readonly<{ kind: 'by'; axis: ScrollAxis; delta: number }>
   | Readonly<{ kind: 'to'; axis: ScrollAxis; position: number }>
   | Readonly<{ kind: 'page'; axis: ScrollAxis; direction: 'before' | 'after' }>
   | Readonly<{ kind: 'control-drag'; axis: ScrollAxis; position: number }>
   | Readonly<{ kind: 'to-end'; axis: ScrollAxis }>;
+
+export type ScrollSurfaceRevealRequest = Readonly<{
+  kind: 'reveal';
+  axis: 'vertical';
+  family: AnatomyFamily;
+  part: AnatomyPartView;
+}>;
+
+export type ScrollSurfaceRequest = ScrollSurfacePositionRequest | ScrollSurfaceRevealRequest;
 
 export type ScrollSurfaceRequestOutcome =
   | Readonly<{ kind: 'dispatched' }>

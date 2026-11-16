@@ -79,6 +79,8 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/test/component-consumer-repairs.browser.test.ts',
+  'packages/compiler/test/control-label-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
   'packages/compiler/test/focus-scope-native.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
@@ -226,7 +228,7 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
     '.github/workflows/homepage-visual-evidence.yml',
   'packages/compiler/test/web-component-native.browser.test.ts':
-    '.github/workflows/compiler-wc-native-evidence.yml',
+    'scripts/test/wc-native-isolation.mjs',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':
     '.github/workflows/language-select-navigation-evidence.yml',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts':

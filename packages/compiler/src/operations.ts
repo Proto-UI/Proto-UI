@@ -1,3 +1,4 @@
+import type { FunctionIR, ParameterIR } from './ir';
 import type { Phase, ValueType, FunctionContext, ModuleCapabilityType } from './ir';
 import { isCapabilityAssignable } from './ir';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
@@ -11,6 +12,7 @@ export type CallbackContext =
   | 'state-watch'
   | 'collection-meta'
   | 'positioning'
+  | 'control-label-target'
   | 'created'
   | 'mounted'
   | 'updated'
@@ -113,6 +115,7 @@ const aliveContexts: readonly CallbackContext[] = [
   'state-watch',
   'collection-meta',
   'positioning',
+  'control-label-target',
 ];
 const key: ArgumentRule = { role: 'static-key', types: ['string'] };
 const record: ArgumentRule = { role: 'value', types: ['record'] };
@@ -469,6 +472,81 @@ export const OPERATION_RULES = {
     [],
     [effect('declare', 'accessibility')],
     { requiredCapabilities: ['accessibility-tree'] }
+  ),
+  'hook.asControlLabel': rule(
+    'void',
+    'asControlLabel',
+    setup,
+    'control-label',
+    [],
+    [effect('declare', 'accessibility')],
+    { requiredCapabilities: ['accessibility-tree', 'input-events'] }
+  ),
+  'controlLabel.label': rule(
+    'control-label',
+    'label',
+    setup,
+    'control-label-handle',
+    [
+      {
+        role: 'value',
+        types: ['record', 'module-config'],
+        optional: true,
+        fields: {
+          family: { role: 'value', types: ['anatomy-family'] },
+          labelRole: { role: 'value', types: ['string'] },
+          targetRole: { role: 'value', types: ['string'] },
+        },
+      },
+    ],
+    [effect('declare', 'accessibility')]
+  ),
+  'controlLabel.target': rule(
+    'control-label',
+    'target',
+    setup,
+    'control-label-handle',
+    [
+      cb('control-label-target', ['run', 'control-label-request']),
+      {
+        role: 'value',
+        types: ['record', 'module-config'],
+        optional: true,
+        fields: {
+          family: { role: 'value', types: ['anatomy-family'] },
+          labelRole: { role: 'value', types: ['string'] },
+          targetRole: { role: 'value', types: ['string'] },
+        },
+      },
+    ],
+    [effect('declare', 'accessibility')]
+  ),
+  'controlLabel.sync': rule(
+    'control-label-handle',
+    'sync',
+    bindingPhase,
+    'void',
+    [
+      {
+        ...record,
+        schema: {
+          kind: 'record',
+          fields: [
+            { name: 'naming', type: 'boolean' },
+            { name: 'activation', type: 'boolean' },
+          ],
+        },
+      },
+    ],
+    [effect('write', 'accessibility')]
+  ),
+  'controlLabelRequest.isCurrent': rule(
+    'control-label-request',
+    'isCurrent',
+    callbackPhase,
+    'boolean',
+    [],
+    [effect('read', 'view')]
   ),
   'run.update': rule(
     'run',
@@ -1898,6 +1976,8 @@ export interface OperationBindings {
   methodReturnType?: ValueType;
 }
 export interface OperationArgument {
+  whenTrue?: OperationArgument;
+  whenFalse?: OperationArgument;
   kind: string;
   type: ValueType;
   value?: unknown;
@@ -1988,6 +2068,15 @@ export function stateValue(receiver?: ValueType): 'boolean' | 'number' | 'string
   return undefined;
 }
 const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueType>>>> = {
+  'control-label-request': {
+    source: {
+      kind: 'union',
+      members: [
+        { kind: 'literal', value: 'pointer' },
+        { kind: 'literal', value: 'accessibility' },
+      ],
+    },
+  },
   focus: {
     focused: 'observed:boolean',
     focusVisible: 'observed:boolean',
@@ -2321,6 +2410,11 @@ export function argumentData(argument: OperationArgument): DataType | undefined 
       typeof argument.value === 'boolean')
   )
     return { kind: 'literal', value: argument.value };
+  if (argument.kind === 'conditional' && argument.whenTrue && argument.whenFalse) {
+    const a = argumentData(argument.whenTrue),
+      b = argumentData(argument.whenFalse);
+    return a && b ? parseDataType({ kind: 'union', members: [a, b] }) : undefined;
+  }
   if (argument.kind === 'record' && argument.entries) {
     const fields: { name: string; type: DataType }[] = [];
     for (const entry of argument.entries) {
@@ -2549,4 +2643,28 @@ export function validateOperationArguments(
       });
   }
   return issues;
+}
+
+/** A callable parameter can only receive a statically checked synchronous signature. */
+export function checkedCallbackMatches(
+  actual: Pick<FunctionIR, 'parameters' | 'returnType'> | undefined,
+  expected: NonNullable<ParameterIR['callback']>
+): boolean {
+  if (!actual) return false;
+  if (
+    actual.parameters.filter((parameter) => !parameter.optional).length >
+    expected.parameters.filter((parameter) => !parameter.optional).length
+  )
+    return false;
+  if (expected.returnType !== 'void' && !assignable(actual.returnType, expected.returnType))
+    return false;
+  return actual.parameters.every((parameter, index) => {
+    const supplied = expected.parameters[index];
+    if (!supplied) return parameter.optional === true;
+    if (!assignable(supplied.type, parameter.type) || (supplied.optional && !parameter.optional))
+      return false;
+    return parameter.callback
+      ? !!supplied.callback && checkedCallbackMatches(supplied.callback, parameter.callback)
+      : !supplied.callback;
+  });
 }

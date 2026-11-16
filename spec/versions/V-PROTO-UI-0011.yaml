@@ -1,0 +1,52 @@
+id: V-PROTO-UI-0011
+type: version
+title: Proto UI 0.3.0-alpha.2
+status: draft
+since: 0.3.0-alpha.2
+summary: Third 0.3 alpha release train, preparing Control Label definition and compiler interoperability repairs under one globally exact 47-package prerelease identity.
+statement:
+  en: Proto UI 0.3.0-alpha.2 is one draft ecosystem release identity shared exactly by all 47 public @proto.ui packages and the corresponding future immutable spec snapshot.
+  zh-CN: Proto UI 0.3.0-alpha.2 是由全部 47 个公开 @proto.ui package 与未来对应不可变 spec snapshot 精确共享的一次 draft 生态发行身份。
+release:
+  version: 0.3.0-alpha.2
+  channel: prerelease
+  gitTag: v0.3.0-alpha.2
+  npmDistTag: next
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+    - D-PRERELEASE-STAGE-0001
+criteria:
+  - id: V-PROTO-UI-0011-DRAFT-BOUNDARY
+    text:
+      en: The draft entity governs aligned 0.3.0-alpha.2 manifests, release assets and catalog revisions. It does not establish npm publication, a Git tag, a GitHub prerelease, next-channel activation, immutable snapshot evidence or ordinary-entity stable admission.
+      zh-CN: 本 draft 实体治理已对齐的 0.3.0-alpha.2 manifest、发行物料与 catalog revisions。它不代表 npm 发布、Git tag、GitHub prerelease、next channel 激活、不可变 snapshot 证据或普通实体 stable admission 已经成立。
+  - id: V-PROTO-UI-0011-IDENTITY
+    text:
+      en: Before publication, VERSION, all 47 public @proto.ui package manifests, staged internal dependency versions and the spec snapshot must be prepared at 0.3.0-alpha.2 exactly. Private compiler tooling remains outside the public package set.
+      zh-CN: 发布前，VERSION、全部 47 个公开 @proto.ui package manifest、暂存发布包的内部依赖版本与 spec snapshot 必须精确统一为 0.3.0-alpha.2。私有 compiler 工具仍在公开 package set 之外。
+  - id: V-PROTO-UI-0011-ALPHA-SCOPE
+    text:
+      en: This alpha train prepares the shared Control Label association boundary, native source compiler repairs and their independent consumer evidence. A successful local fixture or version bump must not be presented as full backend, browser, assistive-technology or release acceptance.
+      zh-CN: 本 alpha train 准备共享的 Control Label 关联边界、原生源码编译器修复及独立 consumer 证据。本地 fixture 通过或版本 bump 不得被描述为全部 backend、browser、assistive-technology 或发行验收完成。
+  - id: V-PROTO-UI-0011-REGISTRY-READINESS
+    text:
+      en: Publication requires every public package identity to pass the existing registry-readiness policy; preparing this version neither creates package identities nor changes registry tags or bootstrap exceptions.
+      zh-CN: 真实发布要求全部公开 package identity 通过既有 registry-readiness policy；准备本版本既不创建 package identity，也不改变 registry tag 或 bootstrap 例外。
+  - id: V-PROTO-UI-0011-PUBLICATION
+    text:
+      en: This entity may become active only after all packages in its reviewed BOM exist at 0.3.0-alpha.2, their next tags point to it, v0.3.0-alpha.2 resolves to the publication commit and immutable snapshot evidence exists. Stable 0.2.0 retains its independent release identity.
+      zh-CN: 仅当已评审 BOM 中全部 package 均存在 0.3.0-alpha.2、各自 next tag 指向该版本、v0.3.0-alpha.2 解析到发布 commit，且不可变 snapshot 证据存在后，本实体才可转为 active。Stable 0.2.0 保留其独立发行身份。
+sources:
+  - path: internal/releases/0.3.0-alpha.2/package-bom.json
+  - path: internal/releases/0.3.0-alpha.2/release-notes.md
+  - path: internal/releases/0.3.0-alpha.2/release-notes.zh-CN.md
+  - path: internal/records/2026-11-15-alpha.2-control-label-release-prep.zh-CN.md
+openQuestions: []
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Opened the third globally exact 0.3 alpha train for the Control Label definition and compiler repair candidate, retaining draft lifecycle and separate publication evidence.
+tags: [release, prerelease, alpha, global-version]

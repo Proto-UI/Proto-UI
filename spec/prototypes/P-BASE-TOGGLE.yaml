@@ -14,6 +14,14 @@ statement:
 
 
 criteria:
+  - id: P-BASE-TOGGLE-EXTERNAL-LABEL
+    text:
+      en: The command target opts into C-CONTROL-LABEL-0001 through the dedicated InstanceAssociations.controlLabel channel. An independent Label may name an icon-only target through its actual semantic identity. Label activation requests the existing command or toggle operation exactly once and retains disabled, controlled selection, focus and lifecycle ownership; Toggle Group Root remains the selection owner. No generic host attribute forwarding or label Prop is introduced.
+      zh-CN: 命令目标通过专用 InstanceAssociations.controlLabel 通道参与 C-CONTROL-LABEL-0001。独立 Label 可通过实际语义 identity 为仅图标目标命名；关联激活只请求一次既有命令或切换操作，保留 disabled、受控选择、focus 与生命周期所有权，Toggle Group Root 仍拥有选择。不引入通用宿主属性透传或 label Prop。
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-TOGGLE-TRANSIENT-CLEANUP
     text:
       zh-CN: 'press.cancel、pointer.cancel 与 view unmount 必须清除本 part 的 hovered/pressed；清理不得改变 persistent active 或发出 activation/request。逻辑实例 remount 不得重放旧瞬态；pointer.leave 的语义清理不等于取消 Host 持有的 contact。'
@@ -590,6 +598,9 @@ verifies:
   tests:
     - T-BASE-TOGGLE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.
   - version: 0.1.0
     change: introduced
     summary: Introduced the first Base Toggle prototype contract draft with active state naming, button-like activation, accessibility pressed projection, and Button/Switch boundaries.

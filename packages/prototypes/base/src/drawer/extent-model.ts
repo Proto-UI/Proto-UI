@@ -33,7 +33,7 @@ function length(value: unknown): AvailableLayoutLength | null {
 /** Pure draft model; live consumer admission and host geometry are verified separately. */
 export function drawerExtentModel(
   raw: Readonly<Record<string, unknown>>,
-  defaultMaximum: AvailableLayoutLength = { unit: 'available', value: 1 }
+  defaultMaximum?: AvailableLayoutLength
 ): Ready | Invalid {
   const { snapPoints: input, side, minExtent, maxExtent, snapPoint, defaultSnapPoint } = raw;
   if (!absent(input) && !Array.isArray(input)) return { status: 'invalid', reason: 'snap-points' };
@@ -45,7 +45,12 @@ export function drawerExtentModel(
   const mode = horizontal || points.length > 0 ? 'fraction' : 'intrinsic';
   if (horizontal && points.length === 0) points.push(1);
   const minimum = length(absent(minExtent) ? { unit: 'logical', value: 0 } : minExtent);
-  const maximum = length(absent(maxExtent) ? defaultMaximum : maxExtent);
+  const maximum = length(
+    absent(maxExtent)
+      ? (defaultMaximum ??
+          (horizontal ? { unit: 'root-text', value: 20 } : { unit: 'available', value: 1 }))
+      : maxExtent
+  );
   if (!minimum) return { status: 'invalid', reason: 'minimum' };
   if (!maximum) return { status: 'invalid', reason: 'maximum' };
   const controlled = mode === 'fraction' && !absent(snapPoint);

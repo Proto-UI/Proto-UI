@@ -11,6 +11,7 @@ import * as library9 from '@proto.ui/prototypes-liquid-glass/select';
 import * as library10 from '@proto.ui/prototypes-lucide/icons/chevron-left';
 import * as library11 from '@proto.ui/prototypes-lucide/icons/chevron-right';
 import * as library12 from '@proto.ui/prototypes-lucide/icons/chevron-down';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import {
@@ -74,6 +75,8 @@ for (const module of [
   }
 }
 
+registerPrototype(styleScope.name, styleScope);
+
 const cleanup: Array<() => void | Promise<void>> = [];
 afterEach(async () => {
   for (const dispose of cleanup.splice(0).reverse()) await dispose();
@@ -113,7 +116,13 @@ it('formats caption month options with explicit or default host Intl locale inde
         timeZone: 'UTC',
       })
     );
-    expect(items.map((item) => item.children?.[0])).toEqual(expected);
+    expect(
+      items.map((item) => {
+        const text = item.children?.[0] as Extract<DemoNode, { kind: 'proto' }>;
+        expect(text.prototypeId).toBe('shadcn-select-item-text');
+        return text.children?.[0];
+      })
+    ).toEqual(expected);
     expect(items.map((item) => item.props?.textValue)).toEqual(expected);
     expect(items.map((item) => item.props?.value)).toEqual(
       Array.from({ length: 12 }, (_, index) => String(index + 1))
@@ -148,6 +157,75 @@ it('preserves the full Shadcn reference year range and identifies the other fami
     expect(values[0]).toBe(String(year - (family === 'shadcn' ? 100 : 10)));
     expect(values.at(-1)).toBe(String(year + (family === 'shadcn' ? 0 : 10)));
   }
+});
+
+describe('Rhea Calendar caption composition', () => {
+  it('uses the required public popup parts and preserves both complete option collections', () => {
+    const nodes = protoNodes(createCalendarDemo('shadcn').root);
+    for (const field of ['month', 'year']) {
+      const root = nodes.find((node) => node.ref === `${field}-select`)!;
+      const content = protoNodes(root).find(
+        (node) => node.prototypeId === 'shadcn-select-content'
+      )!;
+      const surface = content.children?.[0] as Extract<DemoNode, { kind: 'proto' }>;
+      expect(surface.prototypeId).toBe('shadcn-select-surface');
+      const viewport = surface.children?.[0] as Extract<DemoNode, { kind: 'proto' }>;
+      expect(viewport.prototypeId).toBe('shadcn-select-viewport');
+      const items = protoNodes(viewport).filter(
+        (node) => node.prototypeId === 'shadcn-select-item'
+      );
+      expect(items).toHaveLength(field === 'month' ? 12 : 101);
+      for (const item of items) {
+        const text = item.children?.[0] as Extract<DemoNode, { kind: 'proto' }>;
+        expect(text.prototypeId).toBe('shadcn-select-item-text');
+        expect(text.children).toEqual([item.props?.textValue]);
+      }
+    }
+  });
+
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    '%s mounts the ordinary profile and opens its complete month popup',
+    async (runtime) => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      const original = createCalendarDemo('shadcn');
+      let api!: DemoRuntimeApi;
+      const view = await renderDemo({
+        runtime,
+        host,
+        demo: {
+          ...original,
+          root: {
+            kind: 'proto',
+            prototypeId: 'shadcn-style-scope',
+            props: { styleProfile: 'rhea' },
+            children: [original.root],
+          },
+          setup(context) {
+            api = context.api;
+            return original.setup?.(context);
+          },
+        },
+      });
+      cleanup.push(() => view.destroy());
+      const trigger = host.querySelector<HTMLElement>('[data-demo-ref="month-trigger"]')!;
+      await vi.waitFor(() => expect(trigger.getAttribute('aria-label')).toBe('Month'));
+      api.call('month-select', 'openDropdown', 'keyboard');
+      await vi.waitFor(() => {
+        expect(trigger.getAttribute('aria-expanded')).toBe('true');
+        const contentId = trigger.getAttribute('aria-controls');
+        expect(contentId).not.toBeNull();
+        // Closed portals can be detached by the host; count the opened month
+        // owner rather than assuming its closed sibling is in document.body.
+        expect(
+          document.getElementById(contentId!)?.querySelectorAll('[role="option"]')
+        ).toHaveLength(12);
+      });
+      api.call('month-select', 'close', 'escape');
+      await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'));
+    },
+    60_000
+  );
 });
 
 describe('Real family Calendar caption demos', () => {
@@ -192,15 +270,18 @@ describe('Real family Calendar caption demos', () => {
         expect(host.querySelector('[aria-label="Previous month"]')).not.toBeNull();
         expect(host.querySelector('[aria-label="Next month"]')).not.toBeNull();
         await vi.waitFor(() => {
-          expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent).toMatch(
-            /^Month\s+\S/
-          );
+          expect(
+            host.querySelector('[data-demo-ref="month-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Month');
+          expect(
+            host.querySelector('[data-demo-ref="year-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Year');
           expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
-            `Year ${today.slice(0, 4)}`
+            today.slice(0, 4)
           );
         });
-        // Content is a naming input, not proof of the real browser's computed
-        // combobox name. That accessibility-tree check remains a separate gate.
+        // These are real Adapter projections in Happy DOM. Computed accessible
+        // names and physical input remain separate real-browser checks.
         expect(host.querySelectorAll('select')).toHaveLength(0);
 
         // The semantic hidden contract removes unused capacity from both the
@@ -266,11 +347,14 @@ describe('Real family Calendar caption demos', () => {
           expect(read('calendar', 'month')).toBe('1800-01');
           expect(read('year-select')).toBe('1800');
           expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
-            'Year 1800'
-          );
-          expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent).toContain(
             '1800'
           );
+          expect(
+            host.querySelector('[data-demo-ref="year-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Year');
+          expect(
+            host.querySelector('[data-demo-ref="month-trigger"]')?.getAttribute('aria-label')
+          ).toBe('Month');
         });
         // Multi-profile family prototype loading pushed the real render past
         // the 20s bound.
@@ -392,7 +476,7 @@ it('mounts all 101 Shadcn year options, opens from the keyboard, selects a year 
   if (Number(year) >= 2007 && Number(year) <= 2107)
     expect(yearOptions.some((option) => option.textContent?.trim() === '2007')).toBe(true);
   expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent?.trim()).toBe(
-    `Month ${new Date().getMonth() + 1}月`
+    `${new Date().getMonth() + 1}月`
   );
   expect(
     Array.from(host.querySelectorAll('[role="columnheader"]')).map((node) =>

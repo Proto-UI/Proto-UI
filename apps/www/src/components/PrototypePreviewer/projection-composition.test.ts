@@ -778,13 +778,21 @@ describe('Website projection composition', () => {
           node.prototypeId === 'shadcn-select-item' &&
           node.props?.value === requestedValue
       );
+      const initiallySelectedItem = findNode(
+        composition.demo,
+        (node) =>
+          node.kind === 'proto' &&
+          node.prototypeId === 'shadcn-select-item' &&
+          node.props?.value === 'wc'
+      );
       if (
         root.kind !== 'proto' ||
         !root.ref ||
         trigger.kind !== 'proto' ||
         !trigger.ref ||
         popup.kind !== 'proto' ||
-        item.kind !== 'proto'
+        item.kind !== 'proto' ||
+        initiallySelectedItem.kind !== 'proto'
       )
         throw new Error('Expected the authored Select control parts');
       const rootRef = root.ref;
@@ -792,7 +800,9 @@ describe('Website projection composition', () => {
       // This real-protocol host unit explicitly authors public popper mode;
       // the native Header journeys retain their original item-aligned geometry.
       popup.props = { ...popup.props, position: 'popper' };
+      initiallySelectedItem.ref = 'initially-selected-option';
       item.ref = 'accepted-option';
+      const initiallySelectedRef = initiallySelectedItem.ref;
       const prototypeIds = new Set<string>();
       collectPrototypeIds(composition.demo.root, prototypeIds);
       await loadPrototypes([...prototypeIds]);
@@ -823,14 +833,28 @@ describe('Website projection composition', () => {
           reason: 'trigger',
           focusReason: 'keyboard',
         });
-        await vi.waitFor(() => expect(readState(rootRef, 'open')).toBe(true));
+        // Root open commits before Content's deferred selected-option entry.
+        // Observe that real entry before requesting the option under test, so
+        // its one focus request cannot race the still-pending initial entry.
+        await vi.waitFor(() => {
+          expect(readState(rootRef, 'open')).toBe(true);
+          expect(document.activeElement).toBe(context.refs[initiallySelectedRef]);
+          expect(readState(initiallySelectedRef, 'focused')).toBe(true);
+          expect(readState(initiallySelectedRef, 'selected')).toBe(true);
+        });
         context.api.call('accepted-option', 'focusSelf', { reason: 'keyboard' });
-        await vi.waitFor(() =>
-          expect(document.activeElement).toBe(context.refs['accepted-option'])
-        );
+        await vi.waitFor(() => {
+          expect(document.activeElement).toBe(context.refs['accepted-option']);
+          expect(readState('accepted-option', 'focused')).toBe(true);
+        });
         for (const type of ['keydown', 'keyup'])
           context.refs['accepted-option']!.dispatchEvent(
-            new KeyboardEvent(type, { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true })
+            new KeyboardEvent(type, {
+              key: 'Enter',
+              code: 'Enter',
+              bubbles: true,
+              cancelable: true,
+            })
           );
         await vi.waitFor(() => {
           expect(accepted).toEqual([
@@ -1480,5 +1504,4 @@ describe('Header Select family projection', () => {
         }
       }
     );
-
 });

@@ -48,6 +48,7 @@ const legacyHashes = {
     'dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a',
 };
 const oldEmitterSHA256 = '6129be966453ad8960c1736d1b2c88c052fc8c3ff4e915e017d099df1f226474';
+const legacyContextScopeSHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
 const sourceFixtures = {
   trigger: `import {definePrototype} from '@proto.ui/core';
 import {asTrigger} from '@proto.ui/hooks';
@@ -97,6 +98,7 @@ type HistoricalSupportArtifact = { path: string; contents: string };
 async function historicalSupportArtifacts(): Promise<{
   native: HistoricalSupportArtifact;
   adapter: HistoricalSupportArtifact;
+  context: HistoricalSupportArtifact;
 }> {
   // The capture-old source tree predates this verifier's retained payload.
   // Resolve it only in the verification stage, including Vite import analysis.
@@ -105,9 +107,15 @@ async function historicalSupportArtifacts(): Promise<{
   const exports = object(loaded);
   const native = object(exports.legacyNativeInteractionArtifact);
   const adapter = object(exports.legacyNativeAdapterModulesArtifact);
+  const contextFilename = fileURLToPath(
+    new NodeURL('../src/native-context-legacy.ts', import.meta.url)
+  );
+  const contextExports: unknown = await import(/* @vite-ignore */ contextFilename);
+  const context = object(object(contextExports).legacyNativeContextScopeArtifact);
   return {
     native: { path: string(native.path), contents: string(native.contents) },
     adapter: { path: string(adapter.path), contents: string(adapter.contents) },
+    context: { path: string(context.path), contents: string(context.contents) },
   };
 }
 interface ArtifactRecord {
@@ -219,8 +227,12 @@ function verifyCapturedCli(record: Record<string, unknown>) {
 }
 async function corpusForVerification(): Promise<string> {
   if (corpusDirectory) return requiredCorpus();
-  const { native: legacyNativeInteractionArtifact, adapter: legacyNativeAdapterModulesArtifact } =
-    await historicalSupportArtifacts();
+  const {
+    native: legacyNativeInteractionArtifact,
+    adapter: legacyNativeAdapterModulesArtifact,
+    context: legacyNativeContextScopeArtifact,
+  } = await historicalSupportArtifacts();
+  expect(digest(legacyNativeContextScopeArtifact.contents)).toBe(legacyContextScopeSHA256);
   const fixture = fileURLToPath(
     new NodeURL('./fixtures/native-support-migration-v1.json', import.meta.url)
   );
@@ -278,7 +290,10 @@ async function corpusForVerification(): Promise<string> {
       } else if (filename === nativeAdapterModulesArtifact.path) {
         contents = legacyNativeAdapterModulesArtifact.contents;
         origin = 'retained-exact-legacy-adapter-literal';
-      } else if (/^\.proto-ui\/context\/(?:scope-v1|key-[a-f0-9]{64})\.ts$/.test(filename)) {
+      } else if (filename === legacyNativeContextScopeArtifact.path) {
+        contents = legacyNativeContextScopeArtifact.contents;
+        origin = 'retained-exact-legacy-context-literal';
+      } else if (/^\.proto-ui\/context\/key-[a-f0-9]{64}\.ts$/.test(filename)) {
         contents = await readFile(path.join(currentOutput, filename), 'utf8');
         origin = 'same-input-context-helper-exact-old-sha';
       } else
@@ -980,6 +995,98 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     }
   });
 
+  it('normalizes exact old and current Context scopes while retaining IR5 and IR6 provenance', async () => {
+    const { context: historical } = await historicalSupportArtifacts();
+    const { nativeContextScopeArtifact: current } = await import('../src/native-context');
+    expect(digest(historical.contents)).toBe(legacyContextScopeSHA256);
+    expect(current.contents).not.toBe(historical.contents);
+    for (const name of fixtureNames) {
+      for (const [generation, expected, irVersion] of [
+        ['old', historical, 5],
+        ['new', current, 6],
+      ] as const) {
+        const id = generation + '-' + name;
+        expect(await readFile(path.join(root, id, expected.path), 'utf8')).toBe(expected.contents);
+        expect((await manifest(path.join(root, id))).irVersion).toBe(irVersion);
+        expect((await manifest(path.join(migrated, id))).irVersion).toBe(irVersion);
+        expect(
+          await readFile(path.join(migrated, '.proto-ui/migration-inputs', id + '.json'))
+        ).toEqual(await readFile(path.join(root, id, 'provenance.json')));
+      }
+    }
+    const shared = '.proto-ui/shared/context/scope-v1.ts';
+    expect((await plainFiles(migrated)).filter((file) => file === shared)).toHaveLength(1);
+    expect(await readFile(path.join(migrated, shared), 'utf8')).toBe(current.contents);
+  });
+
+  it('shares the upgraded Context identity and drops queued notifications after provider replacement', async () => {
+    const directory = await fresh('context-upgrade-consumer');
+    const outfile = path.join(directory, 'context.cjs');
+    await build({
+      stdin: {
+        contents: `export * as oldContext from './old-trigger/.proto-ui/context/scope-v1';
+          export * as newContext from './new-trigger/.proto-ui/context/scope-v1';`,
+        resolveDir: migrated,
+        sourcefile: 'migration-context-consumer.ts',
+        loader: 'ts',
+      },
+      outfile,
+      bundle: true,
+      format: 'cjs',
+      platform: 'node',
+      target: 'node24',
+      logLevel: 'silent',
+    });
+    const consumer = object(require(outfile)),
+      oldContext = object(consumer.oldContext),
+      newContext = object(consumer.newContext);
+    expect(oldContext.scopeKey).toBe(newContext.scopeKey);
+    expect(oldContext.createContextScope).toBe(newContext.createContextScope);
+    const scopes: unknown[] = [];
+    const create = (module: Record<string, unknown>, getParent: () => unknown) => {
+      const scope = method(module, 'createContextScope', {
+        getParent,
+        isAlive: () => true,
+        invoke: <T>(callback: () => T): T => callback(),
+        validate: (_key: object, value: unknown) => typeof value === 'number',
+      });
+      scopes.push(scope);
+      return scope;
+    };
+    const queued: unknown[] = [];
+    try {
+      const key = Object.freeze({ debugName: 'mixed-context-upgrade' });
+      const firstProvider = create(oldContext, () => null);
+      const replacementProvider = create(newContext, () => null);
+      method(firstProvider, 'provide', key, 0);
+      method(replacementProvider, 'provide', key, 20);
+      let currentParent = firstProvider;
+      const firstSubscriber = create(oldContext, () => firstProvider);
+      const secondSubscriber = create(newContext, () => currentParent);
+      method(firstSubscriber, 'subscribe', key, 'required', () => {
+        currentParent = replacementProvider;
+      });
+      method(secondSubscriber, 'subscribe', key, 'required', (next: unknown, prev: unknown) => {
+        queued.push({ next, prev });
+      });
+      method(firstProvider, 'update', key, 1);
+      expect(queued).toEqual([]);
+      expect(method(secondSubscriber, 'read', key)).toBe(20);
+      method(replacementProvider, 'update', key, 21);
+      expect(queued).toEqual([{ next: 21, prev: 20 }]);
+      await saveEvidence('context-directory-upgrade', {
+        historicalSHA256: legacyContextScopeSHA256,
+        sharedScopeSHA256: digest(
+          await readFile(path.join(migrated, '.proto-ui/shared/context/scope-v1.ts'))
+        ),
+        sharedIdentity: true,
+        delivered: queued,
+      });
+    } finally {
+      for (const scope of scopes.reverse()) method(scope, 'dispose');
+    }
+  });
+
   it('preserves every component and source map byte and records exact original manifests', async () => {
     const outputFiles = await plainFiles(migrated);
     const top = object(JSON.parse(await readFile(path.join(migrated, 'provenance.json'), 'utf8')));
@@ -1148,6 +1255,26 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     test.plan.inputs[1].provenanceSHA256 = '0'.repeat(64);
     await writePlan(test.directory, test.plan);
     await rejectedBeforeWrite(test, 'anchor');
+  });
+  it.each([4, 7, '5', '6', null])(
+    'rejects unsupported provenance IR version %s before writing',
+    async (version) => {
+      const test = await migrationCase('ir-version');
+      const value = await manifest(path.join(test.directory, 'subject'));
+      value.irVersion = version;
+      await reseal(test, value);
+      await rejectedBeforeWrite(test, 'ir-version-' + String(version));
+    }
+  );
+  it('does not widen external IR admission when migrating emitted IR5 directories', async () => {
+    const { parsePrototype } = await import('../src/parser');
+    const { validateIR } = await import('../src/ir-validation');
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'external-ir-boundary',setup(){}});`);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.value.schemaVersion).toBe(6);
+    expect(validateIR({ ...parsed.value, schemaVersion: 5 }).ok).toBe(false);
   });
   it.each(['invalid-json', 'array', 'version', 'empty-inputs', 'unknown-key', 'missing-anchor'])(
     'rejects the %s plan before any output open',

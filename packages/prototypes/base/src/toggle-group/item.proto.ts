@@ -1,5 +1,11 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
+import {
+  asAccessible,
+  asCollectionItem,
+  asControlLabel,
+  asFocusable,
+  asTrigger,
+} from '@proto.ui/hooks';
 import {
   TOGGLE_GROUP_CONTEXT,
   TOGGLE_GROUP_FAMILY,
@@ -47,6 +53,19 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
   def.expose.method('focusSelf', (options) => {
     if (!disabled.get()) focus.focusSelf(options);
   });
+  const activate = (
+    run: RunHandle<ToggleGroupItemProps>,
+    isCurrent: () => boolean = () => true
+  ) => {
+    if (!disabled.get() && currentRun && isCurrent())
+      groupCommand(run, 'requestToggle', run.props.get().value);
+  };
+  asControlLabel().target<ToggleGroupItemProps>((run, request) => {
+    const isCurrent = () => !disabled.get() && !!currentRun && request.isCurrent();
+    if (!isCurrent()) return;
+    focus.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (isCurrent()) activate(run, isCurrent);
+  });
   const sync = (run: RunHandle<ToggleGroupItemProps>, ctx: ToggleGroupContext) => {
     currentRun = run;
     const off = ctx.disabled || !!run.props.get().disabled;
@@ -79,7 +98,7 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
       });
   });
   def.event.on('press.commit', (run) => {
-    if (!disabled.get() && currentRun) groupCommand(run, 'requestToggle', run.props.get().value);
+    activate(run);
   });
 }
 export const asToggleGroupItem = defineAsHook<

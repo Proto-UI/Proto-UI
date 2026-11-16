@@ -46,6 +46,12 @@ export {
 export type * from './operations';
 export { compileProject, CompilerProject } from './project';
 export type * from './project';
+export {
+  projectCompilationArtifacts,
+  writeProjectCompilation,
+  diffProjectCompilation,
+} from './project-output';
+export type { ProjectArtifactOptions } from './project-output';
 export { watchProject } from './watch';
 export type * from './watch';
 export { writeArtifactSet } from './artifact-output';

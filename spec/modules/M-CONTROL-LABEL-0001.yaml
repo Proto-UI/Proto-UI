@@ -4,33 +4,24 @@ title: Control Label owns explicit pairing and bounded request routing
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable
-    admission remains blocked on independent review, complete native input/lifetime and assistive-technology
-    evidence.
+  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
 summary: The module pairs admitted semantic subjects while targets retain activation and value ownership.
 criteria:
   - id: M-CONTROL-LABEL-0001-PAIR
     text:
-      en: One opted-in subject or target per logical instance accepts only a branded reference via ControlLabelPort.
-        Pairing is exact-reference plus host tree scope; duplicate or missing live endpoints do not select a
-        DOM-order winner. Alternatively, an explicit setup-only anatomy pair resolves its nearest-root domain
-        and exact roles through optional AnatomyPort and creates a private reference without exposing it to
-        Props or Context; the two association modes are mutually exclusive.
+      en: One opted-in subject or target per logical instance accepts only a nominally admitted reference via ControlLabelPort. Pairing is exact-reference plus host tree scope; duplicate or missing live endpoints do not select a DOM-order winner. Alternatively, an explicit setup-only anatomy pair resolves its nearest-root domain and exact roles through optional AnatomyPort and creates a private reference without exposing it to Props or Context; the two association modes are mutually exclusive.
   - id: M-CONTROL-LABEL-0001-LEASE
     text:
-      en: Logical intent survives detach. Current binding and host leases carry exact owner/generation identity,
-        revoke on view absence/disposal and reject stale cleanup and requests. Both owned slots are cleared
-        before disposers run; a reentrant newer association wins over the retired caller. The Module is the
-        sole source of initial and dynamic host activation-action projection, independently of naming and
-        visual styling.
+      en: Logical intent survives detach. Current binding and host leases carry exact owner/generation identity, revoke on view absence/disposal and reject stale cleanup and requests. Both owned slots are cleared before disposers run; a reentrant newer association wins over the retired caller. The Module is the sole source of initial and dynamic host activation-action projection, independently of naming and visual styling.
   - id: M-CONTROL-LABEL-0001-NAME
     text:
-      en: Naming uses privileged A11y semantic identity and a distinct derived-name contribution. Nonempty author
-        names/IDREFs win, and owned cleanup preserves author or newer contributions.
+      en: Naming uses privileged A11y semantic identity and a distinct derived-name contribution. Nonempty author names/IDREFs win, and owned cleanup preserves author or newer contributions.
+  - id: M-CONTROL-LABEL-0001-INTEROP
+    text:
+      en: Compatible Module and native compiler implementations share the v1 same-realm pair service by exact admitted reference. Its participant record carries owner, kind, ref, semanticRef, view, options, name, activate and diagnostic; bind returns refresh, requestActivation and dispose. The name operation receives the opaque Label semantic identity and its current identity/scope view, leaving local semantic-source translation and physical projection to the target A11y owner. Pair currentness, duplicate arbitration, callback epochs and obsolete cleanup guards apply across implementation boundaries exactly as within one bundle.
   - id: M-CONTROL-LABEL-0001-REQUEST
     text:
-      en: A qualifying label request enters the target callback scope and shares its existing internal operation.
-        Missing host or callback capability is diagnostic; the module never mutates a checked/editor value.
+      en: A qualifying label request enters the target callback scope and shares its existing internal operation. Missing host or callback capability is diagnostic; the module never mutates a checked/editor value.
 owns:
   contracts:
     - C-CONTROL-LABEL-0001
@@ -54,6 +45,9 @@ sources:
   - path: packages/modules/control-label/src/web.ts
   - path: packages/modules/control-label/src/anatomy-pair.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Shared nominal pairing across compatible runtime and native compiler copies while preserving target-owned A11y naming, callback routing and exact lease cleanup.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the bounded pairing owner and explicit unsupported/lifetime behavior.

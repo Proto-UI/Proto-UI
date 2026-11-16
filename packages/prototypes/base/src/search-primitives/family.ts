@@ -14,6 +14,7 @@ import {
   asCollectionItem,
   asFocusable,
   asOverlay,
+  asScrollSurface,
   asTextControl,
   asTrigger,
 } from '@proto.ui/hooks';
@@ -128,6 +129,9 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     let currentRun: RunHandle<T.SearchRootProps> | null = null;
     let viewEpoch = 0;
     let selectionSequence = 0;
+    let navigationSequence = 0;
+    let ownerQuerySequence = 0;
+    let publicationSequence = 0;
     let published: SearchContext = {
       id,
       value: '',
@@ -148,6 +152,15 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     };
     const publish = (run: RunHandle<T.SearchRootProps>) => {
       const epoch = viewEpoch;
+      const publication = ++publicationSequence;
+      const navigation = navigationSequence;
+      const ownerQuery = ownerQuerySequence;
+      const current = () =>
+        currentRun === run &&
+        viewEpoch === epoch &&
+        publicationSequence === publication &&
+        navigationSequence === navigation &&
+        ownerQuerySequence === ownerQuery;
       if (
         !queryEdited &&
         !run.props.isProvided('inputValue') &&
@@ -155,14 +168,16 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         value.get()
       ) {
         const initial = itemsOf(run).find((i) => i.value === value.get());
+        if (!current()) return;
         if (initial) query.set(initial.text, 'reason: search initial label');
       }
-      if (currentRun !== run || viewEpoch !== epoch) return;
+      if (!current()) return;
       const items = visibleItems(run);
+      if (!current()) return;
       if (!items.some((i) => i.id === active && !i.disabled))
         active = inline ? (items.find((i) => !i.disabled)?.id ?? '') : '';
       count.set(items.length, 'reason: search filtered count');
-      if (currentRun !== run || viewEpoch !== epoch) return;
+      if (!current()) return;
       const next = {
         id,
         value: value.get(),
@@ -200,33 +215,64 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return;
       const epoch = viewEpoch;
+      const navigation = ++navigationSequence;
+      const ownerQuery = ownerQuerySequence;
+      const current = () =>
+        currentRun === run &&
+        viewEpoch === epoch &&
+        navigationSequence === navigation &&
+        ownerQuerySequence === ownerQuery;
       queryEdited = true;
       if (!composing && !run.props.isProvided('inputValue'))
         query.set(next, 'reason: search query request');
-      if (currentRun !== run || viewEpoch !== epoch) return;
+      if (!current()) return;
       if (!composing) {
         active = '';
         publish(run);
-        if (currentRun !== run || viewEpoch !== epoch) return;
+        if (!current()) return;
         requestOpen(true, 'input');
-        if (currentRun !== run || viewEpoch !== epoch) return;
+        if (!current()) return;
       }
       run.expose.emit('inputValueChange', { value: next, composing });
     };
     const select = (selectedValue: string, reason = 'programmatic') => {
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return false;
+      const epoch = viewEpoch;
+      const previousSelection = selectionSequence;
+      const previousNavigation = navigationSequence;
+      const ownerQuery = ownerQuerySequence;
+      const canAccept = () =>
+        currentRun === run &&
+        viewEpoch === epoch &&
+        selectionSequence === previousSelection &&
+        navigationSequence === previousNavigation &&
+        ownerQuerySequence === ownerQuery &&
+        !run.props.get().disabled &&
+        !run.props.get().readOnly;
       const free = mode === 'autocomplete' && reason === 'free-text' && !!selectedValue;
       if (!free && itemsOf(run).filter((i) => i.value === selectedValue).length !== 1) return false;
+      if (!canAccept()) return false;
       const matching = visibleItems(run).filter((i) => i.value === selectedValue);
+      if (!canAccept()) return false;
       const candidate = matching.length === 1 && !matching[0].disabled ? matching[0] : null;
       if (!candidate && !free) return false;
-      const epoch = viewEpoch;
+      // Mint a completion token only after acceptance. An invalid nested
+      // selection must not cancel a valid outer selection's notification tail.
       const selection = ++selectionSequence;
-      const isCurrent = () =>
-        currentRun !== null && viewEpoch === epoch && selectionSequence === selection;
+      const navigation = ++navigationSequence;
       const text = candidate?.text ?? selectedValue;
       const result = mode === 'autocomplete' ? text : selectedValue;
+      const isCurrent = () =>
+        currentRun === run &&
+        viewEpoch === epoch &&
+        selectionSequence === selection &&
+        navigationSequence === navigation &&
+        !run.props.get().disabled &&
+        !run.props.get().readOnly &&
+        // A controlled owner may acknowledge the selected label. Replacing
+        // it with a different query starts a new editing flow instead.
+        (ownerQuerySequence === ownerQuery || query.get() === text);
       if (mode !== 'command' && !run.props.isProvided('value'))
         value.set(result, 'reason: search accepted selection');
       if (!isCurrent()) return true;
@@ -254,7 +300,20 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     });
     def.expose.method('__activate', (id) => {
       const run = currentRun;
-      if (run && visibleItems(run).some((i) => i.id === id && !i.disabled)) {
+      if (!run || run.props.get().disabled || run.props.get().readOnly) return;
+      const epoch = viewEpoch;
+      const activation = ++navigationSequence;
+      const ownerQuery = ownerQuerySequence;
+      const candidate = visibleItems(run).some((i) => i.id === id && !i.disabled);
+      if (
+        candidate &&
+        currentRun === run &&
+        viewEpoch === epoch &&
+        navigationSequence === activation &&
+        ownerQuerySequence === ownerQuery &&
+        !run.props.get().disabled &&
+        !run.props.get().readOnly
+      ) {
         active = id;
         publish(run);
       }
@@ -263,7 +322,20 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return;
       const epoch = viewEpoch;
+      const navigation = ++navigationSequence;
+      const ownerQuery = ownerQuerySequence;
+      const isCurrentNavigation = () =>
+        currentRun === run &&
+        viewEpoch === epoch &&
+        navigationSequence === navigation &&
+        ownerQuerySequence === ownerQuery &&
+        !run.props.get().disabled &&
+        !run.props.get().readOnly;
       const choices = visibleItems(run).filter((i) => !i.disabled);
+      // Collection metadata and owner callbacks may synchronously start a
+      // newer interaction. An older navigation must not overwrite its active
+      // item or use the choices captured before that interaction.
+      if (!isCurrentNavigation()) return;
       if (direction === 'commit') {
         const item = choices.find((i) => i.id === active);
         if (item) select(item.value, 'keyboard');
@@ -275,7 +347,7 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         return;
       }
       requestOpen(true, 'keyboard');
-      if (currentRun !== run || viewEpoch !== epoch) return;
+      if (!isCurrentNavigation() || !open.get()) return;
       if (!choices.length) return;
       const index = choices.findIndex((i) => i.id === active);
       const raw =
@@ -293,7 +365,12 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
           ? Math.max(0, Math.min(choices.length - 1, raw))
           : (raw + choices.length) % choices.length;
       active = choices[next].id;
+      const targetId = active;
       publish(run);
+      const current = () => isCurrentNavigation() && active === targetId;
+      if (!current()) return;
+      const reveal = run.anatomy.partsOf(family, 'content')[0]?.getExpose('__revealActive');
+      if (current() && typeof reveal === 'function') reveal(targetId);
     });
     const sync = (run: RunHandle<T.SearchRootProps>, initial = false) => {
       currentRun = run;
@@ -303,17 +380,19 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
           run.props.isProvided('value') ? (p.value ?? '') : (p.defaultValue ?? ''),
           'reason: search owner value'
         );
-      if (initial || run.props.isProvided('inputValue'))
-        query.set(
-          run.props.isProvided('inputValue')
-            ? (p.inputValue ?? '')
-            : run.props.isProvided('defaultInputValue')
-              ? (p.defaultInputValue ?? '')
-              : mode === 'autocomplete'
-                ? value.get()
-                : '',
-          'reason: search owner query'
-        );
+      if (initial || run.props.isProvided('inputValue')) {
+        const nextQuery = run.props.isProvided('inputValue')
+          ? (p.inputValue ?? '')
+          : run.props.isProvided('defaultInputValue')
+            ? (p.defaultInputValue ?? '')
+            : mode === 'autocomplete'
+              ? value.get()
+              : '';
+        // Accepting the requested open state with the same query continues
+        // keyboard entry. A genuinely newer owner query retires its choices.
+        if (query.get() !== nextQuery) ownerQuerySequence++;
+        query.set(nextQuery, 'reason: search owner query');
+      }
       if (initial || run.props.isProvided('open'))
         open.set(
           inline || (run.props.isProvided('open') ? !!p.open : !!p.defaultOpen),
@@ -433,6 +512,8 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
   }
   function contentSetup(def: DefHandle<T.SearchContentProps, T.SearchContentExposes>) {
     def.anatomy.claim(family, { role: 'content' });
+    const scroll = asScrollSurface<T.SearchContentProps>();
+    scroll.configure({ axes: 'vertical', projection: 'system' });
     const a11y = asAccessible();
     const id = def.state.string('id', ''),
       open = def.state.bool('open', inline),
@@ -477,6 +558,32 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     const boundary = asBoundary();
     if (!inline) boundary.observe('pointer.press');
     let runNow: RunHandle<T.SearchContentProps> | null = null;
+    let viewEpoch = 0;
+    def.expose.method('__revealActive', (targetId) => {
+      const run = runNow;
+      const epoch = viewEpoch;
+      if (!run) return;
+      const current = () => {
+        if (runNow !== run || viewEpoch !== epoch) return false;
+        const ctx = run.context.read(context);
+        return (
+          ctx.open &&
+          !ctx.disabled &&
+          !ctx.readOnly &&
+          ctx.active === targetId &&
+          ctx.visible.includes(targetId) &&
+          runNow === run &&
+          viewEpoch === epoch
+        );
+      };
+      if (!current()) return;
+      const part = run.anatomy.order.partsOf(family, 'item').find((part) => {
+        const raw = part.getExpose('__collectionItem');
+        const item = typeof raw === 'function' ? raw() : raw;
+        return !!item && (item as Item).id === targetId && !(item as Item).disabled;
+      });
+      if (part && current()) scroll.request({ kind: 'reveal', axis: 'vertical', family, part });
+    });
     const sync = (run: RunHandle<T.SearchContentProps>, ctx: SearchContext) => {
       id.set(ctx.id + '-content', 'reason: search list id');
       label.set(ctx.label, 'reason: search list name');
@@ -500,15 +607,19 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       sync(run, run.context.read(context));
     });
     def.lifecycle.onMounted((run) => {
+      viewEpoch++;
       runNow = run;
       const input = run.anatomy.partsOf(family, 'input')[0];
       if (input) overlay?.registerAnchorPart(input);
       position(run);
       sync(run, run.context.read(context));
     });
-    def.lifecycle.onUnmounted(() => {
+    const retireView = () => {
+      viewEpoch++;
       runNow = null;
-    });
+    };
+    def.lifecycle.onUnmounted(retireView);
+    def.lifecycle.onBeforeDispose(retireView);
     def.props.watch(['side', 'align', 'sideOffset', 'collisionPadding'], position);
     boundary.subscribeOutside(() => {
       if (runNow && open.get()) invoke(runNow, 'close');
@@ -594,8 +705,12 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
           source: 'base-' + slug + '-item',
         });
     });
-    def.event.on('pointer.enter', (run) => {
-      if (visible.get() && !disabled.get()) invoke(run, '__activate', id);
+    def.event.on('pointer.move', (run, event) => {
+      // Scrolling or resizing can deliver enter without any pointer intent.
+      // Only a known, unpressed mouse movement may take keyboard ownership.
+      if (event.pointerType !== 'mouse' || event.pointerButtons !== 'none') return;
+      if (mounted && visible.get() && !disabled.get() && run.context.read(context).open)
+        invoke(run, '__activate', id);
     });
     def.event.on('press.commit', (run) => {
       if (!mounted) return;

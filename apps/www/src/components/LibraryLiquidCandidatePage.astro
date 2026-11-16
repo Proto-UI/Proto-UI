@@ -15,11 +15,7 @@ const isZh = locale === 'zh-cn';
     description: isZh
       ? '按视觉风格、适用场景与来源选择组件库或图标库。'
       : 'Choose a component or icon library by visual language, use case, and provenance.',
-    head: [
-      { tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' } },
-      // The shared Gallery retains its original relative destination strings.
-      { tag: 'base', attrs: { href: `/${locale}/ui-libraries/liquid-glass/button/` } },
-    ],
+    head: [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' } }],
   }}
 >
   <UiLibraryGallery locale={locale} liquidMaterialCandidate={true} />

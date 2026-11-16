@@ -552,8 +552,7 @@ async function renderDemoWc(
     },
     setProps(ref, next) {
       if (!ownsLease(opt, lease)) return;
-      const el = refs[ref] as DemoInstance &
-        HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
+      const el = refs[ref] as DemoInstance & HTMLElement & { update?(): void };
       if (!el) return;
       const current = wcRawProps.get(el);
       if (!current) return;
@@ -568,7 +567,11 @@ async function renderDemoWc(
       // DemoRuntimeApi updates are patches. The WC adapter deliberately accepts
       // full snapshots, so retain the authored props before projecting one.
       Object.assign(current, patch);
-      el.setProps?.({ ...current, ...(wcSurfaceProps.get(el) ?? {}) });
+      // Use the same public props channel as initial and keyed-child projection.
+      // The instance's convenience setProps also requests an update; following
+      // it with update would commit twice and could update a lease retired by
+      // a synchronous props watcher before this ownership check.
+      setElementProps(el, { ...current, ...(wcSurfaceProps.get(el) ?? {}) });
       if (ownsLease(opt, lease)) el.update?.();
     },
   };

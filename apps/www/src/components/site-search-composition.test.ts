@@ -1,4 +1,7 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { compile } from 'tailwindcss';
 import { createSiteSearchComposition, type SiteSearchCopy } from './site-search-composition';
 import { createSiteSearchSession } from './site-search-session';
 import { renderDemo } from './PrototypePreviewer/demo-renderer';
@@ -65,6 +68,13 @@ afterEach(async () => {
 });
 
 describe('public Search composition, actual prototype loaders and four hosts', () => {
+  let utilities: Awaited<ReturnType<typeof compile>>;
+  beforeAll(async () => {
+    const require = createRequire(import.meta.url);
+    utilities = await compile(
+      `${readFileSync(require.resolve('tailwindcss/theme.css'), 'utf8')}\n@tailwind utilities;`
+    );
+  });
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
     for (const family of ['shadcn', 'brutalist'] as const) {
       it(`${runtime}/${family}: latest prepared query, stable editor, async rows, close and reopen`, async () => {
@@ -155,9 +165,47 @@ describe('public Search composition, actual prototype loaders and four hosts', (
         expect(scrollBody.contains(context.refs.results)).toBe(true);
         expect(scrollBody.contains(context.refs.status)).toBe(true);
         expect(scrollBody.contains(context.refs.actions)).toBe(true);
+        expect(scrollBody.contains(context.refs['keyboard-hint'])).toBe(true);
+        expect(dismissal.contains(context.refs['keyboard-hint'])).toBe(false);
         expect(scrollBody.contains(context.refs.close)).toBe(false);
         expect(dismissal.contains(context.refs.close)).toBe(true);
         expect(scrollBody.parentElement).toBe(dismissal.parentElement);
+        expect(scrollBody.classList.contains('flex')).toBe(true);
+        expect(scrollBody.classList.contains('flex-col')).toBe(true);
+        // Compile the actual authored utilities. A nested list can fill the
+        // body's height, so the body needs its own side and bottom gesture
+        // regions. Native journeys separately prove actual touch/wheel targets
+        // and complete hint text; this model only checks the authored CSS.
+        const layoutStyle = document.createElement('style');
+        layoutStyle.textContent = utilities.build([...scrollBody.classList]);
+        document.head.append(layoutStyle);
+        cleanups.push(() => layoutStyle.remove());
+        const originalFontSize = document.documentElement.style.fontSize;
+        cleanups.push(() => {
+          document.documentElement.style.fontSize = originalFontSize;
+        });
+        const pixels = (value: string, rootSize: number) => {
+          const calc = value.match(/^calc\(([\d.]+)(rem|px)\s*\*\s*([\d.]+)\)$/);
+          const literal = value.match(/^([\d.]+)(rem|px)$/);
+          const number = calc ? Number(calc[1]) * Number(calc[3]) : Number(literal?.[1] ?? 0);
+          const unit = calc?.[2] ?? literal?.[2];
+          return unit === 'rem' ? number * rootSize : number;
+        };
+        for (const fontSize of [16, 32]) {
+          document.documentElement.style.fontSize = `${fontSize}px`;
+          const layout = getComputedStyle(scrollBody);
+          for (const edge of ['padding-inline', 'padding-bottom']) {
+            expect(
+              pixels(layout.getPropertyValue(edge), fontSize),
+              `${edge} at ${fontSize}px`
+            ).toBeGreaterThan(0);
+          }
+        }
+        expect(context.refs.list.style.flex).toBe('0 0 auto');
+        expect(context.refs.list.style.minHeight).toMatch(/^0(?:px)?$/);
+        expect(context.refs.list.style.maxHeight).toBe('100%');
+        expect(context.refs.list.contains(context.refs.status)).toBe(false);
+        expect(context.refs.list.contains(context.refs.actions)).toBe(false);
         expect(context.refs.status.getAttribute('role')).toBe('status');
         expect(context.refs.status.getAttribute('aria-live')).toBe('polite');
         const input = editor();

@@ -1,6 +1,6 @@
 id: C-DRAWER-EXTENT-MODEL-0001
 type: contract
-title: Drawer vertical intrinsic and explicit snap input model
+title: Drawer intrinsic and explicit snap input model
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: Pure input normalization is a bounded prerequisite; live Drawer integration, gestures, accessibility, Compiler and native geometry require separate evidence.
@@ -11,16 +11,16 @@ statement:
 criteria:
   - id: C-DRAWER-EXTENT-MODEL-0001-MODE
     text:
-      en: Top and bottom select intrinsic extent when snapPoints is omitted, undefined, null or an empty array. A nonempty valid point array selects fractional extent. This matches the fixed Shadcn c2a67849 and Neo 3306a802 wrapper predicate snapPoints != null and length greater than zero. snapPoint or defaultSnapPoint alone never enables snapping; their selection is inactive in intrinsic mode. Left and right retain the existing fractional default with point one in this vertical-only slice. This changes the previous vertical implicit full-point default.
-      zh-CN: top/bottom 在 snapPoints 缺省、undefined、null 或空数组时选择 intrinsic，非空有效数组选择 fraction，遵循固定 Shadcn c2a67849 和 Neo 3306a802 wrapper 的非 null 且 length 大于零判定。单独 snapPoint/defaultSnapPoint 不开启 snap，intrinsic 模式不应用其选择。此次仅改纵向，left/right 保留既有 fraction 和默认点 one。纵向旧隐式满高度默认因此发生迁移。
+      en: Top and bottom select intrinsic extent when snapPoints is omitted, undefined, null or an empty array. A nonempty valid point array selects fractional extent. This matches the fixed Shadcn c2a67849 and Neo 3306a802 wrapper predicate snapPoints != null and length greater than zero. snapPoint or defaultSnapPoint alone never enables snapping; their selection is inactive in intrinsic mode. Left and right retain fractional mode with point one when no points are supplied. All four edges use the same strict length and selection validation. This changes the previous vertical implicit full-point default.
+      zh-CN: top/bottom 在 snapPoints 缺省、undefined、null 或空数组时选择 intrinsic，非空有效数组选择 fraction，遵循固定 Shadcn c2a67849 和 Neo 3306a802 wrapper 的非 null 且 length 大于零判定。单独 snapPoint/defaultSnapPoint 不开启 snap，intrinsic 模式不应用其选择。left/right 保留 fraction 与缺省点 one；四方向使用同一严格长度与选择校验。纵向旧隐式满高度默认因此发生迁移。
   - id: C-DRAWER-EXTENT-MODEL-0001-VALIDATION
     text:
-      en: A supplied non-array point set or any point that is non-finite, nonnumeric, nonpositive or greater than one produces an explicit invalid result. Never manufacture point one from malformed vertical input. Valid arrays are sorted and deduplicated. Active finite selections choose the nearest point with ties toward the more-open point. A non-null supplied snapPoint owns the active selection; omitted, undefined or null is uncontrolled and uses defaultSnapPoint or the largest point. Invalid active selections remain invalid rather than transferring ownership.
-      zh-CN: 已提供的非数组 points 或任何非有限、非数字、不大于零或大于一的 point 返回明确 invalid，不能以 malformed 纵向输入制造满高度点 one。有效数组排序去重。有效有限选择取最近点，等距偏更开放点。非 null 的 snapPoint 控制有效 snap 选择；缺省/undefined/null 为非受控，采用 defaultSnapPoint 或最大点。非法有效选择返回 invalid，不转移所有权。
+      en: A supplied non-array point set or any point that is non-finite, nonnumeric, nonpositive or greater than one produces an explicit invalid result. Never manufacture point one from malformed input. Valid arrays are sorted and deduplicated. Active finite selections choose the nearest point with ties toward the more-open point. A non-null supplied snapPoint owns the active selection; omitted, undefined or null is uncontrolled and uses defaultSnapPoint or the largest point. Invalid active selections remain invalid rather than transferring ownership.
+      zh-CN: 已提供的非数组 points 或任何非有限、非数字、不大于零或大于一的 point 返回明确 invalid，不能以 malformed 输入制造满高度点 one。有效数组排序去重。有效有限选择取最近点，等距偏更开放点。非 null 的 snapPoint 控制有效 snap 选择；缺省/undefined/null 为非受控，采用 defaultSnapPoint 或最大点。非法有效选择返回 invalid，不转移所有权。
   - id: C-DRAWER-EXTENT-MODEL-0001-LENGTH
     text:
-      en: Component minExtent and maxExtent are static shared neutral length records. Missing, undefined or null minimum uses logical zero and maximum uses an explicitly supplied valid family default. Malformed explicit records produce an invalid result rather than silent fallback. Base maximum defaults to available one; the two fixed vertical family defaults are available-minus-root-text six. Valid minimum is ignored in fraction mode. The model reads no host metrics and contains no family-name dispatch; the shared layout contract owns geometry and hard-cap resolution.
-      zh-CN: minExtent/maxExtent 使用静态共享中立长度记录。缺省/undefined/null minimum 为 logical zero，maximum 为明确传入且有效的 family 默认。显式非法记录返回 invalid，不静默回退。Base maximum 默认 available one；两固定纵向 family 默认 available-minus-root-text six。fraction 模式不应用有效 minimum。模型不读宿主测量、不按 family 名称分派；共享 layout 契约负责几何与安全硬 cap。
+      en: Component minExtent and maxExtent are static shared neutral length records. Missing, undefined or null minimum uses logical zero and maximum uses an explicitly supplied valid family default. Malformed explicit records produce an invalid result rather than silent fallback. Vertical Base maximum defaults to available one; the two fixed vertical family defaults are available-minus-root-text six. Horizontal maximum defaults to root-text twenty when the consumer omits maxExtent; an explicit maximum replaces that default and is capped by available width. Valid minimum is ignored in fraction mode. The model reads no host metrics and contains no family-name dispatch; the shared layout contract owns geometry and hard-cap resolution.
+      zh-CN: minExtent/maxExtent 使用静态共享中立长度记录。缺省/undefined/null minimum 为 logical zero，maximum 为明确传入且有效的 family 默认。显式非法记录返回 invalid，不静默回退。纵向 Base maximum 默认 available one；两固定纵向 family 默认 available-minus-root-text six。横向未提供 maxExtent 时默认 root-text twenty；显式 maximum 替换该默认并受可用宽度约束。fraction 模式不应用有效 minimum。模型不读宿主测量、不按 family 名称分派；共享 layout 契约负责几何与安全硬 cap。
   - id: C-DRAWER-EXTENT-MODEL-0001-BOUNDARY
     text:
       en: This model does not activate production Content or Handle. The fixed wrapper swipe handle is an aria-hidden div, not a Close action; no Enter/Space dismissal is introduced by this definition. Logical open, controlled refusal, drag translation, range withdrawal, scrolling composition, transformed layout and native realization remain separate acceptance work. Malformed-point rejection intentionally replaces the old ignored-entry/full-point fallback only when the new model is later integrated.
@@ -34,6 +34,9 @@ openQuestions:
     question: Which separately reviewed prototype and native evidence admits live mode transitions, safe intrinsic extent, drag cancellation, accessibility and internal scrolling?
     blocks: [activation:C-DRAWER-EXTENT-MODEL-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admit horizontal neutral extents using shared strict validation while preserving the twenty-root-text-unit compatibility default and fractional mode.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Separate pure upstream-aligned vertical sizing inputs from unverified live integration.

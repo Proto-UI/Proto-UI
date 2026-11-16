@@ -106,6 +106,7 @@ export async function compileButtonSsrFixture(
   if (!source.ok) throw new Error(JSON.stringify(source.diagnostics));
   const output = emitWebComponentSource(source.value.ir, {
     ssr: true,
+    controlLabelHydration: 'client-only',
     tagName: options.tagName ?? 'pui-ssr-button',
     className: 'CompiledButton',
     styleEnvironment: buttonSsrStyleEnvironment,

@@ -61,6 +61,11 @@ export function interactionValueAlternatives(
       }
       return results;
     }
+    if (value.kind === 'conditional') {
+      const a = analyze(value.whenTrue, scope),
+        b = analyze(value.whenFalse, scope);
+      return a && b ? [...a, ...b] : null;
+    }
     if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator)) {
       const left = analyze(value.left, scope);
       const right = analyze(value.right, scope);
@@ -114,11 +119,15 @@ export function interactionValueAlternatives(
         return true;
       } else if (statement.kind === 'throw') return true;
       else if (statement.kind === 'try') {
-        const branchReturns: InteractionValueAlternative[] = [], finalReturns: InteractionValueAlternative[] = [];
+        const branchReturns: InteractionValueAlternative[] = [],
+          finalReturns: InteractionValueAlternative[] = [];
         const tried = body(statement.body, scope, branchReturns);
         const catchScope = statement.catch?.name
-          ? scope.parameter(statement.catch.name, undefined, scope, null) : scope;
-        const caught = statement.catch ? body(statement.catch.body, catchScope, branchReturns) : true;
+          ? scope.parameter(statement.catch.name, undefined, scope, null)
+          : scope;
+        const caught = statement.catch
+          ? body(statement.catch.body, catchScope, branchReturns)
+          : true;
         const finalized = statement.finally ? body(statement.finally, scope, finalReturns) : false;
         if (finalized === null || (!finalized && (tried === null || caught === null))) return null;
         if (!finalized) returns.push(...branchReturns);

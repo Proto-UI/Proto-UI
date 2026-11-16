@@ -316,6 +316,11 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
   'eventControl.requestDefaultActionPrevention',
+  'hook.asControlLabel',
+  'controlLabel.label',
+  'controlLabel.target',
+  'controlLabel.sync',
+  'controlLabelRequest.isCurrent',
 ]);
 
 /** The only target registry: future identities are explicit metadata, never emitter fallbacks. */
@@ -598,6 +603,7 @@ export interface TargetOperationAnalysis {
 interface HelperBinding {
   fn: FunctionIR;
   scope: Scope;
+  parameter?: true;
 }
 type Scope = Map<string, HelperBinding | undefined>;
 
@@ -646,7 +652,31 @@ export function checkTargetOperations(
     reachedFunctions.add(value);
     activeFunctions.add(value);
     const scope = new Map(outer);
-    for (const parameter of value.parameters) scope.set(parameter.name, undefined);
+    for (const parameter of value.parameters) {
+      if (selected.id === 'gpui-source-v1' && (parameter.callback || parameter.default))
+        diagnostic(
+          'PUI4003',
+          'Checked callback parameters and per-call parameter defaults are not implemented by gpui-source-v1.',
+          value.span
+        );
+      if (parameter.default) expression(parameter.default, scope);
+      scope.set(
+        parameter.name,
+        parameter.callback
+          ? {
+              fn: {
+                ...parameter.callback,
+                body: [],
+                phase: value.phase,
+                context: 'helper',
+                span: value.span,
+              },
+              scope,
+              parameter: true,
+            }
+          : undefined
+      );
+    }
     statements(value.body, scope);
     activeFunctions.delete(value);
   }
@@ -729,6 +759,17 @@ export function checkTargetOperations(
         expression(value.cell, scope);
         expression(value.value, scope);
         return;
+      case 'conditional':
+        if (selected.id === 'gpui-source-v1')
+          diagnostic(
+            'PUI4003',
+            'Conditional expressions are not implemented by gpui-source-v1.',
+            value.span
+          );
+        expression(value.condition, scope);
+        expression(value.whenTrue, scope);
+        expression(value.whenFalse, scope);
+        return;
       case 'binary':
         expression(value.left, scope);
         expression(value.right, scope);
@@ -757,7 +798,7 @@ export function checkTargetOperations(
             `Helper ${JSON.stringify(value.name)} has no admitted semantic function body. Declare a static helper; opaque Module or capability functions cannot be lowered.`,
             value.span
           );
-        else fn(binding.fn, binding.scope);
+        else if (!binding.parameter) fn(binding.fn, binding.scope);
         return;
       }
       case 'authored-hook': {
