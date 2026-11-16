@@ -12,6 +12,7 @@ import { type PropsBaseType } from '@proto.ui/types';
 import { commitChildren } from '../commit';
 import { hasCurrentOwnedDecorationPaint } from '../owned-decoration';
 import { SlotProjector } from '../slot-projector';
+import { hasOwnedSplitZeroOpacity } from '../shadow-split-effects';
 import type { ShadowInnerSurface } from '../shadow-inner-surface';
 
 type DecorationNodeRecord = {
@@ -43,7 +44,8 @@ function isSplitNodeConcealed(node: Element, visibilityOwner?: HTMLElement): boo
   for (const declaration of [style, computed]) {
     if (
       declaration?.getPropertyValue('display') === 'none' ||
-      Number.parseFloat(declaration?.getPropertyValue('opacity') ?? '') === 0 ||
+      (Number.parseFloat(declaration?.getPropertyValue('opacity') ?? '') === 0 &&
+        (declaration === style || !hasOwnedSplitZeroOpacity(node))) ||
       declaration?.getPropertyValue('content-visibility') === 'hidden'
     )
       return true;
@@ -256,6 +258,13 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
             document: splitSurface.ownerDocument,
           }
         : undefined;
+    // A staged child may run a constructor or connected reaction. The
+    // caller still owns this light-DOM sequence until acknowledgement.
+    const callersAtStaging = splitRoot ? Array.from(host.childNodes) : undefined;
+    const assertCallerProjection = () => {
+      if (callersAtStaging && !hasSameChildren(host, callersAtStaging))
+        throw new Error('[WC Adapter] decoration caller projection changed');
+    };
     const stagedChildren = splitRoot ? new Map<Node, ChildNode[]>() : undefined;
     const stagedNodes: DecorationNodeRecord[] = [];
     const owned = new WeakSet<Node>();
@@ -325,6 +334,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           nodes: stagedNodes,
           splitRoot: { ...splitRoot, children: stagedChildren.get(staging) ?? [] },
         };
+        assertCallerProjection();
         assertDecorationTree(staged, splitRoot.document, staging);
         return staged;
       },
@@ -339,7 +349,10 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         )
           throw new Error('[WC Adapter] decoration commit superseded');
         const document = decorationRoot.ownerDocument;
-        if (staged) assertDecorationTree(staged, document);
+        if (staged) {
+          assertCallerProjection();
+          assertDecorationTree(staged, document);
+        }
         decorationCommit = {
           blueprint,
           lease: boundLease,

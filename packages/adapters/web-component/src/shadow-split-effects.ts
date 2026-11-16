@@ -12,6 +12,12 @@ import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-sty
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const activeBindings = new WeakSet<HTMLElement>();
+const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
+
+export function hasOwnedSplitZeroOpacity(surface: Element): boolean {
+  return zeroOpacityOwners.get(surface)?.() ?? false;
+}
+
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
@@ -206,7 +212,10 @@ function splitReceiptVariants(token: string): string[] {
   return parts.filter(Boolean);
 }
 
-function compiledReceiptSelector(token: string): string | null {
+function compiledReceiptSelector(
+  token: string,
+  target: 'host' | 'element' = 'host'
+): string | null {
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   let selector = `[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
   let dark = false;
@@ -246,6 +255,7 @@ function compiledReceiptSelector(token: string): string | null {
       } else return null;
     }
   }
+  if (target === 'element') return dark ? `[data-pui-color-scheme='dark']${selector}` : selector;
   return `${dark ? ":where(:host([data-pui-color-scheme='dark']))" : ''}:host(${selector})`;
 }
 
@@ -384,6 +394,19 @@ export function createShadowSplitEffectsPort({
   let disposed = false;
   let flushing = false;
   let flushRequested = false;
+  zeroOpacityOwners.set(surface, () => {
+    if (!applied || surface.parentNode !== host.shadowRoot) return false;
+    const liveSurfaceTokens = surface.getAttribute('data-pui-style')?.split(/\s+/);
+    return applied.surface.some((token) => {
+      if (
+        (token !== 'opacity-0' && !token.endsWith(':opacity-0')) ||
+        !liveSurfaceTokens?.includes(token)
+      )
+        return false;
+      const selector = compiledReceiptSelector(token, 'element');
+      return selector !== null && host.matches(selector);
+    });
+  });
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
@@ -559,6 +582,7 @@ export function createShadowSplitEffectsPort({
       if (disposed) return;
       disposed = true;
       activeBindings.delete(host);
+      zeroOpacityOwners.delete(surface);
       const errors: unknown[] = [];
       const cleanup = (action: () => void) => {
         try {

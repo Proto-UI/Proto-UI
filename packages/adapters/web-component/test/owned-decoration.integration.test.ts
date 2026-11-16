@@ -381,6 +381,92 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     }
   );
 
+  it('allows owned Root opacity-0 and preserves later caller replacement on reuse', () => {
+    const C = AdaptToWebComponent(
+      definePrototype({
+        name: `owned-root-zero-opacity-${++id}`,
+        setup(def) {
+          def.feedback.style.use(tw('opacity-0'));
+          const target = def.feedback.style.declareDecoration();
+          return (r) => [r.decoration(target), r.slot()];
+        },
+      }),
+      {
+        shadow: {
+          mode: 'open',
+          presentation: 'split',
+          styleArtifact: renderProtoShadowSplitStyleArtifact(['opacity-0']),
+        },
+      }
+    );
+    const host = new C();
+    const callerA = document.createTextNode('Caller A');
+    host.append(callerA);
+    document.body.append(host);
+    const surface = host.shadowRoot!.querySelector('[part="surface"]')!;
+    const slot = surface.querySelector('slot')!;
+    expect(surface.getAttribute('data-pui-style')).toBe('opacity-0');
+    const window = host.ownerDocument.defaultView!;
+    const original = window.getComputedStyle.bind(window);
+    const readStyle = vi.spyOn(window, 'getComputedStyle').mockImplementation((node) => {
+      if (node !== surface) return original(node);
+      return {
+        getPropertyValue: (name: string) => (name === 'opacity' ? '0' : ''),
+      } as CSSStyleDeclaration;
+    });
+    try {
+      expect(() => host.update()).not.toThrow();
+      expect(slot.assignedNodes()).toEqual([callerA]);
+      const callerB = document.createTextNode('Caller B');
+      callerA.replaceWith(callerB);
+      expect(() => host.update()).not.toThrow();
+      expect(slot.assignedNodes()).toEqual([callerB]);
+    } finally {
+      readStyle.mockRestore();
+    }
+  });
+
+  it.each(['remove', 'replace'] as const)(
+    'rejects a split connection reaction that can %s a caller before acknowledgement',
+    (mutation) => {
+      const name = `pui-decoration-caller-reaction-${++id}`;
+      let changed = false;
+      customElements.define(
+        name,
+        class extends HTMLElement {
+          connectedCallback() {
+            const hosted = (this.getRootNode() as ShadowRoot).host;
+            const caller = hosted?.firstChild;
+            if (!caller) return;
+            changed = true;
+            if (mutation === 'remove') caller.remove();
+            else caller.replaceWith(hosted.ownerDocument.createTextNode('Replacement'));
+          }
+        }
+      );
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-caller-boundary-${id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.slot(), r.el(name, {})];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      host.append(document.createTextNode('Original'));
+      expect(() => document.body.append(host)).toThrow('decoration caller projection changed');
+      expect(changed).toBe(true);
+    }
+  );
+
   it.each(['remove decoration', 'reorder slot'] as const)(
     'rejects a connection reaction that can %s before split acknowledgement',
     (mutation) => {
