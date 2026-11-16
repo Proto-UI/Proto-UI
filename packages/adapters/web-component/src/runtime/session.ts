@@ -36,10 +36,10 @@ function captureSplitSurfaceIdentity(surface: HTMLElement): string {
   );
 }
 
-function isSplitSurfaceConcealed(surface: HTMLElement, host: HTMLElement): boolean {
-  const { style, ownerDocument } = surface;
-  const view = ownerDocument.defaultView;
-  const computed = view?.getComputedStyle(surface);
+function isSplitNodeConcealed(node: Element, visibilityOwner?: HTMLElement): boolean {
+  const style = (node as Element & ElementCSSInlineStyle).style;
+  const view = node.ownerDocument.defaultView;
+  const computed = view?.getComputedStyle(node);
   for (const declaration of [style, computed]) {
     if (
       declaration?.getPropertyValue('display') === 'none' ||
@@ -48,14 +48,28 @@ function isSplitSurfaceConcealed(surface: HTMLElement, host: HTMLElement): boole
     )
       return true;
   }
-  const inlineVisibility = style.getPropertyValue('visibility');
+  if (!visibilityOwner) return false;
+  const inlineVisibility = style?.getPropertyValue('visibility');
   if (inlineVisibility === 'hidden' || inlineVisibility === 'collapse') return true;
   const visibility = computed?.getPropertyValue('visibility');
-  // A surrounding owner's hidden phase is not a mutation of the split surface.
+  // An inherited hidden phase of the owner does not conceal its slot locally.
   return (
     (visibility === 'hidden' || visibility === 'collapse') &&
-    visibility !== view?.getComputedStyle(host).getPropertyValue('visibility')
+    visibility !== view?.getComputedStyle(visibilityOwner).getPropertyValue('visibility')
   );
+}
+
+function isSplitSlotPathConcealed(slot: Element, surface: HTMLElement, host: HTMLElement): boolean {
+  if (isSplitNodeConcealed(slot, host)) return true;
+  // The slot's own computed visibility includes inheritance. Layout and
+  // paint on a wrapper can hide assigned content without changing that value.
+  for (
+    let wrapper = slot.parentElement;
+    wrapper && wrapper !== surface;
+    wrapper = wrapper.parentElement
+  )
+    if (isSplitNodeConcealed(wrapper)) return true;
+  return false;
 }
 
 function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean {
@@ -182,7 +196,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         decorationRoot.ownerDocument !== record.splitRoot.document ||
         !hasSameChildren(treeRoot, record.splitRoot.children) ||
         captureSplitSurfaceIdentity(splitSurface) !== record.splitRoot.identity ||
-        isSplitSurfaceConcealed(splitSurface, host))
+        isSplitNodeConcealed(splitSurface, host))
     )
       throw new Error('[WC Adapter] decoration physical blueprint changed');
     for (const { node, parent, decoration, text, splitChildren, splitAttributes } of record.nodes) {
@@ -194,6 +208,15 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         (splitChildren &&
           (!hasSameChildren(node, splitChildren) ||
             captureSplitAttributes(node as Element, decoration) !== splitAttributes))
+      )
+        throw new Error('[WC Adapter] decoration physical blueprint changed');
+      if (
+        !staging &&
+        record.splitRoot &&
+        splitSurface &&
+        splitChildren &&
+        (node as Element).localName === 'slot' &&
+        isSplitSlotPathConcealed(node as Element, splitSurface, host)
       )
         throw new Error('[WC Adapter] decoration physical blueprint changed');
       if (decoration) {

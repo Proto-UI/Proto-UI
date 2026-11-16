@@ -283,6 +283,57 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(caller.data).toBe('Updated caller text');
   });
 
+  it.each(['slot', 'section'] as const)(
+    'rejects equal split reuse when a stylesheet hides the caller path through %s',
+    (selector) => {
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-hidden-slot-${++id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.el('section', r.slot())];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const caller = document.createTextNode('Caller text');
+      host.append(caller);
+      document.body.append(host);
+      const shadow = host.shadowRoot!;
+      const hidden = shadow.querySelector(selector)!;
+      const slot = shadow.querySelector('slot')!;
+      expect(() => host.update()).not.toThrow();
+      expect(slot.assignedNodes()).toEqual([caller]);
+      const style = document.createElement('style');
+      style.textContent = `${selector} { display: none }`;
+      shadow.append(style);
+      // Provide the exact resolved style for the styled node in happy-dom.
+      const window = host.ownerDocument.defaultView!;
+      const original = window.getComputedStyle.bind(window);
+      const readStyle = vi.spyOn(window, 'getComputedStyle').mockImplementation((target) =>
+        target === hidden
+          ? ({
+              getPropertyValue: (name: string) => (name === 'display' ? 'none' : ''),
+            } as CSSStyleDeclaration)
+          : original(target)
+      );
+      try {
+        expect(() => host.update()).toThrow('decoration physical blueprint changed');
+      } finally {
+        readStyle.mockRestore();
+      }
+      expect(caller.parentNode).toBe(host);
+      expect(slot.assignedNodes()).toEqual([caller]);
+    }
+  );
+
   it.each(['remove decoration', 'reorder slot'] as const)(
     'rejects a connection reaction that can %s before split acknowledgement',
     (mutation) => {
