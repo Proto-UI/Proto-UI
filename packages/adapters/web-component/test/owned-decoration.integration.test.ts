@@ -277,6 +277,48 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     }
   );
 
+  it.each(['inert', 'aria-hidden', 'part'] as const)(
+    'rejects a detached child constructor changing the live split surface %s',
+    (attribute) => {
+      const mutator = `pui-decoration-constructor-${++id}`;
+      let host: HTMLElement;
+      let constructed = false;
+      customElements.define(
+        mutator,
+        class extends HTMLElement {
+          constructor() {
+            super();
+            constructed = true;
+            const surface = host.shadowRoot!.querySelector('[part="surface"]')!;
+            surface.setAttribute(attribute, attribute === 'part' ? 'changed' : 'true');
+          }
+        }
+      );
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-split-constructor-${id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.slot(), r.el(mutator, {})];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      host = new C();
+      const caller = document.createTextNode('Caller text');
+      host.append(caller);
+      expect(() => document.body.append(host)).toThrow('decoration physical blueprint changed');
+      expect(constructed).toBe(true);
+      expect(caller.parentNode).toBe(host);
+    }
+  );
+
   it('rejects a duplicate split decoration before publishing the new view', () => {
     const C = AdaptToWebComponent(
       definePrototype({

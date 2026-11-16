@@ -190,6 +190,13 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     }
   };
   const stageOwnedDecorations = (blueprint: TemplateChildren, turn: number) => {
+    // Constructing a staged custom element can already affect the live surface.
+    const splitRoot = splitSurface
+      ? {
+          identity: captureSplitSurfaceIdentity(splitSurface),
+          document: splitSurface.ownerDocument,
+        }
+      : undefined;
     const owned = new WeakSet<Node>();
     const feedback = currentFeedback();
     const lease = feedback?.captureDecorationLease?.();
@@ -232,14 +239,10 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         }
       },
       captureSplitTree(staging: DocumentFragment): DecorationTreeRecord | undefined {
-        if (!boundLease || !splitSurface) return;
+        if (!boundLease || !splitRoot) return;
         return {
           nodes: collectDecorationNodes(staging, owned),
-          splitRoot: {
-            children: Array.from(staging.childNodes),
-            identity: captureSplitSurfaceIdentity(splitSurface),
-            document: staging.ownerDocument,
-          },
+          splitRoot: { ...splitRoot, children: Array.from(staging.childNodes) },
         };
       },
       recordCommit(staged?: DecorationTreeRecord) {
