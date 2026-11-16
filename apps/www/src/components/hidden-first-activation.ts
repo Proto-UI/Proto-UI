@@ -64,6 +64,7 @@ export function createHiddenFirstActivation(
     for (const node of ancestors)
       visibility.observe(node, {
         attributes: true,
+        attributeOldValue: true,
         attributeFilter: ['hidden', 'style', 'class'],
       });
     if (pending.size && !observing) {
@@ -80,10 +81,18 @@ export function createHiddenFirstActivation(
   };
   const visibility = new view.MutationObserver((records) => {
     if (disposed) return;
+    // DOM setters can notify even when the attribute keeps its value. These
+    // records cannot reveal a pending root and need no computed-style flush.
+    const changed = records.filter(
+      (record) =>
+        record.oldValue !==
+        (record.target as Element).getAttributeNS(record.attributeNamespace, record.attributeName!)
+    );
+    if (!changed.length) return;
     const previous = pending.size;
     const display = new Map<HTMLElement, boolean>();
     for (const root of pending) {
-      if (records.some((record) => record.target.contains(root))) tryActivate(root, display);
+      if (changed.some((record) => record.target.contains(root))) tryActivate(root, display);
     }
     if (pending.size !== previous) observeAncestors();
   });

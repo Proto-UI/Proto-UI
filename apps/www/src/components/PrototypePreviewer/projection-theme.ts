@@ -182,10 +182,26 @@ export function watchProjectionThemeSurfaceStyle(
     view.queueMicrotask(emit);
   };
 
-  const observer = new view.MutationObserver(schedule);
+  const observer = new view.MutationObserver((records) => {
+    // Identical attribute writes are observable mutations, but introduce no
+    // new theme input. Real changes in the same delivery still resolve a new
+    // complete theme map; no computed value is cached across deliveries.
+    if (
+      records.some(
+        (record) =>
+          record.oldValue !==
+          (record.target as Element).getAttributeNS(
+            record.attributeNamespace,
+            record.attributeName!
+          )
+      )
+    )
+      schedule();
+  });
   for (let input: Element | null = scope; input; input = input.parentElement) {
     observer.observe(input, {
       attributes: true,
+      attributeOldValue: true,
       attributeFilter: ['class', 'data-theme', 'style'],
     });
   }

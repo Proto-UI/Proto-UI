@@ -24,6 +24,30 @@ function fixture(onActivate?: (root: HTMLElement) => void) {
 }
 
 describe('first-activation pure-read batches', () => {
+  it('does not read display for unchanged ancestor attributes but keeps a real reveal in a mixed batch', async () => {
+    const { owner, roots, activate } = fixture();
+    owner.className = 'deferred-copy-owner';
+    await settle();
+    const records: MutationRecord[] = [];
+    const observer = new MutationObserver((batch) => records.push(...batch));
+    observer.observe(owner, { attributes: true, attributeOldValue: true });
+    releases.push(() => observer.disconnect());
+    const read = vi.spyOn(window, 'getComputedStyle');
+
+    owner.setAttribute('class', owner.getAttribute('class')!);
+    owner.setAttribute('style', owner.getAttribute('style')!);
+    await settle();
+    expect(records.length).toBeGreaterThan(0);
+    expect(read).not.toHaveBeenCalled();
+    expect(activate).not.toHaveBeenCalled();
+
+    owner.setAttribute('class', owner.getAttribute('class')!);
+    owner.style.display = 'block';
+    owner.setAttribute('class', owner.getAttribute('class')!);
+    await vi.waitFor(() => expect(activate).toHaveBeenCalledTimes(roots.length));
+    expect(read.mock.calls.some(([element]) => element === owner)).toBe(true);
+  });
+
   it('stops at the hidden ancestor without computing styles for its descendants', () => {
     const { owner, roots } = fixture();
     const read = vi.spyOn(window, 'getComputedStyle');

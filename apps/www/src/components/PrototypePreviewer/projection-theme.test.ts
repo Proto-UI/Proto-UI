@@ -224,6 +224,41 @@ describe('Website projection theme inputs', () => {
     expect(themes).toHaveLength(2);
   });
 
+  it('does not reread the theme bank for unchanged attributes and keeps real changes in mixed batches', async () => {
+    const scope = document.documentElement;
+    for (const name of WEBSITE_SHADCN_THEME_TOKENS)
+      scope.style.setProperty(`--pui-${name}`, `value-${name}`);
+    scope.className = 'light';
+    scope.dataset.theme = 'light';
+    const themes: ProjectionThemeSurfaceStyle[] = [];
+    const cleanup = watchProjectionThemeSurfaceStyle('shadcn', scope, (theme) =>
+      themes.push(theme)
+    );
+    const records: MutationRecord[] = [];
+    const observer = new MutationObserver((batch) => records.push(...batch));
+    observer.observe(scope, { attributes: true, attributeOldValue: true });
+    const read = vi.spyOn(window, 'getComputedStyle');
+    try {
+      for (const name of ['class', 'data-theme', 'style'])
+        scope.setAttribute(name, scope.getAttribute(name)!);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(records.length).toBeGreaterThan(0);
+      expect(read).not.toHaveBeenCalled();
+      expect(themes).toHaveLength(1);
+
+      scope.setAttribute('class', scope.getAttribute('class')!);
+      scope.style.setProperty('--pui-background', 'changed-background');
+      scope.setAttribute('data-theme', scope.getAttribute('data-theme')!);
+      await vi.waitFor(() => expect(themes).toHaveLength(2));
+      expect(themes[1]?.['--pui-background']).toBe('changed-background');
+      expect(read).toHaveBeenCalledOnce();
+    } finally {
+      cleanup();
+      observer.disconnect();
+      read.mockRestore();
+    }
+  });
+
   it('disconnects every observer when the initial watcher publication throws', () => {
     const originalMutationObserver = Object.getOwnPropertyDescriptor(window, 'MutationObserver');
     const originalMatchMedia = Object.getOwnPropertyDescriptor(window, 'matchMedia');
