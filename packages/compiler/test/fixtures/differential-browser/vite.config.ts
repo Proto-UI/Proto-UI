@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import sourceConfig from '../../../../../vitest.config';
 import { transformWithEsbuild, type Plugin } from 'vite';
 
@@ -31,6 +32,48 @@ const sources: Record<string, string> = {
 };
 const supportingModules = new Map<string, { specifier: string; file: string; contents: string }>();
 const supportingFiles = new Map<string, Map<string, string>>();
+
+function recreateReturnedOwner(code: string): string {
+  const source = ts.createSourceFile(
+    'GeneratedButton.tsx',
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const factories = source.statements.filter(
+    (statement): statement is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(statement) && statement.name?.text === 'createComponent'
+  );
+  const reactImports = source.statements.filter(
+    (statement): statement is ts.ImportDeclaration =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === 'react'
+  );
+  const binding = reactImports[0]?.importClause?.namedBindings;
+  const returns = factories[0]?.body?.statements.filter(ts.isReturnStatement) ?? [];
+  const original = returns[0]?.expression;
+  if (
+    factories.length !== 1 ||
+    reactImports.length !== 1 ||
+    returns.length !== 1 ||
+    !binding ||
+    !ts.isNamespaceImport(binding) ||
+    !original ||
+    !ts.isCallExpression(original)
+  )
+    throw new Error(
+      'Cannot locate the generated component factory for the owner-recreation mutant.'
+    );
+
+  // Mutate the returned component's identity only. Preserve the complete adapter
+  // call, including its independently selected Props update policy and options.
+  const react = binding.name.text;
+  const mutation = `return ((Inner: ${react}.ElementType) => (props: any) => ${react}.createElement(Inner, { ...props, key: String(props.present) }))(${original.getText(source)});`;
+  return code.slice(0, returns[0].getStart(source)) + mutation + code.slice(returns[0].end);
+}
+
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
   resolveId(id, importer) {
@@ -97,10 +140,7 @@ const emitted: Plugin = {
         'count.set(0); run.expose.emit("viewEnded");'
       );
     } else if (specifier === 'virtual:retained-owner-recreate-owner') {
-      code = code.replace(
-        'return __puiAdapt(prototype, options);',
-        'const Inner = __puiAdapt(prototype, options); return (props: any) => __puiReact.createElement(Inner, { ...props, key: String(props.present) });'
-      );
+      code = recreateReturnedOwner(code);
     } else if (specifier === 'virtual:retained-owner-reattach-state-loss') {
       code = code.replace(
         'def.expose.state("count", count);',
