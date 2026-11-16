@@ -15,6 +15,7 @@ import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import { projectCompilationArtifacts } from '../src/project-output';
 import { resolvedPropFacts } from '../src/resolved-props';
+import { mountNativeOwner } from './native-owner-consumer';
 import type { ExpressionIR, FunctionIR, PrototypeIR } from '../src/ir';
 
 const profiles = [
@@ -98,7 +99,7 @@ describe.each(profiles)('generic ControlLabel lowering %s', (profile) => {
     expect(result.output.code).toContain('labelRole');
   });
 
-  it('unifies reached support for a mixed project without changing a standalone output', () => {
+  it('coalesces shared support for mixed demand without changing a standalone output', () => {
     const paired = compilation(source, profile, 'paired.proto.ts');
     const plain = compilation(
       `import {definePrototype} from '@proto.ui/core'; import {asFocusable} from '@proto.ui/hooks';
@@ -131,9 +132,12 @@ describe.each(profiles)('generic ControlLabel lowering %s', (profile) => {
       ).toHaveLength(1);
     expect(JSON.stringify(plain.output)).toBe(before);
     const modified = structuredClone(generation);
+    const sharedPaths = new Set(paired.output.supportingFiles?.map((file) => file.path));
     const helper = modified.entries[1].compilation.output.supportingFiles!.find((file) =>
-      file.path.endsWith('/native-v1.ts')
-    )!;
+      sharedPaths.has(file.path)
+    );
+    expect(helper, 'mixed plans must share a host support artifact').toBeDefined();
+    if (!helper) throw new Error('Missing shared native support');
     helper.contents += '\n// modified outside compiler';
     expect(
       projectCompilationArtifacts(modified, {
@@ -141,8 +145,13 @@ describe.each(profiles)('generic ControlLabel lowering %s', (profile) => {
           'paired.proto.ts': `Paired${extension}`,
           'plain.proto.ts': `Plain${extension}`,
         },
-      }).ok
-    ).toBe(false);
+      })
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI3002', message: expect.stringMatching(/conflicting supporting artifacts/) },
+      ],
+    });
   });
 });
 
@@ -257,10 +266,21 @@ describe('new helper language cannot widen phase or capture authority', () => {
     };
     walk(ir);
     expect(holders).toHaveLength(2);
+    const capturedSeeds = holders.map((holder) => {
+      const seed = holder.function.parameters[0].default!;
+      expect(seed).toMatchObject({ kind: 'reference' });
+      if (seed.kind !== 'reference') throw new Error('Expected captured default binding');
+      return seed;
+    });
+    expect(capturedSeeds[0].bindingId).not.toBe(capturedSeeds[1].bindingId);
+    for (let index = 0; index < holders.length; index++)
+      expect(holders[index].function.captures).toContainEqual(
+        expect.objectContaining({ bindingId: capturedSeeds[index].bindingId })
+      );
     holders[1].function = holders[0].function;
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ message: expect.stringMatching(/capture provenance/) }],
+      diagnostics: [{ code: 'PUI2002', message: 'Reference binding identity mismatch.' }],
     });
   });
 
@@ -269,9 +289,6 @@ describe('new helper language cannot widen phase or capture authority', () => {
     'const apply = (run?:RunHandle<{}>) => run.update(); apply();',
     'const seed=1; const apply = (seed:number=seed) => seed; apply();',
     'const later=1; const apply = (first:number=later,later:number=2) => first; apply();',
-    'const later=1; const apply = (first:()=>number=()=>later,later:number=2) => first(); apply();',
-    'const apply = (current:(value:boolean=true)=>boolean) => current(true);',
-    'const apply = (current:(...values:boolean[])=>boolean) => current();',
   ])('rejects unsupported optional/default parameter scope: %s', (body) => {
     expect(
       parsePrototype(
@@ -280,12 +297,78 @@ describe('new helper language cannot widen phase or capture authority', () => {
     ).toBe(false);
   });
 
+  it('calls a default closure only after the later parameter has initialized', async () => {
+    const owner = await mountNativeOwner(
+      `import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'default-closure-binding',setup(def){
+        const later=1;
+        const apply=(first:()=>number=()=>later,later:number=2)=>first();
+        def.expose.value('defaulted',apply());
+        def.expose.value('supplied',apply(undefined,3));
+      }});`,
+      'react-dom-source-v1'
+    );
+    try {
+      expect(owner.handle.getExposes()).toMatchObject({ defaulted: 2, supplied: 3 });
+    } finally {
+      await owner.dispose();
+    }
+  });
+
+  it.each<{ declaration: string; imports: string; files: Record<string, string> }>([
+    { declaration: 'type Check=(value:boolean=true)=>boolean;', imports: '', files: {} },
+    { declaration: 'type Check={read(value:boolean=true):boolean};', imports: '', files: {} },
+    {
+      declaration: '',
+      imports: "import type {Check} from './signature';",
+      files: { 'signature.ts': 'export type Check=(value:boolean=true)=>boolean;' },
+    },
+  ])(
+    'rejects executable initializers in resolved source type signatures: $declaration $imports',
+    ({ declaration, imports, files }) => {
+      expect(
+        parsePrototype(
+          `import {definePrototype} from '@proto.ui/core';${imports}${declaration}
+      export default definePrototype({name:'inert-signature',setup(){const use=(value:Check)=>{};}});`,
+          { files }
+        )
+      ).toMatchObject({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'PUI1020',
+            message: 'Callable type signatures cannot contain parameter initializers.',
+          },
+        ],
+      });
+    }
+  );
+
+  it('rejects rest metadata even when an ordinary-array call would otherwise match', () => {
+    expect(
+      parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'rest-signature',setup(){const apply=(current:(...values:boolean[])=>boolean)=>current([true]);}});`)
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI1020',
+          message: 'Rest parameters in callable type signatures are unsupported.',
+        },
+      ],
+    });
+  });
+
   it('rejects executable initializers inside imported callback signature metadata', () => {
     const ir = structuredClone(compilation().ir);
     const parameter = findFunctions(ir)
       .flatMap((fn) => fn.parameters)
-      .find((parameter) => parameter.callback)!;
-    parameter.callback!.parameters = [
+      .find(
+        (parameter) => typeof parameter.type !== 'string' && parameter.type.kind === 'callable'
+      )!;
+    if (typeof parameter.type === 'string' || parameter.type.kind !== 'callable')
+      throw new Error('Expected an ordinary callable signature');
+    parameter.type.parameters = [
       {
         name: 'inert',
         type: 'boolean',
@@ -295,7 +378,7 @@ describe('new helper language cannot widen phase or capture authority', () => {
     ];
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ message: expect.stringMatching(/signature parameters/) }],
+      diagnostics: [{ code: 'PUI2002', message: 'Unknown IR field.' }],
     });
   });
 });
@@ -324,32 +407,41 @@ describe('direct emitters preserve unsupported feature boundaries', () => {
     }
   );
   it.each([
-    'const read=(flag:boolean=true)=>flag; read();',
-    'const read=(call:()=>boolean)=>call();read(()=>true);',
-    'const value=true?1:2;',
-  ])('GPUI rejects newly unimplemented checked language: %s', (body) => {
+    'const read=(flag:boolean=true)=>flag; def.expose.value("observed",read());',
+    'const read=(call:()=>boolean)=>call();def.expose.value("observed",read(()=>true));',
+    'const value=true?1:2;def.expose.value("observed",value);',
+  ])('GPUI admits reached ordinary language with a public result: %s', (body) => {
     const result = compilePrototype(
-      `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-boundary',setup(){${body}}});`,
+      `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-boundary',setup(def){${body}}});`,
       { profile: 'gpui-source-v1' }
     );
-    expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4003' }] });
+    expect(result.ok, JSON.stringify(result)).toBe(true);
+    if (!result.ok) return;
+    expect(validateIR(JSON.parse(JSON.stringify(result.value.ir))).ok).toBe(true);
+    expect(result.value.ir.exposes).toContainEqual(
+      expect.objectContaining({ name: 'observed', kind: 'value' })
+    );
+    expect(result.value.output.code).toContain('observed');
   });
   it('does not hide unsupported pointer facts inside a conditional or default expression', () => {
     for (const body of [
-      'const value = true ? event.pointerType : event.pointerType;',
-      "const read = (value:boolean=event.pointerType==='mouse') => value; read();",
+      'const value = true ? event.pointerType : event.pointerType;run.expose.emit("observed",value);',
+      "const read = (value:boolean=event.pointerType==='mouse') => value; run.expose.emit('observed',read());",
     ]) {
       const parsed = parsePrototype(
-        `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'conditional-pointer',setup(def){def.event.on('pointer.move',(_run,event)=>{${body}});}});`
+        `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'conditional-pointer',setup(def){def.expose.event('observed',{payload:'json'});def.event.on('pointer.move',(run,event)=>{${body}});}});`
       );
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
       for (const emit of [emitReactSource, emitVueSource, emitVue2Source, emitWebComponentSource]) {
         const result = emit(parsed.value, { ssr: true });
         expect(result.ok).toBe(false);
         if (!result.ok)
-          expect(result.diagnostics.every((diagnostic) => diagnostic.code === 'PUI4003')).toBe(
-            true
-          );
+          expect(
+            result.diagnostics.some(
+              (diagnostic) =>
+                diagnostic.code === 'PUI4003' && /pointer facts/i.test(diagnostic.message)
+            )
+          ).toBe(true);
       }
     }
   });
@@ -401,11 +493,11 @@ it.each([emitQtSource, emitFlutterSource])(
   '%s explicitly rejects new defaults and callable parameters instead of dropping them',
   (emit) => {
     for (const body of [
-      'const read=(flag:boolean=true)=>flag; read();',
-      'const read=(call:()=>boolean)=>call();read(()=>true);',
+      'const read=(flag:boolean=true)=>flag; def.expose.value("observed",read());',
+      'const read=(call:()=>boolean)=>call();def.expose.value("observed",read(()=>true));',
     ]) {
       const parsed = parsePrototype(
-        `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'direct-native-parameter',setup(){${body}}});`
+        `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'direct-native-parameter',setup(def){${body}}});`
       );
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
       const result = emit(parsed.value);

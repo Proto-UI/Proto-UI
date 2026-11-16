@@ -6,8 +6,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitVue2Source } from './vue2-source';
 import { emitWebComponentSource } from './web-component-source';
-import { nativeAdapterModulesArtifact } from './native-adapter-modules';
-import { nativeInteractionArtifact } from './native-interaction';
 
 type Request = { reason?: string; preventScroll?: boolean };
 type Activation = Request & { entry?: 'manual' | 'configured' };
@@ -95,9 +93,16 @@ export default definePrototype({name:'ordinary-scope-restore',setup(def){
     return exports;
   }
   // Execute product artifacts: Vue2 splits shared ownership; WC emits the
-  // monolithic helper. Both are produced by the canonical source emitter.
-  const adapter = load(nativeAdapterModulesArtifact.path).createNativeAdapterModules;
-  const interaction = load(nativeInteractionArtifact.path).createNativeInteraction;
+  // capability closure. Both are produced by the canonical source emitter.
+  const adapterFile = [...files].find(([, source]) =>
+    source.includes('export function createNativeAdapterModules')
+  )?.[0];
+  const interactionFile = [...files].find(([, source]) =>
+    source.includes('export function createNativeInteraction')
+  )?.[0];
+  if (!adapterFile || !interactionFile) throw new Error('Reached support factory was not emitted');
+  const adapter = load(adapterFile).createNativeAdapterModules;
+  const interaction = load(interactionFile).createNativeInteraction;
   if (typeof adapter !== 'function' || typeof interaction !== 'function')
     throw new Error('Emitted native focus factories are missing');
   // The compiler-created export is called through the native module options seam below.

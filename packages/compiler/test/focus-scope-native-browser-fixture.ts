@@ -241,14 +241,6 @@ export async function startFocusScopeNativeFixture(): Promise<FocusScopeNativeFi
     );
     const sources = new Map<string, GeneratedSource>();
     const compilations: CompilationReceipt[] = [];
-    const allowedSupport: Record<string, true> = {
-      '.proto-ui/context/scope-v1.ts': true,
-      '.proto-ui/style/native-v1.ts': true,
-      '.proto-ui/interaction/native-v1.ts': true,
-      '.proto-ui/interaction/adapter-modules-v1.ts': true,
-      '.proto-ui/web-component/browser-v1.ts': true,
-    };
-    const requiredSupport = Object.keys(allowedSupport).filter((file) => !file.includes('/style/'));
     await mkdir(path.join(evidenceDir, 'authored'), { recursive: true });
     for (const [name, source] of Object.entries(authoredSources))
       await writeFile(path.join(evidenceDir, 'authored', name + '.proto.ts'), source);
@@ -278,7 +270,8 @@ export async function startFocusScopeNativeFixture(): Promise<FocusScopeNativeFi
             if (
               file.kind !== 'source' ||
               seen.has(file.path) ||
-              (file.path !== name + '.ts' && !Object.hasOwn(allowedSupport, file.path)) ||
+              (file.path !== name + '.ts' &&
+                !(file.path.startsWith('.proto-ui/') && file.path.endsWith('.ts'))) ||
               path.posix.isAbsolute(file.path) ||
               file.path.includes('\\') ||
               file.path.split('/').some((part) => part === '' || part === '.' || part === '..')
@@ -293,9 +286,9 @@ export async function startFocusScopeNativeFixture(): Promise<FocusScopeNativeFi
             if (prior) prior.emittedBy.push(name);
             else sources.set(file.path, { contents: file.contents, emittedBy: [name] });
           }
-          for (const required of requiredSupport)
-            if (!seen.has(required))
-              throw new Error('Complete emitted native support missing: ' + required);
+          // Reached support can have distinct content-addressed filenames. The
+          // ordinary bundler below resolves every import only from this emitted
+          // inventory, so an omitted helper still fails the closed-graph check.
         }
       }
       // Retain real parser/emitter diagnostics before any bundle/browser work.

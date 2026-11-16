@@ -1,6 +1,15 @@
+import { pruneDeadValues } from './demand-pruning';
+import {
+  emitJavaScriptValue,
+  emitJavaScriptParameters,
+  formatJavaScriptValueType,
+  emitOptionalOperation,
+  createJavaScriptValueReader,
+  emitJavaScriptMember,
+} from './native-value-lowering';
 import { createHash } from 'node:crypto';
 import { validateIR, validIdentifier } from './ir-validation';
-import { OPERATION_RULES } from './operations';
+import { OPERATION_RULES, privilegedCaptureType } from './operations';
 import { formatDataType } from './data-types';
 import { isDataValueType } from './ir';
 import type {
@@ -12,17 +21,20 @@ import type {
   PrototypeIR,
   StatementIR,
   ValueType,
+  AuthoredHookIR,
 } from './ir';
 import type { RuleCondition } from './rule-declarations';
+import { observableSemantics, type PropsUpdatePolicy } from './observable-semantics';
 
 /** Direct checked semantic calls; never input-source evaluation or an IR interpreter. */
 export function emitReact(
   input: PrototypeIR,
-  options: { componentName?: string } = {}
+  options: { componentName?: string; propsUpdatePolicy?: PropsUpdatePolicy } = {}
 ): CompileResult<GeneratedModule> {
   const checked = validateIR(input);
   if (!checked.ok) return checked;
-  const ir = checked.value;
+  const ir = pruneDeadValues(checked.value);
+  const readValue = createJavaScriptValueReader(ir, typeName);
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
     !validIdentifier(componentName) ||
@@ -73,6 +85,17 @@ export function emitReact(
     ])
   );
   function typeName(type: ValueType): string {
+    if (type === 'delay-task') return `${core}.DelayTask`;
+    if (type === 'presence-owner') return `${core}.PresenceOwnerDeclaration<GeneratedProps>`;
+    if (type === 'presentation-owner-ref') return `${core}.PresentationOwnerRef`;
+    if (type === 'presentation-owner-writer') return `${core}.PresentationOwnerWriter`;
+    if (type === 'presentation-view-binding') return `${core}.PresentationViewBinding`;
+    if (type === 'context-key')
+      return "import('@proto.ui/types').ContextKey<import('@proto.ui/types').JsonObject>";
+    if (typeof type !== 'string' && type.kind === 'capture')
+      return `${core}.AsHookResult<GeneratedProps, ${hookContract(ir.hooks.find((hook) => hook.id === type.hookId)!)}>`;
+    if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
+    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (type === 'exception') return 'unknown';
     if (isDataValueType(type)) return formatDataType(type);
     if (type === 'def') return `${core}.DefHandle<GeneratedProps, GeneratedExposes>`;
@@ -142,43 +165,57 @@ export function emitReact(
     };
     if (Object.hasOwn(tableTypes, type))
       return `import('@proto.ui/module-table-structure').${tableTypes[type]}`;
-    if (type === 'transition')
-      return `import('@proto.ui/prototypes-base/transition').TransitionHandles`;
-    if (type === 'transition-controls')
-      return `import('@proto.ui/prototypes-base/transition').TransitionControls`;
-    if (
-      ['style-disposer', 'subscription-disposer', 'binding-disposer', 'transition-action'].includes(
-        type
-      )
-    )
+    if (['style-disposer', 'subscription-disposer', 'binding-disposer'].includes(type))
       return '() => void';
     if (type === 'record') return 'Record<string, unknown>';
     if (type === 'array') return 'readonly unknown[]';
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values
-      .map(
-        (value) =>
-          `${value.name}${value.optional && !value.default ? '?' : ''}: ${value.callback ? `(${parameters(value.callback.parameters)}) => ${typeName(value.callback.returnType)}` : typeName(value.type)}${value.default ? ` = ${expression(value.default, 0)}` : ''}`
-      )
-      .join(', ');
+    return emitJavaScriptParameters(values, (value) => expression(value, 0), typeName);
+  }
+  function hookContract(hook: AuthoredHookIR): string {
+    const capture = hook.capture;
+    if (!capture) return '{}';
+    const states = capture.states
+      .map((state) => `${JSON.stringify(state.name)}: ${typeName(state.type)}`)
+      .join('; ');
+    const children = capture.children
+      .map((child) => {
+        const privileged = privilegedCaptureType(child.id);
+        if (privileged) return `${JSON.stringify(child.name)}: ${typeName(privileged)}`;
+        const nested = ir.hooks.find((candidate) => candidate.id === child.id)!;
+        const result = nested.projectHandle
+          ? typeName(nested.projectHandle.returnType)
+          : `${core}.AsHookResult<GeneratedProps, ${hookContract(nested)}>`;
+        return `${JSON.stringify(child.name)}: ${result}`;
+      })
+      .join('; ');
+    return `{ state: { ${states} }; asHooks: { ${children} } }`;
   }
   function fn(value: FunctionIR, depth: number): string {
-    return `(${parameters(value.parameters)}) => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'conditional':
+      case 'call':
+      case 'intrinsic':
+      case 'object-spread':
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName)!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
-        return value.name;
+        return readValue(value, value.name);
       case 'lexical-cell':
         return expression(value.value, depth);
       case 'lexical-read':
-        return expression(value.cell, depth);
+        return readValue(value, expression(value.cell, depth));
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
@@ -218,11 +255,15 @@ export function emitReact(
         return `${expression(value.receiver, depth)}.rule({ ${metadata}when: (${builder}) => ${condition(declaration.when)}, intent: (${intent}) => { ${operations} } })`;
       }
       case 'member':
-        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return emitJavaScriptMember(
+          value,
+          (item) => expression(item, depth),
+          typeName,
+          true,
+          readValue
+        );
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -234,14 +275,30 @@ export function emitReact(
       case 'helper-call':
         return `${value.name}(${value.arguments.map((argument) => expression(argument, depth)).join(', ')})`;
       case 'authored-hook':
-        return `${hooks.get(value.hookId)}()`;
+        return `${hooks.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'static-capability':
         return staticNames.get(value.declarationId)!.name;
       case 'operation': {
+        const optional = emitOptionalOperation(
+          value,
+          (item) => expression(item, depth),
+          `${p}OptionalReceiver`,
+          typeName
+        );
+        if (optional !== undefined) return optional;
+        if (value.operation === 'scheduler.delay')
+          return `${core}.delay(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        if (value.operation === 'presentation.snapshotCompletion')
+          return `${core}.snapshotPresentationCompletionConfig(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        if (value.operation === 'meta.get')
+          return `${expression(value.receiver!, depth)}.meta?.get(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        if (value.operation === 'state.get')
+          return `(${expression(value.receiver!, depth)}.get() as ${typeName(value.type)})`;
+        if (value.operation.startsWith('capture.'))
+          return `(${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}?.(${value.arguments.map((item) => expression(item, depth)).join(', ')}) as ${typeName(value.type)})`;
         const rule = OPERATION_RULES[value.operation];
         if (rule.path === 'call')
           return `(${expression(value.receiver!, depth)})(${value.arguments.map((argument) => expression(argument, depth)).join(', ')})`;
-        if (value.operation === 'hook.asTransition') return `${p}Transition.asTransition()`;
         const callee = value.operation.startsWith('hook.')
           ? `${p}Hooks.${rule.path}`
           : `${expression(value.receiver!, depth)}.${rule.path}`;
@@ -256,7 +313,7 @@ export function emitReact(
         const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
         switch (statement.kind) {
           case 'const':
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(statement.expression, depth)};\n`;
           case 'return':
@@ -290,10 +347,16 @@ export function emitReact(
   const hookCode =
     statements(ir.moduleBindings ?? [], 0) +
     ir.hooks
-      .map(
-        (hook) =>
-          `const ${hooks.get(hook.id)} = ${core}.defineAsHook<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(hook.name)},\n  setup: ${fn(hook.setup, 1)},\n});\n`
-      )
+      .map((hook) => {
+        const contract = hookContract(hook);
+        const result =
+          hook.kind === 'hook'
+            ? typeName(hook.optionsType ?? 'void')
+            : hook.projectHandle
+              ? typeName(hook.projectHandle.returnType)
+              : `${core}.AsHookResult<GeneratedProps, ${contract}>`;
+        return `const ${hooks.get(hook.id)} = ${core}.${hook.kind === 'hook' ? 'defineHook' : 'defineAsHook'}<GeneratedProps, GeneratedExposes, ${contract}, ${result}>({\n  name: ${JSON.stringify(hook.name)},${hook.kind === 'hook' ? `\n  mode: ${JSON.stringify(hook.mode ?? 'once')},` : ''}\n  setup: ${fn(hook.setup, 1)},${hook.projectHandle ? `\n  projectHandle: ${fn(hook.projectHandle, 1)},` : ''}${hook.configure ? `\n  configure: ${fn(hook.configure, 1)},` : ''}\n});\n`;
+      })
       .join('\n');
   const contextImports = [
     ...ir.contextKeys.map(
@@ -304,10 +367,6 @@ export function emitReact(
       (entry) =>
         `import { declaration as ${entry.name} } from ${JSON.stringify('./' + entry.file.replace(/\.ts$/, ''))};`
     ),
-    ...(ir.requirements.includes('transition') ||
-    ir.exposes.some((entry) => entry.kind === 'value' && entry.type === 'transition-controls')
-      ? [`import * as ${p}Transition from '@proto.ui/prototypes-base/transition';`]
-      : []),
   ].join('\n');
   const supportingFiles = ir.contextKeys.map((key) => ({
     path: keys.get(key.id)!.file,
@@ -338,7 +397,7 @@ export function emitReact(
           : `import { ${factory} } from '@proto.ui/core';\nexport const declaration = ${factory}(${arguments_});\n`,
     });
   }
-  const code = `// Editable generated source. Profile: react-runtime-v1.\n// Retains Proto-UI Runtime and React Adapter; NOT zero-runtime output.\n// Source graph SHA-256: ${ir.source.sha256}\nimport * as ${p}React from 'react';\nimport * as ${core} from '@proto.ui/core';\nimport * as ${p}Hooks from '@proto.ui/hooks';\nimport { createReactAdapter as ${p}CreateAdapter } from '@proto.ui/adapter-react';\nimport type { ReactAdapterOptions as ${p}Options } from '@proto.ui/adapter-react';\n${contextImports}\n\nexport type GeneratedProps = {\n${props}\n};\nexport type GeneratedExposes = {\n${exposes}\n};\n\n${hookCode}\nexport const prototype = ${core}.definePrototype<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(ir.name)},\n  setup: ${fn(ir.setup, 1)},\n});\nconst ${p}Adapt = ${p}CreateAdapter(${p}React);\nexport function createComponent(options?: ${p}Options<GeneratedProps>) {\n  return ${p}Adapt(prototype, options);\n}\nexport const ${componentName} = createComponent();\nexport default ${componentName};\n`;
+  const code = `// Editable generated source. Profile: react-runtime-v1.\n// Retains Proto-UI Runtime and React Adapter; NOT zero-runtime output.\n// Source graph SHA-256: ${ir.source.sha256}\nimport * as ${p}React from 'react';\nimport * as ${core} from '@proto.ui/core';\nimport * as ${p}Hooks from '@proto.ui/hooks';\nimport { createReactAdapter as ${p}CreateAdapter } from '@proto.ui/adapter-react';\nimport type { ReactAdapterOptions as ${p}Options } from '@proto.ui/adapter-react';\n${contextImports}\n\nexport type GeneratedProps = {\n${props}\n};\nexport type GeneratedExposes = {\n${exposes}\n};\n\n${hookCode}\nexport const prototype = ${core}.definePrototype<GeneratedProps, GeneratedExposes>({\n  name: ${JSON.stringify(ir.name)},\n  setup: ${fn(ir.setup, 1)},\n});\nconst ${p}Adapt = ${p}CreateAdapter(${p}React);\nexport function createComponent(options?: ${p}Options<GeneratedProps>) {\n  return ${p}Adapt(prototype, { autoUpdateOnPropsChange: ${options.propsUpdatePolicy !== 'explicit'}, ...options });\n}\nexport const ${componentName} = createComponent();\nexport default ${componentName};\n`;
   return {
     ok: true,
     value: {
@@ -352,7 +411,16 @@ export function emitReact(
         { name: '@proto.ui/hooks', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
         { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.1', role: 'host-bridge' },
       ],
-      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: 'react-runtime-v1' },
+      provenance: {
+        source: ir.source,
+        irVersion: ir.schemaVersion,
+        backend: 'react-runtime-v1',
+        observableSemantics: observableSemantics(
+          'react',
+          'runtime-backed',
+          options.propsUpdatePolicy
+        ),
+      },
     },
   };
 }

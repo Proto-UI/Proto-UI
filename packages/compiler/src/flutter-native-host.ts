@@ -596,7 +596,6 @@ class NativeOwner<P> implements NativeOwnerBase {
   NativeTextControl<P>? textControl;
   NativeImageView<P>? imageView;
   NativePositioning? positioning;
-  NativeTransition? transition;
   NativeTableStructure? tableStructure;
   final Set<void Function()> _commitObservers = {};
   @override bool alive = true;
@@ -676,7 +675,6 @@ class NativeOwner<P> implements NativeOwnerBase {
   void moduleExpose(String name, Object? value) { declareExpose(name); _moduleExposes[name] = value; }
   T install<T>(String name, T Function() create) { ensureSetup(); hookNames.add(name); return create(); }
   NativeTableStructure declareTableStructure(String role) { ensureSetup(); final current = tableStructure; if (current != null && current.role != role) throw StateError('Table role already declared'); return tableStructure ??= NativeTableStructure(this,role); }
-  NativeTransition declareTransition() { ensureSetup(); return transition ??= NativeTransition(this,NativeTransitionMachine(this)); }
   void declareTextControl(bool multiline) { ensureSetup(); if (textControl != null) throw StateError('Duplicate static TextControl declaration'); textControl = NativeTextControl<P>(this)..multiline = multiline; }
   void declareImageView(Map<String, Object?> config) { ensureSetup(); if (imageView != null) throw StateError('Duplicate static ImageView declaration'); final module = NativeImageView<P>(this); module.config = Map.unmodifiable(config); module.source = config['source'] as String; imageView = module; }
   void Function() onCommit(void Function() callback) { ensureSetup(); _commitObservers.add(callback); return () { _commitObservers.remove(callback); }; }
@@ -745,7 +743,7 @@ class NativeOwner<P> implements NativeOwnerBase {
     rawProps = incoming;
     try { _resolved = _resolve(true); }
     catch (error, stack) { rawProps = previousRaw; _previousValid.clear(); _previousValid.addAll(priorValid); Error.throwWithStackTrace(error, stack); }
-    _typedProps = makeProps(_resolved); transition?.machine.syncProps(_resolved, rawProps.keys.toSet()); project();
+    _typedProps = makeProps(_resolved); project();
     if (!_hydrated) { _hydrated = true; return; }
     final changed = <String>[for (final key in _specs.keys) if (!nativeIdentitySame(previous[key], _resolved[key])) key];
     final rawKeys = {...previousRaw.keys, ...rawProps.keys};

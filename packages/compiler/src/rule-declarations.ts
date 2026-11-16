@@ -4,7 +4,8 @@ import { tw } from '../../core/src/spec/feedback/style';
 import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
 import { acceptsValue, type DataType } from './data-types';
 import type { Primitive, SourceSpan } from './ir';
-import { propertyName, rejectNode, sourceSpan, type SourceModule } from './parser-module';
+import type { SourceModule } from './parser-module';
+import { propertyName, rejectNode, sourceSpan } from './source-syntax';
 import type { StyleTokenHandle } from './style-plan';
 
 type CoreCondition = WhenExpr<Record<string, Primitive>>;

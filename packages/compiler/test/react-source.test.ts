@@ -525,7 +525,10 @@ describe('checked semantics to native React DOM source', () => {
     });
     const second = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(second).not.toBe(first);
-    expect(ref.current!.getExposes()).toBe(exposed);
+    const restored = ref.current!.getExposes();
+    expect(restored).not.toBe(exposed);
+    for (const key of Object.keys(exposed))
+      expect(restored[key as keyof typeof restored]).toBe(exposed[key as keyof typeof exposed]);
     await React.act(async () => {
       exposed.focusSelf();
       second.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
@@ -648,7 +651,10 @@ describe('checked semantics to native React DOM source', () => {
     await React.act(async () => {
       root.render(view(false));
     });
-    expect(ref.current!.getExposes()).toBe(held);
+    const restored = ref.current!.getExposes();
+    expect(restored).not.toBe(held);
+    for (const key of Object.keys(held))
+      expect(restored[key as keyof typeof restored]).toBe(held[key as keyof typeof held]);
     expect(held.focused.get()).toBe(true);
     const resumedRoot = host.querySelector<HTMLElement>('[data-pui-root]')!;
     await React.act(async () => {

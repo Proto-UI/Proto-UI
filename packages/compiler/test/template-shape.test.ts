@@ -308,16 +308,15 @@ const child=r.el('span','captured');const f=()=>child;const g=(${parameter}:stri
   );
 });
 
-// Recursion remains the existing frontend diagnostic; no new shape admission.
-describe('existing recursive-helper admission boundary', () => {
-  it('retains PUI1008 for explicitly typed self-recursion', () => {
+describe('ordinary recursive-helper admission', () => {
+  it('admits typed ordinary recursion without inventing native constructor provenance', () => {
     const parsed = parsePrototype(
       `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'recursive-control',setup(){const loop=():string=>loop();return r=>r.el('span',loop());}});`,
       { fileName: 'recursive-control.proto.ts' }
     );
-    expect(parsed.ok).toBe(false);
-    if (!parsed.ok)
-      expect(parsed.diagnostics.some((diagnostic) => diagnostic.code === 'PUI1008')).toBe(true);
+    expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
+    const unresolved = call('unknown');
+    expect(nativeShape(unresolved, scope())).toBeNull();
   });
 });

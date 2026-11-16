@@ -214,8 +214,11 @@ export default definePrototype({name:'style-phase',setup(def){
       parsePrototype(source, { files: { 'effect.ts': 'globalThis.changed = true;' } })
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
     // An explicitly empty requirements array is now a checked no-op, not a silent discard.
-    expect(parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))).toMatchObject({
-      ok: true, value: { moduleDeclarations: [] },
+    expect(
+      parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))
+    ).toMatchObject({
+      ok: true,
+      value: { moduleDeclarations: [] },
     });
   });
 
@@ -319,8 +322,8 @@ export default prototype({name:'counter',setup(def){
     for (const [body, code] of [
       ["def.lifecycle.onCreated((run)=>run.lifecycle.setPresent('false'));", 'PUI1006'],
       ['def.lifecycle.onCreated((run)=>run.lifecycle.setPresent());', 'PUI1006'],
-      ['def.lifecycle.setPresent(false);', 'PUI1004'],
-      ['def.lifecycle.onCreated((run)=>run.lifecycle.dispose());', 'PUI1004'],
+      ['def.lifecycle.setPresent(false);', 'PUI1006'],
+      ['def.lifecycle.onCreated((run)=>run.lifecycle.dispose());', 'PUI1006'],
     ]) {
       expect(
         parsePrototype(simple.replace('setup(def) {}', `setup(def) { ${body} }`))

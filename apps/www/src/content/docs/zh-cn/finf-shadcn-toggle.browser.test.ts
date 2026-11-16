@@ -8,12 +8,14 @@ import { afterAll, beforeAll, expect, it } from 'vitest';
 import {
   RUNTIMES,
   applyColorScheme,
+  choosePreviewRuntime,
   chromeExecutable,
   openRoute,
-  selectRuntime,
   startServer,
   stopServer,
+  waitForPreviewRuntime,
 } from './browser-harness';
+import { revealHeaderPreferences } from './site-header-browser';
 
 const route = '/zh-cn/ui-libraries/shadcn/toggle/';
 /** The ordinary public demo explicitly selects the shared Rhea scope:
@@ -88,6 +90,7 @@ const source = {
   sharedBase,
   compatibilityBaseline,
   radiusContract,
+  runtimeControl: 'Shared Header preference; public preview toolbar=false',
   dirty: patch.length > 0,
   patchSha256: createHash('sha256').update(patch).digest('hex'),
 };
@@ -202,7 +205,8 @@ for (const runtime of RUNTIMES) {
             runtime,
             scheme,
             state,
-            scope: 'Real public demo under the authored Rhea scope; not packed/GPUI or complete Toggle parity',
+            scope:
+              'Real public demo under the authored Rhea scope; not packed/GPUI or complete Toggle parity',
             observations: receipt,
           },
           null,
@@ -211,7 +215,26 @@ for (const runtime of RUNTIMES) {
       );
     };
     try {
-      await selectRuntime(page, previewer, runtime, '[aria-pressed]', 6);
+      // This public recipe deliberately omits local Runtime UI. Follow the
+      // existing Header preference journey, then require the real preview commit.
+      expect(await previewer.getAttribute('data-demo-id')).toBe('demo-shadcn-toggle');
+      expect(await previewer.getAttribute('data-projection-toolbar')).toBe('false');
+      expect(
+        await previewer
+          .locator('[data-projection-control="runtime"], [data-runtime-tabs-mount]')
+          .count()
+      ).toBe(0);
+      const openedMenu = await revealHeaderPreferences(page);
+      const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+      await choosePreviewRuntime(page, preferences, runtime);
+      expect(
+        await preferences.locator('[data-adapter-select-root]').getAttribute('data-value')
+      ).toBe(runtime);
+      if (openedMenu) {
+        const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+        if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+      }
+      await waitForPreviewRuntime(page, runtime, '[aria-pressed]', 6);
       for (const scheme of ['light', 'dark'] as const) {
         await applyColorScheme(page, scheme);
         await page.mouse.move(0, 0);

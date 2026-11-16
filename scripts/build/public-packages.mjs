@@ -12,6 +12,7 @@ import {
 import { spawnSync } from 'node:child_process';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { protoSourceEntries, protoSourceFiles } from './proto-source.mjs';
 
 export const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const PACKAGE_ROOTS = ['packages'];
@@ -178,7 +179,7 @@ function validateBuiltPackage(pkg, distDir) {
  * out of the runtime barrel to preserve a lazy/import ownership boundary. */
 export function publicPackageSourceEntries(pkg) {
   const sourceRoot = join(pkg.dir, 'src');
-  const entries = new Set([join(sourceRoot, 'index.ts')]);
+  const entries = new Set([join(sourceRoot, 'index.ts'), ...protoSourceEntries(pkg)]);
   for (const target of flattenExportTargets(pkg.manifest.exports)) {
     if (!target.startsWith('./dist/') || !/\.(?:d\.ts|js)$/.test(target) || target.includes('*'))
       continue;
@@ -197,6 +198,8 @@ export function publicPackageSourceEntries(pkg) {
 export function buildPublicPackage(pkg, options = {}) {
   const distDir = options.outDir ?? join(pkg.dir, 'dist');
   const sourceEntries = publicPackageSourceEntries(pkg);
+  // Validate the source/type closure that will accompany explicit proto exports.
+  protoSourceFiles(pkg);
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 

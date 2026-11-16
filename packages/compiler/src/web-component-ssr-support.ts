@@ -1,5 +1,6 @@
 import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
-
+import { mapSupportImports } from './native-support/template-ast';
+import type { NativeSupportPlan } from './native-support/plan';
 interface SsrOptions {
   className: string;
   tagName: string;
@@ -7,7 +8,7 @@ interface SsrOptions {
   artifacts?: { source: string; helpers: string; css: string; environment: string };
   environmentCssText?: string;
   cssText?: string;
-  /** Private experiment: declarations are dormant on the server; live pairs are client-only. */
+  supportPlan?: NativeSupportPlan;
   controlLabel?: boolean;
 }
 
@@ -22,7 +23,10 @@ export function webComponentSsrSupport(options: SsrOptions) {
     cssText = '',
     controlLabel = false,
   } = options;
-  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner, assertNoInstanceAssociations} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
+  const supportPath = options.supportPlan
+    ? '.proto-ui/web-component/ssr-' + options.supportPlan.id + '-v2'
+    : '.proto-ui/web-component/ssr-v1';
+  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner, assertNoInstanceAssociations} from './${supportPath}';\nexport type {Carrier, ServerOptions, ServerParent} from './${supportPath}';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
 }
@@ -33,9 +37,9 @@ export function renderWithScope<T>(props: GeneratedProps & Record<string, unknow
 `;
   const client = `// Browser-only entry. Import Component.ts on the server, never this module.
 import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, hydrationEnvironmentCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
-import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, assertNoInstanceAssociations, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, assertNoInstanceAssociations, HydrationMismatch} from './${supportPath}';
 ${controlLabel ? "import {validateNativeInstanceAssociations} from './.proto-ui/interaction/control-label-v1';\n" : ''}
-export {HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+export {HydrationMismatch} from './${supportPath}';
 export class ${className} extends HTMLElement {
   private owner: HydrationOwner | null = null;
   private port: BrowserPort | null = null;
@@ -178,9 +182,20 @@ export default ${className};
     server,
     files: [
       {
-        path: '.proto-ui/web-component/ssr-v1.ts',
+        path: supportPath + '.ts',
         kind: 'source' as const,
-        contents: runtimeSource,
+        contents: options.supportPlan
+          ? mapSupportImports(
+              runtimeSource,
+              new Map([
+                [
+                  '../interaction/native-v1',
+                  '../interaction/' +
+                    options.supportPlan.interactionPath.split('/').at(-1)!.slice(0, -3),
+                ],
+              ])
+            )
+          : runtimeSource,
       },
       { path: 'Component.client.ts', kind: 'source' as const, contents: client },
     ],

@@ -89,7 +89,7 @@ Issue #817 仍保持 open。网站 demo inventory 只做 source-AST discovery �
 | `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
 | `gpui-source-v1` | 固定 Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` 的 GPUI | GPUI 加生成的共享 Rust support crate；不依赖 Proto UI Runtime/Adapter |
 
-Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **6**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **7**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
 
 GPUI source owner 按定义将 `void` setup 解释为 host Root 内部的匿名 slot（`C-CORE-SYNTAX-0004-C`、`C-TEMPLATE-0001`）。包含 State 和公开 increment method 的纯作者定义在没有 Web global 的环境中完成编译，并在真实 headless GPUI window 中运行。同一生成组件按顺序接入两个 native slot child，method 调用前后保留实际测得的布局框，并通过公开 State 观察到 0 到 1 的变化。这份有界证据不代表 OS-visible rendering、assistive-technology fidelity 或完整 compiler/Prototype equivalence；缺失 native style declaration 会生成 diagnostic，而不会替换成 Web 行为。
 

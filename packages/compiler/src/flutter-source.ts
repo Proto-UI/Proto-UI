@@ -1,7 +1,9 @@
+import { pruneDeadValues } from './demand-pruning';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
   unsupportedPointerFacts,
+  unsupportedDartOrdinaryValues,
 } from './pointer-facts-admission';
 import { createHash } from 'node:crypto';
 import { validateIR } from './ir-validation';
@@ -23,6 +25,7 @@ import type { RuleCondition } from './rule-declarations';
 import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { flutterNativeSource } from './flutter-native-host';
 import { partitionModuleBindings } from './source-module-bindings';
+import { callableValue, valueAlternatives } from './value-types';
 
 /** Checked statements become ordinary Dart; the supporting host has no semantic IR. */
 export function emitFlutterSource(
@@ -31,7 +34,7 @@ export function emitFlutterSource(
 ): CompileResult<GeneratedModule> {
   const checked = validateIR(input);
   if (!checked.ok) return checked;
-  const ir = checked.value;
+  const ir = pruneDeadValues(checked.value);
   const moduleParts = partitionModuleBindings(ir);
   const controlLabelDiagnostics = unsupportedControlLabel(
     ir,
@@ -45,6 +48,8 @@ export function emitFlutterSource(
     'emitted-declarations'
   );
   if (helperDiagnostics.length) return { ok: false, diagnostics: helperDiagnostics };
+  const ordinaryDiagnostics = unsupportedDartOrdinaryValues(ir);
+  if (ordinaryDiagnostics.length) return { ok: false, diagnostics: ordinaryDiagnostics };
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'flutter-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const component = options.componentName ?? 'CompiledComponent';
@@ -235,7 +240,27 @@ export function emitFlutterSource(
   function type(type: ValueType): string {
     if (type === 'exception') return 'Object?';
     if (isDataValueType(type)) return data(type);
-    if (typeof type !== 'string') throw new Error('Invalid Dart type');
+    if (typeof type !== 'string') {
+      if (type.kind === 'cell') return dartType(type.value);
+      if (type.kind === 'capture') return 'Object';
+      if (type.kind === 'callable')
+        return `${dartType(type.returnType)} Function(${type.parameters
+          .map(
+            (parameter, index) =>
+              `${parameter.optional && !type.parameters[index - 1]?.optional ? '[' : ''}${parameterType(parameter)}${parameter.optional && index === type.parameters.length - 1 ? ']' : ''}`
+          )
+          .join(', ')})`;
+      if (type.kind === 'value-union') {
+        const members = type.members.filter((member) => member !== 'null' && member !== 'void');
+        const names = [...new Set(members.map(dartType))];
+        const base =
+          names.length === 1
+            ? names[0] + (type.members.includes('null') && !names[0].endsWith('?') ? '?' : '')
+            : 'Object?';
+        return type.members.includes('void') ? `NativeOptional<${base}>` : base;
+      }
+      throw new Error('Invalid Dart type');
+    }
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9))}?`;
     if (type.startsWith('optional:')) return `NativeOptional<${typeName(type.slice(9))}>`;
     if (type.startsWith('state:')) return `NativeState<${data(type.slice(6) as DataType)}>`;
@@ -245,10 +270,16 @@ export function emitFlutterSource(
       return `NativeStateWatchEvent<${data(type.slice(type.indexOf(':') + 1) as DataType)}>`;
     return typeName(type);
   }
+  const dartType = type;
+  function parameterType(parameter: { type: ValueType; optional?: boolean }): string {
+    const declared = type(parameter.type);
+    return parameter.optional && !declared.startsWith('NativeOptional<')
+      ? `NativeOptional<${declared}>`
+      : declared;
+  }
   function typeName(name: string): string {
-    if (name === 'transition') return 'NativeTransition';
     if (name === 'state-disconnect') return 'NativeStateWatchEvent<Object?>';
-    if (name === 'binding-disposer' || name === 'transition-action') return 'void Function()';
+    if (name === 'binding-disposer') return 'void Function()';
     if (name === 'boundary-outside-event') return 'NativeBoundaryOutsideEvent';
     if (name === 'boundary-sample') return 'NativeBoundarySample';
     if (name === 'collection-item') return 'NativeCollectionItem<GeneratedResolvedProps>';
@@ -309,7 +340,6 @@ export function emitFlutterSource(
         'table-cell-list': 'List<NativeTableCell>',
         'table-diagnostic-list': 'List<NativeTableDiagnostic>',
         'a11y-ref-list': 'List<NativeA11yRef>',
-        'transition-controls': 'NativeTransitionControls',
         'action': 'void Function()',
         'a11y-ref': 'NativeA11yRef',
       } as Record<string, string>
@@ -373,7 +403,7 @@ export function emitFlutterSource(
       value.parameters
         .map(
           (p, index) =>
-            `${p.optional && !value.parameters[index - 1]?.optional ? '[' : ''}${p.optional ? `NativeOptional<${type(p.type)}>` : type(p.type)} ${id(p.name)}${p.optional ? ' = const NativeOptional.absent()' : ''}${p.optional && index === value.parameters.length - 1 ? ']' : ''}`
+            `${p.optional && !value.parameters[index - 1]?.optional ? '[' : ''}${parameterType(p)} ${id(p.name)}${p.optional ? ' = const NativeOptional.absent()' : ''}${p.optional && index === value.parameters.length - 1 ? ']' : ''}`
         )
         .join(', ') || (value.phase === 'render' ? `${type('render')} _` : '');
     const scoped =
@@ -381,7 +411,7 @@ export function emitFlutterSource(
     const body = statements(value.body, depth + 1, value.returnType);
     helperBindings = previousBindings;
     localTypes = previousTypes;
-    return `(${params}) ${scoped ? `=> _owner.inScope(${quote(value.context)}, () ` : ''}{\n${body}${type(value.returnType).startsWith('NativeOptional<') ? `${'  '.repeat(depth + 1)}return const NativeOptional.absent();\n` : ''}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
+    return `(${params}) ${scoped ? `=> _owner.inScope(${quote(value.context)}, () ` : ''}{\n${body}${type(value.returnType).startsWith('NativeOptional<') ? `${'  '.repeat(depth + 1)}return const NativeOptional<Never>.absent();\n` : ''}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
   }
   function style(handle: { tokens: readonly string[] }): string {
     return `NativeStyleHandle(<String>[${handle.tokens.map(quote).join(', ')}], <String>[${handle.tokens.map((token) => quote(getSemanticGroupKeyV0(token))).join(', ')}])`;
@@ -534,7 +564,7 @@ export function emitFlutterSource(
           ? `!${truthy(value.operand, depth)}`
           : `(${value.operator === '-' ? '-' : ''}nativeNumber(${expr(value.operand, depth)}))`;
       case 'conditional':
-        return `(${truthy(value.condition, depth)} ? ${expr(value.whenTrue, depth)} : ${expr(value.whenFalse, depth)})`;
+        return `(${truthy(value.condition, depth)} ? ${expr(value.then, depth)} : ${expr(value.otherwise, depth)})`;
       case 'binary': {
         const left = expr(value.left, depth),
           right = expr(value.right, depth);
@@ -576,6 +606,40 @@ export function emitFlutterSource(
       }
       case 'function':
         return fn(value.function, depth);
+      case 'call': {
+        const signature = callableValue(value.callee.type, value.optional);
+        const arguments_ = value.arguments.map((argument, index) => {
+          const emitted = expr(argument, depth);
+          const evaluated =
+            argument.type === 'void' && argument.kind !== 'undefined'
+              ? `(() { ${emitted}; return const NativeVoid(); })()`
+              : emitted;
+          const expected = parameterType(signature.parameters[index]);
+          return expected.startsWith('NativeOptional<')
+            ? `nativeOptionalResult<${expected.slice(15, -1)}>(${evaluated})`
+            : evaluated;
+        });
+        const invoke = (callee: string) => {
+          const call = `(${callee} as ${type(signature)})(${arguments_.join(', ')})`;
+          return signature.returnType === 'void'
+            ? `(() { ${call}; return const NativeVoid(); })()`
+            : call;
+        };
+        const callee = `nativeValue(${expr(value.callee, depth)})`;
+        const mayBeNullish = valueAlternatives(value.callee.type).some(
+          (member) => member === 'null' || member === 'void'
+        );
+        if (!value.optional || !mayBeNullish) return invoke(callee);
+        const result = value.type === 'void' ? 'NativeVoid' : type(value.type);
+        const absent =
+          value.type === 'void' ? 'const NativeVoid()' : 'const NativeOptional<Never>.absent()';
+        const present =
+          value.type === 'void'
+            ? invoke('callee')
+            : `nativeOptionalResult<${result.slice(15, -1)}>(${invoke('callee')})`;
+        // Keep arguments inside the non-nullish branch, after one callee read.
+        return `nativeProject<Object?, ${result}>(${callee}, (callee) { if (callee == null || callee is NativeVoid) return ${absent}; return ${present}; })`;
+      }
       case 'helper-call':
         return `${id(value.name)}(${value.arguments.map((arg, index) => (helperBindings.get(value.name)?.parameters[index]?.optional && !type(arg.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(arg, depth)})` : expr(arg, depth))).join(', ')})`;
       case 'authored-hook':
@@ -626,8 +690,6 @@ export function emitFlutterSource(
             return `_owner.install('asHitParticipation', () => _owner.hitParticipation ??= NativeHitParticipation(_owner))`;
           case 'hook.asTableStructure':
             return `_owner.install('asTableStructure', () => _owner.declareTableStructure(${args[0]}))`;
-          case 'hook.asTransition':
-            return `_owner.install('asTransition', () => _owner.declareTransition())`;
           case 'run.update':
             return `${receiver}.update()`;
           case 'props.define':
@@ -815,6 +877,7 @@ export function emitFlutterSource(
         }
       }
     }
+    throw new Error('Private Dart admission omitted an unsupported ordinary value');
   }
   function configuration(value: ExpressionIR, depth: number): string {
     if (value.kind === 'record')
@@ -862,10 +925,11 @@ export function emitFlutterSource(
       } else if (statement.kind === 'effect')
         result += `${indent}${expr(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
+        const resultType = type(returnType);
         result +=
           returnType === 'void' && statement.value
             ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
-            : `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
+            : `${indent}return${statement.value ? ` ${resultType.startsWith('NativeOptional<') ? `nativeOptionalResult<${resultType.slice(15, -1)}>(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : resultType.startsWith('NativeOptional<') ? ' const NativeOptional<Never>.absent()' : ''};\n`;
         break;
       } else if (statement.kind === 'throw') {
         usesExceptions = true;

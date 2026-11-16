@@ -34,6 +34,14 @@ criteria:
     text:
       zh-CN: re-entrant `set(...)` 触发的 StateEvent 必须以确定性顺序派发，不得丢失已记录的状态转换。
       en: StateEvents caused by re-entrant `set(...)` calls must be delivered in deterministic order and must not lose recorded state transitions.
+  - id: C-STATE-0011-F
+    text:
+      en: Each changed write records its event and the current subscriber registrations before delivery. Delivery is FIFO across the owner. A registration added later does not receive an earlier event; a removed registration is skipped, including when the same callback is registered again. Re-entrant writes append after already recorded notifications.
+      zh-CN: 每次实际写入变化须在通知前记录事件和当前订阅注册。通知在 owner 内按 FIFO 顺序派发；后来新增的注册不接收较早事件，已经移除的注册须跳过，即使同一 callback 又被重新注册。重入写入追加在已记录通知之后。
+  - id: C-STATE-0011-G
+    text:
+      en: A subscriber exception must not discard or postpone other recorded notifications. Drain eligible notifications, including re-entrant writes, then rethrow the single original exception or an AggregateError containing multiple exceptions in delivery order. Terminal source disposal may cancel its remaining notifications. Equality suppression and lack of implicit rendering remain unchanged.
+      zh-CN: 订阅 callback 抛错不得丢弃或推迟其他已记录通知。须排空仍有效的通知（包括重入写入），随后重新抛出原来的单个异常；多个异常按通知顺序装入 AggregateError。source 终止释放可取消其剩余通知。同值抑制与不隐式渲染的规则保持不变。
 sources:
   - path: packages/types/src/state.ts
     sections:
@@ -48,6 +56,9 @@ dependsOn:
     - C-STATE-0010
     - C-STATE-0005
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Defined recorded subscriber membership, cancellation, FIFO reentry and exception draining so independent compiler backends and StateKernel have one observable notification contract.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Defined number.list content equality while retaining scalar Object.is behavior.

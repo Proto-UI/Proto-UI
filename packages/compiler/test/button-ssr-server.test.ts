@@ -131,11 +131,12 @@ describe('Button SSR generated server artifact', () => {
     const directory = await mkdtemp(path.join(tmpdir(), 'button-ssr-evidence-'));
     try {
       const index = await writeButtonSsrEvidenceArtifacts(fixture, directory);
-      expect(index).toHaveLength(12);
-      expect(index.filter((file) => file.path.startsWith('.proto-ui/'))).toHaveLength(7);
+      expect(index).toHaveLength(15);
+      expect(index.filter((file) => file.path.startsWith('.proto-ui/'))).toHaveLength(10);
       expect(index.map((file) => file.path)).toEqual(
         expect.arrayContaining([
-          '.proto-ui/interaction/ownership-v1.ts',
+          '.proto-ui/interaction/ownership-v2.ts',
+          '.proto-ui/owner/authored-hooks-v1.ts',
           '.proto-ui/interaction/control-label-v1.ts',
         ])
       );

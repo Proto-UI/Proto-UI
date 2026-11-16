@@ -36,7 +36,7 @@ pub fn overlay_commit(owner:&OwnerRef){overlay_reconcile(owner);}
 fn overlay_drive_presence(owner:&OwnerRef,open:bool){
     let(presence,retained)={let owner=owner.borrow();(owner.modules.overlay.presence.clone(),owner.modules.overlay.retained)};
     if matches!(presence,Value::Undefined){overlay_view_active(owner,open);if !retained{set_present(&Rc::downgrade(owner),Value::boolean(open));}}
-    else{presence.member(if open{"enter"}else{"leave"},false).call(vec![]);}
+    else{presence.member(if open{"enter"}else{"leave"},false).call_authored(vec![]);}
 }
 fn overlay_set_open(owner:&OwnerRef,open:bool,reason:Value){
     let changed={let mut owner=owner.borrow_mut();let overlay=&mut owner.modules.overlay;overlay.reason=reason;let changed=overlay.open!=open;overlay.open=open;if changed{owner.dirty=true;}changed};
@@ -53,7 +53,7 @@ pub fn overlay_configure(owner:&OwnerWeak,patch:Value,position_only:bool)->Value
     let owner=if position_only{runtime(owner)}else{setup(owner)};
     let keys=if position_only{&["placement","align","sideOffset","alignOffset","strategy","avoidCollisions","collisionBoundary","collisionPadding","excludeAnchorTranslation"][..]}else{&["defaultOpen","closeOnEscape","closeOnOutsidePress","closeOnFocusOutside","closeOnAnchorPress","closeOnTriggerPress","placement","align","sideOffset","alignOffset","anchored","strategy","avoidCollisions","collisionBoundary","collisionPadding","excludeAnchorTranslation","entry","restore","portal","modal","layerRole","layerOffset"][..]};
     {let mut owner=owner.borrow_mut();for key in keys{let value=patch.member(key,false);if !matches!(value,Value::Undefined){owner.modules.overlay.config.insert((*key).into(),value);}}
-        let meta=patch.member("meta",false);if !position_only&&!matches!(meta,Value::Undefined){let mut merged=BTreeMap::new();let previous=field(&owner.modules.overlay.config,"meta");if !previous.nullish(){merge_config(&mut merged,previous);}merge_config(&mut merged,meta);owner.modules.overlay.config.insert("meta".into(),Value::Record(Rc::new(merged)));}}
+        let meta=patch.member("meta",false);if !position_only&&!matches!(meta,Value::Undefined){let mut merged=BTreeMap::new();let previous=field(&owner.modules.overlay.config,"meta");if !previous.nullish(){merge_config(&mut merged,previous);}merge_config(&mut merged,meta);owner.modules.overlay.config.insert("meta".into(),record_map(merged));}}
     if !position_only{let observing=overlay_boolean(&owner,"closeOnOutsidePress");owner.borrow_mut().modules.boundary.observing=observing;if overlay_boolean(&owner,"defaultOpen"){overlay_set_open(&owner,true,Value::string("programmatic"));}}
     else{overlay_reconcile(&owner);}Value::Undefined
 }
@@ -61,7 +61,7 @@ fn overlay_lifecycle(owner:&OwnerWeak,kind:&str)->Value{
     let owner=ensure(owner);
     match kind{
         "created"=>{let presence=owner.borrow().modules.overlay.presence.clone();let open=owner.borrow().modules.overlay.open;if matches!(presence,Value::Undefined){overlay_drive_presence(&owner,open);}},
-        "presence-created"=>{let presence=owner.borrow().modules.overlay.presence.clone();let open=owner.borrow().modules.overlay.open;overlay_view_active(&owner,presence.member("present",false).get().bool());presence.member(if open{"enter"}else{"leave"},false).call(vec![]);},
+        "presence-created"=>{let presence=owner.borrow().modules.overlay.presence.clone();let open=owner.borrow().modules.overlay.open;overlay_view_active(&owner,presence.member("present",false).get().bool());presence.member(if open{"enter"}else{"leave"},false).call_authored(vec![]);},
         "mounted"=>{owner.borrow_mut().modules.overlay.content=Rc::downgrade(&owner);overlay_reconcile(&owner);},
         "unmounted"=>overlay_detach(&owner),
         "before-dispose"=>{if let Some(active)=owner.borrow_mut().modules.overlay.presence_active.take(){active.set(false);}overlay_detach(&owner);},
