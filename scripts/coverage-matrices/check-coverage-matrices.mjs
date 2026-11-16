@@ -1156,6 +1156,11 @@ function includesForbiddenClassification(value) {
   return /\b(?:unknown|unclassified)\b/i.test(value);
 }
 
+// The Harness equivalence field may honestly record the `unknown input`
+// evidence category. Every other unknown/unclassified classification stays
+// forbidden there, wherever it appears.
+const TRUTHFUL_UNKNOWN_INPUT_PATTERN = /\bunknown\s+input\b/gi;
+
 function escapeRegularExpression(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -11683,7 +11688,14 @@ function validateMainRows(
 
     for (const [header, value] of Object.entries(record)) {
       if (!value.trim()) issues.push(`${context}: ${header} must not be empty`);
-      if (includesForbiddenClassification(value)) {
+      // The runtime equivalence fields describe evidence, including the
+      // distinction between native, synthetic and unknown input. Only that
+      // truthful evidence category is exempt from the classification rule.
+      const classificationValue =
+        header === 'Production host and equivalence evidence'
+          ? value.replace(TRUTHFUL_UNKNOWN_INPUT_PATTERN, '')
+          : value;
+      if (includesForbiddenClassification(classificationValue)) {
         issues.push(`${context}: ${header} must not contain unknown or unclassified`);
       }
     }
@@ -11780,10 +11792,10 @@ function validateMainRows(
         record['Proto UI chain'].includes('P-BASE-INPUT') &&
         inlineCode.has('new PagefindUI') &&
         state === 'blocked' &&
-        /(?:^|\D)#420\b/u.test(record['Dependency and owner']);
+        /(?:^|\D)#1323\b/u.test(record['Dependency and owner']);
       if (!ownsPagefindUi) {
         issues.push(
-          `${context}: matrix row \`www.search.input-results\` must structurally own \`new PagefindUI\` through \`@pagefind/default-ui\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #420`
+          `${context}: matrix row \`www.search.input-results\` must structurally own \`new PagefindUI\` through \`@pagefind/default-ui\`, \`P-BASE-INPUT\`, blocked state, and dependency Issue #1323`
         );
       }
     }

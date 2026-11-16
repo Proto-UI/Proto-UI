@@ -1,11 +1,18 @@
 // packages/runtime/test/contract/as-hook.v0.contract.test.ts
 import { describe, it, expect } from 'vitest';
-import type { AsHookResult, OwnedDecorationTarget, Prototype, State, StyleHandle } from '@proto.ui/core';
-import { defineAsHook, definePrototype, tw } from '@proto.ui/core';
-import type { RuntimeHost } from '../../src';
+import type {
+  AsHookResult,
+  OwnedDecorationTarget,
+  Prototype,
+  State,
+  StyleHandle,
+} from '@proto.ui/core';
+import { createContextKey, defineAsHook, definePrototype, tw } from '@proto.ui/core';
+import type { RuntimeHost, RuntimeSession } from '../../src';
 import { createRuntimeSession, executeWithHost } from '../../src';
 import type { PropsBaseType } from '@proto.ui/types';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { asFocusable } from '@proto.ui/hooks';
 import { EFFECTS_CAP, OWNED_DECORATION_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
 
@@ -184,6 +191,145 @@ describe('runtime contract: asHook (v0)', () => {
     controller.applyRawProps({ a: 3 } as any);
     expect(calls).toEqual([]);
   });
+
+  it.each(['context', 'all'] as const)(
+    'AS-HOOK-0360: %s disposers withdraw strict-ancestor callbacks during setup only',
+    async (withdraw) => {
+      const key = createContextKey<{ value: number }>(`as-hook-ancestor-${withdraw}`);
+      // Ordinary required and optional intent cannot share an instance/key record.
+      const requiredKey = createContextKey<{ value: number }>(`as-hook-required-${withdraw}`);
+      const outerToken = {};
+      const nearerToken = {};
+      const selfToken = {};
+      const parents = new Map<unknown, object>([
+        [selfToken, nearerToken],
+        [nearerToken, outerToken],
+      ]);
+      const retained: Array<[string, number | null, number | null]> = [];
+      const removed: Array<[string, number | null, number | null]> = [];
+      let result!: AsHookResult;
+      const asRetained = defineAsHook({
+        name: 'asRetainedContext0360',
+        setup(def) {
+          def.context.subscribe(requiredKey, (_run, next, prev) => {
+            retained.push(['required', next.value, prev.value]);
+          });
+          def.context.trySubscribe(key, (_run, next, prev) => {
+            retained.push(['optional', next?.value ?? null, prev?.value ?? null]);
+          });
+          def.context.trySubscribeAncestor(key, (_run, next, prev) => {
+            retained.push(['ancestor', next?.value ?? null, prev?.value ?? null]);
+          });
+        },
+      });
+      const asRemoved = defineAsHook({
+        name: 'asRemovedContext0360',
+        setup(def) {
+          def.context.subscribe(requiredKey, (_run, next, prev) => {
+            removed.push(['required', next.value, prev.value]);
+          });
+          def.context.trySubscribe(key, (_run, next, prev) => {
+            removed.push(['optional', next?.value ?? null, prev?.value ?? null]);
+          });
+          def.context.trySubscribeAncestor(key, (_run, next, prev) => {
+            removed.push(['ancestor', next?.value ?? null, prev?.value ?? null]);
+          });
+        },
+      });
+      const outer = definePrototype({
+        name: 'x-as-hook-0360-outer',
+        setup(def) {
+          def.context.provide(key, { value: 1 });
+        },
+      });
+      const nearer = definePrototype({
+        name: 'x-as-hook-0360-nearer',
+        setup(def) {
+          def.context.provide(key, { value: 10 });
+        },
+      });
+      const host = (name: string, token: object): RuntimeHost<PropsBaseType> => ({
+        prototypeName: name,
+        getRawProps: () => ({}),
+        commit(_children, signal) {
+          signal?.done();
+        },
+        schedule(task) {
+          task();
+        },
+        onRuntimeReady(wiring) {
+          wiring.attach('context', [
+            [CONTEXT_INSTANCE_TOKEN_CAP, token],
+            [CONTEXT_PARENT_CAP, (instance: unknown) => parents.get(instance) ?? null],
+          ]);
+        },
+      });
+      const outerSession = createRuntimeSession(outer, host(outer.name, outerToken));
+      const nearerSession = createRuntimeSession(nearer, host(nearer.name, nearerToken));
+      let selfSession: RuntimeSession | undefined;
+      try {
+        await outerSession.mount();
+        await nearerSession.mount();
+        const self = definePrototype({
+          name: 'x-as-hook-0360-self',
+          setup(def) {
+            def.context.provide(key, { value: 100 });
+            def.context.provide(requiredKey, { value: 100 });
+            asRetained();
+            result = asRemoved();
+            // A real provider update while this setup is open proves both
+            // ancestor callbacks are live before withdrawing either capture.
+            nearerSession.invokeInCallbackScope(() => {
+              nearerSession.kernel.run.context.update(key, { value: 11 });
+            });
+            expect(retained).toEqual([['ancestor', 11, 10]]);
+            expect(removed).toEqual([['ancestor', 11, 10]]);
+            for (const dispose of result.disposers![withdraw]!) dispose();
+            nearerSession.invokeInCallbackScope(() => {
+              nearerSession.kernel.run.context.update(key, { value: 12 });
+            });
+            expect(retained).toEqual([
+              ['ancestor', 11, 10],
+              ['ancestor', 12, 11],
+            ]);
+            expect(removed).toEqual([['ancestor', 11, 10]]);
+          },
+        });
+        selfSession = createRuntimeSession(self, host(self.name, selfToken));
+        await selfSession.mount();
+        for (const collection of ['context', 'all'] as const) {
+          for (const dispose of result.disposers![collection]!) {
+            expect(() => dispose()).toThrow(/setup only/i);
+          }
+        }
+        selfSession.invokeInCallbackScope(() => {
+          expect(selfSession!.kernel.run.context.read(requiredKey)).toEqual({ value: 100 });
+          expect(selfSession!.kernel.run.context.tryRead(key)).toEqual({ value: 100 });
+          expect(selfSession!.kernel.run.context.tryReadAncestor(key)).toEqual({ value: 12 });
+          selfSession!.kernel.run.context.update(requiredKey, { value: 101 });
+          selfSession!.kernel.run.context.update(key, { value: 101 });
+        });
+        outerSession.invokeInCallbackScope(() => {
+          outerSession.kernel.run.context.update(key, { value: 2 });
+        });
+        nearerSession.invokeInCallbackScope(() => {
+          nearerSession.kernel.run.context.update(key, { value: 13 });
+        });
+        expect(retained).toEqual([
+          ['ancestor', 11, 10],
+          ['ancestor', 12, 11],
+          ['required', 101, 100],
+          ['optional', 101, 100],
+          ['ancestor', 13, 12],
+        ]);
+        expect(removed).toEqual([['ancestor', 11, 10]]);
+      } finally {
+        await selfSession?.dispose();
+        await nearerSession.dispose();
+        await outerSession.dispose();
+      }
+    }
+  );
 
   it('AS-HOOK-0400: state handles from asHook must be projected to borrowed view', () => {
     let borrowed: any;

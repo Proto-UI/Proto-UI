@@ -5,20 +5,51 @@ import { tmpdir } from 'node:os';
 import { copySourceBindingIssues } from './copy-command-evidence';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, Page } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
   applyColorScheme,
+  choosePreviewRuntime,
   launchBrowser,
   openRoute,
   selectRuntime,
   startServer,
   stopServer,
+  waitForPreviewRuntime,
 } from './browser-harness';
+import { revealHeaderPreferences } from './site-header-browser';
 
 const TEXTAREA_ROUTE = '/en/ui-libraries/shadcn/textarea/';
 const CHECKBOX_ROUTE = '/en/ui-libraries/shadcn/checkbox/';
+
+// Both public compositions explicitly omit local Runtime UI. Keep the Select
+// appearance case below on its own declared toolbar and real public props.
+async function selectToolbarlessRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: (typeof RUNTIMES)[number],
+  readySelector: string,
+  expectedCount: number
+): Promise<void> {
+  expect(await previewer.getAttribute('data-projection-toolbar')).toBe('false');
+  expect(
+    await previewer
+      .locator('[data-projection-control="runtime"], [data-runtime-tabs-mount]')
+      .count()
+  ).toBe(0);
+  const openedMenu = await revealHeaderPreferences(page);
+  const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+  await choosePreviewRuntime(page, preferences, runtime);
+  expect(await preferences.locator('[data-adapter-select-root]').getAttribute('data-value')).toBe(
+    runtime
+  );
+  if (openedMenu) {
+    const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+    if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+  }
+  await waitForPreviewRuntime(page, runtime, readySelector, expectedCount);
+}
 
 /** The demo order: unchecked, checked, mixed, disabled, and a focus target. */
 const UNCHECKED = 0;
@@ -360,23 +391,23 @@ describe.sequential('shadcn control documentation browser regressions', () => {
 
     try {
       await previewer.scrollIntoViewIfNeeded();
-      const mountScope = await previewer.evaluate((root) => ({
-        previewerRoots: root.querySelectorAll('[data-pui-root]').length,
-        demoRoots:
-          root
-            .querySelector(
-              '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
-            )
-            ?.querySelectorAll('[data-pui-root]').length ?? 0,
-        runtimeControlRoots:
-          root
-            .querySelector('[data-projection-control="runtime"]')
-            ?.querySelectorAll('[data-pui-root]').length ?? 0,
-      }));
-      expect(mountScope.previewerRoots).toBeGreaterThan(mountScope.demoRoots);
-      expect(mountScope.runtimeControlRoots).toBeGreaterThan(0);
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        const mountScope = await previewer.evaluate((root) => ({
+          previewerRoots: root.querySelectorAll('[data-pui-root]').length,
+          demoRoots:
+            root
+              .querySelector(
+                '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+              )
+              ?.querySelectorAll('[data-pui-root]').length ?? 0,
+          runtimeControlRoots:
+            root
+              .querySelector('[data-projection-control="runtime"]')
+              ?.querySelectorAll('[data-pui-root]').length ?? 0,
+        }));
+        expect(mountScope.previewerRoots).toBeGreaterThan(mountScope.demoRoots);
+        expect(mountScope.runtimeControlRoots).toBe(0);
         await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
         await page.waitForFunction(
@@ -413,7 +444,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await waitForStableEditorProjection(page);
         await applyColorScheme(page, 'light');
 
@@ -484,7 +515,7 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 3);
+        await selectToolbarlessRuntime(page, previewer, runtime, '[data-pui-root]', 3);
         await waitForStableEditorProjection(page);
 
         // The background is outside the transition set, so each read is the
@@ -511,7 +542,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+        await selectToolbarlessRuntime(
+          page,
+          previewer,
+          runtime,
+          '[role="checkbox"]',
+          CHECKBOX_COUNT
+        );
 
         await applyColorScheme(page, 'light');
         const light = await boxPaints(page);
@@ -562,7 +599,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
     try {
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[role="checkbox"]', CHECKBOX_COUNT);
+        await selectToolbarlessRuntime(
+          page,
+          previewer,
+          runtime,
+          '[role="checkbox"]',
+          CHECKBOX_COUNT
+        );
         await waitForGlyphs(page);
 
         const paints = await boxPaints(page);

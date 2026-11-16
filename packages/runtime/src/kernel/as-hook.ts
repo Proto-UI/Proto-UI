@@ -376,7 +376,13 @@ export function attachAsHookRuntime<P extends PropsBaseType>(
       const propsDisposers = collectDisposers(frame.effects.props);
       const contextDisposers = collectDisposers(
         frame.effects.context,
-        (entry) => (entry as any)?.op === 'subscribe' || (entry as any)?.op === 'trySubscribe'
+        (entry) =>
+          typeof entry === 'object' &&
+          entry !== null &&
+          'op' in entry &&
+          (entry.op === 'subscribe' ||
+            entry.op === 'trySubscribe' ||
+            entry.op === 'trySubscribeAncestor')
       );
       const ruleDisposers = collectDisposers(
         frame.effects.context,

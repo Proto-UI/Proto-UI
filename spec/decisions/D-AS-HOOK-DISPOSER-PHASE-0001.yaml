@@ -21,12 +21,18 @@ sources:
   - path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
     sections:
       - AS-HOOK-0350
+      - AS-HOOK-0360
       - AS-HOOK-0480
   - path: packages/runtime/src/kernel/as-hook.ts
     sections:
       - collectDisposers
       - endCapture
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: >-
+      Strict-ancestor Context subscriptions are captured as reversible setup effects, so their withdrawal belongs to the same setup-only `context` and `all` disposer collections as ordinary Context subscriptions.
+
   - version: 0.1.0
     change: introduced
     summary: Recorded setup-only phase boundary for asHook result disposers.
