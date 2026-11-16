@@ -43,6 +43,10 @@ export type ProjectionMaterializerOptions = Readonly<{
   controlIds?: readonly ProjectionControlId[];
   /** Website-owned host composition, checked against an explicit recipe. */
   content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
+  /** Let independent consumers finish preparation in a task after the frame. */
+  yieldAfterPaint?: boolean;
+  /** First-view preparation can yield while another consumer is preparing. */
+  backgroundPreparation?: Readonly<{ signal: AbortSignal; isPending(): boolean }>;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -55,11 +59,36 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
 // A focus lease belongs to the exact materialized composition, not a DOM role.
 const compositionFocusRestorers = new WeakMap<HTMLElement, (key: ProjectionFocusKey) => boolean>();
 
-function nextPaint(element: HTMLElement): Promise<void> {
+function backgroundPreparationTask(
+  options: ProjectionMaterializerOptions
+): Promise<void> | undefined {
+  const preparation = options.backgroundPreparation;
+  if (!preparation) return;
+  const { signal } = preparation;
+  signal.throwIfAborted();
+  if (!preparation.isPending()) return;
+  const view = options.mount.ownerDocument.defaultView as
+    | (Window & {
+        scheduler?: {
+          postTask(
+            callback: () => void,
+            options: { priority: 'background'; signal: AbortSignal }
+          ): Promise<void>;
+        };
+      })
+    | null;
+  return view?.scheduler?.postTask(() => undefined, { priority: 'background', signal });
+}
+
+function nextPaint(element: HTMLElement, yieldAfterPaint = false): Promise<void> {
   return new Promise((resolve) => {
     const view = element.ownerDocument.defaultView;
-    if (view?.requestAnimationFrame) view.requestAnimationFrame(() => resolve());
-    else queueMicrotask(resolve);
+    if (view?.requestAnimationFrame) {
+      view.requestAnimationFrame(() => {
+        if (yieldAfterPaint) view.setTimeout(resolve, 0);
+        else resolve();
+      });
+    } else queueMicrotask(resolve);
   });
 }
 
@@ -142,10 +171,11 @@ function externalProjectionPortalRoots(
     left.getAttribute('data-projection-owner') === right.getAttribute('data-projection-owner') &&
     left.getAttribute('data-projection-generation') ===
       right.getAttribute('data-projection-generation');
+  const selector = /^[A-Za-z0-9_-]+$/.test(ownerId)
+    ? `[data-projection-owner="${ownerId}"][data-projection-generation]`
+    : '[data-projection-owner][data-projection-generation]';
   const externalSurfaces = Array.from(
-    mount.ownerDocument.querySelectorAll<HTMLElement>(
-      '[data-projection-owner][data-projection-generation]'
-    )
+    mount.ownerDocument.querySelectorAll<HTMLElement>(selector)
   ).filter(
     (element) => !mount.contains(element) && !element.contains(mount) && ownsGeneration(element)
   );
@@ -343,6 +373,9 @@ export async function materializeProjectionCandidate(
   request: ProjectionScopeMaterializeRequest,
   options: ProjectionMaterializerOptions
 ): Promise<MaterializedProjectionCandidate> {
+  const preparation = backgroundPreparationTask(options);
+  if (preparation) await preparation;
+  options.backgroundPreparation?.signal.throwIfAborted();
   const source = options.themeSource;
   if (!source?.isCurrent()) return prepareProjectionCandidate(request, options);
 
@@ -409,6 +442,11 @@ async function prepareProjectionCandidate(
   const themeSurfaceStyle =
     initialTheme ?? resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
   const childDemo = options.content?.demo ?? (await loadDemo(componentManifest.recipeId));
+  // Seed the scope in the renderer's mount so the initial theme and subtree
+  // reach ancestor observers in the same delivery.
+  const seed = options.mount.ownerDocument.createElement('div').style;
+  for (const [property, value] of Object.entries(themeSurfaceStyle))
+    seed.setProperty(property, value);
   const composition = createProjectionComposition({
     ownerId: options.ownerId,
     runtimeId,
@@ -420,6 +458,7 @@ async function prepareProjectionCandidate(
     controls: options.controls,
     controlIds: options.controlIds,
     themeSurfaceStyle,
+    scopeInlineStyle: seed.cssText,
     locked: true,
     eventGateOpen: false,
   });
@@ -427,6 +466,11 @@ async function prepareProjectionCandidate(
   const prototypeIds = new Set<string>();
   collectPrototypeIds(composition.demo.root, prototypeIds);
   await Promise.all([loadPrototypes(Array.from(prototypeIds)), prepareDemoRuntime(runtimeId)]);
+  // Shared dependency completion can otherwise start every independent
+  // framework render in the same foreground turn.
+  const renderPreparation = backgroundPreparationTask(options);
+  if (renderPreparation) await renderPreparation;
+  options.backgroundPreparation?.signal.throwIfAborted();
 
   const host = options.mount.ownerDocument.createElement('div');
   host.className = 'pui-projection-generation';
@@ -509,7 +553,8 @@ async function prepareProjectionCandidate(
     // that update before activation exposes the generation.
     composition.setLocked(false);
     reconcileCandidateExternalPortals();
-    await nextPaint(host);
+    await nextPaint(host, options.yieldAfterPaint);
+    options.backgroundPreparation?.signal.throwIfAborted();
     reconcileCandidateExternalPortals();
 
     const candidate: MaterializedProjectionCandidate = {

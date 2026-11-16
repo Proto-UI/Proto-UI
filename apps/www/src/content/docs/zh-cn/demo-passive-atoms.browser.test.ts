@@ -187,6 +187,12 @@ describe.sequential('Public passive atom documentation previews', () => {
   it.each(cases)(
     '$locale/$family/$atom/$runtime retains public content and passive ownership',
     async ({ family, atom, locale, runtime, route }) => {
+      const expectedAtoms =
+        atom === 'surface' && family === 'bootstrap-2-3-2'
+          ? 10
+          : atom === 'surface' && family === 'liquid-glass'
+            ? 5
+            : 4;
       const context = await browser.newContext({
         viewport: { width: 1280, height: 1000 },
         colorScheme: 'light',
@@ -201,7 +207,7 @@ describe.sequential('Public passive atom documentation previews', () => {
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
         const preview = page.locator('[data-previewer-id]').first();
         const readinessDeadline = Date.now() + 20_000;
-        await selectRuntime(page, preview, runtime, '[data-pui-root]', 4);
+        await selectRuntime(page, preview, runtime, '[data-pui-root]', expectedAtoms);
         if (Date.now() >= readinessDeadline)
           throw new Error('Passive atom readiness exceeded its original 20-second budget');
         // A preparing hidden/empty candidate is not another active content owner.
@@ -285,6 +291,7 @@ describe.sequential('Public passive atom documentation previews', () => {
           return nodes.map((node) => {
             const style = getComputedStyle(node);
             return {
+              ref: node.getAttribute('data-demo-ref'),
               text: node.textContent?.trim(),
               role: node.getAttribute('role'),
               tabIndex: node.tabIndex,
@@ -294,14 +301,16 @@ describe.sequential('Public passive atom documentation previews', () => {
               fontFamily: style.fontFamily,
               fontWeight: style.fontWeight,
               decoration: style.textDecorationLine,
+              color: style.color,
               background: style.backgroundColor,
+              radius: style.borderRadius,
               shadow: style.boxShadow,
               transform: style.transform,
             };
           });
         });
         // P-BASE-TEXT-PASSIVE / P-BASE-SURFACE-PASSIVE: a visual sample must not gain input ownership.
-        expect(facts).toHaveLength(4);
+        expect(facts).toHaveLength(expectedAtoms);
         for (const fact of facts) {
           expect(fact.text?.length).toBeGreaterThan(0);
           expect(fact.role).toBeNull();
@@ -324,6 +333,24 @@ describe.sequential('Public passive atom documentation previews', () => {
               expect(facts[3].transform).toBe('none');
               expect(facts[3].shadow).not.toBe('none');
             } else expect(facts[3].transform).not.toBe('none');
+          }
+          if (family === 'bootstrap-2-3-2') {
+            const buttonPaint = (context: 'default' | 'navbar', state: 'rest' | 'focus') => {
+              const sample = facts.find((fact) => fact.ref === `button-${context}-${state}`);
+              if (!sample) throw new Error(`Missing Button ${context}/${state} example`);
+              return {
+                color: sample.color,
+                background: sample.background,
+                radius: sample.radius,
+                shadow: sample.shadow,
+                transform: sample.transform,
+              };
+            };
+            expect(buttonPaint('navbar', 'rest')).toEqual(buttonPaint('default', 'rest'));
+            expect(buttonPaint('navbar', 'focus')).toEqual(buttonPaint('default', 'focus'));
+            expect(buttonPaint('navbar', 'focus').shadow).not.toBe(
+              buttonPaint('navbar', 'rest').shadow
+            );
           }
         }
         expect(errors).toEqual([]);

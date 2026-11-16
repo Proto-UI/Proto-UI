@@ -3,7 +3,7 @@ import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';
-import { siteTypographyParticipant } from './site-typography';
+import { isWithinOwnedCodeContent, siteTypographyParticipant } from './site-typography';
 
 type DocumentationTypographyHandle = { destroy(): Promise<void>; ready: Promise<unknown> };
 const documents = new WeakMap<
@@ -91,12 +91,13 @@ export function initDocumentationTypography(doc: Document = document) {
       return;
     }
     const selection = { runtimeId: runtime, projectionFamilyId: family() };
+    const sourceChanged = participant.needsRefresh();
     if (
-      participant.needsRefresh() ||
+      sourceChanged ||
       snapshot.selection.runtimeId !== runtime ||
       snapshot.selection.projectionFamilyId !== selection.projectionFamilyId
     )
-      void observe(controller.request(selection, { force: participant.needsRefresh() }));
+      void observe(controller.request(selection, { force: sourceChanged }));
   };
   const preference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -112,7 +113,17 @@ export function initDocumentationTypography(doc: Document = document) {
   };
   const observer = new view.MutationObserver((records) => {
     if (!root.isConnected) void handle.destroy();
-    else if (records.some((record) => root.contains(record.target))) refresh();
+    else if (
+      records.some(
+        ({ target, attributeName }) =>
+          root.contains(target) &&
+          (attributeName === 'data-site-library-family' || !isWithinOwnedCodeContent(target))
+      )
+    ) {
+      // CodeExample and its decoration mounts own their internal changes.
+      // Moving source across that boundary still notifies an authored parent.
+      refresh();
+    }
   });
   // Watching only root cannot observe root's own removal from its parent.
   // Document remains stable across owner/body replacements and view swaps.

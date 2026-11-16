@@ -12,6 +12,7 @@ import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-prefer
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 const preparation = vi.hoisted(() => ({
   hold: null as null | { reached(): void; gate: Promise<void> },
+  readRefresh: vi.fn(),
 }));
 vi.mock('./site-typography', async (original) => {
   const actual = await original<typeof import('./site-typography')>();
@@ -21,6 +22,10 @@ vi.mock('./site-typography', async (original) => {
       const participant = actual.siteTypographyParticipant(...args);
       return {
         ...participant,
+        needsRefresh() {
+          preparation.readRefresh();
+          return participant.needsRefresh();
+        },
         async materialize(request: Parameters<typeof participant.materialize>[0]) {
           const candidate = await participant.materialize(request);
           const held = preparation.hold;
@@ -257,6 +262,114 @@ describe('independent lifecycle positive controls', () => {
 });
 
 describe('source sibling order and immediate owner replacement', () => {
+  it('scans native source once when scheduling a Docs replacement', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    let release!: () => void;
+    let reached!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const prepared = new Promise<void>((resolve) => (reached = resolve));
+    preparation.hold = { gate, reached };
+    preparation.readRefresh.mockClear();
+    const paragraph = document.createElement('p');
+    const source = document.createTextNode('Appended native paragraph');
+    paragraph.append(source);
+    flow.append(paragraph);
+    try {
+      await prepared;
+      expect(preparation.readRefresh).toHaveBeenCalledOnce();
+    } finally {
+      release();
+      preparation.hold = null;
+    }
+    await vi.waitFor(() =>
+      expect(paragraph.querySelector('[data-site-typography-slot]')?.firstChild).toBe(source)
+    );
+  });
+
+  it('keeps a CodeExample tab hint in its native owner without replacing the Docs generation', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const articleText = root.querySelector<HTMLElement>('#body')!;
+    const example = document.createElement('section');
+    example.dataset.codeExample = '';
+    const hint = document.createElement('p');
+    hint.dataset.codeHostOverflow = '';
+    const hintSource = document.createTextNode('Scroll to see all hosts');
+    hint.append(hintSource);
+    example.append(hint);
+    flow.append(example);
+
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    const generation = articleText.dataset.typographyGeneration;
+    expect(generation).toBeTruthy();
+    expect(hint.firstChild).toBe(hintSource);
+    expect(hint.hasAttribute('data-typography-owner')).toBe(false);
+
+    const queries = vi.spyOn(root, 'querySelectorAll');
+    const projectedTabs = document.createElement('div');
+    projectedTabs.dataset.codeExampleTabsProjection = 'shadcn';
+    example.append(projectedTabs);
+    projectedTabs.append(hint);
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith(expect.stringContaining('[data-site-typography]'));
+    expect(articleText.dataset.typographyGeneration).toBe(generation);
+    expect(hint.firstChild).toBe(hintSource);
+    expect(hint.parentElement).toBe(projectedTabs);
+
+    flow.append(hint);
+    await vi.waitFor(() => expect(hint.dataset.typographyRuntime).toBe('wc'));
+    expect(hint.querySelector('[data-site-typography-slot]')?.firstChild).toBe(hintSource);
+  });
+
+  it('ignores renderer-owned Copy and Code children but reconciles their native caption parent', async () => {
+    const root = fixture();
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const caption = document.createElement('figcaption');
+    const source = document.createTextNode('Native caption');
+    const copy = document.createElement('div');
+    copy.className = 'site-copy-mount';
+    const code = document.createElement('div');
+    code.className = 'site-code-surface-mount';
+    caption.append(source, copy);
+    flow.append(caption, code);
+    const handle = initDocumentationTypography(document)!;
+    handles.push(handle);
+    await handle.ready;
+    await settle();
+    expect(caption.getAttribute('data-typography-runtime')).toBeNull();
+
+    const queries = vi.spyOn(root, 'querySelectorAll');
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(flow, { childList: true, subtree: true });
+    });
+    const copyLabel = document.createElement('label');
+    copyLabel.textContent = 'Copy status';
+    const codeLabel = copyLabel.cloneNode(true) as HTMLElement;
+    copy.append(copyLabel);
+    code.append(codeLabel);
+    await delivered;
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith(expect.stringContaining('[data-site-typography]'));
+    expect(copyLabel.getAttribute('data-typography-runtime')).toBeNull();
+    expect(codeLabel.getAttribute('data-typography-runtime')).toBeNull();
+
+    copy.remove();
+    await vi.waitFor(() => expect(caption.getAttribute('data-typography-runtime')).toBe('wc'));
+    expect(caption.querySelector('[data-site-typography-slot]')?.firstChild).toBe(source);
+  });
+
   it('reconciles a source addition whose observer ran during empty-scope preparation', async () => {
     document.body.innerHTML = '<main data-site-family-scope><div data-doc-flow></div></main>';
     const root = document.querySelector('main')!;

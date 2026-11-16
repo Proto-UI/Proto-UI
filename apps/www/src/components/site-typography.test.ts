@@ -624,6 +624,62 @@ it('discovers native note-title intent before any asynchronous Surface bootstrap
 // endpoints remain identical. Happy DOM does not model those browser steps;
 // the controlled side effect below makes that source ownership boundary red.
 describe('startup typography and independent native selection owners', () => {
+  it('reads document selection only when a disposing batch still owns native text', async () => {
+    const root = fixture();
+    const body = root.querySelector('#body')!;
+    const source = body.firstChild!;
+    const participant = siteTypographyParticipant(root);
+    const first = await participant.materialize(request('wc', 1));
+    const second = await participant.materialize(request('wc', 2, 'brutalist'));
+    const cancelled = await participant.materialize(request('wc', 3));
+    candidates.push(first, second, cancelled);
+    first.activate();
+    second.activate();
+    const selection = document.getSelection()!;
+    selection.setBaseAndExtent(source, 3, source, 3);
+    const readSelection = vi.spyOn(document, 'getSelection');
+
+    await cancelled.dispose();
+    await first.dispose();
+    expect(readSelection).not.toHaveBeenCalled();
+    expect(body.querySelector('[data-site-typography-slot]')!.firstChild).toBe(source);
+
+    await second.dispose();
+    expect(readSelection).toHaveBeenCalledTimes(1);
+    expect(body.firstChild).toBe(source);
+    expect(selection.anchorNode).toBe(source);
+    expect(selection.anchorOffset).toBe(3);
+  });
+
+  it('preserves the native owner without reading the other boundary for an empty selection', async () => {
+    const root = fixture();
+    const source = root.querySelector('#body')!.firstChild!;
+    const command = document.createElement('button');
+    command.textContent = 'Header command';
+    root.prepend(command);
+    const candidate = await siteTypographyParticipant(root).materialize(request('react', 1));
+    candidates.push(candidate);
+    command.focus();
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    expect(selection.anchorNode).toBeNull();
+    expect(selection.focusNode).toBeNull();
+    const anchorNode = vi.spyOn(selection, 'anchorNode', 'get');
+    const focusNode = vi.spyOn(selection, 'focusNode', 'get');
+    const anchorOffset = vi.spyOn(selection, 'anchorOffset', 'get');
+    const focusOffset = vi.spyOn(selection, 'focusOffset', 'get');
+
+    candidate.activate();
+    expect(root.querySelector('#body [data-site-typography-slot]')!.firstChild).toBe(source);
+    await candidate.dispose();
+    expect(root.querySelector('#body')!.firstChild).toBe(source);
+    expect(document.activeElement).toBe(command);
+    expect([anchorNode.mock.calls.length, focusNode.mock.calls.length]).toEqual([2, 0]);
+    expect(selection.anchorNode).toBeNull();
+    expect(selection.focusNode).toBeNull();
+    expect([anchorOffset.mock.calls.length, focusOffset.mock.calls.length]).toEqual([0, 0]);
+  });
+
   for (const focusOwner of ['button', 'a'] as const)
     it(`does not reapply a retained code selection while ${focusOwner} owns focus`, async () => {
       const root = fixture();

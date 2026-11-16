@@ -153,6 +153,7 @@ import {
 } from '../portal-mount';
 import {
   composedParentElement,
+  hasWebComponentScopeDescendant,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
@@ -1804,11 +1805,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // A host selected as the substituted Tab stop must remain a valid
             // focus target for the duration of that focus. Once focus leaves,
             // the ordinary descendant-first result is restored immediately.
-            const resolved =
-              target.ownerDocument.activeElement === target
-                ? target
-                : resolveFocusEntryTarget(target, config);
-            projectFocusable(target, resolved === target);
+            const usesSelf =
+              target.ownerDocument.activeElement === target ||
+              (config.fallback === 'self' &&
+                (config.strategy === 'self' ||
+                  !hasWebComponentScopeDescendant(target, isNativelyFocusable)));
+            projectFocusable(target, usesSelf);
             projectedTargetTabIndex = target.getAttribute('tabindex');
           };
           const projectCurrent = () => {
