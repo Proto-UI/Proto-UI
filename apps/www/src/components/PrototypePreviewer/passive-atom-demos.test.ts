@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { assertDemoSpec, type DemoNode, type DemoSpec } from './demo-types';
 import { createSurfaceAtomDemo } from './surface-atom-demo';
@@ -14,6 +15,7 @@ function atoms(demo: DemoSpec): DemoNode[] {
   };
   return collect(demo.root);
 }
+const registry = readFileSync(new URL('./prototype-modules.ts', import.meta.url), 'utf8');
 
 describe('Passive atom documentation recipes', () => {
   for (const family of [
@@ -32,6 +34,8 @@ describe('Passive atom documentation recipes', () => {
         expect(node.kind).toBe('proto');
         if (node.kind !== 'proto') throw new Error('Expected the actual Text atom');
         expect(node.prototypeId).toBe(`${family}-text-root`);
+        expect(registry).toContain(`'${node.prototypeId}'`);
+        expect(registry).toContain(`@proto.ui/prototypes-${family}/text`);
         expect(node.className).toBeUndefined();
         expect(node.surfaceStyle).toBeUndefined();
         expect(
@@ -70,6 +74,8 @@ describe('Passive atom documentation recipes', () => {
       for (const node of atoms(demo)) {
         if (node.kind !== 'proto') throw new Error('Expected the actual Surface atom');
         expect(node.prototypeId).toBe(`${family}-surface-root`);
+        expect(registry).toContain(`'${node.prototypeId}'`);
+        expect(registry).toContain(`@proto.ui/prototypes-${family}/surface`);
         expect(node.className).toBeUndefined();
         expect(node.surfaceStyle).toBeUndefined();
         expect(

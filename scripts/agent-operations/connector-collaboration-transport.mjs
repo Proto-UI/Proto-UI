@@ -45,6 +45,23 @@ function jsonBytes(value) {
   return text;
 }
 
+const LAUNCHER_READ_RETRY_MS = 5;
+const launcherWaitBuffer = new Int32Array(new SharedArrayBuffer(4));
+
+// A launcher pipe is non-blocking, so an empty read window raises EAGAIN
+// instead of waiting for the trusted parent. That is a pending answer, not a
+// disconnect: wait for the next readable window and retry the same read.
+function readLauncherBytes(inputFd, chunk) {
+  for (;;) {
+    try {
+      return readSync(inputFd, chunk, 0, chunk.length, null);
+    } catch (error) {
+      if (error?.code !== 'EAGAIN') throw error;
+      Atomics.wait(launcherWaitBuffer, 0, 0, LAUNCHER_READ_RETRY_MS);
+    }
+  }
+}
+
 // The launcher owns both pipes. Never feed task-authored response files to
 // stdin, or derive launcher options/trust anchors from a request or handoff.
 // Tool traffic uses stderr; stdout remains the canonical CLI result only.
@@ -75,7 +92,7 @@ export function createStdioConnectorExchange({ inputFd = 0, outputFd = 2 } = {})
         Buffer.byteLength(buffered) <= MAX_LIVE_RESPONSE_BYTES,
         'connector bridge response exceeds the live collaboration payload bound'
       );
-      const length = readSync(inputFd, chunk, 0, chunk.length, null);
+      const length = readLauncherBytes(inputFd, chunk);
       requireValue(length > 0, 'trusted connector parent disconnected; no fallback is allowed');
       buffered += decoder.write(chunk.subarray(0, length));
     }

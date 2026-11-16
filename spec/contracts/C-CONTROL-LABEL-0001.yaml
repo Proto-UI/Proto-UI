@@ -7,8 +7,8 @@ lifecycleRationale:
   en: The bounded independent Label and eight-target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
 summary: One opaque reference authorizes one independent Label and one participating control without adding a Label part to the control's anatomy or introducing a general action bus.
 statement:
-  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The implemented target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; Text Control activation is focus-only.
-  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。当前目标包括 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；Text Control 的关联 activation 仅请求 focus。
+  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; each target declares its own participation and keeps its existing operation owners; Text Control activation is focus-only. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item; their association is exercised through the Prototype packages and their Adapters.
+  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；每个目标自行声明参与并保留既有操作所有者；Text Control 的关联 activation 仅请求 focus。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断；这些目标的关联通过 Prototype 包与其 Adapter 使用。
 criteria:
   - id: C-CONTROL-LABEL-0001-IDENTITY
     text:
@@ -109,4 +109,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded the bounded independent Label pairing direction, explicit domain, ownership and lowering requirements without stable admission.
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Named the Compiler admission boundary for the declared association target set; Toggle Group Item stays a declared target and the Toggle Group Root and Item definitions keep their explicit unsupported diagnostic.
 tags: [label, accessibility, association, activation, lifecycle]
