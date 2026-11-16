@@ -169,6 +169,9 @@ verifies:
   tests:
     - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Admitted the exact overflow-y-auto surface role for ordinary split Roots with a validated scrollport recipe.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Bound non-split native w-full parent allocation without moving paint or generalizing flex placement.

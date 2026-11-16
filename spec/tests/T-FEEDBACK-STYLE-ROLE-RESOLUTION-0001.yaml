@@ -397,6 +397,9 @@ sources:
   - path: packages/core/src/spec/feedback/application-role.ts
   - path: packages/core/test/feedback/application-role.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Mapped the exact vertical scroll role and split companion validation to the classifier and Adapter tests.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added bounded Template-only CSS generation and Root admission separation evidence; public author APIs and draft lifecycle unchanged.
