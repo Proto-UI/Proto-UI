@@ -529,6 +529,25 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it.each(['(config) => config', 'defineAsHook'])(
+    'keeps preflight when a local factory shadows definePrototype with %s',
+    async (localFactory) => {
+      await expect(
+        generate(`
+        import { definePrototype, defineAsHook, tw } from '@proto.ui/core';
+        {
+          const definePrototype = ${localFactory};
+          definePrototype({ name: 'lexically-shadowed-producer', setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            def.feedback.style.to(target).use(tw('p-[10%]'));
+            return r => r.decoration(target);
+          }});
+        }
+      `)
+      ).rejects.toThrow(/verified length recipe/);
+    }
+  );
+
   it.each([
     '(def.feedback.style.declareDecoration())',
     '(def.feedback.style.declareDecoration() as ReturnType<typeof def.feedback.style.declareDecoration>)',

@@ -63,10 +63,7 @@ export type HookSourceSummaryContext = {
   /** Resolve an authored producer call and its captured result. */
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
   /** Resolve a stable synchronous authored function without executing it. */
-  resolveSourceFunction(
-    node: ts.Node,
-    source: ts.SourceFile
-  ): ts.FunctionLikeDeclaration | null;
+  resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -78,6 +75,7 @@ export type HookSourceSummaryContext = {
    * does not.
    */
   isAuthoredSetup(node: ts.Node, source: ts.SourceFile): boolean;
+  isDefinePrototypeReference(node: ts.Node, source: ts.SourceFile): boolean;
   /** Verify the actual lexical producer declaration, not a same-named shadow. */
   isSameSourceBinding(
     node: ts.CallExpression,
@@ -629,14 +627,17 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         (ts.isBinaryExpression(node) &&
           node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
           node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
-        ts.isForOfStatement(node) || ts.isForInStatement(node) ||
-        (ts.isVariableDeclaration(node) && node.initializer &&
+        ts.isForOfStatement(node) ||
+        ts.isForInStatement(node) ||
+        (ts.isVariableDeclaration(node) &&
+          node.initializer &&
           ts.isVariableDeclarationList(node.parent) &&
           (node.parent.flags & ts.NodeFlags.BlockScoped) === 0) ||
         ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
           (node.operator === ts.SyntaxKind.PlusPlusToken ||
             node.operator === ts.SyntaxKind.MinusMinusToken))
-      ) candidates.push(node);
+      )
+        candidates.push(node);
       ts.forEachChild(node, visit);
     };
     visit(source);
@@ -4256,6 +4257,8 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     },
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
+    isDefinePrototypeReference: (node, source) =>
+      moduleContext.isDefinePrototypeReference(node, moduleForSource(source)),
     isSameSourceBinding,
   };
 }

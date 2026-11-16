@@ -1280,7 +1280,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           const expression = outerStyleExpression(node);
           const parent = expression.parent;
           if (
-            isTemplateStyleCall(node) ||
+            isTemplateStyleCall(node, scope) ||
             (isCanonicalStyleHandle(node, scope) &&
               isOwnedDecorationStyleArgument(expression, scope))
           ) {
@@ -1420,7 +1420,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
   ts.forEachChild(node, (child) => walk(child, scope, tokens, exposures, rootInventory));
 }
 
-function isTemplateStyleCall(node) {
+function isTemplateStyleCall(node, scope) {
   // No wrapper can receive the handle before the Template node does.
   const style = node.parent;
   if (
@@ -1492,7 +1492,7 @@ function isTemplateStyleCall(node) {
     render.parent.parent !== setup.body
   )
     return false;
-  if (!isCanonicalPrototypeSetup(setup)) return false;
+  if (!isCanonicalPrototypeSetup(setup, scope)) return false;
 
   let safe = true;
   function check(current) {
@@ -1532,7 +1532,7 @@ function isTemplateStyleCall(node) {
   return safe;
 }
 
-function isCanonicalPrototypeSetup(setup, requireTw = true) {
+function isCanonicalPrototypeSetup(setup, scope, requireTw = true) {
   const declaration = ts.isMethodDeclaration(setup)
     ? setup
     : (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) &&
@@ -1554,6 +1554,7 @@ function isCanonicalPrototypeSetup(setup, requireTw = true) {
     return false;
   const source = setup.getSourceFile();
   return (
+    scope.sourceSummary?.isDefinePrototypeReference(definition.expression, source) &&
     hasCanonicalCoreImport(source, 'definePrototype') &&
     (!requireTw || hasCanonicalCoreImport(source, 'tw'))
   );
@@ -1788,7 +1789,7 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
       [...callers].every(
         ([owner, facts]) =>
           receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper) &&
-          (isCanonicalPrototypeSetup(owner, false)
+          (isCanonicalPrototypeSetup(owner, scope, false)
             ? parameterName(owner) === facts.definition
             : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, active))
       )
@@ -1904,7 +1905,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     declarationOwner = ruleCaller.owner;
     definition = ruleCaller.definition;
   }
-  if (isCanonicalPrototypeSetup(declarationOwner, false)) {
+  if (isCanonicalPrototypeSetup(declarationOwner, scope, false)) {
     if (parameterName(declarationOwner) !== definition) return false;
   } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope)) return false;
 
