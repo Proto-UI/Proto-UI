@@ -1533,27 +1533,31 @@ function isTemplateStyleCall(node, scope) {
 }
 
 function isCanonicalPrototypeSetup(setup, scope, requireTw = true) {
-  const declaration = ts.isMethodDeclaration(setup)
-    ? setup
-    : (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) &&
-        ts.isPropertyAssignment(setup.parent) &&
-        setup.parent.initializer === setup
-      ? setup.parent
-      : undefined;
-  if (!declaration || getPropertyName(declaration.name) !== 'setup') return false;
-  const config = declaration.parent;
-  const definition = config.parent;
+  const summary = scope.sourceSummary;
+  if (!summary || (requireTw && !hasCanonicalCoreImport(setup.getSourceFile(), 'tw'))) return false;
+  if (ts.isMethodDeclaration(setup)) return summary.isCanonicalPrototypeSetupProperty(setup);
   if (
-    !ts.isObjectLiteralExpression(config) ||
-    !ts.isCallExpression(definition) ||
-    definition.arguments[0] !== config ||
-    ts.findAncestor(definition.parent, ts.isFunctionLike)
+    (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) &&
+    ts.isPropertyAssignment(setup.parent) &&
+    setup.parent.initializer === setup
   )
-    return false;
-  const source = setup.getSourceFile();
+    return summary.isCanonicalPrototypeSetupProperty(setup.parent);
+
+  const binding = decorationHelperBinding(setup);
+  if (!binding) return false;
+  const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+  const references = inspectedHelperReferences(setup, binding, statement, scope);
   return (
-    scope.sourceSummary?.isDefinePrototypeReference(definition.expression, source) &&
-    (!requireTw || hasCanonicalCoreImport(source, 'tw'))
+    references.length > 0 &&
+    references.every((reference) => {
+      const property = outerStyleExpression(reference).parent;
+      return (
+        ((ts.isPropertyAssignment(property) &&
+          unwrapTransparent(property.initializer) === reference) ||
+          (ts.isShorthandPropertyAssignment(property) && property.name === reference)) &&
+        summary.isCanonicalPrototypeSetupProperty(property)
+      );
+    })
   );
 }
 

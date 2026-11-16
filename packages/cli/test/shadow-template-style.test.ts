@@ -558,6 +558,44 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it.each([
+    ['function setup(def) { BODY }', 'setup'],
+    ['const configure = (def) => { BODY };', 'setup: configure'],
+  ])(
+    'classifies decoration paint from a referenced prototype setup',
+    async (declaration, property) => {
+      const { artifact } = await generate(`
+      import { definePrototype as define, tw } from '@proto.ui/core';
+      ${declaration.replace(
+        'BODY',
+        `
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      `
+      )}
+      define({ name: 'referenced-decoration-setup', ${property} });
+    `);
+      expect(artifact.cssText).toContain('padding: 10%;');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+    }
+  );
+
+  it('retains preflight when a referenced setup also escapes to an opaque caller', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }
+      definePrototype({ name: 'escaped-decoration-setup', setup });
+      consume(setup);
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('identifies a verified decoration helper receiver after its options argument', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';

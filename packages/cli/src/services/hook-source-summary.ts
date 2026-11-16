@@ -77,7 +77,7 @@ export type HookSourceSummaryContext = {
    * does not.
    */
   isAuthoredSetup(node: ts.Node, source: ts.SourceFile): boolean;
-  isDefinePrototypeReference(node: ts.Node, source: ts.SourceFile): boolean;
+  isCanonicalPrototypeSetupProperty(property: ts.ObjectLiteralElementLike): boolean;
   /** Verify the actual lexical producer declaration, not a same-named shadow. */
   isSameSourceBinding(
     node: ts.CallExpression,
@@ -4309,8 +4309,21 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     hasDynamicImportOfFunction,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
-    isDefinePrototypeReference: (node, source) =>
-      moduleContext.isDefinePrototypeReference(node, moduleForSource(source)),
+    isCanonicalPrototypeSetupProperty: (property) => {
+      const config = property.parent;
+      const definition = config.parent;
+      return (
+        ts.isObjectLiteralExpression(config) &&
+        ts.isCallExpression(definition) &&
+        definition.arguments[0] === config &&
+        configProperty(config, 'setup') === property &&
+        !ts.findAncestor(definition.parent, ts.isFunctionLike) &&
+        moduleContext.isDefinePrototypeReference(
+          definition.expression,
+          moduleForSource(property.getSourceFile())
+        )
+      );
+    },
     isSameSourceBinding,
   };
 }
