@@ -46,6 +46,60 @@ function execute(code: string, values: Record<string, unknown>) {
   return vm.runInNewContext(transformSync(code, { loader: 'ts', target: 'es2022' }).code, values);
 }
 const stub = () => {};
+function calendarCloseProbeFixture() {
+  const window = new Window();
+  const document = window.document;
+  const parent = document.createElement('section');
+  const element = document.createElement('div');
+  parent.setAttribute('data-previewer-id', 'calendar');
+  for (const [name, value] of Object.entries({
+    role: 'combobox',
+    'aria-label': 'Month',
+    'aria-controls': 'month-content',
+    'aria-expanded': 'true',
+    'data-demo-ref': 'month-trigger',
+  }))
+    element.setAttribute(name, value);
+  document.body.append(parent);
+  parent.append(element);
+  let now = 10;
+  let onKey!: (event: { key: string; isTrusted: boolean }) => void;
+  let onMutation!: (records: Array<{ oldValue: string | null }>) => void;
+  const removeEventListener = vi.spyOn(document, 'removeEventListener');
+  vi.spyOn(document, 'addEventListener').mockImplementation((_type, listener) => {
+    onKey = listener as unknown as typeof onKey;
+  });
+  const disconnect = vi.fn();
+  const createProbe = execute(
+    `${statements(['createCalendarCloseProbe'])}; createCalendarCloseProbe;`,
+    {
+      performance: { now: () => now, timeOrigin: 100_000 },
+      MutationObserver: class {
+        constructor(listener: typeof onMutation) {
+          onMutation = listener;
+        }
+        observe() {}
+        disconnect = disconnect;
+      },
+    }
+  );
+  const probe = createProbe(element, 'Enter');
+  return {
+    window,
+    parent,
+    element,
+    probe,
+    removeEventListener,
+    disconnect,
+    time: (value: number) => (now = value),
+    key: (isTrusted = true, key = 'Enter') => onKey({ key, isTrusted }),
+    mutate: (oldValues: Array<string | null>, expanded: string | null) => {
+      if (expanded === null) element.removeAttribute('aria-expanded');
+      else element.setAttribute('aria-expanded', expanded);
+      onMutation(oldValues.map((oldValue) => ({ oldValue })));
+    },
+  };
+}
 const manifest = execute(
   `${statements(['FAMILIES', 'CALENDAR_STATES', 'cases', 'routeFor'])}; ({cases, routeFor});`,
   {
@@ -73,7 +127,7 @@ function mockedCase(
     screenshotFailure?: boolean;
     navigationFailure?: Error;
     diagnosticFailure?: boolean;
-    component?: 'form' | 'popover';
+    component?: 'form' | 'popover' | 'calendar';
     journey?: (capture: HarnessCapture) => Promise<void>;
     screenshotEffect?: (options: HarnessScreenshot) => void;
     imageBytes?: (file: string) => Buffer;
@@ -157,8 +211,21 @@ function mockedCase(
 describe('Finf representative evidence harness, no native browser', () => {
   it('registers the existing suite with one official owner and five representative groups plus separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
-    expect(manifest.cases).toHaveLength(34);
-    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(34);
+    expect(manifest.cases).toHaveLength(38);
+    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(38);
+    expect(
+      manifest.cases.filter((entry) => entry.group === 'calendar').map(({ id }) => id)
+    ).toEqual([
+      'shadcn-calendar-rest',
+      'shadcn-calendar-month-menu',
+      'shadcn-calendar-year-scroll',
+      'shadcn-calendar-focus-only',
+      'shadcn-calendar-selected-focused',
+      'shadcn-calendar-caption-wc',
+      'shadcn-calendar-caption-react',
+      'shadcn-calendar-caption-vue',
+      'shadcn-calendar-caption-vue2',
+    ]);
     const counts = Object.fromEntries(
       workflow.jobs['representative-features'].strategy.matrix.group.map((group: string) => [
         group,
@@ -167,7 +234,7 @@ describe('Finf representative evidence harness, no native browser', () => {
     );
     expect(counts).toEqual({
       forms: 12,
-      calendar: 5,
+      calendar: 9,
       'disclosure-overlays': 8,
       'modal-overlays': 5,
       'runtime-tabs': 4,
@@ -289,7 +356,7 @@ describe('Finf representative evidence harness, no native browser', () => {
     const steps = workflow.jobs['representative-features'].steps;
     const presets = steps.find((step: any) => step.id === 'presets');
     expect(presets['continue-on-error']).toBeUndefined();
-    const capture = steps.find((step: any) => step.env?.PUI_FINF_FEATURE_GROUP);
+    const capture = steps.find((step: any) => step.id === 'capture');
     expect(capture.if).toContain('!cancelled()');
     expect(capture.if).not.toContain('steps.presets.outcome');
     expect(capture.env.PUI_FINF_PRESET_CHECK).toBe('${{ steps.presets.outcome }}');
@@ -329,6 +396,335 @@ describe('Finf representative evidence harness, no native browser', () => {
     expect(journey).toContain('element.isConnected)).toBe(true)');
     expect(journey).not.toContain('data-projection-generation');
     expect(journey).not.toContain('dispatchEvent');
+  });
+
+  it.each([true, false])(
+    'selects the actual runtime tab before keyboard navigation even when selected=%s',
+    async (alreadySelected) => {
+      let selected = alreadySelected;
+      let focused = false;
+      const tab = {
+        waitFor: vi.fn(),
+        getAttribute: vi.fn(async () => String(selected)),
+        click: vi.fn(async () => {
+          selected = true;
+          focused = true;
+        }),
+      };
+      const ready = vi.fn();
+      const select = execute(`${statements(['selectRealRuntime'])}; selectRealRuntime;`, {
+        runtimeTab: async () => tab,
+        waitForRealRuntime: ready,
+        expect,
+      });
+      await select({}, {}, 'wc', '[role="gridcell"]', 42);
+      expect(tab.click).toHaveBeenCalledOnce();
+      expect(focused).toBe(true);
+      expect(ready).toHaveBeenCalledOnce();
+    }
+  );
+
+  it('samples Calendar paint only after native pending and running transitions finish', async () => {
+    let frame = 0;
+    const observations = [
+      [{ pending: true, playState: 'running' }],
+      [{ pending: false, playState: 'running' }],
+      [{ pending: false, playState: 'finished' }],
+    ];
+    const element = { getAnimations: () => observations[Math.min(frame, 2)] };
+    const locator = {
+      evaluate: async (read: (element: unknown) => unknown) => {
+        const result = read(element);
+        frame++;
+        return result;
+      },
+    };
+    const paint = vi.fn(async () => ({ shadow: '0px 0px 0px 3px', frame }));
+    const settledPaint = execute(`${statements(['settledPaint'])}; settledPaint;`, {
+      expect,
+      paint,
+    });
+    await expect(settledPaint(locator)).resolves.toEqual({
+      shadow: '0px 0px 0px 3px',
+      frame: 3,
+    });
+    expect(paint).toHaveBeenCalledOnce();
+  });
+
+  it('keeps a nonsettling Calendar transition red without capturing an invented endpoint', async () => {
+    const locator = {
+      evaluate: async (read: (element: unknown) => unknown) =>
+        read({ getAnimations: () => [{ pending: false, playState: 'running' }] }),
+    };
+    const paint = vi.fn();
+    const settledPaint = execute(`${statements(['settledPaint'])}; settledPaint;`, {
+      expect,
+      paint,
+    });
+    await expect(settledPaint(locator)).rejects.toThrow();
+    expect(paint).not.toHaveBeenCalled();
+  });
+
+  it('captures Calendar native transitions without screenshot-driven completion', async () => {
+    const fixture = mockedCase({ component: 'calendar' });
+    await fixture.run();
+    for (const [options] of fixture.page.screenshot.mock.calls)
+      expect(options.animations).toBe('allow');
+  });
+
+  it.each([true, false])(
+    'records Calendar key-to-close time only for trusted input (trusted=%s)',
+    (isTrusted) => {
+      const fixture = calendarCloseProbeFixture();
+      fixture.time(20);
+      fixture.key(true, 'ArrowDown');
+      fixture.key(isTrusted);
+      fixture.time(37);
+      fixture.mutate(['true'], 'false');
+      fixture.time(50);
+      const observation = fixture.probe.stop();
+      expect(observation).toMatchObject({
+        installedAt: 10,
+        keyAt: isTrusted ? 20 : null,
+        closedAt: isTrusted ? 37 : null,
+        closeAfterKeyMs: isTrusted ? 17 : null,
+        initialExpanded: 'true',
+        expanded: 'false',
+      });
+      expect(observation.events.at(-1)).toMatchObject({
+        at: 37,
+        kind: 'expanded',
+        previous: 'true',
+        expanded: 'false',
+      });
+      expect(fixture.disconnect).toHaveBeenCalledOnce();
+      expect(fixture.removeEventListener).toHaveBeenCalledWith(
+        'keydown',
+        expect.any(Function),
+        true
+      );
+    }
+  );
+
+  it('keeps the original Calendar close failure when timing capture also fails', async () => {
+    const failure = new Error('native close assertion failed');
+    const probe = { evaluate: vi.fn(async () => ({})), dispose: vi.fn(async () => {}) };
+    const trigger = { evaluateHandle: vi.fn(async () => probe) };
+    const journey = {
+      page: { keyboard: { press: vi.fn(async () => Promise.reject(failure)) } },
+      previewer: {},
+      capture: vi.fn(async () => {
+        throw new Error('screenshot unavailable');
+      }),
+    };
+    const close = execute(`${statements(['closeCalendarPopup'])}; closeCalendarPopup;`, {
+      createCalendarCloseProbe: stub,
+      expect,
+      performance,
+    });
+    await expect(close(journey, trigger, 'Escape', 'close-timing')).rejects.toBe(failure);
+    expect(journey.capture).toHaveBeenCalledOnce();
+    expect(probe.dispose).toHaveBeenCalledOnce();
+  });
+
+  it.each([false, true])(
+    'records Calendar true/null/false close projection across split batches=%s',
+    (split) => {
+      const fixture = calendarCloseProbeFixture();
+      fixture.time(20);
+      fixture.key();
+      if (split) {
+        fixture.time(30);
+        fixture.mutate(['true'], null);
+      }
+      fixture.time(37);
+      fixture.mutate(split ? [null] : ['true', null], 'false');
+      const observation = fixture.probe.stop(fixture.element);
+      expect(observation).toMatchObject({ closedAt: 37, closeAfterKeyMs: 17 });
+      expect(observation.events.at(-1)).toMatchObject({
+        previous: null,
+        expanded: 'false',
+      });
+    }
+  );
+
+  it('distinguishes a detached Calendar close subject from its same-label replacement', () => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.time(20);
+    fixture.key();
+    const replacement = fixture.element.cloneNode(true);
+    fixture.element.replaceWith(replacement);
+    fixture.time(37);
+    fixture.mutate(['true', null], 'false');
+    const observation = fixture.probe.stop(replacement);
+    expect(observation).toMatchObject({
+      closedAt: 37,
+      sameCurrentElement: false,
+      keySubject: { connected: true, role: 'combobox', label: 'Month' },
+      firstFalseSubject: { connected: false, expanded: 'false' },
+      observedSubject: { connected: false, expanded: 'false' },
+      currentSubject: { connected: true, expanded: 'true', label: 'Month' },
+    });
+  });
+
+  it('records Calendar ancestor exposure separately at input, first false and final inspection', () => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.parent.setAttribute('inert', '');
+    fixture.time(20);
+    fixture.key();
+    fixture.parent.removeAttribute('inert');
+    fixture.parent.setAttribute('aria-hidden', 'true');
+    fixture.time(37);
+    fixture.mutate(['true', null], 'false');
+    fixture.parent.removeAttribute('aria-hidden');
+    fixture.parent.style.visibility = 'hidden';
+    const observation = fixture.probe.stop(fixture.element);
+    expect(observation.sameCurrentElement).toBe(true);
+    expect(observation.keySubject.ancestors[1]).toMatchObject({ inert: true });
+    expect(observation.firstFalseSubject.ancestors[1]).toMatchObject({ ariaHidden: 'true' });
+    expect(observation.currentSubject.ancestors[1]).toMatchObject({
+      inert: false,
+      ariaHidden: null,
+      visibility: 'hidden',
+    });
+    expect(observation.keySubject.ancestors[1].visibility).toBeNull();
+  });
+
+  it('does not attribute an already closed Calendar trigger to a later trusted key', () => {
+    const fixture = calendarCloseProbeFixture();
+    fixture.mutate(['true', null], 'false');
+    fixture.time(20);
+    fixture.key();
+    fixture.time(37);
+    fixture.mutate(['false', null], 'false');
+    expect(fixture.probe.stop(fixture.element)).toMatchObject({
+      keyAt: 20,
+      keyExpanded: 'false',
+      closedAt: null,
+      closeAfterKeyMs: null,
+    });
+  });
+
+  it('records each original Calendar locator read without changing the poll budget or value', async () => {
+    let now = 100;
+    const currentElement = { dispose: vi.fn(async () => {}) };
+    const getterError = new Error('selector unavailable', { cause: new Error('protocol busy') });
+    const getAttribute = vi
+      .fn()
+      .mockImplementationOnce(async () => {
+        now = 150;
+        throw getterError;
+      })
+      .mockImplementationOnce(async () => {
+        now = 180;
+        return 'true';
+      })
+      .mockImplementationOnce(async () => {
+        now = 220;
+        return 'false';
+      });
+    const probe = {
+      evaluate: vi.fn(async (read, current) => read({ stop: () => ({ current }) }, current)),
+      dispose: vi.fn(async () => {}),
+    };
+    const trigger = {
+      evaluateHandle: vi.fn(async () => probe),
+      elementHandle: vi.fn(async () => currentElement),
+      getAttribute,
+    };
+    const capture = vi.fn(async () => {});
+    const poll = vi.fn((read: () => Promise<unknown>) => ({
+      toBe: async (expected: unknown) => {
+        expect(expected).toBe('false');
+        await expect(read()).rejects.toBe(getterError);
+        now = 160;
+        expect(await read()).toBe('true');
+        now = 190;
+        expect(await read()).toBe('false');
+      },
+    }));
+    const close = execute(`${statements(['closeCalendarPopup'])}; closeCalendarPopup;`, {
+      createCalendarCloseProbe: stub,
+      expect: { poll },
+      performance: { now: () => now, timeOrigin: 100_000 },
+    });
+    await close(
+      { page: { keyboard: { press: async () => (now = 130) } }, previewer: {}, capture },
+      trigger,
+      'Escape',
+      'close-timing'
+    );
+    expect(poll).toHaveBeenCalledOnce();
+    expect(poll.mock.calls[0]).toHaveLength(1);
+    expect(getAttribute.mock.calls).toEqual(Array.from({ length: 3 }, () => ['aria-expanded']));
+    const observation = (capture.mock.calls as unknown as Array<[string, any]>)[0][1];
+    expect(observation.assertionPassed).toBe(true);
+    expect(observation.nodeTrace).toMatchObject({
+      keyStartedAt: 100,
+      keyReturnedAt: 130,
+      pollStartedAt: 130,
+      assertionFinishedAt: 220,
+      reads: [
+        {
+          startedAt: 130,
+          settledAt: 150,
+          status: 'rejected',
+          error: { message: 'selector unavailable', cause: { message: 'protocol busy' } },
+        },
+        { startedAt: 160, settledAt: 180, status: 'resolved', value: 'true' },
+        { startedAt: 190, settledAt: 220, status: 'resolved', value: 'false' },
+      ],
+    });
+  });
+
+  it('preserves a Calendar poll timeout when its pending getter later returns false', async () => {
+    let now = 100;
+    let finish!: (value: string) => void;
+    const pending = new Promise<string>((resolve) => (finish = resolve));
+    const failure = new Error('Matcher did not succeed in 1000ms');
+    const capture = vi.fn(async () => {});
+    const probe = {
+      evaluate: vi.fn(async (read, current) => {
+        now = 1500;
+        finish('false');
+        await Promise.resolve();
+        return read({ stop: () => ({ expanded: 'false' }) }, current);
+      }),
+      dispose: vi.fn(async () => {}),
+    };
+    const trigger = {
+      evaluateHandle: vi.fn(async () => probe),
+      elementHandle: vi.fn(async () => null),
+      getAttribute: vi.fn(() => pending),
+    };
+    const poll = vi.fn((read: () => Promise<unknown>) => ({
+      toBe: async () => {
+        void read();
+        now = 1100;
+        throw failure;
+      },
+    }));
+    const close = execute(`${statements(['closeCalendarPopup'])}; closeCalendarPopup;`, {
+      createCalendarCloseProbe: stub,
+      expect: { poll },
+      performance: { now: () => now, timeOrigin: 100_000 },
+    });
+    await expect(
+      close(
+        { page: { keyboard: { press: async () => {} } }, previewer: {}, capture },
+        trigger,
+        'Escape',
+        'close-timing'
+      )
+    ).rejects.toBe(failure);
+    const observation = (capture.mock.calls as unknown as Array<[string, any]>)[0][1];
+    expect(observation.assertionPassed).toBe(false);
+    expect(observation.nodeTrace).toMatchObject({
+      pollStartedAt: 100,
+      assertionFinishedAt: 1100,
+      assertionError: { message: 'Matcher did not succeed in 1000ms' },
+      reads: [{ startedAt: 100, settledAt: 1500, status: 'resolved', value: 'false' }],
+    });
   });
 
   it('keeps Calendar retained capacity distinct from five visible weeks and preserves actual Close', () => {
@@ -1040,7 +1436,7 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     ): unknown;
   };
   const capture = workflow.jobs['representative-features'].steps.find(
-    (step: { env?: { PUI_FINF_FEATURE_GROUP?: string } }) => step.env?.PUI_FINF_FEATURE_GROUP
+    (step: { id?: string }) => step.id === 'capture'
   );
 
   it('owns the exact Card suite once and rejects missing or duplicate whole-inventory registration', () => {

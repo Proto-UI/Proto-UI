@@ -42,6 +42,10 @@ criteria:
     text:
       zh-CN: handle 必须通过 setup-only `endFollow` policy、只读 `atEnd`/follow facts 与 semantic `to-end` request 接入 `C-SCROLL-END-FOLLOW-0001`，不得暴露或接收 raw host geometry。
       en: The handle must reach `C-SCROLL-END-FOLLOW-0001` through a setup-only `endFollow` policy, read-only `atEnd` and follow facts, and the semantic `to-end` request without exposing or accepting raw host geometry.
+  - id: C-AS-SCROLL-SURFACE-0001-TARGET-REVEAL
+    text:
+      en: The existing request entry may accept the typed vertical reveal request defined by C-SCROLL-TARGET-REVEAL-0001. The author supplies only a family and Anatomy part; unsupported or unavailable delivery is explicitly rejected and does not introduce a second hook or raw-host authority.
+      zh-CN: 既有 request 入口可以接受 C-SCROLL-TARGET-REVEAL-0001 定义的 typed vertical reveal 请求。作者只提供 family 与 Anatomy part；不支持或不可用的交付明确拒绝，不引入第二个 hook 或 raw-host 权限。
 sources:
   - path: internal/records/2026-07-29-scroll-area-boundary-and-host-projection.zh-CN.md
 dependsOn:
@@ -53,8 +57,12 @@ dependsOn:
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Extended the existing semantic request entry with current-part vertical reveal without exposing host targets or geometry.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added the setup-only end-follow policy, observed facts, and semantic to-end request to the privileged surface handle.

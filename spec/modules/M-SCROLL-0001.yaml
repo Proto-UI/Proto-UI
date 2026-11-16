@@ -40,9 +40,14 @@ criteria:
     text:
       zh-CN: Module 必须使 end-follow facts 与 scheduled/request outcome 服从当前 view epoch；detach、replacement 或 dispose 后的旧 callback 不得更新当前 observed handles。
       en: The Module must bind end-follow facts and scheduled or request outcomes to the current view epoch; an old callback after detach, replacement, or disposal must not update current observed handles.
+  - id: M-SCROLL-0001-TARGET-REVEAL
+    text:
+      en: The Module must validate the reveal request's current same-family descendant against this surface before resolving a host target, retain the same target and lease authority through host measurement, and reject unavailable or acquiring reveal requests without queueing them, as governed by C-SCROLL-TARGET-REVEAL-0001.
+      zh-CN: Module 必须按 C-SCROLL-TARGET-REVEAL-0001，在解析 host target 前校验 reveal 请求的当前同 family 后代归属本 surface，在宿主测量期间保持同一 target 和 lease 权限，并拒绝不可用或 acquisition 中的 reveal 请求而不排队。
 satisfies:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-AS-SCROLL-SURFACE-0001
     - C-SCROLL-COMPOSED-CHROME-0001
@@ -54,6 +59,7 @@ requires:
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
     - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - T-SCROLL-COMPOSED-CHROME-0001
     - T-SCROLL-COMPOSED-CONTROL-0001
@@ -62,6 +68,9 @@ sources:
   - path: packages/modules/scroll/src/create.ts
   - path: packages/modules/scroll/src/impl.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added current Anatomy descendant validation and non-replayed reveal arbitration on the existing logical surface lease.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added portable end-follow policy, observed facts, semantic request arbitration, and epoch-scoped outcome ownership to the existing Scroll surface session.

@@ -21,12 +21,15 @@ export function partitionModuleBindings(ir: PrototypeIR): {
       }
       const node = value as Record<string, unknown>;
       if (node.kind === 'operation' || node.kind === 'authored-hook') owned.add(binding.name);
-      if ((node.kind === 'helper-call' || node.kind === 'reference') && typeof node.name === 'string')
+      if (
+        (node.kind === 'helper-call' || node.kind === 'reference') &&
+        typeof node.name === 'string'
+      )
         calls.add(node.name);
       for (const [key, child] of Object.entries(node))
         if (key !== 'type' && key !== 'span') visit(child);
     }
-    visit(binding.value.function.body);
+    visit(binding.value.function);
     dependencies.set(binding.name, calls);
   }
   let changed: boolean;

@@ -71,7 +71,10 @@ export type SearchContentProps = TransitionProps & {
   sideOffset?: number;
   collisionPadding?: number;
 };
-export type SearchContentExposes = TransitionExposes & { open: ExposeState<boolean> };
+export type SearchContentExposes = TransitionExposes & {
+  open: ExposeState<boolean>;
+  __revealActive: ExposeMethod<(id: string) => void>;
+};
 export type SearchContentAsHookContract = { state: { open: State<boolean> } };
 export interface SearchItemProps {
   value: string;

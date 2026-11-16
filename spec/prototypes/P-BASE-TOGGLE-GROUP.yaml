@@ -9,6 +9,14 @@ summary: Base owns orientation across family layouts and retires accepted reques
 statement:
   en: ToggleGroup Root owns the effective orientation, horizontal when omitted. Existing Props normalization remains authoritative. Accessibility orientation, roving axis and the typed asToggleGroupRoot orientation state describe the same effective value. Family recipes only read this borrowed state; this is a recipe constraint, not a new read-only hook capability. No AppMaker orientation expose is introduced. Accepted request notifications retain their originating owner and view epoch and drain in the local publication queue order.
 criteria:
+  - id: P-BASE-TOGGLE-GROUP-EXTERNAL-LABEL
+    text:
+      en: The command target opts into C-CONTROL-LABEL-0001 through the dedicated InstanceAssociations.controlLabel channel. An independent Label may name an icon-only target through its actual semantic identity. Label activation requests the existing command or toggle operation exactly once and retains disabled, controlled selection, focus and lifecycle ownership; Toggle Group Root remains the selection owner. No generic host attribute forwarding or label Prop is introduced.
+      zh-CN: 命令目标通过专用 InstanceAssociations.controlLabel 通道参与 C-CONTROL-LABEL-0001。独立 Label 可通过实际语义 identity 为仅图标目标命名；关联激活只请求一次既有命令或切换操作，保留 disabled、受控选择、focus 与生命周期所有权，Toggle Group Root 仍拥有选择。不引入通用宿主属性透传或 label Prop。
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-TOGGLE-GROUP-OWNER
     text:
       en: Preserve the existing horizontal-or-vertical prop and its normalization. Extend the typed hook state contract with orientation matching the existing string state. Borrowed state operations retain C-AS-HOOK-0007 semantics. Family recipes compose Base once and only read its orientation; they must not infer it from DOM or install independent orientation, keyboard or collection ownership.
@@ -53,6 +61,9 @@ verifies:
     - T-TOGGLE-GROUP-ORIENTATION-0001
     - T-TOGGLE-GROUP-REQUEST-RETIREMENT-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Define bounded Base-owned orientation and read-only recipe use of borrowed state, retaining native and full-catalog gates.

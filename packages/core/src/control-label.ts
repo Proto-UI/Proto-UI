@@ -4,23 +4,65 @@ import type { RunHandle } from './handles';
 
 declare const controlLabelBrand: unique symbol;
 export type ControlLabelRef = Readonly<{ [controlLabelBrand]: true }>;
-const references = new WeakSet<object>();
+type ControlLabelReferenceAuthority = Readonly<{
+  version: 1;
+  create(): object;
+  is(value: unknown): boolean;
+}>;
+
+/**
+ * Compatible independently bundled implementations share nominal admission.
+ * Operations never expose the WeakSet or admit an arbitrary caller object.
+ * This interoperability ABI is not a security boundary.
+ */
+function referenceAuthority(): ControlLabelReferenceAuthority {
+  const key = Symbol.for('@proto.ui/control-label/ref/v1');
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+  if (descriptor) {
+    const service = descriptor.value as ControlLabelReferenceAuthority | undefined;
+    if (
+      descriptor.get ||
+      descriptor.set ||
+      descriptor.configurable ||
+      descriptor.writable ||
+      !service ||
+      !Object.isFrozen(service) ||
+      service.version !== 1 ||
+      typeof service.create !== 'function' ||
+      typeof service.is !== 'function'
+    )
+      throw new TypeError('[ControlLabel] incompatible same-realm reference ABI; expected v1');
+    return service;
+  }
+  const references = new WeakSet<object>();
+  const service: ControlLabelReferenceAuthority = Object.freeze({
+    version: 1 as const,
+    create() {
+      const ref = Object.freeze({
+        toJSON(): never {
+          throw new TypeError(
+            '[ControlLabel] opaque references cannot be serialized; use an explicit renderer association key'
+          );
+        },
+      });
+      references.add(ref);
+      return ref;
+    },
+    is(value: unknown) {
+      return typeof value === 'object' && value !== null && references.has(value);
+    },
+  });
+  Object.defineProperty(globalThis, key, { value: service });
+  return service;
+}
 
 /** Explicit pair identity, never a host ID, lookup key or serializable value. */
 export function createControlLabelRef(): ControlLabelRef {
-  const ref = Object.freeze({
-    toJSON(): never {
-      throw new TypeError(
-        '[ControlLabel] opaque references cannot be serialized; use an explicit renderer association key'
-      );
-    },
-  });
-  references.add(ref);
-  return ref as unknown as ControlLabelRef;
+  return referenceAuthority().create() as ControlLabelRef;
 }
 
 export function isControlLabelRef(value: unknown): value is ControlLabelRef {
-  return typeof value === 'object' && value !== null && references.has(value);
+  return referenceAuthority().is(value);
 }
 
 export type ControlLabelOptions = Readonly<{ naming: boolean; activation: boolean }>;

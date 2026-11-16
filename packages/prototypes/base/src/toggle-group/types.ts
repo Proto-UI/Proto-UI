@@ -29,6 +29,7 @@ export type ToggleGroupRootExposes = {
 export type ToggleGroupRootAsHookContract = {
   state: { disabled: State<boolean>; orientation: State<string> };
 };
+/** Independent accessible naming uses Adapter InstanceAssociations.controlLabel, outside portable Props. */
 export interface ToggleGroupItemProps {
   value: string;
   disabled?: boolean;

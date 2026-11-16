@@ -49,6 +49,7 @@ export async function startNativeWcFixture() {
     '.proto-ui/context/scope-v1.ts',
     '.proto-ui/style/native-v1.ts',
     '.proto-ui/interaction/native-v1.ts',
+    '.proto-ui/interaction/ownership-v1.ts',
     '.proto-ui/interaction/adapter-modules-v1.ts',
     '.proto-ui/web-component/browser-v1.ts',
   ]);

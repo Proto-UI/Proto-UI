@@ -89,11 +89,13 @@ Issue #817 仍保持 open。网站 demo inventory 只做 source-AST discovery �
 | `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
 | `gpui-source-v1` | 固定 Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` 的 GPUI | GPUI 加生成的共享 Rust support crate；不依赖 Proto UI Runtime/Adapter |
 
-Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+Qt、Flutter 与四个 SSR profile identity **尚未实现**，通过 registry 选择它们会拒绝编译。现有 direct emitter 的 `ssr: true` 入口仍是私有实验；执行这些入口不激活 SSR profile，也不建立 SSR/hydration conformance。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **6**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
 
 GPUI source owner 按定义将 `void` setup 解释为 host Root 内部的匿名 slot（`C-CORE-SYNTAX-0004-C`、`C-TEMPLATE-0001`）。包含 State 和公开 increment method 的纯作者定义在没有 Web global 的环境中完成编译，并在真实 headless GPUI window 中运行。同一生成组件按顺序接入两个 native slot child，method 调用前后保留实际测得的布局框，并通过公开 State 观察到 0 到 1 的变化。这份有界证据不代表 OS-visible rendering、assistive-technology fidelity 或完整 compiler/Prototype equivalence；缺失 native style declaration 会生成 diagnostic，而不会替换成 Web 行为。
 
 Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
+
+公开 atomic hook 的 import 校验与 operation lowering 复用同一 admission table。每个导出的 `asHook` 都有明确分类，改名 import 与本地 re-export 使用相同规则。`asControlLabel` 已准入，并在四个已实现的 Web client source profile 中完成 lowering；GPUI、direct Qt/Flutter 与默认 SSR 入口继续给出明确的 unsupported diagnostic。私有 Web Component hydration 实验另须显式选择 `controlLabelHydration: 'client-only'`。`asAxisInput`、`asContextMenuInput`、`asNativeLink` 仍不支持，diagnostic 在作者 import 处说明缺少哪项 capability lowering。其他 hook 获得准入，也不表示其每个 method 或每个 target 都已支持：不支持的 capability call 会带上实际 callee 与 source range。这些 diagnostic 不构成缺失 capability 的实现或 conformance 证据。
 
 Static helper 参数可使用已支持的 local record alias，包括 optional field 与有限 literal union。直接传入 `{ entry: 'manual' }` 这类字面量时，会保留其具体值来核对参数类型；不兼容的 literal value 与伪造 IR 仍会被拒绝。Source frontend 与 IR validator 复用同一 data compatibility 规则，不执行作者代码。
 
@@ -102,6 +104,8 @@ Static helper 参数可使用已支持的 local record alias，包括 optional f
 私有同步 `try`/`catch`/`finally` 与 `throw` 保留原始的已准入 thrown data，包括 `undefined`、`null`、`false`、零、空字符串，以及 record/array identity。Catch binding 始终 opaque：TypeScript assertion 不授予 public data、State 或 execution authority。作者的 finalizer 按 source order 执行，其 return 或 throw 替换先前的 authored completion。GPUI 对生成的 source exception 要求 `panic=unwind`，且仅识别自身的 thrown-value marker；无关 native failure 在 cleanup 后保留原始 payload。可读取 caught data field 与 scalar/list member；JavaScript prototype property name 仍不在这项有界 GPUI access surface 内。
 
 Context failure delivery 保留已提交的每次 update，完成其余仍有效的 callback、重置 dispatch state，再抛出 primary authored value；即使该值为 falsy，也不会被当作成功。Required Context 断连 read/update 与 strict Anatomy 缺少 domain 的失败保留可区分的 error code，供作者 catch 判别。这些 source-lowering 边界不构成新的 native acceptance，也不替代未改动的真实公共 GPUI composition consumer。
+
+生成的 Web Context helper 为每个排队 transition 记录 provider identity，并在 delivery 前重新检查接收者的当前 ancestry。前一个 callback 导致 rebind 后，旧 provider 的排队 transition 不会送入新 binding。错误是否发生与 thrown value 分开记录，因此 `throw undefined` 和 `throw null` 仍是失败，后续 callback 的错误也不会替换第一个值。
 
 这项词法 lowering 保留普通 `defineHook` facade 的准入缺口。`D-AS-HOOK-DEFINE-HOOK-0001` 将其 capture、store 与 configurable authoring surface 留在核心 authored-asHook 契约之外；旧 parameterized-asHook note 仍为 proposal。现有普通 facade 及其公共 consumer 是有效 implementation evidence。Compiler 支持仍需独立治理的边界与真实 consumer evidence；仅添加 import whitelist，或替换为 atomic/authored asHook，不能建立这项支持。
 
@@ -112,6 +116,35 @@ State write 与 feedback projection 本身不会请求 template render。作者�
 私有 Vue 2 client profile 的普通 framework repaint 保留上次 authored commit，同时让 native slot 保持实时。已声明的 Text Control 在首次 mount 后拥有原生 editor value：非受控编辑不会被 framework repaint 或后续 defaultValue 变化重置；受控编辑仍只是 proposal，无关更新保留正在进行的 composition。重新创建 view 时，新的物理 editor 绑定到保留的 logical value。这些边界不代表浏览器 IME fidelity、内部 SSR/hydration 迁移、所有准入程序的完整生成类型、完整 reached-support 或 production cost 已通过验收；这些工作仍在 [#1055](https://github.com/Proto-UI/Proto-UI/issues/1055) 分别追踪。
 
 私有 Vue 2 emitter 仅在 client 分支生成 client render-call 注释。SSR 输出保留独立的 renderer 路径；有界的注释回归检查保留其余全部 SSR diagnostic，不代表完整 SSR typing 或 hydration 已通过验收。
+
+完整生成的 Vue 2 pointer consumer 及其 supporting module graph 现已通过原有 strict TypeScript 检查，保留 `checkJs: true` 与 `skipLibCheck: false`。Emitter 将精确的 owned/observed State handle 注册到对应 external view，并在使用 interactive Root 前验证它确为 HTML element。这份证据限定于实际执行的 client 程序；下文历史 consumer measurement 仍未检查 JavaScript body，其他程序与 SSR 的完整类型验收仍需独立完成。
+
+### 多入口 native Web 产物
+
+共享同一个 source Context declaration 的 component 需要使用同一个生成模块图。私有 project API 可以从同一 source root 编译所有 entry，并一起发布组件 source 与共享 supporting module：
+
+```ts
+import { compileProject, writeProjectCompilation } from './packages/compiler/src/index.ts';
+
+const compiled = await compileProject({
+  root: '.',
+  entries: ['src/provider.proto.ts', 'src/consumer.proto.ts'],
+  profile: 'react-dom-source-v1',
+});
+if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+
+const written = await writeProjectCompilation(compiled.value, '.cache/context-assembly', {
+  sourcePaths: {
+    'src/provider.proto.ts': 'Provider.tsx',
+    'src/consumer.proto.ts': 'Consumer.tsx',
+  },
+});
+if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+```
+
+选择未使用的 output directory，并为每个 entry 指定唯一、平铺的 source filename。React 使用 `.tsx`，Vue 3 与 Web Component 使用 `.ts`，Vue 2 使用 `.js`。Planner 只合并 path、kind 和字节完全一致的 supporting file；helper 冲突、source snapshot 不一致、路径歧义或 entry 映射不完整都在发布前拒绝。每个 entry 保留 source map 与 provenance manifest，`provenance.json` 记录整个 project artifact set。`projectCompilationArtifacts` 返回相同的产物规划，`diffProjectCompilation` 只读比较 consumer-owned output。
+
+普通 React consumer 可以从 `Provider.tsx` 导入 `CompiledComponent as Provider`，从 `Consumer.tsx` 导入 `CompiledComponent as Consumer`。二者由此 import 同一组物理 Context key、scope 与 React transport module，通过 native composition 保留 source declaration 的引用身份。独立发布的目录仍是独立模块图，即使 source 字节与 debug name 相同。这条路径不引入共享 source-module registry、不桥接 Runtime/Adapter instance，也不改变单入口 CLI。React consumer 回归覆盖 alias、nearest provider、显式 update 与 terminal cleanup；artifact planner 同时覆盖其余三个 Web source profile。
 
 ### 本地命令与 consumer ownership
 

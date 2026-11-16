@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createControlLabelRef } from '@proto.ui/core';
+import { createControlLabelRef, type ControlLabelRef } from '@proto.ui/core';
 import { checkboxRoot } from '../../../prototypes/base/src/checkbox';
 import { switchRoot } from '../../../prototypes/base/src/switch';
 import { radioGroupRoot, radioGroupItem } from '../../../prototypes/base/src/radio-group';
@@ -32,6 +32,41 @@ function pointerClick(el: HTMLElement) {
   );
 }
 describe('vue2 explicit instance-associated Label', () => {
+  it('tracks an ordinary reactive association wrapper through clearing and rebinding', async () => {
+    const instanceAssociations = Vue2Any.observable({
+      controlLabel: createControlLabelRef() as ControlLabelRef | null,
+    });
+    const changes: unknown[] = [];
+    const target = createMountedVue2Adapter(checkboxRoot, {
+      instanceAssociations,
+      onCheckedChange: (event: unknown) => changes.push(event),
+    });
+    const label = createMountedVue2Adapter(labelRoot, { instanceAssociations });
+    try {
+      await flushVue2();
+      const targetEl = target.root as HTMLElement;
+      const labelEl = label.root as HTMLElement;
+      expect(targetEl.getAttribute('aria-labelledby')).toBe(labelEl.id);
+      pointerClick(labelEl);
+      expect(target.vm.getExposes().checked.get()).toBe(true);
+      expect(changes).toHaveLength(1);
+      instanceAssociations.controlLabel = null;
+      await flushVue2();
+      expect(targetEl.hasAttribute('aria-labelledby')).toBe(false);
+      pointerClick(labelEl);
+      expect(changes).toHaveLength(1);
+      instanceAssociations.controlLabel = createControlLabelRef();
+      await flushVue2();
+      expect(targetEl.getAttribute('aria-labelledby')).toBe(labelEl.id);
+      pointerClick(labelEl);
+      expect(target.vm.getExposes().checked.get()).toBe(false);
+      expect(changes).toHaveLength(2);
+    } finally {
+      label.unmount();
+      target.unmount();
+      await flushVue2();
+    }
+  });
   it.each([checkboxRoot, switchRoot])(
     'names and activates $name across independent sibling roots',
     async (proto) => {

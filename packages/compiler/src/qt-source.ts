@@ -1,4 +1,8 @@
-import { unsupportedPointerFacts } from './pointer-facts-admission';
+import {
+  unsupportedCheckedHelperParameters,
+  unsupportedControlLabel,
+  unsupportedPointerFacts,
+} from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
 import { OPERATION_RULES } from './operations';
 import { buildQtContextArtifacts, emitQtContextValidation } from './qt-native-context';
@@ -38,6 +42,14 @@ export function emitQtSource(
   const moduleParts = partitionModuleBindings(ir);
   const sharedModuleNames = new Set(moduleParts.shared.map((binding) => binding.name));
   let emittingModule = false;
+  const controlLabelDiagnostics = unsupportedControlLabel(ir, 'qt-source', 'emitted-declarations');
+  if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
+  const helperDiagnostics = unsupportedCheckedHelperParameters(
+    ir,
+    'qt-source',
+    'emitted-declarations'
+  );
+  if (helperDiagnostics.length) return { ok: false, diagnostics: helperDiagnostics };
   const pointerDiagnostics = unsupportedPointerFacts(ir, 'qt-source', 'emitted-declarations');
   if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   const componentName = options.componentName ?? 'CompiledComponent';
@@ -176,19 +188,30 @@ export function emitQtSource(
           ? '-0'
           : JSON.stringify(node.value);
       case 'reference':
-        return !emittingModule && sharedModuleNames.has(node.name) ? `${qualifier}Source.${node.name}` : node.name;
+        return !emittingModule && sharedModuleNames.has(node.name)
+          ? `${qualifier}Source.${node.name}`
+          : node.name;
       case 'lexical-cell':
         return expression(node.value, depth);
       case 'lexical-read':
         return expression(node.cell, depth);
       case 'lexical-write':
-        if (!emittingModule && node.cell.kind === 'reference' && sharedModuleNames.has(node.cell.name))
+        if (
+          !emittingModule &&
+          node.cell.kind === 'reference' &&
+          sharedModuleNames.has(node.cell.name)
+        )
           return `${qualifier}Source.__write_${node.cell.name}(${expression(node.value, depth)})`;
         return `(${expression(node.cell, depth)} = ${expression(node.value, depth)})`;
       case 'lexical-update': {
-        if (!emittingModule && node.cell.kind === 'reference' && sharedModuleNames.has(node.cell.name))
+        if (
+          !emittingModule &&
+          node.cell.kind === 'reference' &&
+          sharedModuleNames.has(node.cell.name)
+        )
           return `${qualifier}Source.__update_${node.cell.name}(${node.prefix}, ${node.delta})`;
-        const cell = expression(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        const cell = expression(node.cell, depth),
+          operator = node.delta === 1 ? '++' : '--';
         return `(${node.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -219,6 +242,8 @@ export function emitQtSource(
       }
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
+      case 'conditional':
+        return `(${expression(node.condition, depth)} ? ${expression(node.whenTrue, depth)} : ${expression(node.whenFalse, depth)})`;
       case 'binary':
         return node.operator === '??'
           ? `(function(${p}Optional) { return ${p}Optional == null ? ${expression(node.right, depth)} : ${p}Optional; })(${expression(node.left, depth)})`
@@ -342,12 +367,17 @@ export function emitQtSource(
     .filter(Boolean)
     .join('\n');
   emittingModule = true;
-  const moduleCode = statements(moduleParts.shared, 0) +
+  const moduleCode =
+    statements(moduleParts.shared, 0) +
     `export { ${moduleParts.shared.map((binding) => binding.name).join(', ')} };\n` +
-    moduleParts.shared.filter((binding) => binding.value.kind === 'lexical-cell').map((binding) =>
-      `export function __write_${binding.name}(value) { ${binding.name} = value; return value; }\n` +
-      `export function __update_${binding.name}(prefix, delta) { return delta === 1 ? (prefix ? ++${binding.name} : ${binding.name}++) : (prefix ? --${binding.name} : ${binding.name}--); }\n`
-    ).join('');
+    moduleParts.shared
+      .filter((binding) => binding.value.kind === 'lexical-cell')
+      .map(
+        (binding) =>
+          `export function __write_${binding.name}(value) { ${binding.name} = value; return value; }\n` +
+          `export function __update_${binding.name}(prefix, delta) { return delta === 1 ? (prefix ? ++${binding.name} : ${binding.name}++) : (prefix ? --${binding.name} : ${binding.name}--); }\n`
+      )
+      .join('');
   emittingModule = false;
   const ownedModuleCode = statements(moduleParts.owned, 2);
   const code = `// Editable ordinary Qt Quick 6.4.2 source. No Proto Runtime/Core/Adapter dependency.
@@ -466,7 +496,9 @@ ${eventDispatch}
       code,
       profile: 'qt-source-v1',
       supportingFiles: [
-        ...(moduleParts.shared.length ? [{ path: '.proto-ui/qt/Source.mjs', contents: moduleCode, kind: 'source' as const }] : []),
+        ...(moduleParts.shared.length
+          ? [{ path: '.proto-ui/qt/Source.mjs', contents: moduleCode, kind: 'source' as const }]
+          : []),
         ...context.files,
         ...staticFiles,
         { path: '.proto-ui/qt/QtOwner.mjs', contents: qtOwnerSource, kind: 'source' },

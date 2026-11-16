@@ -1,8 +1,9 @@
-import { unsupportedPointerFacts } from './pointer-facts-admission';
+import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType, parseDataType, type DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
-import { nativeInteractionArtifact } from './native-interaction';
+import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './native-style';
@@ -33,6 +34,8 @@ export function emitVueSource(
   const ir = validated.value;
   const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
+    const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue-source SSR');
+    if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'vue-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   }
@@ -40,6 +43,7 @@ export function emitVueSource(
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
   if (!admitted.ok) return admitted;
+  const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
     !validIdentifier(componentName) ||
@@ -133,6 +137,11 @@ export function emitVueSource(
       case 'lexical-write':
         inspect(node.cell);
         inspect(node.value);
+        break;
+      case 'conditional':
+        inspect(node.condition);
+        inspect(node.whenTrue);
+        inspect(node.whenFalse);
         break;
       case 'binary':
         inspect(node.left);
@@ -228,7 +237,10 @@ export function emitVueSource(
       }
     }
   }
-  admitted.value.functions.forEach((fn) => inspectBody(fn.body));
+  admitted.value.functions.forEach((fn) => {
+    for (const parameter of fn.parameters) if (parameter.default) inspect(parameter.default);
+    inspectBody(fn.body);
+  });
   const exposes = ir.exposes;
   for (const exposure of exposes) {
     if (exposure.kind !== 'method') continue;
@@ -329,7 +341,7 @@ export function emitVueSource(
     return values
       .map(
         (parameter) =>
-          `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`
+          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
       )
       .join(', ');
   }
@@ -355,7 +367,8 @@ export function emitVueSource(
       case 'lexical-write':
         return `(${expression(node.cell, depth)} = ${expression(node.value, depth)})`;
       case 'lexical-update': {
-        const cell = expression(node.cell, depth), operator = node.delta === 1 ? '++' : '--';
+        const cell = expression(node.cell, depth),
+          operator = node.delta === 1 ? '++' : '--';
         return `(${node.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -368,6 +381,8 @@ export function emitVueSource(
         return `(${expression(node.object, depth)}${node.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
+      case 'conditional':
+        return `(${expression(node.condition, depth)} ? ${expression(node.whenTrue, depth)} : ${expression(node.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(node.left, depth)} ${node.operator} ${expression(node.right, depth)})`;
       case 'array':
@@ -722,6 +737,7 @@ const ${n('SlotView')} = ${n('Vue')}.defineComponent({
 
 export const ${componentName} = ${n('Vue')}.defineComponent({
   name: ${JSON.stringify(ir.name)}, inheritAttrs: false,
+  props: { instanceAssociations: { type: Object as ${n('Vue')}.PropType<Readonly<{controlLabel?: object | null}>>, default: undefined } },
   emits: ${JSON.stringify(exposes.filter((entry) => entry.kind === 'event').map((entry) => entry.name))},
   setup(_props, ${n('Context')}) {
     // Protocol values intentionally do not enter Vue's reactive state graph.
@@ -835,6 +851,7 @@ ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
       isReady: () => !${n('Setup')} && !${n('Disposing')} && !!${n('CurrentEpoch')}?.committed && ${n('Present')}.value${ssr ? ` && (${n('ParentTree')}?.ready?.() ?? true)` : ''},
       invoke: (callback) => ${n('Invoke')}('event', callback),
       getRun: () => ${n('RunValue')}, getResolvedProps: () => ${n('Props')},
+${controlLabel ? '      getAssociations: () => _props.instanceAssociations,\n' : ''}
       subscribeState(state, callback) { return ${n('SubscribeInternal')}(state, callback); },
       getRoot: () => ${n('RootEpoch')}?.active && ${n('RootEpoch')} === ${n('CurrentEpoch')}${ssr ? ` && (${n('ParentTree')}?.ready?.() ?? true)` : ''} ? ${n('RootElement')} : null,
       identity: ${n('Scope')}, getLogicalParent: () => ${n('ParentScope')},
@@ -1133,11 +1150,12 @@ ${
     function ${n('ReadRawProps')}(run: ${n('Run')}): Readonly<Record<string, unknown>> { ${n('RequireRun')}(run); return Object.freeze({ ...${n('RawProps')} }); }
     function ${n('IsProvided')}(run: ${n('Run')}, key: string): boolean { ${n('RequireRun')}(run); return Object.hasOwn(${n('RawProps')}, key); }
     function ${n('GetHostProps')}(): Record<string, unknown> {
+${!controlLabel ? emitUndeclaredInstanceAssociations('_props.instanceAssociations', n('InitialAssociations')) : ''}
       // Read the authored host snapshot, bypassing Vue Boolean casts and camelization.
       const raw: Record<string, unknown> = Object.create(null);
       for (const key of Object.keys(${n('Instance')}.vnode.props ?? {})) {
         const value = ${n('Instance')}.vnode.props![key];
-        if (['key', 'ref', 'ref_for', 'ref_key'].includes(key) || key.startsWith('onVnode')) continue;
+        if (['key', 'ref', 'ref_for', 'ref_key', 'instanceAssociations', 'instance-associations'].includes(key) || key.startsWith('onVnode')) continue;
         if (!Object.hasOwn(${n('PropChecks')}, key) && (
           ['class', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) ||
           /^on[A-Z]/.test(key) && typeof value === 'function'
@@ -1148,6 +1166,7 @@ ${
     }
     function ${n('NotifyProps')}(): void {
       if (${n('Disposed')} || ${n('Disposing')}) return;
+${controlLabel ? `      ${n('Interaction')}.refresh();` : emitUndeclaredInstanceAssociations('_props.instanceAssociations', n('Associations'))}
       const raw = ${n('GetHostProps')}();
       const changed = Object.keys({ ...${n('RawProps')}, ...raw }).some((key) => Object.hasOwn(raw, key) !== Object.hasOwn(${n('RawProps')}, key) || !Object.is(raw[key], ${n('RawProps')}[key]));
       if (!changed) return;
@@ -1232,8 +1251,8 @@ ${
       if (${n('Started')} || ${n('Disposed')} || ${n('Disposing')} || ${n('Session')}.closed) return;
       ${n('Started')} = true;
       if (!${n('Record')} && !${n('Server')}) ${n('Present')}.value = true;
-      ${n('Renderer')} = (() => {`
-    : `    const ${n('Renderer')} = (() => {`
+      ${n('Renderer')} = ((): ((frame: ${n('Frame')}) => ${n('Vue')}.VNodeChild) | void => {`
+    : `    const ${n('Renderer')} = ((): ((frame: ${n('Frame')}) => ${n('Vue')}.VNodeChild) | void => {`
 }
       try {
         const renderer = (${fn(ir.setup, 3)})(${usesStyle ? n('DefValue') : 'undefined'});
@@ -1541,7 +1560,7 @@ export default ${componentName};
               ...(contextArtifacts?.files ?? []),
               ...staticDeclarations.files,
               ...(usesStyle ? [nativeStyleArtifact] : []),
-              ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []),
+              ...(usesInteraction ? nativeInteractionArtifacts('full', { controlLabel }) : []),
               ...(ssr ? [vueSsrSupportArtifact] : []),
             ],
           }

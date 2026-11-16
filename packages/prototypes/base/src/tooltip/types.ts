@@ -38,6 +38,7 @@ export type TooltipRootExposes = {
 export type TooltipRootStateHandles = { open: State<boolean> };
 export type TooltipRootAsHookContract = { state: TooltipRootStateHandles };
 
+/** Standalone Trigger and same-node useTooltipTrigger share disabled input; the latter preserves the command focus owner. */
 export interface TooltipTriggerProps {
   disabled?: boolean;
 }

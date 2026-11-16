@@ -207,7 +207,6 @@ export async function runSearchProductionEvidence(options = {}, dependencies = {
     profile = makeProfile();
     const browser = start('search-production-browser', env.CHROME_PATH, [
       '--headless=new',
-      '--no-sandbox',
       '--disable-dev-shm-usage',
       '--disable-background-networking',
       '--disable-component-update',

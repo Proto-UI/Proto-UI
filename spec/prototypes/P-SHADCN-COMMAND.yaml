@@ -62,11 +62,12 @@ criteria:
       en: The opted-in menu InputWrapper may contain an aria-hidden passive decorative glyph next to the existing single-control InputShell. The glyph is not an InputShell addon, ControlLabel, command item, input naming source, focusable target or interactive prefix; it must not install a DOM focus listener. Wrapper spacing belongs to the explicit presentation whether decoration exists or not and is never inferred as optional Anatomy presence from command paint context. A real clickable prefix remains a separately governed atomic capability and is not claimed by this visual slice.
   - id: P-SHADCN-COMMAND-MENU-CONSUMER
     text:
-      en: Website Search composes this menu with its actual localized navigation when the current query is blank, a labeled Pages group, decorative row arrows and a noninteractive Enter instruction, while retaining a real Cancel action. Default navigation is distinct from Pagefind rows and result counts, remains useful when index preparation fails, and executes only from the current open blank-query session against normalized same-origin HTTP(S) targets. Nonempty query or IME invalidates old navigation execution; no row retained by a previous view gains authority. Real search preserves all returned document anchors, loading, empty, error, Retry and LoadMore. Its preferred 20rem middle region must shrink in bounded/short/enlarged layouts rather than force inaccessible footer content. Active-target reveal, interactive-prefix focus, full upstream data/features and native acceptance remain separate unfinished criteria.
+      en: Website Search composes this menu with its actual localized navigation when the current query is blank, a labeled Pages group, decorative row arrows and a noninteractive Enter instruction, while retaining a real Cancel action. Default navigation is distinct from Pagefind rows and result counts, remains useful when index preparation fails, and executes only from the current open blank-query session against normalized same-origin HTTP(S) targets. Nonempty query or IME invalidates old navigation execution; no row retained by a previous view gains authority. Real search preserves all returned document anchors, loading, empty, error, Retry and LoadMore. Its preferred 20rem middle region must shrink in bounded/short/enlarged layouts rather than force inaccessible footer content. Keyboard active-target reveal must use C-SCROLL-TARGET-REVEAL-0001 within a bounded Content viewport while retaining editor focus. Interactive-prefix focus, full upstream data/features and native acceptance remain separate unfinished criteria.
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - { id: C-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
 inherits:
   prototypes:
     - P-BASE-COMMAND
@@ -107,6 +108,9 @@ openQuestions:
       - criterion:P-SHADCN-COMMAND#P-SHADCN-COMMAND-DIALOG-PROFILE
       - activation:P-SHADCN-COMMAND
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Route menu keyboard target reveal through the shared bounded Scroll request without claiming completed native or additional-profile admission.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn command family as draft.

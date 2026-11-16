@@ -19,6 +19,7 @@ import type {
   State,
 } from '@proto.ui/core';
 import type { A11yPartDiagnostic } from './part-relationships';
+import type { A11yControlLabelView } from './caps';
 
 export type A11yFacade = AccessibleHandle;
 
@@ -57,7 +58,8 @@ export type A11yPort = ModulePort & {
   removeRelation(key: A11yRelationKey): void;
   /** Derived Label naming never replaces an authored name or relation. */
   claimControlLabelName(
-    target: A11ySemanticObjectRef
+    target: object,
+    view?: A11yControlLabelView
   ): { dispose(): void; isActive(): boolean } | null;
 };
 

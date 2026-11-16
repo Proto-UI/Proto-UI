@@ -108,6 +108,42 @@ describe('Select alignment structural parts', () => {
     }
   });
 
+  it('admits 101 current options and their text parts while preserving singleton guards', async () => {
+    // T-BASE-SELECT-0001-CASE-FINITE-COLLECTION. The published Calendar year
+    // consumer needs 101 entries; finite option sets have no 100-item policy.
+    const f = await fixture();
+    try {
+      const root = await f.add(f.claim('root', 'item-aligned'));
+      const trigger = await f.add(f.claim('trigger'), root.token);
+      await f.add(f.claim('value'), trigger.token);
+      const content = await f.add(f.claim('content'), root.token);
+      const surface = await f.add(selectSurface, content.token);
+      const viewport = await f.add(selectViewport, surface.token);
+      for (let index = 0; index < 101; index++) {
+        const item = await f.add(f.claim('item'), viewport.token);
+        await f.add(selectItemText, item.token);
+      }
+      const parts = root.port.parts(SELECT_FAMILY);
+      const items = parts.filter((part) => part.role === 'item');
+      expect(items).toHaveLength(101);
+      expect(parts.filter((part) => part.role === 'item-text')).toHaveLength(101);
+      for (const item of items) {
+        expect(root.port.descendantsOf(SELECT_FAMILY, item, 'item-text')).toHaveLength(1);
+      }
+      expect(root.port.getDiagnostics()).toEqual([]);
+
+      await f.add(f.claim('trigger'), root.token);
+      expect(root.port.getDiagnostics()).toEqual(
+        expect.arrayContaining([expect.objectContaining({ role: 'trigger' })])
+      );
+      expect(root.port.getDiagnostics().every((diagnostic) => diagnostic.role === 'trigger')).toBe(
+        true
+      );
+    } finally {
+      await f.dispose();
+    }
+  });
+
   it('reports missing aligned profile parts without silently replacing positioning', async () => {
     const f = await fixture();
     try {

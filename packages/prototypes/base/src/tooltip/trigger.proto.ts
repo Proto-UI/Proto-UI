@@ -1,4 +1,10 @@
-import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  defineHook,
+  definePrototype,
+  type DefHandle,
+  type RunHandle,
+} from '@proto.ui/core';
 import { asAccessible, asFocusable } from '@proto.ui/hooks';
 import {
   createTooltipContentId,
@@ -13,33 +19,29 @@ import type {
   TooltipTriggerProps,
 } from './types';
 
-function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerExposes>): void {
+function setupTooltipIntent(
+  def: Omit<DefHandle<TooltipTriggerProps>, 'expose'>,
+  ownsFocus = false
+) {
   const accessible = asAccessible();
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'trigger' });
   def.props.define({ disabled: { type: 'boolean', empty: 'fallback' } });
-  def.props.setDefaults({ disabled: false });
+  if (ownsFocus) def.props.setDefaults({ disabled: false });
 
   const disabled = def.state.bool('disabled', false);
   const hovered = def.state.bool('hovered', false);
   const describedBy = def.state.string('tooltipContentId', '');
   const focusable = asFocusable<TooltipTriggerProps>();
-  focusable.configure({ disabled: false });
+  if (ownsFocus) focusable.configure({ disabled: false });
   const focused = focusable.focused;
   const focusVisible = focusable.focusVisible;
 
   accessible.relation('describedBy', { target: describedBy, mode: 'append' });
-  def.expose.state('disabled', disabled);
-  def.expose.state('hovered', hovered);
-  def.expose.state('focused', focused);
-  def.expose.state('focusVisible', focusVisible);
-  def.expose.method('focusSelf', (options) => {
-    if (!disabled.get()) focusable.focusSelf(options);
-  });
 
   const syncContext = (run: RunHandle<TooltipTriggerProps>, ctx: TooltipContextValue) => {
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     disabled.set(nextDisabled, 'reason: tooltip trigger disabled sync');
-    focusable.setDisabled(nextDisabled);
+    if (ownsFocus) focusable.setDisabled(nextDisabled);
     const contentPresent = run.anatomy.partsOf(TOOLTIP_FAMILY, 'content').length > 0;
     describedBy.set(
       ctx.open && contentPresent ? createTooltipContentId(ctx.rootId) : '',
@@ -80,11 +82,35 @@ function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerE
     if (event.type !== 'next') return;
     updateTooltipInteraction(
       run,
-      { triggerFocused: event.next },
+      { triggerFocused: event.next && !disabled.get() },
       event.next ? 'trigger.focus' : 'trigger.blur'
     );
   });
+  return { disabled, hovered, focused, focusVisible, focusable };
 }
+
+function setupTooltipTrigger(def: DefHandle<TooltipTriggerProps, TooltipTriggerExposes>): void {
+  const { disabled, hovered, focused, focusVisible, focusable } = setupTooltipIntent(def, true);
+  def.expose.state('disabled', disabled);
+  def.expose.state('hovered', hovered);
+  def.expose.state('focused', focused);
+  def.expose.state('focusVisible', focusVisible);
+  def.expose.method('focusSelf', (options) => {
+    if (!disabled.get()) focusable.focusSelf(options);
+  });
+}
+
+/**
+ * Same-node Tooltip participation for an existing focusable command, such as asButton.
+ * The command owns focus configuration, activation, role, name and outward exposes.
+ * Tooltip only observes its focus and pointer intent and appends its description.
+ */
+export const useTooltipTrigger = defineHook<TooltipTriggerProps, {}>({
+  name: 'useTooltipTrigger',
+  setup(def) {
+    setupTooltipIntent(def);
+  },
+});
 
 export const asTooltipTrigger = defineAsHook<
   TooltipTriggerProps,

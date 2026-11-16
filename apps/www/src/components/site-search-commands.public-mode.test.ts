@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { searchCommandParticipant } from './site-search-commands';
+import { initDocumentationSearchCommands, searchCommandParticipant } from './site-search-commands';
+import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import type { MaterializedProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import type { RuntimeId } from './PrototypePreviewer/runtimes/ids';
@@ -44,6 +45,10 @@ vi.mock('./PrototypePreviewer/runtimes/vue2-runtime', async (original) => {
 
 const owners: Array<ReturnType<typeof searchCommandParticipant>> = [];
 const candidates: MaterializedProjectionCandidate[] = [];
+const documentationScopes: Array<{
+  controller: ReturnType<typeof initDocumentationSearchCommands>;
+  previousRuntime: string | null;
+}> = [];
 const copy = {
   title: 'Search documents',
   description: 'Search and open a document',
@@ -69,6 +74,16 @@ beforeEach(() => {
 });
 afterEach(async () => {
   const errors: unknown[] = [];
+  for (const { controller, previousRuntime } of documentationScopes.splice(0).reverse()) {
+    try {
+      await controller.destroy();
+    } catch (error) {
+      errors.push(error);
+    } finally {
+      if (previousRuntime === null) localStorage.removeItem(PREFERRED_ADAPTER_KEY);
+      else localStorage.setItem(PREFERRED_ADAPTER_KEY, previousRuntime);
+    }
+  }
   for (const candidate of candidates.splice(0).reverse()) {
     try {
       await candidate.dispose();
@@ -193,6 +208,105 @@ async function openHomepageReplacement() {
   expect(document.activeElement).toBe(close);
   return { owner, second, opener, close };
 }
+
+async function openDocumentationReplacement(family: 'shadcn' | 'brutalist', runtime: RuntimeId) {
+  const { root, owner } = mount(family);
+  const previousRuntime = localStorage.getItem(PREFERRED_ADAPTER_KEY);
+  const initialRuntime = runtime === 'wc' ? 'vue' : 'wc';
+  localStorage.setItem(PREFERRED_ADAPTER_KEY, initialRuntime);
+  // Exercise the real documentation path: command and Dialog have independent
+  // controllers, and the public preference event replaces both generations.
+  const controller = initDocumentationSearchCommands(owner);
+  documentationScopes.push({ controller, previousRuntime });
+  await controller.ready;
+  expect(root.dataset.searchRuntime).toBe(initialRuntime);
+  const oldOpener = root.querySelector<HTMLElement>('[data-open-modal]')!;
+  oldOpener.focus();
+  expect(document.activeElement).toBe(oldOpener);
+  owner.open();
+  await vi.waitFor(() => expect(editor(1).isConnected).toBe(true));
+  await vi.waitFor(() => {
+    expect(surface(1, 'panel').getAttribute('data-transition-state')).toBe('entered');
+    expect(document.activeElement).toBe(editor(1));
+  });
+  const oldInput = editor(1);
+  type(oldInput, 'retained');
+  await vi.waitFor(() => expect(surface(1, 'results').textContent).toContain('Result retained'));
+  document.dispatchEvent(
+    new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+  );
+  await vi.waitFor(() => {
+    expect(root.dataset.searchRuntime).toBe(runtime);
+    expect(editor(2).isConnected).toBe(true);
+    expect(oldInput.isConnected).toBe(false);
+    expect(oldOpener.isConnected).toBe(false);
+  });
+  const opener = root.querySelector<HTMLElement>(
+    '[data-projection-generation-state="active"] [data-open-modal]'
+  )!;
+  expect(opener).toBeTruthy();
+  expect(opener).not.toBe(oldOpener);
+  expect(editor(2).value).toBe('retained');
+  const close = surface(2, 'close');
+  // Happy DOM's click does not provide native pointer focus. Explicitly focus
+  // the actual Close, matching the native click's focus before activation.
+  close.focus();
+  expect(document.activeElement).toBe(close);
+  return { owner, controller, opener, close };
+}
+
+for (const family of ['shadcn', 'brutalist'] as const) {
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    `Docs ${family}/%s returns focus to the current opener after a runtime replacement`,
+    async (runtime) => {
+      const { owner, opener, close } = await openDocumentationReplacement(family, runtime);
+      close.click();
+      expect(owner.isOpen()).toBe(false);
+      await vi.waitFor(() => expectClosed(2));
+      await vi.waitFor(() => expect(document.activeElement).toBe(opener));
+    }
+  );
+}
+
+it('Docs replacement handback preserves newer focus during the closing transition', async () => {
+  const { owner, opener, close } = await openDocumentationReplacement('brutalist', 'wc');
+  const outside = document.createElement('button');
+  document.body.append(outside);
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  expect(owner.isOpen()).toBe(false);
+  expect(surface(2, 'panel').hasAttribute('data-pui-view-detached')).toBe(false);
+  outside.focus();
+  expect(document.activeElement).toBe(outside);
+  outside.blur();
+  await vi.waitFor(() => expectClosed(2));
+  expect(document.activeElement).toBe(document.body);
+  expect(returned).not.toHaveBeenCalled();
+});
+
+it('Docs replacement handback is revoked when the closing owner is disposed', async () => {
+  const { controller, opener, close } = await openDocumentationReplacement('brutalist', 'wc');
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  await controller.destroy();
+  expectClosed(2);
+  expect(returned).not.toHaveBeenCalled();
+});
+
+it('Docs replacement handback does not survive an interrupted close', async () => {
+  const { owner, opener, close } = await openDocumentationReplacement('brutalist', 'wc');
+  const returned = vi.fn();
+  opener.addEventListener('focus', returned);
+  close.click();
+  expect(owner.isOpen()).toBe(false);
+  owner.open();
+  await vi.waitFor(() => expect(document.activeElement).toBe(editor(2)));
+  surface(2, 'close').click();
+  await vi.waitFor(() => expectClosed(2));
+  expect(returned).not.toHaveBeenCalled();
+});
 
 it('returns focus to the current Homepage opener after dismissing a replacement Dialog', async () => {
   const { opener, close } = await openHomepageReplacement();
@@ -345,6 +459,112 @@ it('keeps newer focus when a replacement Dialog finishes leaving', async () => {
   expect(document.activeElement).toBe(document.body);
   expect(returned).not.toHaveBeenCalled();
 });
+
+it.each(['query', 'close', 'newer focus'] as const)(
+  'restores the retained Homepage Search after a late publication failure with %s focus',
+  async (focusedRef) => {
+    const { owner, root } = mount('shadcn', true);
+    const failure = new Error('Controlled failure after replacement Search publication');
+    let preparing = false;
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const controller = createProjectionScopeController({
+      initialSelection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' },
+      async materialize(request) {
+        if (request.generation === 2) {
+          preparing = true;
+          await gate;
+        }
+        const { prepared } = await prepare(
+          owner,
+          'shadcn',
+          request.selection.runtimeId as RuntimeId,
+          request.generation
+        );
+        return {
+          activate() {
+            for (const candidate of prepared) candidate.activate();
+          },
+          async setLocked(locked) {
+            for (const candidate of prepared) await candidate.setLocked?.(locked);
+          },
+          async dispose() {
+            for (const candidate of prepared) await candidate.dispose();
+          },
+        };
+      },
+      prepareCommit(request) {
+        const publication = owner.prepareCommit(request);
+        return {
+          publish() {
+            publication.publish();
+            if (request.generation !== 2) return;
+            expect(root.dataset.searchRuntime).toBe('react');
+            if (focusedRef === 'close') {
+              const carrier = root.querySelector<HTMLElement>(
+                '[data-search-dialog-mount] [data-projection-generation-state="active"] .pui-projection-content'
+              )!;
+              carrier.tabIndex = -1;
+              carrier.focus();
+              expect(document.activeElement).toBe(carrier);
+            }
+            throw failure;
+          },
+          rollback: publication.rollback,
+        };
+      },
+    });
+    try {
+      await controller.start();
+      owner.open();
+      await vi.waitFor(() => expect(document.activeElement).toBe(editor(1)));
+      const retainedPanel = surface(1, 'panel');
+      await vi.waitFor(() =>
+        expect(retainedPanel.getAttribute('data-transition-state')).toBe('entered')
+      );
+      const retainedEditor = editor(1);
+      type(retainedEditor, 'retained search query');
+      retainedEditor.setSelectionRange(2, 9);
+      const retainedFocus = focusedRef === 'close' ? surface(1, 'close') : retainedEditor;
+      retainedFocus.focus();
+      let expectedFocus: HTMLElement = retainedFocus;
+      const replacement = controller.request({ runtimeId: 'react' }).catch((error) => error);
+      await vi.waitFor(() => expect(preparing).toBe(true));
+      // Happy DOM does not move focus away from an inert host. Model that
+      // platform fallback, as in the preparation-failure cases above.
+      retainedFocus.blur();
+      if (focusedRef === 'newer focus') {
+        expectedFocus = document.createElement('button');
+        document.body.append(expectedFocus);
+        expectedFocus.focus();
+      }
+      release();
+      expect(await replacement).toBe(failure);
+      expect(controller.getSnapshot()).toMatchObject({ generation: 1, phase: 'ready' });
+      expect(root.dataset.searchRuntime).toBe('wc');
+      expect(owner.isOpen()).toBe(true);
+      expect(surface(1, 'panel')).toBe(retainedPanel);
+      expect(editor(1)).toBe(retainedEditor);
+      expect(retainedEditor.value).toBe('retained search query');
+      expect([retainedEditor.selectionStart, retainedEditor.selectionEnd]).toEqual([2, 9]);
+      await vi.waitFor(() => {
+        expect(retainedPanel.inert).toBe(false);
+        expect(retainedPanel.getAttribute('aria-hidden')).not.toBe('true');
+        expect(retainedPanel.style.visibility).not.toBe('hidden');
+        expect(document.activeElement).toBe(expectedFocus);
+      });
+      owner.toggle();
+      await vi.waitFor(() => expectClosed(1));
+      owner.open();
+      await vi.waitFor(() => expect(document.activeElement).toBe(retainedEditor));
+    } finally {
+      release();
+      await controller.destroy();
+    }
+  }
+);
 
 it('does not return focus from an interrupted replacement Dialog close', async () => {
   const { owner, opener, close } = await openHomepageReplacement();

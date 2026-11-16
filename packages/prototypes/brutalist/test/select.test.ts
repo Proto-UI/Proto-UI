@@ -378,9 +378,18 @@ describe('prototypes/brutalist: select', () => {
     await settle();
     beta.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
     await flush();
+    // Entry only observes hover. P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF
+    // admits known mouse movement through the shared Focus owner.
+    expect(beta.getExposes().hovered.get()).toBe(true);
+    expect(beta.getExposes().active.get()).toBe(false);
+    expect(document.activeElement).toBe(alpha);
+    beta.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse', buttons: 0 })
+    );
+    await flush();
+    expect(document.activeElement).toBe(beta);
     expect(beta.getExposes().active.get()).toBe(true);
     expect(alpha.getExposes().selected.get()).toBe(true);
-    beta.focus();
     await settle();
     expect(alpha.getExposes().active.get()).toBe(false);
     expect(beta.getExposes().focused.get()).toBe(true);

@@ -95,9 +95,11 @@ export type DrawerMaskHandles = {
 
 export type DrawerContentProps = TransitionProps & {
   side?: 'top' | 'right' | 'bottom' | 'left';
-  /** Vertical: absent/empty points fit content; explicit points are fractions of the capped full extent. */
+  /** Vertical: absent/empty points fit content. Horizontal: absent/empty points use [1]. Explicit points are fractions of the capped full extent. */
   snapPoints?: number[];
+  /** Validated on every edge; ignored in fractional mode. */
   minExtent?: AvailableLayoutLength;
+  /** Neutral extent cap, shared by sizing, edge attachment and drag. Horizontal default: 20 root-text units. */
   maxExtent?: AvailableLayoutLength;
   snapPoint?: number;
   defaultSnapPoint?: number;

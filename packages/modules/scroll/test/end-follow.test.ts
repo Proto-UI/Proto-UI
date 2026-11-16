@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { MoveGestureHost, ScrollSurfaceRequest, ScrollSurfaceSnapshot } from '@proto.ui/core';
+import type {
+  MoveGestureHost,
+  ScrollSurfacePositionRequest,
+  ScrollSurfaceSnapshot,
+} from '@proto.ui/core';
 import { createWebScrollSurfaceHost, type ScrollSurfaceHostLease } from '../src';
 
 const moveGestureHost: MoveGestureHost = {
@@ -1226,7 +1230,7 @@ describe('module-scroll: end-follow host contract', () => {
   });
 
   it.each<{
-    request: ScrollSurfaceRequest;
+    request: ScrollSurfacePositionRequest;
     expectedOffset: number;
   }>([
     { request: { kind: 'by', axis: 'vertical', delta: -50 }, expectedOffset: 250 },

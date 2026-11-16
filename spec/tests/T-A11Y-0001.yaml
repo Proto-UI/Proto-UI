@@ -5,6 +5,27 @@ status: draft
 since: 0.1.0
 summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, cross-adapter lifecycle behavior, and bounded React referenced-identity replay.
 cases:
+  - id: T-A11Y-0001-CASE-CONTROL-LABEL-CONSUMER
+    title: Actual compiled and mixed Runtime consumers name the current physical Label
+    covers:
+      - C-A11Y-0001-G
+      - C-A11Y-0001-H
+      - HC-A11Y-0001-CONTROL-LABEL-SOURCE
+    expectation: Ordinary actual Label, Button and Toggle imports use a real source IDREF across all four Web profiles and both generated/Runtime directions without copying label text into aria-label. Disabled targets retain their name, while reference replacement, Label disposal and focus-reentry detach withdraw the retired relation.
+  - id: T-A11Y-0001-CASE-CONTROL-LABEL-NATIVE-NAME
+    title: Native browser naming follows the same compiled or Runtime Label source
+    covers:
+      - C-A11Y-0001-G
+      - C-A11Y-0001-H
+      - HC-A11Y-0001-CONTROL-LABEL-SOURCE
+    expectation: A normally sandboxed Chromium consumer resolves the visible Label as the target button's exact accessible name, keeps that name while disabled and withdraws it when the physical or logical source is retired. This is bounded browser-computed naming evidence and does not certify OS assistive-technology output.
+  - id: T-A11Y-0001-CASE-CONTROL-LABEL-SOURCE
+    title: Bounded foreign Label views use the target registry and shared generated-ID receipts
+    covers:
+      - C-A11Y-0001-GENERATED-ID-LEASE
+      - HC-A11Y-0001-CONTROL-LABEL-SOURCE
+      - HC-A11Y-0001-GENERATED-ID-ABI
+    expectation: actual-label-view-with-exact-local-reuse-no-ambiguous-alias-and-last-owner-id-release
   - id: T-A11Y-0001-CASE-STATE-CONDITION
     title: Conditional state bindings omit inactive keys and restore fresh values without altering source ownership
     covers:
@@ -128,6 +149,33 @@ cases:
       - No heading level is declared or asserted in this fixture; this case is reference identity and dependent IDREF projection evidence, not additional aria-level coverage.
       - Bounded installed-React replay evidence only; this does not establish every React version, replacement document, terminal-disposal branch, or complete accessibility conformance.
 implementations:
+  - id: compiler-runtime-control-label-consumer-naming
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/control-label-consumer-source.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-CONTROL-LABEL-CONSUMER
+    notes:
+      - The executed 55-case happy-dom consumer suite contains the actual generated/Runtime naming, disabled-name retention, reference replacement and source-lifetime assertions across React, Vue, Vue2 and Web Component, including normal Vue2 observed wrappers. It is separate from the 29 compiler-admission and strict-type cases, which do not themselves establish host A11y behavior.
+  - id: compiler-runtime-control-label-native-naming
+    kind: adapter-test
+    status: passing
+    path: packages/compiler/test/control-label-native.browser.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-CONTROL-LABEL-NATIVE-NAME
+    notes:
+      - Twenty-four bounded Chromium cases passed with actual generated and Runtime consumers in a normal uid-1000 process with chromiumSandbox enabled. Browser-computed role/name, disabled-name retention and reference/physical-source withdrawal were asserted with source-bound captures; final verification must rerun the frozen integrated candidate. This remains distinct from OS assistive-technology evidence.
+  - id: module-a11y-control-label-source
+    kind: module-test
+    status: passing
+    path: packages/modules/a11y/test/control-label-source.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-CONTROL-LABEL-SOURCE
+    notes:
+      - Executed six focused DOM-harness cases for source translation, target detach, native-to-runtime and runtime-to-native generated-ID retention, and consumer replacement preservation; native browser and assistive-technology acceptance remain separate.
   - id: runtime-a11y-state-condition
     kind: runtime-test
     status: passing
@@ -246,6 +294,7 @@ verifies:
         - C-A11Y-0001-O
         - C-A11Y-0001-P
         - C-A11Y-0001-LEVEL
+        - C-A11Y-0001-GENERATED-ID-LEASE
     - id: C-ASYNC-A11Y-0001
       since: 0.2.0-rc.7
       anchors:
@@ -256,6 +305,8 @@ verifies:
         - HC-A11Y-0001-A
         - HC-A11Y-0001-B
         - HC-A11Y-0001-C
+        - HC-A11Y-0001-CONTROL-LABEL-SOURCE
+        - HC-A11Y-0001-GENERATED-ID-ABI
 exercises:
   adapters:
     - id: A-REACT-18-19-0001
@@ -266,6 +317,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Referenced identity and dependent IDREF retention exercise same-turn Activity replay and current committed projection; they do not verify all lifecycle/profile obligations or every supported React version.
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Mapped executed target-owned foreign Label source, generated-ID leases, independent actual generated/Runtime naming consumers and the bounded 24-case native browser naming run without broadening semantic-reference author admission. Frozen-candidate verification and OS assistive-technology acceptance remain separate.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added shared AccessibleHandle, removed legacy API and retained-method setup guards; migrated existing Runtime and Adapter evidence to asAccessible.

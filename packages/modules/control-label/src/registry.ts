@@ -1,5 +1,5 @@
-import type { ControlLabelActivationSource } from '@proto.ui/core';
-import type { A11ySemanticObjectRef, ControlLabelOptions, ControlLabelRef } from '@proto.ui/core';
+import { isControlLabelRef, type ControlLabelActivationSource } from '@proto.ui/core';
+import type { ControlLabelOptions, ControlLabelRef } from '@proto.ui/core';
 
 export type ControlLabelView = Readonly<{
   /** Host-private identities; never author Props, State or Context values. */
@@ -10,12 +10,22 @@ export type ControlLabelParticipant = Readonly<{
   owner: object;
   kind: 'label' | 'target';
   ref: ControlLabelRef;
-  semanticRef: A11ySemanticObjectRef;
+  /** Opaque source identity; the target host owns any local A11y translation. */
+  semanticRef: object;
   view(): ControlLabelView | null;
   options(): ControlLabelOptions;
-  name(label: A11ySemanticObjectRef): { dispose(): void; isActive(): boolean } | null;
+  name(label: object, view: ControlLabelView): { dispose(): void; isActive(): boolean } | null;
   activate(isCurrent: () => boolean, source: ControlLabelActivationSource): void;
   diagnostic(code: string | null): void;
+}>;
+export type ControlLabelBinding = Readonly<{
+  refresh(): void;
+  requestActivation(source?: ControlLabelActivationSource): void;
+  dispose(): void;
+}>;
+type ControlLabelPairAuthority = Readonly<{
+  version: 1;
+  bind(participant: ControlLabelParticipant): ControlLabelBinding;
 }>;
 
 type Pair = {
@@ -121,7 +131,7 @@ function refresh(group: Group): void {
           group.pair = pair;
           try {
             if (options.naming)
-              pair.nameLease = target.participant.name(label.participant.semanticRef);
+              pair.nameLease = target.participant.name(label.participant.semanticRef, label.view);
           } catch (error) {
             if (group.pair === pair) withdraw(group);
             throw error;
@@ -132,7 +142,7 @@ function refresh(group: Group): void {
             continue;
           }
         }
-        if (group.pair?.naming && !group.pair.nameLease) code = 'name-conflict';
+        if (group.pair?.naming && !group.pair.nameLease?.isActive()) code = 'name-conflict';
       }
       for (const participant of participants) participant.diagnostic(code);
     } while (group.dirty);
@@ -142,11 +152,9 @@ function refresh(group: Group): void {
 }
 
 /** One lease per logical owner. An obsolete release never withdraws its successor. */
-export function bindControlLabel(participant: ControlLabelParticipant): {
-  refresh(): void;
-  requestActivation(source?: ControlLabelActivationSource): void;
-  dispose(): void;
-} {
+function bindParticipant(participant: ControlLabelParticipant): ControlLabelBinding {
+  if (!isControlLabelRef(participant.ref))
+    throw new TypeError('[ControlLabel] invalid opaque association reference');
   let group = groups.get(participant.ref);
   if (!group) {
     group = { participants: new Map(), revision: 0, pair: null, refreshing: false, dirty: false };
@@ -192,4 +200,31 @@ export function bindControlLabel(participant: ControlLabelParticipant): {
       refresh(ownGroup);
     },
   };
+}
+
+/** One same-realm domain includes runtime and separately emitted native graphs. */
+export function bindControlLabel(participant: ControlLabelParticipant): ControlLabelBinding {
+  const key = Symbol.for('@proto.ui/control-label/pairs/v1');
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, key);
+  if (descriptor) {
+    const service = descriptor.value as ControlLabelPairAuthority | undefined;
+    if (
+      descriptor.get ||
+      descriptor.set ||
+      descriptor.configurable ||
+      descriptor.writable ||
+      !service ||
+      !Object.isFrozen(service) ||
+      service.version !== 1 ||
+      typeof service.bind !== 'function'
+    )
+      throw new TypeError('[ControlLabel] incompatible same-realm pairing ABI; expected v1');
+    return service.bind(participant);
+  }
+  const service: ControlLabelPairAuthority = Object.freeze({
+    version: 1 as const,
+    bind: bindParticipant,
+  });
+  Object.defineProperty(globalThis, key, { value: service });
+  return service.bind(participant);
 }

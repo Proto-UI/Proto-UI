@@ -23,7 +23,7 @@ statement:
 criteria:
   - id: A-VUE-2-0001-CONTROL-LABEL
     text:
-      en: The bounded draft Control Label slice transports typed instance associations separately from portable Props, including custom getProps projections. WC uses setElementAssociations; framework facades reserve instanceAssociations. Only opted-in semantic subjects accept a branded reference. Host-private tree scope, eligible input intent and target callback wiring are supplied; no attribute serialization or native-platform support is inferred. Harness results and real-browser admission remain distinct.
+      en: The bounded draft Control Label slice transports typed instance associations separately from portable Props, including custom getProps projections. Vue2 facades reserve instanceAssociations, and only opted-in semantic subjects accept nominally admitted references. Ordinary reactive wrappers may contain Vue2's own non-enumerable Observer metadata; the Adapter removes only metadata proven against the owning Vue constructor and bound to that exact wrapper, before unchanged strict association validation. Other unknown keys, symbols and fake metadata remain errors, while original getter receiver, errors and reactive tracking survive normalization. Host-private tree scope, eligible input intent and target callback wiring are supplied; no attribute serialization or native-platform support is inferred. Harness results and real-browser admission remain distinct.
     dependsOn:
       contracts:
         - id: C-CONTROL-LABEL-0001
@@ -448,6 +448,9 @@ sources:
   - path: packages/adapters/vue2/test/feedback.integration.test.ts
   - path: packages/adapters/vue2/package.json
   - path: packages/adapters/vue2/src/adapt.ts
+  - path: packages/adapters/vue2/src/instance-associations.ts
+  - path: packages/adapters/vue2/test/instance-associations.test.ts
+  - path: packages/adapters/vue2/test/control-label.integration.test.ts
   - path: packages/adapters/vue2/src/runtime/modules.ts
   - path: packages/adapters/vue2/src/runtime/session.ts
   - path: packages/adapters/vue2/test/props-update.test.ts
@@ -458,6 +461,9 @@ sources:
   - path: packages/adapters/vue2/test/context.integration.test.ts
   - path: packages/adapters/vue2/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Normalized only genuine owning-runtime Vue2 Observer metadata at the reserved association boundary, with reactive clearing/rebinding and strict forged-metadata negative evidence; retained the draft ControlLabel scope.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added the explicitly separate instance-association channel and bounded draft Control Label Web provider links.

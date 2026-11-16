@@ -1,0 +1,31 @@
+id: C-REACT-HOST-PROPS-0001
+type: contract
+title: React diagnoses undeclared host-looking inputs without forwarding semantic attributes
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Bounded diagnostic repair for React consumers; no generic native attribute channel or new stable naming API is admitted.
+summary: Declared prototype Props and explicit Adapter inputs remain distinct from HTML attributes.
+statement:
+  en: React component input is classified into portable prototype Props and explicit Adapter-owned inputs. An undeclared host-looking key is not a DOM forwarding channel and cannot override a semantic owner's role or ARIA state. Development diagnostics make this boundary actionable without logging consumer values.
+criteria:
+  - id: C-REACT-HOST-PROPS-0001-CLASSIFICATION
+    text:
+      en: Prototype-declared keys are accepted as portable Props even if named like host attributes. Adapter-owned className/hostClassName/surfaceClassName, style/hostStyle/surfaceStyle and dir retain their explicit channels. The existing data-demo-ref instrumentation channel is preserved. Generic aria-*, data-*, title, id, role and tabIndex inputs are not implicitly forwarded.
+  - id: C-REACT-HOST-PROPS-0001-DIAGNOSTIC
+    text:
+      en: In development, each undeclared host-looking key that remains in the getProps result is diagnosed once per logical React instance, including keys introduced by updates. The diagnostic names only the prototype and key, explains that the key is not forwarded, points to the documented component API and bounded Control Label association for opted-in naming, and preserves semantic role/state ownership. Production suppresses the warning. A custom getProps mapping that consumes the key does not produce a false dropped-input warning.
+dependsOn:
+  contracts: [C-PROPS-0003, C-PROPS-0008, C-CONTROL-LABEL-0001]
+references:
+  adapters: [A-REACT-18-19-0001]
+verifies:
+  tests: [T-REACT-HOST-PROPS-0001]
+sources:
+  - path: packages/adapters/react/src/host-prop-diagnostics.ts
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/react/README.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define bounded non-forwarding diagnostics and preserve declared semantic inputs and owned accessibility state.
+tags: [react, props, accessibility, diagnostics]

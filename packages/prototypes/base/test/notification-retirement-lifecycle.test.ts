@@ -16,7 +16,7 @@ import {
   AS_TRIGGER_GET_PROTO_CAP,
 } from '@proto.ui/module-as-trigger';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
-import { fieldRoot, fieldControl, FIELD_CONTEXT } from '../src/field';
+import { fieldRoot, fieldControl, fieldTextarea, FIELD_CONTEXT } from '../src/field';
 import { toggleGroupRoot, toggleGroupItem } from '../src/toggle-group';
 import { TOGGLE_GROUP_CONTEXT } from '../src/toggle-group/shared';
 import {
@@ -71,8 +71,11 @@ function runtimeHarness() {
         return { cancel: () => clearTimeout(id) };
       },
       commit: (_c, s) => s?.done(),
+      // This fixture has no separate renderer withdrawal; Runtime still binds
+      // the returned operation to its actual mount epoch and present intent.
+      viewOperations: { capture: () => ({ isCurrent: () => true }) },
       onRuntimeReady(w) {
-        if (proto === fieldControl)
+        if (proto === fieldControl || proto === fieldTextarea)
           w.attach('text-control', [
             [
               TEXT_CONTROL_HOST_CAP,
@@ -146,6 +149,16 @@ function runtimeHarness() {
           inputType: 'insertText',
         });
       },
+      composition(type: 'compositionstart' | 'compositionend', value: string) {
+        textValue = value;
+        connection.onEvent({
+          type,
+          value,
+          composing: type === 'compositionstart',
+          data: value,
+          inputType: null,
+        });
+      },
       get exposes() {
         return exposes;
       },
@@ -160,6 +173,96 @@ function runtimeHarness() {
     },
   };
 }
+
+it.each([fieldControl, fieldTextarea])(
+  '$name retires the Field composition snapshot and allows validation after rejoining',
+  async (proto) => {
+    const { make, actions } = runtimeHarness();
+    const root = make(fieldRoot, null, { externalValidation: true, validationMode: 'manual' });
+    const control = make(proto, root.target, { defaultValue: 'seed' });
+    try {
+      await root.session.mount();
+      await control.session.mount();
+      control.input('candidate', true);
+      expect(control.exposes.composing.get()).toBe(true);
+      root.session.invokeInCallbackScope(() => {
+        expect(root.exposes.validate()).toBeNull();
+      });
+      actions.length = 0;
+
+      await control.session.unmount();
+      expect(control.exposes.__fieldSnapshot()).toMatchObject({
+        value: 'candidate',
+        composing: false,
+        active: false,
+      });
+      expect(control.exposes.composing.get()).toBe(false);
+      await control.session.mount();
+      expect(control.exposes.__fieldSnapshot()).toMatchObject({
+        value: 'candidate',
+        composing: false,
+        active: true,
+      });
+      expect(actions).not.toContain('compositionEnd');
+
+      root.session.invokeInCallbackScope(() => {
+        const request = root.exposes.validate();
+        expect(typeof request).toBe('string');
+        expect(root.exposes.resolveValidation(request, { invalid: false })).toBe(true);
+      });
+      expect(actions.filter((name) => name === 'validationRequest')).toHaveLength(1);
+    } finally {
+      await control.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
+
+for (const proto of [fieldControl, fieldTextarea])
+  it.each(['compositionstart', 'compositionend'] as const)(
+    `${proto.name} does not publish an old %s after a composing observer replaces the view`,
+    async (type) => {
+      const { make, actions } = runtimeHarness();
+      const root = make(fieldRoot);
+      const control = make(proto, root.target, { defaultValue: 'seed' });
+      const transitions: Promise<void>[] = [];
+      let stop: (() => void) | undefined;
+      let armed = false;
+      try {
+        await root.session.mount();
+        await control.session.mount();
+        if (type === 'compositionend') control.input('candidate', true);
+        actions.length = 0;
+        stop = control.exposes.composing.subscribe((event: any) => {
+          if (!armed || event.type !== 'next') return;
+          armed = false;
+          transitions.push(control.session.unmount());
+          transitions.push(control.session.mount());
+          control.input('replacement', false);
+        });
+        armed = true;
+        control.composition(type, 'old candidate');
+        await Promise.all(transitions);
+        expect(transitions).toHaveLength(2);
+        expect(control.exposes.composing.get()).toBe(false);
+        expect(control.exposes.value.get()).toBe('replacement');
+        expect(control.exposes.__fieldSnapshot()).toMatchObject({
+          value: 'replacement',
+          composing: false,
+          active: true,
+        });
+        expect(
+          actions.filter((name) => name === 'compositionStart' || name === 'compositionEnd')
+        ).toEqual([]);
+      } finally {
+        armed = false;
+        stop?.();
+        await Promise.all(transitions);
+        await control.session.dispose();
+        await root.session.dispose();
+      }
+    }
+  );
 
 const cases = [
   {
@@ -360,9 +463,16 @@ it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
       setup(def) {
         def.anatomy.claim(MENUBAR_FAMILY, { role: 'content' });
         def.expose.state('open', def.state.bool('open', true));
-        def.expose.method('focusFirst', () => {
-          focused++;
-        });
+        let entryEpoch = 0;
+        def.expose.method('__prepareEntry', (value: string) =>
+          value === 'file' ? ++entryEpoch : null
+        );
+        def.expose.method(
+          '__requestEntry',
+          (_last: boolean, current: () => boolean, epoch: number) => {
+            if (epoch === entryEpoch && current()) focused++;
+          }
+        );
       },
     });
     const root = make(menubarRoot),

@@ -1,4 +1,5 @@
-import { unsupportedPointerFacts } from './pointer-facts-admission';
+import { resolvedPropFacts } from './resolved-props';
+import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-facts-admission';
 import { dataTypeEqual, formatDataType } from './data-types';
 import type { DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -7,7 +8,8 @@ import { checkTargetOperations, resolveTargetProfile } from './targets';
 import { isDataValueType, isPublicValueType } from './ir';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
-import { nativeInteractionArtifact } from './native-interaction';
+import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
@@ -32,7 +34,10 @@ export function emitReactSource(
   if (!validated.ok) return validated;
   const ir = validated.value;
   const moduleParts = partitionModuleBindings(ir);
+  const resolvedFacts = resolvedPropFacts(ir);
   if (options.ssr) {
+    const controlLabelDiagnostics = unsupportedControlLabel(ir, 'react-source SSR');
+    if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'react-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   }
@@ -59,6 +64,7 @@ export function emitReactSource(
         span: value.span,
       })),
     };
+  const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const reachedFunctions = new Set(admitted.value.functions);
   const interaction =
     ir.moduleDeclarations.length > 0 ||
@@ -242,7 +248,10 @@ export function emitReactSource(
   }
   function parameters(values: readonly ParameterIR[]): string {
     return values
-      .map((value) => `${value.name}${value.optional ? '?' : ''}: ${typeName(value.type)}`)
+      .map(
+        (value) =>
+          `${value.name}${value.optional && !value.default ? '?' : ''}: ${value.callback ? `(${parameters(value.callback.parameters)}) => ${typeName(value.callback.returnType)}` : typeName(value.type)}${value.default ? ` = ${expression(value.default, 0)}` : ''}`
+      )
       .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
@@ -263,7 +272,8 @@ export function emitReactSource(
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
-        const cell = expression(value.cell, depth), operator = value.delta === 1 ? '++' : '--';
+        const cell = expression(value.cell, depth),
+          operator = value.delta === 1 ? '++' : '--';
         return `(${value.prefix ? operator + cell : cell + operator})`;
       }
       case 'context-key':
@@ -278,6 +288,8 @@ export function emitReactSource(
         return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
+      case 'conditional':
+        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -383,10 +395,12 @@ export function emitReactSource(
   const propSchemas = ir.props
     .map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.type)},`)
     .join('\n');
-  const hookDefinitions = statements(moduleParts.owned, 1) + ir.hooks
-    .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
-    .map(
-      (hook) => `  const ${hooks.get(hook.id)} = () => {
+  const hookDefinitions =
+    statements(moduleParts.owned, 1) +
+    ir.hooks
+      .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
+      .map(
+        (hook) => `  const ${hooks.get(hook.id)} = () => {
     if (${p}HookResults.has(${JSON.stringify(hook.name)})) return ${p}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
     ${p}HookResults.set(${JSON.stringify(hook.name)}, undefined);
     (${fn(hook.setup, 2)})(${p}Def);
@@ -394,8 +408,8 @@ export function emitReactSource(
     ${p}HookResults.set(${JSON.stringify(hook.name)}, result);
     return result;
   };`
-    )
-    .join('\n');
+      )
+      .join('\n');
 
   const code = `// Editable generated React DOM source. Profile: ${profile}.
 // Inline owner lowering and emitted shared checked-data/Context helpers v1; no Proto-UI Runtime/Core/Adapter dependencies.
@@ -427,6 +441,7 @@ ${exposed}
 };
 export type GeneratedComponentProps = GeneratedProps & {
   children?: ${p}React.ReactNode;
+  instanceAssociations?: Readonly<{ controlLabel?: object | null }>;
 ${eventProps}
   [event: \`on\${string}\`]: unknown;
 };
@@ -435,7 +450,7 @@ export interface GeneratedHandle {
   getExposes(): GeneratedExposes;
   invokeInCallbackScope<T>(callback: () => T): T;
 }
-type ${p}ResolvedProps = Readonly<{ [K in keyof GeneratedProps]-?: Exclude<GeneratedProps[K], undefined> }>;
+type ${p}ResolvedProps = Readonly<{ ${ir.props.map((prop) => `${JSON.stringify(prop.name)}: ${typeName(prop.type)}${resolvedFacts.nonNull.has(prop.name) ? '' : ' | null'}`).join('; ')} }>;
 type ${p}StateEvent<T> = { type: 'next'; prev: T; next: T; reason?: unknown } | { type: 'disconnect'; reason: 'unmount' };
 type ${p}ExternalState<T> = {
   get(): T;
@@ -859,6 +874,7 @@ ${usesStyle ? `      ${p}Style.refresh();` : ''}
     invoke,
     getRun: () => ${p}RunHandle,
     getResolvedProps: () => resolved,
+${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' : ''}
     subscribeState(state, callback) { return (externalStates.get(state) as ${p}ExternalState<unknown> | undefined)?.subscribe(callback) ?? (state as ${p}NativeObservedState<unknown>).subscribe(callback); },
     getRoot: () => viewConnected ? root : null,
     identity: context,
@@ -959,11 +975,13 @@ ${interaction ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    fe
       },
     }),
     props: {
-      define(incoming: Record<string, ${p}PropSpec>) {
+      define(incoming: Record<string, Omit<${p}PropSpec, 'type'> & { type: ${p}DataSchema | 'enum' | 'object' | 'any' }>) {
         ensurePhase('setup');
         const next = { ...specs };
         for (const [key, authored] of Object.entries(incoming)) {
-          const spec = { ...authored, type: propSchemas[key] ?? authored.type };
+          const schema = propSchemas[key];
+          if (!schema) throw new Error('[Props] missing checked declaration: ' + key);
+          const spec: ${p}PropSpec = { ...authored, type: schema };
           const previous = specs[key];
           if (!previous) { next[key] = { ...spec }; continue; }
           const rank = (empty: ${p}PropSpec['empty']) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
@@ -1061,9 +1079,10 @@ ${hookDefinitions}
   function applyProps(nextHost: GeneratedComponentProps) {
     ensureAlive();
     hostProps = nextHost;
+${controlLabel ? `    ${p}Interaction.refresh();` : emitUndeclaredInstanceAssociations('nextHost.instanceAssociations', `${p}Associations`)}
     const nextRaw: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(nextHost)) {
-      if (key === 'children' || key.startsWith('on') && typeof value === 'function') continue;
+      if (key === 'children' || key === 'instanceAssociations' || key.startsWith('on') && typeof value === 'function') continue;
       nextRaw[key] = value;
     }
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
@@ -1337,7 +1356,8 @@ ${
   // Suspense can disconnect layout effects without unmounting the owner shell.
   // Passive cleanup identifies shell unmount; same-turn StrictMode replay cancels disposal.
   ${p}React.useEffect(() => {
-    const owner = ownerRef.current${ssr ? ';\n    if (!owner) return' : '!'};
+    const owner = ownerRef.current;
+    if (!owner) return;
     owner.connect();
     return () => { owner.disconnect(); };
   }, [${ssr ? 'parentReady' : ''}]);
@@ -1395,7 +1415,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
         ...contextArtifacts.files,
         ...staticArtifacts.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
-        ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []),
+        ...(interaction ? nativeInteractionArtifacts('full', { controlLabel }) : []),
         ...(ssr ? [reactSSRTransportArtifact] : []),
         {
           path: transportFile,

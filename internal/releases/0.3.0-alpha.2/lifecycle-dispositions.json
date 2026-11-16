@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0-alpha.2",
+  "slices": [
+    {
+      "id": "alpha.2-control-label-compiler-repair",
+      "entities": [
+        "C-CONTROL-LABEL-0001",
+        "M-CONTROL-LABEL-0001",
+        "HC-CONTROL-LABEL-0001",
+        "T-CONTROL-LABEL-0001",
+        "P-BASE-LABEL",
+        "P-BASE-BUTTON",
+        "P-BASE-TOGGLE",
+        "P-BASE-TOGGLE-GROUP"
+      ],
+      "disposition": "remain-draft",
+      "rationale": "The alpha.2 repair review preserves the existing draft association and target semantics. Compiler admission and synthetic framework consumer evidence do not supply the independently reviewed complete native-input, lifetime and assistive-technology evidence required for stable admission. C-CONTROL-LABEL-0001-Q-EVIDENCE remains an explicit activation blocker; this scoped preparation neither activates these entities nor asserts full-catalog readiness.",
+      "evidence": [
+        "spec/contracts/C-CONTROL-LABEL-0001.yaml",
+        "spec/modules/M-CONTROL-LABEL-0001.yaml",
+        "spec/host-caps/HC-CONTROL-LABEL-0001.yaml",
+        "spec/tests/T-CONTROL-LABEL-0001.yaml",
+        "spec/versions/V-PROTO-UI-0011.yaml",
+        "internal/records/2026-11-15-alpha.2-control-label-release-prep.zh-CN.md"
+      ]
+    }
+  ]
+}

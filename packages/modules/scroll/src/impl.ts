@@ -12,8 +12,10 @@ import type {
   ScrollSurfaceConfig,
   ScrollSurfaceConfigPatch,
   ScrollSurfaceHandle,
+  ScrollSurfacePositionRequest,
   ScrollSurfaceRequest,
   ScrollSurfaceRequestOutcome,
+  ScrollSurfaceRevealRequest,
   ScrollSurfaceSnapshot,
   Unsubscribe,
 } from '@proto.ui/core';
@@ -70,7 +72,7 @@ export class ScrollModuleImpl extends ModuleBase {
   private refreshAfterRetirement = false;
   private leaseEpoch = 0;
   private snapshotEpoch = 0;
-  private attachingLease: { epoch: number; requests: ScrollSurfaceRequest[] } | null = null;
+  private attachingLease: { epoch: number; requests: ScrollSurfacePositionRequest[] } | null = null;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
@@ -221,6 +223,7 @@ export class ScrollModuleImpl extends ModuleBase {
         this.set(this.endFollowRequestStatusOwned, 'rejected');
       return { kind: 'rejected', reason: 'unavailable' };
     }
+    if (request.kind === 'reveal') return this.reveal(request, epoch);
     const normalized =
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
@@ -237,6 +240,46 @@ export class ScrollModuleImpl extends ModuleBase {
     }
     this.lease.request(normalized);
     return { kind: 'dispatched' };
+  }
+
+  private reveal(request: ScrollSurfaceRevealRequest, epoch: number): ScrollSurfaceRequestOutcome {
+    const rejected = { kind: 'rejected', reason: 'unavailable' } as const;
+    const { axis, family, part } = request;
+    const lease = this.lease;
+    const reveal = lease?.reveal;
+    if (
+      axis !== 'vertical' ||
+      this.config.axes === 'horizontal' ||
+      !lease ||
+      !reveal ||
+      this.attachingLease
+    )
+      return rejected;
+    const binding = this.currentBinding;
+    const currentLease = () =>
+      this.mounted &&
+      this.leaseEpoch === epoch &&
+      this.lease === lease &&
+      (!this.availabilitySession || this.bindingIsCurrent(epoch, binding));
+    const currentPart = () => {
+      if (!currentLease()) return false;
+      const role = this.anatomyPort.resolveSelfRole(family);
+      if (!role || !currentLease()) return false;
+      const self = this.anatomyPort.resolveSelfInstance();
+      const ancestor = this.anatomyPort.resolveAncestorInstance(family, part, role);
+      return ancestor === self && this.anatomyPort.isCurrentPart(family, part) && currentLease();
+    };
+    if (!currentPart()) return rejected;
+    const target = this.anatomyPort.resolvePartTarget(part);
+    if (target === null) return rejected;
+    // The host rechecks this after measurement, so a retired logical claim
+    // cannot retain authority merely because its old DOM node still exists.
+    const currentTarget = () =>
+      currentPart() && this.anatomyPort.resolvePartTarget(part) === target && currentPart();
+    if (!currentTarget()) return rejected;
+    return reveal.call(lease, target, axis, currentTarget) && currentTarget()
+      ? { kind: 'dispatched' }
+      : rejected;
   }
 
   getConfig(): ScrollSurfaceConfig {
@@ -439,7 +482,7 @@ export class ScrollModuleImpl extends ModuleBase {
     if (!this.bindingIsCurrent(epoch, binding)) return;
     this.currentBinding = binding;
     this.acquiringEpoch = epoch;
-    const attaching = { epoch, requests: [] as ScrollSurfaceRequest[] };
+    const attaching = { epoch, requests: [] as ScrollSurfacePositionRequest[] };
     let initial: ScrollSurfaceSnapshot | undefined;
     let admitted = false;
     let returned: ScrollSurfaceHostLease | null = null;
@@ -523,7 +566,7 @@ export class ScrollModuleImpl extends ModuleBase {
       return;
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
-    const attaching = { epoch, requests: [] as ScrollSurfaceRequest[] };
+    const attaching = { epoch, requests: [] as ScrollSurfacePositionRequest[] };
     this.attachingLease = attaching;
     try {
       this.set(this.projectionOwned, projection);

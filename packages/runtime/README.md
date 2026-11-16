@@ -16,8 +16,14 @@ An authored asHook captures setup style contributions made through both `def.fee
 
 ## Install
 
+<!-- proto-ui-release-status:start -->
+
+> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+
+<!-- proto-ui-release-status:end -->
+
 ```bash
-npm install @proto.ui/runtime@0.3.0-alpha.1
+npm install @proto.ui/runtime@0.3.0-alpha.2
 ```
 
 ## Internal Structure

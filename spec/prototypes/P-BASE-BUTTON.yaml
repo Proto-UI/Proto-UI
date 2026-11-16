@@ -14,6 +14,14 @@ statement:
 
 
 criteria:
+  - id: P-BASE-BUTTON-EXTERNAL-LABEL
+    text:
+      en: The command target opts into C-CONTROL-LABEL-0001 through the dedicated InstanceAssociations.controlLabel channel. An independent Label may name an icon-only target through its actual semantic identity. Label activation requests the existing command or toggle operation exactly once and retains disabled, controlled selection, focus and lifecycle ownership; Toggle Group Root remains the selection owner. No generic host attribute forwarding or label Prop is introduced.
+      zh-CN: 命令目标通过专用 InstanceAssociations.controlLabel 通道参与 C-CONTROL-LABEL-0001。独立 Label 可通过实际语义 identity 为仅图标目标命名；关联激活只请求一次既有命令或切换操作，保留 disabled、受控选择、focus 与生命周期所有权，Toggle Group Root 仍拥有选择。不引入通用宿主属性透传或 label Prop。
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-BUTTON-CONTENT-SELECTION
     text:
       en: Pure command-action Button subjects declare select-none through Base feedback, shared by direct and asButton entries. This is a local affordance, not visual family paint or copy protection. Explicit later select-text restoration remains allowed; adjacent prose, editable content, browser range/copy behavior and independent trigger protocols are not suppressed. No global event prevention or family geometry belongs to this policy.
@@ -343,6 +351,9 @@ verifies:
   tests:
     - T-BASE-BUTTON-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Local command selection affordance is owned by Base Button under the admitted content-selection contract; restores the policy lost by the Shadcn paint extraction without adding family dimensions or global copy suppression.

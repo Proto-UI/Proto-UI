@@ -282,7 +282,7 @@ for (const [family, projection] of families) {
       expect(items[1].getAttribute('aria-disabled')).toBe('true');
     });
 
-    it('clears pointer highlight on leave and resets every transient Item state on close', async () => {
+    it('keeps mouse navigation owned by Focus and resets every transient Item state on close', async () => {
       vi.useFakeTimers();
       const { root, trigger, items } = createSelect({
         root: { defaultOpen: true, defaultValue: 'alpha' },
@@ -293,9 +293,29 @@ for (const [family, projection] of families) {
       items[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
       await flush();
       expect(items[1].getExposes().hovered.get()).toBe(true);
+      // Entry alone cannot take navigation from the current Focus owner.
+      expect(items[1].getExposes().active.get()).toBe(false);
+      expect(document.activeElement).toBe(items[0]);
+      items[1].dispatchEvent(
+        new PointerEvent('pointermove', { bubbles: true, pointerType: 'mouse', buttons: 0 })
+      );
+      await flush();
+      expect(document.activeElement).toBe(items[1]);
+      expect(items[0].getExposes().active.get()).toBe(false);
       expect(items[1].getExposes().active.get()).toBe(true);
       expect(root.getExposes().value.get()).toBe('alpha');
 
+      items[1].dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+      await flush();
+      expect(items[1].getExposes().hovered.get()).toBe(false);
+      // A focused Item keeps navigation on leave; selection is independent.
+      expect(document.activeElement).toBe(items[1]);
+      expect(items[1].getExposes().active.get()).toBe(true);
+      expect(items[0].getExposes().active.get()).toBe(false);
+      expect(items[0].getExposes().selected.get()).toBe(true);
+
+      items[0].focus();
+      items[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
       items[1].dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
       await flush();
       expect(items[1].getExposes().hovered.get()).toBe(false);

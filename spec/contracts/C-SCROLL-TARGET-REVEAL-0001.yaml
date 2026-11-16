@@ -1,0 +1,61 @@
+id: C-SCROLL-TARGET-REVEAL-0001
+type: contract
+title: Scroll reveals a current logical descendant without moving focus
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: The bounded runtime operation is under implementation; native consumer evidence and independent review remain required before activation.
+  zh-CN: 有界 runtime 操作正在实现；activation 仍需要 native 消费者证据与独立审查。
+summary: A bounded target reveal request carries a family and current Anatomy part; the current Scroll lease owns target resolution and minimal movement within its own surface.
+statement:
+  en: A reveal request asks the current logical scroll surface to expose one current same-family descendant. Authors pass Anatomy identity, never a host target or geometry. The Module validates current structural membership and lease authority; the host applies the smallest necessary movement inside that surface without changing focus or scrolling an ancestor. An unavailable target is rejected without replay. This first profile is vertical Web runtime delivery; compiler and non-Web admission require their own evidence.
+  zh-CN: reveal request 请求当前 logical scroll surface 显示同一 family 下的当前后代。作者传入 Anatomy identity，不传 host target 或 geometry。Module 校验当前结构归属及 lease 权限；host 在此 surface 内作必要的最小移动，不改变焦点、不滚动祖先。不可用 target 返回拒绝且不重放。首版覆盖纵向 Web runtime 交付；compiler 与非 Web 准入必须另有证据。
+criteria:
+  - id: C-SCROLL-TARGET-REVEAL-0001-IDENTITY
+    text:
+      en: The typed reveal request carries axis vertical, Anatomy family and part. The Module accepts only a current part in its own family domain whose nearest ancestor with the surface role is this surface. A stale, foreign, fabricated, self or sibling part is rejected before any host request.
+      zh-CN: typed reveal request 携带 vertical axis、Anatomy family 和 part。Module 只接受当前同域 part，且其最近的 surface-role 祖先必须是本 surface。旧、异域、伪造、自身及兄弟 part 在任何 host request 前拒绝。
+  - id: C-SCROLL-TARGET-REVEAL-0001-LIFETIME
+    text:
+      en: The request resolves and rechecks the same target against the same mounted lease. Getter or host-call reentry cannot transfer an old request to a replacement view. Not-mounted, pending, unsupported and retired targets return rejected; reveal requests never enter the attachment queue or retry after readiness changes.
+      zh-CN: 请求在同一 mounted lease 中解析并复核同一个 target。getter 或 host-call 重入不能把旧请求转给替换 view。未挂载、待就绪、不支持和退役 target 返回 rejected；reveal 不进入 attachment 队列，也不在 readiness 改变后重试。
+  - id: C-SCROLL-TARGET-REVEAL-0001-HOST
+    text:
+      en: The vertical Web host accepts only a connected, rendered descendant in the same document. It uses its own viewport, scroll padding, target scroll margin and current target bounds to reveal the nearest edge, clamps to the native range, preserves horizontal position and focus, and never writes an ancestor scroll offset. Computed pixel lengths and percentage scroll padding are supported; unresolved inset expressions are rejected rather than treated as zero. A target already covering or contained by the effective viewport requires no movement. Dispatched confirms host delivery, not universal visibility through external clipping.
+      zh-CN: 纵向 Web host 只接受同文档内已连接且已渲染的后代。它使用自身 viewport、scroll padding、目标 scroll margin 和当前 bounds，使最近边缘可见并按原生 range clamp，保留横向位置与焦点，不写祖先 scroll offset。支持 computed pixel length 和 percentage scroll padding；未解析的 inset 表达式返回拒绝，不按零处理。已覆盖或位于有效 viewport 内的目标不需要移动。dispatched 表示交付宿主，不证明任意外部 clipping 下均可见。
+  - id: C-SCROLL-TARGET-REVEAL-0001-CONSUMER
+    text:
+      en: Search families request reveal only after an accepted keyboard active-item change in the current open view. Disabled, read-only, composing, retired and pointer-only activity does not create a keyboard reveal. Enter-only events caused by layout or scrolling do not replace keyboard activity; only known, unpressed mouse movement admits hover activation. The consumer supplies a bounded list layout and retains text-input focus; it must not implement target scrolling with page DOM access.
+      zh-CN: Search 家族只在当前打开 view 接受键盘 active-item 改变后请求 reveal。disabled、read-only、composing、退役及仅 pointer 活动不产生键盘 reveal。布局或滚动引起的 enter-only 事件不能覆盖键盘活动项；仅已知且未按键的 mouse movement 准入 hover activation。消费者提供有界列表布局并保留文本输入焦点，不得用页面 DOM 访问实现目标滚动。
+dependsOn:
+  contracts:
+    - C-SCROLL-0001
+    - C-AS-SCROLL-SURFACE-0001
+  modules:
+    - M-ANATOMY-0001
+    - M-SCROLL-0001
+  hostCaps:
+    - HC-SCROLL-SURFACE-0001
+verifies:
+  tests:
+    - T-SCROLL-TARGET-REVEAL-0001
+sources:
+  - path: packages/modules/scroll/src/impl.ts
+  - path: packages/prototypes/base/src/search-primitives/family.ts
+  - path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+openQuestions:
+  - id: C-SCROLL-TARGET-REVEAL-0001-Q-ADMISSION
+    question:
+      en: When do the original four-adapter short-viewport Search journeys and independent lifetime review admit this bounded Web profile?
+      zh-CN: 何时以原四 Adapter 短视口 Search 旅程及独立生命周期审查准入此有界 Web profile？
+    blocks: [activation:C-SCROLL-TARGET-REVEAL-0001]
+  - id: C-SCROLL-TARGET-REVEAL-0001-Q-PROFILES
+    question:
+      en: When do independent compiler, non-Web, horizontal and externally clipped multi-surface journeys admit corresponding reveal profiles?
+      zh-CN: 何时以独立 compiler、非 Web、横向及外部 clipping 多 surface 旅程准入对应 reveal profile？
+    blocks: []
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Defined current-part target reveal for the demonstrated keyboard Search visibility gap without exporting host identity or changing focus ownership.
+tags: [scroll, anatomy, search, lifecycle]

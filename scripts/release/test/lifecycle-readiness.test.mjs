@@ -22,11 +22,14 @@ const report = (args) =>
     encoding: 'utf8',
     maxBuffer: 1 << 25,
   });
-const ids = 'D-IMAGE-VIEW-PROJECTION-0001,T-IMAGE-VIEW-0001';
 const version = readFileSync(path.join(root, 'VERSION'), 'utf8').trim();
 const plan = JSON.parse(
   readFileSync(path.join(root, 'internal/releases', version, 'lifecycle-dispositions.json'), 'utf8')
 );
+const ids = plan.slices
+  .flatMap((slice) => slice.entities)
+  .slice(0, 2)
+  .join(',');
 
 function assertCurrentDraftDispositions(data) {
   // Read the authored inventory independently of the report producer. A disposition
@@ -58,6 +61,7 @@ function assertCurrentDraftDispositions(data) {
 }
 
 test('release lifecycle CLI distinguishes scoped review from full-inventory completion', () => {
+  assert.notEqual(ids, '', 'the authored plan must provide a nonempty review scope');
   const scoped = report(['--check', '--entities', ids, '--json']);
   assert.equal(scoped.status, 0, scoped.stderr);
   const data = JSON.parse(scoped.stdout);

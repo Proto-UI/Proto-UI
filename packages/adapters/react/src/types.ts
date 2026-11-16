@@ -33,6 +33,7 @@ type ReactPortableProps<TProto extends ProtoLike> =
     : never;
 
 export type ProtoReactProps<TProto extends ProtoLike> = ReactPortableProps<TProto> & {
+  /** Explicit semantic associations, including accessible Label pairing; never generic DOM attribute forwarding. */
   instanceAssociations?: InstanceAssociations;
   dir?: 'ltr' | 'rtl' | 'auto';
   children?: any;

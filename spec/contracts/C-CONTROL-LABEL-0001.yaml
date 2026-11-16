@@ -4,15 +4,19 @@ title: Explicit control-label association separates accessible naming from activ
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: The bounded independent Label and five-target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
+  en: The bounded independent Label and eight-target direction is accepted for implementation; complete paired Web input, lifecycle, projection and assistive-technology evidence is still required before stable admission.
 summary: One opaque reference authorizes one independent Label and one participating control without adding a Label part to the control's anatomy or introducing a general action bus.
 statement:
-  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The implemented target set is Checkbox, Switch, Radio Group Item, Input and Textarea; Text Control activation is focus-only.
-  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。当前目标包括 Checkbox、Switch、Radio Group Item、Input 与 Textarea；Text Control 的关联 activation 仅请求 focus。
+  en: An App Maker explicitly shares a ControlLabelRef between an independent Label and an opt-in target. The reference owns only this association; it carries no host identity, checked value, callback or general component lookup. Naming and activation are independently declared effects. The target retains its existing activation, disabled, controlled value, focus and outward-signal ownership. The association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item; each target declares its own participation and keeps its existing operation owners; Text Control activation is focus-only. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item; their association is exercised through the Prototype packages and their Adapters.
+  zh-CN: App Maker 显式将同一 ControlLabelRef 交给独立 Label 与主动参与的目标。引用仅授权该关联，不携带宿主 identity、checked value、callback 或通用组件查询。命名与 activation 分别声明；目标保留已有 activation、disabled、controlled value、focus 与 outward signal 所有权。关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item；每个目标自行声明参与并保留既有操作所有者；Text Control 的关联 activation 仅请求 focus。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断；这些目标的关联通过 Prototype 包与其 Adapter 使用。
 criteria:
   - id: C-CONTROL-LABEL-0001-IDENTITY
     text:
       en: Only the public factory creates an admitted opaque reference. A plain lookalike, cloned object, string, DOM node or serialized attribute must be rejected with an explicit diagnostic. Creating or sharing a reference does not itself create a binding or discover another component.
+  - id: C-CONTROL-LABEL-0001-INTEROP
+    text:
+      en: Compatible implementations in one ECMAScript realm, including independently emitted native graphs and Runtime Adapters, admit the same exact public-factory reference and participate in one pair-ownership domain. Nominal admission and duplicate arbitration must not depend on which bundle loaded the factory or participant. The v1 realm ABI uses immutable, non-replaceable global data properties at Symbol.for('@proto.ui/control-label/ref/v1') and Symbol.for('@proto.ui/control-label/pairs/v1'). The former exposes version 1, create and is operations with private nominal membership; the latter exposes version 1 and bind with private pair state. No mutable registry, arbitrary-object admission operation or serializable structural brand is exposed. Incompatible occupied ABI slots are explicit errors. This mechanism is an implementation interoperability boundary, not a security boundary or cross-realm serialization guarantee; it does not recover references created by an incompatible older private authority or widen Anatomy domain matching.
+      zh-CN: 同一 ECMAScript realm 中的兼容实现，包括独立生成的原生组件图与 Runtime Adapter，必须接纳同一个公共工厂引用并共享唯一配对所有权域。nominal admission 与重复参与者仲裁不依赖工厂或参与者来自哪个 bundle。v1 realm ABI 在两个固定 Symbol.for 键上提供不可替换的只读服务，私有集合与配对状态不得暴露为可变 registry，也不提供任意对象注册或可序列化结构品牌。已占用且不兼容的 ABI 必须显式报错；该机制不构成安全边界，不承诺跨 realm 序列化，也不恢复旧版私有 authority 创建的引用或扩大 Anatomy 匹配域。
   - id: C-CONTROL-LABEL-0001-DOMAIN
     text:
       en: The shared reference defines the sole logical pair-authorization domain, so explicitly paired siblings need not share an Anatomy family. Both current views must additionally belong to the same host accessibility tree scope. No relation is inferred by position, DOM order, nearest control, name or framework root. Existing kind:part relationships remain constrained to their original same-Anatomy domain; this contract uses the separate direct semantic-object-reference path and does not widen part lookup.
@@ -37,34 +41,24 @@ criteria:
   - id: C-CONTROL-LABEL-0001-CONTENT
     text:
       en: >-
-        The label text-selection policy is explicit and bounded. Passive naming-only labels remain
-        selectable content; a short actionable label may suppress accidental selection under the
-        content-selection affordance contract. The admitted policy vocabulary is the shared
-        ControlLabelSelectionPolicy ('policy', 'auto', 'text', 'none'): 'policy' derives the declaration
-        from the label's actionable role, and the three explicit values lower only to the subject-local
-        select-auto, select-text and select-none affordances. The policy never owns a selection range,
-        editing or clipboard command, control state, focus or a second selection state machine. Long
-        descriptions remain independent selectable content rather than an enlarged action target or
-        duplicated accessible name. Checkbox/Switch anatomy does not acquire a Label part.
+        The label text-selection policy is explicit and bounded. Passive naming-only labels remain selectable content; a short actionable label may suppress accidental selection under the content-selection affordance contract. The admitted policy vocabulary is the shared ControlLabelSelectionPolicy ('policy', 'auto', 'text', 'none'): 'policy' derives the declaration from the label's actionable role, and the three explicit values lower only to the subject-local select-auto, select-text and select-none affordances. The policy never owns a selection range, editing or clipboard command, control state, focus or a second selection state machine. Long descriptions remain independent selectable content rather than an enlarged action target or duplicated accessible name. Checkbox/Switch anatomy does not acquire a Label part.
+
+
   - id: C-CONTROL-LABEL-0001-LOWERING
     text:
       en: Direct host integrations pass the opaque reference through the dedicated typed InstanceAssociations input, whose only admitted key in this slice is controlLabel. The Runtime delivers it through ControlLabelPort only to a Prototype that explicitly declared Label or target participation. It never enters raw or resolved Props; the active JSON Props contracts remain unchanged. This association channel cannot carry arbitrary data, callbacks, values, host objects or other reference families. Unknown keys and undeclared recipients are errors. Data-only demo input must declare an association key in a bounded render instance and materialize references through the public factory, preserving stable identity until that instance is disposed. Reusing the same key in another render instance never associates the two. Unsupported serialization or compiler lowering must report an explicit diagnostic rather than silently output an empty object or install an application listener that simulates protocol support.
   - id: C-CONTROL-LABEL-0001-WEB
     text:
       en: The first Web projection requires connected participants in the same Document and getRootNode tree scope. It uses the existing A11y semantic-reference and IDREF ownership projection for naming, plus a narrowly scoped input-intent host bridge for activation. Scope observers are shared, include shadow-tree containment changes, and retire only their own subscriptions. Cross-document and cross-shadow-root associations are unsupported and diagnosed even when an App Maker shares a reference. View identity and callback epoch are rechecked before every target effect.
+  - id: C-CONTROL-LABEL-0001-NAME-INTEROP
+    text:
+      en: A shared pair passes the Label's opaque semantic identity and current physical view to the target-owned naming operation. When compatible implementations use distinct A11y identity registries, the target host may translate that exact current view into a bounded local semantic source lease. It must reuse an unambiguous exact local binding, reject an ambiguous or foreign-tree binding, and otherwise relate to the same rendered Label without copying content. Alias projection and generated-ID receipts retire with the target relation or view; a generated ID stays valid while another compatible live projection retains it, and last release preserves a consumer replacement. This privileged bridge does not admit foreign objects to the public A11y author API or expose host facts through ControlLabelRef, Props or Context.
   - id: C-CONTROL-LABEL-0001-BOUNDS
     text:
       en: This module does not own Form, submission, validation or error summaries. Its bounded anatomy bridge may be consumed by an independent Field protocol; it admits no multiple-label ordering, arbitrary action dispatch, native selection model or platform-wide support claim. Missing host capability is an explicit unsupported state, not success. Passing instance-association input or rendering label text alone does not certify a working association.
   - id: C-CONTROL-LABEL-0001-ANATOMY
     text:
-      en: A participant may instead declare one setup-only {family,labelRole,targetRole} anatomy pair. ControlLabel
-        alone resolves the opaque nearest-root domain and exact self role through AnatomyPort, retains a module-private
-        pair reference for that domain/role tuple, and uses its existing live registry and physical tree-scope
-        guard. The descriptor contains no host IDs or callbacks; the internal reference never enters Props/Context.
-        Explicit non-null InstanceAssociations conflicts with this mode and is rejected. Missing domain, mismatched
-        role, zero/multiple live targets, adoption, detach, replacement and terminal cleanup fail closed or refresh
-        exact leases. Anatomy supplies structure, not a new value or activation owner. Naming may be disabled
-        so a pre-existing A11y part relationship remains the sole name owner.
+      en: A participant may instead declare one setup-only {family,labelRole,targetRole} anatomy pair. ControlLabel alone resolves the opaque nearest-root domain and exact self role through AnatomyPort, retains a module-private pair reference for that domain/role tuple, and uses its existing live registry and physical tree-scope guard. The descriptor contains no host IDs or callbacks; the internal reference never enters Props/Context. Explicit non-null InstanceAssociations conflicts with this mode and is rejected. Missing domain, mismatched role, zero/multiple live targets, adoption, detach, replacement and terminal cleanup fail closed or refresh exact leases. Anatomy supplies structure, not a new value or activation owner. Naming may be disabled so a pre-existing A11y part relationship remains the sole name owner.
 dependsOn:
   modules:
     - M-ANATOMY-0001
@@ -83,6 +77,9 @@ references:
       P-BASE-INPUT,
       P-BASE-TEXTAREA,
       P-BASE-TEXT,
+      P-BASE-BUTTON,
+      P-BASE-TOGGLE,
+      P-BASE-TOGGLE-GROUP,
     ]
 sources:
   - path: packages/modules/control-label/src/anatomy-pair.ts
@@ -92,6 +89,7 @@ sources:
   - path: packages/core/src/a11y.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts
+  - path: packages/modules/a11y/src/generated-id.ts
   - path: internal/records/2026-10-06-control-label-boundary.md
 openQuestions:
   - id: C-CONTROL-LABEL-0001-Q-EVIDENCE
@@ -99,10 +97,19 @@ openQuestions:
       en: Does the completed slice satisfy paired real input, naming, reentrancy, duplicate binding and remount evidence across all four Web adapters?
     blocks: [activation:C-CONTROL-LABEL-0001]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Defined same-realm nominal reference and pair interoperability across native output graphs and Runtime Adapters, with target-owned semantic source translation and bounded generated-ID lifetime; retained draft admission and existing Label behavior.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Extend explicit target participation to Button, Toggle and Toggle Group Item while retaining the same naming, activation and lifecycle owners.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Declared the explicit bounded label text-selection policy vocabulary (ControlLabelSelectionPolicy) shared with the content-selection affordance, preserving the activation-derived default and selectable passive content.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded the bounded independent Label pairing direction, explicit domain, ownership and lowering requirements without stable admission.
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Named the Compiler admission boundary for the declared association target set; Toggle Group Item stays a declared target and the Toggle Group Root and Item definitions keep their explicit unsupported diagnostic.
 tags: [label, accessibility, association, activation, lifecycle]

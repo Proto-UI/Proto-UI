@@ -229,6 +229,11 @@ export function createBoundWebScrollSurfaceHost(
         request(request) {
           if (active && current()) lease.request(request);
         },
+        reveal(target, axis, isCurrentTarget) {
+          const currentTarget = () =>
+            active && current() && isCurrentTarget() && active && current();
+          return currentTarget() && !!lease.reveal?.(target, axis, currentTarget);
+        },
         dispose() {
           if (!active) return;
           active = false;

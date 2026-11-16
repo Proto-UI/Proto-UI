@@ -9,6 +9,7 @@ import { EventEmitter, getEventListeners } from 'node:events';
 import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import YAML from 'yaml';
+import { WC_NATIVE_BROWSER_SUITE } from './wc-native-isolation.mjs';
 import {
   createCiPlan,
   runtimeSelection,
@@ -221,6 +222,78 @@ it('excludes the Liquid candidate producer from the general and shared-dev phase
       ),
     /Duplicate browser suite registration/
   );
+});
+
+function assertWcNativeOwner(workflow, runner) {
+  assert.equal(
+    PRODUCTION_BROWSER_OWNERS[WC_NATIVE_BROWSER_SUITE],
+    'scripts/test/wc-native-isolation.mjs'
+  );
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(WC_NATIVE_BROWSER_SUITE));
+  assert.ok(
+    Object.values(YAML.parse(workflow).jobs).some((job) =>
+      job.steps?.some((step) =>
+        /^\s*node scripts\/test\/wc-native-isolation\.mjs "\$5" --run-native "\$8" "\$9"\s*$/mu.test(
+          step.run ?? ''
+        )
+      )
+    ),
+    'The workflow must invoke the isolated native execution operation.'
+  );
+  const ast = ts.createSourceFile('wc-native-isolation.mjs', runner, ts.ScriptTarget.Latest, true);
+  let declaredSuite;
+  let selectedForSpawn = false;
+  const visit = (node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      node.name.getText(ast) === 'WC_NATIVE_BROWSER_SUITE' &&
+      node.initializer &&
+      ts.isStringLiteral(node.initializer)
+    )
+      declaredSuite = node.initializer.text;
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText(ast) === 'spawnSync' &&
+      node.arguments[0]?.getText(ast) === 'process.execPath' &&
+      node.arguments[1] &&
+      ts.isArrayLiteralExpression(node.arguments[1])
+    ) {
+      const args = node.arguments[1].elements;
+      selectedForSpawn ||=
+        args[0] &&
+        ts.isStringLiteral(args[0]) &&
+        args[0].text === 'node_modules/vitest/vitest.mjs' &&
+        args[1] &&
+        ts.isStringLiteral(args[1]) &&
+        args[1].text === 'run' &&
+        args[2] &&
+        ts.isIdentifier(args[2]) &&
+        args[2].text === 'WC_NATIVE_BROWSER_SUITE';
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(ast);
+  assert.equal(declaredSuite, WC_NATIVE_BROWSER_SUITE);
+  assert.equal(selectedForSpawn, true, 'The actual Vitest spawn must consume the bound suite.');
+}
+
+it('binds the WC production owner through its actual workflow and native runner argv', () => {
+  const workflow = readFileSync('.github/workflows/compiler-wc-native-evidence.yml', 'utf8');
+  const runner = readFileSync('scripts/test/wc-native-isolation.mjs', 'utf8');
+  assertWcNativeOwner(workflow, runner);
+  for (const changed of [
+    workflow.replace('--run-native', '--probe'),
+    workflow.replaceAll(
+      'scripts/test/wc-native-isolation.mjs',
+      'scripts/test/different-runner.mjs'
+    ),
+  ])
+    assert.throws(() => assertWcNativeOwner(changed, runner));
+  for (const changed of [
+    runner.replace('WC_NATIVE_BROWSER_SUITE,', "'different.browser.test.ts',"),
+    runner.replace(WC_NATIVE_BROWSER_SUITE, 'different.browser.test.ts'),
+  ])
+    assert.throws(() => assertWcNativeOwner(workflow, changed));
 });
 
 describe('runtime test plan', () => {

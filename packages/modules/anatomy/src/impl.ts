@@ -67,6 +67,17 @@ type ClaimRecord = {
   invoke: AnatomyOrderCallbackDispatcher;
 };
 
+// Share reads only within one synchronous notification. A parent-getter identity
+// identifies one logical host tree; independent bridges must not share domains.
+// Each recipient still resolves its own current root and reads current targets.
+// No cached read survives a notification or an author callback.
+type OrderComparisons = Map<AnatomyRootTarget, Map<AnatomyRootTarget, number>>;
+type DomainClaims = Map<AnatomyInstanceToken, ClaimRecord[]>;
+type OrderNotificationReads = {
+  comparisons: OrderComparisons;
+  domains: Map<AnatomyParentGetter, DomainClaims>;
+};
+
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
 
 const ORDER_FOLLOWING = typeof Node !== 'undefined' ? Node.DOCUMENT_POSITION_FOLLOWING : 4;
@@ -263,7 +274,9 @@ function getHookNames(proto: Prototype<any> | null): Set<string> {
 }
 
 export class AnatomyModuleImpl extends ModuleBase {
-  private static readonly liveInstances = new Set<AnatomyModuleImpl>();
+  private static nextInstanceOrder = 0;
+  private static readonly orderSubscribers = new Map<AnatomyFamily, AnatomyModuleImpl[]>();
+  private static readonly targetSubscribers = new Map<AnatomyFamily, AnatomyModuleImpl[]>();
   private static readonly sharedOrderObservers = new Map<
     AnatomyFamily,
     Map<AnatomyInstanceToken, { off: Unsubscribe; listeners: Set<AnatomyModuleImpl> }>
@@ -271,6 +284,7 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private readonly prototypeName: string;
   private readonly exposePort: ExposePort;
+  private readonly instanceOrder = AnatomyModuleImpl.nextInstanceOrder++;
   private disposed = false;
   private claimFamilies = new Set<AnatomyFamily>();
   private orderDispatch: AnatomyOrderCallbackDispatcher = (fn) => fn(undefined);
@@ -287,7 +301,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     super(caps);
     this.prototypeName = prototypeName;
     this.exposePort = exposePort;
-    AnatomyModuleImpl.liveInstances.add(this);
   }
 
   private ensureFamilyRegistered(family: AnatomyFamily): NormalizedFamily {
@@ -729,7 +742,10 @@ export class AnatomyModuleImpl extends ModuleBase {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    AnatomyModuleImpl.liveInstances.delete(this);
+    for (const family of this.orderListeners.keys())
+      this.removeSubscriber(AnatomyModuleImpl.orderSubscribers, family);
+    for (const family of this.targetListeners.keys())
+      this.removeSubscriber(AnatomyModuleImpl.targetSubscribers, family);
     for (const family of this.observedOrderRoots.keys()) {
       this.teardownOrderObserver(family);
     }
@@ -789,6 +805,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!set) {
       set = new Set();
       this.orderListeners.set(family, set);
+      this.addSubscriber(AnatomyModuleImpl.orderSubscribers, family);
     }
     set.add(cb);
     this.primeOrderSignature(family);
@@ -798,6 +815,7 @@ export class AnatomyModuleImpl extends ModuleBase {
       current?.delete(cb);
       if (!current || current.size > 0) return;
       this.orderListeners.delete(family);
+      this.removeSubscriber(AnatomyModuleImpl.orderSubscribers, family);
       this.teardownOrderObserver(family);
     };
   }
@@ -807,24 +825,80 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!set) {
       set = new Set();
       this.targetListeners.set(family, set);
+      this.addSubscriber(AnatomyModuleImpl.targetSubscribers, family);
     }
     set.add(cb);
     return () => {
       const current = this.targetListeners.get(family);
       current?.delete(cb);
-      if (current?.size === 0) this.targetListeners.delete(family);
+      if (current?.size === 0) {
+        this.targetListeners.delete(family);
+        this.removeSubscriber(AnatomyModuleImpl.targetSubscribers, family);
+      }
     };
   }
 
+  // Family publication must not inspect every unrelated Runtime owner. Keep
+  // only subscribed owners, ordered by creation rather than subscription time.
+  // A numeric cursor preserves the old live-Set traversal when a callback adds,
+  // cancels or disposes a recipient, including a nested family publication.
+  private static subscriberAfter(owners: readonly AnatomyModuleImpl[], order: number): number {
+    let start = 0;
+    let end = owners.length;
+    while (start < end) {
+      const middle = start + Math.floor((end - start) / 2);
+      if (owners[middle]!.instanceOrder <= order) start = middle + 1;
+      else end = middle;
+    }
+    return start;
+  }
+
+  private addSubscriber(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): void {
+    if (this.disposed) return;
+    let owners = index.get(family);
+    if (!owners) index.set(family, (owners = []));
+    owners.splice(AnatomyModuleImpl.subscriberAfter(owners, this.instanceOrder), 0, this);
+  }
+
+  private removeSubscriber(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): void {
+    const owners = index.get(family);
+    if (!owners) return;
+    const position = AnatomyModuleImpl.subscriberAfter(owners, this.instanceOrder) - 1;
+    if (owners[position] === this) owners.splice(position, 1);
+    if (owners.length === 0) index.delete(family);
+  }
+
+  private static *subscribers(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): Iterable<AnatomyModuleImpl> {
+    let lastOrder = -1;
+    while (true) {
+      // Re-read after each callback: the last subscriber can be removed and a
+      // later owner can recreate the family index before this traversal resumes.
+      const owners = index.get(family);
+      const next = owners?.[this.subscriberAfter(owners, lastOrder)];
+      if (!next) return;
+      lastOrder = next.instanceOrder;
+      yield next;
+    }
+  }
+
   private static notifyStructuralChange(family: AnatomyFamily): void {
-    for (const impl of AnatomyModuleImpl.liveInstances) {
-      if (!impl.orderListeners.has(family)) continue;
-      impl.emitOrderChangeIfNeeded(family);
+    const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
+    for (const impl of this.subscribers(this.orderSubscribers, family)) {
+      impl.emitOrderChangeIfNeeded(family, reads);
     }
   }
 
   private static notifyTargetChange(family: AnatomyFamily): void {
-    for (const impl of AnatomyModuleImpl.liveInstances) {
+    for (const impl of this.subscribers(this.targetSubscribers, family)) {
       const listeners = impl.targetListeners.get(family);
       if (!listeners?.size) continue;
       impl.orderDispatch((ctx) => {
@@ -854,8 +928,9 @@ export class AnatomyModuleImpl extends ModuleBase {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
       const off = observer(target, () => {
+        const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
         for (const impl of listeners) {
-          impl.emitOrderChangeIfNeeded(family);
+          impl.emitOrderChangeIfNeeded(family, reads);
         }
       });
       entry = { off, listeners };
@@ -897,9 +972,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     return this.orderVersionByFamily.get(family) ?? 0;
   }
 
-  private emitOrderChangeIfNeeded(family: AnatomyFamily): void {
+  private emitOrderChangeIfNeeded(family: AnatomyFamily, reads?: OrderNotificationReads): void {
     const prev = this.orderSignatureByFamily.get(family);
-    const next = this.computeOrderSignature(family);
+    const next = this.computeOrderSignature(family, reads);
     if (typeof prev !== 'undefined' && prev === next) return;
 
     this.orderSignatureByFamily.set(family, next);
@@ -908,15 +983,25 @@ export class AnatomyModuleImpl extends ModuleBase {
 
     const listeners = this.orderListeners.get(family);
     if (!listeners || listeners.size === 0) return;
-    this.orderDispatch((ctx) => {
-      for (const listener of listeners) listener(ctx);
-    });
+    // Callback scopes may synchronously reparent, mount or retire claims and
+    // move or replace host targets, including through a nested notification.
+    // Later recipients must read the resulting structure and order afresh.
+    reads?.comparisons.clear();
+    reads?.domains.clear();
+    try {
+      this.orderDispatch((ctx) => {
+        for (const listener of listeners) listener(ctx);
+      });
+    } finally {
+      reads?.comparisons.clear();
+      reads?.domains.clear();
+    }
   }
 
-  private computeOrderSignature(family: AnatomyFamily): string {
-    const domain = this.resolveCurrentDomain(family, false);
+  private computeOrderSignature(family: AnatomyFamily, reads?: OrderNotificationReads): string {
+    const domain = this.resolveCurrentDomain(family, false, reads?.domains);
     if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims);
+    const ordered = this.sortClaims(domain.claims, reads?.comparisons);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
   }
 
@@ -938,27 +1023,34 @@ export class AnatomyModuleImpl extends ModuleBase {
     return next;
   }
 
-  private sortClaims(claims: ClaimRecord[]): ClaimRecord[] {
+  private sortClaims(claims: ClaimRecord[], comparisons?: OrderComparisons): ClaimRecord[] {
     return claims
       .map((claim, index) => ({ claim, index }))
       .sort((left, right) => {
-        const cmp = this.compareClaims(left.claim, right.claim);
+        const cmp = this.compareClaims(left.claim, right.claim, comparisons);
         if (cmp !== 0) return cmp;
         return left.index - right.index;
       })
       .map((entry) => entry.claim);
   }
 
-  private compareClaims(a: ClaimRecord, b: ClaimRecord): number {
+  private compareClaims(a: ClaimRecord, b: ClaimRecord, comparisons?: OrderComparisons): number {
     const aTarget = a.getRootTarget(a.instance);
     const bTarget = b.getRootTarget(b.instance);
     if (!aTarget || !bTarget || aTarget === bTarget) return 0;
     if (typeof aTarget.compareDocumentPosition !== 'function') return 0;
 
+    const cached = comparisons?.get(aTarget)?.get(bTarget);
+    if (cached !== undefined) return cached;
+
     const pos = aTarget.compareDocumentPosition(bTarget as AnatomyRootTarget);
-    if (pos & ORDER_FOLLOWING) return -1;
-    if (pos & ORDER_PRECEDING) return 1;
-    return 0;
+    const result = pos & ORDER_FOLLOWING ? -1 : pos & ORDER_PRECEDING ? 1 : 0;
+    if (comparisons) {
+      let targets = comparisons.get(aTarget);
+      if (!targets) comparisons.set(aTarget, (targets = new Map()));
+      targets.set(bTarget, result);
+    }
+    return result;
   }
 
   private computeDiagnostics(family: AnatomyFamily): AnatomyDiagnostic[] {
@@ -1099,7 +1191,8 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private resolveCurrentDomain(
     family: AnatomyFamily,
-    strict = true
+    strict = true,
+    domains?: Map<AnatomyParentGetter, DomainClaims>
   ): {
     rootInstance: AnatomyInstanceToken | null;
     claims: ClaimRecord[];
@@ -1116,9 +1209,29 @@ export class AnatomyModuleImpl extends ModuleBase {
       );
     }
 
-    const claims = CENTER.listClaims(family).filter(
-      (claim) => this.findDomainRoot(claim.instance, family, getParent) === rootInstance
-    );
+    let claims: ClaimRecord[];
+    if (domains) {
+      let byRoot = domains.get(getParent);
+      if (!byRoot) {
+        byRoot = new Map();
+        // This cache belongs to this family notification only. Preserve the
+        // registration order inside each root, including stable host fallback.
+        for (const claim of CENTER.listClaims(family)) {
+          const root = this.findDomainRoot(claim.instance, family, getParent);
+          if (!root) continue;
+          let members = byRoot.get(root);
+          if (!members) byRoot.set(root, (members = []));
+          members.push(claim);
+        }
+        domains.set(getParent, byRoot);
+      }
+      claims = byRoot.get(rootInstance) ?? [];
+    } else {
+      // Public queries must observe mutations immediately, even inside callbacks.
+      claims = CENTER.listClaims(family).filter(
+        (claim) => this.findDomainRoot(claim.instance, family, getParent) === rootInstance
+      );
+    }
     const rootClaim =
       claims.find((claim) => claim.role === 'root' && claim.instance === rootInstance) ?? null;
     return {

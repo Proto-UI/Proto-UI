@@ -3,8 +3,20 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { monitorEventLoopDelay } from 'node:perf_hooks';
 import { chromium, type Browser, type Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  traceSearchGetter,
+  type SearchGetterSample,
+  readIndependentPagefindQueries,
+} from './site-search-evidence';
+import {
+  capturePlainInputImeBaseline,
+  installNativeImeTrace,
+  nativeImeCommitTrace,
+  type NativeImeEvent,
+} from './site-search-ime-evidence';
 
 let browser: Browser;
 let baseUrl: string;
@@ -16,6 +28,157 @@ const evidenceDirectory = path.join(
 );
 const routeFor = (family: 'shadcn' | 'brutalist') =>
   `/zh-cn/ui-libraries/${family}/${family === 'brutalist' ? 'components/' : ''}button/`;
+const emptySearchQuery = 'qzxvjkphnwmrgqztvxknqjpl';
+
+/** Same page clock and original dispatch; this observer does not alter a wait budget. */
+function requestProductionRuntime(runtime: string) {
+  const root = document.querySelector<HTMLElement>('site-search');
+  if (!root) throw new Error('Missing Search owner for runtime observation');
+  const traces = ((window as any).__searchProductionRuntimeTransitions ??= []);
+  const trace: {
+    runtime: string;
+    timeOrigin: number;
+    requestAt: number | null;
+    requestAtEpochMs: number | null;
+    readyAt: number | null;
+    readyAtEpochMs: number | null;
+    states: unknown[];
+  } = {
+    runtime,
+    timeOrigin: performance.timeOrigin,
+    requestAt: null,
+    requestAtEpochMs: null,
+    readyAt: null,
+    readyAtEpochMs: null,
+    states: [],
+  };
+  traces.push(trace);
+  const observer = new MutationObserver(() => {
+    const state = {
+      at: performance.now(),
+      runtime: root.dataset.searchRuntime,
+      view: root.dataset.searchView,
+      preparation: root.dataset.searchPreparation,
+      generation: root.dataset.searchGeneration,
+    };
+    if (trace.states.length < 32) trace.states.push(state);
+    if (state.runtime === runtime && state.view === 'ready' && trace.readyAt === null) {
+      trace.readyAt = state.at;
+      trace.readyAtEpochMs = Date.now();
+      observer.disconnect();
+    }
+  });
+  observer.observe(root, {
+    attributes: true,
+    attributeFilter: [
+      'data-search-runtime',
+      'data-search-view',
+      'data-search-preparation',
+      'data-search-generation',
+    ],
+  });
+  trace.requestAt = performance.now();
+  trace.requestAtEpochMs = Date.now();
+  document.dispatchEvent(new CustomEvent('proto-adapter:change', { detail: { adapter: runtime } }));
+}
+
+async function expectProductionRuntime(page: Page, family: string, runtime: string) {
+  const samples: SearchGetterSample[] = [];
+  const poll = {
+    runtime,
+    startedAtEpochMs: Date.now(),
+    endedAtEpochMs: null as number | null,
+    passed: false,
+    budgetMs: 1000,
+    samples,
+  };
+  try {
+    // Keep the original locator and Vitest poll budget; record transport without
+    // starting a new readiness wait or substituting a later page observation.
+    await expect
+      .poll(() =>
+        traceSearchGetter(samples, () =>
+          page.locator('site-search').getAttribute('data-search-runtime')
+        )
+      )
+      .toBe(runtime);
+    poll.passed = true;
+  } finally {
+    poll.endedAtEpochMs = Date.now();
+    await (async () => {
+      const transitions = await page.evaluate(
+        () => (window as any).__searchProductionRuntimeTransitions ?? []
+      );
+      await mkdir(evidenceDirectory, { recursive: true });
+      await writeFile(
+        path.join(evidenceDirectory, `${family}-runtime-${runtime}-poll.json`),
+        JSON.stringify({ source, poll, transitions }, null, 2)
+      );
+    })().catch((error) =>
+      console.warn('[Search production] Runtime observation unavailable', error)
+    );
+  }
+}
+
+/** Opt-in diagnosis only; ordinary acceptance does not start a profiler. */
+async function startRuntimeDiagnostic(page: Page, family: string, runtime: string) {
+  const cdp = await page.context().newCDPSession(page);
+  const nodeLoop = monitorEventLoopDelay({ resolution: 10 });
+  const startedAtEpochMs = Date.now();
+  nodeLoop.enable();
+  await cdp.send('Profiler.enable');
+  await cdp.send('Profiler.start');
+  await cdp.send('Performance.enable');
+  const initialMetrics = await cdp.send('Performance.getMetrics');
+  await page.evaluate(() => {
+    const state = { startedAt: performance.now(), timeOrigin: performance.timeOrigin, tasks: [] as unknown[] };
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries())
+        if (state.tasks.length < 128) state.tasks.push(entry.toJSON());
+    });
+    observer.observe({ type: 'longtask', buffered: false });
+    (window as any).__searchProductionLongTasks = { state, observer };
+  });
+  return async () => {
+    try {
+      const { profile } = await cdp.send('Profiler.stop');
+      const finalMetrics = await cdp.send('Performance.getMetrics');
+      const longTasks = await page.evaluate(() => {
+        const diagnostic = (window as any).__searchProductionLongTasks;
+        diagnostic?.observer.disconnect();
+        return diagnostic?.state ?? null;
+      });
+      const nodeEventLoop = {
+        minMs: nodeLoop.min / 1e6,
+        maxMs: nodeLoop.max / 1e6,
+        meanMs: nodeLoop.mean / 1e6,
+        p50Ms: nodeLoop.percentile(50) / 1e6,
+        p99Ms: nodeLoop.percentile(99) / 1e6,
+      };
+      await mkdir(evidenceDirectory, { recursive: true });
+      await writeFile(
+        path.join(evidenceDirectory, `${family}-runtime-${runtime}-cpu-profile.json`),
+        JSON.stringify(profile)
+      );
+      await writeFile(
+        path.join(evidenceDirectory, `${family}-runtime-${runtime}-diagnostic.json`),
+        JSON.stringify({
+          source,
+          diagnosticOnly: true,
+          startedAtEpochMs,
+          endedAtEpochMs: Date.now(),
+          nodeEventLoop,
+          initialMetrics,
+          finalMetrics,
+          longTasks,
+        }, null, 2)
+      );
+    } finally {
+      nodeLoop.disable();
+      await cdp.detach();
+    }
+  };
+}
 
 beforeAll(async () => {
   // This standalone suite has no dev fallback and no conditional skip. The
@@ -179,6 +342,7 @@ async function capture(page: Page, family: string, state: string, facts: unknown
         }
       ),
       timeline: (window as any).__searchProductionTimeline ?? [],
+      runtimeTransitions: (window as any).__searchProductionRuntimeTransitions ?? [],
     };
   });
   const screenshot = `${family}-${state}.png`;
@@ -362,14 +526,8 @@ describe.sequential('Required production Search recovery with generated Pagefind
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);
         const pendingOldInput = await current.input.elementHandle();
         if (!pendingOldInput) throw new Error('Expected committed Search element: pendingOldInput');
-        await page.evaluate(() =>
-          document.dispatchEvent(
-            new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue' } })
-          )
-        );
-        await expect
-          .poll(() => page.locator('site-search').getAttribute('data-search-runtime'))
-          .toBe('vue');
+        await page.evaluate(requestProductionRuntime, 'vue');
+        await expectProductionRuntime(page, family, 'vue');
         current = await parts(page);
         await expect.poll(() => current.retry.getAttribute('aria-disabled')).toBe('true');
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);
@@ -451,16 +609,18 @@ describe.sequential('Required production Search recovery with generated Pagefind
           const oldClose = await current.close.elementHandle();
           if (!oldClose) throw new Error('Expected committed Search element: oldClose');
           const oldGeneration = current.generation;
-          await page.evaluate(
-            (runtime) =>
-              document.dispatchEvent(
-                new CustomEvent('proto-adapter:change', { detail: { adapter: runtime } })
-              ),
-            runtime
-          );
-          await expect
-            .poll(() => page.locator('site-search').getAttribute('data-search-runtime'))
-            .toBe(runtime);
+          const finishDiagnostic =
+            process.env.PROTO_UI_SEARCH_RUNTIME_PROFILE === '1' && runtime === 'react'
+              ? await startRuntimeDiagnostic(page, family, runtime)
+              : null;
+          try {
+            await page.evaluate(requestProductionRuntime, runtime);
+            await expectProductionRuntime(page, family, runtime);
+          } finally {
+            await finishDiagnostic?.().catch((error) =>
+              console.warn('[Search production] Runtime diagnostic unavailable', error)
+            );
+          }
           current = await parts(page);
           expect(current.generation).not.toBe(oldGeneration);
           await current.input.waitFor({ state: 'visible' });
@@ -614,8 +774,50 @@ describe.sequential('Required production Search recovery with generated Pagefind
 
 // CDP definitions: ChromeDevTools/devtools-protocol browser_protocol.json Input domain.
 // Input.imeSetComposition supplies candidate text; Input.insertText uses Chromium's native
-// non-key text insertion. Actual trusted compositionend is required below, not assumed.
+// non-key text insertion. The same-browser plain-input control independently determines
+// the end event's actual trust bit; the native editing prefix must always be trusted.
 describe.sequential('Required native Search IME and keyboard execution', () => {
+  let imeBaseline: Awaited<ReturnType<typeof capturePlainInputImeBaseline>>;
+  beforeAll(async () => {
+    imeBaseline = await capturePlainInputImeBaseline(browser);
+    await mkdir(evidenceDirectory, { recursive: true });
+    await writeFile(
+      path.join(evidenceDirectory, 'native-ime-plain-input-control.json'),
+      JSON.stringify({ source, ...imeBaseline }, null, 2)
+    );
+    // A query containing "emptycontract" has genuine hits in this generated
+    // index. Establish a real empty query independently of the Search consumer.
+    const control = await browser.newContext();
+    try {
+      const page = await control.newPage();
+      const controlUrl = `${baseUrl}/__pagefind_empty_control__`;
+      await page.route(controlUrl, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'text/html',
+          body: '<!doctype html><html lang="zh-CN"><body>Independent Pagefind control</body></html>',
+        })
+      );
+      await page.goto(controlUrl);
+      const queries = await page.evaluate(readIndependentPagefindQueries, emptySearchQuery);
+      await writeFile(
+        path.join(evidenceDirectory, 'pagefind-empty-query-control.json'),
+        JSON.stringify(
+          {
+            source,
+            boundary: 'Same generated Pagefind index on plain zh-CN HTML; no Proto',
+            queries,
+          },
+          null,
+          2
+        )
+      );
+      expect(queries[0]).toEqual({ query: emptySearchQuery, count: 0 });
+      expect(queries[1]!.count).toBeGreaterThan(0);
+    } finally {
+      await control.close();
+    }
+  });
   for (const family of ['shadcn', 'brutalist'] as const) {
     it(`${family} retains the editor through native composition and executes current results by keyboard`, async () => {
       const context = await browser.newContext({
@@ -657,41 +859,10 @@ describe.sequential('Required native Search IME and keyboard execution', () => {
       });
       await page.addInitScript(() => {
         localStorage.setItem('starlight-theme', 'light');
-        const events: unknown[] = [];
-        (window as any).__searchImeEvents = events;
-        for (const name of [
-          'compositionstart',
-          'compositionupdate',
-          'compositionend',
-          'beforeinput',
-          'input',
-          'keydown',
-          'keyup',
-        ]) {
-          document.addEventListener(
-            name,
-            (event) => {
-              const target = event.target;
-              if (!(target instanceof Element) || !target.closest('[data-demo-ref="query"]'))
-                return;
-              const input =
-                target instanceof HTMLInputElement ? target : target.querySelector('input');
-              events.push({
-                type: event.type,
-                trusted: event.isTrusted,
-                composing: 'isComposing' in event ? (event as InputEvent).isComposing : undefined,
-                data: 'data' in event ? (event as InputEvent).data : undefined,
-                key: event instanceof KeyboardEvent ? event.key : undefined,
-                inputType: event instanceof InputEvent ? event.inputType : undefined,
-                value: input?.value,
-                start: input?.selectionStart,
-                end: input?.selectionEnd,
-              });
-              if (events.length > 160) events.shift();
-            },
-            true
-          );
-        }
+      });
+      await page.addInitScript(installNativeImeTrace, {
+        selector: '[data-demo-ref="query"]',
+        key: '__searchImeEvents',
       });
       let stage = 'navigate';
       let originalFailure = false;
@@ -782,15 +953,16 @@ describe.sequential('Required native Search IME and keyboard execution', () => {
         stage = 'native-composition-commit';
         await cdp.send('Input.insertText', { text: 'Button' });
         await expect.poll(() => current.input.inputValue()).toBe('Button');
+        // Chrome's CDP commit can emit compositionend.isTrusted=false even
+        // without any framework. Match the independent native control's full
+        // trace, including its exact trust bit; keep the original 1000 ms poll.
         await expect
           .poll(async () =>
-            page.evaluate(() =>
-              ((window as any).__searchImeEvents as Array<{ type: string; trusted: boolean }>).some(
-                (event) => event.type === 'compositionend' && event.trusted
-              )
+            nativeImeCommitTrace(
+              await page.evaluate(() => (window as any).__searchImeEvents as NativeImeEvent[])
             )
           )
-          .toBe(true);
+          .toEqual(imeBaseline.trace);
         await expect.poll(() => current.items.count(), { timeout: 20_000 }).toBeGreaterThan(0);
         expect(
           await current.input.evaluate((element, original) => element === original, inputHandle)
@@ -803,9 +975,13 @@ describe.sequential('Required native Search IME and keyboard execution', () => {
         ).toEqual({ start: 6, end: 6 });
         expect(page.url()).toBe(sourceUrl);
         const committed = await page.evaluate(() => (window as any).__searchImeEvents);
-        await capture(page, `${family}-ime`, 'committed', { committed, navigations });
+        await capture(page, `${family}-ime`, 'committed', {
+          committed,
+          nativeControl: 'native-ime-plain-input-control.json',
+          navigations,
+        });
         stage = 'real-empty-result';
-        await current.input.fill('zxqv948271605emptycontract');
+        await current.input.fill(emptySearchQuery);
         const empty = page.locator(
           `[data-projection-owner=${JSON.stringify(current.owner)}][data-projection-generation=${JSON.stringify(current.generation)}][data-demo-ref="results"]`
         );
@@ -816,7 +992,8 @@ describe.sequential('Required native Search IME and keyboard execution', () => {
         ).toBe(true);
         expect(page.url()).toBe(sourceUrl);
         await capture(page, `${family}-ime`, 'empty', {
-          query: 'zxqv948271605emptycontract',
+          query: emptySearchQuery,
+          nativeControl: 'pagefind-empty-query-control.json',
           navigations,
         });
         await current.input.fill('Button');

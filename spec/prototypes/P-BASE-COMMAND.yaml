@@ -15,12 +15,18 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BASE-COMMAND-TARGET-REVEAL
+    text:
+      en: Accepted keyboard navigation in the current open view must reveal its active option through C-SCROLL-TARGET-REVEAL-0001 on Content's vertical scroll surface while retaining editor focus. Pointer-only activation and disabled, read-only, composing or retired input must not request keyboard reveal. Consumer layout must keep that list viewport bounded; external scrolling and additional compiler or host profiles require separate admission.
+      zh-CN: 当前打开 view 接受的键盘导航必须通过 Content 的纵向 scroll surface 和 C-SCROLL-TARGET-REVEAL-0001 显示 active option，保留编辑器焦点。仅 pointer 活动及 disabled、read-only、composing、退役输入不得请求键盘 reveal。消费者布局必须约束列表 viewport；外部滚动及额外 compiler/host profile 必须单独准入。
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - { id: C-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
 verifies:
-  tests: []
+  tests:
+    - { id: T-SCROLL-TARGET-REVEAL-0001, since: 0.3.0-alpha.2 }
 sources:
   - path: packages/prototypes/base/src/command/
 openQuestions:
@@ -31,6 +37,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-COMMAND
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Defined keyboard active-item reveal through the existing Scroll owner while retaining editor focus and explicit additional-profile boundaries.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base command family as draft.

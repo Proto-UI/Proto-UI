@@ -1,4 +1,5 @@
 import {
+  createA11ySemanticObjectRef,
   isA11ySemanticObjectRef,
   type A11yRelationMode,
   type A11ySemanticObjectRef,
@@ -6,6 +7,7 @@ import {
 } from '@proto.ui/core';
 
 import type { A11yProjector } from './caps';
+import { ownGeneratedId, retainGeneratedId, type GeneratedIdLease } from './generated-id';
 
 const ARIA_STATE_ATTRS: Record<string, string> = {
   atomic: 'aria-atomic',
@@ -102,6 +104,7 @@ type WebProjectorRecord = {
   reservedDocument: Document | null;
   ownedIdTarget: HTMLElement | null;
   ownedIdBaseline: string | null;
+  generatedIdLease: GeneratedIdLease | null;
   observedDocument: Document | null;
   lastTargetId: string | null;
   dependencyRefs: Set<A11ySemanticObjectRef>;
@@ -311,13 +314,13 @@ export function createWebA11yProjectionRegistry(
 
   const releaseOwnedId = (record: WebProjectorRecord) => {
     const target = record.ownedIdTarget;
-    if (target && record.reservedId && target.id === record.reservedId) {
-      if (record.ownedIdBaseline === null) target.removeAttribute('id');
-      else target.setAttribute('id', record.ownedIdBaseline);
-      rememberIdWrite(target);
-    }
+    const lease = record.generatedIdLease;
     record.ownedIdTarget = null;
     record.ownedIdBaseline = null;
+    record.generatedIdLease = null;
+    const before = target?.getAttribute('id');
+    lease?.dispose();
+    if (target && target.getAttribute('id') !== before) rememberIdWrite(target);
   };
 
   const releaseReservation = (record: WebProjectorRecord) => {
@@ -477,6 +480,33 @@ export function createWebA11yProjectionRegistry(
     record.reservedDocument = document;
     record.reservedId = id;
     record.lastTargetId = id;
+    if (!record.generatedIdLease) {
+      record.generatedIdLease = retainGeneratedId(target, id);
+      if (record.generatedIdLease) record.ownedIdTarget = target;
+    }
+  };
+
+  const writeGeneratedId = (record: WebProjectorRecord, target: HTMLElement, id: string) => {
+    if (record.generatedIdLease) releaseOwnedId(record);
+    const baseline = target.getAttribute('id');
+    const objectRef = record.objectRef;
+    const lease = ownGeneratedId(target, id, baseline);
+    // Host reactions can retire or replace the source while its ID is written.
+    // A retired record must never publish a receipt after its disposal completed.
+    if (
+      record.disposed ||
+      record.detached ||
+      record.target !== target ||
+      record.objectRef !== objectRef
+    ) {
+      lease.dispose();
+      return false;
+    }
+    record.generatedIdLease = lease;
+    record.ownedIdBaseline = baseline;
+    record.ownedIdTarget = target;
+    rememberIdWrite(target);
+    return true;
   };
 
   const ensureTargetId = (record: WebProjectorRecord): string | null => {
@@ -499,10 +529,10 @@ export function createWebA11yProjectionRegistry(
       if (target.id && target.id !== record.reservedId) return null;
       if (!idIsAvailable(document, record.reservedId, target, objectRef)) return null;
       if (!target.id) {
-        record.ownedIdBaseline = target.getAttribute('id');
-        target.id = record.reservedId;
-        rememberIdWrite(target);
-        record.ownedIdTarget = target;
+        if (!writeGeneratedId(record, target, record.reservedId)) return null;
+      } else if (!record.generatedIdLease) {
+        record.generatedIdLease = retainGeneratedId(target, record.reservedId);
+        if (record.generatedIdLease) record.ownedIdTarget = target;
       }
       const refReservations = reservedIdsByRef.get(objectRef);
       if (refReservations?.get(document)?.id !== record.reservedId) {
@@ -524,10 +554,7 @@ export function createWebA11yProjectionRegistry(
     while (!idIsAvailable(document, candidate, target, objectRef)) {
       candidate = `${idPrefix}-${nextId++}`;
     }
-    record.ownedIdBaseline = target.getAttribute('id');
-    target.id = candidate;
-    rememberIdWrite(target);
-    record.ownedIdTarget = target;
+    if (!writeGeneratedId(record, target, candidate)) return null;
     reserveId(record, candidate);
     return candidate;
   };
@@ -851,8 +878,9 @@ export function createWebA11yProjectionRegistry(
     }
   };
 
-  return {
+  const registry: WebA11yProjectionRegistry = {
     createProjector(getTarget, subscribeTargetChange) {
+      const controlLabelSources = new Set<() => void>();
       const record: WebProjectorRecord = {
         getTarget,
         target: null,
@@ -863,6 +891,7 @@ export function createWebA11yProjectionRegistry(
         reservedDocument: null,
         ownedIdTarget: null,
         ownedIdBaseline: null,
+        generatedIdLease: null,
         observedDocument: null,
         lastTargetId: null,
         scalarAttributes: new Map(),
@@ -891,6 +920,7 @@ export function createWebA11yProjectionRegistry(
         removeDependencies(record);
         unindex(record);
         releaseOwnedId(record);
+        for (const dispose of [...controlLabelSources]) dispose();
         record.lastTargetId = record.target?.id || null;
         if (affectedRef || releasedIdRefs) {
           const affectedRefs = new Set(releasedIdRefs);
@@ -907,6 +937,83 @@ export function createWebA11yProjectionRegistry(
       };
       projector.detach = detach;
       projector.isBound = () => !record.disposed && !record.detached && record.target !== null;
+      projector.acquireControlLabelSource = (semanticRef, view) => {
+        const owner = record.target;
+        const Element = owner?.ownerDocument.defaultView?.HTMLElement;
+        if (!Element || !(view.identity instanceof Element)) return null;
+        const label = view.identity as HTMLElement;
+        const current = () =>
+          !record.disposed &&
+          !record.detached &&
+          record.target === owner &&
+          record.getTarget() === owner &&
+          owner!.isConnected &&
+          label.isConnected &&
+          label.ownerDocument === owner!.ownerDocument &&
+          label.getRootNode() === view.scope &&
+          owner!.getRootNode() === view.scope;
+        if (!current()) return null;
+
+        // Reuse an exact local semantic binding before considering a foreign
+        // source. An ambiguous identity must never be hidden behind an alias.
+        const localRecords = () =>
+          [...(recordsByRef.get(semanticRef as A11ySemanticObjectRef) ?? [])].filter(
+            (candidate) =>
+              !candidate.disposed &&
+              !candidate.detached &&
+              candidate.target?.ownerDocument === owner!.ownerDocument
+          );
+        const candidates = localRecords();
+        if (candidates.length) {
+          if (
+            candidates.length !== 1 ||
+            candidates[0]!.target !== label ||
+            !isA11ySemanticObjectRef(semanticRef)
+          )
+            return null;
+          let active = true;
+          return {
+            objectRef: semanticRef,
+            isActive: () => {
+              const bindings = localRecords();
+              return active && current() && bindings.length === 1 && bindings[0]!.target === label;
+            },
+            dispose() {
+              active = false;
+            },
+          };
+        }
+
+        // The foreign implementation retains its logical subject. This lease
+        // only binds that subject's current physical Label into the target's
+        // own projection registry, without copying text or importing a runtime.
+        let active = true;
+        const objectRef = createA11ySemanticObjectRef();
+        const source = registry.createProjector(() => (active && current() ? label : null));
+        try {
+          source({ objectRef, states: {}, actions: {}, relations: {} });
+        } catch (error) {
+          active = false;
+          try {
+            source.dispose?.();
+          } catch {
+            // Preserve the original source acquisition failure.
+          }
+          throw error;
+        }
+        const dispose = () => {
+          if (!active) return;
+          active = false;
+          controlLabelSources.delete(dispose);
+          source.dispose?.();
+        };
+        controlLabelSources.add(dispose);
+        return {
+          objectRef,
+          isActive: () => active && current() && source.isBound?.() === true,
+          dispose,
+        };
+      };
       projector.hasAuthoredName = () => {
         const target = record.target;
         if (!target) return true;
@@ -951,6 +1058,7 @@ export function createWebA11yProjectionRegistry(
       return projector;
     },
   };
+  return registry;
 }
 
 const DEFAULT_WEB_A11Y_PROJECTION_REGISTRY = createWebA11yProjectionRegistry();

@@ -3,12 +3,10 @@ import { PREFERRED_ADAPTER_EVENT } from './adapter-preference';
 import { getPrototype } from './PrototypePreviewer/registry';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
+import type { ProjectionMaterializerOptions } from './PrototypePreviewer/projection-materializer';
 const faults = vi.hoisted(() => ({ materialize: vi.fn(), theme: vi.fn() }));
 vi.mock('./PrototypePreviewer/projection-materializer', () => ({
   materializeProjectionCandidate: faults.materialize,
-}));
-vi.mock('./PrototypePreviewer/projection-theme', () => ({
-  watchProjectionThemeSurfaceStyle: faults.theme,
 }));
 import { initDocumentationSearchCommands, searchCommandParticipant } from './site-search-commands';
 const handles: Array<ReturnType<typeof initDocumentationSearchCommands>> = [];
@@ -55,8 +53,13 @@ function mount(family: 'shadcn' | 'brutalist' = 'shadcn', inHeader = false) {
   return { root, owner, handle };
 }
 beforeEach(() => {
-  faults.materialize.mockReset().mockImplementation(async () => candidate());
-  faults.theme.mockReset().mockReturnValue(() => {});
+  faults.theme.mockReset();
+  faults.materialize
+    .mockReset()
+    .mockImplementation(async (_request, options: ProjectionMaterializerOptions) => {
+      if (options.themeSource?.isCurrent()) faults.theme(options.themeSource);
+      return candidate();
+    });
   localStorage.clear();
   made.length = 0;
 });
@@ -86,16 +89,24 @@ describe('Search projection failure and lifetime boundaries (materializer fault 
     expect(faults.materialize.mock.calls[3]![1].ownerId).not.toBe(firstOwner);
     expect(error).toHaveBeenCalledTimes(1);
   });
-  it('treats theme setup failure as a failed whole generation and disposes all prepared commands', async () => {
+  it('treats materializer theme failure as a failed whole generation and disposes prepared siblings', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
+    // Theme initialization belongs to the candidate's materializer lease.
+    // The real owner-token rejection/recovery is covered by theme-lease.test.
     faults.theme.mockImplementationOnce(() => {
       throw new Error('theme failed');
     });
     const { root, handle } = mount();
     await handle.ready;
     expect(root.dataset.searchView).toBe('unavailable');
-    expect(made).toHaveLength(3);
-    for (const item of made) expect(item.dispose).toHaveBeenCalledOnce();
+    expect(faults.theme).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: root, family: 'shadcn' })
+    );
+    expect(made).toHaveLength(2);
+    for (const item of made) {
+      expect(item.activate).not.toHaveBeenCalled();
+      expect(item.dispose).toHaveBeenCalledOnce();
+    }
   });
   it('reports a deferred dialog materialization failure instead of swallowing it', async () => {
     const errors = vi.spyOn(console, 'error').mockImplementation(() => {});

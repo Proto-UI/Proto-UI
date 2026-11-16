@@ -1,10 +1,13 @@
+import { nativeVue2AssociationsArtifact } from './native-vue2-associations';
+import { resolvedPropFacts } from './resolved-props';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { NativeLexicalScope, moduleLexicalScope } from './template-shape';
 import { partitionModuleBindings } from './source-module-bindings';
 import {
   collectVue2NativeChildShapes,
   createVue2NativeTemplateEmitter,
 } from './vue2-native-template';
-import { unsupportedPointerFacts } from './pointer-facts-admission';
+import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
@@ -49,6 +52,8 @@ export function emitVue2Source(
   const ir = validated.value;
   const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
+    const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue2-source SSR');
+    if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
     const pointerDiagnostics = unsupportedPointerFacts(ir, 'vue2-source SSR');
     if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   }
@@ -57,6 +62,7 @@ export function emitVue2Source(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   const rootTag = options.rootTag ?? 'div';
   const diagnostics: CompilerDiagnostic[] = [];
@@ -196,14 +202,22 @@ export function emitVue2Source(
       }
       if (node.receiver) inspect(node.receiver);
       node.arguments.forEach(inspect);
-    } else if (node.kind === 'function') inspectBody(node.function.body);
-    else if (node.kind === 'member') inspect(node.object);
+    } else if (node.kind === 'function') {
+      node.function.parameters.forEach((parameter) => {
+        if (parameter.default) inspect(parameter.default);
+      });
+      inspectBody(node.function.body);
+    } else if (node.kind === 'member') inspect(node.object);
     else if (node.kind === 'unary') inspect(node.operand);
     else if (node.kind === 'lexical-cell') inspect(node.value);
     else if (node.kind === 'lexical-read' || node.kind === 'lexical-update') inspect(node.cell);
     else if (node.kind === 'lexical-write') {
       inspect(node.cell);
       inspect(node.value);
+    } else if (node.kind === 'conditional') {
+      inspect(node.condition);
+      inspect(node.whenTrue);
+      inspect(node.whenFalse);
     } else if (node.kind === 'binary') {
       inspect(node.left);
       inspect(node.right);
@@ -228,6 +242,8 @@ export function emitVue2Source(
       }
     }
   }
+  for (const fn of admitted.value.functions)
+    for (const parameter of fn.parameters) if (parameter.default) inspect(parameter.default);
   inspectBody(ir.setup.body);
   for (const hook of ir.hooks) inspectBody(hook.setup.body);
   if (diagnostics.length) return { ok: false, diagnostics };
@@ -296,13 +312,19 @@ export function emitVue2Source(
     if (type === 'host-event') return 'Event';
     if (type === 'host-target') return 'HTMLElement | null';
     if (type === 'observed:boolean') return `${prefix}NativeObservedState<boolean>`;
+    if (
+      type === 'control-label' ||
+      type === 'control-label-handle' ||
+      type === 'control-label-request'
+    )
+      return `import('./.proto-ui/interaction/adapter-modules-v1').NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
     return values
       .map(
         (parameter) =>
-          `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`
+          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
       )
       .join(', ');
   }
@@ -314,7 +336,7 @@ export function emitVue2Source(
       const opaque = value.parameters
         .map((parameter) => ` * @param {unknown} ${parameter.name}`)
         .join('\n');
-      return `${opaque ? `/**\n${opaque}\n */ ` : ''}(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {}`;
+      return `${opaque ? `/**\n${opaque}\n */ ` : ''}(${value.parameters.map((parameter) => parameter.name + (parameter.default ? ' = ' + expression(parameter.default, depth) : '')).join(', ')}) => {}`;
     }
     const saved = nativeScope;
     for (const parameter of value.parameters) {
@@ -332,10 +354,10 @@ export function emitVue2Source(
             parameter.type === 'unknown' || parameter.type === 'template'
               ? nativeTemplate?.parameterType(parameter)
               : undefined;
-          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
+          return `@param {${contextual ?? (parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type))}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
         })
         .join(' ');
-      return `${annotations ? `/** ${annotations} */ ` : ''}(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      return `${annotations ? `/** ${annotations} */ ` : ''}(${value.parameters.map((parameter) => parameter.name + (parameter.default ? ' = ' + expression(parameter.default, depth) : '')).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
     } finally {
       nativeScope = saved;
     }
@@ -376,6 +398,8 @@ export function emitVue2Source(
         return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
+      case 'conditional':
+        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -466,71 +490,7 @@ export function emitVue2Source(
     .map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`)
     .join('\n')
     .replace(/\*\//g, '*\\/');
-  // A raw optional prop and a resolved value are different contracts. Prove
-  // non-null defaults only from a sole unconditional, unconstrained declaration.
-  // The existing whole-scope walk includes conditional, helper and hook bodies:
-  // any possible refinement or unknown declaration keeps the result nullable.
-  const nonNullProps = new Set<string>();
-  const guaranteedProps = new Set<string>();
-  const canReturn = (statements: readonly StatementIR[]): boolean =>
-    statements.some(
-      (statement) =>
-        statement.kind === 'return' ||
-        (statement.kind === 'if' &&
-          (canReturn(statement.then) || canReturn(statement.otherwise))) ||
-        (statement.kind === 'try' &&
-          (canReturn(statement.body) ||
-            (statement.catch !== undefined && canReturn(statement.catch.body)) ||
-            (statement.finally !== undefined && canReturn(statement.finally))))
-    );
-  let opaqueDeclaration = false;
-  for (const statement of ir.setup.body) {
-    if (
-      statement.kind === 'return' ||
-      statement.kind === 'throw' ||
-      (statement.kind === 'if' && (canReturn(statement.then) || canReturn(statement.otherwise))) ||
-      (statement.kind === 'try' && canReturn([statement]))
-    )
-      break;
-    if (
-      statement.kind !== 'effect' ||
-      statement.expression.kind !== 'operation' ||
-      statement.expression.operation !== 'props.define'
-    ) {
-      if (
-        statement.kind !== 'const' ||
-        !['literal', 'reference', 'function'].includes(statement.value.kind)
-      )
-        opaqueDeclaration = true;
-      continue;
-    }
-    const declarations = statement.expression.arguments[0];
-    if (declarations?.kind !== 'record') {
-      opaqueDeclaration = true;
-      continue;
-    }
-    for (const entry of declarations.entries) {
-      if (entry.value.kind !== 'record') continue;
-      guaranteedProps.add(entry.key);
-      const fields = new Map(entry.value.entries.map((field) => [field.key, field.value]));
-      const fallback = fields.get('default');
-      const empty = fields.get('empty');
-      const prop = ir.props.find((prop) => prop.name === entry.key);
-      if (
-        !opaqueDeclaration &&
-        !unknownPropDeclarations &&
-        propDefinitions.get(entry.key) === 1 &&
-        !constrainedProps.has(entry.key) &&
-        !unknownDefaults &&
-        !nullableDefaults.has(entry.key) &&
-        (!empty || (empty.kind === 'literal' && empty.value !== 'accept')) &&
-        fallback?.kind === 'literal' &&
-        fallback.value !== null &&
-        typeof fallback.value === prop?.type
-      )
-        nonNullProps.add(entry.key);
-    }
-  }
+  const { nonNull: nonNullProps, required: guaranteedProps } = resolvedPropFacts(ir);
   const resolvedPropsType = ir.props
     .map(
       (prop) =>
@@ -588,6 +548,9 @@ ${
 }`
     : '';
   const contextImports =
+    (controlLabel
+      ? `import { normalizeVue2InstanceAssociations as ${prefix}NormalizeAssociations } from './.proto-ui/interaction/vue2-associations-v1';\n`
+      : '') +
     styleImport +
     interactionImport +
     (contextArtifacts
@@ -635,7 +598,8 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
     staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined',
     atomicInteraction,
-    interactionSelection === 'image' ? JSON.stringify(ir.moduleDeclarations[0].config) : null
+    interactionSelection === 'image' ? JSON.stringify(ir.moduleDeclarations[0].config) : null,
+    controlLabel
   ).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
   const propDeclarations = ir.props.map((prop) => `[${JSON.stringify(prop.name)}]: {}`).join(', ');
@@ -686,12 +650,14 @@ ${helpers}
 function ${prefix}Setup(${prefix}Owner) {
 ${hooks}
   ${
-    nativeTemplate
-      ? `/** @type {((renderer: ${prefix}NativeRenderer) => ${nativeTemplate.resultType}) | void} */
+    ir.setup.returnType === 'void'
+      ? `(${fn(ir.setup, 1)})(${prefix}Owner.def); return;`
+      : nativeTemplate
+        ? `/** @type {((renderer: ${prefix}NativeRenderer) => ${nativeTemplate.resultType}) | void} */
   const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
   if (typeof ${prefix}AuthoredRenderer !== 'function') return ${prefix}AuthoredRenderer;
   return (/** @param {${prefix}NativeRenderer} ${prefix}Renderer */ (${prefix}Renderer) => ${nativeTemplate.publication(`${prefix}AuthoredRenderer(${prefix}Renderer)`)});`
-      : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
+        : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
   }
 }
 
@@ -699,7 +665,7 @@ ${hooks}
 export const ${componentName} = {
   name: ${JSON.stringify(ir.name)},
   inheritAttrs: false,
-  props: { ${propDeclarations} },
+  props: { instanceAssociations: { type: Object, default: undefined }, ${propDeclarations} },
   ${
     contextArtifacts
       ? `inject: { [${JSON.stringify(`${prefix}ParentScope`)}]: { from: ${prefix}ScopeKey, default: null } },
@@ -752,10 +718,11 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
         ...(contextArtifacts?.files ?? []),
         ...staticDeclarations.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
+        ...(controlLabel ? [nativeVue2AssociationsArtifact] : []),
         ...(usesInteraction
           ? options.ssr
             ? [nativeInteractionArtifact, nativeAdapterModulesArtifact]
-            : nativeInteractionArtifacts(interactionSelection)
+            : nativeInteractionArtifacts(interactionSelection, { controlLabel })
           : []),
       ],
       dependencies: [
@@ -793,7 +760,8 @@ function nativeHelpers(
   declarations: string,
   tableFamily: string,
   atomicInteractive: boolean,
-  imageConfig: string | null
+  imageConfig: string | null,
+  controlLabel: boolean
 ): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   // Derive the generated finite registry and its key enumeration from the same
@@ -825,7 +793,7 @@ ${
 /** @typedef {'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range'} PUIStateKind */
 /** @typedef {ReturnType<typeof PUICreateOwner>} PUIOwner */
 /** @typedef {Parameters<Parameters<PUIOwner['def']['props']['watch']>[1]>[0]} PUIRun */
-/** @typedef {import('vue').default & { readonly PUIParentScope?: import('./.proto-ui/context/scope-v1').ContextScope | null }} PUIOwnerInstance */
+/** @typedef {import('vue').default & { readonly instanceAssociations?: Readonly<{controlLabel?: object | null}>; readonly PUIParentScope?: import('./.proto-ui/context/scope-v1').ContextScope | null }} PUIOwnerInstance */
 ${ssr ? '' : '/** @typedef {(renderer: PUINativeRenderer) => PUINativePaint} PUIRenderFunction */'}
 /** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} PUIPropsWatchInfo */
 /** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: PUIPropsWatchInfo) => void} PUIPropsWatchCallback */
@@ -1049,7 +1017,7 @@ ${
       if (vm.$props) void (/** @type {Readonly<Record<string, unknown>>} */ (vm.$props))[hostKey];
       if (PUIOwn(provided, hostKey)) input[key] = provided[hostKey];
     }
-    for (const key of Object.keys(input)) out[key] = input[key];
+    for (const key of Object.keys(input)) if (key !== 'instanceAssociations' && key !== 'instance-associations') out[key] = input[key];
     return Object.freeze(out);
   };
   /** @param {PUIRawProps} a @param {PUIRawProps} b */
@@ -1118,6 +1086,7 @@ ${
   /** @param {boolean} request */
   const syncHost = (request) => {
     if (terminal) return;
+${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociations('vm.instanceAssociations', 'PUIAssociations')}
     const nextRaw = hostRaw();
     if (hydrated && same(raw, nextRaw)) return;
     const previousRaw = raw;
@@ -1240,6 +1209,7 @@ ${context.owner}
     invoke: (fn) => invoke(fn),
     getRun: () => run,
     getResolvedProps: () => resolved,
+${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanceAssociations, (/** @type {{_base?: {observable?: (value: object) => object}}} */ (vm.$options))._base?.observable),\n' : ''}
     subscribeState: (state, fn) => externalState(state).subscribe(fn),
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
@@ -1447,8 +1417,8 @@ ${
 }    expose: {
       /** @param {string} key @param {unknown} value */
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
-      /** @template T @param {string} key @param {{ external: PUIExternalState<T> }} handle */
-      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'observedExternals.get(handle) ?? ' : ''}handle.external; },
+      /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
+      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn */
       method: (key, fn) => { setupOnly(); exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); return invoke(() => fn(...args)); }); },
       /** @param {string} key @param {unknown} [spec] */

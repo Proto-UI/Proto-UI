@@ -235,12 +235,13 @@ describe('Website dynamic projection wrapper', () => {
     expect(() => ctx.api.setProps(first.ref!, {})).toThrow(/reserved/);
     expect(() => ctx.api.call(first.ref!, 'focus')).toThrow(/reserved/);
     expect(() => ctx.api.getExposes(first.ref!)).toThrow(/reserved/);
-    expect(setSurfaceStyle).toHaveBeenLastCalledWith(first.ref, [
+    expect(first.surfaceStyle).toEqual([
       'padding: 3px',
       { color: 'red' },
       { maxWidth: '100%' },
       { '--pui-background': '#fff' },
     ]);
+    expect(setSurfaceStyle).not.toHaveBeenCalled();
     view.setThemeSurfaceStyle({ '--pui-background': '#222' });
     expect(setSurfaceStyle).toHaveBeenLastCalledWith(first.ref, [
       'padding: 3px',

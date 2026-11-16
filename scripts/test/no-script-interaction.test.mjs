@@ -262,7 +262,7 @@ test('producer retains disabled JavaScript, readability, uncropped capture and o
   assert.match(nojs, /expect\(await page\.locator\('a a'\)\.count\(\)\)\.toBe\(0\)/);
   assert.match(
     nojs,
-    /page\.waitForURL\(`\$\{baseUrl\}\/\$\{locale\}\/ui-libraries\/liquid-glass\/`\)/
+    /page\.waitForURL\(`\$\{baseUrl\}\/\$\{locale\}\/ui-libraries\/liquid-glass\/button\/`\)/
   );
   assert.doesNotMatch(nojs, /scrollIntoViewIfNeeded|\.click\(|force:|captureBeyondViewport|clip\b/);
   assert.match(nojs, /captureCurrentViewport/);

@@ -15,7 +15,7 @@
 // violation; prints each violation with its file and detail. Pure config
 // parse: it performs no network or runner work.
 
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
@@ -64,7 +64,7 @@ export const TRUSTED_CI_JOBS = Object.freeze([
 ]);
 export const FORBIDDEN_TRIGGERS = Object.freeze(['push', 'merge_group', 'pull_request_target']);
 
-export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR)) {
+export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR), sourceRoot = repoRoot) {
   const violations = [];
   const entries = readdirSync(dir, { withFileTypes: true })
     .filter((entry) => entry.isFile() && /\.ya?ml$/.test(entry.name))
@@ -221,10 +221,31 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR)) {
   // A manual invocation shares the leaf's concurrency group with a called
   // cycle. Traverse nested calls too: cancelling a leaf loses active evidence.
   const cycleWorkflows = new Set([REGRESSION_OWNER]);
-  const pendingWorkflows = [ownerDoc];
+  const pendingWorkflows = [{ file: REGRESSION_OWNER, workflow: ownerDoc }];
   while (pendingWorkflows.length > 0) {
-    const workflow = pendingWorkflows.pop();
-    for (const job of Object.values(workflow.jobs ?? {})) {
+    const { file: caller, workflow } = pendingWorkflows.pop();
+    for (const [id, job] of Object.entries(workflow.jobs ?? {})) {
+      // A filtered Vitest command can pass while another requested source is
+      // absent. Reject stale literal suite references before starting the cycle;
+      // generated selections retain the runtime plan's separate inventory gate.
+      const suites = new Set(
+        (job.steps ?? []).flatMap((step) =>
+          [
+            ...String(step.run ?? '').matchAll(
+              /\b(?:apps|packages|internal)\/[a-zA-Z0-9_./-]+\.browser\.test\.[cm]?[jt]sx?\b/gu
+            ),
+          ].map(([suite]) => suite)
+        )
+      );
+      for (const suite of suites) {
+        if (!statSync(path.join(sourceRoot, suite), { throwIfNoEntry: false })?.isFile()) {
+          violations.push({
+            file: caller,
+            rule: 'cycle-browser-source-missing',
+            detail: `job '${id}' references missing browser suite '${suite}'`,
+          });
+        }
+      }
       const file =
         typeof job.uses === 'string'
           ? job.uses.match(/^\.\/(\.github\/workflows\/[^/]+\.ya?ml)$/u)?.[1]
@@ -249,7 +270,7 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR)) {
             'a shared cycle workflow must not cancel active evidence when manually dispatched',
         });
       }
-      pendingWorkflows.push(called);
+      pendingWorkflows.push({ file, workflow: called });
     }
   }
 

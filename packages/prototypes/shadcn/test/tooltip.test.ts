@@ -129,7 +129,16 @@ describe('prototypes/shadcn: tooltip', () => {
       'text-background',
     ];
     for (const token of surface) expect(styleContains(content, token), token).toBe(true);
-    for (const token of ['animate-in', 'fade-in-0', 'zoom-in-95', 'slide-in-from-bottom-2']) {
+    // The exposed open State lowers entry paint to data-[open] CSS selectors.
+    // Check both the emitted recipe and its current activation fact.
+    expect(content.getExposes().open.get()).toBe(true);
+    expect(content.hasAttribute('data-open')).toBe(true);
+    for (const token of [
+      'data-[open]:animate-in',
+      'data-[open]:fade-in-0',
+      'data-[open]:zoom-in-95',
+      'slide-in-from-bottom-2',
+    ]) {
       expect(styleContains(content, token), token).toBe(true);
     }
     for (const token of [
@@ -233,6 +242,8 @@ describe('prototypes/shadcn: tooltip', () => {
     expect(first.root.getExposes().open.get()).toBe(true);
     await advance(1);
     expect(first.root.getExposes().open.get()).toBe(false);
+    expect(first.content.getExposes().open.get()).toBe(false);
+    expect(first.content.hasAttribute('data-open')).toBe(false);
     expect(first.content.getExposes().transitionState.get()).toBe('leaving');
     for (const token of ['animate-out', 'fade-out-0', 'zoom-out-95']) {
       expect(styleContains(first.content, token), token).toBe(true);
@@ -242,8 +253,15 @@ describe('prototypes/shadcn: tooltip', () => {
     await advance(0);
     expect(second.root.getExposes().open.get()).toBe(true);
     expect(first.root.getExposes().open.get()).toBe(false);
+    expect(second.content.getExposes().open.get()).toBe(true);
+    expect(second.content.hasAttribute('data-open')).toBe(true);
     expect(second.content.getExposes().transitionState.get()).toBe('entering');
-    for (const token of ['animate-in', 'fade-in-0', 'zoom-in-95', 'slide-in-from-bottom-2']) {
+    for (const token of [
+      'data-[open]:animate-in',
+      'data-[open]:fade-in-0',
+      'data-[open]:zoom-in-95',
+      'slide-in-from-bottom-2',
+    ]) {
       expect(styleContains(second.content, token), token).toBe(true);
     }
 
