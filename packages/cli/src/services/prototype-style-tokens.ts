@@ -1739,7 +1739,13 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
   return references;
 }
 
-function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new Set()) {
+function hasVerifiedDecorationHelperCalls(
+  helper,
+  receiver,
+  scope,
+  targetOrigin,
+  active = new Set()
+) {
   const binding = decorationHelperBinding(helper);
   if (
     !binding ||
@@ -1786,13 +1792,15 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
     }
     return (
       callers.size > 0 &&
-      [...callers].every(
-        ([owner, facts]) =>
-          receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper) &&
-          (isCanonicalPrototypeSetup(owner, scope, false)
-            ? parameterName(owner) === facts.definition
-            : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, active))
-      )
+      [...callers].every(([owner, facts]) => {
+        if (!receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper)) return false;
+        const reachedOrigin = owner === targetOrigin?.owner;
+        if (reachedOrigin && facts.definition !== targetOrigin.definition) return false;
+        const pendingOrigin = reachedOrigin ? undefined : targetOrigin;
+        return isCanonicalPrototypeSetup(owner, scope, false)
+          ? !pendingOrigin && parameterName(owner) === facts.definition
+          : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, pendingOrigin, active);
+      })
     );
   } finally {
     active.delete(origin);
@@ -1905,11 +1913,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     declarationOwner = ruleCaller.owner;
     definition = ruleCaller.definition;
   }
-  if (isCanonicalPrototypeSetup(declarationOwner, scope, false)) {
-    if (parameterName(declarationOwner) !== definition) return false;
-  } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope)) return false;
-
-  if (!declarationOwner.body || !ts.isBlock(declarationOwner.body)) return false;
+  if (!declarationOwner.body) return false;
   const binding = scopeDeclaring(target.text, scope)?.bindings.get(
     target.text
   )?.decorationTargetDeclaration;
@@ -1918,11 +1922,23 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     !binding ||
     !binding.initializer ||
     !isConstStyleBinding(binding, binding.initializer) ||
-    ts.findAncestor(binding, ts.isFunctionLike) !== declarationOwner ||
     !initializer ||
-    !ts.isCallExpression(initializer) ||
-    feedbackStyleReceiver(initializer.expression, 'declareDecoration') !== definition
+    !ts.isCallExpression(initializer)
   )
+    return false;
+  const targetOwner = ts.findAncestor(binding, ts.isFunctionLike);
+  const targetDefinition = feedbackStyleReceiver(initializer.expression, 'declareDecoration');
+  if (!targetOwner || !targetDefinition) return false;
+  if (targetOwner === declarationOwner && targetDefinition !== definition) return false;
+  const targetOrigin =
+    targetOwner === declarationOwner
+      ? undefined
+      : { owner: targetOwner, definition: targetDefinition };
+  if (targetOrigin && (!targetOwner.body || !nodeWithin(declarationOwner, targetOwner.body)))
+    return false;
+  if (isCanonicalPrototypeSetup(declarationOwner, scope, false)) {
+    if (targetOrigin || parameterName(declarationOwner) !== definition) return false;
+  } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope, targetOrigin))
     return false;
 
   // A sibling statement may rebind the Rule intent or setup receiver. Prove

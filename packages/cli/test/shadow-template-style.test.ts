@@ -529,6 +529,37 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it.each([
+    'function paint() { def.feedback.style.to(target).use(tw("p-[10%]")); } paint();',
+    'const paint = (receiver) => receiver.feedback.style.to(target).use(tw("p-[10%]")); paint(def);',
+  ])('keeps a verified helper paint on its setup-owned target', async (helper) => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'captured-decoration-target', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        ${helper}
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight when a captured-target helper escapes the setup call', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'escaped-decoration-target', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        function paint() { def.feedback.style.to(target).use(tw('p-[10%]')); }
+        paint();
+        expose(paint);
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it.each(['(config) => config', 'defineAsHook'])(
     'keeps preflight when a local factory shadows definePrototype with %s',
     async (localFactory) => {
