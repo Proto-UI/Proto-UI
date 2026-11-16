@@ -394,19 +394,64 @@ export function createShadowSplitEffectsPort({
   let disposed = false;
   let flushing = false;
   let flushRequested = false;
+  let zeroOpacityTransition: { animation: CSSTransition; target: string } | null = null;
+  const isLiveSurfaceToken = (token: string) => {
+    const selector = compiledReceiptSelector(token, 'element');
+    return (
+      selector !== null &&
+      host.matches(selector) &&
+      surface.getAttribute('data-pui-style')?.split(/\s+/).includes(token)
+    );
+  };
+  const ownsZeroOpacity = () =>
+    applied?.surface.some(
+      (token) =>
+        (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
+    ) ?? false;
   zeroOpacityOwners.set(surface, () => {
-    if (!applied || surface.parentNode !== host.shadowRoot) return false;
-    const liveSurfaceTokens = surface.getAttribute('data-pui-style')?.split(/\s+/);
-    return applied.surface.some((token) => {
-      if (
-        (token !== 'opacity-0' && !token.endsWith(':opacity-0')) ||
-        !liveSurfaceTokens?.includes(token)
-      )
-        return false;
-      const selector = compiledReceiptSelector(token, 'element');
-      return selector !== null && host.matches(selector);
-    });
+    if (surface.parentNode !== host.shadowRoot) return false;
+    if (ownsZeroOpacity()) return true;
+    const transition = zeroOpacityTransition;
+    return (
+      !!transition &&
+      isLiveSurfaceToken(transition.target) === true &&
+      (transition.animation.pending || transition.animation.playState === 'running') &&
+      surface.getAnimations().includes(transition.animation)
+    );
   });
+
+  const captureZeroOpacityTransition = (
+    eligible: readonly string[],
+    before: readonly Animation[]
+  ): { animation: CSSTransition; target: string } | null => {
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSTransition || !view.KeyframeEffect) return null;
+    for (const animation of surface.getAnimations()) {
+      if (
+        !(animation instanceof view.CSSTransition) ||
+        animation.transitionProperty !== 'opacity' ||
+        before.includes(animation)
+      )
+        continue;
+      const effect = animation.effect;
+      if (
+        !(effect instanceof view.KeyframeEffect) ||
+        effect.target !== surface ||
+        effect.pseudoElement
+      )
+        continue;
+      const keyframes = effect.getKeyframes();
+      if (keyframes[0]?.opacity !== '0') continue;
+      const finalOpacity = Number(keyframes.at(-1)?.opacity);
+      const target = eligible.find(
+        (token) =>
+          Number(/(?:^|:)opacity-(\d+)$/.exec(token)?.[1]) / 100 === finalOpacity &&
+          isLiveSurfaceToken(token)
+      );
+      if (target) return { animation, target };
+    }
+    return null;
+  };
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
@@ -540,11 +585,22 @@ export function createShadowSplitEffectsPort({
     const previous = applied;
     const next = latest;
     try {
+      // Capture the native transition only on an owned zero-to-positive write.
+      // Subsequent equal projections must not acquire a different animation.
+      const eligible =
+        ownsZeroOpacity() &&
+        next.surface.some((token) => /(?:^|:)transition-(?:opacity|all)$/.test(token))
+          ? next.surface.filter((token) => /(?:^|:)opacity-[1-9]\d*$/.test(token))
+          : [];
+      const before = eligible.length && surface.getAnimations ? surface.getAnimations() : null;
       host.setAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR, next.root);
       if (nativeText) host.setAttribute(NATIVE_TEXT_ATTR, '');
       surface.setAttribute(SHADOW_SPLIT_SURFACE_ATTR, '');
       applier.apply(next.surface);
       applied = next;
+      if (before) zeroOpacityTransition = captureZeroOpacityTransition(eligible, before);
+      else if (zeroOpacityTransition && !next.surface.includes(zeroOpacityTransition.target))
+        zeroOpacityTransition = null;
     } catch (error) {
       // Restore both owned projections even when the failing target mutated before throwing.
       // DOM rollback itself may fail on a broken host; retain the original failure.
@@ -559,7 +615,8 @@ export function createShadowSplitEffectsPort({
         if (!previous) surface.removeAttribute(SHADOW_SPLIT_SURFACE_ATTR);
         if (!previous && nativeText) host.removeAttribute(NATIVE_TEXT_ATTR);
       } catch {}
-      latest = previous;
+      applied = latest = previous;
+      zeroOpacityTransition = null;
       flushRequested = false;
       throw error;
     } finally {

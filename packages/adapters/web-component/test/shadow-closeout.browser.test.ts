@@ -48,6 +48,99 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it('retains owned split Root opacity during its CSS transition out of zero', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const Prototype = p.define({
+            name: 'closeout-owned-split-opacity',
+            setup(def: any) {
+              const visible = def.state.bool('visible', false);
+              def.feedback.style.use(p.tw('opacity-0 transition-opacity'));
+              def.rule({
+                when: (w: any) => w.state(visible).eq(true),
+                intent: (i: any) => i.feedback.style.use(p.tw('opacity-100')),
+              });
+              def.event.on('host:click', () => visible.set(true));
+              const decoration = def.feedback.style.declareDecoration();
+              return (r: any) => [r.decoration(decoration), r.slot()];
+            },
+          });
+          const Component = p.adapt(Prototype, {
+            shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact },
+          });
+          const host = new Component();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]');
+          const slot = surface.querySelector('slot');
+          // Hold the real transition's zero phase for the synchronous update.
+          surface.style.transitionDelay = '1s';
+          const initialOpacity = getComputedStyle(surface).opacity;
+          host.click();
+          await Promise.resolve();
+          const duringOpacity = getComputedStyle(surface).opacity;
+          const transition = surface
+            .getAnimations()
+            .find(
+              (animation: Animation) =>
+                animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+            );
+          function update() {
+            try {
+              host.update();
+              return null;
+            } catch (error) {
+              return String(error);
+            }
+          }
+          const during = {
+            opacity: duringOpacity,
+            tokens: surface.getAttribute('data-pui-style'),
+            transitioning: !!transition,
+            error: update(),
+            sameCaller: slot.assignedNodes()[0] === caller,
+          };
+          transition?.finish();
+          const settledOpacity = getComputedStyle(surface).opacity;
+          const settledError = update();
+          const external = document.createElement('style');
+          external.textContent =
+            '[part="surface"] { opacity: 0 !important; transition: none !important; }';
+          host.shadowRoot.append(external);
+          const externalOpacity = getComputedStyle(surface).opacity;
+          return {
+            initialOpacity,
+            during,
+            settledOpacity,
+            settledError,
+            externalOpacity,
+            externalError: update(),
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['opacity-0', 'opacity-100', 'transition-opacity'])
+      );
+      expect(result.initialOpacity).toBe('0');
+      expect(result.during).toEqual({
+        opacity: '0',
+        tokens: expect.stringContaining('opacity-100'),
+        transitioning: true,
+        error: null,
+        sameCaller: true,
+      });
+      expect(result.settledOpacity).toBe('1');
+      expect(result.settledError).toBeNull();
+      expect(result.externalOpacity).toBe('0');
+      expect(result.externalError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each([
     ['shadcn', SHADCN_STYLE_TOKENS],
     ['brutalist', BRUTALIST_STYLE_TOKENS],
