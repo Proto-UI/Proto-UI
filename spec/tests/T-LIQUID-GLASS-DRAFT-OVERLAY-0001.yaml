@@ -28,6 +28,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-DRAFT-OVERLAY-0001-CASE-PROTOCOL
+      - T-LIQUID-GLASS-DRAFT-OVERLAY-0001-CASE-MATERIAL
     exercises:
       - P-LIQUID-GLASS-DIALOG
       - P-LIQUID-GLASS-DIALOG-TRIGGER

@@ -29,6 +29,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/draft-control-projections.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-CONTROLS
+      - T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-FIELD
     exercises:
       - P-LIQUID-GLASS-INPUT
       - P-LIQUID-GLASS-TEXTAREA

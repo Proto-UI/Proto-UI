@@ -10,6 +10,7 @@ import {
   checkScaffolding,
   extractSidebarSlugs,
   findStaleReleaseClaims,
+  runPublicDocsCheck,
 } from '../check-public-docs.mjs';
 import { publicDocPolicy } from '../public-doc-policy.mjs';
 
@@ -58,11 +59,43 @@ test('an explicitly draft workspace train is not a current release claim', () =>
   assert.deepEqual(errors, []);
 });
 
-test('both bilingual repository landing pages are current release projections', () => {
-  assert.deepEqual(publicDocPolicy.release.additionalCurrentProjections, [
-    'README.md',
-    'README.zh-CN.md',
-  ]);
+test('unavailable package export evidence is not an installation recommendation', () => {
+  for (const [file, text] of [
+    [
+      'availability.en.md',
+      'The npm artifacts for `@proto.ui/prototypes-test@0.3.0-alpha.1` do not export `./spinner`.',
+    ],
+    [
+      'availability.zh-cn.md',
+      'npm 中的 `@proto.ui/prototypes-test@0.3.0-alpha.1` 单包均不导出 `./spinner`。',
+    ],
+  ]) {
+    assert.deepEqual(
+      findStaleReleaseClaims({
+        file,
+        text,
+        currentVersion: '0.2.0',
+        governedSource: 'spec/versions/V-STABLE.yaml',
+      }),
+      []
+    );
+  }
+});
+
+test('an unavailable-export note cannot hide a prerelease install or use directive', () => {
+  for (const text of [
+    'npm install @proto.ui/prototypes-test@0.3.0-alpha.1 # does not export Spinner',
+    'Use @proto.ui/prototypes-test@0.3.0-alpha.1, which does not export Spinner.',
+  ]) {
+    const errors = findStaleReleaseClaims({
+      file: 'install.md',
+      text,
+      currentVersion: '0.2.0',
+      governedSource: 'spec/versions/V-STABLE.yaml',
+    });
+    assert.equal(errors.length, 1);
+    assert.match(errors[0], /current install\/release claim/);
+  }
 });
 
 test('a missing localized primary route reports the exact locale and slug', async () => {
@@ -110,6 +143,91 @@ test('an unclassified released family gap points to catalog remediation', () => 
   assert.equal(errors.length, 1);
   assert.match(errors[0], /unclassified family\/export/);
   assert.match(errors[0], /P-TEST-NEW-FAMILY/);
+});
+
+test('an available exported family missing from the sidebar is rejected', () => {
+  const errors = checkLibraryInventory({
+    releaseVersion: '0.2.0',
+    bom: { packages: [{ name: '@proto.ui/prototypes-test' }] },
+    libraries: [
+      {
+        id: 'test',
+        packageName: '@proto.ui/prototypes-test',
+        detailPrefix: 'ui-libraries/test',
+        catalogPrefix: 'P-TEST-',
+        exportClassifications: {
+          '.': { kind: 'library-root', reason: 'The overview represents the root barrel.' },
+        },
+      },
+    ],
+    manifests: new Map([
+      [
+        '@proto.ui/prototypes-test',
+        { exports: { '.': './dist/index.js', './button': './dist/button.js' } },
+      ],
+    ]),
+    catalog: [{ id: 'P-TEST-BUTTON', since: '0.2.0-rc.1', status: 'draft' }],
+    sidebarSlugs: ['ui-libraries/test'],
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /absent from primary sidebar slug ui-libraries\/test\/button/);
+});
+
+test('a direct family route can differ from its library default without an overview mount', () => {
+  const errors = checkLibraryInventory({
+    releaseVersion: '0.2.0',
+    bom: { packages: [{ name: '@proto.ui/prototypes-test' }] },
+    libraries: [
+      {
+        id: 'test',
+        packageName: '@proto.ui/prototypes-test',
+        detailPrefix: 'ui-libraries/test',
+        catalogPrefix: 'P-TEST-',
+        familyRoutes: { button: 'ui-libraries/test/controls/button' },
+        exportClassifications: {
+          '.': {
+            kind: 'library-root',
+            reason: 'The root barrel aggregates the component families.',
+          },
+        },
+      },
+    ],
+    manifests: new Map([
+      [
+        '@proto.ui/prototypes-test',
+        { exports: { '.': './dist/index.js', './button': './dist/button.js' } },
+      ],
+    ]),
+    catalog: [{ id: 'P-TEST-BUTTON', since: '0.2.0-rc.1', status: 'draft' }],
+    sidebarSlugs: ['ui-libraries/test/controls/button'],
+  });
+
+  assert.deepEqual(errors, []);
+});
+
+test('workspace draft exports need navigation before the next stable publication', () => {
+  const errors = checkLibraryInventory({
+    releaseVersion: '0.2.0',
+    workspaceVersion: '0.3.0-alpha.1',
+    bom: { packages: [{ name: '@proto.ui/prototypes-test' }] },
+    libraries: [
+      {
+        id: 'test',
+        packageName: '@proto.ui/prototypes-test',
+        detailPrefix: 'ui-libraries/test',
+        catalogPrefix: 'P-TEST-',
+      },
+    ],
+    manifests: new Map([
+      ['@proto.ui/prototypes-test', { exports: { './button': './dist/button.js' } }],
+    ]),
+    catalog: [{ id: 'P-TEST-BUTTON', since: '0.3.0-alpha.1', status: 'draft' }],
+    sidebarSlugs: [],
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /P-TEST-BUTTON.*absent from primary sidebar/);
 });
 
 test('a released family with the wrong sidebar route fails the canonical projection', () => {
@@ -235,6 +353,11 @@ test('the Shadcn Input sidebar route opens its real demo in both locales', async
     );
     assert.match(source, /<PrototypePreviewer\s+demoId="demo-shadcn-input"/);
   }
+});
+
+test('the public catalog validates current family routes without a retired overview', async () => {
+  const result = await runPublicDocsCheck();
+  assert.deepEqual(result.errors, []);
 });
 
 test('both general Feedback references explain the bounded selection exception', async () => {

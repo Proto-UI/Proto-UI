@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
 import { publicDocPolicy } from './public-doc-policy.mjs';
 
@@ -10,7 +9,9 @@ const DEFAULT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 
 const DOC_EXTENSIONS = ['.md', '.mdx', '/index.md', '/index.mdx'];
 const PRERELEASE_PATTERN = /\b\d+\.\d+\.\d+-[0-9A-Za-z.-]+\b/g;
 const INSTALL_CONTEXT =
-  /(?:\bnpx\b|\bnpm\s+(?:i|install)\b|\bpnpm\s+(?:add|dlx)\b|\byarn\s+add\b|@proto\.ui\/[\w-]+@)/i;
+  /(?:\bnpx\b|\bnpm\s+(?:i|install)\b|\bpnpm\s+(?:add|dlx)\b|\byarn\s+add\b)/i;
+const PACKAGE_VERSION_CONTEXT = /@proto\.ui\/[\w-]+@/i;
+const UNAVAILABLE_EXPORT_CONTEXT = /\b(?:does?|do)\s+not\s+export\b|(?:不|未)导出/i;
 const CURRENT_CONTEXT =
   /\b(?:current|currently|latest|stable|recommended|install|use)\b|当前|目前|最新|稳定|推荐|安装|使用/i;
 const HISTORICAL_CONTEXT =
@@ -144,7 +145,10 @@ export function findStaleReleaseClaims({
   let lineOffset = 0;
   for (const line of text.split('\n')) {
     for (const match of line.matchAll(PRERELEASE_PATTERN)) {
-      const installClaim = INSTALL_CONTEXT.test(line);
+      const unavailableArtifact =
+        UNAVAILABLE_EXPORT_CONTEXT.test(line) && !CURRENT_CONTEXT.test(line);
+      const installClaim =
+        INSTALL_CONTEXT.test(line) || (PACKAGE_VERSION_CONTEXT.test(line) && !unavailableArtifact);
       const currentClaim =
         CURRENT_CONTEXT.test(line) &&
         !HISTORICAL_CONTEXT.test(line) &&
@@ -220,6 +224,7 @@ function entityAvailableInRelease(entity, releaseVersion) {
 
 export function checkLibraryInventory({
   releaseVersion,
+  workspaceVersion = releaseVersion,
   bom,
   libraries,
   manifests,
@@ -230,6 +235,9 @@ export function checkLibraryInventory({
   const releasedPackages = new Set(bom.packages.map((entry) => entry.name));
   const catalogById = new Map(catalog.map((entity) => [entity.id, entity]));
   const sidebar = new Set(sidebarSlugs);
+  const available = (entity) =>
+    entityAvailableInRelease(entity, releaseVersion) ||
+    entityAvailableInRelease(entity, workspaceVersion);
   for (const library of libraries) {
     if (!releasedPackages.has(library.packageName)) {
       errors.push(
@@ -259,7 +267,7 @@ export function checkLibraryInventory({
         }
         if (classification.kind === 'overview-only') {
           const entity = catalogById.get(classification.catalogId);
-          if (!entity || !entityAvailableInRelease(entity, releaseVersion)) {
+          if (!entity || !available(entity)) {
             errors.push(
               `${library.packageName} ${exportName}: overview-only classification points to unavailable catalog entity ${classification.catalogId} for ${releaseVersion}.`
             );
@@ -281,11 +289,11 @@ export function checkLibraryInventory({
         );
         continue;
       }
-      if (!entityAvailableInRelease(entity, releaseVersion)) continue;
-      const expectedSlug = `${library.detailPrefix}/${family}`;
+      if (!available(entity)) continue;
+      const expectedSlug = library.familyRoutes?.[family] ?? `${library.detailPrefix}/${family}`;
       if (!sidebar.has(expectedSlug)) {
         errors.push(
-          `${library.packageName} ${exportName}: released family ${family} (${catalogId}) is absent from primary sidebar slug ${expectedSlug}.`
+          `${library.packageName} ${exportName}: available family ${family} (${catalogId}) is absent from primary sidebar slug ${expectedSlug}.`
         );
       }
     }
@@ -362,6 +370,7 @@ async function loadLibraryManifests(root, bom, libraries) {
 export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicDocPolicy } = {}) {
   const errors = [];
   const releaseTruth = await loadVersionTruth(root, policy);
+  const workspaceVersion = (await fs.readFile(path.join(root, 'VERSION'), 'utf8')).trim();
   releaseTruth.bom.__source = releaseTruth.bomSource;
   const navigationPath = path.join(root, policy.navigation.source);
   const sidebarSlugs = extractSidebarSlugs(
@@ -427,6 +436,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
   errors.push(
     ...checkLibraryInventory({
       releaseVersion: releaseTruth.stable.release.version,
+      workspaceVersion,
       bom: releaseTruth.bom,
       libraries: policy.libraries,
       manifests: await loadLibraryManifests(root, releaseTruth.bom, policy.libraries),
@@ -434,7 +444,7 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
       sidebarSlugs,
     })
   );
-  return { errors, releaseTruth, sidebarSlugs, primaryDocuments };
+  return { errors, releaseTruth, workspaceVersion, sidebarSlugs, primaryDocuments };
 }
 
 async function main() {
@@ -446,7 +456,7 @@ async function main() {
     return;
   }
   console.log(
-    `[public-docs] OK: ${result.releaseTruth.stable.release.version} from ${result.releaseTruth.stable.__file}; ${result.sidebarSlugs.length} bilingual primary routes; ${publicDocPolicy.libraries.length} library inventories.`
+    `[public-docs] OK: stable ${result.releaseTruth.stable.release.version} from ${result.releaseTruth.stable.__file}; workspace ${result.workspaceVersion}; ${result.sidebarSlugs.length} bilingual primary routes; ${publicDocPolicy.libraries.length} library inventories.`
   );
 }
 

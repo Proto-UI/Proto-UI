@@ -273,6 +273,9 @@ verifies:
       anchors: [M-FOCUS-0001-H]
 revisions:
   - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Bound the activation-owned Entry module evidence relation to its alpha.1 addition while retaining this test's 0.1.0 origin, existing evidence and planned execution statuses.
+  - version: 0.3.0-alpha.1
     change: refined
     summary: Map the explicitly selected activation-owned Entry fallback to logical-priority, host-region, readiness, cancellation, reentry and compatibility cases while keeping all new executions planned and preserving historical evidence.
   - version: 0.3.0-alpha.1

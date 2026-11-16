@@ -4,6 +4,7 @@ import {
   CONTEXT_PARENT_CAP,
 } from '../../../../packages/modules/context/src';
 import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
+import { RULE_META_GET_CAP } from '../../../../packages/modules/rule-meta/src';
 import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
   AS_TRIGGER_INSTANCE_CAP,
@@ -15,6 +16,7 @@ import {
   EVENT_GLOBAL_TARGET_CAP,
 } from '../../../../packages/modules/event/src';
 import type { Prototype, StyleHandle } from '@proto.ui/core';
+import type { PropsBaseType } from '@proto.ui/types';
 
 /** Bind a reviewed, finite recipe collection. Callers select a key, never an
  * arbitrary prototype or dynamic import. Command identity is opt-in per key;
@@ -26,13 +28,18 @@ export function createStyleSnapshotter<const R extends Record<string, Prototype<
 ) {
   const recipes = new Map(Object.entries(registry));
   const commands = new Set(commandKeys);
-  return (key: keyof R, props: Record<string, unknown>): Promise<string[]> => {
+  return (
+    key: keyof R,
+    props: PropsBaseType,
+    colorScheme?: 'light' | 'dark'
+  ): Promise<string[]> => {
     const prototype = recipes.get(String(key));
     if (!prototype) throw new Error(`Unreviewed startup recipe: ${String(key)}`);
     return snapshotPrototypeStyle(
       prototype,
       props,
-      commands.has(key) ? 'command-style' : 'passive'
+      commands.has(key) ? 'command-style' : 'passive',
+      colorScheme
     );
   };
 }
@@ -48,8 +55,9 @@ export function createStyleSnapshotter<const R extends Record<string, Prototype<
  * disposes the Runtime even when rendering fails. */
 async function snapshotPrototypeStyle(
   prototype: Prototype<any, any>,
-  props: Record<string, unknown>,
-  mode: 'passive' | 'command-style' = 'passive'
+  props: PropsBaseType,
+  mode: 'passive' | 'command-style' = 'passive',
+  colorScheme?: 'light' | 'dark'
 ): Promise<string[]> {
   let tokens: string[] = [];
   // One detached identity owns this snapshot's Context root and lets command
@@ -67,6 +75,13 @@ async function snapshotPrototypeStyle(
         [CONTEXT_INSTANCE_TOKEN_CAP, identity],
         [CONTEXT_PARENT_CAP, () => null],
       ]);
+      // A finite theme endpoint uses the same public Meta input as live hosts.
+      // This detached capture owns no browser observer or invalidation lease.
+      if (colorScheme) {
+        wiring.attach('rule-meta', [
+          [RULE_META_GET_CAP, (key: string) => (key === 'colorScheme' ? colorScheme : undefined)],
+        ]);
+      }
       if (mode === 'command-style') {
         wiring.attach('as-trigger', [
           [AS_TRIGGER_INSTANCE_CAP, identity],
