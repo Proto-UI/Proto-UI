@@ -228,7 +228,7 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts':
     '.github/workflows/homepage-visual-evidence.yml',
   'packages/compiler/test/web-component-native.browser.test.ts':
-    '.github/workflows/compiler-wc-native-evidence.yml',
+    'scripts/test/wc-native-isolation.mjs',
   'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts':
     '.github/workflows/language-select-navigation-evidence.yml',
   'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts':

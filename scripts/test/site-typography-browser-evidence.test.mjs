@@ -98,7 +98,6 @@ describe('native typography browser ownership and bounded registration', () => {
       ...['shadcn', 'brutalist', 'homepage'].map(
         (family) => `${family}: retains its own no-JavaScript heading scale`
       ),
-      'retains Overview card native density in each runtime and without JavaScript',
     ];
     const assertInventory = (registered) => {
       const names = registered.map((entry) => entry.name);
@@ -189,7 +188,6 @@ describe('native typography browser ownership and bounded registration', () => {
     assert.match(compactFixture, /noindex, nofollow/);
     assert.match(compact, /originalSources: texts\.every/);
     assert.match(compact, /node\.textNodeCount\)\.toBe\(node\.originalTextNodeCount\)/);
-    assert.match(compact, /node\.surfaceCount\)\.toBe\(1\)/);
   });
   it('requires rendered glyph observations and browser accessibility, selection and copy', () => {
     for (const required of [
@@ -359,7 +357,7 @@ for (const [name, mutate] of [
     assert.throws(() => assertTypographyFontPreparation(changed));
   });
 
-it('keeps exact family-separated narrow Hero paint at both text scales', () => {
+it('keeps exact family and locale narrow Hero paint at both text scales', () => {
   const ast = ts.createSourceFile(suitePath, suite, ts.ScriptTarget.Latest, true);
   const node = ast.statements.find(
     (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'narrowHomepageHeading'
@@ -369,13 +367,17 @@ it('keeps exact family-separated narrow Hero paint at both text scales', () => {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const expected = runInNewContext(js + '; narrowHomepageHeading');
-  for (const [family, percent, token, size, lineHeight] of [
-    ['shadcn', 100, 'text-3xl', 30, '33px'],
-    ['shadcn', 200, 'text-3xl', 60, '66px'],
-    ['brutalist', 100, 'text-2xl', 24, '30px'],
-    ['brutalist', 200, 'text-2xl', 48, '60px'],
+  for (const [family, locale, percent, token, size, lineHeight] of [
+    ['shadcn', 'en', 100, 'text-3xl', 30, '33px'],
+    ['shadcn', 'en', 200, 'text-3xl', 60, '66px'],
+    ['shadcn', 'zh-cn', 100, 'text-3xl', 30, '37.5px'],
+    ['shadcn', 'zh-cn', 200, 'text-3xl', 60, '75px'],
+    ['brutalist', 'en', 100, 'text-2xl', 24, '30px'],
+    ['brutalist', 'en', 200, 'text-2xl', 48, '60px'],
+    ['brutalist', 'zh-cn', 100, 'text-2xl', 24, '30px'],
+    ['brutalist', 'zh-cn', 200, 'text-2xl', 48, '60px'],
   ])
-    assert.deepEqual(JSON.parse(JSON.stringify(expected(family, percent))), {
+    assert.deepEqual(JSON.parse(JSON.stringify(expected(family, locale, percent))), {
       token,
       size,
       lineHeight,
@@ -386,7 +388,7 @@ it('keeps exact family-separated narrow Hero paint at both text scales', () => {
     'size: expectedHeading.size',
     'lineHeight: expectedHeading.lineHeight',
     'timeout: 15_000',
-    "['homepage', '/zh-cn/', '30px', '33px']",
+    "['homepage', '/zh-cn/', '30px', '37.5px']",
     'geometry.documentWidth).toBeLessThanOrEqual(geometry.viewport + 1)',
     'geometry.bodyWidth).toBeLessThanOrEqual(geometry.viewport + 1)',
   ];
@@ -395,4 +397,46 @@ it('keeps exact family-separated narrow Hero paint at both text scales', () => {
   };
   verify(suite);
   for (const item of required) assert.throws(() => verify(suite.replaceAll(item, '')));
+});
+
+it('retains exactly one native Text owner and keeps the rich list item delegated to its paragraph', () => {
+  const ast = ts.createSourceFile(suitePath, suite, ts.ScriptTarget.Latest, true);
+  const node = ast.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'assertSourceIntegrity'
+  );
+  assert.ok(node);
+  const js = ts.transpileModule(node.getText(ast), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const check = runInNewContext(`${js}; assertSourceIntegrity`, {
+    expect: (actual) => ({
+      toBe: (expected) => assert.equal(actual, expected),
+      toBeGreaterThanOrEqual: (expected) => assert.ok(actual >= expected),
+    }),
+  });
+  const measured = Array.from({ length: 8 }, (_, index) => ({
+    id: index === 0 ? 'native-rich-item' : `native-text-${index}`,
+    connected: true,
+    originalSources: true,
+    text: 'Original authored text',
+    expected: 'Original authored text',
+    textNodeCount: 1,
+    originalTextNodeCount: 1,
+    carrierCount: index === 0 ? 0 : 1,
+    surfaceCount: index === 0 ? 0 : 1,
+    invalidBlocks: 0,
+    nestedFocusable: 0,
+  }));
+  check(measured);
+  for (const [index, count] of [
+    [0, 1],
+    [1, 0],
+    [1, 2],
+  ]) {
+    for (const field of ['carrierCount', 'surfaceCount']) {
+      const changed = structuredClone(measured);
+      changed[index][field] = count;
+      assert.throws(() => check(changed));
+    }
+  }
 });

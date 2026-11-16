@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
 import ts from 'typescript';
 
@@ -116,10 +117,47 @@ test('producer keeps verified native wheel, blocking checks, public surfaces and
   assert.match(producer, /libraryCardReadabilityFailures\(cards\)/);
   assert.match(
     producer,
-    /waitForURL\(`\$\{baseUrl\}\/\$\{locale\}\/ui-libraries\/liquid-glass\/`\)/
+    /waitForURL\(`\$\{baseUrl\}\/\$\{locale\}\/ui-libraries\/liquid-glass\/button\/`\)/
   );
   assert.doesNotMatch(
     source,
     /\.scrollIntoView|\.focus\(|\.finish\(|\.pause\(|\.style\.|\.remove\(|addStyleTag/
   );
+});
+
+test('the retained candidate gallery links to real component demos in both locales', () => {
+  const file = 'apps/www/src/components/UiLibraryGallery.astro';
+  const frontmatter = readFileSync(file, 'utf8').split('---')[1];
+  const ast = ts.createSourceFile(file, frontmatter, ts.ScriptTarget.Latest, true);
+  const data = ast.statements.filter(
+    (node) =>
+      ts.isVariableStatement(node) &&
+      node.declarationList.declarations.some((declaration) =>
+        ['copy', 'isZh', 'cards'].includes(declaration.name.getText(ast))
+      )
+  );
+  assert.equal(data.length, 3);
+  const js = ts.transpileModule(data.map((node) => node.getText(ast)).join('\n'), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const destinations = {
+    base: 'base/button',
+    shadcn: 'shadcn/button',
+    lucide: 'lucide/icons',
+    brutalist: 'brutalist/components/button',
+    'bootstrap-2-3-2': 'bootstrap-2-3-2/button',
+    'liquid-glass': 'liquid-glass/button',
+  };
+  for (const locale of ['en', 'zh-cn']) {
+    const cards = runInNewContext(`${js}; cards`, { locale });
+    assert.deepEqual(
+      Array.from(cards, (card) => card.id),
+      Object.keys(destinations)
+    );
+    for (const card of cards) {
+      const route = `${locale}/ui-libraries/${destinations[card.id]}`;
+      assert.equal(card.href, `/${route}/`);
+      assert.ok(readFileSync(`apps/www/src/content/docs/${route}.mdx`, 'utf8').length > 0);
+    }
+  }
 });

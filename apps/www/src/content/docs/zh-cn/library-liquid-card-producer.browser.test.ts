@@ -40,7 +40,7 @@ import { verifyInitialPaintArtifact } from '../../../../../../packages/adapters/
 const output =
   process.env.PUI_LIQUID_CARD_EVIDENCE_DIR ??
   path.join(os.tmpdir(), 'library-liquid-card-producer');
-const sourceFile = 'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts';
+const sourceFile = 'apps/www/src/content/docs/zh-cn/library-card-observer.ts';
 const digest = (bytes: string | Buffer) => createHash('sha256').update(bytes).digest('hex');
 let browser: Browser,
   baseUrl = '',
@@ -251,15 +251,15 @@ beforeAll(async () => {
   if (process.env.CANDIDATE_SHA) expect(sha).toBe(process.env.CANDIDATE_SHA);
   await mkdir(output, { recursive: true });
   expect(await readdir(output)).toEqual([]);
-  // Reuse the actual existing observer without copying/weakening its geometry
-  // or readability model and without executing the other browser suite/hooks.
+  // The candidate owns the observer preserved from the retired overview suite.
+  // Compile only its declaration so the browser receives a self-contained probe.
   const source = await readFile(sourceFile, 'utf8');
   const ast = ts.createSourceFile(sourceFile, source, ts.ScriptTarget.Latest, true);
   const declaration = ast.statements.find(
     (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'readCards'
   );
   if (!declaration) throw new Error('Current library Card observer was not found');
-  const code = declaration.getText(ast);
+  const code = declaration.getText(ast).replace(/^export /, '');
   readCardsSha = digest(code);
   const js = ts.transpileModule(code, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
