@@ -293,11 +293,16 @@ it('no-JS SSR scopes current-only defaults to UI Libraries and preserves other n
       .first();
     await group.locator(':scope > summary').click();
     expect(await group.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
-    // Open the actual native disclosure that owns this leaf, once.
+    // The first leaf also belongs to a nested native disclosure.
+    const family = group.locator(':scope > ul > li > details').first();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(false);
+    await family.locator(':scope > summary').click();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
     const link = group.locator('a[href]').first();
+    // The leaf's own ancestor is that nested disclosure, which the step above
+    // already opened. Toggling it again would close it and hide the leaf, so
+    // assert the open ancestor and the visible leaf instead.
     const subgroup = link.locator('xpath=ancestor::details[1]');
-    expect(await subgroup.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(false);
-    await subgroup.locator(':scope > summary').click();
     expect(await subgroup.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
     expect(await link.isVisible()).toBe(true);
   } finally {

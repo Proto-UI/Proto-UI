@@ -24,7 +24,10 @@
  */
 /** This exact native JavaScript resource is injected with ?raw; it must never
  * pass through Function#toString or a generated/evaluated application function.
- * Native details owns activation. This owner stores only committed manual state. */
+ * Native details owns activation. This owner stores only committed manual state.
+ * The resource runs before the rendered groups, so the stored manual expansion
+ * and the legacy session state reach every group while it is still parsed and
+ * no painted frame can show an unrelated disclosure state. */
 (() => {
   const script = document.currentScript;
   const root = script?.parentElement;
@@ -34,16 +37,16 @@
   const leaseKey = Symbol.for('proto-ui.site-sidebar-disclosure.v1');
   if (root[leaseKey]) return;
   const identities = JSON.parse(script.dataset.sidebarIdentities || 'null');
-  const details = [...root.querySelectorAll('.top-level details')];
   const managed = JSON.parse(script.dataset.sidebarManaged || 'null');
+  const rendered = root.querySelectorAll('.top-level details').length;
   if (
-    !Array.isArray(managed) ||
-    managed.length !== details.length ||
-    managed.some((value) => typeof value !== 'boolean') ||
     !Array.isArray(identities) ||
     identities.some((id) => typeof id !== 'string') ||
-    details.length !== identities.length ||
-    new Set(identities).size !== identities.length
+    new Set(identities).size !== identities.length ||
+    !Array.isArray(managed) ||
+    managed.length !== identities.length ||
+    managed.some((value) => typeof value !== 'boolean') ||
+    (rendered > 0 && rendered !== identities.length)
   )
     throw new Error('Sidebar identity/rendered group mismatch');
   const storageKey = 'proto-ui.sidebar.manual.v1';
@@ -52,10 +55,16 @@
   const manual = Object.create(null);
   const pending = new Map();
   const settled = new Set();
+  const applied = new WeakSet();
+  const legacyApplied = new WeakSet();
   let alive = true;
   let epoch = 0;
   let intervened = false;
   let route = view.location.pathname;
+  let groups = [];
+  let observer = null;
+  let completed = false;
+  let legacy = null;
   function read() {
     try {
       const raw = view.localStorage.getItem(storageKey);
@@ -85,44 +94,103 @@
   // It may record UI indices too; this reader never applies them to managed UI.
   // Do not install SidebarPersister's global restore custom element: that would
   // restore every subtree and race this scoped localStorage owner.
-  function restoreLegacy() {
+  function readLegacy() {
+    legacy = null;
     try {
       if (!view.matchMedia('(min-width: 50em)').matches) return;
       const state = JSON.parse(view.sessionStorage.getItem('sl-sidebar-state') || '0');
       if (!state || state.hash !== root.dataset.hash) return;
-      if (Array.isArray(state.open))
-        details.forEach((element, index) => {
-          if (managed[index]) return;
-          const point = element.querySelector('sl-sidebar-restore');
-          const originalIndex = Number.parseInt(point?.dataset.index || '', 10);
-          if (typeof state.open[originalIndex] === 'boolean')
-            element.open = state.open[originalIndex];
-        });
-      const scroller = ownerDocument.getElementById('starlight__sidebar');
-      if (state.scroll && scroller) scroller.scrollTop = state.scroll;
+      legacy = state;
     } catch {
       /* Same optional legacy session behavior; leave native defaults. */
     }
+  }
+  // One legacy group per rendered group, applied while that group is parsed.
+  // The restore point is the first child, so a group without it is retried.
+  function applyLegacy(element) {
+    if (legacyApplied.has(element)) return;
+    const point = element.querySelector('sl-sidebar-restore');
+    if (!point) return;
+    legacyApplied.add(element);
+    const originalIndex = Number.parseInt(point.dataset.index || '', 10);
+    const open = legacy && Array.isArray(legacy.open) ? legacy.open[originalIndex] : undefined;
+    if (typeof open === 'boolean') element.open = open;
+  }
+  function restoreLegacyScroll() {
+    try {
+      const scroller = ownerDocument.getElementById('starlight__sidebar');
+      if (legacy?.scroll && scroller) scroller.scrollTop = legacy.scroll;
+    } catch {
+      /* Same optional legacy session behavior; leave native defaults. */
+    }
+  }
+  // The initial application runs while the groups are parsed. A managed group
+  // is authored collapsed, so its server-rendered open attribute marks the
+  // current ancestry until the current link of that group is parsed.
+  function applyGroup(element, index, force) {
+    if (index >= identities.length) return;
+    const id = identities[index];
+    if (force || !applied.has(element)) {
+      applied.add(element);
+      element.dataset.siteSidebarGroup = id;
+      element.dataset.siteSidebarManaged = String(managed[index]);
+      if (managed[index]) {
+        const current =
+          !!element.querySelector('a[aria-current="page"]') ||
+          (!force && element.hasAttribute('open'));
+        element.open = current || manual[id] === true;
+      }
+    }
+    if (!managed[index]) applyLegacy(element);
+  }
+  function applyAll(force = false) {
+    if (!alive) return;
+    groups = [...root.querySelectorAll('.top-level details')];
+    for (let index = 0; index < groups.length; index++) applyGroup(groups[index], index, force);
+  }
+  // The rendered groups arrive after this resource, so the policy applies each
+  // group as the parser inserts it. Every painted frame then already carries
+  // the stored manual expansion instead of an unrelated disclosure state.
+  function observe() {
+    if (!view.MutationObserver) return;
+    observer = new view.MutationObserver(() => {
+      if (!alive) return;
+      applyAll();
+    });
+    observer.observe(root, { childList: true, subtree: true });
   }
   function cancelPending() {
     for (const intent of pending.values()) view.clearTimeout(intent.timer);
     pending.clear();
   }
-  function enter(restoreHistory = false) {
+  // The policy is applied once the rendered groups are complete. A group count
+  // that never matches the authored identities is a hard authoring mismatch.
+  function complete() {
+    if (!alive || completed) return;
+    applyAll();
+    if (root.querySelectorAll('.top-level details').length !== identities.length) {
+      if (ownerDocument.readyState === 'loading') return;
+      throw new Error('Sidebar identity/rendered group mismatch');
+    }
+    completed = true;
+    epoch++;
+    cancelPending();
+    intervened = false;
+    root.dataset.siteSidebarPolicyEpoch = String(epoch);
+    root.dataset.siteSidebarPolicyRoute = view.location.pathname;
+    restoreLegacyScroll();
+    observer?.disconnect();
+    observer = null;
+    notifySettled('settled');
+  }
+  function enter() {
     epoch++;
     cancelPending();
     intervened = false;
     route = view.location.pathname;
-    details.forEach((element, index) => {
-      const id = identities[index];
-      element.dataset.siteSidebarGroup = id;
-      element.dataset.siteSidebarManaged = String(managed[index]);
-      if (!managed[index]) return;
-      element.open = !!element.querySelector('a[aria-current="page"]') || manual[id] === true;
-    });
+    applyAll(true);
     root.dataset.siteSidebarPolicyEpoch = String(epoch);
     root.dataset.siteSidebarPolicyRoute = view.location.pathname;
-    if (restoreHistory) restoreLegacy();
     notifySettled('settled');
   }
   function readIntent() {
@@ -155,7 +223,7 @@
     if (!alive || !event.isTrusted || !(event.target instanceof view.Element)) return;
     const group = event.target.closest('summary')?.parentElement;
     if (!(group instanceof view.HTMLDetailsElement) || !root.contains(group)) return;
-    const index = details.indexOf(group);
+    const index = groups.indexOf(group);
     if (index < 0 || !managed[index]) return;
     const previous = pending.get(group);
     if (previous) view.clearTimeout(previous.timer);
@@ -201,6 +269,9 @@
     alive = false;
     epoch++;
     cancelPending();
+    observer?.disconnect();
+    observer = null;
+    ownerDocument.removeEventListener('DOMContentLoaded', complete);
     root.removeEventListener('click', click);
     ownerDocument.removeEventListener('astro:page-load', pageLoad);
     ownerDocument.removeEventListener('astro:before-swap', dispose);
@@ -225,7 +296,12 @@
     },
   };
   read();
-  enter(true);
+  readLegacy();
+  observe();
+  applyAll();
+  complete();
+  if (!completed && ownerDocument.readyState === 'loading')
+    ownerDocument.addEventListener('DOMContentLoaded', complete, { once: true });
   root.addEventListener('click', click);
   ownerDocument.addEventListener('astro:page-load', pageLoad);
   ownerDocument.addEventListener('astro:before-swap', dispose);
