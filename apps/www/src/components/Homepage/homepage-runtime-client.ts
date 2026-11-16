@@ -827,6 +827,17 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         console.error('[HomepageRuntime] Failed to restore retained preview.', error);
       });
   }
+  const selectorFocusRequest = (focusKey: string) => {
+    const active = document.activeElement;
+    if (!active) return undefined;
+    const portal = active.closest('[data-projection-owner][data-projection-generation]');
+    const ownsFocus =
+      selectorGroup.mount.contains(active) ||
+      (portal?.getAttribute('data-projection-owner') === selectorGroup.ownerId &&
+        portal.getAttribute('data-projection-generation') ===
+          String(controller.getSnapshot().generation));
+    return ownsFocus ? { focusKey, focusOrigin: active } : undefined;
+  };
   function requestRuntime(runtime: RuntimeId): void {
     if (destroyed || runtime === desiredRuntime) return;
     desiredRuntime = runtime;
@@ -836,8 +847,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         { runtimeId: runtime, projectionFamilyId: desiredFamily },
         {
           force: desiredComponent !== committedComponent,
-          focusKey: PROJECTION_FOCUS_KEYS.runtime,
-          focusOrigin: document.activeElement,
+          ...selectorFocusRequest(PROJECTION_FOCUS_KEYS.runtime),
         }
       )
     );
@@ -852,8 +862,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         { runtimeId: desiredRuntime, projectionFamilyId: family },
         {
           force: desiredComponent !== committedComponent,
-          focusKey: PROJECTION_FOCUS_KEYS.family,
-          focusOrigin: document.activeElement,
+          ...selectorFocusRequest(PROJECTION_FOCUS_KEYS.family),
         }
       )
     );
@@ -887,12 +896,11 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
   };
   document.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
   const stopThemes = (['shadcn', 'brutalist', 'bootstrap-2-3-2'] as const).map((family) =>
-    watchProjectionThemeSurfaceStyle(family, root, () => {
+    watchProjectionThemeSurfaceStyle(family, root, (theme) => {
       if (destroyed || family !== activeFamily) return;
       // All participants share the page's theme input. Nested language/social
       // mounts inherit a retained Surface's explicit old theme until this
       // transaction finishes, so they must never become theme sources.
-      const theme = resolveProjectionThemeSurfaceStyle(family, root);
       for (const candidate of activeCandidates) candidate.setThemeSurfaceStyle(theme);
     })
   );

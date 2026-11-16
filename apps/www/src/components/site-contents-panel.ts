@@ -117,7 +117,7 @@ export function contentsPanelParticipant(header: HTMLElement) {
       let trigger: HTMLElement | undefined;
       let headerClearance: number | undefined;
       const syncHeaderClearance = () => {
-        if (!trigger?.isConnected || !api) return;
+        if (activeLease !== lease || !trigger?.isConnected || !api) return;
         const headerBox = header.getBoundingClientRect();
         const triggerBox = trigger.getBoundingClientRect();
         if (headerBox.width <= 0 || triggerBox.width <= 0) return;
@@ -368,7 +368,6 @@ export function contentsPanelParticipant(header: HTMLElement) {
               trigger.title = label;
               headerGeometry?.observe(header);
               headerGeometry?.observe(trigger);
-              syncHeaderClearance();
               const unbindTrigger = navigation.bindButton(
                 trigger,
                 () => isCurrent() && !candidate!.host.inert,

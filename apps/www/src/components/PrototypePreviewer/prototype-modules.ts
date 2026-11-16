@@ -1494,6 +1494,8 @@ export const prototypeModules: Record<string, PrototypeModuleLoader> = {
   ...manualPrototypeModules,
 };
 
+const pendingPrototypeLoads = new Map<string, Promise<boolean>>();
+
 /**
  * 动态加载并注册原型
  * @param prototypeId 原型 ID
@@ -1510,19 +1512,22 @@ export async function loadPrototype(prototypeId: string): Promise<boolean> {
     );
   }
 
-  try {
-    // 动态导入模块（模块内部可能会自动调用 registerPrototype）
-    const mod = await loader();
-    // 若模块提供 default export，则作为 Prototype 自动注册
-    if (mod?.default) {
-      registerPrototype(prototypeId, mod.default);
-    }
-    return true;
-  } catch (err) {
-    throw new Error(
-      `[PrototypePreviewer] 加载原型模块 "${prototypeId}" 失败: ${(err as any)?.message || err}`
-    );
-  }
+  const pending = pendingPrototypeLoads.get(prototypeId);
+  if (pending) return pending;
+  const loading = Promise.resolve()
+    .then(loader)
+    .then((mod) => {
+      if (mod?.default) registerPrototype(prototypeId, mod.default);
+      return true;
+    })
+    .catch((err) => {
+      throw new Error(
+        `[PrototypePreviewer] 加载原型模块 "${prototypeId}" 失败: ${(err as any)?.message || err}`
+      );
+    })
+    .finally(() => pendingPrototypeLoads.delete(prototypeId));
+  pendingPrototypeLoads.set(prototypeId, loading);
+  return loading;
 }
 
 /**

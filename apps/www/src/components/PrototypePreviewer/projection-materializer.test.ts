@@ -131,8 +131,13 @@ describe('Website projection materializer', () => {
       }
     );
     expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    const seed = document.createElement('div');
+    seed.style.setProperty('--pui-background', initial['--pui-background']);
     expect(fakes.createComposition).toHaveBeenCalledWith(
-      expect.objectContaining({ themeSurfaceStyle: initial })
+      expect.objectContaining({
+        themeSurfaceStyle: initial,
+        scopeInlineStyle: seed.style.cssText,
+      })
     );
     expect(setThemeSurfaceStyle).toHaveBeenCalledTimes(1);
     expect(setThemeSurfaceStyle).toHaveBeenCalledWith(changed);
@@ -141,6 +146,219 @@ describe('Website projection materializer', () => {
     expect(setThemeSurfaceStyle).toHaveBeenCalledTimes(1);
     await candidate.dispose();
     expect(stopTheme).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['theme', 'render'] as const)(
+    'revokes an independent background %s task on owner disposal',
+    async (phase) => {
+      const mount = document.createElement('div');
+      document.body.append(mount);
+      const owner = new AbortController();
+      const descriptor = Object.getOwnPropertyDescriptor(window, 'scheduler');
+      const tasks: Array<() => void> = [];
+      const postTask = vi.fn(
+        (callback: () => void, { signal }: { signal: AbortSignal }) =>
+          new Promise<void>((resolve, reject) => {
+            const abort = () => reject(signal.reason);
+            signal.addEventListener('abort', abort, { once: true });
+            tasks.push(() => {
+              signal.removeEventListener('abort', abort);
+              resolve(callback());
+            });
+          })
+      );
+      Object.defineProperty(window, 'scheduler', { configurable: true, value: { postTask } });
+      const stopTheme = vi.fn();
+      fakes.watchTheme.mockImplementation((_family, _scope, onChange) => {
+        onChange({ '--pui-background': '#fff' });
+        return stopTheme;
+      });
+      fakes.createComposition.mockReturnValue({ demo: childDemo });
+      const pending = materializeProjectionCandidate(
+        { generation: 1, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+        {
+          mount,
+          ownerId: 'independent-owner',
+          componentId: 'button',
+          controls: controls(),
+          backgroundPreparation: { signal: owner.signal, isPending: () => true },
+          themeSource: { scope: mount, family: 'shadcn', isCurrent: () => !owner.signal.aborted },
+        }
+      );
+      void pending.catch(() => {});
+      try {
+        await vi.waitFor(() => expect(tasks).toHaveLength(1));
+        expect(fakes.watchTheme).not.toHaveBeenCalled();
+        if (phase === 'render') {
+          tasks.shift()!();
+          await vi.waitFor(() => expect(tasks).toHaveLength(1));
+          expect(fakes.watchTheme).toHaveBeenCalledOnce();
+        }
+        expect(postTask).toHaveBeenLastCalledWith(expect.any(Function), {
+          priority: 'background',
+          signal: owner.signal,
+        });
+        owner.abort();
+        await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
+        expect(fakes.renderDemo).not.toHaveBeenCalled();
+        expect(mount.childElementCount).toBe(0);
+        expect(stopTheme).toHaveBeenCalledTimes(phase === 'render' ? 1 : 0);
+      } finally {
+        owner.abort();
+        if (descriptor) Object.defineProperty(window, 'scheduler', descriptor);
+        else Reflect.deleteProperty(window, 'scheduler');
+      }
+    }
+  );
+
+  it('renders without another background task after the competing preparation finishes', async () => {
+    const mount = document.createElement('div');
+    document.body.append(mount);
+    const owner = new AbortController();
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'scheduler');
+    const postTask = vi.fn(async (callback: () => void) => callback());
+    Object.defineProperty(window, 'scheduler', { configurable: true, value: { postTask } });
+    let pending = true;
+    fakes.loadPrototypes.mockImplementationOnce(async () => {
+      pending = false;
+    });
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementationOnce(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'independent-owner';
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    try {
+      const candidate = await materializeProjectionCandidate(
+        { generation: 1, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+        {
+          mount,
+          ownerId: 'independent-owner',
+          componentId: 'button',
+          controls: controls(),
+          backgroundPreparation: { signal: owner.signal, isPending: () => pending },
+        }
+      );
+      expect(postTask).toHaveBeenCalledOnce();
+      expect(fakes.renderDemo).toHaveBeenCalledOnce();
+      await candidate.dispose();
+    } finally {
+      owner.abort();
+      if (descriptor) Object.defineProperty(window, 'scheduler', descriptor);
+      else Reflect.deleteProperty(window, 'scheduler');
+    }
+  });
+
+  it('retains a hidden candidate and its late portal through the opted-in post-paint task', async () => {
+    const mount = document.createElement('div');
+    const retained = document.createElement('div');
+    retained.dataset.projectionGenerationHost = '1';
+    retained.dataset.projectionOwnerHost = 'paint-owner';
+    retained.dataset.projectionGenerationState = 'active';
+    mount.append(retained);
+    document.body.append(mount);
+    const setEventGateOpen = vi.fn();
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen,
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('div');
+      scope.dataset.projectionScope = 'paint-owner';
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    let frame: FrameRequestCallback | undefined;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frame = callback;
+      return 1;
+    });
+    let settled = false;
+    const pending = materializeProjectionCandidate(
+      { generation: 2, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+      {
+        mount,
+        ownerId: 'paint-owner',
+        componentId: 'button',
+        controls: controls(),
+        yieldAfterPaint: true,
+      }
+    ).then((candidate) => {
+      settled = true;
+      return candidate;
+    });
+    await vi.waitFor(() => expect(frame).toBeDefined());
+    let task: (() => void) | undefined;
+    const view: Window = window;
+    const timer = vi.spyOn(view, 'setTimeout').mockImplementationOnce((handler) => {
+      if (typeof handler !== 'function') throw new Error('Expected a post-paint callback');
+      task = () => handler();
+      return 1;
+    });
+    frame!(0);
+    timer.mockRestore();
+    expect(task).toBeDefined();
+    const portal = document.createElement('div');
+    portal.dataset.projectionOwner = 'paint-owner';
+    portal.dataset.projectionGeneration = '2';
+    document.body.append(portal);
+    await vi.waitFor(() => expect(portal.inert).toBe(true));
+    expect(settled).toBe(false);
+    expect(retained.inert).toBe(false);
+    expect(mount.querySelector<HTMLElement>('[data-projection-generation-host="2"]')?.inert).toBe(
+      true
+    );
+    expect(setEventGateOpen).not.toHaveBeenCalled();
+
+    task!();
+    const candidate = await pending;
+    candidate.activate();
+    expect(retained.inert).toBe(true);
+    expect(portal.inert).toBe(false);
+    expect(setEventGateOpen).toHaveBeenCalledWith(true);
+    await candidate.dispose();
+  });
+
+  it('keeps quoted owner coordinates exact when looking up external portals', async () => {
+    const ownerId = 'fixture "quoted" [owner]';
+    const mount = document.createElement('div');
+    const portal = document.createElement('div');
+    portal.dataset.projectionOwner = ownerId;
+    portal.dataset.projectionGeneration = '2';
+    const other = document.createElement('div');
+    other.dataset.projectionOwner = `${ownerId}-other`;
+    other.dataset.projectionGeneration = '2';
+    document.body.append(mount, portal, other);
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('div');
+      scope.dataset.projectionScope = ownerId;
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    const candidate = await materializeProjectionCandidate(
+      { generation: 2, selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' } },
+      { mount, ownerId, componentId: 'button', controls: controls() }
+    );
+    expect(portal.inert).toBe(true);
+    expect(other.inert).toBe(false);
+    candidate.activate();
+    expect(portal.inert).toBe(false);
+    await candidate.dispose();
+    expect(portal.isConnected).toBe(false);
+    expect(other.isConnected).toBe(true);
   });
 
   it('seals staging portals and atomically swaps exact owner generations on activation', async () => {
@@ -200,6 +418,7 @@ describe('Website projection materializer', () => {
     otherOwnerPortal.dataset.projectionOwner = 'another-owner';
     otherOwnerPortal.dataset.projectionGeneration = '2';
     document.body.appendChild(otherOwnerPortal);
+    const containmentReads = vi.spyOn(mount, 'contains');
     let settled = false;
     const pendingCandidate = materializeProjectionCandidate(
       {
@@ -313,6 +532,7 @@ describe('Website projection materializer', () => {
     expect(oldPortal.isConnected).toBe(true);
     expect(futurePortal.isConnected).toBe(true);
     expect(otherOwnerPortal.isConnected).toBe(true);
+    expect(containmentReads).not.toHaveBeenCalledWith(otherOwnerPortal);
   });
 
   it('never seals or removes an owned mount ancestor while still managing sibling portals', async () => {

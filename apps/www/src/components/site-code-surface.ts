@@ -10,6 +10,10 @@ import {
 } from './PrototypePreviewer/projection-scope';
 import { materializeProjectionCandidate } from './PrototypePreviewer/projection-materializer';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
+import {
+  deferUntilDocsHeaderPrepared,
+  hasPendingDocsHeaderPreparation,
+} from './docs-header-preparation';
 
 const NO_CONTROLS: ProjectionCompositionControls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
@@ -59,6 +63,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   if (purpose === 'note') root.append(mount);
   else root.prepend(mount);
   const previewer = root.closest<Previewer>('[data-previewer-id]');
+  const preparation = purpose === 'code' && !previewer ? new AbortController() : undefined;
   let preferred: RuntimeId = 'wc';
   try {
     const stored = view.localStorage.getItem(PREFERRED_ADAPTER_KEY);
@@ -81,13 +86,23 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
   };
   const createController = (initialSelection: ProjectionScopeSelection) => {
     const ownerId = `${logicalOwner}-attempt-${++attempt}`;
-    return createProjectionScopeController({
+    const scope: ProjectionScopeController = createProjectionScopeController({
       initialSelection,
       async materialize(request) {
         const family =
           request.selection.projectionFamilyId === 'brutalist' ? 'brutalist' : 'shadcn';
         return materializeProjectionCandidate(request, {
           mount,
+          yieldAfterPaint: purpose === 'code',
+          backgroundPreparation:
+            preparation &&
+            scope.getSnapshot().generation === 0 &&
+            hasPendingDocsHeaderPreparation(doc)
+              ? {
+                  signal: preparation.signal,
+                  isPending: () => hasPendingDocsHeaderPreparation(doc),
+                }
+              : undefined,
           themeSource: { scope: root, family, isCurrent: isCurrentOwner },
           ownerId,
           componentId: 'button',
@@ -153,8 +168,9 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
         };
       },
     });
+    return scope;
   };
-  let controller = createController(selection());
+  let controller: ProjectionScopeController | undefined;
   const observe = (promise: Promise<unknown>, current: ProjectionScopeController) =>
     promise.catch((error) => {
       if (!isCurrentOwner() || current !== controller) return;
@@ -164,19 +180,32 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
         error
       );
     });
-  const refresh = () => {
+  const prepare = () => {
     if (!isCurrentOwner()) return;
     const next = selection();
-    const snapshot = controller.getSnapshot();
-    if (snapshot.generation === 0 && snapshot.phase === 'idle') {
-      const cleanup = controller.destroy();
-      retired.add(cleanup);
-      void cleanup
-        .finally(() => retired.delete(cleanup))
-        .catch((error) => console.error('[CodeSurface] Retired projection cleanup failed.', error));
+    const previous = controller;
+    const snapshot = previous?.getSnapshot();
+    if (!previous || (snapshot?.generation === 0 && snapshot.phase === 'idle')) {
+      if (previous) {
+        const cleanup = previous.destroy();
+        retired.add(cleanup);
+        void cleanup
+          .finally(() => retired.delete(cleanup))
+          .catch((error) =>
+            console.error('[CodeSurface] Retired projection cleanup failed.', error)
+          );
+      }
       controller = createController(next);
-      void observe(controller.start(), controller);
-    } else void observe(controller.request(next), controller);
+      return observe(controller.start(), controller);
+    }
+    return observe(previous.request(next), previous);
+  };
+  const deferredPreparation =
+    purpose === 'code' && !previewer ? deferUntilDocsHeaderPrepared(root, prepare) : undefined;
+  const refresh = () => {
+    if (deferredPreparation && controller?.getSnapshot().phase === 'ready')
+      void deferredPreparation.prepare();
+    else void prepare();
   };
   const preference = (event: Event) => {
     const adapter = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -203,11 +232,14 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
     // Preparation can enter the materializer synchronously. Publish the
     // source owner before the materializer tests the theme watch's ownership.
     ready: Promise.resolve().then(() => {
-      if (isCurrentOwner()) return observe(controller.start(), controller);
+      if (!isCurrentOwner()) return;
+      return controller ? observe(controller.start(), controller) : prepare();
     }),
     async destroy() {
       if (!alive) return;
       alive = false;
+      preparation?.abort();
+      deferredPreparation?.cancel();
       observer.disconnect();
       doc.removeEventListener(PREFERRED_ADAPTER_EVENT, preference);
       previewer?.removeEventListener('runtime:changed', refresh);
@@ -224,7 +256,7 @@ function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSu
       }
       mount.remove();
       try {
-        await controller.destroy();
+        await controller?.destroy();
       } finally {
         await Promise.allSettled([...retired]);
         mount.remove();
