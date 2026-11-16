@@ -72,6 +72,14 @@ function isSplitSlotPathConcealed(slot: Element, surface: HTMLElement, host: HTM
   return false;
 }
 
+function isSplitDecorationLayoutHidden(leaf: HTMLElement, surface: HTMLElement): boolean {
+  const view = leaf.ownerDocument.defaultView;
+  if (!view) return false;
+  for (let node: Element | null = leaf; node && node !== surface; node = node.parentElement)
+    if (view.getComputedStyle(node).getPropertyValue('display') === 'none') return true;
+  return false;
+}
+
 function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean {
   const { childNodes } = parent;
   return (
@@ -229,6 +237,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           leaf.getAttribute('aria-hidden') !== 'true' ||
           !leaf.hasAttribute('inert') ||
           (shadowViewTarget && !hasCurrentOwnedDecorationPaint(leaf)) ||
+          (!staging && splitSurface && isSplitDecorationLayoutHidden(leaf, splitSurface)) ||
           leaf.style.getPropertyValue('pointer-events') !== 'none' ||
           leaf.style.getPropertyPriority('pointer-events') !== 'important'
         )

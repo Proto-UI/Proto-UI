@@ -334,6 +334,53 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     }
   );
 
+  it.each(['[data-pui-owned-decoration]', 'section'] as const)(
+    'rejects stylesheet layout hiding of a split decoration through %s',
+    (selector) => {
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-hidden-leaf-${++id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.el('section', r.decoration(target)), r.slot()];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const caller = document.createTextNode('Caller text');
+      host.append(caller);
+      document.body.append(host);
+      expect(() => host.update()).not.toThrow();
+      const shadow = host.shadowRoot!;
+      const hidden = shadow.querySelector(selector)!;
+      const style = document.createElement('style');
+      style.textContent = `${selector} { display: none }`;
+      shadow.append(style);
+      const window = host.ownerDocument.defaultView!;
+      const original = window.getComputedStyle.bind(window);
+      const readStyle = vi.spyOn(window, 'getComputedStyle').mockImplementation((target) => {
+        if (target !== hidden) return original(target);
+        return {
+          getPropertyValue: (name: string) => (name === 'display' ? 'none' : ''),
+        } as CSSStyleDeclaration;
+      });
+      try {
+        expect(() => host.update()).toThrow('decoration physical leaf changed');
+      } finally {
+        readStyle.mockRestore();
+      }
+      expect(caller.parentNode).toBe(host);
+      expect(shadow.querySelector('slot')!.assignedNodes()).toEqual([caller]);
+    }
+  );
+
   it.each(['remove decoration', 'reorder slot'] as const)(
     'rejects a connection reaction that can %s before split acknowledgement',
     (mutation) => {
