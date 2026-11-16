@@ -120,7 +120,10 @@ export function enhanceCodeExampleTabs(options: {
   }
   const strip = list.parentElement?.hasAttribute('data-code-toolbar') ? list.parentElement : list;
   const previousHidden = strip.hidden;
-  const reveal = () => revealCodeExampleTab(triggers[value], projectedList);
+  const reveal = () => {
+    if (hint) hint.hidden = projectedList.scrollWidth <= projectedList.clientWidth + 1;
+    revealCodeExampleTab(triggers[value], projectedList);
+  };
   let revealFrame: number | undefined;
   const scheduleReveal = () => {
     if (destroyed || revealFrame !== undefined) return;
@@ -145,7 +148,6 @@ export function enhanceCodeExampleTabs(options: {
   const hintMarker = hint ? doc.createComment('code-example-host-hint') : null;
   const updateOverflow = () => {
     if (destroyed) return;
-    if (hint) hint.hidden = projectedList.scrollWidth <= projectedList.clientWidth + 1;
     scheduleReveal();
   };
   const resize =
