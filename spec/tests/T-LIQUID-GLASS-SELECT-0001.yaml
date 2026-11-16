@@ -24,6 +24,9 @@ implementations:
     status: planned
     path: packages/prototypes/liquid-glass/test/select-complete-projection.test.ts
     required: true
+    consumesCases:
+      - T-LIQUID-GLASS-SELECT-0001-CASE-ANATOMY
+      - T-LIQUID-GLASS-SELECT-0001-CASE-FIELD
     exercises:
       - P-LIQUID-GLASS-SELECT
       - P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS

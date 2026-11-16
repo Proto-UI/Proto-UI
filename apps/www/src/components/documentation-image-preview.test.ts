@@ -100,6 +100,14 @@ describe('documentation image viewer PUI integration', () => {
     expect(document.querySelector('figure > img')).not.toBeNull();
     expect(document.querySelector('[data-docs-image-trigger]')).toBeNull();
   });
+  it('uses one native media source read when admitting an image', async () => {
+    const source = vi.spyOn(HTMLImageElement.prototype, 'currentSrc', 'get');
+    await fixture();
+    expect(document.querySelector('[data-docs-image-trigger]')?.getAttribute('title')).toBe(
+      'Enlarge image: Example diagram'
+    );
+    expect(source).toHaveBeenCalledOnce();
+  });
   it('keeps HTML style changes out of the media inventory scan', async () => {
     const { trigger } = await fixture();
     await (

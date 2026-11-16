@@ -991,8 +991,12 @@ for (const viewport of headerTriggerViewports) {
             await expect
               .poll(async () => (await page.evaluate(readSearchPublicState)).inputFocused)
               .toBe(true);
-            if (cycle === 0) await page.keyboard.press('Escape');
-            else await (await searchPart(page, 'close')).click();
+            if (cycle === 0) {
+              // Measure the resting Brutalist trigger when Escape returns focus.
+              if (family === 'brutalist')
+                await page.mouse.move(viewport.width / 2, viewport.height - 12);
+              await page.keyboard.press('Escape');
+            } else await (await searchPart(page, 'close')).click();
             await expect
               .poll(async () => (await page.evaluate(readSearchPublicState)).open)
               .toBe(false);
@@ -1054,17 +1058,14 @@ for (const width of [1280, 1440, 2048]) {
             };
             const selectors = ['family', 'runtime'].map((name) => {
               const trigger = select(name);
-              const label = trigger
-                .closest('[data-projection-control]')!
-                .querySelector<HTMLElement>('.pui-projection-control-label')!;
+              const control = trigger.closest('[data-projection-control]')!;
               const value = trigger.querySelector<HTMLElement>(
                 '[data-projection-prototype$="select-value"]'
               );
               return {
                 name,
                 trigger: rect(trigger),
-                label: rect(label),
-                labelText: label.textContent?.trim(),
+                hasVisualLabel: !!control.querySelector('.pui-projection-control-label'),
                 expectedLabel: (home as HTMLElement).dataset[`${name}Label`],
                 value: value ? rect(value) : null,
                 text: trigger.textContent,
@@ -1114,10 +1115,9 @@ for (const width of [1280, 1440, 2048]) {
             expect(Math.abs(selector.trigger.center - geometry.search.center)).toBeLessThanOrEqual(
               1
             );
-            // The approved Header composition keeps labels accessible, not a
-            // separate visible row above 36px controls. Assert exact authored AX name.
+            // The Trigger owns the authored AX name without a separate visual label row.
+            expect(selector.hasVisualLabel).toBe(false);
             expect(selector.expectedLabel).toBeTruthy();
-            expect(selector.labelText).toBe(selector.expectedLabel);
             expect(
               await page
                 .locator(
@@ -1225,6 +1225,226 @@ it('homepage keeps one active public Search session through runtime transitions 
   }
 }, 120_000);
 
+it('keeps Bootstrap Homepage Search available after selecting the WIP family', async () => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage();
+  stage(page, 'home-bootstrap-search', 'navigate');
+  try {
+    await installSuccessfulEmptySearchData(page);
+    expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+    await homeReady(page, 'shadcn', 'wc');
+    await choosePageControl(page, 'family', 'Bootstrap 2.3.2 · WIP');
+    await homeReady(page, 'bootstrap-2-3-2', 'wc');
+    await page
+      .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+      .click();
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+    expect(await (await searchPart(page, 'panel')).getAttribute('data-projection-family')).toBe(
+      'bootstrap-2-3-2'
+    );
+    await page.keyboard.press('Escape');
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+  } catch (error) {
+    await captureFailure(page);
+    throw error;
+  } finally {
+    await context.close();
+  }
+}, 60_000);
+
+it('retains Homepage Search Close focus across replacement and returns shortcut focus to the opener', async () => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const page = await context.newPage();
+  stage(page, 'home-search-shortcut-handback', 'navigate');
+  try {
+    await installSuccessfulEmptySearchData(page);
+    expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+    await homeReady(page, 'shadcn', 'wc');
+    const trigger = page.locator(
+      'site-search [data-projection-generation-state="active"] [data-open-modal]'
+    );
+    await trigger.click();
+    const editor = await searchInput(page);
+    await expect.poll(() => editor.evaluate((node) => node === document.activeElement)).toBe(true);
+    const panel = await searchPart(page, 'panel');
+    await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+    await (await searchPart(page, 'close')).focus();
+    await page.evaluate(() =>
+      document.dispatchEvent(
+        new CustomEvent('proto-adapter:change', { detail: { adapter: 'react' } })
+      )
+    );
+    await homeReady(page, 'shadcn', 'react');
+    const close = await searchPart(page, 'close');
+    await expect.poll(() => close.evaluate((node) => node === document.activeElement)).toBe(true);
+    await page.keyboard.press('Control+k');
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+    await expect.poll(() => trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+    await capture(page, 'home-search-shortcut-handback', 'returned');
+  } catch (error) {
+    await captureFailure(page);
+    throw error;
+  } finally {
+    await context.close();
+  }
+}, 60_000);
+
+it.each(['query', 'close', 'newer focus'] as const)(
+  'retains Homepage Search %s through a failure after replacement publication begins',
+  async (focusedRef) => {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+    const page = await context.newPage();
+    const id = `home-search-late-rollback-${focusedRef.replace(' ', '-')}`;
+    stage(page, id, 'navigate');
+    try {
+      await installSuccessfulEmptySearchData(page);
+      expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
+      await homeReady(page, 'shadcn', 'wc');
+      const trigger = page.locator(
+        'site-search [data-projection-generation-state="active"] [data-open-modal]'
+      );
+      await trigger.click();
+      const panel = await searchPart(page, 'panel');
+      await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+      const editor = await searchInput(page);
+      await editor.fill('retained search query');
+      await editor.evaluate((input: HTMLInputElement) => input.setSelectionRange(2, 9));
+      const focused = focusedRef === 'close' ? await searchPart(page, 'close') : editor;
+      await focused.focus();
+      const before = await page.evaluate(readSearchPublicState);
+      const originalPanel = await panel.elementHandle();
+      const originalEditor = await editor.elementHandle();
+      expect(originalPanel).not.toBeNull();
+      expect(originalEditor).not.toBeNull();
+      expect(await focused.evaluate((node) => node === document.activeElement)).toBe(true);
+      const home = page.locator('[data-homepage-runtime]');
+      await home.evaluate((root: HTMLElement, focusedRef) => {
+        const dataset = root.dataset;
+        const mount = root.querySelector('[data-search-dialog-mount]')!;
+        const search = mount.closest<HTMLElement>('site-search')!;
+        const descriptor = Object.getOwnPropertyDescriptor(root, 'dataset');
+        const outside = focusedRef === 'newer focus' ? document.createElement('button') : null;
+        if (outside) {
+          outside.id = 'search-rollback-newer-focus';
+          outside.textContent = 'Unrelated focus destination';
+          document.body.append(outside);
+        }
+        let newerFocusLanded = false;
+        Object.defineProperty(root, 'dataset', {
+          configurable: true,
+          value: new Proxy(dataset, {
+            set(subject, key, value) {
+              if (outside && key === 'runtimeState' && value === 'loading') {
+                outside.focus();
+                newerFocusLanded = document.activeElement === outside;
+              }
+              if (key !== 'runtime' || value !== 'react' || dataset.runtimeState !== 'ready')
+                return Reflect.set(subject, key, value, subject);
+              const active = mount.querySelector<HTMLElement>(
+                '[data-projection-generation-state="active"]'
+              );
+              let speculativeFocusLanded = false;
+              if (active && focusedRef === 'close') {
+                // The lazy React editor can still be mounting at this
+                // synchronous publication boundary. Give the already
+                // activated owner's native content carrier a real focus event.
+                const carrier = active.querySelector<HTMLElement>(
+                  '.pui-projection-content[data-projection-owner][data-projection-generation]'
+                );
+                if (carrier) {
+                  carrier.tabIndex = -1;
+                  carrier.focus();
+                  speculativeFocusLanded = carrier === document.activeElement;
+                }
+              }
+              Object.assign(window, {
+                __puiSearchLateRollback: {
+                  generation: active?.dataset.projectionGenerationHost,
+                  active: !!active && !active.inert,
+                  searchRuntime: search.dataset.searchRuntime,
+                  newerFocusLanded,
+                  speculativeFocusLanded,
+                },
+              });
+              if (descriptor) Object.defineProperty(root, 'dataset', descriptor);
+              else Reflect.deleteProperty(root, 'dataset');
+              throw new Error('Controlled Homepage publication failure after Search activation');
+            },
+          }),
+        });
+      }, focusedRef);
+      stage(page, id, 'rollback');
+      await page.evaluate(() =>
+        document.dispatchEvent(
+          new CustomEvent('proto-adapter:change', { detail: { adapter: 'react' } })
+        )
+      );
+      await expect.poll(() => home.getAttribute('data-runtime-state')).toBe('error');
+      const fault = await page.evaluate(
+        () => (window as Window & { __puiSearchLateRollback?: unknown }).__puiSearchLateRollback
+      );
+      await writeFile(
+        path.join(evidenceDirectory, `${id}-fault.json`),
+        JSON.stringify({ source, fault, previousGeneration: before.generation }, null, 2)
+      );
+      expect(fault).toMatchObject({
+        generation: expect.any(String),
+        active: true,
+        searchRuntime: 'react',
+        newerFocusLanded: focusedRef === 'newer focus',
+        speculativeFocusLanded: focusedRef === 'close',
+      });
+      expect(fault).not.toMatchObject({ generation: before.generation });
+      expect(await home.getAttribute('data-runtime')).toBe('wc');
+      expect(
+        await page.evaluate(async () => {
+          const resource = performance
+            .getEntriesByType('resource')
+            .find(({ name }) =>
+              new URL(name).pathname.endsWith('/components/site-search-commands.ts')
+            );
+          if (!resource) throw new Error('Missing active Search participant module');
+          const browserImport = new Function('url', 'return import(url)') as (
+            url: string
+          ) => Promise<typeof import('../../../components/site-search-commands')>;
+          const { searchCommandParticipant } = await browserImport(resource.name);
+          return searchCommandParticipant(
+            document.querySelector<HTMLElement>('site-search')!
+          ).isOpen();
+        })
+      ).toBe(true);
+      await expect
+        .poll(() => page.evaluate(readSearchPublicState))
+        .toMatchObject({
+          generation: before.generation,
+          open: true,
+          query: 'retained search query',
+        });
+      expect(await panel.evaluate((node, old) => node === old, originalPanel)).toBe(true);
+      expect(await editor.evaluate((node, old) => node === old, originalEditor)).toBe(true);
+      expect(
+        await editor.evaluate((node: HTMLInputElement) => [node.selectionStart, node.selectionEnd])
+      ).toEqual([2, 9]);
+      const target =
+        focusedRef === 'newer focus' ? page.locator('#search-rollback-newer-focus') : focused;
+      await expect
+        .poll(() => target.evaluate((node) => node === document.activeElement))
+        .toBe(true);
+      await capture(page, id, 'retained');
+      await page.keyboard.press('Control+k');
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(false);
+      await trigger.click();
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+    } catch (error) {
+      await captureFailure(page);
+      throw error;
+    } finally {
+      await context.close();
+    }
+  },
+  60_000
+);
+
 it('keeps a documentation link available without JavaScript', async () => {
   const startedAt = Date.now();
   const context = await browser.newContext({ javaScriptEnabled: false });
@@ -1273,7 +1493,7 @@ it('keeps a documentation link available without JavaScript', async () => {
     ]);
     expect(destinationResponse.ok()).toBe(true);
     mark('destination-heading');
-    const heading = page.getByRole('heading', { level: 1, name: 'UI Libraries', exact: true });
+    const heading = page.getByRole('heading', { level: 1, name: 'Button', exact: true });
     expect(await heading.isVisible()).toBe(true);
     headingText = await heading.innerText();
     expect(headingText).toBe('Button');
@@ -1520,6 +1740,7 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
               'site-search [data-projection-generation-state="active"] [data-open-modal]'
             )!;
             const label = header.querySelector<HTMLElement>('.site-header-runtime-label')!;
+            const settings = header.querySelector<HTMLDetailsElement>('[data-site-header-panel]')!;
             const text = document.createRange();
             text.selectNodeContents(value);
             return {
@@ -1535,9 +1756,11 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
               searchRole: search.getAttribute('role'),
               searchDisabled: search.getAttribute('aria-disabled'),
               overflow: document.documentElement.scrollWidth - innerWidth,
-              sidebarTop: parseFloat(
-                getComputedStyle(document.querySelector('.mobile-sidebar-pane')!).top
-              ),
+              settings: {
+                ...rect(settings),
+                open: settings.open,
+                ownsSelect: settings.contains(select),
+              },
             };
           });
           // Save the actual measured geometry even when the assertion below fails.
@@ -1553,19 +1776,32 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
           expect(geometry.textWidth - geometry.value.width).toBeLessThanOrEqual(1);
           expect(geometry.select.scrollWidth - geometry.select.clientWidth).toBeLessThanOrEqual(1);
           expect(geometry.overflow).toBeLessThanOrEqual(1);
-          expect(Math.abs(geometry.select.height - (width < 768 ? 44 : 36))).toBeLessThanOrEqual(1);
+          expect(Math.abs(geometry.select.height - 44)).toBeLessThanOrEqual(1);
           expect(Math.abs(geometry.search.height - 44)).toBeLessThanOrEqual(1);
           expect(geometry.searchRole).toBe('button');
           expect(geometry.searchDisabled).toBe('false');
+          expect(
+            await selector
+              .and(page.getByRole('combobox', { name: '选择适配器', exact: true }))
+              .count()
+          ).toBe(1);
           if (width < 1100) {
             expect(geometry.labelDisplay).not.toBe('none');
             expect(geometry.label.bottom).toBeLessThanOrEqual(geometry.select.y + 1);
             expect(geometry.search.bottom).toBeLessThanOrEqual(geometry.label.y + 1);
-            expect(Math.abs(geometry.sidebarTop - geometry.header.bottom)).toBeLessThanOrEqual(1);
           } else {
             expect(Math.abs(geometry.select.center - geometry.search.center)).toBeLessThanOrEqual(
               1
             );
+          }
+          if (width < 768) {
+            expect(geometry.settings.open).toBe(true);
+            expect(geometry.settings.ownsSelect).toBe(true);
+            expect(
+              Math.abs(geometry.settings.top - geometry.header.bottom - 5)
+            ).toBeLessThanOrEqual(1);
+            expect(geometry.settings.left).toBeGreaterThanOrEqual(-1);
+            expect(geometry.settings.right).toBeLessThanOrEqual(width + 1);
           }
         }
         expect(errors).toEqual([]);
@@ -2114,11 +2350,29 @@ for (const viewport of headerTriggerViewports) {
               throw new Error('Missing real menu anatomy');
             const inputStyle = getComputedStyle(node);
             const wrapperStyle = getComputedStyle(wrapper);
+            const panelStyle = getComputedStyle(panel);
+            const panelMotion = panel
+              .getAnimations()
+              .filter((animation) => animation.pending || animation.playState === 'running');
             return {
               input: node.getBoundingClientRect().toJSON(),
               shell: shell.getBoundingClientRect().toJSON(),
               wrapper: wrapper.getBoundingClientRect().toJSON(),
               panel: panel.getBoundingClientRect().toJSON(),
+              panelPaint: {
+                owner: panel.dataset.projectionOwner,
+                generation: panel.dataset.projectionGeneration,
+                scale: panelStyle.scale,
+                maxWidth: panelStyle.maxWidth,
+                maxHeight: panelStyle.maxHeight,
+                activeMotion: panelMotion.map((animation) =>
+                  animation instanceof CSSAnimation
+                    ? animation.animationName
+                    : animation instanceof CSSTransition
+                      ? animation.transitionProperty
+                      : animation.playState
+                ),
+              },
               glyph: glyph.getBoundingClientRect().toJSON(),
               footer: footer.getBoundingClientRect().toJSON(),
               body: body.getBoundingClientRect().toJSON(),
@@ -2138,7 +2392,39 @@ for (const viewport of headerTriggerViewports) {
               nativeEditorCount: panel.querySelectorAll('input').length,
             };
           });
-        const geometry = await readMenuGeometry();
+        type MenuGeometry = Awaited<ReturnType<typeof readMenuGeometry>>;
+        const settleMenuGeometry = async (initial: MenuGeometry) => {
+          const frame = (geometry: MenuGeometry) =>
+            JSON.stringify([
+              geometry.panelPaint.owner,
+              geometry.panelPaint.generation,
+              geometry.rootFont,
+              geometry.panel,
+              geometry.wrapper,
+              geometry.glyph,
+              geometry.body,
+              geometry.footer,
+            ]);
+          let current = initial;
+          let previous = frame(current);
+          // Logical entry can precede CSS zoom, and a font resize starts new
+          // size transitions. Compare the same menu after physical paint settles.
+          await expect
+            .poll(
+              async () => {
+                current = await readMenuGeometry();
+                const next = frame(current);
+                const still = next === previous && current.panelPaint.activeMotion.length === 0;
+                previous = next;
+                return still;
+              },
+              { timeout: 1000 }
+            )
+            .toBe(true);
+          return current;
+        };
+        const initialGeometry = await readMenuGeometry();
+        const geometry = await settleMenuGeometry(initialGeometry);
         const state = await page.evaluate(readSearchPublicState);
         await mkdir(evidenceDirectory, { recursive: true });
         await writeFile(
@@ -2148,6 +2434,7 @@ for (const viewport of headerTriggerViewports) {
               source,
               runtime,
               viewport,
+              initialGeometry,
               geometry,
               state,
               dataFixture: 'successful empty Pagefind boundary; real native composition',
@@ -2218,12 +2505,17 @@ for (const viewport of headerTriggerViewports) {
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '200%';
         });
-        const enlarged = await readMenuGeometry();
-        assertMenuGeometry(enlarged);
+        const enlargedInitial = await readMenuGeometry();
+        const enlarged = await settleMenuGeometry(enlargedInitial);
         await writeFile(
           path.join(evidenceDirectory, `${id}-200pct-geometry.json`),
-          JSON.stringify({ source, runtime, viewport, geometry: enlarged }, null, 2)
+          JSON.stringify(
+            { source, runtime, viewport, initialGeometry: enlargedInitial, geometry: enlarged },
+            null,
+            2
+          )
         );
+        assertMenuGeometry(enlarged);
         await capture(page, id, '200pct-menu-anatomy');
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '';

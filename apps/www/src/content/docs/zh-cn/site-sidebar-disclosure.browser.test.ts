@@ -107,6 +107,8 @@ for (const locale of ['zh-cn', 'en'])
         expect(initial.filter((x) => x.managed).every((x) => x.open === x.current)).toBe(true);
         expect(initial.filter((x) => !x.managed).every((x) => x.open)).toBe(true);
         if (width < 1024) {
+          // This journey starts with the published Contents owner. The SSR
+          // fallback can stay connected after it hands off to that Trigger.
           const opener = page
             .locator('[data-site-contents-command] [data-projection-generation-state="active"]')
             .getByRole('button');
@@ -291,6 +293,11 @@ it('no-JS SSR scopes current-only defaults to UI Libraries and preserves other n
       .first();
     await group.locator(':scope > summary').click();
     expect(await group.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
+    // The first leaf also belongs to a nested native disclosure.
+    const family = group.locator(':scope > ul > li > details').first();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(false);
+    await family.locator(':scope > summary').click();
+    expect(await family.evaluate((node) => (node as HTMLDetailsElement).open)).toBe(true);
     const link = group.locator('a[href]').first();
     const subgroup = link.locator('xpath=ancestor::details[1]');
     await subgroup.locator(':scope > summary').click();

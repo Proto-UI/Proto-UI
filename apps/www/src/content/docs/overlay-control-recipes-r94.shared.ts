@@ -19,6 +19,24 @@ function portal(node: ProtoNode): ProtoNode {
 }
 
 export function createFamilyDialogDemo(family: Family): DemoSpec {
+  const title = part(family, 'dialog', 'title', 'title', {}, ['Project details']);
+  const description = part(family, 'dialog', 'description', 'description', {}, [
+    'This modal contains project information. Close it, press Escape, or use the mask, then reopen to exercise the same dialog owner.',
+  ]);
+  const closeLabel = 'Close project details';
+  const contents: DemoNode[] =
+    family === 'bootstrap-2-3-2'
+      ? [
+          part(family, 'dialog', 'header', 'header', {}, [title]),
+          description,
+          part(family, 'dialog', 'footer', 'footer', {}, [
+            part(family, 'dialog', 'close', 'close', {}, [
+              { kind: 'proto', prototypeId: 'bootstrap-2-3-2-button', children: [closeLabel] },
+            ]),
+          ]),
+          part(family, 'dialog', 'close-icon', 'closeIcon'),
+        ]
+      : [title, description, part(family, 'dialog', 'close', 'close', {}, [closeLabel])];
   return {
     type: 'demo',
     root: {
@@ -28,15 +46,7 @@ export function createFamilyDialogDemo(family: Family): DemoSpec {
         part(family, 'dialog', 'root', 'root', { a11yLabel: 'Project details' }, [
           part(family, 'dialog', 'trigger', 'trigger', {}, ['Open project details']),
           portal(part(family, 'dialog', 'mask', 'mask')),
-          portal(
-            part(family, 'dialog', 'content', 'content', {}, [
-              part(family, 'dialog', 'title', 'title', {}, ['Project details']),
-              part(family, 'dialog', 'description', 'description', {}, [
-                'This modal contains project information. Close it, press Escape, or use the mask, then reopen to exercise the same dialog owner.',
-              ]),
-              part(family, 'dialog', 'close', 'close', {}, ['Close project details']),
-            ])
-          ),
+          portal(part(family, 'dialog', 'content', 'content', {}, contents)),
         ]),
       ],
     },
@@ -54,16 +64,9 @@ export function createFamilyHoverCardDemo(family: Family): DemoSpec {
         part(family, 'hover-card', 'root', 'root', { openDelay: 700, closeDelay: 300 }, [
           part(family, 'hover-card', 'trigger', 'trigger', {}, ['Proto UI project']),
           portal(
-            part(
-              family,
-              'hover-card',
-              'content',
-              'content',
-              { side: 'bottom', align: 'start' },
-              [
-                'Proto UI builds host-neutral interaction protocols. This preview supplements the project name; it is not a task or a click-to-open control.',
-              ]
-            )
+            part(family, 'hover-card', 'content', 'content', { side: 'bottom', align: 'start' }, [
+              'Proto UI builds host-neutral interaction protocols. This preview supplements the project name; it is not a task or a click-to-open control.',
+            ])
           ),
         ]),
       ],
@@ -76,14 +79,9 @@ export function createFamilyTooltipDemo(family: Family): DemoSpec {
     part(family, 'tooltip', 'root', ref, {}, [
       part(family, 'tooltip', 'trigger', `${ref}Trigger`, {}, [label]),
       portal(
-        part(
-          family,
-          'tooltip',
-          'content',
-          `${ref}Content`,
-          { side: 'top', align: 'center' },
-          [description]
-        )
+        part(family, 'tooltip', 'content', `${ref}Content`, { side: 'top', align: 'center' }, [
+          description,
+        ])
       ),
     ]);
 

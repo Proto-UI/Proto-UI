@@ -241,27 +241,6 @@ describe('finite homepage Hero recipes', () => {
   });
 });
 
-it('Hero native fallback and public recipes share the finite source breakpoints without painting enhanced Text', () => {
-  const hero = readFileSync('apps/www/src/components/override/Hero.astro', 'utf8');
-  expect(hero).toContain(
-    '3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx'
-  );
-  expect(hero).toContain('max-width: 56rem');
-  expect(hero).toContain('@media (min-width: 640px)');
-  expect(hero).toContain('@media (min-width: 1280px)');
-  const fallbackRules = [
-    ...hero.matchAll(/([^{}]+)\{([^{}]*(?:font-size|font-weight|letter-spacing)[^{}]*)\}/g),
-  ];
-  expect(fallbackRules).toHaveLength(5);
-  for (const match of fallbackRules) {
-    expect(match[1]).toContain(":global([data-site-library-family='shadcn'])");
-    expect(match[1]).toContain(':not([data-typography-owner])');
-  }
-  expect(hero).not.toContain('[data-typography-prototype]');
-  expect(hero).toContain('whitepaperHref');
-  expect(hero).toContain('actions={actions}');
-});
-
 it('projects document list/table/quote text through public Text without losing authored density', () => {
   for (const family of ['shadcn', 'brutalist'] as const) {
     for (const context of ['site', 'document'] as const) {

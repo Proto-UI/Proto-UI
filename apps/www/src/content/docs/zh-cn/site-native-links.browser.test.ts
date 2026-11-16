@@ -897,6 +897,31 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             labels[runtime]
           );
           await ready(page, runtime, family);
+          const brand = page.locator(
+            '#home-brand [data-projection-generation-state="active"] a[data-home-brand]'
+          );
+          expect(await brand.count()).toBe(1);
+          const brandDestination = new URL(
+            await brand.evaluate(
+              (anchor) => new URL(anchor.getAttribute('href')!, anchor.ownerDocument.baseURI).href
+            )
+          );
+          const currentDocument = new URL(page.url());
+          const brandMatchesDocument =
+            brandDestination.origin === currentDocument.origin &&
+            brandDestination.pathname === currentDocument.pathname;
+          // Starlight can author a slashless home href under trailingSlash=ignore.
+          // Observe this document's exact route fact without normalizing either path.
+          expect(await brand.getAttribute('aria-current')).toBe(
+            brandMatchesDocument ? 'page' : null
+          );
+          expect(
+            await page
+              .locator(
+                '#home-navigation-desktop [data-projection-generation-state="active"] a[aria-current="page"]'
+              )
+              .count()
+          ).toBe(0);
           const heroCTA = page.locator(
             '#homepage-hero-actions [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
           );

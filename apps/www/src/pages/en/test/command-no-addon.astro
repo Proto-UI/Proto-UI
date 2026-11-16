@@ -12,7 +12,11 @@ const css = renderProtoStyleTokenCss(SHADCN_STYLE_TOKENS);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Default no-addon Command compatibility fixture</title>
+    <style is:inline>
+      @layer theme, base, starlight, proto-ui, components, utilities, code-surfaces;
+    </style>
     <SiteLibraryStyle />
     <style is:global data-command-default-css set:html={css}></style>
   </head>

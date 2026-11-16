@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { assertDemoSpec, type DemoSpec } from '../PrototypePreviewer/demo-types';
+import { PROJECTION_FOCUS_KEYS } from '../PrototypePreviewer/projection-composition';
 const fakes = vi.hoisted(() => ({
   materialize: vi.fn(),
   restoreFocus: vi.fn(),
@@ -107,6 +108,9 @@ describe('Homepage page-owned runtime', () => {
     await settle();
     const old = fakes.materialize.mock.results.map((result) => result.value);
     const controls = fakes.materialize.mock.calls[0]![1].controls;
+    const origin = document.createElement('button');
+    root.querySelector('[data-homepage-mount]')!.append(origin);
+    origin.focus();
     controls.runtime.onValueChange('react');
     await settle();
     expect(root.dataset.runtime).toBe('react');
@@ -121,6 +125,51 @@ describe('Homepage page-owned runtime', () => {
     controls.runtime.onValueChange('vue2');
     await settle();
     expect(handle!.getSnapshot().selection.runtimeId).toBe('vue2');
+  });
+
+  it('commits a deferred page control change without restoring newer outside focus', async () => {
+    const root = fixture();
+    const outside = document.createElement('button');
+    document.body.append(outside);
+    handle = initHomepageRuntime(root);
+    await settle();
+    outside.focus();
+
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    controls.family.onValueChange('brutalist');
+    await settle();
+    expect(root.dataset.family).toBe('brutalist');
+    expect(fakes.restoreFocus).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(outside);
+
+    controls.runtime.onValueChange('react');
+    await settle();
+    expect(root.dataset.runtime).toBe('react');
+    expect(fakes.restoreFocus).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(outside);
+  });
+
+  it('retains owned focus restoration for a portaled page selector surface', async () => {
+    const root = fixture();
+    handle = initHomepageRuntime(root);
+    await settle();
+    const mount = root.querySelector<HTMLElement>('[data-homepage-mount]')!;
+    const option = document.createElement('button');
+    option.dataset.projectionOwner = mount.dataset.projectionOwner;
+    option.dataset.projectionGeneration = String(handle!.getSnapshot().generation);
+    document.body.append(option);
+    option.focus();
+
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    controls.family.onValueChange('brutalist');
+    await settle();
+    expect(root.dataset.family).toBe('brutalist');
+    expect(fakes.restoreFocus).toHaveBeenCalledWith(
+      mount,
+      PROJECTION_FOCUS_KEYS.family,
+      handle!.getSnapshot().generation,
+      option
+    );
   });
 
   it('keeps the prior whole page on partial materialization failure and disposes prepared siblings', async () => {
@@ -190,6 +239,9 @@ describe('Homepage page-owned runtime', () => {
     assertDemoSpec(task.demo);
     expect(task.recipe.prototypeIds).toContain('shadcn-textarea-root');
     expect(task.recipe.prototypeIds).toContain('shadcn-switch-root');
+    const origin = document.createElement('button');
+    root.querySelector('[data-homepage-mount]')!.append(origin);
+    origin.focus();
     controls.family.onValueChange('brutalist');
     await settle();
     expect(root.dataset.family).toBe('brutalist');
@@ -453,6 +505,29 @@ describe('Search participates in the existing homepage generation', () => {
     root.append(search);
     return { root, search, dialog: search.querySelector('dialog')! };
   }
+  function withPublicSearch() {
+    const root = fixture(true);
+    const search = document.createElement('site-search');
+    search.dataset.searchComposition = 'command-dialog';
+    search.dataset.pagefindBundle = '/pagefind/';
+    search.dataset.searchCopy = JSON.stringify({
+      title: 'Search documents',
+      description: 'Search and open a document',
+      placeholder: 'Search',
+      hint: 'Type to search',
+      loading: 'Loading',
+      empty: 'No results',
+      error: 'Unavailable',
+      retry: 'Retry',
+      more: 'More',
+      close: 'Close search',
+      count: '{count} documents',
+    });
+    search.innerHTML =
+      '<div data-search-composition-mount><div data-search-command-mount="open"></div><div data-search-dialog-mount></div></div>';
+    root.append(search);
+    return { root, search };
+  }
   it('uses one generation for all commands and preserves the native service DOM through library/runtime changes', async () => {
     const { root, search, dialog } = withSearch();
     handle = initHomepageRuntime(root);
@@ -508,6 +583,82 @@ describe('Search participates in the existing homepage generation', () => {
     }
     expect(error).toHaveBeenCalled();
   });
+
+  it('commits the public Search opener and Dialog with the same Homepage generation', async () => {
+    const { root, search } = withPublicSearch();
+    const dialog = deferred<ReturnType<typeof candidate>>();
+    fakes.materialize.mockImplementation(async (request, options) =>
+      request.selection.runtimeId === 'react' &&
+      options.content.recipe.id === 'website-search-command-dialog'
+        ? dialog.promise
+        : candidate()
+    );
+    handle = initHomepageRuntime(root);
+    await settle();
+    const generation = root.dataset.runtimeGeneration;
+    const initial = fakes.materialize.mock.calls.findIndex(
+      ([, options]) => options.mount === search.querySelector('[data-search-dialog-mount]')
+    );
+    expect(initial).toBeGreaterThanOrEqual(0);
+    const initialDialog = await fakes.materialize.mock.results[initial]!.value;
+    expect(initialDialog.activate).toHaveBeenCalledOnce();
+    fakes.materialize.mock.calls[0]![1].controls.runtime.onValueChange('react');
+    await settle();
+    expect(root.dataset.runtimeState).toBe('loading');
+    expect(search.dataset.searchGeneration).toBe(generation);
+    expect(initialDialog.dispose).not.toHaveBeenCalled();
+    const next = candidate();
+    dialog.resolve(next);
+    await settle();
+    const searchCalls = fakes.materialize.mock.calls.filter(
+      ([request, options]) =>
+        request.selection.runtimeId === 'react' && search.contains(options.mount)
+    );
+    expect(searchCalls.map(([, options]) => options.content.recipe.id)).toEqual([
+      'website-search-open',
+      'website-search-command-dialog',
+    ]);
+    expect(searchCalls[0]![0]).toBe(searchCalls[1]![0]);
+    expect(root.dataset.runtimeState).toBe('ready');
+    expect(search.dataset.searchRuntime).toBe('react');
+    expect(search.dataset.searchGeneration).toBe(root.dataset.runtimeGeneration);
+    expect(next.activate).toHaveBeenCalledOnce();
+    expect(initialDialog.dispose).toHaveBeenCalledOnce();
+  });
+
+  it.each(['website-search-open', 'website-search-command-dialog'])(
+    'keeps the committed public Search generation when %s fails to prepare',
+    async (failingRecipe) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const { root, search } = withPublicSearch();
+      handle = initHomepageRuntime(root);
+      await settle();
+      const generation = root.dataset.runtimeGeneration;
+      const initial = fakes.materialize.mock.calls.findIndex(
+        ([, options]) => options.content.recipe.id === 'website-search-command-dialog'
+      );
+      expect(initial).toBeGreaterThanOrEqual(0);
+      const initialDialog = await fakes.materialize.mock.results[initial]!.value;
+      const staged: ReturnType<typeof candidate>[] = [];
+      fakes.materialize.mockImplementation(async (_request, options) => {
+        if (options.content.recipe.id === failingRecipe)
+          throw new Error('Search preparation failed');
+        const next = candidate();
+        staged.push(next);
+        return next;
+      });
+      fakes.materialize.mock.calls[0]![1].controls.runtime.onValueChange('react');
+      await settle();
+      expect(root.dataset.runtimeState).toBe('error');
+      expect(search.dataset.searchGeneration).toBe(generation);
+      expect(search.dataset.searchRuntime).toBe('wc');
+      expect(initialDialog.dispose).not.toHaveBeenCalled();
+      for (const item of staged) {
+        expect(item.activate).not.toHaveBeenCalled();
+        expect(item.dispose).toHaveBeenCalledOnce();
+      }
+    }
+  );
 });
 
 describe('pending homepage runtime preference intent', () => {
@@ -704,12 +855,17 @@ it('reads one page-owned theme before updating nested language/social candidates
   const shadcnWatch = fakes.watchTheme.mock.calls.find(([family]) => family === 'shadcn')!;
   for (const next of [true, false, true]) {
     dark = next;
-    shadcnWatch[2]();
-    for (const candidate of candidates)
+    const theme = fakes.resolveTheme('shadcn', root);
+    fakes.resolveTheme.mockClear();
+    shadcnWatch[2](theme);
+    expect(fakes.resolveTheme).not.toHaveBeenCalled();
+    for (const candidate of candidates) {
       expect(candidate.setThemeSurfaceStyle).toHaveBeenLastCalledWith({
         '--pui-background': dark ? '#111' : '#fff',
         '--pui-foreground': dark ? '#fff' : '#111',
       });
+      expect(candidate.setThemeSurfaceStyle.mock.lastCall?.[0]).toBe(theme);
+    }
     expect(handle!.getSnapshot().generation).toBe(generation);
   }
 });

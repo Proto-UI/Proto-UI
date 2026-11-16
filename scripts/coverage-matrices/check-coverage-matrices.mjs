@@ -484,8 +484,32 @@ const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
     'apps/www/src/components/LucideIconGallery.astro',
   ]),
   'www.gallery.ui-library-cards': Object.freeze(['apps/www/src/components/UiLibraryGallery.astro']),
+  // Retain the ledger ID after retiring the overview. This binds native family
+  // navigation and package inventories, not the detail pages' demo interactions.
   'www.gallery.prototype-library-cards': Object.freeze([
-    'apps/www/src/components/PrototypeLibraryOverview.astro',
+    'apps/www/astro.config.mjs',
+    'apps/www/src/components/site-navigation.ts',
+    'packages/prototypes/base/package.json',
+    'packages/prototypes/shadcn/package.json',
+    'packages/prototypes/brutalist/package.json',
+    'packages/prototypes/lucide/package.json',
+    'packages/prototypes/bootstrap-2-3-2/package.json',
+    'packages/prototypes/liquid-glass/package.json',
+    'apps/www/src/content/docs/en/ui-libraries/base/button.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/base/button.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/shadcn/button.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/brutalist/components/button.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/button.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/button.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/button.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/liquid-glass/button.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/button.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/lucide/index.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/lucide/index.mdx',
+    'apps/www/src/content/docs/en/ui-libraries/lucide/icons.mdx',
+    'apps/www/src/content/docs/zh-cn/ui-libraries/lucide/icons.mdx',
+    'apps/www/src/components/LucideIconGallery.astro',
   ]),
   'www.icons.static-lucide': Object.freeze(['apps/www/src/components/StaticLucideIcon.astro']),
   'www.demo.brutalist-theme-style': Object.freeze([
@@ -8304,7 +8328,7 @@ function canonicalImportTarget(absolutePath) {
     suffix.unshift(path.basename(existing));
     existing = parent;
   }
-  return path.join(fs.realpathSync(existing), ...suffix);
+  return path.join(fs.realpathSync.native(existing), ...suffix);
 }
 
 // Package globs are admitted with iterative directory reads. A post-glob

@@ -3,7 +3,7 @@ import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';
-import { isWithinCodeOrCopyProjectionMount, siteTypographyParticipant } from './site-typography';
+import { isWithinOwnedCodeContent, siteTypographyParticipant } from './site-typography';
 
 type DocumentationTypographyHandle = { destroy(): Promise<void>; ready: Promise<unknown> };
 const documents = new WeakMap<
@@ -91,12 +91,13 @@ export function initDocumentationTypography(doc: Document = document) {
       return;
     }
     const selection = { runtimeId: runtime, projectionFamilyId: family() };
+    const sourceChanged = participant.needsRefresh();
     if (
-      participant.needsRefresh() ||
+      sourceChanged ||
       snapshot.selection.runtimeId !== runtime ||
       snapshot.selection.projectionFamilyId !== selection.projectionFamilyId
     )
-      void observe(controller.request(selection, { force: participant.needsRefresh() }));
+      void observe(controller.request(selection, { force: sourceChanged }));
   };
   const preference = (event: Event) => {
     const next = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
@@ -114,13 +115,13 @@ export function initDocumentationTypography(doc: Document = document) {
     if (!root.isConnected) void handle.destroy();
     else if (
       records.some(
-        ({ target, type }) =>
+        ({ target, attributeName }) =>
           root.contains(target) &&
-          (type !== 'childList' || !isWithinCodeOrCopyProjectionMount(target))
+          (attributeName === 'data-site-library-family' || !isWithinOwnedCodeContent(target))
       )
     ) {
-      // The generated children cannot change the native source inventory.
-      // Inserting or removing a mount still notifies its authored parent.
+      // CodeExample and its decoration mounts own their internal changes.
+      // Moving source across that boundary still notifies an authored parent.
       refresh();
     }
   });
