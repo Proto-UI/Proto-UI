@@ -145,16 +145,19 @@ describe('WC authored-hook setup invocation arity', () => {
           );
           const calls: number[] = [];
           const visit = (node: ts.Node) => {
-            if (ts.isExpressionStatement(node) && ts.isCallExpression(node.expression)) {
-              const expression = node.expression.expression;
+            if (
+              ts.isCallExpression(node) &&
+              ts.isArrowFunction(node.parent) &&
+              ts.isPropertyAssignment(node.parent.parent) &&
+              node.parent.parent.name.getText(file) === 'setup'
+            ) {
+              const expression = node.expression;
               if (
                 ts.isParenthesizedExpression(expression) &&
                 ts.isArrowFunction(expression.expression)
               ) {
-                expect(node.expression.arguments.length).toBe(
-                  expression.expression.parameters.length
-                );
-                calls.push(node.expression.arguments.length);
+                expect(node.arguments.length).toBe(expression.expression.parameters.length);
+                calls.push(node.arguments.length);
               }
             }
             ts.forEachChild(node, visit);

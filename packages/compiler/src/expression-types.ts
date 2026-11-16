@@ -1,5 +1,7 @@
 import { dataTypeEqual, type DataType } from './data-types';
-import type { ExpressionIR, ValueType } from './ir';
+import { isDataValueType, type ExpressionIR, type ValueType } from './ir';
+import { joinValueTypes, valueAlternatives, objectFields, objectValueType } from './value-types';
+import { valueAssignable } from './value-types';
 
 export type UnaryOperator = '!' | '-' | '+';
 export type BinaryOperator =
@@ -19,6 +21,66 @@ export type BinaryOperator =
   | '??';
 
 type AtomicDataType = Exclude<DataType, { kind: 'union' }>;
+
+/** A saved predicate is evidence only for immutable bindings, not a past heap/cell read. */
+export function stablePredicate(expression: ExpressionIR): boolean {
+  switch (expression.kind) {
+    case 'literal':
+    case 'undefined':
+    case 'reference':
+      return true;
+    case 'narrow':
+      return stablePredicate(expression.value);
+    case 'unary':
+      return stablePredicate(expression.operand);
+    case 'binary':
+      return stablePredicate(expression.left) && stablePredicate(expression.right);
+    case 'intrinsic':
+      return expression.name === 'typeof' && expression.arguments.every(stablePredicate);
+    default:
+      return false;
+  }
+}
+
+/** Keep stable binding identity while discarding mutable member observations. */
+export function invalidateHeapFlow(
+  current: ValueType,
+  original: ValueType,
+  writtenReadonlyFields: ReadonlySet<string> = new Set()
+): ValueType {
+  return joinValueTypes(
+    valueAlternatives(current).map((member) => {
+      const fields = objectFields(member);
+      if (!fields) return member;
+      const candidates = valueAlternatives(original).filter(
+        (candidate) => objectFields(candidate) && valueAssignable(member, candidate)
+      );
+      if (!candidates.length) return member;
+      return joinValueTypes(
+        candidates.map((candidate) => {
+          const declared = objectFields(candidate)!;
+          const restored = objectValueType(
+            fields.map((field) => {
+              const base = declared.find((other) => other.name === field.name);
+              if (!base) return field;
+              return base.readonly && !writtenReadonlyFields.has(base.name)
+                ? {
+                    ...field,
+                    type: invalidateHeapFlow(field.type, base.type, writtenReadonlyFields),
+                  }
+                : { ...base };
+            })
+          );
+          return typeof member !== 'string' &&
+            member.kind === 'object' &&
+            member.index !== undefined
+            ? { kind: 'object' as const, fields: [...objectFields(restored)!], index: member.index }
+            : restored;
+        })
+      );
+    })
+  );
+}
 
 function alternatives(type: DataType): AtomicDataType[] {
   if (typeof type !== 'string' && type.kind === 'union') return type.members.flatMap(alternatives);
@@ -188,20 +250,41 @@ export function memberDataType(
 /** Refine only immutable lexical values; calls and mutable State reads are never narrowed. */
 export function conditionRefinements(
   condition: ExpressionIR,
-  truth: boolean
+  truth: boolean,
+  current?: (expression: ExpressionIR) => boolean
 ): readonly [string, ValueType][] {
   if (condition.kind === 'unary' && condition.operator === '!')
-    return conditionRefinements(condition.operand, !truth);
+    return conditionRefinements(condition.operand, !truth, current);
   if (
     condition.kind === 'binary' &&
     ((condition.operator === '&&' && truth) || (condition.operator === '||' && !truth))
   )
     return [
-      ...conditionRefinements(condition.left, truth),
-      ...conditionRefinements(condition.right, truth),
+      ...conditionRefinements(condition.left, truth, current),
+      ...conditionRefinements(condition.right, truth, current),
     ];
+  if (
+    condition.kind === 'binary' &&
+    ((condition.operator === '||' && truth) || (condition.operator === '&&' && !truth))
+  ) {
+    const left = conditionRefinements(condition.left, truth, current),
+      right = conditionRefinements(condition.right, truth, current);
+    return left.flatMap(([name, type]) => {
+      const other = right.find(([key]) => key === name);
+      return other ? [[name, joinValueTypes([type, other[1]])] as [string, ValueType]] : [];
+    });
+  }
+  const fresh = (expression: ExpressionIR): boolean => {
+    if (current && !current(expression)) return false;
+    if (expression.kind === 'binary') return fresh(expression.left) && fresh(expression.right);
+    if (expression.kind === 'unary') return fresh(expression.operand);
+    if (expression.kind === 'intrinsic' && expression.name === 'typeof')
+      return expression.arguments.every(fresh);
+    return true;
+  };
+  if (!fresh(condition)) return [];
   // Positive strict identity is the only refinement from the inert join.
-  // A false equality (or true inequality) says nothing about which alternative remains.
+  // It carries nominal authority, which a generic non-null proof cannot infer.
   if (
     condition.kind === 'binary' &&
     ((condition.operator === '===' && truth) || (condition.operator === '!==' && !truth))
@@ -217,6 +300,59 @@ export function conditionRefinements(
     const right = refine(condition.right, condition.left);
     if (right.length) return right;
   }
+  if (
+    condition.kind === 'binary' &&
+    ((condition.operator === '===' && truth) || (condition.operator === '!==' && !truth))
+  ) {
+    const present = (
+      target: ExpressionIR,
+      proof: ExpressionIR
+    ): readonly [string, ValueType][] | undefined => {
+      if (proof.kind === 'literal') return undefined;
+      if (
+        valueAlternatives(proof.type).some(
+          (type) => type === 'null' || type === 'void' || type === 'unknown'
+        )
+      )
+        return undefined;
+      const path: string[] = [];
+      let root = target;
+      while (root.kind === 'member') {
+        path.unshift(root.property);
+        root = root.object;
+      }
+      const reference =
+        root.kind === 'reference'
+          ? root
+          : root.kind === 'lexical-read' && root.cell.kind === 'reference'
+            ? root.cell
+            : undefined;
+      if (!reference) return undefined;
+      const refine = (type: ValueType, index: number): ValueType =>
+        joinValueTypes(
+          valueAlternatives(type)
+            .filter((type) => type !== 'null' && type !== 'void')
+            .map((member) => {
+              if (index === path.length) return member;
+              const fields = objectFields(member);
+              if (!fields) return member;
+              return objectValueType(
+                fields.map((field) =>
+                  field.name === path[index]
+                    ? { ...field, type: refine(field.type, index + 1), optional: false }
+                    : field
+                )
+              );
+            })
+        );
+      return [[reference.name, refine(root.type, 0)]];
+    };
+    const refined =
+      present(condition.left, condition.right) ?? present(condition.right, condition.left);
+    if (refined) return refined;
+  }
+  const ordinary = ordinaryRefinement(condition, truth);
+  if (ordinary) return ordinary;
   let target: ExpressionIR = condition,
     literal: string | number | boolean | null | undefined;
   let equality = truth;
@@ -267,6 +403,7 @@ export function conditionRefinements(
     const present = literal === null ? !equality : truth;
     return [[reference.name, present ? (type.slice(type.indexOf(':') + 1) as ValueType) : absent]];
   }
+  if (!isDataValueType(type)) return [];
   const members = alternatives(type);
   const kept = members.filter((member) => {
     if (target.kind === 'reference') {
@@ -290,4 +427,129 @@ export function conditionRefinements(
     return (field.type.value === literal) === equality;
   });
   return [[reference.name, union(kept)]];
+}
+
+function ordinaryRefinement(
+  condition: ExpressionIR,
+  truth: boolean
+): readonly [string, ValueType][] | undefined {
+  let target = condition,
+    equal = truth,
+    constant: string | number | boolean | null | undefined,
+    runtimeType: string | undefined;
+  if (
+    condition.kind === 'binary' &&
+    (condition.operator === '===' || condition.operator === '!==')
+  ) {
+    const literal =
+      condition.right.kind === 'literal'
+        ? condition.right
+        : condition.left.kind === 'literal'
+          ? condition.left
+          : undefined;
+    if (!literal) return undefined;
+    target = literal === condition.right ? condition.left : condition.right;
+    constant = literal.value;
+    equal = condition.operator === '===' ? truth : !truth;
+    if (target.kind === 'intrinsic' && target.name === 'typeof' && typeof constant === 'string') {
+      runtimeType = constant;
+      target = target.arguments[0];
+    }
+  }
+  const root = (value: ExpressionIR): Extract<ExpressionIR, { kind: 'reference' }> | undefined =>
+    value.kind === 'reference'
+      ? value
+      : value.kind === 'lexical-read' && value.cell.kind === 'reference'
+        ? value.cell
+        : undefined;
+  const owner = target.kind === 'member' ? target.object : target;
+  const reference = root(owner);
+  if (!reference) return undefined;
+  // Opaque nullable/optional handles and event discriminants retain their nominal rules.
+  if (
+    typeof owner.type === 'string' &&
+    (owner.type === 'event-or-control' ||
+      owner.type.startsWith('state-event:') ||
+      /^(nullable|optional):/.test(owner.type))
+  )
+    return undefined;
+  const narrow = (type: ValueType): ValueType => {
+    if (
+      runtimeType &&
+      valueAlternatives(type).includes('unknown') &&
+      equal &&
+      ['boolean', 'number', 'string', 'undefined'].includes(runtimeType)
+    )
+      return runtimeType === 'undefined' ? 'void' : (runtimeType as ValueType);
+    return joinValueTypes(
+      valueAlternatives(type).filter((member) => {
+        let value: unknown,
+          hasLiteral = false;
+        if (member === 'null') {
+          value = null;
+          hasLiteral = true;
+        }
+        if (member === 'void') {
+          value = undefined;
+          hasLiteral = true;
+        }
+        if (typeof member !== 'string' && member.kind === 'literal') {
+          value = member.value;
+          hasLiteral = true;
+        }
+        if (runtimeType) {
+          const kind = hasLiteral
+            ? typeof value
+            : typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
+              ? member
+              : typeof member !== 'string' && member.kind === 'callable'
+                ? 'function'
+                : member === 'unknown'
+                  ? undefined
+                  : 'object';
+          return kind === undefined || (kind === runtimeType) === equal;
+        }
+        if (constant !== undefined) {
+          if (hasLiteral) return (value === constant) === equal;
+          const domain =
+            typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
+              ? member
+              : member === 'unknown'
+                ? undefined
+                : 'object';
+          return domain === undefined || domain === typeof constant || !equal;
+        }
+        return !hasLiteral || Boolean(value) === truth;
+      })
+    );
+  };
+  if (target.kind !== 'member') return [[reference.name, narrow(target.type)]];
+  const values = valueAlternatives(owner.type).flatMap((member): ValueType[] => {
+    if (member === 'null' || member === 'void') return truth ? [] : [member];
+    const fields = objectFields(member),
+      field = fields?.find((field) => field.name === target.property);
+    if (!fields || !field) return [member];
+    const original = field.optional ? joinValueTypes([field.type, 'void']) : field.type;
+    const narrowed = narrow(original);
+    if (
+      typeof narrowed !== 'string' &&
+      (narrowed.kind === 'union' || narrowed.kind === 'value-union') &&
+      !narrowed.members.length
+    )
+      return [];
+    const absent = valueAlternatives(narrowed).includes('void');
+    const next = fields.map((entry) =>
+      entry.name === field.name
+        ? {
+            ...entry,
+            type: absent
+              ? joinValueTypes(valueAlternatives(narrowed).filter((type) => type !== 'void'))
+              : narrowed,
+            optional: absent,
+          }
+        : entry
+    );
+    return [objectValueType(next)];
+  });
+  return [[reference.name, joinValueTypes(values)]];
 }

@@ -71,17 +71,19 @@ describe('reached native support compilation', () => {
         .map((file) => file.path)
         .sort()
     ).toEqual([
-      '.proto-ui/interaction/ownership-v1.ts',
-      '.proto-ui/interaction/text-multiline-v1.ts',
+      expect.stringMatching(/^\.proto-ui\/interaction\/modules-[0-9a-f]+-v2\.ts$/),
+      expect.stringMatching(/^\.proto-ui\/interaction\/native-[0-9a-f]+-v2\.ts$/),
+      '.proto-ui/interaction/ownership-v2.ts',
     ]);
     const output = helpers(plain)
       .map((file) => file.contents)
       .join('\n');
     expect(output).not.toMatch(
-      /createNativeAdapterModules|computePosition|scrollAxes|observed[<(]|declarations|textDeclaration|lineMode/
+      /computePosition|scrollAxes|observed[<(]|imageDeclaration|overlayOpen/
     );
-    expect(output).toContain("alive(); return 'textarea';");
-    expect(plain.code).not.toContain('declarations:');
+    expect(output).toContain('function rootTag()');
+    expect(plain.code).toContain('multiline');
+    expect(plain.code).toContain('declarations:');
     expect(output).toContain('restoreTextValue');
     expect(output).toContain('selectionStart');
     expect(output).toContain('scrollTop');
@@ -95,15 +97,14 @@ describe('reached native support compilation', () => {
       "if (key === 'value') { if (initial) result.domProps = { value }; }"
     );
     expect(plain.code).not.toContain("if (key === 'value') continue;");
-    expect(plain.code).not.toContain('registerGenericObservedState:');
+    expect(output).not.toContain('const focusable = observed');
   });
   it('retains reached Overlay and Focus while sharing the same owner artifact', () => {
     const plain = compile('mixed-reference', '', '', 'native-single-editor', 'single');
-    const single = helpers(plain).find((file) => file.path.endsWith('/text-single-v1.ts'))!;
-    expect(single.contents).toContain("alive(); return 'input';");
-    expect(single.contents).not.toMatch(
-      /declarations|textDeclaration|lineMode|createNativeAdapterModules/
-    );
+    const single = helpers(plain).find((file) => /\/modules-[0-9a-f]+-v2\.ts$/.test(file.path))!;
+    expect(single.contents).toContain("'input'");
+    expect(plain.code).toContain('single');
+    expect(single.contents).not.toMatch(/computePosition|imageDeclaration|overlayOpen/);
     const overlay = compile('overlay', 'const layer=asOverlay();layer.configure({portal:true});');
     const focus = compile('focus', 'asFocusable();');
     for (const module of [overlay, focus]) {
@@ -111,12 +112,12 @@ describe('reached native support compilation', () => {
         .map((file) => file.contents)
         .join('\n');
       expect(output).toContain('createNativeAdapterModules');
-      expect(output).toContain('computePosition');
+      expect(output.includes('computePosition')).toBe(module === overlay);
       expect(
         module.dependencies?.some((dependency) => dependency.name === '@floating-ui/dom')
-      ).toBe(true);
-      expect(helpers(module).find((file) => file.path.endsWith('/ownership-v1.ts'))).toEqual(
-        helpers(plain).find((file) => file.path.endsWith('/ownership-v1.ts'))
+      ).toBe(module === overlay);
+      expect(helpers(module).find((file) => file.path.endsWith('/ownership-v2.ts'))).toEqual(
+        helpers(plain).find((file) => file.path.endsWith('/ownership-v2.ts'))
       );
     }
   });
@@ -199,7 +200,7 @@ function consumerModules(outer: GeneratedModule, inner: GeneratedModule) {
   return {
     outer: load('Outer.js').default as ComponentOptions<Vue2>,
     inner: load('Inner.js').default as ComponentOptions<Vue2>,
-    ownership: load('.proto-ui/interaction/ownership-v1.ts'),
+    ownership: load('.proto-ui/interaction/ownership-v2.ts'),
   };
 }
 function field(value: unknown, key: string): unknown {
@@ -222,12 +223,12 @@ async function nativeConsumer(label: string, erasePhysicalOwner = false) {
   let fault: { path: string; before: string; after: string } | undefined;
   if (erasePhysicalOwner) {
     const before =
-      '    rootOwners.set(root, routeOwner); rootOwners.set(host, routeOwner); logicalOwners.set(options.identity, routeOwner);';
-    const after = '    logicalOwners.set(options.identity, routeOwner);';
+      '        rootOwners.set(target, rootOwner);\n        rootOwners.set(host, rootOwner);';
+    const after = '        // negative control: omit only physical routing identity';
     inner = {
       ...inner,
       supportingFiles: inner.supportingFiles?.map((file) => {
-        if (!file.path.endsWith('/text-multiline-v1.ts')) return file;
+        if (!/\/native-[0-9a-f]+-v2\.ts$/.test(file.path)) return file;
         if (file.contents.split(before).length !== 2)
           throw new Error('Sole physical-owner negative control did not match once');
         fault = { path: file.path, before, after };
@@ -438,30 +439,32 @@ describe('reached Image native support', () => {
         helpers(plain)
           .map((file) => file.path)
           .sort()
-      ).toEqual(['.proto-ui/interaction/image-v1.ts', '.proto-ui/interaction/ownership-v1.ts']);
+      ).toEqual([
+        expect.stringMatching(/^\.proto-ui\/interaction\/modules-[0-9a-f]+-v2\.ts$/),
+        expect.stringMatching(/^\.proto-ui\/interaction\/native-[0-9a-f]+-v2\.ts$/),
+        '.proto-ui/interaction/ownership-v2.ts',
+      ]);
       const output = helpers(plain)
         .map((file) => file.contents)
         .join('\n');
-      expect(output).not.toMatch(
-        /createNativeAdapterModules|computePosition|scrollAxes|textDeclaration|imageDeclaration|declarations:/
-      );
-      expect(output).toContain("alive(); return 'img';");
+      expect(output).not.toMatch(/computePosition|scrollAxes|textDeclaration|overlayOpen/);
+      expect(output).toContain("'img'");
       expect(output).toContain('target.decode()');
       expect(output).toContain("['load', 'error']");
-      expect(plain.code).toContain('imageConfig:');
-      expect(plain.code).not.toContain('declarations:');
-      expect(plain.code).not.toContain('registerGenericObservedState:');
+      expect(plain.code).toContain('declarations:');
+      expect(plain.code).toContain('declarations:');
+      expect(output).not.toContain('const focusable = observed');
       expect(plain.dependencies?.some((dependency) => dependency.name === '@floating-ui/dom')).toBe(
         false
       );
-      expect(helpers(mixed).some((file) => file.path.endsWith('/adapter-modules-v1.ts'))).toBe(
+      expect(helpers(mixed).some((file) => /\/modules-[0-9a-f]+-v2\.ts$/.test(file.path))).toBe(
         true
       );
       expect(mixed.dependencies?.some((dependency) => dependency.name === '@floating-ui/dom')).toBe(
         true
       );
-      expect(helpers(mixed).find((file) => file.path.endsWith('/ownership-v1.ts'))).toEqual(
-        helpers(plain).find((file) => file.path.endsWith('/ownership-v1.ts'))
+      expect(helpers(mixed).find((file) => file.path.endsWith('/ownership-v2.ts'))).toEqual(
+        helpers(plain).find((file) => file.path.endsWith('/ownership-v2.ts'))
       );
     } catch (error) {
       errors.push(error);

@@ -13,6 +13,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { getLaunchProfilePackageNames, loadLaunchPackageGovernance } from './governance.mjs';
+import { protoSourceFiles, writeProtoSourceFiles } from '../build/proto-source.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const ROOT_DIR = resolve(__dirname, '..', '..');
@@ -605,7 +606,13 @@ export function createPublishManifest(pkg, options) {
 
   manifest.version = version ?? manifest.version;
   manifest.license ??= readRootLicenseId();
-  const files = ['dist', 'README.md', 'LICENSE', ...getThirdPartyNoticeFiles(pkg)];
+  const files = [
+    'dist',
+    'README.md',
+    'LICENSE',
+    ...getThirdPartyNoticeFiles(pkg),
+    ...protoSourceFiles(pkg),
+  ];
   if (manifest.bin && !files.includes('bin')) files.push('bin');
   manifest.files = files;
   manifest.publishConfig = {
@@ -650,13 +657,14 @@ function rewriteManifestField(manifest, field) {
   manifest[field] = rewritePath(manifest[field], field === 'types');
 }
 
-function rewriteExports(value, isTypes = false) {
+function rewriteExports(value, isTypes = false, authored = false) {
+  if (authored) return value;
   if (typeof value === 'string') return rewritePath(value, isTypes || value.endsWith('.d.ts'));
   if (Array.isArray(value)) return value.map((item) => rewriteExports(item, isTypes));
   if (value && typeof value === 'object') {
     const next = {};
     for (const [key, entry] of Object.entries(value)) {
-      next[key] = rewriteExports(entry, isTypes || key === 'types');
+      next[key] = rewriteExports(entry, isTypes || key === 'types', key === 'proto');
     }
     return next;
   }
@@ -705,6 +713,7 @@ function sanitizePackageName(name) {
 }
 
 export function writeSupportingFiles(pkg, stageDir) {
+  writeProtoSourceFiles(pkg, stageDir);
   if (pkg.localReadme) {
     copyFileSync(pkg.localReadme, join(stageDir, 'README.md'));
   } else if (existsSync(ROOT_README)) {

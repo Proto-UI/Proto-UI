@@ -5,6 +5,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { getPublicPackages, ROOT_DIR } from './public-packages.mjs';
+import { protoSourceFiles } from './proto-source.mjs';
 
 const check = process.argv.includes('--check');
 const buildScript = join(ROOT_DIR, 'scripts', 'build', 'public-packages.mjs');
@@ -27,13 +28,14 @@ function rewriteExportEntry(entry) {
   const typesTarget = entry.types ?? entry.default ?? entry.import;
   const runtimeTarget = entry.import ?? entry.default ?? entry.types;
   const next = {};
+  if (Object.hasOwn(entry, 'proto')) next.proto = entry.proto;
   if (typesTarget) next.types = rewriteTarget(typesTarget, true);
   if (runtimeTarget) {
     next.import = rewriteTarget(runtimeTarget, false);
     next.default = rewriteTarget(runtimeTarget, false);
   }
   for (const [key, value] of Object.entries(entry)) {
-    if (key === 'types' || key === 'import' || key === 'default') continue;
+    if (key === 'proto' || key === 'types' || key === 'import' || key === 'default') continue;
     next[key] = value;
   }
   return next;
@@ -65,6 +67,7 @@ for (const pkg of getPublicPackages()) {
   const files = ['dist/', 'README.md'];
   if (manifest.bin) files.splice(1, 0, 'bin/');
   for (const notice of manifest.protoUi?.release?.thirdPartyNotices ?? []) files.push(notice);
+  files.push(...protoSourceFiles({ ...pkg, manifest }));
   manifest.files = [...new Set(files)];
   manifest.scripts = {
     ...manifest.scripts,

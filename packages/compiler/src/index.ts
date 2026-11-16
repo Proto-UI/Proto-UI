@@ -52,6 +52,34 @@ export {
   diffProjectCompilation,
 } from './project-output';
 export type { ProjectArtifactOptions } from './project-output';
+export {
+  prepareCompilerLibrary,
+  validateCompilerLibrary,
+  compilerLibraryArtifacts,
+  writeCompilerLibrary,
+  readCompilerLibrary,
+  COMPILER_LIBRARY_FORMAT,
+  COMPILER_LIBRARY_VERSION,
+} from './artifact-library';
+export type {
+  CompilerLibrary,
+  CompilerLibraryManifest,
+  CompilerLibraryOptions,
+  CompilerLibraryDeclaration,
+  CompilerExternalDeclaration,
+  CompilerSharedSupport,
+} from './artifact-library';
+export {
+  linkCompilerLibraries,
+  writeLinkedCompilerLibraries,
+  COMPILER_LINK_FORMAT,
+  COMPILER_LINK_VERSION,
+} from './artifact-linking';
+export type {
+  CompilerLinkOptions,
+  LinkedCompilerLibraries,
+  CompilerLinkedDeclaration,
+} from './artifact-linking';
 export { watchProject } from './watch';
 export type * from './watch';
 export { writeArtifactSet } from './artifact-output';
@@ -98,3 +126,6 @@ export type {
 export { generateSequence, minimizeSequence } from './conformance/sequences';
 
 export { migrateNativeSupport } from './native-support-migration';
+
+export { observableSemantics } from './observable-semantics';
+export type { ObservableSemantics, PropsUpdatePolicy } from './observable-semantics';

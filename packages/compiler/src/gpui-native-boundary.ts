@@ -24,8 +24,10 @@ pub fn native_boundary_press(position:gpui::Point<Pixels>,window:&mut Window,cx:
     for owner in candidates{
         let inside=native_host_hit(&owner,position,window)||{let owner=owner.borrow();owner.modules.boundary.regions.iter().any(|region|region.active.get()&&region.owner.upgrade().is_some_and(|region|native_host_hit(&region,position,window)))||[&owner.modules.overlay.trigger,&owner.modules.overlay.anchor,&owner.modules.overlay.content].iter().any(|region|region.upgrade().is_some_and(|region|native_host_hit(&region,position,window)))};if inside{continue}
         let sample=record(vec![("type",Value::string("pointer.press")),("target",target.as_ref().map(|target|Value::HostTarget(Rc::downgrade(target))).unwrap_or(Value::Json(Json::Null)))]);
-        overlay_outside(&owner);let callbacks=owner.borrow().modules.boundary.callbacks.clone();let event=record(vec![("classification",Value::string("outside")),("sample",sample)]);
-        for(active,callback)in callbacks{if active.get(){invoke(&owner,"event",&callback,vec![event.clone()]);}}
+        native_host_callback(&owner,"boundary-press",||{
+            overlay_outside(&owner);let callbacks=owner.borrow().modules.boundary.callbacks.clone();let event=record(vec![("classification",Value::string("outside")),("sample",sample)]);
+            for(active,callback)in callbacks{if active.get(){invoke(&owner,"event",&callback,vec![event.clone()]);}}
+        });
     }drive_owners(window,cx);
 }
 pub fn hit_participates(owner:&OwnerRef)->bool{for participant in all_owners(){let p=participant.borrow();let mode=text_or(field(&p.modules.hit.config,"mode"),"participating");if mode!="participating"&&Rc::ptr_eq(&participant,owner){return false}for region in &p.modules.hit.regions{if region.active.get()&&region.owner.upgrade().is_some_and(|target|descendant(owner,&target)){let mode=text_or(region.options.member("mode",true),&mode);if mode!="participating"{return false}}}}true}

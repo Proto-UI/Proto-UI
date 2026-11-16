@@ -103,6 +103,7 @@
       "default": "./dist/tools/index.js"
     },
     "./transition": {
+      "proto": "./src/transition/index.ts",
       "types": "./dist/transition/index.d.ts",
       "import": "./dist/transition/index.js",
       "default": "./dist/transition/index.js"
@@ -337,7 +338,12 @@
   ],
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "src/transition/as-transition.proto.ts",
+    "src/transition/index.ts",
+    "src/transition/machine.ts",
+    "src/transition/transition.proto.ts",
+    "src/transition/types.ts"
   ],
   "scripts": {
     "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/prototypes-base",

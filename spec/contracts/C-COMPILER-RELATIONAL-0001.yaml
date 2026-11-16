@@ -41,9 +41,12 @@ criteria:
       A host unable to represent a string must report it unsupported rather than
       silently replace it. GPUI Rust strings cannot represent lone surrogates;
       all strings sent to Rust string literals, including record keys, members,
-      configuration and type fields, reject explicitly. Opaque authored-hook
-      registry names retain their separate injective UTF-16 key encoding. This slice does not expand the
-      host string transport domain or claim complete dynamic-host validation.
+      configuration and type fields, reject explicitly. An injective UTF-16 encoding
+      may represent an opaque internal registry key only while that representation
+      is unobservable. Authored-hook names are observable through api.name and child
+      capture metadata; GPUI rejects unpaired surrogates there rather than exposing
+      an encoded substitute. This slice does not expand the host string transport
+      domain or claim complete dynamic-host validation.
   - id: C-COMPILER-RELATIONAL-0001-EVALUATION
     text: Evaluate each operand exactly once, left before right, preserving observable effects and failures before comparing.
   - id: C-COMPILER-RELATIONAL-0001-MIGRATION

@@ -1,5 +1,13 @@
-import type { ExpressionIR, FunctionIR, ParameterIR, PrototypeIR, StatementIR } from './ir';
+import type {
+  ExpressionIR,
+  FunctionIR,
+  ParameterIR,
+  PrototypeIR,
+  StatementIR,
+  ValueType,
+} from './ir';
 import { operationArgumentRule, type ArgumentRule } from './operations';
+import { ordinaryValueChildren } from './value-children';
 import {
   nativeShape,
   NativeLexicalScope,
@@ -11,6 +19,14 @@ type Operation = Extract<ExpressionIR, { kind: 'operation' }>;
 
 type Use = 'declaration' | 'alias' | 'identity' | 'invoke' | 'other';
 type Binding = NonNullable<ReturnType<NativeLexicalScope['lookup']>>;
+function callableType(type: ValueType): boolean {
+  return (
+    type === 'function' ||
+    (typeof type === 'object' &&
+      (type.kind === 'callable' ||
+        (type.kind === 'value-union' && type.members.some(callableType))))
+  );
+}
 interface Observation {
   readonly expression: ExpressionIR;
   readonly use: Use;
@@ -53,7 +69,7 @@ export function collectVue2IdentityOnlyFunctions(
     while (value.kind === 'reference') {
       const binding = scope.lookup(value.name);
       if (!binding?.value || seen.has(binding)) {
-        if (value.type === 'function') incomplete.add('unresolved-or-cyclic-function-binding');
+        if (callableType(value.type)) incomplete.add('unresolved-or-cyclic-function-binding');
         return undefined;
       }
       seen.add(binding);
@@ -63,7 +79,7 @@ export function collectVue2IdentityOnlyFunctions(
     if (value.kind === 'function') return value.function;
     // Do not invent callable propagation through factories/native operations.
     // An unknown callable anywhere disables this deliberately narrow proof.
-    if (value.type === 'function') incomplete.add('unresolved-function-origin');
+    if (callableType(value.type)) incomplete.add('unresolved-function-origin');
     return undefined;
   }
 
@@ -94,7 +110,7 @@ export function collectVue2IdentityOnlyFunctions(
   }
 
   function expression(value: ExpressionIR, scope: NativeLexicalScope, use: Use): void {
-    if (value.type === 'function' && value.kind !== 'function' && value.kind !== 'reference')
+    if (callableType(value.type) && value.kind !== 'function' && value.kind !== 'reference')
       incomplete.add('unresolved-function-result');
     switch (value.kind) {
       case 'function': {
@@ -119,10 +135,23 @@ export function collectVue2IdentityOnlyFunctions(
         for (const argument of value.arguments) expression(argument, scope, 'other');
         return;
       }
+      case 'call':
+        expression(value.callee, scope, 'invoke');
+        for (const argument of value.arguments) expression(argument, scope, 'other');
+        return;
+      case 'narrow':
+        expression(value.value, scope, use);
+        return;
+      case 'member-write':
+      case 'element':
+      case 'intrinsic':
+      case 'object-spread':
+        for (const operand of ordinaryValueChildren(value)!) expression(operand, scope, 'other');
+        return;
       case 'conditional':
         expression(value.condition, scope, 'other');
-        expression(value.whenTrue, scope, use);
-        expression(value.whenFalse, scope, use);
+        expression(value.then, scope, use);
+        expression(value.otherwise, scope, use);
         return;
       case 'binary': {
         const operandUse =
@@ -164,6 +193,7 @@ export function collectVue2IdentityOnlyFunctions(
         return;
       case 'authored-hook':
         // Every hook root/body is independently visited, including unused hooks.
+        for (const argument of value.arguments ?? []) expression(argument, scope, 'other');
         return;
       case 'literal':
       case 'undefined':
@@ -180,7 +210,7 @@ export function collectVue2IdentityOnlyFunctions(
   }
 
   function statements(values: readonly StatementIR[], initial: NativeLexicalScope) {
-    let scope = initial;
+    let scope = initial.block(values);
     for (const statement of values) {
       switch (statement.kind) {
         case 'const':
@@ -274,7 +304,7 @@ function elementArguments(node: Operation) {
 export function collectVue2NativeChildShapes(ir: PrototypeIR) {
   const facts = new Map<ExpressionIR, NativeShape[]>();
   const parameterFacts = new Map<ParameterIR, NativeShape[] | null>();
-  const active = new Set<FunctionIR>();
+  const active = new Map<FunctionIR, Set<NativeLexicalScope>>();
   const invoked = new Set<FunctionIR>();
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook.setup]));
   const moduleScope = moduleLexicalScope(ir);
@@ -331,9 +361,54 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     return value;
   }
   const callableParameters = new WeakMap<object, Callable[]>();
-  const resolving = new Set<ExpressionIR>();
+  const resolving = new Map<ExpressionIR, Set<NativeLexicalScope>>();
 
   function targets(value: ExpressionIR, scope: NativeLexicalScope): Callable[] {
+    const contexts = resolving.get(value) ?? new Set<NativeLexicalScope>();
+    if (contexts.has(scope)) return [];
+    contexts.add(scope);
+    resolving.set(value, contexts);
+    try {
+      return resolveTargets(value, scope);
+    } finally {
+      contexts.delete(scope);
+    }
+  }
+
+  function recordField(
+    value: ExpressionIR,
+    property: string,
+    scope: NativeLexicalScope
+  ): Callable[] {
+    const visited = new Set<Binding>();
+    while (value.kind === 'reference' || value.kind === 'narrow') {
+      if (value.kind === 'narrow') {
+        value = value.value;
+        continue;
+      }
+      const binding = scope.lookup(value.name);
+      if (!binding?.value || visited.has(binding)) return [];
+      visited.add(binding);
+      value = binding.value;
+      scope = binding.environment;
+    }
+    if (value.kind === 'conditional')
+      return [
+        ...recordField(value.then, property, scope),
+        ...recordField(value.otherwise, property, scope),
+      ];
+    if (value.kind !== 'record') return [];
+    const field = value.entries.find((entry) => entry.key === property);
+    return field ? targets(field.value, scope) : [];
+  }
+
+  function resolveTargets(value: ExpressionIR, scope: NativeLexicalScope): Callable[] {
+    if (value.kind === 'narrow') return targets(value.value, scope);
+    if (value.kind === 'conditional')
+      return [...targets(value.then, scope), ...targets(value.otherwise, scope)];
+    if (value.kind === 'member') return recordField(value.object, value.property, scope);
+    if (value.kind === 'element' && value.index.kind === 'literal')
+      return recordField(value.object, String(value.index.value), scope);
     if (value.kind === 'function') return [{ kind: 'authored', fn: value.function, scope }];
     if (value.kind === 'operation' && nativeDisposers.has(value.operation))
       return [{ kind: 'native-disposer', operation: value }];
@@ -345,61 +420,57 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
           ? targets(binding.value, binding.environment)
           : [];
     }
-    if (value.kind !== 'helper-call') return [];
-    const binding = scope.lookup(value.name);
+    if (value.kind !== 'helper-call' && value.kind !== 'call') return [];
     const callees = targets(
-      { kind: 'reference', name: value.name, type: 'function', span: value.span },
+      value.kind === 'call'
+        ? value.callee
+        : { kind: 'reference', name: value.name, type: 'function', span: value.span },
       scope
     );
     // Resolve arguments before entering a result-producing body: a finite
     // wrapper(wrapper(draw)) is not recursive authored execution.
     const arguments_ = value.arguments.map((argument) =>
-      argument.type === 'function' ? targets(argument, scope) : undefined
+      callableType(argument.type) ? targets(argument, scope) : undefined
     );
-    if (resolving.has(value)) throw new Error('Recursive checked callable provenance.');
-    resolving.add(value);
-    try {
-      const result: Callable[] = [];
-      for (const target of callees) {
-        const callee = authored(target);
-        const local = bind(callee.fn, callee.scope, value.arguments, scope, arguments_);
-        function returns(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
-          let current = initial;
-          for (const statement of body) {
-            if (statement.kind === 'const') current = current.bind(statement.name, statement.value);
-            else if (statement.kind === 'return') {
-              if (statement.value) result.push(...targets(statement.value, current));
-              return true;
-            } else if (statement.kind === 'throw') return true;
-            else if (statement.kind === 'try') {
-              const start = result.length;
-              const tried = returns(statement.body, current);
-              const caught = statement.catch
-                ? returns(
-                    statement.catch.body,
-                    statement.catch.name
-                      ? current.parameter(statement.catch.name, undefined, current, null)
-                      : current
-                  )
-                : true;
-              const end = result.length;
-              const finalized = statement.finally ? returns(statement.finally, current) : false;
-              if (finalized) result.splice(start, end - start);
-              if (finalized || (tried && caught)) return true;
-            } else if (statement.kind === 'if') {
-              const then = returns(statement.then, current);
-              const otherwise = returns(statement.otherwise, current);
-              if (then && otherwise) return true;
-            }
+    const result: Callable[] = [];
+    for (const target of callees) {
+      if (target.kind === 'native-disposer') continue;
+      const callee = authored(target);
+      const local = bind(callee.fn, callee.scope, value.arguments, scope, arguments_);
+      function returns(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
+        let current = initial.block(body);
+        for (const statement of body) {
+          if (statement.kind === 'const') current = current.bind(statement.name, statement.value);
+          else if (statement.kind === 'return') {
+            if (statement.value) result.push(...targets(statement.value, current));
+            return true;
+          } else if (statement.kind === 'throw') return true;
+          else if (statement.kind === 'try') {
+            const start = result.length;
+            const tried = returns(statement.body, current);
+            const caught = statement.catch
+              ? returns(
+                  statement.catch.body,
+                  statement.catch.name
+                    ? current.parameter(statement.catch.name, undefined, current, null)
+                    : current
+                )
+              : true;
+            const end = result.length;
+            const finalized = statement.finally ? returns(statement.finally, current) : false;
+            if (finalized) result.splice(start, end - start);
+            if (finalized || (tried && caught)) return true;
+          } else if (statement.kind === 'if') {
+            const then = returns(statement.then, current);
+            const otherwise = returns(statement.otherwise, current);
+            if (then && otherwise) return true;
           }
-          return false;
         }
-        returns(callee.fn.body, local);
+        return false;
       }
-      return result;
-    } finally {
-      resolving.delete(value);
+      returns(callee.fn.body, local);
     }
+    return result;
   }
 
   function bind(
@@ -407,16 +478,19 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     definition: NativeLexicalScope,
     args?: readonly ExpressionIR[],
     caller = NativeLexicalScope.empty(),
-    callableArguments?: readonly (Callable[] | undefined)[]
+    callableArguments?: readonly (Callable[] | undefined)[],
+    visitDefaults = false
   ) {
     let local = definition;
     for (const [index, parameter] of fn.parameters.entries()) {
       const supplied = args?.[index];
-      const actual =
-        supplied?.kind === 'undefined'
+      const actual = !args
+        ? undefined
+        : supplied?.kind === 'undefined'
           ? (parameter.default ?? supplied)
           : (supplied ?? parameter.default);
       const argumentScope = actual === supplied ? caller : local;
+      if (visitDefaults && actual && actual !== supplied) expression(actual, argumentScope);
       const formal: ExpressionIR = {
         kind: 'reference',
         name: parameter.name,
@@ -433,10 +507,11 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
             : { kind: 'undefined' }
           : nativeShape(formal, NativeLexicalScope.empty())
       );
-      if (parameter.type === 'function' && args) {
+      if (callableType(parameter.type) && args) {
         callableParameters.set(
           local.lookup(parameter.name)!,
-          callableArguments?.[index] ?? (actual ? targets(actual, argumentScope) : [])
+          (actual === supplied ? callableArguments?.[index] : undefined) ??
+            (actual ? targets(actual, argumentScope) : [])
         );
       }
     }
@@ -491,8 +566,12 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     args?: readonly ExpressionIR[],
     caller = NativeLexicalScope.empty()
   ) {
-    if (active.has(fn)) throw new Error('Vue2 native context traversal encountered recursive IR.');
-    const local = bind(fn, definition, args, caller);
+    // Ordinary functions may recurse. Native child/result construction still
+    // needs canonical shape proof at its use; revisiting an active body adds no
+    // lexical syntax and must not reject unrelated ordinary execution.
+    const contexts = active.get(fn) ?? new Set<NativeLexicalScope>();
+    if (contexts.has(definition)) return;
+    const local = bind(fn, definition, args, caller, undefined, true);
     for (const parameter of fn.parameters) {
       const shape = nativeShape(
         {
@@ -510,26 +589,31 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       else parameterFacts.set(parameter, [...(previous ?? []), shape]);
     }
     invoked.add(fn);
-    active.add(fn);
+    contexts.add(definition);
+    active.set(fn, contexts);
     try {
       statements(fn.body, local, fn === ir.setup);
     } finally {
-      active.delete(fn);
+      contexts.delete(definition);
     }
   }
 
   function expression(value: ExpressionIR, scope: NativeLexicalScope) {
     switch (value.kind) {
+      case 'call':
       case 'helper-call': {
+        if (value.kind === 'call') expression(value.callee, scope);
         value.arguments.forEach((argument) => expression(argument, scope));
-        const binding = scope.lookup(value.name);
         const callees = targets(
-          { kind: 'reference', name: value.name, type: 'function', span: value.span },
+          value.kind === 'call'
+            ? value.callee
+            : { kind: 'reference', name: value.name, type: 'function', span: value.span },
           scope
         );
-        if (!callees.length)
+        if (!callees.length && value.kind === 'helper-call')
           throw new Error(`Vue2 native context traversal lost helper ${value.name}.`);
         for (const target of callees) {
+          if (target.kind === 'native-disposer') continue;
           const callee = authored(target);
           enter(callee.fn, callee.scope, value.arguments, scope);
         }
@@ -537,8 +621,15 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       }
       case 'conditional':
         expression(value.condition, scope);
-        expression(value.whenTrue, scope);
-        expression(value.whenFalse, scope);
+        expression(value.then, scope);
+        expression(value.otherwise, scope);
+        return;
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'intrinsic':
+      case 'object-spread':
+        for (const operand of ordinaryValueChildren(value)!) expression(operand, scope);
         return;
       case 'function':
         // Helpers are visited at their calls, not with a fictitious legacy
@@ -558,6 +649,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
         return;
       }
       case 'authored-hook': {
+        for (const argument of value.arguments ?? []) expression(argument, scope);
         const hook = hooks.get(value.hookId);
         if (!hook) throw new Error(`Vue2 native context traversal lost hook ${value.hookId}.`);
         enter(hook, moduleScope);
@@ -610,7 +702,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     initial: NativeLexicalScope,
     setup: boolean
   ): boolean {
-    let scope = initial;
+    let scope = initial.block(body);
     for (const statement of body) {
       if (statement.kind === 'const') {
         expression(statement.value, scope);
@@ -619,7 +711,7 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       else if (statement.kind === 'return') {
         if (statement.value) {
           expression(statement.value, scope);
-          if (setup && statement.value.type === 'function') renderer(statement.value, scope);
+          if (setup && callableType(statement.value.type)) renderer(statement.value, scope);
         }
         return true;
       } else if (statement.kind === 'throw') {

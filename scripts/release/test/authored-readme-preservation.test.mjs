@@ -33,6 +33,7 @@ test('release metadata keeps authored semantic sections byte-for-byte across rep
   try {
     for (const file of ['sync-metadata.mjs', 'readme-metadata.mjs', 'lib.mjs', 'governance.mjs'])
       copy(`scripts/release/${file}`);
+    copy('scripts/build/proto-source.mjs');
     copy('package.json');
     copy('VERSION');
     cpSync(join(ROOT, 'spec/versions'), join(root, 'spec/versions'), { recursive: true });

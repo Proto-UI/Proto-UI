@@ -149,9 +149,9 @@ export default definePrototype({name:'diagnostic-subject',setup(){
       ok: false,
       diagnostics: [
         {
-          code: 'PUI1004',
+          code: 'PUI1006',
           category: 'unsupported-input',
-          message: 'Call accessible.part is outside the supported semantic operation set.',
+          message: 'Undeclared object member part.',
           span: {
             file: 'nested/subject.proto.ts',
             start: input.indexOf("accessible.part('content')"),

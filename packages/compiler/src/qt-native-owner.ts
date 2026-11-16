@@ -60,16 +60,8 @@ export function createOwner(host, options) {
   topology=createTopology({host,alive:ensure,isAlive:()=>alive&&!disposing,active:()=>alive&&!setup&&!disposing,setup:ensureSetup,runtime,ready:()=>alive&&!setup&&!disposing&&view&&!!root,root:()=>view?root:null,invoke,changed:()=>{options.changed();style.refresh();},exposes:()=>exposes,ownedState:moduleState,later:options.later,
     expose(key,value){expose(key,typeof value==='function'?function(){external();return invoke(value,Array.from(arguments),false,'expose-method');}:value.external||value);},
     setPresent(next){runtime();present=next;if(!disposing)schedule(false);}});
-  presentation=createPresentation({host,alive:ensure,active:()=>alive&&!setup&&!disposing,setup:ensureSetup,runtime,ready:()=>alive&&!setup&&!disposing&&view&&!!root,root:()=>view?root:null,invoke,changed:()=>{options.changed();style.refresh();},getProps:()=>resolved,isProvided:(key)=>own(raw,key),emit,ownedState:moduleState,refreshFacts:()=>interaction.refresh(),
-    claimEntries:()=>topology.claimEntries(),tableFamilies:options.tableFamilies,
-    expose(key,value){expose(key,publicValue(value));},
-    setPresent(next){runtime();present=next;if(!disposing)schedule(false);},
-    declareTransition(){
-      def.props.define({open:{type:'boolean',empty:'fallback'},defaultOpen:{type:'boolean',empty:'fallback'},appear:{type:'boolean',empty:'fallback'},enterDuration:{type:'number',empty:'fallback'},leaveDuration:{type:'number',empty:'fallback'},interrupt:{type:'enum',empty:'fallback',options:['reverse','wait','immediate']}});
-      def.props.setDefaults({defaultOpen:false,appear:false,enterDuration:300,leaveDuration:200,interrupt:'reverse'});
-      def.props.watch(['open','interrupt','enterDuration','leaveDuration'],()=>presentation.propsApplied());
-      def.expose.event('beforeEnter');def.expose.event('afterEnter');def.expose.event('beforeLeave');def.expose.event('afterLeave');
-    }});
+  presentation=createPresentation({host,setup:ensureSetup,alive:ensure,ready:()=>alive&&!setup&&!disposing&&view&&!!root,ownedState:moduleState,refreshFacts:()=>interaction.refresh(),
+    claimEntries:()=>topology.claimEntries(),tableFamilies:options.tableFamilies});
   Object.assign(interaction,controls.hooks);
   Object.assign(interaction,topology.hooks,presentation.hooks);
   for(const name of Object.keys(interaction))if(name.startsWith('as')){const acquire=interaction[name];interaction[name]=function(){topology.recordHook(name);return acquire.apply(undefined,arguments);};}
@@ -245,11 +237,11 @@ export function createOwner(host, options) {
     feedback:{style},event:interaction.event,anatomy:topology.anatomy,positioning:topology.positioning};
   owner={def,style,interaction,exposes,scope,identity:{},
     getNativeRoot(){ensure();return root;},getHost(){ensure();return host;},parentNativeRoot(){ensure();const seen=new Set();for(let node=host.logicalParent||host.parent;node;node=node.logicalParent||node.parent){if(seen.has(node))throw new Error('Cyclic native AX ancestry');seen.add(node);if(node.nativeRoot)return node.nativeRoot;if(node.owner&&node.owner!==owner&&node.owner.getNativeRoot)return node.owner.getNativeRoot();}return null;},
-    setRender(fn) {ensureSetup();render=fn;},getProps() {ensure();return resolved;},hydrate,created() {ensureSetup();Object.freeze(exposes);setup=false;presentation.created();topology.created();fire('created');},update() {external();schedule(true);},reconcile,
+    setRender(fn) {ensureSetup();render=fn;},getProps() {ensure();return resolved;},hydrate,created() {ensureSetup();Object.freeze(exposes);setup=false;topology.created();fire('created');},update() {external();schedule(true);},reconcile,
     getExposes() {external();return exposes;},nativeEvent:(name,event)=>interaction.nativeEvent(name,event,false),globalNativeEvent(name,event){interaction.nativeEvent(name,event,true);topology.nativeEvent(name,event);},
     focusChanged:(next)=>interaction.focusChanged(next),textFocusChanged:(next)=>interaction.textFocusChanged(next),accessibleAction:(key)=>interaction.action(key),
     textEdited(text,preedit) {controls.textEvent('input',text,preedit);interaction.nativeEvent('input',{accepted:false,text,preedit},false);},textCommitted(text) {controls.textEvent('change',text,null);interaction.nativeEvent('change',{accepted:false,text},false);},compositionChanged(preedit,text) {controls.composition(preedit,text);},
-    imageStatus(status,generation) {controls.imageStatus(status,generation);},scrollFacts(snapshot) {controls.scrollFacts(snapshot);},transitionComplete(ticket){presentation.transitionComplete(ticket);},geometryChanged(){if(view)topology.geometryChanged();},topologyChanged(){scope.api.rebind();if(view){topology.refresh();presentation.refresh();}schedule(false);},
+    imageStatus(status,generation) {controls.imageStatus(status,generation);},scrollFacts(snapshot) {controls.scrollFacts(snapshot);},geometryChanged(){if(view)topology.geometryChanged();},topologyChanged(){scope.api.rebind();if(view){topology.refresh();presentation.refresh();}schedule(false);},
     dispose() {
       if(!alive||disposing)return;disposing=true;++ticket;queued=false;let failure;
       try{detach();}catch(error){failure=error;}

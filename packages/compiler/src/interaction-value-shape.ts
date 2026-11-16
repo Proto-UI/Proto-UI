@@ -39,6 +39,7 @@ export function interactionValueAlternatives(
     value: ExpressionIR,
     scope: NativeLexicalScope
   ): InteractionValueAlternative[] | null {
+    if (value.kind === 'narrow') return analyze(value.value, scope);
     if (value.kind === 'reference') {
       const binding = scope.lookup(value.name);
       if (binding) {
@@ -62,8 +63,8 @@ export function interactionValueAlternatives(
       return results;
     }
     if (value.kind === 'conditional') {
-      const a = analyze(value.whenTrue, scope),
-        b = analyze(value.whenFalse, scope);
+      const a = analyze(value.then, scope),
+        b = analyze(value.otherwise, scope);
       return a && b ? [...a, ...b] : null;
     }
     if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator)) {
@@ -71,13 +72,17 @@ export function interactionValueAlternatives(
       const right = analyze(value.right, scope);
       return left && right ? [...left, ...right] : null;
     }
-    if (value.kind === 'helper-call') {
+    if (value.kind === 'helper-call' || value.kind === 'call') {
       if (activeCalls.has(value)) return null;
-      const binding = scope.lookup(value.name);
-      if (!binding?.value) return null;
       activeCalls.add(value);
       try {
-        const targets = analyze(binding.value, binding.environment);
+        const binding = value.kind === 'helper-call' ? scope.lookup(value.name) : undefined;
+        const targets =
+          value.kind === 'call'
+            ? analyze(value.callee, scope)
+            : binding?.value
+              ? analyze(binding.value, binding.environment)
+              : null;
         if (!targets) return null;
         const returns: InteractionValueAlternative[] = [];
         for (const target of targets) {
@@ -87,7 +92,15 @@ export function interactionValueAlternatives(
           // with the same identifier. Actual arguments keep the caller frame.
           let local = target.scope;
           fn.parameters.forEach((parameter, index) => {
-            local = local.parameter(parameter.name, value.arguments[index], scope, null);
+            const supplied = value.arguments[index];
+            const useDefault =
+              (!supplied || supplied.kind === 'undefined') && parameter.default !== undefined;
+            local = local.parameter(
+              parameter.name,
+              useDefault ? parameter.default : supplied,
+              useDefault ? local : scope,
+              null
+            );
           });
           const returned = body(fn.body, local, returns);
           if (returned === null) return null;

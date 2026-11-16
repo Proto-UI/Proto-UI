@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createServer as createViteServer } from '../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { createServer as createViteServer } from 'vite';
 import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import type { Browser, Page } from '../../../apps/www/node_modules/playwright-core/types/types';
 
@@ -320,7 +320,8 @@ beforeAll(async () => {
           'finite source-presentation/presentation.css; no general Tailwind/preset coverage',
         projection: {
           feedback: 'Root[data-pui-style]',
-          template: 'ordinary child computed style and layout; host-private carriers are not the oracle',
+          template:
+            'ordinary child computed style and layout; host-private carriers are not the oracle',
         },
         observationUrls: ['reference', 'runtime', 'source', 'source-duplicate-activation'].map(
           (target) => `${baseUrl}/?target=${target}`
