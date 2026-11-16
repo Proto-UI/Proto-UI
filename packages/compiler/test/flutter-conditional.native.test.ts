@@ -264,4 +264,29 @@ describe.skipIf(!dart)('Dart execution of emitted conditional statements', () =>
       { trace: 'facfacx', empty: true, optionalEmpty: true, skipped: true, caught: true }
     );
   });
+
+  it('preserves optional closure result types for bare returns and fallthrough', () => {
+    runConditionals(
+      'optional-return-types',
+      `const bare = (flag: boolean) => { if (!flag) { return; } return 4; };
+       const implicit = (flag: boolean) => { if (flag) { return 5; } };
+       const nullable = (flag: number) => { if (flag === 0) { return; } return flag === 1 ? null : 6; };
+       const barePresent = bare(true) ?? 9;
+       const bareAbsent = bare(false) === undefined;
+       const implicitPresent = implicit(true) ?? 9;
+       const implicitAbsent = implicit(false) === undefined;
+       const nullablePresent = nullable(2) ?? 9;
+       const nullableNull = nullable(1) === null;
+       const nullableAbsent = nullable(0) === undefined;`,
+      {
+        barePresent: 4,
+        bareAbsent: true,
+        implicitPresent: 5,
+        implicitAbsent: true,
+        nullablePresent: 6,
+        nullableNull: true,
+        nullableAbsent: true,
+      }
+    );
+  });
 });
