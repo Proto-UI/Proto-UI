@@ -1587,19 +1587,11 @@ function feedbackStyleReceiver(method, name) {
   return receiver && ts.isIdentifier(receiver) ? receiver.text : undefined;
 }
 
-function directBodyCall(callback, call) {
-  return (
-    callback.body === call ||
-    (ts.isExpressionStatement(call.parent) && callback.body === call.parent.parent)
-  );
-}
-
 function isOperationInCallback(callback, call) {
   return (
-    callback.body === call ||
-    (ts.isExpressionStatement(call.parent) &&
-      ts.findAncestor(call, ts.isFunctionLike) === callback &&
-      nodeWithin(call, callback.body))
+    !!callback.body &&
+    ts.findAncestor(call, ts.isFunctionLike) === callback &&
+    nodeWithin(call, callback.body)
   );
 }
 
@@ -1629,16 +1621,6 @@ function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(),
   }
   check(callback.body);
   return safe;
-}
-
-function isDirectSetupHelperCall(call, setup) {
-  if (directBodyCall(setup, call)) return true;
-  const binding = call.parent;
-  return (
-    isConstStyleBinding(binding, call) &&
-    ts.isVariableStatement(binding.parent.parent) &&
-    binding.parent.parent.parent === setup.body
-  );
 }
 
 function inspectedHelperReferences(helper, scope) {
@@ -1732,7 +1714,7 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope) {
       call.expression !== reference ||
       !setup ||
       !isCanonicalPrototypeSetup(setup, false) ||
-      !isDirectSetupHelperCall(call, setup)
+      !isOperationInCallback(setup, call)
     )
       return false;
     const definition = parameterName(setup);
@@ -1803,16 +1785,15 @@ function isOwnedDecorationStyleArgument(argument, scope) {
       !declarationOwner ||
       !ruleReceiver ||
       !ts.isIdentifier(ruleReceiver) ||
-      ruleReceiver.text !== parameterName(declarationOwner) ||
       !isOperationInCallback(declarationOwner, rule) ||
-      !isCanonicalPrototypeSetup(declarationOwner, false) ||
       !receiverUsesAreDirect(callback, receiver)
     )
       return false;
     definition = ruleReceiver.text;
-  } else if (isCanonicalPrototypeSetup(callback, false)) {
-    if (parameterName(callback) !== receiver) return false;
-  } else if (!hasVerifiedDecorationHelperCalls(callback, receiver, scope)) return false;
+  }
+  if (isCanonicalPrototypeSetup(declarationOwner, false)) {
+    if (parameterName(declarationOwner) !== definition) return false;
+  } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope)) return false;
 
   if (!declarationOwner.body || !ts.isBlock(declarationOwner.body)) return false;
   const binding = scopeDeclaring(target.text, scope)?.bindings.get(

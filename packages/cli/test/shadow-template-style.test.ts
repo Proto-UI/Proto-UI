@@ -279,6 +279,78 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it('classifies targeted Rule styles declared by a verified setup helper', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declarePaint(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        const enabled = definition.state.bool('enabled', true);
+        definition.rule({
+          when: w => w.state(enabled).eq(true),
+          intent: i => i.feedback.style.to(target).use(tw('p-[10%]')),
+        });
+        return target;
+      }
+      definePrototype({ name: 'helper-rule', setup(def) {
+        const target = declarePaint(def);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('keeps decoration scope when setup retains the targeted use disposer', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'decoration-disposer', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const stop = def.feedback.style.to(target).use(tw('p-[10%]'));
+        def.lifecycle.onUnmounted(stop);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('follows a verified setup helper call through a conditional block', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declarePaint(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'conditional-helper', setup(def) {
+        if (enabled) {
+          const decoration = declarePaint(def);
+          return r => r.decoration(decoration);
+        }
+        return r => r.slot();
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('keeps preflight for a helper called from an unverified nested callback', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declarePaint(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'deferred-helper', setup(def) {
+        register(() => declarePaint(def));
+        return r => r.slot();
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('follows a renamed re-export of a synchronous setup helper', async () => {
     const { artifact } = await generate(
       `
