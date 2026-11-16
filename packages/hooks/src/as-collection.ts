@@ -1,9 +1,4 @@
-import type {
-  CollectionConfigPatch,
-  CollectionExposes,
-  CollectionHandles,
-  CollectionItemSnapshot,
-} from '@proto.ui/core';
+import type { CollectionConfigPatch, CollectionExposes, CollectionHandles } from '@proto.ui/core';
 import type { CollectionPort } from '@proto.ui/module-collection';
 import type { PropsBaseType } from '@proto.ui/types';
 
@@ -24,14 +19,13 @@ export const asCollection = definePrivilegedAsHook<PropsBaseType, CollectionHand
     const store = {
       configured: false,
       offOrder: undefined as (() => void) | undefined,
-      items: [] as readonly CollectionItemSnapshot[],
     };
 
     const sync = () => {
       if (!store.configured) return;
-      const items = collection.readProviderItems();
-      store.items = items;
-      count.set(items.length, 'reason: asCollection.sync => collection count');
+      // Count synchronization consumes structure only; metadata stays live in
+      // getItems rather than being eagerly read and discarded on every update.
+      count.set(collection.readProviderCount(), 'reason: asCollection.sync => collection count');
     };
 
     const handle: CollectionHandles = {

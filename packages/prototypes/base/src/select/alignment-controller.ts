@@ -236,7 +236,10 @@ export function createSelectAlignmentController(options: {
     if (mode === 'popper') {
       const preserveFocus = !initial && lastAcceptedFocusShape === focusShape;
       const complete = () => {
-        if (!current() || phase === 'valid') return;
+        // A previous popper request may already have reached valid. The new
+        // request still owns a fresh admission (including close/reopen); its
+        // identity, not the previous presentation phase, decides delivery.
+        if (!current()) return;
         notify(run, 'valid');
         if (!current()) return;
         applied = { id, run, row: null, fallback: null, focusShape, preserveFocus, current };

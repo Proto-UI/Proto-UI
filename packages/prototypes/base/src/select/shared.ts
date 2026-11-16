@@ -96,11 +96,11 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
     content: { cardinality: { min: 0, max: 1 } },
     surface: { cardinality: { min: 0, max: 1 } },
     viewport: { cardinality: { min: 0, max: 1 } },
-    'item-text': { cardinality: { min: 0, max: 100 } },
+    'item-text': { cardinality: { min: 0, max: '*' } },
     group: { cardinality: { min: 0, max: 100 } },
     label: { cardinality: { min: 0, max: 100 } },
     separator: { cardinality: { min: 0, max: 100 } },
-    item: { cardinality: { min: 0, max: 100 } },
+    item: { cardinality: { min: 0, max: '*' } },
   },
   relations: [
     { kind: 'contains', parent: 'root', child: 'trigger' },

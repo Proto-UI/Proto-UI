@@ -111,9 +111,10 @@ export const asCollectionItem = definePrivilegedAsHook<PropsBaseType, Collection
             string,
           () => buildSnapshot()
         );
-        def.expose.method(metaExposeKey as keyof CollectionItemExposes & string, () =>
-          buildSnapshot()
-        );
+        // The provider computes structural fields from its one ordered read.
+        // Publishing another complete snapshot here would sort the same domain
+        // once per item before the provider overwrites all those positions.
+        def.expose.method(metaExposeKey as keyof CollectionItemExposes & string, readMeta);
 
         store.configured = true;
       },

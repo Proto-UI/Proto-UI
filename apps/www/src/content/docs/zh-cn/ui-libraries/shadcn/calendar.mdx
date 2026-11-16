@@ -25,6 +25,8 @@ host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时�
 
 本页选择 Rhea 的32px日期/导航格（`h-8 w-8`）及`p-3`布局（以16px根字号计），来源为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。独立 [base-nova registry](https://ui.shadcn.com/r/styles/base-nova/calendar.json) 的2026-10-10参考仍保留28px/p-2兼容配方；两者都不为匹配截图随意放大。真实focus与selected仍是相互独立的Base事实；这不是完整react-day-picker兼容或原生视觉验收。
 
+Rhea 月／年选择器使用受支持的默认外观与小尺寸，并完整组合 Select Content、Surface、Viewport 和 ItemText；弹层绘制与滚动分别由公开部件承担，保留全部 101 个年份选项。
+
 ## 验证边界
 
 当前仍为 WIP。Calendar 有实际 host 的局部行为测试，包含 WC、React、Vue、Vue2；公开 Props/Exposes/AsHook 的域另有独立负控。当前 CLI collector 会漏掉合法继承 Calendar / 嵌套 Button 状态的部分 token，因此状态样式的生成 CSS 与浏览器视觉保真尚未验收。Compiler 解释能力由另一 owner 负责，不能反过来约束合法 Prototype 语义。原生 GPUI/Qt、compiled/packed 一致性、绑定确切提交的浏览器证据和独立验收仍未完成。

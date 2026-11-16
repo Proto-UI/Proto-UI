@@ -113,7 +113,15 @@ it('formats caption month options with explicit or default host Intl locale inde
         timeZone: 'UTC',
       })
     );
-    expect(items.map((item) => item.children?.[0])).toEqual(expected);
+    // The Rhea profile requires the public ItemText part; the option label is
+    // carried by that part, so the same twelve labels are asserted through it.
+    expect(
+      items.map((item) => {
+        const text = item.children?.[0] as Extract<DemoNode, { kind: 'proto' }>;
+        expect(text.prototypeId).toBe('shadcn-select-item-text');
+        return text.children?.[0];
+      })
+    ).toEqual(expected);
     expect(items.map((item) => item.props?.textValue)).toEqual(expected);
     expect(items.map((item) => item.props?.value)).toEqual(
       Array.from({ length: 12 }, (_, index) => String(index + 1))
