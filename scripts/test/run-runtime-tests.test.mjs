@@ -1299,12 +1299,12 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     );
   });
   it('rejects empty shards, unknown phases, ambiguous filters and invalid shard selections', () => {
-    for (const shard of [undefined, '', '0/8', '9/8', '1/7', '1/99', 'x/8'])
+    for (const shard of [undefined, '', '0/10', '11/10', '1/7', '1/99', 'x/10'])
       assert.throws(() => selectBrowserShard(shard), /Expected browser shard/);
-    assert.throws(() => browserShards([], 8), /nonempty/);
+    assert.throws(() => browserShards([], 10), /nonempty/);
     assert.throws(() => browserShards(['same', 'same'], 2), /unique/);
     assert.throws(() => createRuntimeTestPlan([], { phase: 'typo' }), /Unknown/);
-    assert.throws(() => createRuntimeTestPlan([], { phase: 'general', shard: '1/8' }), /requires/);
+    assert.throws(() => createRuntimeTestPlan([], { phase: 'general', shard: '1/10' }), /requires/);
     assert.throws(
       () => createRuntimeTestPlan(['some-filter'], { phase: 'general' }),
       /cannot be combined/
@@ -1612,7 +1612,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
     [
       'unknown slot',
       (r) => {
-        r.slot = 'browser-99-of-8';
+        r.slot = `browser-99-of-${BROWSER_SHARD_COUNT}`;
       },
     ],
     [
@@ -1636,7 +1636,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
     [
       'slot payload swap',
       (r) => {
-        r.payload.shard = '8/8';
+        r.payload.shard = '2/10';
       },
     ],
   ])
@@ -1719,7 +1719,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
       readFileSync(path.join(directory, 'output'), 'utf8').trim().slice('matrix='.length)
     );
     assert.equal(matrix.include.length, BROWSER_SHARD_COUNT);
-    assert.equal(matrix.include[0].slot, 'browser-1-of-8');
+    assert.equal(matrix.include[0].slot, `browser-1-of-${BROWSER_SHARD_COUNT}`);
     run('plan', path.join(directory, 'wrong-checkout'), { GITHUB_SHA: 'b'.repeat(40) }, 1);
     run('finish', planDir, { PROTO_UI_RUNTIME_SLOT: 'plan', RUNTIME_CI_OUTCOME: 'success' });
     const finished = JSON.parse(readFileSync(path.join(planDir, 'receipt.json'), 'utf8'));
@@ -1728,7 +1728,7 @@ describe('CI partial-rerun receipt protocol (no browser or server)', () => {
     assert.equal(finished.outcome, 'success');
     const failedDir = path.join(directory, 'failed-before-vitest');
     run('finish', failedDir, {
-      PROTO_UI_RUNTIME_SLOT: 'browser-1-of-8',
+      PROTO_UI_RUNTIME_SLOT: `browser-1-of-${BROWSER_SHARD_COUNT}`,
       RUNTIME_CI_OUTCOME: 'failure',
     });
     const failed = JSON.parse(readFileSync(path.join(failedDir, 'receipt.json'), 'utf8'));

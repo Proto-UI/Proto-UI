@@ -616,7 +616,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 10
       matrix: ${{ fromJSON(needs.test-plan.outputs.matrix) }}
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
