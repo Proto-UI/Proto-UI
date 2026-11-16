@@ -113,7 +113,10 @@ function captureCallerControlState(node: Element): readonly (string | number | b
 
 function captureSplitCallerProjection(host: HTMLElement): () => boolean {
   const children = Array.from(host.childNodes);
-  const text = children.map((node) => node.textContent);
+  const content = children.map((node) => ({
+    text: node.textContent,
+    slot: node.nodeType === 1 ? (node as Element).getAttribute('slot') : null,
+  }));
   const selector = 'input, textarea, select';
   const controls = children
     .flatMap((node) => {
@@ -125,7 +128,12 @@ function captureSplitCallerProjection(host: HTMLElement): () => boolean {
     .map((node) => ({ node, state: captureCallerControlState(node) }));
   return () =>
     hasSameChildren(host, children) &&
-    children.every((node, index) => node.textContent === text[index]) &&
+    children.every(
+      (node, index) =>
+        node.textContent === content[index].text &&
+        (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
+          content[index].slot
+    ) &&
     controls.every(({ node, state }) => {
       if (!host.contains(node)) return false;
       const current = captureCallerControlState(node);

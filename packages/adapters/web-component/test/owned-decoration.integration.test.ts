@@ -486,7 +486,7 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     }
   });
 
-  it.each(['input value', 'text content'] as const)(
+  it.each(['input value', 'text content', 'slot assignment'] as const)(
     'rejects a split connection reaction that resets caller %s in place',
     (mutation) => {
       const tag = `pui-decoration-caller-state-${++id}`;
@@ -500,9 +500,11 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
             if (mutation === 'input value') {
               const input = owner.querySelector('input')!;
               input.value = 'Reset';
-            } else {
+            } else if (mutation === 'text content') {
               const leaf = owner.querySelector('span')!.firstChild as Text;
               leaf.data = 'Reset';
+            } else {
+              (owner.firstElementChild as HTMLElement).slot = 'other';
             }
             changed = true;
           }
