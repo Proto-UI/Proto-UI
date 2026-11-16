@@ -51,6 +51,17 @@ cases:
       - A-WEB-COMPONENT-0001-ANATOMY
     expectation: anatomy-adapter-conforms
 implementations:
+  - id: anatomy-subscriber-fanout
+    kind: module-test
+    status: passing
+    path: packages/modules/anatomy/test/subscriber-fanout.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-CANCEL
+      - T-ANATOMY-0004-CASE-ORDER
+      - T-ANATOMY-0004-CASE-LIFETIME
+    notes:
+      - Direct Module controls preserve synchronous creation-order delivery, callback reentry, cancellation, disposal, index recreation and failure propagation. An exact-family Map-operation count proves unrelated owners do not add notification work; this is an implementation cost bound, not native elapsed-time acceptance.
   - id: anatomy-runtime-domain-read-cost
     kind: runtime-test
     status: passing

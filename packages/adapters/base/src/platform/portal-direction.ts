@@ -25,7 +25,25 @@ export function retainWebPortalDirection(
         sync();
       })
     : null;
-  const sourceObserver = Mutation ? new Mutation(() => sync()) : null;
+  const sourceObserver = Mutation
+    ? new Mutation((records) => {
+        // Replaying the same source attribute leaves its CSS inputs unchanged.
+        // Structural mutations still matter even when ancestry is identical:
+        // :empty, :has and sibling selectors can change computed direction.
+        if (
+          records.some(
+            (record) =>
+              record.type !== 'attributes' ||
+              record.oldValue !==
+                (record.target as Element).getAttributeNS(
+                  record.attributeNamespace,
+                  record.attributeName!
+                )
+          )
+        )
+          sync();
+      })
+    : null;
   const observeAuthor = () =>
     authorObserver?.observe(target, { attributes: true, attributeFilter: ['dir'] });
   const drainAuthor = () => {
@@ -50,7 +68,11 @@ export function retainWebPortalDirection(
         sourceObserver?.observe(node, {
           childList: true,
           ...(node.nodeType === 1
-            ? { attributes: true, attributeFilter: ['dir', 'style', 'class'] }
+            ? {
+                attributes: true,
+                attributeOldValue: true,
+                attributeFilter: ['dir', 'style', 'class'],
+              }
             : {}),
         });
       }
