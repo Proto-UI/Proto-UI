@@ -21,6 +21,16 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
   expect(document.querySelector('.sl-markdown-content')).toBeNull();
   return heading;
 }
+
+function readMainPaneClasses() {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  const match = columns.match(
+    /const mainPaneClass = isSplash\s*\? isHomepage\s*\? '([^']+)'\s*:\s*'([^']+)'\s*:\s*'([^']+)'/
+  );
+  expect(match, 'homepage, other splash, and reading branches').not.toBeNull();
+  return { homepage: match![1]!, splash: match![2]!, reading: match![3]! };
+}
+
 afterEach(() => document.body.replaceChildren());
 
 it('keeps reading navigation lateral or hidden and preserves the Header and single native-tree owners', () => {
@@ -45,18 +55,18 @@ it('keeps reading navigation lateral or hidden and preserves the Header and sing
 });
 
 it('keeps the outer canvas as the only narrow reading gutter without changing splash spacing', () => {
-  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const globalStyles = readFileSync('apps/www/src/styles/global.css', 'utf8');
-  const classes = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'\s*:\s*'([^']+)'/)!;
+  const { homepage, splash, reading } = readMainPaneClasses();
   expect(globalStyles).toMatch(
     /\.container-wrapper\s*\{[^}]*padding-inline: calc\(var\(--spacing\) \* 4\)/
   );
-  expect(classes[2]!.split(/\s+/).filter((token) => /^(?:md:)?px-/.test(token))).toEqual([
+  expect(reading.split(/\s+/).filter((token) => /^(?:md:)?px-/.test(token))).toEqual([
     'px-0',
     'md:px-0',
   ]);
-  expect(classes[1]).toContain('px-1');
-  expect(classes[1]).toContain('md:px-6');
+  for (const classes of [homepage, splash]) {
+    expect(classes.split(/\s+/)).toEqual(expect.arrayContaining(['px-1', 'md:px-6']));
+  }
 });
 
 describe('reading rail visibility query boundaries (source arithmetic, not browser paint)', () => {
@@ -408,10 +418,9 @@ it.each(['en', 'zh-cn'])(
       `apps/www/src/content/docs/${locale}/internal/demo-matrix.mdx`,
       'utf8'
     );
-    const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
     expect(splash).toContain('template: splash');
     expect(splash).not.toMatch(/^hero:/m);
-    const splashClass = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'/)![1]!;
+    const { splash: splashClass } = readMainPaneClasses();
     expect(splashClass).not.toContain('--docs-reading-inset');
     const titleRule = frame.match(
       /:global\(([^{}]*?h1\[data-site-typography='h1'\])\)\s*\{\s*scroll-margin-top:\s*([^;]+);/
@@ -468,5 +477,3 @@ it('bounds the Header panel by the Header box so one measured viewport cannot pl
   };
   panelContract(css);
 });
-
-
