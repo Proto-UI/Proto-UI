@@ -13,6 +13,33 @@ import { commitChildren } from '../commit';
 import { SlotProjector } from '../slot-projector';
 import type { ShadowInnerSurface } from '../shadow-inner-surface';
 
+type DecorationNodeRecord = {
+  node: Node;
+  parent: Node | null;
+  decoration: boolean;
+  text: string | null;
+  splitChildren?: ChildNode[];
+  splitAttributes?: string;
+};
+
+function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean {
+  const { childNodes } = parent;
+  return (
+    childNodes.length === expected.length &&
+    expected.every((child, index) => childNodes[index] === child)
+  );
+}
+
+function captureSplitAttributes(element: Element, decoration: boolean): string {
+  // The decoration sink replaces paint while immutable attributes retain ownership.
+  return JSON.stringify(
+    Array.from(element.attributes)
+      .filter(({ name }) => !decoration || (name !== 'style' && name !== 'data-pui-style'))
+      .map(({ namespaceURI, name, value }) => [namespaceURI, name, value])
+      .sort()
+  );
+}
+
 export function createWebComponentHostSession<Props extends PropsBaseType>(args: {
   proto: Prototype<Props>;
   tagName: string;
@@ -72,7 +99,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     blueprint: TemplateChildren;
     lease: object;
     document: Document;
-    nodes: Array<{ node: Node; parent: Node | null; decoration: boolean; text: string | null }>;
+    nodes: DecorationNodeRecord[];
+    splitRootChildren?: ChildNode[];
   } | null = null;
   const currentFeedback = () =>
     capsHub?.getPort?.('feedback') as import('@proto.ui/module-feedback').FeedbackPort | undefined;
@@ -132,22 +160,23 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         if (!boundLease) return;
         if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
           throw new Error('[WC Adapter] decoration lease changed during commit');
-        const nodes: Array<{
-          node: Node;
-          parent: Node | null;
-          decoration: boolean;
-          text: string | null;
-        }> = [];
+        const nodes: DecorationNodeRecord[] = [];
         const collect = (parent: Node) => {
           for (const node of Array.from(parent.childNodes)) {
             if (!owned.has(node)) continue;
-            nodes.push({
+            const element = node.nodeType === 1 ? (node as Element) : null;
+            const decoration = element?.hasAttribute('data-pui-owned-decoration') ?? false;
+            const record: DecorationNodeRecord = {
               node,
               parent: node.parentNode,
               text: node.nodeType === 3 ? node.nodeValue : null,
-              decoration:
-                node.nodeType === 1 && (node as Element).hasAttribute('data-pui-owned-decoration'),
-            });
+              decoration,
+            };
+            if (shadowViewTarget && element) {
+              record.splitChildren = Array.from(element.childNodes);
+              record.splitAttributes = captureSplitAttributes(element, decoration);
+            }
+            nodes.push(record);
             collect(node);
           }
         };
@@ -163,6 +192,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           lease: boundLease,
           document: decorationRoot.ownerDocument,
           nodes,
+          splitRootChildren: shadowViewTarget ? Array.from(decorationRoot.childNodes) : undefined,
         };
       },
     };
@@ -180,12 +210,24 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         throw new Error('[WC Adapter] stale decoration blueprint lease');
       if (!equalOwnedTemplateBlueprint(record.blueprint, children))
         throw new Error('[feedback] decoration structural rebind unsupported');
-      for (const { node, parent, decoration, text } of record.nodes) {
+      if (record.splitRootChildren && !hasSameChildren(decorationRoot, record.splitRootChildren))
+        throw new Error('[WC Adapter] decoration physical blueprint changed');
+      for (const {
+        node,
+        parent,
+        decoration,
+        text,
+        splitChildren,
+        splitAttributes,
+      } of record.nodes) {
         if (
           node.ownerDocument !== record.document ||
           node.parentNode !== parent ||
           !decorationRoot.contains(node) ||
-          (text !== null && node.nodeValue !== text)
+          (text !== null && node.nodeValue !== text) ||
+          (splitChildren &&
+            (!hasSameChildren(node, splitChildren) ||
+              captureSplitAttributes(node as Element, decoration) !== splitAttributes))
         )
           throw new Error('[WC Adapter] decoration physical blueprint changed');
         if (decoration) {

@@ -163,7 +163,7 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(host.shadowRoot!.childNodes).toHaveLength(0);
   });
 
-  it.each(['move surface', 'remove text', 'edit text'] as const)(
+  it.each(['move surface', 'remove text', 'edit text', 'rename slot', 'reorder slot'] as const)(
     'rejects invalid split decoration reuse after %s',
     (mutation) => {
       const C = AdaptToWebComponent(
@@ -193,13 +193,16 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       caller.data = 'Updated caller text';
       expect(() => host.update()).not.toThrow();
       expect(surface.contains(text)).toBe(true);
-      expect(surface.querySelector('slot')?.assignedNodes()).toEqual([caller]);
+      const slot = surface.querySelector('slot')!;
+      expect(slot.assignedNodes()).toEqual([caller]);
       expect(surface.contains(leaf)).toBe(true);
       const destination = document.createElement('div');
       document.body.append(destination);
       if (mutation === 'move surface') destination.append(surface);
       if (mutation === 'remove text') text.remove();
       if (mutation === 'edit text') text.data = 'External edit';
+      if (mutation === 'rename slot') slot.name = 'elsewhere';
+      if (mutation === 'reorder slot') surface.prepend(slot);
       expect(() => host.update()).toThrow(
         mutation === 'move surface'
           ? 'stale decoration blueprint lease'
