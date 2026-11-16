@@ -607,12 +607,14 @@
     max-width: 100%;
     min-width: 0;
   }
-  .home-runtime-header
-    [data-site-header-compact-context]
-    .home-runtime-preferences
-    .pui-projection-controls {
-    grid-template-columns: minmax(0, 1fr);
-  }
+}
+/* A resize can remeasure an open Select before the preference owner moves to
+   the wide slot. Keep its one-column layout while it still belongs here. */
+.home-runtime-header
+  [data-site-header-compact-context]
+  .home-runtime-preferences
+  .pui-projection-controls {
+  grid-template-columns: minmax(0, 1fr);
 }
 /* Text enlargement may reflow the toolbar itself. It must never bring back a
    second settings row or shrink the real PUI touch targets to fit. */
