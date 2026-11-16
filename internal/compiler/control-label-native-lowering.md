@@ -1,4 +1,4 @@
-# Control Label source lowering and IR 6
+# Control Label source lowering and IR 7
 
 The source regression was compiler coverage drift. The Button protocol added valid ControlLabel target participation that invokes its existing activation operation. The compiler independently rejected the public hook at import admission; weakening the Button definition would have hidden that missing implementation. Label and Toggle also exposed older, independent source-language gaps when the same real definitions were used as compiler consumers.
 
@@ -18,7 +18,7 @@ Current IR 7 retains checked callable signatures, per-call default expressions, 
 
 The parser also admits static public ControlLabel selection values, enum Props, closed-graph imported data declarations and the public `renderer.r.slot()` alias. Imported type files actually used by a checked signature participate in the source identity. Missing unused type-only imports remain erasable. Native resolved-Props types use conservative declaration/default-layer facts so strict generated types reflect proven non-null values rather than casts that suppress errors.
 
-Input IR explicitly marked schema 5 is rejected. Old source should be recompiled to produce IR 6. Legacy event/control type labels may still be normalized by proven provenance inside a structurally valid current-schema input; that behavior is separate from schema compatibility.
+Input IR explicitly marked schema 5 is rejected. Old source should be recompiled to produce IR 7. Legacy event/control type labels may still be normalized by proven provenance inside a structurally valid current-schema input; that behavior is separate from schema compatibility.
 
 ## Reached support and project publication
 

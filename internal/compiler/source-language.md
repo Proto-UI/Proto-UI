@@ -49,3 +49,15 @@ Structural width subtyping may omit additional pure-data fields. A type annotati
 Top-level runtime calls remain limited to statically admitted declarations. Aliasing a factory preserves this rule; it cannot make an arbitrary function or effectful initializer safe. A source file reached only for an erased type can contain runtime syntax without that syntax being executed or emitted. Once the same file is reached as a runtime dependency, runtime admission applies normally.
 
 The compiler's normalization tests compare semantic IR after removing spans and source provenance, and separately verify that the complete source graph remains recorded. These tests cover declaration renaming, import aliases, re-exports, local type shadowing, setup normalization, and effectful-source rejection.
+
+## Recursive authored functions
+
+Owner decision, recorded 2026-11-16: an authored function may call itself, and a recursive authored function is admitted for **every** native profile. The previous per-target refusal (a recursive helper expansion was rejected) is withdrawn: rejecting recursion by target was a target-analysis limit, not a source-language rule, and it made the same authored definition behave differently depending on the profile it was compiled for.
+
+The safety of that admission rests on the demand analysis rather than on an expansion bound:
+
+- A recursive call is not expanded. The analysis follows known calls through aliases, parameters and returned closures, and a call whose body is still reachable is treated as an open effect, not as a finite expansion.
+- Where the call graph is opaque - an unresolved callee, an exceeded finite analysis boundary, or a call whose body cannot be reached - the analysis keeps the whole reachable IR conservatively instead of dropping it. Effects that cannot be proven inert are therefore retained and still subject to the ordinary ownership and lifecycle guards.
+- A recursion that reaches a setup-only operation from a mounted callback is rejected on that ground, exactly as a non-recursive equivalent would be. Recursion does not create a new capability.
+
+This decision does not weaken the callable-capture rule: a checked callable parameter may still be captured or returned only where the shared analysis proves the capture and its effect context. That rule is proved separately against hostile sources, and its proof is a precondition of this admission rather than a consequence of it.

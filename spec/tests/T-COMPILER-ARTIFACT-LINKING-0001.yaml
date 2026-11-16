@@ -68,7 +68,7 @@ implementations:
         T-COMPILER-ARTIFACT-LINKING-0001-CASE-PROVENANCE,
       ]
     notes:
-      - Fixed old compiler CLI captures remain byte-exact; new output is compiled independently and linked through the production migration API and CLI.
+      - Fixed old compiler CLI captures remain byte-exact; new output is compiled independently and linked through the production migration API of the compiler library.
       - Ordinary Vue2 imports exercise old/current pairing in both directions, association rebinding and repeated mount; this remains simulated-DOM evidence.
 verifies:
   contracts:
