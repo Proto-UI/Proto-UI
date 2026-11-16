@@ -9,23 +9,33 @@ import {
   localSourceCandidates,
   sourceEdges,
 } from './source-resolution';
-import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
+import {
+  nativeInteractionArtifact,
+  nativeInteractionArtifacts,
+  nativeSupportArtifacts,
+} from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
-import { nativeContextScopeArtifact } from './native-context';
+import { nativeVue2AssociationsArtifact } from './native-vue2-associations';
+import { assertNoRemovedLegacyNativeProtocol } from './legacy-native-admission';
+import { buildNativeContextScopeArtifact } from './native-context';
+import {
+  nativeSupportFeatures,
+  nativeSupportPlanFromFeatures,
+  type NativeSupportFeature,
+} from './native-support/plan';
 import {
   validateArtifacts,
   writeArtifactSet,
   type ExclusiveOutputFile,
   type OutputArtifact,
 } from './artifact-output';
-import type { CompileResult } from './ir';
+import { IR_VERSION, type CompileResult } from './ir';
 
 const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
 const shaPattern = /^[0-9a-f]{64}$/;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 64 * 1024 * 1024;
-const LEGACY_CONTEXT_SCOPE_SHA256 =
-  '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
+const CONTEXT_SCOPE_SHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
 const LEGACY = new Map([
   [
     nativeInteractionArtifact.path,
@@ -36,6 +46,35 @@ const LEGACY = new Map([
     'dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a',
   ],
 ]);
+// Exact helper API capture at published candidate ce56274971f51590c8bccb33c1a2763637a88fc5.
+// These are accepted historical source hashes, never guessed from a v1 filename.
+const SPLIT_V1_OWNERSHIP = 'd6c1f565f20dc33d6455ff56f5eede930f99569485342f6958aaf8ea1b726304';
+const SPLIT_V1 = {
+  full: {
+    'native-v1.ts': 'eacee5364bd02267a99d350000069140b037b12e25a2a92b999238bf4f73d067',
+    'adapter-modules-v1.ts': '38898d784b9ac2a453666ad09f9f500fe1ff16912a52205fa11a88d844083730',
+  },
+  'text-single': {
+    'text-single-v1.ts': 'b5be62715e2f473c9311039b73bc03e5b824ecac629e86e34f532763e1748989',
+  },
+  'text-multiline': {
+    'text-multiline-v1.ts': '5961450f1ac4a07057599ae87ded1448c32c0a1b38f562e9fcc9cf17b6fc91ed',
+  },
+  image: { 'image-v1.ts': '819667b90a9f0c1d2c695120fae9b57b77de2bb3311d7709fe3ca323c1ae185f' },
+} as const;
+// Captured from the fixed published IR6 compiler at 08d8f9d9513003dab8b7ee2faf11609ad3ba1f84.
+// ControlLabel changes the full factory ABI; old Text/Image and ownership bytes are unchanged.
+const PUBLISHED_IR6_FULL = [
+  {
+    'native-v1.ts': 'eacee5364bd02267a99d350000069140b037b12e25a2a92b999238bf4f73d067',
+    'adapter-modules-v1.ts': 'de7e00856cfe3f2b2a7bebd4c1cef21eb3778d17f74d27e94b0db2b059289ae1',
+  },
+  {
+    'native-v1.ts': '7e1e126d568f14fdea023445a681e28e3597208a91309bc226727c081f240874',
+    'adapter-modules-v1.ts': '2ce9474dbb7298463587a4702abf9b571c829f9c894c0a627463f4294958d0aa',
+    'control-label-v1.ts': '1c66c36ef3cea992df7165287f5aa7a38e009c9e055e8f5b8d58e62aa9417f01',
+  },
+] as const;
 const record = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 function required(condition: unknown, message: string): asserts condition {
@@ -152,10 +191,7 @@ function verifyManifest(id: string, anchor: string, snapshot: Snapshot): Verifie
     record(value) &&
       value.profile === 'vue2-source-v1' &&
       value.backend === value.profile &&
-      // These are already emitted directories, not an external IR admission
-      // path. Preserve their original provenance and recognize only the two
-      // compiler generations whose native artifact ABIs are checked below.
-      (value.irVersion === 5 || value.irVersion === 6) &&
+      (value.irVersion === 5 || value.irVersion === 6 || value.irVersion === IR_VERSION) &&
       Array.isArray(value.artifacts),
     'Unknown migration provenance/profile/version'
   );
@@ -225,11 +261,109 @@ function verifyManifest(id: string, anchor: string, snapshot: Snapshot): Verifie
   );
   return { id, anchor, snapshot, manifest: value, artifacts, dependencies };
 }
-async function normalizeInteraction(
-  artifacts: readonly OutputArtifact[]
-): Promise<OutputArtifact[]> {
-  const selected = artifacts.filter((file) => file.path.startsWith('.proto-ui/interaction/'));
-  if (!selected.length) return [...artifacts];
+function compatibleV1Artifacts(
+  artifacts: readonly OutputArtifact[],
+  selection: keyof typeof SPLIT_V1
+): OutputArtifact[] {
+  if (selection === 'full') assertNoRemovedLegacyNativeProtocol(artifacts);
+  const retained = artifacts.filter(
+    (file) =>
+      !file.path.startsWith('.proto-ui/interaction/') ||
+      file.path === nativeVue2AssociationsArtifact.path
+  );
+  const full = nativeSupportPlanFromFeatures(nativeSupportFeatures);
+  const support = nativeSupportArtifacts(full);
+  const directory = '.proto-ui/interaction/';
+  const reference = (from: string, target: string) => facade(directory + from, target);
+  const ownership: OutputArtifact = {
+    path: directory + 'ownership-v1.ts',
+    kind: 'source',
+    contents:
+      reference('ownership-v1.ts', directory + 'ownership-v2.ts') +
+      `export { activeScopes } from './focus-ownership-v2';\n`,
+  };
+  if (selection !== 'full') {
+    // The v1 Text/Image option ABI differs from v2. Preserve the verified native
+    // host implementation and bridge only its imported ownership registries.
+    return [
+      ...retained,
+      ...artifacts.filter(
+        (file) => file.path.startsWith(directory) && file.path !== ownership.path
+      ),
+      ...support.filter((file) => /\/(?:ownership|focus-ownership)-v2\.ts$/.test(file.path)),
+      ownership,
+    ];
+  }
+  return [
+    ...retained,
+    ...support,
+    ownership,
+    {
+      path: directory + 'native-v1.ts',
+      kind: 'source',
+      contents: reference('native-v1.ts', full.interactionPath),
+    },
+    {
+      path: directory + 'adapter-modules-v1.ts',
+      kind: 'source',
+      contents:
+        reference('adapter-modules-v1.ts', full.modulesPath) +
+        `export { noteNativeFocusRequest } from './focus-ownership-v2';\n`,
+    },
+  ];
+}
+async function normalizeInteraction(input: VerifiedInput): Promise<OutputArtifact[]> {
+  const { artifacts } = input;
+  const auxiliary = artifacts.find((file) => file.path === nativeVue2AssociationsArtifact.path);
+  if (auxiliary)
+    required(
+      auxiliary.kind === 'source' && auxiliary.contents === nativeVue2AssociationsArtifact.contents,
+      'Unknown or modified Vue2 association transport ABI'
+    );
+  const selected = artifacts.filter(
+    (file) =>
+      file.path.startsWith('.proto-ui/interaction/') &&
+      file.path !== nativeVue2AssociationsArtifact.path
+  );
+  const metadata = input.manifest.nativeSupport;
+  if (!selected.length) {
+    required(metadata === undefined, 'Native support plan has no emitted support');
+    return [...artifacts];
+  }
+  if (metadata !== undefined) {
+    required(
+      record(metadata) &&
+        metadata.version === 2 &&
+        typeof metadata.id === 'string' &&
+        Array.isArray(metadata.features) &&
+        metadata.features.every(
+          (feature) =>
+            typeof feature === 'string' &&
+            (nativeSupportFeatures as readonly string[]).includes(feature)
+        ),
+      'Unknown native support plan metadata'
+    );
+    const plan = nativeSupportPlanFromFeatures(metadata.features as NativeSupportFeature[]);
+    required(
+      metadata.id === plan.id &&
+        JSON.stringify(metadata.features) === JSON.stringify(plan.features),
+      'Native support plan is not canonical'
+    );
+    const expected = nativeSupportArtifacts(plan);
+    required(
+      selected.length === expected.length &&
+        expected.every((target) =>
+          selected.some(
+            (file) =>
+              file.path === target.path &&
+              file.kind === target.kind &&
+              file.contents === target.contents
+          )
+        ),
+      'Unknown or modified native support ABI (version 2)'
+    );
+    return [...artifacts];
+  }
   const legacy =
     selected.length === LEGACY.size &&
     selected.every(
@@ -251,70 +385,93 @@ async function normalizeInteraction(
           LEGACY.get(legacyNativeAdapterModulesArtifact.path),
       'Legacy migration source anchor changed'
     );
-    return [
-      ...artifacts.filter((file) => !LEGACY.has(file.path)),
-      ...nativeInteractionArtifacts('full'),
-    ];
+    return compatibleV1Artifacts(artifacts, 'full');
   }
-  for (const [selection, controlLabel] of [
-    ['full', false],
-    ['full', true],
-    ['text-single', false],
-    ['text-multiline', false],
-    ['image', false],
-  ] as const) {
-    const expected = nativeInteractionArtifacts(selection, { controlLabel });
+  for (const variant of PUBLISHED_IR6_FULL) {
+    const captured = new Map(
+      Object.entries({ 'ownership-v1.ts': SPLIT_V1_OWNERSHIP, ...variant }).map(
+        ([filename, digest]) => ['.proto-ui/interaction/' + filename, digest]
+      )
+    );
     if (
-      selected.length === expected.length &&
-      expected.every((target) =>
-        selected.some(
-          (file) =>
-            file.path === target.path &&
-            file.kind === target.kind &&
-            file.contents === target.contents
-        )
+      selected.length === captured.size &&
+      selected.every(
+        (file) => file.kind === 'source' && hash(file.contents) === captured.get(file.path)
       )
     )
-      return [...artifacts];
+      return compatibleV1Artifacts(artifacts, 'full');
+  }
+  for (const selection of ['full', 'text-single', 'text-multiline', 'image'] as const) {
+    const captured = new Map(
+      Object.entries({ 'ownership-v1.ts': SPLIT_V1_OWNERSHIP, ...SPLIT_V1[selection] }).map(
+        ([filename, digest]) => ['.proto-ui/interaction/' + filename, digest]
+      )
+    );
+    if (
+      selected.length === captured.size &&
+      selected.every(
+        (file) => file.kind === 'source' && hash(file.contents) === captured.get(file.path)
+      )
+    )
+      return compatibleV1Artifacts(artifacts, selection);
+    for (const controlLabel of selection === 'full' ? [false, true] : [false]) {
+      const expected = nativeInteractionArtifacts(selection, { controlLabel });
+      if (
+        selected.length === expected.length &&
+        expected.every((target) =>
+          selected.some(
+            (file) =>
+              file.path === target.path &&
+              file.kind === target.kind &&
+              file.contents === target.contents
+          )
+        )
+      )
+        return compatibleV1Artifacts(artifacts, selection);
+    }
   }
   throw new Error('Unknown or modified native support ABI; migration refuses to guess');
 }
-/** Recognize exact Context ABIs, then emit one current shared scope identity. */
+/** Validate the existing Context ABI without evaluating any supplied source. */
 async function normalizeContext(artifacts: readonly OutputArtifact[]): Promise<OutputArtifact[]> {
   const selected = artifacts.filter((file) => file.path.startsWith('.proto-ui/context/'));
   if (!selected.length) return [...artifacts];
+  const current = buildNativeContextScopeArtifact();
   required(
-    selected.some((file) => file.path === nativeContextScopeArtifact.path),
+    selected.some((file) => file.path === '.proto-ui/context/scope-v1.ts'),
     'Context keys lack their known scope module'
   );
-  let legacyScope: OutputArtifact | undefined;
   for (const file of selected) {
     required(file.kind === 'source', 'Unknown Context artifact kind');
-    if (file.path === nativeContextScopeArtifact.path) {
-      if (file.contents !== nativeContextScopeArtifact.contents) {
+    if (file.path === '.proto-ui/context/scope-v1.ts') {
+      if (hash(file.contents) === CONTEXT_SCOPE_SHA256) {
+        const { legacyNativeContextScopeArtifact } = await import('./native-context-legacy');
         required(
-          hash(file.contents) === LEGACY_CONTEXT_SCOPE_SHA256,
-          'Unknown or modified Context scope ABI'
+          hash(legacyNativeContextScopeArtifact.contents) === CONTEXT_SCOPE_SHA256 &&
+            file.contents === legacyNativeContextScopeArtifact.contents,
+          'Legacy Context migration source anchor changed'
         );
-        legacyScope = file;
-      }
+      } else required(file.contents === current.contents, 'Unknown or modified Context scope ABI');
       continue;
     }
     const lines = file.contents.split('\n');
+    const keyPrefix = lines[2]?.startsWith(
+      "export const key = Object.freeze({ __brand: 'ContextKey' as const, debugName: "
+    )
+      ? "export const key = Object.freeze({ __brand: 'ContextKey' as const, debugName: "
+      : 'export const key = Object.freeze({ debugName: ';
     required(
       lines.length === 4 &&
         lines[3] === '' &&
         lines[0].startsWith('// Source declaration ') &&
         lines[1].startsWith('// Checked value schema ') &&
-        lines[2].startsWith('export const key = Object.freeze({ debugName: ') &&
+        lines[2].startsWith(keyPrefix) &&
         lines[2].endsWith(' });'),
       'Unknown Context key artifact ABI'
     );
     const id: unknown = JSON.parse(lines[0].slice('// Source declaration '.length));
     const schema: unknown = JSON.parse(lines[1].slice('// Checked value schema '.length));
-    const name: unknown = JSON.parse(
-      lines[2].slice('export const key = Object.freeze({ debugName: '.length, -' });'.length)
-    );
+    const name: unknown = JSON.parse(lines[2].slice(keyPrefix.length, -' });'.length));
     required(
       typeof id === 'string' &&
         typeof name === 'string' &&
@@ -324,25 +481,14 @@ async function normalizeContext(artifacts: readonly OutputArtifact[]): Promise<O
             JSON.stringify(id) +
             '\n// Checked value schema ' +
             JSON.stringify(schema) +
-            '\nexport const key = Object.freeze({ debugName: ' +
+            '\n' +
+            keyPrefix +
             JSON.stringify(name) +
             ' });\n',
       'Unknown or modified Context key source identity'
     );
   }
-  if (legacyScope) {
-    // This exact payload predates queued-provider revalidation. Do not rebuild
-    // it with the current emitter or reinterpret the trusted original manifest.
-    const { legacyNativeContextScopeArtifact } = await import('./native-context-legacy');
-    required(
-      hash(legacyNativeContextScopeArtifact.contents) === LEGACY_CONTEXT_SCOPE_SHA256 &&
-        legacyScope.contents === legacyNativeContextScopeArtifact.contents,
-      'Legacy Context migration source anchor changed'
-    );
-  }
-  return artifacts.map((file) =>
-    file.path === nativeContextScopeArtifact.path ? nativeContextScopeArtifact : file
-  );
+  return artifacts.map((file) => (file.path === current.path ? current : file));
 }
 /** Reuse the compiler's source-edge resolver; this is artifact linkage, not DSL admission. */
 function validateSharedImports(
@@ -392,7 +538,8 @@ function sharedSource(file: OutputArtifact): boolean {
   return (
     file.kind === 'source' &&
     file.path.endsWith('.ts') &&
-    (file.path.startsWith('.proto-ui/interaction/') || file.path.startsWith('.proto-ui/context/'))
+    (file.path.startsWith('.proto-ui/interaction/') ||
+      file.path === '.proto-ui/context/scope-v1.ts')
   );
 }
 function sharedPath(original: string): string {
@@ -400,7 +547,7 @@ function sharedPath(original: string): string {
 }
 function facade(localPath: string, target: string): string {
   let relative = path.posix.relative(path.posix.dirname(localPath), target).replace(/\.ts$/, '');
-  if (!relative.startsWith('.')) relative = './' + relative;
+  if (!relative.startsWith('./') && !relative.startsWith('../')) relative = './' + relative;
   return (
     '// Static support identity link; no capability selection or dispatch.\nexport * from ' +
     JSON.stringify(relative) +
@@ -421,8 +568,8 @@ async function assemble(inputs: VerifiedInput[]): Promise<OutputArtifact[]> {
     }
   const normalized = await Promise.all(
     inputs.map(async (input) => {
-      const context = await normalizeContext(input.artifacts);
-      return { input, artifacts: await normalizeInteraction(context) };
+      const artifacts = await normalizeContext(input.artifacts);
+      return { input, artifacts: await normalizeInteraction({ ...input, artifacts }) };
     })
   );
   for (const { artifacts } of normalized)
@@ -467,6 +614,7 @@ async function assemble(inputs: VerifiedInput[]): Promise<OutputArtifact[]> {
         version: 1,
         sourceManifestSHA256: input.anchor,
         sharedRoot: '../.proto-ui/shared',
+        ownershipABI: 2,
       },
     };
     result.push(

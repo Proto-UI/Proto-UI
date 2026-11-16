@@ -70,8 +70,16 @@ export class StateKernel {
   subscribe<V>(handle: OwnedStateHandle<V>, cb: Subscriber<V>): () => void {
     const id = this.getIdFromHandle(handle);
     const rec = this.getRecord<V>(id);
-    rec.subscribers.add(cb);
-    return () => rec.subscribers.delete(cb);
+    // A registration, rather than callback identity, owns each notification.
+    const subscriber: Subscriber<V> = (event) => cb(event);
+    rec.subscribers.add(subscriber);
+    return () => rec.subscribers.delete(subscriber);
+  }
+
+  /** Record source disconnection through the same owner queue as value changes. */
+  disconnect(handle: OwnedStateHandle<any>): void {
+    const rec = this.getRecord(this.getIdFromHandle(handle));
+    this.emit(rec, { type: 'disconnect', reason: 'unmount' });
   }
 
   /** Internal: get semantic from a handle. */
@@ -126,28 +134,45 @@ export class StateKernel {
 
     rec.value = next;
 
-    const emit = () => {
-      // Align with @proto.ui/types StateEvent<V> union
-      const e: StateEvent<V> = { type: 'next', prev, next, reason };
-      for (const cb of rec.subscribers) cb(e);
-    };
+    this.emit(rec, { type: 'next', prev, next, reason });
+  }
 
-    if (this.emitting) {
-      this.pending.push(emit);
-      return;
+  private emit<V>(rec: StateRecord<V>, event: StateEvent<V>): void {
+    for (const subscriber of [...rec.subscribers]) {
+      Object.defineProperty(this.pending, this.pending.length, {
+        value: () => {
+          if (rec.subscribers.has(subscriber)) subscriber(event);
+        },
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     }
+    if (this.emitting) return;
 
     this.emitting = true;
+    const failures: unknown[] = [];
+    let index = 0;
     try {
-      emit();
-      // flush any queued emits caused by re-entrant sets
-      while (this.pending.length) {
-        const task = this.pending.shift()!;
-        task();
+      while (index < this.pending.length) {
+        const task = this.pending[index++];
+        try {
+          task();
+        } catch (error) {
+          Object.defineProperty(failures, failures.length, {
+            value: error,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        }
       }
     } finally {
+      this.pending.length = 0;
       this.emitting = false;
     }
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) throw new AggregateError(failures, '[State] subscriber failures');
   }
 
   private getIdFromHandle(handle: OwnedStateHandle<any>): StateId {

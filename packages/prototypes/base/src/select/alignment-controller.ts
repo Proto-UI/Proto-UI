@@ -42,6 +42,11 @@ export function createSelectAlignmentController(options: {
   let cycle = 0;
   let wasOpen = false;
   let initial = true;
+  let rejectedGeometry: {
+    recordCount: number;
+    nonemptyValueCount: number;
+    recordsSignature: string;
+  } | null = null;
   // A policy-only remeasurement confirms layout without acquiring a new entry-focus right.
   // Retain only semantic scalars and structural generation, never DOM targets or measurements.
   type FocusShape = string;
@@ -71,6 +76,7 @@ export function createSelectAlignmentController(options: {
   const notify = (run: Run, next: SelectPresentationPhase, reason = '') => {
     // An aborted presentation cannot lend its old entry rights to a later repair.
     if (next !== 'valid' && next !== 'full-pending') lastAcceptedFocusShape = null;
+    if (next === 'valid') rejectedGeometry = null;
     phase = next;
     diagnostic = reason;
     options.changed(run);
@@ -80,6 +86,13 @@ export function createSelectAlignmentController(options: {
     applied = null;
     options.overlay.registerTargetAlignment(null);
     return id;
+  };
+  const prepareDetachedView = (run: Run) => {
+    // The parked children express author intent, but the next lease and entry
+    // must use the parts committed by the returning presentation.
+    settled = false;
+    lastKey = '';
+    notify(run, 'unsettled');
   };
   let delivering = false;
   const deliver = () => {
@@ -135,6 +148,7 @@ export function createSelectAlignmentController(options: {
     if (!ctx.open) {
       if (wasOpen) clear();
       wasOpen = false;
+      rejectedGeometry = null;
       initial = true;
       initialFallback = null;
       lastAcceptedFocusShape = null;
@@ -147,15 +161,18 @@ export function createSelectAlignmentController(options: {
       ++cycle;
       initial = true;
     }
+    if (reopened && !mounted && phase === 'geometry-unavailable') {
+      prepareDetachedView(run);
+      return;
+    }
     if (!settled) return;
     if (phase === 'structure-invalid' && !structural && mode !== 'popper') return;
+    const recoveringGeometry = phase === 'geometry-unavailable' && !reopened && mode !== 'popper';
     if (
-      phase === 'geometry-unavailable' &&
-      !(diagnostic === 'select.geometry.unsupported-size-mode' && mode === 'item-aligned') &&
+      recoveringGeometry &&
+      diagnostic !== 'select.geometry.unsupported-size-mode' &&
       !structural &&
-      !reopened &&
-      revision === lastRevision &&
-      mode !== 'popper'
+      revision === lastRevision
     )
       return;
     const key = `${cycle}:${structureVersion}:${revision}:${mode}:${ctx.value}`;
@@ -187,7 +204,7 @@ export function createSelectAlignmentController(options: {
       return;
     }
     if (mode !== 'popper' && !surfaces.length && !viewports.length && !texts.length) {
-      notify(run, 'legacy');
+      if (!recoveringGeometry) notify(run, 'legacy');
       return;
     }
     const values = role('value');
@@ -198,7 +215,8 @@ export function createSelectAlignmentController(options: {
         triggers.length !== 1 ||
         values.length !== 1)
     ) {
-      notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-parts');
+      if (!recoveringGeometry)
+        notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-parts');
       return;
     }
     const rows = run.anatomy.order.partsOf(SELECT_FAMILY, 'item');
@@ -213,11 +231,34 @@ export function createSelectAlignmentController(options: {
         value: snapshot?.value ?? '',
         textValue: String(snapshot?.textValue ?? ''),
         disabled: snapshot?.disabled ?? true,
+        hasSnapshot: snapshot != null,
         row,
         text: text.length === 1 ? text[0] : null,
       };
     });
     if (!current()) return;
+    // A replacing view can register a row before its collection expose is
+    // ready. The temporary default record is not evidence of an author repair.
+    if (recoveringGeometry && records.some((record) => !record.hasSnapshot)) return;
+    const recordScalars = records.map(({ value, textValue, disabled }) => [
+      value,
+      textValue,
+      disabled,
+    ]);
+    // Detaching can remove or recreate presentation-owned claims. A collection
+    // notification alone can retry a detached view only with a real scalar edit
+    // to a complete list, not an intermediate count or the same re-created list.
+    if (
+      recoveringGeometry &&
+      !mounted &&
+      !structural &&
+      rejectedGeometry &&
+      (records.length !== rejectedGeometry.recordCount ||
+        records.filter((record) => record.value !== '').length <
+          rejectedGeometry.nonemptyValueCount ||
+        JSON.stringify(recordScalars) === rejectedGeometry.recordsSignature)
+    )
+      return;
     // Anatomy wrappers are fresh views, not identities. Structural generation
     // and ordered non-sizing scalars must remain continuously unchanged.
     const focusShape: FocusShape = JSON.stringify([
@@ -226,11 +267,12 @@ export function createSelectAlignmentController(options: {
       ctx.rootId,
       ctx.value,
       mode,
-      records.map(({ value, textValue, disabled }) => [value, textValue, disabled]),
+      recordScalars,
     ]);
     if (lastAcceptedFocusShape !== focusShape) lastAcceptedFocusShape = null;
     if (mode !== 'popper' && records.some((record) => !record.text)) {
-      notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-item-text');
+      if (!recoveringGeometry)
+        notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-item-text');
       return;
     }
     if (mode === 'popper') {
@@ -281,6 +323,7 @@ export function createSelectAlignmentController(options: {
       ? resolveInitialSelectAlignment(input)
       : resolveCurrentSelectAlignment(input);
     if (intent.kind !== 'target-pair') {
+      if (recoveringGeometry) return;
       const reason = intent.kind === 'unresolved' ? intent.reason : 'unexpected-edge';
       const structuralFailure = ['missing-row', 'missing-text', 'missing-reference'].includes(
         reason
@@ -290,6 +333,10 @@ export function createSelectAlignmentController(options: {
         structuralFailure ? 'structure-invalid' : 'unsupported-selection',
         `select.${structuralFailure ? 'structure' : 'selection'}.${reason}`
       );
+      return;
+    }
+    if (recoveringGeometry && !mounted) {
+      prepareDetachedView(run);
       return;
     }
     const firstEnabled = records.find((record) => !record.disabled);
@@ -321,6 +368,12 @@ export function createSelectAlignmentController(options: {
         if (status.status === 'pending-target') return;
         if (status.status === 'unavailable') {
           clear();
+          if (status.reason !== 'invalid-association')
+            rejectedGeometry = {
+              recordCount: records.length,
+              nonemptyValueCount: records.filter((record) => record.value !== '').length,
+              recordsSignature: JSON.stringify(recordScalars),
+            };
           notify(
             run,
             status.reason === 'invalid-association' ? 'structure-invalid' : 'geometry-unavailable',

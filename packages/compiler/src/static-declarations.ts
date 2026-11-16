@@ -1,7 +1,9 @@
 import ts from 'typescript';
 import { CONTROL_LABEL_SELECTION_POLICIES } from '../../core/src/control-label';
 import type { ModuleDeclarationIR, SourceSpan, StaticCapabilityIR, StaticValue } from './ir';
-import { rejectNode, sourceName, sourceSpan, type SourceModule } from './parser-module';
+import type { SourceModule } from './parser-module';
+import { sourceName } from './source-resolution';
+import { rejectNode, sourceSpan } from './source-syntax';
 
 export const STATIC_CORE_VALUES: Readonly<Record<string, StaticValue>> = Object.freeze({
   CONTROL_LABEL_SELECTION_POLICIES,

@@ -1,3 +1,10 @@
+import { pruneDeadValues } from './demand-pruning';
+import {
+  emitJavaScriptValue,
+  emitJavaScriptParameters,
+  formatJavaScriptValueType,
+  emitOptionalOperation,
+} from './native-value-lowering';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
@@ -38,7 +45,7 @@ export function emitQtSource(
 ): CompileResult<GeneratedModule> {
   const checked = validateIR(input);
   if (!checked.ok) return checked;
-  const ir = checked.value;
+  const ir = pruneDeadValues(checked.value);
   const moduleParts = partitionModuleBindings(ir);
   const sharedModuleNames = new Set(moduleParts.shared.map((binding) => binding.name));
   let emittingModule = false;
@@ -177,10 +184,18 @@ export function emitQtSource(
     }
   if (diagnostics.length) return { ok: false, diagnostics };
   function fn(node: FunctionIR, depth: number): string {
-    return `function(${node.parameters.map((parameter) => parameter.name).join(', ')}) {\n${statements(node.body, depth + 1)}${'    '.repeat(depth)}}`;
+    return `function(${emitJavaScriptParameters(node.parameters, (item) => expression(item, depth))}) {\n${statements(node.body, depth + 1)}${'    '.repeat(depth)}}`;
   }
   function expression(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'conditional':
+      case 'call':
+      case 'intrinsic':
+      case 'object-spread':
+        return emitJavaScriptValue(node, (item) => expression(item, depth))!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -242,8 +257,6 @@ export function emitQtSource(
       }
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(node.condition, depth)} ? ${expression(node.whenTrue, depth)} : ${expression(node.whenFalse, depth)})`;
       case 'binary':
         return node.operator === '??'
           ? `(function(${p}Optional) { return ${p}Optional == null ? ${expression(node.right, depth)} : ${p}Optional; })(${expression(node.left, depth)})`
@@ -257,8 +270,14 @@ export function emitQtSource(
       case 'helper-call':
         return `${!emittingModule && sharedModuleNames.has(node.name) ? `${qualifier}Source.` : ''}${node.name}(${node.arguments.map((arg) => expression(arg, depth)).join(', ')})`;
       case 'authored-hook':
-        return `${hooks.get(node.hookId)}()`;
+        return `${hooks.get(node.hookId)}(${(node.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'operation': {
+        const optional = emitOptionalOperation(
+          node,
+          (item) => expression(item, depth),
+          `${p}OptionalReceiver`
+        );
+        if (optional !== undefined) return optional;
         const args = node.arguments.map((item) => expression(item, depth)).join(', ');
         if (node.operation === 'style.tw') {
           const argument = node.arguments[0];

@@ -1,0 +1,37 @@
+id: C-COMPILER-ARTIFACT-LINKING-0001
+type: contract
+title: Explicit nominal identity across independently compiled DOM libraries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: >-
+  Human-directed compiler architecture repair. The versioned DOM library/link format is bounded to its declared profiles; independent review and complete native-browser evidence remain required before stable activation.
+
+
+summary: Explicit declaration ownership and compatible shared transport preserve identity across separately compiled libraries without merging private names.
+statement:
+  en: >-
+    Independently compiled libraries may intentionally share reached nominal declarations through explicit exports and external import obligations. The linker resolves one canonical owner and compatible shared support, while all unmarked declarations remain private. Equal names, paths, hashes or configurations do not imply shared identity.
+
+
+  zh-CN: >-
+    独立编译的库通过显式导出与外部导入义务共享已到达的名义声明。链接器解析唯一 声明所有者及兼容共享支持；未标记的声明继续私有。名称、路径、散列或配置相同 都不隐含共享身份。
+
+
+criteria:
+  - id: C-COMPILER-ARTIFACT-LINKING-0001-OWNERSHIP
+    text: Explicit imports and re-exports resolve to one canonical Context, A11y, Anatomy or Focus declaration owner; missing owners and cycles reject before publication.
+  - id: C-COMPILER-ARTIFACT-LINKING-0001-PRIVATE
+    text: Unmarked declarations remain reference-distinct across libraries even when source IDs, debug names and schemas match; no debug-name global registry is used.
+  - id: C-COMPILER-ARTIFACT-LINKING-0001-ABI
+    text: Declaration kinds and checked schemas/configurations must agree; named support ABI versions and implementation fingerprints must agree. Component update policies need not match when support remains compatible.
+  - id: C-COMPILER-ARTIFACT-LINKING-0001-CONSUMER
+    text: Linked outputs use ordinary component and declaration imports with no runtime IR interpreter or special launcher; unlinked external obligations fail visibly rather than allocating substitute identities.
+  - id: C-COMPILER-ARTIFACT-LINKING-0001-PROVENANCE
+    text: Library input hashes, linked artifact hashes and canonical owners remain separately recorded; malformed paths, modified files and unsupported target profiles reject, and create-only publication preserves existing files.
+sources:
+  - path: internal/compiler/artifact-linking.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define explicit DOM separate-compilation identity and support ABI linking without changing private nominal semantics.
+tags: [compiler, linking, context, identity, abi]

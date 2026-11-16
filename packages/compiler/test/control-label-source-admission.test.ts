@@ -27,10 +27,12 @@ const kinds = Object.keys(CONTROL_LABEL_ENTRIES) as ComponentKind[];
 const unsupportedGroupEntries = [
   {
     entry: 'packages/prototypes/base/src/toggle-group/root.proto.ts',
-    message: 'Props require a checked primitive or enum data declaration.',
+    code: 'PUI1020',
+    message: 'Array elements must be data values.',
   },
   {
     entry: 'packages/prototypes/base/src/toggle-group/item.proto.ts',
+    code: 'PUI1006',
     message: 'Read of undeclared prop value.',
   },
 ];
@@ -63,7 +65,7 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
 
   it.each(unsupportedGroupEntries)(
     'retains a located diagnostic for the existing unsupported $entry language boundary',
-    async ({ entry, message }) => {
+    async ({ entry, code, message }) => {
       // Same-compiler comparison with the 7d30 source baseline established that
       // Toggle Group already lacked compiler admission before Control Label.
       // Its typed collection/reflection/queue language is a separate workstream;
@@ -76,7 +78,7 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
       if (result.ok) throw new Error('Toggle Group support requires its independent acceptance');
       expect(result.diagnostics).toEqual([
         expect.objectContaining({
-          code: 'PUI1006',
+          code,
           category: 'unsupported-input',
           message,
           span: expect.objectContaining({ file: entry }),
@@ -138,8 +140,8 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
 });
 
 describe('checked callback IR compatibility boundary', () => {
-  it('advances the public compiler IR schema for checked callback signatures', () => {
-    expect(IR_VERSION).toBe(6);
+  it('advances the private compiler IR schema for checked ordinary values and captures', () => {
+    expect(IR_VERSION).toBe(7);
   });
 
   it.each([emitReactSource, emitVueSource, emitVue2Source, emitWebComponentSource])(

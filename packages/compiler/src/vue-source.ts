@@ -1,10 +1,33 @@
+import { pruneDeadValues } from './demand-pruning';
+import {
+  nativePublicCallsArtifact,
+  hasPublicCallable,
+  emitPublicValueCheck,
+  emitPublicValue,
+  emitPublicMethodProjection,
+} from './native-public-values';
+import { nativeHostAtomPlan, emitNativeHostAtom } from './native-async';
+import {
+  nativeAuthoredHooksArtifact,
+  emitAuthoredHookDefinition,
+  emitPrivilegedHookCall,
+} from './native-authored-hooks';
+import { ordinaryValueChildren } from './value-children';
+import {
+  createJavaScriptValueReader,
+  emitJavaScriptMember,
+  emitJavaScriptValue,
+  emitJavaScriptParameters,
+  emitUninvokedJavaScriptFunction,
+  formatJavaScriptValueType,
+  emitOptionalOperation,
+} from './native-value-lowering';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType, parseDataType, type DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
-import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
-import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
-import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { nativeSupportArtifacts, planNativeSupport } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './native-style';
 import { OPERATION_RULES } from './operations';
@@ -12,6 +35,8 @@ import { checkTargetOperations, TARGET_PROFILES } from './targets';
 import { vueSsrSupportArtifact } from './vue-ssr-support';
 import { isDataValueType, isPublicValueType } from './ir';
 import { partitionModuleBindings } from './source-module-bindings';
+import { observableSemantics, type PropsUpdatePolicy } from './observable-semantics';
+import { emitRecordedNotification } from './notification-plan';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -27,11 +52,12 @@ import type {
 /** Direct Vue 3 lowering of checked portable operations. The emitted helpers own no IR. */
 export function emitVueSource(
   input: PrototypeIR,
-  options: { componentName?: string; ssr?: boolean } = {}
+  options: { componentName?: string; ssr?: boolean; propsUpdatePolicy?: PropsUpdatePolicy } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
-  const ir = validated.value;
+  const ir = pruneDeadValues(validated.value);
+  const readValue = createJavaScriptValueReader(ir, typeName);
   const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue-source SSR');
@@ -43,6 +69,7 @@ export function emitVueSource(
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
   if (!admitted.ok) return admitted;
+  const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
@@ -84,6 +111,13 @@ export function emitVueSource(
   let prefix = '__puiVue';
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
   const n = (name: string): string => `${prefix}${name}`;
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
+  const publicCalls = ir.exposes.some(
+    (entry) =>
+      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+  );
   const contextArtifacts = buildNativeContextArtifacts(ir);
   const staticDeclarations = buildNativeStaticDeclarations(
     ir.staticDeclarations,
@@ -107,12 +141,17 @@ export function emitVueSource(
   const diagnostics: CompilerDiagnostic[] = [];
   const exposureNames = new Set<string>();
   let usesStyle = false;
-  let usesInteraction = ir.moduleDeclarations.length > 0;
+  let usesInteraction = supportPlan.features.length > 0;
   let usesRawWatchers = false;
   function unsupported(node: ExpressionIR, message: string): void {
     diagnostics.push({ code: 'PUI4003', category: 'unsupported-input', message, span: node.span });
   }
   function inspect(node: ExpressionIR): void {
+    const ordinary = ordinaryValueChildren(node);
+    if (ordinary) {
+      ordinary.forEach(inspect);
+      return;
+    }
     switch (node.kind) {
       case 'style-handle':
         usesStyle = true;
@@ -140,8 +179,8 @@ export function emitVueSource(
         break;
       case 'conditional':
         inspect(node.condition);
-        inspect(node.whenTrue);
-        inspect(node.whenFalse);
+        inspect(node.then);
+        inspect(node.otherwise);
         break;
       case 'binary':
         inspect(node.left);
@@ -265,11 +304,32 @@ export function emitVueSource(
   if (diagnostics.length) return { ok: false, diagnostics };
   const usesRoot = true;
 
+  const needsCallbackScope =
+    publicCalls ||
+    usesInteraction ||
+    hasAuthoredHooks ||
+    atoms.delay ||
+    atoms.presence ||
+    atoms.meta;
   function typeName(type: ValueType): string {
+    const atom = atoms.typeName(type, n('Run'));
+    if (atom) return atom;
+    if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
+    if (typeof type !== 'string' && !isDataValueType(type))
+      return formatJavaScriptValueType(type, typeName);
     if (type === 'exception') return 'unknown';
-    if (typeof type !== 'string') return formatDataType(type);
+    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
+    if (isDataValueType(type)) return formatDataType(type);
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
     if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
+    if (
+      !usesInteraction &&
+      (['focus', 'accessible', 'event', 'event-control', 'event-or-control'].includes(type) ||
+        type.startsWith('observed:'))
+    )
+      return 'unknown';
+    if (!usesStyle && ['style-handle', 'rule-handle', 'template-props'].includes(type))
+      return 'unknown';
     if (type.startsWith('borrowed:'))
       return `${n('State')}<${type.slice(9)}> & {watch(callback: (run: ${n('Run')}, event: ${n('StateEvent')}<${type.slice(9)}>) => void): () => void}`;
     if (type.startsWith('state-event:')) return `${n('StateEvent')}<${type.slice(12)}>`;
@@ -320,7 +380,7 @@ export function emitVueSource(
       case 'record':
         return 'Readonly<Record<string, unknown>>';
       case 'context-key':
-        return 'object';
+        return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
       case 'style-handle':
         return n('StyleHandle');
       case 'style-disposer':
@@ -334,36 +394,47 @@ export function emitVueSource(
       default:
         return ['boolean', 'number', 'string', 'null', 'void'].includes(type)
           ? type
-          : `${n('ModuleCapability')}<${JSON.stringify(type)}, ${n('Run')}>`;
+          : usesInteraction
+            ? `${n('ModuleCapability')}<${JSON.stringify(type)}, ${n('Run')}>`
+            : 'unknown';
     }
   }
   function parameters(values: readonly ParameterIR[]): string {
     return values
       .map(
         (parameter) =>
-          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
+          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
       )
       .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
+    if (!reached.has(value)) return emitUninvokedJavaScriptFunction(value);
     const scoped =
-      usesInteraction &&
+      needsCallbackScope &&
       value.phase === 'callback' &&
-      !['helper', 'context-update'].includes(value.context);
-    return `(${parameters(value.parameters)}) => ${scoped ? `${n('Invoke')}(${JSON.stringify(value.context)}, () => ` : ''}{\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
+      !['helper', 'context-update', 'expose-method'].includes(value.context);
+    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => ${scoped ? `${n('Invoke')}(${JSON.stringify(value.context)}, () => ` : ''}{\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
   }
   function expression(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'conditional':
+      case 'call':
+      case 'intrinsic':
+      case 'object-spread':
+        return emitJavaScriptValue(node, (item) => expression(item, depth), typeName)!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
         return JSON.stringify(node.value);
       case 'reference':
-        return node.name;
+        return readValue(node, node.name);
       case 'lexical-cell':
         return expression(node.value, depth);
       case 'lexical-read':
-        return expression(node.cell, depth);
+        return readValue(node, expression(node.cell, depth));
       case 'lexical-write':
         return `(${expression(node.cell, depth)} = ${expression(node.value, depth)})`;
       case 'lexical-update': {
@@ -378,11 +449,15 @@ export function emitVueSource(
       case 'rule':
         return emitNativeRule(node, (value) => expression(value, depth), n('Style'), n('Props'));
       case 'member':
-        return `(${expression(node.object, depth)}${node.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${node.optional ? '?.' : ''}[${JSON.stringify(node.property)}]`;
+        return emitJavaScriptMember(
+          node,
+          (item) => expression(item, depth),
+          typeName,
+          true,
+          readValue
+        );
       case 'unary':
         return `(${node.operator}${expression(node.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(node.condition, depth)} ? ${expression(node.whenTrue, depth)} : ${expression(node.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(node.left, depth)} ${node.operator} ${expression(node.right, depth)})`;
       case 'array':
@@ -394,10 +469,43 @@ export function emitVueSource(
       case 'helper-call':
         return `${node.name}(${node.arguments.map((arg) => expression(arg, depth)).join(', ')})`;
       case 'authored-hook':
-        return `${hookNames.get(node.hookId)}()`;
+        return `${hookNames.get(node.hookId)}(${(node.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'static-capability':
         return staticNames.get(node.declarationId)!;
       case 'operation': {
+        const optional = emitOptionalOperation(
+          node,
+          (item) => expression(item, depth),
+          `${prefix}OptionalReceiver`,
+          typeName
+        );
+        if (optional !== undefined) return optional;
+        const atom = emitNativeHostAtom(node, (item) => expression(item, depth), prefix);
+        if (atom !== undefined) return atom;
+        if (hasAuthoredHooks && node.operation.startsWith('hook.'))
+          return emitPrivilegedHookCall({
+            value: node,
+            manager: `${prefix}Authored`,
+            callee: `${prefix}Interaction.${OPERATION_RULES[node.operation].path}`,
+            prefix: prefix,
+            emit: (item) => expression(item, depth),
+            typeName,
+            typed: true,
+          });
+        if (node.operation === 'expose.value' && hasPublicCallable(node.arguments[1].type))
+          return `${n('Declare')}(${expression(node.arguments[0], depth)}, ${emitPublicValue({ value: expression(node.arguments[1], depth), type: node.arguments[1].type, wrap: `${prefix}WrapPublic`, prefix: prefix, typeName, typed: true })})`;
+        if (node.operation === 'expose.method') {
+          const projection = emitPublicMethodProjection(node.arguments[1].type, {
+            wrap: `${prefix}WrapPublic`,
+            prefix: prefix,
+            typeName,
+            typed: true,
+          });
+          if (projection)
+            return `${n('ExposeMethod')}(${node.arguments.map((item) => expression(item, depth)).join(', ')}, ${projection})`;
+        }
+        if (node.operation.startsWith('capture.'))
+          return `(${expression(node.receiver!, depth)}.${OPERATION_RULES[node.operation].path}?.(${node.arguments.map((item) => expression(item, depth)).join(', ')}) as ${typeName(node.type)})`;
         const args = node.arguments.map((arg) => expression(arg, depth));
         const receiver = node.receiver ? expression(node.receiver, depth) : 'undefined';
         if (OPERATION_RULES[node.operation].path === 'call')
@@ -503,7 +611,7 @@ export function emitVueSource(
           case 'state.numberRange':
             return `${n('CreateState')}('number.range', ${args.join(', ')})`;
           case 'state.get':
-            return `${receiver}.get()`;
+            return `(${receiver}.get() as ${typeName(node.type)})`;
           case 'state.set':
             return `${receiver}.set(${args.join(', ')})`;
           case 'expose.state':
@@ -555,14 +663,7 @@ export function emitVueSource(
         .replaceAll('\u2029', '\\u2029');
       const origin = `${indent}// Source ${sourceFile}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        if (
-          (statement.value.kind === 'function' && !reached.has(statement.value.function)) ||
-          (statement.value.kind === 'reference' && deadBindings.has(statement.value.name))
-        ) {
-          deadBindings.add(statement.name);
-          continue;
-        }
-        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
       } else if (statement.kind === 'effect')
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
@@ -633,10 +734,10 @@ export function emitVueSource(
     .map((entry) => {
       const checks = entry.parameters.map((parameter, index) => {
         const argument = `${n('Args')}[${index}]`;
-        const test = check(argument, parseDataType(parameter.type));
+        const test = emitPublicValueCheck(argument, parameter.type, check);
         return parameter.optional ? `(${argument} === undefined || ${test})` : `(${test})`;
       });
-      return `    [${JSON.stringify(entry.name)}]: { args: (${n('Args')}: unknown[]) => ${n('Args')}.length <= ${entry.parameters.length}${checks.map((test) => ` && ${test}`).join('')}, result: (${n('Value')}: unknown) => ${isDataValueType(entry.returnType) ? check(n('Value'), parseDataType(entry.returnType)) : 'true'} },`;
+      return `    [${JSON.stringify(entry.name)}]: { args: (${n('Args')}: unknown[]) => ${n('Args')}.length <= ${entry.parameters.length}${checks.map((test) => ` && ${test}`).join('')}, result: (${n('Value')}: unknown) => ${emitPublicValueCheck(n('Value'), entry.returnType, check)} },`;
     })
     .join('\n');
   const eventChecks = exposes
@@ -674,24 +775,28 @@ ${ir.contextKeys.map((key) => `      [${contextNames.get(key.id)}, (value: unkno
     : '';
   const hookCode =
     statements(moduleParts.owned, 2) +
-    `    const ${n('HookResults')} = new Map<string, object | undefined>();\n` +
     ir.hooks
       .filter((hook) => hooks.has(hook.id))
       .map(
-        (hook) => `    const ${hookNames.get(hook.id)} = () => {
-      if (${n('HookResults')}.has(${JSON.stringify(hook.name)})) return ${n('HookResults')}.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
-      ${n('HookResults')}.set(${JSON.stringify(hook.name)}, undefined);
-      (${fn(hook.setup, 2)})(${usesStyle ? n('DefValue') : 'undefined'});
-      const result = Object.freeze(Object.create(null));
-      ${n('HookResults')}.set(${JSON.stringify(hook.name)}, result);
-      return result;
-    };`
+        (hook) =>
+          '    ' +
+          emitAuthoredHookDefinition({
+            hook,
+            name: hookNames.get(hook.id)!,
+            manager: n('Authored'),
+            def: usesStyle ? n('DefValue') : 'undefined',
+            emit: (value) => fn(value, 2),
+            typeName,
+          })
       )
       .join('\n');
   const code = `// Editable Vue 3 source. Profile: ${profile}; no Proto Runtime or Adapter dependency.
 // Inline native costs: owner/update queue, constrained state subscriptions, prop resolution/watchers,
 // public boundary guards, view commit lifecycle and native element/slot composition.
 // Source graph SHA-256: ${ir.source.sha256}
+${atoms.imports}
+${publicCalls ? `import { createNativePublicCalls as ${n('CreatePublicCalls')} } from './.proto-ui/owner/public-callables-v1';` : ''}
+${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${n('CreateAuthored')} } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 import * as ${n('Vue')} from 'vue';
 ${
   ssr
@@ -701,8 +806,8 @@ export type { Handoff as GeneratedHandoff } from './.proto-ui/vue/ssr-v1';`
     : ''
 }
 ${usesStyle ? `import { createNativeStyle as ${n('CreateStyle')}, templateStyleTokens as ${n('TemplateStyleTokens')}, type NativeStyle as ${n('NativeStyle')}, type NativeStyleHandle as ${n('StyleHandle')}, type NativeRuleHandle as ${n('RuleHandle')} } from './.proto-ui/style/native-v1';` : ''}
-${usesInteraction ? `import { createNativeInteraction as ${n('CreateInteraction')}, type NativeInteraction as ${n('NativeInteraction')}, type NativeFocus as ${n('Focus')}, type NativeAccessible as ${n('Accessible')}, type NativeObservedState as ${n('ObservedState')}, type NativeInput as ${n('Input')} } from './.proto-ui/interaction/native-v1';` : ''}
-${usesInteraction ? `import type { NativeModuleCapability as ${n('ModuleCapability')} } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
+${usesInteraction ? `import { createNativeInteraction as ${n('CreateInteraction')}, type NativeInteraction as ${n('NativeInteraction')}, type NativeFocus as ${n('Focus')}, type NativeAccessible as ${n('Accessible')}, type NativeObservedState as ${n('ObservedState')}, type NativeInput as ${n('Input')} } from './${supportPlan.interactionPath.slice(0, -3)}';` : ''}
+${usesInteraction ? `import type { NativeModuleCapability as ${n('ModuleCapability')} } from './${supportPlan.modulesPath.slice(0, -3)}';` : ''}
 ${contextImports}
 ${staticImports}
 ${statements(moduleParts.shared, 0)}
@@ -792,6 +897,7 @@ ${eventChecks}
     // Setup declarations precede hydration; the final snapshot is validated before created.
     let ${n('Props')}: Readonly<GeneratedResolvedProps>;
     let ${n('RawProps')}: Record<string, unknown> = Object.create(null);
+    let ${n('PropsWindow')}: {raw: Readonly<Record<string, unknown>>; resolved: Readonly<GeneratedResolvedProps>} | null = null;
     const ${n('Watchers')}: Array<{ keys: readonly string[] | null; active: boolean; callback: (run: ${n('Run')}, next: Readonly<GeneratedResolvedProps>, previous: Readonly<GeneratedResolvedProps>, info: ${n('WatchInfo')}) => void }> = [];
 ${usesRawWatchers ? `    const ${n('RawWatchers')}: Array<{ keys: readonly string[] | null; active: boolean; callback: (run: ${n('Run')}, next: Readonly<Record<string, unknown>>, previous: Readonly<Record<string, unknown>>, info: ${n('WatchInfo')}) => void }> = [];` : ''}
     const ${n('StateQueue')}: Array<() => void> = [];
@@ -805,7 +911,7 @@ ${
 }
 ${contextCode}
 ${
-  usesInteraction
+  needsCallbackScope
     ? `    let ${n('CallbackScope')}: string | undefined;
     function ${n('Invoke')}<T>(scope: string, callback: () => T): T {
       ${n('Alive')}();
@@ -813,28 +919,32 @@ ${
       const previous = ${n('CallbackScope')}; ${n('CallbackScope')} = scope;
       try { return callback(); } finally { ${n('CallbackScope')} = previous; }
     }
-    function ${n('RegisterObservedState')}<T extends boolean | string | number>(state: ${n('ObservedState')}<T>): void {
-      const removals = new Set<() => void>();
+`
+    : ''
+}
+${
+  usesInteraction
+    ? `    function ${n('RegisterObservedState')}<T extends boolean | string | number>(state: ${n('ObservedState')}<T>): void {
+      const subscribers = new Set<(event: ${n('StateEvent')}<T>) => void>();
       const projection: ${n('PublicState')}<T> = Object.freeze({
         spec: Object.freeze({ kind: typeof state.get() === 'boolean' ? 'bool' as const : typeof state.get() === 'number' ? 'number.discrete' as const : 'string' as const }),
         get() { ${n('PublicAlive')}(); return state.get(); },
         subscribe(callback: (event: ${n('StateEvent')}<T>) => void) {
           ${n('PublicAlive')}();
-          let active = true;
-          const off = state.subscribe((event) => { if (active && !${n('Disposed')} && !${n('Disposing')}) callback(event); });
-          const stop = () => { if (!active) return; active = false; removals.delete(stop); off(); };
-          removals.add(stop);
-          return () => { ${n('PublicAlive')}(); stop(); };
+          const registration = (event: ${n('StateEvent')}<T>) => callback(event);
+          subscribers.add(registration);
+          return () => { ${n('PublicAlive')}(); subscribers.delete(registration); };
         },
         unsubscribe(off: () => void) { ${n('PublicAlive')}(); off(); },
       });
       ${n('States')}.add(state); ${n('PublicStates')}.set(state, projection);
       ${n('InternalSubscriptions')}.set(state, callback => state.subscribe(callback));
-      const refresh = state.subscribe(() => {
+      const refresh = state.subscribe((event) => {
 ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
         ${n('Interaction')}.refresh();
+        ${emitRecordedNotification({ queue: n('StateQueue'), draining: n('EmittingState'), subscribers: 'subscribers', deliver: 'subscriber(event)' })}
       });
-      ${n('StateCleanup')}.push(() => { refresh(); for (const stop of removals) stop(); });
+      ${n('StateCleanup')}.push(() => { refresh(); subscribers.clear(); });
     }
     const ${n('Interaction')}: ${n('NativeInteraction')}<${n('Run')}> = ${n('CreateInteraction')}<${n('Run')}>({
       ensureSetup(operation) { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('[Vue source] ' + operation + ' requires setup'); },
@@ -861,7 +971,6 @@ ${controlLabel ? '      getAssociations: () => _props.instanceAssociations,\n' :
       registerExpose: (key, value) => {
         if (value && typeof value === 'object' && ${n('States')}.has(value)) ${n('ExposeState')}(key, value as ${n('State')}<unknown>);
         else if (typeof value === 'function') ${n('Declare')}(key, (...args: unknown[]) => { ${n('PublicAlive')}(); return ${n('Invoke')}('expose-method', () => value(...args)); });
-        else if (key === 'controls' && value && typeof value === 'object') ${n('Declare')}(key, Object.fromEntries(Object.entries(value).map(([name, action]) => [name, (...args: unknown[]) => { ${n('PublicAlive')}(); return ${n('Invoke')}('expose-method', () => (action as Function)(...args)); }])));
         else ${n('Declare')}(key, value);
       },
       createOwnedState: <T extends boolean | string | number>(name: string, value: T, spec?: ${n('Spec')}) => ${n('CreateState')}(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec) as ${n('State')}<T>,
@@ -870,13 +979,7 @@ ${controlLabel ? '      getAssociations: () => _props.instanceAssociations,\n' :
         ${n('StateCleanup')}.push(off); return off;
       },
       isPropProvided: key => Object.hasOwn(${n('RawProps')}, key),
-      declareTransition(hooks) {
-        ${n('DefineProps')}({open:{type:'boolean'},defaultOpen:{type:'boolean',default:false},appear:{type:'boolean',default:false},enterDuration:{type:'number',default:300},leaveDuration:{type:'number',default:200},interrupt:{type:'enum',options:['reverse','wait','immediate'],default:'reverse'}});
-        for (const key of ['beforeEnter','afterEnter','beforeLeave','afterLeave']) ${n('ExposeEvent')}(key);
-        ${n('Life')}.created.push(() => ${n('Invoke')}('created', hooks.created)); ${n('Life')}.mounted.push(() => ${n('Invoke')}('mounted', hooks.mounted)); ${n('Life')}.unmounted.push(() => ${n('Invoke')}('unmounted', hooks.unmounted)); ${n('Life')}.beforeDispose.push(() => ${n('Invoke')}('before-dispose', hooks.beforeDispose));
-        ${n('WatchProps')}(['open','interrupt','enterDuration','leaveDuration'], () => ${n('Invoke')}('props-watch', hooks.propsChanged));
-      },
-      setPresent: value => ${n('SetPresent')}(${n('RunValue')}, value),
+        setPresent: value => ${n('SetPresent')}(${n('RunValue')}, value),
       requestHostUpdate() {
         if (${n('HostScheduled')} || ${n('Disposed')} || ${n('Disposing')}${ssr ? ` || ${n('Server')}` : ''}) return;
         ${n('HostScheduled')} = true;
@@ -903,6 +1006,16 @@ ${
     const ${n('DefValue')}: ${n('Def')} = Object.freeze({ feedback: Object.freeze({ style: ${n('Style')} }) });`
     : ''
 }
+    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run') })}
+${
+  hasAuthoredHooks
+    ? `    const ${n('Authored')} = ${n('CreateAuthored')}({ setup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed'); }, borrow(value) {
+      const state = value as ${n('State')}<unknown>;
+      return Object.freeze({get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${n('Run')}, event: ${n('StateEvent')}<unknown>) => void) { if (!${n('Setup')}) throw new Error('State watch requires setup'); const off = ${n('SubscribeInternal')}(state, event => ${n('Invoke')}('state-watch', () => callback(${n('RunValue')}, event))); ${n('StateCleanup')}.push(off); return off; }});
+    } });`
+    : ''
+}
+    ${publicCalls ? `const ${n('WrapPublic')} = ${n('CreatePublicCalls')}({alive: ${n('PublicAlive')}, invoke: callback => ${n('Invoke')}('expose-method', callback)});` : ''}
     const ${n('RunValue')}: ${n('Run')} = Object.freeze({ owner: Symbol(${JSON.stringify(ir.name)})${usesStyle ? `, feedback: ${n('DefValue')}.feedback` : ''} });
 
     function ${n('IsRecord')}(value: unknown): value is Record<string, unknown> {
@@ -963,13 +1076,16 @@ ${ssr ? `      if (${n('Server')}) return;` : ''}
       ${n('Present')}.value = present;
     }
     function ${n('InvokeLife')}(kind: keyof typeof ${n('Life')}): void {
-      for (const callback of ${n('Life')}[kind]) callback(${n('RunValue')});
+      if (kind === 'unmounted') { ${atoms.detach} }
+      try { for (const callback of ${n('Life')}[kind]) callback(${n('RunValue')}); }
+      finally { if (kind === 'unmounted') { ${atoms.detach} } }
     }
 ${
   usesRoot
     ? `    function ${n('UnbindRoot')}(epoch: ${n('Epoch')}): void {
       if (${n('RootEpoch')} !== epoch) return;
 ${usesStyle ? `      const root = ${n('RootElement')};` : ''}
+      ${atoms.detach}
       ${n('RootElement')} = null; ${n('RootEpoch')} = undefined;
 ${
   usesInteraction && usesStyle
@@ -998,6 +1114,7 @@ ${usesRoot ? `      ${n('UnbindRoot')}(epoch);` : ''}
     function ${n('CreateState')}(kind: 'number.range' | 'number.discrete', semantic: string, initial: number, options?: Omit<${n('Spec')}, 'kind'>): ${n('State')}<number>;
     function ${n('CreateState')}(kind: ${n('Spec')}['kind'], semantic: string, initial: boolean | number | string, options?: Omit<${n('Spec')}, 'kind'>): ${n('State')}<boolean | number | string>;
     function ${n('CreateState')}(kind: ${n('Spec')}['kind'], semantic: string, initial: boolean | number | string, options: Omit<${n('Spec')}, 'kind'> = {}): unknown {
+${hasAuthoredHooks ? `      ${n('Authored')}.claimState(semantic);` : ''}
       if (typeof semantic !== 'string' || semantic.length === 0) throw new Error('[Vue source] invalid state semantic');
       const spec: ${n('Spec')} = Object.freeze({ ...options, ...(options.options ? { options: Object.freeze([...options.options]) } : {}), kind });
       function validate(value: boolean | number | string): void {
@@ -1022,21 +1139,18 @@ ${usesRoot ? `      ${n('UnbindRoot')}(epoch);` : ''}
           value = next;
 ${usesStyle ? `          ${n('Style')}.refresh();` : ''}
 ${usesInteraction ? `          ${n('Interaction')}.refresh();` : ''}
-          ${n('StateQueue')}.push(() => { for (const callback of subscribers) callback(event); });
-          if (${n('EmittingState')}) return;
-          ${n('EmittingState')} = true;
-          try { while (${n('StateQueue')}.length) ${n('StateQueue')}.shift()!(); }
-          finally { ${n('EmittingState')} = false; ${n('StateQueue')}.length = 0; }
+          ${emitRecordedNotification({ queue: n('StateQueue'), draining: n('EmittingState'), subscribers: 'subscribers', deliver: 'subscriber(event)' })}
         },
-        subscribe(callback) { ${n('PublicAlive')}(); subscribers.add(callback); return () => { ${n('PublicAlive')}(); subscribers.delete(callback); }; },
+        subscribe(callback) { ${n('PublicAlive')}(); const registration: typeof callback = event => callback(event); subscribers.add(registration); return () => { ${n('PublicAlive')}(); subscribers.delete(registration); }; },
         unsubscribe(off) { ${n('PublicAlive')}(); off(); },
       };
       ${n('States')}.add(handle);
       ${n('InternalSubscriptions')}.set(handle, callback => {
-        subscribers.add(callback);
-        return () => { subscribers.delete(callback); };
+        const registration: typeof callback = event => callback(event); subscribers.add(registration);
+        return () => { subscribers.delete(registration); };
       });
       ${n('StateCleanup')}.push(() => subscribers.clear());
+${hasAuthoredHooks ? `      ${n('Authored')}.state(semantic, handle);` : ''}
       return handle;
     }
     function ${n('Declare')}(key: string, value: unknown): void {
@@ -1053,16 +1167,17 @@ ${usesInteraction ? `        if (!('spec' in handle)) throw new Error('[Vue sour
       }
       ${n('Declare')}(key, projection);
     }
-    function ${n('ExposeMethod')}<Args extends unknown[], Result>(key: string, callback: (...args: Args) => Result): void {
+    function ${n('ExposeMethod')}<Args extends unknown[], Result>(key: string, callback: (...args: Args) => Result, project?: (value: Result) => Result): void {
+${hasAuthoredHooks ? `      ${n('Authored')}.method(key, callback);` : ''}
       const boundary = ${n('MethodChecks')}[key];
       ${n('Declare')}(key, (...args: unknown[]) => {
         ${n('PublicAlive')}();
         if (!boundary.args(args)) throw new TypeError('[Vue source] invalid method arguments: ' + key);
         // The specialized predicate just checked the concrete declared argument tuple.
         const checkedArgs = args as Args;
-        const result = callback(...checkedArgs);
+        const result = ${needsCallbackScope ? `${n('Invoke')}('expose-method', () => callback(...checkedArgs))` : 'callback(...checkedArgs)'};
         if (!boundary.result(result)) throw new TypeError('[Vue source] invalid method result: ' + key);
-        return result;
+        return project ? project(result) : result;
       });
     }
     function ${n('ExposeEvent')}(key: string, _spec?: unknown): void {
@@ -1146,9 +1261,9 @@ ${
     }`
     : ''
 }
-    function ${n('ReadProps')}(run: ${n('Run')}): Readonly<GeneratedResolvedProps> { ${n('RequireRun')}(run); return ${n('Props')}; }
-    function ${n('ReadRawProps')}(run: ${n('Run')}): Readonly<Record<string, unknown>> { ${n('RequireRun')}(run); return Object.freeze({ ...${n('RawProps')} }); }
-    function ${n('IsProvided')}(run: ${n('Run')}, key: string): boolean { ${n('RequireRun')}(run); return Object.hasOwn(${n('RawProps')}, key); }
+    function ${n('ReadProps')}(run: ${n('Run')}): Readonly<GeneratedResolvedProps> { ${n('RequireRun')}(run); return ${n('PropsWindow')}?.resolved ?? ${n('Props')}; }
+    function ${n('ReadRawProps')}(run: ${n('Run')}): Readonly<Record<string, unknown>> { ${n('RequireRun')}(run); return ${n('PropsWindow')}?.raw ?? Object.freeze({ ...${n('RawProps')} }); }
+    function ${n('IsProvided')}(run: ${n('Run')}, key: string): boolean { ${n('RequireRun')}(run); return Object.hasOwn(${n('PropsWindow')}?.raw ?? ${n('RawProps')}, key); }
     function ${n('GetHostProps')}(): Record<string, unknown> {
 ${!controlLabel ? emitUndeclaredInstanceAssociations('_props.instanceAssociations', n('InitialAssociations')) : ''}
       // Read the authored host snapshot, bypassing Vue Boolean casts and camelization.
@@ -1176,6 +1291,9 @@ ${usesRawWatchers ? `      const previousRaw = ${n('RawProps')};` : ''}
       ${n('RawProps')} = raw; ${n('Props')} = next;
 ${usesStyle ? `      ${n('Style')}.refresh();` : ''}
 ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
+      const previousWindow = ${n('PropsWindow')};
+      ${n('PropsWindow')} = {raw: Object.freeze({...raw}), resolved: next};
+      try {
       const all = Object.keys(${n('PropSpecs')}).filter((key) => !Object.is(Reflect.get(previous, key), Reflect.get(next, key)));
 ${
   usesRawWatchers
@@ -1198,6 +1316,8 @@ ${
         const matched = watcher.keys ? watcher.keys.filter((key) => all.includes(key)) : all;
         if (matched.length) watcher.callback(${n('RunValue')}, next, previous, { changedKeysAll: all, changedKeysMatched: matched });
       }
+${options.propsUpdatePolicy === 'host' ? `      ${n('RequestUpdate')}(${n('RunValue')});` : ''}
+      } finally { ${n('PropsWindow')} = previousWindow; }
     }
     function ${n('ActiveFrame')}(frame: ${n('Frame')}): void {
       ${n('Alive')}();
@@ -1281,7 +1401,7 @@ ${usesInteraction ? `        ${n('Interaction')}.refresh();` : ''}
           finally {
             try { ${contextArtifacts ? `${n('Scope')}.dispose();` : ''} }
             finally {
-              ${n('Disposed')} = true;
+              ${n('Disposed')} = true; ${atoms.dispose}${hasAuthoredHooks ? `${n('Authored')}.dispose();` : ''}
               for (const cleanup of ${n('StateCleanup')}) cleanup();
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
@@ -1462,7 +1582,7 @@ ${ssr ? `      catch (error) { failure ??= error; }` : ''}
           finally {
             try { ${usesStyle ? `${n('Style')}.dispose();` : ''} }
             finally {
-              ${n('InternalTeardown')} = false; ${n('Disposed')} = true;
+              ${n('InternalTeardown')} = false; ${n('Disposed')} = true; ${atoms.dispose}${hasAuthoredHooks ? `${n('Authored')}.dispose();` : ''}
               for (const cleanup of ${n('StateCleanup')}) cleanup();
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
@@ -1554,26 +1674,54 @@ export default ${componentName};
     value: {
       code,
       profile,
-      ...(usesStyle || usesInteraction || contextArtifacts || ssr || staticDeclarations.files.length
+      ...(publicCalls ||
+      atoms.files.length ||
+      hasAuthoredHooks ||
+      usesStyle ||
+      usesInteraction ||
+      contextArtifacts ||
+      ssr ||
+      staticDeclarations.files.length
         ? {
             supportingFiles: [
+              ...atoms.files,
+              ...(publicCalls ? [nativePublicCallsArtifact] : []),
+              ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
               ...(contextArtifacts?.files ?? []),
               ...staticDeclarations.files,
               ...(usesStyle ? [nativeStyleArtifact] : []),
-              ...(usesInteraction ? nativeInteractionArtifacts('full', { controlLabel }) : []),
+              ...(usesInteraction ? nativeSupportArtifacts(supportPlan) : []),
               ...(ssr ? [vueSsrSupportArtifact] : []),
             ],
           }
         : {}),
       dependencies: [
         ...TARGET_PROFILES['vue-source-v1'].dependencies
-          .filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom')
+          .filter(
+            (dependency) =>
+              supportPlan.packages.includes(dependency.name) ||
+              dependency.name !== '@floating-ui/dom'
+          )
           .map((dependency) => ({ ...dependency })),
         ...(ssr
           ? [{ name: '@vue/server-renderer', version: '3.5.31', role: 'target' as const }]
           : []),
       ],
-      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
+      provenance: {
+        source: ir.source,
+        irVersion: ir.schemaVersion,
+        backend: profile,
+        observableSemantics: observableSemantics('vue', 'source', options.propsUpdatePolicy),
+        ...(usesInteraction
+          ? {
+              nativeSupport: {
+                version: 2 as const,
+                id: supportPlan.id,
+                features: [...supportPlan.features],
+              },
+            }
+          : {}),
+      },
     },
   };
 }

@@ -3,6 +3,7 @@ import { createControlLabelRef, type InstanceAssociations } from '@proto.ui/core
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { compilationArtifacts, compileFile, compilePrototype } from '../src/compile';
 import { emitWebComponentSource } from '../src/web-component-source';
+import { buttonSsrKernelPath } from './button-ssr-evidence';
 import {
   buildButtonSsrFixture,
   compileButtonSsrFixture,
@@ -163,7 +164,7 @@ describe('private client-only ControlLabel hydration', () => {
     expect(fixture.generatedFiles.map((file) => file.path)).toEqual(
       expect.arrayContaining([
         '.proto-ui/interaction/control-label-v1.ts',
-        '.proto-ui/interaction/ownership-v1.ts',
+        '.proto-ui/interaction/ownership-v2.ts',
       ])
     );
     const rendered = fixture.render();
@@ -318,10 +319,7 @@ describe('private client-only ControlLabel hydration', () => {
     const server = loadGeneratedModule(fixture.generatedFiles, 'Component.ts') as {
       createHydrationOwner(port: unknown, props: object, associations: () => unknown): unknown;
     };
-    const kernel = loadGeneratedModule(
-      fixture.generatedFiles,
-      '.proto-ui/web-component/ssr-v1.ts'
-    ) as {
+    const kernel = loadGeneratedModule(fixture.generatedFiles, buttonSsrKernelPath) as {
       createServerPort(options: object): { close(): void };
     };
     const port = kernel.createServerPort({});

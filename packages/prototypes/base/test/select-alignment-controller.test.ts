@@ -171,6 +171,7 @@ it('replaces alignment readiness after view retirement while logical selection s
 
 type TestContent = HTMLElement & {
   getExposes(): {
+    setPresent(present: boolean): void;
     snapshot(): { phase: string; diagnostic: string; value: string };
   };
 };
@@ -314,6 +315,46 @@ it('retains named size conflict instead of accepting stale success or automatica
   expect(registrations.at(-1)).toBeNull();
   expect(content.getExposes().snapshot().phase).toBe('valid');
 });
+
+it.each(['replace-row', 'shorten-label', 'choose-popper'] as const)(
+  'accepts an authored repair after detached size conflict: %s',
+  async (method) => {
+    const { content, rows } = await mountRows();
+    const failed = bindings.at(-1)!;
+    failed.onAlignment({ status: 'applied' });
+    failed.onAlignment({ status: 'unavailable', reason: 'size-conflict' });
+    content.getExposes().setPresent(false);
+    await flush();
+    const retiredCount = bindings.length;
+    expect(content.getExposes().snapshot()).toMatchObject({
+      phase: 'geometry-unavailable',
+      diagnostic: 'select.geometry.size-conflict',
+    });
+
+    if (method === 'choose-popper') {
+      setElementProps(content, { position: 'popper' });
+      await flush();
+      expect(content.getExposes().snapshot().phase).toBe('valid');
+      expect(bindings).toHaveLength(retiredCount);
+      return;
+    }
+
+    if (method === 'replace-row') rows[2].replaceWith(makeRow('gamma'));
+    else setElementProps(rows[2], { value: 'gamma', textValue: 'G' });
+    await flush();
+    expect(content.getExposes().snapshot().phase).toBe('unsettled');
+    expect(bindings).toHaveLength(retiredCount);
+    content.getExposes().setPresent(true);
+    await flush();
+    expect(content.getExposes().snapshot().phase).toBe('full-pending');
+    expect(bindings.length).toBeGreaterThan(retiredCount);
+    expect(targetValues(bindings.at(-1)!)).toEqual(['alpha', 'beta', 'gamma']);
+    failed.onAlignment({ status: 'applied' });
+    expect(applied).toBe(1);
+    bindings.at(-1)!.onAlignment({ status: 'applied' });
+    expect(applied).toBe(2);
+  }
+);
 
 it('replaces a same-value sibling identity and withdraws the size set when its owner is disposed', async () => {
   const { root, rows } = await mountRows();

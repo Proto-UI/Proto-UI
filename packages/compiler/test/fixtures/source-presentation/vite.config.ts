@@ -1,10 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sourceConfig from '../../../../../vitest.config';
-import {
-  transformWithEsbuild,
-  type Plugin,
-} from '../../../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { transformWithEsbuild, type Plugin } from 'vite';
 import { compileFile } from '../../../src/compile';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
@@ -54,7 +51,9 @@ const generated: Plugin = {
       const side = parent.slice(prefix.length).split('/')[0] as keyof typeof profiles;
       await compile(side);
       const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(parent), id));
-      const candidate = [resolved, `${resolved}.ts`, `${resolved}.tsx`].find((name) => modules.has(name));
+      const candidate = [resolved, `${resolved}.ts`, `${resolved}.tsx`].find((name) =>
+        modules.has(name)
+      );
       if (!candidate) throw new Error(`Missing generated supporting artifact ${id} from ${parent}`);
       return `\0${candidate}`;
     }

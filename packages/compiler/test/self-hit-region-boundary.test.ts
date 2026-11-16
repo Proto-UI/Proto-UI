@@ -26,7 +26,8 @@ it('rejects self-region calls until the compiler profile admits their owned life
   expect(result.diagnostics).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        code: 'PUI1004',
+        code: 'PUI1006',
+        message: 'Undeclared object member registerSelfRegion.',
         category: 'unsupported-input',
         span: expect.objectContaining({ line: 6, column: 39 }),
       }),

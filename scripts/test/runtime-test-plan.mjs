@@ -290,8 +290,12 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
 });
 
 // Bound each CI worker to a deterministic share of the complete development inventory.
-// Sorted round-robin assignment is deterministic and never changes local coverage.
-export const BROWSER_SHARD_COUNT = 8;
+// Weight-aware assignment is deterministic and never changes local coverage. Ten
+// shards keep the heaviest balanced shard (~734s of measured suite cost plus
+// ~64s of shared-server setup) under the 900s execution cap with headroom for
+// suites whose cost is still estimated; eight shards concentrated ~1330s into
+// one shard and timed out seven of eight shards in cycle 43837651044.
+export const BROWSER_SHARD_COUNT = 10;
 
 export function corepackInvocation(platform = process.platform) {
   return {
@@ -334,6 +338,72 @@ export function assertBrowserInventory(
     );
 }
 
+// Measured wall-clock cost (seconds) of each development browser suite from the
+// 2026-11-16 regression cycle 43837651044 (main f69d5969). Sorted round-robin
+// assignment placed the heaviest suites (site-search-commands ~629s,
+// demo-select-draft-projections ~420s, homepage-dogfood ~373s,
+// site-native-links ~355s) into the same shards, so seven of eight shards hit
+// the outer 900s cap before reporting a terminal summary. Weight-aware
+// assignment spreads that cost instead of raising the cap. Suites without a
+// measurement use the median measured cost; the table is refreshed from a
+// complete cycle receipt, never from a partial or timed-out shard.
+export const BROWSER_SUITE_WEIGHT_SECONDS = Object.freeze({
+  'apps/www/src/components/documentation-image-preview.browser.test.ts': 90,
+  'apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts': 55,
+  'apps/www/src/content/docs/zh-cn/button-boundaries.browser.test.ts': 83,
+  'apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts': 54,
+  'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts': 49,
+  'apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts': 11,
+  'apps/www/src/content/docs/zh-cn/contrast-tooltip-warm-handoff.browser.test.ts': 59,
+  'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts': 23,
+  'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts': 41,
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts': 32,
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts': 58,
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts': 7,
+  'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts': 24,
+  'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts': 24,
+  'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts': 208,
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts': 52,
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts': 176,
+  'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts': 59,
+  'apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts': 29,
+  'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts': 420,
+  'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts': 12,
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts': 132,
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts': 70,
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts': 43,
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts': 8,
+  'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts': 53,
+  'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts': 34,
+  'apps/www/src/content/docs/zh-cn/finf-alert-dialog-layout.browser.test.ts': 139,
+  'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts': 104,
+  'apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts': 170,
+  'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts': 373,
+  'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts': 47,
+  'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts': 8,
+  'apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts': 174,
+  'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts': 63,
+  'apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts': 24,
+  'apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts': 5,
+  'apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts': 207,
+  'apps/www/src/content/docs/zh-cn/site-native-links.browser.test.ts': 355,
+  'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts': 629,
+  'apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts': 68,
+  'apps/www/src/content/docs/zh-cn/website-markup-provenance.browser.test.ts': 0,
+  'apps/www/test/component-consumer-repairs.browser.test.ts': 22,
+  'apps/www/test/radio-group-entry.browser.test.ts': 8,
+  'apps/www/test/virtual-list-resize.browser.test.ts': 1,
+  'packages/adapters/web-component/test/shadow-closeout.browser.test.ts': 63,
+  'packages/compiler/test/focus-scope-native.browser.test.ts': 0,
+  'packages/prototypes/base/test/async-region.browser.test.ts': 3,
+});
+
+const DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS = 52;
+
+function browserSuiteWeightSeconds(suite) {
+  return BROWSER_SUITE_WEIGHT_SECONDS[suite] ?? DEFAULT_BROWSER_SUITE_WEIGHT_SECONDS;
+}
+
 export function browserShards(suites = BROWSER_SUITES, count = BROWSER_SHARD_COUNT) {
   if (
     !Number.isInteger(count) ||
@@ -342,10 +412,29 @@ export function browserShards(suites = BROWSER_SUITES, count = BROWSER_SHARD_COU
     new Set(suites).size !== suites.length
   )
     throw new Error('Browser shards must be nonempty and suites unique');
-  const sorted = [...suites].sort();
-  return Array.from({ length: count }, (_, index) =>
-    sorted.filter((_, position) => position % count === index)
+  // Longest-processing-time-first greedy assignment: place the heaviest
+  // remaining suite into the lightest shard that still has capacity. Sorting
+  // by (weight desc, name asc) makes the result independent of input order,
+  // and the per-shard count cap keeps every shard bounded and nonempty.
+  const capacity = Math.ceil(suites.length / count);
+  const ordered = [...suites].sort(
+    (left, right) =>
+      browserSuiteWeightSeconds(right) - browserSuiteWeightSeconds(left) ||
+      (left < right ? -1 : left > right ? 1 : 0)
   );
+  const shards = Array.from({ length: count }, () => []);
+  const loads = new Array(count).fill(0);
+  for (const suite of ordered) {
+    let target = -1;
+    for (let index = 0; index < count; index += 1) {
+      if (shards[index].length >= capacity) continue;
+      if (target === -1 || loads[index] < loads[target]) target = index;
+    }
+    shards[target].push(suite);
+    loads[target] += browserSuiteWeightSeconds(suite);
+  }
+  // Restore deterministic name order within each shard for stable receipts.
+  return shards.map((shard) => shard.sort());
 }
 
 export function selectBrowserShard(shard) {

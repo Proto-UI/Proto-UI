@@ -11,6 +11,7 @@ import { parsePrototype } from '../src/parser';
 import { emitVue2Source } from '../src/vue2-source';
 import { validateIR } from '../src/ir-validation';
 import { collectVue2IdentityOnlyFunctions } from '../src/vue2-native-template';
+import { functionValueType } from '../src/value-types';
 import { editingInput, physicalRootInput as physical } from './vue2-native-editor-fixtures';
 import type { ExpressionIR, FunctionIR, GeneratedModule, PrototypeIR } from '../src/ir';
 
@@ -26,6 +27,54 @@ export default definePrototype({name:'native-shapes',setup(def){${body}}});`,
   );
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   return parsed.value;
+}
+
+/** A portable signature edit must also update its binding-resolved uses. */
+function templateFormal(ir: PrototypeIR, fn: FunctionIR) {
+  const nodes: Record<string, unknown>[] = [];
+  const seen = new Set<object>();
+  function visit(value: unknown) {
+    if (!value || typeof value !== 'object' || seen.has(value)) return;
+    seen.add(value);
+    if (Array.isArray(value)) value.forEach(visit);
+    else {
+      const node = value as Record<string, unknown>;
+      nodes.push(node);
+      Object.values(node).forEach(visit);
+    }
+  }
+  visit(ir);
+  const parameter = fn.parameters[0];
+  if (!parameter?.bindingId) throw new Error('Missing template parameter binding');
+  parameter.type = 'template';
+  const callable = functionValueType(fn);
+  const bindings = new Set<string>();
+  for (const node of nodes) {
+    if (node.kind === 'reference' && node.bindingId === parameter.bindingId) node.type = 'template';
+    if (node.kind === 'function' && node.function === fn) node.type = callable;
+    if (node.kind === 'const') {
+      const value = node.value as ExpressionIR;
+      if (value.kind === 'function' && value.function === fn && typeof node.bindingId === 'string')
+        bindings.add(node.bindingId);
+    }
+  }
+  let previous = -1;
+  while (previous !== bindings.size) {
+    previous = bindings.size;
+    for (const node of nodes) {
+      if (node.kind !== 'const' || typeof node.bindingId !== 'string') continue;
+      const value = node.value as ExpressionIR;
+      if (value.kind === 'reference' && value.bindingId && bindings.has(value.bindingId))
+        bindings.add(node.bindingId);
+    }
+  }
+  for (const node of nodes)
+    if (
+      node.kind === 'reference' &&
+      typeof node.bindingId === 'string' &&
+      bindings.has(node.bindingId)
+    )
+      node.type = callable;
 }
 
 const evidenceRoot = process.env.PUI_VUE2_NATIVE_EVIDENCE_DIR;
@@ -678,7 +727,8 @@ describe('Vue2 compiler-native child construction', () => {
     });
     expect(() => write(3)).toThrow(failure);
     expect(nativeMethod(state, 'get')()).toBe(4);
-    expect(events).toEqual(['A1', 'C1', 'A2', 'C2', 'A3', 'C3', 'D3']);
+    // Reentrant notifications drain before the first subscriber failure escapes.
+    expect(events).toEqual(['A1', 'C1', 'A2', 'C2', 'A3', 'C3', 'D3', 'A4', 'C4']);
     expect(view.host.querySelector('output')?.textContent).toBe('2S1');
     if (typeof offThrower !== 'function') throw new Error('Missing throwing unsubscribe');
     offThrower();
@@ -959,14 +1009,15 @@ describe('Vue2 compiler-native child construction', () => {
       returned.value?.kind !== 'operation'
     )
       throw new Error('Expected fixture');
-    helper.value.function.parameters[0].type = 'template';
-    const inside = helper.value.function.body[0];
-    if (inside.kind !== 'return' || inside.value?.kind !== 'operation')
-      throw new Error('Expected wrapper');
-    inside.value.arguments[1].type = 'template';
+    templateFormal(ir, helper.value.function);
     const children = returned.value.arguments[1];
-    if (children.kind !== 'array' || children.elements[0].kind !== 'helper-call')
+    if (children.kind !== 'array' || children.elements[0].kind !== 'call')
       throw new Error('Expected calls');
+    const nodeDeclaration = body.find(
+      (statement) => statement.kind === 'const' && statement.name === 'node'
+    );
+    if (nodeDeclaration?.kind !== 'const' || !nodeDeclaration.bindingId)
+      throw new Error('Missing native child binding');
     const span = children.span;
     const array: ExpressionIR = {
       kind: 'array',
@@ -975,7 +1026,13 @@ describe('Vue2 compiler-native child construction', () => {
       elements: [
         { kind: 'literal', type: 'string', value: 'text', span },
         { kind: 'literal', type: 'null', value: null, span },
-        { kind: 'reference', type: 'template', name: 'node', span },
+        {
+          kind: 'reference',
+          type: 'template',
+          name: 'node',
+          bindingId: nodeDeclaration.bindingId,
+          span,
+        },
       ],
     };
     children.elements[0].arguments[0] = array;
@@ -1011,11 +1068,7 @@ describe('Vue2 compiler-native child construction', () => {
     const helper = renderFunction(ir).body.find((statement) => statement.kind === 'const');
     if (helper?.kind !== 'const' || helper.value.kind !== 'function')
       throw new Error('Expected helper');
-    helper.value.function.parameters[0].type = 'template';
-    const returned = helper.value.function.body[0];
-    if (returned.kind !== 'return' || returned.value?.kind !== 'operation')
-      throw new Error('Expected element');
-    returned.value.arguments[1].type = 'template';
+    templateFormal(ir, helper.value.function);
     // This legal checked-IR signature may not be downgraded merely because its
     // identity is observed without invoking it. It must not require body DCE.
     const view = await mount(ir);
@@ -1290,12 +1343,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     // complete graph assertion are independent; neither filters the other.
     return { program, source, evidence, diagnostics };
   }
-  function legacy(fn: FunctionIR) {
-    fn.parameters[0].type = 'template';
-    const returned = fn.body[0];
-    if (returned.kind !== 'return' || returned.value?.kind !== 'operation')
-      throw new Error('Expected direct native child');
-    returned.value.arguments[1].type = 'template';
+  function legacy(ir: PrototypeIR, fn: FunctionIR) {
+    templateFormal(ir, fn);
   }
   function identity(tail = "return r.el('i','not-called');") {
     return prototype(`return r=>{
@@ -1303,11 +1352,24 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
       if(make!==alias)return null;${tail}
     };`);
   }
+  function aliasReference(ir: PrototypeIR): ExpressionIR {
+    const alias = renderFunction(ir).body.find(
+      (statement) => statement.kind === 'const' && statement.name === 'alias'
+    );
+    if (alias?.kind !== 'const' || !alias.bindingId) throw new Error('Missing alias binding');
+    return {
+      kind: 'reference',
+      name: alias.name,
+      bindingId: alias.bindingId,
+      type: alias.value.type,
+      span: alias.span,
+    };
+  }
 
   it('requires complete identity uses, preserves checked types, and honors an independent invocation veto', () => {
     const ir = identity();
     const make = helper(ir);
-    legacy(make);
+    legacy(ir, make);
     const before = JSON.stringify(ir);
     const proof = checked(ir);
     expect(proof.incomplete.size).toBe(0);
@@ -1383,7 +1445,7 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
       if(make!==alias)return null;return r.el('i','not-called');
     };`);
     const make = helper(ir);
-    legacy(make);
+    legacy(ir, make);
     const proof = checked(ir);
     expect(proof.incomplete.size).toBe(0);
     expect([...proof.eligible]).toEqual([make]);
@@ -1423,31 +1485,40 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
           optional: false,
           property,
           span,
-          object: { kind: 'reference', type: 'function', name: 'alias', span },
+          object: aliasReference(ir),
         },
       });
       const { result } = validated(ir);
       expect(result.ok).toBe(false);
       if (!result.ok)
         expect(
-          result.diagnostics.some((item) => item.message.includes('Unsupported IR property access'))
+          result.diagnostics.some(
+            (item) =>
+              item.code === 'PUI2002' && item.message === `Undeclared object member ${property}.`
+          )
         ).toBe(true);
       // Invalid input is not evidence of supported reflection or safe escape.
     }
   );
 
   it.each(['array', 'record'] as const)(
-    'retains upstream rejection of callable container escape: %s',
+    'rejects callable containers mislabeled as data: %s',
     (kind) => {
       const ir = identity();
       const fn = renderFunction(ir);
       const span = fn.span;
-      const reference: ExpressionIR = { kind: 'reference', type: 'function', name: 'alias', span };
+      const reference = aliasReference(ir);
       const value: ExpressionIR =
         kind === 'array'
           ? { kind, type: 'array', elements: [reference], span }
           : { kind, type: 'record', entries: [{ key: 'callback', value: reference }], span };
-      fn.body.splice(2, 0, { kind: 'const', name: 'escaped', value, span });
+      fn.body.splice(2, 0, {
+        kind: 'const',
+        name: 'escaped',
+        bindingId: 'negative#escaped',
+        value,
+        span,
+      });
       const { result } = validated(ir);
       expect(result.ok).toBe(false);
       if (!result.ok)
@@ -1456,14 +1527,14 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
             item.message.includes(
               kind === 'array'
                 ? 'Data arrays cannot contain semantic handles'
-                : 'Configuration records cannot contain execution-scope handles or escaping callbacks'
+                : 'IR expression type mismatch.'
             )
           )
         ).toBe(true);
     }
   );
 
-  it('retains upstream rejection of recursive aliases', () => {
+  it('rejects a recursive edge absent from portable capture metadata', () => {
     const ir = identity();
     const make = helper(ir);
     make.body.unshift({
@@ -1473,7 +1544,7 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
         kind: 'helper-call',
         type: 'template',
         name: 'make',
-        arguments: [],
+        arguments: [{ kind: 'literal', type: 'string', value: 'recursive', span: make.span }],
         span: make.span,
       },
     });
@@ -1481,7 +1552,11 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     expect(result.ok).toBe(false);
     if (!result.ok)
       expect(
-        result.diagnostics.some((item) => item.message.includes('Unknown or recursive helper call'))
+        result.diagnostics.some(
+          (item) =>
+            item.code === 'PUI2002' &&
+            item.message === 'Capture metadata must include every captured binding.'
+        )
       ).toBe(true);
   });
 
@@ -1494,8 +1569,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
       if(first===second)return r.el('i','wrong-shared-identity');
       return r.el('i','distinct');
     };`);
-    legacy(helper(ir, 'first'));
-    legacy(helper(ir, 'second'));
+    legacy(ir, helper(ir, 'first'));
+    legacy(ir, helper(ir, 'second'));
     const view = await mount(ir);
     expect(view.host.textContent).toBe('distinct');
     const { program, source, evidence, diagnostics } = strictGraph(view.module);
@@ -1530,7 +1605,9 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
           type: checker.typeToString(type),
         });
       }
-      expect(ts.isBlock(fn.body) && fn.body.statements.length).toBe(0);
+      // A proved uninvoked body can be empty or retain only a defensive throw.
+      // Its original renderer operations and defaults must not be delivered.
+      expect(ts.isBlock(fn.body) && fn.body.statements.every(ts.isThrowStatement)).toBe(true);
       // No hoisting: the original creation is still nested in the authored renderer.
       let parent: ts.Node | undefined = declaration.parent;
       while (parent && !ts.isArrowFunction(parent)) parent = parent.parent;
@@ -1543,12 +1620,11 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     capture(evidence, 'formal-types.json', JSON.stringify(formalTypes, null, 2));
     expect(formalTypes.length).toBe(4);
     expect(formalTypes.every((type) => type.flags === ts.TypeFlags.Unknown)).toBe(true);
-    expect(view.module.code).not.toContain('unreachable authored callable');
   });
 
   it('keeps the full body when an identity-observed alias is actually invoked', async () => {
     const ir = identity("return alias('called');");
-    legacy(helper(ir));
+    legacy(ir, helper(ir));
     const proof = checked(ir);
     expect(proof.eligible.has(helper(ir))).toBe(false);
     const view = await mount(ir);

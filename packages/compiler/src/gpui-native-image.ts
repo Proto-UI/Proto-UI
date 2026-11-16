@@ -93,7 +93,7 @@ pub fn image_accessible(owner:&OwnerRef,node:&mut gpui::accesskit::Node){
 }
 fn image_complete(owner:&OwnerWeak,generation:u64,epoch:u64,status:&'static str,window:&mut Window,cx:&mut App){
     let Some(owner)=owner.upgrade().filter(|owner|{let o=owner.borrow();let image=&o.modules.image;!o.disposed&&o.mounted&&o.present&&image.attached&&image.generation==generation&&image.lease_epoch==epoch&&!image.source.is_empty()&&image.status=="loading"})else{return};
-    image_transition(&owner,status);let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}
+    native_host_callback(&owner,"image-completion",||image_transition(&owner,status));let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}
 }
 pub fn image_element(owner:&OwnerRef,fill_height:bool)->AnyElement{
     use gpui::StyledImage as _;

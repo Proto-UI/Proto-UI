@@ -600,6 +600,50 @@ describe('Website projection materializer', () => {
     expect(portal.isConnected).toBe(false);
   });
 
+  it('seals the active generation portals on request without switching generations', async () => {
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    const portal = document.createElement('section');
+    portal.dataset.projectionOwner = 'seal-request-owner';
+    portal.dataset.projectionGeneration = '2';
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'seal-request-owner';
+      host.appendChild(scope);
+      document.body.append(portal);
+      return { destroy: fakes.destroyRender };
+    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      queueMicrotask(() => callback(0));
+      return 1;
+    });
+    const mount = document.createElement('div');
+    document.body.append(mount);
+
+    const candidate = await materializeProjectionCandidate(
+      { selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' }, generation: 2 },
+      { mount, ownerId: 'seal-request-owner', componentId: 'button', controls: controls() }
+    );
+    candidate.activate();
+    expect(portal.inert).toBe(false);
+
+    expect(candidate.sealExternalPortals).toBeTypeOf('function');
+    candidate.sealExternalPortals?.();
+    expect(portal.inert).toBe(true);
+    expect(portal.getAttribute('aria-hidden')).toBe('true');
+    expect(portal.style.visibility).toBe('hidden');
+    expect(portal.style.pointerEvents).toBe('none');
+
+    candidate.setLocked?.(false);
+    expect(portal.inert).toBe(false);
+    expect(portal.hasAttribute('aria-hidden')).toBe(false);
+    await candidate.dispose();
+  });
+
   it('shares one owner-filtered document portal observer across candidates', async () => {
     fakes.createComposition.mockImplementation(() => ({
       demo: childDemo,

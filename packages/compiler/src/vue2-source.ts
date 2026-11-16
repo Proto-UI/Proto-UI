@@ -1,6 +1,32 @@
+import { pruneDeadValues } from './demand-pruning';
+import { ordinaryValueChildren } from './value-children';
 import { nativeVue2AssociationsArtifact } from './native-vue2-associations';
 import { resolvedPropFacts } from './resolved-props';
 import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
+import {
+  nativePublicCallsArtifact,
+  hasPublicCallable,
+  emitPublicValue,
+  emitPublicMethodProjection,
+} from './native-public-values';
+import { nativeHostAtomPlan, emitNativeHostAtom, type NativeHostAtomPlan } from './native-async';
+import {
+  nativeAuthoredHooksArtifact,
+  emitAuthoredHookDefinition,
+  emitPrivilegedHookCall,
+} from './native-authored-hooks';
+import {
+  createJavaScriptValueReader,
+  emitJavaScriptMember,
+  emitJavaScriptValue,
+  emitJavaScriptParameters,
+  emitUninvokedJavaScriptFunction,
+  formatJavaScriptValueType,
+  emitOptionalOperation,
+} from './native-value-lowering';
+import { isDataValueType } from './ir';
+import { emitRecordedNotification } from './notification-plan';
+import { observableSemantics } from './observable-semantics';
 import { NativeLexicalScope, moduleLexicalScope } from './template-shape';
 import { partitionModuleBindings } from './source-module-bindings';
 import {
@@ -11,12 +37,7 @@ import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-fact
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
-import {
-  nativeInteractionArtifact,
-  nativeInteractionArtifacts,
-  selectNativeSupport,
-} from './native-interaction';
-import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { nativeSupportArtifacts, planNativeSupport } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './native-style';
 import { OPERATION_RULES } from './operations';
@@ -39,6 +60,7 @@ export interface Vue2SourceOptions {
   componentName?: string;
   rootTag?: string;
   autoUpdateOnPropsChange?: boolean;
+  propsUpdatePolicy?: import('./observable-semantics').PropsUpdatePolicy;
   ssr?: boolean;
 }
 
@@ -49,7 +71,8 @@ export function emitVue2Source(
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
-  const ir = validated.value;
+  const ir = pruneDeadValues(validated.value);
+  const readValue = createJavaScriptValueReader(ir, typeName, false);
   const moduleParts = partitionModuleBindings(ir);
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue2-source SSR');
@@ -62,6 +85,7 @@ export function emitVue2Source(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   const rootTag = options.rootTag ?? 'div';
@@ -75,18 +99,9 @@ export function emitVue2Source(
       site.operation.startsWith('rule.') ||
       site.operation.startsWith('feedback.')
   );
-  const usesInteraction =
-    ir.moduleDeclarations.length > 0 ||
-    admitted.value.sites.some((site) =>
-      /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.)/.test(site.operation)
-    );
-  const interactionSelection = selectNativeSupport(ir, admitted.value);
-  const atomicInteraction = usesInteraction && !options.ssr && interactionSelection !== 'full';
-  const interactionPath = options.ssr
-    ? './.proto-ui/interaction/native-v1'
-    : atomicInteraction
-      ? './.proto-ui/interaction/' + interactionSelection + '-v1'
-      : './.proto-ui/interaction/native-v1';
+  const usesInteraction = supportPlan.features.length > 0;
+  const atomicInteraction = false;
+  const interactionPath = './' + supportPlan.interactionPath.slice(0, -3);
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
   // Only admitted Overlay capability can produce a non-null portal target.
@@ -142,6 +157,11 @@ export function emitVue2Source(
   // An operation name is not proof that every host-specific argument has a lowering.
   // Fail closed before emitting, including inside statically expanded authored hooks.
   function inspect(node: ExpressionIR): void {
+    const ordinary = ordinaryValueChildren(node);
+    if (ordinary) {
+      ordinary.forEach(inspect);
+      return;
+    }
     if (node.kind === 'operation') {
       if (node.operation === 'props.define') {
         const declarations = node.arguments[0];
@@ -216,8 +236,8 @@ export function emitVue2Source(
       inspect(node.value);
     } else if (node.kind === 'conditional') {
       inspect(node.condition);
-      inspect(node.whenTrue);
-      inspect(node.whenFalse);
+      inspect(node.then);
+      inspect(node.otherwise);
     } else if (node.kind === 'binary') {
       inspect(node.left);
       inspect(node.right);
@@ -291,18 +311,44 @@ export function emitVue2Source(
   const contextNames = new Map(
     ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`])
   );
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
+  const publicCalls = ir.exposes.some(
+    (entry) =>
+      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+  );
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
+    const atom = atoms.typeName(type, `${prefix}Run`);
+    if (atom) return atom;
+    if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
+    if (typeof type !== 'string' && !isDataValueType(type))
+      return formatJavaScriptValueType(type, typeName);
     if (type === 'exception') return 'unknown';
-    if (typeof type === 'object') return formatDataType(type);
+    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
+    if (isDataValueType(type)) return formatDataType(type);
     if (['boolean', 'number', 'string', 'null', 'void', 'unknown'].includes(type)) return type;
+    if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
+    if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
+    if (
+      !usesInteraction &&
+      (['focus', 'accessible', 'event', 'event-control', 'event-or-control'].includes(type) ||
+        type.startsWith('observed:'))
+    )
+      return 'unknown';
+    if (!usesStyle && ['style-handle', 'rule-handle', 'template-props'].includes(type))
+      return 'unknown';
+    if (type.startsWith('borrowed:'))
+      return `${prefix}OwnedState<${type.slice(9)}> & {watch(callback: (run: ${prefix}Run, event: ${prefix}StateEvent<${type.slice(9)}>) => void): () => void}`;
     if (type === 'props') return `${prefix}ResolvedProps`;
     if (type === 'def') return `${prefix}Owner['def']`;
     if (type === 'run') return `${prefix}Run`;
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
-    if (type === 'context-key') return 'object';
+    if (type === 'context-key')
+      return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'focus') return `${prefix}NativeFocus`;
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
@@ -317,18 +363,19 @@ export function emitVue2Source(
       type === 'control-label-handle' ||
       type === 'control-label-request'
     )
-      return `import('./.proto-ui/interaction/adapter-modules-v1').NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
+      return `import(${JSON.stringify('./' + supportPlan.modulesPath.slice(0, -3))}).NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
     return values
       .map(
         (parameter) =>
-          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
+          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
       )
       .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
+    if (!reachedFunctions.has(value)) return emitUninvokedJavaScriptFunction(value, false);
     if (nativePlan?.identityOnly.has(value)) {
       // Complete lexical use proof, not absence from the invocation collector.
       // Preserve this allocation site and original arity. Opaque unused formals
@@ -336,7 +383,7 @@ export function emitVue2Source(
       const opaque = value.parameters
         .map((parameter) => ` * @param {unknown} ${parameter.name}`)
         .join('\n');
-      return `${opaque ? `/**\n${opaque}\n */ ` : ''}(${value.parameters.map((parameter) => parameter.name + (parameter.default ? ' = ' + expression(parameter.default, depth) : '')).join(', ')}) => {}`;
+      return `${opaque ? `/**\n${opaque}\n */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {}`;
     }
     const saved = nativeScope;
     for (const parameter of value.parameters) {
@@ -354,10 +401,15 @@ export function emitVue2Source(
             parameter.type === 'unknown' || parameter.type === 'template'
               ? nativeTemplate?.parameterType(parameter)
               : undefined;
-          return `@param {${contextual ?? (parameter.callback ? `(${parameters(parameter.callback.parameters)}) => ${typeName(parameter.callback.returnType)}` : typeName(parameter.type))}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
+          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
         })
         .join(' ');
-      return `${annotations ? `/** ${annotations} */ ` : ''}(${value.parameters.map((parameter) => parameter.name + (parameter.default ? ' = ' + expression(parameter.default, depth) : '')).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      const returns =
+        value.context === 'helper' &&
+        !['function', 'unknown', 'template'].includes(value.returnType as string)
+          ? ` @returns {${typeName(value.returnType)}}`
+          : '';
+      return `${annotations || returns ? `/** ${annotations}${returns} */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
     } finally {
       nativeScope = saved;
     }
@@ -365,16 +417,24 @@ export function emitVue2Source(
 
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'conditional':
+      case 'call':
+      case 'intrinsic':
+      case 'object-spread':
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false)!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
-        return value.name;
+        return readValue(value, value.name);
       case 'lexical-cell':
         return expression(value.value, depth);
       case 'lexical-read':
-        return expression(value.cell, depth);
+        return readValue(value, expression(value.cell, depth));
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
@@ -395,11 +455,15 @@ export function emitVue2Source(
           false
         );
       case 'member':
-        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return emitJavaScriptMember(
+          value,
+          (item) => expression(item, depth),
+          typeName,
+          false,
+          readValue
+        );
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -411,15 +475,49 @@ export function emitVue2Source(
       case 'helper-call':
         return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
       case 'authored-hook':
-        return `${aliases.get(value.hookId)}()`;
+        return `${aliases.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'static-capability':
         return staticNames.get(value.declarationId)!;
       case 'operation': {
+        const optional = emitOptionalOperation(
+          value,
+          (item) => expression(item, depth),
+          `${prefix}OptionalReceiver`
+        );
+        if (optional !== undefined) return optional;
+        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), prefix);
+        if (atom !== undefined) return atom;
+        if (hasAuthoredHooks && value.operation.startsWith('hook.'))
+          return emitPrivilegedHookCall({
+            value: value,
+            manager: `${prefix}Authored`,
+            callee: `${prefix}Owner.interaction.${OPERATION_RULES[value.operation].path}`,
+            prefix: prefix,
+            emit: (item) => expression(item, depth),
+            typeName,
+            typed: false,
+          });
+        if (value.operation === 'expose.value' && hasPublicCallable(value.arguments[1].type))
+          return `${expression(value.receiver!, depth)}.expose.value(${expression(value.arguments[0], depth)}, ${emitPublicValue({ value: expression(value.arguments[1], depth), type: value.arguments[1].type, wrap: `${prefix}WrapPublic`, prefix: prefix, typeName, typed: false })})`;
+        if (value.operation === 'expose.method') {
+          const projection = emitPublicMethodProjection(value.arguments[1].type, {
+            wrap: `${prefix}WrapPublic`,
+            prefix: prefix,
+            typeName,
+            typed: false,
+          });
+          if (projection)
+            return `${expression(value.receiver!, depth)}.expose.method(${value.arguments.map((item) => expression(item, depth)).join(', ')}, ${projection})`;
+        }
+        if (value.operation.startsWith('capture.'))
+          return `/** @type {${typeName(value.type)}} */ (${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}?.(${value.arguments.map((item) => expression(item, depth)).join(', ')}))`;
         if (nativeTemplate && value.operation === 'render.el')
           return nativeTemplate.element(value, depth);
         if (nativeTemplate && value.operation === 'render.slot')
           return nativeTemplate.slot(value, depth);
         const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
+        if (value.operation === 'state.get')
+          return `/** @type {${typeName(value.type)}} */ (${expression(value.receiver!, depth)}.get())`;
         if (OPERATION_RULES[value.operation].path === 'call')
           return `${expression(value.receiver!, depth)}(${argumentsCode})`;
         if (value.operation.startsWith('hook.') || value.operation.startsWith('anatomy.')) {
@@ -440,16 +538,7 @@ export function emitVue2Source(
     for (const statement of statements) {
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        if (
-          (statement.value.kind === 'function' &&
-            !reachedFunctions.has(statement.value.function)) ||
-          (statement.value.kind === 'reference' && deadBindings.has(statement.value.name))
-        ) {
-          deadBindings.add(statement.name);
-          continue;
-        }
-        deadBindings.delete(statement.name);
-        output += `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `${indent}/** @type {${typeName(statement.value.type)}} */\n` : ''}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
         nativeScope = nativeScope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') {
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
@@ -514,22 +603,22 @@ export function emitVue2Source(
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
   const hooks =
     body(moduleParts.owned, 1) +
-    (reachedHooks.size
-      ? `  const ${prefix}HookResults = new Map();\n` +
-        ir.hooks
-          .filter((hook) => reachedHooks.has(hook.id))
-          .map(
-            (hook) => `  const ${aliases.get(hook.id)} = () => {
-    if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
-    ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
-    (${fn(hook.setup, 1)})(${prefix}Owner.def);
-    const result = Object.freeze(Object.create(null));
-    ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
-    return result;
-  };`
-          )
-          .join('\n')
-      : '');
+    ir.hooks
+      .filter((hook) => reachedHooks.has(hook.id))
+      .map(
+        (hook) =>
+          '  ' +
+          emitAuthoredHookDefinition({
+            hook,
+            name: aliases.get(hook.id)!,
+            manager: `${prefix}Authored`,
+            def: `${prefix}Owner.def`,
+            emit: (value) => fn(value, 1),
+            typeName,
+            typed: false,
+          })
+      )
+      .join('\n');
   const styleImport = usesStyle
     ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n`
     : '';
@@ -598,7 +687,11 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
     staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined',
     atomicInteraction,
-    interactionSelection === 'image' ? JSON.stringify(ir.moduleDeclarations[0].config) : null,
+    null,
+    supportPlan.features.includes('event'),
+    atoms,
+    hasAuthoredHooks,
+    publicCalls,
     controlLabel
   ).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
@@ -607,6 +700,9 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
 // Inline native-lowering helpers: logical owner, prop resolution, state, semantic templates.
 // No Proto-UI Core, Runtime, Hooks or Adapter dependency; optional native helpers are emitted artifacts.
 // Source graph SHA-256: ${ir.source.sha256}
+${atoms.jsImports}
+${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${contextImports}
 ${staticImports}
 ${body(moduleParts.shared, 0)}
@@ -648,6 +744,9 @@ ${helpers}
 
 /** @param {${prefix}Owner} ${prefix}Owner */
 function ${prefix}Setup(${prefix}Owner) {
+${publicCalls ? `  const ${prefix}WrapPublic = ${prefix}Owner.wrapPublic;` : ''}
+${hasAuthoredHooks ? `  const ${prefix}Authored = ${prefix}Owner.authored;` : ''}
+${atoms.delay ? `  const ${prefix}Delay = ${prefix}Owner.delay;` : ''}${atoms.presence ? `  const ${prefix}Presence = ${prefix}Owner.presence;` : ''}${atoms.meta ? `  const ${prefix}Meta = ${prefix}Owner.meta;` : ''}
 ${hooks}
   ${
     ir.setup.returnType === 'void'
@@ -675,7 +774,7 @@ export const ${componentName} = {
   }
   /** @this {${prefix}NativeInstance} */
   beforeCreate() {
-    Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.autoUpdateOnPropsChange !== false}) });
+    Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.propsUpdatePolicy ? options.propsUpdatePolicy === 'host' : options.autoUpdateOnPropsChange !== false}) });
     ${
       options.ssr
         ? `const session = ${prefix}FindSession(this);
@@ -715,28 +814,47 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
       code,
       profile,
       supportingFiles: [
+        ...atoms.files,
+        ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...(contextArtifacts?.files ?? []),
         ...staticDeclarations.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
         ...(controlLabel ? [nativeVue2AssociationsArtifact] : []),
-        ...(usesInteraction
-          ? options.ssr
-            ? [nativeInteractionArtifact, nativeAdapterModulesArtifact]
-            : nativeInteractionArtifacts(interactionSelection, { controlLabel })
-          : []),
+        ...(usesInteraction ? nativeSupportArtifacts(supportPlan) : []),
       ],
       dependencies: [
         ...selected.value.dependencies
           .filter(
             (dependency) =>
-              (usesInteraction && !atomicInteraction) || dependency.name !== '@floating-ui/dom'
+              supportPlan.packages.includes(dependency.name) ||
+              dependency.name !== '@floating-ui/dom'
           )
           .map((dependency) => ({ ...dependency })),
         ...(options.ssr
           ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }]
           : []),
       ],
-      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
+      provenance: {
+        source: ir.source,
+        irVersion: ir.schemaVersion,
+        backend: profile,
+        observableSemantics: observableSemantics(
+          'vue2',
+          'source',
+          options.propsUpdatePolicy ??
+            (options.autoUpdateOnPropsChange === false ? 'explicit' : undefined)
+        ),
+        ...(usesInteraction
+          ? {
+              nativeSupport: {
+                version: 2 as const,
+                id: supportPlan.id,
+                features: [...supportPlan.features],
+              },
+            }
+          : {}),
+      },
     },
   };
 }
@@ -761,6 +879,10 @@ function nativeHelpers(
   tableFamily: string,
   atomicInteractive: boolean,
   imageConfig: string | null,
+  eventSupport: boolean,
+  atoms: NativeHostAtomPlan,
+  hasAuthoredHooks: boolean,
+  publicCalls: boolean,
   controlLabel: boolean
 ): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
@@ -983,6 +1105,8 @@ ${stateful ? '  let notifying = false;\n' : ''}${
 `
       : ''
   }  let dispatchingProps = false;
+  /** @type {{raw: PUIRawProps; resolved: PUIResolvedProps} | null} */
+  let propsWindow = null;
   const alive = () => { if (disposed) throw new Error('[Vue2 native] logical instance has been disposed.'); };
   const publicAlive = () => { if (terminal) throw new Error('[Vue2 native] exposed target has been terminally invalidated.'); };
   const callback = () => { alive(); if (phase !== 'callback') throw new Error('[Vue2 native] mutation requires callback scope.'); };
@@ -1100,6 +1224,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
     ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if ((changedKeys.length || changedRawKeys.length) && !dispatchingProps) {
       dispatchingProps = true;
+      const previousWindow = propsWindow; propsWindow = {raw: nextRaw, resolved: next.snapshot};
       try {
         invoke(() => {
           // Raw-all precedes raw-keyed; resolved-all and keyed share declaration order.
@@ -1120,7 +1245,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
             }
           }
         }, false);
-      } finally { dispatchingProps = false; }
+      } finally { propsWindow = previousWindow; dispatchingProps = false; }
     }
     if (request && autoUpdate) update();
   };
@@ -1165,14 +1290,31 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
       : new AggregateError(failures, '[Vue2 native] presence withdrawal failed.');
   };
 ${context.owner}
+  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', typed: false })}
+${
+  hasAuthoredHooks
+    ? `  /** @type {(() => void)[]} */ const PUIAuthoredWatchCleanups = [];
+  const PUIAuthored = PUICreateAuthored({setup: setupOnly, borrow(/** @type {unknown} */ value) {
+    ${
+      stateful
+        ? `
+    const state = /** @type {PUIOwnedState<unknown>} */ (value);
+    return Object.freeze({get: () => state.get(), setDefault: (/** @type {unknown} */ value) => state.setDefault(value), set: (/** @param {unknown} value @param {unknown} [reason] */ (value, reason) => state.set(value, reason)), watch: (/** @type {(run: PUIRun, event: PUIStateEvent<unknown>) => void} */ fn) => { setupOnly(); const off = state.external.subscribe(event => invoke(() => fn(run, event), false)); PUIAuthoredWatchCleanups.push(off); return off; }});
+    `
+        : 'return value;'
+    }
+  }});`
+    : ''
+}
+  ${publicCalls ? `const PUIWrapPublic = PUICreatePublicCalls({alive: publicAlive, invoke});` : ''}
   const run = {
     ${context.run}
     ${styled ? 'feedback: { style },' : ''}
     update: () => { callback(); update(); },
     props: {
-      get: () => { alive(); return resolved; },
-      getRaw: () => { alive(); return raw; },
-      isProvided: (/** @param {PropertyKey} key */ (key) => { alive(); return PUIOwn(raw, key); }),
+      get: () => { alive(); return propsWindow?.resolved ?? resolved; },
+      getRaw: () => { alive(); return propsWindow?.raw ?? raw; },
+      isProvided: (/** @param {PropertyKey} key */ (key) => { alive(); return PUIOwn(propsWindow?.raw ?? raw, key); }),
     },
     lifecycle: { setPresent },
     expose: { emit: (/** @param {string} key @param {unknown} [payload] @param {unknown} [options] */ (key, payload, options) => {
@@ -1219,21 +1361,11 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
       setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration: ' + key);
       if (value !== null && typeof value === 'object' && observedExternals.has(value)) exposed[key] = observedExternals.get(value);
       else if (typeof value === 'function') exposed[key] = (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); });
-      else if (key === 'controls' && value !== null && typeof value === 'object') exposed[key] = Object.fromEntries(Object.entries(/** @type {Record<string, unknown>} */ (value)).map(([name, action]) => {
-        if (typeof action !== 'function') throw new TypeError('[Expose] a control action must be callable.');
-        return [name, (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => action(...args)); })];
-      }));
       else exposed[key] = value;
     },
     createOwnedState: (name, value, spec) => createState(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec),
     watchState: (state, fn) => { setupOnly(); return externalState(state).subscribe(event => invoke(() => fn(run, event))); },
     isPropProvided: key => PUIOwn(raw, key),
-    declareTransition(hooks) {
-      def.props.define({open:{type:'boolean'},defaultOpen:{type:'boolean',default:false},appear:{type:'boolean',default:false},enterDuration:{type:'number',default:300},leaveDuration:{type:'number',default:200},interrupt:{type:'enum',options:['reverse','wait','immediate'],default:'reverse'}});
-      for (const key of ['beforeEnter','afterEnter','beforeLeave','afterLeave']) def.expose.event(key);
-      lifecycle.created.push(hooks.created); lifecycle.mounted.push(hooks.mounted); lifecycle.unmounted.push(hooks.unmounted); lifecycle.beforeDispose.push(hooks.beforeDispose);
-      def.props.watch(['open','interrupt','enterDuration','leaveDuration'], hooks.propsChanged);
-    },
     setPresent, requestHostUpdate: force,
     emit: (key) => run.expose.emit(key),
     registerGenericObservedState: (handle) => {
@@ -1241,16 +1373,12 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
       const subscribers = new Set();
       const off = handle.subscribe((event) => {
         ${refresh}
-        notifications.push(() => { for (const subscriber of Array.from(subscribers)) if (subscribers.has(subscriber)) subscriber(event); });
-        if (notifying) return;
-        notifying = true;
-        try { while (notifications.length) notifications.shift()?.(); }
-        finally { notifying = false; }
+        ${emitRecordedNotification({ queue: 'notifications', draining: 'notifying', subscribers: 'subscribers', deliver: 'subscriber(event)', typed: false })}
       });
       /** @type {PUIExternalState<ReturnType<typeof handle.get>>} */
       const external = Object.freeze({
         get: () => { publicAlive(); return handle.get(); },
-        subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },
+        subscribe: (fn) => { publicAlive(); /** @type {typeof fn} */ const registration = (/** @type {Parameters<typeof fn>[0]} */ event) => fn(event); subscribers.add(registration); return () => subscribers.delete(registration); },
         unsubscribe: (unsubscribe) => { publicAlive(); if (typeof unsubscribe === 'function') unsubscribe(); },
         spec: Object.freeze({ kind: typeof handle.get() === 'boolean' ? 'bool' : typeof handle.get() === 'number' ? 'number.discrete' : 'string', observed: true }),
       });
@@ -1302,15 +1430,11 @@ ${
         ${refresh}
         /** @type {PUIStateEvent<T>} */
         const event = { type: 'next', prev: previous, next, reason };
-        notifications.push(() => { for (const subscriber of Array.from(subscribers)) if (subscribers.has(subscriber)) subscriber(event); });
-        if (notifying) return;
-        notifying = true;
-        try { while (notifications.length) notifications.shift()?.(); }
-        finally { notifying = false; }
+        ${emitRecordedNotification({ queue: 'notifications', draining: 'notifying', subscribers: 'subscribers', deliver: 'subscriber(event)', typed: false })}
       },
       external: {
         get: () => { publicAlive(); return handle.get(); },
-        subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },
+        subscribe: (fn) => { publicAlive(); /** @type {typeof fn} */ const registration = (/** @type {Parameters<typeof fn>[0]} */ event) => fn(event); subscribers.add(registration); return () => subscribers.delete(registration); },
         unsubscribe: (off) => { publicAlive(); if (typeof off === 'function') off(); },
         spec,
       },
@@ -1339,7 +1463,10 @@ ${
       if (kind === 'number.discrete' && !(spec.options && spec.options.length) && PUIBefore(0, spec.step) && !Number.isInteger((/** @type {number} */ (value) - /** @type {number} */ (spec.min ?? 0)) / /** @type {number} */ (spec.step))) throw new Error('[Vue2 native] state value violates step: ' + key);
       return value;
     };
-    return createStateCell(initial, spec, check);
+    ${hasAuthoredHooks ? 'PUIAuthored.claimState(key);' : ''}
+    const handle = createStateCell(initial, spec, check);
+    ${hasAuthoredHooks ? 'PUIAuthored.state(key, handle);' : ''}
+    return handle;
   };
 `
     : ''
@@ -1381,7 +1508,7 @@ ${
   const def = {
     ${context.def}
     ${styled ? 'feedback: { style },' : ''}
-    ${interactive && !atomicInteractive ? 'event: interaction.event,' : ''}
+    ${eventSupport ? 'event: interaction.event,' : ''}
     props: {
       define: defineProps,
       setDefaults: (/** @param {PUIRawProps} layer */ (layer) => {
@@ -1419,8 +1546,8 @@ ${
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; },
-      /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn */
-      method: (key, fn) => { setupOnly(); exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); return invoke(() => fn(...args)); }); },
+      /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
+      method: (key, fn, project) => { setupOnly(); ${hasAuthoredHooks ? 'PUIAuthored.method(key, fn);' : ''} exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
       /** @param {string} key @param {unknown} [spec] */
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },
@@ -1431,7 +1558,7 @@ ${
     })),
   };
   /** @param {PUILifecycleKind} kind */
-  const fire = (kind) => invoke(() => { for (const fn of lifecycle[kind]) fn(run); }, !terminal);
+  const fire = (kind) => invoke(() => { if (kind === 'unmounted') { ${atoms.detach} } try { for (const fn of lifecycle[kind]) fn(run); } finally { if (kind === 'unmounted') { ${atoms.detach} } } }, !terminal);
   const detach = () => {
     if (!viewActive) return;
     viewActive = false; pending = null; queued = false;
@@ -1499,6 +1626,9 @@ ${
     });
   };
   const owner = {
+    ${publicCalls ? 'wrapPublic: PUIWrapPublic,' : ''}
+    ${hasAuthoredHooks ? 'authored: PUIAuthored,' : ''}
+    ${atoms.delay ? `delay: ${atoms.names.delay},` : ''}${atoms.presence ? `presence: ${atoms.names.presence},` : ''}${atoms.meta ? `meta: ${atoms.names.meta},` : ''}
     ${context.handle}
     host() { return viewActive && present && hostActive && !terminal ? vm.$el : null; },
     ${interactive ? 'interaction,' : ''}
@@ -1530,7 +1660,7 @@ ${
       if (present !== initialProjection.present || (${interactive ? 'interaction.rootTag() || rootTag' : 'rootTag'}) !== initialProjection.rootTag) throw new Error('[Vue2 SSR] initial owner Root/presence differs from server projection.');
       if (present) { renderSemantic(); if (JSON.stringify(template) !== JSON.stringify(initialProjection.template)) throw new Error('[Vue2 SSR] initial owner template differs from server projection.'); }
       firstContinuation = initialProjection.present && present;
-      unwatch = vm.$watch(() => hostRaw(), () => syncHost(true), { deep: true });
+      unwatch = vm.$watch(() => ${controlLabel ? '({ props: hostRaw(), associations: PUINormalizeAssociations(vm.instanceAssociations, (/** @type {{_base?: {observable?: (value: object) => object}}} */ (vm.$options))._base?.observable) })' : 'hostRaw()'}, () => syncHost(true), { deep: true });
       // The accepted carrier is a render snapshot, not transferred State or handles.
       template = initialProjection.template;
       if (initialProjection.present && renderedCommit) {
@@ -1557,7 +1687,7 @@ ${
         phase = 'idle';
         syncHost(false);
         fire('created');
-        ${ssr ? `if (!session || session.mode === 'client' && !bootRaw)` : ''} unwatch = vm.$watch(() => hostRaw(), () => syncHost(true), { deep: true });
+        ${ssr ? `if (!session || session.mode === 'client' && !bootRaw)` : ''} unwatch = vm.$watch(() => ${controlLabel ? '({ props: hostRaw(), associations: PUINormalizeAssociations(vm.instanceAssociations, (/** @type {{_base?: {observable?: (value: object) => object}}} */ (vm.$options))._base?.observable) })' : 'hostRaw()'}, () => syncHost(true), { deep: true });
       } catch (error) {
         ${
           ssr
@@ -1637,6 +1767,7 @@ ${
     dispose() {
       if (terminal) return;
       terminal = true; ++epoch; renderedCommit = null; pending = null; queued = false;
+      ${hasAuthoredHooks ? 'for (const off of PUIAuthoredWatchCleanups.splice(0)) off();' : ''}
       unwatch?.(); unwatch = undefined;
       let failure;
       try { detach(); } catch (error) { failure = error; }
@@ -1657,6 +1788,7 @@ ${
       if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');`
           : ''
       }
+      ${atoms.dispose}${hasAuthoredHooks ? 'PUIAuthored.dispose();' : ''}
       disposed = true; phase = 'idle';
       watchers.length = 0;${stateful ? ' notifications.length = 0; states.length = 0;' : ''} defaults.length = 0;
       for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;

@@ -1,4 +1,5 @@
 import { validateIR, validIdentifier } from './ir-validation';
+import { pruneDeadValues } from './demand-pruning';
 import { createHash } from 'node:crypto';
 import { checkTargetOperations, TARGET_PROFILES } from './targets';
 import { OPERATION_RULES } from './operations';
@@ -16,10 +17,18 @@ import {
   moduleLexicalScope,
   type NativeShape,
 } from './template-shape';
-import { isDataValueType, isPublicValueType, lexicalValueType, statementsTerminate } from './ir';
+import { isDataValueType, isPublicValueType, lexicalStoredType, statementsTerminate } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
+import {
+  GPUI_MISSING_FOCUS_TREE,
+  GPUI_UNAVAILABLE_OPERATIONS,
+  gpuiScopeCapabilityDiagnostic,
+} from './gpui-capabilities';
+import { gpuiLexicalNames, gpuiExpressionChildren } from './gpui-lexical-names';
 import { partitionModuleBindings } from './source-module-bindings';
 import type { RuleCondition } from './rule-declarations';
+import { gpuiTableFamily } from './gpui-native-table';
+import { isDeepStrictEqual } from 'node:util';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -37,7 +46,7 @@ export function emitGpuiSource(
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
-  const ir = validated.value;
+  const ir = gpuiLexicalNames(pruneDeadValues(validated.value));
   const admitted = checkTargetOperations(ir, {
     ...TARGET_PROFILES['gpui-source-v1'],
     implemented: true,
@@ -69,6 +78,19 @@ export function emitGpuiSource(
   const reached = new Set(admittedAnalysis.functions);
   const hookNames = new Map(ir.hooks.map((hook, index) => [hook.id, `authored_hook_${index}`]));
   const supported = new Set([
+    'scheduler.delay',
+    'delay.cancel',
+    'presence.owner',
+    'presence.publish',
+    'presence.settle',
+    'presence.isCurrent',
+    'presence.onCompletionRequest',
+    'presentation.snapshotCompletion',
+    'meta.get',
+    'capture.getState',
+    'capture.getMethod',
+    'capture.getAsHook',
+    'capture.getAsHookHandle',
     'run.update',
     'style.tw',
     'rule.declare',
@@ -194,11 +216,6 @@ export function emitGpuiSource(
     'host.get',
     'state.setDefault',
     'state.watch',
-    'hook.asTransition',
-    'transition.configure',
-    'transitionControls.enter',
-    'transitionControls.leave',
-    'transitionControls.complete',
     'boundary.configure',
     'boundary.observe',
     'boundary.setStackActive',
@@ -302,7 +319,14 @@ export function emitGpuiSource(
           : [];
     for (const handle of handles)
       for (const token of handle.tokens) styleTokens.set(token, node.span);
-    if (node.kind === 'operation' && !supported.has(node.operation))
+    if (node.kind === 'operation' && GPUI_UNAVAILABLE_OPERATIONS.has(node.operation))
+      diagnostics.push({
+        code: 'PUI_GPUI_SDK_CAPABILITY',
+        category: 'unsupported-input',
+        message: `${node.operation} is unavailable in the default GPUI profile. ${GPUI_MISSING_FOCUS_TREE}`,
+        span: node.span,
+      });
+    else if (node.kind === 'operation' && !supported.has(node.operation))
       diagnostics.push({
         code: 'PUI_GPUI_HOST_REQUIRED',
         category: 'unsupported-input',
@@ -393,6 +417,24 @@ export function emitGpuiSource(
         .join(', ')}])`;
     return literal(value as string | number | boolean | null, span);
   }
+  const invalidSharedDeclaration = ir.staticDeclarations.find(
+    (declaration) =>
+      declaration.id === gpuiTableFamily.id &&
+      (declaration.kind !== gpuiTableFamily.kind ||
+        !isDeepStrictEqual(declaration.config, gpuiTableFamily.config))
+  );
+  if (invalidSharedDeclaration)
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI_GPUI_STATIC_ABI',
+          category: 'unsupported-input',
+          message: 'The shared native Table family must match its declared package ABI.',
+          span: invalidSharedDeclaration.span,
+        },
+      ],
+    };
   const staticArtifacts = ir.staticDeclarations.map((declaration) => {
     const digest = createHash('sha256').update(declaration.id).digest('hex').slice(0, 32);
     const name = `declaration_${digest}`;
@@ -402,7 +444,10 @@ export function emitGpuiSource(
       name,
       path,
       kind: 'source' as const,
-      contents: `// Original static declaration ${JSON.stringify(declaration.id)}\nuse crate::native::gpui_native_owner::*;\nuse std::rc::Rc;\nuse serde_json::Value as Json;\npub static DECLARATION: StaticDeclaration = StaticDeclaration { id: ${string(declaration.id)}, kind: ${string(declaration.kind)}, config: || ${staticValue(declaration.config, declaration.span)} };\n`,
+      contents:
+        declaration.id === gpuiTableFamily.id
+          ? 'pub use crate::native::gpui_native_owner::TABLE_STRUCTURE_FAMILY as DECLARATION;\n'
+          : `// Original static declaration ${JSON.stringify(declaration.id)}\nuse crate::native::gpui_native_owner::*;\nuse std::rc::Rc;\nuse serde_json::Value as Json;\npub static DECLARATION: StaticDeclaration = StaticDeclaration { id: ${string(declaration.id)}, kind: ${string(declaration.kind)}, config: || ${staticValue(declaration.config, declaration.span)} };\n`,
     };
   });
   function literal(value: string | number | boolean | null, span = ir.setup.span): string {
@@ -412,7 +457,26 @@ export function emitGpuiSource(
     return `Value::number(${Object.is(value, -0) ? '-0.0' : Number.isInteger(value) ? `${value}.0` : String(value)})`;
   }
   const moduleScope = moduleLexicalScope(ir);
-  const moduleParts = partitionModuleBindings(ir);
+  // These operations use identity carried by their explicit receiver or are
+  // pure value atoms. They do not close a module function over an instance.
+  const ownerlessOperations = new Set([
+    'delay.cancel',
+    'presentation.snapshotCompletion',
+    'capture.getState',
+    'capture.getMethod',
+    'capture.getAsHook',
+    'capture.getAsHookHandle',
+    'state.get',
+    'state.set',
+    'state.setDefault',
+    'subscription.release',
+    'binding.release',
+    'feedback.style.release',
+  ]);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    (operation) => !ownerlessOperations.has(operation)
+  );
   const moduleBindings = new Map(
     moduleParts.shared.map((binding) => [binding.name, binding.value])
   );
@@ -445,39 +509,31 @@ export function emitGpuiSource(
     }, declaration);
   }
   function indexExpression(node: ExpressionIR, scope: NativeLexicalScope): void {
+    const capabilityDiagnostic = gpuiScopeCapabilityDiagnostic(node, scope);
+    if (capabilityDiagnostic) diagnostics.push(capabilityDiagnostic);
     if (node.kind === 'function') {
       functionDeclarations.set(node.function, scope);
+      if (!reached.has(node.function)) return;
       lexicalDepth++;
-      indexBody(node.function.body, parameterScope(node.function, scope));
+      const parameters = parameterScope(node.function, scope);
+      node.function.parameters.forEach((parameter) => {
+        if (parameter.default) indexExpression(parameter.default, parameters);
+      });
+      indexBody(node.function.body, parameters);
       lexicalDepth--;
     } else if (node.kind === 'reference') {
       const value = scope.lookup(node.name)?.value;
       if (value?.kind === 'lexical-cell' && lexicalDepth > cellDepths.get(value)!)
         capturedCells.add(value);
-    } else if (node.kind === 'lexical-cell') indexExpression(node.value, scope);
-    else if (node.kind === 'lexical-read' || node.kind === 'lexical-update')
-      indexExpression(node.cell, scope);
-    else if (node.kind === 'lexical-write') {
-      indexExpression(node.cell, scope);
-      indexExpression(node.value, scope);
-    } else if (node.kind === 'array') node.elements.forEach((item) => indexExpression(item, scope));
-    else if (node.kind === 'record')
-      node.entries.forEach((entry) => indexExpression(entry.value, scope));
-    else if (node.kind === 'binary') {
-      indexExpression(node.left, scope);
-      indexExpression(node.right, scope);
-    } else if (node.kind === 'unary') indexExpression(node.operand, scope);
-    else if (node.kind === 'member') indexExpression(node.object, scope);
-    else if (node.kind === 'operation' || node.kind === 'helper-call') {
-      if (node.kind === 'operation' && node.receiver) indexExpression(node.receiver, scope);
-      node.arguments.forEach((argument) => indexExpression(argument, scope));
-    } else if (node.kind === 'rule') {
-      indexExpression(node.receiver, scope);
-      node.states.forEach((state) => indexExpression(state.value, scope));
-    }
+    } else for (const child of gpuiExpressionChildren(node)) indexExpression(child, scope);
   }
   function indexBody(body: readonly StatementIR[], initial: NativeLexicalScope): void {
     let scope = initial;
+    for (const statement of body)
+      if (statement.kind === 'const') {
+        scope = scope.bind(statement.name, statement.value);
+        if (statement.value.kind === 'lexical-cell') cellDepths.set(statement.value, lexicalDepth);
+      }
     for (const statement of body) {
       if (statement.kind === 'const') {
         if (statement.value.kind === 'lexical-cell') cellDepths.set(statement.value, lexicalDepth);
@@ -585,6 +641,13 @@ export function emitGpuiSource(
     scope = templateScope,
     seen = new Set<object>()
   ): boolean {
+    if (node.kind === 'narrow') return snapshotAbi(node.value, scope, seen);
+    if (node.kind === 'conditional')
+      return snapshotAbi(node.then, scope, seen) || snapshotAbi(node.otherwise, scope, seen);
+    if (node.kind === 'call') {
+      const fn = functionTarget(node.callee, scope);
+      return !!fn && returnsNative(fn);
+    }
     if (node.kind === 'operation')
       return node.operation === 'render.el' || node.operation === 'render.slot';
     if (node.kind === 'helper-call') {
@@ -608,6 +671,16 @@ export function emitGpuiSource(
     return shapeHasNative(nativeShape(node, scope));
   }
   function returnsNative(fn: FunctionIR): boolean {
+    const mayCarryNative = (type: ExpressionIR['type']): boolean =>
+      typeof type === 'string'
+        ? ['template', 'array', 'record', 'unknown'].includes(type)
+        : type.kind === 'object'
+          ? type.fields.some((field) => mayCarryNative(field.type)) ||
+            (!!type.index && mayCarryNative(type.index))
+          : type.kind === 'value-union'
+            ? type.members.some(mayCarryNative)
+            : false;
+    if (!mayCarryNative(fn.returnType)) return false;
     const previous = nativeReturns.get(fn);
     if (previous !== undefined) return previous;
     if (activeNativeReturns.has(fn))
@@ -651,6 +724,13 @@ export function emitGpuiSource(
   // payload or an interpreted template. Its admitted observations are identity,
   // truthiness and lexical ownership; module-config member access is not admitted.
   function recordAbi(node: ExpressionIR, scope = templateScope, seen = new Set<object>()): boolean {
+    if (node.kind === 'narrow') return recordAbi(node.value, scope, seen);
+    if (node.kind === 'conditional')
+      return recordAbi(node.then, scope, seen) || recordAbi(node.otherwise, scope, seen);
+    if (node.kind === 'call') {
+      const fn = functionTarget(node.callee, scope);
+      return !!fn && nativeRecordReturns.has(fn);
+    }
     if (node.kind === 'reference') {
       const binding = scope.lookup(node.name);
       if (!binding || seen.has(binding)) return false;
@@ -680,8 +760,12 @@ export function emitGpuiSource(
     do {
       changed = false;
       function inspect(node: ExpressionIR, scope: NativeLexicalScope): void {
-        if (node.kind === 'helper-call') {
-          const fn = helperFunction(node.name, scope);
+        if (node.kind === 'helper-call' || node.kind === 'call') {
+          const fn =
+            node.kind === 'helper-call'
+              ? helperFunction(node.name, scope)
+              : functionTarget(node.callee, scope);
+          if (node.kind === 'call') inspect(node.callee, scope);
           node.arguments.forEach((argument, index) => {
             inspect(argument, scope);
             if (fn && recordAbi(argument, scope) && !nativeRecordParameter(fn, index)) {
@@ -711,7 +795,7 @@ export function emitGpuiSource(
         else if (node.kind === 'rule') {
           inspect(node.receiver, scope);
           node.states.forEach((state) => inspect(state.value, scope));
-        }
+        } else for (const child of gpuiExpressionChildren(node)) inspect(child, scope);
         // Nested functions are separately visited in their own declaration frame.
       }
       function body(
@@ -797,10 +881,9 @@ export function emitGpuiSource(
     }
     const values = node.entries.map((entry) => ({
       name: freshNative(),
-      code:
-        entry.value.type === 'function'
-          ? callableValue(entry.value, environment, depth)
-          : expression(entry.value, environment, depth),
+      code: callableType(entry.value.type)
+        ? callableValue(entry.value, environment, depth)
+        : expression(entry.value, environment, depth),
     }));
     const construction = `__PuiNativeRecordValue::Literal${layout.index}(Rc::new(__PuiNativeRecord${layout.index} { identity:Rc::new(()), ${values.map((value, index) => `_field_${index}:${value.name}`).join(', ')} }))`;
     // A shared helper's carrier can contain a completely ordinary record at a
@@ -935,13 +1018,14 @@ impl __PuiNativeRecordValue {
     }`;
   }
 
+  function functionTarget(node: ExpressionIR, scope = templateScope): FunctionIR | undefined {
+    if (node.kind === 'narrow') return functionTarget(node.value, scope);
+    if (node.kind === 'function') return node.function;
+    if (node.kind === 'reference') return helperFunction(node.name, scope);
+    return undefined;
+  }
   function nativeCallable(node: ExpressionIR): FunctionIR | undefined {
-    const fn =
-      node.kind === 'function'
-        ? node.function
-        : node.kind === 'reference'
-          ? helperFunction(node.name)
-          : undefined;
+    const fn = functionTarget(node);
     return fn && typedFunction(fn) ? fn : undefined;
   }
   // Follow callable provenance only. Template-result facts remain owned by
@@ -960,6 +1044,9 @@ impl __PuiNativeRecordValue {
       scope: NativeLexicalScope
     ): { fn: FunctionIR; environment: NativeLexicalScope }[] {
       if (node.kind === 'function') return [{ fn: node.function, environment: scope }];
+      if (node.kind === 'narrow') return resolve(node.value, scope);
+      if (node.kind === 'conditional')
+        return [...resolve(node.then, scope), ...resolve(node.otherwise, scope)];
       if (node.kind === 'reference') {
         const binding = scope.lookup(node.name);
         return binding && parameterFacts.has(binding)
@@ -968,15 +1055,19 @@ impl __PuiNativeRecordValue {
             ? resolve(binding.value, binding.environment)
             : [];
       }
-      if (node.kind !== 'helper-call') return [];
-      const binding = scope.lookup(node.name);
-      if (!binding?.value) return [];
-      const functions = resolve(binding.value, binding.environment);
+      if (node.kind !== 'helper-call' && node.kind !== 'call') return [];
+      const binding = node.kind === 'helper-call' ? scope.lookup(node.name) : undefined;
+      const functions =
+        node.kind === 'call'
+          ? resolve(node.callee, scope)
+          : binding?.value
+            ? resolve(binding.value, binding.environment)
+            : [];
       // Analyze caller arguments before entering the callee. Finite repeated
       // wrapper(wrapper(draw)) may revisit one body call expression through a
       // different actual argument; it is not recursive authored execution.
       const arguments_ = node.arguments.map((argument) =>
-        argument.type === 'function' ? resolve(argument, scope) : undefined
+        callableType(argument.type) ? resolve(argument, scope) : undefined
       );
       if (active.has(node)) return [];
       active.add(node);
@@ -993,7 +1084,7 @@ impl __PuiNativeRecordValue {
                 ? nativeShape(node.arguments[index], scope)
                 : { kind: 'undefined' }
             );
-            if (parameter.type === 'function')
+            if (callableType(parameter.type))
               parameterFacts.set(local.lookup(parameter.name)!, arguments_[index] ?? []);
           });
           function returns(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
@@ -1115,6 +1206,41 @@ impl __PuiNativeRecordValue {
     } }`;
   }
 
+  const capturedBindings = new Set(
+    admittedAnalysis.functions
+      .flatMap((fn) => (fn.captures ?? []).map((capture) => capture.name))
+      .filter((name) => !moduleBindings.has(name))
+  );
+  const callableType = (type: ExpressionIR['type']): boolean =>
+    type === 'function' ||
+    (typeof type !== 'string' &&
+      (type.kind === 'callable' ||
+        (type.kind === 'value-union' && type.members.some(callableType))));
+  function valueRustType(value: ExpressionIR): string {
+    if (value.kind === 'lexical-cell' || lexicalStoredType(value.type))
+      return 'Rc<std::cell::RefCell<Value>>';
+    if (value.kind === 'function' && typedFunction(value.function)) {
+      const fn = value.function;
+      return `native::gpui_native_owner::NativeCallable<dyn Fn(${fn.parameters.map((_, index) => parameterRustType(fn, index)).join(', ')}) -> ${functionRustResult(fn)}>`;
+    }
+    if (snapshotAbi(value)) return 'native::gpui_native_owner::NativeSnapshot';
+    if (recordAbi(value)) return '__PuiNativeRecordValue';
+    return 'Value';
+  }
+  function parameterRustType(fn: FunctionIR, index: number): string {
+    return nativeFunctionParameter(fn, index)
+      ? 'native::gpui_native_owner::NativeSnapshot'
+      : nativeRecordParameter(fn, index)
+        ? '__PuiNativeRecordValue'
+        : 'Value';
+  }
+  function functionRustResult(fn: FunctionIR): string {
+    return returnsNative(fn)
+      ? 'native::gpui_native_owner::NativeSnapshot'
+      : nativeRecordReturns.has(fn)
+        ? '__PuiNativeRecordValue'
+        : 'Value';
+  }
   let uses = { names: new Set<string>(), owner: false };
   let emitsExceptions = false;
   function ownerReference(): string {
@@ -1122,16 +1248,57 @@ impl __PuiNativeRecordValue {
     return 'owner';
   }
   function functionValue(fn: FunctionIR, environment: ReadonlySet<string>, depth: number): string {
+    if (!reached.has(fn)) {
+      // The allocation can remain observable even when a closed callable-flow
+      // proof excludes invocation. Keep its ordinary identity and native ABI;
+      // defaults, captures and body operations are evaluated only on a call.
+      const guard = 'panic!("compiler-proven uninvoked callable was invoked")';
+      if (typedFunction(fn)) {
+        const parameters = fn.parameters.map((_, index) => parameterRustType(fn, index));
+        const result = functionRustResult(fn);
+        return `{ let call:Rc<dyn Fn(${parameters.join(', ')})->${result}>=Rc::new(move |${parameters.map((type, index) => `_argument_${index}: ${type}`).join(', ')}| -> ${result} { ${guard} }); native::gpui_native_owner::NativeCallable { identity:Rc::new(()), call } }`;
+      }
+      return `Value::${returnsNative(fn) ? 'Renderer' : 'Function'}(Rc::new(move |_:Vec<Value>| { ${guard} }))`;
+    }
     const indent = '    '.repeat(depth);
     const scope = new Set(environment);
     const parameterNames = new Set(fn.parameters.map((parameter) => parameter.name));
     parameterNames.forEach((name) => scope.add(name));
     const parentUses = uses;
     uses = { names: new Set<string>(), owner: false };
-    const nativeReturn = returnsNative(fn);
-    const recordReturn = nativeRecordReturns.has(fn);
+    const nativeReturn = returnsNative(fn),
+      recordReturn = nativeRecordReturns.has(fn),
+      typed = typedFunction(fn);
     const savedTemplateScope = templateScope;
     templateScope = parameterScope(fn, functionDeclarations.get(fn) ?? templateScope);
+    let parameterSlots = '',
+      parameters = '';
+    for (const [index, parameter] of fn.parameters.entries()) {
+      const type = typed ? parameterRustType(fn, index) : 'Value';
+      const variable = local(parameter.name),
+        incoming = typed ? `argument_${index}` : `arg(&arguments, ${index})`;
+      if (capturedBindings.has(parameter.name))
+        parameterSlots += `${indent}    let ${variable}: LexicalBinding<${type}> = lexical_binding();\n`;
+      let value = incoming;
+      if (parameter.default) {
+        const fallback =
+          typed && nativeFunctionParameter(fn, index)
+            ? snapshotExpression(parameter.default, scope, depth + 1)
+            : typed && nativeRecordParameter(fn, index)
+              ? recordExpression(parameter.default, scope, depth + 1)
+              : expression(parameter.default, scope, depth + 1);
+        const absent =
+          type === 'native::gpui_native_owner::NativeSnapshot'
+            ? 'matches!(&argument.observation, Some(Value::Undefined))'
+            : type === '__PuiNativeRecordValue'
+              ? 'matches!(&argument, __PuiNativeRecordValue::Ordinary(Value::Undefined))'
+              : 'matches!(&argument, Value::Undefined)';
+        value = `{ let argument = ${incoming}; if ${absent} { ${fallback} } else { argument } }`;
+      }
+      parameters += capturedBindings.has(parameter.name)
+        ? `${indent}    ${variable}.initialize(${value});\n`
+        : `${indent}    let ${variable}: ${type} = ${value};\n`;
+    }
     const moduleBody =
       fn.context === 'setup' ? statements(moduleParts.owned, scope, depth + 1, false) : '';
     if (fn.context === 'setup') moduleParts.owned.forEach((binding) => scope.add(binding.name));
@@ -1157,40 +1324,62 @@ impl __PuiNativeRecordValue {
         return `let ${local(name)} = ${local(name)}.clone();`;
       })
       .join(' ');
-    const parameters = fn.parameters
-      .flatMap((parameter, index) =>
-        functionUses.names.has(parameter.name)
-          ? [`${indent}    let ${local(parameter.name)} = arg(&arguments, ${index});\n`]
-          : []
-      )
-      .join('');
     const owner = functionUses.owner ? `let owner = ${ownerReference()}.clone();` : '';
-    if (typedFunction(fn)) {
+    if (typed) {
       const signature = fn.parameters
-        .map(
-          (parameter, index) =>
-            `${local(parameter.name)}: ${nativeFunctionParameter(fn, index) ? 'native::gpui_native_owner::NativeSnapshot' : nativeRecordParameter(fn, index) ? '__PuiNativeRecordValue' : 'Value'}`
-        )
+        .map((_, index) => `argument_${index}: ${parameterRustType(fn, index)}`)
         .join(', ');
       const parameterTypes = fn.parameters
-        .map((_, index) =>
-          nativeFunctionParameter(fn, index)
-            ? 'native::gpui_native_owner::NativeSnapshot'
-            : nativeRecordParameter(fn, index)
-              ? '__PuiNativeRecordValue'
-              : 'Value'
-        )
+        .map((_, index) => parameterRustType(fn, index))
         .join(', ');
-      const resultType = nativeReturn
-        ? 'native::gpui_native_owner::NativeSnapshot'
-        : recordReturn
-          ? '__PuiNativeRecordValue'
-          : 'Value';
-      return `{ ${owner} ${captures} let call:Rc<dyn Fn(${parameterTypes})->${resultType}>=Rc::new(move |${signature}| -> ${resultType} {\n${moduleBody}${body}${indent}}); native::gpui_native_owner::NativeCallable { identity:Rc::new(()), call } }`;
+      const resultType = functionRustResult(fn);
+      return `{ ${owner} ${captures} let call:Rc<dyn Fn(${parameterTypes})->${resultType}>=Rc::new(move |${signature}| -> ${resultType} {\n${parameterSlots}${parameters}${moduleBody}${body}${indent}}); native::gpui_native_owner::NativeCallable { identity:Rc::new(()), call } }`;
     }
-    return `{ ${owner} ${captures} Value::${nativeReturn ? 'Renderer' : 'Function'}(Rc::new(move |${parameters ? 'arguments' : '_'}: Vec<Value>| {\n${parameters}${moduleBody}${body}${indent}})) }`;
+    return `{ ${owner} ${captures} Value::${nativeReturn ? 'Renderer' : 'Function'}(Rc::new(move |${fn.parameters.length ? 'arguments' : '_'}: Vec<Value>| {\n${parameterSlots}${parameters}${moduleBody}${body}${indent}})) }`;
   }
-  function expression(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
+  function expression(
+    node: ExpressionIR,
+    environment: ReadonlySet<string>,
+    depth: number,
+    bindReceiver = true
+  ): string {
+    if (
+      node.kind === 'call' &&
+      !node.optional &&
+      node.callee.kind === 'reference' &&
+      functionTarget(node.callee)
+    ) {
+      // A proven immutable lexical callable has the same direct native ABI as
+      // the historical named-call node. Cells and computed callees keep the
+      // ordinary evaluate-once Value call path below.
+      return expression(
+        {
+          kind: 'helper-call',
+          name: node.callee.name,
+          arguments: node.arguments,
+          type: node.type,
+          span: node.span,
+        },
+        environment,
+        depth
+      );
+    }
+    if (bindReceiver && node.kind === 'operation' && node.receiver) {
+      const name = freshNative(),
+        variable = local(name);
+      const receiverValue = expression(node.receiver, environment, depth);
+      const inner = expression(
+        {
+          ...node,
+          optional: false,
+          receiver: { kind: 'reference', name, type: node.receiver.type, span: node.receiver.span },
+        },
+        environment,
+        depth,
+        false
+      );
+      return `{ let ${variable} = ${receiverValue}; ${node.optional ? `if ${variable}.nullish() { Value::Undefined } else { ${inner} }` : inner} }`;
+    }
     if (node.kind === 'operation' && node.operation === 'render.el')
       return nativeElement(node, environment, depth);
     if (node.kind === 'operation' && node.operation === 'render.slot')
@@ -1203,7 +1392,7 @@ impl __PuiNativeRecordValue {
           ? snapshotExpression(argument, environment, depth)
           : fn && nativeRecordParameter(fn, index)
             ? recordExpression(argument, environment, depth)
-            : argument.type === 'function'
+            : callableType(argument.type)
               ? callableValue(argument, environment, depth)
               : expression(argument, environment, depth)
       );
@@ -1220,16 +1409,16 @@ impl __PuiNativeRecordValue {
           );
         return moduleBindings.has(node.name)
           ? `${local(node.name)}.with(|function| (function.call)(${args.join(', ')}))`
-          : `(${local(node.name)}.call)(${args.join(', ')})`;
+          : `(${local(node.name)}${capturedBindings.has(node.name) ? '.read()' : ''}.call)(${args.join(', ')})`;
       }
       return moduleBindings.has(node.name)
-        ? `${local(node.name)}.with(|function| function.call(vec![${args.join(', ')}]))`
-        : `${local(node.name)}.call(vec![${args.join(', ')}])`;
+        ? `${local(node.name)}.with(|function| function.call_authored(vec![${args.join(', ')}]))`
+        : `${local(node.name)}${capturedBindings.has(node.name) ? '.read()' : ''}.call_authored(vec![${args.join(', ')}])`;
     }
     const args =
       node.kind === 'operation'
         ? node.arguments.map((argument) =>
-            argument.type === 'function'
+            callableType(argument.type)
               ? callableValue(argument, environment, depth)
               : recordAbi(argument)
                 ? `(${expression(argument, environment, depth)}).into_ordinary()`
@@ -1245,22 +1434,25 @@ impl __PuiNativeRecordValue {
           : `capability(&${ownerReference()})`);
     const receiverOwner = () => `&(${receiver()}).owner()`;
     switch (node.kind) {
+      case 'narrow':
+        return expression(node.value, environment, depth);
       case 'undefined':
         return 'Value::Undefined';
       case 'literal':
         return literal(node.value, node.span);
       case 'reference':
         uses.names.add(node.name);
-        if (moduleBindings.has(node.name) && !lexicalValueType(node.type))
+        if (moduleBindings.has(node.name) && !lexicalStoredType(node.type))
           return `${local(node.name)}.with(|value| value.clone())`;
-        if (lexicalValueType(node.type)) {
+        if (capturedBindings.has(node.name)) return `${local(node.name)}.read()`;
+        if (lexicalStoredType(node.type)) {
           const cell = templateScope.lookup(node.name)?.value;
-          return cell && capturedCells.has(cell) ? `&*${local(node.name)}` : `&${local(node.name)}`;
+          return `${local(node.name)}.clone()`;
         }
         return `${local(node.name)}.clone()`;
       case 'lexical-cell': {
         const value = `std::cell::RefCell::new(${expression(node.value, environment, depth)})`;
-        return capturedCells.has(node) ? `Rc::new(${value})` : value;
+        return `Rc::new(${value})`;
       }
       case 'lexical-read':
         if (node.cell.kind === 'reference' && moduleBindings.has(node.cell.name))
@@ -1277,19 +1469,83 @@ impl __PuiNativeRecordValue {
         return `{ let cell = ${cell}; let previous = cell.borrow().clone(); let value = Value::number(previous.scalar_number() ${node.delta === 1 ? '+' : '-'} 1.0); *cell.borrow_mut() = value.clone(); ${node.prefix ? 'value' : 'previous'} }`;
       }
       case 'context-key':
-        return `Value::string(${string(node.keyId)})`;
+        return `native_context_key(&PUI_CONTEXT_KEY_${ir.contextKeys.findIndex((key) => key.id === node.keyId)}, ${string(node.keyId)})`;
       case 'style-handle':
         return `Value::Style(vec![${node.handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`;
       case 'member':
         return `(${expression(node.object, environment, depth)}).${node.object.type === 'exception' ? 'caught_member' : 'member'}(${string(node.property, node.span)}, ${node.optional})`;
+      case 'member-write':
+        return `set_member(${expression(node.object, environment, depth)}, ${string(node.property, node.span)}, ${expression(node.value, environment, depth)})`;
+      case 'element': {
+        const object = expression(node.object, environment, depth),
+          index = expression(node.index, environment, depth);
+        return `{ let object = ${object}; ${node.optional ? `if object.nullish() { Value::Undefined } else { object.caught_member(&property_key(&(${index})), false) }` : `object.caught_member(&property_key(&(${index})), false)`} }`;
+      }
+      case 'conditional': {
+        const emit = snapshotAbi(node)
+          ? snapshotExpression
+          : recordAbi(node)
+            ? recordExpression
+            : expression;
+        return `if (${expression(node.condition, environment, depth)}).truthy() { ${emit(node.then, environment, depth)} } else { ${emit(node.otherwise, environment, depth)} }`;
+      }
+      case 'call': {
+        const fn = nativeCallable(node.callee);
+        const callable = expression(node.callee, environment, depth);
+        const args = node.arguments.map((argument, index) =>
+          fn && nativeFunctionParameter(fn, index)
+            ? snapshotExpression(argument, environment, depth)
+            : fn && nativeRecordParameter(fn, index)
+              ? recordExpression(argument, environment, depth)
+              : callableType(argument.type)
+                ? callableValue(argument, environment, depth)
+                : expression(argument, environment, depth)
+        );
+        if (fn) {
+          for (let index = args.length; index < fn.parameters.length; index++)
+            args.push(
+              nativeFunctionParameter(fn, index)
+                ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)'
+                : nativeRecordParameter(fn, index)
+                  ? '__PuiNativeRecordValue::Ordinary(Value::Undefined)'
+                  : 'Value::Undefined'
+            );
+          return `{ let callable = ${callable}; (callable.call)(${args.join(', ')}) }`;
+        }
+        const invocation = `callable.call_authored(vec![${args.join(', ')}])`;
+        return `{ let callable = ${callable}; ${node.optional ? `if callable.nullish() { Value::Undefined } else { ${invocation} }` : invocation} }`;
+      }
+      case 'intrinsic': {
+        const args = node.arguments.map((argument) => expression(argument, environment, depth));
+        switch (node.name) {
+          case 'number.isFinite':
+            return `number_is_finite(&(${args[0]}))`;
+          case 'object.freeze':
+            return `freeze(${args[0]})`;
+          case 'object.hasOwn':
+            return `has_own(&(${args[0]}), &(${args[1]}))`;
+          case 'array.every':
+            return `array_every(${args[0]}, ${args[1]})`;
+          case 'typeof':
+            return `typeof_value(&(${args[0]}))`;
+          case 'error':
+            return `record(vec![("name", Value::string("Error")), ("message", Value::string(&(${args[0] ?? 'Value::Undefined'}).error_message()))])`;
+        }
+      }
+      case 'object-spread':
+        return `{ let mut fields = std::collections::BTreeMap::new(); ${node.parts
+          .map((part) =>
+            part.kind === 'spread'
+              ? `fields.extend(own_entries(${expression(part.value, environment, depth)}));`
+              : `fields.insert(${string(part.key, node.span)}.into(), ${expression(part.value, environment, depth)});`
+          )
+          .join(' ')} record_map(fields) }`;
       case 'unary': {
         const operand = expression(node.operand, environment, depth);
         return node.operator === '!'
           ? `Value::boolean(!(${operand}).truthy())`
           : `Value::number(${node.operator === '-' ? '-' : ''}(${operand}).scalar_number())`;
       }
-      case 'conditional':
-        return `{ if (${expression(node.condition, environment, depth)}).truthy() { ${expression(node.whenTrue, environment, depth)} } else { ${expression(node.whenFalse, environment, depth)} }`;
       case 'binary': {
         if (['&&', '||', '??'].includes(node.operator) && snapshotAbi(node)) {
           const left = snapshotExpression(node.left, environment, depth),
@@ -1393,7 +1649,7 @@ impl __PuiNativeRecordValue {
         return functionValue(node.function, environment, depth);
 
       case 'authored-hook':
-        return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}))`;
+        return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}), ${node.arguments?.[0] ? expression(node.arguments[0], environment, depth) : 'Value::Undefined'})`;
       case 'static-capability':
         return `Value::StaticCapability(&${staticArtifacts.find((declaration) => declaration.id === node.declarationId)!.name}::DECLARATION)`;
       case 'rule': {
@@ -1437,13 +1693,41 @@ impl __PuiNativeRecordValue {
         return `rule(&${ownerReference()}, ${predicate}, vec![${handles.join(', ')}])`;
       }
       case 'operation': {
+        const builtin = (installation: string) =>
+          `native_builtin_hook(&${ownerReference()}, ${string(node.operation.slice('hook.'.length))}, || ${installation})`;
         switch (node.operation) {
+          case 'scheduler.delay':
+            return `schedule_delay(&${ownerReference()}, ${argument(0)}, ${argument(1)})`;
+          case 'delay.cancel':
+            return `(${receiver()}).member("cancel", false).call_authored(vec![])`;
+          case 'presence.owner':
+            return `presence_owner(&${ownerReference()})`;
+          case 'presence.publish':
+            return `presence_publish(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
+          case 'presence.settle':
+            return `presence_settle(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
+          case 'presence.isCurrent':
+            return `presence_is_current(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
+          case 'presence.onCompletionRequest':
+            return `(${receiver()}).member("onCompletionRequest", false).call_authored(vec![${argument(0)}])`;
+          case 'presentation.snapshotCompletion':
+            return `snapshot_completion(${argument(0)})`;
+          case 'meta.get':
+            return `native_meta_get(${receiverOwner()}, ${argument(0)})`;
+          case 'capture.getState':
+          case 'capture.getMethod':
+          case 'capture.getAsHook':
+          case 'capture.getAsHookHandle':
+            // Empty capture frames omit their getters. A capture lookup returns
+            // undefined in that case, matching the optional getter operation;
+            // child artifacts must not be flattened into this frame to fill it.
+            return `{ let capture_getter = (${receiver()}).member(${string(node.operation.slice('capture.'.length))}, false); if capture_getter.nullish() { Value::Undefined } else { capture_getter.call_authored(vec![${argument(0)}]) } }`;
           case 'run.update':
             return `request_update(${receiverOwner()})`;
           case 'feedback.style.use':
             return `style_use(&${ownerReference()}, vec![${args.join(', ')}])`;
           case 'feedback.style.release':
-            return `(${receiver()}).call(vec![])`;
+            return `(${receiver()}).call_authored(vec![])`;
           case 'feedback.style.patch':
             return `patch(${receiverOwner()}, vec![${args.join(', ')}], false)`;
           case 'feedback.style.suppress':
@@ -1488,7 +1772,7 @@ impl __PuiNativeRecordValue {
             return `watch_state(&${ownerReference()}, ${receiver()}, ${argument(0)})`;
           case 'subscription.release':
           case 'binding.release':
-            return `(${receiver()}).call(vec![])`;
+            return `(${receiver()}).call_authored(vec![])`;
           case 'host.get':
             return `host_target(${receiverOwner()})`;
           case 'expose.state':
@@ -1524,11 +1808,11 @@ impl __PuiNativeRecordValue {
           case 'context.tryUpdate':
             return `context_update(${receiverOwner()}, ${argument(0)}, ${argument(1)}, ${node.operation === 'context.tryUpdate'})`;
           case 'hook.asTrigger':
-            return `as_trigger(&${ownerReference()})`;
+            return builtin(`as_trigger(&${ownerReference()})`);
           case 'hook.asFocusable':
-            return `as_focusable(&${ownerReference()})`;
+            return builtin(`as_focusable(&${ownerReference()})`);
           case 'hook.asAccessible':
-            return `as_accessible(&${ownerReference()})`;
+            return builtin(`as_accessible(&${ownerReference()})`);
           case 'focus.configure':
             return `focus_setup_config(${receiverOwner()}, "focus", ${argument(0)})`;
           case 'focus.setDisabled':
@@ -1537,11 +1821,11 @@ impl __PuiNativeRecordValue {
           case 'focus.focusSelf':
             return `focus_request(${receiverOwner()}, ${argument(0)}, false)`;
           case 'hook.asFocusEntry':
-            return `focus_setup(&${ownerReference()}, "focus-entry")`;
+            return builtin(`focus_setup(&${ownerReference()}, "focus-entry")`);
           case 'hook.asFocusScope':
-            return `focus_setup(&${ownerReference()}, "focus-scope")`;
+            return builtin(`focus_setup(&${ownerReference()}, "focus-scope")`);
           case 'hook.asFocusRoving':
-            return `focus_setup(&${ownerReference()}, "focus-roving")`;
+            return builtin(`focus_setup(&${ownerReference()}, "focus-roving")`);
           case 'focusEntry.configure':
             return `focus_setup_config(${receiverOwner()}, "focus-entry", ${argument(0)})`;
           case 'focusScope.configure':
@@ -1628,9 +1912,9 @@ impl __PuiNativeRecordValue {
           case 'anatomyPart.hasHook':
             return `part_has_hook(${receiver()}, ${argument(0)})`;
           case 'hook.asCollection':
-            return `collection_setup(&${ownerReference()}, false)`;
+            return builtin(`collection_setup(&${ownerReference()}, false)`);
           case 'hook.asCollectionItem':
-            return `collection_setup(&${ownerReference()}, true)`;
+            return builtin(`collection_setup(&${ownerReference()}, true)`);
           case 'collection.configure':
             return `collection_configure(${receiverOwner()}, ${argument(0)}, false)`;
           case 'collectionItem.configure':
@@ -1641,16 +1925,8 @@ impl __PuiNativeRecordValue {
             return `collection_count(${receiverOwner()})`;
           case 'collectionItem.getSnapshot':
             return `collection_item_snapshot(${receiverOwner()})`;
-          case 'hook.asTransition':
-            return `transition_setup(&${ownerReference()})`;
-          case 'transition.configure':
-            return `transition_configure(${receiverOwner()}, ${argument(0)})`;
-          case 'transitionControls.enter':
-          case 'transitionControls.leave':
-          case 'transitionControls.complete':
-            return `transition_control(${receiverOwner()}, ${string(node.operation.slice('transitionControls.'.length))})`;
           case 'hook.asTableStructure':
-            return `table_setup(&${ownerReference()}, ${argument(0)})`;
+            return `{ let pui_builtin_role=${argument(0)}; native_builtin_hook(&${ownerReference()}, &format!("asTableStructure:{}", pui_builtin_role.text()), || table_setup(&${ownerReference()}, pui_builtin_role)) }`;
           case 'tableStructure.configure':
             return `table_configure(${receiverOwner()}, ${argument(0)})`;
           case 'tableStructure.getObjectRef':
@@ -1658,9 +1934,9 @@ impl __PuiNativeRecordValue {
           case 'tableStructure.getSnapshot':
             return `table_snapshot(${receiverOwner()})`;
           case 'hook.asBoundary':
-            return `boundary_setup(&${ownerReference()}, false)`;
+            return builtin(`boundary_setup(&${ownerReference()}, false)`);
           case 'hook.asHitParticipation':
-            return `boundary_setup(&${ownerReference()}, true)`;
+            return builtin(`boundary_setup(&${ownerReference()}, true)`);
           case 'boundary.configure':
             return `boundary_configure(${receiverOwner()}, ${argument(0)}, false)`;
           case 'hitParticipation.configure':
@@ -1681,7 +1957,7 @@ impl __PuiNativeRecordValue {
           case 'boundary.subscribeOutside':
             return `boundary_subscribe(${receiverOwner()}, ${argument(0)})`;
           case 'hook.asScrollSurface':
-            return `scroll_setup(&${ownerReference()})`;
+            return builtin(`scroll_setup(&${ownerReference()})`);
           case 'scroll.configure':
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
@@ -1689,7 +1965,7 @@ impl __PuiNativeRecordValue {
           case 'scroll.getSnapshot':
             return `scroll_snapshot(${receiverOwner()})`;
           case 'hook.asTextControl':
-            return `text_setup(&${ownerReference()})`;
+            return builtin(`text_setup(&${ownerReference()})`);
           case 'textControl.on':
             return `text_on(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'textControl.sync':
@@ -1697,7 +1973,7 @@ impl __PuiNativeRecordValue {
           case 'textControl.snapshot':
             return `text_snapshot(${receiverOwner()})`;
           case 'hook.asImageView':
-            return `image_setup(&${ownerReference()})`;
+            return builtin(`image_setup(&${ownerReference()})`);
           case 'imageView.on':
             return `image_on(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'imageView.sync':
@@ -1705,7 +1981,7 @@ impl __PuiNativeRecordValue {
           case 'imageView.snapshot':
             return `image_snapshot(${receiverOwner()})`;
           case 'hook.asOverlay':
-            return `overlay_setup(&${ownerReference()})`;
+            return builtin(`overlay_setup(&${ownerReference()})`);
           case 'overlay.isOpen':
             return `overlay_is_open(${receiverOwner()})`;
           case 'overlay.openOverlay':
@@ -1763,16 +2039,22 @@ impl __PuiNativeRecordValue {
       indent = '    '.repeat(depth);
     let code = '';
     const savedTemplateScope = templateScope;
+    for (const statement of body)
+      if (statement.kind === 'const') {
+        scope.add(statement.name);
+        templateScope = templateScope.bind(statement.name, statement.value);
+      }
+    for (const statement of body)
+      if (statement.kind === 'const' && capturedBindings.has(statement.name)) {
+        code += `${indent}let ${local(statement.name)}: LexicalBinding<${valueRustType(statement.value)}> = lexical_binding();\n`;
+      }
     for (const statement of body) {
-      if (
-        statement.kind === 'const' &&
-        statement.value.kind === 'function' &&
-        !reached.has(statement.value.function)
-      )
-        continue;
       code += `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        code += `${indent}let ${local(statement.name)} = ${expression(statement.value, scope, depth)};\n`;
+        const initialized = expression(statement.value, scope, depth);
+        code += capturedBindings.has(statement.name)
+          ? `${indent}${local(statement.name)}.initialize(${initialized});\n`
+          : `${indent}let ${local(statement.name)} = ${initialized};\n`;
         scope.add(statement.name);
         templateScope = templateScope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') {
@@ -1792,13 +2074,13 @@ impl __PuiNativeRecordValue {
         const value = discardReturn
           ? '()'
           : statement.value
-            ? rendererResult && statement.value.type === 'function'
+            ? rendererResult && callableType(statement.value.type)
               ? rendererEntry(statement.value, scope, depth)
               : nativeReturn
                 ? snapshotExpression(statement.value, scope, depth)
                 : recordReturn
                   ? recordExpression(statement.value, scope, depth)
-                  : statement.value.type === 'function'
+                  : callableType(statement.value.type)
                     ? callableValue(statement.value, scope, depth)
                     : expression(statement.value, scope, depth)
             : nativeReturn
@@ -1864,7 +2146,7 @@ impl __PuiNativeRecordValue {
         const bodyFlow = `std::ops::ControlFlow<${discardReturn || finalOverrides ? '()' : returnAbi}>`;
         const finalFlow = `std::ops::ControlFlow<${discardReturn ? '()' : returnAbi}>`;
         const operation = caught
-          ? `match catch_authored::<${bodyFlow}>(|| {\n${branch(statement.body, level + 1, undefined, discardReturn || finalOverrides)}${pad}}) {\n${pad}    Ok(flow) => flow,\n${pad}    Err(${caught.name ? local(caught.name) : '_'}) => {\n${branch(caught.body, level + 2, caught.name, discardReturn || finalOverrides)}${pad}    }\n${pad}}`
+          ? `match catch_authored::<${bodyFlow}>(|| {\n${branch(statement.body, level + 1, undefined, discardReturn || finalOverrides)}${pad}}) {\n${pad}    Ok(flow) => flow,\n${pad}    Err(${caught.name ? local(caught.name) : '_'}) => (|| -> ${bodyFlow} {\n${branch(caught.body, level + 2, caught.name, discardReturn || finalOverrides)}${pad}    })()\n${pad}}`
           : `{\n${branch(statement.body, level + 1, undefined, discardReturn || finalOverrides)}${pad}}`;
         const flow = statement.finally
           ? `${finalOverrides ? 'authored_finally_override' : 'authored_finally'}(|| -> ${bodyFlow} {\n${pad}${operation}\n${'    '.repeat(depth + 1)}}, || -> ${finalFlow} {\n${branch(statement.finally, depth + 2)}${'    '.repeat(depth + 1)}})`
@@ -1950,23 +2232,47 @@ impl __PuiNativeRecordValue {
   });
   const typedMethods: string[] = [],
     methodChecks: string[] = [];
+  const nativeInput = (type: ExpressionIR['type']): boolean =>
+    isPublicValueType(type) ||
+    type === 'context-key' ||
+    (typeof type !== 'string' &&
+      ((type.kind === 'object' &&
+        type.fields.every((field) => nativeInput(field.type)) &&
+        (!type.index || nativeInput(type.index))) ||
+        (type.kind === 'value-union' && type.members.every(nativeInput))));
+  function acceptsNative(value: string, type: ExpressionIR['type'], span = ir.setup.span): string {
+    if (isDataValueType(type))
+      return type === 'void'
+        ? `matches!(${value}, Value::Undefined)`
+        : `(${value}).try_data().is_some_and(|data| ${accepts('data', type, span)})`;
+    if (type === 'context-key') return `matches!(${value}, Value::ContextKey(_))`;
+    if (typeof type !== 'string') {
+      if (type.kind === 'object')
+        return `(matches!(${value}, Value::Record(_)) && ${type.fields.map((field) => `{let member=(${value}).member(${string(field.name, span)},false); ${field.optional ? 'matches!(&member,Value::Undefined) || ' : ''}${acceptsNative('&member', field.type, span)}}`).join(' && ') || 'true'})`;
+      if (type.kind === 'value-union')
+        return `(${type.members.map((member) => acceptsNative(value, member, span)).join(' || ')})`;
+      if (type.kind === 'callable') return `matches!(${value}, Value::Function(_))`;
+    }
+    if (type === 'presentation-owner-ref') return `matches!(${value}, Value::Opaque(_))`;
+    return `!(${value}).nullish()`;
+  }
   for (const [index, exposure] of ir.exposes.entries()) {
     if (exposure.kind === 'value') {
       typedMethods.push(
-        `    pub fn value_${index}(&self) -> Value { ensure(&Rc::downgrade(&self.owner)); self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).expect("exposed value").clone() }`
+        `    pub fn value_${index}(&self) -> Result<Value, Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).cloned().unwrap_or_else(|| value_error("unknown exposed value")) }) }`
       );
       continue;
     }
     if (exposure.kind === 'state') {
       typedMethods.push(
-        `    pub fn state_${index}(&self) -> ${rustType(exposure.type, exposure.span)} { serde_json::from_value(self.state(${string(exposure.name, exposure.span)})).expect("checked exposed State") }`
+        `    pub fn state_${index}(&self) -> Result<${rustType(exposure.type, exposure.span)}, Value> { self.state(${string(exposure.name, exposure.span)}).map(|value| serde_json::from_value(value).expect("checked exposed State")) }`
       );
       continue;
     }
     if (exposure.kind !== 'method') continue;
     if (
       !isPublicValueType(exposure.returnType) ||
-      exposure.parameters.some((parameter) => !isDataValueType(parameter.type))
+      exposure.parameters.some((parameter) => !nativeInput(parameter.type))
     )
       return {
         ok: false,
@@ -1975,7 +2281,7 @@ impl __PuiNativeRecordValue {
             code: 'PUI_GPUI_PUBLIC_DATA',
             category: 'unsupported-input',
             message:
-              'Native exposed methods require portable arguments and concrete public data or read-only nominal results.',
+              'Native exposed methods require public values or ContextKey arguments and concrete public results; setup, Run and owned State authority cannot cross this boundary.',
             span: exposure.span,
           },
         ],
@@ -1985,56 +2291,52 @@ impl __PuiNativeRecordValue {
     const parameters = exposure.parameters
       .map(
         (parameter, parameterIndex) =>
-          `argument_${parameterIndex}: ${parameter.optional ? `Option<${rustType(parameter.type as DataType, exposure.span)}>` : rustType(parameter.type as DataType, exposure.span)}`
+          `argument_${parameterIndex}: ${!isDataValueType(parameter.type) ? 'Value' : parameter.optional ? `Option<${rustType(parameter.type, exposure.span)}>` : rustType(parameter.type, exposure.span)}`
       )
       .join(', ');
     const args = exposure.parameters
       .map((parameter, parameterIndex) =>
-        parameter.optional
-          ? `argument_${parameterIndex}.map(|value| Value::json(serde_json::to_value(value).expect("portable argument"))).unwrap_or(Value::Undefined)`
-          : `Value::json(serde_json::to_value(argument_${parameterIndex}).expect("portable argument"))`
+        !isDataValueType(parameter.type)
+          ? `argument_${parameterIndex}`
+          : parameter.optional
+            ? `argument_${parameterIndex}.map(|value| Value::json(serde_json::to_value(value).expect("portable argument"))).unwrap_or(Value::Undefined)`
+            : `Value::json(serde_json::to_value(argument_${parameterIndex}).expect("portable argument"))`
       )
       .join(', ');
-    typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> ${portableReturn ? rustType(returnType, exposure.span) : 'Value'} {
-        refresh_native_entry(&self.owner, window);
+    typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> Result<${portableReturn ? rustType(returnType, exposure.span) : 'Value'}, Value> {
+        catch_authored(|| {
+        refresh_native_atoms(&self.owner, window, cx);
+          #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&self.owner, window);
         let arguments = vec![${args}];
-        let callback = self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).expect("exposed method").clone();
+        let callback = self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
         check_method(${string(exposure.name, exposure.span)}, &arguments);
         let result = invoke(&self.owner, "expose-method", &callback, arguments);
         let drive = self.owner.borrow().native_drive.clone(); if let Some(drive) = drive { drive(window, cx); }
         ${
           portableReturn
             ? `let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
-        assert!(${accepts('result', returnType, exposure.span)}, "exposed method returned invalid portable data");
+        if !(${accepts('result', returnType, exposure.span)}) { value_type_error("exposed method returned invalid portable data") }
         serde_json::from_value(result).expect("checked exposed method result")`
             : 'result'
         }
+        })
     }`);
     const checks =
       exposure.parameters
         .map(
           (parameter, parameterIndex) =>
-            `arguments.get(${parameterIndex}).map_or(${Boolean(parameter.optional)}, |value| ${parameter.optional ? 'matches!(value, Value::Undefined) || ' : ''}{let value = value.data(); ${accepts('value', parameter.type as DataType, exposure.span)}})`
+            `arguments.get(${parameterIndex}).map_or(${Boolean(parameter.optional)}, |value| ${parameter.optional ? 'matches!(value, Value::Undefined) || ' : ''}${acceptsNative('value', parameter.type, exposure.span)})`
         )
         .join(' && ') || 'true';
     methodChecks.push(
-      `        ${string(exposure.name, exposure.span)} => assert!(arguments.len() <= ${exposure.parameters.length} && ${checks}, "invalid exposed method arguments"),`
+      `        ${string(exposure.name, exposure.span)} => if !(arguments.len() <= ${exposure.parameters.length} && ${checks}) { value_type_error("invalid exposed method arguments") },`
     );
   }
-  // Registry keys preserve UTF-16 name equality, including lone surrogates, without Rust escapes.
-  const authoredHookKey = (name: string): string =>
-    JSON.stringify(
-      'u16:' +
-        name
-          .split('')
-          .map((unit) => unit.charCodeAt(0).toString(16).padStart(4, '0'))
-          .join('')
-    );
   const hooks = ir.hooks
     .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
     .map(
       (hook) =>
-        `fn ${hookNames.get(hook.id)}(definition: Value) -> Value {\n    let owner = definition.owner();\n    authored_hook(&owner, ${authoredHookKey(hook.name)}, || { ${functionValue(hook.setup, new Set(), 1)}.call(vec![definition]); })\n}`
+        `fn ${hookNames.get(hook.id)}(definition: Value, input: Value) -> Value {\n    let owner = definition.owner();\n    authored_hook(&owner, ${string(hook.name)}, ${string(hook.kind === 'hook' ? (hook.mode ?? 'once') : 'once')}, input, ${functionValue(hook.setup, new Set(), 1)}, ${hook.projectHandle ? functionValue(hook.projectHandle, new Set(), 1) : 'Value::Undefined'}, ${hook.configure ? functionValue(hook.configure, new Set(), 1) : 'Value::Undefined'})\n}`
     )
     .join('\n');
   const moduleSetups = ir.moduleDeclarations
@@ -2096,8 +2398,9 @@ impl __PuiNativeRecordValue {
   fn prop_valid(key: &str, value: &Json) -> bool { match key { ${propValidChecks} _ => false } }
   fn check_method(name: &str, arguments: &[Value]) { match name {
   ${methodChecks.join('\n')}
-          _ => panic!("unknown exposed method"),
+          _ => value_error("unknown exposed method"),
   } }
+  ${ir.contextKeys.map((_, index) => `static PUI_CONTEXT_KEY_${index}: std::sync::OnceLock<NativeContextKey> = std::sync::OnceLock::new();`).join('\n')}
   ${dataDeclarations.join('\n')}
   ${nativeRecords}
   pub type GeneratedProps = ${propsType};
@@ -2107,64 +2410,128 @@ impl __PuiNativeRecordValue {
   impl ${componentName}Handle {
   ${typedMethods.join('\n')}
       pub fn owner(&self) -> OwnerWeak { Rc::downgrade(&self.owner) }
-      pub fn state(&self, name: &str) -> Json { self.owner.borrow().exposes.get(name).expect("unknown exposed State").clone().get().data() }
-      pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App) -> Json {
-          refresh_native_entry(&self.owner, window);
-          let callback = self.owner.borrow().exposes.get(name).expect("unknown exposed method").clone();
+      pub fn state(&self, name: &str) -> Result<Json, Value> { catch_authored(|| { let state=self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed State")); state.get().data() }) }
+      pub fn call(&self, name: &str, arguments: Vec<Json>, window: &mut Window, cx: &mut App) -> Result<Json, Value> {
+          catch_authored(|| {
+          refresh_native_atoms(&self.owner, window, cx);
+          #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&self.owner, window);
+          let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
           let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect(); check_method(name, &arguments);
           let result = invoke(&self.owner, "expose-method", &callback, arguments);
           let drive = self.owner.borrow().native_drive.clone(); if let Some(drive) = drive { drive(window, cx); }
           if matches!(result, Value::Undefined) { Json::Null } else { result.data() }
+          })
       }
-      pub fn host_target(&self) -> Value { ensure(&self.owner()); Value::HostTarget(self.owner()) }
+      pub fn host_target(&self) -> Result<Value, Value> { catch_authored(|| { ensure(&self.owner()); Value::HostTarget(self.owner()) }) }
       pub fn take_events(&self) -> Vec<(String, Json)> { std::mem::take(&mut self.owner.borrow_mut().emitted) }
-      pub fn dispose(&self, window: &mut Window, cx: &mut App) { let drive = self.owner.borrow().native_drive.clone(); Owner::dispose(&self.owner); if let Some(drive) = drive { drive(window, cx); } }
+      pub fn take_failures(&self) -> Vec<NativeFailure> { take_native_failures(&self.owner) }
+      pub fn dispose(&self, window: &mut Window, cx: &mut App) -> Result<(), Value> {
+          catch_authored(|| {
+          let drive = self.owner.borrow().native_drive.clone();
+          let failure = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| Owner::dispose(&self.owner)));
+          let driven = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| { if let Some(drive) = drive { drive(window, cx); } }));
+          if let Err(failure) = failure { std::panic::resume_unwind(failure); }
+          if let Err(failure) = driven { std::panic::resume_unwind(failure); }
+          })
+      }
   }
-  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: [Subscription; 3], _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
+  pub struct ${componentName} { pub owner: OwnerRef, focus: FocusHandle, window_input: Option<FocusHandle>, _focus_subscriptions: Vec<Subscription>, _focus_lost: Option<Subscription>, _global_key_capture: Option<Subscription>, _entry_readiness: Option<(gpui::WindowId, Subscription)> }
   impl ${componentName} {
-      pub fn new_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Self { Self::new(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
-      pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Self {
+      pub fn create_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> { Self::create(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
+      pub fn create(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
+          let mut failure = None;
+          let entity = cx.new(|cx| Self::new(raw_props, parent, window, cx).unwrap_or_else(|error| {
+              failure = Some(error);
+              // A failed construction still returns normally through GPUI's
+              // entity insertion. This inert temporary is dropped immediately
+              // below; it is never published or mounted as a native component.
+              let owner = Owner::new(Json::Object(Default::default()), Default::default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
+              { let mut owner = owner.borrow_mut(); owner.disposed = true; owner.present = false; }
+              Self { owner, focus: cx.focus_handle(), window_input: None, _focus_subscriptions: Vec::new(), _focus_lost: None, _global_key_capture: None, _entry_readiness: None }
+          }));
+          match failure { Some(error) => Err(error), None => Ok(entity) }
+      }
+      pub fn new_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> { Self::new(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
+      pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
+          catch_authored(|| {
           let owner_ref = Owner::new(raw_props, parent.unwrap_or_default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
           let owner = Rc::downgrade(&owner_ref);
+          let focus = cx.focus_handle();
           let view = cx.entity().downgrade();
-          let drive: Drive = Rc::new(move |window, cx| { let _ = view.update(cx, |view, cx| view.drive(window, cx)); });
+          let drive_owner=owner.clone(); let drive_focus=focus.clone();
+          let driving = Rc::new(std::cell::Cell::new(false));
+          let drive_pending = Rc::new(std::cell::Cell::new(false));
+          let drive: Drive = Rc::new(move |window, cx| {
+              // Platform effects need owner storage and its real FocusHandle,
+              // not another lease of the generated component. Preserve their
+              // synchronous effect (notably physical focus) under public calls.
+              if !driving.replace(true) {
+                  if let Some(owner)=drive_owner.upgrade() {
+                      native_host_callback(&owner, "drive", || { modules_drive(&owner, &drive_focus, window, cx); drive_queued_focus(&owner, window, cx); });
+                  }
+                  driving.set(false);
+              }
+              if drive_pending.replace(true) { return; }
+              let view=view.clone(); let pending=drive_pending.clone();
+              // A public handle can be called from Entity::update. Return the
+              // current host lease before requesting another component update.
+              // Authored calls, State writes and platform commands remain
+              // synchronous; component refresh is coalesced at the host boundary.
+              window.defer(cx, move |window, cx| {
+                  pending.set(false);
+                  let _ = view.update(cx, |view, cx| { if let Err(error) = view.drive(window, cx) { report_native_failure(&view.owner, "drive", error); } });
+              });
+          });
           { let mut owner = owner_ref.borrow_mut(); owner.native_drive = Some(drive); owner.window_id = Some(window.window_handle().window_id()); }
   ${moduleSetups}
-          let renderer = ${setupCallable}.call(vec![capability(&owner)]);
+          configure_native_atoms(&owner_ref, ${admittedAnalysis.operations.includes('scheduler.delay')}, ${admittedAnalysis.operations.includes('meta.get')});
+          refresh_native_atoms(&owner_ref, window, cx);
+          let _lexical_owner = enter_lexical_owner(&owner);
+          let renderer = ${setupCallable}.call_authored(vec![capability(&owner)]);
           Owner::finish(&owner_ref, renderer);
-          let focus = cx.focus_handle();
+          let focus_subscriptions = if native_focus_observation_needed(&owner_ref) {
           let focus_owner = owner_ref.clone();
           let on_focus = cx.on_focus(&focus, window, move |view, window, cx| {
+              native_host_callback(&focus_owner, "focus", || {
               let epoch = focus_owner.borrow().epoch;
               if !ready(&focus_owner) || focus_owner.borrow().window_id != Some(window.window_handle().window_id()) { return; }
-              refresh_native_entry(&focus_owner, window);
+              #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&focus_owner, window);
               native_focus_fact(&focus_owner, view.focus.is_focused(window));
               if !ready(&focus_owner) || focus_owner.borrow().epoch != epoch { return; }
               dispatch(&focus_owner, "host:focus", false, event_fields("host:focus"));
-              if ready(&focus_owner) && focus_owner.borrow().epoch == epoch { view.drive(window, cx); }
+              if ready(&focus_owner) && focus_owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
+              });
           });
           let blur_owner = owner_ref.clone();
           let on_blur = cx.on_blur(&focus, window, move |view, window, cx| {
+              native_host_callback(&blur_owner, "blur", || {
               let epoch = blur_owner.borrow().epoch;
               if !ready(&blur_owner) || blur_owner.borrow().window_id != Some(window.window_handle().window_id()) { return; }
-              refresh_native_entry(&blur_owner, window);
+              #[cfg(feature = "experimental-focus-tree")] refresh_native_entry(&blur_owner, window);
               native_focus_fact(&blur_owner, view.focus.is_focused(window));
               if !ready(&blur_owner) || blur_owner.borrow().epoch != epoch { return; }
               text_blur(&blur_owner, window, cx);
               dispatch(&blur_owner, "host:blur", false, event_fields("host:blur"));
-              if ready(&blur_owner) && blur_owner.borrow().epoch == epoch { view.drive(window, cx); }
+              if ready(&blur_owner) && blur_owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
+              });
           });
           let activation_owner = owner_ref.clone();
-          let on_activation = cx.observe_window_activation(window, move |view, window, cx| { if activation_owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() { native_window_blur(&activation_owner); view.drive(window, cx); } });
+          let on_activation = cx.observe_window_activation(window, move |view, window, cx| { native_host_callback(&activation_owner, "window-activation", || { if activation_owner.borrow().window_id == Some(window.window_handle().window_id()) && !window.is_window_active() { native_window_blur(&activation_owner); view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); } }); });
+          vec![on_focus, on_blur, on_activation]
+          } else { Vec::new() };
           let global_key_capture = subscribe_global_key_capture(&owner_ref, cx);
           let window_input = window_input_needed(&owner_ref).then(|| cx.focus_handle().tab_stop(false));
-          let focus_lost = window_input.as_ref().map(|_| cx.on_focus_lost(window, |view, window, cx| { if view.owner.borrow().window_id == Some(window.window_handle().window_id()) { if let Some(focus) = &view.window_input { restore_window_input(&view.owner, focus, window, cx); } } }));
-          Self { owner: owner_ref, focus, window_input, _focus_subscriptions: [on_focus, on_blur, on_activation], _focus_lost: focus_lost, _global_key_capture: global_key_capture, _entry_readiness: None }
+          let focus_lost = window_input.as_ref().map(|_| cx.on_focus_lost(window, |view, window, cx| { let owner=view.owner.clone(); native_host_callback(&owner, "focus-lost", || { if view.owner.borrow().window_id == Some(window.window_handle().window_id()) { if let Some(focus) = &view.window_input { restore_window_input(&view.owner, focus, window, cx); } } }); }));
+          Self { owner: owner_ref, focus, window_input, _focus_subscriptions: focus_subscriptions, _focus_lost: focus_lost, _global_key_capture: global_key_capture, _entry_readiness: None }
+          })
       }
+      #[cfg(feature="test-support")]
+      pub fn native_resource_counts(&self) -> Json { let mut counts=native::gpui_native_owner::native_resource_counts(&self.owner); counts["nativeSubscriptions"] = Json::from(self._focus_subscriptions.len() + usize::from(self._focus_lost.is_some()) + usize::from(self._global_key_capture.is_some()) + usize::from(self._entry_readiness.is_some())); counts }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
-      pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) { replace_props(&self.owner, raw); self.drive(window, cx); }
-      pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }
-      pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), &'static str> { set_native_parent(&self.owner, parent.unwrap_or_default())?; cx.notify(); Ok(()) }
+      pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_props(&self.owner, raw))?; self.drive(window, cx) }
+      pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
+      pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
+      #[cfg(feature = "experimental-focus-tree")]
       fn bind_entry_readiness(&mut self, window: &mut Window, cx: &mut Context<Self>) {
           if !self.owner.borrow().modules.hooks.contains("focus-entry") { return; }
           let window_id = window.window_handle().window_id();
@@ -2173,35 +2540,41 @@ impl __PuiNativeRecordValue {
           let view = cx.entity().downgrade();
           let subscription = window.observe_focus_tree(cx, move |_, window, cx| {
               let _ = view.update(cx, |view, cx| {
-                  if view._entry_readiness.as_ref().is_some_and(|(bound, _)| *bound == window.window_handle().window_id()) { view.drive(window, cx); }
+                  if view._entry_readiness.as_ref().is_some_and(|(bound, _)| *bound == window.window_handle().window_id()) { if let Err(error)=view.drive(window, cx){report_native_failure(&view.owner,"entry-readiness",error)} }
               });
           });
           self._entry_readiness = Some((window_id, subscription));
       }
-      pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-          if self.owner.borrow().disposed { self._entry_readiness.take(); cx.notify(); return; }
+      pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
+          catch_authored(|| {
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
           modules_drive(&self.owner, &self.focus, window, cx);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); cx.notify(); return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); cx.notify(); return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
           let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty); if dirty { cx.notify(); }
+          })
       }
   }
-  impl Drop for ${componentName} { fn drop(&mut self) { Owner::dispose(&self.owner); } }
+  impl Drop for ${componentName} { fn drop(&mut self) { native_host_callback(&self.owner, "drop", || Owner::dispose(&self.owner)); } }
   impl gpui::Focusable for ${componentName} { fn focus_handle(&self, _: &App) -> FocusHandle { self.focus.clone() } }
   impl Render for ${componentName} {
       fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+          let report_owner = self.owner.clone();
+          native_host_callback(&report_owner, "render", || {
+          refresh_native_atoms(&self.owner, window, cx);
           Owner::project(&self.owner);
           if self.owner.borrow().disposed { self._entry_readiness.take(); return gpui::div().into_any_element(); }
-          if !self.owner.borrow().present { return gpui::div().into_any_element(); }
+          if !self.owner.borrow().present { detach_native_view(&self.owner); return gpui::div().into_any_element(); }
           bind_native_focus_window(&self.owner, window);
-          self.bind_entry_readiness(window, cx);
+          #[cfg(feature = "experimental-focus-tree")] self.bind_entry_readiness(window, cx);
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
           self.owner.borrow_mut().dirty = false;
           let snapshot = self.owner.borrow().projection.clone().expect("live native projection");
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           let element = paint_native_root(&snapshot, &self.owner, &self.focus, format!("compiled-root-{}", Rc::as_ptr(&self.owner) as usize), drive);
           if let Some(focus) = &self.window_input { window_input_scope(element, focus, &self.owner) } else { element }
+          }).unwrap_or_else(|| gpui::div().into_any_element())
       }
   }
   `;
@@ -2219,6 +2592,11 @@ impl __PuiNativeRecordValue {
   version = "0.1.0"
   edition = "2021"
   
+  [features]
+  # An explicit local SDK experiment, never enabled by the default published profile.
+  experimental-focus-tree = ["proto-ui-gpui-native/experimental-focus-tree"]
+  test-support = ["proto-ui-gpui-native/test-support"]
+
   [lib]
   name = "generated_gpui_component"
   path = "Component.rs"

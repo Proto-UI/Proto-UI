@@ -187,6 +187,12 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
   let activeCandidate: MaterializedProjectionCandidate | null = null;
   let watchedProjectionFamilyId: SiteLibraryFamily | null = null;
   let stopThemeWatcher: (() => void) | null = null;
+  // A control switch request is applied after the control's own close
+  // handback, so the outgoing generation's open portals are sealed in the
+  // request's own turn.
+  const sealOutgoingPortals = (): void => {
+    activeCandidate?.sealExternalPortals?.();
+  };
   const componentByGeneration = new Map<number, SharedBaseFamilyId>();
   const candidateByGeneration = new Map<number, MaterializedProjectionCandidate>();
 
@@ -373,6 +379,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
         componentId,
         controls: controlsFor(),
         controlIds: ['family', 'component'],
+        sealOutgoingPortals,
       });
       if (
         !destroyed &&
@@ -565,6 +572,7 @@ export function initHomeDemoPreviewer(root: HTMLElement): void {
     ) {
       return;
     }
+    sealOutgoingPortals();
     desiredRuntimeId = runtimeId;
     desiredIntentRevision += 1;
     requestDesiredIntent();
