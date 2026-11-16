@@ -33,11 +33,17 @@ import {
   validateSkillHandoff,
   requireCompletedHandoff,
 } from './skill-registry.mjs';
+import { createConnectorCollaborationRunner } from './connector-collaboration-transport.mjs';
 
 const POLICY_PATH = new URL(
   '../../internal/agent-operations/capability-policy.yaml',
   import.meta.url
 );
+
+// The transport is declared by the launcher/operator, never by task content.
+// 'gh' keeps the ordinary GitHub CLI runner; 'connector' reuses the same
+// collector, admission gate and writer through a trusted parent bridge.
+const COLLABORATION_TRANSPORTS = new Set(['gh', 'connector']);
 
 function usage() {
   return [
@@ -45,9 +51,10 @@ function usage() {
     '  pnpm agent:collaborate -- thread-revision --repository <github.com:owner/repo> --pull-request <number> --thread <thread-id>',
     '  pnpm agent:collaborate -- request-digest --request <request.json>',
     '  pnpm agent:collaborate -- validate --mode human-assisted|autonomous --mode-source <trusted-source> --request <request.json> --handoff <handoff.json> [--assessment <result.json>] [--owner-authorization <state.json> --owner-key <public.pem> --owner-grant <grant-id>]',
-    '  pnpm agent:collaborate -- apply --mode human-assisted|autonomous --mode-source <trusted-source> --request <request.json> --handoff <handoff.json> [--assessment <result.json>] [--owner-authorization <state.json> --owner-key <public.pem> --owner-grant <grant-id>]',
+    '  pnpm agent:collaborate -- apply --mode human-assisted|autonomous --mode-source <trusted-source> --request <request.json> --handoff <handoff.json> [--assessment <result.json>] [--owner-authorization <state.json> --owner-key <public.pem> --owner-grant <grant-id>] [--transport gh|connector]',
     '',
     'validate and apply require mode and source declared independently by the launcher/operator, matching the handoff. These arguments are declarations, not runtime attestation.',
+    'apply --transport connector routes the same collector, admission gate and writer through a trusted parent-owned connector bridge instead of the gh CLI. The launcher owns the bridge; it is not an authority source, a second admission path or a fallback after an uncertain write.',
     'apply performs a fresh live GitHub preflight, checks admission for one declared purpose-bound action, emits an idempotent no-op when already satisfied, or attempts exactly one mutation. A thrown/unknown write is reconciled once and is never retried blindly.',
   ].join('\n');
 }
@@ -79,6 +86,7 @@ const OPTIONS = new Map([
       '--owner-authorization',
       '--owner-key',
       '--owner-grant',
+      '--transport',
     ]),
   ],
 ]);
@@ -97,6 +105,10 @@ export function parseCollaborationCli(argv) {
     }
     if (value === undefined || args.has(name)) throw new Error(usage());
     args.set(name, value);
+  }
+  const transport = args.get('--transport');
+  if (transport !== undefined && !COLLABORATION_TRANSPORTS.has(transport)) {
+    throw new Error('--transport must be gh or connector');
   }
   return { command, args };
 }
@@ -204,6 +216,17 @@ function rejectedReceipt(request, preState, postState, reason) {
   });
 }
 
+// One runner serves the whole invocation: the connector bridge consumes its
+// write-attempt latch, so the initial collection, the final admission read and
+// the single admitted write must share it.
+function collaborationRunner(request, args, dependencies) {
+  const transport = args.get('--transport') ?? 'gh';
+  if (transport === 'gh') return dependencies.runner;
+  return createConnectorCollaborationRunner(request, {
+    exchange: dependencies.connectorExchange,
+  }).runner;
+}
+
 export function runCollaborationCli(argv, dependencies = {}) {
   const { command, args } = parseCollaborationCli(argv);
   if (command === 'thread-revision') {
@@ -247,7 +270,8 @@ export function runCollaborationCli(argv, dependencies = {}) {
   }
 
   const collectState = dependencies.collectState ?? collectLiveCollaborationState;
-  const preState = collectState(request, { runner: dependencies.runner });
+  const runner = collaborationRunner(request, args, dependencies);
+  const preState = collectState(request, { runner });
   const decision = authorizeCollaborationMutation({
     request,
     liveState: preState,
@@ -281,7 +305,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
   try {
     applied = applyMutation(request, preState, {
       collectState,
-      runner: dependencies.runner,
+      runner,
       authorizationContext: {
         ...invocationContext,
         policy,
