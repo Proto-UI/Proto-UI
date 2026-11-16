@@ -17,7 +17,9 @@ const identities = sidebarGroupIdentities(entries, Object.keys(config.locales ??
 ---
 
 <sl-sidebar-state-persist class="contents" data-site-sidebar-policy data-hash={legacyHash}>
-  <SidebarSublist sublist={entries} />
+  <!-- The disclosure policy owns the stored manual expansion. It runs before
+       the rendered groups so every group is arbitrated while it is parsed and
+       no painted frame can show an unrelated disclosure state. -->
   <script
     is:inline
     aria-hidden="true"
@@ -25,6 +27,7 @@ const identities = sidebarGroupIdentities(entries, Object.keys(config.locales ??
     data-sidebar-managed={JSON.stringify(managed)}
     set:html={bootstrap}
   />
+  <SidebarSublist sublist={entries} />
 </sl-sidebar-state-persist>
 <!-- Theme remains in the Header; language and social destinations remain in
      its shared Navigation and settings disclosure. Do not duplicate them here. -->
