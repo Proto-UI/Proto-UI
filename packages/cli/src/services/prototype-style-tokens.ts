@@ -1269,7 +1269,8 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           const parent = expression.parent;
           if (
             isTemplateStyleCall(node) ||
-            (isCanonicalStyleHandle(node, scope) && isOwnedDecorationStyleArgument(expression))
+            (isCanonicalStyleHandle(node, scope) &&
+              isOwnedDecorationStyleArgument(expression, scope))
           ) {
             rootInventory.templateTokens.add(token);
           } else if (
@@ -1581,7 +1582,119 @@ function directBodyCall(callback, call) {
   );
 }
 
-function isOwnedDecorationStyleArgument(argument) {
+function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper) {
+  let safe = true;
+  function check(node) {
+    if (!safe || node === helper) return;
+    if (ts.isIdentifier(node)) {
+      if (node.text === receiver && !allowedArguments.has(node)) {
+        let access = node;
+        while (
+          (ts.isPropertyAccessExpression(access.parent) ||
+            ts.isElementAccessExpression(access.parent)) &&
+          access.parent.expression === access
+        )
+          access = access.parent;
+        if (
+          access === node ||
+          !ts.isCallExpression(access.parent) ||
+          access.parent.expression !== access
+        )
+          safe = false;
+      }
+      if (node.text === 'tw' && node.parent.name === node) safe = false;
+    }
+    ts.forEachChild(node, check);
+  }
+  check(callback.body);
+  return safe;
+}
+
+function isDirectSetupHelperCall(call, setup) {
+  if (directBodyCall(setup, call)) return true;
+  const binding = call.parent;
+  return (
+    isConstStyleBinding(binding, call) &&
+    ts.isVariableStatement(binding.parent.parent) &&
+    binding.parent.parent.parent === setup.body
+  );
+}
+
+function hasVerifiedDecorationHelperCalls(helper, receiver, scope) {
+  if (
+    !ts.isFunctionDeclaration(helper) ||
+    !helper.name ||
+    !helper.body ||
+    helper.asteriskToken ||
+    helper.modifiers?.some(
+      (item) =>
+        item.kind === ts.SyntaxKind.AsyncKeyword ||
+        item.kind === ts.SyntaxKind.ExportKeyword ||
+        item.kind === ts.SyntaxKind.DefaultKeyword
+    ) ||
+    !scope.sourceSummary
+  )
+    return false;
+  const source = helper.getSourceFile();
+  const name = helper.name.text;
+  const argument = parameterName(helper) === receiver;
+  const callsBySetup = new Map();
+  let safe = true;
+  function findCalls(node) {
+    if (!safe) return;
+    if (
+      ts.isIdentifier(node) &&
+      node.text === name &&
+      node !== helper.name &&
+      !(
+        (ts.isPropertyAccessExpression(node.parent) || ts.isPropertyAssignment(node.parent)) &&
+        node.parent.name === node
+      )
+    ) {
+      const call = node.parent;
+      const setup = ts.findAncestor(node, ts.isFunctionLike);
+      if (
+        scope.sourceSummary.resolveSourceFunction(node, source) !== helper ||
+        !ts.isCallExpression(call) ||
+        call.expression !== node ||
+        !setup ||
+        !isCanonicalPrototypeSetup(setup, false) ||
+        !isDirectSetupHelperCall(call, setup)
+      ) {
+        safe = false;
+        return;
+      }
+      const definition = parameterName(setup);
+      const provided = call.arguments[0];
+      if (
+        !definition ||
+        (argument
+          ? !provided || !ts.isIdentifier(provided) || provided.text !== definition
+          : helper.parent !== setup.body ||
+            receiver !== definition ||
+            helper.parameters.some(
+              (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver
+            ))
+      ) {
+        safe = false;
+        return;
+      }
+      if (!callsBySetup.has(setup)) callsBySetup.set(setup, new Set());
+      if (argument) callsBySetup.get(setup).add(provided);
+    }
+    ts.forEachChild(node, findCalls);
+  }
+  findCalls(source);
+  return (
+    safe &&
+    callsBySetup.size > 0 &&
+    [...callsBySetup].every(([setup, passed]) =>
+      receiverUsesAreDirect(setup, parameterName(setup), passed, helper)
+    )
+  );
+}
+
+function isOwnedDecorationStyleArgument(argument, scope) {
   const use = argument.parent;
   if (
     !ts.isCallExpression(use) ||
@@ -1597,15 +1710,15 @@ function isOwnedDecorationStyleArgument(argument) {
     return false;
 
   const callback = ts.findAncestor(use, ts.isFunctionLike);
-  if (!callback || parameterName(callback) !== receiver || !directBodyCall(callback, use))
-    return false;
-  let setup = callback;
+  if (!callback || !directBodyCall(callback, use)) return false;
+  let declarationOwner = callback;
+  let definition = receiver;
   if (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) {
-    if (ts.isBlock(callback.body) && callback.body.statements.length !== 1) return false;
     if (
+      parameterName(callback) !== receiver ||
       callback.parameters.length !== 1 ||
-      parameterName(callback) === target.text ||
-      parameterName(callback) === 'tw'
+      receiver === target.text ||
+      receiver === 'tw'
     )
       return false;
     const intent = callback.parent;
@@ -1619,60 +1732,38 @@ function isOwnedDecorationStyleArgument(argument) {
       !memberIs(rule.expression, 'rule')
     )
       return false;
-    setup = ts.findAncestor(rule, ts.isFunctionLike);
+    declarationOwner = ts.findAncestor(rule, ts.isFunctionLike);
     const ruleReceiver = memberOwner(rule.expression);
     if (
-      !setup ||
+      !declarationOwner ||
       !ruleReceiver ||
       !ts.isIdentifier(ruleReceiver) ||
-      ruleReceiver.text !== parameterName(setup) ||
-      !directBodyCall(setup, rule)
+      ruleReceiver.text !== parameterName(declarationOwner) ||
+      !directBodyCall(declarationOwner, rule) ||
+      !isCanonicalPrototypeSetup(declarationOwner, false) ||
+      !receiverUsesAreDirect(callback, receiver)
     )
       return false;
-  }
+    definition = ruleReceiver.text;
+  } else if (isCanonicalPrototypeSetup(callback, false)) {
+    if (parameterName(callback) !== receiver) return false;
+  } else if (!hasVerifiedDecorationHelperCalls(callback, receiver, scope)) return false;
 
-  if (!isCanonicalPrototypeSetup(setup, false) || !setup.body || !ts.isBlock(setup.body))
+  if (!declarationOwner.body || !ts.isBlock(declarationOwner.body)) return false;
+  const binding = scopeDeclaring(target.text, scope)?.bindings.get(target.text)?.bindingNode;
+  if (
+    !binding ||
+    !binding.initializer ||
+    !isConstStyleBinding(binding, binding.initializer) ||
+    binding.parent.parent.parent !== declarationOwner.body ||
+    !ts.isCallExpression(binding.initializer) ||
+    feedbackStyleReceiver(binding.initializer.expression, 'declareDecoration') !== definition
+  )
     return false;
-  const definition = parameterName(setup);
-  const isDeclaredTarget = setup.body.statements.some(
-    (statement) =>
-      ts.isVariableStatement(statement) &&
-      Boolean(statement.declarationList.flags & ts.NodeFlags.Const) &&
-      statement.declarationList.declarations.some(
-        (binding) =>
-          ts.isIdentifier(binding.name) &&
-          binding.name.text === target.text &&
-          binding.initializer &&
-          ts.isCallExpression(binding.initializer) &&
-          feedbackStyleReceiver(binding.initializer.expression, 'declareDecoration') === definition
-      )
-  );
-  if (!isDeclaredTarget) return false;
 
-  // Keep the Root preflight for rebound or escaped definition receivers and
-  // for a shadowing binding of the canonical tw import.
-  let safe = true;
-  function check(current) {
-    if (!safe) return;
-    if (ts.isIdentifier(current)) {
-      const parent = current.parent;
-      if (current.text === definition && current !== setup.parameters[0].name) {
-        let access = current;
-        while (ts.isPropertyAccessExpression(access.parent) && access.parent.expression === access)
-          access = access.parent;
-        if (
-          access === current ||
-          !ts.isCallExpression(access.parent) ||
-          access.parent.expression !== access
-        )
-          safe = false;
-      }
-      if (current.text === 'tw' && parent.name === current) safe = false;
-    }
-    ts.forEachChild(current, check);
-  }
-  check(setup.body);
-  return safe;
+  // A sibling statement may rebind the Rule intent or setup receiver. Prove
+  // each access independently of the number of operations recorded.
+  return receiverUsesAreDirect(declarationOwner, definition);
 }
 
 function isCanonicalStyleHandle(node, scope) {
@@ -1734,7 +1825,7 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
     tokens.add(token);
     usage.tokens.add(token);
   }
-  if (isOwnedDecorationStyleArgument(expression)) usage.targeted = true;
+  if (isOwnedDecorationStyleArgument(expression, scope)) usage.targeted = true;
   else usage.unclassified = true;
 }
 

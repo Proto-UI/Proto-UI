@@ -146,6 +146,135 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(documentCss).toContain('[data-pui-style~="p-[10%]"]');
   });
 
+  it('classifies each verified decoration operation in a Rule intent block', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'decorations-in-rule', setup(def) {
+        const track = def.feedback.style.declareDecoration();
+        const marker = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        def.rule({
+          when: w => w.state(active).eq(true),
+          intent: i => {
+            i.feedback.style.to(track).use(tw('p-[10%]'));
+            i.feedback.style.to(marker).use(tw('p-[var(--space)]'));
+          },
+        });
+        return r => [r.decoration(track), r.decoration(marker)];
+      }});
+    `);
+    for (const token of ['p-[10%]', 'p-[var(--space)]']) {
+      expect(artifact.cssText).toContain(`[data-pui-style~="${token}"]`);
+      expect(artifact.cssText).not.toContain(`[data-pui-split-root-style~="${token}"]`);
+    }
+  });
+
+  it('follows a setup call to a synchronous decoration helper', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declareDecoration(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'decoration-helper', setup(def) {
+        const target = declareDecoration(def);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains Root preflight when a Rule intent receiver is rebound', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'rebound-intent', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        def.rule({
+          when: w => w.state(active).eq(true),
+          intent: i => {
+            i = other;
+            i.feedback.style.to(target).use(tw('p-[10%]'));
+          },
+        });
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('keeps a targeted lookalike helper outside proven setup calls unclassified', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declareDecoration(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      declareDecoration(opaque);
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('follows a local synchronous helper that closes over the setup receiver', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'local-decoration-helper', setup(def) {
+        function declareDecoration() {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        }
+        const target = declareDecoration();
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight for a helper with both setup and unknown call sites', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function declareDecoration(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'shared-decoration-helper', setup(def) {
+        const target = declareDecoration(def);
+        return r => r.decoration(target);
+      }});
+      declareDecoration(opaque);
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('retains preflight when Rule intent shadows the declared target', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'shadowed-target', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        def.rule({
+          when: w => w.state(active).eq(true),
+          intent: i => {
+            const target = other;
+            i.feedback.style.to(target).use(tw('p-[10%]'));
+          },
+        });
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('follows a renamed imported recipe handle into the targeted argument', async () => {
     const { artifact } = await generate(
       `
