@@ -1547,15 +1547,12 @@ function isCanonicalPrototypeSetup(setup, scope, requireTw = true) {
     !ts.isObjectLiteralExpression(config) ||
     !ts.isCallExpression(definition) ||
     definition.arguments[0] !== config ||
-    !ts.isIdentifier(definition.expression) ||
-    definition.expression.text !== 'definePrototype' ||
     ts.findAncestor(definition.parent, ts.isFunctionLike)
   )
     return false;
   const source = setup.getSourceFile();
   return (
     scope.sourceSummary?.isDefinePrototypeReference(definition.expression, source) &&
-    hasCanonicalCoreImport(source, 'definePrototype') &&
     (!requireTw || hasCanonicalCoreImport(source, 'tw'))
   );
 }
@@ -1576,8 +1573,8 @@ function hasCanonicalCoreImport(source, name) {
   );
 }
 
-function parameterName(callback) {
-  const parameter = callback.parameters[0];
+function parameterName(callback, index = 0) {
+  const parameter = callback.parameters[index];
   return parameter &&
     !parameter.initializer &&
     !parameter.dotDotDotToken &&
@@ -1677,6 +1674,12 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
     );
     const namespaces = new Set();
     if (exported) {
+      if (scope.sourceSummary.hasDynamicImportOfFunction(file, helper)) {
+        // The import can expose the helper without a statically known call site.
+        const unverified = [];
+        cache?.set(helper, unverified);
+        return unverified;
+      }
       for (const declaration of file.statements) {
         if (
           !ts.isImportDeclaration(declaration) ||
@@ -1761,7 +1764,10 @@ function hasVerifiedDecorationHelperCalls(
   try {
     const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
     const references = inspectedHelperReferences(helper, binding, statement, scope);
-    const receivesDefinition = parameterName(helper) === receiver;
+    const receiverIndex = helper.parameters.findIndex(
+      (_, index) => parameterName(helper, index) === receiver
+    );
+    const receivesDefinition = receiverIndex !== -1;
     const callers = new Map();
     for (const reference of references) {
       const call = reference.parent;
@@ -1773,10 +1779,12 @@ function hasVerifiedDecorationHelperCalls(
         !isOperationInCallback(owner, call)
       )
         return false;
-      const provided = call.arguments[0];
+      const provided = call.arguments[receiverIndex];
       if (
         receivesDefinition
-          ? !provided || !ts.isIdentifier(provided)
+          ? !provided ||
+            !ts.isIdentifier(provided) ||
+            call.arguments.slice(0, receiverIndex).some(ts.isSpreadElement)
           : statement.parent !== owner.body ||
             helper.parameters.some(
               (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver

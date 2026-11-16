@@ -64,6 +64,8 @@ export type HookSourceSummaryContext = {
   resolveCall(node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution;
   /** Resolve a stable synchronous authored function without executing it. */
   resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
+  /** Whether an opaque dynamic import can expose the authored function. */
+  hasDynamicImportOfFunction(source: ts.SourceFile, helper: ts.FunctionLikeDeclaration): boolean;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -583,6 +585,8 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const summaryStack = new Set<string>();
   const providerStateCache = new Map<string, ReadonlyMap<string, ProviderStateProof> | null>();
   const canonicalFocusableCache = new Map<string, SymbolRef | null>();
+  const dynamicImports = new WeakMap<ts.SourceFile, string[]>();
+  const exportedFunctionKeys = new Map<string, Set<string>>();
   const moduleForSource = (source: ts.SourceFile): Module => {
     const module = moduleContext.moduleForSource(source);
     const previous = registeredSources.get(module.file);
@@ -592,6 +596,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       summaryStack.clear();
       providerStateCache.clear();
       canonicalFocusableCache.clear();
+      exportedFunctionKeys.clear();
     }
     registeredSources.set(module.file, source);
     return module;
@@ -4241,6 +4246,52 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const resolveCall = (node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution =>
     evaluate(node, source, new Map());
 
+  function hasDynamicImportOfFunction(
+    source: ts.SourceFile,
+    helper: ts.FunctionLikeDeclaration
+  ): boolean {
+    let imports = dynamicImports.get(source);
+    if (!imports) {
+      imports = [];
+      const specifiers = imports;
+      function visit(node: ts.Node) {
+        if (ts.isTypeNode(node)) return;
+        if (
+          ts.isCallExpression(node) &&
+          node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+          node.arguments[0] &&
+          ts.isStringLiteralLike(node.arguments[0]) &&
+          node.arguments[0].text.startsWith('.')
+        )
+          specifiers.push(node.arguments[0].text);
+        ts.forEachChild(node, visit);
+      }
+      visit(source);
+      dynamicImports.set(source, imports);
+    }
+    if (!imports.length) return false;
+
+    const importer = moduleForSource(source);
+    const helperModule = moduleForSource(helper.getSourceFile());
+    const helperKey = symbolKey({ module: helperModule, declaration: helper });
+    return imports.some((specifier) => {
+      const target = moduleContext.resolveModule(importer.file, specifier);
+      if (!target) return false;
+      let keys = exportedFunctionKeys.get(target.file);
+      if (!keys) {
+        keys = new Set();
+        for (const symbol of moduleContext.resolveExports(target)) {
+          const { declaration, module } = symbol;
+          const value = ts.isVariableDeclaration(declaration) ? declaration.name : declaration;
+          const resolved = functionFor(value, module);
+          if (resolved) keys.add(symbolKey({ module: resolved.module, declaration: resolved.fn }));
+        }
+        exportedFunctionKeys.set(target.file, keys);
+      }
+      return keys.has(helperKey);
+    });
+  }
+
   return {
     registerSource,
     resolve: evaluate,
@@ -4255,6 +4306,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         return null;
       return resolved.fn;
     },
+    hasDynamicImportOfFunction,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
     isDefinePrototypeReference: (node, source) =>

@@ -545,6 +545,89 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it('classifies targeted paint from an aliased canonical prototype factory', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype as define, tw } from '@proto.ui/core';
+      define({ name: 'aliased-decoration-factory', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('identifies a verified decoration helper receiver after its options argument', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function add(options, receiver) {
+        const target = receiver.feedback.style.declareDecoration();
+        receiver.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'indexed-decoration-receiver', setup(def) {
+        const target = add({}, def);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight when a spread makes the helper receiver index unknown', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function add(options, receiver) {
+        const target = receiver.feedback.style.declareDecoration();
+        receiver.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'unknown-decoration-receiver-index', setup(def) {
+        const target = add(...options, def);
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it.each([
+    [
+      "import('./paint').then(({ add }) => add(opaque));",
+      "export { add as paint } from './paint';",
+    ],
+    [
+      "import('./bridge').then(({ paint }) => paint(opaque));",
+      "export { add as paint } from './paint';",
+    ],
+  ])('retains preflight for a dynamically imported helper escape', async (dynamicUse, bridge) => {
+    await expect(
+      generate(
+        `
+      import { definePrototype } from '@proto.ui/core';
+      import { add } from './paint';
+      definePrototype({ name: 'dynamic-decoration-escape', setup(def) {
+        const target = add(def);
+        return r => r.decoration(target);
+      }});
+    `,
+        {
+          'paint.ts': `
+        import { tw } from '@proto.ui/core';
+        export function add(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        }
+      `,
+          'bridge.ts': bridge,
+          'other.ts': dynamicUse,
+        }
+      )
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('retains preflight when a captured-target helper escapes the setup call', async () => {
     await expect(
       generate(`
