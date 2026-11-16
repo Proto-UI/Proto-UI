@@ -105,6 +105,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   const homepage = !!root.closest('[data-homepage-runtime]');
   let focusEpoch = 0;
   let dialogFocusEpoch = 0;
+  let activeDialogCandidate: MaterializedProjectionCandidate | null = null;
   let rememberedDialogFocus: {
     candidate: MaterializedProjectionCandidate;
     request: SiteSearchFocusRestore;
@@ -465,22 +466,24 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       return {
         ...prepared,
         activate() {
-          const previousGeneration = root.dataset.searchGeneration;
-          const replacesOpenHomepageDialog =
+          // Docs commits its command and Dialog with independent controllers.
+          // The command's published generation cannot identify the Dialog
+          // owner being replaced; follow the actual activated candidate.
+          const replacesOpenDialog =
             !activated &&
-            homepage &&
-            !!previousGeneration &&
-            previousGeneration !== String(request.generation) &&
+            !!activeDialogCandidate &&
+            activeDialogCandidate !== prepared &&
             search.session.read().open;
-          if (replacesOpenHomepageDialog && rememberedDialogFocus)
+          if (replacesOpenDialog && homepage && rememberedDialogFocus)
             rememberedDialogFocus.replacement = {
               owner: ownerId,
               generation: String(request.generation),
             };
           prepared.activate();
+          activeDialogCandidate = prepared;
           activated = true;
           composition.activate(
-            replacesOpenHomepageDialog
+            replacesOpenDialog
               ? (panel) => {
                   const origin = document.activeElement;
                   const epoch = focusEpoch;
@@ -545,6 +548,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           resume();
         },
         dispose() {
+          if (activeDialogCandidate === prepared) activeDialogCandidate = null;
           if (rememberedDialogFocus?.candidate === prepared) rememberedDialogFocus = null;
           return prepared.dispose();
         },
@@ -593,6 +597,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       alive = false;
       callbacks = null;
       offDialogFocus?.();
+      activeDialogCandidate = null;
       rememberedDialogFocus = null;
       search?.dispose();
       subscribers.clear();
