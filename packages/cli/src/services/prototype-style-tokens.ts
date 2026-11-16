@@ -1646,7 +1646,26 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
   const cached = cache?.get(helper);
   if (cached) return cached;
   const source = helper.getSourceFile();
-  const exported = statement.modifiers?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword);
+  const localName = binding.name?.text;
+  const exported =
+    statement.modifiers?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword) ||
+    (localName &&
+      source.statements.some((item) => {
+        if (ts.isExportAssignment(item) && !item.isExportEquals) {
+          const value = unwrapTransparent(item.expression);
+          return ts.isIdentifier(value) && value.text === localName;
+        }
+        return (
+          ts.isExportDeclaration(item) &&
+          !item.isTypeOnly &&
+          !item.moduleSpecifier &&
+          item.exportClause &&
+          ts.isNamedExports(item.exportClause) &&
+          item.exportClause.elements.some(
+            (entry) => !entry.isTypeOnly && (entry.propertyName ?? entry.name).text === localName
+          )
+        );
+      }));
   const files = exported ? scope.decorationSourceFiles : [source];
   const helperOrigin = styleHandleOrigin(helper);
   if (!files?.some((file) => file.fileName === source.fileName)) return [];
@@ -1677,6 +1696,12 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
     if (!names.size && !namespaces.size) continue;
     function find(node) {
       if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node) || ts.isTypeNode(node))
+        return;
+      if (
+        ts.isExportAssignment(node) &&
+        !node.isExportEquals &&
+        ts.isIdentifier(unwrapTransparent(node.expression))
+      )
         return;
       if (
         (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
@@ -1774,12 +1799,24 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
 }
 
 function isOwnedDecorationStyleArgument(argument, scope) {
-  // Only the result branches of a conditional can supply the style handle.
-  while (ts.isConditionalExpression(argument.parent) && argument.parent.condition !== argument) {
-    argument = outerStyleExpression(argument.parent);
+  // Follow value positions only. A nested array must be spread before it
+  // can contribute any of its members to the targeted rest argument.
+  let shape = 'handle';
+  while (true) {
+    const parent = argument.parent;
+    if (ts.isConditionalExpression(parent) && parent.condition !== argument) {
+      argument = outerStyleExpression(parent);
+    } else if (ts.isArrayLiteralExpression(parent) && shape !== 'array') {
+      shape = 'array';
+      argument = outerStyleExpression(parent);
+    } else if (ts.isSpreadElement(parent) && shape === 'array') {
+      shape = 'spread';
+      argument = parent;
+    } else break;
   }
   const use = argument.parent;
   if (
+    shape === 'array' ||
     !ts.isCallExpression(use) ||
     !use.arguments.includes(argument) ||
     !memberIs(use.expression, 'use')
@@ -1796,10 +1833,12 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   if (!callback || !isOperationInCallback(callback, use)) return false;
   let declarationOwner = callback;
   let definition = receiver;
+  const intent = ts.isMethodDeclaration(callback) ? callback : callback.parent;
   if (
-    (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) &&
-    ts.isPropertyAssignment(callback.parent) &&
-    getPropertyName(callback.parent.name) === 'intent'
+    (ts.isMethodDeclaration(intent) ||
+      ((ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) &&
+        ts.isPropertyAssignment(intent))) &&
+    getPropertyName(intent.name) === 'intent'
   ) {
     if (
       parameterName(callback) !== receiver ||
@@ -1808,7 +1847,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
       receiver === 'tw'
     )
       return false;
-    const config = callback.parent.parent;
+    const config = intent.parent;
     const rule = config.parent;
     if (
       !ts.isObjectLiteralExpression(config) ||

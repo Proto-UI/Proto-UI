@@ -423,6 +423,77 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it.each([
+    ['export { paint as exposed };', "import { exposed as add } from './fixture.proto';"],
+    ['export default paint;', "import add from './fixture.proto';"],
+  ])('retains preflight for an opaque consumer of %s', async (exported, imported) => {
+    await expect(
+      generate(
+        `
+      import { definePrototype, tw } from '@proto.ui/core';
+      function paint(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      definePrototype({ name: 'export-list-helper', setup(def) {
+        const target = paint(def);
+        return r => r.decoration(target);
+      }});
+      ${exported}
+    `,
+        { 'other.ts': imported + ' register(add);' }
+      )
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('classifies a method-shorthand Rule intent as targeted paint', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'method-intent-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        def.rule({
+          when: w => w.state(active).eq(true),
+          intent(i) { i.feedback.style.to(target).use(tw('p-[10%]')); },
+        });
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('follows inline spread arrays into the targeted rest argument', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'spread-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const compact = tw('p-2');
+        def.feedback.style.to(target).use(...[...[tw('p-[10%]')], compact]);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    for (const token of ['p-[10%]', 'p-2']) {
+      expect(artifact.cssText).toContain('[data-pui-style~="' + token + '"]');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="' + token + '"]');
+    }
+  });
+
+  it('retains preflight when a style handle sits in an unspread nested array', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'unspread-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(...[[tw('p-[10%]')]]);
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('keeps both conditional handle alternatives on the targeted decoration', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
