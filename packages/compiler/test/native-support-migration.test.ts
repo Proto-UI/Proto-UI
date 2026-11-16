@@ -840,8 +840,14 @@ async function sharedLegacyBaseline(): Promise<string> {
   ];
   for (const [id, name] of entries) {
     const source = path.join(root, 'old-' + name),
-      target = path.join(directory, id);
-    await cp(source, target, { recursive: true });
+      target = path.join(directory, id),
+      sourceHelpers = path.join(source, '.proto-ui');
+    // Every helper below becomes a facade. Copy the retained CLI files once,
+    // without first copying helper bytes that would immediately be overwritten.
+    await cp(source, target, {
+      recursive: true,
+      filter: (filename) => filename !== sourceHelpers,
+    });
     for (const file of (await manifest(source)).artifacts.filter((item) =>
       item.path.startsWith('.proto-ui/')
     )) {
@@ -864,6 +870,7 @@ async function sharedLegacyBaseline(): Promise<string> {
         .join('/')
         .replace(/\.ts$/, '');
       if (!specifier.startsWith('.')) specifier = './' + specifier;
+      await mkdir(path.dirname(facade), { recursive: true });
       await writeFile(facade, `export * from ${JSON.stringify(specifier)};\n`);
     }
     for (const filename of ['Component.js', 'Component.js.map', 'provenance.json'])

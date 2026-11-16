@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
+import { traceCallableDemand } from '../src/callable-effects';
+import { functionValueType } from '../src/value-types';
 import type { FunctionIR, PrototypeIR } from '../src/ir';
 
 function source(
@@ -36,6 +38,40 @@ function functions(ir: PrototypeIR): FunctionIR[] {
   };
   visit(ir);
   return result;
+}
+
+function reverseEffectChoice(ir: PrototypeIR): void {
+  const declaration = functions(ir)
+    .flatMap((fn) => fn.body)
+    .find((statement) => statement.kind === 'const' && statement.name === 'effect');
+  if (!declaration || declaration.kind !== 'const' || declaration.value.kind !== 'conditional')
+    throw new Error('Expected the checked callable choice');
+  const choice = declaration.value;
+  [choice.then, choice.otherwise] = [choice.otherwise, choice.then];
+}
+
+function replaceAliasWrite(ir: PrototypeIR, name: string): void {
+  const declaration = ir.setup.body.find(
+    (statement) => statement.kind === 'const' && statement.name === name
+  );
+  const write = ir.setup.body.find(
+    (statement) => statement.kind === 'effect' && statement.expression.kind === 'member-write'
+  );
+  if (!declaration || declaration.kind !== 'const' || declaration.value.kind !== 'function')
+    throw new Error('Expected the callable declaration');
+  if (!write || write.kind !== 'effect' || write.expression.kind !== 'member-write')
+    throw new Error('Expected the alias write');
+  // Reuse the checked callable body as an ordinary function expression and keep
+  // both recorded types consistent with it, so the portable validator reaches
+  // the effect analysis instead of rejecting the rewritten type first.
+  const callable = functionValueType(declaration.value.function);
+  write.expression.value = {
+    kind: 'function',
+    type: callable,
+    function: declaration.value.function,
+    span: declaration.value.span,
+  };
+  write.expression.type = callable;
 }
 
 const deferredBodies = [
@@ -197,5 +233,264 @@ describe('ordinary callable execution contexts', () => {
         });
       }});`);
     expect(validateIR(ir).ok).toBe(true);
+  });
+});
+
+describe('checked native callable argument escapes', () => {
+  const core = `import {definePrototype,defineHook} from '@proto.ui/core';`;
+
+  it('retains checked numeric arguments for direct and computed callback forwarding', () => {
+    parsed(`${core}export default definePrototype({name:'numeric-forward',setup(def){
+      def.expose.method('apply',(read:(value:number)=>number,value:number)=>{
+        read(value);return read(value+1);
+      });
+    }});`);
+  });
+
+  it.each(['warn', 'conflict'])(
+    'retains checked computed string arguments for ordinary tools.%s',
+    (method) => {
+      parsed(`${core}
+        const install=defineHook<{}, {}, {}, number>({name:'computed-tool',mode:'configurable',
+          setup(){},configure(api,value,tools){tools.${method}('value='+value);}
+        });
+        export default definePrototype({name:'tool-owner',setup(){install(1);}});`);
+    }
+  );
+
+  it.each([
+    [
+      'computed data beside an authored callback',
+      `(entry:{value:number;label:string;read:()=>number})=>void`,
+      `{value:value+1,label:'value='+value,read:()=>value}`,
+    ],
+    [
+      'additional nested data omitted by the native signature',
+      `(entry:{read:()=>number})=>void`,
+      `{details:{value:value+1,labels:['value='+value]},read:()=>value}`,
+    ],
+  ])('preserves mixed record field types: %s', (_label, consumeType, argument) => {
+    parsed(`${core}export default definePrototype({name:'mixed-record-forward',setup(def){
+      def.expose.method('apply',(consume:${consumeType},value:number)=>{consume(${argument});});
+    }});`);
+  });
+
+  it('retains checked data fields in a host-supplied mixed record', () => {
+    parsed(`${core}export default definePrototype({name:'host-record-forward',setup(def){
+      def.expose.method('apply',(
+        consume:(entry:{value:number;read:()=>number})=>void,
+        entry:{value:number;read:()=>number}
+      )=>{consume(entry);});
+    }});`);
+  });
+
+  it('retains original data field types through a narrower mixed record view', () => {
+    parsed(`${core}export default definePrototype({name:'narrow-record-forward',setup(def){
+      def.expose.method('apply',(consume:(entry:{read:()=>number})=>void,value:number)=>{
+        const entry:{read:()=>number}={value:value+1,read:()=>value};
+        consume(entry);
+      });
+    }});`);
+  });
+
+  it('still checks an escaped callable beside computed data in source and portable IR', () => {
+    const input = `${core}export default definePrototype({name:'mixed-record-effect',setup(def){
+      def.props.define({enabled:{type:'boolean',default:false}});
+      const configure=()=>{def.props.setDefaults({enabled:true});};
+      def.expose.method('apply',(consume:(entry:{read:()=>void})=>void,value:number)=>{
+        const effect = false ? configure : () => {};
+        consume({value:value+1,read:effect});
+      });
+    }});`;
+    const ir = parsed(input);
+    expect(
+      parsePrototype(input.replace('false ? configure : () => {}', 'false ? () => {} : configure'))
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' }],
+    });
+    reverseEffectChoice(ir);
+    expect(validateIR(ir)).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI2002', message: 'props.setDefaults is not permitted in callback.' }],
+    });
+  });
+
+  it.each([
+    [
+      'native argument escape',
+      `def.expose.method('apply',(consume:(effect:()=>void)=>void)=>{
+        const effect = false ? unknownCallable() : () => {};
+        consume(effect);
+      });`,
+    ],
+    [
+      'callable field in a narrower mixed record view',
+      `def.expose.method('apply',(consume:(entry:{read:()=>void})=>void)=>{
+        const effect = false ? unknownCallable() : () => {};
+        const entry:{read:()=>void}={value:1+1,read:effect};
+        consume(entry);
+      });`,
+    ],
+    [
+      'registered callback',
+      `const effect = false ? unknownCallable() : () => {};
+       def.lifecycle.onMounted(effect);`,
+    ],
+  ])('still rejects genuinely unresolved callable provenance at %s', (_label, body) => {
+    const input = `${core}export default definePrototype({name:'unresolved-callable',setup(def){
+      const unknownCallable=():()=>void=>unknownCallable();
+      ${body}
+    }});`;
+    const ir = parsed(input);
+    expect(
+      parsePrototype(
+        input.replace('false ? unknownCallable() : () => {}', 'false ? () => {} : unknownCallable()')
+      )
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: expect.stringContaining('Callable provenance is not closed') },
+      ],
+    });
+    reverseEffectChoice(ir);
+    expect(validateIR(ir)).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI2002', message: expect.stringContaining('Callable provenance is not closed') },
+      ],
+    });
+  });
+});
+
+describe('alias writes and mixed record unions', () => {
+  const core = `import {definePrototype} from '@proto.ui/core';`;
+  const aliasSource = (write: string) => `${core}export default definePrototype({name:'alias-write',setup(def){
+      def.props.define({enabled:{type:'boolean',default:false}});
+      const configure=()=>{def.props.setDefaults({enabled:true});};
+      const original={value:0,read:()=>{}};
+      const outward:{read:()=>void}=original;
+      const writable:{value:unknown;read:()=>void}=original;
+      ${write}
+      def.expose.method('apply',(consume:(entry:{read:()=>void})=>void)=>{consume(outward);});
+    }});`;
+  const unionSource = (condition: string, payload: string) => `${core}export default definePrototype({name:'mixed-union',setup(def){
+      def.props.define({enabled:{type:'boolean',default:false}});
+      const unknownCallable=():()=>void=>unknownCallable();
+      def.expose.method('apply',(consume:(entry:{read:()=>number;payload:number|(()=>void)})=>void,value:number)=>{
+        const entry = ${condition}
+          ? {read:()=>value,payload:value+1}
+          : {read:()=>value,payload:${payload}};
+        consume(entry);
+      });
+    }});`;
+
+  it.each([
+    ['checked numeric data', 'writable.value=1;'],
+    ['a pure authored callback', 'writable.value=()=>{};'],
+  ])('keeps an alias write of %s legal', (_label, write) => {
+    parsed(aliasSource(write));
+  });
+
+  it('rejects a setup-only closure written through an alias', () => {
+    expect(parsePrototype(aliasSource('writable.value=configure;'))).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+      ],
+    });
+  });
+
+  it('rejects an unresolved value written through an alias', () => {
+    expect(parsePrototype(aliasSource('writable.value=[1][0];'))).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: expect.stringContaining('Callable provenance is not closed') },
+      ],
+    });
+  });
+
+  it('rejects the setup-only alias write in portable IR', () => {
+    const ir = parsed(aliasSource('writable.value=1;'));
+    replaceAliasWrite(ir, 'configure');
+    const portable = validateIR(ir);
+    expect(portable.ok).toBe(false);
+    if (portable.ok) return;
+    expect(portable.diagnostics[0]).toMatchObject({
+      code: 'PUI2002',
+      message: expect.stringContaining('props.setDefaults is not permitted in'),
+    });
+  });
+
+  it('retains callable demand for an escaped alias callback', () => {
+    const ir = parsed(aliasSource('writable.value=1;'));
+    replaceAliasWrite(ir, 'configure');
+    const declaration = ir.setup.body.find(
+      (statement) => statement.kind === 'const' && statement.name === 'configure'
+    );
+    if (!declaration || declaration.kind !== 'const' || declaration.value.kind !== 'function')
+      throw new Error('Expected the callable declaration');
+    const demanded = new Set<FunctionIR>();
+    traceCallableDemand(ir, {
+      expression() {},
+      function(value) {
+        demanded.add(value);
+      },
+      hook() {},
+      opaque() {},
+    });
+    expect(demanded.has(declaration.value.function)).toBe(true);
+  });
+
+  it.each([
+    ['a literal true condition', 'true', '()=>value'],
+    ['a literal false condition', 'false', '()=>value'],
+    ['a runtime boolean condition', 'value > 0', '()=>value'],
+  ])('admits the mixed record union with %s', (_label, condition, payload) => {
+    parsed(unionSource(condition, payload));
+  });
+
+  it('rejects a setup-only callable payload of the mixed record union', () => {
+    expect(
+      parsePrototype(
+        unionSource('value > 0', '()=>{def.props.setDefaults({enabled:true});return value;}')
+      )
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+      ],
+    });
+  });
+
+  it('rejects a setup-only callable payload selected by the condition', () => {
+    expect(
+      parsePrototype(
+        unionSource('false', '()=>{def.props.setDefaults({enabled:true});return value;}')
+      )
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+      ],
+    });
+  });
+
+  it('rejects an unresolved callable payload of the mixed record union', () => {
+    expect(parsePrototype(unionSource('value > 0', 'unknownCallable()'))).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: expect.stringContaining('Callable provenance is not closed') },
+      ],
+    });
+  });
+
+  it('rejects an unresolved callable payload selected by the condition', () => {
+    expect(parsePrototype(unionSource('false', 'unknownCallable()'))).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI1007', message: expect.stringContaining('Callable provenance is not closed') },
+      ],
+    });
   });
 });

@@ -242,6 +242,7 @@ export function emitFlutterSource(
     if (isDataValueType(type)) return data(type);
     if (typeof type !== 'string') {
       if (type.kind === 'cell') return dartType(type.value);
+      if (type.kind === 'capture') return 'Object';
       if (type.kind === 'callable')
         return `${dartType(type.returnType)} Function(${type.parameters
           .map(

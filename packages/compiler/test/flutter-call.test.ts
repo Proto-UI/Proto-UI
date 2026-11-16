@@ -3,9 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { emitFlutterSource } from '../src/flutter-source';
 import { parsePrototype } from '../src/parser';
 
-function emit(body: string) {
+function emit(body: string, declarations = '') {
   const parsed = parsePrototype(
-    `import {definePrototype} from '@proto.ui/core';
+    `import {definePrototype,defineAsHook,defineHook} from '@proto.ui/core';
+     ${declarations}
      export default definePrototype({name:'ordinary-dart-call',setup(def){${body}}});`,
     { fileName: 'ordinary-dart-call.proto.ts' }
   );
@@ -97,6 +98,85 @@ describe('direct Dart ordinary calls', () => {
               'Checked callback parameters and per-call parameter defaults'
             ),
           }),
+        ]),
+      });
+    });
+});
+
+describe('Dart opaque authored hook results', () => {
+  it('retains the host Object representation through a returned capture', () => {
+    const emitted = emit(
+      `const create = () => install(); const first = create(); const second = create();
+       def.expose.value('same', first === second);`,
+      `const install = defineAsHook({name:'opaque',setup(){}});`
+    );
+    if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
+    expect(emitted.value.code).toContain('as Object Function()');
+    expect(emitted.value.code).toContain('nativeSame(');
+  });
+
+  it.each(['getState', 'getMethod', 'getAsHook', 'getAsHookHandle'])(
+    'diagnoses %s instead of emitting a method on the opaque Object',
+    (lookup) => {
+      const key = lookup === 'getState' ? 'flag' : lookup === 'getMethod' ? 'read' : 'child';
+      expect(
+        emit(
+          `const result = install(); const found = result.${lookup}('${key}');
+           def.expose.value('missing', found === undefined);`,
+          `const child = defineAsHook({name:'child',setup(){}});
+           const install = defineAsHook({name:'capture',setup(def){
+             child(); def.state.bool('flag', true); def.expose.method('read', () => true);
+           }});`
+        )
+      ).toMatchObject({
+        ok: false,
+        diagnostics: expect.arrayContaining([
+          expect.objectContaining({
+            code: 'PUI4003',
+            message: expect.stringContaining('Authored hook capture lookup'),
+          }),
+        ]),
+      });
+    }
+  );
+
+  for (const [label, declaration, call, diagnostic] of [
+    [
+      'identity projection',
+      `defineAsHook({name:'projected',setup(){},projectHandle(capture){return capture;}})`,
+      'install();',
+      'Authored hook handle projection',
+    ],
+    [
+      'configurator',
+      `defineHook({name:'configured',mode:'configurable',setup(){},configure(){}})`,
+      'install();',
+      'Authored hook configuration and repeated installation',
+    ],
+    [
+      'multiple installation',
+      `defineHook({name:'multiple',mode:'multiple',setup(){}})`,
+      'install(); install();',
+      'Authored hook configuration and repeated installation',
+    ],
+    [
+      'ignored effectful options',
+      `defineHook<{}, {}, {}, number>({name:'options',setup(){}})`,
+      `let count = 0; install(++count); def.expose.value('count', count);`,
+      'Authored hook options and installation API',
+    ],
+    [
+      'unsupplied setup API',
+      `defineHook({name:'api',setup(def,options,api){}})`,
+      'install();',
+      'Authored hook options and installation API',
+    ],
+  ] as const)
+    it(`diagnoses the unimplemented ${label} path`, () => {
+      expect(emit(call, `const install = ${declaration};`)).toMatchObject({
+        ok: false,
+        diagnostics: expect.arrayContaining([
+          expect.objectContaining({ code: 'PUI4003', message: expect.stringContaining(diagnostic) }),
         ]),
       });
     });

@@ -16,12 +16,13 @@ import {
   type ArgumentRule,
   type CallbackContext,
 } from './operations';
-import { lexicalStoredType } from './ir';
+import { isDataValueType, lexicalStoredType } from './ir';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 
 type Known = readonly Atom[];
 type Atom =
-  | { kind: 'unknown' | 'undefined' | 'uninitialized' }
+  | { kind: 'unknown'; data?: ValueType }
+  | { kind: 'undefined' | 'uninitialized' }
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: Extract<ValueType, { kind: 'callable' }> }
@@ -74,6 +75,8 @@ const copyStore = (state: Store): Store => ({
 const UNKNOWN: Known = [{ kind: 'unknown' }];
 const UNDEFINED: Known = [{ kind: 'undefined' }];
 const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
+/** An untracked value whose checked type cannot carry a callable or owner authority. */
+const dataFact = (type: ValueType): Known => [{ kind: 'unknown', data: type }];
 
 /** Values here are provenance, not an evaluator for authored data or host effects. */
 class Scope {
@@ -421,7 +424,9 @@ function analyzeCallableFlow(
         case 'unknown':
         case 'undefined':
         case 'uninitialized':
-          return [value.kind];
+          return value.kind === 'unknown' && value.data
+            ? ['unknown-data', value.data]
+            : [value.kind];
         case 'literal':
           return ['literal', value.value];
         case 'native':
@@ -493,7 +498,8 @@ function analyzeCallableFlow(
     const key = JSON.stringify(type),
       cached = hostTypes.get(key);
     if (cached) return cached;
-    if (typeof type === 'string') return type === 'void' ? UNDEFINED : UNKNOWN;
+    if (typeof type === 'string')
+      return type === 'void' ? UNDEFINED : isDataValueType(type) ? dataFact(type) : UNKNOWN;
     if (type.kind === 'callable') {
       const value: Known = [{ kind: 'native', type }];
       hostTypes.set(key, value);
@@ -502,6 +508,7 @@ function analyzeCallableFlow(
     if (type.kind === 'value-union' || type.kind === 'union')
       return merge(type.members.map(hostValue));
     if (type.kind === 'object' || type.kind === 'record') {
+      if (isDataValueType(type)) return dataFact(type);
       if (!carriesCallable(type)) return UNKNOWN;
       const record: RecordValue = {
         kind: 'record',
@@ -647,7 +654,8 @@ function analyzeCallableFlow(
     values: Known,
     args: readonly Known[],
     execution: Execution,
-    span: SourceSpan = ir.setup.span
+    span: SourceSpan = ir.setup.span,
+    checkedArguments?: readonly { type: ValueType }[]
   ): Known {
     const previousPath = invocationPath;
     invocationPath = [...invocationPath, `${span.file}:${span.start}`];
@@ -658,8 +666,14 @@ function analyzeCallableFlow(
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
-            args.forEach((argument) =>
-              escape(argument, { phase: 'callback', context: 'expose-method' })
+            // UNKNOWN also represents untracked data; retain the actual checked
+            // shape, including data fields omitted by a narrower host signature.
+            args.forEach((argument, index) =>
+              escape(
+                argument,
+                { phase: 'callback', context: 'expose-method' },
+                checkedArguments?.[index]?.type ?? value.type.parameters[index]?.type
+              )
             );
             possibleThrow();
             return hostValue(value.type.returnType);
@@ -672,7 +686,9 @@ function analyzeCallableFlow(
             return UNDEFINED;
           if (value.kind === 'unknown') {
             opaque(span);
-            args.forEach((argument) => escape(argument, execution));
+            args.forEach((argument, index) =>
+              escape(argument, execution, checkedArguments?.[index]?.type)
+            );
           }
           return UNKNOWN;
         })
@@ -693,9 +709,12 @@ function analyzeCallableFlow(
       seen = new Set<Atom>();
     function fieldType(type: ValueType | undefined, name: string): ValueType | undefined {
       if (!type || typeof type === 'string') return undefined;
-      if (type.kind === 'object')
-        return type.fields.find((field) => field.name === name)?.type ?? type.index;
-      if (type.kind === 'value-union') {
+      if (type.kind === 'object' || type.kind === 'record')
+        return (
+          type.fields.find((field) => field.name === name)?.type ??
+          (type.kind === 'object' ? type.index : undefined)
+        );
+      if (type.kind === 'value-union' || type.kind === 'union') {
         const members = type.members
           .map((member) => fieldType(member, name))
           .filter((member): member is ValueType => member !== undefined);
@@ -705,14 +724,19 @@ function analyzeCallableFlow(
     }
     while (pending.length) {
       const { value, type } = pending.pop()!;
-      if (type && !carriesCallable(type)) continue;
       if (seen.has(value)) continue;
       seen.add(value);
+      if (value.kind === 'unknown') {
+        // An untracked fact is not callable provenance when it is proven data or
+        // its checked type cannot carry a callable. A stored closure, record,
+        // cell or capture is always traversed, whatever the checked type says.
+        if (!value.data && (!type || carriesCallable(type))) opaque(ir.setup.span);
+        continue;
+      }
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
           pending.push(...field.map((value) => ({ value, type: fieldType(type, name) })));
-      else if (value.kind === 'unknown') demand?.opaque();
       else if (value.kind === 'cell')
         pending.push(...cellValue(value).map((value) => ({ value, type })));
       else if (value.kind === 'capture') {
@@ -737,7 +761,8 @@ function analyzeCallableFlow(
       !(rule.callback.acceptsValue && type && !carriesCallable(type)) &&
       rule.callback.parameterPolicy !== 'declared-method'
     ) {
-      if (values.some((value) => value.kind === 'unknown')) demand?.opaque();
+      if (values.some((value) => value.kind === 'unknown' && !value.data))
+        opaque(ir.setup.span);
       const signature = rule.callback;
       const origin: Execution =
         signature.contextFrom === 'caller'
@@ -759,7 +784,7 @@ function analyzeCallableFlow(
   function scheduleRender(values: Known): void {
     for (const value of values) {
       if (value.kind === 'closure') callbacks.push({ closure: value, execution: render });
-      else if (value.kind === 'unknown') opaque(ir.setup.span);
+      else if (value.kind === 'unknown' && !value.data) opaque(ir.setup.span);
     }
   }
 
@@ -806,7 +831,9 @@ function analyzeCallableFlow(
                   const args = value.arguments.map((argument) =>
                     expression(argument, scope, execution)
                   );
-                  return reachable ? calls(present, args, execution, value.span) : [];
+                  return reachable
+                    ? calls(present, args, execution, value.span, value.arguments)
+                    : [];
                 },
               ]
             : []),
@@ -817,7 +844,8 @@ function analyzeCallableFlow(
           scope.lookup(value.name)?.value ?? UNKNOWN,
           value.arguments.map((argument) => expression(argument, scope, execution)),
           execution,
-          value.span
+          value.span,
+          value.arguments
         );
       case 'member':
         return property(expression(value.object, scope, execution), value.property);
@@ -839,12 +867,16 @@ function analyzeCallableFlow(
       case 'record': {
         if (!carriesCallable(value.type)) {
           value.entries.forEach((entry) => expression(entry.value, scope, execution));
-          return UNKNOWN;
+          return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         }
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
         if (!record) {
-          record = { kind: 'record', fields: new Map(), tracked: carriesCallable(value.type) };
+          record = {
+            kind: 'record',
+            fields: new Map(),
+            tracked: carriesCallable(value.type),
+          };
           recordSites.set(value, record);
           allocationSerial++;
         }
@@ -855,7 +887,7 @@ function analyzeCallableFlow(
       case 'object-spread': {
         if (!carriesCallable(value.type)) {
           value.parts.forEach((part) => expression(part.value, scope, execution));
-          return UNKNOWN;
+          return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         }
         const nextFields = new Map<string, Known>();
         for (const part of value.parts) {
@@ -883,7 +915,11 @@ function analyzeCallableFlow(
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
         if (!record) {
-          record = { kind: 'record', fields: new Map(), tracked: carriesCallable(value.type) };
+          record = {
+            kind: 'record',
+            fields: new Map(),
+            tracked: carriesCallable(value.type),
+          };
           recordSites.set(value, record);
           allocationSerial++;
         }
@@ -911,11 +947,11 @@ function analyzeCallableFlow(
           ]);
         }
         expression(value.right, scope, execution);
-        return UNKNOWN;
+        return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
       }
       case 'unary':
         expression(value.operand, scope, execution);
-        return UNKNOWN;
+        return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
       case 'intrinsic': {
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
         if (value.name === 'array.every') calls(args[1] ?? UNKNOWN, [UNKNOWN], execution);
@@ -945,7 +981,7 @@ function analyzeCallableFlow(
         const cells = expression(value.cell, scope, execution);
         for (const cell of cells)
           if (cell.kind === 'cell' && cell.tracked) store.cells.set(cell, UNKNOWN);
-        return UNKNOWN;
+        return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
       }
       case 'lexical-write': {
         const cells = expression(value.cell, scope, execution),

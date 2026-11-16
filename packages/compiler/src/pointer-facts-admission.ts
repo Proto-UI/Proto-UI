@@ -94,17 +94,27 @@ export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnost
     if (type.kind === 'callable')
       return supportedType(type.returnType) && type.parameters.every((p) => supportedType(p.type));
     if (type.kind === 'value-union') return type.members.every(supportedType);
-    // A capture is an opaque hook identity, not a structural value. The Dart host
-    // returns it as an opaque object handle, so it is expressible in Flutter.
+    // The Dart host supplies Object identity only; capture lookup and hook
+    // projection/configuration require separate lowering below.
     if (type.kind === 'capture') return true;
     return false;
   }
-  return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) =>
-    ['narrow', 'element', 'intrinsic', 'object-spread', 'member-write'].includes(value.kind) ||
-    !supportedType(value.type)
+  return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) => {
+    if (value.kind === 'operation' && value.operation.startsWith('capture.'))
+      return 'Authored hook capture lookup';
+    if (value.kind === 'authored-hook') {
+      const hook = ir.hooks.find((entry) => entry.id === value.hookId);
+      if (hook?.projectHandle) return 'Authored hook handle projection';
+      if (hook?.configure || (hook?.mode && hook.mode !== 'once'))
+        return 'Authored hook configuration and repeated installation';
+      if (value.arguments?.length || (hook && hook.setup.parameters.length > 1))
+        return 'Authored hook options and installation API';
+    }
+    return ['narrow', 'element', 'intrinsic', 'object-spread', 'member-write'].includes(value.kind) ||
+      !supportedType(value.type)
       ? 'Ordinary callable / structural value expressions'
-      : undefined
-  );
+      : undefined;
+  });
 }
 
 function unsupportedSourceExpressions(
