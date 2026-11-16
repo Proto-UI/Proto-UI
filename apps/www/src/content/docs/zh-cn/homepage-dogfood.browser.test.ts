@@ -20,7 +20,7 @@ import {
 } from './site-header-breakpoint-evidence';
 import type { Browser, ElementHandle, JSHandle, Page } from 'playwright-core';
 import type * as SidebarCurrentVisibility from '../../../components/site-sidebar-current-visibility';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
 const LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' } as const;
 const familyQueryMode = process.env.PROTO_UI_FAMILY_QUERY_MODE ?? 'hybrid';
@@ -1213,16 +1213,18 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             expect(scrolling.max).toBeGreaterThan(0);
             await page.mouse.move(scrolling.x, scrolling.y);
             await page.mouse.wheel(0, scrolling.top < scrolling.max / 2 ? 500 : -500);
-            await expect
-              .poll(() =>
-                dialog.evaluate((element) => {
+            await vi.waitFor(
+              async () => {
+                const top = await dialog.evaluate((element) => {
                   const surface =
                     element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
                     element;
                   return surface.scrollTop;
-                })
-              )
-              .not.toBe(scrolling.top);
+                });
+                expect(top).not.toBe(scrolling.top);
+              },
+              { timeout: 1000 }
+            );
             await page.evaluate(
               () =>
                 new Promise<void>((resolve) =>
