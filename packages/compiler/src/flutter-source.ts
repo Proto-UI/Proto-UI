@@ -410,7 +410,7 @@ export function emitFlutterSource(
     const body = statements(value.body, depth + 1, value.returnType);
     helperBindings = previousBindings;
     localTypes = previousTypes;
-    return `(${params}) ${scoped ? `=> _owner.inScope(${quote(value.context)}, () ` : ''}{\n${body}${type(value.returnType).startsWith('NativeOptional<') ? `${'  '.repeat(depth + 1)}return const NativeOptional.absent();\n` : ''}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
+    return `(${params}) ${scoped ? `=> _owner.inScope(${quote(value.context)}, () ` : ''}{\n${body}${type(value.returnType).startsWith('NativeOptional<') ? `${'  '.repeat(depth + 1)}return const NativeOptional<Never>.absent();\n` : ''}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
   }
   function style(handle: { tokens: readonly string[] }): string {
     return `NativeStyleHandle(<String>[${handle.tokens.map(quote).join(', ')}], <String>[${handle.tokens.map((token) => quote(getSemanticGroupKeyV0(token))).join(', ')}])`;
@@ -928,7 +928,7 @@ export function emitFlutterSource(
         result +=
           returnType === 'void' && statement.value
             ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
-            : `${indent}return${statement.value ? ` ${resultType.startsWith('NativeOptional<') ? `nativeOptionalResult<${resultType.slice(15, -1)}>(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : resultType.startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
+            : `${indent}return${statement.value ? ` ${resultType.startsWith('NativeOptional<') ? `nativeOptionalResult<${resultType.slice(15, -1)}>(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : resultType.startsWith('NativeOptional<') ? ' const NativeOptional<Never>.absent()' : ''};\n`;
         break;
       } else if (statement.kind === 'throw') {
         usesExceptions = true;
