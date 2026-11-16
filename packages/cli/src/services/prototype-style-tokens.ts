@@ -1630,7 +1630,12 @@ function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(),
 }
 
 function decorationHelperBinding(helper) {
-  if (ts.isFunctionDeclaration(helper)) return helper.name ? helper : undefined;
+  if (ts.isFunctionDeclaration(helper)) {
+    const defaultExport = helper.modifiers?.some(
+      (item) => item.kind === ts.SyntaxKind.DefaultKeyword
+    );
+    return helper.name || defaultExport ? helper : undefined;
+  }
   if (!ts.isArrowFunction(helper) && !ts.isFunctionExpression(helper)) return undefined;
   const expression = outerStyleExpression(helper);
   return isConstStyleBinding(expression.parent, expression) ? expression.parent : undefined;
@@ -1647,7 +1652,9 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
   if (!files?.some((file) => file.fileName === source.fileName)) return [];
   const references = [];
   for (const file of files) {
-    const names = new Set(file.fileName === source.fileName ? [binding.name.text] : []);
+    const names = new Set(
+      file.fileName === source.fileName && binding.name ? [binding.name.text] : []
+    );
     const namespaces = new Set();
     if (exported) {
       for (const declaration of file.statements) {
@@ -1767,6 +1774,10 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
 }
 
 function isOwnedDecorationStyleArgument(argument, scope) {
+  // Only the result branches of a conditional can supply the style handle.
+  while (ts.isConditionalExpression(argument.parent) && argument.parent.condition !== argument) {
+    argument = outerStyleExpression(argument.parent);
+  }
   const use = argument.parent;
   if (
     !ts.isCallExpression(use) ||

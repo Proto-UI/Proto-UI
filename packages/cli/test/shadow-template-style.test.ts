@@ -398,6 +398,61 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it('follows an imported anonymous default setup helper', async () => {
+    const { artifact } = await generate(
+      `
+        import { definePrototype } from '@proto.ui/core';
+        import add from './paint';
+        definePrototype({ name: 'default-decoration-helper', setup(def) {
+          const target = add(def);
+          return r => r.decoration(target);
+        }});
+      `,
+      {
+        'paint.ts': `
+        import { tw } from '@proto.ui/core';
+        export default function (definition) {
+          const target = definition.feedback.style.declareDecoration();
+          definition.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        }
+      `,
+      }
+    );
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('keeps both conditional handle alternatives on the targeted decoration', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'conditional-decoration-handle', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const compact = tw('p-2');
+        def.feedback.style.to(target).use(enabled ? (large ? tw('p-[10%]') : compact) : tw('p-4'));
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    for (const token of ['p-[10%]', 'p-2', 'p-4']) {
+      expect(artifact.cssText).toContain('[data-pui-style~="' + token + '"]');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="' + token + '"]');
+    }
+  });
+
+  it('retains preflight for a handle read by the conditional predicate', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'conditional-handle-predicate', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(tw('p-[10%]') ? tw('p-2') : tw('p-4'));
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('retains preflight when a function-valued helper escapes setup', async () => {
     await expect(
       generate(`
