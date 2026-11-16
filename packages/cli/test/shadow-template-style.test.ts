@@ -18,10 +18,13 @@ afterEach(async () => {
   await Promise.all(directories.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-async function generate(source: string) {
+async function generate(source: string, recipes: Record<string, string> = {}) {
   const dir = await mkdtemp(path.join(tmpdir(), 'pui-shadow-template-'));
   directories.push(dir);
   await writeFile(path.join(dir, 'fixture.proto.ts'), source);
+  for (const [file, content] of Object.entries(recipes)) {
+    await writeFile(path.join(dir, file), content);
+  }
   await run([
     'tokens',
     '--input',
@@ -122,6 +125,9 @@ describe('source-scanned Shadow Template/Root separation', () => {
   it.each([
     "def.feedback.style.to(target).use(tw('p-[10%]'));",
     "def.rule({when: w => w.state(active).eq(true), intent: i => i.feedback.style.to(target).use(tw('p-[10%]'))});",
+    "def.feedback.style.to(target).use(tw('opacity-50'), tw('p-[10%]'));",
+    "const paint = tw('p-[10%]'); const alias = paint; def.feedback.style.to(target).use(alias);",
+    "const paint = tw('p-[10%]'); def.rule({when: w => w.state(active).eq(true), intent: i => i.feedback.style.to(target).use(paint)});",
   ])('compiles targeted decoration paint as Template CSS: %s', async (contribution) => {
     const { artifact, documentCss } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
@@ -138,6 +144,45 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
     expect(artifact.cssText).toContain('[data-pui-split-root-style~="p-2"]');
     expect(documentCss).toContain('[data-pui-style~="p-[10%]"]');
+  });
+
+  it('follows a renamed imported recipe handle into the targeted argument', async () => {
+    const { artifact } = await generate(
+      `
+      import { definePrototype } from '@proto.ui/core';
+      import { sharedPaint as paint } from './recipe';
+      definePrototype({ name: 'imported-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(paint);
+        return r => r.decoration(target);
+      }});
+    `,
+      {
+        'recipe.ts': "export { paint as sharedPaint } from './palette';",
+        'palette.ts': "import { tw } from '@proto.ui/core'; export const paint = tw('p-[10%]');",
+      }
+    );
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it.each([
+    'def.feedback.style.use(paint);',
+    'consume(paint);',
+    "const unrelated = tw('p-[10%]');",
+  ])('keeps the Root preflight when a targeted handle has another use: %s', async (otherUse) => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'shared-decoration', setup(def) {
+        const paint = tw('p-[10%]');
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(paint);
+        ${otherUse}
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
   });
 
   it('still preflights tokens independently used on Root and an owned decoration', async () => {

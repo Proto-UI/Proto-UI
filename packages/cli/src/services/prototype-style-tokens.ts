@@ -46,6 +46,7 @@ export async function collectProtoShadowStyleTokenUsage(root) {
   const templateTokens = new Set();
   const nonTemplateTokens = new Set();
   const unclassifiedTokens = new Set();
+  const styleHandleUsage = new Map();
   const occurrences = [];
   const moduleCache = new Map();
   const sourceSummary = createHookSourceSummaryContext();
@@ -61,12 +62,24 @@ export async function collectProtoShadowStyleTokenUsage(root) {
       templateTokens,
       nonTemplateTokens,
       unclassifiedTokens,
+      styleHandleUsage,
     });
   }
   // Reuse Root occurrence provenance; a token used on both targets needs both
   // outputs and must still pass the complete Root recipe preflight.
   for (const { token } of occurrences) nonTemplateTokens.add(token);
   for (const token of unclassifiedTokens) templateTokens.add(token);
+  for (const {
+    tokens: held,
+    declarationSeen,
+    targeted,
+    unclassified,
+  } of styleHandleUsage.values()) {
+    for (const token of held) {
+      templateTokens.add(token);
+      if (!declarationSeen || !targeted || unclassified) nonTemplateTokens.add(token);
+    }
+  }
   return {
     tokens: Array.from(tokens).sort(),
     rootTokens: Array.from(tokens)
@@ -742,6 +755,8 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
 }
 
 function walk(node, scope, tokens, exposures, rootInventory = null) {
+  if (rootInventory?.styleHandleUsage && ts.isIdentifier(node))
+    observeStyleHandleReference(node, scope, tokens, rootInventory);
   if (ts.isDeleteExpression(node)) {
     const target = unwrapTransparent(node.expression);
     if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
@@ -1250,9 +1265,21 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       for (const token of value.strings.flatMap(splitTokens)) {
         tokens.add(token);
         if (rootInventory?.templateTokens) {
-          if (isTemplateStyleCall(node) || isOwnedDecorationStyleCall(node))
+          const expression = outerStyleExpression(node);
+          const parent = expression.parent;
+          if (
+            isTemplateStyleCall(node) ||
+            (isCanonicalStyleHandle(node, scope) && isOwnedDecorationStyleArgument(expression))
+          ) {
             rootInventory.templateTokens.add(token);
-          else {
+          } else if (
+            isConstStyleBinding(parent, expression) &&
+            isCanonicalStyleHandle(node, scope)
+          ) {
+            const usage = decorationStyleUsage(rootInventory, styleHandleOrigin(node));
+            usage.declarationSeen = true;
+            usage.tokens.add(token);
+          } else {
             rootInventory.nonTemplateTokens.add(token);
             if (!isFeedbackStyleTwCall(node)) rootInventory.unclassifiedTokens.add(token);
           }
@@ -1492,7 +1519,7 @@ function isTemplateStyleCall(node) {
   return safe;
 }
 
-function isCanonicalPrototypeSetup(setup) {
+function isCanonicalPrototypeSetup(setup, requireTw = true) {
   if (!ts.isMethodDeclaration(setup)) return false;
   if (getPropertyName(setup.name) !== 'setup') return false;
   const config = setup.parent;
@@ -1507,26 +1534,26 @@ function isCanonicalPrototypeSetup(setup) {
   )
     return false;
   const source = setup.getSourceFile();
-  for (const name of ['definePrototype', 'tw']) {
-    if (
-      !source.statements.some(
-        (statement) =>
-          ts.isImportDeclaration(statement) &&
-          statement.moduleSpecifier.text === '@proto.ui/core' &&
-          !statement.importClause?.isTypeOnly &&
-          ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
-          statement.importClause.namedBindings.elements.some(
-            (binding) =>
-              !binding.isTypeOnly &&
-              binding.name.text === name &&
-              (binding.propertyName ?? binding.name).text === name
-          )
-      )
-    )
-      return false;
-  }
+  return (
+    hasCanonicalCoreImport(source, 'definePrototype') &&
+    (!requireTw || hasCanonicalCoreImport(source, 'tw'))
+  );
+}
 
-  return true;
+function hasCanonicalCoreImport(source, name) {
+  return source.statements.some(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      statement.moduleSpecifier.text === '@proto.ui/core' &&
+      !statement.importClause?.isTypeOnly &&
+      ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
+      statement.importClause.namedBindings.elements.some(
+        (binding) =>
+          !binding.isTypeOnly &&
+          binding.name.text === name &&
+          (binding.propertyName ?? binding.name).text === name
+      )
+  );
 }
 
 function parameterName(callback) {
@@ -1554,9 +1581,13 @@ function directBodyCall(callback, call) {
   );
 }
 
-function isOwnedDecorationStyleCall(node) {
-  const use = node.parent;
-  if (!ts.isCallExpression(use) || use.arguments[0] !== node || !memberIs(use.expression, 'use'))
+function isOwnedDecorationStyleArgument(argument) {
+  const use = argument.parent;
+  if (
+    !ts.isCallExpression(use) ||
+    !use.arguments.includes(argument) ||
+    !memberIs(use.expression, 'use')
+  )
     return false;
   const selection = memberOwner(use.expression);
   if (!selection || !ts.isCallExpression(selection)) return false;
@@ -1600,7 +1631,8 @@ function isOwnedDecorationStyleCall(node) {
       return false;
   }
 
-  if (!isCanonicalPrototypeSetup(setup) || !setup.body || !ts.isBlock(setup.body)) return false;
+  if (!isCanonicalPrototypeSetup(setup, false) || !setup.body || !ts.isBlock(setup.body))
+    return false;
   const definition = parameterName(setup);
   const isDeclaredTarget = setup.body.statements.some(
     (statement) =>
@@ -1641,6 +1673,69 @@ function isOwnedDecorationStyleCall(node) {
   }
   check(setup.body);
   return safe;
+}
+
+function isCanonicalStyleHandle(node, scope) {
+  return (
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === 'tw' &&
+    !scopeDeclaring('tw', scope) &&
+    hasCanonicalCoreImport(node.getSourceFile(), 'tw')
+  );
+}
+
+function outerStyleExpression(node) {
+  let expression = node;
+  while (expression.parent && unwrapTransparent(expression.parent) === node)
+    expression = expression.parent;
+  return expression;
+}
+
+function isConstStyleBinding(binding, initializer) {
+  return (
+    ts.isVariableDeclaration(binding) &&
+    binding.initializer === initializer &&
+    ts.isIdentifier(binding.name) &&
+    (binding.parent.flags & ts.NodeFlags.Const) !== 0
+  );
+}
+
+function styleHandleOrigin(node) {
+  // The same relative module can be parsed again while resolving its exports.
+  return node.getSourceFile().fileName + ':' + node.pos;
+}
+
+function decorationStyleUsage(inventory, origin) {
+  const previous = inventory.styleHandleUsage.get(origin);
+  if (previous) return previous;
+  const usage = { tokens: new Set(), declarationSeen: false, targeted: false, unclassified: false };
+  inventory.styleHandleUsage.set(origin, usage);
+  return usage;
+}
+
+function observeStyleHandleReference(node, scope, tokens, inventory) {
+  const binding = scopeDeclaring(node.text, scope)?.bindings.get(node.text);
+  if (
+    !binding?.styleHandleOrigin ||
+    ts.isTypeNode(node.parent) ||
+    ts.isImportSpecifier(node.parent) ||
+    ts.isExportSpecifier(node.parent) ||
+    ((ts.isPropertyAccessExpression(node.parent) || ts.isPropertyAssignment(node.parent)) &&
+      node.parent.name === node)
+  )
+    return;
+  const expression = outerStyleExpression(node);
+  const parent = expression.parent;
+  if (isConstStyleBinding(parent, expression)) return;
+
+  const usage = decorationStyleUsage(inventory, binding.styleHandleOrigin);
+  for (const token of binding.strings.flatMap(splitTokens)) {
+    tokens.add(token);
+    usage.tokens.add(token);
+  }
+  if (isOwnedDecorationStyleArgument(expression)) usage.targeted = true;
+  else usage.unclassified = true;
 }
 
 function isFeedbackStyleUseCall(node) {
@@ -1707,7 +1802,22 @@ function registerDeclaration(decl, scope, exposures) {
     shadowBindingPattern(scope, decl.name);
     return;
   }
-  registerValueBinding(decl.name, resolveBinding(decl.initializer, scope), scope, exposures, decl);
+  const value = resolveBinding(decl.initializer, scope);
+  const initializer = unwrapTransparent(decl.initializer);
+  const origin = isConstStyleBinding(decl, decl.initializer)
+    ? isCanonicalStyleHandle(initializer, scope)
+      ? styleHandleOrigin(initializer)
+      : ts.isIdentifier(initializer)
+        ? value.styleHandleOrigin
+        : undefined
+    : undefined;
+  registerValueBinding(
+    decl.name,
+    origin || value.styleHandleOrigin ? { ...value, styleHandleOrigin: origin } : value,
+    scope,
+    exposures,
+    decl
+  );
 }
 
 function registerValueBinding(name, binding, scope, exposures, bindingNode) {
