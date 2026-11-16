@@ -71,6 +71,9 @@ dependsOn:
     - C-TEMPLATE-0006
     - C-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Admitted owned decoration for ordinary Roots in the explicit open split profile with view-owned binding and physical reuse checks.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: 'Defined a draft-only generic dependency boundary for #935; no implementation or acceptance claim.'

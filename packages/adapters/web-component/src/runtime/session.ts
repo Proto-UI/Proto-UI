@@ -72,7 +72,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     blueprint: TemplateChildren;
     lease: object;
     document: Document;
-    nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }>;
+    nodes: Array<{ node: Node; parent: Node | null; decoration: boolean; text: string | null }>;
   } | null = null;
   const currentFeedback = () =>
     capsHub?.getPort?.('feedback') as import('@proto.ui/module-feedback').FeedbackPort | undefined;
@@ -84,6 +84,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     shadowViewTarget && !textControlTarget ? root.ownerDocument.createDocumentFragment() : null;
 
   const decorationRoot = shadowViewTarget?.element ?? root;
+  const ownsDecorationRoot = () =>
+    decorationRoot.isConnected && (!shadowViewTarget || decorationRoot.parentNode === root);
   const stageOwnedDecorations = (blueprint: TemplateChildren, turn: number) => {
     const owned = new WeakSet<Node>();
     const feedback = currentFeedback();
@@ -130,13 +132,19 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         if (!boundLease) return;
         if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
           throw new Error('[WC Adapter] decoration lease changed during commit');
-        const nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }> = [];
+        const nodes: Array<{
+          node: Node;
+          parent: Node | null;
+          decoration: boolean;
+          text: string | null;
+        }> = [];
         const collect = (parent: Node) => {
           for (const node of Array.from(parent.childNodes)) {
             if (!owned.has(node)) continue;
             nodes.push({
               node,
               parent: node.parentNode,
+              text: node.nodeType === 3 ? node.nodeValue : null,
               decoration:
                 node.nodeType === 1 && (node as Element).hasAttribute('data-pui-owned-decoration'),
             });
@@ -146,7 +154,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         collect(decorationRoot);
         if (
           turn !== commitTurn ||
-          !decorationRoot.isConnected ||
+          !ownsDecorationRoot() ||
           currentFeedback()?.captureDecorationLease?.() !== boundLease
         )
           throw new Error('[WC Adapter] decoration commit superseded');
@@ -167,16 +175,17 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (
         currentFeedback()?.captureDecorationLease?.() !== record.lease ||
         decorationRoot.ownerDocument !== record.document ||
-        !decorationRoot.isConnected
+        !ownsDecorationRoot()
       )
         throw new Error('[WC Adapter] stale decoration blueprint lease');
       if (!equalOwnedTemplateBlueprint(record.blueprint, children))
         throw new Error('[feedback] decoration structural rebind unsupported');
-      for (const { node, parent, decoration } of record.nodes) {
+      for (const { node, parent, decoration, text } of record.nodes) {
         if (
           node.ownerDocument !== record.document ||
           node.parentNode !== parent ||
-          !decorationRoot.contains(node)
+          !decorationRoot.contains(node) ||
+          (text !== null && node.nodeValue !== text)
         )
           throw new Error('[WC Adapter] decoration physical blueprint changed');
         if (decoration) {
@@ -198,7 +207,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (
         turn !== commitTurn ||
         decorationCommit !== record ||
-        !decorationRoot.isConnected ||
+        !ownsDecorationRoot() ||
         decorationRoot.ownerDocument !== record.document ||
         currentFeedback()?.captureDecorationLease?.() !== record.lease
       )

@@ -86,18 +86,15 @@ function appendCommittedChild(
 ) {
   if (child === null) return;
 
-  if (typeof child === 'string' || typeof child === 'number') {
-    parent.appendChild(doc.createTextNode(String(child)));
-    return;
-  }
-
   if (isSvgTemplateNode(child)) {
     appendSvgChild(parent, child, doc, opt, ctx);
     return;
   }
 
   if (!isTemplateNode(child)) {
-    parent.appendChild(doc.createTextNode(String(child)));
+    const text = doc.createTextNode(String(child));
+    opt.owned.add(text);
+    parent.appendChild(text);
     return;
   }
 
