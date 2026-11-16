@@ -1,6 +1,7 @@
 import type { RuntimeHost } from '@proto.ui/runtime';
 import { withWebComponentOwnedRelocation } from '../owned-relocation';
 import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
+import type { OwnedDecorationBinding } from '@proto.ui/module-feedback';
 import { equalOwnedTemplateBlueprint, type InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { Prototype, TemplateChildren } from '@proto.ui/core';
@@ -82,14 +83,91 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   const shadowCommitRoot =
     shadowViewTarget && !textControlTarget ? root.ownerDocument.createDocumentFragment() : null;
 
+  const decorationRoot = shadowViewTarget?.element ?? root;
+  const stageOwnedDecorations = (blueprint: TemplateChildren, turn: number) => {
+    const owned = new WeakSet<Node>();
+    const feedback = currentFeedback();
+    const lease = feedback?.captureDecorationLease?.();
+    let boundLease: object | undefined;
+    return {
+      owned,
+      bindDecorations(bindings: readonly OwnedDecorationBinding[]) {
+        const overlay = capsHub?.getPort?.('overlay') as
+          | import('@proto.ui/module-overlay').OverlayPort
+          | undefined;
+        const gate =
+          bindings.length && overlay?.getConfig().portal
+            ? createWebOwnedDecorationPortalGate(host, () => {
+                try {
+                  return feedback?.captureDecorationLease?.() === lease;
+                } catch {
+                  return false;
+                }
+              })
+            : null;
+        try {
+          if (feedback?.bindDecorations)
+            feedback.bindDecorations(
+              gate
+                ? bindings.map((binding) => ({
+                    target: binding.target,
+                    sink: gate.wrap(binding.sink),
+                  }))
+                : bindings,
+              lease!
+            );
+          else if (bindings.length)
+            throw new Error('[WC Adapter] owned-decoration binding unavailable');
+          portalDecorationGate?.dispose();
+          portalDecorationGate = gate;
+          if (bindings.length) boundLease = lease;
+        } catch (error) {
+          gate?.dispose();
+          throw error;
+        }
+      },
+      recordCommit() {
+        if (!boundLease) return;
+        if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
+          throw new Error('[WC Adapter] decoration lease changed during commit');
+        const nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }> = [];
+        const collect = (parent: Node) => {
+          for (const node of Array.from(parent.childNodes)) {
+            if (!owned.has(node)) continue;
+            nodes.push({
+              node,
+              parent: node.parentNode,
+              decoration:
+                node.nodeType === 1 && (node as Element).hasAttribute('data-pui-owned-decoration'),
+            });
+            collect(node);
+          }
+        };
+        collect(decorationRoot);
+        if (
+          turn !== commitTurn ||
+          !decorationRoot.isConnected ||
+          currentFeedback()?.captureDecorationLease?.() !== boundLease
+        )
+          throw new Error('[WC Adapter] decoration commit superseded');
+        decorationCommit = {
+          blueprint,
+          lease: boundLease,
+          document: decorationRoot.ownerDocument,
+          nodes,
+        };
+      },
+    };
+  };
+
   const commitWebComponentChildren = (children: TemplateChildren) => {
     const turn = ++commitTurn;
     if (decorationCommit) {
       const record = decorationCommit;
       if (
         currentFeedback()?.captureDecorationLease?.() !== record.lease ||
-        root.ownerDocument !== record.document ||
-        !root.isConnected
+        decorationRoot.ownerDocument !== record.document ||
+        !decorationRoot.isConnected
       )
         throw new Error('[WC Adapter] stale decoration blueprint lease');
       if (!equalOwnedTemplateBlueprint(record.blueprint, children))
@@ -98,7 +176,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         if (
           node.ownerDocument !== record.document ||
           node.parentNode !== parent ||
-          !root.contains(node)
+          !decorationRoot.contains(node)
         )
           throw new Error('[WC Adapter] decoration physical blueprint changed');
         if (decoration) {
@@ -120,8 +198,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (
         turn !== commitTurn ||
         decorationCommit !== record ||
-        !root.isConnected ||
-        root.ownerDocument !== record.document ||
+        !decorationRoot.isConnected ||
+        decorationRoot.ownerDocument !== record.document ||
         currentFeedback()?.captureDecorationLease?.() !== record.lease
       )
         throw new Error('[WC Adapter] decoration reuse superseded');
@@ -142,8 +220,14 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         root.replaceChildren(nativeTarget);
       }
     } else if (shadow) {
-      commitChildren(shadowCommitRoot ?? root, children, { mode: 'shadow' });
+      const decorations = shadowCommitRoot ? stageOwnedDecorations(children, turn) : null;
+      commitChildren(shadowCommitRoot ?? root, children, {
+        mode: 'shadow',
+        owned: decorations?.owned,
+        bindDecorations: decorations?.bindDecorations,
+      });
       if (shadowCommitRoot) shadowViewTarget!.replaceRenderedChildren(shadowCommitRoot.childNodes);
+      decorations?.recordCommit();
     } else if (isSlotOnly(children)) {
       const projector = getSlotProjector();
       if (projector) {
@@ -155,54 +239,13 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();
       const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
-      const owned = new WeakSet<Node>();
-      let boundLease: object | undefined;
+      const decorations = stageOwnedDecorations(children, turn);
 
       const result = commitChildren(root, children, {
         mode: 'light',
         slotPool,
-        owned,
-        bindDecorations: (() => {
-          const feedback = capsHub?.getPort?.('feedback') as
-            | import('@proto.ui/module-feedback').FeedbackPort
-            | undefined;
-          const lease = feedback?.captureDecorationLease?.();
-          return (bindings) => {
-            const overlay = capsHub?.getPort?.('overlay') as
-              | import('@proto.ui/module-overlay').OverlayPort
-              | undefined;
-            const gate =
-              bindings.length && overlay?.getConfig().portal
-                ? createWebOwnedDecorationPortalGate(root as HTMLElement, () => {
-                    try {
-                      return feedback?.captureDecorationLease?.() === lease;
-                    } catch {
-                      return false;
-                    }
-                  })
-                : null;
-            try {
-              if (feedback?.bindDecorations)
-                feedback.bindDecorations(
-                  gate
-                    ? bindings.map((binding) => ({
-                        target: binding.target,
-                        sink: gate.wrap(binding.sink),
-                      }))
-                    : bindings,
-                  lease!
-                );
-              else if (bindings.length)
-                throw new Error('[WC Adapter] owned-decoration binding unavailable');
-              portalDecorationGate?.dispose();
-              portalDecorationGate = gate;
-              if (bindings.length) boundLease = lease;
-            } catch (error) {
-              gate?.dispose();
-              throw error;
-            }
-          };
-        })(),
+        owned: decorations.owned,
+        bindDecorations: decorations.bindDecorations,
       });
 
       // Preserve the established no-slot parking contract, but only after
@@ -210,42 +253,13 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (!result.hasSlot) for (const node of slotPool) node.parentNode?.removeChild(node);
 
       projector.afterCommit({
-        owned,
+        owned: decorations.owned,
         slotStart: result.slotStart,
         slotEnd: result.slotEnd,
         projected: slotPool,
         enableMO: result.hasSlot,
       });
-      if (boundLease) {
-        if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
-          throw new Error('[WC Adapter] decoration lease changed during commit');
-        const nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }> = [];
-        const collect = (parent: Node) => {
-          for (const node of Array.from(parent.childNodes)) {
-            if (!owned.has(node)) continue;
-            nodes.push({
-              node,
-              parent: node.parentNode,
-              decoration:
-                node.nodeType === 1 && (node as Element).hasAttribute('data-pui-owned-decoration'),
-            });
-            collect(node);
-          }
-        };
-        collect(root);
-        if (
-          turn !== commitTurn ||
-          !root.isConnected ||
-          currentFeedback()?.captureDecorationLease?.() !== boundLease
-        )
-          throw new Error('[WC Adapter] decoration commit superseded');
-        decorationCommit = {
-          blueprint: children,
-          lease: boundLease,
-          document: root.ownerDocument,
-          nodes,
-        };
-      }
+      decorations.recordCommit();
       return;
     }
     clearSlotProjector();

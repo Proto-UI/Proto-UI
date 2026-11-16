@@ -1,7 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest';
-import { definePrototype, tw } from '@proto.ui/core';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
 import { AdaptToWebComponent } from '../src';
 import { createRuntimeSession } from '@proto.ui/runtime';
+import type { PropsBaseType } from '@proto.ui/types';
+import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 
 let id = 0;
 afterEach(() => document.body.replaceChildren());
@@ -80,6 +82,112 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     await settle();
     expect(leaves[0].getAttribute('data-pui-style')).toBe('bg-red-500 opacity-50');
   });
+  it('keeps the split surface, owned leaf and native slot stable until a view detaches', async () => {
+    let run!: RunHandle<PropsBaseType>;
+    let renders = 0;
+    const proto = definePrototype({
+      name: `owned-decoration-split-${++id}`,
+      setup(def) {
+        const decoration = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', false);
+        def.lifecycle.onCreated((value) => {
+          run = value;
+        });
+        def.expose.method('present', (present: boolean) => run.lifecycle.setPresent(present));
+        def.expose.method('activate', () => active.set(true));
+        def.feedback.style.to(decoration).use(tw('opacity-50'));
+        def.rule({
+          when: (w) => w.state(active).eq(true),
+          intent: (i) => i.feedback.style.to(decoration).use(tw('opacity-100')),
+        });
+        return (r) => {
+          renders++;
+          return [r.decoration(decoration), r.slot()];
+        };
+      },
+    });
+    const C = AdaptToWebComponent(proto, {
+      shadow: {
+        mode: 'open',
+        presentation: 'split',
+        styleArtifact: renderProtoShadowSplitStyleArtifact(['opacity-50', 'opacity-100']),
+      },
+    });
+    const host = new C();
+    const input = document.createElement('input');
+    input.value = 'caller input';
+    host.append(input);
+    document.body.append(host);
+    await settle();
+    const surface = host.shadowRoot!.querySelector('[part="surface"]')!;
+    const leaf = surface.querySelector('[data-pui-owned-decoration]')!;
+    const slot = surface.querySelector('slot')!;
+    expect(slot.assignedNodes()).toEqual([input]);
+    expect(leaf.getAttribute('data-pui-style')).toBe('opacity-50');
+    expect(leaf.getAttribute('aria-hidden')).toBe('true');
+    expect(leaf.hasAttribute('inert')).toBe(true);
+    expect(leaf.hasAttribute('tabindex')).toBe(false);
+    const exposes = host.getExposes() as { activate(): void; present(value: boolean): void };
+    input.focus();
+    input.setSelectionRange(1, 5, 'backward');
+    exposes.activate();
+    await settle();
+    expect(leaf.getAttribute('data-pui-style')).toBe('opacity-100');
+    expect(renders).toBe(1);
+    host.update();
+    await settle();
+    expect(renders).toBe(2);
+    expect([...surface.children]).toEqual([leaf, slot]);
+    expect(document.activeElement).toBe(input);
+    expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
+      1,
+      5,
+      'backward',
+    ]);
+    exposes.present(false);
+    await settle();
+    expect(surface.isConnected).toBe(true);
+    expect(surface.childNodes).toHaveLength(0);
+    expect(input.parentNode).toBe(host);
+    exposes.present(true);
+    await vi.waitFor(() =>
+      expect(surface.querySelector('[data-pui-owned-decoration]')).not.toBeNull()
+    );
+    const replacement = surface.querySelector('[data-pui-owned-decoration]')!;
+    expect(replacement).not.toBe(leaf);
+    expect(replacement.getAttribute('data-pui-style')).toBe('opacity-100');
+    expect(surface.querySelector('slot')!.assignedNodes()).toEqual([input]);
+    expect(input.value).toBe('caller input');
+    host.remove();
+    await settle();
+    expect(host.shadowRoot!.childNodes).toHaveLength(0);
+  });
+
+  it('rejects a duplicate split decoration before publishing the new view', () => {
+    const C = AdaptToWebComponent(
+      definePrototype({
+        name: `owned-decoration-invalid-split-${++id}`,
+        setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          return (r) => [r.slot(), r.decoration(target), r.decoration(target)];
+        },
+      }),
+      {
+        shadow: {
+          mode: 'open',
+          presentation: 'split',
+          styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+        },
+      }
+    );
+    const host = new C();
+    const child = document.createElement('input');
+    host.append(child);
+    expect(() => document.body.append(host)).toThrow(/duplicate decoration binding/);
+    expect(child.parentNode).toBe(host);
+    expect(host.shadowRoot?.querySelector('[data-pui-owned-decoration]')).toBeNull();
+  });
+
   it('rejects declaration on a runtime without the physical capability', () => {
     expect(() =>
       createRuntimeSession(
@@ -153,9 +261,14 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
   });
 });
 
-it.each([false, true])(
-  'paints a same-document portal and replays on reopen (directBody=%s)',
-  async (directBody) => {
+it.each([
+  { split: false, directBody: false },
+  { split: false, directBody: true },
+  { split: true, directBody: false },
+  { split: true, directBody: true },
+])(
+  'paints a same-document portal and replays on reopen (split=$split, directBody=$directBody)',
+  async ({ split, directBody }) => {
     const { asOverlay } = await import('@proto.ui/hooks');
     let setups = 0,
       renders = 0;
@@ -183,7 +296,18 @@ it.each([false, true])(
         };
       },
     });
-    AdaptToWebComponent(proto);
+    AdaptToWebComponent(
+      proto,
+      split
+        ? {
+            shadow: {
+              mode: 'open',
+              presentation: 'split',
+              styleArtifact: renderProtoShadowSplitStyleArtifact(['bg-black', 'bg-white']),
+            },
+          }
+        : undefined
+    );
     const origin = directBody ? document.body : document.createElement('div');
     if (!directBody) document.body.append(origin);
     const host = document.createElement(proto.name) as HTMLElement & { getExposes(): any };
@@ -196,7 +320,8 @@ it.each([false, true])(
       await new Promise((r) => setTimeout(r, 0));
     };
     await flush();
-    const leaf = host.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+    const view = host.shadowRoot ?? host;
+    const leaf = view.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
     expect(host.parentNode).toBe(document.body);
     expect(leaf.getAttribute('data-pui-style')).toBe('bg-black');
     const before = renders;
@@ -216,7 +341,7 @@ it.each([false, true])(
       await flush();
     }
     expect(setups).toBe(1);
-    const reopened = host.querySelector('[data-pui-owned-decoration]')!;
+    const reopened = view.querySelector('[data-pui-owned-decoration]')!;
     expect(reopened.getAttribute('data-pui-style')).toBe('bg-white');
     expect(host.querySelector('input')).toBe(input);
     expect(input.value).toBe('unchanged');

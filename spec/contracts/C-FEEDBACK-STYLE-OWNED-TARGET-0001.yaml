@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 summary: 'Draft owner-lived decoration addressing with generation-scoped physical views; bounded Web adapter implementation remains under review. Tracks #935 and #957.'
 statement:
   en: This draft defines the minimum law for owned decorative targets of existing feedback.style. Bounded experimental Web Component, React, Vue and Vue2 implementations use setup declareDecoration, style.to(target).use and r.decoration(target). It does not establish stable or portable support. Existing style contribution semantics remain authoritative; no Tabs-specific path is introduced.
-  zh-CN: 本草案定义既有 feedback.style 自有装饰目标的最小法则。受限实验实现探索 light-DOM Web Component、React、Vue 与 Vue2 的 setup 身份、定点样式贡献与空装饰叶绑定，不构成稳定或可移植支持；既有样式贡献语义优先，不引入 Tabs 专用通道。
+  zh-CN: 本草案定义既有 feedback.style 自有装饰目标的最小法则。受限实验实现探索 Web Component、React、Vue 与 Vue2 的 setup 身份、定点样式贡献与空装饰叶绑定，不构成稳定或可移植支持；既有样式贡献语义优先，不引入 Tabs 专用通道。
 criteria:
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-IDENTITY
     text:
@@ -34,8 +34,8 @@ criteria:
       zh-CN: 目标永久为装饰：退出无障碍树但不隐藏布局，不可聚焦，无 action、名称、事件或用户内容。可适用处复用受治理 A11y 投影，不得隐藏所属控件或其 slot；仍禁止任意 Template props 及 DOM 属性。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-SUPPORT
     text:
-      en: Each adapter must explicitly implement or reject the capability. Accepted types, draft contracts, static inspection and planned tests do not establish runtime or cross-adapter support. PrototypeRef rejection remains unchanged.
-      zh-CN: 每个 adapter 必须明确实现或拒绝能力；类型接受、草案、静态审查及计划测试均不构成运行时或跨 adapter 支持证明。PrototypeRef 拒绝规则不变。
+      en: Each adapter must explicitly implement or reject the capability. Accepted types, draft contracts, static inspection and planned tests do not establish runtime or cross-adapter support. PrototypeRef rejection remains unchanged. The bounded Web Component path covers ordinary Light DOM and ordinary Roots with an explicit open split profile. Split binds the complete leaf set in the current view of the inner surface. Direct Shadow and native text, image and link projections reject owned decoration.
+      zh-CN: 每个 adapter 必须明确实现或拒绝能力；类型接受、草案、静态审查及计划测试均不构成运行时或跨 adapter 支持证明。PrototypeRef 拒绝规则不变。Web Component 的有界实现覆盖普通 Light DOM 和显式启用 open split profile 的普通 Root。Split 在 inner surface 的当前视图内绑定完整装饰叶集合。Direct Shadow 和原生文本、图片及链接投射拒绝自有装饰。
 openQuestions:
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-Q-API
     question:

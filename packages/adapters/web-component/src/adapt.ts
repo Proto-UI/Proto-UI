@@ -1073,6 +1073,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
+              splitSurface: Boolean(splitResources),
               surfaceProjection: this._a11yProjection,
               feedbackSurfaceProjection: this._surfaceProjection,
               instanceToken: instanceToken,
@@ -1272,6 +1273,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const ownerModules = createWebComponentOwnerModules({
         el: thisEl,
+        splitSurface: Boolean(splitResources),
         instanceToken,
         rawPropsSource,
         getMeta: ownerGetMeta,
