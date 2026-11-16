@@ -1798,6 +1798,60 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new 
   }
 }
 
+function decorationRuleCaller(intent) {
+  if (
+    (!ts.isMethodDeclaration(intent) &&
+      !ts.isPropertyAssignment(intent) &&
+      !ts.isShorthandPropertyAssignment(intent)) ||
+    getPropertyName(intent.name) !== 'intent'
+  )
+    return undefined;
+  const config = intent.parent;
+  const rule = config.parent;
+  if (
+    !ts.isObjectLiteralExpression(config) ||
+    !ts.isCallExpression(rule) ||
+    rule.arguments[0] !== config ||
+    !memberIs(rule.expression, 'rule')
+  )
+    return undefined;
+  const owner = ts.findAncestor(rule, ts.isFunctionLike);
+  const receiver = memberOwner(rule.expression);
+  return owner && receiver && ts.isIdentifier(receiver) && isOperationInCallback(owner, rule)
+    ? { owner, definition: receiver.text }
+    : undefined;
+}
+
+function referencedDecorationRuleCaller(callback, scope) {
+  const binding = decorationHelperBinding(callback);
+  if (
+    !binding ||
+    callback.asteriskToken ||
+    callback.modifiers?.some((item) => item.kind === ts.SyntaxKind.AsyncKeyword) ||
+    !scope.sourceSummary
+  )
+    return undefined;
+  const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+  let origin;
+  for (const reference of inspectedHelperReferences(callback, binding, statement, scope)) {
+    const value = outerStyleExpression(reference);
+    const intent = value.parent;
+    if (
+      (ts.isPropertyAssignment(intent) && intent.initializer !== value) ||
+      (ts.isShorthandPropertyAssignment(intent) && intent.name !== value)
+    )
+      return undefined;
+    const caller = decorationRuleCaller(intent);
+    if (
+      !caller ||
+      (origin && (origin.owner !== caller.owner || origin.definition !== caller.definition))
+    )
+      return undefined;
+    origin = caller;
+  }
+  return origin;
+}
+
 function isOwnedDecorationStyleArgument(argument, scope) {
   // Follow value positions only. A nested array must be spread before it
   // can contribute any of its members to the targeted rest argument.
@@ -1833,40 +1887,22 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   if (!callback || !isOperationInCallback(callback, use)) return false;
   let declarationOwner = callback;
   let definition = receiver;
-  const intent = ts.isMethodDeclaration(callback) ? callback : callback.parent;
-  if (
-    (ts.isMethodDeclaration(intent) ||
-      ((ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) &&
-        ts.isPropertyAssignment(intent))) &&
-    getPropertyName(intent.name) === 'intent'
-  ) {
+  const intent = ts.isMethodDeclaration(callback)
+    ? callback
+    : outerStyleExpression(callback).parent;
+  const ruleCaller =
+    decorationRuleCaller(intent) ?? referencedDecorationRuleCaller(callback, scope);
+  if (ruleCaller) {
     if (
       parameterName(callback) !== receiver ||
       callback.parameters.length !== 1 ||
       receiver === target.text ||
-      receiver === 'tw'
-    )
-      return false;
-    const config = intent.parent;
-    const rule = config.parent;
-    if (
-      !ts.isObjectLiteralExpression(config) ||
-      !ts.isCallExpression(rule) ||
-      rule.arguments[0] !== config ||
-      !memberIs(rule.expression, 'rule')
-    )
-      return false;
-    declarationOwner = ts.findAncestor(rule, ts.isFunctionLike);
-    const ruleReceiver = memberOwner(rule.expression);
-    if (
-      !declarationOwner ||
-      !ruleReceiver ||
-      !ts.isIdentifier(ruleReceiver) ||
-      !isOperationInCallback(declarationOwner, rule) ||
+      receiver === 'tw' ||
       !receiverUsesAreDirect(callback, receiver)
     )
       return false;
-    definition = ruleReceiver.text;
+    declarationOwner = ruleCaller.owner;
+    definition = ruleCaller.definition;
   }
   if (isCanonicalPrototypeSetup(declarationOwner, false)) {
     if (parameterName(declarationOwner) !== definition) return false;

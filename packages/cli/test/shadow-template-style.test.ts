@@ -447,6 +447,41 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it.each([
+    ['function paint(i) { i.feedback.style.to(target).use(tw("p-[10%]")); }', 'intent: paint'],
+    ['const paint = (i) => i.feedback.style.to(target).use(tw("p-[10%]"));', 'intent: (paint)'],
+    ['function intent(i) { i.feedback.style.to(target).use(tw("p-[10%]")); }', 'intent'],
+  ])('classifies a locally referenced Rule intent', async (declaration, intent) => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'referenced-rule-intent', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        ${declaration}
+        def.rule({ when: w => w.state(active).eq(true), ${intent} });
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight when a referenced Rule intent also escapes', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'escaped-rule-intent', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        function paint(i) { i.feedback.style.to(target).use(tw('p-[10%]')); }
+        def.rule({ when: w => w.state(active).eq(true), intent: paint });
+        expose(paint);
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('classifies a method-shorthand Rule intent as targeted paint', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
