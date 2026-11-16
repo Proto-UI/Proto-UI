@@ -94,6 +94,9 @@ export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnost
     if (type.kind === 'callable')
       return supportedType(type.returnType) && type.parameters.every((p) => supportedType(p.type));
     if (type.kind === 'value-union') return type.members.every(supportedType);
+    // A capture is an opaque hook identity, not a structural value. The Dart host
+    // returns it as an opaque object handle, so it is expressible in Flutter.
+    if (type.kind === 'capture') return true;
     return false;
   }
   return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) =>
