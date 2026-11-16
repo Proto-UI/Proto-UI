@@ -18,6 +18,7 @@ cases:
     expectation: old-target-lease-retires-and-host-size-conflict-remains-named-unavailability
     notes:
       - A supplied unavailable callback verifies consumer handling, not actual long-label overflow detection by a native host.
+      - Detached recovery checks distinguish a recreated collection from authored row replacement, a label edit, and explicit popper. A recovered aligned lease waits for the committed view.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
     title: One Content owner separates logical open from complete composition presentation
     covers:
@@ -79,7 +80,7 @@ implementations:
       - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-ITEM-SIZE
       - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-SIZE-BOUNDARY
     notes:
-      - The new multi-row cases are implemented but not executed on this candidate; prior passing metadata does not certify the changed behavior.
+      - Module fixtures exercise the all-row lease and detached structural, scalar and policy recovery. They do not measure a native row.
     exercises: [P-BASE-SELECT-CONTENT]
   - id: prototypes-base-select-alignment-owner
     kind: module-test
@@ -115,10 +116,12 @@ implementations:
     status: needs-review
     path: packages/adapters/react/test/select-presence-remount.integration.test.ts
     required: true
-    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION]
+    consumesCases:
+      - T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
+      - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-SIZE-BOUNDARY
     exercises: [P-BASE-SELECT-CONTENT]
     notes:
-      - Real React with bounded Happy DOM geometry covers Base and Shadcn popper/item-aligned close and reentry; native direction and paint remain separate evidence.
+      - Real React with bounded Happy DOM geometry covers Base and Shadcn close, geometry rejection without self-readmission, and committed close/reopen. Native direction and paint remain separate evidence.
   - id: adapter-react-select-content-entry-stability
     kind: adapter-test
     status: passing
