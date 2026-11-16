@@ -279,6 +279,91 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it('follows a renamed re-export of a synchronous setup helper', async () => {
+    const { artifact } = await generate(
+      `
+      import { definePrototype } from '@proto.ui/core';
+      import { prepare as addDecoration } from './recipe';
+      definePrototype({ name: 'exported-decoration-helper', setup(def) {
+        const target = addDecoration(def);
+        return r => r.decoration(target);
+      }});
+    `,
+      {
+        'recipe.ts': "export { declarePaint as prepare } from './paint';",
+        'paint.ts': `
+        import { tw } from '@proto.ui/core';
+        export function declarePaint(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        }
+      `,
+      }
+    );
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight for an exported helper with an opaque caller elsewhere', async () => {
+    await expect(
+      generate(
+        `
+      import { definePrototype } from '@proto.ui/core';
+      import { declarePaint } from './paint';
+      definePrototype({ name: 'mixed-external-helper', setup(def) {
+        const target = declarePaint(def);
+        return r => r.decoration(target);
+      }});
+    `,
+        {
+          'paint.ts': `
+        import { tw } from '@proto.ui/core';
+        export function declarePaint(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return target;
+        }
+      `,
+          'other.ts': "import { declarePaint } from './paint'; declarePaint(opaque);",
+        }
+      )
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('keeps the original target identity when passing an immutable alias to style and render', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'aliased-decoration', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const alias = target;
+        const second = alias;
+        def.feedback.style.to(second).use(tw('p-[10%]'));
+        return r => r.decoration(second);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('retains preflight when an alias shadows the declared target', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'shadowed-alias', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const alias = target;
+        {
+          const target = opaque;
+          const alias = target;
+          def.feedback.style.to(alias).use(tw('p-[10%]'));
+        }
+        return r => r.decoration(alias);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('follows a renamed imported recipe handle into the targeted argument', async () => {
     const { artifact } = await generate(
       `
