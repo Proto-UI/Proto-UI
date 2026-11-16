@@ -17,10 +17,14 @@ function runConditionals(
   label: string,
   body: string,
   expected: Record<string, string | number | boolean>,
-  fixture: { parameters?: string; prelude?: string; before?: string; after?: string } = {}
+  fixture: { prelude?: string; before?: string; after?: string; external?: string[] } = {}
 ) {
+  const observed = Object.keys(expected).filter((key) => !fixture.external?.includes(key));
+  const observations = observed
+    .map((key) => `def.expose.value(${JSON.stringify(`observe_${key}`)}, ${key});`)
+    .join('\n');
   const source = `import {definePrototype} from '@proto.ui/core';
-    export default definePrototype({name:'conditional-native',setup(${fixture.parameters ?? ''}){${body}}});`;
+    export default definePrototype({name:'conditional-native',setup(def){${body}\n${observations}}});`;
   const parsed = parsePrototype(source, { fileName: `${label}.proto.ts` });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const generated = emitFlutterSource(parsed.value);
@@ -30,7 +34,8 @@ function runConditionals(
   if (!host) throw new Error('Missing emitted native support');
 
   // Copy the actual emitted setup statements and scalar support unchanged.
-  // No widget, owner, view or platform input participates in these fixtures.
+  // A typed observation port keeps the results in the authored demand graph.
+  // No widget, real owner, view or platform input participates in these fixtures.
   // Fail if the generated boundaries change instead of silently testing a
   // handwritten equivalent of the conditional under review.
   const closure = code.indexOf('      ((');
@@ -54,10 +59,14 @@ function runConditionals(
     .split('\n')
     .filter((line) => !/^(?:import|export) /.test(line))
     .join('\n');
-  const observe = Object.keys(expected)
+  const observe = (fixture.external ?? [])
     .map((key) => `${JSON.stringify(key)}: ${name(key)}`)
     .join(', ');
-  const program = `import 'dart:convert';\n${host.contents.slice(scalarStart, scalarEnd)}\n${prelude}\n${fixture.prelude ?? ''}\nvoid main() {\n${fixture.before ?? ''}\n${setup}\n${fixture.after ?? ''}\nprint(jsonEncode({${observe}}));\n}\n`;
+  const observer = `class Observations {
+    final values = <String, Object?>{};
+    ${observed.map((key) => `void bind${name(`observe_${key}`)}(Object? value) { values[${JSON.stringify(key)}] = nativeValue(value); }`).join('\n')}
+  }`;
+  const program = `import 'dart:convert';\n${host.contents.slice(scalarStart, scalarEnd)}\n${prelude}\n${observer}\n${fixture.prelude ?? ''}\nvoid main() {\n${fixture.before ?? 'final _owner = Observations();'}\n${setup}\n${fixture.after ?? ''}\nprint(jsonEncode({..._owner.values, ${observe}}));\n}\n`;
   const directory = evidence
     ? path.join(evidence, label)
     : mkdtempSync(path.join(tmpdir(), 'proto-flutter-conditional-'));
@@ -180,11 +189,10 @@ describe.skipIf(!dart)('Dart execution of emitted conditional statements', () =>
        if (def.expose.value('third', true)) { entered = true; }`,
       { ternary: 'no', negated: true, entered: false, writes: 3 },
       {
-        parameters: 'def',
         // Typed port doubles only count the emitted effects. The generated
         // calls and all conditional expressions remain unchanged; this does
         // not claim NativeOwner lifecycle or Flutter Widget acceptance.
-        prelude: `class Effects {
+        prelude: `class Effects extends Observations {
           int writes = 0;
           void bind${name('first')}(bool value) { writes++; }
           void bind${name('second')}(bool value) { writes++; }
@@ -192,6 +200,92 @@ describe.skipIf(!dart)('Dart execution of emitted conditional statements', () =>
         }`,
         before: 'final _owner = Effects();',
         after: `final ${name('writes')} = _owner.writes;`,
+        external: ['writes'],
+      }
+    );
+  });
+
+  it('preserves alias arguments, omitted values and optional-call laziness', () => {
+    runConditionals(
+      'call-arguments',
+      `let trace = '';
+       const first = () => { trace = trace + 'a'; return 2; };
+       const second = () => { trace = trace + 'b'; return 3; };
+       const effect = () => { trace = trace + 'v'; };
+       const add = (left: number, right?: number) => { trace = trace + 'c'; return left + (right ?? 10); };
+       const alias = add;
+       const sum = alias(first(), second());
+       const omitted = alias(first());
+       const absent = alias(first(), undefined);
+       const consumed = alias(first(), effect());
+       const present = alias?.(first(), second());
+       const missing = false ? alias : undefined;
+       const nil = false ? alias : null;
+       const skipped = missing?.(first(), second()) === undefined;
+       const skippedNull = nil?.(first(), second()) === undefined;
+       const maybe = (flag: boolean) => flag ? 4 : undefined;
+       const unionPresent = maybe(true) ?? 9;
+       const unionAbsent = maybe(false) ?? 9;
+       const required = (value: number | undefined) => value ?? 7;
+       const requiredAbsent = required(undefined);`,
+      {
+        trace: 'abcacacavcabc',
+        sum: 5,
+        omitted: 12,
+        absent: 12,
+        consumed: 12,
+        present: 5,
+        skipped: true,
+        skippedNull: true,
+        unionPresent: 4,
+        unionAbsent: 9,
+        requiredAbsent: 7,
+      }
+    );
+  });
+
+  it('evaluates a callable factory once and retains void results and thrown arguments', () => {
+    runConditionals(
+      'call-evaluation',
+      `let trace = '';
+       const create = () => {
+         trace = trace + 'f';
+         return (value: number) => { trace = trace + 'c'; };
+       };
+       const argument = () => { trace = trace + 'a'; return 1; };
+       const empty = create()(argument()) === undefined;
+       const optionalEmpty = create()?.(argument()) === undefined;
+       const unselected = false ? create() : undefined;
+       const skipped = unselected?.(argument()) === undefined;
+       let caught = false;
+       const fail = () => { trace = trace + 'x'; throw 'argument failed'; };
+       const consume = (value?: number) => { trace = trace + 'wrong'; };
+       try { consume(fail()); } catch { caught = true; }`,
+      { trace: 'facfacx', empty: true, optionalEmpty: true, skipped: true, caught: true }
+    );
+  });
+
+  it('preserves optional closure result types for bare returns and fallthrough', () => {
+    runConditionals(
+      'optional-return-types',
+      `const bare = (flag: boolean) => { if (!flag) { return; } return 4; };
+       const implicit = (flag: boolean) => { if (flag) { return 5; } };
+       const nullable = (flag: number) => { if (flag === 0) { return; } return flag === 1 ? null : 6; };
+       const barePresent = bare(true) ?? 9;
+       const bareAbsent = bare(false) === undefined;
+       const implicitPresent = implicit(true) ?? 9;
+       const implicitAbsent = implicit(false) === undefined;
+       const nullablePresent = nullable(2) ?? 9;
+       const nullableNull = nullable(1) === null;
+       const nullableAbsent = nullable(0) === undefined;`,
+      {
+        barePresent: 4,
+        bareAbsent: true,
+        implicitPresent: 5,
+        implicitAbsent: true,
+        nullablePresent: 6,
+        nullableNull: true,
+        nullableAbsent: true,
       }
     );
   });

@@ -24,22 +24,17 @@ export class StateModuleImpl {
   readonly kernel = new StateKernel();
   private disposed = false;
 
-  /**
-   * watchersById stores internal watchers that need ctx injection.
-   * We keep it in module layer to avoid coupling kernel to runtime context.
-   */
-  private watchersById = new Map<number, Set<InternalStateWatchCallback<any>>>();
-
-  /**
-   * For each state slot id that has at least one watcher, we keep exactly one kernel subscription
-   * and fan-out to watchersById.
-   */
-  private kernelOffById = new Map<number, () => void>();
+  // The kernel owns notification ordering and registration identity. The module
+  // only tracks the subscriptions it must release and injects callback context.
+  private watchedSlots = new Map<
+    number,
+    { handle: OwnedStateHandle<any>; subscriptions: Set<() => void> }
+  >();
 
   /**
    * ctx stack for nested set() calls (re-entrant set in watch callbacks, etc.)
-   * kernel already queues emits deterministically; this stack ensures we always forward
-   * the correct ctx for the current "set chain".
+   * The runtime dispatcher supplies the owning callback run. Without a dispatcher,
+   * queued reentrant notifications retain the outer synchronous set-chain context.
    */
   private ctxStack: unknown[] = [];
   private callbackDispatcher: StateCallbackDispatcher | null = null;
@@ -100,64 +95,36 @@ export class StateModuleImpl {
   // watcher plumbing
   // -----------------------
 
-  private ensureKernelForwarder<V>(id: number, handle: OwnedStateHandle<V>): void {
-    if (this.kernelOffById.has(id)) return;
-
-    const off = this.kernel.subscribe(handle, (e: StateEvent<V>) => {
-      const watchers = this.watchersById.get(id);
-      if (!watchers || watchers.size === 0) return;
-
-      const ctx = this.currentCtx();
-      // Snapshot for safety if callbacks mutate watcher sets
-      const list = Array.from(watchers);
-      for (const cb of list) this.dispatchWatcher(cb, ctx, e);
-    });
-
-    this.kernelOffById.set(id, off);
-  }
-
   private addWatcher<V>(
     handle: OwnedStateHandle<V>,
     cb: InternalStateWatchCallback<V>
   ): () => void {
     const id = getIdFromHandle(handle);
-
-    let set = this.watchersById.get(id);
-    if (!set) {
-      set = new Set();
-      this.watchersById.set(id, set);
+    const unsubscribe = this.kernel.subscribe(handle, (event) => {
+      if (this.disposed) {
+        // Terminal disconnect historically has no live callback scope.
+        if (event.type === 'disconnect') cb(undefined, event);
+        return;
+      }
+      this.dispatchWatcher(cb, this.currentCtx(), event);
+    });
+    let slot = this.watchedSlots.get(id);
+    if (!slot) {
+      slot = { handle, subscriptions: new Set() };
+      this.watchedSlots.set(id, slot);
     }
-    set.add(cb as any);
-
-    this.ensureKernelForwarder(id, handle);
-
+    slot.subscriptions.add(unsubscribe);
     return () => {
-      const s = this.watchersById.get(id);
-      if (!s) return;
-      s.delete(cb as any);
-
-      if (s.size === 0) {
-        this.watchersById.delete(id);
-
-        // Optional: remove kernel forwarder when no watchers remain
-        const off = this.kernelOffById.get(id);
-        if (off) {
-          off();
-          this.kernelOffById.delete(id);
-        }
+      unsubscribe();
+      slot.subscriptions.delete(unsubscribe);
+      if (slot.subscriptions.size === 0 && this.watchedSlots.get(id) === slot) {
+        this.watchedSlots.delete(id);
       }
     };
   }
 
   private emitDisconnect(handle: OwnedStateHandle<any>): void {
-    const id = getIdFromHandle(handle);
-    const watchers = this.watchersById.get(id);
-    if (!watchers || watchers.size === 0) return;
-
-    const e: StateEvent<any> = { type: 'disconnect', reason: 'unmount' };
-    const ctx = this.currentCtx();
-    const list = Array.from(watchers);
-    for (const cb of list) this.dispatchWatcher(cb, ctx, e);
+    this.kernel.disconnect(handle);
   }
 
   // -----------------------
@@ -342,19 +309,29 @@ export class StateModuleImpl {
     if (this.disposed) return;
     this.disposed = true;
 
-    // Emit disconnect for all watched slots (best-effort).
-    for (const [, watchers] of this.watchersById) {
-      const e: StateEvent<any> = { type: 'disconnect', reason: 'unmount' };
-      const list = Array.from(watchers);
-      for (const cb of list) cb(undefined, e);
+    const failures: unknown[] = [];
+    try {
+      for (const { handle } of Array.from(this.watchedSlots.values())) {
+        try {
+          this.emitDisconnect(handle);
+        } catch (error) {
+          Object.defineProperty(failures, failures.length, {
+            value: error,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        }
+      }
+    } finally {
+      for (const { subscriptions } of this.watchedSlots.values()) {
+        for (const unsubscribe of subscriptions) unsubscribe();
+      }
+      this.watchedSlots.clear();
+      this.ctxStack = [];
+      this.kernel.dispose();
     }
-
-    // cleanup kernel subscriptions
-    for (const [, off] of this.kernelOffById) off();
-    this.kernelOffById.clear();
-    this.watchersById.clear();
-    this.ctxStack = [];
-
-    this.kernel.dispose();
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) throw new AggregateError(failures, '[State] disconnect failures');
   }
 }

@@ -42,6 +42,7 @@ test('metadata sync projects draft installation examples, retains authored prose
   try {
     for (const file of ['sync-metadata.mjs', 'readme-metadata.mjs', 'lib.mjs', 'governance.mjs'])
       copy(`scripts/release/${file}`);
+    copy('scripts/build/proto-source.mjs');
     copy('package.json');
     copy('VERSION');
     symlinkSync(join(ROOT, 'node_modules'), join(root, 'node_modules'), 'dir');

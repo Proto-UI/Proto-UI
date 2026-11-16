@@ -113,7 +113,7 @@ impl gpui::Element for PositionedRoot {
             if !floating.upgrade().is_some_and(|owner|ready(&owner))||!anchor.upgrade().is_some_and(|owner|ready(&owner)){return}
             if !controller.borrow().modules.positioning.connection.as_ref().is_some_and(|connection|connection.generation==generation){return}
             let snapshot=record(vec![("side",Value::string(side)),("align",Value::string(align)),("strategy",Value::string(config.strategy))]);controller.borrow_mut().modules.positioning.snapshot=snapshot.clone();
-            if matches!(callback,Value::Function(_)){invoke(&controller,"positioning",&callback,vec![snapshot]);}
+            if matches!(callback,Value::Function(_)){native_host_callback(&controller,"positioning",||invoke(&controller,"positioning",&callback,vec![snapshot]));}
             let drive=controller.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx);}
         });}
     }

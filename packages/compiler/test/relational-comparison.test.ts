@@ -55,15 +55,33 @@ function rustLiteralSpelling(token: string): string {
   });
 }
 function firstArgumentBinding(code: string): string {
-  const tokens = rustTokens(code), names = new Set<string>();
-  for (let i = 0; i < tokens.length - 10; i++) {
-    if (tokens[i] === 'let' && /^[A-Za-z_][A-Za-z_0-9]*$/.test(tokens[i + 1]!) &&
-        tokens.slice(i + 2, i + 6).join(' ') === '= arg ( &' &&
-        tokens.slice(i + 7, i + 11).join(' ') === ', 0 ) ;') names.add(tokens[i + 1]!);
+  const tokens = rustTokens(code);
+  // Ordinary setup and renderer closures now have their own arguments. Locate
+  // the argument in the innermost lexical scope enclosing this bottom block,
+  // rather than assuming the entire component has exactly one argument local.
+  const scopes: Set<string>[] = [new Set()];
+  const bottomArguments: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i] === '{') scopes.push(new Set());
+    if (tokens[i] === '}') scopes.pop();
+    if (tokens[i] === 'let' && /^[A-Za-z_][A-Za-z_0-9]*$/.test(tokens[i + 1] ?? '')) {
+      const assignment = tokens[i + 2] === ':' && tokens[i + 3] === 'Value' ? i + 4 : i + 2;
+      if (tokens.slice(assignment, assignment + 4).join(' ') === '= arg ( &' &&
+          /^[A-Za-z_][A-Za-z_0-9]*$/.test(tokens[assignment + 4] ?? '') &&
+          tokens.slice(assignment + 5, assignment + 9).join(' ') === ', 0 ) ;')
+        scopes.at(-1)!.add(tokens[i + 1]!);
+    }
+    if (tokens[i] === 'unreachable' && tokens[i + 1] === '!') {
+      const argumentsInScope = scopes.findLast(scope => scope.size > 0);
+      if (argumentsInScope?.size !== 1)
+        throw new Error('Expected one first-argument binding in the bottom expression’s lexical scope');
+      bottomArguments.push([...argumentsInScope][0]!);
+    }
   }
-  if (names.size !== 1) throw new Error('Expected one unambiguous first-argument binding in this fixture');
-  return [...names][0]!;
+  if (bottomArguments.length !== 1) throw new Error('Expected one bottom expression in this fixture');
+  return bottomArguments[0]!;
 }
+
 function hasOneRustBlock(code: string, expected: string): boolean {
   const actual = rustTokens(code), pattern = rustTokens(expected);
   let matches = 0;
@@ -228,6 +246,21 @@ for (const operator of operators) {
     }
   });
 }
+it('bottom source oracle follows its lexical argument through ordinary closure emission', () => {
+  const inner = bottomRelationBlock('null', 'input_arg').replace('$diagnostic', '"bottom"').replaceAll('$', 'tmp_');
+  const code = `let outer = |outer_args| { let setup_arg: Value = arg(&outer_args, 0);
+    let compare = |method_args| { let input_arg: Value = arg(&method_args, 0); ${inner} };
+    let renderer = |render_args| { let render_arg: Value = arg(&render_args, 0); render_arg };
+  };`;
+  expect(firstArgumentBinding(code)).toBe('input_arg');
+  expect(hasOneRustBlock(code, bottomRelationBlock('null', firstArgumentBinding(code)))).toBe(true);
+  expect(hasOneRustBlock(code.replace('let tmp_left = input_arg.clone()', 'let tmp_left = setup_arg.clone()'),
+    bottomRelationBlock('null', firstArgumentBinding(code)))).toBe(false);
+  expect(() => firstArgumentBinding(code.replace('arg(&method_args, 0)', 'arg(&method_args, 1)')))
+    .not.toThrow();
+  const wrongParameter = code.replace('arg(&method_args, 0)', 'arg(&method_args, 1)');
+  expect(hasOneRustBlock(wrongParameter, bottomRelationBlock('null', firstArgumentBinding(wrongParameter)))).toBe(false);
+});
 // Handwritten adversarial controls test the oracle, not native execution.
 for (const [label, expected, good] of [
   ['string', stringRelationBlock('<'), `{ let lhs = Value::string("𐀀"); let rhs = Value::string(""); Value::boolean(lhs.text().encode_utf16().cmp(rhs.text().encode_utf16()) < std::cmp::Ordering::Equal) }`],
@@ -377,10 +410,10 @@ for (const body of [
     }
   });
 }
-it('GPUI keeps valid string output UTF-8 roundtrippable and preserves opaque UTF-16 hook keys', () => {
+it('GPUI keeps observable authored hook names and valid string output UTF-8 roundtrippable', () => {
   const input = `import {definePrototype,defineAsHook} from '@proto.ui/core';
-const a=defineAsHook({name:'\\uD800',setup(){}});
-const b=defineAsHook({name:'\\uD801',setup(){}});
+const a=defineAsHook({name:'\\u{10000}',setup(){}});
+const b=defineAsHook({name:'\\uE000',setup(){}});
 export default definePrototype({name:'keys',setup(def){
  const first=a();const second=b();def.expose.value('different',first!==second);
  const r={'\\u{10000}':1,'\\uE000':2};def.expose.value('result',r['\\u{10000}']<r['\\uE000']);
@@ -391,10 +424,30 @@ export default definePrototype({name:'keys',setup(def){
   const emitted = emitGpuiSource(parsed.value);
   expect(emitted.ok).toBe(true);
   if (!emitted.ok) return;
-  expect(emitted.value.code).toContain('"u16:d800"');
-  expect(emitted.value.code).toContain('"u16:d801"');
+  expect(emitted.value.code).toContain('"𐀀"');
+  expect(emitted.value.code).toContain('""');
   for (const text of [emitted.value.code, ...(emitted.value.supportingFiles ?? []).map(f => f.contents)]) {
     expect(Buffer.from(text, 'utf8').toString('utf8')).toBe(text);
+  }
+});
+it('GPUI diagnoses unrepresentable observable authored hook names without encoding a substitute', () => {
+  for (const name of ['\\uD800', '\\uD801']) {
+    const input = `import {definePrototype,defineAsHook} from '@proto.ui/core';
+const hook=defineAsHook({name:'${name}',setup(){}});
+export default definePrototype({name:'keys',setup(){hook();}});`;
+    const parsed = parsePrototype(input, { fileName: 'keys.proto.ts' });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) continue;
+    // Names are visible through api.name and capture children. An ASCII u16:...
+    // registry spelling cannot be exposed as though it were the authored string.
+    const emitted = emitGpuiSource(parsed.value);
+    expect(emitted.ok).toBe(false);
+    if (!emitted.ok) {
+      expect(emitted.diagnostics).toEqual(expect.arrayContaining([
+        expect.objectContaining({ code: 'PUI_GPUI_STRING_UNSUPPORTED', span: expect.objectContaining({ file: 'keys.proto.ts' }) }),
+      ]));
+      expect(emitted).not.toHaveProperty('value');
+    }
   }
 });
 it('GPUI literal type diagnostics carry the owning parameter source span', () => {

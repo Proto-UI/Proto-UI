@@ -29,17 +29,18 @@ export function createScopedExposesReader(
 ): ScopedExposesReader {
   let live = true;
   let lastRaw: Record<string, unknown> | null = null;
-  let lastWrapped: Record<string, unknown> = {};
-  const externalHandleCache = new WeakMap<object, Record<string, unknown>>();
   // The top-level record is a replacement snapshot of one instance registry.
   const rootReceiver = {};
   const callableCache = new WeakMap<object, WeakMap<Function, (...args: unknown[]) => unknown>>();
+  const recordCache = new WeakMap<object, object>();
+  const projectedCallables = new WeakSet<Function>();
 
   const wrapCallable = (
     value: (...args: unknown[]) => unknown,
     receiver: object,
     currentReceiver: () => object = () => receiver
   ): ((...args: unknown[]) => unknown) => {
+    if (projectedCallables.has(value)) return value;
     let receiverCache = callableCache.get(receiver);
     if (!receiverCache) {
       receiverCache = new WeakMap();
@@ -57,12 +58,13 @@ export function createScopedExposesReader(
 
       let result: unknown;
       invoke(() => {
-        result = Reflect.apply(value, currentReceiver(), args);
+        result = projectValue(Reflect.apply(value, currentReceiver(), args));
       });
       return result;
     };
 
     receiverCache.set(value, wrapped);
+    projectedCallables.add(wrapped);
     return wrapped;
   };
 
@@ -75,90 +77,113 @@ export function createScopedExposesReader(
     });
   };
 
-  const wrapValue = (value: unknown, receiver: object, seen: WeakMap<object, unknown>): unknown => {
-    if (typeof value === 'function') {
-      return wrapCallable(value as (...args: unknown[]) => unknown, receiver);
-    }
+  function projectValue(value: unknown, registry = false): unknown {
+    if (typeof value === 'function')
+      return wrapCallable(
+        value as (...args: unknown[]) => unknown,
+        rootReceiver,
+        () => lastRaw ?? rootReceiver
+      );
     if (value === null || typeof value !== 'object') return value;
 
-    const existing = seen.get(value);
-    if (existing) return existing;
-
-    if (isExposeStateExternalHandle(value)) {
-      const cached = externalHandleCache.get(value);
-      if (cached) {
-        seen.set(value, cached);
-        return cached;
+    type RecordNode = {
+      source: object;
+      entries: [string, unknown][];
+      parents: Set<RecordNode>;
+      project: boolean;
+      target?: object;
+    };
+    const graph = new WeakMap<object, RecordNode>();
+    const nodes: RecordNode[] = [];
+    const inspect = (source: object): RecordNode | undefined => {
+      const existing = graph.get(source);
+      if (existing) return existing;
+      if (!Array.isArray(source) && !isPlainRecord(source) && !isExposeStateExternalHandle(source))
+        return undefined;
+      const node: RecordNode = {
+        source,
+        entries: [],
+        parents: new Set(),
+        project: recordCache.has(source),
+      };
+      graph.set(source, node);
+      nodes.push(node);
+      // Read each entry once. Projection discovery must not evaluate accessors
+      // again when deciding which records need a callable boundary.
+      for (const [key, entry] of Object.entries(source)) {
+        if (key.startsWith('__collection') || !isAppMakerExposeRecordEntry(entry)) {
+          node.project = true;
+          continue;
+        }
+        node.entries.push([key, entry]);
+        if (typeof entry === 'function') node.project = true;
+        else if (entry !== null && typeof entry === 'object') inspect(entry)?.parents.add(node);
       }
+      return node;
+    };
+    const root = inspect(value);
+    if (!root) return value;
+    root.project ||= registry;
 
-      const projected: Record<string, unknown> = {};
-      externalHandleCache.set(value, projected);
-      seen.set(value, projected);
-      wrapEntries(value as unknown as Record<string, unknown>, projected, seen);
-      return projected;
+    // Propagate through cycles before allocating. A data-only graph retains its
+    // original identity, including nominal ContextKey and presentation tokens.
+    const pending = nodes.filter((node) => node.project);
+    while (pending.length) {
+      for (const parent of pending.pop()!.parents) {
+        if (parent.project) continue;
+        parent.project = true;
+        pending.push(parent);
+      }
     }
-
-    if (Array.isArray(value)) {
-      const projected: unknown[] = new Array(value.length);
-      seen.set(value, projected);
-      wrapEntries(value as unknown as Record<string, unknown>, projected, seen);
-      return projected;
+    for (const node of nodes) {
+      if (!node.project) continue;
+      node.target = recordCache.get(node.source);
+      if (!node.target) {
+        node.target = Array.isArray(node.source)
+          ? []
+          : Object.create(Object.getPrototypeOf(node.source));
+        recordCache.set(node.source, node.target!);
+        // A public record can return with newly assigned functions. Scan its
+        // current contents again while preserving the same projection object.
+        recordCache.set(node.target!, node.target!);
+      }
     }
-
-    if (!isPlainRecord(value)) return value;
-
-    const projected = Object.create(Object.getPrototypeOf(value)) as Record<string, unknown>;
-    seen.set(value, projected);
-    wrapEntries(value, projected, seen);
-    return projected;
-  };
-
-  function wrapEntries(
-    source: Record<string, unknown>,
-    target: Record<string, unknown> | unknown[],
-    seen: WeakMap<object, unknown>
-  ): void {
-    for (const [key, value] of Object.entries(source)) {
-      // Collection anatomy coordination remains available to internal PartView
-      // consumers but is never part of the App Maker expose record.
-      if (key.startsWith('__collection')) continue;
-      if (!isAppMakerExposeRecordEntry(value)) continue;
-      defineEntry(
-        target,
-        key,
-        source === lastRaw && typeof value === 'function'
-          ? wrapCallable(
-              value as (...args: unknown[]) => unknown,
-              rootReceiver,
-              () => lastRaw ?? source
-            )
-          : wrapValue(value, source, seen)
-      );
+    for (const node of nodes) {
+      if (!node.target) continue;
+      // Refresh on an explicit read or result boundary; this is not a reactive
+      // value channel. Held projections keep identity and observe that refresh.
+      for (const key of Object.keys(node.target)) Reflect.deleteProperty(node.target, key);
+      if (Array.isArray(node.target) && Array.isArray(node.source))
+        node.target.length = node.source.length;
+      for (const [key, entry] of node.entries) {
+        const projected =
+          typeof entry === 'function'
+            ? registry && node === root
+              ? wrapCallable(
+                  entry as (...args: unknown[]) => unknown,
+                  rootReceiver,
+                  () => lastRaw ?? rootReceiver
+                )
+              : wrapCallable(entry as (...args: unknown[]) => unknown, node.source)
+            : entry !== null && typeof entry === 'object'
+              ? (graph.get(entry)?.target ?? entry)
+              : entry;
+        defineEntry(node.target, key, projected);
+      }
     }
+    return root.target ?? value;
   }
-
-  const wrapRecord = (record: Record<string, unknown>): Record<string, unknown> => {
-    const wrapped: Record<string, unknown> = {};
-    const seen = new WeakMap<object, unknown>();
-    seen.set(record, wrapped);
-    wrapEntries(record, wrapped, seen);
-    return wrapped;
-  };
 
   return {
     read(record) {
       if (!live) return {};
-      if (record !== lastRaw) {
-        lastRaw = record;
-        lastWrapped = wrapRecord(record);
-      }
-      return { ...lastWrapped };
+      lastRaw = record;
+      return { ...(projectValue(record, true) as Record<string, unknown>) };
     },
     invalidate() {
       if (!live) return;
       live = false;
       lastRaw = null;
-      lastWrapped = {};
     },
   };
 }

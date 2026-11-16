@@ -745,6 +745,19 @@ function writeGovernanceSnapshot(root, issueOverrides = {}) {
       milestone: null,
       owners: ['harness infrastructure owner'],
     },
+    {
+      number: 1323,
+      nodeId: 'I_kwDOMhQZjc_fixture_1323',
+      state: 'OPEN',
+      stateReason: null,
+      title: 'Current website consumer criterion',
+      url: 'https://github.com/Proto-UI/Proto-UI/issues/1323',
+      updatedAt: '2026-11-06T00:00:00Z',
+      labels: [],
+      assignees: [],
+      milestone: null,
+      owners: ['website search'],
+    },
   ].map((issue) => ({ ...issue, ...(issueOverrides[issue.number] ?? {}) }));
   const snapshotPath = path.join(
     root,
@@ -1295,7 +1308,7 @@ function rowsWithRequiredIds(config, primaryRow, rowFactory) {
                 'Proto UI chain': '`P-BASE-INPUT` draft target plus current Pagefind UI',
                 Lifecycle: '`P-BASE-INPUT=draft`; third-party UI remains current',
                 State: 'blocked',
-                'Dependency and owner': '#420; owner: website search',
+                'Dependency and owner': '#1323; owner: website search',
                 Evidence:
                   '`@pagefind/default-ui` constructs `new PagefindUI` for the Website search input and results',
               }
@@ -3621,6 +3634,98 @@ test('rejects unstable and duplicate IDs plus unsupported classifications', () =
   assert.match(message, /must not contain unknown or unclassified/);
   assert.match(message, /unsupported Target class/);
   assert.match(message, /unsupported State/);
+});
+
+test('retains unknown input provenance in Harness equivalence evidence', () => {
+  for (const evidence of [
+    'Host: React 19; WC: reusable fixture required; React: future receipts distinguish native input from synthetic or unknown input and record the actual method; Vue: reusable fixture required',
+    'Host: React 19. WC: reusable fixture required. React: native input, synthetic input and unknown input are separate evidence categories. Vue: reusable fixture required.',
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(root, {}, { 'Production host and equivalence evidence': evidence });
+    assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+  }
+});
+
+test('rejects unresolved Harness host classification despite concrete input evidence', () => {
+  for (const host of ['unknown runtime', 'unclassified runtime']) {
+    const root = createRoot();
+    writeValidMatrices(
+      root,
+      {},
+      {
+        'Production host and equivalence evidence': `Host: ${host}. WC: reusable fixture required. React: native, synthetic and unknown input remain distinct. Vue: reusable fixture required.`,
+      }
+    );
+    assert.match(
+      validationMessage(root),
+      /Production host and equivalence evidence must not contain unknown or unclassified/
+    );
+  }
+});
+
+test('rejects a classification phrase inside Harness equivalence evidence', () => {
+  for (const phrase of [
+    'WC: unknown runtime',
+    'React: unclassified runtime',
+    'Vue: unknown host',
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(
+      root,
+      {},
+      {
+        'Production host and equivalence evidence': `Host: React 19; ${phrase}; React: native, synthetic and unknown input remain distinct; Vue: reusable fixture required`,
+      }
+    );
+    assert.match(
+      validationMessage(root),
+      /Production host and equivalence evidence must not contain unknown or unclassified/
+    );
+  }
+});
+
+test('retains forbidden owner classifications alongside unknown input evidence', () => {
+  for (const [header, value] of [
+    ['Current owner', 'unknown Harness owner'],
+    ['Target owner', 'unclassified Proto UI owner'],
+    ['Dependency and owner', '#519; owner: unknown team'],
+  ]) {
+    const root = createRoot();
+    writeValidMatrices(
+      root,
+      {},
+      {
+        'Production host and equivalence evidence':
+          'Host: React 19; WC: reusable fixture required; React: native, synthetic and unknown input remain distinct; Vue: reusable fixture required',
+        [header]: value,
+      }
+    );
+    assert.ok(
+      validationMessage(root).includes(`${header} must not contain unknown or unclassified`)
+    );
+  }
+});
+
+test('rejects placeholder Harness equivalence labels alongside input provenance', () => {
+  for (const label of ['WC:', 'React:', 'Vue:']) {
+    const root = createRoot();
+    const evidence =
+      'Host: React 19; WC: reusable fixture required; React: native, synthetic and unknown input remain distinct; Vue: reusable fixture required';
+    writeValidMatrices(
+      root,
+      {},
+      {
+        'Production host and equivalence evidence': evidence.replace(
+          new RegExp(`${label}[^;]*`),
+          `${label} unknown`
+        ),
+      }
+    );
+    assert.ok(
+      validationMessage(root).includes(`required \`${label}\` label must have a meaningful value`)
+    );
+  }
 });
 
 test('requires an issue for every blocked or research row', () => {
@@ -6221,7 +6326,7 @@ test('requires Pagefind default UI ownership on the search interaction row', () 
     State: 'blocked',
     'Proto UI chain': 'Input, Collection, links, and async result state',
     Lifecycle: 'Search interaction ownership remains blocked',
-    'Dependency and owner': '#420; owner: website search',
+    'Dependency and owner': '#1323; owner: website search',
     Evidence: `${searchPath} input and result baseline`,
   });
 
@@ -7155,8 +7260,7 @@ test('detects computed Harness addEventListener calls', () => {
   );
 });
 
-test('requires structural Pagefind UI ownership on the input-results row', () => {
-  const root = createRoot();
+function writePagefindUiOwnershipFixture(root, overrides = {}) {
   const searchPath = 'apps/www/src/components/override/Search.astro';
   fs.mkdirSync(path.dirname(path.join(root, searchPath)), { recursive: true });
   fs.writeFileSync(
@@ -7164,20 +7268,59 @@ test('requires structural Pagefind UI ownership on the input-results row', () =>
     "---\nconst { PagefindUI } = await import('@pagefind/default-ui');\nnew PagefindUI({ element: '#search' });\n---\n<div id=\"search\"></div>",
     'utf8'
   );
-  writeValidMatrices(root, {
-    ID: 'www.search.input-results',
-    Path: `\`${searchPath}\``,
-    'Target class': 'site-composition',
-    State: 'blocked',
-    'Proto UI chain': 'Input and result UI',
-    Lifecycle: 'Third-party UI remains current',
-    'Dependency and owner': '#420; owner: website search',
-    Evidence: 'Reviewed interaction dependency `@pagefind/default-ui`',
-  });
+  writeValidMatrices(
+    root,
+    {
+      ID: 'www.search.input-results',
+      Path: `\`${searchPath}\``,
+      'Target class': 'site-composition',
+      'Current owner': '`@pagefind/default-ui` plus Website search orchestration',
+      State: 'blocked',
+      'Proto UI chain': '`P-BASE-INPUT` draft target plus current Pagefind UI',
+      Lifecycle: '`P-BASE-INPUT=draft`; third-party UI remains current',
+      'Dependency and owner':
+        '[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323); owner: website search',
+      Evidence: '`@pagefind/default-ui` constructs `new PagefindUI`',
+      ...overrides,
+    },
+    {},
+    { websiteBindings: [[searchPath, ['www.search.input-results']]] }
+  );
+}
 
+test('accepts Pagefind UI ownership under the current criterion tracker', () => {
+  const root = createRoot();
+  writePagefindUiOwnershipFixture(root, {
+    Evidence:
+      '`@pagefind/default-ui` constructs `new PagefindUI`; original Issue #420 remains historical evidence',
+  });
+  assert.deepEqual(validateCoverageMatrices({ rootDir: root }), { matrixCount: 2 });
+});
+
+for (const [criterion, overrides] of [
+  ['third-party UI owner', { 'Current owner': 'Website query engine' }],
+  ['Input owner', { 'Proto UI chain': 'P-ACTIVE-BUTTON' }],
+  ['constructor evidence', { Evidence: 'Reviewed interaction dependency `@pagefind/default-ui`' }],
+  ['blocked state', { State: 'research' }],
+  ['current tracker', { 'Dependency and owner': '#420; owner: website search' }],
+]) {
+  test(`rejects Pagefind UI ownership missing ${criterion}`, () => {
+    const root = createRoot();
+    writePagefindUiOwnershipFixture(root, overrides);
+    assert.match(
+      validationMessage(root),
+      /matrix row `www\.search\.input-results` must structurally own `new PagefindUI`/
+    );
+  });
+}
+
+test('requires the current Pagefind criterion tracker to remain OPEN', () => {
+  const root = createRoot();
+  writeGovernanceSnapshot(root, { 1323: { state: 'CLOSED', stateReason: 'COMPLETED' } });
+  writePagefindUiOwnershipFixture(root);
   assert.match(
     validationMessage(root),
-    /matrix row `www\.search\.input-results` must structurally own `new PagefindUI`/
+    /dependency issue #1323 must be OPEN for a blocked row; snapshot state is CLOSED\/COMPLETED/
   );
 });
 

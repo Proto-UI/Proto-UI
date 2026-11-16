@@ -353,12 +353,35 @@ describe.sequential('Runtime-only vertical layout parity', () => {
         const pairs: Array<{ runtime: string; facts: Awaited<ReturnType<typeof docsGeometry>> }> =
           [];
         for (const [index, runtime] of sequence.entries()) {
-          if (index > 0) await choosePreviewRuntime(page, root, runtime);
+          if (index > 0) {
+            if ((await root.getAttribute('data-projection-toolbar')) === 'false') {
+              // The Shadcn Toggle page delegates Runtime selection to the Header;
+              // the Brutalist Button page retains its real local Runtime Tabs.
+              const openedMenu = await revealHeaderPreferences(page);
+              const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+              await choosePreviewRuntime(page, preferences, runtime);
+              expect(
+                await preferences.locator('[data-adapter-select-root]').getAttribute('data-value')
+              ).toBe(runtime);
+              if (openedMenu) {
+                const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+                if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+              }
+            } else {
+              await choosePreviewRuntime(page, root, runtime);
+            }
+          }
           await root.scrollIntoViewIfNeeded();
           await page.waitForFunction(
             ({ id, runtime }) => {
               const root = document.querySelector<HTMLElement>(`[data-previewer-id="${id}"]`);
+              const committed = (
+                root as HTMLElement & {
+                  __previewer__?: { getCurrentRuntime?: () => string | null };
+                }
+              )?.__previewer__?.getCurrentRuntime?.();
               return (
+                committed === runtime &&
                 root?.querySelector<HTMLElement>('.pui-runtime-preview-surface')?.dataset
                   .projectionRuntime === runtime &&
                 root.querySelectorAll('.pui-runtime-preview-surface').length === 1 &&

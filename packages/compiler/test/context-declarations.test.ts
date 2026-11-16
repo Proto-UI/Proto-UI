@@ -71,15 +71,27 @@ interface Value extends Base {
   note?: string | null;
 }
 export const KEY = key<Value>('record');`);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'open', items: [{ label: 'row', active: true }],
-    })).toBe(true);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'invalid', items: [],
-    })).toBe(false);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'closed', items: [{ label: 'row', active: 'yes' }],
-    })).toBe(false);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'open',
+        items: [{ label: 'row', active: true }],
+      })
+    ).toBe(true);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'invalid',
+        items: [],
+      })
+    ).toBe(false);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'closed',
+        items: [{ label: 'row', active: 'yes' }],
+      })
+    ).toBe(false);
     expect(acceptsValue(key.type, { mode: 'open', items: [] })).toBe(false);
     expect(JSON.parse(JSON.stringify(key))).toEqual(key);
   });
@@ -129,20 +141,48 @@ export const KEY = createContextKey<Value>('conflict');`;
     expect(rejected(conflict)).toMatchObject({ code: 'PUI1020' });
   });
 
-  it('rejects dynamic record shapes and generic aliases instead of erasing their constraints', () => {
+  it('rejects dynamic record shapes and computed property declarations', () => {
     const dynamic = `${core}
 type Value = {[name:string]:number};
 export const KEY = createContextKey<Value>('dynamic');`;
     expect(rejected(dynamic)).toMatchObject({ code: 'PUI1020' });
-    const generic = `${core}
-type Value<T> = {value:T};
-export const KEY = createContextKey<Value<number>>('generic');`;
-    expect(rejected(generic)).toMatchObject({ code: 'PUI1020' });
     const computed = `${core}
 type Value = {['value']:number};
 export const KEY = createContextKey<Value>('computed');`;
     const diagnostic = rejected(computed);
     expect(computed.slice(diagnostic.span.start, diagnostic.span.end)).toBe("['value']");
+  });
+
+  it('resolves generic data aliases while retaining their constraints', () => {
+    const generic = `${core}
+type Value<T> = {value:T};
+export const KEY = createContextKey<Value<number>>('generic');`;
+    const key = extract(generic);
+    expect(acceptsValue(key.type, { value: 3 })).toBe(true);
+    expect(acceptsValue(key.type, { value: '3' })).toBe(false);
+    const invalid = generic.replace('Value<number>', 'Value<() => void>');
+    const diagnostic = rejected(invalid);
+    expect(diagnostic.code).toBe('PUI1020');
+    expect(invalid.slice(diagnostic.span.start, diagnostic.span.end)).toBe('() => void');
+  });
+
+  it('retains the declaration span of an imported executable data field', () => {
+    const declaration = 'export type Imported={value:()=>void};';
+    const graph = new SourceGraph(
+      `${core}import type {Imported} from './types';export const KEY=createContextKey<Imported>('bad');`,
+      { fileName: 'keys.ts', files: { 'types.ts': declaration } }
+    );
+    try {
+      extractContextKeyDeclaration(graph.load('keys.ts'), 'KEY');
+      throw new Error('Expected a checked rejection');
+    } catch (error) {
+      if (!(error instanceof CompilerRejection)) throw error;
+      expect(error.diagnostic.code).toBe('PUI1020');
+      expect(error.diagnostic.span.file).toBe('types.ts');
+      expect(declaration.slice(error.diagnostic.span.start, error.diagnostic.span.end)).toBe(
+        '()=>void'
+      );
+    }
   });
 
   it('does not resolve a factory or data type by its spelling alone', () => {

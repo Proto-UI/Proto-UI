@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../../cli/src/legacy/type';
 import { renderPrefixedThemeCss } from '../../cli/src/services/proto-style-css';
 import { createHash } from 'node:crypto';
@@ -7,7 +7,11 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, URL as NodeURL } from 'node:url';
 import ts from 'typescript';
 import { build } from 'esbuild';
-import { compileFile, compilationArtifacts } from '../src/compile';
+import { compilationArtifacts } from '../src/compile';
+import { parsePrototype } from '../src/parser';
+import { FileSourceGraph } from '../src/source-loader';
+import { sourceName } from '../src/source-resolution';
+import { checkTargetOperations, resolveTargetProfile } from '../src/targets';
 import { emitWebComponentSource } from '../src/web-component-source';
 import type { Compilation } from '../src/compile';
 
@@ -96,15 +100,29 @@ export function loadGeneratedModule(
 export async function compileButtonSsrFixture(
   options: { tagName?: string; direct?: boolean } = {}
 ): Promise<Compilation> {
-  const source = await compileFile(
-    path.join(repositoryRoot, options.direct ? baseButtonPath : fixtureButtonPath),
-    {
-      root: repositoryRoot,
-      profile: 'web-component-source-v1',
-    }
+  // Keep the production loader, parser and target checks, but emit only SSR.
+  // compileFile would first lower a complete non-SSR artifact and source map
+  // whose output this private harness immediately discards.
+  const root = await realpath(repositoryRoot);
+  const graph = new FileSourceGraph(root);
+  const source = await graph.load(
+    await graph.entry(path.join(root, options.direct ? baseButtonPath : fixtureButtonPath))
   );
-  if (!source.ok) throw new Error(JSON.stringify(source.diagnostics));
-  const output = emitWebComponentSource(source.value.ir, {
+  if (source.failures.length) throw source.failures[0];
+  const fileName = sourceName(source.entry);
+  const text = source.files[fileName];
+  if (typeof text !== 'string') throw new Error(`Closed source snapshot has no entry ${fileName}.`);
+  const parsed = parsePrototype(text, {
+    fileName,
+    files: source.files,
+    sourceImports: source.sourceImports,
+  });
+  if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+  const profile = resolveTargetProfile('web-component-source-v1');
+  if (!profile.ok) throw new Error(JSON.stringify(profile.diagnostics));
+  const admitted = checkTargetOperations(parsed.value, profile.value);
+  if (!admitted.ok) throw new Error(JSON.stringify(admitted.diagnostics));
+  const output = emitWebComponentSource(parsed.value, {
     ssr: true,
     controlLabelHydration: 'client-only',
     tagName: options.tagName ?? 'pui-ssr-button',
@@ -112,7 +130,7 @@ export async function compileButtonSsrFixture(
     styleEnvironment: buttonSsrStyleEnvironment,
   });
   if (!output.ok) throw new Error(JSON.stringify(output.diagnostics));
-  return { ir: source.value.ir, output: output.value };
+  return { ir: parsed.value, output: output.value };
 }
 
 export async function buildButtonSsrFixture(options: { tagName?: string; direct?: boolean } = {}) {

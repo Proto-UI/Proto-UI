@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -415,5 +416,68 @@ test('removing serial admission or failure continuation is rejected', () => {
         key === 'needs' ? 'sizing-not-in-bounded-chain' : 'predecessor-failure-hides-evidence'
       )
     );
+  }
+});
+
+test('GPUI source consumers run once per full cycle with retained, exact-source evidence', () => {
+  const workflows = readWorkflows();
+  const workflowPath = './.github/workflows/compiler-gpui-source-consumers.yml';
+  const calls = Object.entries(workflows['ci.yml'].jobs).filter(
+    ([, job]) => job.uses === workflowPath
+  );
+  assert.equal(calls.length, 1);
+  const [jobId, call] = calls[0];
+  assert.equal(call.if, "${{ github.event_name != 'pull_request' }}");
+  assert.ok(workflows['ci.yml'].jobs['cycle-report'].needs.includes(jobId));
+
+  const workflow = workflows['compiler-gpui-source-consumers.yml'];
+  assert.deepEqual(Object.keys(workflow.on).sort(), ['workflow_call', 'workflow_dispatch']);
+  assert.equal(workflow.concurrency['cancel-in-progress'], false);
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  const job = workflow.jobs['native-consumer'];
+  assert.deepEqual(job.strategy.matrix.os, ['ubuntu-24.04', 'macos-14']);
+  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  assert.equal(checkout.with.ref, '${{ github.sha }}');
+  assert.equal(checkout.with['persist-credentials'], false);
+  const artifact = job.steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
+  assert.equal(artifact.if, 'always()');
+  assert.ok(artifact.with.name.includes('${{ github.sha }}'));
+  assert.equal(artifact.with['if-no-files-found'], 'error');
+});
+
+test('GPUI Cargo target is initialized after runner allocation in the shared step environment', () => {
+  const workflow = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  const job = workflow.jobs['native-consumer'];
+  // runner is unavailable in jobs.<job_id>.env, even though it is valid in
+  // step contexts. A workflow rejected there cannot start a native test job.
+  assert.doesNotMatch(JSON.stringify(job.env), /\$\{\{[^}]*\brunner\./u);
+  const setupIndex = job.steps.findIndex((step) => step.id === 'configure-cargo');
+  assert.ok(setupIndex >= 0);
+  const consumers = job.steps
+    .map((step, index) => (/\bcargo\b/u.test(step.run ?? '') ? index : -1))
+    .filter((index) => index >= 0);
+  assert.ok(consumers.length >= 2);
+  assert.ok(consumers.every((index) => index > setupIndex));
+  const cache = job.steps.find((step) => step.uses?.startsWith('actions/cache@'));
+  assert.ok(job.steps.indexOf(cache) > setupIndex);
+  assert.ok(cache.with.path.split('\n').includes('${{ runner.temp }}/gpui-consumer-target'));
+
+  const temporary = mkdtempSync(path.join(os.tmpdir(), 'pui-gpui-runner-'));
+  try {
+    const runnerTemp = path.join(temporary, 'runner directory');
+    const environmentFile = path.join(temporary, 'step-environment');
+    mkdirSync(runnerTemp);
+    writeFileSync(environmentFile, 'UNCHANGED=before\n');
+    const configured = spawnSync('bash', ['-euo', 'pipefail', '-c', job.steps[setupIndex].run], {
+      env: { ...process.env, RUNNER_TEMP: runnerTemp, GITHUB_ENV: environmentFile },
+      encoding: 'utf8',
+    });
+    assert.equal(configured.status, 0, configured.stderr);
+    assert.equal(
+      readFileSync(environmentFile, 'utf8'),
+      `UNCHANGED=before\nCARGO_TARGET_DIR=${runnerTemp}/gpui-consumer-target\n`
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
   }
 });

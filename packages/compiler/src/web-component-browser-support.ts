@@ -8,7 +8,6 @@ export const webComponentBrowserSupport = {
   path: '.proto-ui/web-component/browser-v1.ts',
   kind: 'source' as const,
   contents: `
-import {createNativeInteraction,markNativeExposeEvent} from '../interaction/native-v1';
 import {ownerScopes,type ContextScope} from '../context/scope-v1';
 export interface NativeFrame {
   readonly fragment: DocumentFragment;
@@ -149,12 +148,12 @@ export function createNativeRangeOwner(host: HTMLElement, shadow: boolean): Nati
     },
   };
 }
-export interface NativeBrowserPort {
+export interface NativeBrowserPort<InteractionFactory = undefined> {
   readonly server:false;readonly isConnected:boolean;readonly root:HTMLElement;readonly host:HTMLElement;
   readonly document:Document;
   readonly hydrationAttributes?:Readonly<Record<string,string|null>>;
   readonly hydrationBaselines?:Readonly<Record<string,string|null>>;
-  createInteraction:typeof createNativeInteraction;
+  createInteraction:InteractionFactory;
   createFrame():NativeFrameBuilder;
   projectRoot(tag:string|null,properties:Readonly<Record<string,string|number|boolean|null>>,portal:HTMLElement|null):void;
   projectInteraction(snapshot:Readonly<Record<string,string|null>>):void;
@@ -170,16 +169,18 @@ function nativeParent(host:HTMLElement):ContextScope|null {
   return null;
 }
 /** Physical host mediation only; commit receives already constructed native Nodes. */
-export function createNativeBrowserPort(host:HTMLElement,shadow:boolean):NativeBrowserPort {
+export function createNativeBrowserPort(host:HTMLElement,shadow:boolean):NativeBrowserPort;
+export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,shadow:boolean,createInteraction:InteractionFactory,markExposeEvent?:<T extends Event>(event:T)=>T):NativeBrowserPort<InteractionFactory>;
+export function createNativeBrowserPort<InteractionFactory>(host:HTMLElement,shadow:boolean,createInteraction?:InteractionFactory,markExposeEvent:<T extends Event>(event:T)=>T = event=>event):NativeBrowserPort<InteractionFactory | undefined> {
   const document=host.ownerDocument,range=createNativeRangeOwner(host,shadow);
   let disposed=false,accepted=false,control:HTMLElement|null=null;
   let portalAnchor:Comment|null=null,portalParent:ContextScope|null=null;
   let display:{value:string;priority:string}|null=null;
   const attributes=new Map<string,{baseline:string|null;projected:string|null}>();
   const emissions:{key:string;payload:unknown;options?:CustomEventInit}[]=[];
-  const port:NativeBrowserPort={
+  const port:NativeBrowserPort<InteractionFactory | undefined>={
     server:false,host,document,get isConnected(){return host.isConnected&&!disposed;},get root(){return control??host;},
-    createInteraction:createNativeInteraction,
+    createInteraction,
     createFrame(){return createNativeFrame(document,shadow);},
     projectRoot(tag,properties,portal){
       if(tag&&!['input','textarea','img'].includes(tag))throw new Error('Unsupported physical Root tag');
@@ -208,7 +209,7 @@ export function createNativeBrowserPort(host:HTMLElement,shadow:boolean):NativeB
       if(!present){if(!display)display={value:host.style.getPropertyValue('display'),priority:host.style.getPropertyPriority('display')};host.style.setProperty('display','none','important');}
       else if(display){if(host.style.getPropertyValue('display')==='none'&&host.style.getPropertyPriority('display')==='important'){if(display.value)host.style.setProperty('display',display.value,display.priority);else host.style.removeProperty('display');}display=null;}
     },
-    emit(key,payload,options){if(!accepted){emissions.push({key,payload,options});return;}if(!disposed)host.dispatchEvent(markNativeExposeEvent(new document.defaultView!.CustomEvent(key,{detail:payload,bubbles:true,cancelable:true,...options})));},
+    emit(key,payload,options){if(!accepted){emissions.push({key,payload,options});return;}if(!disposed)host.dispatchEvent(markExposeEvent(new document.defaultView!.CustomEvent(key,{detail:payload,bubbles:true,cancelable:true,...options})));},
     parentContext:()=>portalAnchor?portalParent:nativeParent(host),
     bindContext(scope){if(scope)ownerScopes.set(host,scope);else ownerScopes.delete(host);},
     accept(){accepted=true;for(const emission of emissions.splice(0)){if(disposed)break;port.emit(emission.key,emission.payload,emission.options);}},

@@ -1,5 +1,8 @@
 // This is ordinary emitted Rust support, not an IR interpreter. Every authored
 // function and semantic operation is compiled into Component.rs.
+import { gpuiNativeAsyncSource } from './gpui-native-async';
+import { gpuiNativeAuthoredHooksSource } from './gpui-native-authored-hooks';
+import { gpuiNativeValuesSource } from './gpui-native-values';
 import { gpuiNativeModulesSource } from './gpui-native-modules';
 import { gpuiNativeTopologySource } from './gpui-native-topology';
 import { gpuiNativeTableSource } from './gpui-native-table';
@@ -40,8 +43,8 @@ impl NativeSnapshot {
     // children. Saturating at two is sufficient to reject duplicates without
     // overflow. This is validation metadata, never a semantic node/tag plan.
     pub fn assert_children(&self) {
-        assert!(self.valid,"invalid template children");
-        assert!(self.slot_count <= 1,"a render output permits at most one anonymous slot");
+        if !self.valid{value_error("invalid template children")}
+        if self.slot_count>1{value_error("a render output permits at most one anonymous slot")}
     }
 
     // Scalar observations preserve authored operations before a result is used
@@ -75,45 +78,69 @@ impl NativeSnapshot {
 pub fn assert_native_slot_children(children:&[NativeSnapshot]) {
     for child in children {
         child.assert_children();
-        assert!(child.slot_count == 0,"external native children cannot contain the receiving owner's slot marker");
+        if child.slot_count!=0{value_error("external native children cannot contain the receiving owner's slot marker")}
     }
 }
 #[derive(Clone)]
 pub enum Value {
-    Undefined, Opaque(Rc<()>), Number(f64), Json(Json), Record(Rc<BTreeMap<String, Value>>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16),
-    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), State(Rc<State>),
+    Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16),
+    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
     Style(Vec<(String, String)>), Resource(Rc<Cell<bool>>),
     Input(Rc<Input>),
     StaticCapability(&'static StaticDeclaration), Handle(OwnerWeak, &'static str),
     Observed(OwnerWeak, &'static str), Part(OwnerWeak, String), ObjectRef(OwnerWeak), HostTarget(OwnerWeak),
 }
+// Diagnostics must not recursively traverse arbitrary authored records or
+// execute their callables. Public Result APIs can still use ordinary Rust
+// expect/unwrap without requiring every capability to implement Debug.
+impl std::fmt::Debug for Value {
+    fn fmt(&self,output:&mut std::fmt::Formatter<'_>)->std::fmt::Result{match self{
+        Self::Undefined=>output.write_str("undefined"),Self::Number(value)=>std::fmt::Debug::fmt(value,output),Self::Json(value)=>std::fmt::Debug::fmt(value,output),
+        Self::Record(record)=>{let fields=record.fields.borrow();let scalars:Vec<_>=fields.iter().filter_map(|(name,value)|match value{Self::Undefined|Self::Number(_)|Self::Json(Json::Null|Json::Bool(_)|Json::Number(_)|Json::String(_))=>Some((name,value)),_=>None}).collect();output.debug_struct("AuthoredRecord").field("scalar_fields",&scalars).finish()},
+        Self::Array(items)=>output.debug_struct("AuthoredArray").field("length",&items.len()).finish(),
+        Self::Function(_)|Self::NativeFunction{..}|Self::Renderer(_)=>output.write_str("[authored callable]"),_=>output.write_str("[native capability]"),
+    }}
+}
+#[derive(Debug)]
+pub struct NativeFailure {pub phase:String,pub error:Value}
+pub fn report_native_failure(owner:&OwnerRef,phase:&str,error:Value){
+    eprintln!("[Proto-UI:{phase}] authored callback failed: {error:?}");
+    owner.borrow_mut().failures.push(NativeFailure{phase:phase.into(),error});
+}
+// GPUI leases are not unwind-safe. Host callbacks without a Result return
+// channel report exact authored errors while returning normally to GPUI.
+pub fn native_host_callback<T>(owner:&OwnerRef,phase:&str,body:impl FnOnce()->T)->Option<T>{
+    match catch_authored(body){Ok(value)=>Some(value),Err(error)=>{report_native_failure(owner,phase,error);None}}
+}
+pub fn take_native_failures(owner:&OwnerRef)->Vec<NativeFailure>{std::mem::take(&mut owner.borrow_mut().failures)}
 impl Value {
-    pub fn json(value: Json) -> Self { match value { Json::Object(entries)=>Self::Record(Rc::new(entries.into_iter().map(|(key,value)|(key,Self::json(value))).collect())),Json::Array(items)=>Self::Array(Rc::new(items.into_iter().map(Self::json).collect())),Json::Number(number)=>Self::Number(number.as_f64().expect("JSON number")),other=>Self::Json(other) } }
+    pub fn json(value: Json) -> Self { match value { Json::Object(entries)=>record_map(entries.into_iter().map(|(key,value)|(key,Self::json(value))).collect()),Json::Array(items)=>Self::Array(Rc::new(items.into_iter().map(Self::json).collect())),Json::Number(number)=>Self::Number(number.as_f64().expect("JSON number")),other=>Self::Json(other) } }
     pub fn string(value: &str) -> Self { Self::Json(Json::String(value.into())) }
     pub fn boolean(value: bool) -> Self { Self::Json(Json::Bool(value)) }
     pub fn number(value: f64) -> Self { Self::Number(value) }
     pub fn try_data(&self) -> Option<Json> { match self {
         Self::Number(value) => value.is_finite().then(||Json::from(*value)),
         Self::Json(value) => Some(value.clone()),
-        Self::Record(entries) => entries.iter().map(|(key,value)|Some((key.clone(),value.try_data()?))).collect::<Option<Map<String,Json>>>().map(Json::Object),
+        Self::Record(entries) => entries.fields.borrow().iter().map(|(key,value)|Some((key.clone(),value.try_data()?))).collect::<Option<Map<String,Json>>>().map(Json::Object),
         Self::Array(items) => items.iter().map(Self::try_data).collect::<Option<Vec<_>>>().map(Json::Array),
         _ => None,
     } }
     pub fn data(&self) -> Json { match self {
-        Self::Number(value)=>{assert!(value.is_finite(),"non-finite portable data");Json::from(*value)},Self::Json(value) => value.clone(),
-        Self::Record(value) => Json::Object(value.iter().map(|(k,v)|(k.clone(),v.data())).collect()),
+        Self::Number(value)=>{if !value.is_finite(){value_type_error("non-finite portable data")}Json::from(*value)},Self::Json(value) => value.clone(),
+        Self::Record(value) => Json::Object(value.fields.borrow().iter().map(|(k,v)|(k.clone(),v.data())).collect()),
         Self::Array(value) => Json::Array(value.iter().map(Self::data).collect()),
-        _ => panic!("semantic capability is not portable data"),
+        _ => value_type_error("semantic capability is not portable data"),
     } }
     pub fn member(&self, key: &str, optional: bool) -> Self { match self {
         Self::Undefined | Self::Json(Json::Null) if optional => Self::Undefined,
         Self::Json(Json::Object(value)) => value.get(key).cloned().map(Self::json).unwrap_or(Self::Undefined),
-        Self::Record(value) => value.get(key).cloned().unwrap_or(Self::Undefined),
+        Self::Record(value) => value.fields.borrow().get(key).cloned().unwrap_or(Self::Undefined),
         Self::Array(value) => if key=="length"{Self::number(value.len()as f64)}else{key.parse::<usize>().ok().and_then(|index|value.get(index).cloned()).unwrap_or(Self::Undefined)},
         Self::Input(value) => value.fields.get(key).cloned().map(Self::Json).unwrap_or(Self::Undefined),
+        Self::ContextKey(_) if key=="__brand" => Self::string("ContextKey"),
         Self::Handle(owner, kind) => capability_member(owner, kind, key),
         Self::Part(_, role) if key == "role" => Self::string(role),
-        _ => panic!("member access requires a record"),
+        _ => self.caught_member(key, optional),
     } }
     pub fn caught_member(&self, key:&str, optional:bool)->Self { match self {
         Self::Undefined | Self::Json(Json::Null) if optional => Self::Undefined,
@@ -127,17 +154,20 @@ impl Value {
         Self::Record(_) | Self::Json(Json::Object(_)) => self.member(key,optional),
         _ => Self::Undefined,
     } }
-    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(), Self::Number(v)=>v.to_string(),Self::Json(Json::Number(v))=>v.to_string(), _=>panic!("expected string or number") } }
-    pub fn bool(&self) -> bool { match self {Self::Json(Json::Bool(v))=>*v,_=>panic!("expected boolean")} }
-    pub fn num(&self) -> f64 { match self {Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),_=>panic!("expected number")} }
+    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(), Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()), _=>value_type_error("expected string or number") } }
+    pub fn bool(&self) -> bool { match self {Self::Json(Json::Bool(v))=>*v,_=>value_type_error("expected boolean")} }
+    pub fn num(&self) -> f64 { match self {Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),_=>value_type_error("expected number")} }
     pub fn truthy(&self)->bool{match self{Self::Undefined|Self::Json(Json::Null)=>false,Self::Json(Json::Bool(v))=>*v,Self::Number(v)=>*v!=0.&&!v.is_nan(),Self::Json(Json::Number(v))=>v.as_f64().is_some_and(|v|v!=0.&&!v.is_nan()),Self::Json(Json::String(v))=>!v.is_empty(),_=>true}}
-    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::Number(v)=>v.to_string(),Self::Json(Json::Number(v))=>v.as_f64().unwrap().to_string(),_=>panic!("structured coercion is not admitted")}}
-    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>if v.trim().is_empty(){0.}else{v.trim().parse().unwrap_or(f64::NAN)},Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
+    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()),_=>panic!("structured coercion is not admitted")}}
+    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
     pub fn nullish(&self) -> bool { matches!(self,Self::Undefined|Self::Json(Json::Null)) }
-    pub fn call(&self, args: Vec<Self>) -> Self { match self { Self::Function(f)=>f(args), _=>panic!("expected checked callable") } }
-    pub fn get(&self) -> Self { match self { Self::State(state)=>{ensure(&state.owner);state.value.borrow().clone()}, Self::Observed(owner, key)=>observed(owner,key), _=>panic!("expected State handle") } }
+    pub fn call(&self,args:Vec<Self>)->Result<Self,Self>{catch_authored(||self.call_authored(args))}
+    // Compiler-emitted authored composition stays in one exception scope.
+    // Native consumers use call(), which returns before any GPUI lease unwinds.
+    pub fn call_authored(&self, args: Vec<Self>) -> Self { match self { Self::Function(f)=>f(args), _=>value_type_error("Value is not callable") } }
+    pub fn get(&self) -> Self { match self { Self::State(state)|Self::BorrowedState(state)=>{ensure(&state.owner);state.value.borrow().clone()}, Self::Observed(owner, key)=>observed(owner,key), _=>value_type_error("expected State handle") } }
     pub fn owner(&self) -> OwnerWeak { match self { Self::Owner(owner)|Self::Handle(owner,_)|Self::HostTarget(owner)|Self::Part(owner,_)|Self::ObjectRef(owner)=>owner.clone(), _=>panic!("expected owner capability") } }
-    pub fn items(&self) -> Vec<Self> { match self {Self::Array(v)=>(**v).clone(),Self::Json(Json::Array(v))=>v.iter().cloned().map(Self::json).collect(),_=>panic!("expected array")} }
+    pub fn items(&self) -> Vec<Self> { match self {Self::Array(v)=>(**v).clone(),Self::Json(Json::Array(v))=>v.iter().cloned().map(Self::json).collect(),_=>value_type_error("expected array")} }
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
     match (a,b) {
@@ -145,14 +175,14 @@ pub fn strict_equal(a:&Value,b:&Value)->bool {
         (Value::CaughtStringUnit(unit),Value::Json(Json::String(text)))|(Value::Json(Json::String(text)),Value::CaughtStringUnit(unit))=>return text.encode_utf16().eq(std::iter::once(*unit)),
         _=>{},
     }
-    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.id==b.id,(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
+    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
 fn same_value(a:&Value,b:&Value)->bool{
     if matches!(a,Value::Number(_)|Value::Json(Json::Number(_)))&&matches!(b,Value::Number(_)|Value::Json(Json::Number(_))){
         let a=a.num();let b=b.num();a.to_bits()==b.to_bits()||(a.is_nan()&&b.is_nan())
     }else{strict_equal(a,b)}
 }
 pub fn add(a:Value,b:Value)->Value {if matches!(&a,Value::Json(Json::String(_)))||matches!(&b,Value::Json(Json::String(_))){Value::string(&(a.scalar_text()+&b.scalar_text()))}else{Value::number(a.scalar_number()+b.scalar_number())}}
-pub fn record(entries:Vec<(&str,Value)>)->Value{Value::Record(Rc::new(entries.into_iter().map(|(k,v)|(k.to_owned(),v)).collect()))}
+pub fn record(entries:Vec<(&str,Value)>)->Value{record_map(entries.into_iter().map(|(k,v)|(k.to_owned(),v)).collect())}
 // The unwind payload is Send; authored values retain their original UI-thread
 // identity in a private slot. Only this exact marker, on its creating thread,
 // is an authored throw. Unrelated native panic payloads are never translated.
@@ -225,9 +255,9 @@ pub fn authored_finally_override<B,T>(body:impl FnOnce()->B,finalize:impl FnOnce
     finalized
 }
 pub fn arg(args:&[Value],index:usize)->Value{args.get(index).cloned().unwrap_or(Value::Undefined)}
-pub fn ensure(owner:&OwnerWeak)->OwnerRef{let owner=owner.upgrade().expect("owner released");assert!(!owner.borrow().disposed,"terminally disposed owner");owner}
-pub fn setup(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);assert!(owner.borrow().phase=="setup","setup-only capability");owner}
-pub fn runtime(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);assert!(owner.borrow().phase!="setup"&&owner.borrow().phase!="render"&&owner.borrow().phase!="before-dispose","callback capability required");owner}
+pub fn ensure(owner:&OwnerWeak)->OwnerRef{let owner=owner.upgrade().unwrap_or_else(||throw_error("OWNER_RELEASED","owner released"));if owner.borrow().disposed{throw_error("OWNER_DISPOSED","terminally disposed owner")}owner}
+pub fn setup(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if owner.borrow().phase!="setup"{value_error("setup-only capability")}owner}
+pub fn runtime(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if matches!(owner.borrow().phase,"setup"|"render"|"before-dispose"){value_error("callback capability required")}owner}
 pub fn capability(owner:&OwnerWeak)->Value{Value::Owner(owner.clone())}
 pub struct State { pub value:RefCell<Value>, pub kind:&'static str, pub spec:Value, pub owner:OwnerWeak }
 #[derive(Clone)]
@@ -237,31 +267,27 @@ struct Listener { active:Rc<Cell<bool>>, kind:String, global:bool, capture:bool,
 #[derive(Clone)]
 struct Contribution {active:Rc<Cell<bool>>, predicate:Option<Value>, styles:Vec<(String,String)>}
 #[derive(Clone)]
-struct ContextSubscription {active:Rc<Cell<bool>>, key:String, optional:bool, callback:Value}
+struct ContextSubscription {active:Rc<Cell<bool>>, key:NativeContextKey, optional:bool, callback:Value}
 #[derive(Clone)]
 pub struct Input {pub fields:Map<String,Json>,pub prevented:Cell<bool>,pub passive:bool,pub live:Cell<bool>}
 #[derive(Default)]
 struct NativePress{key:Option<String>,global_key:Option<String>,pointer:bool,global_pointer:bool,cancelled:bool,global_keyboard_click:bool,global_pointer_cancelled:bool}
-thread_local! {static OWNERS:RefCell<Vec<OwnerWeak>>=RefCell::new(Vec::new());static CONTEXT_QUEUE:RefCell<VecDeque<(OwnerWeak,Value,Value,Value)>>=RefCell::new(VecDeque::new());static CONTEXT_DISPATCHING:Cell<bool>=Cell::new(false);}
-pub fn authored_hook(owner:&OwnerWeak,name:&str,install:impl FnOnce())->Value {
-    let owner=setup(owner);
-    { let mut state=owner.borrow_mut();
-      if let Some(result)=state.authored_results.get(name) { return result.clone().unwrap_or_else(||Value::Opaque(Rc::new(()))); }
-      state.authored_results.insert(name.into(),None);
-    }
-    install();
-    let result=Value::Opaque(Rc::new(()));
-    owner.borrow_mut().authored_results.insert(name.into(),Some(result.clone()));
-    result
-}
+struct ContextNotice {target:OwnerWeak,registration:ContextSubscription,next:Value,previous:Value}
+#[derive(Default)]
+struct ContextChannel {pending:VecDeque<ContextNotice>}
+thread_local! {static OWNERS:RefCell<Vec<OwnerWeak>>=RefCell::new(Vec::new());static CONTEXT_CHANNELS:RefCell<BTreeMap<(usize,NativeContextKey),Rc<RefCell<ContextChannel>>>>=RefCell::new(BTreeMap::new());}
 pub struct Owner {
-    authored_results:BTreeMap<String,Option<Value>>,
-    pub phase:&'static str,pub disposed:bool,pub present:bool,pub mounted:bool,pub epoch:u64,
+    atoms:NativeHostAtoms,
+    lexical_slots:Vec<Weak<dyn LexicalLifetime>>,
+    authored:AuthoredHooks,
+    public_values:PublicValues,
+    failures:Vec<NativeFailure>,
+    pub phase:&'static str,pub disposed:bool,pub disposing:bool,pub present:bool,pub mounted:bool,pub epoch:u64,
     pub dirty:bool,pub native_drive:Option<Drive>,pub window_id:Option<gpui::WindowId>,pub update_requested:bool,pub projection_revision:u64,pub committed_revision:u64,
     pub projection:Option<NativeSnapshot>,pub renderer:Value,pub raw:Json,pub raw_value:Value,pub props_value:Value,pub props:Json,pub schemas:BTreeMap<String,Value>,pub defaults:BTreeMap<String,Value>,
     pub states:BTreeMap<String,Rc<State>>,pub exposes:BTreeMap<String,Value>,pub declared_events:BTreeSet<String>,pub emitted:Vec<(String,Json)>,
     pub lifecycle:BTreeMap<String,Vec<Value>>,watchers:Vec<Watcher>,listeners:Vec<Listener>,contributions:Vec<Contribution>,patch:Vec<(String,String)>,suppressed:BTreeSet<String>,
-    pub parent:OwnerWeak,pub providers:BTreeMap<String,Value>,subscriptions:Vec<ContextSubscription>,
+    pub parent:OwnerWeak,pub providers:BTreeMap<NativeContextKey,Value>,subscriptions:Vec<ContextSubscription>,
     pub context_accepts:fn(&str,&Json)->bool,pub props_accepts:fn(&Json)->bool,pub prop_valid:fn(&str,&Json)->bool,pub previous_valid:BTreeMap<String,Json>,pub default_layers:Vec<BTreeMap<String,Value>>,
     pub focusable:bool,pub focus_disabled:bool,pub focus_requested:bool,pub focus_entry:bool,pub focused:bool,pub suppress_click:bool,
     pub accessible:bool,pub accessible_role:Value,pub accessible_states:BTreeMap<String,Value>,pub accessible_actions:BTreeSet<String>,pub name_content:bool,
@@ -269,13 +295,29 @@ pub struct Owner {
     pub style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary,
     pub modules:Modules,press:NativePress,press_global:bool,window_input_observed:Option<gpui::WeakFocusHandle>,
 }
+#[cfg(feature="test-support")]
+pub fn native_owner_allocation_count()->usize{OWNERS.with(|owners|owners.borrow().iter().filter(|owner|owner.strong_count()>0).count())}
+#[cfg(feature="test-support")]
+pub fn native_resource_counts(owner:&OwnerRef)->Json{
+    let o=owner.borrow();serde_json::json!({
+        "states":o.states.len(),"hooks":o.modules.hooks.len(),"listeners":o.listeners.len(),
+        "stateWatchers":o.modules.state_watchers.len(),"propsWatchers":o.watchers.len(),
+        "contextSubscriptions":o.subscriptions.len(),"anatomySubscriptions":o.modules.topology.subscriptions.len(),
+        "collectionStates":o.modules.topology.handles.len(),"scrollHandles":usize::from(o.modules.scroll.handle.is_some()),
+        "boundaryRegions":o.modules.boundary.regions.len(),"boundaryCallbacks":o.modules.boundary.callbacks.len(),
+        "metadataKeys":o.atoms.meta.len(),"schedulerBindings":usize::from(o.atoms.app.is_some()),
+        "delays":o.atoms.delays.len(),"presenceOwners":o.atoms.presence.len(),
+        "pointerInput":native_pointer_input_needed(owner),"keyInput":native_key_input_needed(owner),
+        "boundaryInput":native_boundary_input_needed(owner),"focusObservation":native_focus_observation_needed(owner)
+    })
+}
 impl Owner {
     pub fn new(raw:Json,parent:OwnerWeak,context_accepts:fn(&str,&Json)->bool,props_accepts:fn(&Json)->bool,prop_valid:fn(&str,&Json)->bool,style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary)->OwnerRef {
-        assert!(raw.is_object(),"raw props must be a record");
-        let owner=Rc::new(RefCell::new(Self{authored_results:BTreeMap::new(),phase:"setup",disposed:false,present:true,mounted:false,epoch:0,dirty:true,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None}));
+        if !raw.is_object(){value_type_error("raw props must be a record")}
+        let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None}));
         OWNERS.with(|all|all.borrow_mut().push(Rc::downgrade(&owner)));owner
     }
-    pub fn finish(owner:&OwnerRef,renderer:Value){owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
+    pub fn finish(owner:&OwnerRef,renderer:Value){finish_public_exposes(owner);owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
         if let Err(failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||life(owner,"created"))){
             attempt_failed_created_cleanup(||Self::failed_created_cleanup(owner));
             std::panic::resume_unwind(failure);
@@ -288,6 +330,7 @@ impl Owner {
         for release in NATIVE_VIEW_RELEASES{attempt_failed_created_cleanup(||release(owner));}
         let callbacks=owner.borrow().lifecycle.get("before-dispose").cloned().unwrap_or_default();
         for callback in callbacks{attempt_failed_created_cleanup(||invoke(owner,"before-dispose",&callback,vec![capability(&Rc::downgrade(owner))]));}
+        attempt_failed_created_cleanup(||clear_lexicals(owner));
         attempt_failed_created_cleanup(||Self::failed_created_retire(owner));
         attempt_failed_created_cleanup(topology_refresh);
         attempt_failed_created_cleanup(poll_state_watchers);
@@ -300,6 +343,7 @@ impl Owner {
         // Retire the render phase even when the authored renderer or validation panics.
         let guard=PhaseGuard{owner:Rc::downgrade(owner),previous};
         // C-CORE-SYNTAX-0004-C: void setup projects one anonymous slot.
+        let _lexical_owner=enter_lexical_owner(&Rc::downgrade(owner));
         let result=match renderer{Value::Undefined=>NativeSnapshot::slot(),Value::Renderer(render)=>render(vec![capability(&Rc::downgrade(owner))]),_=>panic!("expected compiled native renderer")};
         result.assert_children();
         {let mut o=owner.borrow_mut();o.projection=Some(result);o.projection_revision+=1;}
@@ -311,12 +355,22 @@ impl Owner {
         {let o=owner.borrow();if o.disposed||!o.present||!o.mounted||o.epoch!=epoch||o.projection_revision!=revision||o.committed_revision!=revision{return}}
         life(owner,event);
     }
-    pub fn dispose(owner:&OwnerRef){if owner.borrow().disposed{return}retire_entry_intent(owner);clear_scope_recipient(owner);detach_native_view(owner);
-        life(owner,"before-dispose");Self::retire(owner);topology_refresh();poll_state_watchers();
+    pub fn dispose(owner:&OwnerRef){
+        {let mut owner=owner.borrow_mut();if owner.disposed||owner.disposing{return}owner.disposing=true;}
+        // The first authored failure stops its callback list, but cannot skip
+        // terminal private cleanup. Keep the original payload, including 0/false.
+        let mut failure=None;
+        attempt_native_cleanup(&mut failure,||detach_native_view(owner));
+        attempt_native_cleanup(&mut failure,||life(owner,"before-dispose"));
+        attempt_native_cleanup(&mut failure,||clear_lexicals(owner));
+        attempt_native_cleanup(&mut failure,||Self::failed_created_retire(owner));
+        attempt_native_cleanup(&mut failure,topology_refresh);
+        attempt_native_cleanup(&mut failure,poll_state_watchers);
+        if let Some(failure)=failure{std::panic::resume_unwind(failure);}
     }
     fn retire(owner:&OwnerRef){
         retire_entry_intent(owner);clear_scope_recipient(owner);
-        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.modules=Modules::default();
+        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
     }
     // Failed-created retirement extracts owned values inside one short borrow so
     // one destructor panic cannot abort the remaining terminal release attempts;
@@ -340,8 +394,11 @@ impl Owner {
         attempt_failed_created_cleanup(||drop(lifecycle));
         attempt_failed_created_cleanup(||drop(slot));
         attempt_failed_created_cleanup(||drop(modules));
+        let (authored,atoms,public_values)={let mut owner=owner.borrow_mut();(std::mem::take(&mut owner.authored),std::mem::take(&mut owner.atoms),std::mem::take(&mut owner.public_values))};
+        attempt_failed_created_cleanup(||drop(authored));attempt_failed_created_cleanup(||drop(atoms));attempt_failed_created_cleanup(||drop(public_values));
     }
 }
+impl Drop for Owner { fn drop(&mut self){for slot in self.lexical_slots.drain(..){if let Some(slot)=slot.upgrade(){slot.clear();}}} }
 fn attempt_failed_created_cleanup<T>(operation:impl FnOnce()->T){
     if let Err(failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||drop(operation()))){
         if let Err(drop_failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||drop(failure))){
@@ -350,7 +407,12 @@ fn attempt_failed_created_cleanup<T>(operation:impl FnOnce()->T){
         }
     }
 }
-const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);4]=[text_detach,image_detach,positioning_detach,overlay_detach];
+fn attempt_native_cleanup<T>(failure:&mut Option<Box<dyn std::any::Any+Send>>,operation:impl FnOnce()->T){
+    if let Err(next)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||drop(operation()))){
+        if failure.is_none(){*failure=Some(next);}else{attempt_failed_created_cleanup(||drop(next));}
+    }
+}
+const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);5]=[text_detach,image_detach,positioning_detach,overlay_detach,atoms_detach];
 fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
     let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
@@ -358,18 +420,25 @@ fn begin_native_detach(owner:&OwnerRef)->bool{
 pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
 pub fn detach_native_view(owner:&OwnerRef){
     let mounted=begin_native_detach(owner);
-    for release in NATIVE_VIEW_RELEASES{release(owner);}
-    if mounted{topology_refresh();life(owner,"unmounted");poll_state_watchers();}
+    let mut failure=None;
+    for release in NATIVE_VIEW_RELEASES{attempt_native_cleanup(&mut failure,||release(owner));}
+    if mounted{attempt_native_cleanup(&mut failure,topology_refresh);attempt_native_cleanup(&mut failure,||life(owner,"unmounted"));}
+    // An unmounted callback may create another task. Cancellation after that
+    // callback pass is unconditional, including an authored thrown value.
+    attempt_native_cleanup(&mut failure,||atoms_detach(owner));
+    if mounted{attempt_native_cleanup(&mut failure,poll_state_watchers);}
+    if let Some(failure)=failure{std::panic::resume_unwind(failure);}
 }
 struct PhaseGuard{owner:OwnerWeak,previous:&'static str}
 impl Drop for PhaseGuard{fn drop(&mut self){if let Some(owner)=self.owner.upgrade(){owner.borrow_mut().phase=self.previous;}}}
-pub fn invoke(owner:&OwnerRef,phase:&'static str,callback:&Value,args:Vec<Value>)->Value{assert!(!owner.borrow().disposed,"owner disposed");let previous=owner.borrow().phase;owner.borrow_mut().phase=phase;let guard=PhaseGuard{owner:Rc::downgrade(owner),previous};let result=callback.call(args);drop(guard);if phase!="before-dispose"{poll_state_watchers();}result}
+fn invoke_scoped<T>(owner:&OwnerRef,phase:&'static str,body:impl FnOnce()->T)->T{if owner.borrow().disposed{throw_error("OWNER_DISPOSED","owner disposed")}let previous=owner.borrow().phase;owner.borrow_mut().phase=phase;let guard=PhaseGuard{owner:Rc::downgrade(owner),previous};let _lexical_owner=enter_lexical_owner(&Rc::downgrade(owner));let result=body();drop(guard);if phase!="before-dispose"{poll_state_watchers();}result}
+pub fn invoke(owner:&OwnerRef,phase:&'static str,callback:&Value,args:Vec<Value>)->Value{invoke_scoped(owner,phase,||callback.call_authored(args))}
 pub fn life(owner:&OwnerRef,kind:&'static str){let callbacks=owner.borrow().lifecycle.get(kind).cloned().unwrap_or_default();for callback in callbacks{invoke(owner,kind,&callback,vec![capability(&Rc::downgrade(owner))]);}}
 pub fn register_life(owner:&OwnerWeak,kind:&str,callback:Value)->Value{setup(owner).borrow_mut().lifecycle.entry(kind.into()).or_default().push(callback);Value::Undefined}
 pub fn request_update(owner:&OwnerWeak)->Value{let owner=runtime(owner);let mut o=owner.borrow_mut();o.update_requested=true;o.dirty=true;Value::Undefined}
-pub fn set_present(owner:&OwnerWeak,present:Value)->Value{let owner=runtime(owner);let present=present.bool();{let mut o=owner.borrow_mut();if o.present==present{return Value::Undefined}o.present=present;o.dirty=true;if present{o.projection=None;o.update_requested=true;}}if !present{detach_native_view(&owner);}Value::Undefined}
-pub fn props_define(owner:&OwnerWeak,schema:Value)->Value{let owner=setup(owner);match schema{Value::Record(entries)=>{owner.borrow_mut().schemas.extend(entries.iter().map(|(k,v)|(k.clone(),v.clone())));},_=>panic!("checked Props schema record")};resolve_props(&owner);Value::Undefined}
-pub fn set_defaults(owner:&OwnerWeak,defaults:Value)->Value{let owner=setup(owner);match defaults{Value::Record(entries)=>owner.borrow_mut().default_layers.push((*entries).clone()),_=>panic!("checked defaults record")};resolve_props(&owner);Value::Undefined}
+pub fn set_present(owner:&OwnerWeak,present:Value)->Value{let owner=runtime(owner);let present=present.bool();{let mut o=owner.borrow_mut();if o.present==present{return Value::Undefined}o.present=present;o.dirty=true;if present{o.projection=None;o.update_requested=true;}}Value::Undefined}
+pub fn props_define(owner:&OwnerWeak,schema:Value)->Value{let owner=setup(owner);match schema{Value::Record(entries)=>{owner.borrow_mut().schemas.extend(entries.fields.borrow().iter().map(|(k,v)|(k.clone(),v.clone())));},_=>panic!("checked Props schema record")};resolve_props(&owner);Value::Undefined}
+pub fn set_defaults(owner:&OwnerWeak,defaults:Value)->Value{let owner=setup(owner);match defaults{Value::Record(entries)=>owner.borrow_mut().default_layers.push(entries.fields.borrow().clone()),_=>panic!("checked defaults record")};resolve_props(&owner);Value::Undefined}
 fn resolve_props(owner:&OwnerRef){
 let(raw,schemas,layers,previous_valid,valid,strict)={let o=owner.borrow();(o.raw.clone(),o.schemas.clone(),o.default_layers.clone(),o.previous_valid.clone(),o.prop_valid,o.phase!="setup")};
 let mut resolved=Map::new();let mut previous_valid=previous_valid;
@@ -381,21 +450,69 @@ let mut value=None;
 if let Some(raw)=provided{if !raw.is_null()&&accepts(raw){value=Some(raw.clone());previous_valid.insert(key.clone(),raw.clone());}else if raw.is_null()&&matches!(&empty_policy,Value::Json(Json::String(s))if s=="accept"){value=Some(Json::Null);}else if let Some(previous)=previous_valid.get(&key){if !previous.is_null()&&accepts(previous){value=Some(previous.clone());}}}
 if value.is_none(){for layer in &layers{if let Some(candidate)=layer.get(&key){let candidate=candidate.data();if candidate.is_null()&&!error||!candidate.is_null()&&accepts(&candidate){value=Some(candidate);break}}}}
 if value.is_none(){let default=schema.member("default",false);if !matches!(default,Value::Undefined){let default=default.data();if default.is_null()&&!error||!default.is_null()&&accepts(&default){value=Some(default);}}}
-let value=value.unwrap_or_else(||{assert!(!error,"missing, empty or invalid prop without nonempty fallback: {key}");Json::Null});if provided.is_some()&&!value.is_null(){previous_valid.insert(key.clone(),value.clone());}resolved.insert(key,value);
+let value=value.unwrap_or_else(||{if error{value_error(&format!("missing, empty or invalid prop without nonempty fallback: {key}"))}Json::Null});if provided.is_some()&&!value.is_null(){previous_valid.insert(key.clone(),value.clone());}resolved.insert(key,value);
 }
-let props=Json::Object(resolved);let mut o=owner.borrow_mut();assert!((o.props_accepts)(&props),"invalid resolved Props value");o.previous_valid=previous_valid;o.props_value=Value::json(props.clone());o.props=props;
+let props=Json::Object(resolved);let mut o=owner.borrow_mut();if !(o.props_accepts)(&props){value_type_error("invalid resolved Props value")}o.previous_valid=previous_valid;o.props_value=Value::json(props.clone());o.props=props;
 }
 pub fn read_props(owner:&OwnerWeak,raw:bool)->Value{let owner=ensure(owner);let o=owner.borrow();if raw{o.raw_value.clone()}else{o.props_value.clone()}}
 pub fn is_provided(owner:&OwnerWeak,key:Value)->Value{Value::boolean(ensure(owner).borrow().raw.get(key.text()).is_some())}
 pub fn watch_props(owner:&OwnerWeak,keys:Option<Value>,raw:bool,callback:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let keys=keys.map(|v|match v{Value::Json(Json::String(s))=>vec![s],_=>v.items().iter().map(Value::text).collect()});owner.borrow_mut().watchers.push(Watcher{active:active.clone(),keys,raw,callback});disposer(owner,active,false)}
-pub fn replace_props(owner:&OwnerRef,raw:Json){assert!(raw.is_object(),"raw props must be a record");let (old_raw,old_props,watchers)={let o=owner.borrow();assert!(!o.disposed);(o.raw.clone(),o.props.clone(),o.watchers.clone())};{let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}resolve_props(owner);let (new_raw,new_props)={let o=owner.borrow();(o.raw.clone(),o.props.clone())};let mut pending=Vec::new();for watcher in watchers{let(previous,next)=if watcher.raw{(&old_raw,&new_raw)}else{(&old_props,&new_props)};let all:BTreeSet<String>=previous.as_object().unwrap().keys().chain(next.as_object().unwrap().keys()).cloned().collect();let changed:Vec<String>=all.into_iter().filter(|key|previous.get(key)!=next.get(key)).collect();if changed.is_empty()||watcher.keys.as_ref().is_some_and(|keys|!changed.iter().any(|key|keys.contains(key))){continue}let info=record(vec![("changedKeys",Value::Array(Rc::new(changed.iter().map(|k|Value::string(k)).collect())))]);pending.push((watcher,next.clone(),previous.clone(),info));}for(watcher,next,previous,info)in pending{if watcher.active.get(){invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),Value::json(next),Value::json(previous),info]);}}}
-pub fn create_state(owner:&OwnerWeak,kind:&'static str,key:Value,value:Value,spec:Value)->Value{let owner_ref=setup(owner);let key=key.text();assert!(!key.is_empty()&&!owner_ref.borrow().states.contains_key(&key),"State name must be nonempty and same-frame unique");let state=Rc::new(State{value:RefCell::new(normalize_state(kind,value,&spec,true)),kind,spec,owner:owner.clone()});owner_ref.borrow_mut().states.insert(key,state.clone());Value::State(state)}
-fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{match kind{"bool"=>{value.bool();},"string"|"enum"=>{assert!(matches!(value,Value::Json(Json::String(_))),"State string required");let options=spec.member("options",true);assert!(!options.nullish()||kind!="enum","enum options required");if !options.nullish(){assert!(options.items().iter().any(|option|strict_equal(option,&value)),"State value outside options");}},"discrete"|"range"=>{let number=value.num();assert!(number.is_finite(),"State finite number required");let min=spec.member("min",true);let max=spec.member("max",true);if kind=="range"{assert!(!min.nullish()&&!max.nullish()&&min.num()<=max.num(),"invalid range");let clamp=spec.member("clamp",true);if initial&&!clamp.nullish()&&clamp.bool(){return Value::number(number.max(min.num()).min(max.num()))}assert!(number>=min.num()&&number<=max.num(),"State range violation");}else{if !min.nullish(){assert!(number>=min.num(),"State below min")}if !max.nullish(){assert!(number<=max.num(),"State above max")}let step=spec.member("step",true);if !step.nullish(){assert!(step.num()>0.,"State step must be positive");let origin=if min.nullish(){0.}else{min.num()};assert!(((number-origin)/step.num()).fract().abs()<1e-9,"State step violation");}}},_=>panic!("unknown State constructor")};let options=spec.member("options",true);if !options.nullish(){assert!(options.items().iter().any(|item|strict_equal(item,&value)),"State option violation")}value}
+pub fn replace_props(owner:&OwnerRef,raw:Json){if !raw.is_object(){value_type_error("raw props must be a record")}let (old_raw,old_props,watchers)={let o=owner.borrow();if o.disposed{throw_error("OWNER_DISPOSED","terminally disposed owner")}(o.raw.clone(),o.props.clone(),o.watchers.clone())};{let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}resolve_props(owner);let (new_raw,new_props)={let o=owner.borrow();(o.raw.clone(),o.props.clone())};let mut pending=Vec::new();for watcher in watchers{let(previous,next)=if watcher.raw{(&old_raw,&new_raw)}else{(&old_props,&new_props)};let all:BTreeSet<String>=previous.as_object().unwrap().keys().chain(next.as_object().unwrap().keys()).cloned().collect();let changed:Vec<String>=all.into_iter().filter(|key|previous.get(key)!=next.get(key)).collect();if changed.is_empty()||watcher.keys.as_ref().is_some_and(|keys|!changed.iter().any(|key|keys.contains(key))){continue}let info=record(vec![("changedKeys",Value::Array(Rc::new(changed.iter().map(|k|Value::string(k)).collect())))]);pending.push((watcher,next.clone(),previous.clone(),info));}for(watcher,next,previous,info)in pending{if watcher.active.get(){invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),Value::json(next),Value::json(previous),info]);}}}
+// Scalar domain validation is a compiler-profile policy. Its failures are
+// authored errors, never Rust invariants: source try/catch and native Result
+// boundaries must be able to recover without unwinding a GPUI entity lease.
+pub fn create_state(owner:&OwnerWeak,kind:&'static str,key:Value,value:Value,spec:Value)->Value{
+    let owner_ref=setup(owner);
+    let Value::Json(Json::String(key))=key else{value_error("[State] state name must be a non-empty string.")};
+    let value=normalize_state(kind,value,&spec,true);
+    // Failed validation must not reserve the name in this capture frame.
+    let storage_key=claim_state_name(&owner_ref,&key);
+    let state=Rc::new(State{value:RefCell::new(value),kind,spec,owner:owner.clone()});
+    owner_ref.borrow_mut().states.insert(storage_key,state.clone());capture_state(&owner_ref,key,state.clone());Value::State(state)
+}
+fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{
+    match kind{
+        "bool"=>{value.bool();},
+        "string"|"enum"=>{
+            if !matches!(value,Value::Json(Json::String(_))){value_error("State string required")}
+            let options=spec.member("options",true);
+            if options.nullish()&&kind=="enum"{value_error("enum options required")}
+            if !options.nullish()&&!options.items().iter().any(|option|strict_equal(option,&value)){value_error("State value outside options")}
+        },
+        "discrete"|"range"=>{
+            let number=value.num();if !number.is_finite(){value_error("State finite number required")}
+            let min=spec.member("min",true);let max=spec.member("max",true);
+            if kind=="range"{
+                if min.nullish()||max.nullish()||!(min.num()<=max.num()){value_error("invalid range")}
+                let clamp=spec.member("clamp",true);
+                if initial&&!clamp.nullish()&&clamp.bool(){return Value::number(number.max(min.num()).min(max.num()))}
+                if !(number>=min.num()&&number<=max.num()){value_error("State range violation")}
+            }else{
+                if !min.nullish()&&!(number>=min.num()){value_error("State below min")}
+                if !max.nullish()&&!(number<=max.num()){value_error("State above max")}
+                let step=spec.member("step",true);
+                if !step.nullish(){
+                    if !(step.num()>0.){value_error("State step must be positive")}
+                    let origin=if min.nullish(){0.}else{min.num()};
+                    if !(((number-origin)/step.num()).fract().abs()<1e-9){value_error("State step violation")}
+                }
+            }
+        },
+        _=>panic!("unknown State constructor"),
+    }
+    let options=spec.member("options",true);
+    if !options.nullish()&&!options.items().iter().any(|item|strict_equal(item,&value)){value_error("State option violation")}
+    value
+}
 pub fn state_set(receiver:Value,value:Value,reason:Value)->Value{match receiver{Value::State(state)=>{runtime(&state.owner);write_state_value(&state,value,reason);},_=>panic!("State handle required")};Value::Undefined}
-pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{setup(owner).borrow_mut().exposes.insert(key.text(),state);Value::Undefined}
-pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{setup(owner).borrow_mut().exposes.insert(key.text(),value);Value::Undefined}
-pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{setup(owner).borrow_mut().exposes.insert(key.text(),callback);Value::Undefined}
-pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{setup(owner).borrow_mut().declared_events.insert(key.text());Value::Undefined}
+fn expose_key(owner:&OwnerRef,key:Value)->String{
+    let key=key.text();if key.is_empty(){throw_error("EXPOSE_KEY_INVALID","Expose key must be nonempty")}
+    let owner=owner.borrow();if owner.exposes.contains_key(&key)||owner.declared_events.contains(&key){throw_error("EXPOSE_DUPLICATE",&format!("duplicate Expose key: {key}"))}key
+}
+pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,state);Value::Undefined}
+pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
+pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
+pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}
 pub fn emit(owner:&OwnerWeak,key:Value,payload:Value)->Value{let owner=runtime(owner);let key=key.text();assert!(owner.borrow().declared_events.contains(&key),"undeclared Expose event");let payload=if matches!(payload,Value::Undefined){Json::Null}else{payload.data()};owner.borrow_mut().emitted.push((key,payload));Value::Undefined}
 pub fn disposer(owner:OwnerRef,active:Rc<Cell<bool>>,setup_only:bool)->Value{let owner=Rc::downgrade(&owner);Value::Function(Rc::new(move |_|{if setup_only{setup(&owner);}else{ensure(&owner);}active.set(false);Value::Undefined}))}
 pub fn style_use(owner:&OwnerWeak,handles:Vec<Value>)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));owner.borrow_mut().contributions.push(Contribution{active:active.clone(),predicate:None,styles:style_items(handles)});disposer(owner,active,true)}
@@ -404,24 +521,24 @@ pub fn rule_dispose(owner:&OwnerWeak,receiver:Value)->Value{setup(owner);match r
 pub fn style_items(handles:Vec<Value>)->Vec<(String,String)>{handles.into_iter().flat_map(|v|match v{Value::Style(items)=>items,_=>panic!("style handle required")}).collect()}
 pub fn patch(owner:&OwnerWeak,handles:Vec<Value>,suppress:bool)->Value{let owner=runtime(owner);let items=style_items(handles);let mut o=owner.borrow_mut();o.dirty=true;for item in items{if suppress{o.patch.retain(|(_,group)|group!=&item.1);o.suppressed.insert(item.1);}else{o.suppressed.remove(&item.1);o.patch.retain(|(_,group)|group!=&item.1);o.patch.push(item);}}Value::Undefined}
 pub fn clear_patch(owner:&OwnerWeak)->Value{let owner=runtime(owner);let mut o=owner.borrow_mut();o.patch.clear();o.suppressed.clear();o.dirty=true;Value::Undefined}
-pub fn styles(owner:&OwnerRef)->Vec<String>{let(contributions,patch,suppressed)={let o=owner.borrow();(o.contributions.clone(),o.patch.clone(),o.suppressed.clone())};let mut merged=Vec::<(String,String)>::new();for contribution in contributions{if !contribution.active.get()||contribution.predicate.is_some_and(|predicate|!predicate.call(vec![]).bool()){continue}for item in contribution.styles{merged.retain(|(_,group)|group!=&item.1);merged.push(item)}}for item in patch{merged.retain(|(_,group)|group!=&item.1);merged.push(item)}merged.into_iter().filter(|(_,group)|!suppressed.contains(group)).map(|(token,_)|token).collect()}
+pub fn styles(owner:&OwnerRef)->Vec<String>{let(contributions,patch,suppressed)={let o=owner.borrow();(o.contributions.clone(),o.patch.clone(),o.suppressed.clone())};let mut merged=Vec::<(String,String)>::new();for contribution in contributions{if !contribution.active.get()||contribution.predicate.is_some_and(|predicate|!predicate.call_authored(vec![]).bool()){continue}for item in contribution.styles{merged.retain(|(_,group)|group!=&item.1);merged.push(item)}}for item in patch{merged.retain(|(_,group)|group!=&item.1);merged.push(item)}merged.into_iter().filter(|(_,group)|!suppressed.contains(group)).map(|(token,_)|token).collect()}
 pub fn context_provide(owner:&OwnerWeak,key:Value,value:Value)->Value {
-    let owner=setup(owner);let key=key.text();
+    let owner=setup(owner);let key=context_identity(key);
     let data=value.try_data().unwrap_or_else(||throw_error("CONTEXT_VALUE_INVALID","invalid Context data"));
-    if !(owner.borrow().context_accepts)(&key,&data) { throw_error("CONTEXT_VALUE_INVALID","invalid Context data"); }
+    if !(owner.borrow().context_accepts)(&key.descriptor,&data) { throw_error("CONTEXT_VALUE_INVALID","invalid Context data"); }
     if owner.borrow().providers.contains_key(&key) { throw_error("CONTEXT_DUPLICATE_PROVIDE","duplicate Context provider"); }
     owner.borrow_mut().providers.insert(key,value);Value::Undefined
 }
-fn provider(owner:&OwnerRef,key:&str)->Option<OwnerRef>{let mut current=Some(owner.clone());let mut visited=BTreeSet::new();while let Some(node)=current{assert!(visited.insert(Rc::as_ptr(&node)as usize),"cyclic Context ancestry");let o=node.borrow();if o.disposed{return None}if o.providers.contains_key(key){drop(o);return Some(node)}current=o.parent.upgrade();}None}
+fn provider(owner:&OwnerRef,key:&NativeContextKey)->Option<OwnerRef>{let mut current=Some(owner.clone());let mut visited=BTreeSet::new();while let Some(node)=current{assert!(visited.insert(Rc::as_ptr(&node)as usize),"cyclic Context ancestry");let o=node.borrow();if o.disposed{return None}if o.providers.contains_key(key){drop(o);return Some(node)}current=o.parent.upgrade();}None}
 pub fn context_subscribe(owner:&OwnerWeak,key:Value,optional:bool,callback:Value)->Value {
-    let owner=setup(owner);let key=key.text();
+    let owner=setup(owner);let key=context_identity(key);
     if !optional&&provider(&owner,&key).is_none() { throw_error("CONTEXT_PROVIDER_MISSING","required Context provider missing"); }
     let active=Rc::new(Cell::new(true));
     owner.borrow_mut().subscriptions.push(ContextSubscription{active:active.clone(),key,optional,callback});
     disposer(owner,active,false)
 }
 pub fn context_read(owner:&OwnerWeak,key:Value,optional:bool)->Value {
-    let owner=ensure(owner);let key=key.text();
+    let owner=ensure(owner);let key=context_identity(key);
     if !owner.borrow().subscriptions.iter().any(|s|s.key==key&&s.optional==optional) { throw_error("CONTEXT_SUBSCRIPTION_REQUIRED","Context read requires corresponding subscription"); }
     match provider(&owner,&key) {
         Some(provider)=>provider.borrow().providers[&key].clone(),
@@ -429,58 +546,58 @@ pub fn context_read(owner:&OwnerWeak,key:Value,optional:bool)->Value {
         None=>throw_error("CONTEXT_DISCONNECTED","required Context provider missing"),
     }
 }
-struct ContextDispatchReset;
+struct ContextDispatchReset {key:(usize,NativeContextKey)}
 impl Drop for ContextDispatchReset {
-    fn drop(&mut self) {
-        CONTEXT_QUEUE.with(|queue|queue.borrow_mut().clear());
-        CONTEXT_DISPATCHING.with(|flag|flag.set(false));
-    }
+    fn drop(&mut self) {CONTEXT_CHANNELS.with(|channels|channels.borrow_mut().remove(&self.key));}
 }
 pub fn context_update(owner:&OwnerWeak,key:Value,next:Value,optional:bool)->Value {
-    let owner=runtime(owner);let key=key.text();
+    let owner=runtime(owner);let key=context_identity(key);
     if !owner.borrow().subscriptions.iter().any(|s|s.key==key&&s.optional==optional) { throw_error("CONTEXT_SUBSCRIPTION_REQUIRED","Context update requires corresponding subscription"); }
     let Some(bound)=provider(&owner,&key) else {
         if optional { return Value::boolean(false); }
         throw_error("CONTEXT_DISCONNECTED","required Context provider missing")
     };
     let previous=bound.borrow().providers[&key].clone();
-    let value=if matches!(next,Value::Function(_)){next.call(vec![previous.clone()])}else{next};
+    let value=if matches!(next,Value::Function(_)){next.call_authored(vec![previous.clone()])}else{next};
     ensure(&Rc::downgrade(&bound));
     let data=value.try_data().unwrap_or_else(||throw_error("CONTEXT_VALUE_INVALID","invalid Context data"));
-    if !(owner.borrow().context_accepts)(&key,&data) { throw_error("CONTEXT_VALUE_INVALID","invalid Context data"); }
+    if !(owner.borrow().context_accepts)(&key.descriptor,&data) { throw_error("CONTEXT_VALUE_INVALID","invalid Context data"); }
     bound.borrow_mut().providers.insert(key.clone(),value.clone());
-    OWNERS.with(|all| {
-        for weak in all.borrow().iter() {
-            if let Some(participant)=weak.upgrade() {
-                if participant.borrow().disposed { continue; }
-                if provider(&participant,&key).is_some_and(|p|Rc::ptr_eq(&p,&bound)) {
-                    let subscriptions=participant.borrow().subscriptions.clone();
-                    for subscription in subscriptions {
-                        if subscription.active.get()&&subscription.key==key&&!matches!(subscription.callback,Value::Undefined) {
-                            CONTEXT_QUEUE.with(|q|q.borrow_mut().push_back((weak.clone(),subscription.callback,value.clone(),previous.clone())));
-                        }
-                    }
+    let mut recorded=Vec::new();
+    for participant in all_owners(){
+        if provider(&participant,&key).is_some_and(|current|Rc::ptr_eq(&current,&bound)){
+            let subscriptions=participant.borrow().subscriptions.clone();
+            for registration in subscriptions{
+                if registration.active.get()&&registration.key==key&&!matches!(registration.callback,Value::Undefined){
+                    recorded.push(ContextNotice{target:Rc::downgrade(&participant),registration,next:value.clone(),previous:previous.clone()});
                 }
             }
         }
-    });
-    let dispatch=CONTEXT_DISPATCHING.with(|flag|!flag.replace(true));
-    if dispatch {
-        let reset=ContextDispatchReset;
-        let mut primary:Option<Value>=None;
-        loop {
-            let task=CONTEXT_QUEUE.with(|q|q.borrow_mut().pop_front());
-            let Some((weak,callback,next,previous))=task else { break; };
-            if let Some(owner)=weak.upgrade() {
-                if !owner.borrow().disposed {
-                    if let Err(error)=catch_authored(||invoke(&owner,"context-watch",&callback,vec![capability(&weak),next,previous])) {
-                        if primary.is_none() { primary=Some(error); }
-                    }
-                }
+    }
+    if !recorded.is_empty(){
+        // Core Context channels serialize reentry only for the same provider/key.
+        // A different channel remains an ordinary nested callback delivery.
+        let channel_key=(Rc::as_ptr(&bound)as usize,key.clone());
+        let (channel,dispatch)=CONTEXT_CHANNELS.with(|channels|{
+            let mut channels=channels.borrow_mut();
+            if let Some(channel)=channels.get(&channel_key){(channel.clone(),false)}else{
+                let channel=Rc::new(RefCell::new(ContextChannel::default()));channels.insert(channel_key.clone(),channel.clone());(channel,true)
             }
+        });
+        channel.borrow_mut().pending.extend(recorded);
+        if dispatch{
+            let reset=ContextDispatchReset{key:channel_key};let mut failures=Vec::new();
+            loop{
+                let notice=channel.borrow_mut().pending.pop_front();let Some(notice)=notice else{break};
+                if !notice.registration.active.get(){continue}
+                let Some(target)=notice.target.upgrade().filter(|owner|!owner.borrow().disposed)else{continue};
+                if !provider(&target,&key).is_some_and(|current|Rc::ptr_eq(&current,&bound)){continue}
+                if let Err(error)=catch_authored(||invoke(&target,"context-watch",&notice.registration.callback,vec![capability(&notice.target),notice.next,notice.previous])){failures.push(error);}
+            }
+            drop(reset);
+            if failures.len()==1{throw_value(failures.pop().unwrap());}
+            if !failures.is_empty(){throw_value(record(vec![("name",Value::string("AggregateError")),("message",Value::string("[Context] callback delivery failed")),("errors",Value::Array(Rc::new(failures)))]));}
         }
-        drop(reset);
-        if let Some(error)=primary { throw_value(error); }
     }
     if optional { Value::boolean(true) } else { Value::Undefined }
 }
@@ -500,10 +617,28 @@ pub fn accessible_state(owner:&OwnerWeak,key:Value,state:Value)->Value{setup(own
 pub fn accessible_action(owner:&OwnerWeak,key:Value)->Value{setup(owner).borrow_mut().accessible_actions.insert(key.text());Value::Undefined}
 pub fn name_content(owner:&OwnerWeak)->Value{let owner=setup(owner);let mut o=owner.borrow_mut();o.name_content=true;o.modules.accessible_text.remove("name");Value::Undefined}
 pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let kind=key.text();if global&&kind.starts_with("press."){owner.borrow_mut().press_global=true;}let capture=options.member("capture",true);let once=options.member("once",true);let passive=options.member("passive",true);owner.borrow_mut().listeners.push(Listener{active:active.clone(),kind,global,capture:!capture.nullish()&&capture.bool(),once:!once.nullish()&&once.bool(),consumed_epoch:Rc::new(Cell::new(None)),passive:!passive.nullish()&&passive.bool(),callback});disposer(owner,active,false)}
-pub fn prevent(input:Value)->Value{match input{Value::Input(input)=>{assert!(input.live.get(),"input control expired");if !input.passive{input.prevented.set(true)}},_=>panic!("input capability required")};Value::Undefined}
+pub fn prevent(input:Value)->Value{match input{Value::Input(input)=>{if !input.live.get(){throw_error("INPUT_CONTROL_EXPIRED","input control expired")}if !input.passive{input.prevented.set(true)}},_=>panic!("input capability required")};Value::Undefined}
+struct InputLifetime<'a>(&'a Input);
+impl Drop for InputLifetime<'_>{fn drop(&mut self){self.0.live.set(false);}}
 pub fn dispatch(owner:&OwnerRef,kind:&str,global:bool,fields:Map<String,Json>)->bool{dispatch_phase(owner,kind,global,false,fields)}
 fn has_listener(owner:&OwnerRef,kind:&str,global:bool,capture:bool)->bool{let owner=owner.borrow();owner.listeners.iter().any(|listener|listener.active.get()&&listener.kind==kind&&listener.global==global&&listener.capture==capture&&(!listener.once||listener.consumed_epoch.get()!=Some(owner.epoch)))}
-fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<String,Json>)->bool{if owner.borrow().disposed||!owner.borrow().present||!owner.borrow().mounted{return false}if !global&&(kind.starts_with("pointer.")||kind=="press.commit"||kind=="context.menu")&&!hit_participates(owner){return false}let listeners=owner.borrow().listeners.clone();let mut prevented=false;for listener in listeners{if owner.borrow().disposed||!owner.borrow().mounted{break}if listener.active.get()&&listener.global==global&&listener.capture==capture&&listener.kind==kind{if listener.once{let epoch=owner.borrow().epoch;if listener.consumed_epoch.get()==Some(epoch){continue}listener.consumed_epoch.set(Some(epoch));}let input=Rc::new(Input{fields:fields.clone(),prevented:Cell::new(false),passive:listener.passive,live:Cell::new(true)});invoke(owner,"event",&listener.callback,vec![capability(&Rc::downgrade(owner)),Value::Input(input.clone())]);input.live.set(false);prevented|=input.prevented.get();}}prevented}
+fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<String,Json>)->bool{
+    if owner.borrow().disposed||!owner.borrow().present||!owner.borrow().mounted{return false}
+    if !global&&(kind.starts_with("pointer.")||kind=="press.commit"||kind=="context.menu")&&!hit_participates(owner){return false}
+    let listeners=owner.borrow().listeners.clone();let mut prevented=false;
+    for listener in listeners{
+        if owner.borrow().disposed||!owner.borrow().mounted{break}
+        if !listener.active.get()||listener.global!=global||listener.capture!=capture||listener.kind!=kind{continue}
+        if listener.once{let epoch=owner.borrow().epoch;if listener.consumed_epoch.get()==Some(epoch){continue}listener.consumed_epoch.set(Some(epoch));}
+        let input=Rc::new(Input{fields:fields.clone(),prevented:Cell::new(false),passive:listener.passive,live:Cell::new(true)});
+        let delivered=native_host_callback(owner,kind,||invoke_scoped(owner,"event",||{
+            let _lifetime=InputLifetime(input.as_ref());listener.callback.call_authored(vec![capability(&Rc::downgrade(owner)),Value::Input(input.clone())])
+        }));
+        // A prevention request already made by the callback survives its error.
+        prevented|=input.prevented.get();if delivered.is_none(){break}
+    }
+    prevented
+}
 pub fn event_fields(kind:&str)->Map<String,Json>{let mut fields=Map::new();fields.insert("type".into(),Json::String(kind.into()));fields}
 pub fn text_content(value:&Option<NativeSnapshot>,slot:&[NativeSnapshot])->String{value.as_ref().map(|snapshot|(snapshot.text)(slot)).unwrap_or_default()}
 pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
@@ -547,8 +682,9 @@ pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandl
 // Authored children are captured native factories, never semantic tag dispatch.
 let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
 if image_supported(owner){element=element.role(gpui::Role::Image);}
-if owner.borrow().modules.hooks.contains("scroll"){let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle.clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
+if owner.borrow().modules.hooks.contains("scroll"){let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
 let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let owner=owner.clone();let drive=drive.clone();let kind=action.clone();element=element.on_a11y_action(action_from_name(&action),move |_,window,cx|{let kind=owner.borrow().modules.action_events.get(&kind).cloned().unwrap_or_else(||format!("a11y:{kind}"));if dispatch(&owner,&kind,false,event_fields(&kind)){window.prevent_default()}drive(window,cx)});}}
+if native_pointer_input_needed(owner){
 let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{if claim_pointer(&on_down){let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",event_fields("context.menu")){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}down_drive(window,cx)});
 let capture_up=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_up(move|event,window,cx|{let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_up,"host:mouseup",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
@@ -557,10 +693,28 @@ let on_move=owner.clone();let move_drive=drive.clone();element=element.on_mouse_
 let on_hover=owner.clone();let hover_drive=drive.clone();element=element.on_hover(move|hover,window,cx|{let kind=if *hover{"pointer.enter"}else{"pointer.leave"};let mut prevented=dispatch_root_route(&on_hover,kind,event_fields(kind));if !*hover{prevented|=pointer_intent(&on_hover,"press.cancel",event_fields("press.cancel"));}if prevented{window.prevent_default()}let kind=if *hover{"host:mouseenter"}else{"host:mouseleave"};if dispatch(&on_hover,kind,false,event_fields(kind)){window.prevent_default()}hover_drive(window,cx)});
 let on_click=owner.clone();let click_drive=drive.clone();element=element.on_click(move|event,window,cx|{let(suppress,cancelled)={let mut o=on_click.borrow_mut();(std::mem::take(&mut o.suppress_click),std::mem::take(&mut o.press.cancelled))};if !cancelled&&!(suppress&&matches!(event,gpui::ClickEvent::Keyboard(_)))&&claim_click(&on_click)&&dispatch_root_route(&on_click,"press.commit",event_fields("press.commit")){window.prevent_default()}if dispatch(&on_click,"host:click",false,event_fields("host:click")){window.prevent_default()}global_native_click(event,window,cx);click_drive(window,cx)});
 
+}
+if native_key_input_needed(owner){
 let capture_key=owner.clone();element=element.capture_key_down(move|event,window,_|{reset_key();let mut fields=event_fields("host:keydown");if let Some(key)=portable_key(&event.keystroke){fields.insert("key".into(),Json::String(key));}modifiers(&mut fields,event.keystroke.modifiers);if dispatch_phase(&capture_key,"host:keydown",false,true,fields){window.prevent_default()}});let capture_key=owner.clone();element=element.capture_key_up(move|event,window,_|{reset_key();let mut fields=event_fields("host:keyup");if let Some(key)=portable_key(&event.keystroke){fields.insert("key".into(),Json::String(key));}modifiers(&mut fields,event.keystroke.modifiers);if dispatch_phase(&capture_key,"host:keyup",false,true,fields){window.prevent_default()}});
 let on_key=owner.clone();element=element.on_key_down(move|event,window,cx|{let mut fields=event_fields("host:keydown");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keydown",false,fields){window.prevent_default()}collect_key(&on_key);global_key_down(event,window,cx);});
 let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut fields=event_fields("host:keyup");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keyup",false,fields){window.prevent_default()}collect_key(&on_key);global_key_up(event,window,cx);});
-let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);},move|_,_,window,cx|{register_pointer_input(window,Some(Rc::downgrade(&committed)));window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);window.on_mouse_event::<gpui::ScrollWheelEvent>(overlay_modal_wheel);let owner=committed.clone();let drive=commit_drive.clone();let focus=commit_focus.clone();let epoch=owner.borrow().epoch;window.defer(cx,move|window,cx|{let current={let o=owner.borrow();!o.disposed&&o.present&&o.bounds.is_some()&&o.epoch==epoch&&o.window_id==Some(window.window_handle().window_id())&&o.projection_revision==revision};if !current{return}owner.borrow_mut().modules.focus.native=Some(focus);refresh_native_entry(&owner,window);Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}});}).absolute().size_full());
+}
+let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
+element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);},move|_,_,window,cx|{
+    if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
+    if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}
+    if committed.borrow().modules.hooks.contains("overlay"){window.on_mouse_event::<gpui::ScrollWheelEvent>(overlay_modal_wheel);}
+    let owner=committed.clone();let drive=commit_drive.clone();let focus=commit_focus.clone();let epoch=owner.borrow().epoch;
+    window.defer(cx,move|window,cx|{
+        native_host_callback(&owner,"commit",||{
+            let current={let o=owner.borrow();!o.disposed&&o.present&&o.bounds.is_some()&&o.epoch==epoch&&o.window_id==Some(window.window_handle().window_id())&&o.projection_revision==revision};
+            if !current{return}if native_focus_observation_needed(&owner){owner.borrow_mut().modules.focus.native=Some(focus);}
+            #[cfg(feature="experimental-focus-tree")]refresh_native_entry(&owner,window);
+            Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}
+            poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}
+        });
+    });
+}).absolute().size_full());
 if image_supported(owner){let fill_height=matches!(element.style().size.height,Some(gpui::Length::Definite(_)));element=element.child(image_element(owner,fill_height));}
 if text_supported(owner){let fill_height=matches!(element.style().size.height,Some(gpui::Length::Definite(_)));let scrolled=owner.clone();element=element.on_scroll_wheel(move|event,window,cx|{if text_scroll(&scrolled,event,window,cx){cx.stop_propagation();}}).child(NativeTextElement::new(owner,focus,fill_height));}
 let slot=owner.borrow().slot.clone();let mut child_index=0;for child in (value.frame)(owner,focus,&path,&drive,&slot,&mut child_index){element=element.child(child);}
@@ -713,6 +867,12 @@ pub fn register_key_scope(focus:&FocusHandle,window:&Window){let id=window.windo
 // Resolve against the current physical tree, including cached or reparented views.
 // Equal handles are excluded: SDK contains(h,h) is not a physical-presence check.
 pub fn outer_key_scope(focus:&FocusHandle,window:&Window)->bool{let id=window.window_handle().window_id();KEY_SCOPES.with(|scopes|!scopes.borrow().iter().any(|(scope_window,scope)|*scope_window==id&&scope!=focus&&scope.upgrade().is_some_and(|parent|parent.contains(focus,window))))}
+// Hooks and listeners are installed during checked setup; these direct host
+// predicates acquire only the native input resources actually requested.
+pub fn native_focus_observation_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.focusable||o.modules.hooks.iter().any(|hook|matches!(*hook,"focus"|"focus-entry"|"focus-scope"|"focus-roving"|"trigger"|"text-control"))||o.listeners.iter().any(|listener|matches!(listener.kind.as_str(),"host:focus"|"host:blur"|"focus"|"blur")||listener.kind.starts_with("press."))}
+pub fn native_pointer_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.modules.hooks.contains("trigger")||o.modules.hooks.contains("text-control")||o.listeners.iter().any(|listener|listener.kind.starts_with("pointer.")||listener.kind.starts_with("press.")||listener.kind.starts_with("host:mouse")||matches!(listener.kind.as_str(),"host:click"|"context.menu"))}
+pub fn native_key_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.focusable||o.modules.hooks.iter().any(|hook|matches!(*hook,"focus-scope"|"focus-roving"|"trigger"|"text-control"))||o.listeners.iter().any(|listener|listener.kind.starts_with("key.")||listener.kind.starts_with("press.")||matches!(listener.kind.as_str(),"host:keydown"|"host:keyup"))}
+pub fn native_boundary_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.modules.boundary.observing||o.modules.hooks.contains("overlay")}
 pub fn window_input_needed(owner:&OwnerRef)->bool{let owner=owner.borrow();owner.modules.hooks.contains("focus-scope")||owner.modules.focus.roving_declared||owner.listeners.iter().any(|listener|listener.global&&(listener.kind.starts_with("key.")||listener.kind.starts_with("press.")||matches!(listener.kind.as_str(),"host:keydown"|"host:keyup")))}
 pub fn restore_window_input(owner:&OwnerRef,focus:&FocusHandle,window:&mut Window,cx:&mut App){
     if !ready(owner){return}
@@ -824,6 +984,9 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
     if prevented{window.prevent_default();cx.stop_propagation();}drive_owners(window,cx);
 }
 ` +
+  gpuiNativeValuesSource +
+  gpuiNativeAuthoredHooksSource +
+  gpuiNativeAsyncSource +
   gpuiNativeModulesSource +
   gpuiNativeTopologySource +
   gpuiNativeTableSource +

@@ -53,7 +53,7 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(invoke).toHaveBeenCalledOnce();
   });
 
-  it('preserves opaque host values and projects cyclic plain-record graphs safely', () => {
+  it('preserves opaque host values and data-only graph identities', () => {
     const reader = createScopedExposesReader(() => (call) => call());
     class HostValue {
       constructor(readonly value: string) {}
@@ -75,7 +75,7 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(values.date).toBe(date);
     expect(values.map).toBe(map);
     expect(values.hostValue).toBe(hostValue);
-    expect(values.cyclic).not.toBe(cyclic);
+    expect(values.cyclic).toBe(cyclic);
     expect(values.cyclic.self).toBe(values.cyclic);
     expect(values.shared).toBe(snapshot.alias);
   });
@@ -145,7 +145,131 @@ describe('adapter-base contract: expose record (v0)', () => {
     });
 
     expect(snapshot).toEqual({ authorValue });
-    expect(snapshot.authorValue).not.toBe(authorValue);
+    expect(snapshot.authorValue).toBe(authorValue);
+  });
+});
+
+describe('returned expose values share the owner boundary', () => {
+  it('wraps returned functions once and preserves their identity across factory aliases', () => {
+    const invoke = vi.fn((call: () => void) => call());
+    const reader = createScopedExposesReader(() => invoke);
+    const returned = () => 'result';
+    const factory = () => returned;
+    const snapshot = reader.read({ factory, alias: factory, direct: returned }) as {
+      factory(): () => string;
+      alias(): () => string;
+      direct(): string;
+    };
+    expect(snapshot.factory).toBe(snapshot.alias);
+    const first = snapshot.factory();
+    expect(first).toBe(snapshot.direct);
+    expect(snapshot.alias()).toBe(first);
+    expect(first()).toBe('result');
+    expect(invoke).toHaveBeenCalledTimes(3);
+    reader.invalidate();
+    expect(() => first()).toThrow(/terminal disposal/);
+  });
+
+  it('preserves cyclic callable-record identity through values and results', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const api: { value: number; read(): number; self?: unknown } = {
+      value: 4,
+      read() {
+        return this.value;
+      },
+    };
+    api.self = api;
+    const snapshot = reader.read({ api, factory: () => api }) as {
+      api: typeof api;
+      factory(): typeof api;
+    };
+    expect(snapshot.api).not.toBe(api);
+    expect(snapshot.api.self).toBe(snapshot.api);
+    expect(snapshot.factory()).toBe(snapshot.api);
+    expect(snapshot.factory().read).toBe(snapshot.api.read);
+    expect(snapshot.api.read()).toBe(4);
+  });
+
+  it('refreshes a cached projection without rerunning accessors during discovery', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    let reads = 0;
+    const api = {
+      value: 1,
+      obsolete: 'remove' as string | undefined,
+      get current() {
+        reads++;
+        return this.value;
+      },
+      next() {
+        this.value++;
+      },
+    };
+    const raw = { api, factory: () => api };
+    const first = reader.read(raw) as { api: typeof api; factory(): typeof api };
+    expect(reads).toBe(1);
+    first.api.next();
+    delete (api as Partial<typeof api>).obsolete;
+    const second = reader.read(raw) as typeof first;
+    expect(reads).toBe(2);
+    expect(second.api).toBe(first.api);
+    expect(first.api.current).toBe(2);
+    expect(first.api.value).toBe(2);
+    expect(Object.hasOwn(first.api, 'obsolete')).toBe(false);
+    expect(second.factory()).toBe(first.api);
+    expect(reads).toBe(3);
+  });
+
+  it('does not wrap an already projected returned callable or record again', () => {
+    const invoke = vi.fn((call: () => void) => call());
+    const reader = createScopedExposesReader(() => invoke);
+    const api = { read: () => 7 };
+    const first = reader.read({ api }) as { api: typeof api };
+    const second = reader.read({ echo: () => first.api, read: () => first.api.read }) as {
+      echo(): typeof api;
+      read(): () => number;
+    };
+    expect(second.echo()).toBe(first.api);
+    expect(second.read()).toBe(first.api.read);
+    expect(second.read()()).toBe(7);
+    expect(invoke).toHaveBeenCalledTimes(4);
+  });
+
+  it('keeps owner caches separate even for a shared author object', () => {
+    const firstReader = createScopedExposesReader(() => (call) => call());
+    const secondReader = createScopedExposesReader(() => (call) => call());
+    const api = { read: () => 7 };
+    const first = firstReader.read({ api }) as { api: typeof api };
+    const second = secondReader.read({ api }) as typeof first;
+    expect(first.api).not.toBe(second.api);
+    expect(first.api.read).not.toBe(second.api.read);
+    firstReader.invalidate();
+    expect(() => first.api.read()).toThrow(/terminal disposal/);
+    expect(second.api.read()).toBe(7);
+  });
+
+  it('keeps returned registry snapshots detached and propagates thrown values unchanged', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const failure = Object.freeze({ reason: 'author' });
+    const raw = {
+      label: 'author',
+      read() {
+        return this.label;
+      },
+      factory: () => () => {
+        throw failure;
+      },
+    };
+    const snapshot = reader.read(raw) as typeof raw;
+    snapshot.label = 'consumer';
+    expect(snapshot.read()).toBe('author');
+    expect(raw.label).toBe('author');
+    let observed: unknown;
+    try {
+      snapshot.factory()();
+    } catch (error) {
+      observed = error;
+    }
+    expect(observed).toBe(failure);
   });
 });
 

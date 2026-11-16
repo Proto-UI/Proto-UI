@@ -8,7 +8,8 @@ import { createControlLabelRef } from '../../core/src/control-label';
 import { createA11ySemanticObjectRef } from '@proto.ui/core';
 import { createWebA11yProjectionRegistry } from '../../modules/a11y/src/web';
 import { nativeControlLabelArtifact } from '../src/native-control-label';
-import { nativeInteractionArtifacts } from '../src/native-interaction';
+import { nativeSupportArtifacts } from '../src/native-interaction';
+import { nativeSupportPlanFromFeatures } from '../src/native-support/plan';
 
 type Request = { source: 'pointer' | 'accessibility'; isCurrent(): boolean };
 type Pair = {
@@ -56,12 +57,8 @@ function loadNative(): NativeModule {
   return exports as NativeModule;
 }
 function loadInteraction() {
-  const files = new Map(
-    nativeInteractionArtifacts('full', { controlLabel: true }).map((file) => [
-      file.path,
-      file.contents,
-    ])
-  );
+  const plan = nativeSupportPlanFromFeatures(['control-label']);
+  const files = new Map(nativeSupportArtifacts(plan).map((file) => [file.path, file.contents]));
   const cache = new Map<string, Record<string, unknown>>();
   function load(file: string): Record<string, unknown> {
     const existing = cache.get(file);
@@ -85,7 +82,7 @@ function loadInteraction() {
     });
     return exports;
   }
-  return load('.proto-ui/interaction/native-v1.ts').createNativeInteraction as (
+  return load(plan.interactionPath).createNativeInteraction as (
     options: Record<string, unknown>
   ) => {
     asAccessible(): {
@@ -566,14 +563,28 @@ describe('native ControlLabel authority and derived-name ownership', () => {
   });
 
   it('emits no ControlLabel support for a graph with no reached declaration', () => {
-    expect(
-      nativeInteractionArtifacts('full').some((file) => file.path.includes('control-label'))
-    ).toBe(false);
-    expect(nativeInteractionArtifacts('full')[1].contents).not.toContain(
-      'createNativeControlLabel'
-    );
-    const reached = nativeInteractionArtifacts('full', { controlLabel: true });
+    const plain = nativeSupportArtifacts(nativeSupportPlanFromFeatures(['a11y']));
+    expect(plain.some((file) => file.path.includes('control-label'))).toBe(false);
+    const plan = nativeSupportPlanFromFeatures(['control-label']);
+    const reached = nativeSupportArtifacts(plan);
     expect(reached.some((file) => file.path === nativeControlLabelArtifact.path)).toBe(true);
-    expect(reached[1].contents).toContain('options.getAssociations ? createNativeControlLabel');
+    const paths = new Set(reached.map((file) => file.path));
+    const imports = (contents: string) =>
+      ts
+        .createSourceFile('support.ts', contents, ts.ScriptTarget.Latest, true)
+        .statements.filter(ts.isImportDeclaration)
+        .map((statement) => (statement.moduleSpecifier as ts.StringLiteral).text);
+    expect(imports(reached.find((file) => file.path === plan.interactionPath)!.contents)).toContain(
+      './control-label-v1'
+    );
+    for (const file of plain) expect(imports(file.contents)).not.toContain('./control-label-v1');
+    for (const file of reached)
+      for (const specifier of imports(file.contents)) {
+        if (!specifier.startsWith('.')) continue;
+        expect(
+          paths.has(path.posix.join(path.posix.dirname(file.path), specifier) + '.ts'),
+          `Closed ordinary import: ${file.path} -> ${specifier}`
+        ).toBe(true);
+      }
   });
 });

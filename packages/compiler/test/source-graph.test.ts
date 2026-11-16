@@ -18,6 +18,16 @@ export const Choice=definePrototype({name:'${name}',setup(def){}});`;
 
 // These exercise the public frontend, not generated-source text or resolver wiring.
 describe('static local source graph', () => {
+  it('resolves mapped package exports through the same closed authored graph', () => {
+    const result=parsePrototype(`import Subject from '@example/widgets/subject'; export default Subject;`,{sourceImports:{'@example/widgets/subject':'vendor/widgets/subject.proto.ts'},files:{'vendor/widgets/subject.proto.ts':`import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'mapped',setup(def){}});`}});
+    expect(result).toMatchObject({ok:true,value:{name:'mapped'}});
+  });
+
+  it('rejects effectful mapped package code without evaluating it', () => {
+    const result=parsePrototype(`import Subject from '@example/widgets'; export default Subject;`,{sourceImports:{'@example/widgets':'vendor/index.ts'},files:{'vendor/index.ts':`globalThis.packageExecuted=true; export const Subject=1;`}});
+    expect(result).toMatchObject({ok:false,diagnostics:[{code:'PUI1004'}]});
+    expect((globalThis as Record<string,unknown>).packageExecuted).toBeUndefined();
+  });
   it('resolves a default import alias through explicit default forwarding', () => {
     const result = parsePrototype(
       `import Renamed from './bridge'; export {Renamed as default};`,
@@ -200,7 +210,7 @@ import {definePrototype} from '@proto.ui/core';`);
     expect(result).toMatchObject({ ok: true, value: { name: 'forward', exposes: [{ name: 'ready' }] } });
   });
 
-  it('rejects arbitrary package defaults and indirect core factory calls', () => {
+  it('rejects arbitrary package defaults and preserves canonical factory identity through a barrel', () => {
     expect(parsePrototype(`import Factory from 'unknown-package'; ${prototype}`)).toMatchObject({
       ok: false,
       diagnostics: [{ code: 'PUI1003' }],
@@ -209,7 +219,7 @@ import {definePrototype} from '@proto.ui/core';`);
       parsePrototype(`import {factory} from './bridge'; export default factory({name:'x',setup(def){}});`, {
         files: { 'bridge.ts': `import {definePrototype as factory} from '@proto.ui/core'; export {factory};` },
       })
-    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1002' }] });
+    ).toMatchObject({ ok: true, value: { name: 'x' } });
   });
 
   it('rejects lexical root traversal even if a similarly named source is supplied', () => {

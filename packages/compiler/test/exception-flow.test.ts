@@ -35,24 +35,37 @@ function visit(value: unknown, action: (node: Record<string, unknown>) => void):
 
 describe('authored exception source admission', () => {
   it.each([
-    'react-runtime-v1', 'react-dom-source-v1', 'vue-source-v1', 'vue2-source-v1',
-    'web-component-source-v1', 'gpui-source-v1',
+    'react-runtime-v1',
+    'react-dom-source-v1',
+    'vue-source-v1',
+    'vue2-source-v1',
+    'web-component-source-v1',
+    'gpui-source-v1',
   ])('preserves thrown data and finalizer control flow through %s', (profile) => {
     for (const exportName of ['default', 'FinallyRenderer']) {
-      const result = compilePrototype(source, { profile, exportName, fileName: 'exception-flow.proto.ts' });
+      const result = compilePrototype(source, {
+        profile,
+        exportName,
+        fileName: 'exception-flow.proto.ts',
+      });
       if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
       expect(result.ok).toBe(true);
       expect(validateIR(result.value.ir).ok).toBe(true);
     }
   });
 
-  it.each([
-    'react-dom-ssr-v1', 'vue-ssr-v1', 'vue2-ssr-v1', 'web-component-ssr-v1',
-  ])('retains the explicit unimplemented registry boundary for %s', (profile) => {
-    for (const exportName of ['default', 'FinallyRenderer'])
-      expect(compilePrototype(source, { profile, exportName, fileName: 'exception-flow.proto.ts' }))
-        .toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4001', category: 'unsupported-input' }] });
-  });
+  it.each(['react-dom-ssr-v1', 'vue-ssr-v1', 'vue2-ssr-v1', 'web-component-ssr-v1'])(
+    'retains the explicit unimplemented registry boundary for %s',
+    (profile) => {
+      for (const exportName of ['default', 'FinallyRenderer'])
+        expect(
+          compilePrototype(source, { profile, exportName, fileName: 'exception-flow.proto.ts' })
+        ).toMatchObject({
+          ok: false,
+          diagnostics: [{ code: 'PUI4001', category: 'unsupported-input' }],
+        });
+    }
+  );
 
   it.each([
     { profile: 'react-dom-ssr-v1', emit: emitReactSource },
@@ -77,7 +90,7 @@ describe('authored exception source admission', () => {
     expect(methods.find((entry) => entry.name === 'caughtScope')?.returnType).toBe('boolean');
   });
 
-  it('keeps dormant Qt and Flutter emitters exhaustive without activating either profile', () => {
+  it('emits ordinary exception-flow calls in both dormant native experiments', () => {
     const ir = parsed();
     expect(emitQtSource(ir).ok).toBe(true);
     expect(emitFlutterSource(ir).ok).toBe(true);
@@ -88,10 +101,12 @@ describe('authored exception source admission', () => {
       "def.expose.value('leak', error as {code:string});",
       "def.expose.state('leak', error as {get:()=>boolean});",
     ]) {
-      expect(parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      expect(
+        parsePrototype(`import {definePrototype} from '@proto.ui/core';
         export default definePrototype({name:'opaque-catch',setup(def){
           try {throw {code:'private'};} catch(error) {${action}}
-        }});`)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+        }});`)
+      ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
     }
   });
 

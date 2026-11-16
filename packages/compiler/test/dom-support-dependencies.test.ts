@@ -11,16 +11,22 @@ const profiles = [
   ['Vue2', emitVue2Source, 'vue'],
 ] as const;
 function importsPackage(code: string, name: string): boolean {
-  return ts.createSourceFile('artifact.ts', code, ts.ScriptTarget.Latest, true).statements.some((node) =>
-    ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === name);
+  return ts
+    .createSourceFile('artifact.ts', code, ts.ScriptTarget.Latest, true)
+    .statements.some(
+      (node) =>
+        ts.isImportDeclaration(node) &&
+        ts.isStringLiteral(node.moduleSpecifier) &&
+        node.moduleSpecifier.text === name
+    );
 }
 
 describe.each(profiles)('%s source dependency closure', (_name, emit, framework) => {
-  function compile(interaction: boolean) {
+  function compile(interaction: 'none' | 'focus' | 'overlay') {
     const parsed = parsePrototype(`import { definePrototype } from '@proto.ui/core';
-      import { asFocusable } from '@proto.ui/hooks';
+      import { asFocusable, asOverlay } from '@proto.ui/hooks';
       export default definePrototype({ name: 'ordinary-owner', setup(def) {
-        ${interaction ? 'const focus = asFocusable(); focus.configure({ disabled: false });' : ''}
+        ${interaction === 'focus' ? 'const focus = asFocusable(); focus.configure({ disabled: false });' : interaction === 'overlay' ? 'asOverlay();' : ''}
         return r => r.el('span', 'native');
       } });`);
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
@@ -30,17 +36,42 @@ describe.each(profiles)('%s source dependency closure', (_name, emit, framework)
   }
 
   it('does not advertise Floating UI when no delivered support unit imports it', () => {
-    const output = compile(false);
-    expect([output.code, ...(output.supportingFiles ?? []).map((file) => file.contents)]
-      .some((code) => importsPackage(code, '@floating-ui/dom'))).toBe(false);
-    expect(output.dependencies.some((dependency) => dependency.name === '@floating-ui/dom')).toBe(false);
+    const output = compile('none');
+    expect(
+      [output.code, ...(output.supportingFiles ?? []).map((file) => file.contents)].some((code) =>
+        importsPackage(code, '@floating-ui/dom')
+      )
+    ).toBe(false);
+    expect(output.dependencies.some((dependency) => dependency.name === '@floating-ui/dom')).toBe(
+      false
+    );
     expect(output.dependencies.some((dependency) => dependency.name === framework)).toBe(true);
   });
 
   it('retains the exact pinned dependency when the delivered interaction module imports it', () => {
-    const output = compile(true);
-    expect((output.supportingFiles ?? []).some((file) => importsPackage(file.contents, '@floating-ui/dom'))).toBe(true);
-    expect(output.dependencies).toContainEqual({ name: '@floating-ui/dom', version: '1.8.0', role: 'target' });
+    const output = compile('overlay');
+    expect(
+      (output.supportingFiles ?? []).some((file) =>
+        importsPackage(file.contents, '@floating-ui/dom')
+      )
+    ).toBe(true);
+    expect(output.dependencies).toContainEqual({
+      name: '@floating-ui/dom',
+      version: '1.8.0',
+      role: 'target',
+    });
     expect(output.dependencies.some((dependency) => dependency.name === framework)).toBe(true);
+  });
+
+  it('keeps ordinary focus independent of positioning and Floating UI', () => {
+    const output = compile('focus');
+    expect(
+      [output.code, ...(output.supportingFiles ?? []).map((file) => file.contents)].some((code) =>
+        importsPackage(code, '@floating-ui/dom')
+      )
+    ).toBe(false);
+    expect(output.dependencies.some((dependency) => dependency.name === '@floating-ui/dom')).toBe(
+      false
+    );
   });
 });

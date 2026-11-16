@@ -1,6 +1,14 @@
+import { pruneDeadValues } from './demand-pruning';
+import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
+import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import {
+  observableSemantics,
+  type ObservableSemantics,
+  type PropsUpdatePolicy,
+} from './observable-semantics';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -57,18 +65,34 @@ export interface TargetProfile {
   readonly hostCapabilities: readonly HostCapability[];
   readonly dependencies: readonly TargetDependency[];
   readonly helpers: readonly TargetHelper[];
+  readonly observableSemantics: ObservableSemantics;
 }
 export interface TargetSelection {
   profile?: string;
   framework?: FrameworkId;
   version?: string;
   mode?: TargetMode;
+  /** Host policy is an explicit update request after changed input, never a Props-channel effect. */
+  propsUpdatePolicy?: PropsUpdatePolicy;
   /** Restrict the available host; omission uses the profile's declared host. */
   hostCapabilities?: readonly HostCapability[];
   span?: SourceSpan;
 }
 
 const nativeOperations: readonly Operation[] = Object.freeze([
+  'scheduler.delay',
+  'delay.cancel',
+  'presence.owner',
+  'presence.onCompletionRequest',
+  'presence.publish',
+  'presence.settle',
+  'presence.isCurrent',
+  'presentation.snapshotCompletion',
+  'meta.get',
+  'capture.getState',
+  'capture.getMethod',
+  'capture.getAsHook',
+  'capture.getAsHookHandle',
   'run.update',
   'style.tw',
   'rule.declare',
@@ -80,7 +104,6 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'feedback.style.clearPatch',
   'subscription.release',
   'binding.release',
-  'transitionAction.call',
   'props.define',
   'props.setDefaults',
   'props.watch',
@@ -102,7 +125,6 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'hook.asHitParticipation',
   'hook.asCollection',
   'hook.asCollectionItem',
-  'hook.asTransition',
   'event.on',
   'event.onGlobal',
   'event.requestDefaultActionPrevention',
@@ -164,10 +186,6 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'tableStructure.getObjectRef',
   'tableStructure.getSnapshot',
   'host.get',
-  'transition.configure',
-  'transitionControls.enter',
-  'transitionControls.leave',
-  'transitionControls.complete',
   'collection.configure',
   'collection.getItems',
   'collection.getCount',
@@ -288,9 +306,15 @@ const nativeHostCapabilities: readonly HostCapability[] = Object.freeze([
   'focus-target',
   'accessibility-tree',
 ]);
-function freezeProfile(profile: TargetProfile): TargetProfile {
+function freezeProfile(
+  profile: Omit<TargetProfile, 'observableSemantics'> & {
+    observableSemantics?: ObservableSemantics;
+  }
+): TargetProfile {
   return Object.freeze({
     ...profile,
+    observableSemantics:
+      profile.observableSemantics ?? observableSemantics(profile.framework, profile.mode),
     operations: Object.freeze([...profile.operations]),
     hostCapabilities: Object.freeze([...profile.hostCapabilities]),
     dependencies: Object.freeze(
@@ -432,7 +456,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: nativeOperations,
+    operations: nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
@@ -541,7 +565,7 @@ export function resolveTargetProfile(
         ? 'react-dom-source-v1'
         : 'react-runtime-v1'
       : `${framework}-source-v1`);
-  const profile = Object.hasOwn(TARGET_PROFILES, id)
+  let profile = Object.hasOwn(TARGET_PROFILES, id)
     ? TARGET_PROFILES[id as TargetProfileId]
     : undefined;
   if (!profile)
@@ -573,6 +597,30 @@ export function resolveTargetProfile(
       span
     );
   }
+  if (options.propsUpdatePolicy !== undefined) {
+    if (!['explicit', 'host'].includes(options.propsUpdatePolicy)) {
+      return unsupported(
+        'PUI4008',
+        `Unknown props update policy ${JSON.stringify(options.propsUpdatePolicy)}.`,
+        span
+      );
+    }
+    if (profile.framework === 'gpui' && options.propsUpdatePolicy !== 'explicit') {
+      return unsupported(
+        'PUI4008',
+        'GPUI currently admits explicit props update intent only.',
+        span
+      );
+    }
+    profile = freezeProfile({
+      ...profile,
+      observableSemantics: observableSemantics(
+        profile.framework,
+        profile.mode,
+        options.propsUpdatePolicy
+      ),
+    });
+  }
   if (options.hostCapabilities) {
     for (const capability of options.hostCapabilities) {
       if (!profile.hostCapabilities.includes(capability))
@@ -600,26 +648,17 @@ export interface TargetOperationAnalysis {
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
 }
-interface HelperBinding {
-  fn: FunctionIR;
-  scope: Scope;
-  parameter?: true;
-}
-type Scope = Map<string, HelperBinding | undefined>;
-
-/** Check the reached semantic call graph, not filenames, source hashes or requirements labels.
- * Both dynamic branches are conservatively reached; function declarations are reached on use.
- * Callbacks and the returned render function are entry points even if not invoked during setup.
- * The input is checked semantic IR; structural/type validation remains the preceding stage.
- */
+/** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
-  ir: PrototypeIR,
+  input: PrototypeIR,
   profile: TargetProfile
 ): CompileResult<TargetOperationAnalysis> {
+  const ir = pruneDeadValues(input);
   const resolved = resolveTargetProfile({
     profile: profile.id,
     framework: profile.framework,
     mode: profile.mode,
+    propsUpdatePolicy: profile.observableSemantics.props.update,
     ...(profile.version === null ? {} : { version: profile.version }),
     hostCapabilities: profile.hostCapabilities,
     span: ir.setup.span,
@@ -631,88 +670,49 @@ export function checkTargetOperations(
   const operations = new Set<Operation>();
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
-  const reachedHooks = new Set<string>();
-  const activeHooks = new Set<string>();
-  const reachedFunctions = new Set<FunctionIR>();
-  const activeFunctions = new Set<FunctionIR>();
-  const diagnostics: CompilerDiagnostic[] = [];
-  function diagnostic(code: string, message: string, span: SourceSpan): void {
+  const reachedHooks = new Set<string>(),
+    reachedFunctions = new Set<FunctionIR>();
+  const visited = new Set<ExpressionIR>(),
+    diagnostics: CompilerDiagnostic[] = [];
+  let opaque = false;
+  function diagnostic(code: string, message: string, span: SourceSpan) {
     diagnostics.push({ code, category: 'unsupported-input', message, span });
   }
-  function fn(value: FunctionIR, outer: Scope): void {
-    if (activeFunctions.has(value)) {
-      diagnostic(
-        'PUI4005',
-        'Recursive function expansion is not supported by this target. Remove the recursive helper call.',
-        value.span
-      );
-      return;
-    }
-    if (reachedFunctions.has(value)) return;
-    reachedFunctions.add(value);
-    activeFunctions.add(value);
-    const scope = new Map(outer);
-    for (const parameter of value.parameters) {
-      if (selected.id === 'gpui-source-v1' && (parameter.callback || parameter.default))
+  function operation(value: Operation, span: SourceSpan) {
+    operations.add(value);
+    sites.push({ operation: value, span });
+    if (!allowed.has(value)) {
+      if (selected.id === 'gpui-source-v1' && GPUI_UNAVAILABLE_OPERATIONS.has(value))
+        diagnostic('PUI_GPUI_SDK_CAPABILITY', `${value}: ${GPUI_MISSING_FOCUS_TREE}`, span);
+      else
         diagnostic(
           'PUI4003',
-          'Checked callback parameters and per-call parameter defaults are not implemented by gpui-source-v1.',
-          value.span
+          `Operation ${value} is not implemented by ${selected.id}. Select an explicit supported profile; native output never falls back to Runtime/Adapter.`,
+          span
         );
-      if (parameter.default) expression(parameter.default, scope);
-      scope.set(
-        parameter.name,
-        parameter.callback
-          ? {
-              fn: {
-                ...parameter.callback,
-                body: [],
-                phase: value.phase,
-                context: 'helper',
-                span: value.span,
-              },
-              scope,
-              parameter: true,
-            }
-          : undefined
-      );
+      return;
     }
-    statements(value.body, scope);
-    activeFunctions.delete(value);
+    for (const required of OPERATION_RULES[value].requiredCapabilities)
+      if (!capabilities.has(required as HostCapability))
+        diagnostic(
+          'PUI4004',
+          `Operation ${value} requires host capability ${required}, which is unavailable in ${selected.id}.`,
+          span
+        );
   }
-  function expression(value: ExpressionIR, scope: Scope): void {
+  function expression(value: ExpressionIR) {
+    if (visited.has(value)) return;
+    visited.add(value);
     switch (value.kind) {
-      case 'undefined':
-      case 'literal':
-        return;
+      case 'operation':
+        operation(value.operation, value.span);
+        break;
       case 'style-handle':
-        operations.add('style.tw');
-        sites.push({ operation: 'style.tw', span: value.span });
-        if (!allowed.has('style.tw'))
-          diagnostic(
-            'PUI4003',
-            `Static style handles are not implemented by ${selected.id}.`,
-            value.span
-          );
-        return;
+        operation('style.tw', value.span);
+        break;
       case 'rule':
-        operations.add('rule.declare');
-        sites.push({ operation: 'rule.declare', span: value.span });
-        if (!allowed.has('rule.declare'))
-          diagnostic(
-            'PUI4003',
-            `Declarative Rule projection is not implemented by ${selected.id}.`,
-            value.span
-          );
-        else if (!capabilities.has('style-projection'))
-          diagnostic(
-            'PUI4004',
-            `Rule projection requires host capability style-projection, which is unavailable in ${selected.id}.`,
-            value.span
-          );
-        expression(value.receiver, scope);
-        for (const state of value.states) expression(state.value, scope);
-        return;
+        operation('rule.declare', value.span);
+        break;
       case 'context-key':
         if (!capabilities.has('context-scope'))
           diagnostic(
@@ -720,12 +720,7 @@ export function checkTargetOperations(
             `Context key ${JSON.stringify(value.keyId)} requires a declared logical Context scope in ${selected.id}.`,
             value.span
           );
-        return;
-      case 'reference': {
-        const binding = scope.get(value.name);
-        if (binding) fn(binding.fn, binding.scope);
-        return;
-      }
+        break;
       case 'member':
         if (
           value.object.type === 'event' &&
@@ -743,40 +738,7 @@ export function checkTargetOperations(
             `Portable pointer sample facts are not implemented by ${selected.id}.`,
             value.span
           );
-        expression(value.object, scope);
-        return;
-      case 'unary':
-        expression(value.operand, scope);
-        return;
-      case 'lexical-cell':
-        expression(value.value, scope);
-        return;
-      case 'lexical-read':
-      case 'lexical-update':
-        expression(value.cell, scope);
-        return;
-      case 'lexical-write':
-        expression(value.cell, scope);
-        expression(value.value, scope);
-        return;
-      case 'conditional':
-        if (selected.id === 'gpui-source-v1')
-          diagnostic(
-            'PUI4003',
-            'Conditional expressions are not implemented by gpui-source-v1.',
-            value.span
-          );
-        expression(value.condition, scope);
-        expression(value.whenTrue, scope);
-        expression(value.whenFalse, scope);
-        return;
-      case 'binary':
-        expression(value.left, scope);
-        expression(value.right, scope);
-        return;
-      case 'array':
-        for (const element of value.elements) expression(element, scope);
-        return;
+        break;
       case 'record':
         if (value.type === 'template-props' && !capabilities.has('style-projection'))
           diagnostic(
@@ -784,113 +746,59 @@ export function checkTargetOperations(
             `TemplateStyleHandle requires host capability style-projection, which is unavailable in ${selected.id}.`,
             value.span
           );
-        for (const entry of value.entries) expression(entry.value, scope);
-        return;
-      case 'function':
-        fn(value.function, scope);
-        return;
-      case 'helper-call': {
-        for (const argument of value.arguments) expression(argument, scope);
-        const binding = scope.get(value.name);
-        if (!binding)
-          diagnostic(
-            'PUI4005',
-            `Helper ${JSON.stringify(value.name)} has no admitted semantic function body. Declare a static helper; opaque Module or capability functions cannot be lowered.`,
-            value.span
-          );
-        else if (!binding.parameter) fn(binding.fn, binding.scope);
-        return;
-      }
-      case 'authored-hook': {
-        const hook = hooks.get(value.hookId);
-        if (!hook)
-          diagnostic(
-            'PUI4006',
-            `Authored hook ${JSON.stringify(value.hookId)} has no semantic body. Include its static source graph before choosing a target.`,
-            value.span
-          );
-        else if (activeHooks.has(hook.id))
-          diagnostic(
-            'PUI4006',
-            `Recursive authored hook ${JSON.stringify(hook.id)} cannot be expanded. Remove the recursive composition.`,
-            value.span
-          );
-        else if (!reachedHooks.has(hook.id)) {
-          reachedHooks.add(hook.id);
-          activeHooks.add(hook.id);
-          fn(hook.setup, new Map(moduleScope));
-          activeHooks.delete(hook.id);
-        }
-        return;
-      }
-      case 'operation': {
-        operations.add(value.operation);
-        sites.push({ operation: value.operation, span: value.span });
-        if (!allowed.has(value.operation)) {
-          const action =
-            selected.mode === 'source'
-              ? 'Choose react-runtime-v1 explicitly if its bridge cost is acceptable, or remove this operation; native output never falls back to Runtime/Adapter.'
-              : 'Use an operation with an admitted compiler contract; an Adapter manifest cannot enable an unknown Module operation.';
-          diagnostic(
-            'PUI4003',
-            `Operation ${value.operation} is not implemented by ${selected.id}. ${action}`,
-            value.span
-          );
-        } else {
-          const rule = OPERATION_RULES[value.operation];
-          for (const capability of rule.requiredCapabilities) {
-            if (!capabilities.has(capability as HostCapability))
-              diagnostic(
-                'PUI4004',
-                `Operation ${value.operation} requires host capability ${capability}, which is unavailable in ${selected.id}. Select a host/profile that implements this capability.`,
-                value.span
-              );
-          }
-        }
-        if (value.receiver) expression(value.receiver, scope);
-        for (const argument of value.arguments) expression(argument, scope);
-        return;
-      }
+        break;
     }
   }
-  function statements(body: readonly StatementIR[], scope: Scope): void {
-    for (const statement of body) {
-      switch (statement.kind) {
-        case 'const':
-          if (statement.value.kind === 'function') {
-            scope.set(statement.name, { fn: statement.value.function, scope: new Map(scope) });
-          } else {
-            const binding =
-              statement.value.kind === 'reference' ? scope.get(statement.value.name) : undefined;
-            if (!binding) expression(statement.value, scope);
-            scope.set(statement.name, binding);
-          }
-          break;
-        case 'effect':
-          expression(statement.expression, scope);
-          break;
-        case 'if':
-          expression(statement.condition, scope);
-          statements(statement.then, new Map(scope));
-          statements(statement.otherwise, new Map(scope));
-          break;
-        case 'try':
-          statements(statement.body, new Map(scope));
-          if (statement.catch) statements(statement.catch.body, new Map(scope));
-          if (statement.finally) statements(statement.finally, new Map(scope));
-          break;
-        case 'throw':
-          expression(statement.value, scope);
-          return;
-        case 'return':
-          if (statement.value) expression(statement.value, scope);
-          return;
-      }
-    }
+  function hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>, recursive = false) {
+    if (!hooks.has(value.hookId))
+      diagnostic(
+        'PUI4006',
+        `Authored hook ${JSON.stringify(value.hookId)} has no semantic body.`,
+        value.span
+      );
+    if (recursive)
+      diagnostic(
+        'PUI4006',
+        `Recursive authored hook ${JSON.stringify(value.hookId)} cannot be installed.`,
+        value.span
+      );
+    reachedHooks.add(value.hookId);
   }
-  const moduleScope: Scope = new Map();
-  statements(ir.moduleBindings ?? [], moduleScope);
-  fn(ir.setup, moduleScope);
+  traceCallableDemand(ir, {
+    expression,
+    function: (fn) => reachedFunctions.add(fn),
+    hook,
+    opaque() {
+      opaque = true;
+    },
+  });
+  if (opaque) {
+    // Unknown or recursive callable provenance never permits an elision proof.
+    // Retain the checked native program conservatively; this is not a runtime fallback.
+    function retain(value: unknown): void {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) {
+        value.forEach(retain);
+        return;
+      }
+      const node = value as Record<string, unknown>;
+      if (Array.isArray(node.body) && Array.isArray(node.parameters))
+        reachedFunctions.add(value as FunctionIR);
+      if (typeof node.kind === 'string' && node.span && node.type !== undefined)
+        expression(value as ExpressionIR);
+      if (node.kind === 'authored-hook')
+        hook(value as Extract<ExpressionIR, { kind: 'authored-hook' }>);
+      for (const [key, child] of Object.entries(node))
+        if (!['type', 'span', 'captures', 'capture'].includes(key)) retain(child);
+    }
+    retain(ir.moduleBindings);
+    retain(ir.setup);
+    ir.hooks.forEach((item) => {
+      retain(item.setup);
+      retain(item.projectHandle);
+      retain(item.configure);
+    });
+  }
   if (selected.mode === 'source')
     diagnostics.push(...validateNativeInteraction(ir, reachedFunctions));
   return diagnostics.length

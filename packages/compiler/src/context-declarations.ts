@@ -1,7 +1,9 @@
 import ts from 'typescript';
 import type { DataType } from './data-types';
 import type { SourceSpan } from './ir';
-import { rejectNode, sourceName, sourceSpan, type SourceModule } from './parser-module';
+import type { SourceModule } from './parser-module';
+import { sourceName } from './source-resolution';
+import { rejectNode, sourceSpan } from './source-syntax';
 import { parseSourceDataType } from './source-types';
 
 /** Serializable declaration identity; a debug name is never a key identity. */

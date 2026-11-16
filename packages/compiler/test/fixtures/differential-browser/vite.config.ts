@@ -1,11 +1,9 @@
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import sourceConfig from '../../../../../vitest.config';
-import {
-  transformWithEsbuild,
-  type Plugin,
-} from '../../../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { transformWithEsbuild, type Plugin } from 'vite';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
@@ -34,15 +32,60 @@ const sources: Record<string, string> = {
 };
 const supportingModules = new Map<string, { specifier: string; file: string; contents: string }>();
 const supportingFiles = new Map<string, Map<string, string>>();
+
+function recreateReturnedOwner(code: string): string {
+  const source = ts.createSourceFile(
+    'GeneratedButton.tsx',
+    code,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const factories = source.statements.filter(
+    (statement): statement is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(statement) && statement.name?.text === 'createComponent'
+  );
+  const reactImports = source.statements.filter(
+    (statement): statement is ts.ImportDeclaration =>
+      ts.isImportDeclaration(statement) &&
+      ts.isStringLiteral(statement.moduleSpecifier) &&
+      statement.moduleSpecifier.text === 'react'
+  );
+  const binding = reactImports[0]?.importClause?.namedBindings;
+  const returns = factories[0]?.body?.statements.filter(ts.isReturnStatement) ?? [];
+  const original = returns[0]?.expression;
+  if (
+    factories.length !== 1 ||
+    reactImports.length !== 1 ||
+    returns.length !== 1 ||
+    !binding ||
+    !ts.isNamespaceImport(binding) ||
+    !original ||
+    !ts.isCallExpression(original)
+  )
+    throw new Error(
+      'Cannot locate the generated component factory for the owner-recreation mutant.'
+    );
+
+  // Mutate the returned component's identity only. Preserve the complete adapter
+  // call, including its independently selected Props update policy and options.
+  const react = binding.name.text;
+  const mutation = `return ((Inner: ${react}.ElementType) => (props: any) => ${react}.createElement(Inner, { ...props, key: String(props.present) }))(${original.getText(source)});`;
+  return code.slice(0, returns[0].getStart(source)) + mutation + code.slice(returns[0].end);
+}
+
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
   resolveId(id, importer) {
     if (importer && id.startsWith('.')) {
       const support = supportingModules.get(importer);
-      const specifier = support?.specifier ??
+      const specifier =
+        support?.specifier ??
         (importer.startsWith('\0') && importer.endsWith('.tsx') ? importer.slice(1, -4) : null);
       if (specifier && supportingFiles.has(specifier)) {
-        const file = path.posix.normalize(path.posix.join(path.posix.dirname(support?.file ?? 'GeneratedButton.tsx'), id));
+        const file = path.posix.normalize(
+          path.posix.join(path.posix.dirname(support?.file ?? 'GeneratedButton.tsx'), id)
+        );
         const files = supportingFiles.get(specifier)!;
         for (const candidate of [file, `${file}.ts`, `${file}.tsx`]) {
           const resolved = files.get(candidate);
@@ -58,7 +101,8 @@ const emitted: Plugin = {
     if (support) {
       if (support.file.endsWith('.css')) return support.contents;
       return transformWithEsbuild(support.contents, support.file, {
-        loader: support.file.endsWith('.tsx') ? 'tsx' : 'ts', sourcemap: true,
+        loader: support.file.endsWith('.tsx') ? 'tsx' : 'ts',
+        sourcemap: true,
       });
     }
     if (!id.startsWith('\0') || !id.endsWith('.tsx')) return null;
@@ -68,7 +112,8 @@ const emitted: Plugin = {
     const result = await compileFile(sources[specifier], {
       root: repository,
       componentName: 'GeneratedButton',
-      profile: specifier === 'virtual:update-intent-source' ? 'react-dom-source-v1' : 'react-runtime-v1',
+      profile:
+        specifier === 'virtual:update-intent-source' ? 'react-dom-source-v1' : 'react-runtime-v1',
     });
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     const files = new Map<string, string>();
@@ -95,10 +140,7 @@ const emitted: Plugin = {
         'count.set(0); run.expose.emit("viewEnded");'
       );
     } else if (specifier === 'virtual:retained-owner-recreate-owner') {
-      code = code.replace(
-        'return __puiAdapt(prototype, options);',
-        'const Inner = __puiAdapt(prototype, options); return (props: any) => __puiReact.createElement(Inner, { ...props, key: String(props.present) });'
-      );
+      code = recreateReturnedOwner(code);
     } else if (specifier === 'virtual:retained-owner-reattach-state-loss') {
       code = code.replace(
         'def.expose.state("count", count);',
@@ -120,13 +162,15 @@ const emitted: Plugin = {
       generatedSha256: createHash('sha256').update(code).digest('hex'),
       mutant: code !== result.value.output.code,
       supportingFiles: (result.value.output.supportingFiles ?? []).map((file) => ({
-        path: file.path, kind: file.kind,
+        path: file.path,
+        kind: file.kind,
         sha256: createHash('sha256').update(file.contents).digest('hex'),
       })),
     };
     return transformWithEsbuild(
       `${code}\nexport const __puiBrowserFixtureCompilation = ${JSON.stringify(compilation)};\n`,
-      'GeneratedButton.tsx', { loader: 'tsx', sourcemap: true }
+      'GeneratedButton.tsx',
+      { loader: 'tsx', sourcemap: true }
     );
   },
 };

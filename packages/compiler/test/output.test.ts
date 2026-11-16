@@ -51,7 +51,9 @@ describe('transactional create-only compiler delivery', () => {
       expect(await readFile(path.join(directory, 'Component.tsx'), 'utf8')).toBe(
         compilation.output.code + '\n//# sourceMappingURL=Component.tsx.map\n'
       );
-      expect(JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version).toBe(3);
+      expect(
+        JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version
+      ).toBe(3);
       expect(
         JSON.parse(await readFile(path.join(directory, 'provenance.json'), 'utf8')).profile
       ).toBe('react-runtime-v1');
@@ -94,4 +96,31 @@ describe('transactional create-only compiler delivery', () => {
     await writeFile(entry, `${source}\nexport { type TypeOnly } from './absent';`);
     expect(await compileFile(entry, { root })).toMatchObject({ ok: true });
   });
+
+  it.each([
+    "export type {Used} from './used'; export type {Unused} from './absent';",
+    "import type {Used as Present} from './used'; import type {Missing} from './absent'; export type Used=Present; export type Unused=Missing;",
+  ])(
+    'follows the requested type without requiring an unrelated missing type: %s',
+    async (barrel) => {
+      const root = await mkdtemp(path.join(tmpdir(), 'proto-compiler-type-barrel-'));
+      temporary.push(root);
+      const entry = path.join(root, 'entry.proto.ts');
+      await writeFile(path.join(root, 'barrel.ts'), barrel);
+      await writeFile(path.join(root, 'used.ts'), 'export interface Used {value:number}');
+      await writeFile(
+        entry,
+        "import {definePrototype} from '@proto.ui/core';import type {Used} from './barrel';export default definePrototype({name:'type-barrel',setup(def){def.expose.method('read',(value:Used)=>value.value);}});"
+      );
+      expect(await compileFile(entry, { root })).toMatchObject({ ok: true });
+      await writeFile(
+        entry,
+        "import {definePrototype} from '@proto.ui/core';import type {Unused} from './barrel';export default definePrototype({name:'type-barrel',setup(def){def.expose.method('read',(value:Unused)=>value.value);}});"
+      );
+      expect(await compileFile(entry, { root })).toMatchObject({
+        ok: false,
+        diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI1020' })]),
+      });
+    }
+  );
 });

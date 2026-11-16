@@ -130,6 +130,9 @@ export function runtimeSourceEdges(file: ts.SourceFile): SourceEdge[] {
   return sourceEdges(file).filter((edge) => !edge.typeOnly);
 }
 
+/** Missing optional type edges may be deferred; traversal and I/O errors may not. */
+export class MissingLocalSourceError extends Error {}
+
 /**
  * Find a regular source file beneath a declared root without evaluating it.
  * The importer and returned identity are source-root-relative. Both lexical
@@ -162,5 +165,7 @@ export async function resolveLocalSource(
     if (!(await stat(absolute)).isFile()) continue;
     return sourceName(relative);
   }
-  throw new Error(`Missing local source ${specifier} in ${sourceName(importer)}.`);
+  throw new MissingLocalSourceError(
+    `Missing local source ${specifier} in ${sourceName(importer)}.`
+  );
 }

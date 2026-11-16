@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { writeProtoSourceFiles } from './proto-source.mjs';
 import {
   ROOT_DIR,
   buildPublicPackage,
@@ -30,12 +31,20 @@ export function draftExports(manifest) {
       )
         throw new Error(`Unsupported draft source export: ${subpath}`);
       const stem = source.replace('./src/', './dist/').slice(0, -3);
-      return [subpath, { types: `${stem}.d.ts`, import: `${stem}.js`, default: `${stem}.js` }];
+      return [
+        subpath,
+        {
+          ...(Object.hasOwn(entry, 'proto') ? { proto: entry.proto } : {}),
+          types: `${stem}.d.ts`,
+          import: `${stem}.js`,
+          default: `${stem}.js`,
+        },
+      ];
     })
   );
 }
 
-export function localManifest(manifest, versions, exports = manifest.exports) {
+export function localManifest(manifest, versions, exports = manifest.exports, sourceFiles = []) {
   const result = {
     name: manifest.name,
     version: versions.get(manifest.name),
@@ -49,6 +58,7 @@ export function localManifest(manifest, versions, exports = manifest.exports) {
       'README.md',
       'LICENSE',
       ...(manifest.protoUi?.release?.thirdPartyNotices ?? []),
+      ...sourceFiles,
     ],
     protoUi: {
       release: { scan: false },
@@ -125,7 +135,8 @@ export function buildDraftPackages(names, { pack = false } = {}) {
         { outDir: join(stageDir, 'dist'), validate: false }
       );
     } else cpSync(join(pkg.dir, 'dist'), join(stageDir, 'dist'), { recursive: true });
-    const manifest = localManifest(pkg.manifest, versions, pkg.exports);
+    const sourceFiles = writeProtoSourceFiles(pkg, stageDir);
+    const manifest = localManifest(pkg.manifest, versions, pkg.exports, sourceFiles);
     for (const entry of Object.values(manifest.exports))
       for (const target of Object.values(entry)) {
         if (typeof target !== 'string' || target.includes('*')) continue;
