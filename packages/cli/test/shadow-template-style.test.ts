@@ -351,6 +351,59 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
+  it('follows the proven setup receiver through two synchronous helpers', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function inner(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      function outer(definition) { return inner(definition); }
+      definePrototype({ name: 'nested-decoration-helpers', setup(def) {
+        const target = outer(def);
+        return r => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it.each(['(def) =>', 'function (def)'])(
+    'accepts the canonical function-valued setup form %s',
+    async (prefix) => {
+      const { artifact } = await generate(`
+        import { definePrototype, tw } from '@proto.ui/core';
+        definePrototype({ name: 'function-setup', setup: ${prefix} {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return r => r.decoration(target);
+        }});
+      `);
+      expect(artifact.cssText).toContain('padding: 10%;');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+    }
+  );
+
+  it('retains preflight when an intermediate helper also has an opaque caller', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function inner(definition) {
+        const target = definition.feedback.style.declareDecoration();
+        definition.feedback.style.to(target).use(tw('p-[10%]'));
+        return target;
+      }
+      function outer(definition) { return inner(definition); }
+      definePrototype({ name: 'mixed-helper-chain', setup(def) {
+        const target = outer(def);
+        return r => r.decoration(target);
+      }});
+      outer(opaque);
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it('follows a renamed re-export of a synchronous setup helper', async () => {
     const { artifact } = await generate(
       `

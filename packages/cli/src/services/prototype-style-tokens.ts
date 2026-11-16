@@ -1533,9 +1533,15 @@ function isTemplateStyleCall(node) {
 }
 
 function isCanonicalPrototypeSetup(setup, requireTw = true) {
-  if (!ts.isMethodDeclaration(setup)) return false;
-  if (getPropertyName(setup.name) !== 'setup') return false;
-  const config = setup.parent;
+  const declaration = ts.isMethodDeclaration(setup)
+    ? setup
+    : (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) &&
+        ts.isPropertyAssignment(setup.parent) &&
+        setup.parent.initializer === setup
+      ? setup.parent
+      : undefined;
+  if (!declaration || getPropertyName(declaration.name) !== 'setup') return false;
+  const config = declaration.parent;
   const definition = config.parent;
   if (
     !ts.isObjectLiteralExpression(config) ||
@@ -1693,7 +1699,7 @@ function inspectedHelperReferences(helper, scope) {
   return references;
 }
 
-function hasVerifiedDecorationHelperCalls(helper, receiver, scope) {
+function hasVerifiedDecorationHelperCalls(helper, receiver, scope, active = new Set()) {
   if (
     !ts.isFunctionDeclaration(helper) ||
     !helper.name ||
@@ -1703,42 +1709,53 @@ function hasVerifiedDecorationHelperCalls(helper, receiver, scope) {
     !scope.sourceSummary
   )
     return false;
-  const references = inspectedHelperReferences(helper, scope);
-  const argument = parameterName(helper) === receiver;
-  const callsBySetup = new Map();
-  for (const reference of references) {
-    const call = reference.parent;
-    const setup = ts.findAncestor(reference, ts.isFunctionLike);
-    if (
-      !ts.isCallExpression(call) ||
-      call.expression !== reference ||
-      !setup ||
-      !isCanonicalPrototypeSetup(setup, false) ||
-      !isOperationInCallback(setup, call)
-    )
-      return false;
-    const definition = parameterName(setup);
-    const provided = call.arguments[0];
-    if (
-      !definition ||
-      (argument
-        ? !provided || !ts.isIdentifier(provided) || provided.text !== definition
-        : helper.parent !== setup.body ||
-          receiver !== definition ||
-          helper.parameters.some(
-            (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver
-          ))
-    )
-      return false;
-    if (!callsBySetup.has(setup)) callsBySetup.set(setup, new Set());
-    if (argument) callsBySetup.get(setup).add(provided);
+  const origin = styleHandleOrigin(helper);
+  if (active.has(origin)) return false;
+  active.add(origin);
+  try {
+    const references = inspectedHelperReferences(helper, scope);
+    const receivesDefinition = parameterName(helper) === receiver;
+    const callers = new Map();
+    for (const reference of references) {
+      const call = reference.parent;
+      const owner = ts.findAncestor(reference, ts.isFunctionLike);
+      if (
+        !ts.isCallExpression(call) ||
+        call.expression !== reference ||
+        !owner ||
+        !isOperationInCallback(owner, call)
+      )
+        return false;
+      const provided = call.arguments[0];
+      if (
+        receivesDefinition
+          ? !provided || !ts.isIdentifier(provided)
+          : helper.parent !== owner.body ||
+            helper.parameters.some(
+              (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver
+            )
+      )
+        return false;
+      const definition = receivesDefinition ? provided.text : receiver;
+      const existing = callers.get(owner);
+      if (existing && existing.definition !== definition) return false;
+      const facts = existing ?? { definition, arguments: new Set() };
+      if (receivesDefinition) facts.arguments.add(provided);
+      callers.set(owner, facts);
+    }
+    return (
+      callers.size > 0 &&
+      [...callers].every(
+        ([owner, facts]) =>
+          receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper) &&
+          (isCanonicalPrototypeSetup(owner, false)
+            ? parameterName(owner) === facts.definition
+            : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, active))
+      )
+    );
+  } finally {
+    active.delete(origin);
   }
-  return (
-    callsBySetup.size > 0 &&
-    [...callsBySetup].every(([setup, passed]) =>
-      receiverUsesAreDirect(setup, parameterName(setup), passed, helper)
-    )
-  );
 }
 
 function isOwnedDecorationStyleArgument(argument, scope) {
@@ -1760,7 +1777,10 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   if (!callback || !isOperationInCallback(callback, use)) return false;
   let declarationOwner = callback;
   let definition = receiver;
-  if (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) {
+  if (
+    !isCanonicalPrototypeSetup(callback, false) &&
+    (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback))
+  ) {
     if (
       parameterName(callback) !== receiver ||
       callback.parameters.length !== 1 ||
