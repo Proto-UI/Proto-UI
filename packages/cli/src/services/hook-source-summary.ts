@@ -66,6 +66,11 @@ export type HookSourceSummaryContext = {
   resolveSourceFunction(node: ts.Node, source: ts.SourceFile): ts.FunctionLikeDeclaration | null;
   /** Whether an opaque dynamic import can expose the authored function. */
   hasDynamicImportOfFunction(source: ts.SourceFile, helper: ts.FunctionLikeDeclaration): boolean;
+  resolveStableSourceBinding(
+    node: ts.Identifier
+  ): ts.VariableDeclaration | ts.ParameterDeclaration | null;
+  dynamicImportVariableInitializers(source: ts.SourceFile): readonly ts.Expression[];
+  isSelectedSourceProperty(property: ts.ObjectLiteralElementLike, name: string): boolean;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -4246,10 +4251,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const resolveCall = (node: ts.CallExpression, source: ts.SourceFile): HookSourceResolution =>
     evaluate(node, source, new Map());
 
-  function hasDynamicImportOfFunction(
-    source: ts.SourceFile,
-    helper: ts.FunctionLikeDeclaration
-  ): boolean {
+  function dynamicImportTargets(source: ts.SourceFile): Module[] {
     let imports = dynamicImports.get(source);
     if (!imports) {
       imports = [];
@@ -4269,14 +4271,50 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       visit(source);
       dynamicImports.set(source, imports);
     }
-    if (!imports.length) return false;
-
+    if (!imports.length) return [];
     const importer = moduleForSource(source);
+    return imports.flatMap((specifier) => {
+      const target = moduleContext.resolveModule(importer.file, specifier);
+      return target ? [target] : [];
+    });
+  }
+
+  function dynamicImportVariableInitializers(source: ts.SourceFile): ts.Expression[] {
+    const values: ts.Expression[] = [];
+    for (const target of dynamicImportTargets(source)) {
+      for (const symbol of moduleContext.resolveExports(target)) {
+        let current: SymbolRef | null = symbol;
+        const seen = new Set<string>();
+        while (current) {
+          const { declaration, module } = current;
+          if (
+            !ts.isVariableDeclaration(declaration) ||
+            !declaration.initializer ||
+            !stableVariable(declaration, module)
+          )
+            break;
+          const key = symbolKey(current);
+          if (seen.has(key)) break;
+          seen.add(key);
+          const value = unwrap(declaration.initializer) as ts.Expression;
+          values.push(value);
+          if (!ts.isIdentifier(value)) break;
+          current = moduleContext.resolveReference(value, module);
+        }
+      }
+    }
+    return values;
+  }
+
+  function hasDynamicImportOfFunction(
+    source: ts.SourceFile,
+    helper: ts.FunctionLikeDeclaration
+  ): boolean {
+    const targets = dynamicImportTargets(source);
+    if (!targets.length) return false;
     const helperModule = moduleForSource(helper.getSourceFile());
     const helperKey = symbolKey({ module: helperModule, declaration: helper });
-    return imports.some((specifier) => {
-      const target = moduleContext.resolveModule(importer.file, specifier);
-      if (!target) return false;
+    return targets.some((target) => {
       let keys = exportedFunctionKeys.get(target.file);
       if (!keys) {
         keys = new Set();
@@ -4307,6 +4345,29 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       return resolved.fn;
     },
     hasDynamicImportOfFunction,
+    dynamicImportVariableInitializers,
+    resolveStableSourceBinding: (node) => {
+      const binding = moduleContext.resolveReference(node, moduleForSource(node.getSourceFile()));
+      if (!binding) return null;
+      const { declaration, module } = binding;
+      if (ts.isVariableDeclaration(declaration) && stableVariable(declaration, module))
+        return declaration;
+      const parameter = ts.isParameter(declaration)
+        ? declaration
+        : ts.isIdentifier(declaration) && ts.isParameter(declaration.parent)
+          ? declaration.parent
+          : null;
+      return parameter &&
+        ts.isIdentifier(parameter.name) &&
+        !parameter.initializer &&
+        !parameter.dotDotDotToken &&
+        !hasBindingWrite(parameter.name, module)
+        ? parameter
+        : null;
+    },
+    isSelectedSourceProperty: (property, name) =>
+      ts.isObjectLiteralExpression(property.parent) &&
+      configProperty(property.parent, name) === property,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
     isCanonicalPrototypeSetupProperty: (property) => {

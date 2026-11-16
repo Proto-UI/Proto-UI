@@ -499,6 +499,62 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it.each([
+    ['def.rule(spec);', false],
+    ['consume(spec); def.rule(spec);', true],
+    ['spec.intent = opaque; def.rule(spec);', true],
+  ])('tracks a local Rule spec only through its verified uses: %s', async (use, escaped) => {
+    const result = generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'referenced-rule-spec', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', true);
+        const spec = {
+          when: w => w.state(active).eq(true),
+          intent(i) { i.feedback.style.to(target).use(tw('p-[10%]')); },
+        };
+        ${use}
+        return r => r.decoration(target);
+      }});
+    `);
+    if (escaped) {
+      await expect(result).rejects.toThrow(/verified length recipe/);
+      return;
+    }
+    const { artifact } = await result;
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it.each([
+    ['paint(def, target);', false],
+    ['paint(def, target); useElsewhere(paint);', true],
+    ['paint(def, target); paint(def, opaque);', true],
+    ['paint(...args, target);', true],
+  ])(
+    'tracks explicit decoration target arguments at proven helper calls: %s',
+    async (use, escaped) => {
+      const result = generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      function paint(receiver, leaf) {
+        receiver.feedback.style.to(leaf).use(tw('p-[10%]'));
+      }
+      definePrototype({ name: 'explicit-decoration-helper-target', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        ${use}
+        return r => r.decoration(target);
+      }});
+    `);
+      if (escaped) {
+        await expect(result).rejects.toThrow(/verified length recipe/);
+        return;
+      }
+      const { artifact } = await result;
+      expect(artifact.cssText).toContain('padding: 10%;');
+      expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+    }
+  );
+
   it('follows inline spread arrays into the targeted rest argument', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
@@ -903,6 +959,32 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).toContain('padding: 10%;');
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
+
+  it.each(['./recipes', './palette'])(
+    'withdraws targeted-only proof for a dynamic style handle import from %s',
+    async (moduleName) => {
+      await expect(
+        generate(
+          `
+        import { definePrototype } from '@proto.ui/core';
+        import { paint } from './palette';
+        const { paint: rootPaint } = await import('${moduleName}');
+        definePrototype({ name: 'dynamically-shared-decoration', setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(paint);
+          def.feedback.style.use(rootPaint);
+          return r => r.decoration(target);
+        }});
+        `,
+          {
+            'recipes.ts': "export { paint } from './palette';",
+            'palette.ts':
+              "import { tw } from '@proto.ui/core'; export const paint = tw('p-[10%]');",
+          }
+        )
+      ).rejects.toThrow(/verified length recipe/);
+    }
+  );
 
   it.each([
     'def.feedback.style.use(paint);',

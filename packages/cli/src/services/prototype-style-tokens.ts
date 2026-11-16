@@ -56,6 +56,11 @@ export async function collectProtoShadowStyleTokenUsage(root) {
     sourceSummary.registerSource(source);
     sourceFiles.push(source);
   }
+  const dynamicHandleOrigins = new Set(
+    sourceFiles.flatMap((source) =>
+      sourceSummary.dynamicImportVariableInitializers(source).map(styleHandleOrigin)
+    )
+  );
   const decorationHelperUses = new WeakMap();
   for (const sourceFile of sourceFiles) {
     const file = sourceFile.fileName;
@@ -77,15 +82,14 @@ export async function collectProtoShadowStyleTokenUsage(root) {
   // outputs and must still pass the complete Root recipe preflight.
   for (const { token } of occurrences) nonTemplateTokens.add(token);
   for (const token of unclassifiedTokens) templateTokens.add(token);
-  for (const {
-    tokens: held,
-    declarationSeen,
-    targeted,
-    unclassified,
-  } of styleHandleUsage.values()) {
+  for (const [
+    origin,
+    { tokens: held, declarationSeen, targeted, unclassified },
+  ] of styleHandleUsage) {
     for (const token of held) {
       templateTokens.add(token);
-      if (!declarationSeen || !targeted || unclassified) nonTemplateTokens.add(token);
+      if (!declarationSeen || !targeted || unclassified || dynamicHandleOrigins.has(origin))
+        nonTemplateTokens.add(token);
     }
   }
   return {
@@ -1746,6 +1750,34 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
   return references;
 }
 
+function decorationBindingOrigin(binding) {
+  const initializer = binding?.initializer && unwrapTransparent(binding.initializer);
+  if (
+    !binding ||
+    !initializer ||
+    !isConstStyleBinding(binding, binding.initializer) ||
+    !ts.isCallExpression(initializer)
+  )
+    return undefined;
+  const owner = ts.findAncestor(binding, ts.isFunctionLike);
+  const definition = feedbackStyleReceiver(initializer.expression, 'declareDecoration');
+  return owner && definition ? { owner, definition } : undefined;
+}
+
+function referencedDecorationTarget(reference, summary) {
+  const seen = new Set();
+  for (let node = reference; ts.isIdentifier(node); ) {
+    const binding = summary.resolveStableSourceBinding(node);
+    if (!binding || seen.has(binding)) return undefined;
+    seen.add(binding);
+    if (ts.isParameter(binding)) return { owner: binding.parent, parameter: binding };
+    if (!binding.initializer) return undefined;
+    node = unwrapTransparent(binding.initializer);
+    if (!ts.isIdentifier(node)) return decorationBindingOrigin(binding);
+  }
+  return undefined;
+}
+
 function hasVerifiedDecorationHelperCalls(
   helper,
   receiver,
@@ -1772,6 +1804,10 @@ function hasVerifiedDecorationHelperCalls(
       (_, index) => parameterName(helper, index) === receiver
     );
     const receivesDefinition = receiverIndex !== -1;
+    const targetIndex = targetOrigin?.parameter
+      ? helper.parameters.indexOf(targetOrigin.parameter)
+      : -1;
+    if (targetOrigin?.parameter && targetIndex < 0) return false;
     const callers = new Map();
     for (const reference of references) {
       const call = reference.parent;
@@ -1798,7 +1834,27 @@ function hasVerifiedDecorationHelperCalls(
       const definition = receivesDefinition ? provided.text : receiver;
       const existing = callers.get(owner);
       if (existing && existing.definition !== definition) return false;
-      const facts = existing ?? { definition, arguments: new Set() };
+      const facts = existing ?? { definition, arguments: new Set(), targets: [] };
+      let forwarded = targetOrigin;
+      if (targetIndex >= 0) {
+        const supplied = call.arguments[targetIndex];
+        if (
+          !supplied ||
+          !ts.isIdentifier(supplied) ||
+          call.arguments.slice(0, targetIndex).some(ts.isSpreadElement)
+        )
+          return false;
+        forwarded = referencedDecorationTarget(supplied, scope.sourceSummary);
+        if (
+          !forwarded ||
+          (forwarded.owner !== owner &&
+            (forwarded.parameter ||
+              !forwarded.owner.body ||
+              !nodeWithin(owner, forwarded.owner.body)))
+        )
+          return false;
+      }
+      facts.targets.push(forwarded);
       if (receivesDefinition) facts.arguments.add(provided);
       callers.set(owner, facts);
     }
@@ -1806,12 +1862,15 @@ function hasVerifiedDecorationHelperCalls(
       callers.size > 0 &&
       [...callers].every(([owner, facts]) => {
         if (!receiverUsesAreDirect(owner, facts.definition, facts.arguments, helper)) return false;
-        const reachedOrigin = owner === targetOrigin?.owner;
-        if (reachedOrigin && facts.definition !== targetOrigin.definition) return false;
-        const pendingOrigin = reachedOrigin ? undefined : targetOrigin;
-        return isCanonicalPrototypeSetup(owner, scope, false)
-          ? !pendingOrigin && parameterName(owner) === facts.definition
-          : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, pendingOrigin, active);
+        return facts.targets.every((target) => {
+          // A parameter is still unresolved even when it belongs to this caller.
+          const reachedOrigin = target?.owner === owner && !target.parameter;
+          if (reachedOrigin && facts.definition !== target.definition) return false;
+          const pending = reachedOrigin ? undefined : target;
+          return isCanonicalPrototypeSetup(owner, scope, false)
+            ? !pending && parameterName(owner) === facts.definition
+            : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, pending, active);
+        });
       })
     );
   } finally {
@@ -1819,20 +1878,10 @@ function hasVerifiedDecorationHelperCalls(
   }
 }
 
-function decorationRuleCaller(intent) {
+function decorationRuleInvocation(rule, spec) {
   if (
-    (!ts.isMethodDeclaration(intent) &&
-      !ts.isPropertyAssignment(intent) &&
-      !ts.isShorthandPropertyAssignment(intent)) ||
-    getPropertyName(intent.name) !== 'intent'
-  )
-    return undefined;
-  const config = intent.parent;
-  const rule = config.parent;
-  if (
-    !ts.isObjectLiteralExpression(config) ||
     !ts.isCallExpression(rule) ||
-    rule.arguments[0] !== config ||
+    rule.arguments[0] !== spec ||
     !memberIs(rule.expression, 'rule')
   )
     return undefined;
@@ -1841,6 +1890,47 @@ function decorationRuleCaller(intent) {
   return owner && receiver && ts.isIdentifier(receiver) && isOperationInCallback(owner, rule)
     ? { owner, definition: receiver.text }
     : undefined;
+}
+
+function decorationRuleCaller(intent, scope) {
+  const summary = scope.sourceSummary;
+  if (
+    (!ts.isMethodDeclaration(intent) &&
+      !ts.isPropertyAssignment(intent) &&
+      !ts.isShorthandPropertyAssignment(intent)) ||
+    !summary?.isSelectedSourceProperty(intent, 'intent')
+  )
+    return undefined;
+  const config = intent.parent;
+  const declaration = config.parent;
+  const direct = decorationRuleInvocation(declaration, config);
+  if (direct) return direct;
+  if (!isConstStyleBinding(declaration, config)) return undefined;
+  const owner = ts.findAncestor(declaration, ts.isFunctionLike);
+  if (!owner?.body || summary.resolveStableSourceBinding(declaration.name) !== declaration)
+    return undefined;
+  let origin;
+  let escaped = false;
+  function visit(node) {
+    if (escaped || ts.isTypeNode(node)) return;
+    if (
+      ts.isIdentifier(node) &&
+      node !== declaration.name &&
+      node.text === declaration.name.text &&
+      (node.parent.name !== node || ts.isShorthandPropertyAssignment(node.parent)) &&
+      summary.resolveStableSourceBinding(node) === declaration
+    ) {
+      const caller = decorationRuleInvocation(node.parent, node);
+      if (caller?.owner !== owner || (origin && origin.definition !== caller.definition)) {
+        escaped = true;
+        return;
+      }
+      origin = caller;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(owner.body);
+  return escaped ? undefined : origin;
 }
 
 function referencedDecorationRuleCaller(callback, scope) {
@@ -1862,7 +1952,7 @@ function referencedDecorationRuleCaller(callback, scope) {
       (ts.isShorthandPropertyAssignment(intent) && intent.name !== value)
     )
       return undefined;
-    const caller = decorationRuleCaller(intent);
+    const caller = decorationRuleCaller(intent, scope);
     if (
       !caller ||
       (origin && (origin.owner !== caller.owner || origin.definition !== caller.definition))
@@ -1912,7 +2002,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     ? callback
     : outerStyleExpression(callback).parent;
   const ruleCaller =
-    decorationRuleCaller(intent) ?? referencedDecorationRuleCaller(callback, scope);
+    decorationRuleCaller(intent, scope) ?? referencedDecorationRuleCaller(callback, scope);
   if (ruleCaller) {
     if (
       parameterName(callback) !== receiver ||
@@ -1929,25 +2019,24 @@ function isOwnedDecorationStyleArgument(argument, scope) {
   const binding = scopeDeclaring(target.text, scope)?.bindings.get(
     target.text
   )?.decorationTargetDeclaration;
-  const initializer = binding?.initializer && unwrapTransparent(binding.initializer);
-  if (
-    !binding ||
-    !binding.initializer ||
-    !isConstStyleBinding(binding, binding.initializer) ||
-    !initializer ||
-    !ts.isCallExpression(initializer)
-  )
-    return false;
-  const targetOwner = ts.findAncestor(binding, ts.isFunctionLike);
-  const targetDefinition = feedbackStyleReceiver(initializer.expression, 'declareDecoration');
-  if (!targetOwner || !targetDefinition) return false;
-  if (targetOwner === declarationOwner && targetDefinition !== definition) return false;
-  const targetOrigin =
-    targetOwner === declarationOwner
-      ? undefined
-      : { owner: targetOwner, definition: targetDefinition };
-  if (targetOrigin && (!targetOwner.body || !nodeWithin(declarationOwner, targetOwner.body)))
-    return false;
+  // Replaying a call can expose its argument in this scope. A lexical
+  // parameter still needs the same proof across every call to its helper.
+  const referenceOrigin =
+    scope.sourceSummary && referencedDecorationTarget(target, scope.sourceSummary);
+  let targetOrigin;
+  if (referenceOrigin?.parameter) {
+    if (referenceOrigin.owner !== declarationOwner) return false;
+    targetOrigin = referenceOrigin;
+  } else {
+    targetOrigin = decorationBindingOrigin(binding);
+    if (!targetOrigin) return false;
+    if (targetOrigin.owner === declarationOwner) {
+      if (targetOrigin.definition !== definition) return false;
+      targetOrigin = undefined;
+    } else if (!targetOrigin.owner.body || !nodeWithin(declarationOwner, targetOrigin.owner.body))
+      return false;
+  }
+
   if (isCanonicalPrototypeSetup(declarationOwner, scope, false)) {
     if (targetOrigin || parameterName(declarationOwner) !== definition) return false;
   } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope, targetOrigin))
