@@ -30,19 +30,21 @@ type DecorationTreeRecord = {
 
 function captureSplitSurfaceIdentity(surface: HTMLElement): string {
   const { style } = surface;
-  let opacity = Number.parseFloat(style.opacity);
-  if (style.opacity && Number.isNaN(opacity)) {
-    // Custom properties and calculated values need the used CSS declaration.
-    opacity = Number.parseFloat(
-      surface.ownerDocument.defaultView?.getComputedStyle(surface).opacity ?? ''
-    );
-  }
+  let computed: CSSStyleDeclaration | undefined;
+  const read = (property: string): string => {
+    const value = style.getPropertyValue(property);
+    if (!value || !/\(|^(?:inherit|initial|unset|revert(?:-layer)?)$/i.test(value)) return value;
+    computed ??= surface.ownerDocument.defaultView?.getComputedStyle(surface);
+    return computed?.getPropertyValue(property) || value;
+  };
+  const display = read('display');
+  const visibility = read('visibility');
   const concealed =
-    style.display === 'none' ||
-    style.visibility === 'hidden' ||
-    style.visibility === 'collapse' ||
-    opacity === 0 ||
-    style.getPropertyValue('content-visibility') === 'hidden';
+    display === 'none' ||
+    visibility === 'hidden' ||
+    visibility === 'collapse' ||
+    Number.parseFloat(read('opacity')) === 0 ||
+    read('content-visibility') === 'hidden';
   return JSON.stringify([
     ...['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
       surface.getAttribute(name)

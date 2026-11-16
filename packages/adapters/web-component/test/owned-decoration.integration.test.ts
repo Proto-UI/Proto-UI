@@ -178,6 +178,9 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'conceal surface with visibility',
     'conceal surface with zero opacity',
     'conceal surface with variable opacity',
+    'conceal surface with variable display',
+    'conceal surface with variable visibility',
+    'conceal surface with variable content-visibility',
     'remove split marker',
   ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
     const C = AdaptToWebComponent(
@@ -240,14 +243,18 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
         : mutation === 'remove paint tokens' || mutation === 'add inline paint'
           ? 'decoration physical leaf changed'
           : 'decoration physical blueprint changed';
-    if (mutation === 'conceal surface with variable opacity') {
+    if (mutation.startsWith('conceal surface with variable ')) {
+      const property = mutation.slice('conceal surface with variable '.length);
+      const value = property === 'opacity' ? '0' : property === 'display' ? 'none' : 'hidden';
       const { style } = surface as HTMLElement;
-      style.setProperty('--split-opacity', '0');
-      style.opacity = 'var(--split-opacity)';
+      style.setProperty('--split-concealment', value);
+      style.setProperty(property, 'var(--split-concealment)');
       // The DOM test environment exposes the declaration without resolving var().
       const window = host.ownerDocument.defaultView!;
-      const computed = window.getComputedStyle(surface);
-      Object.defineProperty(computed, 'opacity', { value: '0' });
+      const computed = {
+        opacity: property === 'opacity' ? value : '',
+        getPropertyValue: (name: string) => (name === property ? value : ''),
+      } as CSSStyleDeclaration;
       const readStyle = vi.spyOn(window, 'getComputedStyle').mockReturnValueOnce(computed);
       try {
         expect(() => host.update()).toThrow(expected);
