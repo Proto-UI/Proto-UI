@@ -34,6 +34,7 @@ function captureSplitSurfaceIdentity(surface: HTMLElement): string {
     style.display === 'none' ||
     style.visibility === 'hidden' ||
     style.visibility === 'collapse' ||
+    Number.parseFloat(style.opacity) === 0 ||
     style.getPropertyValue('content-visibility') === 'hidden';
   return JSON.stringify([
     ...['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
