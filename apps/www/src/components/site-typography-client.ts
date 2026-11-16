@@ -3,7 +3,7 @@ import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';
-import { isWithinOwnedCodeContent, siteTypographyParticipant } from './site-typography';
+import { isPrivateTypographyMutation, siteTypographyParticipant } from './site-typography';
 
 type DocumentationTypographyHandle = { destroy(): Promise<void>; ready: Promise<unknown> };
 const documents = new WeakMap<
@@ -115,13 +115,14 @@ export function initDocumentationTypography(doc: Document = document) {
     if (!root.isConnected) void handle.destroy();
     else if (
       records.some(
-        ({ target, attributeName }) =>
-          root.contains(target) &&
-          (attributeName === 'data-site-library-family' || !isWithinOwnedCodeContent(target))
+        (record) =>
+          root.contains(record.target) &&
+          (record.attributeName === 'data-site-library-family' ||
+            !isPrivateTypographyMutation(record))
       )
     ) {
-      // CodeExample and its decoration mounts own their internal changes.
-      // Moving source across that boundary still notifies an authored parent.
+      // Private component updates do not change the native source inventory.
+      // The shared ownership check retains moved source and native-label cases.
       refresh();
     }
   });
