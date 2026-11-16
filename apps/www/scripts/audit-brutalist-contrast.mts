@@ -1224,9 +1224,13 @@ async function labelAssociationObservation(
       ).puiContrastProbe;
       const boundary = probe.readContrastAuditSubject(input.subject);
       const scope = boundary.retained;
+      // The Label journey must observe the control the recipe actually
+      // associates: the Brutalist Label pairs with the Brutalist Checkbox
+      // (demo-brutalist-label.demo.ts and the brutalist label family in
+      // projection-families.ts), not a convenient control from another family.
       const controls = [
         ...(scope?.querySelectorAll<HTMLElement>(
-          '[data-pui-root][data-projection-prototype="base-checkbox-root"][data-demo-ref="checkbox"]'
+          '[data-pui-root][data-projection-prototype="brutalist-checkbox-root"][data-demo-ref="checkbox"]'
         ) ?? []),
       ];
       const target = controls.length === 1 ? controls[0] : null;
@@ -1288,7 +1292,7 @@ async function labelAssociationObservation(
 
 async function labelJourney(page: Page, item: Case, label: Locator): Promise<void> {
   const target = casePreviewer(page).locator(
-    '[data-projection-content] [data-pui-root][data-projection-prototype="base-checkbox-root"][data-demo-ref="checkbox"]'
+    '[data-projection-content] [data-pui-root][data-projection-prototype="brutalist-checkbox-root"][data-demo-ref="checkbox"]'
   );
   await label.hover();
   await capture(page, item, 'label-hover', async () => {

@@ -1018,15 +1018,17 @@ test('actual Label reader requires its named live target and never turns Label i
       'labelJourney'
     );
     const label = node('brutalist-label-root', 'label-checkbox');
-    const target = node('base-checkbox-root', 'checkbox');
+    // Mirror the real Brutalist Label recipe: its associated control is the
+    // Brutalist Checkbox, so the reader must find that control and no other.
+    const target = node('brutalist-checkbox-root', 'checkbox');
     label.id = 'actual-label';
     target.setAttribute('aria-labelledby', label.id);
     target.setAttribute('role', 'checkbox');
     target.setAttribute('aria-checked', 'false');
     if (damage === 'naming') target.setAttribute('aria-labelledby', 'foreign');
-    if (damage === 'duplicate-id') node('base-checkbox-root', 'other').id = label.id;
+    if (damage === 'duplicate-id') node('brutalist-checkbox-root', 'other').id = label.id;
     if (damage === 'wrong-target') target.dataset.demoRef = 'passive';
-    if (damage === 'duplicate-target') node('base-checkbox-root', 'checkbox');
+    if (damage === 'duplicate-target') node('brutalist-checkbox-root', 'checkbox');
     if (damage === 'stale-target') target.dataset.projectionGeneration = 'old';
     if (damage === 'stale-label') label.dataset.projectionOwner = 'foreign';
     if (damage === 'label-tab-stop') label.tabIndex = 0;
@@ -1346,10 +1348,21 @@ test('new journeys match the actual recipe association and uncontrolled domain i
       const label = ref('label-checkbox')[0].node,
         target = ref('checkbox')[0].node;
       assert.equal(label.prototypeId, 'brutalist-label-root');
-      assert.equal(target.prototypeId, 'base-checkbox-root');
+      // The journey targets the family's own Checkbox, not a Base control:
+      // apps/www/src/content/docs/zh-cn/demo-brutalist-label.demo.ts composes
+      // createControlLabelDemo('brutalist-label-root', 'brutalist'), and the
+      // brutalist label family in projection-families.ts lists
+      // 'brutalist-checkbox-root' as the recipe's control prototype.
+      assert.equal(target.prototypeId, 'brutalist-checkbox-root');
       assert.deepEqual(label.associations, target.associations);
-      assert.equal(label.props.naming, true);
-      assert.equal(label.props.activation, true);
+      // Actionable labels use the public Label defaults instead of authoring
+      // them (packages/prototypes/base/src/label/root.proto.ts sets naming:
+      // true and activation: true), so the recipe authors neither prop here
+      // and only its naming-only example authors activation={false}.
+      assert.equal(label.props.naming, undefined);
+      assert.equal(label.props.activation, undefined);
+      assert.equal(ref('label-passive').length, 1);
+      assert.equal(ref('label-passive')[0].node.props.activation, false);
       assert.equal(target.props.checked, undefined);
       assert.equal(target.props.defaultChecked, undefined);
     } else if (family === 'collapsible') {
