@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import { loadPrototype, loadPrototypes, prototypeModules } from './prototype-modules';
-import { getPrototype } from './registry';
+import { getPrototype, registerPrototype } from './registry';
 
 // Real loader imports and registry, not a manually registered substitute.
 // Synthetic DOM loader evidence only; does not establish native Search behavior.
@@ -61,5 +61,54 @@ it('releases failed registration so the next caller can try again', async () => 
     expect(getPrototype(id).name).toBe(id);
   } finally {
     loader.mockRestore();
+  }
+});
+
+it('reuses the completed registration across preview loads', async () => {
+  const id = 'base-select-root';
+  const loader = vi.spyOn(prototypeModules, id);
+  try {
+    await loadPrototypes([id]);
+    const registered = getPrototype(id);
+    await loadPrototypes([id]);
+    expect(loader).toHaveBeenCalledOnce();
+    expect(getPrototype(id)).toBe(registered);
+  } finally {
+    loader.mockRestore();
+  }
+});
+
+it('restores the loader registration after the registered value is replaced', async () => {
+  const id = 'base-select-trigger';
+  const loader = vi.spyOn(prototypeModules, id);
+  const replacementId = 'base-select-value';
+  try {
+    await loadPrototype(replacementId);
+    await loadPrototype(id);
+    const registered = getPrototype(id);
+    registerPrototype(id, getPrototype(replacementId));
+    await loadPrototype(id);
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(getPrototype(id)).toBe(registered);
+  } finally {
+    loader.mockRestore();
+  }
+});
+
+it('does not reuse a completed registration after the loader is replaced', async () => {
+  const id = 'base-select-item';
+  const previousLoader = prototypeModules[id];
+  try {
+    await loadPrototype('base-select-value');
+    await loadPrototype(id);
+    const next = getPrototype('base-select-value');
+    const newLoader = vi.fn(() => Promise.resolve({ default: next }));
+    prototypeModules[id] = newLoader;
+    await loadPrototype(id);
+    await loadPrototype(id);
+    expect(newLoader).toHaveBeenCalledOnce();
+    expect(getPrototype(id)).toBe(next);
+  } finally {
+    prototypeModules[id] = previousLoader;
   }
 });
