@@ -23,6 +23,19 @@ type DecorationNodeRecord = {
   splitAttributes?: string;
 };
 
+type DecorationTreeRecord = {
+  nodes: DecorationNodeRecord[];
+  splitRoot?: { children: ChildNode[]; identity: string; document: Document };
+};
+
+function captureSplitSurfaceIdentity(surface: Element): string {
+  return JSON.stringify(
+    ['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
+      surface.getAttribute(name)
+    )
+  );
+}
+
 function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean {
   const { childNodes } = parent;
   return (
@@ -100,8 +113,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     blueprint: TemplateChildren;
     lease: object;
     document: Document;
-    nodes: DecorationNodeRecord[];
-    splitRootChildren?: ChildNode[];
+    tree: DecorationTreeRecord;
   } | null = null;
   const currentFeedback = () =>
     capsHub?.getPort?.('feedback') as import('@proto.ui/module-feedback').FeedbackPort | undefined;
@@ -112,9 +124,71 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   const shadowCommitRoot =
     shadowViewTarget && !textControlTarget ? root.ownerDocument.createDocumentFragment() : null;
 
-  const decorationRoot = shadowViewTarget?.element ?? root;
+  const splitSurface = shadowViewTarget?.element;
+  const decorationRoot = splitSurface ?? root;
   const ownsDecorationRoot = () =>
     decorationRoot.isConnected && (!shadowViewTarget || decorationRoot.parentNode === root);
+  const collectDecorationNodes = (source: Node, owned: WeakSet<Node>) => {
+    const nodes: DecorationNodeRecord[] = [];
+    const collect = (parent: Node) => {
+      for (const node of Array.from(parent.childNodes)) {
+        if (!owned.has(node)) continue;
+        const element = node.nodeType === 1 ? (node as Element) : null;
+        const decoration = element?.hasAttribute('data-pui-owned-decoration') ?? false;
+        const record: DecorationNodeRecord = {
+          node,
+          parent: parent === source ? decorationRoot : parent,
+          text: node.nodeType === 3 ? node.nodeValue : null,
+          decoration,
+        };
+        if (shadowViewTarget && element) {
+          record.splitChildren = Array.from(element.childNodes);
+          record.splitAttributes = captureSplitAttributes(element, decoration);
+        }
+        nodes.push(record);
+        collect(node);
+      }
+    };
+    collect(source);
+    return nodes;
+  };
+  const assertDecorationTree = (record: DecorationTreeRecord, document: Document) => {
+    if (
+      record.splitRoot &&
+      (!splitSurface ||
+        decorationRoot.ownerDocument !== record.splitRoot.document ||
+        !hasSameChildren(decorationRoot, record.splitRoot.children) ||
+        captureSplitSurfaceIdentity(splitSurface) !== record.splitRoot.identity)
+    )
+      throw new Error('[WC Adapter] decoration physical blueprint changed');
+    for (const { node, parent, decoration, text, splitChildren, splitAttributes } of record.nodes) {
+      if (
+        node.ownerDocument !== document ||
+        node.parentNode !== parent ||
+        !decorationRoot.contains(node) ||
+        (text !== null && node.nodeValue !== text) ||
+        (splitChildren &&
+          (!hasSameChildren(node, splitChildren) ||
+            captureSplitAttributes(node as Element, decoration) !== splitAttributes))
+      )
+        throw new Error('[WC Adapter] decoration physical blueprint changed');
+      if (decoration) {
+        const leaf = node as HTMLElement;
+        if (
+          leaf.childNodes.length ||
+          leaf.hasAttribute('tabindex') ||
+          leaf.hasAttribute('contenteditable') ||
+          !leaf.hasAttribute('data-pui-owned-decoration') ||
+          leaf.getAttribute('aria-hidden') !== 'true' ||
+          !leaf.hasAttribute('inert') ||
+          (shadowViewTarget && !hasCurrentOwnedDecorationPaint(leaf)) ||
+          leaf.style.getPropertyValue('pointer-events') !== 'none' ||
+          leaf.style.getPropertyPriority('pointer-events') !== 'important'
+        )
+          throw new Error('[WC Adapter] decoration physical leaf changed');
+      }
+    }
+  };
   const stageOwnedDecorations = (blueprint: TemplateChildren, turn: number) => {
     const owned = new WeakSet<Node>();
     const feedback = currentFeedback();
@@ -157,43 +231,34 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           throw error;
         }
       },
-      recordCommit() {
+      captureSplitTree(staging: DocumentFragment): DecorationTreeRecord | undefined {
+        if (!boundLease || !splitSurface) return;
+        return {
+          nodes: collectDecorationNodes(staging, owned),
+          splitRoot: {
+            children: Array.from(staging.childNodes),
+            identity: captureSplitSurfaceIdentity(splitSurface),
+            document: staging.ownerDocument,
+          },
+        };
+      },
+      recordCommit(staged?: DecorationTreeRecord) {
         if (!boundLease) return;
         if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
           throw new Error('[WC Adapter] decoration lease changed during commit');
-        const nodes: DecorationNodeRecord[] = [];
-        const collect = (parent: Node) => {
-          for (const node of Array.from(parent.childNodes)) {
-            if (!owned.has(node)) continue;
-            const element = node.nodeType === 1 ? (node as Element) : null;
-            const decoration = element?.hasAttribute('data-pui-owned-decoration') ?? false;
-            const record: DecorationNodeRecord = {
-              node,
-              parent: node.parentNode,
-              text: node.nodeType === 3 ? node.nodeValue : null,
-              decoration,
-            };
-            if (shadowViewTarget && element) {
-              record.splitChildren = Array.from(element.childNodes);
-              record.splitAttributes = captureSplitAttributes(element, decoration);
-            }
-            nodes.push(record);
-            collect(node);
-          }
-        };
-        collect(decorationRoot);
         if (
           turn !== commitTurn ||
           !ownsDecorationRoot() ||
           currentFeedback()?.captureDecorationLease?.() !== boundLease
         )
           throw new Error('[WC Adapter] decoration commit superseded');
+        const document = decorationRoot.ownerDocument;
+        if (staged) assertDecorationTree(staged, document);
         decorationCommit = {
           blueprint,
           lease: boundLease,
-          document: decorationRoot.ownerDocument,
-          nodes,
-          splitRootChildren: shadowViewTarget ? Array.from(decorationRoot.childNodes) : undefined,
+          document,
+          tree: staged ?? { nodes: collectDecorationNodes(decorationRoot, owned) },
         };
       },
     };
@@ -211,42 +276,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         throw new Error('[WC Adapter] stale decoration blueprint lease');
       if (!equalOwnedTemplateBlueprint(record.blueprint, children))
         throw new Error('[feedback] decoration structural rebind unsupported');
-      if (record.splitRootChildren && !hasSameChildren(decorationRoot, record.splitRootChildren))
-        throw new Error('[WC Adapter] decoration physical blueprint changed');
-      for (const {
-        node,
-        parent,
-        decoration,
-        text,
-        splitChildren,
-        splitAttributes,
-      } of record.nodes) {
-        if (
-          node.ownerDocument !== record.document ||
-          node.parentNode !== parent ||
-          !decorationRoot.contains(node) ||
-          (text !== null && node.nodeValue !== text) ||
-          (splitChildren &&
-            (!hasSameChildren(node, splitChildren) ||
-              captureSplitAttributes(node as Element, decoration) !== splitAttributes))
-        )
-          throw new Error('[WC Adapter] decoration physical blueprint changed');
-        if (decoration) {
-          const leaf = node as HTMLElement;
-          if (
-            leaf.childNodes.length ||
-            leaf.hasAttribute('tabindex') ||
-            leaf.hasAttribute('contenteditable') ||
-            !leaf.hasAttribute('data-pui-owned-decoration') ||
-            leaf.getAttribute('aria-hidden') !== 'true' ||
-            !leaf.hasAttribute('inert') ||
-            (shadowViewTarget && !hasCurrentOwnedDecorationPaint(leaf)) ||
-            leaf.style.getPropertyValue('pointer-events') !== 'none' ||
-            leaf.style.getPropertyPriority('pointer-events') !== 'important'
-          )
-            throw new Error('[WC Adapter] decoration physical leaf changed');
-        }
-      }
+      assertDecorationTree(record.tree, record.document);
       portalDecorationGate?.assertReusable();
       if (
         turn !== commitTurn ||
@@ -279,8 +309,11 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         owned: decorations?.owned,
         bindDecorations: decorations?.bindDecorations,
       });
-      if (shadowCommitRoot) shadowViewTarget!.replaceRenderedChildren(shadowCommitRoot.childNodes);
-      decorations?.recordCommit();
+      if (shadowCommitRoot && decorations) {
+        const staged = decorations.captureSplitTree(shadowCommitRoot);
+        shadowViewTarget!.replaceRenderedChildren(shadowCommitRoot.childNodes);
+        decorations.recordCommit(staged);
+      }
     } else if (isSlotOnly(children)) {
       const projector = getSlotProjector();
       if (projector) {

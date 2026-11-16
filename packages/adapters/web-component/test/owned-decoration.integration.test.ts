@@ -171,6 +171,10 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'reorder slot',
     'remove paint tokens',
     'add inline paint',
+    'hide surface',
+    'inert surface',
+    'retag surface',
+    'remove split marker',
   ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
     const C = AdaptToWebComponent(
       definePrototype({
@@ -213,6 +217,13 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     if (mutation === 'reorder slot') surface.prepend(slot);
     if (mutation === 'remove paint tokens') leaf.removeAttribute('data-pui-style');
     if (mutation === 'add inline paint') leaf.style.setProperty('opacity', '1');
+    if (mutation === 'hide surface') surface.setAttribute('aria-hidden', 'true');
+    if (mutation === 'inert surface') surface.setAttribute('inert', '');
+    if (mutation === 'retag surface') surface.setAttribute('part', 'other');
+    if (mutation === 'remove split marker') {
+      expect(surface.hasAttribute('data-pui-split-surface')).toBe(true);
+      surface.removeAttribute('data-pui-split-surface');
+    }
     const expected =
       mutation === 'move surface'
         ? 'stale decoration blueprint lease'
@@ -223,6 +234,48 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(surface.contains(leaf)).toBe(true);
     expect(caller.data).toBe('Updated caller text');
   });
+
+  it.each(['remove decoration', 'reorder slot'] as const)(
+    'rejects a connection reaction that can %s before split acknowledgement',
+    (mutation) => {
+      const mutator = `pui-decoration-reaction-${++id}`;
+      let reacted = false;
+      customElements.define(
+        mutator,
+        class extends HTMLElement {
+          connectedCallback() {
+            reacted = true;
+            const surface = this.parentElement!;
+            if (mutation === 'remove decoration')
+              surface.querySelector('[data-pui-owned-decoration]')!.remove();
+            else surface.prepend(surface.querySelector('slot')!);
+          }
+        }
+      );
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-split-reaction-${id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.decoration(target), r.slot(), r.el(mutator, {})];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const caller = document.createTextNode('Caller text');
+      host.append(caller);
+      expect(() => document.body.append(host)).toThrow('decoration physical blueprint changed');
+      expect(reacted).toBe(true);
+      expect(caller.parentNode).toBe(host);
+    }
+  );
 
   it('rejects a duplicate split decoration before publishing the new view', () => {
     const C = AdaptToWebComponent(
