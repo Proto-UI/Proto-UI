@@ -408,7 +408,15 @@ it('keeps library overview and long-prose routes bounded in both locales without
         const geometry = await page.evaluate(() => {
           const main = document.querySelector<HTMLElement>('.main-pane')!;
           const nav = document.querySelector<HTMLElement>('.mobile-sidebar-pane')!;
+          const canvas = document.querySelector<HTMLElement>('.docs-shell')!;
+          const canvasLeft = canvas.getBoundingClientRect().left;
+          const canvasInset = parseFloat(getComputedStyle(canvas).paddingLeft);
+          const mainLeft = main.getBoundingClientRect().left;
+          const prose = main.querySelector<HTMLElement>('[data-doc-flow]');
           return {
+            canvasContentLeft: canvasLeft + canvasInset,
+            mainLeft,
+            proseLeft: prose?.getBoundingClientRect().left ?? null,
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             mainWidth: main.getBoundingClientRect().width,
             navVisible: getComputedStyle(nav).display !== 'none',
@@ -421,6 +429,15 @@ it('keeps library overview and long-prose routes bounded in both locales without
         expect(geometry.navVisible).toBe(true);
         expect(geometry.headerPosition).toBe('static');
         expect(geometry.anchors).toBeGreaterThan(0);
+        if (route === 'start-here/why-proto-ui/') {
+          await writeFile(
+            path.join(evidence, `nojs-reading-gutter-${locale}.json`),
+            JSON.stringify({ source, url: page.url(), geometry }, null, 2)
+          );
+          expect(geometry.proseLeft).not.toBeNull();
+          expect(Math.abs(geometry.mainLeft - geometry.canvasContentLeft)).toBeLessThanOrEqual(1);
+          expect(Math.abs(geometry.proseLeft! - geometry.canvasContentLeft)).toBeLessThanOrEqual(1);
+        }
       }
     } finally {
       await context.close();
@@ -428,44 +445,66 @@ it('keeps library overview and long-prose routes bounded in both locales without
   }
 }, 150_000);
 
-it('keeps the existing no-TOC splash measure independent from the prose grid', async () => {
-  const context = await browser.newContext({
-    javaScriptEnabled: false,
-    viewport: { width: 1440, height: 1000 },
-  });
-  await context.route('**/*', (route) =>
-    new URL(route.request().url()).origin === new URL(baseUrl).origin
-      ? route.continue()
-      : route.abort()
-  );
-  const page = await context.newPage();
-  const id = 'nojs-splash-no-toc';
-  try {
-    await page.goto(`${baseUrl}/en/internal/demo-matrix/`, { waitUntil: 'networkidle' });
-    const facts = await page.locator('.docs-reading-columns').evaluate((columns) => {
-      const main = columns.querySelector<HTMLElement>('.main-pane')!;
-      return {
-        layout: columns.getAttribute('data-layout'),
-        tocCount: columns.querySelectorAll('.right-sidebar-container').length,
-        maxWidth: getComputedStyle(main).maxWidth,
-        width: main.getBoundingClientRect().width,
-        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      };
+it.each(['en', 'zh-cn'])(
+  'keeps the %s no-TOC splash measure and page-title clearance',
+  async (locale) => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 1440, height: 1000 },
     });
-    await writeFile(
-      path.join(evidence, `${id}.json`),
-      JSON.stringify({ source, url: page.url(), facts }, null, 2)
+    await context.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(baseUrl).origin
+        ? route.continue()
+        : route.abort()
     );
-    await page.screenshot({ path: path.join(evidence, `${id}.png`) });
-    expect(facts.layout).toBe('splash');
-    expect(facts.tocCount).toBe(0);
-    expect(parseFloat(facts.maxWidth)).toBe(88 * 16);
-    expect(facts.width).toBeGreaterThan(0);
-    expect(facts.overflow).toBeLessThanOrEqual(1);
-  } catch (error) {
-    await page.screenshot({ path: path.join(evidence, `${id}-failure.png`) }).catch(() => {});
-    throw error;
-  } finally {
-    await context.close();
-  }
-}, 150_000);
+    const page = await context.newPage();
+    const id = `nojs-splash-no-toc-${locale}`;
+    try {
+      const response = await page.goto(`${baseUrl}/${locale}/internal/demo-matrix/#_top`, {
+        waitUntil: 'networkidle',
+      });
+      expect(response?.status()).toBe(200);
+      const facts = await page.locator('.docs-reading-columns').evaluate((columns) => {
+        const main = columns.querySelector<HTMLElement>('.main-pane')!;
+        const title = main.querySelector<HTMLElement>('h1#_top')!;
+        const header = document.querySelector<HTMLElement>('[data-docs-site-header]')!;
+        const page = document.documentElement;
+        const titleTop = title.getBoundingClientRect().top;
+        const headerBottom = header.getBoundingClientRect().bottom;
+        const scrollPadding = parseFloat(getComputedStyle(page).scrollPaddingTop) || 0;
+        const scrollMargin = parseFloat(getComputedStyle(title).scrollMarginTop) || 0;
+        return {
+          fragment: location.hash,
+          titleTop,
+          headerBottom,
+          fragmentScrollClearance: scrollPadding + scrollMargin,
+          rootFontSize: parseFloat(getComputedStyle(page).fontSize),
+          layout: columns.getAttribute('data-layout'),
+          tocCount: columns.querySelectorAll('.right-sidebar-container').length,
+          maxWidth: getComputedStyle(main).maxWidth,
+          width: main.getBoundingClientRect().width,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      await writeFile(
+        path.join(evidence, `${id}.json`),
+        JSON.stringify({ source, url: page.url(), facts }, null, 2)
+      );
+      await page.screenshot({ path: path.join(evidence, `${id}.png`) });
+      expect(facts.fragment).toBe('#_top');
+      expect(facts.titleTop).toBeGreaterThanOrEqual(facts.headerBottom);
+      expect(facts.fragmentScrollClearance).toBeGreaterThanOrEqual(facts.rootFontSize);
+      expect(facts.layout).toBe('splash');
+      expect(facts.tocCount).toBe(0);
+      expect(parseFloat(facts.maxWidth)).toBe(88 * 16);
+      expect(facts.width).toBeGreaterThan(0);
+      expect(facts.overflow).toBeLessThanOrEqual(1);
+    } catch (error) {
+      await page.screenshot({ path: path.join(evidence, `${id}-failure.png`) }).catch(() => {});
+      throw error;
+    } finally {
+      await context.close();
+    }
+  },
+  150_000
+);
