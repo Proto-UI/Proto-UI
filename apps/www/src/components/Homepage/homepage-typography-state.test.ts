@@ -4,6 +4,7 @@ import { initHomepageRuntime } from './homepage-runtime-client';
 import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
+import * as projectionScope from '../PrototypePreviewer/projection-scope';
 import {
   initAdapterSelects,
   PREFERRED_ADAPTER_EVENT,
@@ -68,9 +69,19 @@ vi.mock('../PrototypePreviewer/projection-theme', async (original) => {
 });
 
 let handle: NonNullable<ReturnType<typeof initHomepageRuntime>> | undefined;
+let homepageController: projectionScope.ProjectionScopeController | undefined;
 let media: MediaQueryList;
 beforeEach(() => {
   localStorage.clear();
+  homepageController = undefined;
+  const createController = projectionScope.createProjectionScopeController;
+  // Observe the page-owned startup without replacing its controller or result.
+  vi.spyOn(projectionScope, 'createProjectionScopeController').mockImplementationOnce((options) => {
+    const controller = createController(options);
+    vi.spyOn(controller, 'start');
+    homepageController = controller;
+    return controller;
+  });
   preparation.next = null;
   preparation.count = 0;
   media = Object.assign(new EventTarget(), {
@@ -142,9 +153,19 @@ function holdNext() {
   return { entered: entered.promise, release: () => gate.resolve() };
 }
 
+async function waitForHomepageStartup() {
+  const start = vi.mocked(homepageController!.start);
+  const started = start.mock.results[0];
+  if (!started || started.type !== 'return') {
+    throw new Error('The original Homepage startup Promise was not captured.');
+  }
+  await started.value;
+  expect(handle!.getSnapshot().phase).toBe('ready');
+}
+
 async function editGallery() {
   handle = initHomepageRuntime(document.querySelector('[data-homepage-runtime]')!)!;
-  await expect.poll(() => handle!.getSnapshot().phase).toBe('ready');
+  await waitForHomepageStartup();
   const summary = ref('settings-summary');
   summary.click();
   await expect.poll(() => summary.getAttribute('aria-checked')).toBe('true');
@@ -334,13 +355,23 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     await editGallery();
     const committedSurface = surface();
     const preparations = preparation.count;
+    const requested = deferred<{ promise: Promise<projectionScope.ProjectionScopeSnapshot> }>();
+    const originalRequest = homepageController!.request;
+    vi.spyOn(homepageController!, 'request').mockImplementationOnce((...args) => {
+      const promise = originalRequest(...args);
+      requested.resolve({ promise });
+      return promise;
+    });
+    const failure = new Error('injected page publication failure');
     const applyFamily = siteFamily.applySiteLibraryFamily;
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.spyOn(siteFamily, 'applySiteLibraryFamily').mockImplementation((document, family) => {
       applyFamily(document, family);
-      if (family === 'brutalist') throw new Error('injected page publication failure');
+      if (family === 'brutalist') throw failure;
     });
     select('family', 'brutalist');
+    const { promise } = await requested.promise;
+    await expect(promise).rejects.toBe(failure);
     await expect
       .poll(
         () => document.querySelector<HTMLElement>('[data-homepage-runtime]')!.dataset.runtimeState
@@ -592,7 +623,7 @@ it('publishes a committed runtime preference when a live family request supersed
   document.addEventListener(PREFERRED_ADAPTER_EVENT, listener);
   try {
     handle = initHomepageRuntime(document.querySelector('[data-homepage-runtime]')!)!;
-    await expect.poll(() => handle!.getSnapshot().phase).toBe('ready');
+    await waitForHomepageStartup();
     select('runtime', 'react'); // Actual current WC control event channel.
     await entered.promise;
     expect(handle.getSnapshot().selection.runtimeId).toBe('react');

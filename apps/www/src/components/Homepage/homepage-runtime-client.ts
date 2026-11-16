@@ -12,6 +12,7 @@ import {
 import { homeActionIcon, appendHomeActionGlyph } from './home-action-icons';
 import {
   linkSurfaceProps,
+  navbarLinkContext,
   linkSurfaceLayout,
   linkTextProps,
   appendSiteLinkGlyph,
@@ -162,13 +163,20 @@ export function createHomepageContent(
           ref: `home-link-surface-${index}`,
           surfaceStyle: linkSurfaceLayout(family, siteLinkAppearance(link), siteLinkEmphasis(link)),
           props: {
-            ...linkSurfaceProps(family, siteLinkAppearance(link), siteLinkEmphasis(link), {
-              hovered: false,
-              pressed: false,
-              focusVisible: false,
-              current:
-                link.hasAttribute('aria-current') && link.getAttribute('aria-current') !== 'false',
-            }),
+            ...linkSurfaceProps(
+              family,
+              siteLinkAppearance(link),
+              siteLinkEmphasis(link),
+              {
+                hovered: false,
+                pressed: false,
+                focusVisible: false,
+                current:
+                  link.hasAttribute('aria-current') &&
+                  link.getAttribute('aria-current') !== 'false',
+              },
+              navbarLinkContext(link)
+            ),
           },
           children:
             siteLinkIcon(link) !== 'none'
@@ -298,7 +306,8 @@ export function createHomepageContent(
                 family,
                 siteLinkAppearance(group.links[index]!),
                 siteLinkEmphasis(group.links[index]!),
-                facts
+                facts,
+                navbarLinkContext(group.links[index]!)
               ),
             });
             if (context.refs[`home-link-text-${index}`])
