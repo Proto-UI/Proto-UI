@@ -21,9 +21,13 @@ import { isSvgTemplateNode } from '@proto.ui/core';
 export type CommitOptions = {
   mode?: 'light' | 'shadow';
   bindDecorations?: (bindings: readonly OwnedDecorationBinding[]) => void;
+  recordStagedNode?: (parent: Node, node: ChildNode) => void;
   slotPool?: Node[];
   owned?: WeakSet<Node>; // 收集“模板创建的节点”，用于区分外部节点
 };
+
+type CommitConfig = Required<Omit<CommitOptions, 'recordStagedNode'>> &
+  Pick<CommitOptions, 'recordStagedNode'>;
 
 export type CommitResult = {
   hasSlot: boolean;
@@ -59,7 +63,7 @@ const SVG_ATTR_NAMES: Record<string, string> = {
   clipRule: 'clip-rule',
 };
 
-function createElementForType(type: TemplateType, doc: Document): Node | null {
+function createElementForType(type: TemplateType, doc: Document): Element | null {
   if (typeof type === 'string') return doc.createElement(type);
 
   if (isReservedType(type)) return null; // slot handled elsewhere
@@ -76,7 +80,7 @@ function appendCommittedChild(
   parent: Node,
   child: TemplateChild,
   doc: Document,
-  opt: Required<CommitOptions>,
+  opt: CommitConfig,
   ctx: {
     slotUsed: boolean;
     slotStart?: Text;
@@ -94,6 +98,7 @@ function appendCommittedChild(
   if (!isTemplateNode(child)) {
     const text = doc.createTextNode(String(child));
     opt.owned.add(text);
+    opt.recordStagedNode?.(parent, text);
     parent.appendChild(text);
     return;
   }
@@ -108,6 +113,7 @@ function appendCommittedChild(
     const staged = stageOwnedDecoration(doc, t.target);
     opt.owned.add(staged.node);
     ctx.decorations.push(staged.binding);
+    opt.recordStagedNode?.(parent, staged.node);
     parent.appendChild(staged.node);
     return;
   }
@@ -131,6 +137,7 @@ function appendCommittedChild(
     if (opt.mode === 'shadow') {
       const el = doc.createElement('slot');
       opt.owned?.add(el);
+      opt.recordStagedNode?.(parent, el);
       parent.appendChild(el);
       return;
     }
@@ -159,6 +166,7 @@ function appendCommittedChild(
     const el = node as Element;
 
     applyTemplateStyle(el, child.style);
+    opt.recordStagedNode?.(parent, el);
 
     const kids = toArray(child.children ?? null);
     for (const k of kids) appendCommittedChild(el, k, doc, opt, ctx);
@@ -181,7 +189,7 @@ function appendSvgChild(
   parent: Node,
   child: SvgTemplateNode,
   doc: Document,
-  opt: Required<CommitOptions>,
+  opt: CommitConfig,
   ctx: {
     slotUsed: boolean;
     slotStart?: Text;
@@ -196,6 +204,7 @@ function appendSvgChild(
     setSvgAttribute(el, key, value);
   }
 
+  opt.recordStagedNode?.(parent, el);
   const kids = toArray(child.children ?? null);
   if (!svgTagAllowsChildren(child.tag) && kids.length > 0) {
     throw new Error(`svg <${child.tag}>:children unsupported`);
@@ -216,7 +225,11 @@ export function commitChildren(
   const doc = hostRoot.ownerDocument ?? document;
   const container = doc.createDocumentFragment();
 
-  const cfg: Required<CommitOptions> = {
+  const recordStagedNode = opt.recordStagedNode;
+  const cfg: CommitConfig = {
+    recordStagedNode: recordStagedNode
+      ? (parent, node) => recordStagedNode(parent === container ? hostRoot : parent, node)
+      : undefined,
     mode: opt.mode ?? 'light',
     slotPool: opt.slotPool ?? [],
     owned: opt.owned ?? new WeakSet<Node>(),

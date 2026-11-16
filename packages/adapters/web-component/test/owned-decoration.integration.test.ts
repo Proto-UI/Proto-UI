@@ -181,6 +181,7 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'conceal surface with variable display',
     'conceal surface with variable visibility',
     'conceal surface with variable content-visibility',
+    'conceal surface with stylesheet display',
     'remove split marker',
   ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
     const C = AdaptToWebComponent(
@@ -256,6 +257,20 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
         getPropertyValue: (name: string) => (name === property ? value : ''),
       } as CSSStyleDeclaration;
       const readStyle = vi.spyOn(window, 'getComputedStyle').mockReturnValueOnce(computed);
+      try {
+        expect(() => host.update()).toThrow(expected);
+      } finally {
+        readStyle.mockRestore();
+      }
+    } else if (mutation === 'conceal surface with stylesheet display') {
+      const stylesheet = document.createElement('style');
+      stylesheet.textContent = '[part="surface"] { display: none }';
+      host.shadowRoot!.append(stylesheet);
+      expect((surface as HTMLElement).style.display).toBe('');
+      const window = host.ownerDocument.defaultView!;
+      const readStyle = vi.spyOn(window, 'getComputedStyle').mockReturnValueOnce({
+        getPropertyValue: (name: string) => (name === 'display' ? 'none' : ''),
+      } as CSSStyleDeclaration);
       try {
         expect(() => host.update()).toThrow(expected);
       } finally {
@@ -349,6 +364,60 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       expect(() => document.body.append(host)).toThrow('decoration physical blueprint changed');
       expect(constructed).toBe(true);
       expect(caller.parentNode).toBe(host);
+    }
+  );
+
+  it.each(['remove', 'retag'] as const)(
+    'rejects a later constructor that can %s an earlier staged sibling',
+    (mutation) => {
+      const earlier = `pui-decoration-staged-earlier-${++id}`;
+      const later = `pui-decoration-staged-later-${id}`;
+      let staged: HTMLElement | undefined;
+      let changed = false;
+      customElements.define(
+        earlier,
+        class extends HTMLElement {
+          constructor() {
+            super();
+            staged = this;
+          }
+        }
+      );
+      customElements.define(
+        later,
+        class extends HTMLElement {
+          constructor() {
+            super();
+            if (!staged || !staged.parentNode) return;
+            changed = true;
+            if (mutation === 'remove') staged.remove();
+            else staged.setAttribute('title', 'rewritten');
+          }
+        }
+      );
+      const C = AdaptToWebComponent(
+        definePrototype({
+          name: `owned-decoration-staged-constructor-${id}`,
+          setup(def) {
+            const target = def.feedback.style.declareDecoration();
+            return (r) => [r.el(earlier, {}), r.el(later, {}), r.decoration(target), r.slot()];
+          },
+        }),
+        {
+          shadow: {
+            mode: 'open',
+            presentation: 'split',
+            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+          },
+        }
+      );
+      const host = new C();
+      const caller = document.createTextNode('Caller text');
+      host.append(caller);
+      expect(() => document.body.append(host)).toThrow('decoration physical blueprint changed');
+      expect(changed).toBe(true);
+      expect(caller.parentNode).toBe(host);
+      expect(host.shadowRoot?.querySelector('[part="surface"]')?.childNodes.length ?? 0).toBe(0);
     }
   );
 
