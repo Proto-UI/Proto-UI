@@ -1582,6 +1582,15 @@ function directBodyCall(callback, call) {
   );
 }
 
+function isOperationInCallback(callback, call) {
+  return (
+    callback.body === call ||
+    (ts.isExpressionStatement(call.parent) &&
+      ts.findAncestor(call, ts.isFunctionLike) === callback &&
+      nodeWithin(call, callback.body))
+  );
+}
+
 function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper) {
   let safe = true;
   function check(node) {
@@ -1710,7 +1719,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     return false;
 
   const callback = ts.findAncestor(use, ts.isFunctionLike);
-  if (!callback || !directBodyCall(callback, use)) return false;
+  if (!callback || !isOperationInCallback(callback, use)) return false;
   let declarationOwner = callback;
   let definition = receiver;
   if (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)) {
@@ -1739,7 +1748,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
       !ruleReceiver ||
       !ts.isIdentifier(ruleReceiver) ||
       ruleReceiver.text !== parameterName(declarationOwner) ||
-      !directBodyCall(declarationOwner, rule) ||
+      !isOperationInCallback(declarationOwner, rule) ||
       !isCanonicalPrototypeSetup(declarationOwner, false) ||
       !receiverUsesAreDirect(callback, receiver)
     )
@@ -1755,7 +1764,7 @@ function isOwnedDecorationStyleArgument(argument, scope) {
     !binding ||
     !binding.initializer ||
     !isConstStyleBinding(binding, binding.initializer) ||
-    binding.parent.parent.parent !== declarationOwner.body ||
+    ts.findAncestor(binding, ts.isFunctionLike) !== declarationOwner ||
     !ts.isCallExpression(binding.initializer) ||
     feedbackStyleReceiver(binding.initializer.expression, 'declareDecoration') !== definition
   )

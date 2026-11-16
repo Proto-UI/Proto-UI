@@ -128,6 +128,10 @@ describe('source-scanned Shadow Template/Root separation', () => {
     "def.feedback.style.to(target).use(tw('opacity-50'), tw('p-[10%]'));",
     "const paint = tw('p-[10%]'); const alias = paint; def.feedback.style.to(target).use(alias);",
     "const paint = tw('p-[10%]'); def.rule({when: w => w.state(active).eq(true), intent: i => i.feedback.style.to(target).use(paint)});",
+    "if (enabled) { def.feedback.style.to(target).use(tw('p-[10%]')); }",
+    "for (const variant of [1, 2]) { def.feedback.style.to(target).use(tw('p-[10%]')); }",
+    "{ def.feedback.style.to(target).use(tw('p-[10%]')); }",
+    "if (enabled) def.rule({when: w => w.state(active).eq(true), intent: i => { if (enabled) i.feedback.style.to(target).use(tw('p-[10%]')); }});",
   ])('compiles targeted decoration paint as Template CSS: %s', async (contribution) => {
     const { artifact, documentCss } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
@@ -322,6 +326,21 @@ describe('source-scanned Shadow Template/Root separation', () => {
         const target = def.feedback.style.declareDecoration();
         def.feedback.style.to(target).use(tw('p-[10%]'));
         def.feedback.style.use(tw('p-[10%]'));
+        return r => r.decoration(target);
+      }});
+    `)
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
+  it('retains preflight for an unverified nested callback inside setup control flow', async () => {
+    await expect(
+      generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'opaque-nested-callback', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        if (enabled) register(() => {
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+        });
         return r => r.decoration(target);
       }});
     `)
