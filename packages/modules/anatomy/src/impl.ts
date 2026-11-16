@@ -274,7 +274,9 @@ function getHookNames(proto: Prototype<any> | null): Set<string> {
 }
 
 export class AnatomyModuleImpl extends ModuleBase {
-  private static readonly liveInstances = new Set<AnatomyModuleImpl>();
+  private static nextInstanceOrder = 0;
+  private static readonly orderSubscribers = new Map<AnatomyFamily, AnatomyModuleImpl[]>();
+  private static readonly targetSubscribers = new Map<AnatomyFamily, AnatomyModuleImpl[]>();
   private static readonly sharedOrderObservers = new Map<
     AnatomyFamily,
     Map<AnatomyInstanceToken, { off: Unsubscribe; listeners: Set<AnatomyModuleImpl> }>
@@ -282,6 +284,7 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private readonly prototypeName: string;
   private readonly exposePort: ExposePort;
+  private readonly instanceOrder = AnatomyModuleImpl.nextInstanceOrder++;
   private disposed = false;
   private claimFamilies = new Set<AnatomyFamily>();
   private orderDispatch: AnatomyOrderCallbackDispatcher = (fn) => fn(undefined);
@@ -298,7 +301,6 @@ export class AnatomyModuleImpl extends ModuleBase {
     super(caps);
     this.prototypeName = prototypeName;
     this.exposePort = exposePort;
-    AnatomyModuleImpl.liveInstances.add(this);
   }
 
   private ensureFamilyRegistered(family: AnatomyFamily): NormalizedFamily {
@@ -740,7 +742,10 @@ export class AnatomyModuleImpl extends ModuleBase {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
-    AnatomyModuleImpl.liveInstances.delete(this);
+    for (const family of this.orderListeners.keys())
+      this.removeSubscriber(AnatomyModuleImpl.orderSubscribers, family);
+    for (const family of this.targetListeners.keys())
+      this.removeSubscriber(AnatomyModuleImpl.targetSubscribers, family);
     for (const family of this.observedOrderRoots.keys()) {
       this.teardownOrderObserver(family);
     }
@@ -800,6 +805,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!set) {
       set = new Set();
       this.orderListeners.set(family, set);
+      this.addSubscriber(AnatomyModuleImpl.orderSubscribers, family);
     }
     set.add(cb);
     this.primeOrderSignature(family);
@@ -809,6 +815,7 @@ export class AnatomyModuleImpl extends ModuleBase {
       current?.delete(cb);
       if (!current || current.size > 0) return;
       this.orderListeners.delete(family);
+      this.removeSubscriber(AnatomyModuleImpl.orderSubscribers, family);
       this.teardownOrderObserver(family);
     };
   }
@@ -818,25 +825,80 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!set) {
       set = new Set();
       this.targetListeners.set(family, set);
+      this.addSubscriber(AnatomyModuleImpl.targetSubscribers, family);
     }
     set.add(cb);
     return () => {
       const current = this.targetListeners.get(family);
       current?.delete(cb);
-      if (current?.size === 0) this.targetListeners.delete(family);
+      if (current?.size === 0) {
+        this.targetListeners.delete(family);
+        this.removeSubscriber(AnatomyModuleImpl.targetSubscribers, family);
+      }
     };
+  }
+
+  // Family publication must not inspect every unrelated Runtime owner. Keep
+  // only subscribed owners, ordered by creation rather than subscription time.
+  // A numeric cursor preserves the old live-Set traversal when a callback adds,
+  // cancels or disposes a recipient, including a nested family publication.
+  private static subscriberAfter(owners: readonly AnatomyModuleImpl[], order: number): number {
+    let start = 0;
+    let end = owners.length;
+    while (start < end) {
+      const middle = start + Math.floor((end - start) / 2);
+      if (owners[middle]!.instanceOrder <= order) start = middle + 1;
+      else end = middle;
+    }
+    return start;
+  }
+
+  private addSubscriber(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): void {
+    if (this.disposed) return;
+    let owners = index.get(family);
+    if (!owners) index.set(family, (owners = []));
+    owners.splice(AnatomyModuleImpl.subscriberAfter(owners, this.instanceOrder), 0, this);
+  }
+
+  private removeSubscriber(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): void {
+    const owners = index.get(family);
+    if (!owners) return;
+    const position = AnatomyModuleImpl.subscriberAfter(owners, this.instanceOrder) - 1;
+    if (owners[position] === this) owners.splice(position, 1);
+    if (owners.length === 0) index.delete(family);
+  }
+
+  private static *subscribers(
+    index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
+    family: AnatomyFamily
+  ): Iterable<AnatomyModuleImpl> {
+    let lastOrder = -1;
+    while (true) {
+      // Re-read after each callback: the last subscriber can be removed and a
+      // later owner can recreate the family index before this traversal resumes.
+      const owners = index.get(family);
+      const next = owners?.[this.subscriberAfter(owners, lastOrder)];
+      if (!next) return;
+      lastOrder = next.instanceOrder;
+      yield next;
+    }
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
     const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
-    for (const impl of AnatomyModuleImpl.liveInstances) {
-      if (!impl.orderListeners.has(family)) continue;
+    for (const impl of this.subscribers(this.orderSubscribers, family)) {
       impl.emitOrderChangeIfNeeded(family, reads);
     }
   }
 
   private static notifyTargetChange(family: AnatomyFamily): void {
-    for (const impl of AnatomyModuleImpl.liveInstances) {
+    for (const impl of this.subscribers(this.targetSubscribers, family)) {
       const listeners = impl.targetListeners.get(family);
       if (!listeners?.size) continue;
       impl.orderDispatch((ctx) => {
