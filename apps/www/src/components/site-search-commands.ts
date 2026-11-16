@@ -18,8 +18,8 @@ import {
 import {
   materializeProjectionCandidate,
   type MaterializedProjectionCandidate,
+  type ProjectionMaterializerOptions,
 } from './PrototypePreviewer/projection-materializer';
-import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { collectPrototypeIds, type DemoSpec } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
 import type { SiteSearchFocusRestore } from './site-search-composition';
@@ -33,6 +33,7 @@ registerPrototype('lucide-x-icon', closeIcon);
 registerPrototype('lucide-arrow-right-icon', arrowRightIcon);
 
 export type SearchCommand = 'open' | 'close' | 'retry';
+type SearchThemeSource = NonNullable<ProjectionMaterializerOptions['themeSource']>;
 type SearchCallbacks = Record<SearchCommand, () => unknown> & { prepare?: () => unknown };
 export type SearchCommandParticipant = {
   root: HTMLElement;
@@ -47,12 +48,14 @@ export type SearchCommandParticipant = {
   focus(command: SearchCommand): void;
   materialize(
     request: ProjectionScopeMaterializeRequest,
-    namespace?: string
+    namespace?: string,
+    themeSource?: SearchThemeSource
   ): Promise<MaterializedProjectionCandidate[]>;
   materializeDialog(
     request: ProjectionScopeMaterializeRequest,
     namespace?: string,
     options?: {
+      themeSource?: SearchThemeSource;
       focusEpoch(): number;
       takeFocusRestore(): SiteSearchFocusRestore | null;
     }
@@ -346,7 +349,11 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       publishState();
     },
     focus,
-    async materialize(request: ProjectionScopeMaterializeRequest, namespace = 'homepage') {
+    async materialize(
+      request: ProjectionScopeMaterializeRequest,
+      namespace = 'homepage',
+      themeSource?: SearchThemeSource
+    ) {
       rememberedFocus.clear();
       const origin = document.activeElement;
       const focusedCommand =
@@ -368,6 +375,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           mounts[index]!.dataset.projectionOwner = ownerId;
           candidate = await materializeProjectionCandidate(request, {
             mount: mounts[index]!,
+            themeSource,
             ownerId,
             componentId: 'button',
             controls,
@@ -409,6 +417,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       request: ProjectionScopeMaterializeRequest,
       namespace = 'homepage',
       options?: {
+        themeSource?: SearchThemeSource;
         focusEpoch(): number;
         takeFocusRestore(): SiteSearchFocusRestore | null;
       }
@@ -449,6 +458,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
       dialogMount.dataset.projectionOwner = ownerId;
       candidate = await materializeProjectionCandidate(request, {
         mount: dialogMount,
+        themeSource: options?.themeSource,
         ownerId,
         componentId: 'dialog',
         controls,
@@ -626,6 +636,9 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   }
   const family = root.dataset.searchInitialFamily === 'brutalist' ? 'brutalist' : 'shadcn';
   let alive = true;
+  // The same owner supplies the initial theme and later color-mode updates.
+  // Each candidate keeps its own lease, including the retained rollback view.
+  const themeSource: SearchThemeSource = { scope: root, family, isCurrent: () => alive };
   let attempt = 0;
   const retired = new Set<Promise<void>>();
   // The public Dialog is only needed once the user opens Search. Defer its
@@ -657,7 +670,8 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     return createProjectionScopeController({
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
-        const candidate = await participant.materializeDialog(request, namespace, {
+        return participant.materializeDialog(request, namespace, {
+          themeSource,
           focusEpoch: () => dialogFocusEpoch,
           takeFocusRestore: () => {
             const pending = pendingDialogFocus;
@@ -665,27 +679,6 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
             return pending;
           },
         });
-        let stop: () => void;
-        try {
-          stop = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
-            candidate.setThemeSurfaceStyle(theme)
-          );
-        } catch (error) {
-          await candidate.dispose();
-          throw error;
-        }
-        return {
-          activate() {
-            candidate.activate();
-          },
-          setLocked(locked) {
-            candidate.setLocked?.(locked);
-          },
-          async dispose() {
-            stop();
-            await candidate.dispose();
-          },
-        };
       },
     });
   };
@@ -701,16 +694,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     return createProjectionScopeController({
       initialSelection: { runtimeId: runtime, projectionFamilyId: family },
       async materialize(request) {
-        const candidates = await participant.materialize(request, namespace);
-        let stop: () => void;
-        try {
-          stop = watchProjectionThemeSurfaceStyle(family, root, (theme) =>
-            candidates.forEach((candidate) => candidate.setThemeSurfaceStyle(theme))
-          );
-        } catch (error) {
-          await Promise.allSettled(candidates.map((candidate) => candidate.dispose()));
-          throw error;
-        }
+        const candidates = await participant.materialize(request, namespace, themeSource);
         return {
           activate() {
             candidates.forEach((candidate) => candidate.activate());
@@ -719,7 +703,6 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
             candidates.forEach((candidate) => candidate.setLocked?.(locked));
           },
           async dispose() {
-            stop();
             const results = await Promise.allSettled(
               candidates.map((candidate) => candidate.dispose())
             );
