@@ -28,12 +28,19 @@ type DecorationTreeRecord = {
   splitRoot?: { children: ChildNode[]; identity: string; document: Document };
 };
 
-function captureSplitSurfaceIdentity(surface: Element): string {
-  return JSON.stringify(
-    ['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
+function captureSplitSurfaceIdentity(surface: HTMLElement): string {
+  const { style } = surface;
+  const concealed =
+    style.display === 'none' ||
+    style.visibility === 'hidden' ||
+    style.visibility === 'collapse' ||
+    style.getPropertyValue('content-visibility') === 'hidden';
+  return JSON.stringify([
+    ...['part', 'data-pui-split-surface', 'aria-hidden', 'inert', 'hidden'].map((name) =>
       surface.getAttribute(name)
-    )
-  );
+    ),
+    concealed,
+  ]);
 }
 
 function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean {

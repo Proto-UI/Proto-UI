@@ -174,6 +174,8 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'hide surface',
     'inert surface',
     'retag surface',
+    'conceal surface with display',
+    'conceal surface with visibility',
     'remove split marker',
   ] as const)('rejects invalid split decoration reuse after %s', (mutation) => {
     const C = AdaptToWebComponent(
@@ -220,6 +222,10 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     if (mutation === 'hide surface') surface.setAttribute('aria-hidden', 'true');
     if (mutation === 'inert surface') surface.setAttribute('inert', '');
     if (mutation === 'retag surface') surface.setAttribute('part', 'other');
+    if (mutation === 'conceal surface with display')
+      (surface as HTMLElement).style.setProperty('display', 'none', 'important');
+    if (mutation === 'conceal surface with visibility')
+      (surface as HTMLElement).style.visibility = 'hidden';
     if (mutation === 'remove split marker') {
       expect(surface.hasAttribute('data-pui-split-surface')).toBe(true);
       surface.removeAttribute('data-pui-split-surface');
