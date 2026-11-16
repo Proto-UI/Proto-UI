@@ -25,6 +25,7 @@ import type { RuleCondition } from './rule-declarations';
 import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { flutterNativeSource } from './flutter-native-host';
 import { partitionModuleBindings } from './source-module-bindings';
+import { callableValue } from './value-types';
 
 /** Checked statements become ordinary Dart; the supporting host has no semantic IR. */
 export function emitFlutterSource(
@@ -239,7 +240,26 @@ export function emitFlutterSource(
   function type(type: ValueType): string {
     if (type === 'exception') return 'Object?';
     if (isDataValueType(type)) return data(type);
-    if (typeof type !== 'string') throw new Error('Invalid Dart type');
+    if (typeof type !== 'string') {
+      if (type.kind === 'cell') return dartType(type.value);
+      if (type.kind === 'callable')
+        return `${dartType(type.returnType)} Function(${type.parameters
+          .map(
+            (parameter, index) =>
+              `${parameter.optional && !type.parameters[index - 1]?.optional ? '[' : ''}${parameterType(parameter)}${parameter.optional && index === type.parameters.length - 1 ? ']' : ''}`
+          )
+          .join(', ')})`;
+      if (type.kind === 'value-union') {
+        const members = type.members.filter((member) => member !== 'null' && member !== 'void');
+        const names = [...new Set(members.map(dartType))];
+        const base =
+          names.length === 1
+            ? names[0] + (type.members.includes('null') && !names[0].endsWith('?') ? '?' : '')
+            : 'Object?';
+        return type.members.includes('void') ? `NativeOptional<${base}>` : base;
+      }
+      throw new Error('Invalid Dart type');
+    }
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9))}?`;
     if (type.startsWith('optional:')) return `NativeOptional<${typeName(type.slice(9))}>`;
     if (type.startsWith('state:')) return `NativeState<${data(type.slice(6) as DataType)}>`;
@@ -248,6 +268,13 @@ export function emitFlutterSource(
     if (type.startsWith('state-event:') || type.startsWith('state-next:'))
       return `NativeStateWatchEvent<${data(type.slice(type.indexOf(':') + 1) as DataType)}>`;
     return typeName(type);
+  }
+  const dartType = type;
+  function parameterType(parameter: { type: ValueType; optional?: boolean }): string {
+    const declared = type(parameter.type);
+    return parameter.optional && !declared.startsWith('NativeOptional<')
+      ? `NativeOptional<${declared}>`
+      : declared;
   }
   function typeName(name: string): string {
     if (name === 'state-disconnect') return 'NativeStateWatchEvent<Object?>';
@@ -375,7 +402,7 @@ export function emitFlutterSource(
       value.parameters
         .map(
           (p, index) =>
-            `${p.optional && !value.parameters[index - 1]?.optional ? '[' : ''}${p.optional ? `NativeOptional<${type(p.type)}>` : type(p.type)} ${id(p.name)}${p.optional ? ' = const NativeOptional.absent()' : ''}${p.optional && index === value.parameters.length - 1 ? ']' : ''}`
+            `${p.optional && !value.parameters[index - 1]?.optional ? '[' : ''}${parameterType(p)} ${id(p.name)}${p.optional ? ' = const NativeOptional.absent()' : ''}${p.optional && index === value.parameters.length - 1 ? ']' : ''}`
         )
         .join(', ') || (value.phase === 'render' ? `${type('render')} _` : '');
     const scoped =
@@ -578,6 +605,37 @@ export function emitFlutterSource(
       }
       case 'function':
         return fn(value.function, depth);
+      case 'call': {
+        const signature = callableValue(value.callee.type, value.optional);
+        const arguments_ = value.arguments.map((argument, index) => {
+          const emitted = expr(argument, depth);
+          const evaluated =
+            argument.type === 'void' && argument.kind !== 'undefined'
+              ? `(() { ${emitted}; return const NativeVoid(); })()`
+              : emitted;
+          const expected = parameterType(signature.parameters[index]);
+          return expected.startsWith('NativeOptional<')
+            ? `nativeOptionalResult<${expected.slice(15, -1)}>(${evaluated})`
+            : evaluated;
+        });
+        const invoke = (callee: string) => {
+          const call = `(${callee} as ${type(signature)})(${arguments_.join(', ')})`;
+          return signature.returnType === 'void'
+            ? `(() { ${call}; return const NativeVoid(); })()`
+            : call;
+        };
+        const callee = `nativeValue(${expr(value.callee, depth)})`;
+        if (!value.optional) return invoke(callee);
+        const result = value.type === 'void' ? 'NativeVoid' : type(value.type);
+        const absent =
+          value.type === 'void' ? 'const NativeVoid()' : 'const NativeOptional<Never>.absent()';
+        const present =
+          value.type === 'void'
+            ? invoke('callee')
+            : `nativeOptionalResult<${result.slice(15, -1)}>(${invoke('callee')})`;
+        // Keep arguments inside the non-nullish branch, after one callee read.
+        return `nativeProject<Object?, ${result}>(${callee}, (callee) { if (callee == null || callee is NativeVoid) return ${absent}; return ${present}; })`;
+      }
       case 'helper-call':
         return `${id(value.name)}(${value.arguments.map((arg, index) => (helperBindings.get(value.name)?.parameters[index]?.optional && !type(arg.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(arg, depth)})` : expr(arg, depth))).join(', ')})`;
       case 'authored-hook':
@@ -863,10 +921,11 @@ export function emitFlutterSource(
       } else if (statement.kind === 'effect')
         result += `${indent}${expr(statement.expression, depth)};\n`;
       else if (statement.kind === 'return') {
+        const resultType = type(returnType);
         result +=
           returnType === 'void' && statement.value
             ? `${statement.value.kind === 'undefined' ? '' : `${indent}${expr(statement.value, depth)};\n`}${indent}return;\n`
-            : `${indent}return${statement.value ? ` ${type(returnType).startsWith('NativeOptional<') && !type(statement.value.type).startsWith('NativeOptional<') ? `NativeOptional.value(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : type(returnType).startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
+            : `${indent}return${statement.value ? ` ${resultType.startsWith('NativeOptional<') ? `nativeOptionalResult<${resultType.slice(15, -1)}>(${expr(statement.value, depth)})` : expr(statement.value, depth)}` : resultType.startsWith('NativeOptional<') ? ' const NativeOptional.absent()' : ''};\n`;
         break;
       } else if (statement.kind === 'throw') {
         usesExceptions = true;

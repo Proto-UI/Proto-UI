@@ -90,19 +90,10 @@ describe('authored exception source admission', () => {
     expect(methods.find((entry) => entry.name === 'caughtScope')?.returnType).toBe('boolean');
   });
 
-  it('keeps the dormant native experiments explicit about ordinary callable coverage', () => {
+  it('emits ordinary exception-flow calls in both dormant native experiments', () => {
     const ir = parsed();
     expect(emitQtSource(ir).ok).toBe(true);
-    expect(emitFlutterSource(ir)).toMatchObject({
-      ok: false,
-      diagnostics: expect.arrayContaining([
-        expect.objectContaining({
-          code: 'PUI4003',
-          message:
-            'Ordinary callable / structural value expressions are not implemented by flutter-source.',
-        }),
-      ]),
-    });
+    expect(emitFlutterSource(ir).ok).toBe(true);
   });
 
   it('does not turn a source assertion over a catch into public State or data authority', () => {

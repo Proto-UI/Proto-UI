@@ -1,5 +1,13 @@
 import { ordinaryValueChildren } from './value-children';
-import type { CompilerDiagnostic, ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
+import {
+  isDataValueType,
+  type CompilerDiagnostic,
+  type ExpressionIR,
+  type FunctionIR,
+  type PrototypeIR,
+  type StatementIR,
+  type ValueType,
+} from './ir';
 
 type Binding = { fn: FunctionIR; scope: Scope };
 type Scope = Map<string, Binding | undefined>;
@@ -78,10 +86,19 @@ export function unsupportedCheckedHelperParameters(
   );
 }
 
-/** The private Dart experiment has not implemented the ordinary ValueIR additions. */
+/** Ordinary calls use native closures; the remaining structural additions do not. */
 export function unsupportedDartOrdinaryValues(ir: PrototypeIR): CompilerDiagnostic[] {
+  function supportedType(type: ValueType): boolean {
+    if (typeof type === 'string' || isDataValueType(type)) return true;
+    if (type.kind === 'cell') return supportedType(type.value);
+    if (type.kind === 'callable')
+      return supportedType(type.returnType) && type.parameters.every((p) => supportedType(p.type));
+    if (type.kind === 'value-union') return type.members.every(supportedType);
+    return false;
+  }
   return unsupportedSourceExpressions(ir, 'flutter-source', 'emitted-declarations', (value) =>
-    ['call', 'narrow', 'element', 'intrinsic', 'object-spread', 'member-write'].includes(value.kind)
+    ['narrow', 'element', 'intrinsic', 'object-spread', 'member-write'].includes(value.kind) ||
+    !supportedType(value.type)
       ? 'Ordinary callable / structural value expressions'
       : undefined
   );

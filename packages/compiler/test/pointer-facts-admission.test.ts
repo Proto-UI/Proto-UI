@@ -164,24 +164,12 @@ describe('portable pointer facts: capability admission', () => {
 
 describe('legacy control labels within the current IR schema', () => {
   const bodies = [
-    [
-      'const control = event.control; const alias = control; const same = alias === control;',
-      false,
-    ],
-    [
-      'const control = event.control; const get = () => control; const same = get() === control;',
-      true,
-    ],
-    [
-      'const control = event.control; const choose = (flag: boolean) => { if (flag) return event; return control; }; const mixed = choose(true); const same = mixed === event;',
-      true,
-    ],
-    [
-      'const control = event.control; const choose = (flag: boolean) => { if (flag) return control; return event; }; const get = () => choose(false); const same = get() !== control;',
-      true,
-    ],
+    'const control = event.control; const alias = control; const same = alias === control;',
+    'const control = event.control; const get = () => control; const same = get() === control;',
+    'const control = event.control; const choose = (flag: boolean) => { if (flag) return event; return control; }; const mixed = choose(true); const same = mixed === event;',
+    'const control = event.control; const choose = (flag: boolean) => { if (flag) return control; return event; }; const get = () => choose(false); const same = get() !== control;',
   ] as const;
-  for (const [body, ordinaryCall] of bodies)
+  for (const body of bodies)
     it(`normalizes only proven old event labels: ${body}`, () => {
       const old = oldLabels(parse(body));
       const before = JSON.stringify(old);
@@ -194,22 +182,8 @@ describe('legacy control labels within the current IR schema', () => {
       const again = validateIR(checked.value);
       expect(again.ok).toBe(true);
       if (again.ok) expect(again.value).toBe(checked.value);
-      for (const emit of [...web, emitGpuiSource, emitQtSource])
+      for (const emit of [...web, emitGpuiSource, emitQtSource, emitFlutterSource])
         expect(emit(old).ok, emit.name).toBe(true);
-      const flutter = emitFlutterSource(old);
-      // Normalization succeeds independently of this private target's lowering
-      // boundary. Flutter still diagnoses ordinary callable expressions.
-      if (ordinaryCall)
-        expect(flutter).toMatchObject({
-          ok: false,
-          diagnostics: expect.arrayContaining([
-            expect.objectContaining({
-              code: 'PUI4003',
-              message: expect.stringContaining('Ordinary callable / structural value expressions'),
-            }),
-          ]),
-        });
-      else expect(flutter.ok).toBe(true);
     });
   for (const guard of ['mixed === event', '!(mixed !== event)'])
     it(`positive identity narrows an inert join: ${guard}`, () => {
