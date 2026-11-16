@@ -8,6 +8,10 @@ lifecycleRationale:
 since: 0.3.0-alpha.0
 summary: Canonical classification plus Root-only provenance through semantic merge, Rule lowering, runtime patches, replay, and unchanged collapsed output.
 cases:
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-VERTICAL-SCROLL
+    title: Exact vertical overflow keeps the scrollport in the bounded inner surface
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-VERTICAL-SCROLL]
+    expectation: exact-surface-role-and-companion-validation-before-mutation
   - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-RESIDENT-SPACING
     title: Exact translate-x-5 admission preserves unresolved neighbors and real Shadow initial targets
     covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING]
@@ -290,6 +294,7 @@ implementations:
     path: packages/adapters/web-component/test/shadow-split-effects.test.ts
     required: true
     consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-VERTICAL-SCROLL
       - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
   - id: shadow-split-runtime-views
     kind: adapter-test
@@ -314,6 +319,7 @@ implementations:
     path: packages/core/test/feedback/application-role.test.ts
     required: true
     consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-VERTICAL-SCROLL
       - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SURFACE
       - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-PLACEMENT
       - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-COMPOSITE

@@ -75,6 +75,10 @@ criteria:
     text:
       zh-CN: H1 在内部 vocabulary 中增加 `root-geometry` 与 `hit-testing`，不增加作者 API。首批精确准入 `translate-y-px`、`translate-x-0`、`translate-x-[calc(100%_-_2px)]`、`scale-[0.98]`、`will-change-transform` 为 canonical root-geometry，`pointer-events-none` 为 canonical hit-testing。其余未治理的 translate/scale/will-change/pointer-events 值仍 unresolved；分类准入不等于物理 recipe 已支持。新增信息必须沿用 G–H 的完整 provenance transport。
       en: H1 adds internal `root-geometry` and `hit-testing` vocabulary without author APIs. The initial exact canonical root-geometry tokens are `translate-y-px`, `translate-x-0`, `translate-x-[calc(100%_-_2px)]`, `scale-[0.98]`, and `will-change-transform`; `pointer-events-none` is canonical hit-testing. Other ungoverned translate/scale/will-change/pointer-events values remain unresolved. Classification admission does not establish physical recipe support. New information retains the complete provenance transport under G-H.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-VERTICAL-SCROLL
+    text:
+      zh-CN: 仅准入精确 overflow-y-auto 为 canonical surface role。普通 split Root 的宿主保留尺寸约束与定位，内层 surface 拥有滚动和面板绘制。提交前必须校验同一来源的 overflow-y auto 声明与 surface selector。原生文本控件拒绝该 recipe，其他尚未治理的 overflow token 保持 unresolved。
+      en: Admit exactly overflow-y-auto as a canonical surface role. For an ordinary split Root, the host retains sizing constraints and placement while the inner surface owns scrolling and panel paint. Validate the same-source overflow-y auto declaration and the surface selector before commit. Native text controls reject this recipe. Other ungoverned overflow tokens remain unresolved.
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING
     text:
       en: >-
