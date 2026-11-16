@@ -2,7 +2,7 @@
 
 Date: 2026-11-15. This is an AI-assisted, current-user-directed repair and integration record. The requested outcome was one broad PR covering important 0.3 work and smaller defects, with parallel implementation and cross-review. It is not a release, independent approval or permission to merge.
 
-**Disposition: draft; compilation compatibility blocks merge.** The new ControlLabel target declarations repair real Runtime consumers but make the previously compilable Base Button fail `react-dom-source-v1`. That change is isolated in its own commit and is not described as pre-existing compiler debt. The remaining repairs and their evidence are retained for review.
+**Disposition: draft; the compiler regression observed on this date was repaired later in this same candidate.** The new ControlLabel target declarations repair real Runtime consumers but made the previously compilable Base Button fail `react-dom-source-v1` when this record was written. That change was isolated in its own commit and is not described as pre-existing compiler debt. Commit `b41273fdb264ffc5a4f29ecfa398aa5b6a319e26` later admitted and lowered `asControlLabel` for the four Web client source profiles in this candidate, so the diagnostic named below no longer exists at the current head and no longer blocks the merge. The remaining repairs and their evidence are retained for review.
 
 ## Source binding and integration
 
@@ -97,6 +97,8 @@ The native suite performs real keyboard and pointer actions, checks accessible n
 
 ## Reproduce the merge-blocking compiler regression
 
+Historical status: this section records the state observed on 2026-11-15, before the repair in this same candidate. `b41273fdb264ffc5a4f29ecfa398aa5b6a319e26` later admitted and lowered `asControlLabel` for the four Web client source profiles, so the diagnostic named below no longer exists at the current head, and the candidate call in the recipe returns `ok: true` again. The recipe is retained as the reproduction of the regression that was observed.
+
 From the candidate repository root with its dependencies installed:
 
 ```sh
@@ -118,12 +120,12 @@ JS
 git worktree remove ../proto-ui-baseline-7d30a788
 ```
 
-Both calls use the candidate compiler. The baseline Prototype returns `ok: true`; the candidate returns `ok: false`, `PUI1003`, at the Button `asControlLabel` import: Control Label association and activation lowering is not implemented.
+Both calls use the candidate compiler. At the time of writing the baseline Prototype returned `ok: true` and the candidate returned `ok: false`, `PUI1003`, at the Button `asControlLabel` import: Control Label association and activation lowering is not implemented. That diagnostic was removed by the later repair in this candidate; at the current head the candidate call returns `ok: true` and no such diagnostic exists.
 
-The public association ref is nominally branded by Core. An independently emitted copy cannot recognize those existing refs, while importing Core would violate the present standalone source-profile boundary. The next compiler-owned step is to govern that interoperability contract, implement generic association/activation lowering, then prove naming, activation, disabled/controlled state, focus reentry and disposal in real compiled consumers. No no-op lowering, component-name dispatch or invented ABI was added to hide this gap.
+The public association ref is nominally branded by Core. At the time of writing an independently emitted copy could not recognize those existing refs, while importing Core would violate the standalone source-profile boundary. The compiler-owned work that followed in this candidate governed that interoperability contract, implemented generic association/activation lowering and proved naming, activation, disabled/controlled state, focus reentry and disposal in real compiled consumers. No no-op lowering, component-name dispatch or invented ABI was added to hide this gap.
 
 ## Acceptance and publication debt
 
-The draft remains blocked on the new compiler regression, independent review and actual current-head CI. The compiler is still private; this does not complete #1458, the 0.3 milestone, every Finf family/host, SSR or native-platform admission. The nine guarded official Calendar native evidence cases and full Search/browser matrix were not executed here. Existing source PR acceptance findings remain with their original owners.
+The draft remains blocked on independent review and actual current-head CI. The compiler regression recorded above was repaired later in this same candidate and no longer blocks it. The compiler is still private; this does not complete #1458, the 0.3 milestone, every Finf family/host, SSR or native-platform admission. The nine guarded official Calendar native evidence cases and full Search/browser matrix were not executed here. Existing source PR acceptance findings remain with their original owners.
 
 Before marking ready, resolve the compiler contract, run affected compiled consumers and the relevant hosted browser/namespace jobs, inspect and publish final visual evidence through an approved destination, and obtain the repository's normal independent review and native DCO/check results. No Issue checkbox or release lifecycle was promoted on the strength of this draft.

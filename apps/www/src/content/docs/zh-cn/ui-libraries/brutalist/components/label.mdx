@@ -37,7 +37,7 @@ WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, 
 
 入口为 `@proto.ui/prototypes-brutalist/label`。CLI component `brutalist-label` 可生成 WC、React、Vue、Vue 2 facade。
 
-当前目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle、Toggle Group Item。仅图标命令可以通过同一关联使用独立 Label；Button 保留 click signal，Toggle 保留 activeChange，Toggle Group Item 将选择请求交给 Group。此关联不附带 Form submission、validation、多 Label 排序或原生平台/辅助技术认证。真实浏览器验收与源码、合成宿主测试分别追踪。
+声明的关联目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle、Toggle Group Item。仅图标命令可以通过同一关联使用独立 Label；Button 保留 click signal，Toggle 保留 activeChange，Toggle Group Item 将选择请求交给 Group。每个目标自行声明参与，并通过 Prototype 包与其 Adapter 使用。在这些目标中，私有 Compiler 只把 Button、Toggle 与 Label 降级为独立 Web 源码，其余目标（包括 Toggle Group Root 与 Item）保留明确的 unsupported 诊断。此关联不附带 Form submission、validation、多 Label 排序或原生平台/辅助技术认证。真实浏览器验收与源码、合成宿主测试分别追踪。
 
 - [关联契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
 - [P-BRUTALIST-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-LABEL.yaml)
