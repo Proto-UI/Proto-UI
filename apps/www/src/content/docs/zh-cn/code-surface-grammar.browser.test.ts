@@ -544,6 +544,11 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                 expect(await panel.locator('pre, [data-site-copy], [data-code-file-tabs]').count()).toBe(0);
                 expect(await panel.textContent()).toContain('WIP');
               } else {
+                // A newly selected host keeps native file controls until its queued
+                // Tree projection commits. Observe that boundary before inspecting it.
+                await panel
+                  .locator('[data-code-example-tree][role="tree"]')
+                  .waitFor({ state: 'visible' });
                 expect(await panel.locator('[data-code-example-tree]').count()).toBe(1);
                 expect(await panel.locator('[data-code-example-command] pre').textContent()).toContain('npx @proto.ui/cli@latest');
                 expect(await panel.locator('[data-code-example-command] [role="tab"], [data-code-example-command] [role="tabpanel"]').count()).toBe(0);
