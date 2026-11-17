@@ -164,17 +164,12 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
     if (!ts.isImportDeclaration(stmt)) continue;
     const specifier = stmt.moduleSpecifier;
     if (!ts.isStringLiteralLike(specifier)) continue;
-    if (!specifier.text.startsWith('.')) continue;
-    const resolved = await resolveModuleFile(path.dirname(file), specifier.text);
-    if (!resolved || stack.includes(resolved)) continue;
     const clause = stmt.importClause;
     if (!clause || clause.isTypeOnly) continue;
-    const bindings = await loadModuleBindings(
-      resolved,
-      moduleCache,
-      stack,
-      scope.sourceSummary ?? scope.functionSummary
-    );
+    const summary = scope.sourceSummary ?? scope.functionSummary;
+    const resolved = await resolveTokenImport(file, sourceFile, specifier.text, summary);
+    if (!resolved || stack.includes(resolved)) continue;
+    const bindings = await loadModuleBindings(resolved, moduleCache, stack, summary);
     // A default import binds the module's default export, so the local name
     // stands for whatever that export holds. Bind it as an import: the
     // built-in hook table is a spelling fallback, and a default import that
@@ -211,6 +206,12 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         });
     }
   }
+}
+
+function resolveTokenImport(file, source, specifier, summary) {
+  return specifier.startsWith('.')
+    ? resolveModuleFile(path.dirname(file), specifier)
+    : summary?.resolveRegisteredSourceImport(source, specifier);
 }
 
 async function resolveModuleFile(dir, specifier) {
@@ -333,12 +334,13 @@ async function loadModuleBindings(file, moduleCache, stack, sourceSummary) {
       continue;
     let exported = bindings;
     if (stmt.moduleSpecifier) {
-      if (
-        !ts.isStringLiteralLike(stmt.moduleSpecifier) ||
-        !stmt.moduleSpecifier.text.startsWith('.')
-      )
-        continue;
-      const resolved = await resolveModuleFile(path.dirname(file), stmt.moduleSpecifier.text);
+      if (!ts.isStringLiteralLike(stmt.moduleSpecifier)) continue;
+      const resolved = await resolveTokenImport(
+        file,
+        sourceFile,
+        stmt.moduleSpecifier.text,
+        sourceSummary
+      );
       if (!resolved || [...stack, file].includes(resolved)) continue;
       exported = await loadModuleBindings(resolved, moduleCache, [...stack, file], sourceSummary);
     }
@@ -1717,7 +1719,10 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
           declaration.importClause?.isTypeOnly ||
           !ts.isStringLiteralLike(declaration.moduleSpecifier) ||
           (!declaration.moduleSpecifier.text.startsWith('.') &&
-            !scope.sourceSummary.isRegisteredSourceImport(file, declaration.moduleSpecifier.text))
+            !scope.sourceSummary.resolveRegisteredSourceImport(
+              file,
+              declaration.moduleSpecifier.text
+            ))
         )
           continue;
         const bindings = declaration.importClause?.namedBindings;

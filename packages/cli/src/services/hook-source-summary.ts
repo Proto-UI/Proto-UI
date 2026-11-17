@@ -54,7 +54,7 @@ export type HookSourceResolution = {
 export type HookSourceSummaryContext = {
   /** Register an already-read source, preserving caller-provided text exactly. */
   registerSource(source: ts.SourceFile): void;
-  isRegisteredSourceImport(source: ts.SourceFile, specifier: string): boolean;
+  resolveRegisteredSourceImport(source: ts.SourceFile, specifier: string): string | null;
   /** Resolve a source expression without executing it. */
   resolve(
     node: ts.Node,
@@ -617,9 +617,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     authoredSourcePaths.add(moduleForSource(source).file);
   };
 
-  const isRegisteredSourceImport = (source: ts.SourceFile, specifier: string): boolean => {
+  const resolveRegisteredSourceImport = (
+    source: ts.SourceFile,
+    specifier: string
+  ): string | null => {
     const target = moduleContext.resolveModule(moduleForSource(source).file, specifier);
-    return target !== null && authoredSourcePaths.has(target.file);
+    return target && authoredSourcePaths.has(target.file) ? target.file : null;
   };
 
   const resolveSymbol = (module: Module, name: string): SymbolRef | null =>
@@ -4275,7 +4278,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           node.arguments[0] &&
           ts.isStringLiteralLike(node.arguments[0]) &&
           (node.arguments[0].text.startsWith('.') ||
-            isRegisteredSourceImport(source, node.arguments[0].text))
+            resolveRegisteredSourceImport(source, node.arguments[0].text))
         )
           specifiers.push(node.arguments[0].text);
         ts.forEachChild(node, visit);
@@ -4347,7 +4350,13 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     const cached = canonicalPrototypeConfigs.get(config);
     if (cached !== undefined) return cached;
     const module = moduleForSource(config.getSourceFile());
-    const isFactoryArgument = (value: ts.Node): boolean => {
+    const outerExpression = (node: ts.Node): ts.Node => {
+      let outer = node;
+      while (outer.parent && unwrap(outer.parent) === node) outer = outer.parent;
+      return outer;
+    };
+    const isFactoryArgument = (node: ts.Node): boolean => {
+      const value = outerExpression(node);
       const call = value.parent;
       return (
         ts.isCallExpression(call) &&
@@ -4356,12 +4365,13 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         moduleContext.isDefinePrototypeReference(call.expression, module)
       );
     };
-    const declaration = config.parent;
+    const value = outerExpression(config);
+    const declaration = value.parent;
     let canonical = isFactoryArgument(config);
     if (
       !canonical &&
       ts.isVariableDeclaration(declaration) &&
-      declaration.initializer === config &&
+      declaration.initializer === value &&
       ts.isIdentifier(declaration.name) &&
       ts.isVariableStatement(declaration.parent.parent) &&
       !declaration.parent.parent.modifiers?.some(
@@ -4397,7 +4407,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
 
   return {
     registerSource,
-    isRegisteredSourceImport,
+    resolveRegisteredSourceImport,
     resolve: evaluate,
     resolveCall,
     resolveSourceFunction: (node, source) => {
