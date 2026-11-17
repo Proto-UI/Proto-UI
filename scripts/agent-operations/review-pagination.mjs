@@ -7,7 +7,7 @@ const MAX_REST_FILES = 3_000;
 const PAGE_INFO = 'totalCount pageInfo { hasNextPage endCursor }';
 const PR_FIELDS = `
   id number updatedAt state isDraft mergeable mergeStateStatus viewerCanMergeAsAdmin
-  changedFiles body baseRefName baseRefOid headRefOid author { login }
+  changedFiles body baseRefName baseRef { target { oid } } headRefOid author { login }
 `;
 const CHECK_FIELDS = `
   __typename
@@ -180,7 +180,7 @@ function anchor(raw, owner, name, number) {
     !['ADMIN', 'MAINTAIN', 'WRITE', 'TRIAGE', 'READ'].includes(repository.viewerPermission) ||
     !stringId(pr?.id) ||
     pr.number !== number ||
-    !/^[a-f0-9]{40,64}$/.test(pr.baseRefOid ?? '') ||
+    !/^[a-f0-9]{40,64}$/.test(pr.baseRef?.target?.oid ?? '') ||
     !/^[a-f0-9]{40,64}$/.test(pr.headRefOid ?? '') ||
     typeof pr.body !== 'string' ||
     typeof pr.updatedAt !== 'string' ||
@@ -202,7 +202,7 @@ function anchor(raw, owner, name, number) {
     'changedFiles',
     'body',
     'baseRefName',
-    'baseRefOid',
+    'baseRef',
     'headRefOid',
     'author',
   ];

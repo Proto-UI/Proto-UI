@@ -196,7 +196,7 @@ export function publicationRoundTrip({ existingApproval = false } = {}) {
           changedFiles: before.changedFiles.length,
           body: before.pullRequestBody,
           baseRefName: before.baseRefName,
-          baseRefOid: before.baseSha,
+          baseRef: { target: { oid: before.baseSha } },
           headRefOid: before.headSha,
           author: { login: before.pullRequestAuthor },
           commits: complete(
