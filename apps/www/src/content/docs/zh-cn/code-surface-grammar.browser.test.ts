@@ -544,6 +544,12 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                 expect(await panel.locator('pre, [data-site-copy], [data-code-file-tabs]').count()).toBe(0);
                 expect(await panel.textContent()).toContain('WIP');
               } else {
+                // Host selection publishes before its next idle Tree acquisition.
+                // Observe real admission under a fixed cap, then keep every grammar assertion.
+                await panel.locator('[data-code-example-tree][role="tree"]').waitFor({
+                  state: 'visible',
+                  timeout: 1_000,
+                });
                 expect(await panel.locator('[data-code-example-tree]').count()).toBe(1);
                 expect(await panel.locator('[data-code-example-command] pre').textContent()).toContain('npx @proto.ui/cli@latest');
                 expect(await panel.locator('[data-code-example-command] [role="tab"], [data-code-example-command] [role="tabpanel"]').count()).toBe(0);
