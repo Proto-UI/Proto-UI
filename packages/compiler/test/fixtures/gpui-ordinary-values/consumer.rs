@@ -7,7 +7,7 @@ use gpui::{
 use proto_ui_gpui_native::gpui_native_owner::{
     catch_authored, detach_native_view, dispatch, event_fields, expose_event, expose_method,
     expose_value, focus_setup, focus_setup_config, invoke, native_owner_allocation_count,
-    native_resource_counts, record, strict_equal, NativeSnapshot, Owner, OwnerRef, Value,
+    native_resource_counts, record, scroll_request, strict_equal, NativeSnapshot, Owner, OwnerRef, Value,
     TABLE_STRUCTURE_FAMILY,
 };
 use serde_json::{json, Value as Json};
@@ -145,6 +145,56 @@ fn event_names(owner: &OwnerRef) -> Vec<String> {
         .iter()
         .map(|(name, _)| name.clone())
         .collect()
+}
+
+#[gpui::test]
+fn generated_scroll_request_outcomes_and_retired_end_work(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    let component = window.update(cx, |host, window, cx| {
+        let component = validation::CompiledComponent::create(json!({}), None, window, cx)
+            .expect("native scroll consumer construction");
+        let owner = component.read(cx).owner.clone();
+        let before = exposed(&owner, "scrollTo").call(vec![]).expect("unmounted outcome");
+        assert_eq!(before.member("kind", false).text(), "rejected");
+        assert_eq!(before.member("reason", false).text(), "not-mounted");
+        let plain = host.plain.read(cx).owner.clone();
+        let undeclared = scroll_request(&Rc::downgrade(&plain), record(vec![]));
+        assert_eq!(undeclared.member("reason", false).text(), "not-declared");
+        host.scope.update(cx, |scope, cx| {
+            scope.set_slot(vec![NativeSnapshot::native_view(component.clone().into())], cx)
+                .expect("mount native scroll consumer");
+        });
+        component
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(owner.borrow().mounted);
+        for method in ["scrollToKind", "scrollBy", "scrollPage", "scrollDrag", "scrollEnd"] {
+            assert_eq!(exposed(&owner, method).call(vec![]).expect("structured outcome member").text(), "dispatched");
+        }
+        let wrong_axis = exposed(&owner, "scrollWrongAxis").call(vec![]).expect("axis rejection");
+        assert_eq!(wrong_axis.member("kind", false).text(), "rejected");
+        assert_eq!(wrong_axis.member("reason", false).text(), "unavailable");
+        // An accepted end request belongs to this view epoch. Detaching before
+        // its next layout must not apply that work to the replacement view.
+        assert_eq!(exposed(&owner, "scrollEnd").call(vec![]).unwrap().text(), "dispatched");
+        assert!(owner.borrow().modules.scroll.pending_end.is_some());
+        detach_native_view(&owner);
+        let detached = exposed(&owner, "scrollTo").call(vec![]).expect("detached outcome");
+        assert_eq!(detached.member("reason", false).text(), "not-mounted");
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(owner.borrow().mounted);
+        assert!(owner.borrow().modules.scroll.pending_end.is_none());
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+        assert_eq!(exposed(&owner, "scrollToKind").call(vec![]).unwrap().text(), "dispatched");
+        let retained = exposed(&owner, "scrollToKind");
+        Owner::dispose(&owner);
+        assert!(retained.call(vec![]).is_err());
+    }).unwrap();
 }
 
 #[gpui::test]
