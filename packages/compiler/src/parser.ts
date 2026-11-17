@@ -10,6 +10,7 @@ import {
   operationArgumentRule,
   operationResultType,
   argumentData,
+  argumentValue,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -978,7 +979,7 @@ class Frontend {
             if (
               expected &&
               !assignable(value.type, expected) &&
-              !assignable(argumentData(value) ?? value.type, expected)
+              !assignable(argumentValue(value), expected)
             )
               rejectNode(declaration, 'PUI1006', 'Initializer does not satisfy its declared type.');
             if (expected && !sameType(value.type, expected))

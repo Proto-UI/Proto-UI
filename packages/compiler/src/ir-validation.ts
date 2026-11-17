@@ -30,6 +30,7 @@ import {
   operationArgumentRule,
   operationResultType,
   argumentData,
+  argumentValue,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -1135,7 +1136,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'narrow': {
             const source = expression(node.value, scope, phase, context, true),
               target = valueType(node.type, location);
-            if (!canNarrowValue(source, target))
+            // Only use literal/nominal evidence after recursively validating the
+            // complete source expression and all its declared types above.
+            if (
+              !canNarrowValue(source, target) &&
+              !valueAssignable(argumentValue(node.value as ExpressionIR), target)
+            )
               bad('Type narrowing cannot grant unproven data or capability authority.', location);
             type = target;
             break;

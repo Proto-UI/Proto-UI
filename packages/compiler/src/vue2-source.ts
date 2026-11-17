@@ -370,7 +370,8 @@ export function emitVue2Source(
     if (
       type === 'control-label' ||
       type === 'control-label-handle' ||
-      type === 'control-label-request'
+      type === 'control-label-request' ||
+      (usesInteraction && (type === 'anatomy-family' || type === 'anatomy-part'))
     )
       return `import(${JSON.stringify('./' + supportPlan.modulesPath.slice(0, -3))}).NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
