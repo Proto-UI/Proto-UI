@@ -1,55 +1,830 @@
-name: Browser suite repair evidence
-
+name: Original PR1489 native source carrier
+run-name: pr1489-frozen-source-${{ github.sha }}
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
 concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: pr1489-frozen-native-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  focused-browser:
+  original-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        lane: [runtime-tabs, liquid-button, code-surface-grammar]
+    env:
+      EVIDENCE_DIR: ${{ runner.temp }}/pr1489-native/${{ matrix.lane }}
+      MATRIX_LANE: ${{ matrix.lane }}
+      CANDIDATE_SHA: ${{ github.sha }}
+      PROTO_UI_BROWSER_BASE_URL: ''
     steps:
+      - name: Initialize retained evidence before setup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/job-started-at.txt"
+          printf '%s\n' "$MATRIX_LANE" > "$EVIDENCE_DIR/lane.txt"
+          printf '%s\n' 'Original PR1489 source-equivalent carrier; combined-main proof remains separate.' > "$EVIDENCE_DIR/scope.txt"
       - uses: actions/checkout@v4
+        id: checkout
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@v4
+        id: node
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Admit and retain the actual original-source carrier before setup
+        id: source-before
+        shell: bash
         run: |
+          set -euo pipefail
+          cat > "$EVIDENCE_DIR/source-custody.json" <<'PR1489_SOURCE_CUSTODY'
+          {
+            "schemaVersion": 1,
+            "kind": "pr1489-original-source-carrier-custody",
+            "primaryHead": "556ed6439a900e6d37e58aa96190684de8e14d97",
+            "primaryTree": "791be71081ff2dd1328e5b3cedfc1b6f720f0d12",
+            "workflowPath": ".github/workflows/browser-suite-repair-evidence.yml",
+            "acceptedPlanSha256": "1a025c21c724a8431fe7e9856afad22293e7e94399078833ba735b19f03faf69",
+            "inputs": [
+              {
+                "path": "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "a2df0194c5752f5d2db3f247718bf3897a02b555",
+                "sha256": "61aee02e02a3e3ab6314712b52eda443b890d433003e3b83ab1ca8cd70ec21a0",
+                "bytes": 56256
+              },
+              {
+                "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "b7e90603ed93e26f71384a47602d19736b2df18a",
+                "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+                "bytes": 54053
+              },
+              {
+                "path": "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "2199bd97e55b12e0b778db9393b6bede8d5ad52e",
+                "sha256": "dfc5114d5d46c2bead19eb85cbc39478ec6bb5dd0c24951720cd79d36553ed62",
+                "bytes": 78598
+              },
+              {
+                "path": "internal/records/2026-11-17-code-example-tree-readiness.md",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "88749aa3ac7f6c4da2b8a8373b686baec57fb769",
+                "sha256": "e93d5dfe3d012ddb8f76f7120332546698e0eb73a6acb0305429ec95b2b06170",
+                "bytes": 4754
+              },
+              {
+                "path": "internal/records/2026-11-17-tabs-liquid-followups.md",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "29a0f31aa2e3b59b7ffe89e7163b1db63a34feab",
+                "sha256": "4721add26c9638d193814968c155d4288b4fdea218f662943bf52f31e4ee009b",
+                "bytes": 4610
+              },
+              {
+                "path": "internal/records/evidence/2026-11-17-code-example-tree-readiness.json",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "774ff235ae72e721d7353a9d9e1e12adcd6d0247",
+                "sha256": "15bdc5ab46f0f174f325cc599ea5950eef219605c3a50ad870122a7f717d6e6d",
+                "bytes": 41819
+              },
+              {
+                "path": "internal/records/evidence/2026-11-17-tabs-liquid-followups.json",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "ae8c85d8b8d968f9bd900dde9e3c8a699e301a34",
+                "sha256": "0a053a0c31e566ce40acf57206584e8e1aea61dea8d7a1d45dbe295ec846dfb3",
+                "bytes": 85499
+              },
+              {
+                "path": "packages/prototypes/shadcn/src/tabs/trigger.proto.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "3b150a050ea0c19a19ef689334aba348785f7d05",
+                "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+                "bytes": 8926
+              },
+              {
+                "path": "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f",
+                "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+                "bytes": 4658
+              },
+              {
+                "path": ".github/workflows/browser-suite-repair-evidence.yml",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "8a08b618d5701c816d71065b708223e7cd4baca2",
+                "sha256": "286f1111a31d8f0e697041181f0880f73025f3af6fca365d3608d4a7682dd6df",
+                "bytes": 2123
+              },
+              {
+                "path": "scripts/test/run-runtime-tests.mjs",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "dc0de189e9638a13f9e6c28eff8aab95cfc3d4e9",
+                "sha256": "4a9e90e26ce72f3ef271f83a3146a5ffb17001262f6617cea9d39c0080b084ad",
+                "bytes": 9550
+              },
+              {
+                "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "966ff688c2c6c853e05dc676e1685e9a7b8b1a50",
+                "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+                "bytes": 30579
+              },
+              {
+                "path": "pnpm-lock.yaml",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "897e79ea9a85661eb965ab87f708f0c1ffb305c0",
+                "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+                "bytes": 263425
+              },
+              {
+                "path": "package.json",
+                "sourceCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+                "mode": "100644",
+                "type": "blob",
+                "sha": "d5eaaa094769bc198df8cb3eb1f495974ad6b24a",
+                "sha256": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+                "bytes": 10980
+              }
+            ],
+            "lanes": [
+              {
+                "id": "runtime-tabs",
+                "suitePath": "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts",
+                "fixtureSha256": "dfc5114d5d46c2bead19eb85cbc39478ec6bb5dd0c24951720cd79d36553ed62",
+                "declaredInventory": {
+                  "selectedVitestCases": 4,
+                  "ancestor": "Finf source-bound representative feature screenshots",
+                  "titles": [
+                    "shadcn-runtime-tabs",
+                    "brutalist-runtime-tabs",
+                    "bootstrap-2-3-2-runtime-tabs",
+                    "liquid-glass-runtime-tabs"
+                  ],
+                  "runtimesPerCase": [
+                    "wc",
+                    "react",
+                    "vue",
+                    "vue2"
+                  ],
+                  "selectionRule": "The unchanged selectedCases filters PUI_FINF_FEATURE_GROUP before registering it blocks. Match the four actual assertion names, not a guessed global counter."
+                },
+                "originalDeadlines": {
+                  "beforeAllMs": 180000,
+                  "eachRuntimeTabsCaseMs": 180000,
+                  "afterAllMs": 30000,
+                  "allOtherCaseDeadlineOverrideAdded": false
+                },
+                "criteria": [
+                  "Run all four real family consumers on their original /en/ui-libraries/<family>/form/ routes.",
+                  "Record hoverBeforeRest/hoverAfterRest after the real pointer move; require both native :hover and exposed hovered false before resting ink comparisons.",
+                  "Keep selected bottom border 2px, radius 0, zero horizontal padding, transparent background, no visible box shadow and |selected width-text width|<=2px.",
+                  "Keep selected/inactive text colors different after the keyboard switch, labels unchanged and exactly one selected tab.",
+                  "Keep ArrowRight manual focus without publication, Enter/Space exactly-once publication order, old surface disconnected after successful switch, and End/Home focus behavior.",
+                  "Keep 320px horizontal overflow/reveal checks and retained current surface after focus-only keys.",
+                  "Retain actual source.json and each terminal case receipt; blocked-before-browser is not a passing case."
+                ],
+                "requiredNativeArtifacts": [
+                  "source.json",
+                  "vitest-results.json",
+                  "<family>-runtime-tabs.json",
+                  "<family>-runtime-tabs-wc-rest.png",
+                  "<family>-runtime-tabs-react-selected.png",
+                  "<family>-runtime-tabs-vue-selected.png",
+                  "<family>-runtime-tabs-vue2-selected.png",
+                  "<family>-runtime-tabs-wc-selected.png",
+                  "<family>-runtime-tabs-narrow-keyboard-focus.png",
+                  "Actual failure DOM/ARIA/screenshots/captureErrors/pageErrors/blockedRequests when present"
+                ],
+                "scopeBoundary": "This is four Vitest cases, each iterating the real runtime switch journey. Existing unit roundtrip evidence remains separate; no extra native/default-style or umbrella acceptance is invented."
+              },
+              {
+                "id": "liquid-button",
+                "suitePath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+                "fixtureSha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+                "declaredInventory": {
+                  "selectedVitestCases": 2,
+                  "unselectedSourceCases": 2,
+                  "selected": [
+                    {
+                      "ancestor": "V2 optical paint through four real Web Adapter runtimes",
+                      "title": "the actual public Button documentation uses the same optical path on all four runtime panels"
+                    },
+                    {
+                      "ancestor": "bounded public Liquid live-canvas diagnostics",
+                      "title": "records actual four-runtime idle/hover work without accepting an optimization"
+                    }
+                  ],
+                  "runtimesPerSelectedCase": [
+                    "wc",
+                    "react",
+                    "vue",
+                    "vue2"
+                  ],
+                  "runtimeIterationsAcrossSelectedJourneys": 8,
+                  "route": "/en/ui-libraries/liquid-glass/button/",
+                  "countRule": "Require exactly these two selected assertionResults to pass. Vitest can include the two unselected light/dark cases as skipped; do not report numTotalTests=2 or eight separate native test cases.",
+                  "localeBoundary": "The original two affected native journeys exercise the en route. The existing eight locale/runtime source-inventory rows do not constitute eight native locale observations."
+                },
+                "originalDeadlines": {
+                  "beforeAllMs": 150000,
+                  "eachSelectedCaseMs": 150000,
+                  "selfOpticalPollMs": 30000,
+                  "afterAllMs": 60000
+                },
+                "criteria": [
+                  "Both unique locators must use exact runtime plus a descendant .proto-previewer[data-demo-id=\"demo-liquid-glass-button\"][data-projection-toolbar=\"true\"]. No first(), visibility fallback or locator rewrite.",
+                  "For each original runtime, preserve data-material-quality=self-optical within 30000ms, actual Back click and nonzero activation status, no alternate background image and nonempty material-backdrop canvas.",
+                  "Preserve public pool/empty-document controls, native idle starts unhovered, true hover landing, monotonic counters, complete nonempty GPU/observer/trace observations and original bounds.",
+                  "The diagnostic checks actual sourceSha/CANDIDATE_SHA, clean checkout, module response hashes and original pool identity. Keep every rejection and source-overlap/Portal/material fallback failure.",
+                  "Preserve actual original error through failure capture and cleanup; incomplete trace/module observations and cleanup errors remain failures.",
+                  "A self-optical counter is not independent perceptual acceptance; inspect new captures and retain source/provider/quality limitations."
+                ],
+                "requiredNativeArtifacts": [
+                  "vitest-results.json",
+                  "metadata.json",
+                  "public-button-<runtime>.png",
+                  "performance-public-button-<runtime>.png",
+                  "performance-diagnostic-summary.json",
+                  "performance-<runtime>-gpu.json",
+                  "Actual trace/observer/module/resource artifacts emitted by the unchanged suite",
+                  "performance-public-failure and quality-timeout diagnostics if emitted"
+                ],
+                "scopeBoundary": "The second case is an observation diagnostic and explicitly does not accept an optimization or hardware user-lag claim. Passing these two journeys does not certify all Liquid cases, arbitrary DOM capture, full GPU performance or native-engine equivalence."
+              },
+              {
+                "id": "code-surface-grammar",
+                "suitePath": "apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+                "fixtureSha256": "61aee02e02a3e3ab6314712b52eda443b890d433003e3b83ab1ca8cd70ec21a0",
+                "declaredInventory": {
+                  "selectedVitestCases": 26,
+                  "cases": [
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "wc/shadcn: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "wc/brutalist: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "react/shadcn: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "react/brutalist: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "vue/shadcn: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "vue/brutalist: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "vue2/shadcn: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "vue2/brutalist: real source frames, 44px toolbar and responsive native CodeExample",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "website passive code-surface grammar (#785)",
+                      "title": "keeps the installation toolbar thin without reducing its manager target",
+                      "deadlineMs": 90000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/320/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/320/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/390/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/390/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/1440/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "en/1440/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/320/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/320/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/390/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/390/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/1440/light: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": "CodeExample host coverage and upstream visual hierarchy",
+                      "title": "zh-cn/1440/dark: known hosts remain selectable and WIP never invents code",
+                      "deadlineMs": 120000
+                    },
+                    {
+                      "ancestor": null,
+                      "title": "keeps every authored source reachable without JavaScript and does not fake an interactive tree",
+                      "deadlineMs": 90000
+                    },
+                    {
+                      "ancestor": null,
+                      "title": "keeps embedded file navigation identifiable in forced colors and enlarged text",
+                      "deadlineMs": 90000
+                    },
+                    {
+                      "ancestor": null,
+                      "title": "browses real build-generated init files with exact copy payloads and genuine Tree ownership (en)",
+                      "deadlineMs": 90000
+                    },
+                    {
+                      "ancestor": null,
+                      "title": "browses real build-generated init files with exact copy payloads and genuine Tree ownership (zh-cn)",
+                      "deadlineMs": 90000
+                    },
+                    {
+                      "ancestor": null,
+                      "title": "keeps the generated-file browser accessible in forced colors and enlarged text",
+                      "deadlineMs": 90000
+                    }
+                  ],
+                  "decomposition": {
+                    "runtimeFamily": 8,
+                    "installationToolbar": 1,
+                    "localeWidthThemeHostMatrix": 12,
+                    "noJavaScript": 1,
+                    "embeddedForcedColorsAndTextScale": 1,
+                    "buildGeneratedInitLocales": 2,
+                    "generatedFilesForcedColorsAndTextScale": 1
+                  },
+                  "countRule": "At the frozen fixture, require this complete 26-name inventory and all actual assertionResults passed. If a different tree changes names/counts, stop attribution and report the source mismatch; never overwrite this inventory with an easier count."
+                },
+                "originalDeadlines": {
+                  "beforeAllMs": 300000,
+                  "runtimeFamilyCaseMs": 120000,
+                  "hostMatrixCaseMs": 120000,
+                  "otherCaseMs": 90000,
+                  "addedTreeWaitMs": 30000,
+                  "addedTreeWaitSource": "Original 1489 uses the locked Playwright 1.58.2 locator default, with no timeout argument in the five-line addition.",
+                  "afterAllMs": "No explicit fixture argument; retain repository-configured default unchanged."
+                },
+                "criteria": [
+                  "Keep all original 8 runtime/family cases, installation geometry, twelve en/zh-cn x 320/390/1440 x light/dark host cases, no-JS and both source-browser accessibility families.",
+                  "For each ready host, wait for the real current panel [data-code-example-tree][role=\"tree\"] to become visible; keep the subsequent exact Tree count=1 and every original geometry/source/Copy/keyboard/node-identity assertion.",
+                  "Do not add the future PR1490 timeout:1000 to this frozen primary fixture. The original inherited 30000ms bound is part of the reviewed 1489 bytes.",
+                  "Keep all seven host names, exact WIP/availability text and no fabricated code for Vue 2/GPUI/Qt/Flutter.",
+                  "Keep source-retention, horizontal overflow, actual same-page native keyboard behavior and 32px Tree rows/16px icons/48px header geometry.",
+                  "Start the normal real docs server so it generates apps/www/src/generated/cli-init.generated.json through the real CLI extractor; no committed/fake fixture fallback.",
+                  "Keep no-JS source reachability, generated exact copy payloads, forced-colors and 200% text-scaling observations, without relabeling text scaling as verified browser zoom or AT.",
+                  "Enable only the existing PROTO_UI_CODE_GRAMMAR_PHASES=1 path for native-phases.jsonl. It does not currently record pageerror/console event streams; do not claim those missing fields were collected or modify this frozen fixture to add them."
+                ],
+                "requiredNativeArtifacts": [
+                  "vitest-results.json",
+                  "code-surface-grammar/source-binding.json",
+                  "code-surface-grammar/native-phases.jsonl",
+                  "All original code-surface-grammar/*.json and *.png emitted by the complete inventory",
+                  "Actual generated CLI fixture and its declared cli/sourceTreeHash/file SHA identities",
+                  "Raw failures including known-host Tree wait, geometry, source, keyboard, WIP and no-JS errors"
+                ],
+                "scopeBoundary": "This original-head run keeps the inherited 30s Tree wait. PR1490 explicit 1s belongs only to a separately reviewed future combination, whose results must name that new source."
+              }
+            ],
+            "comparisonBoundary": {
+              "actualMainAtPreparation": "e485e75c82b2634067fe636d709a242fceb844e2",
+              "historicalComparison": "8a5f6ad961ee9c325f7411350a80086f88ce66a8",
+              "sourceScope": "Original 556ed source equivalence only. Combined-main proof needs its own actual source, command and independent acceptance."
+            }
+          }
+          PR1489_SOURCE_CUSTODY
+          cat > "$EVIDENCE_DIR/source-admission.mjs" <<'PR1489_SOURCE_ADMISSION'
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { createHash } from 'node:crypto';
+          import { execFileSync, spawnSync } from 'node:child_process';
+
+          // Embedded verbatim in the carrier workflow; run only on the real hosted checkout.
+          const [stage, manifestPath] = process.argv.slice(2);
+          assert(['before-setup', 'before-native', 'after-native'].includes(stage));
+          const evidence = process.env.EVIDENCE_DIR;
+          assert(evidence && path.isAbsolute(evidence));
+          const expected = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+          const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+          const blobOid = (bytes) => createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
+          const report = { stage, observedAt: new Date().toISOString(), admitted: false, files: [] };
+          const write = (name, bytes) => fs.writeFileSync(path.join(evidence, `${stage}-${name}`), bytes);
+          function git(name, args) {
+            try {
+              const bytes = execFileSync('git', ['--no-pager', ...args], {
+                encoding: null, timeout: 60_000, maxBuffer: 64 * 1024 * 1024,
+              });
+              write(name, bytes);
+              return bytes;
+            } catch (error) {
+              write(`${name}.error.json`, JSON.stringify({ message: String(error), status: error.status,
+                signal: error.signal, stdout: String(error.stdout ?? ''), stderr: String(error.stderr ?? '') }, null, 2));
+              throw error;
+            }
+          }
+          function members(bytes) {
+            const entries = new Map();
+            for (const record of bytes.toString('utf8').split('\0').filter(Boolean)) {
+              const tab = record.indexOf('\t');
+              assert(tab > 0);
+              const [mode, type, oid] = record.slice(0, tab).split(' ');
+              const file = record.slice(tab + 1);
+              assert(!entries.has(file), 'Duplicate native tree member');
+              entries.set(file, { mode, type, oid });
+            }
+            return entries;
+          }
+          try {
+            const head = git('head.txt', ['rev-parse', 'HEAD']).toString('utf8').trim();
+            const tree = git('tree.txt', ['rev-parse', 'HEAD^{tree}']).toString('utf8').trim();
+            report.head = head;
+            report.tree = tree;
+            report.actualEnvironment = Object.fromEntries([
+              'CI', 'GITHUB_ACTIONS', 'GITHUB_SHA', 'CANDIDATE_SHA', 'GITHUB_REPOSITORY',
+              'GITHUB_EVENT_NAME', 'GITHUB_REF', 'GITHUB_WORKFLOW_REF', 'GITHUB_WORKFLOW_SHA',
+              'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT', 'GITHUB_ACTOR', 'RUNNER_OS', 'RUNNER_ARCH',
+              'CHROME_PATH', 'PUI_FINF_FEATURE_GROUP', 'PUI_FINF_PRESET_CHECK',
+              'PROTO_UI_RUNTIME_PHASE', 'PROTO_UI_RUNTIME_SHARD', 'PROTO_UI_RUNTIME_SLOT',
+            ].map((key) => [key, process.env[key] ?? null]));
+            assert.equal(process.env.CI, 'true');
+            assert.equal(process.env.GITHUB_ACTIONS, 'true');
+            assert.equal(process.env.GITHUB_EVENT_NAME, 'workflow_dispatch');
+            assert.equal(process.env.GITHUB_REPOSITORY, 'Proto-UI/Proto-UI');
+            assert.equal(process.env.GITHUB_SHA, head, 'Actual event SHA and checkout differ');
+            assert.equal(process.env.CANDIDATE_SHA, head, 'Candidate must be the actual carrier SHA');
+            assert.notEqual(head, expected.primaryHead, 'A workflow carrier must retain its own identity');
+            assert.equal(process.versions.node.split('.')[0], '24');
+            const raw = git('commit.raw', ['cat-file', 'commit', head]);
+            const boundary = raw.indexOf('\n\n');
+            assert(boundary > 0);
+            const headers = raw.subarray(0, boundary).toString('utf8').split('\n');
+            assert.deepEqual(headers.filter((line) => line.startsWith('parent ')), [`parent ${expected.primaryHead}`]);
+            assert(headers.includes(`tree ${tree}`));
+            git('commit-display.txt', ['show', '--no-patch', '--format=raw', head]);
+            const primaryTree = git('original-tree.txt', ['rev-parse', `${expected.primaryHead}^{tree}`])
+              .toString('utf8').trim();
+            assert.equal(primaryTree, expected.primaryTree);
+            const original = members(git('original-members.z', ['ls-tree', '-r', '-z', expected.primaryHead]));
+            const carrier = members(git('carrier-members.z', ['ls-tree', '-r', '-z', head]));
+            git('complete-carrier-tree.z', ['ls-tree', '-r', '-t', '-z', head]);
+            assert.equal(carrier.size, original.size);
+            const sourceDelta = git('complete-source-diff.z', ['diff-tree', '--no-commit-id', '--name-only',
+              '-r', '-z', expected.primaryHead, head]).toString('utf8').split('\0').filter(Boolean);
+            report.sourceDelta = sourceDelta;
+            assert.deepEqual(sourceDelta, [expected.workflowPath]);
+            for (const [file, member] of original) {
+              if (file !== expected.workflowPath) assert.deepEqual(carrier.get(file), member,
+                `Unexpected source-tree change: ${file}`);
+            }
+            for (const entry of expected.inputs) {
+              const bytes = fs.readFileSync(entry.path);
+              report.files.push({ path: entry.path, bytes: bytes.length, sha256: hash(bytes),
+                gitBlobOid: blobOid(bytes), carrierMember: carrier.get(entry.path), originalMember: original.get(entry.path) });
+            }
+            for (const [index, entry] of expected.inputs.entries()) {
+              const actual = report.files[index];
+              const member = { mode: entry.mode, type: entry.type, oid: entry.sha };
+              // The workflow is the sole admitted source delta; record its real current bytes.
+              assert.deepEqual(actual.originalMember, member);
+              if (entry.path === expected.workflowPath) {
+                assert.equal(actual.gitBlobOid, actual.carrierMember.oid);
+                assert.notEqual(actual.gitBlobOid, entry.sha);
+                fs.copyFileSync(entry.path, path.join(evidence, 'actual-workflow.yml'));
+                continue;
+              }
+              assert.equal(actual.bytes, entry.bytes);
+              assert.equal(actual.sha256, entry.sha256);
+              assert.equal(actual.gitBlobOid, entry.sha);
+              assert.deepEqual(actual.carrierMember, member);
+            }
+            const diff = git('tracked-diff.txt', ['diff', '--name-only', 'HEAD']);
+            const status = git('status.txt', ['status', '--porcelain', '--untracked-files=all']);
+            report.trackedDiffBytes = diff.length;
+            report.statusBytes = status.length;
+            assert.equal(diff.length, 0, 'Tracked checkout changes remain a source-admission failure');
+            assert.equal(status.length, 0, 'The complete native checkout is not clean');
+            const event = fs.readFileSync(process.env.GITHUB_EVENT_PATH);
+            write('event.json', event);
+            report.eventBytes = event.length;
+            report.eventSha256 = hash(event);
+            const eventValue = JSON.parse(event.toString('utf8'));
+            assert.equal(eventValue.repository?.full_name, 'Proto-UI/Proto-UI');
+            assert.equal(`refs/heads/${eventValue.ref.replace(/^refs\/heads\//, '')}`, process.env.GITHUB_REF);
+            report.frozenSourceRelation = 'Original PR1489 source-equivalent carrier; no combined-main acceptance.';
+            report.acceptedPlanSha256 = expected.acceptedPlanSha256;
+            if (stage === 'before-setup') {
+              // Native objects retain every tracked blob, including hidden paths and symlinks.
+              // Git attributes cannot omit or substitute bytes in a Git object pack.
+              const file = path.join(evidence, 'carrier-source.pack');
+              const fd = fs.openSync(file, 'wx', 0o600);
+              let packed;
+              try {
+                packed = spawnSync('git', ['pack-objects', '--stdout', '--revs'], {
+                  input: Buffer.from(`${head}\n`), stdio: ['pipe', fd, 'pipe'], timeout: 60_000,
+                });
+              } finally {
+                fs.closeSync(fd);
+              }
+              write('source-pack-command.json', JSON.stringify({ argv: ['git', 'pack-objects', '--stdout', '--revs'],
+                stdin: `${head}\n`, status: packed.status, signal: packed.signal,
+                error: packed.error ? String(packed.error) : null, stderr: String(packed.stderr ?? '') }, null, 2));
+              assert.equal(packed.error, undefined);
+              assert.equal(packed.signal, null);
+              assert.equal(packed.status, 0);
+              report.sourceArchive = { file: 'carrier-source.pack', format: 'Native Git object pack',
+                bytes: fs.statSync(file).size, head, tree, shallowBoundary: 'Actual actions/checkout depth=2' };
+            }
+            const generated = 'apps/www/src/generated/cli-init.generated.json';
+            if (fs.existsSync(generated)) {
+              const bytes = fs.readFileSync(generated);
+              report.generatedCliFixture = { path: generated, bytes: bytes.length, sha256: hash(bytes),
+                scope: 'Observed generated fixture; no substitute or fabricated source.' };
+              write('cli-init.generated.json', bytes);
+            } else {
+              report.generatedCliFixture = { path: generated, present: false };
+            }
+            report.admitted = true;
+          } catch (error) {
+            report.error = { name: error?.name ?? typeof error, message: String(error?.message ?? error),
+              stack: typeof error?.stack === 'string' ? error.stack : null };
+            throw error;
+          } finally {
+            write('source-admission.json', JSON.stringify(report, null, 2) + '\n');
+          }
+          PR1489_SOURCE_ADMISSION
+          cat > "$EVIDENCE_DIR/artifact-inventory.mjs" <<'PR1489_ARTIFACT_INVENTORY'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import { createHash } from 'node:crypto';
+
+          // Embedded verbatim in the workflow; preserve bytes and outcomes without a pass inference.
+          const root = process.env.EVIDENCE_DIR;
+          const outcomes = Object.fromEntries(Object.entries(process.env)
+            .filter(([key]) => key.startsWith('OUTCOME_')));
+          fs.writeFileSync(path.join(root, 'step-outcomes.json'), JSON.stringify({
+            observedAt: new Date().toISOString(), lane: process.env.MATRIX_LANE,
+            outcomes, acceptance: 'Unassessed. Inspect native results, exact inventory and captures independently.',
+          }, null, 2) + '\n');
+          const files = [];
+          async function visit(directory) {
+            for (const entry of fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+              const file = path.join(directory, entry.name);
+              if (entry.isDirectory()) await visit(file);
+              else if (entry.isFile()) {
+                const digest = createHash('sha256');
+                for await (const chunk of fs.createReadStream(file)) digest.update(chunk);
+                files.push({ path: path.relative(root, file), bytes: fs.statSync(file).size, sha256: digest.digest('hex') });
+              } else if (entry.isSymbolicLink()) {
+                files.push({ path: path.relative(root, file), type: 'symlink', target: fs.readlinkSync(file) });
+              } else {
+                throw new Error(`Unsupported native artifact kind: ${file}`);
+              }
+            }
+          }
+          await visit(root);
+          fs.writeFileSync(path.join(root, 'artifact-files.json'), JSON.stringify({
+            scope: 'Complete artifact directory before upload; artifact-files.json excludes its own recursive digest.',
+            files, imageCount: files.filter((file) => /\.(png|jpe?g|webp)$/i.test(file.path)).length,
+          }, null, 2) + '\n', { flag: 'wx' });
+          PR1489_ARTIFACT_INVENTORY
+          node "$EVIDENCE_DIR/source-admission.mjs" before-setup "$EVIDENCE_DIR/source-custody.json"
+      - name: Install the locked graph and build the real CLI prerequisite
+        id: prerequisite
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > "$EVIDENCE_DIR/prerequisite-command.txt" <<'PR1489_PREREQUISITE'
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
+          corepack pnpm@10.32.1 --filter @proto.ui/cli build
+          PR1489_PREREQUISITE
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/prerequisite-started-at.txt"
+          set +e
+          (
+            set -euo pipefail
+            corepack enable
+            corepack pnpm@10.32.1 install --frozen-lockfile
+            corepack pnpm@10.32.1 --filter @proto.ui/cli build
+          ) 2>&1 | tee "$EVIDENCE_DIR/prerequisite.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${codes[0]}" > "$EVIDENCE_DIR/prerequisite-exit-code.txt"
+          printf '%s\n' "${codes[1]}" > "$EVIDENCE_DIR/prerequisite-tee-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/prerequisite-finished-at.txt"
+          if (( codes[0] != 0 )); then exit "${codes[0]}"; fi
+          exit "${codes[1]}"
+      - name: Record the real browser and install the existing official font prerequisite
+        id: browser
+        shell: bash
+        run: |
+          set -euo pipefail
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
+          test -x "$CHROME"
+          printf 'CHROME_PATH=%s\n' "$CHROME" >> "$GITHUB_ENV"
+          printf '%s\n' "$CHROME" > "$EVIDENCE_DIR/chrome-path.txt"
+          "$CHROME" --version > "$EVIDENCE_DIR/chrome-version.txt"
+          node --version > "$EVIDENCE_DIR/node-version.txt"
+          corepack pnpm@10.32.1 --version > "$EVIDENCE_DIR/pnpm-version.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/fonts-started-at.txt"
+          set +e
+          (
+            set -euo pipefail
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk
+          ) 2>&1 | tee "$EVIDENCE_DIR/fonts.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${codes[0]}" > "$EVIDENCE_DIR/fonts-exit-code.txt"
+          printf '%s\n' "${codes[1]}" > "$EVIDENCE_DIR/fonts-tee-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/fonts-finished-at.txt"
+          if (( codes[0] != 0 )); then exit "${codes[0]}"; fi
+          exit "${codes[1]}"
+      - name: Preserve the actual preset check outcome
+        id: presets
+        continue-on-error: true
+        shell: bash
         run: |
           set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+          printf '%s\n' 'corepack pnpm@10.32.1 check:styles:preset' > "$EVIDENCE_DIR/preset-check-command.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/preset-check-started-at.txt"
+          set +e
+          corepack pnpm@10.32.1 check:styles:preset 2>&1 | tee "$EVIDENCE_DIR/preset-check.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${codes[0]}" > "$EVIDENCE_DIR/preset-check-exit-code.txt"
+          printf '%s\n' "${codes[1]}" > "$EVIDENCE_DIR/preset-check-tee-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/preset-check-finished-at.txt"
+          if (( codes[0] != 0 )); then exit "${codes[0]}"; fi
+          exit "${codes[1]}"
+      - name: Disable only the supported Astro development toolbar preference
+        id: preference
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar' > "$EVIDENCE_DIR/astro-preference-command.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar 2>&1 | tee "$EVIDENCE_DIR/astro-preference.log"
+      - name: Re-admit unchanged checkout bytes before the native command
+        id: source-ready
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$EVIDENCE_DIR/source-admission.mjs" before-native "$EVIDENCE_DIR/source-custody.json"
+      - name: Run the complete selected original native inventory
+        id: native
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
+        shell: bash
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          unset PROTO_UI_RUNTIME_PHASE PROTO_UI_RUNTIME_SHARD PROTO_UI_RUNTIME_SLOT
+          unset PUI_FINF_POPOVER_NEGATIVE_CONTROL
+          case "$MATRIX_LANE" in
+            runtime-tabs)
+              export PUI_FINF_FEATURE_GROUP=runtime-tabs
+              export PUI_FINF_FEATURE_EVIDENCE_DIR="$EVIDENCE_DIR"
+              native=(node scripts/test/run-runtime-tests.mjs apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts)
+              ;;
+            liquid-button)
+              export PROTO_UI_MATERIAL_EVIDENCE_DIR="$EVIDENCE_DIR"
+              native=(node scripts/test/run-runtime-tests.mjs apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts --testNamePattern 'the actual public Button documentation uses the same optical path on all four runtime panels|records actual four-runtime idle/hover work without accepting an optimization')
+              ;;
+            code-surface-grammar)
+              export PROTO_UI_RUNTIME_EVIDENCE_DIR="$EVIDENCE_DIR"
+              export PROTO_UI_CODE_GRAMMAR_PHASES=1
+              native=(node scripts/test/run-runtime-tests.mjs apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts)
+              ;;
+            *) printf '%s\n' 'Unknown source lane' >&2; exit 2 ;;
+          esac
+          native+=(--maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json "--outputFile=$EVIDENCE_DIR/vitest-results.json")
+          printf '%q ' timeout --signal=TERM --kill-after=10s 900s "${native[@]}" > "$EVIDENCE_DIR/command.txt"
+          printf '\n' >> "$EVIDENCE_DIR/command.txt"
+          node --input-type=module -e 'import fs from "node:fs"; const keys=["CI","GITHUB_ACTIONS","GITHUB_SHA","CANDIDATE_SHA","CHROME_PATH","PROTO_UI_BROWSER_BASE_URL","PROTO_UI_RUNTIME_PHASE","PROTO_UI_RUNTIME_SHARD","PROTO_UI_RUNTIME_SLOT","PUI_FINF_FEATURE_GROUP","PUI_FINF_FEATURE_EVIDENCE_DIR","PUI_FINF_PRESET_CHECK","PUI_FINF_POPOVER_NEGATIVE_CONTROL","PROTO_UI_MATERIAL_EVIDENCE_DIR","PROTO_UI_RUNTIME_EVIDENCE_DIR","PROTO_UI_CODE_GRAMMAR_PHASES"]; fs.writeFileSync(process.env.EVIDENCE_DIR+"/native-environment.json",JSON.stringify(Object.fromEntries(keys.map(key=>[key,process.env[key]??null])),null,2)+"\n");'
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s "${native[@]}" 2>&1 | tee "$EVIDENCE_DIR/native.log"
+          codes=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${codes[0]}" > "$EVIDENCE_DIR/exit-code.txt"
+          printf '%s\n' "${codes[1]}" > "$EVIDENCE_DIR/native-tee-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/finished-at.txt"
+          if (( codes[0] != 0 )); then exit "${codes[0]}"; fi
+          exit "${codes[1]}"
+      - name: Retain source identity and generated CLI bytes after every native outcome
+        id: source-after
+        if: always() && steps.source-before.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node "$EVIDENCE_DIR/source-admission.mjs" after-native "$EVIDENCE_DIR/source-custody.json"
+      - name: Keep a failed preset prerequisite blocking
+        if: always() && steps.presets.outcome == 'failure'
+        shell: bash
+        run: exit 1
+      - name: Bind actual step outcomes and all retained artifact bytes
+        if: always() && steps.source-before.outcome != 'skipped' && steps.node.outcome == 'success'
+        env:
+          OUTCOME_CHECKOUT: ${{ steps.checkout.outcome }}
+          OUTCOME_NODE: ${{ steps.node.outcome }}
+          OUTCOME_SOURCE_BEFORE: ${{ steps.source-before.outcome }}
+          OUTCOME_PREREQUISITE: ${{ steps.prerequisite.outcome }}
+          OUTCOME_BROWSER: ${{ steps.browser.outcome }}
+          OUTCOME_PRESETS: ${{ steps.presets.outcome }}
+          OUTCOME_PREFERENCE: ${{ steps.preference.outcome }}
+          OUTCOME_SOURCE_READY: ${{ steps.source-ready.outcome }}
+          OUTCOME_NATIVE: ${{ steps.native.outcome }}
+          OUTCOME_SOURCE_AFTER: ${{ steps.source-after.outcome }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$EVIDENCE_DIR/collection-at.txt"
+          node "$EVIDENCE_DIR/artifact-inventory.mjs"
+      - name: Retain original-source observations and every failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: pr1489-frozen-source-${{ github.sha }}-${{ matrix.lane }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pr1489-native/${{ matrix.lane }}
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
