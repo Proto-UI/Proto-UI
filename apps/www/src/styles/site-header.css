@@ -607,12 +607,14 @@
     max-width: 100%;
     min-width: 0;
   }
-  .home-runtime-header
-    [data-site-header-compact-context]
-    .home-runtime-preferences
-    .pui-projection-controls {
-    grid-template-columns: minmax(0, 1fr);
-  }
+}
+/* A resize can remeasure an open Select before the preference owner moves to
+   the wide slot. Keep its one-column layout while it still belongs here. */
+.home-runtime-header
+  [data-site-header-compact-context]
+  .home-runtime-preferences
+  .pui-projection-controls {
+  grid-template-columns: minmax(0, 1fr);
 }
 /* Text enlargement may reflow the toolbar itself. It must never bring back a
    second settings row or shrink the real PUI touch targets to fit. */
@@ -773,6 +775,11 @@
 /* The complete family name and status stay on one line at ordinary desktop
    scale. Small screens and enlarged text still use the existing reflow. */
 @container docs-page (min-width: 80rem) {
+  /* Shadcn matches all popup rows to the Trigger. Reserve room for the
+     complete family option even when the shorter selected value is shown. */
+  [data-site-library-family='shadcn'] .home-runtime-header {
+    grid-template-columns: auto auto minmax(0, 1fr) 23.5rem minmax(10rem, 13rem) 2.75rem 2.75rem;
+  }
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-header {
     grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 2.75rem 2.75rem;
   }
