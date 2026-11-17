@@ -8,7 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { installDocsCallTimingObserver } from './docs-query-timing.mjs';
+import { installDocsCallTimingObserver } from '../../../../test/helpers/docs-query-timing.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
