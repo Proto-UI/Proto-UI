@@ -511,7 +511,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
                 isDraft: input.isDraft,
                 body: input.pullRequestBody,
                 baseRefName: input.baseRefName,
-                baseRefOid: input.baseSha,
+                baseRef: { target: { oid: input.baseSha } },
                 headRefOid: input.headSha,
                 changedFiles: input.changedFiles.length,
                 author: { login: input.pullRequestAuthor },

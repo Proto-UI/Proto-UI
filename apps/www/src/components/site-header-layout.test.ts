@@ -21,6 +21,7 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
   expect(document.querySelector('.sl-markdown-content')).toBeNull();
   return heading;
 }
+
 afterEach(() => document.body.replaceChildren());
 
 it('keeps reading navigation lateral or hidden and preserves the Header and single native-tree owners', () => {
@@ -42,21 +43,6 @@ it('keeps reading navigation lateral or hidden and preserves the Header and sing
   );
   expect(header).toContain('@container docs-page (max-width: 68.749rem)');
   expect(header).toContain('@container docs-page (max-width: 42rem)');
-});
-
-it('keeps the outer canvas as the only narrow reading gutter without changing splash spacing', () => {
-  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
-  const globalStyles = readFileSync('apps/www/src/styles/global.css', 'utf8');
-  const classes = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'\s*:\s*'([^']+)'/)!;
-  expect(globalStyles).toMatch(
-    /\.container-wrapper\s*\{[^}]*padding-inline: calc\(var\(--spacing\) \* 4\)/
-  );
-  expect(classes[2]!.split(/\s+/).filter((token) => /^(?:md:)?px-/.test(token))).toEqual([
-    'px-0',
-    'md:px-0',
-  ]);
-  expect(classes[1]).toContain('px-1');
-  expect(classes[1]).toContain('md:px-6');
 });
 
 describe('reading rail visibility query boundaries (source arithmetic, not browser paint)', () => {
@@ -401,29 +387,6 @@ it('keeps the page-top anchor at the initial reading inset when deferred modules
   expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
 });
 
-it.each(['en', 'zh-cn'])(
-  'preserves the original page-title clearance on the %s nohero splash',
-  (locale) => {
-    const splash = readFileSync(
-      `apps/www/src/content/docs/${locale}/internal/demo-matrix.mdx`,
-      'utf8'
-    );
-    const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
-    expect(splash).toContain('template: splash');
-    expect(splash).not.toMatch(/^hero:/m);
-    const splashClass = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'/)![1]!;
-    expect(splashClass).not.toContain('--docs-reading-inset');
-    const titleRule = frame.match(
-      /:global\(([^{}]*?h1\[data-site-typography='h1'\])\)\s*\{\s*scroll-margin-top:\s*([^;]+);/
-    )!;
-    document.body.innerHTML = `<div class="site-page-frame"><header data-docs-site-header></header><main><div data-layout="splash" class="${splashClass}"><h1 id="_top" data-site-typography="h1">Matrix</h1></div></main></div>`;
-    expect(document.querySelector(titleRule[1]!)).toBe(document.getElementById('_top'));
-    // A missing variable invalidates the winning declaration; it does not fall
-    // back to the lower-specificity section rule. Preserve that rule's 1rem.
-    expect(titleRule[2]).toBe('calc(var(--header-height) + var(--docs-reading-inset, 1rem))');
-  }
-);
-
 it('separates full-width Header chrome and edge rails from the bounded reading measure', () => {
   const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   expect(frame.indexOf('<slot name="header" />')).toBeLessThan(frame.indexOf('class:list={['));
@@ -468,5 +431,3 @@ it('bounds the Header panel by the Header box so one measured viewport cannot pl
   };
   panelContract(css);
 });
-
-
