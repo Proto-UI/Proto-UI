@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { build } from 'esbuild';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { definePrototype } from '@proto.ui/core';
+import type { AdaptToWebComponent } from '../src';
 import { launchBrowser } from '../../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import {
   renderProtoShadowSplitStyleArtifact,
@@ -178,20 +180,37 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
-  it.each([false, true])(
-    'validates caller focus through late split publication (blur=%s)',
-    async (blur) => {
+  it.each([
+    { mutation: 'unchanged', nested: false },
+    { mutation: 'reset state', nested: false },
+    { mutation: 'unchanged', nested: true },
+    { mutation: 'remove input', nested: true },
+    { mutation: 'adopt input', nested: true },
+  ] as const)(
+    'validates caller focus through late split publication (mutation=$mutation, nested=$nested)',
+    async ({ mutation, nested }) => {
       const page = await browser.newPage();
       try {
         await page.addScriptTag({ content: script });
         const result = await page.evaluate(
-          ({ artifact, blur }) => {
+          ({ artifact, mutation, nested }) => {
             const p = (window as any).Closeout;
             const host = document.createElement('closeout-split-focused-upgrade');
             const caller = document.createElement('input');
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            let foreignFocusCalls = 0;
+            const focus = caller.focus.bind(caller);
+            caller.focus = (options?: FocusOptions) => {
+              if (caller.ownerDocument === foreign) foreignFocusCalls++;
+              focus(options);
+            };
             caller.value = 'Caller';
             caller.setSelectionRange(1, 4, 'backward');
-            host.append(caller);
+            const wrapper = document.createElement('span');
+            if (nested) wrapper.append(caller);
+            host.append(nested ? wrapper : caller);
             document.body.append(host);
             caller.focus();
             const initial = document.activeElement === caller;
@@ -203,10 +222,18 @@ describe('Shadow closeout native boundaries', () => {
                 connectedCallback() {
                   reaction = true;
                   activeAtReaction = document.activeElement === caller;
-                  if (blur) {
+                  if (mutation !== 'unchanged') {
                     caller.value = 'Reset';
-                    caller.setAttribute('slot', 'claim');
-                    caller.blur();
+                    caller.setSelectionRange(0, 5, 'forward');
+                    if (mutation === 'remove input') caller.remove();
+                    else if (mutation === 'adopt input') {
+                      foreign.body.append(foreign.adoptNode(caller));
+                      caller.value = 'Foreign input';
+                      caller.setSelectionRange(0, 7, 'forward');
+                    } else {
+                      caller.setAttribute('slot', 'claim');
+                      caller.blur();
+                    }
                   }
                 }
               }
@@ -235,24 +262,47 @@ describe('Shadow closeout native boundaries', () => {
               reaction,
               activeAtReaction,
               errors,
-              retained: host.firstChild === caller,
+              retained:
+                host.firstChild === (nested ? wrapper : caller) && host.childNodes.length === 1,
+              controlRetained:
+                !nested || (wrapper.firstChild === caller && wrapper.childNodes.length === 1),
+              callerOwned: caller.ownerDocument === document,
+              foreignOwner: caller.ownerDocument === foreign,
+              foreignParent: caller.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+              foreignFocusCalls,
               focused: document.activeElement === caller,
               value: caller.value,
               slot: caller.getAttribute('slot'),
               selection: [caller.selectionStart, caller.selectionEnd, caller.selectionDirection],
             };
           },
-          { artifact: renderProtoShadowSplitStyleArtifact([]), blur }
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation, nested }
         );
         expect(result.initial).toBe(true);
         expect(result.reaction).toBe(true);
         expect(result.activeAtReaction).toBe(true);
         expect(result.retained).toBe(true);
-        expect(result.value).toBe('Caller');
+        expect(result.foreignFocusCalls).toBe(0);
         expect(result.slot).toBeNull();
-        expect(result.selection).toEqual([1, 4, 'backward']);
-        expect(result.focused).toBe(true);
-        if (blur)
+        if (mutation === 'adopt input') {
+          expect(result.controlRetained).toBe(false);
+          expect(result.callerOwned).toBe(false);
+          expect(result.foreignOwner).toBe(true);
+          expect(result.foreignParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+          expect(result.value).toBe('Foreign input');
+          expect(result.selection).toEqual([0, 7, 'forward']);
+          expect(result.focused).toBe(false);
+        } else {
+          expect(result.controlRetained).toBe(true);
+          expect(result.callerOwned).toBe(true);
+          expect(result.foreignChildren).toBe(0);
+          expect(result.value).toBe('Caller');
+          expect(result.selection).toEqual([1, 4, 'backward']);
+          expect(result.focused).toBe(true);
+        }
+        if (mutation !== 'unchanged')
           expect(result.errors).toEqual([
             expect.stringContaining('decoration caller projection changed'),
           ]);
@@ -265,45 +315,86 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
-  it.each([false, true])(
-    'validates caller text selection through late split publication (reset=%s)',
-    async (reset) => {
+  it.each([
+    { mutation: 'unchanged', nested: false, kind: 'text' },
+    { mutation: 'text data', nested: false, kind: 'text' },
+    { mutation: 'unchanged', nested: true, kind: 'text' },
+    { mutation: 'text replacement', nested: true, kind: 'text' },
+    { mutation: 'adopt text', nested: true, kind: 'text' },
+    { mutation: 'unchanged', nested: true, kind: 'element' },
+    { mutation: 'replace children', nested: true, kind: 'element' },
+    { mutation: 'adopt child', nested: true, kind: 'element' },
+  ] as const)(
+    'validates caller text selection through late split publication (mutation=$mutation, nested=$nested, kind=$kind)',
+    async ({ mutation, nested, kind }) => {
       const page = await browser.newPage();
       try {
         await page.addScriptTag({ content: script });
         const result = await page.evaluate(
-          ({ artifact, reset }) => {
+          ({ artifact, mutation, nested, kind }) => {
             const p = (window as any).Closeout;
             const host = document.createElement('closeout-split-selected-upgrade');
-            const caller = document.createTextNode('Caller text');
-            host.append(caller);
+            const text = document.createTextNode('Caller text');
+            const wrapper = document.createElement('span');
+            const firstBreak = document.createElement('br');
+            const lastBreak = document.createElement('br');
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            if (kind === 'element') wrapper.append(firstBreak, lastBreak);
+            else if (nested) wrapper.append(text);
+            const caller = kind === 'element' ? wrapper : text;
+            host.append(nested ? wrapper : caller);
             document.body.append(host);
             const selection = document.getSelection()!;
-            selection.setBaseAndExtent(caller, 1, caller, 6);
+            const anchorOffset = kind === 'element' ? 0 : 1;
+            const focusOffset = kind === 'element' ? 2 : 6;
+            selection.setBaseAndExtent(caller, anchorOffset, caller, focusOffset);
             const matches = () =>
+              selection.rangeCount === 1 &&
               selection.anchorNode === caller &&
-              selection.anchorOffset === 1 &&
+              selection.anchorOffset === anchorOffset &&
               selection.focusNode === caller &&
-              selection.focusOffset === 6;
+              selection.focusOffset === focusOffset;
             const selectedBefore = matches();
             let reaction = false;
             let selectedAtReaction = false;
+            let adoptedSelection:
+              | readonly [Node | null, number, Node | null, number, number]
+              | undefined;
             customElements.define(
               'closeout-split-selection-reaction',
               class extends HTMLElement {
                 connectedCallback() {
                   reaction = true;
                   selectedAtReaction = matches();
-                  if (reset) {
-                    caller.data = 'Reset text';
+                  if (mutation === 'text replacement') wrapper.textContent = 'Reset';
+                  else if (mutation === 'text data') {
+                    text.data = 'Reset text';
                     selection.removeAllRanges();
+                  } else if (mutation === 'replace children') {
+                    wrapper.replaceChildren(document.createElement('br'));
+                  } else if (mutation === 'adopt text' || mutation === 'adopt child') {
+                    foreign.body.append(
+                      foreign.adoptNode(mutation === 'adopt text' ? text : lastBreak)
+                    );
+                    if (mutation === 'adopt text') text.data = 'Foreign text';
+                    adoptedSelection = [
+                      selection.anchorNode,
+                      selection.anchorOffset,
+                      selection.focusNode,
+                      selection.focusOffset,
+                      selection.rangeCount,
+                    ];
                   }
                 }
               }
             );
             const errors: string[] = [];
+            const errorNames: string[] = [];
             window.addEventListener('error', (event) => {
               errors.push(event.message);
+              errorNames.push(event.error?.name ?? 'unknown');
               event.preventDefault();
             });
             p.adapt(
@@ -320,30 +411,321 @@ describe('Shadow closeout native boundaries', () => {
               }),
               { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
             );
+            const adopted = mutation === 'adopt text' ? text : lastBreak;
             return {
               selectedBefore,
               reaction,
               selectedAtReaction,
               errors,
-              retained: host.firstChild === caller,
+              errorNames,
+              retained:
+                host.firstChild === (nested ? wrapper : caller) && host.childNodes.length === 1,
+              textRetained:
+                kind !== 'text' ||
+                !nested ||
+                (wrapper.firstChild === text && wrapper.childNodes.length === 1),
+              elementChildren: [
+                wrapper.childNodes[0] === firstBreak,
+                wrapper.childNodes[1] === lastBreak,
+              ],
+              childCount: wrapper.childNodes.length,
+              hasTextOrControl:
+                host.textContent !== '' || !!host.querySelector('input, textarea, select'),
+              adoptedOwner: adopted.ownerDocument === foreign,
+              adoptedParent: adopted.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+              adoptionSelectionRetained:
+                !!adoptedSelection &&
+                selection.anchorNode === adoptedSelection[0] &&
+                selection.anchorOffset === adoptedSelection[1] &&
+                selection.focusNode === adoptedSelection[2] &&
+                selection.focusOffset === adoptedSelection[3] &&
+                selection.rangeCount === adoptedSelection[4],
+              selectionOwned:
+                (!selection.anchorNode || selection.anchorNode.getRootNode() === document) &&
+                (!selection.focusNode || selection.focusNode.getRootNode() === document),
+              selectionOffsets: [selection.anchorOffset, selection.focusOffset],
               selectedAfter: matches(),
-              text: caller.data,
+              text: kind === 'text' ? text.data : null,
+              projectedText: host.textContent,
+              selectedText: selection.toString(),
             };
           },
-          { artifact: renderProtoShadowSplitStyleArtifact([]), reset }
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation, nested, kind }
         );
         expect(result.selectedBefore).toBe(true);
         expect(result.reaction).toBe(true);
         expect(result.selectedAtReaction).toBe(true);
         expect(result.retained).toBe(true);
-        expect(result.text).toBe('Caller text');
-        expect(result.selectedAfter).toBe(true);
-        if (reset)
+        expect(result.selectionOwned).toBe(true);
+        if (mutation === 'adopt text' || mutation === 'adopt child') {
+          expect(result.adoptedOwner).toBe(true);
+          expect(result.adoptedParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+          expect(result.adoptionSelectionRetained).toBe(true);
+          expect(result.selectedAfter).toBe(false);
+        } else {
+          expect(result.foreignChildren).toBe(0);
+          expect(result.selectedAfter).toBe(true);
+        }
+        if (kind === 'element') {
+          expect(result.text).toBeNull();
+          expect(result.hasTextOrControl).toBe(false);
+          expect(result.projectedText).toBe('');
+          if (mutation === 'adopt child') {
+            expect(result.childCount).toBe(1);
+            expect(result.elementChildren).toEqual([true, false]);
+          } else {
+            expect(result.childCount).toBe(2);
+            expect(result.elementChildren).toEqual([true, true]);
+            expect(result.selectionOffsets).toEqual([0, 2]);
+          }
+        } else if (mutation === 'adopt text') {
+          expect(result.textRetained).toBe(false);
+          expect(result.childCount).toBe(0);
+          expect(result.text).toBe('Foreign text');
+          expect(result.projectedText).toBe('');
+        } else {
+          expect(result.textRetained).toBe(true);
+          expect(result.text).toBe('Caller text');
+          expect(result.projectedText).toBe('Caller text');
+          expect(result.selectionOffsets).toEqual([1, 6]);
+          expect(result.selectedText).toBe('aller');
+        }
+        if (mutation !== 'unchanged') {
           expect(result.errors).toEqual([
             expect.stringContaining('decoration caller projection changed'),
           ]);
-        else {
+          expect(result.errorNames).toEqual(['Error']);
+        } else {
           expect(result.errors).toEqual([]);
+          expect(result.errorNames).toEqual([]);
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it.each([
+    'unchanged',
+    'remove option',
+    'reorder options',
+    'remove optgroup',
+    'adopt option',
+  ] as const)(
+    'validates caller select choices through late split publication (%s)',
+    async (mutation) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation }) => {
+            // beforeAll injects these exact local exports before this callback runs.
+            const fixture = window as unknown as {
+              Closeout: {
+                adapt: typeof AdaptToWebComponent;
+                define: typeof definePrototype;
+              };
+            };
+            const p = fixture.Closeout;
+            const host = document.createElement('closeout-split-select-upgrade');
+            const wrapper = document.createElement('div');
+            const select = document.createElement('select');
+            select.multiple = true;
+            const first = document.createElement('option');
+            first.label = 'First';
+            first.value = 'first';
+            first.selected = true;
+            const second = document.createElement('option');
+            second.label = 'Second';
+            second.value = 'second';
+            const third = document.createElement('option');
+            third.label = 'Third';
+            third.value = 'third';
+            third.selected = true;
+            const group = document.createElement('optgroup');
+            group.label = 'Group';
+            group.append(second, third);
+            select.append(first, group);
+            wrapper.append(select);
+            host.append(wrapper);
+            document.body.append(host);
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            select.focus();
+            const initiallyFocused = document.activeElement === select;
+            let reaction = false;
+            let activeAtReaction = false;
+            customElements.define(
+              'closeout-split-select-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  activeAtReaction = document.activeElement === select;
+                  if (mutation === 'remove option') {
+                    first.remove();
+                    first.selected = false;
+                  } else if (mutation === 'reorder options') group.prepend(third);
+                  else if (mutation === 'remove optgroup') {
+                    group.remove();
+                    second.selected = true;
+                    third.selected = false;
+                  } else if (mutation === 'adopt option') {
+                    foreign.body.append(foreign.adoptNode(second));
+                    second.selected = true;
+                  }
+                }
+              }
+            );
+            const errors: string[] = [];
+            const errorNames: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              errorNames.push(event.error?.name ?? 'unknown');
+              event.preventDefault();
+            });
+            const C = p.adapt(
+              p.define({
+                name: 'closeout-split-select-upgrade',
+                setup(def) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-select-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            const initial = {
+              initiallyFocused,
+              reaction,
+              activeAtReaction,
+              errors,
+              errorNames,
+              wrapperRetained: host.firstChild === wrapper && host.childNodes.length === 1,
+              selectRetained: wrapper.firstChild === select && wrapper.childNodes.length === 1,
+              groupRetained:
+                select.firstChild === first &&
+                select.lastChild === group &&
+                select.childNodes.length === 2,
+              choices: Array.from(select.options, (option) =>
+                option === first
+                  ? 'first'
+                  : option === second
+                    ? 'second'
+                    : option === third
+                      ? 'third'
+                      : 'other'
+              ),
+              groupOrder: Array.from(group.children, (option) =>
+                option === second ? 'second' : option === third ? 'third' : 'other'
+              ),
+              parents: [
+                first.parentNode === select,
+                group.parentNode === select,
+                second.parentNode === group,
+                third.parentNode === group,
+              ],
+              emptyOptionChildren: [
+                first.childNodes.length,
+                second.childNodes.length,
+                third.childNodes.length,
+              ],
+              labels: [first.label, second.label, third.label],
+              values: [first.value, second.value, third.value],
+              selected: [first.selected, second.selected, third.selected],
+              value: select.value,
+              focused: document.activeElement === select,
+              foreignOwner: second.ownerDocument === foreign,
+              foreignParent: second.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+            };
+            let later: Record<string, unknown> | null = null;
+            if (mutation === 'unchanged') {
+              group.prepend(third);
+              first.remove();
+              const laterOption = document.createElement('option');
+              laterOption.label = 'Later';
+              laterOption.value = 'later';
+              laterOption.selected = true;
+              second.replaceWith(laterOption);
+              third.selected = false;
+              let error: string | null = null;
+              try {
+                // Registration above upgrades this already-connected native host.
+                const upgraded = host as InstanceType<typeof C>;
+                upgraded.update();
+              } catch (cause) {
+                error = String(cause);
+              }
+              later = {
+                error,
+                groupRetained: select.firstChild === group && select.childNodes.length === 1,
+                choices: Array.from(select.options, (option) =>
+                  option === third ? 'third' : option === laterOption ? 'later' : 'other'
+                ),
+                firstDetached: first.parentNode === null,
+                secondDetached: second.parentNode === null,
+                emptyChoice: laterOption.childNodes.length === 0,
+                selected: [third.selected, laterOption.selected],
+                value: select.value,
+                focused: document.activeElement === select,
+              };
+            }
+            return { ...initial, later };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation }
+        );
+        expect(result.initiallyFocused).toBe(true);
+        expect(result.reaction).toBe(true);
+        expect(result.activeAtReaction).toBe(true);
+        expect(result.wrapperRetained).toBe(true);
+        expect(result.selectRetained).toBe(true);
+        expect(result.groupRetained).toBe(true);
+        expect(result.emptyOptionChildren).toEqual([0, 0, 0]);
+        expect(result.labels).toEqual(['First', 'Second', 'Third']);
+        expect(result.values).toEqual(['first', 'second', 'third']);
+        expect(result.value).toBe('first');
+        expect(result.focused).toBe(true);
+        if (mutation === 'adopt option') {
+          expect(result.choices).toEqual(['first', 'third']);
+          expect(result.groupOrder).toEqual(['third']);
+          expect(result.parents).toEqual([true, true, false, true]);
+          expect(result.selected).toEqual([true, true, true]);
+          expect(result.foreignOwner).toBe(true);
+          expect(result.foreignParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+        } else {
+          expect(result.choices).toEqual(['first', 'second', 'third']);
+          expect(result.groupOrder).toEqual(['second', 'third']);
+          expect(result.parents).toEqual([true, true, true, true]);
+          expect(result.selected).toEqual([true, false, true]);
+          expect(result.foreignChildren).toBe(0);
+        }
+        if (mutation === 'unchanged') {
+          expect(result.errors).toEqual([]);
+          expect(result.errorNames).toEqual([]);
+          expect(result.later).toEqual({
+            error: null,
+            groupRetained: true,
+            choices: ['third', 'later'],
+            firstDetached: true,
+            secondDetached: true,
+            emptyChoice: true,
+            selected: [false, true],
+            value: 'later',
+            focused: true,
+          });
+        } else {
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+          expect(result.errorNames).toEqual(['Error']);
+          expect(result.later).toBeNull();
         }
       } finally {
         await page.close();

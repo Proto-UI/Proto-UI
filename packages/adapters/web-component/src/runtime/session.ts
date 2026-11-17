@@ -134,6 +134,7 @@ function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean 
 type CallerSnapshot = { isCurrent(): boolean; restore(): void };
 
 function captureCallerControlState(node: Element): CallerSnapshot {
+  const document = node.ownerDocument;
   if (node.localName === 'select') {
     const select = node as HTMLSelectElement;
     const { value } = select;
@@ -147,6 +148,15 @@ function captureCallerControlState(node: Element): CallerSnapshot {
             option === select.options[index] && option.selected === selected
         ),
       restore() {
+        if (
+          select.ownerDocument !== document ||
+          select.options.length !== options.length ||
+          !options.every(
+            ({ option }, index) =>
+              option.ownerDocument === document && select.options[index] === option
+          )
+        )
+          return;
         for (const { option, selected } of options)
           if (option.selected !== selected) option.selected = selected;
       },
@@ -167,6 +177,7 @@ function captureCallerControlState(node: Element): CallerSnapshot {
       input?.checked === checked &&
       input?.indeterminate === indeterminate,
     restore() {
+      if (control.ownerDocument !== document) return;
       if (control.value !== value) {
         if (input?.type === 'file' && files) input.files = files;
         else control.value = value;
@@ -195,9 +206,17 @@ function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
 function captureSplitCallerSelection(
   host: HTMLElement,
   root: Document | ShadowRoot
-): CallerSnapshot | undefined {
+):
+  | (CallerSnapshot & {
+      anchorNode: Node | null;
+      focusNode: Node | null;
+      boundaries: readonly { startContainer: Node; endContainer: Node }[];
+    })
+  | undefined {
+  const document = host.ownerDocument;
+  const ownsNode = (node: Node | null) => node === document || node?.ownerDocument === document;
   const selectionRoot = root as (Document | ShadowRoot) & { getSelection?(): Selection | null };
-  const read = () => selectionRoot.getSelection?.() ?? host.ownerDocument.getSelection();
+  const read = () => selectionRoot.getSelection?.() ?? document.getSelection();
   const selection = read();
   if (!selection?.rangeCount) return;
   const ranges = Array.from({ length: selection.rangeCount }, (_, index) =>
@@ -212,9 +231,13 @@ function captureSplitCallerSelection(
     endOffset,
   }));
   return {
+    anchorNode,
+    focusNode,
+    boundaries,
     isCurrent() {
       const current = read();
       return (
+        host.ownerDocument === document &&
         host.getRootNode() === root &&
         !!current &&
         current.anchorNode === anchorNode &&
@@ -234,6 +257,16 @@ function captureSplitCallerSelection(
       );
     },
     restore() {
+      if (
+        host.ownerDocument !== document ||
+        host.getRootNode() !== root ||
+        !ownsNode(anchorNode) ||
+        !ownsNode(focusNode) ||
+        !boundaries.every(
+          ({ startContainer, endContainer }) => ownsNode(startContainer) && ownsNode(endContainer)
+        )
+      )
+        return;
       const current = read();
       if (!current || this.isCurrent()) return;
       if (boundaries.length === 1 && anchorNode && focusNode) {
@@ -241,7 +274,7 @@ function captureSplitCallerSelection(
       } else {
         current.removeAllRanges();
         for (const boundary of boundaries) {
-          const range = host.ownerDocument.createRange();
+          const range = document.createRange();
           range.setStart(boundary.startContainer, boundary.startOffset);
           range.setEnd(boundary.endContainer, boundary.endOffset);
           current.addRange(range);
@@ -251,8 +284,14 @@ function captureSplitCallerSelection(
   };
 }
 
-function captureSplitCallerProjection(host: HTMLElement): CallerSnapshot {
+function captureSplitCallerProjection(
+  host: HTMLElement,
+  isCurrentPublication: () => boolean
+): CallerSnapshot {
+  const document = host.ownerDocument;
   const root = host.getRootNode() as Document | ShadowRoot;
+  const canRestore = () =>
+    host.ownerDocument === document && host.getRootNode() === root && isCurrentPublication();
   const active = activeWithinOpenTree(root);
   const activeBranch = root.activeElement;
   const callerOwnsFocus = !!activeBranch && activeBranch !== host && host.contains(activeBranch);
@@ -262,10 +301,19 @@ function captureSplitCallerProjection(host: HTMLElement): CallerSnapshot {
     text: node.textContent,
     slot: node.nodeType === 1 ? (node as Element).getAttribute('slot') : null,
   }));
+  // Keep captured text, controls, choices and selection containers parent first.
+  const parents = new Map<ParentNode, ChildNode[]>();
+  const captureParents = (node: Node): void => {
+    const parent = node.parentNode;
+    if (!parent || parent === host || parents.has(parent)) return;
+    captureParents(parent);
+    parents.set(parent, Array.from(parent.childNodes));
+  };
   const textNodes: { node: Text; data: string }[] = [];
-  const walker = host.ownerDocument.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+  const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
     const node = walker.currentNode as Text;
+    captureParents(node);
     textNodes.push({ node, data: node.data });
   }
   const selector = 'input, textarea, select';
@@ -276,39 +324,115 @@ function captureSplitCallerProjection(host: HTMLElement): CallerSnapshot {
       const descendants = Array.from(element.querySelectorAll(selector));
       return element.matches(selector) ? [element, ...descendants] : descendants;
     })
-    .map((node) => ({ node, state: captureCallerControlState(node) }));
+    .map((node) => {
+      captureParents(node);
+      if (node.localName === 'select') {
+        if (!parents.has(node)) parents.set(node, Array.from(node.childNodes));
+        for (const child of node.querySelectorAll('optgroup, option')) {
+          captureParents(child);
+          if (!parents.has(child)) parents.set(child, Array.from(child.childNodes));
+        }
+      }
+      return { node, state: captureCallerControlState(node) };
+    });
+  if (selection) {
+    const captureContainer = (node: Node | null) => {
+      if (!node || node === host || !host.contains(node)) return;
+      captureParents(node);
+      if (node.nodeType === 1) {
+        const element = node as Element;
+        if (!parents.has(element)) parents.set(element, Array.from(element.childNodes));
+      }
+    };
+    captureContainer(selection.anchorNode);
+    captureContainer(selection.focusNode);
+    for (const { startContainer, endContainer } of selection.boundaries) {
+      captureContainer(startContainer);
+      captureContainer(endContainer);
+    }
+  }
   return {
-    isCurrent: () =>
-      (!callerOwnsFocus ||
-        (host.getRootNode() === root && activeWithinOpenTree(root) === active)) &&
-      (!selection || selection.isCurrent()) &&
-      hasSameChildren(host, children) &&
-      children.every(
-        (node, index) =>
-          node.textContent === content[index].text &&
-          (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
-            content[index].slot
-      ) &&
-      controls.every(({ node, state }) => host.contains(node) && state.isCurrent()),
+    isCurrent() {
+      if (host.ownerDocument !== document || host.getRootNode() !== root) return false;
+      for (const [parent, children] of parents)
+        if (!hasSameChildren(parent, children)) return false;
+      return (
+        (!callerOwnsFocus ||
+          (host.getRootNode() === root && activeWithinOpenTree(root) === active)) &&
+        (!selection || selection.isCurrent()) &&
+        hasSameChildren(host, children) &&
+        children.every(
+          (node, index) =>
+            node.textContent === content[index].text &&
+            (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
+              content[index].slot
+        ) &&
+        controls.every(({ node, state }) => host.contains(node) && state.isCurrent())
+      );
+    },
     restore() {
-      if (host.getRootNode() !== root) return;
-      if (!hasSameChildren(host, children)) {
+      if (!canRestore()) return;
+      if (
+        !hasSameChildren(host, children) &&
+        children.every((node) => node.ownerDocument === document)
+      ) {
         withWebComponentOwnedRelocation(children, host, () => host.replaceChildren(...children));
       }
+      for (const [parent, children] of parents) {
+        if (!canRestore()) return;
+        if (
+          parent.ownerDocument === document &&
+          host.contains(parent) &&
+          children.every((node) => node.ownerDocument === document) &&
+          !hasSameChildren(parent, children)
+        )
+          withWebComponentOwnedRelocation(children, parent, () =>
+            parent.replaceChildren(...children)
+          );
+      }
       children.forEach((node, index) => {
-        if (node.nodeType !== 1) return;
+        if (
+          !canRestore() ||
+          node.ownerDocument !== document ||
+          !host.contains(node) ||
+          node.nodeType !== 1
+        )
+          return;
         const element = node as Element;
         const { slot } = content[index]!;
         if (element.getAttribute('slot') === slot) return;
         if (slot === null) element.removeAttribute('slot');
         else element.setAttribute('slot', slot);
       });
-      for (const { node, data } of textNodes)
-        if (host.contains(node) && node.data !== data) node.data = data;
-      if (callerOwnsFocus && activeWithinOpenTree(root) !== active)
+      for (const { node, data } of textNodes) {
+        if (!canRestore()) return;
+        if (node.ownerDocument === document && host.contains(node) && node.data !== data)
+          node.data = data;
+      }
+      if (!canRestore()) return;
+      if (
+        callerOwnsFocus &&
+        active?.ownerDocument === document &&
+        activeBranch?.ownerDocument === document &&
+        host.contains(activeBranch) &&
+        activeWithinOpenTree(root) !== active
+      )
         (active as HTMLElement | null)?.focus({ preventScroll: true });
-      for (const { node, state } of controls) if (host.contains(node)) state.restore();
-      selection?.restore();
+      for (const { node, state } of controls) {
+        if (!canRestore()) return;
+        if (node.ownerDocument === document && host.contains(node)) state.restore();
+      }
+      if (!selection || !canRestore() || !hasSameChildren(host, children)) return;
+      // Focus/control reactions may have changed a captured relationship again.
+      for (const [parent, children] of parents)
+        if (
+          parent.ownerDocument !== document ||
+          !host.contains(parent) ||
+          children.some((node) => node.ownerDocument !== document) ||
+          !hasSameChildren(parent, children)
+        )
+          return;
+      selection.restore();
     },
   };
 }
@@ -484,7 +608,16 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         : undefined;
     // A staged child may run a constructor or connected reaction. The
     // caller still owns this light-DOM sequence until acknowledgement.
-    const callerProjection = splitRoot ? captureSplitCallerProjection(host) : undefined;
+    const callerProjection = splitRoot
+      ? captureSplitCallerProjection(
+          host,
+          () =>
+            turn === commitTurn &&
+            ownsDecorationRoot() &&
+            decorationRoot.ownerDocument === splitRoot.document &&
+            currentFeedback() === feedback
+        )
+      : undefined;
     const assertCallerProjection = () => {
       if (!callerProjection || callerProjection.isCurrent()) return;
       const error = new Error('[WC Adapter] decoration caller projection changed');
