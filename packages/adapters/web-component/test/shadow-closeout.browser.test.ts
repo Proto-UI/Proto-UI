@@ -185,6 +185,163 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
+  it.each([false, true])(
+    'validates caller text selection through late split publication (reset=%s)',
+    async (reset) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, reset }) => {
+            const p = (window as any).Closeout;
+            const host = document.createElement('closeout-split-selected-upgrade');
+            const caller = document.createTextNode('Caller text');
+            host.append(caller);
+            document.body.append(host);
+            const selection = document.getSelection()!;
+            selection.setBaseAndExtent(caller, 1, caller, 6);
+            const matches = () =>
+              selection.anchorNode === caller &&
+              selection.anchorOffset === 1 &&
+              selection.focusNode === caller &&
+              selection.focusOffset === 6;
+            const selectedBefore = matches();
+            let reaction = false;
+            let selectedAtReaction = false;
+            customElements.define(
+              'closeout-split-selection-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  selectedAtReaction = matches();
+                  if (reset) selection.removeAllRanges();
+                }
+              }
+            );
+            const errors: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              event.preventDefault();
+            });
+            p.adapt(
+              p.define({
+                name: 'closeout-split-selected-upgrade',
+                setup(def: any) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r: any) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-selection-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            return {
+              selectedBefore,
+              reaction,
+              selectedAtReaction,
+              errors,
+              retained: host.firstChild === caller,
+              selectedAfter: matches(),
+              text: caller.data,
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), reset }
+        );
+        expect(result.selectedBefore).toBe(true);
+        expect(result.reaction).toBe(true);
+        expect(result.selectedAtReaction).toBe(true);
+        expect(result.retained).toBe(true);
+        expect(result.text).toBe('Caller text');
+        if (reset)
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+        else {
+          expect(result.errors).toEqual([]);
+          expect(result.selectedAfter).toBe(true);
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it('accepts an admitted split exit animation at its retained zero opacity', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-owned-split-exit',
+              setup(def: any) {
+                const leaf = def.feedback.style.declareDecoration();
+                def.feedback.style.use(p.tw('animate-out fade-out-0 duration-150'));
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const host = new C();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+          const slot = surface.querySelector('slot')!;
+          const animation = surface
+            .getAnimations()
+            .find(
+              (candidate) =>
+                candidate instanceof CSSAnimation &&
+                candidate.animationName === 'pui-split-paint-exit'
+            );
+          animation?.finish();
+          const opacity = getComputedStyle(surface).opacity;
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          const retainedState = animation?.playState;
+          const sheet = new CSSStyleSheet();
+          sheet.replaceSync(
+            '[part="surface"] { animation: none !important; opacity: 0 !important; }'
+          );
+          host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, sheet];
+          const replacementOpacity = getComputedStyle(surface).opacity;
+          let replacementError: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            replacementError = String(cause);
+          }
+          return {
+            animation: retainedState,
+            opacity,
+            error,
+            replacementOpacity,
+            replacementError,
+            sameCaller: slot.assignedNodes()[0] === caller,
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['animate-out', 'fade-out-0', 'duration-150'])
+      );
+      expect(result.animation).toBe('finished');
+      expect(result.opacity).toBe('0');
+      expect(result.sameCaller).toBe(true);
+      expect(result.error).toBeNull();
+      expect(result.replacementOpacity).toBe('0');
+      expect(result.replacementError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('retains owned split Root opacity during its CSS transition out of zero', async () => {
     const page = await browser.newPage();
     try {

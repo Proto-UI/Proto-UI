@@ -134,11 +134,54 @@ function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
   return active;
 }
 
+function captureSplitCallerSelection(
+  host: HTMLElement,
+  root: Document | ShadowRoot
+): (() => boolean) | undefined {
+  const selectionRoot = root as (Document | ShadowRoot) & { getSelection?(): Selection | null };
+  const read = () => selectionRoot.getSelection?.() ?? host.ownerDocument.getSelection();
+  const selection = read();
+  if (!selection?.rangeCount) return;
+  const ranges = Array.from({ length: selection.rangeCount }, (_, index) =>
+    selection.getRangeAt(index)
+  );
+  if (!ranges.some((range) => range.intersectsNode(host))) return;
+  const { anchorNode, anchorOffset, focusNode, focusOffset } = selection;
+  const boundaries = ranges.map(({ startContainer, startOffset, endContainer, endOffset }) => ({
+    startContainer,
+    startOffset,
+    endContainer,
+    endOffset,
+  }));
+  return () => {
+    const current = read();
+    return (
+      host.getRootNode() === root &&
+      !!current &&
+      current.anchorNode === anchorNode &&
+      current.anchorOffset === anchorOffset &&
+      current.focusNode === focusNode &&
+      current.focusOffset === focusOffset &&
+      current.rangeCount === boundaries.length &&
+      boundaries.every((before, index) => {
+        const after = current.getRangeAt(index);
+        return (
+          after.startContainer === before.startContainer &&
+          after.startOffset === before.startOffset &&
+          after.endContainer === before.endContainer &&
+          after.endOffset === before.endOffset
+        );
+      })
+    );
+  };
+}
+
 function captureSplitCallerProjection(host: HTMLElement): () => boolean {
   const root = host.getRootNode() as Document | ShadowRoot;
   const active = activeWithinOpenTree(root);
   const activeBranch = root.activeElement;
   const callerOwnsFocus = !!activeBranch && activeBranch !== host && host.contains(activeBranch);
+  const selectionIsCurrent = captureSplitCallerSelection(host, root);
   const children = Array.from(host.childNodes);
   const content = children.map((node) => ({
     text: node.textContent,
@@ -155,6 +198,7 @@ function captureSplitCallerProjection(host: HTMLElement): () => boolean {
     .map((node) => ({ node, state: captureCallerControlState(node) }));
   return () =>
     (!callerOwnsFocus || (host.getRootNode() === root && activeWithinOpenTree(root) === active)) &&
+    (!selectionIsCurrent || selectionIsCurrent()) &&
     hasSameChildren(host, children) &&
     children.every(
       (node, index) =>

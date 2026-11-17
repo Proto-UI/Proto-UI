@@ -408,9 +408,31 @@ export function createShadowSplitEffectsPort({
       (token) =>
         (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
     ) ?? false;
+  const ownsZeroOpacityExit = () => {
+    const hasPaint = (name: string) =>
+      applied?.surface.some(
+        (token) => (token === name || token.endsWith(`:${name}`)) && isLiveSurfaceToken(token)
+      );
+    if (!hasPaint('animate-out') || !hasPaint('fade-out-0')) return false;
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSAnimation || !view.KeyframeEffect || !surface.getAnimations) return false;
+    return surface.getAnimations().some((animation) => {
+      const effect = animation.effect;
+      return (
+        animation instanceof view.CSSAnimation &&
+        animation.animationName === 'pui-split-paint-exit' &&
+        effect instanceof view.KeyframeEffect &&
+        effect.target === surface &&
+        !effect.pseudoElement &&
+        effect.getTiming().fill === 'both' &&
+        effect.getComputedTiming().progress !== null &&
+        effect.getKeyframes().at(-1)?.opacity === '0'
+      );
+    });
+  };
   zeroOpacityOwners.set(surface, () => {
     if (surface.parentNode !== host.shadowRoot) return false;
-    if (ownsZeroOpacity()) return true;
+    if (ownsZeroOpacity() || ownsZeroOpacityExit()) return true;
     const transition = zeroOpacityTransition;
     return (
       !!transition &&
