@@ -155,6 +155,7 @@ export function createScopedExposesReader(
         pending.push(parent);
       }
     }
+    const refreshNodes = new Map<object, RecordNode>();
     for (const node of nodes) {
       if (!node.project) continue;
       node.target = recordCache.get(node.source);
@@ -168,8 +169,12 @@ export function createScopedExposesReader(
         recordCache.set(node.target!, node.target!);
       }
       if (registryRecords.has(node.source)) registryRecords.add(node.target!);
+      // Refresh each target once. Prefer the raw record when its cached public
+      // alias is also present; a projection-only echo still scans its own entries.
+      if (node.source !== node.target || !refreshNodes.has(node.target!))
+        refreshNodes.set(node.target!, node);
     }
-    for (const node of nodes) {
+    for (const node of refreshNodes.values()) {
       if (!node.target) continue;
       // Refresh on an explicit read or result boundary; this is not a reactive
       // value channel. Held projections keep identity and observe that refresh.
