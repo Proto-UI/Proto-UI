@@ -675,7 +675,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
         : '',
       handle: contextArtifacts ? 'contextScope,' : '',
       dispose: contextArtifacts
-        ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }'
+        ? 'try { contextScope.dispose(); } catch (error) { failure ??= { error }; }'
         : '',
       setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
     },
@@ -1769,21 +1769,21 @@ ${
       terminal = true; ++epoch; renderedCommit = null; pending = null; queued = false;
       ${hasAuthoredHooks ? 'for (const off of PUIAuthoredWatchCleanups.splice(0)) off();' : ''}
       unwatch?.(); unwatch = undefined;
-      let failure;
-      try { detach(); } catch (error) { failure = error; }
-      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= error; }
+      /** @type {{ error: unknown } | undefined} */ let failure;
+      try { detach(); } catch (error) { failure = { error }; }
+      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= { error }; }
 ${
   stateful
     ? String.raw`      for (const state of states) {
-        try { state.dispose(); } catch (error) { failure ??= error; }
+        try { state.dispose(); } catch (error) { failure ??= { error }; }
       }
 `
     : ''
 }      ${context.dispose}
-      ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= error; }' : ''}
+      ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= { error }; }' : ''}
       ${
         styled
-          ? `try { style.dispose(); } catch (error) { failure ??= error; }
+          ? `try { style.dispose(); } catch (error) { failure ??= { error }; }
       const target = vm.$el;
       if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');`
           : ''
@@ -1803,7 +1803,7 @@ ${
       }`
           : ''
       }
-      if (failure) throw failure;
+      if (failure) throw failure.error;
     },
   };
   return owner;

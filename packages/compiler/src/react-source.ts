@@ -1225,18 +1225,18 @@ ${
     if (lifetime !== 'alive') return;
     lifetime = 'disposing'; phase = 'callback';
     for (const off of authorStateWatchCleanups.splice(0)) off();
-    let failure: unknown;
-    try { dispatch(callbacks.beforeDispose); } catch (error) { failure = error; }
+    let failure: { error: unknown } | undefined;
+    try { dispatch(callbacks.beforeDispose); } catch (error) { failure = { error }; }
     finally {
-${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }` : ''}
-      try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= error; }
+${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= { error }; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= { error }; }` : ''}
+      try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= { error }; }
       lifetime = 'disposed'; phase = 'idle'; connected = false;
       for (const subscribers of stateSubscribers) subscribers.clear();
       pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
       for (const list of Object.values(callbacks)) list.length = 0;
       for (const key of Object.keys(exposes)) delete exposes[key];
     }
-    if (failure !== undefined) throw failure;
+    if (failure) throw failure.error;
   }
 `
     : ''
@@ -1341,21 +1341,21 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
         lifetime = 'disposing';
         for (const off of authorStateWatchCleanups.splice(0)) off();
         phase = 'callback';
-        let failure: unknown;
+        let failure: { error: unknown } | undefined;
 ${
   interaction
     ? `        try { ${p}Interaction.unmount(); }
-        catch (error) { failure = error; }
+        catch (error) { failure = { error }; }
 `
     : ''
 }        try { if (mounted) { mounted = false; ${usesStyle ? `${p}Style.unmount(); ` : ''}dispatch(callbacks.unmounted); } }
-        catch (error) { failure ??= error; }
+        catch (error) { failure ??= { error }; }
         try { dispatch(callbacks.beforeDispose); }
-        catch (error) { failure ??= error; }
+        catch (error) { failure ??= { error }; }
         finally {
 ${
   interaction
-    ? `          try { disposeInteraction(); } catch (error) { failure ??= error; }
+    ? `          try { disposeInteraction(); } catch (error) { failure ??= { error }; }
 `
     : ''
 }          ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
@@ -1370,7 +1370,7 @@ ${usesStyle ? `          ${p}Style.dispose();` : ''}
           for (const list of Object.values(callbacks)) list.length = 0;
           for (const key of Object.keys(exposes)) delete exposes[key];
         }
-        if (failure !== undefined) throw failure;
+        if (failure) throw failure.error;
       });
     },
   };

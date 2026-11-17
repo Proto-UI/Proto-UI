@@ -1,0 +1,1049 @@
+{
+  "schemaVersion": 1,
+  "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+  "scope": "ordinary compiled owner disposal error presence",
+  "authority": {
+    "criterion": "C-LIFECYCLE-0002-K",
+    "lifecycle": "draft",
+    "related": "C-LIFECYCLE-0002-G",
+    "issue": "https://github.com/Proto-UI/Proto-UI/issues/1488"
+  },
+  "source": [
+    {
+      "path": "packages/compiler/src/react-source.ts",
+      "sha256": "61ef148fece8840c29c79686184e7ac1843ac48a3075aa3541432c8df2dca354",
+      "blob": "7b13468368b5f1f99dec6b2391164f0315a9509a"
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "ce8c7e099437e5bd9163b8c7166548189521c22c243d1f9f47882bd7b862af9f",
+      "blob": "a27f0a0f28f29692874eeeacf19b3d7a73921777"
+    },
+    {
+      "path": "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+      "sha256": "fa925a3a02472d736a0e8c072280f95b156f7792278cedcc28d481afc5e733f9",
+      "blob": "902d5e638b65d9fe63686502e03272b9134dfa2a"
+    }
+  ],
+  "initialFixtureRun": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/8077f6e9f3a8/recovery-20261117/falsy-baseline.json"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui",
+    "startedAt": "2026-11-17T08:53:02.772436+00:00",
+    "sourceHead": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "testSha256": "3b724f9459c3437129904011be7f3d946b03672f528cd6833f6bd94369aa296f",
+    "productChanges": [],
+    "exitCode": 1,
+    "elapsedSeconds": 8.555891337000503,
+    "logSha256": "fe278fc59edc8ec2d8dc201656ec75abb9a2bc3a3e24bd2d1f46d254550edf2c",
+    "summary": {
+      "numTotalTests": 30,
+      "numPassedTests": 3,
+      "numFailedTests": 27,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": false
+    },
+    "files": [
+      {
+        "path": "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+        "passed": 3,
+        "failed": 27,
+        "cases": [
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'zero' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'negative zero' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'false' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'empty string' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'null' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'undefined' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'NaN' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'truthy string' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'Error' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'normal return' inside the established request aggregate",
+            "status": "failed"
+          }
+        ]
+      }
+    ]
+  },
+  "red": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/8077f6e9f3a8/recovery-20261117/falsy-red.json"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui",
+    "startedAt": "2026-11-17T08:53:48.604872+00:00",
+    "sourceHead": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "testSha256": "588bc3c7dea806df82bbd80be30494e1ccb5c2ff594245f015450f19f25b77f2",
+    "productChanges": [],
+    "fixtureCorrection": "Producer writers require a fresh non-existing output child; initial 20 writer conflicts are not product regressions.",
+    "exitCode": 1,
+    "elapsedSeconds": 8.4909153410008,
+    "logSha256": "6b30abba924df6ee2ed6a28e77b2652937a69b97f283d45267ade7847d4ee5e6",
+    "summary": {
+      "numTotalTests": 30,
+      "numPassedTests": 21,
+      "numFailedTests": 9,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": false
+    },
+    "files": [
+      {
+        "path": "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+        "passed": 21,
+        "failed": 9,
+        "cases": [
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "failed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'zero' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'negative zero' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'false' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'empty string' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'null' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'undefined' inside the established request aggregate",
+            "status": "failed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'NaN' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'truthy string' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'Error' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'normal return' inside the established request aggregate",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "green": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/8077f6e9f3a8/recovery-20261117/falsy-green.json"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui",
+    "startedAt": "2026-11-17T08:55:46.504400+00:00",
+    "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "testSha256": "fa925a3a02472d736a0e8c072280f95b156f7792278cedcc28d481afc5e733f9",
+    "productPatchSha256": "ce7ed497980b63b362449280fcf2766744a288629c11bf1ea54cde7edb1a978e",
+    "reviewFix": "afterEach attempts all cleanup and restores globals in finally; pending Vue2 owner cleanup retains case handler. Consumer sources and all assertions unchanged from red.",
+    "exitCode": 0,
+    "elapsedSeconds": 8.560545538999577,
+    "logSha256": "cce7f00be7ca5eadd0f06f167eabb965fe391e23658bd27155a027edd2a56393",
+    "summary": {
+      "numTotalTests": 30,
+      "numPassedTests": 30,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": true
+    },
+    "files": [
+      {
+        "path": "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+        "passed": 30,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "react-dom-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'negative zero' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'false' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'empty string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'null' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'undefined' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'NaN' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'truthy string' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'Error' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 ordinary terminal disposal preserves 'normal return' and retires the owner",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'zero' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'negative zero' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'false' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'empty string' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'null' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'undefined' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'NaN' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'truthy string' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'Error' inside the established request aggregate",
+            "status": "passed"
+          },
+          {
+            "name": "existing direct React SSR owner disposal preserves 'normal return' inside the established request aggregate",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "affected": {
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "vitest",
+      "run",
+      "packages/compiler/test/react-source.test.ts",
+      "packages/compiler/test/react-context-source.test.ts",
+      "packages/compiler/test/vue2-native-template.test.ts",
+      "packages/compiler/test/button-ssr-server.test.ts",
+      "packages/compiler/test/delay-detach-consumer.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile=/workspace/scratch/8077f6e9f3a8/recovery-20261117/falsy-affected.json"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui",
+    "startedAt": "2026-11-17T08:57:18.276074+00:00",
+    "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "productPatchSha256": "ce7ed497980b63b362449280fcf2766744a288629c11bf1ea54cde7edb1a978e",
+    "exitCode": 0,
+    "elapsedSeconds": 51.03235507899808,
+    "logSha256": "7600869c9d5b3aa66f99f3a9d646f77a9367447ca8eb42acde6d26aa96b0e7cf",
+    "summary": {
+      "numTotalTests": 106,
+      "numPassedTests": 106,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": true
+    },
+    "files": [
+      {
+        "path": "packages/compiler/test/button-ssr-server.test.ts",
+        "passed": 8,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "Button SSR generated server artifact renders real Button source in a process environment with no browser globals and emits deterministic artifacts",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact refuses accessor/cyclic initial data before authored setup can observe it",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact changes compatibility binding when generated helper bytes change without changing Button source",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact binds consumer environment identity and bytes separately from unchanged Button source and token CSS",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact exports every generated byte under a non-hidden allowlist with reconstructable logical paths",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact rejects traversal, non-generated paths, duplicate paths and foreign bytes before any evidence write",
+            "status": "passed"
+          },
+          {
+            "name": "Button SSR generated server artifact typechecks the generated server/client/helper artifact closure without Proto UI packages",
+            "status": "passed"
+          },
+          {
+            "name": "held-client first-paint font proof requires real system glyphs and rejects web fonts, unavailable or missing font evidence",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "packages/compiler/test/delay-detach-consumer.test.ts",
+        "passed": 4,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "react-dom-source-v1 retires work scheduled by the unmounted callback before detach completes",
+            "status": "passed"
+          },
+          {
+            "name": "vue-source-v1 retires work scheduled by the unmounted callback before detach completes",
+            "status": "passed"
+          },
+          {
+            "name": "vue2-source-v1 retires work scheduled by the unmounted callback before detach completes",
+            "status": "passed"
+          },
+          {
+            "name": "web-component-source-v1 retires work scheduled by the unmounted callback before detach completes",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "packages/compiler/test/react-context-source.test.ts",
+        "passed": 14,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "native React Context scope ownership preserves a missing-provider startup error without a secondary null-owner connection failure",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership rejects absent initial projections and preserves Context for fresh post-adoption children",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership preserves nominal Anatomy callback parts across child attachment and removal",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership shares declaration references through native wrappers and portals, resolves nearest scopes, and requires explicit rendering",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership retains subscriptions while a view is absent and removes them on terminal owner disposal",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership prefers self-provided Context over ancestors without granting read authority to an unsubscribed provider",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership rebounds against current ancestry, rejects same-debugName impostors, and preserves every nested transition in deterministic order",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value undefined",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value null",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value false",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value 0",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value \"\"",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drains finite Context delivery and rethrows the original authored value {\"authored\":true}",
+            "status": "passed"
+          },
+          {
+            "name": "native React Context scope ownership drops queued transitions after a recipient rebinds to a different provider",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "packages/compiler/test/react-source.test.ts",
+        "passed": 11,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "checked semantics to native React DOM source retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source retains explicit watcher updates until a pending mount is acknowledged without adding an update to every mount",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source runs setup/created exactly once through StrictMode replay and never starts an abandoned shell",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source expands supported authored hooks once and enforces typed method/event boundaries",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source rejects reached host capabilities before output instead of silently bridging native source",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source routes native input in owner scope and projects readonly focus/ARIA facts without a template update",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source installs explicit raw host listeners without hooks and removes Root/global routes at terminal teardown",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source deactivates real Root and global input during Suspense layout disconnection without publishing lifecycle epochs",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source enforces finite state domains atomically and clamps range definitions but not callback writes",
+            "status": "passed"
+          },
+          {
+            "name": "checked semantics to native React DOM source rejects component names that would shadow globals used by native lowering",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "path": "packages/compiler/test/vue2-native-template.test.ts",
+        "passed": 69,
+        "failed": 0,
+        "cases": [
+          {
+            "name": "Vue2 compiler-native child construction preserves lifecycle registration order and run binding across native view epochs",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction keeps lifecycle throw order while finishing terminal state cleanup and invalidation",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction preserves resolved watcher hydration, coalesced snapshots, registration order and run binding",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction keeps a setup-returned props watcher disposer inactive through repeated native invocation and cleanup",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction preserves queued native update commits without treating live-slot paint as an authored commit",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retires the old queued commit when an updated callback detaches and a later prop reopens",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction preserves owned state family validation, defaults and committed native publication",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction keeps owned state subscriber snapshots, reentry and queued work after a thrown callback",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction preserves structurally admitted extra state fields instead of assuming closed schemas",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction continues other owned state cleanup after a disconnect throw and retires old handles",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction uses native paint closures, nested finite arrays and live native slots",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction matches native Vue2 numeric normalization through nested children and live slots",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction does not resolve an authored String binding when normalizing captured numeric children",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains native custom-tag identity despite a registered component with the same name",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains native custom-tag style attributes with the exact pre flag",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction preserves the real native renderer props/context reads and live slot capability",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains default-slot behavior when setup returns no renderer",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction adapts only the private setup-result boundary: const alias=draw;return alias;",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction adapts only the private setup-result boundary: const factory=()=>draw;return factory();",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains declaration captures across a caller parameter with the same name",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction does not turn a render-context checked-IR scalar helper into a renderer ABI",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction uses actual checked-IR template formal contexts without a legacy node guess",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains an identity-observed callable with invoked=false",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains an identity-observed callable with invoked=true",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains an uncalled identity-observed callable with a legacy template formal",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'direct'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'alias'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'props.watch' through 'factory'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'direct'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'alias'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.subscribe' through 'factory'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'direct'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'alias'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains admitted native disposer 'context.trySubscribe' through 'factory'",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchAll",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchRaw",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compiler-native child construction retains the existing Vue2 target rejection for props.watchRawAll",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof requires complete identity uses, preserves checked types, and honors an independent invocation veto",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: direct",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: alias",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: after-return",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: nested-unused-body",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not infer non-invocation from an empty collector set: dead-branch",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not discard calls in a checked inline callback",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof retains returned/factory callable bodies: return alias;",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof retains returned/factory callable bodies: const factory=()=>draw;return factory();",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof resolves a captured alias separately from a caller parameter with the same name",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof closes a direct alias chain using each declaration environment",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof does not collapse multiple valid creations sharing one FunctionIR and the same captures",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: name",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: length",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof retains upstream rejection of callable reflection: toString",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof rejects callable containers mislabeled as data: array",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof rejects callable containers mislabeled as data: record",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof rejects a recursive edge absent from portable capture metadata",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof preserves separate function identities and original arity with no runtime projector",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof keeps the full body when an identity-observed alias is actually invoked",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof checks complete SSR output without client renderer type references (interaction=false)",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 closed identity-only body proof checks complete SSR output without client renderer type references (interaction=true)",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand constructs fresh native root data directly when no root-property producer is reached",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand retains root-property lowering for a reached native interaction",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand preserves legal physical root attributes and style: image",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand retains uncontrolled native editing through repaint, props and a new view lease: single",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand retains uncontrolled native editing through repaint, props and a new view lease: multiline",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand preserves controlled sync and composition across host repaint and remount: single",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand preserves controlled sync and composition across host repaint and remount: multiline",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand detects removal of only the native value handoff using the real Vue2 patcher",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand retains the full SSR transport root-data path (interaction=false)",
+            "status": "passed"
+          },
+          {
+            "name": "Vue2 compile-time root-data demand retains the full SSR transport root-data path (interaction=true)",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "independentLocalReview": {
+    "type": "local-independent-review-summary",
+    "scope": [
+      "react-source.ts and vue2-source.ts error presence carriers",
+      "lifecycle-disposal-errors.test.ts design and executed evidence"
+    ],
+    "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "testSha256": "fa925a3a02472d736a0e8c072280f95b156f7792278cedcc28d481afc5e733f9",
+    "productPatchSha256": "ce7ed497980b63b362449280fcf2766744a288629c11bf1ea54cde7edb1a978e",
+    "verified": {
+      "currentTestMatchesGreenReceipt": true,
+      "redTestRecoveredByReversingOnlyTwoCleanupFixes": true,
+      "currentProductPatchMatchesGreenReceipt": true,
+      "falsy-redLogHashMatchesReceipt": true,
+      "falsy-greenLogHashMatchesReceipt": true
+    },
+    "result": "No remaining blocking finding within the exact local patch and 30-case scope. Not GitHub APPROVE or full CI/native/profile acceptance.",
+    "finding": {
+      "id": "DISPOSAL-TEST-ISOLATION-01",
+      "status": "resolved",
+      "resolution": "All teardown operations attempted with finally restoration; pending Vue2 owner cleanup reinstates/restores the case error observer."
+    },
+    "evidence": {
+      "initial": "3 pass /27 fail;20 output-conflict fixture errors and7 actual suppressed errors retained",
+      "validRed": "30 collected,21 pass,9 missing-error failures: React undefined1 +Vue2 falsy7 +directSSR undefined1",
+      "green": "30/30 pass,0 skip,exit0; raw log hashes checked",
+      "redToGreen": "Reversing only the two teardown changes exactly reproduces red test SHA; authored fixture and assertion bytes unchanged."
+    },
+    "boundaries": [
+      "HappyDOM/fake timers/explicit host microtasks",
+      "Direct experimental SSR only",
+      "Error control checks class/message; no independent object-identity claim",
+      "No new secondary cleanup combination or full compiler matrix acceptance"
+    ],
+    "fullReport": "local-review-report.json",
+    "fullReportSha256": "e8d2f6ce22dc280f54ba93d84b06582780de5983e3b0413367ec32ad8a545fcb"
+  },
+  "limitations": [
+    "HappyDOM actual framework consumers; no native browser acceptance",
+    "Direct SSR experiment remains outside public profile admission",
+    "No new exhaustive multiple private cleanup failure combination acceptance",
+    "Local review is not formal GitHub approval",
+    "No claim that whole Compiler, whole types or full repository CI passed"
+  ]
+}
