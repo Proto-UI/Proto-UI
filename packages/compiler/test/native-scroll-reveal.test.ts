@@ -353,6 +353,252 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
     expect(f.surface.scrollTop).toBe(300);
   });
 
+  it('to-end applied status completes following without nested work', () => {
+    const f = fixture({ mount: false });
+    const observations: object[] = [];
+    const sample = (point: string) => {
+      const value = {
+        point,
+        offset: f.surface.scrollTop,
+        atEnd: f.scroll.vertical.atEnd.get(),
+        state: f.scroll.endFollow.state.get(),
+        status: f.scroll.endFollow.requestStatus.get(),
+      };
+      observations.push(value);
+      return value;
+    };
+    let appliedCalls = 0;
+    f.scroll.endFollow.requestStatus.watch((_run: unknown, event: { next: string }) => {
+      if (event.next !== 'applied') return;
+      appliedCalls++;
+      sample('applied-entry');
+    });
+    f.owner.modules.mount();
+    sample('before-request');
+    const outcome = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    const final = sample('outer-return');
+    console.info(
+      'scroll-to-end-applied-diagnostic',
+      JSON.stringify({ scenario: 'control', outcome, observations })
+    );
+    expect(outcome).toEqual({ kind: 'dispatched' });
+    expect(appliedCalls).toBe(1);
+    expect(final).toEqual({
+      point: 'outer-return',
+      offset: 300,
+      atEnd: true,
+      state: 'following',
+      status: 'applied',
+    });
+  });
+
+  it('to-end applied status preserves the later same-view reveal pause', () => {
+    const f = fixture({ mount: false });
+    const observations: object[] = [];
+    const sample = (point: string) => {
+      const value = {
+        point,
+        offset: f.surface.scrollTop,
+        atEnd: f.scroll.vertical.atEnd.get(),
+        state: f.scroll.endFollow.state.get(),
+        status: f.scroll.endFollow.requestStatus.get(),
+      };
+      observations.push(value);
+      return value;
+    };
+    let appliedCalls = 0;
+    let nestedOutcome: unknown, nestedFacts: object | undefined;
+    f.scroll.endFollow.requestStatus.watch((_run: unknown, event: { next: string }) => {
+      if (event.next !== 'applied') return;
+      appliedCalls++;
+      if (appliedCalls !== 1) return;
+      sample('applied-entry');
+      nestedOutcome = f.reveal();
+      nestedFacts = sample('nested-return');
+    });
+    f.owner.modules.mount();
+    sample('before-request');
+    const outcome = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    const final = sample('outer-return');
+    console.info(
+      'scroll-to-end-applied-diagnostic',
+      JSON.stringify({ scenario: 'nested-reveal', outcome, nestedOutcome, observations })
+    );
+    expect(appliedCalls).toBe(1);
+    expect(outcome).toEqual({ kind: 'dispatched' });
+    expect(nestedOutcome).toEqual({ kind: 'dispatched' });
+    expect(f.surface.isConnected).toBe(true);
+    expect(f.target.parentNode).toBe(f.surface);
+    expect(f.owner.modules.anatomy.partsOf(f.family, 'item')[0]).toBe(f.part);
+    expect(nestedFacts).toEqual({
+      point: 'nested-return',
+      offset: 150,
+      atEnd: false,
+      state: 'paused',
+      status: 'applied',
+    });
+    expect(final).toEqual({
+      point: 'outer-return',
+      offset: 150,
+      atEnd: false,
+      state: 'paused',
+      status: 'applied',
+    });
+  });
+
+  it.each([
+    { axis: 'horizontal', contact: false },
+    { axis: 'vertical', contact: true },
+    { axis: 'horizontal', contact: true },
+  ] as const)(
+    'to-end completion controls resumes $axis with contact=$contact',
+    ({ axis, contact }) => {
+      const f = fixture({ mount: false });
+      f.scroll.configure({
+        axes: 'both',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis },
+      });
+      f.owner.modules.mount();
+      if (contact) f.surface.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1 }));
+      const outcome = f.scroll.request({ kind: 'to-end', axis });
+      const facts = {
+        axis,
+        contact,
+        outcome,
+        offset: axis === 'horizontal' ? f.surface.scrollLeft : f.surface.scrollTop,
+        atEnd: f.scroll[axis].atEnd.get(),
+        state: f.scroll.endFollow.state.get(),
+        status: f.scroll.endFollow.requestStatus.get(),
+      };
+      console.info('scroll-to-end-completion-control', JSON.stringify(facts));
+      expect(facts).toEqual({
+        axis,
+        contact,
+        outcome: { kind: 'dispatched' },
+        offset: 300,
+        atEnd: true,
+        state: 'following',
+        status: 'applied',
+      });
+    }
+  );
+
+  it('to-end completion controls keeps an off follow policy off', () => {
+    const f = fixture({ mount: false });
+    f.scroll.configure({ endFollow: { mode: 'off' } });
+    f.owner.modules.mount();
+    const before = f.scroll.endFollow.state.get();
+    const outcome = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    const facts = {
+      before,
+      outcome,
+      offset: f.surface.scrollTop,
+      atEnd: f.scroll.vertical.atEnd.get(),
+      state: f.scroll.endFollow.state.get(),
+      status: f.scroll.endFollow.requestStatus.get(),
+    };
+    console.info('scroll-to-end-completion-control', JSON.stringify({ scenario: 'off', ...facts }));
+    expect(facts).toEqual({
+      before: 'off',
+      outcome: { kind: 'dispatched' },
+      offset: 300,
+      atEnd: true,
+      state: 'off',
+      status: 'applied',
+    });
+  });
+
+  it('to-end completion controls does not repeat following after a state-watcher reveal', () => {
+    const f = fixture({ mount: false });
+    const observations: object[] = [];
+    const sample = (point: string) => {
+      const value = {
+        point,
+        offset: f.surface.scrollTop,
+        atEnd: f.scroll.vertical.atEnd.get(),
+        state: f.scroll.endFollow.state.get(),
+        status: f.scroll.endFollow.requestStatus.get(),
+      };
+      observations.push(value);
+      return value;
+    };
+    let followingEvents = 0;
+    let nestedOutcome: unknown, nestedFacts: ReturnType<typeof sample> | undefined;
+    f.scroll.endFollow.state.watch((_run: unknown, event: { next: string }) => {
+      if (event.next !== 'following') return;
+      followingEvents++;
+      if (followingEvents !== 1) return;
+      sample('following-entry');
+      nestedOutcome = f.reveal();
+      nestedFacts = sample('nested-return');
+    });
+    f.owner.modules.mount();
+    const outcome = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    const final = sample('outer-return');
+    console.info(
+      'scroll-to-end-completion-control',
+      JSON.stringify({
+        scenario: 'state-watcher-reveal',
+        outcome,
+        nestedOutcome,
+        followingEvents,
+        observations,
+      })
+    );
+    expect(outcome).toEqual({ kind: 'dispatched' });
+    expect(nestedOutcome).toEqual({ kind: 'dispatched' });
+    expect(nestedFacts).toMatchObject({ offset: 150, atEnd: false, state: 'paused' });
+    expect(final).toEqual({
+      point: 'outer-return',
+      offset: 150,
+      atEnd: false,
+      state: 'paused',
+      status: 'applied',
+    });
+    expect(followingEvents).toBe(1);
+  });
+
+  it('to-end completion controls preserves a newer pending status created by a state watcher', () => {
+    const clock = frames(),
+      f = fixture({ mount: false });
+    const observations: object[] = [];
+    const sample = (point: string) => {
+      const value = {
+        point,
+        offset: f.surface.scrollTop,
+        atEnd: f.scroll.vertical.atEnd.get(),
+        state: f.scroll.endFollow.state.get(),
+        status: f.scroll.endFollow.requestStatus.get(),
+        frames: clock.pending.size,
+      };
+      observations.push(value);
+      return value;
+    };
+    let created = false;
+    f.scroll.endFollow.state.watch((_run: unknown, event: { next: string }) => {
+      if (event.next !== 'following' || created) return;
+      created = true;
+      sample('following-entry');
+      f.grow();
+      sample('new-pending-return');
+    });
+    f.owner.modules.mount();
+    const outcome = f.scroll.request({ kind: 'to-end', axis: 'vertical' });
+    const beforeFrame = sample('outer-return');
+    clock.flush();
+    const afterFrame = sample('new-frame-return');
+    console.info(
+      'scroll-to-end-completion-control',
+      JSON.stringify({ scenario: 'state-watcher-pending', outcome, observations })
+    );
+    expect(outcome).toEqual({ kind: 'dispatched' });
+    expect(created).toBe(true);
+    expect(beforeFrame.frames).toBe(1);
+    expect(afterFrame).toMatchObject({ offset: 400, atEnd: true, status: 'applied', frames: 0 });
+    expect(beforeFrame.status).toBe('pending');
+  });
+
   it('does not let a cancelled frame retire a newer pending end request', () => {
     const clock = frames(),
       f = fixture({ atEnd: true });

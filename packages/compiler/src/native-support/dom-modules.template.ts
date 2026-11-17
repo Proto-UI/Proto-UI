@@ -976,6 +976,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   };
   const scrollAxes = observed<string>('vertical'), scrollProjection = observed<string>('unresolved'), scrolling = observed<boolean>(false);
   const followState = observed<string>('off'), followRequest = observed<string>('idle');
+  let scrollRequestStatusVersion = 0;
+  function setScrollRequestStatus(next: string) {
+    ++scrollRequestStatusVersion;
+    followRequest.set(next);
+  }
   function axisFacts(): { handle: NativeScrollAxis; update(position: number, viewport: number, extent: number, current: () => boolean): void } {
     const position = observed<number>(0), ratio = observed<number>(1), before = observed<boolean>(false), after = observed<boolean>(false), end = observed<boolean>(true);
     return { handle: { position: position.handle, visibleRatio: ratio.handle, canScrollBefore: before.handle, canScrollAfter: after.handle, atEnd: end.handle },
@@ -1003,7 +1008,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function currentScrollBinding(binding: ScrollBinding): boolean {
     return scrollBinding === binding && generation === binding.epoch && root === binding.surface && ready();
   }
-  function scrollFacts() {
+  function scrollFacts(resumeEndAxis?: 'horizontal' | 'vertical') {
     const binding = scrollBinding;
     if (!binding || !currentScrollBinding(binding)) return;
     const current = () => currentScrollBinding(binding), surface = binding.surface;
@@ -1014,8 +1019,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     vertical.update(top, height, scrollHeight, current); if (!current()) return;
     const follow = scrollConfig.endFollow as NativeConfig;
     if (follow?.mode === 'while-at-end') {
-      const atEnd = follow.axis === 'horizontal' ? horizontal.handle.atEnd.get() : vertical.handle.atEnd.get();
-      if (readerContacts || !atEnd && Date.now() < readerIntent) followState.set('paused');
+      const followAxis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
+      const atEnd = (followAxis === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get();
+      if (resumeEndAxis === followAxis && atEnd) followState.set('following');
+      else if (readerContacts || !atEnd && Date.now() < readerIntent) followState.set('paused');
       else if (atEnd) followState.set('following');
     }
     if (current()) projectChrome();
@@ -1025,7 +1032,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!work || work.binding !== binding || work.axis !== axis) return;
     scrollEndWork = null;
     if (work.frame !== null) binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
-    if (currentScrollBinding(binding)) followRequest.set('rejected');
+    if (currentScrollBinding(binding)) setScrollRequestStatus('rejected');
   }
   function revealScroll(request: NativeConfig, binding: ScrollBinding): NativeScrollRequestOutcome {
     const rejected = { kind: 'rejected', reason: 'unavailable' } as const;
@@ -1079,11 +1086,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     else throw new Error('[Scroll] invalid request kind.');
     if (!Number.isFinite(next)) throw new Error('[Scroll] request coordinate must be finite.');
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    const statusVersion = scrollRequestStatusVersion;
     if (horizontalAxis) surface.scrollLeft = Math.max(0, Math.min(range, next)); else surface.scrollTop = Math.max(0, Math.min(range, next));
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
-    scrollFacts();
+    scrollFacts(request.kind === 'to-end' ? horizontalAxis ? 'horizontal' : 'vertical' : undefined);
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
-    if (request.kind === 'to-end') { followRequest.set('applied'); followState.set('following'); }
+    if (request.kind === 'to-end' && statusVersion === scrollRequestStatusVersion) setScrollRequestStatus('applied');
     return {kind:'dispatched'};
   }
   function endFollowContentChanged() {
@@ -1096,13 +1104,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const axis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
     const work: ScrollEndWork = { binding, axis, frame: null };
     scrollEndWork = work;
-    followRequest.set('pending');
+    setScrollRequestStatus('pending');
     if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
     work.frame = view.requestAnimationFrame(() => {
       if (scrollEndWork !== work) return;
       scrollEndWork = null;
       if (!currentScrollBinding(binding)) return;
-      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { followRequest.set('rejected'); return; }
+      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { setScrollRequestStatus('rejected'); return; }
       options.invoke(() => applyScroll({ kind: 'to-end', axis }));
     });
   }
@@ -1489,7 +1497,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       scrollBinding = null; scrollAttachment = null;
       const work = scrollEndWork; scrollEndWork = null;
       if (work && work.frame !== null) work.binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
-      if (work) followRequest.set('rejected');
+      if (work) setScrollRequestStatus('rejected');
       scrollProjection.set('unresolved');
     }
     if (__nativeFeature('table') && table) { tableSignature = null; clearTable(); }

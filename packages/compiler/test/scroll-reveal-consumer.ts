@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as React from 'react';
@@ -28,7 +28,32 @@ def.anatomy.claim(FAMILY,{role:'root'});return r=>r.slot();}});`;
 const itemSource = `import{definePrototype,type RunHandle}from'@proto.ui/core';import{FAMILY}from'./family';
 export default definePrototype({name:'scroll-family-item',setup(def){
 def.anatomy.claim(FAMILY,{role:'item'});${lifecycle}return r=>r.el('span','item');}});`;
-const surfaceSource = `import{definePrototype,type RunHandle,type ScrollSurfaceRevealRequest}from'@proto.ui/core';
+const appliedRevealScenario = `let completionArmed=false;
+let completionVisits=0;
+let completionBeforeAtEnd=false;
+let completionBeforeState='';
+let completionAfterAtEnd=false;
+let completionAfterState='';
+let completionNestedKind='';
+scroll.endFollow.requestStatus.watch((run,event)=>{
+  if(event.type!=='next'||event.next!=='applied'||!completionArmed)return;
+  completionArmed=false;
+  completionVisits=completionVisits+1;
+  completionBeforeAtEnd=scroll.vertical.atEnd.get();
+  completionBeforeState=scroll.endFollow.state.get();
+  const parts=run.anatomy.order.partsOf(FAMILY,'item');
+  const part=parts[0];
+  if(part){const outcome=scroll.request({kind:'reveal',axis:'vertical',family:FAMILY,part});completionNestedKind=outcome.kind;}
+  completionAfterAtEnd=scroll.vertical.atEnd.get();
+  completionAfterState=scroll.endFollow.state.get();
+});
+def.expose.method('armCompletionReveal',()=>{completionArmed=true;});
+def.expose.method('requestEnd',()=>scroll.request({kind:'to-end',axis:'vertical'}));
+def.expose.method('readCompletionTrace',()=>({visits:completionVisits,beforeAtEnd:completionBeforeAtEnd,beforeState:completionBeforeState,nestedKind:completionNestedKind,afterAtEnd:completionAfterAtEnd,afterState:completionAfterState}));
+`;
+const surfaceSource = (
+  appliedReveal = false
+) => `import{definePrototype,type RunHandle,type ScrollSurfaceRevealRequest}from'@proto.ui/core';
 import{asScrollSurface}from'@proto.ui/hooks';import{FAMILY,OTHER}from'./family';
 export default definePrototype({name:'scroll-family-surface',setup(def){
 def.anatomy.claim(FAMILY,{role:'surface'});${lifecycle}
@@ -59,7 +84,7 @@ def.expose.method('capture',(index:number)=>{
     if(part){const request:ScrollSurfaceRevealRequest={kind:'reveal',axis:'vertical',family:FAMILY,part};saved=request;}}
 });
 def.expose.method('revealSaved',()=>{if(saved)return scroll.request(saved);return{kind:'rejected',reason:'unavailable'};});
-def.expose.method('read',()=>scroll.getSnapshot());
+${appliedReveal ? appliedRevealScenario : ''}def.expose.method('read',()=>scroll.getSnapshot());
 return r=>r.slot();}});`;
 
 type Name = 'root' | 'surface' | 'direct' | 'nested' | 'nestedItem' | 'sibling' | 'siblingItem';
@@ -86,7 +111,10 @@ const tree: Tree = {
 };
 
 /** One documented project/writer graph retains family and owner registry identity. */
-export async function mountScrollFamily(profile: NativeOwnerProfile) {
+export async function mountScrollFamily(
+  profile: NativeOwnerProfile,
+  options: { appliedReveal?: boolean; captureDirectory?: string } = {}
+) {
   const parent = path.join(path.dirname(fileURLToPath(import.meta.url)), 'generated-modules');
   await mkdir(parent, { recursive: true });
   const temporary = await mkdtemp(path.join(parent, 'scroll-family-'));
@@ -96,16 +124,36 @@ export async function mountScrollFamily(profile: NativeOwnerProfile) {
   const sources = {
     'family.ts': family,
     'root.proto.ts': rootSource,
-    'surface.proto.ts': surfaceSource,
+    'surface.proto.ts': surfaceSource(options.appliedReveal),
     'item.proto.ts': itemSource,
   };
   for (const [file, contents] of Object.entries(sources))
     await writeFile(path.join(author, file), contents);
+  const capture = options.captureDirectory && path.join(options.captureDirectory, profile);
+  if (capture) {
+    await mkdir(capture, { recursive: true });
+    await cp(author, path.join(capture, 'author'), {
+      recursive: true,
+      errorOnExist: true,
+      force: false,
+    });
+  }
   const compilation = await compileProject({
     root: author,
     entries: ['root.proto.ts', 'surface.proto.ts', 'item.proto.ts'],
     profile,
   });
+  if (capture)
+    await writeFile(
+      path.join(capture, 'compilation.json'),
+      JSON.stringify(
+        compilation.ok
+          ? { ok: true, profile }
+          : { ok: false, diagnostics: compilation.diagnostics },
+        null,
+        2
+      )
+    );
   if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
   const extension =
     profile === 'react-dom-source-v1' ? '.tsx' : profile === 'vue2-source-v1' ? '.js' : '.ts';
@@ -116,7 +164,22 @@ export async function mountScrollFamily(profile: NativeOwnerProfile) {
   };
   const output = path.join(temporary, 'output');
   const written = await writeProjectCompilation(compilation.value, output, { sourcePaths });
+  if (capture)
+    await writeFile(
+      path.join(capture, 'writer.json'),
+      JSON.stringify(
+        written.ok ? { ok: true, profile } : { ok: false, diagnostics: written.diagnostics },
+        null,
+        2
+      )
+    );
   if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+  if (capture)
+    await cp(output, path.join(capture, 'output'), {
+      recursive: true,
+      errorOnExist: true,
+      force: false,
+    });
   const generated: Record<string, any> = {};
   for (const file of Object.values(sourcePaths))
     generated[path.basename(file, extension)] = await import(

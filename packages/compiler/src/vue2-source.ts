@@ -356,6 +356,8 @@ export function emitVue2Source(
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
+    if (type.startsWith('state-next:'))
+      return `Extract<${prefix}StateEvent<${type.slice(11)}>, {type:'next'}>`;
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'focus') return `${prefix}NativeFocus`;
