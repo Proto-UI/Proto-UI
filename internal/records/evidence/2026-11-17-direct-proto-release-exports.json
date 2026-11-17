@@ -1,0 +1,696 @@
+{
+  "schemaVersion": 1,
+  "kind": "direct-authored-release-export-regression",
+  "criterion": "https://github.com/Proto-UI/Proto-UI/pull/1479#discussion_r4586811133",
+  "baseRevision": "385d7c706c9e4c35280878efbb6e42d63d7df786",
+  "candidateRevision": null,
+  "candidateIdentity": "uncommitted delta; bind by code file hashes and code diff digest",
+  "codeDiffSha256": "3945dee6e7773db96343a583e9758aaab73ef36f8d934ff23cc0dd214bbf11d0",
+  "candidateFiles": [
+    {
+      "path": "scripts/release/lib.mjs",
+      "sha256": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+      "gitBlob": "cf76a70d347ec4f671688b564ae6ee09aec872c9"
+    },
+    {
+      "path": "scripts/release/test/proto-source-package.test.mjs",
+      "sha256": "b1af75a532f4c438e37d994490783eb006f918762f7c4aa45dd2cafb46a7396e",
+      "gitBlob": "7185dcb63d9bbb66d074e7bc587a8d74a0886cd1"
+    }
+  ],
+  "sourceLoaderSha256": "076257fa2e1231d51befccff537fa31473ed9b6c2412ebdcaa4016ab71771796",
+  "toolchain": {
+    "node": "v24.22.1",
+    "npm": "11.14.1",
+    "pnpm": "10.32.1"
+  },
+  "workspaceAuthoredExports": [
+    {
+      "package": "@proto.ui/prototypes-base",
+      "manifest": "packages/prototypes/base/package.json",
+      "key": "exports../transition.proto",
+      "value": "./src/transition/index.ts"
+    }
+  ],
+  "baselineProbe": {
+    "phase": "baseline",
+    "timestamp": "2026-11-17T09:25:35.754Z",
+    "node": "v24.22.1",
+    "libSha256": "e57c4d254e42baec942075005f2cc755daeba089fe7f6ffa2da11c33eba71ae2",
+    "runtimeBuilds": 0,
+    "registryWrites": 0,
+    "packagePublishes": 0,
+    "rows": [
+      {
+        "form": "root",
+        "inputExports": "./src/behavior.proto.ts",
+        "publishedExports": "./dist/behavior.proto.js",
+        "publishedTarget": "./dist/behavior.proto.js",
+        "sourceTarget": "./src/behavior.proto.ts",
+        "sourceFiles": ["src/behavior.proto.ts", "src/helper.ts"],
+        "stagedSourceExists": true,
+        "stagedTargetExists": false,
+        "inventedRuntimeTargetExists": false,
+        "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/baseline-stage-buh6XH/root/output/example__direct-root",
+        "stageResult": null,
+        "failure": {
+          "name": "Error",
+          "message": "Stage export validation failed for @example/direct-root: missing ./dist/behavior.proto.js",
+          "stack": "Error: Stage export validation failed for @example/direct-root: missing ./dist/behavior.proto.js\n    at stagePackage (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/lib.mjs:371:13)\n    at file:///workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/stage-probe.mjs:42:14\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)"
+        },
+        "passed": false
+      },
+      {
+        "form": "subpath",
+        "inputExports": {
+          ".": {
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
+          },
+          "./behavior": "./src/behavior.proto.ts"
+        },
+        "publishedExports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "./behavior": "./dist/behavior.proto.js"
+        },
+        "publishedTarget": "./dist/behavior.proto.js",
+        "sourceTarget": "./src/behavior.proto.ts",
+        "sourceFiles": ["src/behavior.proto.ts", "src/helper.ts"],
+        "stagedSourceExists": true,
+        "stagedTargetExists": false,
+        "inventedRuntimeTargetExists": false,
+        "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/baseline-stage-buh6XH/subpath/output/example__direct-subpath",
+        "stageResult": null,
+        "failure": {
+          "name": "Error",
+          "message": "Stage export validation failed for @example/direct-subpath: missing ./dist/behavior.proto.js",
+          "stack": "Error: Stage export validation failed for @example/direct-subpath: missing ./dist/behavior.proto.js\n    at stagePackage (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/lib.mjs:371:13)\n    at file:///workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/stage-probe.mjs:42:14\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)"
+        },
+        "passed": false
+      }
+    ]
+  },
+  "focusedBefore": {
+    "command": [
+      "node",
+      "--test",
+      "--test-name-pattern=direct authored",
+      "scripts/release/test/proto-source-package.test.mjs"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+    "start": "2026-11-17T09:27:57.759405+00:00",
+    "end": "2026-11-17T09:27:58.327850+00:00",
+    "exitCode": 1,
+    "libSha256": "e57c4d254e42baec942075005f2cc755daeba089fe7f6ffa2da11c33eba71ae2",
+    "testSha256": "6ee8f7e225973572c75914727e4aa39ed3b98cd6b21acd57c3139e0539fb9759",
+    "stdoutAndStderr": "\u2716 direct authored root exports remain reachable after release staging (299.493367ms)\n\u2716 direct authored subpath exports remain reachable after release staging (3.75851ms)\n\u2716 direct authored leaves preserve nested conditions and array runtime/type rewrites (8.606702ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 0\n\u2139 fail 3\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 480.820907\n\n\u2716 failing tests:\n\ntest at scripts/release/test/proto-source-package.test.mjs:74:3\n\u2716 direct authored root exports remain reachable after release staging (299.493367ms)\n  Error: Stage export validation failed for @example/ordinary-source: missing ./dist/logic.proto.js\n      at stagePackage (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/lib.mjs:371:13)\n      at TestContext.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/test/proto-source-package.test.mjs:84:20)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.start (node:internal/test_runner/test:1262:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)\n\ntest at scripts/release/test/proto-source-package.test.mjs:74:3\n\u2716 direct authored subpath exports remain reachable after release staging (3.75851ms)\n  Error: Stage export validation failed for @example/ordinary-source: missing ./dist/logic.proto.js\n      at stagePackage (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/lib.mjs:371:13)\n      at TestContext.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/test/proto-source-package.test.mjs:84:20)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)\n      at Test.postRun (node:internal/test_runner/test:1542:19)\n      at Test.run (node:internal/test_runner/test:1467:12)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)\n\ntest at scripts/release/test/proto-source-package.test.mjs:113:1\n\u2716 direct authored leaves preserve nested conditions and array runtime/type rewrites (8.606702ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n  + actual - expected\n  ... Skipped lines\n  \n    {\n      '.': {\n        default: './dist/index.js',\n        node: {\n          default: './dist/index.js',\n  ...\n            },\n  +         './dist/logic.proto.js'\n  -         './src/logic.proto.ts'\n          ],\n          types: [\n            './dist/index.d.ts',\n            './dist/index.d.ts'\n          ]\n        }\n      },\n  +   './behavior': './dist/logic.proto.js',\n  -   './behavior': './src/logic.proto.ts',\n      './blocked': null\n    }\n  \n      at TestContext.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/scripts/release/test/proto-source-package.test.mjs:129:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)\n      at Test.postRun (node:internal/test_runner/test:1542:19)\n      at Test.run (node:internal/test_runner/test:1467:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: { '.': { node: [Object], default: './dist/index.js' }, './behavior': './dist/logic.proto.js', './blocked': null },\n    expected: { '.': { node: [Object], default: './dist/index.js' }, './behavior': './src/logic.proto.ts', './blocked': null },\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }\n",
+    "passed": 0,
+    "failed": 3
+  },
+  "focusedAfter": {
+    "command": [
+      "node",
+      "--test",
+      "--test-name-pattern=direct authored",
+      "scripts/release/test/proto-source-package.test.mjs"
+    ],
+    "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+    "start": "2026-11-17T09:28:18.005241+00:00",
+    "end": "2026-11-17T09:28:18.881299+00:00",
+    "exitCode": 0,
+    "libSha256": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+    "testSha256": "6ee8f7e225973572c75914727e4aa39ed3b98cd6b21acd57c3139e0539fb9759",
+    "stdoutAndStderr": "\u2714 direct authored root exports remain reachable after release staging (440.919487ms)\n\u2714 direct authored subpath exports remain reachable after release staging (73.277671ms)\n\u2714 direct authored leaves preserve nested conditions and array runtime/type rewrites (4.620956ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 699.00395\n",
+    "passed": 3,
+    "failed": 0
+  },
+  "candidateStageProbe": {
+    "phase": "candidate",
+    "timestamp": "2026-11-17T09:32:26.894Z",
+    "node": "v24.22.1",
+    "libSha256": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+    "runtimeBuilds": 0,
+    "registryWrites": 0,
+    "packagePublishes": 0,
+    "rows": [
+      {
+        "form": "root",
+        "inputExports": "./src/behavior.proto.ts",
+        "publishedExports": "./src/behavior.proto.ts",
+        "publishedTarget": "./src/behavior.proto.ts",
+        "sourceTarget": "./src/behavior.proto.ts",
+        "sourceFiles": ["src/behavior.proto.ts", "src/helper.ts"],
+        "stagedSourceExists": true,
+        "stagedTargetExists": true,
+        "inventedRuntimeTargetExists": false,
+        "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/root/output/example__direct-root",
+        "stageResult": {
+          "name": "@example/direct-root",
+          "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/root/output/example__direct-root",
+          "buildCode": 0,
+          "buildErrors": [],
+          "packResult": null,
+          "publishResult": null
+        },
+        "failure": null,
+        "passed": true
+      },
+      {
+        "form": "subpath",
+        "inputExports": {
+          ".": {
+            "types": "./src/index.ts",
+            "default": "./src/index.ts"
+          },
+          "./behavior": "./src/behavior.proto.ts"
+        },
+        "publishedExports": {
+          ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "./behavior": "./src/behavior.proto.ts"
+        },
+        "publishedTarget": "./src/behavior.proto.ts",
+        "sourceTarget": "./src/behavior.proto.ts",
+        "sourceFiles": ["src/behavior.proto.ts", "src/helper.ts"],
+        "stagedSourceExists": true,
+        "stagedTargetExists": true,
+        "inventedRuntimeTargetExists": false,
+        "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/subpath/output/example__direct-subpath",
+        "stageResult": {
+          "name": "@example/direct-subpath",
+          "stageDir": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/subpath/output/example__direct-subpath",
+          "buildCode": 0,
+          "buildErrors": [],
+          "packResult": null,
+          "publishResult": null
+        },
+        "failure": null,
+        "passed": true
+      }
+    ]
+  },
+  "window": {
+    "startedAt": "2026-11-17T09:32:26.150273+00:00",
+    "worktree": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+    "libSha256Before": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+    "testSha256Before": "b1af75a532f4c438e37d994490783eb006f918762f7c4aa45dd2cafb46a7396e",
+    "commands": [
+      {
+        "name": "candidate-stage-probe",
+        "command": [
+          "node",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/stage-probe.mjs",
+          "candidate"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+        "startedAt": "2026-11-17T09:32:26.150537+00:00",
+        "endedAt": "2026-11-17T09:32:26.908024+00:00",
+        "wallSeconds": 0.7575024479992862,
+        "exitCode": 0,
+        "log": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-probe.log"
+      },
+      {
+        "name": "packed-source-probe",
+        "command": [
+          "node",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-probe.mjs"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+        "startedAt": "2026-11-17T09:32:26.908528+00:00",
+        "endedAt": "2026-11-17T09:32:30.978126+00:00",
+        "wallSeconds": 4.069610089998605,
+        "exitCode": 0,
+        "log": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-probe.log"
+      },
+      {
+        "name": "related-release-tests",
+        "command": [
+          "node",
+          "--test",
+          "scripts/release/test/proto-source-package.test.mjs",
+          "scripts/release/test/publish-manifest.test.mjs"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+        "startedAt": "2026-11-17T09:32:30.978428+00:00",
+        "endedAt": "2026-11-17T09:32:31.897714+00:00",
+        "wallSeconds": 0.9192988260001584,
+        "exitCode": 0,
+        "log": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/related-release-tests.log"
+      }
+    ],
+    "endedAt": "2026-11-17T09:32:31.898082+00:00",
+    "wallSeconds": 5.7475529389994335,
+    "exitCode": 0,
+    "libSha256After": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+    "testSha256After": "b1af75a532f4c438e37d994490783eb006f918762f7c4aa45dd2cafb46a7396e"
+  },
+  "relatedTests": {
+    "files": [
+      "scripts/release/test/proto-source-package.test.mjs",
+      "scripts/release/test/publish-manifest.test.mjs"
+    ],
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "stdoutAndStderr": "\u2714 direct authored root exports remain reachable after release staging (241.959364ms)\n\u2714 direct authored subpath exports remain reachable after release staging (72.683159ms)\n\u2714 direct authored leaves preserve nested conditions and array runtime/type rewrites (4.2525ms)\n\u2714 source staging preserves explicit proto exports and the complete source/type closure (6.518645ms)\n\u2714 the ordinary packed tarball contains source helpers and erased types without running scripts (321.238564ms)\n\u2714 the actual Transition package source export stages its machine and types unchanged (77.301186ms)\n\u2714 ordinary runtime exports never imply a source publication (1.293298ms)\n\u2714 source publication rejects missing, escaping, ambiguous and symlinked source targets (3.770474ms)\n\u2714 partial recovery is an explicit release argument (1.17071ms)\n\u2714 tarball packing is an explicit release argument (0.393177ms)\n\u2714 workspace dependencies use exact package versions in published manifests (1.431656ms)\n\u2714 declared package-local third-party notices enter the published tarball (1.778068ms)\n\u2139 tests 12\n\u2139 suites 0\n\u2139 pass 12\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 847.197596\n",
+    "countNote": "The three new focused cases are included in these twelve."
+  },
+  "packedConsumers": {
+    "startedAt": "2026-11-17T09:32:26.976Z",
+    "node": "v24.22.1",
+    "npm": "11.14.1",
+    "libSha256": "89f1d8112f0f461d9884f764d1da5e3873f858e250d0c737dcd973859ecb894a",
+    "sourceLoaderSha256": "076257fa2e1231d51befccff537fa31473ed9b6c2412ebdcaa4016ab71771796",
+    "commands": [
+      {
+        "name": "root-pack",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/node_modules/npm/bin/npm-cli.js",
+          "pack",
+          "--offline",
+          "--ignore-scripts",
+          "--json",
+          "--pack-destination",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/root/output/example__direct-root",
+        "startedAt": "2026-11-17T09:32:26.978Z",
+        "endedAt": "2026-11-17T09:32:27.783Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-pack.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-pack.stderr",
+        "stdout": "[\n  {\n    \"id\": \"@example/direct-root@1.0.0\",\n    \"name\": \"@example/direct-root\",\n    \"version\": \"1.0.0\",\n    \"size\": 1177,\n    \"unpackedSize\": 1608,\n    \"shasum\": \"0116b1b5400ff9cd423547026f5ed3068c22edf1\",\n    \"integrity\": \"sha512-AtiVDMq/HussuLreuUWrGCVe9jTPwiwstpYYmaJpTy/AUeG8lctDjGmVU60CyJ1qUNuZ469ghfo6klR+2yXwLQ==\",\n    \"filename\": \"example-direct-root-1.0.0.tgz\",\n    \"files\": [\n      {\n        \"path\": \"LICENSE\",\n        \"size\": 1078,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"README.md\",\n        \"size\": 81,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"dist/index.d.ts\",\n        \"size\": 39,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"dist/index.js\",\n        \"size\": 25,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"package.json\",\n        \"size\": 299,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/behavior.proto.ts\",\n        \"size\": 63,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/helper.ts\",\n        \"size\": 23,\n        \"mode\": 420\n      }\n    ],\n    \"entryCount\": 7,\n    \"bundled\": []\n  }\n]\n",
+        "stderr": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+      },
+      {
+        "name": "root-install",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/node_modules/npm/bin/npm-cli.js",
+          "install",
+          "--offline",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund",
+          "--package-lock=false",
+          "--save-exact",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root/example-direct-root-1.0.0.tgz"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root/consumer",
+        "startedAt": "2026-11-17T09:32:27.783Z",
+        "endedAt": "2026-11-17T09:32:28.181Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-install.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-install.stderr",
+        "stdout": "\nadded 1 package in 295ms\n",
+        "stderr": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+      },
+      {
+        "name": "root-source-loader",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "--import",
+          "tsx",
+          "--input-type=module",
+          "--eval",
+          "\n      import assert from 'node:assert/strict';\n      import {pathToFileURL} from 'node:url';\n      const [root, loader, specifier, packageName] = process.argv.slice(1);\n      const {FileSourceGraph} = await import(pathToFileURL(loader).href);\n      const graph = new FileSourceGraph(root);\n      const snapshot = await graph.load(await graph.entry('entry.proto.ts'));\n      assert.deepEqual(snapshot.failures, []);\n      const target = 'node_modules/' + packageName + '/src/behavior.proto.ts';\n      assert.equal(snapshot.sourceImports[specifier], target);\n      assert.deepEqual(Object.keys(snapshot.files).sort(), [\n        'entry.proto.ts', target, 'node_modules/' + packageName + '/src/helper.ts'\n      ].sort());\n      assert.equal(snapshot.sourceResolution.packages.length, 1);\n      process.stdout.write(JSON.stringify({\n        sourceImports: snapshot.sourceImports,\n        files: Object.keys(snapshot.files).sort(),\n        packages: snapshot.sourceResolution.packages\n      }, null, 2));\n    ",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root/consumer",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/packages/compiler/src/source-loader.ts",
+          "@example/direct-root",
+          "@example/direct-root"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+        "startedAt": "2026-11-17T09:32:28.182Z",
+        "endedAt": "2026-11-17T09:32:29.349Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-source-loader.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root-source-loader.stderr",
+        "stdout": "{\n  \"sourceImports\": {\n    \"@example/direct-root\": \"node_modules/@example/direct-root/src/behavior.proto.ts\"\n  },\n  \"files\": [\n    \"entry.proto.ts\",\n    \"node_modules/@example/direct-root/src/behavior.proto.ts\",\n    \"node_modules/@example/direct-root/src/helper.ts\"\n  ],\n  \"packages\": [\n    {\n      \"manifest\": \"node_modules/@example/direct-root/package.json\",\n      \"sha256\": \"74271be2ad563f3a8f0cc87453d550961f2153a1d0fca38af3af9ef4e3e62ee6\"\n    }\n  ]\n}",
+        "stderr": ""
+      },
+      {
+        "name": "subpath-pack",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/node_modules/npm/bin/npm-cli.js",
+          "pack",
+          "--offline",
+          "--ignore-scripts",
+          "--json",
+          "--pack-destination",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/candidate-stage-qlKmSL/subpath/output/example__direct-subpath",
+        "startedAt": "2026-11-17T09:32:29.350Z",
+        "endedAt": "2026-11-17T09:32:29.652Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-pack.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-pack.stderr",
+        "stdout": "[\n  {\n    \"id\": \"@example/direct-subpath@1.0.0\",\n    \"name\": \"@example/direct-subpath\",\n    \"version\": \"1.0.0\",\n    \"size\": 1208,\n    \"unpackedSize\": 1730,\n    \"shasum\": \"3bd4ae182be1f0d23bcc07d5c6d030600316dc21\",\n    \"integrity\": \"sha512-g5nmAWY0P3QxhBCMKGnllv5FRh9uzR+8p5qG0oZXZ99ImBwzXBGEDKRUjuTedWDkRej2iDFnHuwUbkdDIYVGdg==\",\n    \"filename\": \"example-direct-subpath-1.0.0.tgz\",\n    \"files\": [\n      {\n        \"path\": \"LICENSE\",\n        \"size\": 1078,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"README.md\",\n        \"size\": 87,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"dist/index.d.ts\",\n        \"size\": 39,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"dist/index.js\",\n        \"size\": 25,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"package.json\",\n        \"size\": 415,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/behavior.proto.ts\",\n        \"size\": 63,\n        \"mode\": 420\n      },\n      {\n        \"path\": \"src/helper.ts\",\n        \"size\": 23,\n        \"mode\": 420\n      }\n    ],\n    \"entryCount\": 7,\n    \"bundled\": []\n  }\n]\n",
+        "stderr": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+      },
+      {
+        "name": "subpath-install",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/node_modules/npm/bin/npm-cli.js",
+          "install",
+          "--offline",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund",
+          "--package-lock=false",
+          "--save-exact",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/example-direct-subpath-1.0.0.tgz"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/consumer",
+        "startedAt": "2026-11-17T09:32:29.653Z",
+        "endedAt": "2026-11-17T09:32:30.009Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-install.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-install.stderr",
+        "stdout": "\nadded 1 package in 259ms\n",
+        "stderr": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+      },
+      {
+        "name": "subpath-source-loader",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "--import",
+          "tsx",
+          "--input-type=module",
+          "--eval",
+          "\n      import assert from 'node:assert/strict';\n      import {pathToFileURL} from 'node:url';\n      const [root, loader, specifier, packageName] = process.argv.slice(1);\n      const {FileSourceGraph} = await import(pathToFileURL(loader).href);\n      const graph = new FileSourceGraph(root);\n      const snapshot = await graph.load(await graph.entry('entry.proto.ts'));\n      assert.deepEqual(snapshot.failures, []);\n      const target = 'node_modules/' + packageName + '/src/behavior.proto.ts';\n      assert.equal(snapshot.sourceImports[specifier], target);\n      assert.deepEqual(Object.keys(snapshot.files).sort(), [\n        'entry.proto.ts', target, 'node_modules/' + packageName + '/src/helper.ts'\n      ].sort());\n      assert.equal(snapshot.sourceResolution.packages.length, 1);\n      process.stdout.write(JSON.stringify({\n        sourceImports: snapshot.sourceImports,\n        files: Object.keys(snapshot.files).sort(),\n        packages: snapshot.sourceResolution.packages\n      }, null, 2));\n    ",
+          "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/consumer",
+          "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports/packages/compiler/src/source-loader.ts",
+          "@example/direct-subpath/behavior",
+          "@example/direct-subpath"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-release-exports",
+        "startedAt": "2026-11-17T09:32:30.011Z",
+        "endedAt": "2026-11-17T09:32:30.891Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-source-loader.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-source-loader.stderr",
+        "stdout": "{\n  \"sourceImports\": {\n    \"@example/direct-subpath/behavior\": \"node_modules/@example/direct-subpath/src/behavior.proto.ts\"\n  },\n  \"files\": [\n    \"entry.proto.ts\",\n    \"node_modules/@example/direct-subpath/src/behavior.proto.ts\",\n    \"node_modules/@example/direct-subpath/src/helper.ts\"\n  ],\n  \"packages\": [\n    {\n      \"manifest\": \"node_modules/@example/direct-subpath/package.json\",\n      \"sha256\": \"5c484991db606abfc5c2418623e31a9b87412c921d50e9d0ca81e31a8f86ed1a\"\n    }\n  ]\n}",
+        "stderr": ""
+      },
+      {
+        "name": "subpath-runtime-import",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "--input-type=module",
+          "--eval",
+          "import assert from 'node:assert/strict'; const runtime=await import(process.argv[1]); assert.equal(runtime.behavior,1);",
+          "@example/direct-subpath"
+        ],
+        "cwd": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/consumer",
+        "startedAt": "2026-11-17T09:32:30.892Z",
+        "endedAt": "2026-11-17T09:32:30.968Z",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "stdoutFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-runtime-import.stdout",
+        "stderrFile": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath-runtime-import.stderr",
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "cases": [
+      {
+        "form": "root",
+        "packageName": "@example/direct-root",
+        "tarball": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root/example-direct-root-1.0.0.tgz",
+        "tarballSha256": "aeab09b6f354193041ef54eff5a2059771fe6b841b5691e69a7d343ccf6c1f48",
+        "integrity": "sha512-AtiVDMq/HussuLreuUWrGCVe9jTPwiwstpYYmaJpTy/AUeG8lctDjGmVU60CyJ1qUNuZ469ghfo6klR+2yXwLQ==",
+        "packedFiles": [
+          {
+            "path": "LICENSE",
+            "size": 1078,
+            "mode": 420
+          },
+          {
+            "path": "README.md",
+            "size": 81,
+            "mode": 420
+          },
+          {
+            "path": "dist/index.d.ts",
+            "size": 39,
+            "mode": 420
+          },
+          {
+            "path": "dist/index.js",
+            "size": 25,
+            "mode": 420
+          },
+          {
+            "path": "package.json",
+            "size": 299,
+            "mode": 420
+          },
+          {
+            "path": "src/behavior.proto.ts",
+            "size": 63,
+            "mode": 420
+          },
+          {
+            "path": "src/helper.ts",
+            "size": 23,
+            "mode": 420
+          }
+        ],
+        "status": "passed",
+        "installedManifest": {
+          "path": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/root/consumer/node_modules/@example/direct-root/package.json",
+          "sha256": "74271be2ad563f3a8f0cc87453d550961f2153a1d0fca38af3af9ef4e3e62ee6",
+          "exports": "./src/behavior.proto.ts"
+        },
+        "installedSource": [
+          {
+            "file": "src/behavior.proto.ts",
+            "stagedSha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc",
+            "installedSha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc"
+          },
+          {
+            "file": "src/helper.ts",
+            "stagedSha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993",
+            "installedSha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993"
+          }
+        ],
+        "compilerSourceGraph": {
+          "sourceImports": {
+            "@example/direct-root": "node_modules/@example/direct-root/src/behavior.proto.ts"
+          },
+          "files": [
+            "entry.proto.ts",
+            "node_modules/@example/direct-root/src/behavior.proto.ts",
+            "node_modules/@example/direct-root/src/helper.ts"
+          ],
+          "packages": [
+            {
+              "manifest": "node_modules/@example/direct-root/package.json",
+              "sha256": "74271be2ad563f3a8f0cc87453d550961f2153a1d0fca38af3af9ef4e3e62ee6"
+            }
+          ]
+        }
+      },
+      {
+        "form": "subpath",
+        "packageName": "@example/direct-subpath",
+        "tarball": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/example-direct-subpath-1.0.0.tgz",
+        "tarballSha256": "2608987d96c2da2c18cac1cafda80b64051c1ee131f6de93bc3c3052422868ef",
+        "integrity": "sha512-g5nmAWY0P3QxhBCMKGnllv5FRh9uzR+8p5qG0oZXZ99ImBwzXBGEDKRUjuTedWDkRej2iDFnHuwUbkdDIYVGdg==",
+        "packedFiles": [
+          {
+            "path": "LICENSE",
+            "size": 1078,
+            "mode": 420
+          },
+          {
+            "path": "README.md",
+            "size": 87,
+            "mode": 420
+          },
+          {
+            "path": "dist/index.d.ts",
+            "size": 39,
+            "mode": 420
+          },
+          {
+            "path": "dist/index.js",
+            "size": 25,
+            "mode": 420
+          },
+          {
+            "path": "package.json",
+            "size": 415,
+            "mode": 420
+          },
+          {
+            "path": "src/behavior.proto.ts",
+            "size": 63,
+            "mode": 420
+          },
+          {
+            "path": "src/helper.ts",
+            "size": 23,
+            "mode": 420
+          }
+        ],
+        "status": "passed",
+        "installedManifest": {
+          "path": "/workspace/scratch/8077f6e9f3a8/release-direct-proto-20261117/packed-source-OTosjW/subpath/consumer/node_modules/@example/direct-subpath/package.json",
+          "sha256": "5c484991db606abfc5c2418623e31a9b87412c921d50e9d0ca81e31a8f86ed1a",
+          "exports": {
+            ".": {
+              "types": "./dist/index.d.ts",
+              "default": "./dist/index.js"
+            },
+            "./behavior": "./src/behavior.proto.ts"
+          }
+        },
+        "installedSource": [
+          {
+            "file": "src/behavior.proto.ts",
+            "stagedSha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc",
+            "installedSha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc"
+          },
+          {
+            "file": "src/helper.ts",
+            "stagedSha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993",
+            "installedSha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993"
+          }
+        ],
+        "compilerSourceGraph": {
+          "sourceImports": {
+            "@example/direct-subpath/behavior": "node_modules/@example/direct-subpath/src/behavior.proto.ts"
+          },
+          "files": [
+            "entry.proto.ts",
+            "node_modules/@example/direct-subpath/src/behavior.proto.ts",
+            "node_modules/@example/direct-subpath/src/helper.ts"
+          ],
+          "packages": [
+            {
+              "manifest": "node_modules/@example/direct-subpath/package.json",
+              "sha256": "5c484991db606abfc5c2418623e31a9b87412c921d50e9d0ca81e31a8f86ed1a"
+            }
+          ]
+        },
+        "ordinaryRuntimeRootImport": "passed"
+      }
+    ],
+    "packagePublishes": 0,
+    "runtimeBuilds": 0,
+    "status": "passed",
+    "endedAt": "2026-11-17T09:32:30.969Z",
+    "fixtures": [
+      {
+        "form": "root",
+        "manifest": {
+          "name": "@example/direct-root",
+          "version": "1.0.0",
+          "type": "module",
+          "exports": "./src/behavior.proto.ts",
+          "license": "MIT",
+          "files": ["dist", "README.md", "LICENSE", "src/behavior.proto.ts", "src/helper.ts"],
+          "publishConfig": {
+            "access": "public"
+          }
+        },
+        "sources": [
+          {
+            "path": "src/behavior.proto.ts",
+            "text": "import {helper} from './helper'; export const behavior=helper;\n",
+            "sha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc"
+          },
+          {
+            "path": "src/helper.ts",
+            "text": "export const helper=1;\n",
+            "sha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993"
+          }
+        ]
+      },
+      {
+        "form": "subpath",
+        "manifest": {
+          "name": "@example/direct-subpath",
+          "version": "1.0.0",
+          "type": "module",
+          "exports": {
+            ".": {
+              "types": "./dist/index.d.ts",
+              "default": "./dist/index.js"
+            },
+            "./behavior": "./src/behavior.proto.ts"
+          },
+          "license": "MIT",
+          "files": ["dist", "README.md", "LICENSE", "src/behavior.proto.ts", "src/helper.ts"],
+          "publishConfig": {
+            "access": "public"
+          }
+        },
+        "sources": [
+          {
+            "path": "src/behavior.proto.ts",
+            "text": "import {helper} from './helper'; export const behavior=helper;\n",
+            "sha256": "ec931e1ceee218c8ef458558f2282b28dece9c769c3f8fd6fae68b6f674b30fc"
+          },
+          {
+            "path": "src/helper.ts",
+            "text": "export const helper=1;\n",
+            "sha256": "2fbde7fb6fc64488a7d37dddcb1541b10497f2eb169373910b597e7b05df0993"
+          }
+        ]
+      }
+    ]
+  },
+  "probeArtifacts": [
+    {
+      "name": "stage-probe.mjs",
+      "sha256": "9e9665d295d49975fc879bf9146e354cd53de2a29d20ec0f265e740cbf46fa27"
+    },
+    {
+      "name": "packed-source-probe.mjs",
+      "sha256": "ab0597d3a4e82e209f177c1cf50fa515df5660fe63820bf61b5de564374920d5"
+    },
+    {
+      "name": "baseline-stage-probe.log",
+      "sha256": "9a43b9e0821eca0d63f4afd6599f51decd8f13b0ce0f03ccd44b5d2e1ba3cb4a"
+    },
+    {
+      "name": "candidate-stage-probe.log",
+      "sha256": "fe66f8920ff290b5a990e3d4d1c6c8e9558940b933df14613bfd0b1063843de3"
+    },
+    {
+      "name": "packed-source-probe.log",
+      "sha256": "c68030b6ceab6c9c54d20ce7cf4a31d4b477e222614cece08df9648794888ebd"
+    }
+  ],
+  "limits": [
+    "No full release or whole-package build was run.",
+    "FileSourceGraph proves installed authored-source reachability; no generated component or native-browser pass is claimed.",
+    "The existing workspace Transition export already uses a proto condition; no direct workspace manifest failure is invented.",
+    "No npm publish, registry write, permission change, workflow change or bulk manifest rewrite occurred.",
+    "Implementation evidence is not independent approval."
+  ]
+}
