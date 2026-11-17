@@ -17,8 +17,14 @@ Both complete checker executions use `node scripts/coverage-matrices/check-cover
 
 The candidate checker still fails with 1,413 retained diagnostics. This change does not establish complete coverage acceptance or authorize mass fingerprint regeneration.
 
+## Source-bound Homepage follow-up
+
+At `2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889`, the integration worktree built its own CLI with `corepack pnpm@10.32.1 --filter @proto.ui/cli build` (exit 0, 3.934 seconds), then ran `node apps/www/scripts/generate-website-prototype-tokens.mjs` (exit 0, 71.506 seconds). The generator produced the actual website token stylesheet and Shadow companions from 1,433 package and website tokens. No generated stylesheet or dependency tree was borrowed from another checkout.
+
+The eight affected Homepage files then passed **59/59 tests, zero failed or skipped, exit 0**, in a single-worker run lasting 136.087 seconds: composition, dialog focus, gallery props, gallery projection, showcase, React 19 showcase, text layout, and typography state. The adjacent evidence JSON retains all three commands, generated-file SHA-256 hashes, log/JSON hashes, and individual case results. This new consumer result belongs to that integration head; it does not rebind the earlier checker comparison to a different source.
+
 ## Remaining validation
 
-Eight Homepage test files need the source-generated `proto-ui-tokens.generated.css` and CLI build before execution. Their assertions and helper contents are preserved, but those eight files have not yet run on this candidate. Three importing browser test files have path-only changes and have not run here. Whole types, build, the whole scanner fixture suite and full CI are not represented by the bounded checks above.
+Three importing browser test files have path-only changes and have not run here. Whole types, the full website/public-package build, the whole scanner fixture suite and full CI are not represented by the bounded checks above. The CLI build alone is not a complete website or release build.
 
 The accompanying JSON records source and log hashes, complete commands, the exact six-diagnostic difference, and the source-preservation audit. A separate local agent reviewed the file placement and import resolution; this is local engineering review and is not a formal GitHub approval.
