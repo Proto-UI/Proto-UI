@@ -1,55 +1,62 @@
-name: Browser suite repair evidence
-
+name: PR1483 Bootstrap Dialog native diagnostic
+run-name: pr1483-bootstrap-native-${{ github.sha }}
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
 concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: pr1483-bootstrap-native-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  focused-browser:
+  bootstrap-dialog-native-diagnostic:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Install the locked graph and build the real CLI prerequisite
         run: |
+          set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
+          corepack pnpm@10.32.1 --filter @proto.ui/cli build
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+          mkdir -p "$RUNNER_TEMP/b3-native"
+          node --version > "$RUNNER_TEMP/b3-native/node-version.txt"
+          corepack pnpm@10.32.1 --version > "$RUNNER_TEMP/b3-native/pnpm-version.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/b3-native/chrome-version.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/b3-native/source-sha.txt"
+          git show --no-patch --format=raw HEAD > "$RUNNER_TEMP/b3-native/source-commit.txt"
+          sha256sum .github/evidence/pr1483-bootstrap-native/source-inputs.json > "$RUNNER_TEMP/b3-native/source-inputs.sha256"
+          cp .github/evidence/pr1483-bootstrap-native/source-inputs.json "$RUNNER_TEMP/b3-native/source-inputs.json"
+      - name: Run only the four real Bootstrap cold and warm journeys
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          PROTO_UI_NATIVE_SOURCE_INPUTS: .github/evidence/pr1483-bootstrap-native/source-inputs.json
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/b3-native
+          PROTO_UI_BROWSER_BASE_URL: ''
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          unset PROTO_UI_RUNTIME_PHASE PROTO_UI_RUNTIME_SHARD PROTO_UI_RUNTIME_SLOT
+          echo 'node scripts/test/run-runtime-tests.mjs apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts --testNamePattern '\''Bootstrap Dialog PrototypePreviewer native consumer'\'' --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/b3-native/vitest-results.json"' > "$RUNNER_TEMP/b3-native/command.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/b3-native/started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 900s node scripts/test/run-runtime-tests.mjs apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts --testNamePattern 'Bootstrap Dialog PrototypePreviewer native consumer' --maxWorkers=1 --minWorkers=1 --no-file-parallelism --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/b3-native/vitest-results.json" 2>&1 | tee "$RUNNER_TEMP/b3-native/native.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/b3-native/exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/b3-native/finished-at.txt"
+          exit "$status"
+      - name: Retain the actual source, result, browser observations and failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: pr1483-bootstrap-native-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/b3-native
+          if-no-files-found: error
           retention-days: 30

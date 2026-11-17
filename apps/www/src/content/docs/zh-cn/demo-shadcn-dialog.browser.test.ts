@@ -2,7 +2,7 @@
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, CDPSession, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -13,6 +13,7 @@ import {
   selectRuntime,
   startServer,
   stopServer,
+  waitForPreviewRuntime,
 } from './browser-harness';
 
 const ROUTE = '/en/ui-libraries/shadcn/dialog/';
@@ -45,7 +46,8 @@ async function captureNativeState(
   cdp: CDPSession,
   contentId: string,
   journey: NativeJourney,
-  step: string
+  step: string,
+  captureDirectory: string | null = evidenceDirectory ?? null
 ) {
   const dom = await page.evaluate((id) => {
     const content = document.getElementById(id);
@@ -97,9 +99,9 @@ async function captureNativeState(
       backendDOMNodeId: node.backendDOMNodeId,
     }));
   let image;
-  if (evidenceDirectory) {
+  if (captureDirectory) {
     const file = `${journey.id}-${step}.png`;
-    const bytes = await page.screenshot({ path: path.join(evidenceDirectory, file) });
+    const bytes = await page.screenshot({ path: path.join(captureDirectory, file) });
     image = { file, sha256: createHash('sha256').update(bytes).digest('hex') };
   }
   const observation = { step, url: page.url(), viewport: page.viewportSize(), dom, dialogs, image };
@@ -109,6 +111,263 @@ async function captureNativeState(
 
 type PointerSample = { trusted: boolean; partial: boolean };
 type PointerSampleWindow = Window & { __nextPointerSample?: Promise<PointerSample> };
+
+type BootstrapInput = { type: string; key: string | null; ref: string | null; trusted: boolean };
+type BootstrapWindow = Window & { __bootstrapDialogInputs: BootstrapInput[] };
+type BootstrapSourceInputs = {
+  files: Array<{ path: string; bytes: number; sha256: string }>;
+};
+
+// Private source-bound diagnostic: this describe is selected on its own. The
+// existing Shadcn cases remain in the same registered suite and keep their scope.
+describe('Bootstrap Dialog PrototypePreviewer native consumer', () => {
+  const route = (runtime: string) => `/en/test/bootstrap-dialog-preview/${runtime}/`;
+  const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'bootstrap-dialog-preview')
+    : null;
+  const journeys: NativeJourney[] = [];
+  let nativeBrowser: Browser | undefined;
+  let nativeBaseUrl = '';
+  let inputs: BootstrapSourceInputs;
+  let inputsSha256: string;
+  let before: Awaited<ReturnType<typeof snapshotSources>> | undefined;
+  let after: Awaited<ReturnType<typeof snapshotSources>> | undefined;
+
+  async function snapshotSources() {
+    return {
+      observedAt: new Date().toISOString(),
+      root: await realpath(process.cwd()),
+      headSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+      files: await Promise.all(
+        inputs.files.map(async (input) => {
+          try {
+            const bytes = await readFile(input.path);
+            const sha256 = createHash('sha256').update(bytes).digest('hex');
+            return {
+              path: input.path,
+              realPath: await realpath(input.path),
+              bytes: bytes.length,
+              sha256,
+              matchesExpected: bytes.length === input.bytes && sha256 === input.sha256,
+            };
+          } catch (error) {
+            return { path: input.path, error: String(error), matchesExpected: false };
+          }
+        })
+      ),
+    };
+  }
+
+  beforeAll(async () => {
+    if (!directory || !process.env.PROTO_UI_NATIVE_SOURCE_INPUTS)
+      throw new Error('Bootstrap native evidence requires an output directory and frozen source inputs.');
+    await mkdir(directory, { recursive: true });
+    const bytes = await readFile(process.env.PROTO_UI_NATIVE_SOURCE_INPUTS);
+    inputsSha256 = createHash('sha256').update(bytes).digest('hex');
+    inputs = JSON.parse(bytes.toString('utf8')) as BootstrapSourceInputs;
+    before = await snapshotSources();
+    expect(before.files.every((file) => file.matchesExpected), 'Frozen source admission').toBe(true);
+    nativeBaseUrl = await startServer(RUNTIMES.map(route));
+    nativeBrowser = await launchBrowser();
+  }, 240_000);
+
+  afterAll(async () => {
+    try {
+      await nativeBrowser?.close();
+    } finally {
+      try {
+        await stopServer();
+      } finally {
+        if (inputs) after = await snapshotSources();
+        if (directory) {
+          await writeFile(
+            path.join(directory, 'observations.json'),
+            JSON.stringify({
+              schemaVersion: 1,
+              sourceInputs: process.env.PROTO_UI_NATIVE_SOURCE_INPUTS,
+              inputsSha256,
+              before,
+              after,
+              invocation: {
+                executable: process.execPath,
+                argv: process.argv,
+                execArgv: process.execArgv,
+                cwd: process.cwd(),
+                parentReceipt: 'The enclosing original command/terminal receipt binds the parent invocation.',
+              },
+              browser: nativeBrowser?.version(),
+              expectedRuntimes: RUNTIMES,
+              viewport: { width: 900, height: 700 },
+              journeys,
+              qualification: 'First document mount and same-document runtime return through real PrototypePreviewer, authored Bootstrap recipe and production loaders/portals. Named native source bytes are checked before and after. Cold means first browser-document mount, not a cold Astro compiler. No load-count, full dependency-tree, S4, AT, theme/viewport matrix, Compiler or stable Bootstrap acceptance claim.',
+            }, null, 2)
+          );
+        }
+        if (after)
+          expect(after.files.every((file) => file.matchesExpected), 'Source retained after teardown').toBe(true);
+      }
+    }
+  }, 60_000);
+
+  for (const [index, runtime] of RUNTIMES.entries()) {
+    it(`${runtime}: cold mount and warm runtime return preserve Dialog ownership and focus`, async () => {
+      const journey: NativeJourney = {
+        id: `bootstrap-${runtime}`,
+        result: 'running',
+        observations: [],
+        pageErrors: [],
+      };
+      journeys.push(journey);
+      try {
+        if (!nativeBrowser) throw new Error('Native browser did not start.');
+        const context = await nativeBrowser.newContext({ viewport: { width: 900, height: 700 } });
+        try {
+          // This fixes the initial reader preference; it does not mount a host or
+          // change Dialog state. Runtime switching below uses the actual toolbar.
+          await context.addInitScript((value) =>
+            localStorage.setItem('preferred-prototypes-adapter', value), runtime);
+          const page = await context.newPage();
+          page.on('pageerror', (error) => journey.pageErrors.push(error.message));
+          page.on('console', (message) => {
+            if (message.type() === 'error') journey.pageErrors.push(`console: ${message.text()}`);
+          });
+          const response = await page.goto(`${nativeBaseUrl}${route(runtime)}`, { waitUntil: 'networkidle' });
+          expect(response?.ok()).toBe(true);
+          const previewer = page.locator('[data-previewer-id]');
+          expect(await previewer.count()).toBe(1);
+          await waitForPreviewRuntime(page, runtime, '[aria-haspopup="dialog"]', 1);
+          await page.evaluate(() => {
+            const owner = window as BootstrapWindow;
+            owner.__bootstrapDialogInputs = [];
+            for (const type of ['keydown', 'click']) {
+              document.addEventListener(type, (event) => {
+                owner.__bootstrapDialogInputs.push({
+                  type: event.type,
+                  key: event instanceof KeyboardEvent ? event.key : null,
+                  ref: (event.target as Element | null)?.closest('[data-demo-ref]')?.getAttribute('data-demo-ref') ?? null,
+                  trusted: event.isTrusted,
+                });
+              }, { capture: true });
+            }
+          });
+          const cdp = await context.newCDPSession(page);
+          let coldGeneration: string | null = null;
+          for (const phase of ['cold', 'warm'] as const) {
+            const trigger = previewer.locator('[data-demo-ref="trigger"][aria-haspopup="dialog"]');
+            expect(await trigger.count()).toBe(1);
+            const contentId = await trigger.getAttribute('aria-controls');
+            if (!contentId) throw new Error('Authored Dialog Trigger has no Content identity.');
+            const content = page.locator(`[role="dialog"][id=${JSON.stringify(contentId)}]`);
+            const generation = await trigger.evaluate((element) =>
+              element.closest('[data-projection-generation]')?.getAttribute('data-projection-generation') ?? null);
+            expect(generation).toBeTruthy();
+            if (phase === 'cold') coldGeneration = generation;
+            else expect(generation, 'Runtime return must materialize a new generation').not.toBe(coldGeneration);
+            const capture = async (step: string) => {
+              const observation = await captureNativeState(page, cdp, contentId, journey,
+                `${phase}-${step}`, phase === 'cold' && step === 'enter-open' ? directory : null);
+              journey.observations.push({ step: `${phase}-${step}-owner`, runtime, generation,
+                expanded: await trigger.getAttribute('aria-expanded'),
+                focusedTrigger: await trigger.evaluate((element) => element === document.activeElement),
+              });
+              return observation;
+            };
+            const closed = async (step: string) => {
+              await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
+              await expect.poll(() => content.isVisible()).toBe(false);
+              await expect.poll(() => page.locator('[role="dialog"]:visible').count()).toBe(0);
+              await expect.poll(() => trigger.evaluate((element) => element === document.activeElement)).toBe(true);
+              expect((await capture(step)).dialogs).toEqual([]);
+            };
+            const opened = async (step: string) => {
+              await page.keyboard.press('Enter');
+              await expect.poll(() => content.getAttribute('data-transition-state')).toBe('entered');
+              expect(await content.isVisible()).toBe(true);
+              expect(await content.count()).toBe(1);
+              expect(await page.locator('[role="dialog"]').count()).toBe(1);
+              expect(await page.locator('[role="dialog"]:visible').count()).toBe(1);
+              expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+              expect(await content.getAttribute('data-projection-runtime')).toBe(runtime);
+              expect(await content.getAttribute('data-projection-prototype')).toBe('bootstrap-2-3-2-dialog-content');
+              expect(await page.locator('[data-demo-ref="mask"]').count()).toBe(1);
+              expect(await page.locator('[data-demo-ref="trigger"][aria-haspopup="dialog"]').count()).toBe(1);
+              await expect.poll(() => content.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+              const close = content.locator('[data-demo-ref="close"]');
+              expect(await close.count()).toBe(1);
+              expect(await page.locator('[data-demo-ref="close"]').count()).toBe(1);
+              expect(await content.locator('[data-demo-ref="footer"]').getByRole('button').count()).toBe(1);
+              expect(await close.getAttribute('role')).toBe('button');
+              expect(await close.innerText()).toBe('Close project details');
+              expect(await close.evaluate((element) => ({
+                commands: [element, ...element.querySelectorAll('*')].filter((node) => node.matches('button, [role="button"]')).length,
+                focusOwners: [element, ...element.querySelectorAll<HTMLElement>('*')].filter((node) => (node as HTMLElement).tabIndex >= 0).length,
+                passive: ['closeAppearance', 'closeLabel'].map((ref) => {
+                  const node = element.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`);
+                  return !!node && !node.hasAttribute('role') && !node.hasAttribute('tabindex') && node.tabIndex < 0;
+                }),
+              }))).toEqual({ commands: 1, focusOwners: 1, passive: [true, true] });
+              const observation = await capture(step);
+              expect(Number(observation.dom.paint?.opacity)).toBeGreaterThan(0);
+              expect(observation.dom.rect?.width).toBeGreaterThan(0);
+              expect(observation.dialogs).toHaveLength(1);
+            };
+            expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+            expect(await content.isVisible()).toBe(false);
+            await trigger.focus();
+            await closed('initial-closed');
+            await opened('enter-open');
+            await content.getByRole('button', { name: 'Close project details', exact: true }).click();
+            await closed('native-close');
+            await opened('enter-reopen');
+            await page.keyboard.press('Escape');
+            await closed('escape-close');
+            if (phase === 'cold') {
+              const originalTrigger = await trigger.elementHandle();
+              if (!originalTrigger) throw new Error('Missing cold Dialog Trigger.');
+              try {
+                const alternate = RUNTIMES[(index + 1) % RUNTIMES.length]!;
+                await selectRuntime(page, previewer, alternate, '[aria-haspopup="dialog"]', 1);
+                expect(await originalTrigger.evaluate((element) => element.isConnected)).toBe(false);
+                expect(await page.locator('[role="dialog"]:visible').count()).toBe(0);
+                journey.observations.push({ step: 'runtime-away', runtime: alternate,
+                  oldTriggerConnected: false, url: page.url() });
+                await selectRuntime(page, previewer, runtime, '[aria-haspopup="dialog"]', 1);
+              } finally {
+                await originalTrigger.dispose();
+              }
+            }
+          }
+          await previewer.evaluate(async (root) => {
+            const controller = (root as HTMLElement & { __previewer__?: { destroy(): Promise<void> | void } }).__previewer__;
+            if (!controller) throw new Error('Real PrototypePreviewer controller is missing.');
+            await controller.destroy();
+            // Drain the queued appearance work and two real host frames after
+            // terminal teardown. This is a bounded observation, not an idle proof.
+            await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+          });
+          expect(await previewer.locator('.host [data-pui-root]').count()).toBe(0);
+          expect(await page.locator('[role="dialog"]').count()).toBe(0);
+          expect(await page.locator('[data-projection-prototype="bootstrap-2-3-2-dialog-content"], [data-projection-prototype="bootstrap-2-3-2-dialog-mask"]').count()).toBe(0);
+          const input = await page.evaluate(() => (window as BootstrapWindow).__bootstrapDialogInputs);
+          expect(input.every((event) => event.trusted)).toBe(true);
+          expect(input.filter((event) => event.type === 'keydown' && event.key === 'Enter' && event.ref === 'trigger')).toHaveLength(4);
+          expect(input.filter((event) => event.type === 'keydown' && event.key === 'Escape')).toHaveLength(2);
+          expect(input.filter((event) => event.type === 'click' && event.ref === 'close')).toHaveLength(2);
+          journey.observations.push({ step: 'terminal-teardown', input, remainingOwners: 0 });
+          await cdp.detach();
+        } finally {
+          await context.close();
+        }
+        expect(journey.pageErrors).toEqual([]);
+        journey.result = 'passed';
+      } catch (error) {
+        journey.result = 'failed';
+        journey.failure = String(error);
+        throw error;
+      }
+    }, 120_000);
+  }
+});
 
 let browser: Browser;
 let baseUrl = '';
