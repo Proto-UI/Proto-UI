@@ -41,3 +41,9 @@ callable flow 将实际提供的三个值作为已检查的纯数据事实传入
 这些 consumer 通过测试 DOM 环境执行目标框架产物，不是原生浏览器或 macOS、Flutter、GPUI SDK 验收。本机没有 Rust/Dart/Flutter SDK。本修复未增加 `thisArg`、其他数组方法、稀疏数组模型或新的公开 profile；也没有改原生 `every` 迭代算法、引入 IR 解释器或放宽 e46 authority 边界。
 
 共享 callable type formatter 与未调用函数的 JSDoc 中还有非尾部默认参数的相邻输出路径，本次未执行其独立反例，未将它们计为已修。全量 Compiler、全仓类型检查和最终原生矩阵仍需各自的真实运行证据。
+
+## 发布后整合复核补记
+
+在 `e329c21ef07a5e7d05b093250ee5ae2be80a3eed` 发布后，另一代理从父 `54e37f37beed260996d598423637f251140bbec0` 重建已复核的四文件产品补丁，结果与整合源码逐字节一致；九个先前已整合的其他产品及夹具文件与父提交保持一致。复核还独立读取了同一次 113 项的原始日志和 JSON，并检查全部 16 个输入摘要。格式化后的 consumer fixture 经 TypeScript AST token kind/text 比较，只有 trivia 差异。
+
+完整复核已追加到机器证据的 `postPublicationIntegrationReview`。这是对既有执行的独立检查，没有新增一轮测试，也不增加通过数量。

@@ -2377,10 +2377,7 @@
             "arityRejects": 4,
             "supportIncorrectlyPruned": 8
           },
-          "twoPassingControls": [
-            "element-only callback",
-            "required fourth formal rejected"
-          ],
+          "twoPassingControls": ["element-only callback", "required fourth formal rejected"],
           "vue2Specific": "root=null failures follow logged created-hook TypeError reading asFocusable on undefined; target missing generated support, not a fixture root-selector failure",
           "setupFailureFinding": "No output-directory, import/dependency fixture error explains the target28. Existing mount helper can leave resources until body cleanup after a throwing mount; this does not explain or invalidate these exact missing-support errors."
         },
@@ -3606,5 +3603,148 @@
     ],
     "completedAt": "2026-11-17T09:53:27.354650+00:00",
     "postFormatScopeConservation": "Unrelated pre-existing opaque line wrapping restored to original; only consumer whitespace changed, token-text equality checked before combined execution."
+  },
+  "postPublicationIntegrationReview": {
+    "source": {
+      "path": "/workspace/scratch/8077f6e9f3a8/current-ci-review/array-every-review/integration-review.json",
+      "sha256": "fb07388974416c50fcd7ca1da7a50684e7b1bba82beff44efaf90bfb98c08b37"
+    },
+    "review": {
+      "reviewer": "/root/current_ci_review",
+      "reviewedAt": "2026-11-17T10:03:40.593947+00:00",
+      "kind": "local independent conservation and existing evidence review; no GitHub approval",
+      "parent": "54e37f37beed260996d598423637f251140bbec0",
+      "integratedHeadObserved": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+      "priorReview": {
+        "path": "/workspace/scratch/8077f6e9f3a8/current-ci-review/array-every-review/final-review.json",
+        "sha256": "b9c916aaeda5fbfccb4153da1411c5e5faebe28cd0bca26ce585d35286c123d9"
+      },
+      "productConservation": {
+        "originalFourSourcePatchSha256": "4d35da9472cbd22fdfd19ab61b9031f4a5bf614158f00de52a57ad424932a915",
+        "frozenFullPatchSha256": "8fdd89a8ab9b325ff0b2fce309be0816caa8ed6414450f08a77438ad4a416f22",
+        "fourSourcePatchUnchanged": true,
+        "method": "Read each original product file at integration parent into an isolated temporary directory, apply the already reviewed four-source patch, compare reconstructed file bytes with the integrated worktree. No product tree or git index was modified.",
+        "applyExitCode": 0,
+        "allFourReconstructedFilesByteIdentical": true,
+        "reconstructedSha256": {
+          "packages/compiler/src/callable-effects.ts": "ebccbb347ad60998bd99d91a535d6c374f6680948d5095317ffaf9705de9021b",
+          "packages/compiler/src/parser.ts": "e8785ee81d2b0765beab8aac9dbed45096e05f4b66ae160212df23c5ac394034",
+          "packages/compiler/src/value-types.ts": "5b3d1e713a8a8cc98b43a1c7068337212f6ca2048b2553435700eea24b227f44",
+          "packages/compiler/src/vue2-source.ts": "e4046bd198106dbeeb9af49fef1c42a6b376e7d884447f7a3445d9a5e788b13b"
+        },
+        "otherPreviouslyIntegratedSourcesAndFixturesByteIdenticalToParent": {
+          "packages/compiler/src/react-source.ts": true,
+          "packages/compiler/src/vue-source.ts": true,
+          "packages/compiler/src/web-component-source.ts": true,
+          "packages/compiler/src/native-public-values.ts": true,
+          "packages/compiler/src/native-value-lowering.ts": true,
+          "packages/compiler/src/source-module-bindings.ts": true,
+          "packages/compiler/test/external-callback-owner.test.ts": true,
+          "packages/compiler/test/external-callback-owner-types.test.ts": true,
+          "packages/compiler/test/lifecycle-disposal-errors.test.ts": true
+        }
+      },
+      "combinedEvidence": {
+        "startReceipt": "/workspace/scratch/8077f6e9f3a8/every-callback-evidence/combined-owner-every-disposal-start.json",
+        "resultReceipt": "/workspace/scratch/8077f6e9f3a8/every-callback-evidence/combined-owner-every-disposal-result.json",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/compiler/test/array-every-callback.test.ts",
+          "packages/compiler/test/array-every-consumer.test.ts",
+          "packages/compiler/test/array-every-types.test.ts",
+          "packages/compiler/test/external-callback-owner.test.ts",
+          "packages/compiler/test/external-callback-owner-types.test.ts",
+          "packages/compiler/test/lifecycle-disposal-errors.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--reporter=verbose",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/8077f6e9f3a8/every-callback-evidence/combined-owner-every-disposal.json"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 36.14,
+        "counts": {
+          "numTotalTests": 113,
+          "numPassedTests": 113,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "success": true
+        },
+        "files": [
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/array-every-callback.test.ts",
+            "passed": 15,
+            "failed": []
+          },
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/array-every-consumer.test.ts",
+            "passed": 16,
+            "failed": []
+          },
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/array-every-types.test.ts",
+            "passed": 4,
+            "failed": []
+          },
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/external-callback-owner-types.test.ts",
+            "passed": 4,
+            "failed": []
+          },
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/external-callback-owner.test.ts",
+            "passed": 44,
+            "failed": []
+          },
+          {
+            "path": "/workspace/scratch/8077f6e9f3a8/proto-ui-followup/packages/compiler/test/lifecycle-disposal-errors.test.ts",
+            "passed": 30,
+            "failed": []
+          }
+        ],
+        "inputs": {
+          "packages/compiler/src/callable-effects.ts": "ebccbb347ad60998bd99d91a535d6c374f6680948d5095317ffaf9705de9021b",
+          "packages/compiler/src/parser.ts": "e8785ee81d2b0765beab8aac9dbed45096e05f4b66ae160212df23c5ac394034",
+          "packages/compiler/src/value-types.ts": "5b3d1e713a8a8cc98b43a1c7068337212f6ca2048b2553435700eea24b227f44",
+          "packages/compiler/src/vue2-source.ts": "e4046bd198106dbeeb9af49fef1c42a6b376e7d884447f7a3445d9a5e788b13b",
+          "packages/compiler/src/react-source.ts": "4711772199e0101f61dce65af22637be3cb1565b7ce95d6c405c4bd1fed7bf5b",
+          "packages/compiler/src/vue-source.ts": "01eb1c94bcc009103a222ec665ad0e129d10a0191294a7feaa270a597da4b262",
+          "packages/compiler/src/web-component-source.ts": "5ff4325add9a79034533fe09a0d22d9b42eb58cdf08e07d208683a646e82c0ed",
+          "packages/compiler/src/native-public-values.ts": "f09317eb31e6ec8497b1dc7fda018c05db244ce383694935a1fa5c19f8531f07",
+          "packages/compiler/src/native-value-lowering.ts": "f28c3261dc750f6b822763a4b94f935cfd85a33a4177f68744a1e0c9cc923349",
+          "packages/compiler/src/source-module-bindings.ts": "5b8989a637383f7c128c2dbd403ec11ce377cd20718faa194165ccc6b7cf06af",
+          "packages/compiler/test/array-every-callback.test.ts": "43e740c103119568d549190b353ca0114dea088bb800dbdf49f01016ca914dc7",
+          "packages/compiler/test/array-every-consumer.test.ts": "8102473bd1894c072b9db79e63db5b15f4044aa1e86343b7f64b4d655af5332d",
+          "packages/compiler/test/array-every-types.test.ts": "a0c2fc4f9c921afac2579f2ef73abea57e14561142bbf792d820f94b5bd82465",
+          "packages/compiler/test/external-callback-owner.test.ts": "378440f5b6be863a69186986ab310bdef070499256a40c050dda9fc2bd33f570",
+          "packages/compiler/test/external-callback-owner-types.test.ts": "a41513bc54363297737408feb498b2e60b1d5f7805513d834e3827ce918ea04e",
+          "packages/compiler/test/lifecycle-disposal-errors.test.ts": "fa925a3a02472d736a0e8c072280f95b156f7792278cedcc28d481afc5e733f9"
+        },
+        "allSixteenInputHashesIndependentlyVerified": true,
+        "logSha256": "3de98bc47e64b928aca647e8e188a4cf08e8977add5a4e80c66072d7da10768c",
+        "jsonSha256": "cdec39c4bfb166280a2e4f1eef81bf78cbfc7c3e560efc85d4581985fc59504f"
+      },
+      "consumerWhitespaceReview": {
+        "method": "TypeScript parsed syntax-tree token kind and exact token text; trivia excluded. Parser handles template interpolation boundaries.",
+        "priorReviewedFixtureSha256": "00cd037ee99d0facdbc0a19addd7fac336dae9d64c01624c0b5e7dcd4695323d",
+        "integratedFixtureSha256": "8102473bd1894c072b9db79e63db5b15f4044aa1e86343b7f64b4d655af5332d",
+        "tokenKindAndTextEqual": true,
+        "tokenSequenceSha256": "4a2b0fcbc020ef3c59515487b5bd08e904c89b96d896b0cbe0e456efff34e172",
+        "priorDiagnostic": "The earlier context-free scanner did not rescan template tails and included following source whitespace in a mis-tokenized template. That diagnostic comparison is retained separately and is not product/test evidence.",
+        "evidence": "/workspace/scratch/8077f6e9f3a8/current-ci-review/array-every-review/consumer-token-comparison.json",
+        "evidenceSha256": "df1602dc255f6f16500ecbb8699f48f544892c945c516d701799d035995df44d"
+      },
+      "outcome": "No new static conflict in the exact applied product delta. The combined 113 assertions and process exit 0 were independently read, not rerun.",
+      "limits": [
+        "This combined run covers Every 35, callback-owner 48 and disposal 30 cases, not full CI or a native browser acceptance suite.",
+        "The earlier 31-case baseline, selector fixture correction and TS1016 failed artifact check remain preserved.",
+        "Reviewer did not run product tests or change any implementation."
+      ]
+    },
+    "interpretation": "Additional independent reconstruction/hash inspection of the already recorded 113-case run. No new execution or additional passing cases."
   }
 }
