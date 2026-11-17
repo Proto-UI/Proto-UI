@@ -64,38 +64,56 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
       (sourceContainers.has(boundary.node) &&
         [boundary.previous, boundary.next].some((node) => !!node && scope.contains(node))));
   const ownedSelection = !!selection && (ownsBoundary(anchor) || ownsBoundary(extent));
-  move();
-  if (ownedFocus && focused?.isConnected && activeElement(document) !== focused)
-    focused.focus({ preventScroll: true });
-  // Move and focus callbacks may replace the value or select a newer range.
-  const input =
-    ownedFocus && activeElement(document) === focused
-      ? (focused as HTMLInputElement | HTMLTextAreaElement)
-      : null;
-  const inputSelection =
-    input && typeof input.selectionStart === 'number'
-      ? ([input.selectionStart, input.selectionEnd, input.selectionDirection ?? undefined] as const)
-      : null;
-  const nextAnchor = resolve(anchor),
-    nextExtent = resolve(extent);
-  if (ownedSelection && nextAnchor && nextExtent) {
-    try {
-      selection!.setBaseAndExtent(
-        nextAnchor.node,
-        nextAnchor.offset,
-        nextExtent.node,
-        nextExtent.offset
-      );
-    } catch {
-      /* Connected callbacks may edit source lengths. Cleanup still completes. */
+  let focusRevoked = false;
+  const onFocus = (event: Event) => {
+    if (!event.composedPath().includes(focused!)) focusRevoked = true;
+  };
+  if (ownedFocus) {
+    document.addEventListener('focusin', onFocus, true);
+  }
+  try {
+    move();
+    if (!focusRevoked && ownedFocus && focused?.isConnected && activeElement(document) !== focused)
+      focused.focus({ preventScroll: true });
+    // Move and focus callbacks may replace the value or select a newer range.
+    const input =
+      !focusRevoked && ownedFocus && activeElement(document) === focused
+        ? (focused as HTMLInputElement | HTMLTextAreaElement)
+        : null;
+    const inputSelection =
+      input && typeof input.selectionStart === 'number'
+        ? ([
+            input.selectionStart,
+            input.selectionEnd,
+            input.selectionDirection ?? undefined,
+          ] as const)
+        : null;
+    const nextAnchor = resolve(anchor),
+      nextExtent = resolve(extent);
+    if (!focusRevoked && ownedSelection && nextAnchor && nextExtent) {
+      try {
+        selection!.setBaseAndExtent(
+          nextAnchor.node,
+          nextAnchor.offset,
+          nextExtent.node,
+          nextExtent.offset
+        );
+      } catch {
+        /* Connected callbacks may edit source lengths. Cleanup still completes. */
+      }
+    }
+    // Restoring the document range can reset the focused text control's caret.
+    if (
+      !focusRevoked &&
+      inputSelection &&
+      input?.isConnected &&
+      activeElement(document) === input &&
+      typeof input.selectionStart === 'number'
+    )
+      input.setSelectionRange(...inputSelection);
+  } finally {
+    if (ownedFocus) {
+      document.removeEventListener('focusin', onFocus, true);
     }
   }
-  // Restoring the document range can reset the focused text control's caret.
-  if (
-    inputSelection &&
-    input?.isConnected &&
-    activeElement(document) === input &&
-    typeof input.selectionStart === 'number'
-  )
-    input.setSelectionRange(...inputSelection);
 }

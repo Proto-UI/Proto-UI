@@ -209,6 +209,50 @@ describe('shadow-backed native text control selection', () => {
       });
 });
 
+describe('shadow move callback focus ownership', () => {
+  for (const tag of ['input', 'textarea'] as const)
+    for (const action of ['other', 'other-then-blur'] as const)
+      it(`preserves ${tag} callback ${action} focus`, () => {
+        const source = document.createElement('div');
+        const destination = document.createElement('div');
+        const host = document.createElement('div');
+        const shadow = host.attachShadow({ mode: 'open' });
+        const control = document.createElement(tag);
+        const other = document.createElement('input');
+        other.value = 'New focus owner';
+        shadow.append(control);
+        source.append(host);
+        document.body.append(source, destination, other);
+        control.focus();
+        const selection = document.getSelection()!;
+        selection.setBaseAndExtent(host, 0, host, 0);
+        control.setSelectionRange(0, 0);
+
+        withNativeContentLease(source, () => {
+          source.remove();
+          control.blur();
+          destination.append(source);
+          if (action === 'other') {
+            other.focus();
+            other.setSelectionRange(1, 4, 'backward');
+          } else {
+            other.focus();
+            other.blur();
+          }
+        });
+
+        expect(shadow.activeElement).toBeNull();
+        expect(document.activeElement).toBe(action === 'other' ? other : document.body);
+        if (action === 'other')
+          expect([
+            other.value,
+            other.selectionStart,
+            other.selectionEnd,
+            other.selectionDirection,
+          ]).toEqual(['New focus owner', 1, 4, 'backward']);
+      });
+});
+
 describe('synchronous owner-to-owner Selection freshness', () => {
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);
