@@ -1017,6 +1017,52 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it('classifies a known namespace member used only for decoration paint', async () => {
+    const { artifact } = await generate(
+      `
+      import { definePrototype } from '@proto.ui/core';
+      import * as styles from './palette';
+      definePrototype({ name: 'namespace-decoration-paint', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        def.feedback.style.to(target).use(styles['paint']);
+        return (r) => r.decoration(target);
+      }});
+      `,
+      {
+        'palette.ts': "import { tw } from '@proto.ui/core'; export const paint = tw('p-[10%]');",
+      }
+    );
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it('withdraws targeted-only proof for Root paint through a namespace import', async () => {
+    await expect(
+      generate(
+        `
+        import { definePrototype } from '@proto.ui/core';
+        import { paint } from './palette';
+        definePrototype({ name: 'named-decoration-paint', setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(paint);
+          return (r) => r.decoration(target);
+        }});
+        `,
+        {
+          'palette.ts': "import { tw } from '@proto.ui/core'; export const paint = tw('p-[10%]');",
+          'root.ts': `
+            import { definePrototype } from '@proto.ui/core';
+            import * as styles from './palette';
+            definePrototype({ name: 'namespace-root-paint', setup(def) {
+              def.feedback.style.use(styles.paint);
+              return (r) => r.slot();
+            }});
+          `,
+        }
+      )
+    ).rejects.toThrow(/verified length recipe/);
+  });
+
   it.each([
     'def.feedback.style.use(paint);',
     'consume(paint);',

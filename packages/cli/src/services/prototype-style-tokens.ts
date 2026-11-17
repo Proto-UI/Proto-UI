@@ -187,6 +187,15 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         importSpecifier: specifier.text,
       });
     }
+    if (clause.namedBindings && ts.isNamespaceImport(clause.namedBindings)) {
+      if (scope.decorationSourceFiles)
+        scope.bindings.set(clause.namedBindings.name.text, {
+          ...emptyValue(),
+          importedBinding: true,
+          styleNamespace: bindings,
+        });
+      continue;
+    }
     if (!clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) continue;
     for (const element of clause.namedBindings.elements) {
       if (element.isTypeOnly) continue;
@@ -2115,12 +2124,24 @@ function decorationStyleUsage(inventory, origin) {
   return usage;
 }
 
+function recordStyleHandleUse(binding, expression, scope, tokens, inventory) {
+  if (!binding?.styleHandleOrigin) return;
+  const usage = decorationStyleUsage(inventory, binding.styleHandleOrigin);
+  for (const token of binding.strings.flatMap(splitTokens)) {
+    tokens.add(token);
+    usage.tokens.add(token);
+  }
+  if (expression && isOwnedDecorationStyleArgument(expression, scope)) usage.targeted = true;
+  else usage.unclassified = true;
+}
+
 function observeStyleHandleReference(node, scope, tokens, inventory) {
   const binding = scopeDeclaring(node.text, scope)?.bindings.get(node.text);
   if (
-    !binding?.styleHandleOrigin ||
+    (!binding?.styleHandleOrigin && !binding?.styleNamespace) ||
     ts.isTypeNode(node.parent) ||
     ts.isImportSpecifier(node.parent) ||
+    ts.isNamespaceImport(node.parent) ||
     ts.isExportSpecifier(node.parent) ||
     ((ts.isPropertyAccessExpression(node.parent) || ts.isPropertyAssignment(node.parent)) &&
       node.parent.name === node)
@@ -2128,15 +2149,30 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
     return;
   const expression = outerStyleExpression(node);
   const parent = expression.parent;
-  if (isConstStyleBinding(parent, expression)) return;
-
-  const usage = decorationStyleUsage(inventory, binding.styleHandleOrigin);
-  for (const token of binding.strings.flatMap(splitTokens)) {
-    tokens.add(token);
-    usage.tokens.add(token);
+  if (binding.styleNamespace) {
+    const property =
+      ts.isPropertyAccessExpression(parent) && parent.expression === expression
+        ? parent.name.text
+        : ts.isElementAccessExpression(parent) &&
+            parent.expression === expression &&
+            ts.isStringLiteralLike(parent.argumentExpression)
+          ? parent.argumentExpression.text
+          : undefined;
+    if (property !== undefined)
+      recordStyleHandleUse(
+        binding.styleNamespace.get(property),
+        outerStyleExpression(parent),
+        scope,
+        tokens,
+        inventory
+      );
+    else
+      for (const value of binding.styleNamespace.values())
+        recordStyleHandleUse(value, null, scope, tokens, inventory);
+    return;
   }
-  if (isOwnedDecorationStyleArgument(expression, scope)) usage.targeted = true;
-  else usage.unclassified = true;
+  if (!isConstStyleBinding(parent, expression))
+    recordStyleHandleUse(binding, expression, scope, tokens, inventory);
 }
 
 function isFeedbackStyleUseCall(node) {
