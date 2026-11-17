@@ -40,7 +40,10 @@ function captureSplitSurfaceIdentity(surface: HTMLElement): string {
   );
 }
 
-function hasCollapsedSplitTransform(computed: CSSStyleDeclaration | undefined): boolean {
+function hasCollapsedSplitTransform(
+  computed: CSSStyleDeclaration | undefined,
+  Matrix: typeof DOMMatrixReadOnly | undefined
+): boolean {
   const transform = computed?.getPropertyValue('transform') ?? '';
   const matrix = /^matrix\(([^)]+)\)$/.exec(transform)?.[1].split(',').map(Number);
   // The admitted Root recipes translate or scale by a nonzero amount.
@@ -48,6 +51,12 @@ function hasCollapsedSplitTransform(computed: CSSStyleDeclaration | undefined): 
     const [a, b, c, d] = matrix;
     if (a! * d! - b! * c! === 0) return true;
   }
+  if (
+    transform.startsWith('matrix3d(') &&
+    Matrix &&
+    Number.isNaN(new Matrix(transform).inverse().m11)
+  )
+    return true;
   const scale = computed?.getPropertyValue('scale') ?? '';
   return scale
     .trim()
@@ -70,7 +79,7 @@ function isSplitNodeConcealed(node: Element, visibilityOwner?: HTMLElement): boo
     )
       return true;
   }
-  if (hasCollapsedSplitTransform(computed)) return true;
+  if (hasCollapsedSplitTransform(computed, view?.DOMMatrixReadOnly)) return true;
   if (!visibilityOwner) return false;
   const inlineVisibility = style?.getPropertyValue('visibility');
   if (inlineVisibility === 'hidden' || inlineVisibility === 'collapse') return true;

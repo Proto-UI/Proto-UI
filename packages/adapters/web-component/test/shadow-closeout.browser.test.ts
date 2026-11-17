@@ -83,6 +83,18 @@ describe('Shadow closeout native boundaries', () => {
         const visible = { width: caller.getBoundingClientRect().width, error: update() };
         surface.style.transform = 'scale(0)';
         const inline = { width: caller.getBoundingClientRect().width, error: update() };
+        surface.style.transform = 'translateZ(1px)';
+        const visible3d = {
+          width: caller.getBoundingClientRect().width,
+          transform: getComputedStyle(surface).transform,
+          error: update(),
+        };
+        surface.style.transform = 'scale3d(0,0,0)';
+        const inline3d = {
+          width: caller.getBoundingClientRect().width,
+          transform: getComputedStyle(surface).transform,
+          error: update(),
+        };
         surface.style.removeProperty('transform');
         const sheet = new CSSStyleSheet();
         sheet.replaceSync('[part="surface"] { scale: 0 1; }');
@@ -92,12 +104,18 @@ describe('Shadow closeout native boundaries', () => {
           visible,
           inline,
           sheetCollapse,
+          inline3d,
+          visible3d,
           callerRetained: slot.assignedNodes()[0] === caller,
         };
       }, renderProtoShadowSplitStyleArtifact([]));
       expect(result.visible.width).toBeGreaterThan(0);
       expect(result.visible.error).toBeNull();
-      for (const collapsed of [result.inline, result.sheetCollapse]) {
+      expect(result.inline3d.transform).toMatch(/^matrix3d/);
+      expect(result.visible3d.transform).toMatch(/^matrix3d/);
+      expect(result.visible3d.width).toBeGreaterThan(0);
+      expect(result.visible3d.error).toBeNull();
+      for (const collapsed of [result.inline, result.sheetCollapse, result.inline3d]) {
         expect(collapsed.width).toBe(0);
         expect(collapsed.error).toMatch(/decoration physical blueprint changed/);
       }
