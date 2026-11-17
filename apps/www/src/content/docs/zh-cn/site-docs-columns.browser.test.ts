@@ -450,6 +450,70 @@ it('keeps library overview and long-prose routes bounded in both locales without
   }
 }, 150_000);
 
+it('keeps the real reading and splash content edges at narrow and medium widths', async () => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 390, height: 900 },
+  });
+  await context.route('**/*', (route) =>
+    new URL(route.request().url()).origin === new URL(baseUrl).origin
+      ? route.continue()
+      : route.abort()
+  );
+  const page = await context.newPage();
+  try {
+    for (const { name, route, reading } of [
+      { name: 'reading', route: '/en/start-here/why-proto-ui/', reading: true },
+      { name: 'homepage', route: '/en/', reading: false },
+      { name: 'splash', route: '/en/internal/demo-matrix/', reading: false },
+    ]) {
+      const response = await page.goto(baseUrl + route, { waitUntil: 'networkidle' });
+      expect(response?.status()).toBe(200);
+      expect(new URL(page.url()).pathname).toBe(route);
+      for (const width of [390, 900]) {
+        await page.setViewportSize({ width, height: 900 });
+        const geometry = await page.locator('.main-pane').evaluate((main) => {
+          const canvas = main.closest<HTMLElement>('.container-wrapper')!;
+          const outerStyle = getComputedStyle(canvas);
+          const mainStyle = getComputedStyle(main);
+          const { left, right } = canvas.getBoundingClientRect();
+          const pane = main.getBoundingClientRect();
+          const outerPadding = [
+            parseFloat(outerStyle.paddingLeft),
+            parseFloat(outerStyle.paddingRight),
+          ];
+          return {
+            viewportWidth: innerWidth,
+            layout: main.getAttribute('data-layout'),
+            rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            outerPadding,
+            mainPadding: [parseFloat(mainStyle.paddingLeft), parseFloat(mainStyle.paddingRight)],
+            canvasContentLeft: left + outerPadding[0]!,
+            canvasContentRight: right - outerPadding[1]!,
+            mainLeft: pane.left,
+            mainRight: pane.right,
+          };
+        });
+        await writeFile(
+          path.join(evidence, `nojs-inline-spacing-${name}-${width}.json`),
+          JSON.stringify({ source, route, width, geometry }, null, 2)
+        );
+        expect(geometry.viewportWidth).toBe(width);
+        expect(geometry.layout).toBe(reading ? 'docs' : 'splash');
+        const rem = geometry.rootFontSize;
+        const outer = reading ? Math.min(2 * rem, Math.max(rem, width * 0.02)) : rem;
+        const inner = reading ? 0 : rem * (width < 768 ? 0.25 : 1.5);
+        for (const gutter of geometry.outerPadding) expect(gutter).toBeCloseTo(outer, 1);
+        for (const gutter of geometry.mainPadding) expect(gutter).toBeCloseTo(inner, 1);
+        expect(geometry.mainLeft).toBeGreaterThanOrEqual(geometry.canvasContentLeft - 1);
+        expect(geometry.mainRight).toBeLessThanOrEqual(geometry.canvasContentRight + 1);
+      }
+    }
+  } finally {
+    await context.close();
+  }
+}, 150_000);
+
 it.each(['en', 'zh-cn'])(
   'keeps the %s no-TOC splash measure and page-title clearance',
   async (locale) => {
@@ -478,8 +542,15 @@ it.each(['en', 'zh-cn'])(
         const headerBottom = header.getBoundingClientRect().bottom;
         const scrollPadding = parseFloat(getComputedStyle(page).scrollPaddingTop) || 0;
         const scrollMargin = parseFloat(getComputedStyle(title).scrollMarginTop) || 0;
+        const reserveProbe = document.createElement('span');
+        reserveProbe.style.cssText =
+          'position:absolute;visibility:hidden;pointer-events:none;inline-size:0;block-size:var(--header-height)';
+        main.append(reserveProbe);
+        const headerScrollReserve = reserveProbe.getBoundingClientRect().height;
+        reserveProbe.remove();
         return {
           fragment: location.hash,
+          headerScrollReserve,
           titleTop,
           headerBottom,
           fragmentScrollClearance: scrollPadding + scrollMargin,
@@ -498,7 +569,11 @@ it.each(['en', 'zh-cn'])(
       await page.screenshot({ path: path.join(evidence, `${id}.png`) });
       expect(facts.fragment).toBe('#_top');
       expect(facts.titleTop).toBeGreaterThanOrEqual(facts.headerBottom);
-      expect(facts.fragmentScrollClearance).toBeGreaterThanOrEqual(facts.rootFontSize);
+      expect(facts.headerScrollReserve).toBeGreaterThan(0);
+      expect(facts.fragmentScrollClearance - facts.headerScrollReserve).toBeCloseTo(
+        facts.rootFontSize,
+        1
+      );
       expect(facts.layout).toBe('splash');
       expect(facts.tocCount).toBe(0);
       expect(parseFloat(facts.maxWidth)).toBe(88 * 16);
