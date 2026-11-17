@@ -124,6 +124,47 @@ describe('native text control selection', () => {
       });
 });
 
+describe('callback-updated native text control selection', () => {
+  for (const tag of ['input', 'textarea'] as const)
+    for (const phase of ['move', 'focus'] as const)
+      it(`preserves ${tag} selection updated during ${phase}`, () => {
+        const control = document.createElement(tag);
+        control.value = 'Retained uncontrolled source';
+        const source = document.createElement('div');
+        const destination = document.createElement('div');
+        source.append(control);
+        document.body.append(source, destination);
+        control.focus();
+        control.setSelectionRange(3, 8, 'forward');
+        const selection = document.getSelection()!;
+        selection.setBaseAndExtent(control, 0, control, 0);
+        const restore = selection.setBaseAndExtent.bind(selection);
+        vi.spyOn(selection, 'setBaseAndExtent').mockImplementation((...args) => {
+          restore(...args);
+          control.setSelectionRange(0, 0);
+        });
+        const update = () => {
+          control.value = 'New text';
+          control.setSelectionRange(1, 4, 'backward');
+        };
+        if (phase === 'focus') control.addEventListener('focus', update);
+
+        withNativeContentLease(source, () => {
+          control.blur();
+          destination.append(source);
+          if (phase === 'move') update();
+        });
+
+        expect(document.activeElement).toBe(control);
+        expect(control.value).toBe('New text');
+        expect([control.selectionStart, control.selectionEnd, control.selectionDirection]).toEqual([
+          1,
+          4,
+          'backward',
+        ]);
+      });
+});
+
 describe('synchronous owner-to-owner Selection freshness', () => {
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);

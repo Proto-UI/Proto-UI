@@ -42,11 +42,6 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   const document = scope.ownerDocument;
   const focused = document.activeElement as HTMLElement | null;
   const ownedFocus = focused && (focused === scope || scope.contains(focused));
-  const input = ownedFocus ? (focused as HTMLInputElement | HTMLTextAreaElement) : null;
-  const inputSelection =
-    input && typeof input.selectionStart === 'number'
-      ? ([input.selectionStart, input.selectionEnd, input.selectionDirection ?? undefined] as const)
-      : null;
   const selection = document.getSelection();
   const anchor = capture(selection?.anchorNode, selection?.anchorOffset ?? 0);
   const extent = capture(selection?.focusNode, selection?.focusOffset ?? 0);
@@ -62,6 +57,15 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   move();
   if (ownedFocus && focused.isConnected && document.activeElement !== focused)
     focused.focus({ preventScroll: true });
+  // Move and focus callbacks may replace the value or select a newer range.
+  const input =
+    ownedFocus && document.activeElement === focused
+      ? (focused as HTMLInputElement | HTMLTextAreaElement)
+      : null;
+  const inputSelection =
+    input && typeof input.selectionStart === 'number'
+      ? ([input.selectionStart, input.selectionEnd, input.selectionDirection ?? undefined] as const)
+      : null;
   const nextAnchor = resolve(anchor),
     nextExtent = resolve(extent);
   if (ownedSelection && nextAnchor && nextExtent) {
