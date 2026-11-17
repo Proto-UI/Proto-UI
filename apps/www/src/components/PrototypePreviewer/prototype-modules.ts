@@ -1,7 +1,7 @@
 // src/components/PrototypePreviewer/prototype-modules.ts
 // 原型模块映射表 - 按需动态导入
 
-import { registerPrototype } from './registry';
+import { findRegisteredPrototype, registerPrototype } from './registry';
 import { finfPrototypeModules } from './finf-prototype-modules';
 
 export type PrototypeModuleLoader = () => Promise<any>;
@@ -1494,7 +1494,12 @@ export const prototypeModules: Record<string, PrototypeModuleLoader> = {
   ...manualPrototypeModules,
 };
 
-const pendingPrototypeLoads = new Map<string, Promise<boolean>>();
+type PrototypeLoad = {
+  loader: PrototypeModuleLoader;
+  promise: Promise<boolean>;
+  prototype?: ReturnType<typeof findRegisteredPrototype>;
+};
+const prototypeLoads = new Map<string, PrototypeLoad>();
 
 /**
  * 动态加载并注册原型
@@ -1512,22 +1517,33 @@ export async function loadPrototype(prototypeId: string): Promise<boolean> {
     );
   }
 
-  const pending = pendingPrototypeLoads.get(prototypeId);
-  if (pending) return pending;
-  const loading = Promise.resolve()
-    .then(loader)
-    .then((mod) => {
-      if (mod?.default) registerPrototype(prototypeId, mod.default);
-      return true;
-    })
-    .catch((err) => {
-      throw new Error(
-        `[PrototypePreviewer] 加载原型模块 "${prototypeId}" 失败: ${(err as any)?.message || err}`
-      );
-    })
-    .finally(() => pendingPrototypeLoads.delete(prototypeId));
-  pendingPrototypeLoads.set(prototypeId, loading);
-  return loading;
+  const current = prototypeLoads.get(prototypeId);
+  if (
+    current &&
+    (!current.prototype ||
+      (current.loader === loader && findRegisteredPrototype(prototypeId) === current.prototype))
+  )
+    return current.promise;
+
+  const load: PrototypeLoad = {
+    loader,
+    promise: Promise.resolve()
+      .then(loader)
+      .then((mod) => {
+        if (mod?.default) registerPrototype(prototypeId, mod.default);
+        load.prototype = findRegisteredPrototype(prototypeId);
+        if (!load.prototype) prototypeLoads.delete(prototypeId);
+        return true;
+      })
+      .catch((err) => {
+        prototypeLoads.delete(prototypeId);
+        throw new Error(
+          `[PrototypePreviewer] 加载原型模块 "${prototypeId}" 失败: ${(err as any)?.message || err}`
+        );
+      }),
+  };
+  prototypeLoads.set(prototypeId, load);
+  return load.promise;
 }
 
 /**
