@@ -33,6 +33,7 @@ export function createScopedExposesReader(
   const rootReceiver = {};
   const callableCache = new WeakMap<object, WeakMap<Function, (...args: unknown[]) => unknown>>();
   const recordCache = new WeakMap<object, object>();
+  const registryRecords = new WeakSet<object>();
   const projectedCallables = new WeakSet<Function>();
 
   const wrapCallable = (
@@ -68,10 +69,10 @@ export function createScopedExposesReader(
     return wrapped;
   };
 
-  const defineEntry = (target: object, key: string, value: unknown) => {
+  const defineEntry = (target: object, key: PropertyKey, value: unknown, enumerable: boolean) => {
     Object.defineProperty(target, key, {
       value,
-      enumerable: true,
+      enumerable,
       configurable: true,
       writable: true,
     });
@@ -85,10 +86,13 @@ export function createScopedExposesReader(
         () => lastRaw ?? rootReceiver
       );
     if (value === null || typeof value !== 'object') return value;
+    // Registry objects remain classified when returned directly, nested in a
+    // public result, or retained across replacement snapshots of this owner.
+    if (registry) registryRecords.add(value);
 
     type RecordNode = {
       source: object;
-      entries: [string, unknown][];
+      entries: [PropertyKey, unknown, boolean][];
       parents: Set<RecordNode>;
       project: boolean;
       target?: object;
@@ -104,18 +108,34 @@ export function createScopedExposesReader(
         source,
         entries: [],
         parents: new Set(),
-        project: recordCache.has(source),
+        // A mutable data-only record can acquire a callable after this read boundary.
+        project: recordCache.has(source) || !Object.isFrozen(source),
       };
       graph.set(source, node);
       nodes.push(node);
+      const isRegistry = registryRecords.has(source);
       // Read each entry once. Projection discovery must not evaluate accessors
       // again when deciding which records need a callable boundary.
-      for (const [key, entry] of Object.entries(source)) {
-        if (key.startsWith('__collection') || !isAppMakerExposeRecordEntry(entry)) {
+      for (const key of Reflect.ownKeys(source)) {
+        const descriptor = Object.getOwnPropertyDescriptor(source, key);
+        if (!descriptor) continue;
+        if (isRegistry && (typeof key !== 'string' || !descriptor.enumerable)) continue;
+        // Array length is refreshed separately; its nonconfigurable descriptor
+        // cannot use the ordinary replaceable snapshot entry representation.
+        if (Array.isArray(source) && key === 'length') continue;
+        // Freezing an accessor does not freeze its result. Nested values retain
+        // all own keys and enumerability while getters are sampled once per read.
+        if (!('value' in descriptor)) node.project = true;
+        const entry = Reflect.get(source, key);
+        if (
+          isRegistry &&
+          typeof key === 'string' &&
+          (key.startsWith('__collection') || !isAppMakerExposeRecordEntry(entry))
+        ) {
           node.project = true;
           continue;
         }
-        node.entries.push([key, entry]);
+        node.entries.push([key, entry, !!descriptor.enumerable]);
         if (typeof entry === 'function') node.project = true;
         else if (entry !== null && typeof entry === 'object') inspect(entry)?.parents.add(node);
       }
@@ -125,8 +145,8 @@ export function createScopedExposesReader(
     if (!root) return value;
     root.project ||= registry;
 
-    // Propagate through cycles before allocating. A data-only graph retains its
-    // original identity, including nominal ContextKey and presentation tokens.
+    // Propagate through cycles and frozen containers. Only immutable, inert graphs
+    // retain raw identity, including nominal ContextKey and presentation tokens.
     const pending = nodes.filter((node) => node.project);
     while (pending.length) {
       for (const parent of pending.pop()!.parents) {
@@ -147,15 +167,18 @@ export function createScopedExposesReader(
         // current contents again while preserving the same projection object.
         recordCache.set(node.target!, node.target!);
       }
+      if (registryRecords.has(node.source)) registryRecords.add(node.target!);
     }
     for (const node of nodes) {
       if (!node.target) continue;
       // Refresh on an explicit read or result boundary; this is not a reactive
       // value channel. Held projections keep identity and observe that refresh.
-      for (const key of Object.keys(node.target)) Reflect.deleteProperty(node.target, key);
+      for (const key of Reflect.ownKeys(node.target))
+        if (!Array.isArray(node.target) || key !== 'length')
+          Reflect.deleteProperty(node.target, key);
       if (Array.isArray(node.target) && Array.isArray(node.source))
         node.target.length = node.source.length;
-      for (const [key, entry] of node.entries) {
+      for (const [key, entry, enumerable] of node.entries) {
         const projected =
           typeof entry === 'function'
             ? registry && node === root
@@ -168,7 +191,7 @@ export function createScopedExposesReader(
             : entry !== null && typeof entry === 'object'
               ? (graph.get(entry)?.target ?? entry)
               : entry;
-        defineEntry(node.target, key, projected);
+        defineEntry(node.target, key, projected, enumerable);
       }
     }
     return root.target ?? value;
@@ -178,7 +201,9 @@ export function createScopedExposesReader(
     read(record) {
       if (!live) return {};
       lastRaw = record;
-      return { ...(projectValue(record, true) as Record<string, unknown>) };
+      const snapshot = { ...(projectValue(record, true) as Record<string, unknown>) };
+      registryRecords.add(snapshot);
+      return snapshot;
     },
     invalidate() {
       if (!live) return;

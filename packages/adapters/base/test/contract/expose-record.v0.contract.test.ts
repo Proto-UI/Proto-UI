@@ -53,7 +53,7 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(invoke).toHaveBeenCalledOnce();
   });
 
-  it('preserves opaque host values and data-only graph identities', () => {
+  it('preserves opaque host values and projected data graph aliases', () => {
     const reader = createScopedExposesReader(() => (call) => call());
     class HostValue {
       constructor(readonly value: string) {}
@@ -75,9 +75,23 @@ describe('adapter-base contract: expose record (v0)', () => {
     expect(values.date).toBe(date);
     expect(values.map).toBe(map);
     expect(values.hostValue).toBe(hostValue);
-    expect(values.cyclic).toBe(cyclic);
+    expect(values.cyclic).not.toBe(cyclic);
     expect(values.cyclic.self).toBe(values.cyclic);
     expect(values.shared).toBe(snapshot.alias);
+  });
+
+  it('retains the raw identity of immutable inert graphs, including cycles', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const shared = Object.freeze({ value: 1 });
+    const cycle: Record<string, unknown> = { shared };
+    cycle.self = cycle;
+    Object.freeze(cycle);
+
+    const snapshot = reader.read({ cycle, shared, read: () => cycle });
+
+    expect(snapshot.cycle).toBe(cycle);
+    expect(snapshot.shared).toBe(shared);
+    expect((snapshot.read as () => unknown)()).toBe(cycle);
   });
 
   it('projects array callables in callback scope while preserving cycles', () => {
@@ -145,11 +159,256 @@ describe('adapter-base contract: expose record (v0)', () => {
     });
 
     expect(snapshot).toEqual({ authorValue });
-    expect(snapshot.authorValue).toBe(authorValue);
+    expect(snapshot.authorValue).not.toBe(authorValue);
   });
 });
 
 describe('returned expose values share the owner boundary', () => {
+  it.each(['direct', 'nested'] as const)(
+    'keeps known registry entries private when returned through a %s public result',
+    (shape) => {
+      const reader = createScopedExposesReader(() => (call) => call());
+      const classification = Symbol.for('@proto.ui/expose/entry-classification');
+      const signal = Object.freeze({ [classification]: 'event', __pui_expose: 'event' });
+      const raw = {
+        __collectionItem: () => 'internal',
+        signal,
+        getRegistry() {
+          return this;
+        },
+        getNested() {
+          return { registry: this };
+        },
+      };
+      const snapshot = reader.read(raw) as typeof raw;
+      expect(Object.hasOwn(snapshot, '__collectionItem')).toBe(false);
+      expect(Object.hasOwn(snapshot, 'signal')).toBe(false);
+      const returned = shape === 'direct' ? snapshot.getRegistry() : snapshot.getNested().registry;
+      expect(Object.hasOwn(returned, '__collectionItem')).toBe(false);
+      expect(Object.hasOwn(returned, 'signal')).toBe(false);
+    }
+  );
+
+  it('keeps old registry identities classified after replacement', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const classification = Symbol.for('@proto.ui/expose/entry-classification');
+    const old = {
+      __collectionSnapshot: () => 'old-internal',
+      signal: Object.freeze({ [classification]: 'event', __pui_expose: 'event' }),
+      label: 'old',
+    };
+    reader.read(old);
+    const current = reader.read({ getOld: () => ({ old }) }) as { getOld(): { old: typeof old } };
+    const returned = current.getOld().old;
+    expect(returned.label).toBe('old');
+    expect(Object.hasOwn(returned, '__collectionSnapshot')).toBe(false);
+    expect(Object.hasOwn(returned, 'signal')).toBe(false);
+  });
+
+  it('retains the registry role when its projected object returns again', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const raw = {
+      getRegistry() {
+        return this;
+      },
+      echo: (value: unknown) => value,
+    };
+    const snapshot = reader.read(raw) as typeof raw;
+    const projected = snapshot.getRegistry() as typeof raw & Record<string, unknown>;
+    projected.__collectionLate = () => 'consumer-added';
+    projected.signal = Object.freeze({
+      [Symbol.for('@proto.ui/expose/entry-classification')]: 'event',
+      __pui_expose: 'event',
+    });
+    const returned = snapshot.echo(projected) as typeof projected;
+    expect(returned).toBe(projected);
+    expect(Object.hasOwn(returned, '__collectionLate')).toBe(false);
+    expect(Object.hasOwn(returned, 'signal')).toBe(false);
+  });
+
+  it('retains the public registry copy role when a caller sends it back', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const raw = { echo: (value: unknown) => value };
+    const snapshot = reader.read(raw) as typeof raw & Record<string, unknown>;
+    snapshot.__collectionLate = () => 'consumer-added';
+    snapshot.signal = Object.freeze({
+      [Symbol.for('@proto.ui/expose/entry-classification')]: 'event',
+      __pui_expose: 'event',
+    });
+    const returned = snapshot.echo(snapshot) as typeof snapshot;
+    expect(Object.hasOwn(returned, '__collectionLate')).toBe(false);
+    expect(Object.hasOwn(returned, 'signal')).toBe(false);
+    expect(Object.hasOwn(raw, '__collectionLate')).toBe(false);
+  });
+
+  it('preserves nested symbol and nonenumerable data without applying registry key filters', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const symbol = Symbol('data');
+    const value = { [symbol]: 'symbol-value', __collectionItem: () => 'author-value' };
+    Object.defineProperty(value, 'hidden', { value: 'hidden-value', enumerable: false });
+    const record = { value, [symbol]: 'not-a-registry-key' };
+    Object.defineProperty(record, 'hidden', { value: 'not-a-registry-key', enumerable: false });
+
+    const snapshot = reader.read(record);
+    const projected = snapshot.value as typeof value & { hidden: string };
+
+    expect(projected[symbol]).toBe('symbol-value');
+    expect(projected.hidden).toBe('hidden-value');
+    expect(Object.getOwnPropertyDescriptor(projected, 'hidden')?.enumerable).toBe(false);
+    expect(Object.getOwnPropertyDescriptor(projected, symbol)?.enumerable).toBe(true);
+    expect(projected.__collectionItem()).toBe('author-value');
+    expect(Reflect.ownKeys(snapshot)).toEqual(['value']);
+  });
+
+  it('preserves a frozen iterable and guards its symbol method after disposal', () => {
+    const invoke = vi.fn((call: () => void) => call());
+    const reader = createScopedExposesReader(() => invoke);
+    const value = Object.freeze({
+      *[Symbol.iterator]() {
+        yield 1;
+      },
+    });
+    const snapshot = reader.read({ value }) as { value: typeof value };
+
+    expect([...snapshot.value]).toEqual([1]);
+    expect(invoke).toHaveBeenCalledOnce();
+    const iterate = snapshot.value[Symbol.iterator];
+    reader.invalidate();
+    expect(() => iterate()).toThrow(/terminal disposal/);
+  });
+
+  it.each(['hidden', 'symbol'] as const)(
+    'replaces and removes %s callables on explicit refresh',
+    (kind) => {
+      const invoke = vi.fn((call: () => void) => call());
+      const reader = createScopedExposesReader(() => invoke);
+      const key = kind === 'hidden' ? 'action' : Symbol('action');
+      const value: Record<PropertyKey, any> = { label: 'first' };
+      Object.defineProperty(value, key, {
+        value: function (this: { label: string }) {
+          return this.label;
+        },
+        enumerable: false,
+        configurable: true,
+        writable: true,
+      });
+      const raw = { value, read: () => value };
+      const snapshot = reader.read(raw) as typeof raw;
+      const original = snapshot.value[key];
+      expect(original()).toBe('first');
+      expect(Object.getOwnPropertyDescriptor(snapshot.value, key)?.enumerable).toBe(false);
+      value[key] = function (this: { label: string }) {
+        return `${this.label}-next`;
+      };
+      expect(snapshot.read()).toBe(snapshot.value);
+      const replaced = snapshot.value[key];
+      expect(replaced).not.toBe(original);
+      expect(replaced()).toBe('first-next');
+      delete value[key];
+      expect(reader.read(raw).value).toBe(snapshot.value);
+      expect(Object.hasOwn(snapshot.value, key)).toBe(false);
+      reader.invalidate();
+      expect(() => original()).toThrow(/terminal disposal/);
+      expect(() => replaced()).toThrow(/terminal disposal/);
+    }
+  );
+
+  it('preserves custom array keys while refreshing holes, length and hidden methods', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    const key = Symbol('array-action');
+    const value = ['first'] as string[] & { [key]?: () => string; hidden?: string };
+    Object.defineProperty(value, key, {
+      value: function (this: string[]) {
+        return this[0];
+      },
+      enumerable: false,
+      configurable: true,
+    });
+    Object.defineProperty(value, 'hidden', {
+      value: 'data',
+      enumerable: false,
+      configurable: true,
+    });
+    const first = reader.read({ value }) as { value: typeof value };
+    expect(first.value[key]!()).toBe('first');
+    expect(first.value.hidden).toBe('data');
+    expect(Object.getOwnPropertyDescriptor(first.value, key)?.enumerable).toBe(false);
+    value[2] = 'third';
+    delete value[key];
+    delete value.hidden;
+    const second = reader.read({ value }) as typeof first;
+    expect(second.value).toBe(first.value);
+    expect(second.value.length).toBe(3);
+    expect(Object.hasOwn(second.value, '1')).toBe(false);
+    expect(second.value[2]).toBe('third');
+    expect(Object.hasOwn(second.value, key)).toBe(false);
+    expect(Object.hasOwn(second.value, 'hidden')).toBe(false);
+  });
+
+  it.each(['record', 'array', 'frozen-parent'] as const)(
+    'contains callables installed after the first data-only %s snapshot',
+    (shape) => {
+      const invoke = vi.fn((call: () => void) => call());
+      const reader = createScopedExposesReader(() => invoke);
+      let count = 0;
+      const box: { value: number; action?: () => number } = { value: 0 };
+      const value =
+        shape === 'array' ? [box] : shape === 'frozen-parent' ? Object.freeze({ box }) : box;
+      const raw = {
+        value,
+        install: () => {
+          box.action = () => ++count;
+        },
+        read: () => value,
+      };
+      const snapshot = reader.read(raw) as typeof raw;
+      const projected = () =>
+        shape === 'array'
+          ? (snapshot.value as (typeof box)[])[0]
+          : shape === 'frozen-parent'
+            ? (snapshot.value as { box: typeof box }).box
+            : (snapshot.value as typeof box);
+      expect(projected().action).toBeUndefined();
+      snapshot.install();
+      // Mutation is not a subscription or a new public read boundary.
+      expect(projected().action).toBeUndefined();
+      expect(invoke).toHaveBeenCalledOnce();
+      expect(snapshot.read()).toBe(snapshot.value);
+      const action = projected().action!;
+      expect(action).not.toBe(box.action);
+      expect(action()).toBe(1);
+      expect(invoke).toHaveBeenCalledTimes(3);
+      reader.invalidate();
+      expect(() => action()).toThrow(/terminal disposal/);
+      expect(count).toBe(1);
+    }
+  );
+
+  it('snapshots frozen accessors before their later value becomes callable', () => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    let current: unknown = 0;
+    let reads = 0;
+    const box = Object.freeze({
+      get value() {
+        reads++;
+        return current;
+      },
+    });
+    const raw = { box };
+    const first = reader.read(raw) as typeof raw;
+    expect(reads).toBe(1);
+    current = () => 7;
+    expect(first.box.value).toBe(0);
+    expect(reads).toBe(1);
+    const second = reader.read(raw) as typeof raw;
+    expect(second.box).toBe(first.box);
+    expect(reads).toBe(2);
+    const action = second.box.value as () => number;
+    expect(action()).toBe(7);
+    reader.invalidate();
+    expect(() => action()).toThrow(/terminal disposal/);
+  });
+
   it('wraps returned functions once and preserves their identity across factory aliases', () => {
     const invoke = vi.fn((call: () => void) => call());
     const reader = createScopedExposesReader(() => invoke);

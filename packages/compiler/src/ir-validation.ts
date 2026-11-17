@@ -1492,7 +1492,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             )
               type = joinValueTypes([owner.index, 'void']);
             else if (objectFields(owner) && index === 'string')
-              type = joinValueTypes([...objectFields(owner)!.map((field) => field.type), 'void']);
+              // A finite field list does not close a structural record's runtime key set.
+              type = 'unknown';
             else bad('Dynamic indexing requires an ordinary array or record.', location);
             break;
           }
