@@ -84,7 +84,7 @@ function transport() {
           changedFiles: 1,
           body: 'fixture',
           baseRefName: 'main',
-          baseRefOid: sha('a'),
+          baseRef: { target: { oid: sha('a') } },
           headRefOid: sha('b'),
           author: other,
           commits: connection([
