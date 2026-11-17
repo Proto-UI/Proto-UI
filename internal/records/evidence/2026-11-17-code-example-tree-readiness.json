@@ -37,7 +37,16 @@
     "inheritedLocatorTimeout": true,
     "unchangedHostCaseDeadlineMs": 120000,
     "unchangedCases": "All original 26 case bodies and assertions retained; only 12-case host-coverage branch receives the readiness wait. Other eight runtime/family cases and noJS controls unchanged.",
-    "state": "prepared-for-independent-review; not applied to tracked source",
+    "state": "At candidate creation (2026-11-17T09:05:23.969460+00:00, publication parent 46e362a69abe3ca40f6a150dece859a964db2407): prepared-for-independent-review; not applied to tracked source. This is creation-time state, not the state at the published head.",
+    "stateQualification": {
+      "finding": "R1489-03",
+      "originalState": "prepared-for-independent-review; not applied to tracked source",
+      "scope": "creation-time",
+      "publicationParent": "46e362a69abe3ca40f6a150dece859a964db2407",
+      "appliedAtCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+      "appliedFileSha256": "61aee02e02a3e3ab6314712b52eda443b890d433003e3b83ab1ca8cd70ec21a0",
+      "observationQualification": "The retained probe and nativeRun=false describe the pre-application candidate observation. This qualification neither reruns that probe nor makes an exact-head/native acceptance claim."
+    },
     "nativeRun": false,
     "productionSourceChanged": false,
     "inheritedLocatorTimeoutMs": 30000,

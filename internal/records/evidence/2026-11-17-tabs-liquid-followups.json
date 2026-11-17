@@ -1481,7 +1481,23 @@
       "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
       "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
       "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
-      "patchSha256": "6819a1b62d6d2b947bd2a1f3150aa9d0c3339278f677de0d53938b478651c46e",
+      "patchSha256": "76c40f149199116b969cef0474137773bac6636d4454bd8d4b4d9babc0a402e9",
+      "patchBytes": 1496,
+      "patchProvenance": {
+        "finding": "R1489-02",
+        "supersededPatchSha256": "6819a1b62d6d2b947bd2a1f3150aa9d0c3339278f677de0d53938b478651c46e",
+        "supersededDigestStatus": "Retained historical value; original generation inputs are not established. The replacement identifies only the explicit base-to-head unified diff below.",
+        "baseCommit": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "headCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+        "baseSha256": "2673adf6d01dcedbcc86c92b6373bafe807ced9df70d7f532fd5df83a5af0fd7",
+        "headSha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+        "baseBlob": "8870fdd2e6eb3972e114c01a3fe98e59e16397f7",
+        "headBlob": "b7e90603ed93e26f71384a47602d19736b2df18a",
+        "generation": "LC_ALL=C diff -u --label a/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts --label b/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts <base-file> <head-file>; expected diff exit status 1; hash exact stdout bytes without normalization",
+        "inputExtraction": "git cat-file blob <baseBlob> and git cat-file blob <headBlob>, or the matching byte-bound archived files; no working-tree filters or rendered text",
+        "scope": "Metadata correction only; no new native execution or acceptance. All original observations and failed receipts remain historical."
+      },
       "why": "The public docs have legitimate Install and usage panels per runtime; both optical journeys must scope to the unique toolbar-enabled live demo.",
       "changed": "Two selector filters only; no first() and no visibility-driven disambiguation.",
       "unchanged": [
@@ -1601,6 +1617,14 @@
   },
   "native": {
     "candidateExecution": "not-run",
+    "familyResolution": {
+      "statement": "The runtime-tabs native lane has Shadcn, Liquid, Brutalist and Bootstrap rows. The generic Liquid route resolves its runtime control family through the Shadcn fallback, so the Liquid row is not independent Liquid-family control evidence.",
+      "source": [
+        "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts:41-47 runtimePreviewFamily falls back to resolveSiteLibraryFamily",
+        "apps/www/src/components/site-library-family.ts:12-18 resolveSiteLibraryFamily returns shadcn outside the brutalist and bootstrap routes"
+      ],
+      "status": "Source-derived attribution, not a native execution result. The runtime-tabs native lane stays failed and this metadata correction claims no native acceptance."
+    },
     "environmentObservation": "Ordinary sandbox Chromium 156.0.8078.79 failed during process launch with socket() Operation not permitted before any page assertion. Box main reported empty wallet. No sandbox, credential or billing change was made.",
     "baselineTabsJob": "https://github.com/Proto-UI/Proto-UI/actions/runs/44038705347/job/133893072353",
     "baselineResult": "4 original native cases failed: Shadcn/Liquid 4px label gap exceeds 2px; Brutalist/Bootstrap selected and inactive ink were equal. Original artifacts did not sample hover; the hover explanation is source-derived and needs native confirmation.",
