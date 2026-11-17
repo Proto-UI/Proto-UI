@@ -137,6 +137,7 @@ describe('Shadow closeout native boundaries', () => {
             const host = document.createElement('closeout-split-focused-upgrade');
             const caller = document.createElement('input');
             caller.value = 'Caller';
+            caller.setSelectionRange(1, 4, 'backward');
             host.append(caller);
             document.body.append(host);
             caller.focus();
@@ -149,7 +150,11 @@ describe('Shadow closeout native boundaries', () => {
                 connectedCallback() {
                   reaction = true;
                   activeAtReaction = document.activeElement === caller;
-                  if (blur) caller.blur();
+                  if (blur) {
+                    caller.value = 'Reset';
+                    caller.setAttribute('slot', 'claim');
+                    caller.blur();
+                  }
                 }
               }
             );
@@ -180,6 +185,8 @@ describe('Shadow closeout native boundaries', () => {
               retained: host.firstChild === caller,
               focused: document.activeElement === caller,
               value: caller.value,
+              slot: caller.getAttribute('slot'),
+              selection: [caller.selectionStart, caller.selectionEnd, caller.selectionDirection],
             };
           },
           { artifact: renderProtoShadowSplitStyleArtifact([]), blur }
@@ -189,13 +196,15 @@ describe('Shadow closeout native boundaries', () => {
         expect(result.activeAtReaction).toBe(true);
         expect(result.retained).toBe(true);
         expect(result.value).toBe('Caller');
+        expect(result.slot).toBeNull();
+        expect(result.selection).toEqual([1, 4, 'backward']);
+        expect(result.focused).toBe(true);
         if (blur)
           expect(result.errors).toEqual([
             expect.stringContaining('decoration caller projection changed'),
           ]);
         else {
           expect(result.errors).toEqual([]);
-          expect(result.focused).toBe(true);
         }
       } finally {
         await page.close();
@@ -232,7 +241,10 @@ describe('Shadow closeout native boundaries', () => {
                 connectedCallback() {
                   reaction = true;
                   selectedAtReaction = matches();
-                  if (reset) selection.removeAllRanges();
+                  if (reset) {
+                    caller.data = 'Reset text';
+                    selection.removeAllRanges();
+                  }
                 }
               }
             );
@@ -272,13 +284,13 @@ describe('Shadow closeout native boundaries', () => {
         expect(result.selectedAtReaction).toBe(true);
         expect(result.retained).toBe(true);
         expect(result.text).toBe('Caller text');
+        expect(result.selectedAfter).toBe(true);
         if (reset)
           expect(result.errors).toEqual([
             expect.stringContaining('decoration caller projection changed'),
           ]);
         else {
           expect(result.errors).toEqual([]);
-          expect(result.selectedAfter).toBe(true);
         }
       } finally {
         await page.close();

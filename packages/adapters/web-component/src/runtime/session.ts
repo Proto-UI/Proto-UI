@@ -120,21 +120,59 @@ function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean 
   );
 }
 
-function captureCallerControlState(node: Element): readonly (string | number | boolean | null)[] {
+type CallerSnapshot = { isCurrent(): boolean; restore(): void };
+
+function captureCallerControlState(node: Element): CallerSnapshot {
   if (node.localName === 'select') {
     const select = node as HTMLSelectElement;
-    return [select.value, ...Array.from(select.options, (option) => option.selected)];
+    const { value } = select;
+    const options = Array.from(select.options, (option) => ({ option, selected: option.selected }));
+    return {
+      isCurrent: () =>
+        select.value === value &&
+        select.options.length === options.length &&
+        options.every(
+          ({ option, selected }, index) =>
+            option === select.options[index] && option.selected === selected
+        ),
+      restore() {
+        for (const { option, selected } of options)
+          if (option.selected !== selected) option.selected = selected;
+      },
+    };
   }
   const control = node as HTMLInputElement | HTMLTextAreaElement;
-  return [
-    control.value,
-    control.selectionStart,
-    control.selectionEnd,
-    control.selectionDirection,
-    ...(node.localName === 'input'
-      ? [(control as HTMLInputElement).checked, (control as HTMLInputElement).indeterminate]
-      : []),
-  ];
+  const input = node.localName === 'input' ? (node as HTMLInputElement) : undefined;
+  const { value, selectionStart, selectionEnd, selectionDirection } = control;
+  const checked = input?.checked;
+  const indeterminate = input?.indeterminate;
+  const files = input?.files;
+  return {
+    isCurrent: () =>
+      control.value === value &&
+      control.selectionStart === selectionStart &&
+      control.selectionEnd === selectionEnd &&
+      control.selectionDirection === selectionDirection &&
+      input?.checked === checked &&
+      input?.indeterminate === indeterminate,
+    restore() {
+      if (control.value !== value) {
+        if (input?.type === 'file' && files) input.files = files;
+        else control.value = value;
+      }
+      if (input && checked !== undefined && input.checked !== checked) input.checked = checked;
+      if (input && indeterminate !== undefined && input.indeterminate !== indeterminate)
+        input.indeterminate = indeterminate;
+      if (
+        selectionStart !== null &&
+        selectionEnd !== null &&
+        (control.selectionStart !== selectionStart ||
+          control.selectionEnd !== selectionEnd ||
+          control.selectionDirection !== selectionDirection)
+      )
+        control.setSelectionRange(selectionStart, selectionEnd, selectionDirection ?? undefined);
+    },
+  };
 }
 
 function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
@@ -146,7 +184,7 @@ function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
 function captureSplitCallerSelection(
   host: HTMLElement,
   root: Document | ShadowRoot
-): (() => boolean) | undefined {
+): CallerSnapshot | undefined {
   const selectionRoot = root as (Document | ShadowRoot) & { getSelection?(): Selection | null };
   const read = () => selectionRoot.getSelection?.() ?? host.ownerDocument.getSelection();
   const selection = read();
@@ -162,40 +200,63 @@ function captureSplitCallerSelection(
     endContainer,
     endOffset,
   }));
-  return () => {
-    const current = read();
-    return (
-      host.getRootNode() === root &&
-      !!current &&
-      current.anchorNode === anchorNode &&
-      current.anchorOffset === anchorOffset &&
-      current.focusNode === focusNode &&
-      current.focusOffset === focusOffset &&
-      current.rangeCount === boundaries.length &&
-      boundaries.every((before, index) => {
-        const after = current.getRangeAt(index);
-        return (
-          after.startContainer === before.startContainer &&
-          after.startOffset === before.startOffset &&
-          after.endContainer === before.endContainer &&
-          after.endOffset === before.endOffset
-        );
-      })
-    );
+  return {
+    isCurrent() {
+      const current = read();
+      return (
+        host.getRootNode() === root &&
+        !!current &&
+        current.anchorNode === anchorNode &&
+        current.anchorOffset === anchorOffset &&
+        current.focusNode === focusNode &&
+        current.focusOffset === focusOffset &&
+        current.rangeCount === boundaries.length &&
+        boundaries.every((before, index) => {
+          const after = current.getRangeAt(index);
+          return (
+            after.startContainer === before.startContainer &&
+            after.startOffset === before.startOffset &&
+            after.endContainer === before.endContainer &&
+            after.endOffset === before.endOffset
+          );
+        })
+      );
+    },
+    restore() {
+      const current = read();
+      if (!current || this.isCurrent()) return;
+      if (boundaries.length === 1 && anchorNode && focusNode) {
+        current.setBaseAndExtent(anchorNode, anchorOffset, focusNode, focusOffset);
+      } else {
+        current.removeAllRanges();
+        for (const boundary of boundaries) {
+          const range = host.ownerDocument.createRange();
+          range.setStart(boundary.startContainer, boundary.startOffset);
+          range.setEnd(boundary.endContainer, boundary.endOffset);
+          current.addRange(range);
+        }
+      }
+    },
   };
 }
 
-function captureSplitCallerProjection(host: HTMLElement): () => boolean {
+function captureSplitCallerProjection(host: HTMLElement): CallerSnapshot {
   const root = host.getRootNode() as Document | ShadowRoot;
   const active = activeWithinOpenTree(root);
   const activeBranch = root.activeElement;
   const callerOwnsFocus = !!activeBranch && activeBranch !== host && host.contains(activeBranch);
-  const selectionIsCurrent = captureSplitCallerSelection(host, root);
+  const selection = captureSplitCallerSelection(host, root);
   const children = Array.from(host.childNodes);
   const content = children.map((node) => ({
     text: node.textContent,
     slot: node.nodeType === 1 ? (node as Element).getAttribute('slot') : null,
   }));
+  const textNodes: { node: Text; data: string }[] = [];
+  const walker = host.ownerDocument.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode as Text;
+    textNodes.push({ node, data: node.data });
+  }
   const selector = 'input, textarea, select';
   const controls = children
     .flatMap((node) => {
@@ -205,23 +266,40 @@ function captureSplitCallerProjection(host: HTMLElement): () => boolean {
       return element.matches(selector) ? [element, ...descendants] : descendants;
     })
     .map((node) => ({ node, state: captureCallerControlState(node) }));
-  return () =>
-    (!callerOwnsFocus || (host.getRootNode() === root && activeWithinOpenTree(root) === active)) &&
-    (!selectionIsCurrent || selectionIsCurrent()) &&
-    hasSameChildren(host, children) &&
-    children.every(
-      (node, index) =>
-        node.textContent === content[index].text &&
-        (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
-          content[index].slot
-    ) &&
-    controls.every(({ node, state }) => {
-      if (!host.contains(node)) return false;
-      const current = captureCallerControlState(node);
-      return (
-        current.length === state.length && current.every((value, index) => value === state[index])
-      );
-    });
+  return {
+    isCurrent: () =>
+      (!callerOwnsFocus ||
+        (host.getRootNode() === root && activeWithinOpenTree(root) === active)) &&
+      (!selection || selection.isCurrent()) &&
+      hasSameChildren(host, children) &&
+      children.every(
+        (node, index) =>
+          node.textContent === content[index].text &&
+          (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
+            content[index].slot
+      ) &&
+      controls.every(({ node, state }) => host.contains(node) && state.isCurrent()),
+    restore() {
+      if (host.getRootNode() !== root) return;
+      if (!hasSameChildren(host, children)) {
+        withWebComponentOwnedRelocation(children, host, () => host.replaceChildren(...children));
+      }
+      children.forEach((node, index) => {
+        if (node.nodeType !== 1) return;
+        const element = node as Element;
+        const { slot } = content[index]!;
+        if (element.getAttribute('slot') === slot) return;
+        if (slot === null) element.removeAttribute('slot');
+        else element.setAttribute('slot', slot);
+      });
+      for (const { node, data } of textNodes)
+        if (host.contains(node) && node.data !== data) node.data = data;
+      if (callerOwnsFocus && activeWithinOpenTree(root) !== active)
+        (active as HTMLElement | null)?.focus({ preventScroll: true });
+      for (const { node, state } of controls) if (host.contains(node)) state.restore();
+      selection?.restore();
+    },
+  };
 }
 
 function captureSplitAttributes(element: Element, decoration: boolean): string {
@@ -395,10 +473,18 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         : undefined;
     // A staged child may run a constructor or connected reaction. The
     // caller still owns this light-DOM sequence until acknowledgement.
-    const callerProjectionIsCurrent = splitRoot ? captureSplitCallerProjection(host) : undefined;
+    const callerProjection = splitRoot ? captureSplitCallerProjection(host) : undefined;
     const assertCallerProjection = () => {
-      if (callerProjectionIsCurrent && !callerProjectionIsCurrent())
-        throw new Error('[WC Adapter] decoration caller projection changed');
+      if (!callerProjection || callerProjection.isCurrent()) return;
+      const error = new Error('[WC Adapter] decoration caller projection changed');
+      if (turn === commitTurn && ownsDecorationRoot()) {
+        try {
+          callerProjection.restore();
+        } catch (rollbackError) {
+          throw new AggregateError([error, rollbackError], error.message);
+        }
+      }
+      throw error;
     };
     const stagedChildren = splitRoot ? new Map<Node, ChildNode[]>() : undefined;
     const stagedNodes: DecorationNodeRecord[] = [];
