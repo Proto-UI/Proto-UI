@@ -165,6 +165,50 @@ describe('callback-updated native text control selection', () => {
       });
 });
 
+describe('shadow-backed native text control selection', () => {
+  for (const tag of ['input', 'textarea'] as const)
+    for (const update of [false, true])
+      it(`preserves shadow ${tag} ${update ? 'focus callback' : 'original'} selection`, () => {
+        const source = document.createElement('div');
+        const destination = document.createElement('div');
+        const host = document.createElement('div');
+        const shadow = host.attachShadow({ mode: 'open' });
+        const control = document.createElement(tag);
+        control.value = 'Retained uncontrolled source';
+        shadow.append(control);
+        source.append(host);
+        document.body.append(source, destination);
+        control.focus();
+        control.setSelectionRange(3, 8, 'backward');
+        expect(document.activeElement).toBe(host);
+        expect(shadow.activeElement).toBe(control);
+        const selection = document.getSelection()!;
+        selection.setBaseAndExtent(host, 0, host, 0);
+        const restore = selection.setBaseAndExtent.bind(selection);
+        vi.spyOn(selection, 'setBaseAndExtent').mockImplementation((...args) => {
+          restore(...args);
+          control.setSelectionRange(0, 0);
+        });
+        if (update)
+          control.addEventListener('focus', () => {
+            control.value = 'New text';
+            control.setSelectionRange(1, 4, 'forward');
+          });
+
+        withNativeContentLease(source, () => {
+          control.blur();
+          destination.append(source);
+        });
+
+        expect(document.activeElement).toBe(host);
+        expect(shadow.activeElement).toBe(control);
+        expect(control.value).toBe(update ? 'New text' : 'Retained uncontrolled source');
+        expect([control.selectionStart, control.selectionEnd, control.selectionDirection]).toEqual(
+          update ? [1, 4, 'forward'] : [3, 8, 'backward']
+        );
+      });
+});
+
 describe('synchronous owner-to-owner Selection freshness', () => {
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);

@@ -36,12 +36,22 @@ function resolve(boundary: Boundary | null): { node: Node; offset: number } | nu
   }
   return boundary.node.isConnected ? { node: boundary.node, offset: boundary.offset } : null;
 }
+function activeElement(document: Document): HTMLElement | null {
+  let active = document.activeElement as HTMLElement | null;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  return active;
+}
 /** Preserve browser-owned focus and directional Selection around a physical
  * composition move. Source nodes are retained, never cloned or serialized. */
 export function withNativeContentLease(scope: HTMLElement, move: () => void): void {
   const document = scope.ownerDocument;
-  const focused = document.activeElement as HTMLElement | null;
-  const ownedFocus = focused && (focused === scope || scope.contains(focused));
+  const focused = activeElement(document);
+  let focusOwner: Node | null = focused;
+  while (focusOwner && !scope.contains(focusOwner)) {
+    const root = focusOwner.getRootNode();
+    focusOwner = root.nodeType === 11 && 'host' in root ? (root as ShadowRoot).host : null;
+  }
+  const ownedFocus = !!focusOwner;
   const selection = document.getSelection();
   const anchor = capture(selection?.anchorNode, selection?.anchorOffset ?? 0);
   const extent = capture(selection?.focusNode, selection?.focusOffset ?? 0);
@@ -55,11 +65,11 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
         [boundary.previous, boundary.next].some((node) => !!node && scope.contains(node))));
   const ownedSelection = !!selection && (ownsBoundary(anchor) || ownsBoundary(extent));
   move();
-  if (ownedFocus && focused.isConnected && document.activeElement !== focused)
+  if (ownedFocus && focused?.isConnected && activeElement(document) !== focused)
     focused.focus({ preventScroll: true });
   // Move and focus callbacks may replace the value or select a newer range.
   const input =
-    ownedFocus && document.activeElement === focused
+    ownedFocus && activeElement(document) === focused
       ? (focused as HTMLInputElement | HTMLTextAreaElement)
       : null;
   const inputSelection =
@@ -84,7 +94,7 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   if (
     inputSelection &&
     input?.isConnected &&
-    document.activeElement === input &&
+    activeElement(document) === input &&
     typeof input.selectionStart === 'number'
   )
     input.setSelectionRange(...inputSelection);
