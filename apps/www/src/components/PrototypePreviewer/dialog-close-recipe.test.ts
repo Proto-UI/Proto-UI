@@ -9,7 +9,12 @@ import {
 import { createFamilyDialogDemo } from '../../content/docs/overlay-control-recipes-r94.shared';
 import { renderDemo } from './demo-renderer';
 import { loadPrototypes } from './prototype-modules';
-import { collectPrototypeIds, type DemoRuntimeApi, type DemoSetupContext } from './demo-types';
+import {
+  collectPrototypeIds,
+  type DemoPublicInstance,
+  type DemoRuntimeApi,
+  type DemoSetupContext,
+} from './demo-types';
 import type { RuntimeId } from './runtimes/ids';
 
 // Only CDN loaders are replaced. The shared recipe, prototypes, adapters and
@@ -72,7 +77,7 @@ async function mount(
   let context!: DemoSetupContext;
   const requests = vi.fn();
   const writes = vi.fn();
-  const subscriptions: Array<{
+  let subscriptions: Array<{
     key: string;
     callback: Parameters<ExposedStateHandle<boolean>['subscribe']>[0];
     off: ReturnType<typeof vi.fn>;
@@ -84,25 +89,55 @@ async function mount(
     demo: {
       ...demo,
       setup(ctx) {
+        // Observe the subscriptions at the instance reader used by the recipe.
+        // Each read refreshes the adapter's scoped expose handles.
+        const observedInstances = new WeakMap<DemoPublicInstance, DemoPublicInstance>();
+        const observeClose = (close: DemoPublicInstance | undefined) => {
+          if (!close) return;
+          let observed = observedInstances.get(close);
+          if (!observed) {
+            observed = {
+              getExposes() {
+                const exposes = { ...close.getExposes() };
+                // Opening can replace the original committed Close view.
+                // Track the four registrations of each observed binding.
+                const binding: typeof subscriptions = [];
+                subscriptions = binding;
+                for (const key of ['disabled', 'hovered', 'pressed', 'focusVisible']) {
+                  const state = exposes[key] as ExposedStateHandle<boolean>;
+                  exposes[key] = {
+                    ...state,
+                    subscribe(callback: Parameters<ExposedStateHandle<boolean>['subscribe']>[0]) {
+                      const off = vi.fn(state.subscribe(callback));
+                      binding.push({ key, callback, off });
+                      return off;
+                    },
+                  };
+                }
+                return exposes;
+              },
+            };
+            observedInstances.set(close, observed);
+          }
+          return observed;
+        };
         const api: DemoRuntimeApi = {
           ...ctx.api,
+          getPublicInstance(ref) {
+            const instance = ctx.api.getPublicInstance!(ref);
+            return ref === 'close' ? observeClose(instance) : instance;
+          },
+          subscribePublicInstances(refs, listener) {
+            return ctx.api.subscribePublicInstances!(refs, (snapshot, revision) =>
+              listener({ ...snapshot, close: observeClose(snapshot.close) }, revision)
+            );
+          },
           setProps(ref, props) {
             writes(ref, props);
             ctx.api.setProps(ref, props);
           },
         };
         context = { ...ctx, api };
-        // Observe the real public subscriptions without replacing state facts
-        // or their delivery. Saved callbacks model delivery after retirement.
-        for (const key of ['disabled', 'hovered', 'pressed', 'focusVisible']) {
-          const state = api.getExposes('close')?.[key] as ExposedStateHandle<boolean>;
-          const subscribe = state.subscribe.bind(state);
-          vi.spyOn(state, 'subscribe').mockImplementation((callback) => {
-            const off = vi.fn(subscribe(callback));
-            subscriptions.push({ key, callback, off });
-            return off;
-          });
-        }
         if (options.controlled) api.setProps('root', { open: true, onOpenChange: requests });
         const release = demo.setup?.(context);
         if (typeof release === 'function') releaseSetup = release;

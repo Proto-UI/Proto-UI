@@ -1,0 +1,40 @@
+---
+import PrototypePreviewer from '../../../../components/PrototypePreviewer/PrototypePreviewer.astro';
+import ThemeProvider from '../../../../components/override/ThemeProvider.astro';
+import type { RuntimeId } from '../../../../components/PrototypePreviewer/runtimes/ids';
+import '../../../../styles/global.css';
+
+export function getStaticPaths() {
+  return ['wc', 'react', 'vue', 'vue2'].map((runtime) => ({
+    params: { runtime },
+    props: { runtime },
+  }));
+}
+const { runtime } = Astro.props as { runtime: RuntimeId };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="data:," />
+    <title>Bootstrap Dialog preview — {runtime}</title>
+    <ThemeProvider />
+  </head>
+  <body>
+    <main style="max-width: 54rem; margin: 2rem auto; padding: 0 1rem;">
+      <h1>Bootstrap 2.3.2 Dialog — WIP / Experimental</h1>
+      <p>Source-only draft preview. This bounded journey does not establish stable family admission.</p>
+      <PrototypePreviewer
+        demoId="demo-bootstrap-2-3-2-dialog"
+        initialRuntime={runtime}
+        runtimes={['wc', 'react', 'vue', 'vue2']}
+        allowExperimentalRuntimes={true}
+        codePanel={false}
+        lazy={false}
+      />
+    </main>
+  </body>
+</html>
