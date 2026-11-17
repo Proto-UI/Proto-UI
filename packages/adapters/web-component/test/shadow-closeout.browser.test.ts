@@ -125,6 +125,59 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('rejects external opacity filters hiding a split slot', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate((artifact) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-split-filter',
+            setup(def: any) {
+              const leaf = def.feedback.style.declareDecoration();
+              return (r: any) => [r.decoration(leaf), r.slot()];
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const host = new C();
+        const caller = document.createElement('button');
+        caller.textContent = 'Caller';
+        host.append(caller);
+        document.body.append(host);
+        const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+        const sheet = new CSSStyleSheet();
+        host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, sheet];
+        const inspect = (value: string) => {
+          sheet.replaceSync(`[part="surface"] { filter: ${value}; }`);
+          const { filter, opacity } = getComputedStyle(surface);
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          return { filter, opacity, error, callerWidth: caller.getBoundingClientRect().width };
+        };
+        return {
+          visible: inspect('blur(0px) opacity(0.4)'),
+          concealed: inspect('drop-shadow(1px 1px red) opacity(0%)'),
+          callerRetained: surface.querySelector('slot')?.assignedNodes()[0] === caller,
+        };
+      }, renderProtoShadowSplitStyleArtifact([]));
+      expect(result.visible.filter).toContain('opacity(0.4)');
+      expect(result.visible.error).toBeNull();
+      expect(result.concealed.opacity).toBe('1');
+      expect(result.concealed.filter).toContain('opacity(0)');
+      expect(result.concealed.callerWidth).toBeGreaterThan(0);
+      expect(result.concealed.error).toMatch(/decoration physical blueprint changed/);
+      expect(result.callerRetained).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each([false, true])(
     'validates caller focus through late split publication (blur=%s)',
     async (blur) => {
@@ -480,11 +533,29 @@ describe('Shadow closeout native boundaries', () => {
           } catch (cause) {
             error = String(cause);
           }
+          animation?.finish();
+          const finishedOpacity = surface ? getComputedStyle(surface).opacity : null;
+          const finishedProgress = animation?.effect?.getComputedTiming().progress;
+          const stylesheet = new CSSStyleSheet();
+          stylesheet.replaceSync('[part="surface"] { opacity: 0 !important; }');
+          host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, stylesheet];
+          const concealedOpacity = surface ? getComputedStyle(surface).opacity : null;
+          let concealedError: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            concealedError = String(cause);
+          }
           return {
             errors,
             opacity,
             entry: !!animation,
             error,
+            finishedOpacity,
+            finishedProgress,
+            concealedOpacity,
+            concealedError,
+            retainedAnimation: surface?.getAnimations().includes(animation!) ?? false,
             sameCaller: surface?.querySelector('slot')?.assignedNodes()[0] === caller,
           };
         },
@@ -494,6 +565,11 @@ describe('Shadow closeout native boundaries', () => {
       expect(result.entry).toBe(true);
       expect(result.opacity).toBe('0');
       expect(result.error).toBeNull();
+      expect(result.finishedOpacity).toBe('1');
+      expect(result.finishedProgress).toBe(1);
+      expect(result.retainedAnimation).toBe(true);
+      expect(result.concealedOpacity).toBe('0');
+      expect(result.concealedError).toMatch(/decoration physical blueprint changed/);
       expect(result.sameCaller).toBe(true);
     } finally {
       await page.close();

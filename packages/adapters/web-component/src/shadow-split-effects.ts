@@ -433,7 +433,7 @@ export function createShadowSplitEffectsPort({
         effect.target === surface &&
         !effect.pseudoElement &&
         effect.getTiming().fill === 'both' &&
-        effect.getComputedTiming().progress !== null &&
+        effect.getComputedTiming().progress === (direction === 'in' ? 0 : 1) &&
         effect.getKeyframes().at(direction === 'in' ? 0 : -1)?.opacity === '0'
       );
     });

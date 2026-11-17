@@ -80,6 +80,17 @@ function isSplitNodeConcealed(node: Element, visibilityOwner?: HTMLElement): boo
       return true;
   }
   if (hasCollapsedSplitTransform(computed, view?.DOMMatrixReadOnly)) return true;
+  // The computed list normalizes zero percentages. A URL may contain the
+  // same text, but only an actual opacity filter conceals the caller here.
+  const filter = computed?.getPropertyValue('filter');
+  if (
+    filter?.includes('opacity(0)') &&
+    filter
+      .replace(/url\("(?:\\.|[^"\\])*"\)/g, '')
+      .split(/\s+/)
+      .includes('opacity(0)')
+  )
+    return true;
   if (!visibilityOwner) return false;
   const inlineVisibility = style?.getPropertyValue('visibility');
   if (inlineVisibility === 'hidden' || inlineVisibility === 'collapse') return true;
