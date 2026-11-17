@@ -298,6 +298,17 @@ export function checkedCall(
     : fn.returnType;
 }
 
+/** Every supplies these three values even when the callback declares fewer formals. */
+export function arrayEveryCallbackParameters(
+  array: Extract<ValueType, { kind: 'array' }>
+): CallableType['parameters'] {
+  return [
+    { name: 'value', type: array.element },
+    { name: 'index', type: 'number' },
+    { name: 'array', type: array },
+  ];
+}
+
 export function intrinsicResult(name: string, args: readonly ValueType[]): ValueType {
   if (name === 'typeof' && args.length === 1) return 'string';
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
@@ -318,7 +329,12 @@ export function intrinsicResult(name: string, args: readonly ValueType[]): Value
     args[0].kind === 'array'
   ) {
     const fn = callableValue(args[1]);
-    checkedCall(fn, [args[0].element]);
+    checkedCall(
+      fn,
+      arrayEveryCallbackParameters(args[0])
+        .slice(0, fn.parameters.length)
+        .map((parameter) => parameter.type)
+    );
     return 'boolean';
   }
   throw new TypeError(`Invalid intrinsic ${name} arguments.`);

@@ -410,7 +410,7 @@ export function emitVue2Source(
             parameter.type === 'unknown' || parameter.type === 'template'
               ? nativeTemplate?.parameterType(parameter)
               : undefined;
-          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
+          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional && !parameter.default ? `[${parameter.name}]` : parameter.name}`;
         })
         .join(' ');
       const returns =

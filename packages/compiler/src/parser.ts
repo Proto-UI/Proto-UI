@@ -66,6 +66,7 @@ import {
   functionValueType,
   callableValue,
   checkedCall,
+  arrayEveryCallbackParameters,
   intrinsicResult,
   valueAlternatives,
   canNarrowValue,
@@ -2347,7 +2348,7 @@ class Frontend {
             rejectNode(node, 'PUI1006', 'Array every requires one callback.');
           const value = this.expression(module, callback, scope, phase, undefined, {
             kind: 'callable',
-            parameters: [{ name: 'value', type: array.type.element }],
+            parameters: arrayEveryCallbackParameters(array.type),
             returnType: 'unknown',
           });
           return {
