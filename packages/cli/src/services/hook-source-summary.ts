@@ -54,6 +54,7 @@ export type HookSourceResolution = {
 export type HookSourceSummaryContext = {
   /** Register an already-read source, preserving caller-provided text exactly. */
   registerSource(source: ts.SourceFile): void;
+  isRegisteredSourceImport(source: ts.SourceFile, specifier: string): boolean;
   /** Resolve a source expression without executing it. */
   resolve(
     node: ts.Node,
@@ -73,7 +74,7 @@ export type HookSourceSummaryContext = {
   isSelectedSourceProperty(property: ts.ObjectLiteralElementLike, name: string): boolean;
   isSourceMemberReference(
     expression: ts.PropertyAccessExpression | ts.ElementAccessExpression,
-    property: ts.PropertyAssignment
+    property: ts.PropertyAssignment | ts.ShorthandPropertyAssignment
   ): boolean;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
@@ -589,6 +590,7 @@ function isStringValue(
 export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   const moduleContext = createHookSourceModuleContext();
   const registeredSources = new Map<string, ts.SourceFile>();
+  const authoredSourcePaths = new Set<string>();
   const producerCache = new Map<string, Producer | null>();
   const summaryCache = new Map<string, HookSourceValue>();
   const summaryStack = new Set<string>();
@@ -612,7 +614,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   };
 
   const registerSource = (source: ts.SourceFile): void => {
-    moduleForSource(source);
+    authoredSourcePaths.add(moduleForSource(source).file);
+  };
+
+  const isRegisteredSourceImport = (source: ts.SourceFile, specifier: string): boolean => {
+    const target = moduleContext.resolveModule(moduleForSource(source).file, specifier);
+    return target !== null && authoredSourcePaths.has(target.file);
   };
 
   const resolveSymbol = (module: Module, name: string): SymbolRef | null =>
@@ -4267,7 +4274,8 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           node.expression.kind === ts.SyntaxKind.ImportKeyword &&
           node.arguments[0] &&
           ts.isStringLiteralLike(node.arguments[0]) &&
-          node.arguments[0].text.startsWith('.')
+          (node.arguments[0].text.startsWith('.') ||
+            isRegisteredSourceImport(source, node.arguments[0].text))
         )
           specifiers.push(node.arguments[0].text);
         ts.forEachChild(node, visit);
@@ -4334,8 +4342,62 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     });
   }
 
+  const canonicalPrototypeConfigs = new WeakMap<ts.ObjectLiteralExpression, boolean>();
+  function isCanonicalPrototypeConfig(config: ts.ObjectLiteralExpression): boolean {
+    const cached = canonicalPrototypeConfigs.get(config);
+    if (cached !== undefined) return cached;
+    const module = moduleForSource(config.getSourceFile());
+    const isFactoryArgument = (value: ts.Node): boolean => {
+      const call = value.parent;
+      return (
+        ts.isCallExpression(call) &&
+        call.arguments[0] === value &&
+        !ts.findAncestor(call.parent, ts.isFunctionLike) &&
+        moduleContext.isDefinePrototypeReference(call.expression, module)
+      );
+    };
+    const declaration = config.parent;
+    let canonical = isFactoryArgument(config);
+    if (
+      !canonical &&
+      ts.isVariableDeclaration(declaration) &&
+      declaration.initializer === config &&
+      ts.isIdentifier(declaration.name) &&
+      ts.isVariableStatement(declaration.parent.parent) &&
+      !declaration.parent.parent.modifiers?.some(
+        (item) => item.kind === ts.SyntaxKind.ExportKeyword
+      ) &&
+      stableVariable(declaration, module)
+    ) {
+      const name = declaration.name;
+      let called = false;
+      let escaped = false;
+      function visit(node: ts.Node): void {
+        if (escaped || ts.isTypeNode(node)) return;
+        if (
+          ts.isIdentifier(node) &&
+          node !== name &&
+          node.text === name.text &&
+          ((node.parent as ts.NamedDeclaration).name !== node ||
+            ts.isShorthandPropertyAssignment(node.parent) ||
+            ts.isExportSpecifier(node.parent)) &&
+          moduleContext.resolveReference(node, module)?.declaration === declaration
+        ) {
+          if (!isFactoryArgument(node)) escaped = true;
+          else called = true;
+        }
+        ts.forEachChild(node, visit);
+      }
+      visit(module.source);
+      canonical = called && !escaped;
+    }
+    canonicalPrototypeConfigs.set(config, canonical);
+    return canonical;
+  }
+
   return {
     registerSource,
+    isRegisteredSourceImport,
     resolve: evaluate,
     resolveCall,
     resolveSourceFunction: (node, source) => {
@@ -4377,21 +4439,10 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         ?.declaration === property,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
-    isCanonicalPrototypeSetupProperty: (property) => {
-      const config = property.parent;
-      const definition = config.parent;
-      return (
-        ts.isObjectLiteralExpression(config) &&
-        ts.isCallExpression(definition) &&
-        definition.arguments[0] === config &&
-        configProperty(config, 'setup') === property &&
-        !ts.findAncestor(definition.parent, ts.isFunctionLike) &&
-        moduleContext.isDefinePrototypeReference(
-          definition.expression,
-          moduleForSource(property.getSourceFile())
-        )
-      );
-    },
+    isCanonicalPrototypeSetupProperty: (property) =>
+      ts.isObjectLiteralExpression(property.parent) &&
+      configProperty(property.parent, 'setup') === property &&
+      isCanonicalPrototypeConfig(property.parent),
     isSameSourceBinding,
   };
 }

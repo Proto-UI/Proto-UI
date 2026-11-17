@@ -1299,7 +1299,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           ) {
             rootInventory.templateTokens.add(token);
           } else if (
-            (isConstStyleBinding(parent, expression) || isLocalStyleMember(expression, scope)) &&
+            (isConstStyleBinding(parent, expression) || isLocalStyleMember(parent, scope)) &&
             isCanonicalStyleHandle(node, scope)
           ) {
             const usage = decorationStyleUsage(rootInventory, styleHandleOrigin(node));
@@ -1716,7 +1716,8 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
           !ts.isImportDeclaration(declaration) ||
           declaration.importClause?.isTypeOnly ||
           !ts.isStringLiteralLike(declaration.moduleSpecifier) ||
-          !declaration.moduleSpecifier.text.startsWith('.')
+          (!declaration.moduleSpecifier.text.startsWith('.') &&
+            !scope.sourceSummary.isRegisteredSourceImport(file, declaration.moduleSpecifier.text))
         )
           continue;
         const bindings = declaration.importClause?.namedBindings;
@@ -1757,7 +1758,7 @@ function inspectedHelperReferences(helper, binding, statement, scope) {
       if (ts.isIdentifier(node) && (names.has(node.text) || namespaces.has(node.text))) {
         const parent = node.parent;
         if (parent.name !== node || ts.isShorthandPropertyAssignment(parent)) {
-          // An escaped relative namespace may permit unknown external calls.
+          // An escaped namespace can expose the helper to unverified calls.
           if (namespaces.has(node.text)) references.push(node);
           else {
             const resolved = scope.sourceSummary.resolveSourceFunction(node, file);
@@ -2111,9 +2112,9 @@ function isConstStyleBinding(binding, initializer) {
   );
 }
 
-function isLocalStyleMember(expression, scope) {
-  const property = expression.parent;
-  if (!ts.isPropertyAssignment(property) || property.initializer !== expression) return false;
+function isLocalStyleMember(property, scope) {
+  if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property))
+    return false;
   const key = getPropertyName(property.name);
   const holder = outerStyleExpression(property.parent);
   return (
@@ -2128,18 +2129,19 @@ function collectLocalStyleMembers(initializer, scope) {
   if (!ts.isObjectLiteralExpression(initializer)) return undefined;
   const members = new Map();
   for (const property of initializer.properties) {
-    if (!ts.isPropertyAssignment(property)) continue;
-    const expression = unwrapTransparent(property.initializer);
-    if (
-      !isCanonicalStyleHandle(expression, scope) ||
-      !isLocalStyleMember(property.initializer, scope)
-    )
-      continue;
-    members.set(getPropertyName(property.name), {
-      ...resolveBinding(property.initializer, scope),
-      styleHandleOrigin: styleHandleOrigin(expression),
-      styleMemberDeclaration: property,
-    });
+    if (!isLocalStyleMember(property, scope)) continue;
+    const shorthand = ts.isShorthandPropertyAssignment(property);
+    const source = shorthand ? property.name : property.initializer;
+    const expression = unwrapTransparent(source);
+    if (!shorthand && !isCanonicalStyleHandle(expression, scope)) continue;
+    const binding = resolveBinding(source, scope);
+    const origin = shorthand ? binding.styleHandleOrigin : styleHandleOrigin(expression);
+    if (origin)
+      members.set(getPropertyName(property.name), {
+        ...binding,
+        styleHandleOrigin: origin,
+        styleMemberDeclaration: property,
+      });
   }
   return members.size ? members : undefined;
 }
@@ -2208,7 +2210,10 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
         recordStyleHandleUse(value, null, scope, tokens, inventory);
     return;
   }
-  if (!isConstStyleBinding(parent, expression))
+  if (
+    !isConstStyleBinding(parent, expression) &&
+    !(ts.isShorthandPropertyAssignment(parent) && isLocalStyleMember(parent, scope))
+  )
     recordStyleHandleUse(binding, expression, scope, tokens, inventory);
 }
 

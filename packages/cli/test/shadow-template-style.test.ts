@@ -632,6 +632,77 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
+  it('classifies decoration paint from a const prototype spec', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype as define, tw } from '@proto.ui/core';
+      const spec = {
+        name: 'const-decoration-spec',
+        setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return (r) => r.decoration(target);
+        },
+      };
+      define(spec);
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it.each(['spec.setup = opaque;', 'consume(spec);', 'export { spec };'])(
+    'keeps Root preflight for a const prototype spec with an escape: %s',
+    async (escape) => {
+      await expect(
+        generate(`
+        import { definePrototype, tw } from '@proto.ui/core';
+        const spec = { name: 'const-decoration-spec-escape', setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('p-[10%]'));
+          return (r) => r.decoration(target);
+        }};
+        ${escape}
+        definePrototype(spec);
+      `)
+      ).rejects.toThrow(/verified length recipe/);
+    }
+  );
+
+  it.each([
+    "import { add } from '@app/paint'; add(opaque);",
+    "import * as paint from '@app/paint'; paint.add(opaque);",
+    "const { add } = await import('@app/paint'); add(opaque);",
+  ])(
+    'retains Root preflight when a source alias escapes an exported helper: %s',
+    async (opaqueUse) => {
+      await expect(
+        generate(
+          `
+        import { definePrototype } from '@proto.ui/core';
+        import { add } from './paint';
+        definePrototype({ name: 'aliased-helper-origin', setup(def) {
+          const target = add(def);
+          return (r) => r.decoration(target);
+        }});
+        `,
+          {
+            'tsconfig.json': JSON.stringify({
+              compilerOptions: { paths: { '@app/paint': ['./paint.ts'] } },
+            }),
+            'paint.ts': `
+            import { tw } from '@proto.ui/core';
+            export function add(def) {
+              const target = def.feedback.style.declareDecoration();
+              def.feedback.style.to(target).use(tw('p-[10%]'));
+              return target;
+            }
+          `,
+            'other.ts': opaqueUse,
+          }
+        )
+      ).rejects.toThrow(/verified length recipe/);
+    }
+  );
+
   it('classifies targeted paint from an aliased canonical prototype factory', async () => {
     const { artifact } = await generate(`
       import { definePrototype as define, tw } from '@proto.ui/core';
@@ -1017,6 +1088,21 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it('classifies a const shorthand decoration palette member', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'shorthand-decoration-palette', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const leaf = tw('p-[10%]');
+        const styles = { leaf };
+        def.feedback.style.to(target).use(styles.leaf);
+        return (r) => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
   it('classifies decoration handles stored in immutable object members', async () => {
     const { artifact } = await generate(`
       import { definePrototype, tw } from '@proto.ui/core';
@@ -1031,15 +1117,22 @@ describe('source-scanned Shadow Template/Root separation', () => {
     expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
   });
 
-  it.each(['styles.leaf = opaque;', 'consume(styles);', 'def.feedback.style.use(styles.leaf);'])(
-    'keeps Root preflight when an object-held handle is unproven: %s',
-    async (otherUse) => {
+  it.each(
+    ['leaf: tw("p-[10%]")', 'leaf'].flatMap((member) =>
+      ['styles.leaf = opaque;', 'consume(styles);', 'def.feedback.style.use(styles.leaf);'].map(
+        (otherUse) => [member, otherUse]
+      )
+    )
+  )(
+    'keeps Root preflight when an object-held handle is unproven: %s / %s',
+    async (member, otherUse) => {
       await expect(
         generate(`
         import { definePrototype, tw } from '@proto.ui/core';
         definePrototype({ name: 'member-decoration-escape', setup(def) {
           const target = def.feedback.style.declareDecoration();
-          const styles = { leaf: tw('p-[10%]') };
+          ${member === 'leaf' ? "const leaf = tw('p-[10%]');" : ''}
+          const styles = { ${member} };
           ${otherUse}
           def.feedback.style.to(target).use(styles.leaf);
           return (r) => r.decoration(target);
