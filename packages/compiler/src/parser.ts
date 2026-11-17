@@ -1880,7 +1880,8 @@ class Frontend {
         )
           type = joinValueTypes([object.type.index, 'void']);
         else if (objectFields(object.type) && index.type === 'string')
-          type = joinValueTypes([...objectFields(object.type)!.map((field) => field.type), 'void']);
+          // Structural records may contain additional fields absent from this type view.
+          type = 'unknown';
         else rejectNode(node, 'PUI1006', 'Dynamic index requires a checked array or record.');
         return { kind: 'element', object, index, optional, type, span };
       }

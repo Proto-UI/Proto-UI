@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import type { PrototypeIR } from '../src/ir';
+import { partitionModuleBindings } from '../src/source-module-bindings';
 
 const core = `import {definePrototype} from '@proto.ui/core';`;
 function checked(source: string): PrototypeIR {
@@ -14,6 +15,29 @@ function checked(source: string): PrototypeIR {
 }
 
 describe('shared module storage and owner closures', () => {
+  it('retains owner dependencies in defaults without promoting scalar-only module helpers', () => {
+    const ir = checked(`import {definePrototype,delay} from '@proto.ui/core';
+      function wait(task=delay(0,()=>{})){return 1;}
+      function forwarded(value=wait()){return value;}
+      function throughReference(helper=wait){return helper();}
+      function scalar(value=7){return value;}
+      export default definePrototype({name:'defaults',setup(def){
+        def.expose.method('wait',()=>wait());
+        def.expose.method('forwarded',forwarded);
+        def.expose.method('throughReference',()=>throughReference());
+        def.expose.method('scalar',scalar);
+      }});`);
+    const { shared, owned } = partitionModuleBindings(ir);
+    expect(owned).toHaveLength(3);
+    expect(shared).toHaveLength(1);
+    expect(shared[0].value.kind).toBe('function');
+    if (shared[0].value.kind === 'function')
+      expect(shared[0].value.function.parameters[0].default).toMatchObject({
+        kind: 'literal',
+        value: 7,
+      });
+  });
+
   it('shares module data and static first-class functions without turning them into owner storage', () => {
     const ir = checked(`${core}let count:number=0;
       function increase(delta:number){count=count+delta;return count;}
