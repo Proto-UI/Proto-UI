@@ -4270,17 +4270,17 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     if (!imports) {
       imports = [];
       const specifiers = imports;
+      const module = moduleForSource(source);
       function visit(node: ts.Node) {
         if (ts.isTypeNode(node)) return;
-        if (
-          ts.isCallExpression(node) &&
-          node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-          node.arguments[0] &&
-          ts.isStringLiteralLike(node.arguments[0]) &&
-          (node.arguments[0].text.startsWith('.') ||
-            resolveRegisteredSourceImport(source, node.arguments[0].text))
-        )
-          specifiers.push(node.arguments[0].text);
+        if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+          const specifier = literalString(node.arguments[0], module, new Map());
+          if (
+            specifier &&
+            (specifier.startsWith('.') || resolveRegisteredSourceImport(source, specifier))
+          )
+            specifiers.push(specifier);
+        }
         ts.forEachChild(node, visit);
       }
       visit(source);

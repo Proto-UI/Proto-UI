@@ -965,6 +965,13 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     // effects for intercepted non-plain writes without widening plain `=`.
     if (!plainAssignment) walk(node.left, scope, tokens, exposures, rootInventory);
     const base = unwrapTransparent(memberOwner(node.left) ?? node.left);
+    if (
+      plainAssignment &&
+      rootInventory?.styleHandleUsage &&
+      ts.isIdentifier(base) &&
+      scopeDeclaring(base.text, scope)?.bindings.get(base.text)?.styleTuple
+    )
+      observeStyleHandleReference(base, scope, tokens, rootInventory);
     const member = memberName(node.left);
     const resolvedBefore = resolveExpression(base, scope);
     let knownStateHandle = false;
@@ -1301,7 +1308,9 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           ) {
             rootInventory.templateTokens.add(token);
           } else if (
-            (isConstStyleBinding(parent, expression) || isLocalStyleMember(parent, scope)) &&
+            (isConstStyleBinding(parent, expression) ||
+              isLocalStyleMember(parent, scope) ||
+              isLocalStyleTuple(parent)) &&
             isCanonicalStyleHandle(node, scope)
           ) {
             const usage = decorationStyleUsage(rootInventory, styleHandleOrigin(node));
@@ -2001,10 +2010,10 @@ function referencedDecorationRuleCaller(callback, scope) {
   return origin;
 }
 
-function isOwnedDecorationStyleArgument(argument, scope) {
+function isOwnedDecorationStyleArgument(argument, scope, tuple = false) {
   // Follow value positions only. A nested array must be spread before it
   // can contribute any of its members to the targeted rest argument.
-  let shape = 'handle';
+  let shape = tuple ? 'array' : 'handle';
   while (true) {
     const parent = argument.parent;
     if (ts.isConditionalExpression(parent) && parent.condition !== argument) {
@@ -2151,6 +2160,32 @@ function collectLocalStyleMembers(initializer, scope) {
   return members.size ? members : undefined;
 }
 
+function isLocalStyleTuple(tuple) {
+  if (!ts.isArrayLiteralExpression(tuple)) return false;
+  const holder = outerStyleExpression(tuple);
+  return (
+    isConstStyleBinding(holder.parent, holder) &&
+    ts.findAncestor(holder.parent, ts.isFunctionLike) &&
+    tuple.elements.every((item) => !ts.isSpreadElement(item) && !ts.isOmittedExpression(item))
+  );
+}
+
+function collectLocalStyleTuple(tuple, scope) {
+  if (!isLocalStyleTuple(tuple)) return undefined;
+  const handles = [];
+  for (const source of tuple.elements) {
+    const expression = unwrapTransparent(source);
+    const binding = resolveBinding(source, scope);
+    const origin = isCanonicalStyleHandle(expression, scope)
+      ? styleHandleOrigin(expression)
+      : ts.isIdentifier(expression)
+        ? binding.styleHandleOrigin
+        : undefined;
+    if (origin) handles.push({ ...binding, styleHandleOrigin: origin });
+  }
+  return handles.length ? handles : undefined;
+}
+
 function styleHandleOrigin(node) {
   // The same relative module can be parsed again while resolving its exports.
   return node.getSourceFile().fileName + ':' + node.pos;
@@ -2164,21 +2199,21 @@ function decorationStyleUsage(inventory, origin) {
   return usage;
 }
 
-function recordStyleHandleUse(binding, expression, scope, tokens, inventory) {
+function recordStyleHandleUse(binding, expression, scope, tokens, inventory, tuple = false) {
   if (!binding?.styleHandleOrigin) return;
   const usage = decorationStyleUsage(inventory, binding.styleHandleOrigin);
   for (const token of binding.strings.flatMap(splitTokens)) {
     tokens.add(token);
     usage.tokens.add(token);
   }
-  if (expression && isOwnedDecorationStyleArgument(expression, scope)) usage.targeted = true;
+  if (expression && isOwnedDecorationStyleArgument(expression, scope, tuple)) usage.targeted = true;
   else usage.unclassified = true;
 }
 
 function observeStyleHandleReference(node, scope, tokens, inventory) {
   const binding = scopeDeclaring(node.text, scope)?.bindings.get(node.text);
   if (
-    (!binding?.styleHandleOrigin && !binding?.styleMembers) ||
+    (!binding?.styleHandleOrigin && !binding?.styleMembers && !binding?.styleTuple) ||
     ts.isTypeNode(node.parent) ||
     ts.isImportSpecifier(node.parent) ||
     ts.isNamespaceImport(node.parent) ||
@@ -2189,6 +2224,11 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
     return;
   const expression = outerStyleExpression(node);
   const parent = expression.parent;
+  if (binding.styleTuple) {
+    for (const value of binding.styleTuple)
+      recordStyleHandleUse(value, expression, scope, tokens, inventory, true);
+    return;
+  }
   if (binding.styleMembers) {
     const property =
       ts.isPropertyAccessExpression(parent) && parent.expression === expression
@@ -2217,6 +2257,7 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
   }
   if (
     !isConstStyleBinding(parent, expression) &&
+    !isLocalStyleTuple(parent) &&
     !(ts.isShorthandPropertyAssignment(parent) && isLocalStyleMember(parent, scope))
   )
     recordStyleHandleUse(binding, expression, scope, tokens, inventory);
@@ -2291,6 +2332,7 @@ function registerDeclaration(decl, scope, exposures) {
   const styleMembers = isConstStyleBinding(decl, decl.initializer)
     ? collectLocalStyleMembers(initializer, scope)
     : undefined;
+  const styleTuple = collectLocalStyleTuple(initializer, scope);
   const origin = isConstStyleBinding(decl, decl.initializer)
     ? isCanonicalStyleHandle(initializer, scope)
       ? styleHandleOrigin(initializer)
@@ -2312,12 +2354,14 @@ function registerDeclaration(decl, scope, exposures) {
       value.styleHandleOrigin ||
       targetDeclaration ||
       value.decorationTargetDeclaration ||
-      styleMembers
+      styleMembers ||
+      styleTuple
       ? {
           ...value,
           styleHandleOrigin: origin,
           decorationTargetDeclaration: targetDeclaration,
           ...(styleMembers && { styleMembers }),
+          ...(styleTuple && { styleTuple }),
         }
       : value,
     scope,
