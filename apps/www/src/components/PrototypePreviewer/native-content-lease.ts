@@ -42,6 +42,11 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   const document = scope.ownerDocument;
   const focused = document.activeElement as HTMLElement | null;
   const ownedFocus = focused && (focused === scope || scope.contains(focused));
+  const input = ownedFocus ? (focused as HTMLInputElement | HTMLTextAreaElement) : null;
+  const inputSelection =
+    input && typeof input.selectionStart === 'number'
+      ? ([input.selectionStart, input.selectionEnd, input.selectionDirection ?? undefined] as const)
+      : null;
   const selection = document.getSelection();
   const anchor = capture(selection?.anchorNode, selection?.anchorOffset ?? 0);
   const extent = capture(selection?.focusNode, selection?.focusOffset ?? 0);
@@ -71,4 +76,12 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
       /* Connected callbacks may edit source lengths. Cleanup still completes. */
     }
   }
+  // Restoring the document range can reset the focused text control's caret.
+  if (
+    inputSelection &&
+    input?.isConnected &&
+    document.activeElement === input &&
+    typeof input.selectionStart === 'number'
+  )
+    input.setSelectionRange(...inputSelection);
 }

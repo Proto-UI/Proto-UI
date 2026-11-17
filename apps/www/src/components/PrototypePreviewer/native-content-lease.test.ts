@@ -88,6 +88,42 @@ describe('passive shell ancestor boundary ownership', () => {
   });
 });
 
+describe('native text control selection', () => {
+  for (const tag of ['input', 'textarea'] as const)
+    for (const direction of ['forward', 'backward'] as const)
+      it(`restores ${tag} ${direction} selection after the document Selection`, () => {
+        const control = document.createElement(tag);
+        control.value = 'Retained uncontrolled source';
+        const source = document.createElement('div');
+        const destination = document.createElement('div');
+        source.append(control);
+        document.body.append(source, destination);
+        control.focus();
+        control.setSelectionRange(3, 8, direction);
+        const selection = document.getSelection()!;
+        selection.setBaseAndExtent(control, 0, control, 0);
+        const restore = selection.setBaseAndExtent.bind(selection);
+        vi.spyOn(selection, 'setBaseAndExtent').mockImplementation((...args) => {
+          restore(...args);
+          // Chromium's document Selection restoration also moves the control caret.
+          control.setSelectionRange(0, 0);
+        });
+
+        withNativeContentLease(source, () => {
+          control.blur();
+          destination.append(source);
+        });
+
+        expect(document.activeElement).toBe(control);
+        expect(control.value).toBe('Retained uncontrolled source');
+        expect([control.selectionStart, control.selectionEnd, control.selectionDirection]).toEqual([
+          3,
+          8,
+          direction,
+        ]);
+      });
+});
+
 describe('synchronous owner-to-owner Selection freshness', () => {
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);
