@@ -40,6 +40,7 @@ function bindDialogCloseAppearance({ api }: DemoSetupContext): () => void {
       const surface = instances.closeAppearance;
       if (!live || currentGeneration !== generation || !close || !surface) return;
       let active = true;
+      let disconnected = false;
       const subscriptions: Array<() => void> = [];
       const release = () => {
         active = false;
@@ -86,11 +87,15 @@ function bindDialogCloseAppearance({ api }: DemoSetupContext): () => void {
       };
       for (const state of Object.values(facts)) {
         const off = state.subscribe((event) => {
-          if (event.type === 'disconnect') release();
-          else requestPaint();
+          if (event.type === 'disconnect') {
+            // Terminal disposal already owns subscription cleanup.
+            disconnected = true;
+            active = false;
+            subscriptions.length = 0;
+          } else requestPaint();
         });
         if (current()) subscriptions.push(off);
-        else off();
+        else if (!disconnected) off();
       }
       requestPaint();
     }
