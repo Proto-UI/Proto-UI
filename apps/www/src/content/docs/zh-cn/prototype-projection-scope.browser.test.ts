@@ -2,6 +2,9 @@
 
 import type { Browser, ElementHandle, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+// PR1472 native evidence begin
+import { captureProjectionEvidence, installProjectionEvidence } from './projection-native-evidence';
+// PR1472 native evidence end
 import {
   RUNTIMES,
   applyColorScheme,
@@ -244,8 +247,20 @@ async function portalControlledBy(page: Page, trigger: Locator): Promise<Locator
   expect(controlledId, 'combobox aria-controls').toBeTruthy();
 
   const portal = page.locator(attributeEquals('id', controlledId!));
+// PR1472 native evidence begin
+  try {
+// PR1472 native evidence end
   await portal.waitFor({ state: 'visible', timeout: 10_000 });
+// PR1472 native evidence begin
+  } catch (error) {
+    await captureProjectionEvidence(page, 'portal-visibility-failure', { controlledId, error: String(error) });
+    throw error;
+  }
+// PR1472 native evidence end
   expect(await portal.count(), `one portal controlled by #${controlledId}`).toBe(1);
+// PR1472 native evidence begin
+  await captureProjectionEvidence(page, 'portal-visible', { controlledId });
+// PR1472 native evidence end
   return portal;
 }
 
@@ -371,6 +386,9 @@ async function setCoordinates(
     await chooseControl(page, scope, 'family', targetProjectionFamilyId);
     current = await waitForReady(scope, targetRuntimeId, targetProjectionFamilyId);
   }
+// PR1472 native evidence begin
+  await captureProjectionEvidence(page, 'coordinate-ready', { coordinate: current });
+// PR1472 native evidence end
   return current;
 }
 
@@ -764,6 +782,9 @@ async function expectSemanticFocus(
       { timeout: 10_000 }
     )
     .toBe(true);
+// PR1472 native evidence begin
+  await captureProjectionEvidence(page, 'semantic-focus-restored', { control });
+// PR1472 native evidence end
 }
 
 function observePageErrors(page: Page): string[] {
@@ -789,6 +810,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('commits one coherent generation across four Runtimes and both projection lanes', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+// PR1472 native evidence begin
+    await installProjectionEvidence(page, expect.getState().currentTestName ?? 'unknown');
+// PR1472 native evidence end
     const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
@@ -810,10 +834,16 @@ describe.sequential('Homepage Prototype projection scope', () => {
           }
           await assertCoherentGeneration(page, scope, current);
           await assertOpenTaskProjection(page, scope, current);
+// PR1472 native evidence begin
+          await captureProjectionEvidence(page, 'matrix-coordinate-complete', { coordinate: current });
+// PR1472 native evidence end
           previous = current;
         }
       }
     } finally {
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'case-final', { errors });
+// PR1472 native evidence end
       await context.close();
       expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
@@ -822,6 +852,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('projects the WC gallery with every concrete part and exact Select fingerprints', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+// PR1472 native evidence begin
+    await installProjectionEvidence(page, expect.getState().currentTestName ?? 'unknown');
+// PR1472 native evidence end
     const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
@@ -843,6 +876,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
         );
       }
     } finally {
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'case-final', { errors });
+// PR1472 native evidence end
       await context.close();
       expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
@@ -855,6 +891,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
         colorScheme,
       });
       const page = await context.newPage();
+// PR1472 native evidence begin
+      await installProjectionEvidence(page, expect.getState().currentTestName ?? 'unknown');
+// PR1472 native evidence end
       const errors = observePageErrors(page);
       await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
       await applyColorScheme(page, colorScheme);
@@ -896,6 +935,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
           await page.keyboard.press('Escape');
         }
       } finally {
+// PR1472 native evidence begin
+        await captureProjectionEvidence(page, 'case-final', { errors, colorScheme });
+// PR1472 native evidence end
         await context.close();
         expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
       }
@@ -905,6 +947,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('restores semantic control focus and disconnects the replaced generation portal', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+// PR1472 native evidence begin
+    await installProjectionEvidence(page, expect.getState().currentTestName ?? 'unknown');
+// PR1472 native evidence end
     const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
@@ -952,6 +997,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
       ).toBe(0);
       await assertCoherentGeneration(page, scope, current);
     } finally {
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'case-final', { errors });
+// PR1472 native evidence end
       await context.close();
       expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
@@ -960,6 +1008,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('atomically seals an open child portal during programmatic lane and Runtime switches', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+// PR1472 native evidence begin
+    await installProjectionEvidence(page, expect.getState().currentTestName ?? 'unknown');
+// PR1472 native evidence end
     const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
@@ -980,6 +1031,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
         value: 'brutalist',
       });
       expectPortalSealed(familyProbe.immediate, 'family switch immediate old portal');
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'family-immediate-seal', { input: 'synthetic valueChange dispatch', immediate: familyProbe.immediate });
+// PR1472 native evidence end
 
       let current = await waitForReady(scope, 'wc', 'brutalist');
       const familySamples = await stopPortalSealProbe(page);
@@ -993,6 +1047,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
         })
         .toBe(false);
       await assertCoherentGeneration(page, scope, current);
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'family-seal-complete', { samples: familySamples, coordinate: current });
+// PR1472 native evidence end
 
       const { content: brutalistContent, selectRoot: brutalistSelect } = await workspaceTask(
         scope,
@@ -1007,6 +1064,9 @@ describe.sequential('Homepage Prototype projection scope', () => {
         value: 'react',
       });
       expectPortalSealed(runtimeProbe.immediate, 'Runtime switch immediate old portal');
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'runtime-immediate-seal', { input: 'synthetic proto-adapter:change dispatch', immediate: runtimeProbe.immediate });
+// PR1472 native evidence end
 
       current = await waitForReady(scope, 'react', 'brutalist');
       const runtimeSamples = await stopPortalSealProbe(page);
@@ -1020,7 +1080,13 @@ describe.sequential('Homepage Prototype projection scope', () => {
         })
         .toBe(false);
       await assertCoherentGeneration(page, scope, current);
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'runtime-seal-complete', { samples: runtimeSamples, coordinate: current });
+// PR1472 native evidence end
     } finally {
+// PR1472 native evidence begin
+      await captureProjectionEvidence(page, 'case-final', { errors });
+// PR1472 native evidence end
       await context.close();
       expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }

@@ -1,0 +1,262 @@
+{
+  "schemaVersion": 1,
+  "kind": "private.pr1472-exact-native-inputs",
+  "baseCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53",
+  "baseTree": "80155c7bf9f8725509628f59a373397b8d5d5592",
+  "originalPrHead": "65eb442e8113b04353e2d5fb973654eb7500dcaf",
+  "candidateMeaning": "Separate R6 composition of exact current main0f0955a9 plus two retained resolved1472 blobs and additive evidence. Current main Dialog/compiler/adapter members are inherited unchanged. Historical R5 remains immutable; no native pass or published PR head is asserted.",
+  "originalSuiteSha256": "8957370291089edd463a55b490d995b53ea0b82911c7c66bc83709cef03557a2",
+  "expectedTestNames": [
+    "commits one coherent generation across four Runtimes and both projection lanes",
+    "projects the WC gallery with every concrete part and exact Select fingerprints",
+    "closes portaled Select presentation over the lane theme without mutating Website tokens",
+    "restores semantic control focus and disconnects the replaced generation portal",
+    "atomically seals an open child portal during programmatic lane and Runtime switches"
+  ],
+  "originalDeadlinesMs": {
+    "beforeAll": 150000,
+    "afterAll": 60000,
+    "cases": [
+      240000,
+      180000,
+      180000,
+      120000,
+      120000
+    ],
+    "portalVisible": 10000,
+    "semanticFocus": 10000,
+    "coordinateReady": 30000
+  },
+  "sandbox": "Unmodified browser-harness chromiumSandbox:true; no custom flags or environment policy overrides.",
+  "eventProvenance": "Original chooseControl/native mouse and keyboard actions remain browser input; startPortalSealProbe retains synthetic CustomEvent dispatch and synchronous immediate sample. Screenshots are later captures and are never labeled as the synchronous dispatch frame.",
+  "files": [
+    {
+      "path": ".github/evidence/pr1472-native/original-projection.browser.ts",
+      "bytes": 37793,
+      "sha256": "8957370291089edd463a55b490d995b53ea0b82911c7c66bc83709cef03557a2",
+      "sourceCommit": null
+    },
+    {
+      "path": ".github/evidence/pr1472-native/run-projection-native.mjs",
+      "bytes": 19530,
+      "sha256": "c83e3b6df438cbc934d7ae724c73bb22207d4deeb442391ba7ef021dc4759007",
+      "sourceCommit": null
+    },
+    {
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 2980,
+      "sha256": "d363c42e53ce20ed2985c4b54566391774a262e9f2a23b88bd0e1178af049a43",
+      "sourceCommit": null
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 17240,
+      "sha256": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/home-demo-client.ts",
+      "bytes": 24104,
+      "sha256": "d2c331ef416a8cc479a63e7300a81ea4bc65e711958c37809676e57cc2b2bcaf",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "bytes": 22394,
+      "sha256": "76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.test.ts",
+      "bytes": 55551,
+      "sha256": "8410aaed9faa8e4d12ca58fdd43d9bb02fd92573455c95737ad8183e49f26ac2",
+      "sourceCommit": null
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "bytes": 54862,
+      "sha256": "789c8bffdf55ad5691238e16dd388d9c692c3d2c3ce1a2fa275c345359627767",
+      "sourceCommit": null
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-families.ts",
+      "bytes": 86490,
+      "sha256": "0ff5db00a7e5a1ab12f8f57ccff4f8e8b00b0045e6d88c7c10d728412ae646b9",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-materializer.ts",
+      "bytes": 21439,
+      "sha256": "a9a174a9de802704781b7c0ec3d259b95380077a54f668730b1a11fb5355299d",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-portal-seal.ts",
+      "bytes": 6569,
+      "sha256": "a9d54b272b3b7b9f1cf7c35795000ed6a057e64de77533593d83e2caf20a1b86",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-scope.ts",
+      "bytes": 22152,
+      "sha256": "9d0fc44ed3ea0655d53099a47699e1c4f6ab367ef3005bd5c6719b1d3f5936f1",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/projection-native-evidence.ts",
+      "bytes": 15186,
+      "sha256": "f116b30fef8395bd8723a6f11ea593874413dd300d49f58e6246cee48d246c36",
+      "sourceCommit": null
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts",
+      "bytes": 41079,
+      "sha256": "ed511f75c69d9d969edd0ab61b916216480ef166bb3794d61404ab2ef956cac1",
+      "sourceCommit": null
+    },
+    {
+      "path": "internal/agent-operations/skills.yaml",
+      "bytes": 16071,
+      "sha256": "8d3e44ed9bbab8d69cf58a9f0a0653286961327e5fa16663fd412b447def5588",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "package.json",
+      "bytes": 10980,
+      "sha256": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/border-box-size-lease.ts",
+      "bytes": 12450,
+      "sha256": "046be0c030a65305e19f6264932bde53effc5460b2bc8c4e1a1a5f7384b6885f",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 20552,
+      "sha256": "b61932803491e50e2e72d4e3200b0f30b79b6a4712bfd9cb1be9e63797f3c702",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 2448,
+      "sha256": "fc056f82368d23ac82e2ed4205a98bfaffb249621555e021cc9797156d0aa281",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/target-alignment-host.ts",
+      "bytes": 19632,
+      "sha256": "eab35b8f5d604845e58beb73cec428db516658781cd06dfdd30afe846d80e5d7",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/base/src/select/alignment-controller.ts",
+      "bytes": 15867,
+      "sha256": "917bb3101f3b179ac0fd5688bb009a1bc1037851eaa623c6597978b3e6b3d879",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/base/src/select/alignment-intent.ts",
+      "bytes": 4395,
+      "sha256": "55a59dbdba8162868af863b5edb09081d72dd92b0b8e853ba1115ff11761fb97",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/base/src/select/content.proto.ts",
+      "bytes": 19538,
+      "sha256": "9ad6e4bca34c0fbf2c4f3dca3e03b297041e5405ae3828ef06a74c06e3b95461",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/base/src/select/item.proto.ts",
+      "bytes": 6905,
+      "sha256": "c2b36678b54559fb39e72e9ae246f8d996f02fef7f138b514d165ab0d97a56ea",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/select/content.proto.ts",
+      "bytes": 6119,
+      "sha256": "af381bbd4ed800f55597c16671f2ec90aaef836760cfeeb85a2934338355c3fb",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/select/item.proto.ts",
+      "bytes": 4879,
+      "sha256": "f6c7929d24c159ecb8a6842eca118595d4ca1f23bacce2cf2b9b543a8c444f21",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/select/recipes.ts",
+      "bytes": 10683,
+      "sha256": "d452ee14c6f65232a777cb8381c7e6cd0e2dc98f273f0fa1f6b0941d157cda50",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/select/trigger-visual.ts",
+      "bytes": 10686,
+      "sha256": "cd82e7cbd9f78f297160221d1dced00d9b955f5c23c42c002795a5c934c2311b",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 263425,
+      "sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "scripts/test/run-runtime-tests.mjs",
+      "bytes": 9550,
+      "sha256": "4a9e90e26ce72f3ef271f83a3146a5ffb17001262f6617cea9d39c0080b084ad",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "scripts/test/runtime-test-plan.mjs",
+      "bytes": 28091,
+      "sha256": "bd2c83b268b19465f6167237bfe65e49ec63eb966b26a946cdcb8f471c3aff8d",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "spec/contracts/C-TARGET-SIZE-MATCH-0001.yaml",
+      "bytes": 7315,
+      "sha256": "05d95c29e5b6e73b37c256e8c9a5d970b7bc6d8a2849e34c6366985e3c0662fe",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "spec/decisions/D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001.yaml",
+      "bytes": 20815,
+      "sha256": "d23ff4613f79e3a62a2fca070430a3d06abf7fc6fbf08e85b5065d7f120da44e",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-CONTENT.yaml",
+      "bytes": 21502,
+      "sha256": "115c000cf55762f0bd111ccf87110ae4529f8488e50bfbc489080086b5e0e69f",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SELECT-ITEM.yaml",
+      "bytes": 9928,
+      "sha256": "c1eb14eb497810352c05cfc58f0c35e1e7c7e058bad471fa9969d289426568cb",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    },
+    {
+      "path": "vitest.config.ts",
+      "bytes": 4511,
+      "sha256": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da",
+      "sourceCommit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53"
+    }
+  ]
+}

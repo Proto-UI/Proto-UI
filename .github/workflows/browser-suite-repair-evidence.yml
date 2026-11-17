@@ -1,4 +1,5 @@
 name: Browser suite repair evidence
+run-name: pr1472-native-${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -18,38 +19,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Retain exact checkout identity before setup
+        env:
+          PROTO_UI_PROJECTION_EVIDENCE_DIR: ${{ runner.temp }}/pr1472-native
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/pr1472-native
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_PROJECTION_EVIDENCE_DIR"
+          printf 'PROTO_UI_PROJECTION_EVIDENCE_DIR=%s\n' "$PROTO_UI_PROJECTION_EVIDENCE_DIR" >> "$GITHUB_ENV"
+          printf 'PROTO_UI_RUNTIME_EVIDENCE_DIR=%s\n' "$PROTO_UI_RUNTIME_EVIDENCE_DIR" >> "$GITHUB_ENV"
+          printf 'PROTO_UI_NATIVE_DEADLINE_EPOCH_MS=%s\n' "$(( $(date +%s) * 1000 + 540000 ))" >> "$GITHUB_ENV"
+          git rev-parse HEAD > "$PROTO_UI_PROJECTION_EVIDENCE_DIR/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$PROTO_UI_PROJECTION_EVIDENCE_DIR/source-tree.txt"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Install locked dependencies and the real CLI prerequisite
         run: |
+          set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
+          corepack pnpm@10.32.1 --filter @proto.ui/cli build
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          node --version > "$PROTO_UI_PROJECTION_EVIDENCE_DIR/node-version.txt"
+          corepack pnpm@10.32.1 --version > "$PROTO_UI_PROJECTION_EVIDENCE_DIR/pnpm-version.txt"
+          "$CHROME" --version > "$PROTO_UI_PROJECTION_EVIDENCE_DIR/chrome-version.txt"
       - name: Disable only the supported Astro development toolbar
         run: |
           set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
-        env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+      - name: Exercise all five original projection journeys with additive diagnostics
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          unset PROTO_UI_RUNTIME_PHASE PROTO_UI_RUNTIME_SHARD PROTO_UI_RUNTIME_SLOT PROTO_UI_BROWSER_BASE_URL
+          node .github/evidence/pr1472-native/run-projection-native.mjs
+      - name: Retain exact-source observations including any failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: pr1472-native-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/pr1472-native
+          if-no-files-found: error
           retention-days: 30
