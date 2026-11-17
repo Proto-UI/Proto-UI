@@ -15,7 +15,7 @@ import { type PropsBaseType } from '@proto.ui/types';
 import { commitChildren } from '../commit';
 import { hasCurrentOwnedDecorationPaint } from '../owned-decoration';
 import { SlotProjector } from '../slot-projector';
-import { hasOwnedSplitZeroOpacity } from '../shadow-split-effects';
+import { hasCurrentSplitSurfacePaint, hasOwnedSplitZeroOpacity } from '../shadow-split-effects';
 import type { ShadowInnerSurface } from '../shadow-inner-surface';
 
 type DecorationNodeRecord = {
@@ -331,6 +331,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         decorationRoot.ownerDocument !== record.splitRoot.document ||
         !hasSameChildren(treeRoot, record.splitRoot.children) ||
         captureSplitSurfaceIdentity(splitSurface) !== record.splitRoot.identity ||
+        !hasCurrentSplitSurfacePaint(splitSurface) ||
         isSplitNodeConcealed(splitSurface, host))
     )
       throw new Error('[WC Adapter] decoration physical blueprint changed');

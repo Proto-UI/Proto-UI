@@ -342,6 +342,134 @@ describe('Shadow closeout native boundaries', () => {
     }
   });
 
+  it('rejects removed split surface paint after a legitimate Rule change', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-split-surface-paint',
+              setup(def: any) {
+                const active = def.state.bool('active', false);
+                def.feedback.style.use(p.tw('opacity-50'));
+                def.rule({
+                  when: (w: any) => w.state(active).eq(true),
+                  intent: (i: any) => i.feedback.style.use(p.tw('opacity-100')),
+                });
+                def.event.on('host:click', () => active.set(true));
+                const leaf = def.feedback.style.declareDecoration();
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const host = new C();
+          host.append(document.createTextNode('Caller'));
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+          const initial = surface.getAttribute('data-pui-style');
+          host.click();
+          await Promise.resolve();
+          const rule = surface.getAttribute('data-pui-style');
+          function update() {
+            try {
+              host.update();
+              return null;
+            } catch (error) {
+              return String(error);
+            }
+          }
+          const ruleError = update();
+          surface.removeAttribute('data-pui-style');
+          const removedError = update();
+          surface.setAttribute('data-pui-style', rule!);
+          host.removeAttribute('data-pui-split-root-style');
+          return { initial, rule, ruleError, removedError, rootProjectionError: update() };
+        },
+        renderProtoShadowSplitStyleArtifact(['opacity-50', 'opacity-100'])
+      );
+      expect(result.initial).toContain('opacity-50');
+      expect(result.rule).toContain('opacity-100');
+      expect(result.ruleError).toBeNull();
+      expect(result.removedError).toMatch(/decoration physical blueprint changed/);
+      expect(result.rootProjectionError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('accepts native zero opacity at the start of admitted split entry', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-split-owned-enter',
+              setup(def: any) {
+                def.feedback.style.use(p.tw('animate-in fade-in-0 duration-150'));
+                const leaf = def.feedback.style.declareDecoration();
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const errors: string[] = [];
+          window.addEventListener('error', (event) => {
+            errors.push(event.message);
+            event.preventDefault();
+          });
+          const host = new C();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          try {
+            document.body.append(host);
+          } catch (error) {
+            errors.push(String(error));
+          }
+          const surface = host.shadowRoot?.querySelector('[part="surface"]') as HTMLElement | null;
+          const animation = surface
+            ?.getAnimations()
+            .find(
+              (entry) =>
+                entry instanceof CSSAnimation && entry.animationName === 'pui-split-paint-enter'
+            );
+          if (animation) {
+            animation.pause();
+            animation.currentTime = 0;
+          }
+          const opacity = surface ? getComputedStyle(surface).opacity : null;
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          return {
+            errors,
+            opacity,
+            entry: !!animation,
+            error,
+            sameCaller: surface?.querySelector('slot')?.assignedNodes()[0] === caller,
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['animate-in', 'fade-in-0', 'duration-150'])
+      );
+      expect(result.errors).toEqual([]);
+      expect(result.entry).toBe(true);
+      expect(result.opacity).toBe('0');
+      expect(result.error).toBeNull();
+      expect(result.sameCaller).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
   it('retains owned split Root opacity during its CSS transition out of zero', async () => {
     const page = await browser.newPage();
     try {

@@ -6,16 +6,23 @@ import {
   resolveRootStyleEntry,
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
-import { createOwnedTwTokenApplier } from './feedback-style';
+import { createOwnedTwTokenApplier, PUI_STYLE_ATTR } from './feedback-style';
 import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const activeBindings = new WeakSet<HTMLElement>();
-const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
+const splitPaintOwners = new WeakMap<
+  Element,
+  { containsCurrentTokens(): boolean; ownsZeroOpacity(): boolean }
+>();
+
+export function hasCurrentSplitSurfacePaint(surface: Element): boolean {
+  return splitPaintOwners.get(surface)?.containsCurrentTokens() ?? false;
+}
 
 export function hasOwnedSplitZeroOpacity(surface: Element): boolean {
-  return zeroOpacityOwners.get(surface)?.() ?? false;
+  return splitPaintOwners.get(surface)?.ownsZeroOpacity() ?? false;
 }
 
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
@@ -400,7 +407,7 @@ export function createShadowSplitEffectsPort({
     return (
       selector !== null &&
       host.matches(selector) &&
-      surface.getAttribute('data-pui-style')?.split(/\s+/).includes(token)
+      surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/).includes(token)
     );
   };
   const ownsZeroOpacity = () =>
@@ -408,38 +415,49 @@ export function createShadowSplitEffectsPort({
       (token) =>
         (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
     ) ?? false;
-  const ownsZeroOpacityExit = () => {
+  const ownsZeroOpacityAnimation = (direction: 'in' | 'out') => {
     const hasPaint = (name: string) =>
       applied?.surface.some(
         (token) => (token === name || token.endsWith(`:${name}`)) && isLiveSurfaceToken(token)
       );
-    if (!hasPaint('animate-out') || !hasPaint('fade-out-0')) return false;
+    if (!hasPaint(`animate-${direction}`) || !hasPaint(`fade-${direction}-0`)) return false;
     const view = surface.ownerDocument.defaultView;
     if (!view?.CSSAnimation || !view.KeyframeEffect || !surface.getAnimations) return false;
     return surface.getAnimations().some((animation) => {
       const effect = animation.effect;
       return (
         animation instanceof view.CSSAnimation &&
-        animation.animationName === 'pui-split-paint-exit' &&
+        animation.animationName ===
+          (direction === 'in' ? 'pui-split-paint-enter' : 'pui-split-paint-exit') &&
         effect instanceof view.KeyframeEffect &&
         effect.target === surface &&
         !effect.pseudoElement &&
         effect.getTiming().fill === 'both' &&
         effect.getComputedTiming().progress !== null &&
-        effect.getKeyframes().at(-1)?.opacity === '0'
+        effect.getKeyframes().at(direction === 'in' ? 0 : -1)?.opacity === '0'
       );
     });
   };
-  zeroOpacityOwners.set(surface, () => {
-    if (surface.parentNode !== host.shadowRoot) return false;
-    if (ownsZeroOpacity() || ownsZeroOpacityExit()) return true;
-    const transition = zeroOpacityTransition;
-    return (
-      !!transition &&
-      isLiveSurfaceToken(transition.target) === true &&
-      (transition.animation.pending || transition.animation.playState === 'running') &&
-      surface.getAnimations().includes(transition.animation)
-    );
+  splitPaintOwners.set(surface, {
+    containsCurrentTokens() {
+      if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) !== applied.root) return false;
+      const owned = applier.getOwned();
+      if (owned.size === 0) return true;
+      const live = new Set(surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/));
+      return [...owned].every((token) => live.has(token));
+    },
+    ownsZeroOpacity() {
+      if (surface.parentNode !== host.shadowRoot) return false;
+      if (ownsZeroOpacity() || ownsZeroOpacityAnimation('in') || ownsZeroOpacityAnimation('out'))
+        return true;
+      const transition = zeroOpacityTransition;
+      return (
+        !!transition &&
+        isLiveSurfaceToken(transition.target) === true &&
+        (transition.animation.pending || transition.animation.playState === 'running') &&
+        surface.getAnimations().includes(transition.animation)
+      );
+    },
   });
 
   const captureZeroOpacityTransition = (
@@ -661,7 +679,7 @@ export function createShadowSplitEffectsPort({
       if (disposed) return;
       disposed = true;
       activeBindings.delete(host);
-      zeroOpacityOwners.delete(surface);
+      splitPaintOwners.delete(surface);
       const errors: unknown[] = [];
       const cleanup = (action: () => void) => {
         try {
