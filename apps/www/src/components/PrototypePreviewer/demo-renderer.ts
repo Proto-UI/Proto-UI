@@ -58,7 +58,11 @@ const vue2Runtime = retryableModule(
   () => import('./runtimes/vue2-runtime'),
   runtimeUrls.vue2Runtime
 );
-const reactModules = () => Promise.all([reactAdapter(), reactRuntime()]);
+const reactModules = (canLoad: () => boolean = () => true) =>
+  Promise.all([
+    reactAdapter(),
+    reactRuntime().then((runtime) => (canLoad() ? runtime.loadReact() : undefined)),
+  ]);
 const vueModules = () => Promise.all([vueAdapter(), vueRuntime()]);
 const vue2Modules = () => Promise.all([vue2Adapter(), vue2Runtime()]);
 
@@ -133,7 +137,7 @@ export async function prepareDemoRuntime(runtime: RuntimeId): Promise<void> {
     case 'wc':
       return;
     case 'react':
-      await (await reactModules())[1].loadReact();
+      await reactModules();
       return;
     case 'vue':
       await (await vueModules())[1].loadVue();
@@ -970,12 +974,10 @@ async function renderDemoReact(
   const refs: Record<string, HTMLElement> = Object.create(null);
   let stopRefObservation: (() => void) | undefined;
 
-  // Non-WC modules join the graph only when this runtime is selected. A
-  // superseded owner must not proceed to CDN loading after that import boundary.
-  const [{ createReactAdapter }, { loadReact }] = await reactModules();
-  if (!ownsLease(opt, lease)) return abandonLease(lease);
-  const { React, ReactDOM } = await loadReact();
-  if (!ownsLease(opt, lease)) return abandonLease(lease);
+  // A current owner can prepare the browser package while the adapter loads.
+  const [{ createReactAdapter }, runtime] = await reactModules(() => ownsLease(opt, lease));
+  if (!runtime || !ownsLease(opt, lease)) return abandonLease(lease);
+  const { React, ReactDOM } = runtime;
   const adapter = createReactAdapter({
     ...React,
     createPortal: ReactDOM.createPortal,

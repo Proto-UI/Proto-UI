@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const imported = vi.hoisted(() => vi.fn());
 const loaded = vi.hoisted(() => vi.fn());
-vi.mock('@proto.ui/adapter-react', () => {
+const reactAdapterImport = vi.hoisted(() => ({ gate: undefined as Promise<void> | undefined }));
+vi.mock('@proto.ui/adapter-react', async () => {
   imported('react-adapter');
+  if (reactAdapterImport.gate) await reactAdapterImport.gate;
   return { createReactAdapter: vi.fn() };
 });
 vi.mock('@proto.ui/adapter-vue', () => {
@@ -79,6 +81,9 @@ describe('demo renderer runtime module activation', () => {
     'loads only selected %s modules and preserves load errors',
     async (runtime) => {
       const before = imported.mock.calls.length;
+      const beforeLoad = loaded.mock.calls.length;
+      const gate = runtime === 'react' ? Promise.withResolvers<void>() : undefined;
+      reactAdapterImport.gate = gate?.promise;
       // Three Search commands prepare concurrently. The asynchronous original
       // module acquisition must finish once before any consumer uses its loader.
       const hosts = Array.from({ length: 3 }, () => document.createElement('div'));
@@ -90,8 +95,18 @@ describe('demo renderer runtime module activation', () => {
           demo: { type: 'demo', root: { kind: 'box', children: [] } },
         })
       );
-      const results = await Promise.allSettled(attempts);
-      for (const result of results) {
+      const pending = Promise.allSettled(attempts);
+      try {
+        if (gate)
+          await vi.waitFor(() =>
+            expect(loaded.mock.calls.slice(beforeLoad)).toEqual([['react'], ['react'], ['react']])
+          );
+      } finally {
+        gate?.resolve();
+        reactAdapterImport.gate = undefined;
+        await pending;
+      }
+      for (const result of await pending) {
         expect(result.status).toBe('rejected');
         if (result.status === 'rejected')
           expect(result.reason.message).toBe(`${runtime} load failed`);
