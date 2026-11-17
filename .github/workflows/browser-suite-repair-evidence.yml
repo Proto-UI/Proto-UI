@@ -1,55 +1,83 @@
-name: Browser suite repair evidence
-
+name: PR1484 and PR1485 bounded native composition
+run-name: pr1484-wc-1485-native-${{ github.sha }}
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
 concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: pr1484-wc-1485-native-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  focused-browser:
+  wc-dialog-native-composition:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Install the locked graph and prepare the actual public consumer
+        id: prepare
         run: |
+          set -euo pipefail
           corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
-        run: |
-          set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
+          mkdir -p "$RUNNER_TEMP/wc1485-native"
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/wc1485-native/locked-install.log"
+          corepack pnpm@10.32.1 --filter @proto.ui/cli build 2>&1 | tee "$RUNNER_TEMP/wc1485-native/cli-build.log"
+          node scripts/build/public-packages.mjs --package @proto.ui/adapter-web-component --package @proto.ui/prototypes-shadcn --json 2>&1 | tee "$RUNNER_TEMP/wc1485-native/public-packages-build.log"
+          corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style 2>&1 | tee "$RUNNER_TEMP/wc1485-native/generated-styles.log"
+          WC1485_CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$WC1485_CHROME" >> "$GITHUB_ENV"
+          node --version > "$RUNNER_TEMP/wc1485-native/node-version.txt"
+          corepack pnpm@10.32.1 --version > "$RUNNER_TEMP/wc1485-native/pnpm-version.txt"
+          "$WC1485_CHROME" --version > "$RUNNER_TEMP/wc1485-native/chrome-version.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/wc1485-native/source-sha.txt"
+          git show --no-patch --format=raw HEAD > "$RUNNER_TEMP/wc1485-native/source-commit.txt"
+          sha256sum .github/evidence/pr1484-wc-1485/hosted-source-inputs-r2.json > "$RUNNER_TEMP/wc1485-native/source-inputs.sha256"
+          cp .github/evidence/pr1484-wc-1485/hosted-source-inputs-r2.json "$RUNNER_TEMP/wc1485-native/source-inputs.json"
+      - name: Admit the exact source and actual hosted environment
+        id: guard_before
+        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}
+        run: node .github/evidence/pr1484-wc-1485/hosted-source-guard-r2.mjs .github/evidence/pr1484-wc-1485/hosted-source-inputs-r2.json "$GITHUB_WORKSPACE" "$RUNNER_TEMP/wc1485-native" before
+      - name: Run the unchanged eighteen native caller rows
+        if: ${{ !cancelled() && steps.guard_before.outcome == 'success' }}
         env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/wc1485-native
+          PROTO_UI_BROWSER_BASE_URL: ''
         run: |
           set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          unset PROTO_UI_RUNTIME_PHASE PROTO_UI_RUNTIME_SHARD PROTO_UI_RUNTIME_SLOT
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/wc1485-native/caller-started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 600s node scripts/test/run-runtime-tests.mjs packages/adapters/web-component/test/shadow-closeout.browser.test.ts --testNamePattern 'validates caller (focus|text selection|select choices) through late split publication' --pool=forks --no-file-parallelism --testTimeout=5000 --hookTimeout=5000 --maxWorkers=1 --minWorkers=1 --reporter=verbose --reporter=json --outputFile.json="$RUNNER_TEMP/wc1485-native/caller-native-eighteen.json" 2>&1 | tee "$RUNNER_TEMP/wc1485-native/caller-native-eighteen.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/wc1485-native/caller-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/wc1485-native/caller-finished-at.txt"
+          exit "$status"
+      - name: Observe the actual composed public Dialog wheel focus and slots
+        if: ${{ !cancelled() && steps.guard_before.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/wc1485-native/dialog-started-at.txt"
+          set +e
+          timeout --signal=TERM --kill-after=10s 600s node --import tsx .github/evidence/pr1484-wc-1485/hosted-dialog-scroll.mjs "$GITHUB_WORKSPACE" "$RUNNER_TEMP/wc1485-native/dialog" 2>&1 | tee "$RUNNER_TEMP/wc1485-native/dialog.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/wc1485-native/dialog-exit-code.txt"
+          date -u +%Y-%m-%dT%H:%M:%SZ > "$RUNNER_TEMP/wc1485-native/dialog-finished-at.txt"
+          exit "$status"
+      - name: Retain the actual source and environment after both observations
+        if: ${{ always() && steps.guard_before.outcome == 'success' }}
+        run: node .github/evidence/pr1484-wc-1485/hosted-source-guard-r2.mjs .github/evidence/pr1484-wc-1485/hosted-source-inputs-r2.json "$GITHUB_WORKSPACE" "$RUNNER_TEMP/wc1485-native" after
+      - name: Retain actual observations failures and source guards
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: pr1484-wc-1485-native-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wc1485-native
+          if-no-files-found: error
           retention-days: 30

@@ -52,6 +52,7 @@ export interface FeedbackFacade extends ModuleFacade {
 
 export type FeedbackPort = {
   supportsOwnedDecoration?: true;
+  hasDecorationTargets?: () => boolean;
   captureDecorationLease?: () => object;
   bindDecorations?: (
     bindings: readonly import('./style/owned-decoration-cap').OwnedDecorationBinding[],

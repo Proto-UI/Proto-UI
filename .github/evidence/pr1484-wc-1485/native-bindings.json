@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "kind": "quote-free-hosted-projection-of-private-source-bindings",
+  "sourceManifestSha256": "ce7149a8dd13f59fea324a68dc175e6be0eb1cfd2333ce21324812c4e27f169f",
+  "records": [
+    {
+      "relativePath": "packages/adapters/web-component/src/runtime/session.ts",
+      "edited": {
+        "bytes": 34075,
+        "sha256": "3f89df416754351fcd16e5e22a89ced74a5382e89173726801d4d926fb8dc778",
+        "gitBlob": "050fd7b760875a028ba8ac759cfde58ed5649d69"
+      }
+    },
+    {
+      "relativePath": "packages/adapters/web-component/src/shadow-split-effects.ts",
+      "edited": {
+        "bytes": 27232,
+        "sha256": "43121b0bc34ebf00f6978c22143e1114dbbc1f84bba7a58ac7afd33eb21d73f6",
+        "gitBlob": "02cf1630828b7b0b0005dac9de66ac4f50e9f7ca"
+      }
+    },
+    {
+      "relativePath": "packages/core/src/spec/feedback/application-role.ts",
+      "edited": {
+        "bytes": 6094,
+        "sha256": "4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1",
+        "gitBlob": "e138cffe82feae1480bd4fd7f0e5234d6b7820d4"
+      }
+    }
+  ],
+  "support": [
+    {
+      "relativePath": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+      "gitBlob": "966ff688c2c6c853e05dc676e1685e9a7b8b1a50"
+    },
+    {
+      "relativePath": "scripts/analysis/fixtures/shadow-s4/dialog.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 4794,
+      "sha256": "409432a3b39a47ce2fc3ceb946b5577b399809c52466532eb29280d4a49c2a5f",
+      "gitBlob": "dd95ed30246ae81822d044b63e50ea9348a3fa6f"
+    },
+    {
+      "relativePath": "vitest.config.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 4511,
+      "sha256": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da",
+      "gitBlob": "149fe40bb044c4a65619d011d51694bec410b29f"
+    },
+    {
+      "relativePath": "scripts/spec/check-lifecycle-authoring.mjs",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 3095,
+      "sha256": "b0aed26b138f5e6cf6bf4243faf6ce55fc1310cda8e5b75170bc84ac52543728",
+      "gitBlob": "c4fa16fbabbff352f825af11c479451159516b2d"
+    },
+    {
+      "relativePath": "packages/spec/engine/src/index.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 4874,
+      "sha256": "1832a2fc6a6e9a08ca1ac451cb1de51b87a46c06d42ba3efe08baad60e9a6a18",
+      "gitBlob": "4864608a046e55962fcc4e26cbe91eb716fc03c6"
+    },
+    {
+      "relativePath": "packages/spec/engine/src/lifecycle.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 25780,
+      "sha256": "b71205a8689f4c4e9eed36638b7b873594bec4a31a74003ba8094c2e241e9a79",
+      "gitBlob": "e385b5aba2a519fc5d9cbe044cf4e0671019fe10"
+    },
+    {
+      "relativePath": "packages/spec/schema/src/index.ts",
+      "revision": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "bytes": 29508,
+      "sha256": "fb16f9b58f172a28036e768de63c0483a1cf9a2bc6606f1a632ebcf1a12523d0",
+      "gitBlob": "73b5c3c7ff01b388398558975981ee0fd60e5165"
+    }
+  ],
+  "publishedCurrentTarget": {
+    "kind": "factual-current-target-provenance-disclosure",
+    "declaredAt": "2026-11-17",
+    "purpose": "A reader of this published evidence can see the live platform target identity of both contributing pull requests and the exact per-path relationship between the published carrier bytes and those current target bytes. This is a factual provenance statement only.",
+    "currentTargetHeads": {
+      "pr1484": "00f240c0b7fb15a8853af5ed8c654968cc768dd5",
+      "pr1485": "52c89701fec2a6afaa4cd341fafb707795901fc8"
+    },
+    "originalContributionHeads": {
+      "pr1484": "947a65ebd02d9331ad67663ed1647d061b3b6316",
+      "pr1485": "52c89701fec2a6afaa4cd341fafb707795901fc8"
+    },
+    "currentTargetRelation": {
+      "pr1484": "The current PR1484 target 00f240c0b7fb15a8853af5ed8c654968cc768dd5 is exactly one commit ahead of the original 947a65ebd02d9331ad67663ed1647d061b3b6316 contribution head; merge base 947a65eb, ahead 1, behind 0, and it changed exactly the three paths listed below.",
+      "pr1485": "The current PR1485 target is unchanged at 52c89701fec2a6afaa4cd341fafb707795901fc8 and is also the original PR1485 contribution head."
+    },
+    "changedPaths": [
+      {
+        "path": "packages/adapters/web-component/src/runtime/session.ts",
+        "currentTarget": {
+          "bytes": 34075,
+          "sha256": "3f89df416754351fcd16e5e22a89ced74a5382e89173726801d4d926fb8dc778",
+          "gitBlob": "050fd7b760875a028ba8ac759cfde58ed5649d69"
+        },
+        "carrier": {
+          "bytes": 34075,
+          "sha256": "3f89df416754351fcd16e5e22a89ced74a5382e89173726801d4d926fb8dc778",
+          "gitBlob": "050fd7b760875a028ba8ac759cfde58ed5649d69"
+        },
+        "matchesCurrentTarget": true,
+        "carrierSourceRole": "exact-retained-PR1484-R2-repair",
+        "carrierAction": "overlay-reviewed-candidate",
+        "explanation": "The current PR1484 target bytes for this path are byte-identical to the published carrier bytes; the published file is exactly the current target file."
+      },
+      {
+        "path": "packages/adapters/web-component/test/owned-decoration.integration.test.ts",
+        "currentTarget": {
+          "bytes": 42946,
+          "sha256": "9ef4ec85b0acbd600631be5d3a5d27344bd53ebb376db07413c85aa5f114e1d2",
+          "gitBlob": "ae3b715c065f314a032a24d550a0a16d7240cb38"
+        },
+        "carrier": {
+          "bytes": 44735,
+          "sha256": "41d55ed8e5774b0bd79bed323f161c8282896a0bd545b20d5f7101e289420251",
+          "gitBlob": "c3a34feffbd018657c1cf9d11b67900bd60eebfe"
+        },
+        "matchesCurrentTarget": false,
+        "carrierSourceRole": "separate-reviewed-unit-harness-context",
+        "carrierAction": "overlay-unit-context-only",
+        "explanation": "The published carrier deliberately keeps the separately reviewed 41d55ed8 unit-harness-context variant of this test path. It is not the current PR1484 target 9ef4ec85 byte set.",
+        "limitation": "Unit-harness-only context separation: this published path is source-equivalent for the separately reviewed unit-harness context only. It is not current-PR1484-head equality and it carries no native, hosted, CI, exact-head, release or product acceptance."
+      },
+      {
+        "path": "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+        "currentTarget": {
+          "bytes": 308822,
+          "sha256": "7a61281fae8078bd646183a42d791e22b5bd48ae073f1d58c318cd34aabd5098",
+          "gitBlob": "85dc13995fcf37f04c21cf92dcf7adb6fcd983ee"
+        },
+        "carrier": {
+          "bytes": 308822,
+          "sha256": "7a61281fae8078bd646183a42d791e22b5bd48ae073f1d58c318cd34aabd5098",
+          "gitBlob": "85dc13995fcf37f04c21cf92dcf7adb6fcd983ee"
+        },
+        "matchesCurrentTarget": true,
+        "carrierSourceRole": "exact-retained-PR1484-R2-repair",
+        "carrierAction": "overlay-reviewed-candidate",
+        "explanation": "The current PR1484 target bytes for this path are byte-identical to the published carrier bytes; the published file is exactly the current target file."
+      }
+    ],
+    "exactCurrentTargetMatches": [
+      "packages/adapters/web-component/src/runtime/session.ts",
+      "packages/adapters/web-component/test/shadow-closeout.browser.test.ts"
+    ],
+    "divergentCarrierPaths": [
+      "packages/adapters/web-component/test/owned-decoration.integration.test.ts"
+    ],
+    "unchangedPublishedPaths": "Every other published carrier path is byte-identical to the reviewed carrier and is unaffected by the PR1484 head advance.",
+    "originalProvenancePreserved": {
+      "originalImmutableSourceEntries": 15,
+      "pr1484_947a_entries": 10,
+      "pr1485_52c897_entries": 5,
+      "sourceHeadsRepinned": false,
+      "historicalReceiptsRestamped": false,
+      "productTestWorkflowBytesChanged": false
+    },
+    "publishedMembership": {
+      "guardSourceFiles": 35,
+      "publishedPaths": 40,
+      "treeEntries": 32,
+      "assets": 5
+    },
+    "changedPublishedFiles": [
+      ".github/evidence/pr1484-wc-1485/hosted-source-inputs-r2.json (this file: extended with this disclosure)",
+      ".github/evidence/pr1484-wc-1485/native-bindings.json (extended with the identical publishedCurrentTarget disclosure)"
+    ],
+    "acceptanceClaim": "NONE. This disclosure asserts provenance only. It claims no native, browser, hosted, CI, Matrix, exact-head, release or product acceptance, and it does not restate any historical receipt as a current-target result.",
+    "executionAuthority": "The publisher live preflight is the authority at execution time: it stops before any write unless the live PR1484 head is 00f240c0b7fb15a8853af5ed8c654968cc768dd5, the live PR1485 head is 52c89701fec2a6afaa4cd341fafb707795901fc8 and live main is 0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53."
+  },
+  "privateLocationsIncluded": false
+}

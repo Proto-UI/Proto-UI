@@ -6,12 +6,25 @@ import {
   resolveRootStyleEntry,
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
-import { createOwnedTwTokenApplier } from './feedback-style';
+import { createOwnedTwTokenApplier, PUI_STYLE_ATTR } from './feedback-style';
 import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
 const activeBindings = new WeakSet<HTMLElement>();
+const splitPaintOwners = new WeakMap<
+  Element,
+  { containsCurrentTokens(): boolean; ownsZeroOpacity(): boolean }
+>();
+
+export function hasCurrentSplitSurfacePaint(surface: Element): boolean {
+  return splitPaintOwners.get(surface)?.containsCurrentTokens() ?? false;
+}
+
+export function hasOwnedSplitZeroOpacity(surface: Element): boolean {
+  return splitPaintOwners.get(surface)?.ownsZeroOpacity() ?? false;
+}
+
 const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
@@ -55,16 +68,17 @@ function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
     .replace(/\s/g, '');
 }
 
-// Canonical host-sizing recipes are Adapter trust anchors rather than values
-// supplied by the plain artifact. Keep this bounded list explicit: accepting a
-// new generated sizing spelling requires an Adapter update and parity evidence.
-function hasCanonicalSizingRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
+// Canonical recipes affecting boundary sizing or scrolling are Adapter trust
+// anchors. A new generated spelling requires an Adapter update and parity evidence.
+function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
   const expected =
     entry.authorToken === 'w-full'
       ? 'width:100%;'
       : entry.authorToken === 'min-h-16'
         ? 'min-height:4rem;'
-        : null;
+        : entry.authorToken === 'overflow-y-auto'
+          ? 'overflow-y:auto;'
+          : null;
   if (!expected) return true;
   return declarationsBeforeReceipt(rule) === expected;
 }
@@ -206,7 +220,10 @@ function splitReceiptVariants(token: string): string[] {
   return parts.filter(Boolean);
 }
 
-function compiledReceiptSelector(token: string): string | null {
+function compiledReceiptSelector(
+  token: string,
+  target: 'host' | 'element' = 'host'
+): string | null {
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   let selector = `[${SHADOW_SPLIT_ROOT_STYLE_ATTR}~="${escaped}"]`;
   let dark = false;
@@ -246,6 +263,7 @@ function compiledReceiptSelector(token: string): string | null {
       } else return null;
     }
   }
+  if (target === 'element') return dark ? `[data-pui-color-scheme='dark']${selector}` : selector;
   return `${dark ? ":where(:host([data-pui-color-scheme='dark']))" : ''}:host(${selector})`;
 }
 
@@ -292,17 +310,20 @@ function hasExactCompiledReceipt(
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const selection = token.startsWith('selection:');
   const placeholder = token.startsWith('placeholder:');
+  const surface = `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
   const allowed = new Set(
-    selection
-      ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
-      : placeholder
-        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
-        : [
-            receipt,
-            `${receipt}:host([data-pui-split-text-control])`,
-            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
-            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
-          ]
+    entry.authorToken === 'overflow-y-auto'
+      ? [surface]
+      : selection
+        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
+        : placeholder
+          ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
+          : [
+              receipt,
+              `${receipt}:host([data-pui-split-text-control])`,
+              `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
+              surface,
+            ]
   );
   const candidates = rules.filter(({ selector }) => selector.replace(/\s/g, '').includes(receipt));
   const matching = candidates.filter(({ selector }) => {
@@ -314,7 +335,7 @@ function hasExactCompiledReceipt(
     matching.length > 0 &&
     ((!selection && !placeholder && entry.roleSource === 'fallback') ||
       matching.every(
-        (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalSizingRecipe(rule, entry)
+        (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalProjectionRecipe(rule, entry)
       ))
   );
 }
@@ -384,6 +405,97 @@ export function createShadowSplitEffectsPort({
   let disposed = false;
   let flushing = false;
   let flushRequested = false;
+  let zeroOpacityTransition: { animation: CSSTransition; target: string } | null = null;
+  const isLiveSurfaceToken = (token: string) => {
+    const selector = compiledReceiptSelector(token, 'element');
+    return (
+      selector !== null &&
+      host.matches(selector) &&
+      surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/).includes(token)
+    );
+  };
+  const ownsZeroOpacity = () =>
+    applied?.surface.some(
+      (token) =>
+        (token === 'opacity-0' || token.endsWith(':opacity-0')) && isLiveSurfaceToken(token)
+    ) ?? false;
+  const ownsZeroOpacityAnimation = (direction: 'in' | 'out') => {
+    const hasPaint = (name: string) =>
+      applied?.surface.some(
+        (token) => (token === name || token.endsWith(`:${name}`)) && isLiveSurfaceToken(token)
+      );
+    if (!hasPaint(`animate-${direction}`) || !hasPaint(`fade-${direction}-0`)) return false;
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSAnimation || !view.KeyframeEffect || !surface.getAnimations) return false;
+    return surface.getAnimations().some((animation) => {
+      const effect = animation.effect;
+      return (
+        animation instanceof view.CSSAnimation &&
+        animation.animationName ===
+          (direction === 'in' ? 'pui-split-paint-enter' : 'pui-split-paint-exit') &&
+        effect instanceof view.KeyframeEffect &&
+        effect.target === surface &&
+        !effect.pseudoElement &&
+        effect.getTiming().fill === 'both' &&
+        effect.getComputedTiming().progress === (direction === 'in' ? 0 : 1) &&
+        effect.getKeyframes().at(direction === 'in' ? 0 : -1)?.opacity === '0'
+      );
+    });
+  };
+  splitPaintOwners.set(surface, {
+    containsCurrentTokens() {
+      if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) !== applied.root) return false;
+      const owned = applier.getOwned();
+      if (owned.size === 0) return true;
+      const live = new Set(surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/));
+      return [...owned].every((token) => live.has(token));
+    },
+    ownsZeroOpacity() {
+      if (surface.parentNode !== host.shadowRoot) return false;
+      if (ownsZeroOpacity() || ownsZeroOpacityAnimation('in') || ownsZeroOpacityAnimation('out'))
+        return true;
+      const transition = zeroOpacityTransition;
+      return (
+        !!transition &&
+        isLiveSurfaceToken(transition.target) === true &&
+        (transition.animation.pending || transition.animation.playState === 'running') &&
+        surface.getAnimations().includes(transition.animation)
+      );
+    },
+  });
+
+  const captureZeroOpacityTransition = (
+    eligible: readonly string[],
+    before: readonly Animation[]
+  ): { animation: CSSTransition; target: string } | null => {
+    const view = surface.ownerDocument.defaultView;
+    if (!view?.CSSTransition || !view.KeyframeEffect) return null;
+    for (const animation of surface.getAnimations()) {
+      if (
+        !(animation instanceof view.CSSTransition) ||
+        animation.transitionProperty !== 'opacity' ||
+        before.includes(animation)
+      )
+        continue;
+      const effect = animation.effect;
+      if (
+        !(effect instanceof view.KeyframeEffect) ||
+        effect.target !== surface ||
+        effect.pseudoElement
+      )
+        continue;
+      const keyframes = effect.getKeyframes();
+      if (keyframes[0]?.opacity !== '0') continue;
+      const finalOpacity = Number(keyframes.at(-1)?.opacity);
+      const target = eligible.find(
+        (token) =>
+          Number(/(?:^|:)opacity-(\d+)$/.exec(token)?.[1]) / 100 === finalOpacity &&
+          isLiveSurfaceToken(token)
+      );
+      if (target) return { animation, target };
+    }
+    return null;
+  };
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
@@ -418,6 +530,7 @@ export function createShadowSplitEffectsPort({
         fail(flex, 'intrinsic operands');
     }
     for (const entry of entries) {
+      if (nativeText && entry.authorToken === 'overflow-y-auto') fail(entry, 'native scrollport');
       if (
         nativeText &&
         /^(?:(?:min-|max-)?[wh]-|size-|aspect-)/.test(entry.authorToken) &&
@@ -517,11 +630,22 @@ export function createShadowSplitEffectsPort({
     const previous = applied;
     const next = latest;
     try {
+      // Capture the native transition only on an owned zero-to-positive write.
+      // Subsequent equal projections must not acquire a different animation.
+      const eligible =
+        ownsZeroOpacity() &&
+        next.surface.some((token) => /(?:^|:)transition-(?:opacity|all)$/.test(token))
+          ? next.surface.filter((token) => /(?:^|:)opacity-[1-9]\d*$/.test(token))
+          : [];
+      const before = eligible.length && surface.getAnimations ? surface.getAnimations() : null;
       host.setAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR, next.root);
       if (nativeText) host.setAttribute(NATIVE_TEXT_ATTR, '');
       surface.setAttribute(SHADOW_SPLIT_SURFACE_ATTR, '');
       applier.apply(next.surface);
       applied = next;
+      if (before) zeroOpacityTransition = captureZeroOpacityTransition(eligible, before);
+      else if (zeroOpacityTransition && !next.surface.includes(zeroOpacityTransition.target))
+        zeroOpacityTransition = null;
     } catch (error) {
       // Restore both owned projections even when the failing target mutated before throwing.
       // DOM rollback itself may fail on a broken host; retain the original failure.
@@ -536,7 +660,8 @@ export function createShadowSplitEffectsPort({
         if (!previous) surface.removeAttribute(SHADOW_SPLIT_SURFACE_ATTR);
         if (!previous && nativeText) host.removeAttribute(NATIVE_TEXT_ATTR);
       } catch {}
-      latest = previous;
+      applied = latest = previous;
+      zeroOpacityTransition = null;
       flushRequested = false;
       throw error;
     } finally {
@@ -559,6 +684,7 @@ export function createShadowSplitEffectsPort({
       if (disposed) return;
       disposed = true;
       activeBindings.delete(host);
+      splitPaintOwners.delete(surface);
       const errors: unknown[] = [];
       const cleanup = (action: () => void) => {
         try {

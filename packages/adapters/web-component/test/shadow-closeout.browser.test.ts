@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { build } from 'esbuild';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { definePrototype } from '@proto.ui/core';
+import type { AdaptToWebComponent } from '../src';
 import { launchBrowser } from '../../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import {
   renderProtoShadowSplitStyleArtifact,
@@ -48,6 +50,1007 @@ afterAll(async () => {
 });
 
 describe('Shadow closeout native boundaries', () => {
+  it('rejects external split surface transforms that collapse the caller', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate((artifact) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-split-transform',
+            setup(def: any) {
+              const leaf = def.feedback.style.declareDecoration();
+              return (r: any) => [r.decoration(leaf), r.slot()];
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const host = new C();
+        const caller = document.createElement('button');
+        caller.textContent = 'Caller';
+        host.append(caller);
+        document.body.append(host);
+        const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+        const slot = surface.querySelector('slot')!;
+        const update = () => {
+          try {
+            host.update();
+            return null;
+          } catch (error) {
+            return String(error);
+          }
+        };
+        surface.style.transform = 'translateX(4px) scale(.75)';
+        const visible = { width: caller.getBoundingClientRect().width, error: update() };
+        surface.style.transform = 'scale(0)';
+        const inline = { width: caller.getBoundingClientRect().width, error: update() };
+        surface.style.transform = 'translateZ(1px)';
+        const visible3d = {
+          width: caller.getBoundingClientRect().width,
+          transform: getComputedStyle(surface).transform,
+          error: update(),
+        };
+        surface.style.transform = 'scale3d(0,0,0)';
+        const inline3d = {
+          width: caller.getBoundingClientRect().width,
+          transform: getComputedStyle(surface).transform,
+          error: update(),
+        };
+        surface.style.removeProperty('transform');
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync('[part="surface"] { scale: 0 1; }');
+        host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, sheet];
+        const sheetCollapse = { width: caller.getBoundingClientRect().width, error: update() };
+        return {
+          visible,
+          inline,
+          sheetCollapse,
+          inline3d,
+          visible3d,
+          callerRetained: slot.assignedNodes()[0] === caller,
+        };
+      }, renderProtoShadowSplitStyleArtifact([]));
+      expect(result.visible.width).toBeGreaterThan(0);
+      expect(result.visible.error).toBeNull();
+      expect(result.inline3d.transform).toMatch(/^matrix3d/);
+      expect(result.visible3d.transform).toMatch(/^matrix3d/);
+      expect(result.visible3d.width).toBeGreaterThan(0);
+      expect(result.visible3d.error).toBeNull();
+      for (const collapsed of [result.inline, result.sheetCollapse, result.inline3d]) {
+        expect(collapsed.width).toBe(0);
+        expect(collapsed.error).toMatch(/decoration physical blueprint changed/);
+      }
+      expect(result.callerRetained).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rejects external opacity filters hiding a split slot', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate((artifact) => {
+        const p = (window as any).Closeout;
+        const C = p.adapt(
+          p.define({
+            name: 'closeout-split-filter',
+            setup(def: any) {
+              const leaf = def.feedback.style.declareDecoration();
+              return (r: any) => [r.decoration(leaf), r.slot()];
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const host = new C();
+        const caller = document.createElement('button');
+        caller.textContent = 'Caller';
+        host.append(caller);
+        document.body.append(host);
+        const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+        const sheet = new CSSStyleSheet();
+        host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, sheet];
+        const inspect = (value: string) => {
+          sheet.replaceSync(`[part="surface"] { filter: ${value}; }`);
+          const { filter, opacity } = getComputedStyle(surface);
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          return { filter, opacity, error, callerWidth: caller.getBoundingClientRect().width };
+        };
+        return {
+          visible: inspect('blur(0px) opacity(0.4)'),
+          concealed: inspect('drop-shadow(1px 1px red) opacity(0%)'),
+          callerRetained: surface.querySelector('slot')?.assignedNodes()[0] === caller,
+        };
+      }, renderProtoShadowSplitStyleArtifact([]));
+      expect(result.visible.filter).toContain('opacity(0.4)');
+      expect(result.visible.error).toBeNull();
+      expect(result.concealed.opacity).toBe('1');
+      expect(result.concealed.filter).toContain('opacity(0)');
+      expect(result.concealed.callerWidth).toBeGreaterThan(0);
+      expect(result.concealed.error).toMatch(/decoration physical blueprint changed/);
+      expect(result.callerRetained).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it.each([
+    { mutation: 'unchanged', nested: false },
+    { mutation: 'reset state', nested: false },
+    { mutation: 'unchanged', nested: true },
+    { mutation: 'remove input', nested: true },
+    { mutation: 'adopt input', nested: true },
+  ] as const)(
+    'validates caller focus through late split publication (mutation=$mutation, nested=$nested)',
+    async ({ mutation, nested }) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation, nested }) => {
+            const p = (window as any).Closeout;
+            const host = document.createElement('closeout-split-focused-upgrade');
+            const caller = document.createElement('input');
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            let foreignFocusCalls = 0;
+            const focus = caller.focus.bind(caller);
+            caller.focus = (options?: FocusOptions) => {
+              if (caller.ownerDocument === foreign) foreignFocusCalls++;
+              focus(options);
+            };
+            caller.value = 'Caller';
+            caller.setSelectionRange(1, 4, 'backward');
+            const wrapper = document.createElement('span');
+            if (nested) wrapper.append(caller);
+            host.append(nested ? wrapper : caller);
+            document.body.append(host);
+            caller.focus();
+            const initial = document.activeElement === caller;
+            let reaction = false;
+            let activeAtReaction = false;
+            customElements.define(
+              'closeout-split-focus-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  activeAtReaction = document.activeElement === caller;
+                  if (mutation !== 'unchanged') {
+                    caller.value = 'Reset';
+                    caller.setSelectionRange(0, 5, 'forward');
+                    if (mutation === 'remove input') caller.remove();
+                    else if (mutation === 'adopt input') {
+                      foreign.body.append(foreign.adoptNode(caller));
+                      caller.value = 'Foreign input';
+                      caller.setSelectionRange(0, 7, 'forward');
+                    } else {
+                      caller.setAttribute('slot', 'claim');
+                      caller.blur();
+                    }
+                  }
+                }
+              }
+            );
+            const errors: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              event.preventDefault();
+            });
+            p.adapt(
+              p.define({
+                name: 'closeout-split-focused-upgrade',
+                setup(def: any) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r: any) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-focus-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            return {
+              initial,
+              reaction,
+              activeAtReaction,
+              errors,
+              retained:
+                host.firstChild === (nested ? wrapper : caller) && host.childNodes.length === 1,
+              controlRetained:
+                !nested || (wrapper.firstChild === caller && wrapper.childNodes.length === 1),
+              callerOwned: caller.ownerDocument === document,
+              foreignOwner: caller.ownerDocument === foreign,
+              foreignParent: caller.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+              foreignFocusCalls,
+              focused: document.activeElement === caller,
+              value: caller.value,
+              slot: caller.getAttribute('slot'),
+              selection: [caller.selectionStart, caller.selectionEnd, caller.selectionDirection],
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation, nested }
+        );
+        expect(result.initial).toBe(true);
+        expect(result.reaction).toBe(true);
+        expect(result.activeAtReaction).toBe(true);
+        expect(result.retained).toBe(true);
+        expect(result.foreignFocusCalls).toBe(0);
+        expect(result.slot).toBeNull();
+        if (mutation === 'adopt input') {
+          expect(result.controlRetained).toBe(false);
+          expect(result.callerOwned).toBe(false);
+          expect(result.foreignOwner).toBe(true);
+          expect(result.foreignParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+          expect(result.value).toBe('Foreign input');
+          expect(result.selection).toEqual([0, 7, 'forward']);
+          expect(result.focused).toBe(false);
+        } else {
+          expect(result.controlRetained).toBe(true);
+          expect(result.callerOwned).toBe(true);
+          expect(result.foreignChildren).toBe(0);
+          expect(result.value).toBe('Caller');
+          expect(result.selection).toEqual([1, 4, 'backward']);
+          expect(result.focused).toBe(true);
+        }
+        if (mutation !== 'unchanged')
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+        else {
+          expect(result.errors).toEqual([]);
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it.each([
+    { mutation: 'unchanged', nested: false, kind: 'text' },
+    { mutation: 'text data', nested: false, kind: 'text' },
+    { mutation: 'unchanged', nested: true, kind: 'text' },
+    { mutation: 'text replacement', nested: true, kind: 'text' },
+    { mutation: 'adopt text', nested: true, kind: 'text' },
+    { mutation: 'unchanged', nested: true, kind: 'element' },
+    { mutation: 'replace children', nested: true, kind: 'element' },
+    { mutation: 'adopt child', nested: true, kind: 'element' },
+  ] as const)(
+    'validates caller text selection through late split publication (mutation=$mutation, nested=$nested, kind=$kind)',
+    async ({ mutation, nested, kind }) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation, nested, kind }) => {
+            const p = (window as any).Closeout;
+            const host = document.createElement('closeout-split-selected-upgrade');
+            const text = document.createTextNode('Caller text');
+            const wrapper = document.createElement('span');
+            const firstBreak = document.createElement('br');
+            const lastBreak = document.createElement('br');
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            if (kind === 'element') wrapper.append(firstBreak, lastBreak);
+            else if (nested) wrapper.append(text);
+            const caller = kind === 'element' ? wrapper : text;
+            host.append(nested ? wrapper : caller);
+            document.body.append(host);
+            const selection = document.getSelection()!;
+            const anchorOffset = kind === 'element' ? 0 : 1;
+            const focusOffset = kind === 'element' ? 2 : 6;
+            selection.setBaseAndExtent(caller, anchorOffset, caller, focusOffset);
+            const matches = () =>
+              selection.rangeCount === 1 &&
+              selection.anchorNode === caller &&
+              selection.anchorOffset === anchorOffset &&
+              selection.focusNode === caller &&
+              selection.focusOffset === focusOffset;
+            const selectedBefore = matches();
+            let reaction = false;
+            let selectedAtReaction = false;
+            let adoptedSelection:
+              | readonly [Node | null, number, Node | null, number, number]
+              | undefined;
+            customElements.define(
+              'closeout-split-selection-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  selectedAtReaction = matches();
+                  if (mutation === 'text replacement') wrapper.textContent = 'Reset';
+                  else if (mutation === 'text data') {
+                    text.data = 'Reset text';
+                    selection.removeAllRanges();
+                  } else if (mutation === 'replace children') {
+                    wrapper.replaceChildren(document.createElement('br'));
+                  } else if (mutation === 'adopt text' || mutation === 'adopt child') {
+                    foreign.body.append(
+                      foreign.adoptNode(mutation === 'adopt text' ? text : lastBreak)
+                    );
+                    if (mutation === 'adopt text') text.data = 'Foreign text';
+                    adoptedSelection = [
+                      selection.anchorNode,
+                      selection.anchorOffset,
+                      selection.focusNode,
+                      selection.focusOffset,
+                      selection.rangeCount,
+                    ];
+                  }
+                }
+              }
+            );
+            const errors: string[] = [];
+            const errorNames: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              errorNames.push(event.error?.name ?? 'unknown');
+              event.preventDefault();
+            });
+            p.adapt(
+              p.define({
+                name: 'closeout-split-selected-upgrade',
+                setup(def: any) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r: any) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-selection-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            const adopted = mutation === 'adopt text' ? text : lastBreak;
+            return {
+              selectedBefore,
+              reaction,
+              selectedAtReaction,
+              errors,
+              errorNames,
+              retained:
+                host.firstChild === (nested ? wrapper : caller) && host.childNodes.length === 1,
+              textRetained:
+                kind !== 'text' ||
+                !nested ||
+                (wrapper.firstChild === text && wrapper.childNodes.length === 1),
+              elementChildren: [
+                wrapper.childNodes[0] === firstBreak,
+                wrapper.childNodes[1] === lastBreak,
+              ],
+              childCount: wrapper.childNodes.length,
+              hasTextOrControl:
+                host.textContent !== '' || !!host.querySelector('input, textarea, select'),
+              adoptedOwner: adopted.ownerDocument === foreign,
+              adoptedParent: adopted.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+              adoptionSelectionRetained:
+                !!adoptedSelection &&
+                selection.anchorNode === adoptedSelection[0] &&
+                selection.anchorOffset === adoptedSelection[1] &&
+                selection.focusNode === adoptedSelection[2] &&
+                selection.focusOffset === adoptedSelection[3] &&
+                selection.rangeCount === adoptedSelection[4],
+              selectionOwned:
+                (!selection.anchorNode || selection.anchorNode.getRootNode() === document) &&
+                (!selection.focusNode || selection.focusNode.getRootNode() === document),
+              selectionOffsets: [selection.anchorOffset, selection.focusOffset],
+              selectedAfter: matches(),
+              text: kind === 'text' ? text.data : null,
+              projectedText: host.textContent,
+              selectedText: selection.toString(),
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation, nested, kind }
+        );
+        expect(result.selectedBefore).toBe(true);
+        expect(result.reaction).toBe(true);
+        expect(result.selectedAtReaction).toBe(true);
+        expect(result.retained).toBe(true);
+        expect(result.selectionOwned).toBe(true);
+        if (mutation === 'adopt text' || mutation === 'adopt child') {
+          expect(result.adoptedOwner).toBe(true);
+          expect(result.adoptedParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+          expect(result.adoptionSelectionRetained).toBe(true);
+          expect(result.selectedAfter).toBe(false);
+        } else {
+          expect(result.foreignChildren).toBe(0);
+          expect(result.selectedAfter).toBe(true);
+        }
+        if (kind === 'element') {
+          expect(result.text).toBeNull();
+          expect(result.hasTextOrControl).toBe(false);
+          expect(result.projectedText).toBe('');
+          if (mutation === 'adopt child') {
+            expect(result.childCount).toBe(1);
+            expect(result.elementChildren).toEqual([true, false]);
+          } else {
+            expect(result.childCount).toBe(2);
+            expect(result.elementChildren).toEqual([true, true]);
+            expect(result.selectionOffsets).toEqual([0, 2]);
+          }
+        } else if (mutation === 'adopt text') {
+          expect(result.textRetained).toBe(false);
+          expect(result.childCount).toBe(0);
+          expect(result.text).toBe('Foreign text');
+          expect(result.projectedText).toBe('');
+        } else {
+          expect(result.textRetained).toBe(true);
+          expect(result.text).toBe('Caller text');
+          expect(result.projectedText).toBe('Caller text');
+          expect(result.selectionOffsets).toEqual([1, 6]);
+          expect(result.selectedText).toBe('aller');
+        }
+        if (mutation !== 'unchanged') {
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+          expect(result.errorNames).toEqual(['Error']);
+        } else {
+          expect(result.errors).toEqual([]);
+          expect(result.errorNames).toEqual([]);
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it.each([
+    'unchanged',
+    'remove option',
+    'reorder options',
+    'remove optgroup',
+    'adopt option',
+  ] as const)(
+    'validates caller select choices through late split publication (%s)',
+    async (mutation) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation }) => {
+            // beforeAll injects these exact local exports before this callback runs.
+            const fixture = window as unknown as {
+              Closeout: {
+                adapt: typeof AdaptToWebComponent;
+                define: typeof definePrototype;
+              };
+            };
+            const p = fixture.Closeout;
+            const host = document.createElement('closeout-split-select-upgrade');
+            const wrapper = document.createElement('div');
+            const select = document.createElement('select');
+            select.multiple = true;
+            const first = document.createElement('option');
+            first.label = 'First';
+            first.value = 'first';
+            first.selected = true;
+            const second = document.createElement('option');
+            second.label = 'Second';
+            second.value = 'second';
+            const third = document.createElement('option');
+            third.label = 'Third';
+            third.value = 'third';
+            third.selected = true;
+            const group = document.createElement('optgroup');
+            group.label = 'Group';
+            group.append(second, third);
+            select.append(first, group);
+            wrapper.append(select);
+            host.append(wrapper);
+            document.body.append(host);
+            const frame = document.createElement('iframe');
+            document.body.append(frame);
+            const foreign = frame.contentDocument!;
+            select.focus();
+            const initiallyFocused = document.activeElement === select;
+            let reaction = false;
+            let activeAtReaction = false;
+            customElements.define(
+              'closeout-split-select-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  activeAtReaction = document.activeElement === select;
+                  if (mutation === 'remove option') {
+                    first.remove();
+                    first.selected = false;
+                  } else if (mutation === 'reorder options') group.prepend(third);
+                  else if (mutation === 'remove optgroup') {
+                    group.remove();
+                    second.selected = true;
+                    third.selected = false;
+                  } else if (mutation === 'adopt option') {
+                    foreign.body.append(foreign.adoptNode(second));
+                    second.selected = true;
+                  }
+                }
+              }
+            );
+            const errors: string[] = [];
+            const errorNames: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              errorNames.push(event.error?.name ?? 'unknown');
+              event.preventDefault();
+            });
+            const C = p.adapt(
+              p.define({
+                name: 'closeout-split-select-upgrade',
+                setup(def) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-select-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            const initial = {
+              initiallyFocused,
+              reaction,
+              activeAtReaction,
+              errors,
+              errorNames,
+              wrapperRetained: host.firstChild === wrapper && host.childNodes.length === 1,
+              selectRetained: wrapper.firstChild === select && wrapper.childNodes.length === 1,
+              groupRetained:
+                select.firstChild === first &&
+                select.lastChild === group &&
+                select.childNodes.length === 2,
+              choices: Array.from(select.options, (option) =>
+                option === first
+                  ? 'first'
+                  : option === second
+                    ? 'second'
+                    : option === third
+                      ? 'third'
+                      : 'other'
+              ),
+              groupOrder: Array.from(group.children, (option) =>
+                option === second ? 'second' : option === third ? 'third' : 'other'
+              ),
+              parents: [
+                first.parentNode === select,
+                group.parentNode === select,
+                second.parentNode === group,
+                third.parentNode === group,
+              ],
+              emptyOptionChildren: [
+                first.childNodes.length,
+                second.childNodes.length,
+                third.childNodes.length,
+              ],
+              labels: [first.label, second.label, third.label],
+              values: [first.value, second.value, third.value],
+              selected: [first.selected, second.selected, third.selected],
+              value: select.value,
+              focused: document.activeElement === select,
+              foreignOwner: second.ownerDocument === foreign,
+              foreignParent: second.parentNode === foreign.body,
+              foreignChildren: foreign.body.childNodes.length,
+            };
+            let later: Record<string, unknown> | null = null;
+            if (mutation === 'unchanged') {
+              group.prepend(third);
+              first.remove();
+              const laterOption = document.createElement('option');
+              laterOption.label = 'Later';
+              laterOption.value = 'later';
+              laterOption.selected = true;
+              second.replaceWith(laterOption);
+              third.selected = false;
+              let error: string | null = null;
+              try {
+                // Registration above upgrades this already-connected native host.
+                const upgraded = host as InstanceType<typeof C>;
+                upgraded.update();
+              } catch (cause) {
+                error = String(cause);
+              }
+              later = {
+                error,
+                groupRetained: select.firstChild === group && select.childNodes.length === 1,
+                choices: Array.from(select.options, (option) =>
+                  option === third ? 'third' : option === laterOption ? 'later' : 'other'
+                ),
+                firstDetached: first.parentNode === null,
+                secondDetached: second.parentNode === null,
+                emptyChoice: laterOption.childNodes.length === 0,
+                selected: [third.selected, laterOption.selected],
+                value: select.value,
+                focused: document.activeElement === select,
+              };
+            }
+            return { ...initial, later };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation }
+        );
+        expect(result.initiallyFocused).toBe(true);
+        expect(result.reaction).toBe(true);
+        expect(result.activeAtReaction).toBe(true);
+        expect(result.wrapperRetained).toBe(true);
+        expect(result.selectRetained).toBe(true);
+        expect(result.groupRetained).toBe(true);
+        expect(result.emptyOptionChildren).toEqual([0, 0, 0]);
+        expect(result.labels).toEqual(['First', 'Second', 'Third']);
+        expect(result.values).toEqual(['first', 'second', 'third']);
+        expect(result.value).toBe('first');
+        expect(result.focused).toBe(true);
+        if (mutation === 'adopt option') {
+          expect(result.choices).toEqual(['first', 'third']);
+          expect(result.groupOrder).toEqual(['third']);
+          expect(result.parents).toEqual([true, true, false, true]);
+          expect(result.selected).toEqual([true, true, true]);
+          expect(result.foreignOwner).toBe(true);
+          expect(result.foreignParent).toBe(true);
+          expect(result.foreignChildren).toBe(1);
+        } else {
+          expect(result.choices).toEqual(['first', 'second', 'third']);
+          expect(result.groupOrder).toEqual(['second', 'third']);
+          expect(result.parents).toEqual([true, true, true, true]);
+          expect(result.selected).toEqual([true, false, true]);
+          expect(result.foreignChildren).toBe(0);
+        }
+        if (mutation === 'unchanged') {
+          expect(result.errors).toEqual([]);
+          expect(result.errorNames).toEqual([]);
+          expect(result.later).toEqual({
+            error: null,
+            groupRetained: true,
+            choices: ['third', 'later'],
+            firstDetached: true,
+            secondDetached: true,
+            emptyChoice: true,
+            selected: [false, true],
+            value: 'later',
+            focused: true,
+          });
+        } else {
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+          expect(result.errorNames).toEqual(['Error']);
+          expect(result.later).toBeNull();
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
+  it('accepts an admitted split exit animation at its retained zero opacity', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-owned-split-exit',
+              setup(def: any) {
+                const leaf = def.feedback.style.declareDecoration();
+                def.feedback.style.use(p.tw('animate-out fade-out-0 duration-150'));
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const host = new C();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+          const slot = surface.querySelector('slot')!;
+          const animation = surface
+            .getAnimations()
+            .find(
+              (candidate) =>
+                candidate instanceof CSSAnimation &&
+                candidate.animationName === 'pui-split-paint-exit'
+            );
+          animation?.finish();
+          const opacity = getComputedStyle(surface).opacity;
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          const retainedState = animation?.playState;
+          const sheet = new CSSStyleSheet();
+          sheet.replaceSync(
+            '[part="surface"] { animation: none !important; opacity: 0 !important; }'
+          );
+          host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, sheet];
+          const replacementOpacity = getComputedStyle(surface).opacity;
+          let replacementError: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            replacementError = String(cause);
+          }
+          return {
+            animation: retainedState,
+            opacity,
+            error,
+            replacementOpacity,
+            replacementError,
+            sameCaller: slot.assignedNodes()[0] === caller,
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['animate-out', 'fade-out-0', 'duration-150'])
+      );
+      expect(result.animation).toBe('finished');
+      expect(result.opacity).toBe('0');
+      expect(result.sameCaller).toBe(true);
+      expect(result.error).toBeNull();
+      expect(result.replacementOpacity).toBe('0');
+      expect(result.replacementError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('rejects removed split surface paint after a legitimate Rule change', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-split-surface-paint',
+              setup(def: any) {
+                const active = def.state.bool('active', false);
+                def.feedback.style.use(p.tw('opacity-50'));
+                def.rule({
+                  when: (w: any) => w.state(active).eq(true),
+                  intent: (i: any) => i.feedback.style.use(p.tw('opacity-100')),
+                });
+                def.event.on('host:click', () => active.set(true));
+                const leaf = def.feedback.style.declareDecoration();
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const host = new C();
+          host.append(document.createTextNode('Caller'));
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]') as HTMLElement;
+          const initial = surface.getAttribute('data-pui-style');
+          host.click();
+          await Promise.resolve();
+          const rule = surface.getAttribute('data-pui-style');
+          function update() {
+            try {
+              host.update();
+              return null;
+            } catch (error) {
+              return String(error);
+            }
+          }
+          const ruleError = update();
+          surface.removeAttribute('data-pui-style');
+          const removedError = update();
+          surface.setAttribute('data-pui-style', rule!);
+          host.removeAttribute('data-pui-split-root-style');
+          return { initial, rule, ruleError, removedError, rootProjectionError: update() };
+        },
+        renderProtoShadowSplitStyleArtifact(['opacity-50', 'opacity-100'])
+      );
+      expect(result.initial).toContain('opacity-50');
+      expect(result.rule).toContain('opacity-100');
+      expect(result.ruleError).toBeNull();
+      expect(result.removedError).toMatch(/decoration physical blueprint changed/);
+      expect(result.rootProjectionError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('accepts native zero opacity at the start of admitted split entry', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        (artifact) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-split-owned-enter',
+              setup(def: any) {
+                def.feedback.style.use(p.tw('animate-in fade-in-0 duration-150'));
+                const leaf = def.feedback.style.declareDecoration();
+                return (r: any) => [r.decoration(leaf), r.slot()];
+              },
+            }),
+            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+          );
+          const errors: string[] = [];
+          window.addEventListener('error', (event) => {
+            errors.push(event.message);
+            event.preventDefault();
+          });
+          const host = new C();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          try {
+            document.body.append(host);
+          } catch (error) {
+            errors.push(String(error));
+          }
+          const surface = host.shadowRoot?.querySelector('[part="surface"]') as HTMLElement | null;
+          const animation = surface
+            ?.getAnimations()
+            .find(
+              (entry) =>
+                entry instanceof CSSAnimation && entry.animationName === 'pui-split-paint-enter'
+            );
+          if (animation) {
+            animation.pause();
+            animation.currentTime = 0;
+          }
+          const opacity = surface ? getComputedStyle(surface).opacity : null;
+          let error: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            error = String(cause);
+          }
+          animation?.finish();
+          const finishedOpacity = surface ? getComputedStyle(surface).opacity : null;
+          const finishedProgress = animation?.effect?.getComputedTiming().progress;
+          const stylesheet = new CSSStyleSheet();
+          stylesheet.replaceSync('[part="surface"] { opacity: 0 !important; }');
+          host.shadowRoot.adoptedStyleSheets = [...host.shadowRoot.adoptedStyleSheets, stylesheet];
+          const concealedOpacity = surface ? getComputedStyle(surface).opacity : null;
+          let concealedError: string | null = null;
+          try {
+            host.update();
+          } catch (cause) {
+            concealedError = String(cause);
+          }
+          return {
+            errors,
+            opacity,
+            entry: !!animation,
+            error,
+            finishedOpacity,
+            finishedProgress,
+            concealedOpacity,
+            concealedError,
+            retainedAnimation: surface?.getAnimations().includes(animation!) ?? false,
+            sameCaller: surface?.querySelector('slot')?.assignedNodes()[0] === caller,
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['animate-in', 'fade-in-0', 'duration-150'])
+      );
+      expect(result.errors).toEqual([]);
+      expect(result.entry).toBe(true);
+      expect(result.opacity).toBe('0');
+      expect(result.error).toBeNull();
+      expect(result.finishedOpacity).toBe('1');
+      expect(result.finishedProgress).toBe(1);
+      expect(result.retainedAnimation).toBe(true);
+      expect(result.concealedOpacity).toBe('0');
+      expect(result.concealedError).toMatch(/decoration physical blueprint changed/);
+      expect(result.sameCaller).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('retains owned split Root opacity during its CSS transition out of zero', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(
+        async (artifact) => {
+          const p = (window as any).Closeout;
+          const Prototype = p.define({
+            name: 'closeout-owned-split-opacity',
+            setup(def: any) {
+              const visible = def.state.bool('visible', false);
+              def.feedback.style.use(p.tw('opacity-0 transition-opacity'));
+              def.rule({
+                when: (w: any) => w.state(visible).eq(true),
+                intent: (i: any) => i.feedback.style.use(p.tw('opacity-100')),
+              });
+              def.event.on('host:click', () => visible.set(true));
+              const decoration = def.feedback.style.declareDecoration();
+              return (r: any) => [r.decoration(decoration), r.slot()];
+            },
+          });
+          const Component = p.adapt(Prototype, {
+            shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact },
+          });
+          const host = new Component();
+          const caller = document.createTextNode('Caller');
+          host.append(caller);
+          document.body.append(host);
+          const surface = host.shadowRoot.querySelector('[part="surface"]');
+          const slot = surface.querySelector('slot');
+          // Hold the real transition's zero phase for the synchronous update.
+          surface.style.transitionDelay = '1s';
+          const initialOpacity = getComputedStyle(surface).opacity;
+          host.click();
+          await Promise.resolve();
+          const duringOpacity = getComputedStyle(surface).opacity;
+          const transition = surface
+            .getAnimations()
+            .find(
+              (animation: Animation) =>
+                animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+            );
+          function update() {
+            try {
+              host.update();
+              return null;
+            } catch (error) {
+              return String(error);
+            }
+          }
+          const during = {
+            opacity: duringOpacity,
+            tokens: surface.getAttribute('data-pui-style'),
+            transitioning: !!transition,
+            error: update(),
+            sameCaller: slot.assignedNodes()[0] === caller,
+          };
+          transition?.finish();
+          const settledOpacity = getComputedStyle(surface).opacity;
+          const settledError = update();
+          const external = document.createElement('style');
+          external.textContent =
+            '[part="surface"] { opacity: 0 !important; transition: none !important; }';
+          host.shadowRoot.append(external);
+          const externalOpacity = getComputedStyle(surface).opacity;
+          return {
+            initialOpacity,
+            during,
+            settledOpacity,
+            settledError,
+            externalOpacity,
+            externalError: update(),
+          };
+        },
+        renderProtoShadowSplitStyleArtifact(['opacity-0', 'opacity-100', 'transition-opacity'])
+      );
+      expect(result.initialOpacity).toBe('0');
+      expect(result.during).toEqual({
+        opacity: '0',
+        tokens: expect.stringContaining('opacity-100'),
+        transitioning: true,
+        error: null,
+        sameCaller: true,
+      });
+      expect(result.settledOpacity).toBe('1');
+      expect(result.settledError).toBeNull();
+      expect(result.externalOpacity).toBe('0');
+      expect(result.externalError).toMatch(/decoration physical blueprint changed/);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each([
     ['shadcn', SHADCN_STYLE_TOKENS],
     ['brutalist', BRUTALIST_STYLE_TOKENS],

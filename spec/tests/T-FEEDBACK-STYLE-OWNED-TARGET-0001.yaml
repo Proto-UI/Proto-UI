@@ -3,7 +3,7 @@ type: test
 title: Draft owned decorative target bounded acceptance
 status: draft
 since: 0.3.0-alpha.1
-summary: Bounded light-WC DOM and module evidence exercises two owned leaves and caller content, identity rejection, independent merge, no reset and terminal cleanup. Native focus and accessibility acceptance remain planned.
+summary: Bounded WC Light and split DOM evidence and module tests exercise owned leaves, caller content, identity rejection, independent merge, view reuse and terminal cleanup. Native focus and accessibility acceptance remain planned.
 cases:
   - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
     title: Identity
@@ -154,7 +154,7 @@ implementations:
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
     notes:
-      - 'Actual light-WC DOM tests; no native-browser accessibility or focus acceptance.'
+      - 'DOM tests exercise ordinary Light and explicit split Roots. Split cases cover initial binding, native slot preservation, view detach and replay, duplicate rejection and same-document portals. Native browser and accessibility acceptance have separate evidence.'
   - id: owned-decoration-module-guards
     kind: runtime-test
     status: active
@@ -204,6 +204,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Registered planned fail-closed tests without converting design intent into passing implementation evidence.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Mapped explicit split Root binding, native slot preservation and fail-closed reuse to the WC tests.
 tags:
   - feedback
   - style

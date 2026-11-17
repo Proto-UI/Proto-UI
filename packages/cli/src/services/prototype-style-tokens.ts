@@ -46,13 +46,27 @@ export async function collectProtoShadowStyleTokenUsage(root) {
   const templateTokens = new Set();
   const nonTemplateTokens = new Set();
   const unclassifiedTokens = new Set();
+  const styleHandleUsage = new Map();
   const occurrences = [];
   const moduleCache = new Map();
   const sourceSummary = createHookSourceSummaryContext();
+  const sourceFiles = [];
   for (const file of await collectSourceFiles(root)) {
-    const sourceFile = await parseSourceFile(file);
-    sourceSummary.registerSource(sourceFile);
+    const source = await parseSourceFile(file);
+    sourceSummary.registerSource(source);
+    sourceFiles.push(source);
+  }
+  const dynamicHandleOrigins = new Set(
+    sourceFiles.flatMap((source) =>
+      sourceSummary.dynamicImportVariableInitializers(source).map(styleHandleOrigin)
+    )
+  );
+  const decorationHelperUses = new WeakMap();
+  for (const sourceFile of sourceFiles) {
+    const file = sourceFile.fileName;
     const scope = createScope(null, null, sourceSummary);
+    scope.decorationSourceFiles = sourceFiles;
+    scope.decorationHelperUses = decorationHelperUses;
     await applyImportBindings(file, sourceFile, scope, moduleCache, []);
     walk(sourceFile, scope, tokens, collectExposures(sourceFile), {
       occurrences,
@@ -61,12 +75,23 @@ export async function collectProtoShadowStyleTokenUsage(root) {
       templateTokens,
       nonTemplateTokens,
       unclassifiedTokens,
+      styleHandleUsage,
     });
   }
   // Reuse Root occurrence provenance; a token used on both targets needs both
   // outputs and must still pass the complete Root recipe preflight.
   for (const { token } of occurrences) nonTemplateTokens.add(token);
   for (const token of unclassifiedTokens) templateTokens.add(token);
+  for (const [
+    origin,
+    { tokens: held, declarationSeen, targeted, unclassified },
+  ] of styleHandleUsage) {
+    for (const token of held) {
+      templateTokens.add(token);
+      if (!declarationSeen || !targeted || unclassified || dynamicHandleOrigins.has(origin))
+        nonTemplateTokens.add(token);
+    }
+  }
   return {
     tokens: Array.from(tokens).sort(),
     rootTokens: Array.from(tokens)
@@ -139,17 +164,12 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
     if (!ts.isImportDeclaration(stmt)) continue;
     const specifier = stmt.moduleSpecifier;
     if (!ts.isStringLiteralLike(specifier)) continue;
-    if (!specifier.text.startsWith('.')) continue;
-    const resolved = await resolveModuleFile(path.dirname(file), specifier.text);
-    if (!resolved || stack.includes(resolved)) continue;
     const clause = stmt.importClause;
     if (!clause || clause.isTypeOnly) continue;
-    const bindings = await loadModuleBindings(
-      resolved,
-      moduleCache,
-      stack,
-      scope.sourceSummary ?? scope.functionSummary
-    );
+    const summary = scope.sourceSummary ?? scope.functionSummary;
+    const resolved = await resolveTokenImport(file, sourceFile, specifier.text, summary);
+    if (!resolved || stack.includes(resolved)) continue;
+    const bindings = await loadModuleBindings(resolved, moduleCache, stack, summary);
     // A default import binds the module's default export, so the local name
     // stands for whatever that export holds. Bind it as an import: the
     // built-in hook table is a spelling fallback, and a default import that
@@ -161,6 +181,15 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         defaultImport: true,
         importSpecifier: specifier.text,
       });
+    }
+    if (clause.namedBindings && ts.isNamespaceImport(clause.namedBindings)) {
+      if (scope.decorationSourceFiles)
+        scope.bindings.set(clause.namedBindings.name.text, {
+          ...emptyValue(),
+          importedBinding: true,
+          styleMembers: bindings,
+        });
+      continue;
     }
     if (!clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) continue;
     for (const element of clause.namedBindings.elements) {
@@ -177,6 +206,12 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         });
     }
   }
+}
+
+function resolveTokenImport(file, source, specifier, summary) {
+  return specifier.startsWith('.')
+    ? resolveModuleFile(path.dirname(file), specifier)
+    : summary?.resolveRegisteredSourceImport(source, specifier);
 }
 
 async function resolveModuleFile(dir, specifier) {
@@ -299,12 +334,13 @@ async function loadModuleBindings(file, moduleCache, stack, sourceSummary) {
       continue;
     let exported = bindings;
     if (stmt.moduleSpecifier) {
-      if (
-        !ts.isStringLiteralLike(stmt.moduleSpecifier) ||
-        !stmt.moduleSpecifier.text.startsWith('.')
-      )
-        continue;
-      const resolved = await resolveModuleFile(path.dirname(file), stmt.moduleSpecifier.text);
+      if (!ts.isStringLiteralLike(stmt.moduleSpecifier)) continue;
+      const resolved = await resolveTokenImport(
+        file,
+        sourceFile,
+        stmt.moduleSpecifier.text,
+        sourceSummary
+      );
       if (!resolved || [...stack, file].includes(resolved)) continue;
       exported = await loadModuleBindings(resolved, moduleCache, [...stack, file], sourceSummary);
     }
@@ -322,6 +358,8 @@ function createScope(parent = null, node = null, sourceSummary = parent?.sourceS
     bindings: new Map(),
     node,
     sourceSummary,
+    decorationSourceFiles: parent?.decorationSourceFiles,
+    decorationHelperUses: parent?.decorationHelperUses,
     functionSummary: parent?.functionSummary ?? sourceSummary,
     activeSourceFunctions: parent?.activeSourceFunctions ?? new Set(),
     sourceExposures: parent?.sourceExposures ?? new WeakMap(),
@@ -679,6 +717,8 @@ function sourceFunctionNeedsReplay(helper, captured) {
 function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory) {
   if (!helper || !sourceFunctionNeedsReplay(helper, captured)) return;
   const nextScope = createScope(helper.scope, helper.node, scope.sourceSummary);
+  nextScope.decorationSourceFiles = scope.decorationSourceFiles;
+  nextScope.decorationHelperUses = scope.decorationHelperUses;
   nextScope.versions = scope.versions;
   nextScope.activeSourceFunctions = scope.activeSourceFunctions;
   if (captured.some((entry) => carriesHelperEffects(entry.binding)))
@@ -742,6 +782,8 @@ function collectSourceFunctionCall(node, helper, captured, scope, tokens, rootIn
 }
 
 function walk(node, scope, tokens, exposures, rootInventory = null) {
+  if (rootInventory?.styleHandleUsage && ts.isIdentifier(node))
+    observeStyleHandleReference(node, scope, tokens, rootInventory);
   if (ts.isDeleteExpression(node)) {
     const target = unwrapTransparent(node.expression);
     if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
@@ -923,6 +965,13 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     // effects for intercepted non-plain writes without widening plain `=`.
     if (!plainAssignment) walk(node.left, scope, tokens, exposures, rootInventory);
     const base = unwrapTransparent(memberOwner(node.left) ?? node.left);
+    if (
+      plainAssignment &&
+      rootInventory?.styleHandleUsage &&
+      ts.isIdentifier(base) &&
+      scopeDeclaring(base.text, scope)?.bindings.get(base.text)?.styleTuple
+    )
+      observeStyleHandleReference(base, scope, tokens, rootInventory);
     const member = memberName(node.left);
     const resolvedBefore = resolveExpression(base, scope);
     let knownStateHandle = false;
@@ -1250,8 +1299,24 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
       for (const token of value.strings.flatMap(splitTokens)) {
         tokens.add(token);
         if (rootInventory?.templateTokens) {
-          if (isTemplateStyleCall(node)) rootInventory.templateTokens.add(token);
-          else {
+          const expression = outerStyleExpression(node);
+          const parent = expression.parent;
+          if (
+            isTemplateStyleCall(node, scope) ||
+            (isCanonicalStyleHandle(node, scope) &&
+              isOwnedDecorationStyleArgument(expression, scope))
+          ) {
+            rootInventory.templateTokens.add(token);
+          } else if (
+            (isConstStyleBinding(parent, expression) ||
+              isLocalStyleMember(parent, scope) ||
+              isLocalStyleTuple(parent)) &&
+            isCanonicalStyleHandle(node, scope)
+          ) {
+            const usage = decorationStyleUsage(rootInventory, styleHandleOrigin(node));
+            usage.declarationSeen = true;
+            usage.tokens.add(token);
+          } else {
             rootInventory.nonTemplateTokens.add(token);
             if (!isFeedbackStyleTwCall(node)) rootInventory.unclassifiedTokens.add(token);
           }
@@ -1379,7 +1444,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
   ts.forEachChild(node, (child) => walk(child, scope, tokens, exposures, rootInventory));
 }
 
-function isTemplateStyleCall(node) {
+function isTemplateStyleCall(node, scope) {
   // No wrapper can receive the handle before the Template node does.
   const style = node.parent;
   if (
@@ -1451,37 +1516,7 @@ function isTemplateStyleCall(node) {
     render.parent.parent !== setup.body
   )
     return false;
-  if (getPropertyName(setup.name) !== 'setup') return false;
-  const config = setup.parent;
-  const definition = config.parent;
-  if (
-    !ts.isObjectLiteralExpression(config) ||
-    !ts.isCallExpression(definition) ||
-    definition.arguments[0] !== config ||
-    !ts.isIdentifier(definition.expression) ||
-    definition.expression.text !== 'definePrototype' ||
-    ts.findAncestor(definition.parent, ts.isFunctionLike)
-  )
-    return false;
-  const source = node.getSourceFile();
-  for (const name of ['definePrototype', 'tw']) {
-    if (
-      !source.statements.some(
-        (statement) =>
-          ts.isImportDeclaration(statement) &&
-          statement.moduleSpecifier.text === '@proto.ui/core' &&
-          !statement.importClause?.isTypeOnly &&
-          ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
-          statement.importClause.namedBindings.elements.some(
-            (binding) =>
-              !binding.isTypeOnly &&
-              binding.name.text === name &&
-              (binding.propertyName ?? binding.name).text === name
-          )
-      )
-    )
-      return false;
-  }
+  if (!isCanonicalPrototypeSetup(setup, scope)) return false;
 
   let safe = true;
   function check(current) {
@@ -1519,6 +1554,716 @@ function isTemplateStyleCall(node) {
   }
   checkTw(setup);
   return safe;
+}
+
+function isCanonicalPrototypeSetup(setup, scope, requireTw = true) {
+  const summary = scope.sourceSummary;
+  if (!summary || (requireTw && !hasCanonicalCoreImport(setup.getSourceFile(), 'tw'))) return false;
+  if (ts.isMethodDeclaration(setup)) return summary.isCanonicalPrototypeSetupProperty(setup);
+  if (
+    (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) &&
+    ts.isPropertyAssignment(setup.parent) &&
+    setup.parent.initializer === setup
+  )
+    return summary.isCanonicalPrototypeSetupProperty(setup.parent);
+
+  const binding = decorationHelperBinding(setup);
+  if (!binding) return false;
+  const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+  const references = inspectedHelperReferences(setup, binding, statement, scope);
+  return (
+    references.length > 0 &&
+    references.every((reference) => {
+      const property = outerStyleExpression(reference).parent;
+      return (
+        ((ts.isPropertyAssignment(property) &&
+          unwrapTransparent(property.initializer) === reference) ||
+          (ts.isShorthandPropertyAssignment(property) && property.name === reference)) &&
+        summary.isCanonicalPrototypeSetupProperty(property)
+      );
+    })
+  );
+}
+
+function hasCanonicalCoreImport(source, name) {
+  return source.statements.some(
+    (statement) =>
+      ts.isImportDeclaration(statement) &&
+      statement.moduleSpecifier.text === '@proto.ui/core' &&
+      !statement.importClause?.isTypeOnly &&
+      ts.isNamedImports(statement.importClause?.namedBindings ?? {}) &&
+      statement.importClause.namedBindings.elements.some(
+        (binding) =>
+          !binding.isTypeOnly &&
+          binding.name.text === name &&
+          (binding.propertyName ?? binding.name).text === name
+      )
+  );
+}
+
+function parameterName(callback, index = 0) {
+  const parameter = callback.parameters[index];
+  return parameter &&
+    !parameter.initializer &&
+    !parameter.dotDotDotToken &&
+    ts.isIdentifier(parameter.name)
+    ? parameter.name.text
+    : undefined;
+}
+
+function feedbackStyleReceiver(method, name) {
+  if (!memberIs(method, name)) return undefined;
+  const style = memberOwner(method);
+  const feedback = style && memberIs(style, 'style') ? memberOwner(style) : undefined;
+  const receiver = feedback && memberIs(feedback, 'feedback') ? memberOwner(feedback) : undefined;
+  return receiver && ts.isIdentifier(receiver) ? receiver.text : undefined;
+}
+
+function isOperationInCallback(callback, call) {
+  return (
+    !!callback.body &&
+    ts.findAncestor(call, ts.isFunctionLike) === callback &&
+    nodeWithin(call, callback.body)
+  );
+}
+
+function isDirectHelperReceiverArgument(node, summary) {
+  const call = node.parent;
+  if (!summary || !ts.isCallExpression(call) || !ts.isIdentifier(call.expression)) return false;
+  const index = call.arguments.indexOf(node);
+  if (index < 0 || call.arguments.slice(0, index).some(ts.isSpreadElement)) return false;
+  const helper = summary.resolveSourceFunction(call.expression, call.getSourceFile());
+  const receiver = helper && parameterName(helper, index);
+  return !!receiver && receiverUsesAreDirect(helper, receiver);
+}
+
+function receiverUsesAreDirect(callback, receiver, allowedArguments = new Set(), helper, summary) {
+  let safe = true;
+  function check(node) {
+    if (!safe || node === helper || ts.isTypeNode(node)) return;
+    if (ts.isIdentifier(node)) {
+      if (
+        node.text === receiver &&
+        !allowedArguments.has(node) &&
+        !isDirectHelperReceiverArgument(node, summary)
+      ) {
+        let access = node;
+        while (
+          (ts.isPropertyAccessExpression(access.parent) ||
+            ts.isElementAccessExpression(access.parent)) &&
+          access.parent.expression === access
+        )
+          access = access.parent;
+        if (
+          access === node ||
+          !ts.isCallExpression(access.parent) ||
+          access.parent.expression !== access
+        )
+          safe = false;
+      }
+      if (node.text === 'tw' && node.parent.name === node) safe = false;
+    }
+    ts.forEachChild(node, check);
+  }
+  check(callback.body);
+  return safe;
+}
+
+function decorationHelperBinding(helper) {
+  if (ts.isFunctionDeclaration(helper)) {
+    const defaultExport = helper.modifiers?.some(
+      (item) => item.kind === ts.SyntaxKind.DefaultKeyword
+    );
+    return helper.name || defaultExport ? helper : undefined;
+  }
+  if (!ts.isArrowFunction(helper) && !ts.isFunctionExpression(helper)) return undefined;
+  const expression = outerStyleExpression(helper);
+  return isConstStyleBinding(expression.parent, expression) ? expression.parent : undefined;
+}
+
+function inspectedHelperReferences(helper, binding, statement, scope) {
+  const cache = scope.decorationHelperUses;
+  const cached = cache?.get(helper);
+  if (cached) return cached;
+  const source = helper.getSourceFile();
+  const localName = binding.name?.text;
+  const exported =
+    statement.modifiers?.some((item) => item.kind === ts.SyntaxKind.ExportKeyword) ||
+    (localName &&
+      source.statements.some((item) => {
+        if (ts.isExportAssignment(item) && !item.isExportEquals) {
+          const value = unwrapTransparent(item.expression);
+          return ts.isIdentifier(value) && value.text === localName;
+        }
+        return (
+          ts.isExportDeclaration(item) &&
+          !item.isTypeOnly &&
+          !item.moduleSpecifier &&
+          item.exportClause &&
+          ts.isNamedExports(item.exportClause) &&
+          item.exportClause.elements.some(
+            (entry) => !entry.isTypeOnly && (entry.propertyName ?? entry.name).text === localName
+          )
+        );
+      }));
+  const files = exported ? scope.decorationSourceFiles : [source];
+  const helperOrigin = styleHandleOrigin(helper);
+  if (!files?.some((file) => file.fileName === source.fileName)) return [];
+  const references = [];
+  for (const file of files) {
+    const names = new Set(
+      file.fileName === source.fileName && binding.name ? [binding.name.text] : []
+    );
+    const namespaces = new Set();
+    if (exported) {
+      if (scope.sourceSummary.hasDynamicImportOfFunction(file, helper)) {
+        // The import can expose the helper without a statically known call site.
+        const unverified = [];
+        cache?.set(helper, unverified);
+        return unverified;
+      }
+      for (const declaration of file.statements) {
+        if (
+          !ts.isImportDeclaration(declaration) ||
+          declaration.importClause?.isTypeOnly ||
+          !ts.isStringLiteralLike(declaration.moduleSpecifier) ||
+          (!declaration.moduleSpecifier.text.startsWith('.') &&
+            !scope.sourceSummary.resolveRegisteredSourceImport(
+              file,
+              declaration.moduleSpecifier.text
+            ))
+        )
+          continue;
+        const bindings = declaration.importClause?.namedBindings;
+        if (bindings && ts.isNamespaceImport(bindings)) {
+          namespaces.add(bindings.name.text);
+        } else if (bindings && ts.isNamedImports(bindings)) {
+          for (const item of bindings.elements) if (!item.isTypeOnly) names.add(item.name.text);
+        }
+        if (declaration.importClause?.name) names.add(declaration.importClause.name.text);
+      }
+    }
+    if (!names.size && !namespaces.size) continue;
+    function find(node) {
+      if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node) || ts.isTypeNode(node))
+        return;
+      if (
+        ts.isExportAssignment(node) &&
+        !node.isExportEquals &&
+        ts.isIdentifier(unwrapTransparent(node.expression))
+      )
+        return;
+      if (
+        (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) &&
+        ts.isIdentifier(node.expression) &&
+        namespaces.has(node.expression.text)
+      ) {
+        if (
+          ts.isElementAccessExpression(node) &&
+          !ts.isStringLiteralLike(node.argumentExpression)
+        ) {
+          references.push(node.expression);
+          return;
+        }
+        const resolved = scope.sourceSummary.resolveSourceFunction(node, file);
+        if (resolved && styleHandleOrigin(resolved) === helperOrigin) references.push(node);
+        return;
+      }
+      if (ts.isIdentifier(node) && (names.has(node.text) || namespaces.has(node.text))) {
+        const parent = node.parent;
+        if (parent.name !== node || ts.isShorthandPropertyAssignment(parent)) {
+          // An escaped namespace can expose the helper to unverified calls.
+          if (namespaces.has(node.text)) references.push(node);
+          else {
+            const resolved = scope.sourceSummary.resolveSourceFunction(node, file);
+            if (resolved && styleHandleOrigin(resolved) === helperOrigin) references.push(node);
+          }
+        }
+      }
+      ts.forEachChild(node, find);
+    }
+    find(file);
+  }
+  cache?.set(helper, references);
+  return references;
+}
+
+function decorationBindingOrigin(binding) {
+  const initializer = binding?.initializer && unwrapTransparent(binding.initializer);
+  if (
+    !binding ||
+    !initializer ||
+    !isConstStyleBinding(binding, binding.initializer) ||
+    !ts.isCallExpression(initializer)
+  )
+    return undefined;
+  const owner = ts.findAncestor(binding, ts.isFunctionLike);
+  const definition = feedbackStyleReceiver(initializer.expression, 'declareDecoration');
+  return owner && definition ? { owner, definition } : undefined;
+}
+
+function referencedDecorationTarget(reference, summary) {
+  const seen = new Set();
+  for (let node = reference; ts.isIdentifier(node); ) {
+    const binding = summary.resolveStableSourceBinding(node);
+    if (!binding || seen.has(binding)) return undefined;
+    seen.add(binding);
+    if (ts.isParameter(binding)) return { owner: binding.parent, parameter: binding };
+    if (!binding.initializer) return undefined;
+    node = unwrapTransparent(binding.initializer);
+    if (!ts.isIdentifier(node)) return decorationBindingOrigin(binding);
+  }
+  return undefined;
+}
+
+function hasVerifiedDecorationHelperCalls(
+  helper,
+  receiver,
+  scope,
+  targetOrigin,
+  active = new Set()
+) {
+  const binding = decorationHelperBinding(helper);
+  if (
+    !binding ||
+    !helper.body ||
+    helper.asteriskToken ||
+    helper.modifiers?.some((item) => item.kind === ts.SyntaxKind.AsyncKeyword) ||
+    !scope.sourceSummary
+  )
+    return false;
+  const origin = styleHandleOrigin(helper);
+  if (active.has(origin)) return false;
+  active.add(origin);
+  try {
+    const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+    const references = inspectedHelperReferences(helper, binding, statement, scope);
+    const receiverIndex = helper.parameters.findIndex(
+      (_, index) => parameterName(helper, index) === receiver
+    );
+    const receivesDefinition = receiverIndex !== -1;
+    const targetIndex = targetOrigin?.parameter
+      ? helper.parameters.indexOf(targetOrigin.parameter)
+      : -1;
+    if (targetOrigin?.parameter && targetIndex < 0) return false;
+    const callers = new Map();
+    for (const reference of references) {
+      const call = reference.parent;
+      const owner = ts.findAncestor(reference, ts.isFunctionLike);
+      if (
+        !ts.isCallExpression(call) ||
+        call.expression !== reference ||
+        !owner ||
+        !isOperationInCallback(owner, call)
+      )
+        return false;
+      const provided = call.arguments[receiverIndex];
+      if (
+        receivesDefinition
+          ? !provided ||
+            !ts.isIdentifier(provided) ||
+            call.arguments.slice(0, receiverIndex).some(ts.isSpreadElement)
+          : statement.parent !== owner.body ||
+            helper.parameters.some(
+              (parameter) => !ts.isIdentifier(parameter.name) || parameter.name.text === receiver
+            )
+      )
+        return false;
+      const definition = receivesDefinition ? provided.text : receiver;
+      const existing = callers.get(owner);
+      if (existing && existing.definition !== definition) return false;
+      const facts = existing ?? { definition, arguments: new Set(), targets: [] };
+      let forwarded = targetOrigin;
+      if (targetIndex >= 0) {
+        const supplied = call.arguments[targetIndex];
+        if (
+          !supplied ||
+          !ts.isIdentifier(supplied) ||
+          call.arguments.slice(0, targetIndex).some(ts.isSpreadElement)
+        )
+          return false;
+        forwarded = referencedDecorationTarget(supplied, scope.sourceSummary);
+        if (
+          !forwarded ||
+          (forwarded.owner !== owner &&
+            (forwarded.parameter ||
+              !forwarded.owner.body ||
+              !nodeWithin(owner, forwarded.owner.body)))
+        )
+          return false;
+      }
+      facts.targets.push(forwarded);
+      if (receivesDefinition) facts.arguments.add(provided);
+      callers.set(owner, facts);
+    }
+    return (
+      callers.size > 0 &&
+      [...callers].every(([owner, facts]) => {
+        if (
+          !receiverUsesAreDirect(
+            owner,
+            facts.definition,
+            facts.arguments,
+            helper,
+            scope.sourceSummary
+          )
+        )
+          return false;
+        return facts.targets.every((target) => {
+          // A parameter is still unresolved even when it belongs to this caller.
+          const reachedOrigin = target?.owner === owner && !target.parameter;
+          if (reachedOrigin && facts.definition !== target.definition) return false;
+          const pending = reachedOrigin ? undefined : target;
+          return isCanonicalPrototypeSetup(owner, scope, false)
+            ? !pending && parameterName(owner) === facts.definition
+            : hasVerifiedDecorationHelperCalls(owner, facts.definition, scope, pending, active);
+        });
+      })
+    );
+  } finally {
+    active.delete(origin);
+  }
+}
+
+function decorationRuleInvocation(rule, spec) {
+  if (
+    !ts.isCallExpression(rule) ||
+    rule.arguments[0] !== spec ||
+    !memberIs(rule.expression, 'rule')
+  )
+    return undefined;
+  const owner = ts.findAncestor(rule, ts.isFunctionLike);
+  const receiver = memberOwner(rule.expression);
+  return owner && receiver && ts.isIdentifier(receiver) && isOperationInCallback(owner, rule)
+    ? { owner, definition: receiver.text }
+    : undefined;
+}
+
+function decorationRuleCaller(intent, scope) {
+  const summary = scope.sourceSummary;
+  if (
+    (!ts.isMethodDeclaration(intent) &&
+      !ts.isPropertyAssignment(intent) &&
+      !ts.isShorthandPropertyAssignment(intent)) ||
+    !summary?.isSelectedSourceProperty(intent, 'intent')
+  )
+    return undefined;
+  const config = intent.parent;
+  const declaration = config.parent;
+  const direct = decorationRuleInvocation(declaration, config);
+  if (direct) return direct;
+  if (!isConstStyleBinding(declaration, config)) return undefined;
+  const owner = ts.findAncestor(declaration, ts.isFunctionLike);
+  if (!owner?.body || summary.resolveStableSourceBinding(declaration.name) !== declaration)
+    return undefined;
+  let origin;
+  let escaped = false;
+  function visit(node) {
+    if (escaped || ts.isTypeNode(node)) return;
+    if (
+      ts.isIdentifier(node) &&
+      node !== declaration.name &&
+      node.text === declaration.name.text &&
+      (node.parent.name !== node || ts.isShorthandPropertyAssignment(node.parent)) &&
+      summary.resolveStableSourceBinding(node) === declaration
+    ) {
+      const caller = decorationRuleInvocation(node.parent, node);
+      if (caller?.owner !== owner || (origin && origin.definition !== caller.definition)) {
+        escaped = true;
+        return;
+      }
+      origin = caller;
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(owner.body);
+  return escaped ? undefined : origin;
+}
+
+function referencedDecorationRuleCaller(callback, scope) {
+  const binding = decorationHelperBinding(callback);
+  if (
+    !binding ||
+    callback.asteriskToken ||
+    callback.modifiers?.some((item) => item.kind === ts.SyntaxKind.AsyncKeyword) ||
+    !scope.sourceSummary
+  )
+    return undefined;
+  const statement = ts.isVariableDeclaration(binding) ? binding.parent.parent : binding;
+  let origin;
+  for (const reference of inspectedHelperReferences(callback, binding, statement, scope)) {
+    const value = outerStyleExpression(reference);
+    const intent = value.parent;
+    if (
+      (ts.isPropertyAssignment(intent) && intent.initializer !== value) ||
+      (ts.isShorthandPropertyAssignment(intent) && intent.name !== value)
+    )
+      return undefined;
+    const caller = decorationRuleCaller(intent, scope);
+    if (
+      !caller ||
+      (origin && (origin.owner !== caller.owner || origin.definition !== caller.definition))
+    )
+      return undefined;
+    origin = caller;
+  }
+  return origin;
+}
+
+function isOwnedDecorationStyleArgument(argument, scope, tuple = false) {
+  // Follow value positions only. A nested array must be spread before it
+  // can contribute any of its members to the targeted rest argument.
+  let shape = tuple ? 'array' : 'handle';
+  while (true) {
+    const parent = argument.parent;
+    if (ts.isConditionalExpression(parent) && parent.condition !== argument) {
+      argument = outerStyleExpression(parent);
+    } else if (ts.isArrayLiteralExpression(parent) && shape !== 'array') {
+      shape = 'array';
+      argument = outerStyleExpression(parent);
+    } else if (ts.isSpreadElement(parent) && shape === 'array') {
+      shape = 'spread';
+      argument = parent;
+    } else break;
+  }
+  const use = argument.parent;
+  if (
+    shape === 'array' ||
+    !ts.isCallExpression(use) ||
+    !use.arguments.includes(argument) ||
+    !memberIs(use.expression, 'use')
+  )
+    return false;
+  const selection = memberOwner(use.expression);
+  if (!selection || !ts.isCallExpression(selection)) return false;
+  const receiver = feedbackStyleReceiver(selection.expression, 'to');
+  const target = selection.arguments[0];
+  if (!receiver || !target || !ts.isIdentifier(target) || selection.arguments.length !== 1)
+    return false;
+
+  const callback = ts.findAncestor(use, ts.isFunctionLike);
+  if (!callback || !isOperationInCallback(callback, use)) return false;
+  let declarationOwner = callback;
+  let definition = receiver;
+  const intent = ts.isMethodDeclaration(callback)
+    ? callback
+    : outerStyleExpression(callback).parent;
+  const ruleCaller =
+    decorationRuleCaller(intent, scope) ?? referencedDecorationRuleCaller(callback, scope);
+  if (ruleCaller) {
+    if (
+      parameterName(callback) !== receiver ||
+      callback.parameters.length !== 1 ||
+      receiver === target.text ||
+      receiver === 'tw' ||
+      !receiverUsesAreDirect(callback, receiver)
+    )
+      return false;
+    declarationOwner = ruleCaller.owner;
+    definition = ruleCaller.definition;
+  }
+  if (!declarationOwner.body) return false;
+  const binding = scopeDeclaring(target.text, scope)?.bindings.get(
+    target.text
+  )?.decorationTargetDeclaration;
+  // Replaying a call can expose its argument in this scope. A lexical
+  // parameter still needs the same proof across every call to its helper.
+  const referenceOrigin =
+    scope.sourceSummary && referencedDecorationTarget(target, scope.sourceSummary);
+  let targetOrigin;
+  if (referenceOrigin?.parameter) {
+    if (referenceOrigin.owner !== declarationOwner) return false;
+    targetOrigin = referenceOrigin;
+  } else {
+    targetOrigin = decorationBindingOrigin(binding);
+    if (!targetOrigin) return false;
+    if (targetOrigin.owner === declarationOwner) {
+      if (targetOrigin.definition !== definition) return false;
+      targetOrigin = undefined;
+    } else if (!targetOrigin.owner.body || !nodeWithin(declarationOwner, targetOrigin.owner.body))
+      return false;
+  }
+
+  if (isCanonicalPrototypeSetup(declarationOwner, scope, false)) {
+    if (targetOrigin || parameterName(declarationOwner) !== definition) return false;
+  } else if (!hasVerifiedDecorationHelperCalls(declarationOwner, definition, scope, targetOrigin))
+    return false;
+
+  // A sibling statement may rebind the Rule intent or setup receiver. Prove
+  // each access independently of the number of operations recorded.
+  return receiverUsesAreDirect(
+    declarationOwner,
+    definition,
+    undefined,
+    undefined,
+    scope.sourceSummary
+  );
+}
+
+function isCanonicalStyleHandle(node, scope) {
+  return (
+    ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.text === 'tw' &&
+    !scopeDeclaring('tw', scope) &&
+    hasCanonicalCoreImport(node.getSourceFile(), 'tw')
+  );
+}
+
+function outerStyleExpression(node) {
+  let expression = node;
+  while (expression.parent && unwrapTransparent(expression.parent) === node)
+    expression = expression.parent;
+  return expression;
+}
+
+function isConstStyleBinding(binding, initializer) {
+  return (
+    ts.isVariableDeclaration(binding) &&
+    binding.initializer === initializer &&
+    ts.isIdentifier(binding.name) &&
+    (binding.parent.flags & ts.NodeFlags.Const) !== 0
+  );
+}
+
+function isLocalStyleMember(property, scope) {
+  if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property))
+    return false;
+  const key = getPropertyName(property.name);
+  const holder = outerStyleExpression(property.parent);
+  return (
+    key &&
+    isConstStyleBinding(holder.parent, holder) &&
+    ts.findAncestor(holder.parent, ts.isFunctionLike) &&
+    scope.sourceSummary?.isSelectedSourceProperty(property, key)
+  );
+}
+
+function collectLocalStyleMembers(initializer, scope) {
+  if (!ts.isObjectLiteralExpression(initializer)) return undefined;
+  const members = new Map();
+  for (const property of initializer.properties) {
+    if (!isLocalStyleMember(property, scope)) continue;
+    const shorthand = ts.isShorthandPropertyAssignment(property);
+    const source = shorthand ? property.name : property.initializer;
+    const expression = unwrapTransparent(source);
+    if (!shorthand && !isCanonicalStyleHandle(expression, scope)) continue;
+    const binding = resolveBinding(source, scope);
+    const origin = shorthand ? binding.styleHandleOrigin : styleHandleOrigin(expression);
+    if (origin)
+      members.set(getPropertyName(property.name), {
+        ...binding,
+        styleHandleOrigin: origin,
+        styleMemberDeclaration: property,
+      });
+  }
+  return members.size ? members : undefined;
+}
+
+function isLocalStyleTuple(tuple) {
+  if (!ts.isArrayLiteralExpression(tuple)) return false;
+  const holder = outerStyleExpression(tuple);
+  return (
+    isConstStyleBinding(holder.parent, holder) &&
+    ts.findAncestor(holder.parent, ts.isFunctionLike) &&
+    tuple.elements.every((item) => !ts.isSpreadElement(item) && !ts.isOmittedExpression(item))
+  );
+}
+
+function collectLocalStyleTuple(tuple, scope) {
+  if (!isLocalStyleTuple(tuple)) return undefined;
+  const handles = [];
+  for (const source of tuple.elements) {
+    const expression = unwrapTransparent(source);
+    const binding = resolveBinding(source, scope);
+    const origin = isCanonicalStyleHandle(expression, scope)
+      ? styleHandleOrigin(expression)
+      : ts.isIdentifier(expression)
+        ? binding.styleHandleOrigin
+        : undefined;
+    if (origin) handles.push({ ...binding, styleHandleOrigin: origin });
+  }
+  return handles.length ? handles : undefined;
+}
+
+function styleHandleOrigin(node) {
+  // The same relative module can be parsed again while resolving its exports.
+  return node.getSourceFile().fileName + ':' + node.pos;
+}
+
+function decorationStyleUsage(inventory, origin) {
+  const previous = inventory.styleHandleUsage.get(origin);
+  if (previous) return previous;
+  const usage = { tokens: new Set(), declarationSeen: false, targeted: false, unclassified: false };
+  inventory.styleHandleUsage.set(origin, usage);
+  return usage;
+}
+
+function recordStyleHandleUse(binding, expression, scope, tokens, inventory, tuple = false) {
+  if (!binding?.styleHandleOrigin) return;
+  const usage = decorationStyleUsage(inventory, binding.styleHandleOrigin);
+  for (const token of binding.strings.flatMap(splitTokens)) {
+    tokens.add(token);
+    usage.tokens.add(token);
+  }
+  if (expression && isOwnedDecorationStyleArgument(expression, scope, tuple)) usage.targeted = true;
+  else usage.unclassified = true;
+}
+
+function observeStyleHandleReference(node, scope, tokens, inventory) {
+  const binding = scopeDeclaring(node.text, scope)?.bindings.get(node.text);
+  if (
+    (!binding?.styleHandleOrigin && !binding?.styleMembers && !binding?.styleTuple) ||
+    ts.isTypeNode(node.parent) ||
+    ts.isImportSpecifier(node.parent) ||
+    ts.isNamespaceImport(node.parent) ||
+    ts.isExportSpecifier(node.parent) ||
+    ((ts.isPropertyAccessExpression(node.parent) || ts.isPropertyAssignment(node.parent)) &&
+      node.parent.name === node)
+  )
+    return;
+  const expression = outerStyleExpression(node);
+  const parent = expression.parent;
+  if (binding.styleTuple) {
+    // A const alias retains these member origins; its actual references decide
+    // whether the tuple is targeted, mutated, Root-bound or otherwise exposed.
+    if (isConstStyleBinding(parent, expression)) return;
+    for (const value of binding.styleTuple)
+      recordStyleHandleUse(value, expression, scope, tokens, inventory, true);
+    return;
+  }
+  if (binding.styleMembers) {
+    const property =
+      ts.isPropertyAccessExpression(parent) && parent.expression === expression
+        ? parent.name.text
+        : ts.isElementAccessExpression(parent) &&
+            parent.expression === expression &&
+            ts.isStringLiteralLike(parent.argumentExpression)
+          ? parent.argumentExpression.text
+          : undefined;
+    if (property !== undefined) {
+      const member = binding.styleMembers.get(property);
+      const proven =
+        !member?.styleMemberDeclaration ||
+        scope.sourceSummary?.isSourceMemberReference(parent, member.styleMemberDeclaration);
+      recordStyleHandleUse(
+        member,
+        proven ? outerStyleExpression(parent) : null,
+        scope,
+        tokens,
+        inventory
+      );
+    } else
+      for (const value of binding.styleMembers.values())
+        recordStyleHandleUse(value, null, scope, tokens, inventory);
+    return;
+  }
+  if (
+    !isConstStyleBinding(parent, expression) &&
+    !isLocalStyleTuple(parent) &&
+    !(ts.isShorthandPropertyAssignment(parent) && isLocalStyleMember(parent, scope))
+  )
+    recordStyleHandleUse(binding, expression, scope, tokens, inventory);
 }
 
 function isFeedbackStyleUseCall(node) {
@@ -1585,7 +2330,47 @@ function registerDeclaration(decl, scope, exposures) {
     shadowBindingPattern(scope, decl.name);
     return;
   }
-  registerValueBinding(decl.name, resolveBinding(decl.initializer, scope), scope, exposures, decl);
+  const value = resolveBinding(decl.initializer, scope);
+  const initializer = unwrapTransparent(decl.initializer);
+  const styleMembers = isConstStyleBinding(decl, decl.initializer)
+    ? collectLocalStyleMembers(initializer, scope)
+    : undefined;
+  const styleTuple = collectLocalStyleTuple(initializer, scope);
+  const origin = isConstStyleBinding(decl, decl.initializer)
+    ? isCanonicalStyleHandle(initializer, scope)
+      ? styleHandleOrigin(initializer)
+      : ts.isIdentifier(initializer)
+        ? value.styleHandleOrigin
+        : undefined
+    : undefined;
+  const targetDeclaration = isConstStyleBinding(decl, decl.initializer)
+    ? ts.isCallExpression(initializer) &&
+      feedbackStyleReceiver(initializer.expression, 'declareDecoration')
+      ? decl
+      : ts.isIdentifier(initializer)
+        ? value.decorationTargetDeclaration
+        : undefined
+    : undefined;
+  registerValueBinding(
+    decl.name,
+    origin ||
+      value.styleHandleOrigin ||
+      targetDeclaration ||
+      value.decorationTargetDeclaration ||
+      styleMembers ||
+      styleTuple
+      ? {
+          ...value,
+          styleHandleOrigin: origin,
+          decorationTargetDeclaration: targetDeclaration,
+          ...(styleMembers && { styleMembers }),
+          ...(styleTuple && { styleTuple }),
+        }
+      : value,
+    scope,
+    exposures,
+    decl
+  );
 }
 
 function registerValueBinding(name, binding, scope, exposures, bindingNode) {
