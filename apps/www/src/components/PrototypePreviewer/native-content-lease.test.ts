@@ -253,6 +253,60 @@ describe('shadow move callback focus ownership', () => {
       });
 });
 
+describe('shadow callback blur and descendant focus', () => {
+  for (const tag of ['input', 'textarea'] as const) {
+    it(`honors a connected ${tag} blur without a transport`, () => {
+      const source = document.createElement('div');
+      const host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      const control = document.createElement(tag);
+      control.value = 'Retained authored source';
+      shadow.append(control);
+      source.append(host);
+      document.body.append(source);
+      control.focus();
+      document.getSelection()!.setBaseAndExtent(host, 0, host, 0);
+
+      withNativeContentLease(source, () => control.blur());
+
+      expect(document.activeElement).toBe(document.body);
+      expect(shadow.activeElement).toBeNull();
+      expect(control.value).toBe('Retained authored source');
+    });
+
+    it(`keeps callback focus on a ${tag} inside the original host`, () => {
+      const source = document.createElement('div');
+      const destination = document.createElement('div');
+      const host = document.createElement('div');
+      host.tabIndex = 0;
+      const shadow = host.attachShadow({ mode: 'open' });
+      const control = document.createElement(tag);
+      control.value = 'New focus owner';
+      shadow.append(control);
+      source.append(host);
+      document.body.append(source, destination);
+      host.focus();
+      expect(shadow.activeElement).toBeNull();
+      document.getSelection()!.setBaseAndExtent(source, 0, source, 0);
+
+      withNativeContentLease(source, () => {
+        destination.append(source);
+        control.focus();
+        control.setSelectionRange(1, 4, 'backward');
+      });
+
+      expect(document.activeElement).toBe(host);
+      expect(shadow.activeElement).toBe(control);
+      expect([
+        control.value,
+        control.selectionStart,
+        control.selectionEnd,
+        control.selectionDirection,
+      ]).toEqual(['New focus owner', 1, 4, 'backward']);
+    });
+  }
+});
+
 describe('synchronous owner-to-owner Selection freshness', () => {
   it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
     const first = fixture(true);

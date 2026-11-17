@@ -47,9 +47,13 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   const document = scope.ownerDocument;
   const focused = activeElement(document);
   let focusOwner: Node | null = focused;
+  const focusRoots: ShadowRoot[] = [];
   while (focusOwner && !scope.contains(focusOwner)) {
     const root = focusOwner.getRootNode();
-    focusOwner = root.nodeType === 11 && 'host' in root ? (root as ShadowRoot).host : null;
+    if (root.nodeType === 11 && 'host' in root) {
+      focusRoots.push(root as ShadowRoot);
+      focusOwner = (root as ShadowRoot).host;
+    } else focusOwner = null;
   }
   const ownedFocus = !!focusOwner;
   const selection = document.getSelection();
@@ -65,16 +69,39 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
         [boundary.previous, boundary.next].some((node) => !!node && scope.contains(node))));
   const ownedSelection = !!selection && (ownsBoundary(anchor) || ownsBoundary(extent));
   let focusRevoked = false;
-  const onFocus = (event: Event) => {
-    if (!event.composedPath().includes(focused!)) focusRevoked = true;
+  const removals = ownedFocus ? new MutationObserver(() => {}) : null;
+  let blurPath: Set<EventTarget> | null = null;
+  const onFocus = () => {
+    if (activeElement(document) !== focused) focusRevoked = true;
+  };
+  const onBlur = (event: Event) => {
+    if (!focused?.isConnected || !event.composedPath().includes(focused)) return;
+    // Native focusout can precede its removal while the field is still connected.
+    // Only subsequent removal of this path identifies transport-induced loss.
+    removals!.takeRecords();
+    blurPath = new Set(event.composedPath());
+  };
+  const settleBlur = () => {
+    if (!blurPath) return;
+    const path = blurPath;
+    blurPath = null;
+    const moved = removals!
+      .takeRecords()
+      .some((record) => Array.from(record.removedNodes).some((node) => path.has(node)));
+    if (!moved) focusRevoked = true;
   };
   if (ownedFocus) {
+    removals!.observe(scope.parentNode ?? scope, { childList: true, subtree: true });
+    for (const root of focusRoots) removals!.observe(root, { childList: true, subtree: true });
     document.addEventListener('focusin', onFocus, true);
+    document.addEventListener('focusout', onBlur, true);
   }
   try {
     move();
+    settleBlur();
     if (!focusRevoked && ownedFocus && focused?.isConnected && activeElement(document) !== focused)
       focused.focus({ preventScroll: true });
+    settleBlur();
     // Move and focus callbacks may replace the value or select a newer range.
     const input =
       !focusRevoked && ownedFocus && activeElement(document) === focused
@@ -102,6 +129,7 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
         /* Connected callbacks may edit source lengths. Cleanup still completes. */
       }
     }
+    settleBlur();
     // Restoring the document range can reset the focused text control's caret.
     if (
       !focusRevoked &&
@@ -114,6 +142,8 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
   } finally {
     if (ownedFocus) {
       document.removeEventListener('focusin', onFocus, true);
+      document.removeEventListener('focusout', onBlur, true);
+      removals!.disconnect();
     }
   }
 }
