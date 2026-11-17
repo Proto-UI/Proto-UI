@@ -8,7 +8,12 @@ import {
   type PrototypeIR,
   type ValueType,
 } from './ir';
-import { memberValueType, parameterValueType, valueTypeEqual } from './value-types';
+import {
+  memberValueType,
+  minimumArgumentCount,
+  parameterValueType,
+  valueTypeEqual,
+} from './value-types';
 import { traceCallableDemand } from './callable-effects';
 import { emitPublicValue, hasPublicCallable } from './native-public-values';
 
@@ -124,8 +129,17 @@ export function formatJavaScriptValueType(
         type.members.map((member) => `(${formatJavaScriptValueType(member, atom)})`).join(' | ') ||
         'never'
       );
-    case 'callable':
-      return `(${type.parameters.map((parameter) => `${parameter.name}${parameter.optional || parameter.default ? '?' : ''}: ${formatJavaScriptValueType(parameter.type, atom)}`).join(', ')}) => ${formatJavaScriptValueType(type.returnType, atom)}`;
+    case 'callable': {
+      const required = minimumArgumentCount(type.parameters);
+      const parameters = type.parameters.map((parameter, index) => {
+        const optional = !!(parameter.optional || parameter.default);
+        const value = formatJavaScriptValueType(parameter.type, atom);
+        // A leading default still occupies a required argument position. Its
+        // type accepts undefined; only the trailing optional suffix uses '?'.
+        return `${parameter.name}${optional && index >= required ? '?' : ''}: ${optional && index < required ? `(${value}) | undefined` : value}`;
+      });
+      return `(${parameters.join(', ')}) => ${formatJavaScriptValueType(type.returnType, atom)}`;
+    }
     case 'object':
       return `{ ${type.fields
         .map(
@@ -253,7 +267,7 @@ export function emitUninvokedJavaScriptFunction(value: FunctionIR, typed = true)
     .join(', ');
   const annotations =
     !typed && value.parameters.length
-      ? `/** ${value.parameters.map((parameter) => `@param {unknown} ${parameter.optional || parameter.default ? `[${parameter.name}]` : parameter.name}`).join(' ')} */ `
+      ? `/** ${value.parameters.map((parameter) => `@param {unknown} ${parameter.optional && !parameter.default ? `[${parameter.name}]` : parameter.name}`).join(' ')} */ `
       : '';
   return `${annotations}(${parameters}) => { throw new Error('[Compiler] unreachable authored callable invoked'); }`;
 }
