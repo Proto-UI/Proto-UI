@@ -38,8 +38,8 @@ export function partitionModuleBindings(
       for (const [key, child] of Object.entries(node))
         if (key !== 'type' && key !== 'span') visit(child);
     }
-    // Defaults execute in the callee and can use the same owner as its body.
-    visit(binding.value.function.parameters);
+    // Defaults execute on invocation and may close over this owner or another owned helper.
+    for (const parameter of binding.value.function.parameters) visit(parameter.default);
     visit(binding.value.function.body);
     dependencies.set(binding.name, calls);
   }

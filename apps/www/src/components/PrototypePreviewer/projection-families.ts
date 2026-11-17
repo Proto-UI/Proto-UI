@@ -1390,10 +1390,12 @@ const BOOTSTRAP_232_MANIFEST = {
         'bootstrap-2-3-2-dialog-close-icon',
         'bootstrap-2-3-2-dialog-header',
         'bootstrap-2-3-2-dialog-footer',
-        'bootstrap-2-3-2-button',
+        'bootstrap-2-3-2-surface-root',
+        'bootstrap-2-3-2-text-root',
       ],
       auxiliaryPrototypes: [
-        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+        { basePrototypeId: 'P-BASE-SURFACE', prototypeId: 'bootstrap-2-3-2-surface-root' },
+        { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'bootstrap-2-3-2-text-root' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-DIALOG', prototypeId: 'bootstrap-2-3-2-dialog-root' },
