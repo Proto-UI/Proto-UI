@@ -1017,6 +1017,38 @@ describe('source-scanned Shadow Template/Root separation', () => {
     }
   );
 
+  it('classifies decoration handles stored in immutable object members', async () => {
+    const { artifact } = await generate(`
+      import { definePrototype, tw } from '@proto.ui/core';
+      definePrototype({ name: 'member-decoration-paint', setup(def) {
+        const target = def.feedback.style.declareDecoration();
+        const styles = { leaf: tw('p-[10%]') };
+        def.feedback.style.to(target).use(styles.leaf);
+        return (r) => r.decoration(target);
+      }});
+    `);
+    expect(artifact.cssText).toContain('padding: 10%;');
+    expect(artifact.cssText).not.toContain('[data-pui-split-root-style~="p-[10%]"]');
+  });
+
+  it.each(['styles.leaf = opaque;', 'consume(styles);', 'def.feedback.style.use(styles.leaf);'])(
+    'keeps Root preflight when an object-held handle is unproven: %s',
+    async (otherUse) => {
+      await expect(
+        generate(`
+        import { definePrototype, tw } from '@proto.ui/core';
+        definePrototype({ name: 'member-decoration-escape', setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          const styles = { leaf: tw('p-[10%]') };
+          ${otherUse}
+          def.feedback.style.to(target).use(styles.leaf);
+          return (r) => r.decoration(target);
+        }});
+      `)
+      ).rejects.toThrow(/verified length recipe/);
+    }
+  );
+
   it('classifies a known namespace member used only for decoration paint', async () => {
     const { artifact } = await generate(
       `

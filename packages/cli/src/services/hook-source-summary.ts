@@ -71,6 +71,10 @@ export type HookSourceSummaryContext = {
   ): ts.VariableDeclaration | ts.ParameterDeclaration | null;
   dynamicImportVariableInitializers(source: ts.SourceFile): readonly ts.Expression[];
   isSelectedSourceProperty(property: ts.ObjectLiteralElementLike, name: string): boolean;
+  isSourceMemberReference(
+    expression: ts.PropertyAccessExpression | ts.ElementAccessExpression,
+    property: ts.PropertyAssignment
+  ): boolean;
   /** Recognize the authored producer independently of its capture/projection proof. */
   isAuthoredProducerCall(node: ts.CallExpression, source: ts.SourceFile): boolean;
   /**
@@ -4368,6 +4372,9 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     isSelectedSourceProperty: (property, name) =>
       ts.isObjectLiteralExpression(property.parent) &&
       configProperty(property.parent, name) === property,
+    isSourceMemberReference: (expression, property) =>
+      moduleContext.resolveReference(expression, moduleForSource(expression.getSourceFile()))
+        ?.declaration === property,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
     isCanonicalPrototypeSetupProperty: (property) => {

@@ -192,7 +192,7 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         scope.bindings.set(clause.namedBindings.name.text, {
           ...emptyValue(),
           importedBinding: true,
-          styleNamespace: bindings,
+          styleMembers: bindings,
         });
       continue;
     }
@@ -1299,7 +1299,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           ) {
             rootInventory.templateTokens.add(token);
           } else if (
-            isConstStyleBinding(parent, expression) &&
+            (isConstStyleBinding(parent, expression) || isLocalStyleMember(expression, scope)) &&
             isCanonicalStyleHandle(node, scope)
           ) {
             const usage = decorationStyleUsage(rootInventory, styleHandleOrigin(node));
@@ -2111,6 +2111,39 @@ function isConstStyleBinding(binding, initializer) {
   );
 }
 
+function isLocalStyleMember(expression, scope) {
+  const property = expression.parent;
+  if (!ts.isPropertyAssignment(property) || property.initializer !== expression) return false;
+  const key = getPropertyName(property.name);
+  const holder = outerStyleExpression(property.parent);
+  return (
+    key &&
+    isConstStyleBinding(holder.parent, holder) &&
+    ts.findAncestor(holder.parent, ts.isFunctionLike) &&
+    scope.sourceSummary?.isSelectedSourceProperty(property, key)
+  );
+}
+
+function collectLocalStyleMembers(initializer, scope) {
+  if (!ts.isObjectLiteralExpression(initializer)) return undefined;
+  const members = new Map();
+  for (const property of initializer.properties) {
+    if (!ts.isPropertyAssignment(property)) continue;
+    const expression = unwrapTransparent(property.initializer);
+    if (
+      !isCanonicalStyleHandle(expression, scope) ||
+      !isLocalStyleMember(property.initializer, scope)
+    )
+      continue;
+    members.set(getPropertyName(property.name), {
+      ...resolveBinding(property.initializer, scope),
+      styleHandleOrigin: styleHandleOrigin(expression),
+      styleMemberDeclaration: property,
+    });
+  }
+  return members.size ? members : undefined;
+}
+
 function styleHandleOrigin(node) {
   // The same relative module can be parsed again while resolving its exports.
   return node.getSourceFile().fileName + ':' + node.pos;
@@ -2138,7 +2171,7 @@ function recordStyleHandleUse(binding, expression, scope, tokens, inventory) {
 function observeStyleHandleReference(node, scope, tokens, inventory) {
   const binding = scopeDeclaring(node.text, scope)?.bindings.get(node.text);
   if (
-    (!binding?.styleHandleOrigin && !binding?.styleNamespace) ||
+    (!binding?.styleHandleOrigin && !binding?.styleMembers) ||
     ts.isTypeNode(node.parent) ||
     ts.isImportSpecifier(node.parent) ||
     ts.isNamespaceImport(node.parent) ||
@@ -2149,7 +2182,7 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
     return;
   const expression = outerStyleExpression(node);
   const parent = expression.parent;
-  if (binding.styleNamespace) {
+  if (binding.styleMembers) {
     const property =
       ts.isPropertyAccessExpression(parent) && parent.expression === expression
         ? parent.name.text
@@ -2158,16 +2191,20 @@ function observeStyleHandleReference(node, scope, tokens, inventory) {
             ts.isStringLiteralLike(parent.argumentExpression)
           ? parent.argumentExpression.text
           : undefined;
-    if (property !== undefined)
+    if (property !== undefined) {
+      const member = binding.styleMembers.get(property);
+      const proven =
+        !member?.styleMemberDeclaration ||
+        scope.sourceSummary?.isSourceMemberReference(parent, member.styleMemberDeclaration);
       recordStyleHandleUse(
-        binding.styleNamespace.get(property),
-        outerStyleExpression(parent),
+        member,
+        proven ? outerStyleExpression(parent) : null,
         scope,
         tokens,
         inventory
       );
-    else
-      for (const value of binding.styleNamespace.values())
+    } else
+      for (const value of binding.styleMembers.values())
         recordStyleHandleUse(value, null, scope, tokens, inventory);
     return;
   }
@@ -2241,6 +2278,9 @@ function registerDeclaration(decl, scope, exposures) {
   }
   const value = resolveBinding(decl.initializer, scope);
   const initializer = unwrapTransparent(decl.initializer);
+  const styleMembers = isConstStyleBinding(decl, decl.initializer)
+    ? collectLocalStyleMembers(initializer, scope)
+    : undefined;
   const origin = isConstStyleBinding(decl, decl.initializer)
     ? isCanonicalStyleHandle(initializer, scope)
       ? styleHandleOrigin(initializer)
@@ -2258,8 +2298,17 @@ function registerDeclaration(decl, scope, exposures) {
     : undefined;
   registerValueBinding(
     decl.name,
-    origin || value.styleHandleOrigin || targetDeclaration || value.decorationTargetDeclaration
-      ? { ...value, styleHandleOrigin: origin, decorationTargetDeclaration: targetDeclaration }
+    origin ||
+      value.styleHandleOrigin ||
+      targetDeclaration ||
+      value.decorationTargetDeclaration ||
+      styleMembers
+      ? {
+          ...value,
+          styleHandleOrigin: origin,
+          decorationTargetDeclaration: targetDeclaration,
+          ...(styleMembers && { styleMembers }),
+        }
       : value,
     scope,
     exposures,
