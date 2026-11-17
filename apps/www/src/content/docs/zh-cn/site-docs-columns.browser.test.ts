@@ -129,9 +129,14 @@ async function measure(page: Page) {
       mode: getComputedStyle(columns).display,
       rightVisible:
         getComputedStyle(right).display !== 'none' && right.getBoundingClientRect().width > 0,
-      tocLinkWidths: [...right.querySelectorAll<HTMLElement>('a[href]')].map(
+      // Starlight's mobile TOC also lives inside this side container. The
+      // desktop reading-width oracle belongs to the desktop TOC owner.
+      tocLinkWidths: [...right.querySelectorAll<HTMLElement>('sl-toc a[href]')].map(
         (link) => link.getBoundingClientRect().width
       ),
+      mobileTocLinkWidths: [
+        ...right.querySelectorAll<HTMLElement>('mobile-starlight-toc a[href]'),
+      ].map((link) => link.getBoundingClientRect().width),
       tocCount: columns.querySelectorAll('sl-toc').length,
       currentCount: left.querySelectorAll('a[aria-current="page"]').length,
       focused: document.activeElement?.tagName,
