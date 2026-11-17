@@ -1,7 +1,8 @@
 /**
  * Compiler-owned standalone lowering of C-SCROLL-TARGET-REVEAL-0001 host geometry.
- * Keep the bounded algorithm aligned with modules/scroll/src/web/target-reveal.ts;
- * generated consumers import neither that runtime Module nor an IR interpreter.
+ * Keep host geometry aligned with modules/scroll/src/web/target-reveal.ts;
+ * request admission guards compiler-owned synchronous status publication.
+ * Generated consumers import neither that runtime Module nor an IR interpreter.
  * Logical part and view authority stay with the surrounding native Scroll owner.
  */
 export const NATIVE_SCROLL_REVEAL_SOURCE = String.raw`/** Host-local geometry only. No target or measurement crosses the author boundary. */
@@ -34,6 +35,8 @@ const nativeScrollPixels = (value: string, percentageBasis?: number): number => 
       : (parsed * percentageBasis) / 100;
 };
 
+const nativeScrollRevealRequests = new WeakMap<HTMLElement, number>();
+
 /**
  * Reveal inside this surface only. Native scrollIntoView may move unrelated
  * ancestors or the page; focus is independently owned by the Focus domain.
@@ -48,13 +51,17 @@ function revealNativeScrollTarget(
   const view = document.defaultView;
   if (!view || !(candidate instanceof view.HTMLElement)) return false;
   const target = candidate as HTMLElement;
+  // Geometry can reenter before this request is accepted. Only a newer valid
+  // reveal may supersede it; refused attempts leave this generation unchanged.
+  let expectedGeneration = nativeScrollRevealRequests.get(surface) ?? 0;
   const current = () =>
     isCurrent() &&
     surface.ownerDocument === document &&
     target.ownerDocument === document &&
     surface.isConnected &&
     target.isConnected &&
-    nativeScrollDescendant(surface, target);
+    nativeScrollDescendant(surface, target) &&
+    (nativeScrollRevealRequests.get(surface) ?? 0) === expectedGeneration;
   if (!current()) return false;
   if (!surface.getClientRects().length || !target.getClientRects().length) return false;
   const surfaceStyle = view.getComputedStyle(surface);
@@ -116,6 +123,10 @@ function revealNativeScrollTarget(
   const trailing = targetEnd - end;
   const delta = visible ? 0 : Math.abs(leading) < Math.abs(trailing) ? leading : trailing;
   const next = Math.min(range, Math.max(0, position + delta / scale));
+  // Accept moving and no-op reveals before cancellation can notify observers.
+  // Keep the accepted generation after completion so older calls cannot resume.
+  expectedGeneration += 1;
+  nativeScrollRevealRequests.set(surface, expectedGeneration);
   beforeApply();
   if (!current()) return false;
   if (next === position) return true;

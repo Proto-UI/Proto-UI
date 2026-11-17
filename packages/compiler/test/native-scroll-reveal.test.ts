@@ -281,6 +281,111 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
     expect(f.surface.scrollTop).toBe(300);
   });
 
+  it.each([
+    { nestedStart: 300, writes: [220] },
+    { nestedStart: 100, writes: [] },
+  ])(
+    'stops the older reveal after a cancellation observer reenters at $nestedStart',
+    ({ nestedStart, writes: expectedWrites }) => {
+      const clock = frames(),
+        f = fixture({ atEnd: true });
+      f.grow();
+      expect(f.scroll.endFollow.requestStatus.get()).toBe('pending');
+      f.surface.scrollTop = 50;
+      f.geometry.start = 150;
+      let position = 50;
+      const writes: number[] = [];
+      Object.defineProperty(f.surface, 'scrollTop', {
+        configurable: true,
+        get: () => position,
+        set(value: number) {
+          writes.push(value);
+          position = value;
+        },
+      });
+      let nestedOutcome: unknown;
+      f.scroll.endFollow.requestStatus.watch((_run: unknown, event: { next: string }) => {
+        if (event.next !== 'rejected') return;
+        f.geometry.start = nestedStart;
+        nestedOutcome = f.reveal();
+      });
+      // The older reveal measured 70 before the cancellation notification
+      // published its rejected status to the observer.
+      expect(f.reveal()).toEqual(unavailable);
+      expect(nestedOutcome).toEqual({ kind: 'dispatched' });
+      expect(writes).toEqual(expectedWrites);
+      expect(f.surface.scrollTop).toBe(
+        expectedWrites.length ? expectedWrites[expectedWrites.length - 1] : 50
+      );
+      expect(clock.pending.size).toBe(0);
+      clock.flush();
+      expect(writes).toEqual(expectedWrites);
+    }
+  );
+
+  it.each(['hidden', 'zero-height', 'unresolved-inset'] as const)(
+    'keeps the older reveal after a cancellation observer issues a %s reveal',
+    (refusal) => {
+      const clock = frames(),
+        f = fixture({ atEnd: true });
+      f.grow();
+      expect(f.scroll.endFollow.requestStatus.get()).toBe('pending');
+      f.surface.scrollTop = 50;
+      f.geometry.start = 150;
+      let nestedOutcome: unknown;
+      f.scroll.endFollow.requestStatus.watch((_run: unknown, event: { next: string }) => {
+        if (event.next !== 'rejected') return;
+        if (refusal === 'hidden') f.target.style.visibility = 'hidden';
+        else if (refusal === 'zero-height') f.geometry.height = 0;
+        else f.target.style.scrollMarginTop = 'calc(1px + 1em)';
+        nestedOutcome = f.reveal();
+      });
+      expect(f.reveal()).toEqual({ kind: 'dispatched' });
+      expect(nestedOutcome).toEqual(unavailable);
+      expect(f.surface.scrollTop).toBe(70);
+      expect(clock.pending.size).toBe(0);
+      clock.flush();
+      expect(f.surface.scrollTop).toBe(70);
+    }
+  );
+
+  it('lets a valid reveal during measurement supersede the older reveal', () => {
+    const f = fixture();
+    let position = 50;
+    const writes: number[] = [];
+    Object.defineProperty(f.surface, 'scrollTop', {
+      configurable: true,
+      get: () => position,
+      set(value: number) {
+        writes.push(value);
+        position = value;
+      },
+    });
+    let nestedOutcome: unknown;
+    f.geometry.onMeasure = () => {
+      f.geometry.start = 300;
+      nestedOutcome = f.reveal();
+      f.geometry.start = 150;
+    };
+    expect(f.reveal()).toEqual(unavailable);
+    expect(nestedOutcome).toEqual({ kind: 'dispatched' });
+    expect(writes).toEqual([220]);
+    expect(f.surface.scrollTop).toBe(220);
+  });
+
+  it('keeps the older reveal after a zero-height reveal during measurement', () => {
+    const f = fixture();
+    let nestedOutcome: unknown;
+    f.geometry.onMeasure = () => {
+      f.geometry.height = 0;
+      nestedOutcome = f.reveal();
+      f.geometry.height = 20;
+    };
+    expect(f.reveal()).toEqual({ kind: 'dispatched' });
+    expect(nestedOutcome).toEqual(unavailable);
+    expect(f.surface.scrollTop).toBe(70);
+  });
+
   it('preserves an older pending end request after an invalid reveal', () => {
     const clock = frames(),
       f = fixture({ atEnd: true });

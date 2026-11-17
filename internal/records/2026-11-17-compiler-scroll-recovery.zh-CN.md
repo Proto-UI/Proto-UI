@@ -137,3 +137,21 @@ root 将上述冻结 v4 补丁按 hunk 应用到已发布的 `7d0e2dfcaffcdf6007
 [机器证据](./evidence/2026-11-17-compiler-scroll-recovery.json) 保存冻结补丁、19 轮历史记录的原 JSON 内容、独立审查及严格祖先闭环、组合命令的实际 receipt／JSON 和格式转换证明。历史失败与各阶段的 before-only 限制保持，不用本次组合通过改写旧记录。
 
 组合验证后的有界诊断还复现了既有 `to-end` 尾部重入缺陷：两个新增 emitted host case 为 1 passed / 1 failed、原 17 项明确过滤。普通 to-end 正控得到 300 / atEnd / following / applied；applied watcher 内新的合法 reveal 返回 150 / 非 atEnd / paused 后，旧 outer 尾部仍把 state 写回 following。requestStatus 保持 applied，未发生第二次即时位移。该尾部在 base `385d7c` 已存在；本检查点记录真实失败和独立后续修复，不将 150 项通过扩充为此场景已通过，也不把模型的 no-op phase guard 冒充普通 framework 证明。
+
+## 第三检查点：reveal 请求身份与同步通知重入
+
+PR 1490 的独立审查 thread（`discussion_r4601575108`）指出：emitted helper `packages/compiler/src/native-scroll-reveal.ts` 的 `beforeApply` 会调用 `cancelScrollEnd` 并同步发布 `rejected` 状态，该通知里的观察者可以再发出一次 reveal。较新的 reveal 完成后，较旧请求的 `current()` 仍然通过——它此前只检查 mount、owner、document 与后代关系——于是较旧请求继续写入自己测量阶段算出的旧 `next`（审查报告中的 emitted helper 执行写入 `[320,70]`）。
+
+首轮修复在 helper 内按 surface 记录请求身份：每次进入 `revealNativeScrollTarget` 先自增并登记身份，`current()` 追加“本请求身份仍是最新”的判断。身份在较新的请求完成后仍然保留，因此较旧的请求不能恢复自己的旧位移；已有的 mount、owner、document 与后代关系检查全部保留。独立复核 F1 随后指出，这个过早的身份登记也会使隐藏、零高度或 inset 未解析的嵌套无效请求取消有效的外层 reveal。
+
+当前修订改为记录已接受请求的 generation：入口只捕获当前值（缺省为 0），不自增；`current()` 同时检查原有 authority 与捕获值是否仍等于 surface 的已接受 generation。所有宿主有效性检查、再次检查 `current()` 和计算 `next` 完成后，才自增并登记 generation，然后调用 `beforeApply`。同一个局部可变捕获值更新为自己的已接受 generation，不增加逐请求对象。测量中的较新有效 reveal 会先登记并使较旧请求失效；无效 reveal 不登记，外层有效请求仍可继续。移动与 no-op 都在通知前登记，已接受身份在完成后保留。
+
+`packages/compiler/test/native-scroll-reveal.test.ts` 增加两个行为用例：在 `rejected` 通知的观察者里发出较新的 reveal（一个移动到 220，一个是无位移 no-op），断言较旧 reveal 返回 rejected、只有较新的请求写入 offset、无位移的较新请求同样不让较旧请求补写 70。两个用例都只观察真实写入与请求结果，不做源码文本断言。
+
+F1 修订另增加五项行为覆盖：取消通知中的隐藏、零高度、未解析 inset 请求均被拒绝，但外层仍移动到 70；既有 `geometry.onMeasure` hook 中较新有效请求独占 220 写入并拒绝外层；同一测量 hook 中零高度请求被拒绝，恢复尺寸后的外层仍移动到 70。保留前述移动与 no-op 重入用例及全部原 27 项，没有新增 fixture scaffold。补丁准备阶段未执行测试、构建或格式化；后续集成定点验证的 300 秒超时与 32 项通过结果见本节末段，两次运行的边界分别保留。
+
+一致性说明：helper 与 Runtime Web 的 `packages/modules/scroll/src/web/target-reveal.ts` 仅对齐宿主几何算法。本次 generation 防护对应 Compiler 的同步状态发布边界。按源码推断，Runtime 的 `create-web-scroll-host.ts` 在 `beforeApply` 内只赋值 status，没有发布该状态；目前没有证明它有等价的可重入缺陷，也没有 Runtime 执行证据。本修订不修改 Runtime，不能将相似回调结构表述为已证明的 Runtime 缺陷。
+
+首轮身份修复集成到 `96a83383719cbe316ad585052010a341a8e41b5e` 的工作树后，root 实际执行 `corepack pnpm@10.32.1 exec vitest run packages/compiler/test/native-scroll-reveal.test.ts --maxWorkers=1 --minWorkers=1 --no-file-parallelism`：**27 / 27 passed**，包含两个新重入用例与 reached standalone support graph 的严格类型检查；Vitest duration 21.92 秒，命令 wall time 34.01 秒。这份历史收据仅绑定 F1 修订前的候选，不表示当前 generation 准入修订或新增五项已执行通过。此为 Happy DOM emitted host closure／生成图证据，不替代真实浏览器或四框架普通消费者验收。原有 ES2024 与缺失 Astro base config 警告保留，未改配置或屏蔽警告。
+
+F1 修订后的首次定点命令在 300 秒预算内仅打印 Vitest 启动信息并超时，未得到测试结论；该失败保留。随后核对未发现该工作树遗留的自有 Vitest 进程；当时宿主 swap 已满，I/O full avg10 为 29.51%，但这些观测不能证明超时原因。对相同产品／测试源码，第二次显式使用 900 秒命令资源预算及 JSON reporter：**32 / 32 passed**，Vitest duration 28.42 秒，命令 wall time 49.30 秒。实际 JSON 收据为 `/tmp/pr1490-validity-resource-900s-1118.json`；产品源码 SHA-256 为 `ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603`，测试源码为 `b46e4710d14a01cfbc6953811f37b7192615b0d2e1c4603641e98fad668c64e8`。这轮覆盖新增五项及此前全部 27 项，仍是 Happy DOM emitted host closure 与生成图严格类型证据；它不将前一次 300 秒超时改写为通过，也不证明真实浏览器布局或普通框架消费者。
