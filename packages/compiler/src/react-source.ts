@@ -1,6 +1,7 @@
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
+  nativeAuthoredCallablesArtifact,
   hasPublicCallable,
   emitPublicValueCheck,
   emitPublicValue,
@@ -14,6 +15,7 @@ import {
 } from './native-authored-hooks';
 import {
   createJavaScriptValueReader,
+  planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -58,7 +60,12 @@ export function emitReactSource(
   if (!validated.ok) return validated;
   const ir = pruneDeadValues(validated.value);
   const readValue = createJavaScriptValueReader(ir, typeName);
-  const moduleParts = partitionModuleBindings(ir);
+  const callBoundaries = planJavaScriptCallBoundaries(ir);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    undefined,
+    (value) => value.kind === 'call' && callBoundaries.calls.has(value)
+  );
   const resolvedFacts = resolvedPropFacts(ir);
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'react-source SSR');
@@ -204,11 +211,13 @@ export function emitReactSource(
   while ([...names].some((name) => name.startsWith(p))) p += '_';
   const atoms = nativeHostAtomPlan(admitted.value.operations, p);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
-  const publicCalls = ir.exposes.some(
-    (entry) =>
-      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
-      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
-  );
+  const publicCalls =
+    callBoundaries.calls.size > 0 ||
+    ir.exposes.some(
+      (entry) =>
+        (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+        (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+    );
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${p}Hook${index}`]));
   const contextArtifacts = buildNativeContextArtifacts(ir);
   const staticArtifacts = buildNativeStaticDeclarations(
@@ -295,7 +304,8 @@ export function emitReactSource(
 
   function fn(value: FunctionIR, depth: number): string {
     if (!reachedFunctions.has(value)) return emitUninvokedJavaScriptFunction(value);
-    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    const callable = `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    return callBoundaries.authored.has(value) ? `${p}MarkAuthoredCallable(${callable})` : callable;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
@@ -306,7 +316,12 @@ export function emitReactSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
-        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName)!;
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, true, {
+          plan: callBoundaries,
+          wrap: `${p}WrapPublic`,
+          prefix: p,
+          isAuthored: `${p}IsAuthoredCallable`,
+        })!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -512,6 +527,7 @@ export function emitReactSource(
 import * as ${p}React from 'react';
 ${atoms.imports}
 ${publicCalls ? `import { createNativePublicCalls as ${p}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${p}MarkAuthoredCallable, isNativeAuthoredCallable as ${p}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${p}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
 ${
@@ -1513,6 +1529,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
       supportingFiles: [
         ...atoms.files,
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...contextArtifacts.files,
         ...staticArtifacts.files,

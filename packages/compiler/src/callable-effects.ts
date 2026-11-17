@@ -114,6 +114,11 @@ export interface CallableDemandObserver {
   expression(value: ExpressionIR): void;
   function(value: FunctionIR): void;
   hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>, recursive?: boolean): void;
+  /** Actual call provenance, including separate invocations of a shared helper. */
+  call?(
+    value: Extract<ExpressionIR, { kind: 'call' }>,
+    provenance: { external: boolean; authored: readonly FunctionIR[] }
+  ): void;
   /** An opaque/cyclic callable edge prevents a closed invocation proof. */
   opaque(): void;
 }
@@ -831,9 +836,14 @@ function analyzeCallableFlow(
                   const args = value.arguments.map((argument) =>
                     expression(argument, scope, execution)
                   );
-                  return reachable
-                    ? calls(present, args, execution, value.span, value.arguments)
-                    : [];
+                  if (!reachable) return [];
+                  demand?.call?.(value, {
+                    external: present.some((target) => target.kind === 'native'),
+                    authored: present.flatMap((target) =>
+                      target.kind === 'closure' ? [target.fn] : []
+                    ),
+                  });
+                  return calls(present, args, execution, value.span, value.arguments);
                 },
               ]
             : []),

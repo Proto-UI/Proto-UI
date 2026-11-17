@@ -5,6 +5,7 @@ import { resolvedPropFacts } from './resolved-props';
 import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import {
   nativePublicCallsArtifact,
+  nativeAuthoredCallablesArtifact,
   hasPublicCallable,
   emitPublicValue,
   emitPublicMethodProjection,
@@ -17,6 +18,7 @@ import {
 } from './native-authored-hooks';
 import {
   createJavaScriptValueReader,
+  planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -73,7 +75,12 @@ export function emitVue2Source(
   if (!validated.ok) return validated;
   const ir = pruneDeadValues(validated.value);
   const readValue = createJavaScriptValueReader(ir, typeName, false);
-  const moduleParts = partitionModuleBindings(ir);
+  const callBoundaries = planJavaScriptCallBoundaries(ir);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    undefined,
+    (value) => value.kind === 'call' && callBoundaries.calls.has(value)
+  );
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue2-source SSR');
     if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
@@ -313,11 +320,13 @@ export function emitVue2Source(
   );
   const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
-  const publicCalls = ir.exposes.some(
-    (entry) =>
-      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
-      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
-  );
+  const publicCalls =
+    callBoundaries.calls.size > 0 ||
+    ir.exposes.some(
+      (entry) =>
+        (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+        (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+    );
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
     const atom = atoms.typeName(type, `${prefix}Run`);
@@ -409,7 +418,10 @@ export function emitVue2Source(
         !['function', 'unknown', 'template'].includes(value.returnType as string)
           ? ` @returns {${typeName(value.returnType)}}`
           : '';
-      return `${annotations || returns ? `/** ${annotations}${returns} */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      const callable = `${annotations || returns ? `/** ${annotations}${returns} */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      return callBoundaries.authored.has(value)
+        ? `${prefix}MarkAuthoredCallable(${callable})`
+        : callable;
     } finally {
       nativeScope = saved;
     }
@@ -424,7 +436,12 @@ export function emitVue2Source(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
-        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false)!;
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false, {
+          plan: callBoundaries,
+          wrap: `${prefix}WrapPublic`,
+          prefix: prefix,
+          isAuthored: `${prefix}IsAuthoredCallable`,
+        })!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -702,6 +719,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
 // Source graph SHA-256: ${ir.source.sha256}
 ${atoms.jsImports}
 ${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${prefix}MarkAuthoredCallable, isNativeAuthoredCallable as ${prefix}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${contextImports}
 ${staticImports}
@@ -816,6 +834,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
       supportingFiles: [
         ...atoms.files,
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...(contextArtifacts?.files ?? []),
         ...staticDeclarations.files,
