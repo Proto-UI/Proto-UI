@@ -3,6 +3,7 @@ import {
   createWebOwnedDecorationStage,
   type WebOwnedDecorationStage,
 } from '@proto.ui/adapter-base';
+import type { EventPort } from '@proto.ui/module-event';
 import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
 import {
   getWebPortalDestinationGeneration,
@@ -745,6 +746,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           eventGateRef.value = eventGate;
 
           const router = createWebProtoEventRouter({
+            rootRegistrations: hostSession?.caps.getPort<EventPort>('event'),
             rootEl,
             instanceToken,
             resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

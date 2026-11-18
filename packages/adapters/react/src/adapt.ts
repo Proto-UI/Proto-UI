@@ -1,4 +1,5 @@
 import { diagnoseHostProps } from './host-prop-diagnostics';
+import type { EventPort } from '@proto.ui/module-event';
 import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
@@ -776,6 +777,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         eventGateRef.current = eventGate;
 
         const router = createWebProtoEventRouter({
+          rootRegistrations: hostSessionRef.current?.caps.getPort<EventPort>('event'),
           rootEl,
           instanceToken: instanceTokenRef.current,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

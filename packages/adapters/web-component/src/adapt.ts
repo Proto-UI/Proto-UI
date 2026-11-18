@@ -2,6 +2,7 @@ import {
   claimWebComponentOwnedRelocation,
   isWebComponentOwnedRelocating,
 } from './owned-relocation';
+import type { EventPort } from '@proto.ui/module-event';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -878,6 +879,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             : undefined);
           const eventGate = (resources.eventGate = createEventGate());
           const router = (resources.router = createWebProtoEventRouter({
+            rootRegistrations: owner.session?.caps.getPort<EventPort>('event'),
             rootEl: thisEl,
             // The eager native bridge owns focus/blur before provider construction.
             // Router subscriptions stay on a private target, avoiding a second

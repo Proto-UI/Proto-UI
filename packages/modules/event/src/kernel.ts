@@ -207,8 +207,8 @@ export class EventKernel {
     }));
   }
 
-  hasAny(kind: TargetKind) {
-    return this.regs.some((r) => r.kind === kind);
+  hasAny(kind: TargetKind, type?: EventTypeV0) {
+    return this.regs.some((r) => r.kind === kind && (type === undefined || r.type === type));
   }
 
   hasAnyAtAll() {
