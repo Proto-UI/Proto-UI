@@ -1,3 +1,4 @@
+import { observePreviewerRemoval } from './previewer-removal';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import { refreshCodePanel } from './code-panel-client';
 import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
@@ -477,7 +478,6 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   };
   root.ownerDocument.addEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
 
-  let removalObserver!: MutationObserver;
   const destroy = (): Promise<void> => {
     if (destroyPromise) return destroyPromise;
     destroyPromise = (async () => {
@@ -487,7 +487,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
       stopThemeWatcher = null;
       activeCandidate = null;
       candidateByGeneration.clear();
-      removalObserver.disconnect();
+      stopWatchingRemoval();
       root.ownerDocument.removeEventListener(PREFERRED_ADAPTER_EVENT, onAdapterChange);
       await controller.destroy();
       mount.replaceChildren();
@@ -495,10 +495,9 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     return destroyPromise;
   };
 
-  removalObserver = new MutationObserver(() => {
+  const stopWatchingRemoval = observePreviewerRemoval(root.ownerDocument.body, () => {
     if (!root.isConnected) void destroy();
   });
-  removalObserver.observe(root.ownerDocument.body, { childList: true, subtree: true });
 
   (root as HTMLElement & { __previewer__?: unknown }).__previewer__ = {
     switchRuntime: (runtimeId: string) =>
