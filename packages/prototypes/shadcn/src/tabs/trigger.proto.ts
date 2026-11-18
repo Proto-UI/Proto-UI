@@ -190,6 +190,12 @@ const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExp
           )
         ),
     });
+    // The compatibility underline is the host border. Its unused owned line
+    // must not become another flex item and add a gap beside the caller label.
+    def.rule({
+      when: (w) => w.prop('appearance').eq('underline'),
+      intent: (i) => i.feedback.style.to(lineIndication).use(tw('absolute opacity-0')),
+    });
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('underline'), w.state(selected).eq(true)),
       intent: (i) => i.feedback.style.use(tw('border-foreground text-foreground')),

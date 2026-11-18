@@ -1,0 +1,1642 @@
+{
+  "schemaVersion": 1,
+  "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+  "date": "2026-11-17",
+  "executionMode": "human-assisted",
+  "requestParaphrase": "Continue unfinished Proto-UI 0.3 repairs and carry the completed fixes into a reviewable follow-up PR.",
+  "sourceBinding": {
+    "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+      "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+      "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+    },
+    "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+      "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+      "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+    },
+    "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+      "sha256": "dfc5114d5d46c2bead19eb85cbc39478ec6bb5dd0c24951720cd79d36553ed62",
+      "gitBlob": "2199bd97e55b12e0b778db9393b6bede8d5ad52e"
+    },
+    "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts": {
+      "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "gitBlob": "b7e90603ed93e26f71384a47602d19736b2df18a"
+    }
+  },
+  "tabs": {
+    "authority": {
+      "observedAt": "2026-11-17T08:45:44.839269+00:00",
+      "governedFacts": [
+        {
+          "path": "spec/prototypes/P-SHADCN-TABS-TRIGGER.yaml",
+          "status": "draft",
+          "anchors": [
+            "P-SHADCN-TABS-TRIGGER-APPEARANCE",
+            "P-SHADCN-TABS-TRIGGER-CURRENT-BASE-DEVIATIONS",
+            "P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT"
+          ],
+          "fact": "Compatibility underline is separate from upstream line; Base owns selection, hover, focus and disabled state. Default/underline/default withdraws and restores contributions."
+        },
+        {
+          "path": "spec/contracts/C-FEEDBACK-STYLE-OWNED-TARGET-0001.yaml",
+          "status": "draft",
+          "anchors": [
+            "C-FEEDBACK-STYLE-OWNED-TARGET-0001-BINDING",
+            "C-FEEDBACK-STYLE-OWNED-TARGET-0001-CONTRIBUTION",
+            "C-FEEDBACK-STYLE-OWNED-TARGET-0001-NO-RESET",
+            "C-FEEDBACK-STYLE-OWNED-TARGET-0001-DECORATIVE"
+          ],
+          "fact": "Style changes retain the owned leaf, caller nodes, handles and focus; fixed decorative A11y exclusion remains. No DOM querying or rebinding is added in the Prototype."
+        },
+        {
+          "path": "spec/tests/T-RUNTIME-TABS-APPEARANCE-0001.yaml",
+          "status": "draft",
+          "anchors": [
+            "T-RUNTIME-TABS-APPEARANCE-0001-CASE-STATE-ROUNDTRIP",
+            "T-RUNTIME-TABS-APPEARANCE-0001-CASE-GENERATION-FOCUS",
+            "T-RUNTIME-TABS-APPEARANCE-0001-CASE-RESOURCE-NATIVE"
+          ],
+          "fact": "Emulated-host appearance checks and native narrow layout, geometry, keyboard/focus and switching are separate evidence; native gate remains incomplete until exact-source browser execution."
+        }
+      ],
+      "implementation": {
+        "path": "packages/prototypes/shadcn/src/tabs/trigger.proto.ts",
+        "baselineBlob": "325f4b1a710737e95b084353b4137a575cd44180",
+        "causalTrace": "Permanent empty owned decoration is positioned absolute only for appearance=default. Underline host uses inline-flex gap-1, so its otherwise in-flow empty decoration contributes the observed 4 px gap. A conditional absolute opacity-0 contribution removes unused decoration from flow while retaining node and ownership."
+      },
+      "fixture": {
+        "path": "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts",
+        "baselineBlob": "a9b0ef7275665eaf0cb0bf649299e3d1bfeb43ff",
+        "causalTrace": "Initial WC runtime is selected with a native click. The still-hovered inactive tab intentionally uses selected foreground, while the final assertion compares resting inactive versus selected ink. Move pointer away and poll both native :hover and exposed hovered before the resting measurement."
+      },
+      "negativeBoundaries": [
+        "Do not weaken 2 px width bound, color inequality, narrow width, keyboard, focus, selected count, event order or disconnection assertions",
+        "Do not remove decoration or replace Base owner",
+        "Do not change original formal CI/source guard or fake CI",
+        "No spec lifecycle promotion, Adapter changes, preset or native acceptance claim"
+      ],
+      "consumers": [
+        "Four-family Runtime Tabs public Form previewers",
+        "Code example Tabs",
+        "Base Tabs control behavior",
+        "Shadcn default/line/underline profiles"
+      ],
+      "plannedValidation": [
+        "Exact four new emulated-host regressions red on baseline then green on candidate",
+        "Relevant existing Tabs scope chosen from current catalog/consumer graph",
+        "Type and formatting checks proportional to three-file change",
+        "Parent-owned hosted native four-case rerun remains pending"
+      ],
+      "unresolvedSemanticConflicts": [],
+      "knownLimitations": [
+        "HappyDOM generated CSS is flattened from @layer only in the test",
+        "Unit test does not measure real browser text width",
+        "Historical exact 73-test scope was not recovered"
+      ]
+    },
+    "red": {
+      "numTotalTestSuites": 2,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 2,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 4,
+      "numPassedTests": 0,
+      "numFailedTests": 4,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1794905171338,
+      "success": false,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow horizontal: underline entry and appearance roundtrip preserve the live owner",
+              "status": "failed",
+              "title": "horizontal: underline entry and appearance roundtrip preserve the live owner",
+              "duration": 142.36171399999967,
+              "failureMessages": [
+                "AssertionError: expected false to be true // Object.is equality\n    at assertUnderline (/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:66:13)\n    at /workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:80:48\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+              ],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow horizontal: default entry and appearance roundtrip preserve the live owner",
+              "status": "failed",
+              "title": "horizontal: default entry and appearance roundtrip preserve the live owner",
+              "duration": 51.95331200000055,
+              "failureMessages": [
+                "AssertionError: expected false to be true // Object.is equality\n    at assertUnderline (/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:66:13)\n    at /workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:88:9\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+              ],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow vertical: underline entry and appearance roundtrip preserve the live owner",
+              "status": "failed",
+              "title": "vertical: underline entry and appearance roundtrip preserve the live owner",
+              "duration": 36.516852000000654,
+              "failureMessages": [
+                "AssertionError: expected false to be true // Object.is equality\n    at assertUnderline (/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:66:13)\n    at /workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:80:48\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+              ],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow vertical: default entry and appearance roundtrip preserve the live owner",
+              "status": "failed",
+              "title": "vertical: default entry and appearance roundtrip preserve the live owner",
+              "duration": 60.11194700000033,
+              "failureMessages": [
+                "AssertionError: expected false to be true // Object.is equality\n    at assertUnderline (/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:66:13)\n    at /workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts:88:9\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+              ],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905176952,
+          "endTime": 1794905177243.112,
+          "status": "failed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts"
+        }
+      ]
+    },
+    "green": {
+      "numTotalTestSuites": 2,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 4,
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1794905195600,
+      "success": true,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow horizontal: underline entry and appearance roundtrip preserve the live owner",
+              "status": "passed",
+              "title": "horizontal: underline entry and appearance roundtrip preserve the live owner",
+              "duration": 200.98096999999962,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow horizontal: default entry and appearance roundtrip preserve the live owner",
+              "status": "passed",
+              "title": "horizontal: default entry and appearance roundtrip preserve the live owner",
+              "duration": 98.09899599999972,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow vertical: underline entry and appearance roundtrip preserve the live owner",
+              "status": "passed",
+              "title": "vertical: underline entry and appearance roundtrip preserve the live owner",
+              "duration": 78.78107899999941,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [
+                "Shadcn Tabs underline keeps the unused decoration out of label flow"
+              ],
+              "fullName": "Shadcn Tabs underline keeps the unused decoration out of label flow vertical: default entry and appearance roundtrip preserve the live owner",
+              "status": "passed",
+              "title": "vertical: default entry and appearance roundtrip preserve the live owner",
+              "duration": 35.814704999999776,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905202492,
+          "endTime": 1794905202905.8147,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts"
+        }
+      ]
+    },
+    "related": {
+      "numTotalTestSuites": 23,
+      "numPassedTestSuites": 23,
+      "numFailedTestSuites": 0,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 85,
+      "numPassedTests": 85,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1794905281560,
+      "success": true,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["shadcn Tabs appearance state equivalence"],
+              "fullName": "shadcn Tabs appearance state equivalence preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "status": "passed",
+              "title": "preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "duration": 261.0354030000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["brutalist Tabs appearance state equivalence"],
+              "fullName": "brutalist Tabs appearance state equivalence preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "status": "passed",
+              "title": "preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "duration": 133.794492,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["bootstrap-2-3-2 Tabs appearance state equivalence"],
+              "fullName": "bootstrap-2-3-2 Tabs appearance state equivalence preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "status": "passed",
+              "title": "preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "duration": 109.46935899999994,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["liquid-glass Tabs appearance state equivalence"],
+              "fullName": "liquid-glass Tabs appearance state equivalence preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "status": "passed",
+              "title": "preserves Base facts and current style on every default/underline roundtrip, including disabled withdrawal",
+              "duration": 100.666424,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905298715,
+          "endTime": 1794905299320.6665,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/base/test/runtime-tabs-appearance.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [],
+              "fullName": "retains the exact existing React SSR shell before hydration (neither snapshot claims live SSR styling)",
+              "status": "passed",
+              "title": "retains the exact existing React SSR shell before hydration (neither snapshot claims live SSR styling)",
+              "duration": 7.0277410000001055,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "compares pre/post default CSS facts, restores default tokens, and bounds simulated paint evidence",
+              "status": "passed",
+              "title": "compares pre/post default CSS facts, restores default tokens, and bounds simulated paint evidence",
+              "duration": 1457.6357419999997,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "records the simulated selector limitation independently of any Proto or generated style",
+              "status": "passed",
+              "title": "records the simulated selector limitation independently of any Proto or generated style",
+              "duration": 0.5660840000000462,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905300849,
+          "endTime": 1794905302314.5662,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-appearance-equivalence.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection keeps Indicator passive while exposing accepted selection, active focus and orientation",
+              "status": "passed",
+              "title": "keeps Indicator passive while exposing accepted selection, active focus and orientation",
+              "duration": 177.92484100000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection updates the owned line indication without replacing leaves or caller content (horizontal)",
+              "status": "passed",
+              "title": "updates the owned line indication without replacing leaves or caller content (horizontal)",
+              "duration": 74.90003000000002,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection updates the owned line indication without replacing leaves or caller content (vertical)",
+              "status": "passed",
+              "title": "updates the owned line indication without replacing leaves or caller content (vertical)",
+              "duration": 59.08463299999994,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection withdraws dark active fills in line mode and restores them in default mode",
+              "status": "passed",
+              "title": "withdraws dark active fills in line mode and restores them in default mode",
+              "duration": 48.638386999999966,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for vega",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for vega",
+              "duration": 51.485454000000004,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for nova",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for nova",
+              "duration": 53.97148100000004,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for maia",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for maia",
+              "duration": 182.75002199999994,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for lyra",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for lyra",
+              "duration": 57.78823000000011,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for mira",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for mira",
+              "duration": 61.21004100000005,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for luma",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for luma",
+              "duration": 47.61511900000005,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for sera",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for sera",
+              "duration": 51.63445200000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for rhea",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for rhea",
+              "duration": 51.596334999999954,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection retains the source-distinct default and line paint and Base state for new-york-v4",
+              "status": "passed",
+              "title": "retains the source-distinct default and line paint and Base state for new-york-v4",
+              "duration": 45.50403099999994,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection keeps controlled refusal and disabled requests out of line selection paint",
+              "status": "passed",
+              "title": "keeps controlled refusal and disabled requests out of line selection paint",
+              "duration": 46.078882999999905,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection resets private List variant at a nested Root instead of leaking outer line paint",
+              "status": "passed",
+              "title": "resets private List variant at a nested Root instead of leaking outer line paint",
+              "duration": 69.76865599999996,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Shadcn Tabs draft source projection"],
+              "fullName": "Shadcn Tabs draft source projection keeps Proto underline separate and rejects unknown raw styles rather than falling back",
+              "status": "passed",
+              "title": "keeps Proto underline separate and rejects unknown raw styles rather than falling back",
+              "duration": 36.39598000000001,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905295609,
+          "endTime": 1794905296726.396,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs-draft-projection.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["prototypes/shadcn: tabs"],
+              "fullName": "prototypes/shadcn: tabs keeps every Tabs anatomy part as a named direct entry",
+              "status": "passed",
+              "title": "keeps every Tabs anatomy part as a named direct entry",
+              "duration": 0.9997979999999416,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["prototypes/shadcn: tabs"],
+              "fullName": "prototypes/shadcn: tabs runs as a compound tabs family with trigger selection and content switching",
+              "status": "passed",
+              "title": "runs as a compound tabs family with trigger selection and content switching",
+              "duration": 171.45400200000006,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["prototypes/shadcn: tabs"],
+              "fullName": "prototypes/shadcn: tabs applies focus-visible ring styles while keeping trigger shadow tokens",
+              "status": "passed",
+              "title": "applies focus-visible ring styles while keeping trigger shadow tokens",
+              "duration": 33.720028999999954,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["prototypes/shadcn: tabs"],
+              "fullName": "prototypes/shadcn: tabs does not leave a trigger pressed after pointer activity outside the tabs trigger",
+              "status": "passed",
+              "title": "does not leave a trigger pressed after pointer activity outside the tabs trigger",
+              "duration": 47.73901599999999,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905297448,
+          "endTime": 1794905297702.739,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/packages/prototypes/shadcn/test/tabs.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement uses real underline Tabs, retains source nodes, and restores native owners on cleanup",
+              "status": "passed",
+              "title": "uses real underline Tabs, retains source nodes, and restores native owners on cleanup",
+              "duration": 324.4525430000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement normalizes SSR label edges without changing source content",
+              "status": "passed",
+              "title": "normalizes SSR label edges without changing source content",
+              "duration": 113.958756,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement restores source and fallback if the real list fails role admission",
+              "status": "passed",
+              "title": "restores source and fallback if the real list fails role admission",
+              "duration": 85.42900600000007,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement restores source and fallback if the real content fails role admission",
+              "status": "passed",
+              "title": "restores source and fallback if the real content fails role admission",
+              "duration": 42.84297199999992,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement retains an in-progress native keyboard interaction rather than hiding its focused tab",
+              "status": "passed",
+              "title": "retains an in-progress native keyboard interaction rather than hiding its focused tab",
+              "duration": 1.5051029999999628,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement does not reparent a panel containing the active source viewport",
+              "status": "passed",
+              "title": "does not reparent a panel containing the active source viewport",
+              "duration": 1.368840000000091,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample real legacy Tabs enhancement"],
+              "fullName": "CodeExample real legacy Tabs enhancement does not accept a bubbled nested Tabs valueChange as a host change",
+              "status": "passed",
+              "title": "does not accept a bubbled nested Tabs valueChange as a host change",
+              "duration": 61.03044,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "retains the host name and explicit availability in the real tab accessible text",
+              "status": "passed",
+              "title": "retains the host name and explicit availability in the real tab accessible text",
+              "duration": 43.18972499999995,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "reveals clipped tabs using only the strip horizontal scroll",
+              "status": "passed",
+              "title": "reveals clipped tabs using only the strip horizontal scroll",
+              "duration": 1.069686000000047,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "keeps the overflow hint beside the real host list and restores its original position",
+              "status": "passed",
+              "title": "keeps the overflow hint beside the real host list and restores its original position",
+              "duration": 45.381405000000086,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases defers initial overflow geometry until the same reveal frame",
+              "status": "passed",
+              "title": "defers initial overflow geometry until the same reveal frame",
+              "duration": 48.95500300000003,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases commits both real owners before reading their reveal geometry",
+              "status": "passed",
+              "title": "commits both real owners before reading their reveal geometry",
+              "duration": 123.89832200000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases reveals only the latest committed selection once in a frame",
+              "status": "passed",
+              "title": "reveals only the latest committed selection once in a frame",
+              "duration": 51.29173700000001,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases reveals an actual focused tab synchronously without waiting for a frame",
+              "status": "passed",
+              "title": "reveals an actual focused tab synchronously without waiting for a frame",
+              "duration": 73.00871400000005,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases cancels a retired owner and lets a fresh owner reveal after reconnection",
+              "status": "passed",
+              "title": "cancels a retired owner and lets a fresh owner reveal after reconnection",
+              "duration": 104.68093499999986,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["CodeExample selection and native layout phases"],
+              "fullName": "CodeExample selection and native layout phases keeps the existing immediate reveal fallback when animation frames are unavailable",
+              "status": "passed",
+              "title": "keeps the existing immediate reveal fallback when animation frames are unavailable",
+              "duration": 47.48215400000004,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905293747,
+          "endTime": 1794905294918.4822,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/apps/www/src/components/code-example-tabs.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease shadcn: restores the initiating real Tab only after a successful unlocked switch",
+              "status": "passed",
+              "title": "shadcn: restores the initiating real Tab only after a successful unlocked switch",
+              "duration": 512.384849,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease brutalist: restores the initiating real Tab only after a successful unlocked switch",
+              "status": "passed",
+              "title": "brutalist: restores the initiating real Tab only after a successful unlocked switch",
+              "duration": 257.30124200000046,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease bootstrap-2-3-2: restores the initiating real Tab only after a successful unlocked switch",
+              "status": "passed",
+              "title": "bootstrap-2-3-2: restores the initiating real Tab only after a successful unlocked switch",
+              "duration": 225.78552500000023,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease liquid-glass: restores the initiating real Tab only after a successful unlocked switch",
+              "status": "passed",
+              "title": "liquid-glass: restores the initiating real Tab only after a successful unlocked switch",
+              "duration": 246.65551400000004,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease never reclaims focus after a newer focus target returns to body",
+              "status": "passed",
+              "title": "never reclaims focus after a newer focus target returns to body",
+              "duration": 302.18602199999987,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease cancels on newer pointerdown even without a new focus target",
+              "status": "passed",
+              "title": "cancels on newer pointerdown even without a new focus target",
+              "duration": 254.56808199999978,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease cancels on newer keydown even without a new focus target",
+              "status": "passed",
+              "title": "cancels on newer keydown even without a new focus target",
+              "duration": 294.98045700000057,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease cancels on newer window-blur even without a new focus target",
+              "status": "passed",
+              "title": "cancels on newer window-blur even without a new focus target",
+              "duration": 223.6416739999995,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not grant a focus lease to a document preference broadcast",
+              "status": "passed",
+              "title": "does not grant a focus lease to a document preference broadcast",
+              "duration": 159.74353400000018,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease cancels a failed switch instead of restoring when finally unlocks",
+              "status": "passed",
+              "title": "cancels a failed switch instead of restoring when finally unlocks",
+              "duration": 220.95872000000054,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease revokes a superseded version before its late render resolves",
+              "status": "passed",
+              "title": "revokes a superseded version before its late render resolves",
+              "duration": 176.10158000000047,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease revokes on destruction before the late renderer returns",
+              "status": "passed",
+              "title": "revokes on destruction before the late renderer returns",
+              "duration": 224.73991300000034,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not revive a disconnected and reconnected Tab instance",
+              "status": "passed",
+              "title": "does not revive a disconnected and reconnected Tab instance",
+              "duration": 227.90883500000018,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not issue a redundant request when this host kept focus across inert",
+              "status": "passed",
+              "title": "does not issue a redundant request when this host kept focus across inert",
+              "duration": 158.10733299999993,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease consumes before public focus callbacks synchronously start another switch",
+              "status": "passed",
+              "title": "consumes before public focus callbacks synchronously start another switch",
+              "duration": 376.80291600000055,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not request deferred focus through a newly hidden ancestor",
+              "status": "passed",
+              "title": "does not request deferred focus through a newly hidden ancestor",
+              "duration": 230.79421699999875,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not request deferred focus through a newly inert ancestor",
+              "status": "passed",
+              "title": "does not request deferred focus through a newly inert ancestor",
+              "duration": 224.84446899999966,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not request deferred focus through a newly display ancestor",
+              "status": "passed",
+              "title": "does not request deferred focus through a newly display ancestor",
+              "duration": 219.1252889999996,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not capture another Tab's focus for an unfocused activation",
+              "status": "passed",
+              "title": "does not capture another Tab's focus for an unfocused activation",
+              "duration": 170.7257410000002,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease synchronizes a second preview without letting it steal the local lease",
+              "status": "passed",
+              "title": "synchronizes a second preview without letting it steal the local lease",
+              "duration": 338.63821499999904,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not persist or broadcast an activation superseded by teardown (focus lease true)",
+              "status": "passed",
+              "title": "does not persist or broadcast an activation superseded by teardown (focus lease true)",
+              "duration": 276.06036999999924,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not persist or broadcast an activation superseded by teardown (focus lease false)",
+              "status": "passed",
+              "title": "does not persist or broadcast an activation superseded by teardown (focus lease false)",
+              "duration": 282.1443959999997,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease does not replay an outer activation over a synchronous newer peer activation",
+              "status": "passed",
+              "title": "does not replay an outer activation over a synchronous newer peer activation",
+              "duration": 409.3797139999988,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease preserves a nested newer broadcast with its listener before the previews",
+              "status": "passed",
+              "title": "preserves a nested newer broadcast with its listener before the previews",
+              "duration": 267.5328959999988,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease preserves a nested newer broadcast with its listener between the previews",
+              "status": "passed",
+              "title": "preserves a nested newer broadcast with its listener between the previews",
+              "duration": 272.40046900000016,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["generic Runtime Tabs focus lease"],
+              "fullName": "generic Runtime Tabs focus lease preserves a nested newer broadcast with its listener after the previews",
+              "status": "passed",
+              "title": "preserves a nested newer broadcast with its listener after the previews",
+              "duration": 270.6552960000008,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905286089,
+          "endTime": 1794905292913.6553,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/apps/www/src/components/PrototypePreviewer/runtime-tabs-focus.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [],
+              "fullName": "shadcn: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "status": "passed",
+              "title": "shadcn: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "duration": 441.68332699999996,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "brutalist: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "status": "passed",
+              "title": "brutalist: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "duration": 394.96317,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "bootstrap-2-3-2: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "status": "passed",
+              "title": "bootstrap-2-3-2: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "duration": 263.4388959999999,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": [],
+              "fullName": "liquid-glass: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "status": "passed",
+              "title": "liquid-glass: real projected controlled Tabs reject, lock, resume and ignore nested events",
+              "duration": 397.276973,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905306154,
+          "endTime": 1794905307651.2769,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/apps/www/src/components/PrototypePreviewer/runtime-tabs-projection.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["Runtime Tabs complete source CSS closure"],
+              "fullName": "Runtime Tabs complete source CSS closure shadcn retains both default and underline paint in document and Shadow CSS",
+              "status": "passed",
+              "title": "shadcn retains both default and underline paint in document and Shadow CSS",
+              "duration": 830.0642219999999,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Runtime Tabs complete source CSS closure"],
+              "fullName": "Runtime Tabs complete source CSS closure brutalist retains both default and underline paint in document and Shadow CSS",
+              "status": "passed",
+              "title": "brutalist retains both default and underline paint in document and Shadow CSS",
+              "duration": 434.970691,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Runtime Tabs complete source CSS closure"],
+              "fullName": "Runtime Tabs complete source CSS closure bootstrap-2-3-2 retains both default and underline paint in document and Shadow CSS",
+              "status": "passed",
+              "title": "bootstrap-2-3-2 retains both default and underline paint in document and Shadow CSS",
+              "duration": 448.95976599999995,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["Runtime Tabs complete source CSS closure"],
+              "fullName": "Runtime Tabs complete source CSS closure liquid-glass retains both default and underline paint in document and Shadow CSS",
+              "status": "passed",
+              "title": "liquid-glass retains both default and underline paint in document and Shadow CSS",
+              "duration": 431.7943320000004,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905308311,
+          "endTime": 1794905310456.7944,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/apps/www/src/components/PrototypePreviewer/runtime-tabs-style.test.ts"
+        },
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": ["shadcn Runtime Tabs"],
+              "fullName": "shadcn Runtime Tabs uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "status": "passed",
+              "title": "uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "duration": 430.18998799999986,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["shadcn Runtime Tabs"],
+              "fullName": "shadcn Runtime Tabs has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "status": "passed",
+              "title": "has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "duration": 229.50239800000008,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["brutalist Runtime Tabs"],
+              "fullName": "brutalist Runtime Tabs uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "status": "passed",
+              "title": "uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "duration": 125.26955299999986,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["brutalist Runtime Tabs"],
+              "fullName": "brutalist Runtime Tabs has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "status": "passed",
+              "title": "has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "duration": 165.08916499999987,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["bootstrap-2-3-2 Runtime Tabs"],
+              "fullName": "bootstrap-2-3-2 Runtime Tabs uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "status": "passed",
+              "title": "uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "duration": 114.03897399999983,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["bootstrap-2-3-2 Runtime Tabs"],
+              "fullName": "bootstrap-2-3-2 Runtime Tabs has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "status": "passed",
+              "title": "has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "duration": 154.603787,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["liquid-glass Runtime Tabs"],
+              "fullName": "liquid-glass Runtime Tabs uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "status": "passed",
+              "title": "uses four real tabs and reciprocal panels, while controlled rejection preserves the active runtime",
+              "duration": 216.21706099999983,
+              "failureMessages": [],
+              "meta": {}
+            },
+            {
+              "ancestorTitles": ["liquid-glass Runtime Tabs"],
+              "fullName": "liquid-glass Runtime Tabs has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "status": "passed",
+              "title": "has manual arrow/Home/End keyboard selection, skips locked activations and isolates nested value changes",
+              "duration": 139.5727479999996,
+              "failureMessages": [],
+              "meta": {}
+            }
+          ],
+          "startTime": 1794905303437,
+          "endTime": 1794905305012.5728,
+          "status": "passed",
+          "message": "",
+          "name": "/workspace/scratch/46c8fad17f2b/proto-ui-tabs-fixes/apps/www/src/components/PrototypePreviewer/runtime-tabs.test.ts"
+        }
+      ]
+    },
+    "receipts": {
+      "unit-red.receipt.json": {
+        "name": "unit-red-original-product",
+        "startedAt": "2026-11-17T08:46:10.066538+00:00",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "status": "?? packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts\n",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "e79ce2475609ae35cacb37493ab73aafcd017cb04f8fa32f05b9a282d8911757",
+            "gitBlob": "325f4b1a710737e95b084353b4137a575cd44180"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "02dcfa357b09924dbda3bc0c09a9939cfb51e19d01b2084861319a8be08e1e40",
+            "gitBlob": "a9b0ef7275665eaf0cb0bf649299e3d1bfeb43ff"
+          }
+        },
+        "node": "v24.22.1",
+        "pnpm": "10.32.1",
+        "native": false,
+        "environmentFlags": {
+          "CI": null,
+          "GITHUB_ACTIONS": null
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts",
+          "--maxWorkers=1",
+          "--fileParallelism=false",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/workspace/scratch/46c8fad17f2b/wc-recovery-20261117/unit-red.vitest.json"
+        ],
+        "exitCode": 1,
+        "durationSeconds": 7.169,
+        "finishedAt": "2026-11-17T08:46:17.372060+00:00",
+        "logSha256": "d1d133fbefa5614b1017ba82e7395a4f227f17b1b8272c3cc4547ad3e88f5f33"
+      },
+      "unit-green.receipt.json": {
+        "name": "unit-green-restored-candidate",
+        "startedAt": "2026-11-17T08:46:34.642827+00:00",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "status": " M apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts\n M packages/prototypes/shadcn/src/tabs/trigger.proto.ts\n?? packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts\n",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "6b189b37ec429281d65f19e3c965015a8fe7ffd05ed914ec88809bb3a7cdf5b4",
+            "gitBlob": "2b949303ecb554de863dfe0374eeb2231657bd7f"
+          }
+        },
+        "node": "v24.22.1",
+        "pnpm": "10.32.1",
+        "native": false,
+        "environmentFlags": {
+          "CI": null,
+          "GITHUB_ACTIONS": null
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts",
+          "--maxWorkers=1",
+          "--fileParallelism=false",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/workspace/scratch/46c8fad17f2b/wc-recovery-20261117/unit-green.vitest.json"
+        ],
+        "exitCode": 0,
+        "durationSeconds": 8.335,
+        "finishedAt": "2026-11-17T08:46:43.028460+00:00",
+        "logSha256": "6dfc49fa3b585d0602cf46dcbadb5d96c3e45019b63968521eb38a8ffb2b4f1d"
+      },
+      "related-tests.receipt.json": {
+        "name": "related-current-tabs-consumers",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "6b189b37ec429281d65f19e3c965015a8fe7ffd05ed914ec88809bb3a7cdf5b4",
+            "gitBlob": "2b949303ecb554de863dfe0374eeb2231657bd7f"
+          }
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "packages/prototypes/shadcn/test/tabs.test.ts",
+          "packages/prototypes/shadcn/test/tabs-appearance-equivalence.test.ts",
+          "packages/prototypes/shadcn/test/tabs-draft-projection.test.ts",
+          "packages/prototypes/base/test/runtime-tabs-appearance.test.ts",
+          "apps/www/src/components/PrototypePreviewer/runtime-tabs.test.ts",
+          "apps/www/src/components/PrototypePreviewer/runtime-tabs-focus.test.ts",
+          "apps/www/src/components/PrototypePreviewer/runtime-tabs-style.test.ts",
+          "apps/www/src/components/PrototypePreviewer/runtime-tabs-projection.test.ts",
+          "apps/www/src/components/code-example-tabs.test.ts",
+          "--maxWorkers=1",
+          "--fileParallelism=false",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/workspace/scratch/46c8fad17f2b/wc-recovery-20261117/related-tests.vitest.json"
+        ],
+        "startedAt": "2026-11-17T08:48:00.742265+00:00",
+        "node": "v24.22.1",
+        "pnpm": "10.32.1",
+        "native": false,
+        "exitCode": 0,
+        "durationSeconds": 29.857,
+        "finishedAt": "2026-11-17T08:48:30.599333+00:00",
+        "logSha256": "c4ebeb00a3f25be58e558bffd6e46db0b6f6cb58ff6c0ce16c663edadbdd7d1e"
+      },
+      "scoped-types.receipt.json": {
+        "name": "scoped-types-current-three-files",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "6b189b37ec429281d65f19e3c965015a8fe7ffd05ed914ec88809bb3a7cdf5b4",
+            "gitBlob": "2b949303ecb554de863dfe0374eeb2231657bd7f"
+          }
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "tsc",
+          "--project",
+          "/workspace/scratch/46c8fad17f2b/wc-recovery-20261117/tsconfig.tabs-current.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-17T08:48:00.729763+00:00",
+        "node": "v24.22.1",
+        "pnpm": "10.32.1",
+        "exitCode": 0,
+        "durationSeconds": 7.673,
+        "finishedAt": "2026-11-17T08:48:08.402544+00:00",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "format.receipt.json": {
+        "name": "format-current-three-files",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "6b189b37ec429281d65f19e3c965015a8fe7ffd05ed914ec88809bb3a7cdf5b4",
+            "gitBlob": "2b949303ecb554de863dfe0374eeb2231657bd7f"
+          }
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--check",
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts",
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts",
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts"
+        ],
+        "startedAt": "2026-11-17T08:48:00.739713+00:00",
+        "exitCode": 1,
+        "durationSeconds": 1.437,
+        "finishedAt": "2026-11-17T08:48:02.176633+00:00",
+        "logSha256": "62d15c4847bb6827883138fc5acce3f0f47df0218950feddc750418aa4c8b796"
+      },
+      "format-final.receipt.json": {
+        "name": "format-current-three-files-final",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "dfc5114d5d46c2bead19eb85cbc39478ec6bb5dd0c24951720cd79d36553ed62",
+            "gitBlob": "2199bd97e55b12e0b778db9393b6bede8d5ad52e"
+          }
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--check",
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts",
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts",
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts"
+        ],
+        "startedAt": "2026-11-17T08:50:56.167552+00:00",
+        "exitCode": 0,
+        "durationSeconds": 1.383,
+        "finishedAt": "2026-11-17T08:50:57.550129+00:00",
+        "logSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      "scoped-types-final.receipt.json": {
+        "name": "scoped-types-current-three-files-final",
+        "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "files": {
+          "packages/prototypes/shadcn/src/tabs/trigger.proto.ts": {
+            "sha256": "d297138b947c6a96620af45383ae3acf8764f5b477299deae7b4a11de3b5ba2c",
+            "gitBlob": "3b150a050ea0c19a19ef689334aba348785f7d05"
+          },
+          "packages/prototypes/shadcn/test/tabs-underline-decoration.test.ts": {
+            "sha256": "76ead77cc3bb43ee2ce415abf47f6467aa6337541fbedda4d419eceb3768604d",
+            "gitBlob": "2d7c0ac8f91064b9f5c9ef795a54a9d9aa548d9f"
+          },
+          "apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts": {
+            "sha256": "dfc5114d5d46c2bead19eb85cbc39478ec6bb5dd0c24951720cd79d36553ed62",
+            "gitBlob": "2199bd97e55b12e0b778db9393b6bede8d5ad52e"
+          }
+        },
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "tsc",
+          "--project",
+          "/workspace/scratch/46c8fad17f2b/wc-recovery-20261117/tsconfig.tabs-current.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-17T08:54:25.805681+00:00",
+        "node": "v24.22.1",
+        "pnpm": "10.32.1",
+        "exitCode": 0,
+        "durationSeconds": 6.645,
+        "finishedAt": "2026-11-17T08:54:32.457397+00:00",
+        "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "formatDelta": "The browser fixture was formatted after the unit/related runs; product and new unit bytes remained identical. Final scoped types separately ran on the formatted bytes."
+  },
+  "liquid": {
+    "inventory": {
+      "method": "Current source inventory, not browser execution",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "rows": [
+        {
+          "lang": "en",
+          "runtime": "wc",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "en",
+          "runtime": "react",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "en",
+          "runtime": "vue",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "en",
+          "runtime": "vue2",
+          "allSourcePanels": 1,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "zh-cn",
+          "runtime": "wc",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "zh-cn",
+          "runtime": "react",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "zh-cn",
+          "runtime": "vue",
+          "allSourcePanels": 5,
+          "toolbarDemoPanels": 1
+        },
+        {
+          "lang": "zh-cn",
+          "runtime": "vue2",
+          "allSourcePanels": 1,
+          "toolbarDemoPanels": 1
+        }
+      ],
+      "before": "Unqualified runtime locator can match intro, Install, and usage panels.",
+      "negativeBoundary": "demoId alone also matches usage panels; selecting first() would hide identity ambiguity.",
+      "nativeStatus": "not executed: Chromium launch EPERM before any page"
+    },
+    "candidate": {
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "sha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "patchSha256": "76c40f149199116b969cef0474137773bac6636d4454bd8d4b4d9babc0a402e9",
+      "patchBytes": 1496,
+      "patchProvenance": {
+        "finding": "R1489-02",
+        "supersededPatchSha256": "6819a1b62d6d2b947bd2a1f3150aa9d0c3339278f677de0d53938b478651c46e",
+        "supersededDigestStatus": "Retained historical value; original generation inputs are not established. The replacement identifies only the explicit base-to-head unified diff below.",
+        "baseCommit": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+        "headCommit": "556ed6439a900e6d37e58aa96190684de8e14d97",
+        "path": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+        "baseSha256": "2673adf6d01dcedbcc86c92b6373bafe807ced9df70d7f532fd5df83a5af0fd7",
+        "headSha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+        "baseBlob": "8870fdd2e6eb3972e114c01a3fe98e59e16397f7",
+        "headBlob": "b7e90603ed93e26f71384a47602d19736b2df18a",
+        "generation": "LC_ALL=C diff -u --label a/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts --label b/apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts <base-file> <head-file>; expected diff exit status 1; hash exact stdout bytes without normalization",
+        "inputExtraction": "git cat-file blob <baseBlob> and git cat-file blob <headBlob>, or the matching byte-bound archived files; no working-tree filters or rendered text",
+        "scope": "Metadata correction only; no new native execution or acceptance. All original observations and failed receipts remain historical."
+      },
+      "why": "The public docs have legitimate Install and usage panels per runtime; both optical journeys must scope to the unique toolbar-enabled live demo.",
+      "changed": "Two selector filters only; no first() and no visibility-driven disambiguation.",
+      "unchanged": [
+        "runtime iteration",
+        "30000ms quality deadline",
+        "150000ms journey deadline",
+        "self-optical requirement",
+        "none background requirement",
+        "nonempty backdrop",
+        "native click and activation counter",
+        "public pool metrics and disposal controls"
+      ],
+      "native": "pending; host launch fails before page",
+      "verification": [
+        "git diff --check exit0",
+        "prettier targeted check exit0",
+        "source inventory exact unique demo for all8locale/runtime pairs"
+      ]
+    },
+    "sourceReview": {
+      "baseSha": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "fixturePath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts",
+      "baselineBlob": "8870fdd2e6eb3972e114c01a3fe98e59e16397f7",
+      "candidateSha256": "22547af4fa707c3824b8091fd68b3b8706a308f331bb925d486049ab4c80a178",
+      "candidateBlob": "b7e90603ed93e26f71384a47602d19736b2df18a",
+      "inventory": [
+        {
+          "locale": "en",
+          "runtime": "wc",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "7892497eb0f3c0c133ffed53b0a67c168c2733b579d817aff36aefd1bbdc9cb2"
+        },
+        {
+          "locale": "en",
+          "runtime": "react",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "7892497eb0f3c0c133ffed53b0a67c168c2733b579d817aff36aefd1bbdc9cb2"
+        },
+        {
+          "locale": "en",
+          "runtime": "vue",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "7892497eb0f3c0c133ffed53b0a67c168c2733b579d817aff36aefd1bbdc9cb2"
+        },
+        {
+          "locale": "en",
+          "runtime": "vue2",
+          "allPanels": 1,
+          "topDemoMatches": 1,
+          "sourceSha256": "7892497eb0f3c0c133ffed53b0a67c168c2733b579d817aff36aefd1bbdc9cb2"
+        },
+        {
+          "locale": "zh-cn",
+          "runtime": "wc",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "2dbcfa9d686fdfa2e19ccdce244597ef2ba0f7194dce88263088c6452cebf48a"
+        },
+        {
+          "locale": "zh-cn",
+          "runtime": "react",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "2dbcfa9d686fdfa2e19ccdce244597ef2ba0f7194dce88263088c6452cebf48a"
+        },
+        {
+          "locale": "zh-cn",
+          "runtime": "vue",
+          "allPanels": 5,
+          "topDemoMatches": 1,
+          "sourceSha256": "2dbcfa9d686fdfa2e19ccdce244597ef2ba0f7194dce88263088c6452cebf48a"
+        },
+        {
+          "locale": "zh-cn",
+          "runtime": "vue2",
+          "allPanels": 1,
+          "topDemoMatches": 1,
+          "sourceSha256": "2dbcfa9d686fdfa2e19ccdce244597ef2ba0f7194dce88263088c6452cebf48a"
+        }
+      ],
+      "onlyLocatorExpressionsChanged": true,
+      "changedExpressionCount": 2,
+      "nativeExecuted": false,
+      "reviewedAt": "2026-11-17T08:54:27.337339+00:00",
+      "reviewer": "/root/wc_resume",
+      "disposition": "bounded-no-finding",
+      "authority": "Existing browser test intention: actual public Button demo optical and activation path; fixture scope correction only.",
+      "sourceChain": [
+        "Both current en/zh-cn ui-libraries/liquid-glass/button.mdx: one toolbar=true demo for each runtime; lower usage demos toolbar=false; install panels have no previewer",
+        "PrototypePreviewer.astro: data-demo-id=demoId; data-projection-toolbar=projectionRecipe ? String(toolbar) : undefined",
+        "projection-families.ts: exact demo-liquid-glass-button manifest recipe; tryResolveProjectionRecipe rejects duplicate matches",
+        "demo-liquid-glass-button.demo.ts: actual liquid-glass-button Back action and onClick activation status",
+        "AdapterPanelScript.astro: shows every panel for selected runtime, so the old runtime-only locator correctly remained ambiguous"
+      ],
+      "preserved": [
+        "Original 30000 ms optical poll and 150000 ms test deadline",
+        "self-optical, real Back click and nonzero activation status assertions",
+        "Real canvas/background and resource availability checks",
+        "Idle/hover and monotonic counter controls",
+        "Original trace/observer/cleanup and source binding"
+      ],
+      "limits": [
+        "Read-only source review and exact diff comparison; no browser execution",
+        "Selector uniqueness is established for the current two MDX sources and renderer attribute chain, not arbitrary future page content",
+        "Does not repair source-overlapping-content or Portal layout failure",
+        "No claim of native/optical acceptance"
+      ]
+    },
+    "syntaxEmission": {
+      "check": "TypeScript transpileModule ES2024/ESNext",
+      "errorDiagnostics": [],
+      "scope": "Syntax/emission only; not full type checking"
+    }
+  },
+  "native": {
+    "candidateExecution": "not-run",
+    "familyResolution": {
+      "statement": "The runtime-tabs native lane has Shadcn, Liquid, Brutalist and Bootstrap rows. The generic Liquid route resolves its runtime control family through the Shadcn fallback, so the Liquid row is not independent Liquid-family control evidence.",
+      "source": [
+        "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts:41-47 runtimePreviewFamily falls back to resolveSiteLibraryFamily",
+        "apps/www/src/components/site-library-family.ts:12-18 resolveSiteLibraryFamily returns shadcn outside the brutalist and bootstrap routes"
+      ],
+      "status": "Source-derived attribution, not a native execution result. The runtime-tabs native lane stays failed and this metadata correction claims no native acceptance."
+    },
+    "environmentObservation": "Ordinary sandbox Chromium 156.0.8078.79 failed during process launch with socket() Operation not permitted before any page assertion. Box main reported empty wallet. No sandbox, credential or billing change was made.",
+    "baselineTabsJob": "https://github.com/Proto-UI/Proto-UI/actions/runs/44038705347/job/133893072353",
+    "baselineResult": "4 original native cases failed: Shadcn/Liquid 4px label gap exceeds 2px; Brutalist/Bootstrap selected and inactive ink were equal. Original artifacts did not sample hover; the hover explanation is source-derived and needs native confirmation.",
+    "nextAction": "Run original four runtime-tabs native cases and the two public Button optical journeys on the published exact candidate in a supported environment.",
+    "baselineTabsArtifact": "https://github.com/Proto-UI/Proto-UI/actions/runs/44038705347/artifacts/14309795968",
+    "baselineArtifactSha256": "43f168faae18de8dab093578676c4b6bfb866bfdfeced4a5cdd67be9cd3cd60c",
+    "dispatchAccess": "GitHub connector has no workflow-dispatch method; connected browser tool lacks originating context; cloud GitHub Actions page is signed out. No dispatch was performed."
+  },
+  "limitations": [
+    "HappyDOM CSS @layer is flattened only in the new unit; no real layout or pixel claim.",
+    "Scoped TypeScript and local tests do not substitute full exact-head CI or independent platform acceptance.",
+    "No new native captures or uploaded visual evidence from the candidate.",
+    "No spec lifecycle, acceptance threshold, deadline, Adapter or public API change."
+  ]
+}
