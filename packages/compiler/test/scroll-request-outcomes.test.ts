@@ -27,7 +27,7 @@ function operations(value: unknown): Extract<ExpressionIR, { kind: 'operation' }
   const node = value as Record<string, unknown>;
   return [
     ...(node.kind === 'operation' && node.operation === 'scroll.request'
-      ? [node as Extract<ExpressionIR, { kind: 'operation' }>]
+      ? [value as Extract<ExpressionIR, { kind: 'operation' }>]
       : []),
     ...Object.values(node).flatMap(operations),
   ];
