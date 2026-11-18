@@ -85,6 +85,7 @@ export function originalCodePanels(html) {
       };
       visit(root);
       const contents = owned.filter((node) => attribute(node, 'data-code-content') !== undefined);
+      const contentLocation = contents.length === 1 ? contents[0].sourceCodeLocation : null;
       return {
         id: attribute(root, 'data-previewer-id'),
         demoId: attribute(root, 'data-demo-id') ?? null,
@@ -92,7 +93,9 @@ export function originalCodePanels(html) {
         highlightsAttribute: attribute(root, 'data-code-highlights') ?? '',
         codeMapAttribute: attribute(root, 'data-code-map') ?? '',
         contentCount: contents.length,
-        contentHtml: contents.length === 1 ? serialize(contents[0]) : null,
+        // Retain the response spelling of character references until comparison.
+        contentHtml: contentLocation?.startTag && contentLocation.endTag
+          ? html.slice(contentLocation.startTag.endOffset, contentLocation.endTag.startOffset) : null,
         // parse5 offsets are UTF-16 code units in the retained response text.
         sourceRange: root.sourceCodeLocation
           ? [root.sourceCodeLocation.startOffset, root.sourceCodeLocation.endOffset] : null,
