@@ -40,6 +40,8 @@ type Owner = {
   notify: () => void;
 };
 
+type PartsByScope = Map<unknown, { owner: Owner; part: A11yPartRegistration }[]>;
+
 export type A11yPartOwner = {
   update(snapshot: A11yPartOwnerSnapshot): void;
   getRelationships(): readonly A11yPartRelationshipSnapshot[];
@@ -72,22 +74,21 @@ export function createA11yPartRelationshipRegistry() {
   // Retain failed notifications across calls; resolution equality does not prove projection succeeded.
   const pending = new Set<Owner>();
 
-  const resolve = (owner: Owner): Resolution => {
+  const resolve = (owner: Owner, partsByScope: PartsByScope): Resolution => {
     const diagnostics: A11yPartDiagnostic[] = [];
     const relationships = owner.input.relationships.map((declaration) => {
       const { family, scope, role, key, relation, targetRole } = declaration;
       const matches: Owner[] = [];
-      if (scope !== null && scope !== undefined && role && key) {
-        for (const target of owners.values()) {
-          for (const part of target.input.parts) {
-            if (
-              part.family === family &&
-              part.scope === scope &&
-              part.role === targetRole &&
-              part.key === key
-            )
-              matches.push(target);
-          }
+      const candidates = partsByScope.get(scope);
+      if (candidates && role && key) {
+        for (const { owner: target, part } of candidates) {
+          if (
+            part.family === family &&
+            part.scope === scope &&
+            part.role === targetRole &&
+            part.key === key
+          )
+            matches.push(target);
         }
       }
       if (scope === null || scope === undefined || !role) {
@@ -129,9 +130,20 @@ export function createA11yPartRelationshipRegistry() {
     try {
       while (changed || pending.size) {
         changed = false;
+        // Build the lookup before publishing. A reentrant change starts a
+        // fresh sweep with the current memberships.
+        const partsByScope: PartsByScope = new Map();
+        for (const owner of owners.values()) {
+          for (const part of owner.input.parts) {
+            if (part.scope == null) continue;
+            const entries = partsByScope.get(part.scope);
+            if (entries) entries.push({ owner, part });
+            else partsByScope.set(part.scope, [{ owner, part }]);
+          }
+        }
         // Publish every new resolution before invoking a projection callback.
         for (const owner of owners.values()) {
-          const next = resolve(owner);
+          const next = resolve(owner, partsByScope);
           if (
             sameList(next.relationships, owner.resolution.relationships) &&
             sameList(next.diagnostics, owner.resolution.diagnostics)
