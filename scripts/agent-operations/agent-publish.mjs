@@ -256,8 +256,9 @@ function pullBinding(io, args, viewer) {
   const baseBranch = io.api(`repos/${owner}/${name}/branches/${encodeURIComponent(base)}`);
   if (liveBranch?.commit?.sha !== localSha || !baseBranch?.commit?.sha)
     throw new Error('PR source must be pushed and bound to exact local HEAD/base');
+  const comparisonHead = sameLogin(source.owner, owner) ? localSha : `${source.owner}:${localSha}`;
   const comparisons = io.api(
-    `repos/${owner}/${name}/compare/${baseBranch.commit.sha}...${localSha}?per_page=100`,
+    `repos/${owner}/${name}/compare/${baseBranch.commit.sha}...${comparisonHead}?per_page=100`,
     { paginate: 'pages' }
   );
   const total = comparisons[0]?.total_commits;

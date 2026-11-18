@@ -612,6 +612,18 @@ test('a public READ contributor can propose the exact fork head without rewritin
     protectedBranch: true,
     foreignCommit: true,
   });
+  let comparisonReads = 0;
+  const runner = (binary, args, options) => {
+    const endpoint = args.find((arg) => arg.includes('/compare/'));
+    if (endpoint) {
+      assert.equal(
+        endpoint,
+        `repos/fixture-owner/fixture-repository/compare/${'d'.repeat(40)}...${LOGIN}:${'c'.repeat(40)}?per_page=100`
+      );
+      comparisonReads++;
+    }
+    return gh.runner(binary, args, options);
+  };
   const head = `${LOGIN}:fixture-contributor-branch`;
   const result = runPublishCli(
     [
@@ -627,9 +639,10 @@ test('a public READ contributor can propose the exact fork head without rewritin
       '--head',
       head,
     ],
-    { runner: gh.runner, now: f.now }
+    { runner, now: f.now }
   );
   assert.equal(result.status, 'published');
+  assert.equal(comparisonReads, 2);
   assert.equal(gh.writes.length, 1);
 });
 
