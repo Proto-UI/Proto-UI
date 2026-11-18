@@ -127,6 +127,7 @@ function setupSelectContent(
   let ownerDisposed = false;
   let entryTask: { cancel(): void } | null = null;
   let entryCancelled = false;
+  let retiredFocusHandoff = 0;
   const cancelPendingEntry = () => {
     if (ownerDisposed || !open.get()) return;
     entryCancelled = true;
@@ -275,6 +276,7 @@ function setupSelectContent(
   };
   const applyPresentation = (run: any, ctx: SelectContextValue, reason: string) => {
     if (!isCurrentPresentation(run, ctx)) return;
+    if (blocked()) retiredFocusHandoff = ctx.focusHandoff ?? 0;
     const ownedEntry = entryActive || transition.isPresent.get();
     const focusedEntry =
       blocked() &&
@@ -411,7 +413,8 @@ function setupSelectContent(
           entryTask = null;
           if (entryCancelled || !current()) return;
           const ctx = readContext(_run);
-          if (ctx && current()) resolveOpenFocusAction(_run, ctx, false);
+          if (!ctx || (ctx.focusHandoff && ctx.focusHandoff !== retiredFocusHandoff)) return;
+          if (current()) resolveOpenFocusAction(_run, ctx, false);
         });
         return true;
       }

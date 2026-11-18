@@ -39,10 +39,14 @@ cases:
     expectation: select-entry-focus-never-falls-back-before-the-current-item-mount-turn-stabilizes
   - id: T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
     title: Popper entry and keyboard typeahead allow the host to reveal the focused option
-    covers: [P-BASE-SELECT-CONTENT-A11Y, P-BASE-SELECT-CONTENT-KEYBOARD]
+    covers:
+      - P-BASE-SELECT-CONTENT-A11Y
+      - P-BASE-SELECT-CONTENT-KEYBOARD
+      - P-BASE-SELECT-CONTENT-PRESENTATION-ADMISSION
     expectation: popper-focus-does-not-suppress-native-scroll-and-item-aligned-policy-is-preserved
     notes:
       - Covers selected and enabled boundary entry, reopen, and uncommitted typeahead across Base, Shadcn and Brutalist with complete and legacy parts.
+      - Complete Popper entry preserves newer Item and external focus owners from controlled and uncontrolled opening callbacks, while a new committed value or reopening can admit focus.
       - Host focus options under Happy DOM establish policy delivery, not actual browser clipping, scroll offsets or assistive-technology acceptance.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     title: Content retains leave view and portals a collision-aware Trigger-anchored surface

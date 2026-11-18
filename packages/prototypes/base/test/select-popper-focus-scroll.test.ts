@@ -149,6 +149,74 @@ describe.each(families)('$name Select popper host focus scroll policy', (family)
     });
   });
 
+  it.each([
+    { owner: 'item', controlled: false },
+    { owner: 'external', controlled: false },
+    { owner: 'item', controlled: true },
+    { owner: 'external', controlled: true },
+  ] as const)(
+    'preserves a newer $owner focus owner from openChange (controlled: $controlled)',
+    async ({ owner, controlled }) => {
+      vi.useFakeTimers();
+      const f = createSelect(family, true, 'alpha');
+      const external = document.createElement('button');
+      document.body.append(external);
+      if (controlled) setElementProps(f.root, { open: false });
+      await settle();
+      f.trigger.focus();
+      const selected = vi.spyOn(f.items[0] as HTMLElement, 'focus');
+      const target = owner === 'item' ? f.items[2] : external;
+      const opened = vi.fn(() => {
+        if (controlled) setElementProps(f.root, { open: true });
+        target.focus();
+      });
+      f.root.addEventListener('openChange', opened, { once: true });
+      f.root.getExposes().requestOpen({
+        open: true,
+        reason: 'popper-owner-handoff',
+        focusReason: 'programmatic',
+      });
+      expect(opened).toHaveBeenCalledOnce();
+      expect(document.activeElement).toBe(target);
+      expect(f.root.getExposes().open.get()).toBe(true);
+      const earlierCalls = selected.mock.calls.length;
+
+      await settle();
+
+      expect(document.activeElement).toBe(target);
+      expect(selected).toHaveBeenCalledTimes(earlierCalls);
+      expect(f.root.getExposes().open.get()).toBe(true);
+      expect(f.root.getExposes().value.get()).toBe('alpha');
+
+      if (owner === 'item') {
+        setElementProps(f.root, { value: 'gamma' });
+        await settle();
+        expect(document.activeElement).toBe(f.items[3]);
+        return;
+      }
+
+      if (controlled) setElementProps(f.root, { open: false });
+      else
+        f.root.getExposes().requestOpen({
+          open: false,
+          reason: 'popper-owner-handoff-close',
+          focusReason: 'programmatic',
+        });
+      await settle();
+      expect(f.root.getExposes().open.get()).toBe(false);
+      f.trigger.focus();
+      if (controlled) setElementProps(f.root, { open: true });
+      else
+        f.root.getExposes().requestOpen({
+          open: true,
+          reason: 'popper-owner-handoff-reopen',
+          focusReason: 'programmatic',
+        });
+      await settle();
+      expect(document.activeElement).toBe(f.items[0]);
+    }
+  );
+
   it('keeps the existing item-aligned legacy focus scroll policy', async () => {
     vi.useFakeTimers();
     const f = createSelect(family, false, 'gamma', 'item-aligned');

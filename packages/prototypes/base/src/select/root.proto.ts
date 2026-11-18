@@ -1,9 +1,10 @@
 import { FIELD_CONTEXT } from '../field/shared';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asCollection } from '@proto.ui/hooks';
+import { asBoundary, asCollection } from '@proto.ui/hooks';
 import { useOpenState } from '../tools';
 import {
   createSelectRootId,
+  recordSelectFocusHandoff,
   SELECT_CONTEXT,
   SELECT_FAMILY,
   SELECT_GROUP_FAMILY,
@@ -37,6 +38,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   def.anatomy.claim(SELECT_GROUP_FAMILY, { role: 'root' });
   const collection = asCollection();
   collection.configure({ family: SELECT_FAMILY });
+  const boundary = asBoundary();
+  boundary.observe('focus.move');
 
   def.props.define({
     open: { type: 'boolean', empty: 'fallback' },
@@ -58,6 +61,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   const initialContext: SelectContextValue = {
     rootId: '',
     collectionRevision: 0,
+    focusHandoff: 0,
     open: false,
     controlledOpen: false,
     value: '',
@@ -143,8 +147,9 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   };
 
   const syncContext = (run: any) => {
+    const previous = snapshot;
     const next = {
-      ...snapshot,
+      ...previous,
       controlDisabled: !!run.props.get().disabled,
       controlReadOnly: !!run.props.get().readOnly,
       disabled: !!run.props.get().disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
@@ -153,11 +158,19 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
       value: value.get(),
       textValue: textValue.get(),
     };
+    if (!next.open || next.value !== previous.value) next.focusHandoff = 0;
     snapshot = next;
     if (sameContext(published, next)) return;
     published = next;
     run.context.update(SELECT_CONTEXT, next);
   };
+
+  // The Root remains observable while Content's opening view is being installed.
+  boundary.subscribeOutside((event) => {
+    if (event.observation !== 'focus.move' || !currentRun || !snapshot.open) return;
+    snapshot = recordSelectFocusHandoff(snapshot);
+    syncContext(currentRun);
+  });
 
   def.context.trySubscribe(FIELD_CONTEXT, (run) => {
     if (currentRun) syncContext(run);

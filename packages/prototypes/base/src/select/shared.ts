@@ -20,6 +20,8 @@ export type SelectContextValue = {
   rootId: string;
   /** Internal scalar collection fact revision, not part identity or readiness. */
   collectionRevision?: number;
+  /** A successful focus handoff for this opening and committed value. */
+  focusHandoff?: number;
   open: boolean;
   controlledOpen: boolean;
   value: string;
@@ -37,6 +39,13 @@ export type SelectContextValue = {
   requestFocusReason: SelectFocusReason | null;
   requestEntry: SelectOpenEntry | null;
 };
+
+let nextFocusHandoff = 0;
+
+export function recordSelectFocusHandoff(ctx: SelectContextValue): SelectContextValue {
+  if (!ctx.open) return ctx;
+  return { ...ctx, focusHandoff: ++nextFocusHandoff };
+}
 
 let nextSelectRootId = 0;
 

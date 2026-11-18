@@ -3,6 +3,7 @@ import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
 import {
   notifySelectItemSnapshotChanged,
+  recordSelectFocusHandoff,
   requestSelectOpen,
   requestSelectValue,
   SELECT_CONTEXT,
@@ -96,15 +97,16 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     if (!nextOwnDisabled && !disposed) notifySelectItemSnapshotChanged(run);
   });
 
-  const updateActiveValue = (run: any) => {
+  const updateActiveValue = (run: any, focused = false) => {
     if (command.disabled.get()) return;
     const ownValue = run.props.get().value ?? '';
     if (!ownValue) return;
     active.set(true, 'reason: select item interaction => active');
     command.setRovingStatus({ active: true, selected: selected.get() });
-    run.context.update(SELECT_CONTEXT, (prev: SelectContextValue) =>
-      prev.activeValue === ownValue ? prev : { ...prev, activeValue: ownValue }
-    );
+    run.context.update(SELECT_CONTEXT, (prev: SelectContextValue) => {
+      const next = prev.activeValue === ownValue ? prev : { ...prev, activeValue: ownValue };
+      return focused ? recordSelectFocusHandoff(next) : next;
+    });
   };
 
   const clearTransientActive = (run: any, reason: string) => {
@@ -146,7 +148,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   command.focused.watch((run, event) => {
     if (event.type !== 'next') return;
     if (event.next) {
-      updateActiveValue(run);
+      updateActiveValue(run, true);
       return;
     }
     if (!command.hovered.get()) {
