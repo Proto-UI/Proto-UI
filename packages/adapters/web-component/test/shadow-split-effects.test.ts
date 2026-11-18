@@ -200,7 +200,7 @@ describe('private Shadow split effects', () => {
     }
   );
 
-  it('rejects unimplemented animated border rounding but retains fixed-border sizing animation', () => {
+  it('preserves the complete projection after animated border rejection and permits fixed-border sizing', () => {
     const { host, surface, effects } = setup([
       'block',
       'border',
@@ -215,7 +215,8 @@ describe('private Shadow split effects', () => {
     const previous = [host.outerHTML, surface.outerHTML];
     expect(() =>
       effects.queueStyle(effect(['block', 'border-2', 'w-64', 'transition-all'], 'runtime'))
-    ).toThrow(/used-value-rounding/);
+    ).toThrow();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
     expect(() =>
@@ -225,61 +226,28 @@ describe('private Shadow split effects', () => {
           ...lowerRootStyleTokens(['border-2'], 'data-[checked]').entries,
         ])
       )
-    ).toThrow(/used-value-rounding/);
+    ).toThrow();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
+    effects.requestFlush();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(previous);
     effects.queueStyle(effect(['block', 'border', 'w-64', 'transition-all']));
     effects.requestFlush();
     expect(host.getAttribute(ROOT)).toContain('w-64');
+    expect(surface.getAttribute('data-pui-style')).toContain('border');
+    expect(surface.getAttribute('data-pui-style')).not.toContain('border-2');
     effects.dispose();
   });
-  it('rejects overlapping animated border widths independently of effect entry order', () => {
+  it.each([
+    ['block', 'border-b', 'border-2', 'transition-all'],
+    ['block', 'border-2', 'border-b', 'transition-all'],
+  ])('rejects overlapping animated borders before first projection: %s %s %s %s', (...tokens) => {
     const { host, surface, effects } = setup(['block', 'border-2', 'border-b', 'transition-all']);
     const before = [host.outerHTML, surface.outerHTML];
-    expect(() =>
-      effects.queueStyle(effect(['block', 'border-b', 'border-2', 'transition-all']))
-    ).toThrow(/used-value-rounding/);
+    expect(() => effects.queueStyle(effect(tokens))).toThrow();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.requestFlush();
     expect([host.outerHTML, surface.outerHTML]).toEqual(before);
     effects.dispose();
-  });
-  it('admits changing border widths when the H1 motion companion owns their compensation', () => {
-    // Public Shadcn Button/Switch rest and checked states carry transition-all
-    // with a moving border width; the H1 surface margins already compensate.
-    const { host, surface, effects, options } = setup([
-      'block',
-      'border',
-      'border-2',
-      'data-[checked]:border-2',
-      'transition-all',
-    ]);
-    effects.queueStyle(effect(['block', 'border', 'transition-all']));
-    effects.requestFlush();
-    expect(() =>
-      effects.queueStyle(
-        createRootStyleEffect([
-          ...effect(['block', 'border', 'transition-all']).entries,
-          ...lowerRootStyleTokens(['border-2'], 'data-[checked]').entries,
-        ])
-      )
-    ).not.toThrow();
-    effects.requestFlush();
-    expect(host.getAttribute(ROOT)).toContain('transition-all');
-    effects.dispose();
-
-    const withoutCompanion = createShadowSplitEffectsPort({
-      ...options,
-      artifact: {
-        ...options.artifact,
-        cssText: rewriteSplitBaseDeclarations(options.artifact.cssText, (declarations) =>
-          declarations.replace('--pui-split-motion-recipe: h1;', '')
-        ),
-      },
-    });
-    expect(() =>
-      withoutCompanion.queueStyle(effect(['block', 'border', 'border-2', 'transition-all']))
-    ).toThrow(/H1 recipe/);
-    withoutCompanion.dispose();
-    expect(surface.outerHTML).not.toContain('border');
   });
   it('admits logical padding without reading writing mode during atomic preflight', () => {
     const { host, surface, effects } = setup(['block', 'px-2']);
