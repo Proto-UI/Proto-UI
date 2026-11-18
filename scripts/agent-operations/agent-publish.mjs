@@ -478,6 +478,11 @@ export function runPublishCli(argv, options = {}) {
       pull.head?.repo?.full_name?.toLowerCase() === branch.sourceRepository
     );
   }
+  function readPublishedPull(number) {
+    const pull = io.api(`${endpoint}/pulls/${number}`);
+    if (!samePullBinding(pull)) throw new Error('existing PR head/base binding changed');
+    return exactPublished(pull, body, viewer, { number, title: args.get('--title') });
+  }
   function findPublished() {
     if (command === 'update-body') {
       const current = target(io, endpoint, number);
@@ -519,14 +524,9 @@ export function runPublishCli(argv, options = {}) {
       throw new Error('publication marker belongs to a PR, not an Issue');
     if (command === 'pull-request create') {
       if (!item.pull_request) throw new Error('publication marker belongs to an Issue, not a PR');
-      const pull = io.api(`${endpoint}/pulls/${item.number}`);
-      if (!samePullBinding(pull)) throw new Error('existing PR head/base binding changed');
       // PR and backing Issue IDs are different GitHub platform objects.
       // Match a PR creation acknowledgement to the re-read PR, not its Issue.
-      return exactPublished(pull, body, viewer, {
-        number: item.number,
-        title: args.get('--title'),
-      });
+      return readPublishedPull(item.number);
     }
     return item;
   }
@@ -592,7 +592,10 @@ export function runPublishCli(argv, options = {}) {
   }
   try {
     if (!acknowledged?.id) throw new Error('mutation acknowledgement is incomplete');
-    const published = findPublished();
+    // The author list can lag behind a successful PR creation.
+    if (branch && (!Number.isSafeInteger(acknowledged.number) || acknowledged.number < 1))
+      throw new Error('PR creation acknowledgement is missing its number');
+    const published = branch ? readPublishedPull(acknowledged.number) : findPublished();
     if (!published || published.id !== acknowledged.id)
       throw new Error('publication readback does not match acknowledgement');
     return { status: 'published', command, publicationDigest, url: published.html_url };

@@ -586,6 +586,32 @@ test('complete contributor comparisons beyond the unpaged API limit can publish 
   assert.equal(gh.writes.length, 1);
 });
 
+test('an acknowledged PR can be read back before the author list includes it', (t) => {
+  const f = fixture(t);
+  const gh = server({ pull: true });
+  const runner = (binary, args, options) => {
+    if (gh.writes.length && args.some((arg) => arg.includes('/issues?'))) return '[]';
+    return gh.runner(binary, args, options);
+  };
+  const first = createComparedPull(f, { runner });
+  assert.equal(first.status, 'published');
+  assert.equal(createComparedPull(f, gh).status, 'already-published');
+  assert.equal(gh.writes.length, 1);
+});
+
+test('a mismatched acknowledged PR readback remains unknown after one write', (t) => {
+  const f = fixture(t);
+  const gh = server({ pull: true });
+  const runner = (binary, args, options) => {
+    const result = gh.runner(binary, args, options);
+    if (!args.some((arg) => /\/pulls\/\d+$/.test(arg))) return result;
+    const pull = JSON.parse(result);
+    return JSON.stringify({ ...pull, body: 'Different public body' });
+  };
+  assert.throws(() => createComparedPull(f, { runner }), PublicationUnknown);
+  assert.equal(gh.writes.length, 1);
+});
+
 test('a missing comparison page cannot create a partially attributed PR', (t) => {
   const f = fixture(t);
   const gh = server({ pull: true, comparisonPages: completeComparisonPages().slice(0, 2) });
