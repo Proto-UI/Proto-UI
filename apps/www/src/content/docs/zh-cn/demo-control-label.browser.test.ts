@@ -16,6 +16,7 @@ import {
 } from './label-selection-observer';
 
 const families = ['base', 'shadcn', 'brutalist'] as const;
+const appleEditingKeys = process.platform === 'darwin';
 const subjects = [
   { ref: 'checkbox', role: 'checkbox', name: 'Community updates' },
   { ref: 'switch', role: 'switch', name: 'Enable notifications' },
@@ -228,7 +229,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
           .poll(() => input.evaluate((element) => element === document.activeElement))
           .toBe(true);
         expect(await input.inputValue()).toBe(inputValue);
-        await page.keyboard.press('End');
+        await page.keyboard.press(appleEditingKeys ? 'Meta+ArrowRight' : 'End');
         await page.keyboard.type(' notes');
         await expect.poll(() => input.inputValue()).toBe(`${inputValue} notes`);
         const textareaValue = await textarea.inputValue();
@@ -238,7 +239,7 @@ describe.sequential('Independent Label public consumer journeys', () => {
           .toBe(true);
         expect(await textarea.inputValue()).toBe(textareaValue);
         // End stops at a wrapped visual line; the append target is the document end.
-        await page.keyboard.press('Control+End');
+        await page.keyboard.press(appleEditingKeys ? 'Meta+ArrowDown' : 'Control+End');
         await page.keyboard.type('!');
         await expect.poll(() => textarea.inputValue()).toBe(`${textareaValue}!`);
         await capture('editors');
