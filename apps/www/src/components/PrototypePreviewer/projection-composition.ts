@@ -99,6 +99,15 @@ export type ProjectionCompositionOptions = Readonly<{
   locked?: boolean;
   /** Host generation gate; independent from physical disabled projection. */
   eventGateOpen?: boolean;
+  /**
+   * Host-owned seal for the open portals of the generation that is leaving.
+   *
+   * The switch itself is applied after the control's own close handback, so
+   * the outgoing generation's portals must be sealed in the request's own
+   * turn. The host owns the whole scope, so it can seal the candidates this
+   * composition does not own.
+   */
+  sealOutgoingPortals?: () => void;
 }>;
 
 export type ProjectionComposition = Readonly<{
@@ -1044,6 +1053,13 @@ export function createProjectionComposition(
             control.onValueChange(value);
             return;
           }
+          // The switch is applied after this signal returns, so the outgoing
+          // generation's open portals are sealed now. A popup that stays
+          // interactive until the deferred switch lands is a reachable stale
+          // surface of the generation that is leaving. A selection that
+          // repeats the current coordinate leaves the generation in place, so
+          // it must not seal anything.
+          if (value !== controlValues[id]) options.sealOutgoingPortals?.();
           // Item finishes its public close-on-select and Trigger handback after
           // valueChange returns. Replacing or disabling its owner inside that
           // signal would cancel the close request and lose its focus origin.

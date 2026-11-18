@@ -754,6 +754,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.6(react@19.2.6)
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1(@types/node@25.6.2)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3)
       vue:
         specifier: 3.5.31
         version: 3.5.31(typescript@5.9.3)

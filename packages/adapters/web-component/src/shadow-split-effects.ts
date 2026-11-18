@@ -55,16 +55,17 @@ function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
     .replace(/\s/g, '');
 }
 
-// Canonical host-sizing recipes are Adapter trust anchors rather than values
-// supplied by the plain artifact. Keep this bounded list explicit: accepting a
-// new generated sizing spelling requires an Adapter update and parity evidence.
-function hasCanonicalSizingRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
+// Canonical recipes affecting boundary sizing or scrolling are Adapter trust
+// anchors. A new generated spelling requires an Adapter update and parity evidence.
+function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
   const expected =
     entry.authorToken === 'w-full'
       ? 'width:100%;'
       : entry.authorToken === 'min-h-16'
         ? 'min-height:4rem;'
-        : null;
+        : entry.authorToken === 'overflow-y-auto'
+          ? 'overflow-y:auto;'
+          : null;
   if (!expected) return true;
   return declarationsBeforeReceipt(rule) === expected;
 }
@@ -292,17 +293,20 @@ function hasExactCompiledReceipt(
   const escaped = token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
   const selection = token.startsWith('selection:');
   const placeholder = token.startsWith('placeholder:');
+  const surface = `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
   const allowed = new Set(
-    selection
-      ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
-      : placeholder
-        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
-        : [
-            receipt,
-            `${receipt}:host([data-pui-split-text-control])`,
-            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
-            `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`,
-          ]
+    entry.authorToken === 'overflow-y-auto'
+      ? [surface]
+      : selection
+        ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::selection`]
+        : placeholder
+          ? [`${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]::placeholder`]
+          : [
+              receipt,
+              `${receipt}:host([data-pui-split-text-control])`,
+              `${receipt}>[${SHADOW_SPLIT_SURFACE_ATTR}]:not(input,textarea)`,
+              surface,
+            ]
   );
   const candidates = rules.filter(({ selector }) => selector.replace(/\s/g, '').includes(receipt));
   const matching = candidates.filter(({ selector }) => {
@@ -314,7 +318,7 @@ function hasExactCompiledReceipt(
     matching.length > 0 &&
     ((!selection && !placeholder && entry.roleSource === 'fallback') ||
       matching.every(
-        (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalSizingRecipe(rule, entry)
+        (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalProjectionRecipe(rule, entry)
       ))
   );
 }
@@ -418,6 +422,7 @@ export function createShadowSplitEffectsPort({
         fail(flex, 'intrinsic operands');
     }
     for (const entry of entries) {
+      if (nativeText && entry.authorToken === 'overflow-y-auto') fail(entry, 'native scrollport');
       if (
         nativeText &&
         /^(?:(?:min-|max-)?[wh]-|size-|aspect-)/.test(entry.authorToken) &&

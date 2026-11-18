@@ -37,6 +37,8 @@ function fixture() {
     mkdirSync(join(root, 'scripts/release'), { recursive: true });
     cpSync(join(ROOT, 'scripts/release', name), join(root, 'scripts/release', name));
   }
+  mkdirSync(join(root, 'scripts/build'), { recursive: true });
+  cpSync(join(ROOT, 'scripts/build/proto-source.mjs'), join(root, 'scripts/build/proto-source.mjs'));
   symlinkSync(join(ROOT, 'node_modules'), join(root, 'node_modules'), 'dir');
   write('package.json', { packageManager: 'pnpm@10.32.1' });
   write('VERSION', `${version}\n`);

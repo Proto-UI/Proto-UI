@@ -3,6 +3,14 @@ import type { PrototypeIR } from './ir';
 
 const scopeFile = '.proto-ui/context/scope-v1.ts';
 
+export function buildNativeContextScopeArtifact(): {
+  path: string;
+  contents: string;
+  kind: 'source';
+} {
+  return { path: scopeFile, kind: 'source', contents: nativeContextScopeSource };
+}
+
 /** One reference module per source declaration; names are diagnostics, never identity. */
 export function buildNativeContextArtifacts(ir: PrototypeIR): {
   files: readonly { path: string; contents: string; kind: 'source' }[];
@@ -21,9 +29,9 @@ export function buildNativeContextArtifacts(ir: PrototypeIR): {
   const files = ir.contextKeys.map((key) => ({
     path: keys.get(key.id)!.file.slice(2),
     kind: 'source' as const,
-    contents: `// Source declaration ${JSON.stringify(key.id)}\n// Checked value schema ${JSON.stringify(key.type)}\nexport const key = Object.freeze({ debugName: ${JSON.stringify(key.name)} });\n`,
+    contents: `// Source declaration ${JSON.stringify(key.id)}\n// Checked value schema ${JSON.stringify(key.type)}\nexport const key = Object.freeze({ __brand: 'ContextKey' as const, debugName: ${JSON.stringify(key.name)} });\n`,
   }));
-  files.push(nativeContextScopeArtifact);
+  files.push(buildNativeContextScopeArtifact());
   return { files, keys, scopeFile: `./${scopeFile}` };
 }
 
@@ -227,8 +235,4 @@ export function createContextScope(options: {
 `;
 
 /** Canonical current bytes, shared by emission and explicit directory migration. */
-export const nativeContextScopeArtifact = {
-  path: scopeFile,
-  kind: 'source' as const,
-  contents: nativeContextScopeSource,
-};
+export const nativeContextScopeArtifact = buildNativeContextScopeArtifact();

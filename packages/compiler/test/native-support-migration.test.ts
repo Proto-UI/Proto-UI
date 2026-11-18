@@ -25,6 +25,8 @@ import { runCompilerCli } from '../src/cli';
 import type { ExclusiveOutputFile } from '../src/artifact-output';
 import { nativeInteractionArtifact } from '../src/native-interaction';
 import { nativeAdapterModulesArtifact } from '../src/native-adapter-modules';
+import { IR_VERSION } from '../src/ir';
+const legacyContextScopeSHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
 
 // Two intentionally separate executions, with the same test leaf:
 // A: the fixed old emitter, PUI_NATIVE_SUPPORT_MIGRATION_STAGE=capture-old,
@@ -48,7 +50,6 @@ const legacyHashes = {
     'dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a',
 };
 const oldEmitterSHA256 = '6129be966453ad8960c1736d1b2c88c052fc8c3ff4e915e017d099df1f226474';
-const legacyContextScopeSHA256 = '12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794';
 const sourceFixtures = {
   trigger: `import {definePrototype} from '@proto.ui/core';
 import {asTrigger} from '@proto.ui/hooks';
@@ -107,9 +108,7 @@ async function historicalSupportArtifacts(): Promise<{
   const exports = object(loaded);
   const native = object(exports.legacyNativeInteractionArtifact);
   const adapter = object(exports.legacyNativeAdapterModulesArtifact);
-  const contextFilename = fileURLToPath(
-    new NodeURL('../src/native-context-legacy.ts', import.meta.url)
-  );
+  const contextFilename = fileURLToPath(new NodeURL('../src/native-context-legacy.ts', import.meta.url));
   const contextExports: unknown = await import(/* @vite-ignore */ contextFilename);
   const context = object(object(contextExports).legacyNativeContextScopeArtifact);
   return {
@@ -117,6 +116,19 @@ async function historicalSupportArtifacts(): Promise<{
     adapter: { path: string(adapter.path), contents: string(adapter.contents) },
     context: { path: string(context.path), contents: string(context.contents) },
   };
+}
+async function currentFullSupportArtifacts(): Promise<{ path: string; contents: string }[]> {
+  const filename = fileURLToPath(new NodeURL('../src/native-support/plan.ts', import.meta.url));
+  const plan = await import(/* @vite-ignore */ filename);
+  const { nativeSupportArtifacts } = await import('../src/native-interaction');
+  return nativeSupportArtifacts(plan.nativeSupportPlanFromFeatures(plan.nativeSupportFeatures));
+}
+function nativeV2Filename(value: Manifest): string {
+  const files = value.artifacts.filter((file) =>
+    /^\.proto-ui\/interaction\/native-[a-f0-9]{16}-v2\.ts$/.test(file.path)
+  );
+  if (files.length !== 1) throw new Error('Expected one actual version 2 native support entry');
+  return files[0].path;
 }
 interface ArtifactRecord {
   path: string;
@@ -227,12 +239,12 @@ function verifyCapturedCli(record: Record<string, unknown>) {
 }
 async function corpusForVerification(): Promise<string> {
   if (corpusDirectory) return requiredCorpus();
-  const {
-    native: legacyNativeInteractionArtifact,
-    adapter: legacyNativeAdapterModulesArtifact,
-    context: legacyNativeContextScopeArtifact,
-  } = await historicalSupportArtifacts();
-  expect(digest(legacyNativeContextScopeArtifact.contents)).toBe(legacyContextScopeSHA256);
+  const { native: legacyNativeInteractionArtifact, adapter: legacyNativeAdapterModulesArtifact } =
+    await historicalSupportArtifacts();
+  const contextArchive = fileURLToPath(
+    new NodeURL('../src/native-context-legacy.ts', import.meta.url)
+  );
+  const { legacyNativeContextScopeArtifact } = await import(/* @vite-ignore */ contextArchive);
   const fixture = fileURLToPath(
     new NodeURL('./fixtures/native-support-migration-v1.json', import.meta.url)
   );
@@ -290,7 +302,7 @@ async function corpusForVerification(): Promise<string> {
       } else if (filename === nativeAdapterModulesArtifact.path) {
         contents = legacyNativeAdapterModulesArtifact.contents;
         origin = 'retained-exact-legacy-adapter-literal';
-      } else if (filename === legacyNativeContextScopeArtifact.path) {
+      } else if (filename === '.proto-ui/context/scope-v1.ts') {
         contents = legacyNativeContextScopeArtifact.contents;
         origin = 'retained-exact-legacy-context-literal';
       } else if (/^\.proto-ui\/context\/key-[a-f0-9]{64}\.ts$/.test(filename)) {
@@ -748,15 +760,33 @@ async function overlays(
         split === 'shared-ownership'
           ? loaded.files.filter((file) => file.includes('/.proto-ui/shared/interaction/'))
           : loaded.files;
-      expect(
-        implementations.filter((file) => /\/native-(?:v1|counterfactual)\.ts$/.test(file))
-      ).toHaveLength(2);
-      expect(
-        implementations.filter((file) => /\/adapter-(?:modules-v1|counterfactual)\.ts$/.test(file))
-      ).toHaveLength(2);
-      expect(loaded.files.filter((file) => file.endsWith('/ownership-v1.ts'))).toHaveLength(
-        split === 'shared-ownership' ? 1 : 0
-      );
+      if (split === 'shared-ownership') {
+        expect(
+          implementations.filter((file) =>
+            /\/native-(?:[a-f0-9]{16}-v2|counterfactual)\.ts$/.test(file)
+          )
+        ).toHaveLength(2);
+        expect(
+          implementations.filter((file) =>
+            /\/modules-(?:[a-f0-9]{16}-v2|counterfactual)\.ts$/.test(file)
+          )
+        ).toHaveLength(2);
+        expect(implementations.filter((file) => file.endsWith('/ownership-v2.ts'))).toHaveLength(1);
+        const registry = modal ? 'overlay' : 'boundary';
+        expect(
+          implementations.filter(
+            (file) =>
+              file.endsWith(`/${registry}-ownership-v2.ts`) ||
+              file.endsWith(`/${registry}-ownership-counterfactual.ts`)
+          )
+        ).toHaveLength(2);
+      } else {
+        expect(implementations.filter((file) => file.endsWith('/native-v1.ts'))).toHaveLength(2);
+        expect(
+          implementations.filter((file) => file.endsWith('/adapter-modules-v1.ts'))
+        ).toHaveLength(2);
+        expect(loaded.files.filter((file) => file.endsWith('/ownership-v1.ts'))).toHaveLength(0);
+      }
     }
   } catch (error) {
     failures.push(error);
@@ -810,8 +840,14 @@ async function sharedLegacyBaseline(): Promise<string> {
   ];
   for (const [id, name] of entries) {
     const source = path.join(root, 'old-' + name),
-      target = path.join(directory, id);
-    await cp(source, target, { recursive: true });
+      target = path.join(directory, id),
+      sourceHelpers = path.join(source, '.proto-ui');
+    // Every helper below becomes a facade. Copy the retained CLI files once,
+    // without first copying helper bytes that would immediately be overwritten.
+    await cp(source, target, {
+      recursive: true,
+      filter: (filename) => filename !== sourceHelpers,
+    });
     for (const file of (await manifest(source)).artifacts.filter((item) =>
       item.path.startsWith('.proto-ui/')
     )) {
@@ -834,6 +870,7 @@ async function sharedLegacyBaseline(): Promise<string> {
         .join('/')
         .replace(/\.ts$/, '');
       if (!specifier.startsWith('.')) specifier = './' + specifier;
+      await mkdir(path.dirname(facade), { recursive: true });
       await writeFile(facade, `export * from ${JSON.stringify(specifier)};\n`);
     }
     for (const filename of ['Component.js', 'Component.js.map', 'provenance.json'])
@@ -855,20 +892,42 @@ async function splitFullHelper(second: string): Promise<string> {
   await cp(migrated, directory, { recursive: true });
   const originalInventory = await inventory(directory);
   const shared = path.join(directory, '.proto-ui/shared/interaction');
-  const native = await readFile(path.join(shared, 'native-v1.ts'), 'utf8');
-  const adapter = await readFile(path.join(shared, 'adapter-modules-v1.ts'), 'utf8');
-  expect(native).toContain("'./adapter-modules-v1'");
-  expect(native).toContain("'./ownership-v1'");
+  const support = await currentFullSupportArtifacts();
+  const nativeName = path.basename(
+    support.find((file) => /\/native-[a-f0-9]{16}-v2\.ts$/.test(file.path))!.path,
+    '.ts'
+  );
+  const modulesName = path.basename(
+    support.find((file) => /\/modules-[a-f0-9]{16}-v2\.ts$/.test(file.path))!.path,
+    '.ts'
+  );
+  const registry = second.endsWith('modal') ? 'overlay' : 'boundary';
+  const native = await readFile(path.join(shared, nativeName + '.ts'), 'utf8');
+  const adapter = await readFile(path.join(shared, modulesName + '.ts'), 'utf8');
+  expect(native).toContain('./' + modulesName);
+  expect(native).toContain('./ownership-v2');
   await writeFile(
     path.join(shared, 'native-counterfactual.ts'),
-    native.replaceAll("'./adapter-modules-v1'", "'./adapter-counterfactual'"),
+    native.replaceAll('./' + modulesName, './modules-counterfactual'),
     { flag: 'wx' }
   );
-  await writeFile(path.join(shared, 'adapter-counterfactual.ts'), adapter, { flag: 'wx' });
+  expect(adapter).toContain(`./${registry}-ownership-v2`);
+  await writeFile(
+    path.join(shared, 'modules-counterfactual.ts'),
+    adapter.replaceAll(`./${registry}-ownership-v2`, `./${registry}-ownership-counterfactual`),
+    { flag: 'wx' }
+  );
+  await cp(
+    path.join(shared, `${registry}-ownership-v2.ts`),
+    path.join(shared, `${registry}-ownership-counterfactual.ts`),
+    { force: false, errorOnExist: true }
+  );
   const facade = path.join(directory, second, '.proto-ui/interaction/native-v1.ts');
   const before = await readFile(facade, 'utf8');
   expect(before.split('native-v1')).toHaveLength(2);
-  await writeFile(facade, before.replace('native-v1', 'native-counterfactual'));
+  // The v1 compatibility facade forwards to a v2 full plan; redirect only this input.
+  const redirected = `export * from '../../../.proto-ui/shared/interaction/native-counterfactual';\n`;
+  await writeFile(facade, redirected);
   expect(await readFile(path.join(directory, second, 'Component.js'))).toEqual(
     await readFile(path.join(migrated, second, 'Component.js'))
   );
@@ -880,10 +939,13 @@ async function splitFullHelper(second: string): Promise<string> {
     .filter((file) => !Object.hasOwn(originalInventory, file))
     .sort();
   expect(changed).toEqual([second + '/.proto-ui/interaction/native-v1.ts']);
-  expect(added).toEqual([
-    '.proto-ui/shared/interaction/adapter-counterfactual.ts',
-    '.proto-ui/shared/interaction/native-counterfactual.ts',
-  ]);
+  expect(added).toEqual(
+    [
+      `.proto-ui/shared/interaction/${registry}-ownership-counterfactual.ts`,
+      '.proto-ui/shared/interaction/modules-counterfactual.ts',
+      '.proto-ui/shared/interaction/native-counterfactual.ts',
+    ].sort()
+  );
   await saveEvidence('counterfactual-' + second + '-delta', {
     changed,
     added,
@@ -967,7 +1029,6 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     // static imports would make capture-old depend on its future verifier.
     const { native: legacyNativeInteractionArtifact, adapter: legacyNativeAdapterModulesArtifact } =
       await historicalSupportArtifacts();
-    const { nativeInteractionArtifacts } = await import('../src/native-interaction');
     expect(digest(legacyNativeInteractionArtifact.contents)).toBe(
       legacyHashes['.proto-ui/interaction/native-v1.ts']
     );
@@ -989,13 +1050,13 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
         )
       ).toBe(legacyNativeAdapterModulesArtifact.contents);
     }
-    for (const file of nativeInteractionArtifacts('full')) {
+    for (const file of await currentFullSupportArtifacts()) {
       const filename = file.path.replace('.proto-ui/', '.proto-ui/shared/');
       expect(await readFile(path.join(migrated, filename), 'utf8')).toBe(file.contents);
     }
   });
 
-  it('normalizes exact old and current Context scopes while retaining IR5 and IR6 provenance', async () => {
+  it('normalizes exact old and current Context scopes while retaining historical and current provenance', async () => {
     const { context: historical } = await historicalSupportArtifacts();
     const { nativeContextScopeArtifact: current } = await import('../src/native-context');
     expect(digest(historical.contents)).toBe(legacyContextScopeSHA256);
@@ -1003,7 +1064,7 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     for (const name of fixtureNames) {
       for (const [generation, expected, irVersion] of [
         ['old', historical, 5],
-        ['new', current, 6],
+        ['new', current, IR_VERSION],
       ] as const) {
         const id = generation + '-' + name;
         expect(await readFile(path.join(root, id, expected.path), 'utf8')).toBe(expected.contents);
@@ -1139,7 +1200,68 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
       outputFiles.filter((file) => file === '.proto-ui/shared/interaction/adapter-modules-v1.ts')
     ).toHaveLength(1);
     expect(
-      outputFiles.filter((file) => file === '.proto-ui/shared/interaction/ownership-v1.ts')
+      outputFiles.filter((file) => file === '.proto-ui/shared/interaction/ownership-v2.ts')
+    ).toHaveLength(1);
+  });
+  it('keeps equal private Context declarations distinct while migrating their shared transport', async () => {
+    const directory = await fresh('private-context');
+    await writeFile(
+      path.join(directory, 'keys.ts'),
+      `import {createContextKey} from '@proto.ui/core';export const KEY=createContextKey<{value:number}>('same-name');`
+    );
+    await writeFile(
+      path.join(directory, 'entry.proto.ts'),
+      `import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
+      export default definePrototype({name:'private-context',setup(def){def.context.provide(KEY,{value:1});return()=>null;}});`
+    );
+    for (const id of ['first', 'second']) {
+      const result = await invoke(directory, [
+        'compile',
+        'entry.proto.ts',
+        '--profile',
+        'vue2-source-v1',
+        '--output',
+        id,
+        '--json',
+      ]);
+      expect(result).toMatchObject({ code: 0, stderr: '' });
+    }
+    const inputs = await Promise.all(
+      ['first', 'second'].map(async (id) => ({
+        id,
+        directory: id,
+        provenanceSHA256: digest(await readFile(path.join(directory, id, 'provenance.json'))),
+      }))
+    );
+    const plan = await writePlan(directory, { version: 1, inputs });
+    const output = path.join(directory, 'linked');
+    expect((await migrate(plan, output)).ok).toBe(true);
+    const first = await manifest(path.join(output, 'first'));
+    const key = first.artifacts.find((file) => /^\.proto-ui\/context\/key-/.test(file.path))!.path;
+    for (const id of ['first', 'second'])
+      expect(await readFile(path.join(output, id, key), 'utf8')).toBe(
+        await readFile(path.join(directory, id, key), 'utf8')
+      );
+    const entry = path.join(directory, 'identity.ts'),
+      bundle = path.join(directory, 'identity.cjs');
+    await writeFile(
+      entry,
+      ['first', 'second']
+        .map((id) => `export {key as ${id}} from ${JSON.stringify(path.join(output, id, key))};`)
+        .join('\n')
+    );
+    await build({
+      entryPoints: [entry],
+      outfile: bundle,
+      bundle: true,
+      platform: 'node',
+      format: 'cjs',
+      logLevel: 'silent',
+    });
+    const identities = require(bundle);
+    expect(identities.first).not.toBe(identities.second);
+    expect(
+      (await plainFiles(output)).filter((file) => file === '.proto-ui/shared/context/scope-v1.ts')
     ).toHaveLength(1);
   });
   it('retains a filesystem baseline with one byte-identical legacy support instance', async () => {
@@ -1180,7 +1302,7 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
           family === 'modal'
         );
       });
-    it(`detects a second full ${family} helper instance even while ownership stays shared`, async () => {
+    it(`detects a split ${family} registry even while logical and physical ownership stay shared`, async () => {
       const split = await splitFullHelper('old-' + family);
       await overlays(
         split,
@@ -1256,7 +1378,7 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     await writePlan(test.directory, test.plan);
     await rejectedBeforeWrite(test, 'anchor');
   });
-  it.each([4, 7, '5', '6', null])(
+  it.each([4, IR_VERSION + 1, '5', '6', null])(
     'rejects unsupported provenance IR version %s before writing',
     async (version) => {
       const test = await migrationCase('ir-version');
@@ -1273,7 +1395,7 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
       export default definePrototype({name:'external-ir-boundary',setup(){}});`);
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
-    expect(parsed.value.schemaVersion).toBe(6);
+    expect(parsed.value.schemaVersion).toBe(IR_VERSION);
     expect(validateIR({ ...parsed.value, schemaVersion: 5 }).ok).toBe(false);
   });
   it.each(['invalid-json', 'array', 'version', 'empty-inputs', 'unknown-key', 'missing-anchor'])(
@@ -1656,11 +1778,11 @@ async function imageDirectoryConsumer(directory: string, label: string, mode: Im
     `export { default as Vue } from ${JSON.stringify(vueEntry)};`,
     `export { default as first } from ${JSON.stringify(path.join(directory, 'old-trigger/Component.js'))};`,
     `export { default as second } from ${JSON.stringify(path.join(directory, 'new-image/Component.js'))};`,
-    `export * as imageOwnership from ${JSON.stringify(path.join(directory, 'new-image/.proto-ui/interaction/ownership-v1.ts'))};`,
+    `export * as imageOwnership from ${JSON.stringify(path.join(directory, 'new-image/.proto-ui/interaction/ownership-v2.ts'))};`,
   ];
   if (mode !== 'independent')
     lines.push(
-      `export * as outerOwnership from ${JSON.stringify(path.join(directory, 'old-trigger/.proto-ui/interaction/ownership-v1.ts'))};`
+      `export * as outerOwnership from ${JSON.stringify(path.join(directory, 'old-trigger/.proto-ui/interaction/ownership-v2.ts'))};`
     );
   await writeFile(entry, lines.join('\n') + '\n');
   expect(esbuildVersion).toBe('0.25.12');
@@ -1704,7 +1826,7 @@ async function imageDirectoryConsumer(directory: string, label: string, mode: Im
   expect(
     files.filter(
       (file) =>
-        /\/ownership-(?:v1|counterfactual)\.ts$/.test(file) &&
+        /\/ownership-(?:v2|counterfactual)\.ts$/.test(file) &&
         (mode === 'independent' || file.includes('/.proto-ui/shared/interaction/'))
     )
   ).toHaveLength(mode === 'split' ? 2 : 1);
@@ -2027,12 +2149,15 @@ describe.runIf(stage !== 'capture-old')(
         result: { directory: path.join(directory, 'new-image') },
       });
       const image = await owned(path.join(directory, 'new-image'));
+      const native = nativeV2Filename(image),
+        modules = native.replace('/native-', '/modules-');
+      expect(image.nativeSupport).toMatchObject({ version: 2, features: ['ownership', 'image'] });
       expect(
         image.artifacts
           .filter((file) => file.path.startsWith('.proto-ui/interaction/'))
           .map((file) => file.path)
           .sort()
-      ).toEqual(['.proto-ui/interaction/image-v1.ts', '.proto-ui/interaction/ownership-v1.ts']);
+      ).toEqual([native, modules, '.proto-ui/interaction/ownership-v2.ts'].sort());
       const inputs = await Promise.all(
         ['old-trigger', 'new-image'].map(async (id) => ({
           id,
@@ -2122,23 +2247,38 @@ describe.runIf(stage !== 'capture-old')(
       await cp(cohort, split, { recursive: true });
       const prior = await inventory(split),
         shared = path.join(split, '.proto-ui/shared/interaction');
-      const image = await readFile(path.join(shared, 'image-v1.ts'), 'utf8');
-      expect(image.split("'./ownership-v1'")).toHaveLength(2);
+      const input = await manifest(path.join(split, 'new-image'));
+      const native = path.basename(nativeV2Filename(input), '.ts'),
+        modules = native.replace('native-', 'modules-');
+      const image = await readFile(path.join(shared, native + '.ts'), 'utf8');
+      const implementation = await readFile(path.join(shared, modules + '.ts'), 'utf8');
+      expect(image).toContain('./ownership-v2');
+      expect(implementation).toContain('./ownership-v2');
       await writeFile(
-        path.join(shared, 'image-counterfactual.ts'),
-        image.replace("'./ownership-v1'", "'./ownership-counterfactual'"),
+        path.join(shared, 'native-counterfactual.ts'),
+        image
+          .replaceAll('./ownership-v2', './ownership-counterfactual')
+          .replaceAll('./' + modules, './modules-counterfactual'),
         { flag: 'wx' }
       );
       await cp(
-        path.join(shared, 'ownership-v1.ts'),
+        path.join(shared, 'ownership-v2.ts'),
         path.join(shared, 'ownership-counterfactual.ts'),
         { force: false, errorOnExist: true }
       );
-      for (const name of ['image', 'ownership']) {
-        const filename = path.join(split, 'new-image/.proto-ui/interaction', name + '-v1.ts');
+      await writeFile(
+        path.join(shared, 'modules-counterfactual.ts'),
+        implementation.replaceAll('./ownership-v2', './ownership-counterfactual'),
+        { flag: 'wx' }
+      );
+      for (const [name, target] of [
+        [native, 'native-counterfactual'],
+        ['ownership-v2', 'ownership-counterfactual'],
+      ]) {
+        const filename = path.join(split, 'new-image/.proto-ui/interaction', name + '.ts');
         const facade = await readFile(filename, 'utf8');
-        expect(facade.split(name + '-v1')).toHaveLength(2);
-        await writeFile(filename, facade.replace(name + '-v1', name + '-counterfactual'));
+        expect(facade.split(name)).toHaveLength(2);
+        await writeFile(filename, facade.replace(name, target));
       }
       const after = await inventory(split);
       expect(
@@ -2146,10 +2286,11 @@ describe.runIf(stage !== 'capture-old')(
           .filter((file) => prior[file] !== after[file])
           .sort()
       ).toEqual([
-        '.proto-ui/shared/interaction/image-counterfactual.ts',
+        '.proto-ui/shared/interaction/modules-counterfactual.ts',
+        '.proto-ui/shared/interaction/native-counterfactual.ts',
         '.proto-ui/shared/interaction/ownership-counterfactual.ts',
-        'new-image/.proto-ui/interaction/image-v1.ts',
-        'new-image/.proto-ui/interaction/ownership-v1.ts',
+        'new-image/.proto-ui/interaction/' + native + '.ts',
+        'new-image/.proto-ui/interaction/ownership-v2.ts',
       ]);
       // A test mutation, never resealed or represented as valid migration output.
       await saveEvidence('image-split-delta', { before: prior, after });
@@ -2163,7 +2304,7 @@ describe.runIf(stage !== 'capture-old')(
       for (const id of ['old-trigger', 'new-image'])
         await cp(path.join(directory, id), path.join(test, id), { recursive: true });
       const target = path.join(test, 'new-image'),
-        filename = '.proto-ui/interaction/image-v1.ts';
+        filename = nativeV2Filename(await manifest(target));
       const value = await manifest(target),
         bytes = (await readFile(path.join(target, filename), 'utf8')) + '\n// unknown image ABI\n';
       await writeFile(path.join(target, filename), bytes);

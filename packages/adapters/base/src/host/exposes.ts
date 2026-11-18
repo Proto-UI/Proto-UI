@@ -29,17 +29,19 @@ export function createScopedExposesReader(
 ): ScopedExposesReader {
   let live = true;
   let lastRaw: Record<string, unknown> | null = null;
-  let lastWrapped: Record<string, unknown> = {};
-  const externalHandleCache = new WeakMap<object, Record<string, unknown>>();
   // The top-level record is a replacement snapshot of one instance registry.
   const rootReceiver = {};
   const callableCache = new WeakMap<object, WeakMap<Function, (...args: unknown[]) => unknown>>();
+  const recordCache = new WeakMap<object, object>();
+  const registryRecords = new WeakSet<object>();
+  const projectedCallables = new WeakSet<Function>();
 
   const wrapCallable = (
     value: (...args: unknown[]) => unknown,
     receiver: object,
     currentReceiver: () => object = () => receiver
   ): ((...args: unknown[]) => unknown) => {
+    if (projectedCallables.has(value)) return value;
     let receiverCache = callableCache.get(receiver);
     if (!receiverCache) {
       receiverCache = new WeakMap();
@@ -57,108 +59,161 @@ export function createScopedExposesReader(
 
       let result: unknown;
       invoke(() => {
-        result = Reflect.apply(value, currentReceiver(), args);
+        result = projectValue(Reflect.apply(value, currentReceiver(), args));
       });
       return result;
     };
 
     receiverCache.set(value, wrapped);
+    projectedCallables.add(wrapped);
     return wrapped;
   };
 
-  const defineEntry = (target: object, key: string, value: unknown) => {
+  const defineEntry = (target: object, key: PropertyKey, value: unknown, enumerable: boolean) => {
     Object.defineProperty(target, key, {
       value,
-      enumerable: true,
+      enumerable,
       configurable: true,
       writable: true,
     });
   };
 
-  const wrapValue = (value: unknown, receiver: object, seen: WeakMap<object, unknown>): unknown => {
-    if (typeof value === 'function') {
-      return wrapCallable(value as (...args: unknown[]) => unknown, receiver);
-    }
-    if (value === null || typeof value !== 'object') return value;
-
-    const existing = seen.get(value);
-    if (existing) return existing;
-
-    if (isExposeStateExternalHandle(value)) {
-      const cached = externalHandleCache.get(value);
-      if (cached) {
-        seen.set(value, cached);
-        return cached;
-      }
-
-      const projected: Record<string, unknown> = {};
-      externalHandleCache.set(value, projected);
-      seen.set(value, projected);
-      wrapEntries(value as unknown as Record<string, unknown>, projected, seen);
-      return projected;
-    }
-
-    if (Array.isArray(value)) {
-      const projected: unknown[] = new Array(value.length);
-      seen.set(value, projected);
-      wrapEntries(value as unknown as Record<string, unknown>, projected, seen);
-      return projected;
-    }
-
-    if (!isPlainRecord(value)) return value;
-
-    const projected = Object.create(Object.getPrototypeOf(value)) as Record<string, unknown>;
-    seen.set(value, projected);
-    wrapEntries(value, projected, seen);
-    return projected;
-  };
-
-  function wrapEntries(
-    source: Record<string, unknown>,
-    target: Record<string, unknown> | unknown[],
-    seen: WeakMap<object, unknown>
-  ): void {
-    for (const [key, value] of Object.entries(source)) {
-      // Collection anatomy coordination remains available to internal PartView
-      // consumers but is never part of the App Maker expose record.
-      if (key.startsWith('__collection')) continue;
-      if (!isAppMakerExposeRecordEntry(value)) continue;
-      defineEntry(
-        target,
-        key,
-        source === lastRaw && typeof value === 'function'
-          ? wrapCallable(
-              value as (...args: unknown[]) => unknown,
-              rootReceiver,
-              () => lastRaw ?? source
-            )
-          : wrapValue(value, source, seen)
+  function projectValue(value: unknown, registry = false): unknown {
+    if (typeof value === 'function')
+      return wrapCallable(
+        value as (...args: unknown[]) => unknown,
+        rootReceiver,
+        () => lastRaw ?? rootReceiver
       );
-    }
-  }
+    if (value === null || typeof value !== 'object') return value;
+    // Registry objects remain classified when returned directly, nested in a
+    // public result, or retained across replacement snapshots of this owner.
+    if (registry) registryRecords.add(value);
 
-  const wrapRecord = (record: Record<string, unknown>): Record<string, unknown> => {
-    const wrapped: Record<string, unknown> = {};
-    const seen = new WeakMap<object, unknown>();
-    seen.set(record, wrapped);
-    wrapEntries(record, wrapped, seen);
-    return wrapped;
-  };
+    type RecordNode = {
+      source: object;
+      entries: [PropertyKey, unknown, boolean][];
+      parents: Set<RecordNode>;
+      project: boolean;
+      target?: object;
+    };
+    const graph = new WeakMap<object, RecordNode>();
+    const nodes: RecordNode[] = [];
+    const inspect = (source: object): RecordNode | undefined => {
+      const existing = graph.get(source);
+      if (existing) return existing;
+      if (!Array.isArray(source) && !isPlainRecord(source) && !isExposeStateExternalHandle(source))
+        return undefined;
+      const node: RecordNode = {
+        source,
+        entries: [],
+        parents: new Set(),
+        // A mutable data-only record can acquire a callable after this read boundary.
+        project: recordCache.has(source) || !Object.isFrozen(source),
+      };
+      graph.set(source, node);
+      nodes.push(node);
+      const isRegistry = registryRecords.has(source);
+      // Read each entry once. Projection discovery must not evaluate accessors
+      // again when deciding which records need a callable boundary.
+      for (const key of Reflect.ownKeys(source)) {
+        const descriptor = Object.getOwnPropertyDescriptor(source, key);
+        if (!descriptor) continue;
+        if (isRegistry && (typeof key !== 'string' || !descriptor.enumerable)) continue;
+        // Array length is refreshed separately; its nonconfigurable descriptor
+        // cannot use the ordinary replaceable snapshot entry representation.
+        if (Array.isArray(source) && key === 'length') continue;
+        // Freezing an accessor does not freeze its result. Nested values retain
+        // all own keys and enumerability while getters are sampled once per read.
+        if (!('value' in descriptor)) node.project = true;
+        const entry = Reflect.get(source, key);
+        if (
+          isRegistry &&
+          typeof key === 'string' &&
+          (key.startsWith('__collection') || !isAppMakerExposeRecordEntry(entry))
+        ) {
+          node.project = true;
+          continue;
+        }
+        node.entries.push([key, entry, !!descriptor.enumerable]);
+        if (typeof entry === 'function') node.project = true;
+        else if (entry !== null && typeof entry === 'object') inspect(entry)?.parents.add(node);
+      }
+      return node;
+    };
+    const root = inspect(value);
+    if (!root) return value;
+    root.project ||= registry;
+
+    // Propagate through cycles and frozen containers. Only immutable, inert graphs
+    // retain raw identity, including nominal ContextKey and presentation tokens.
+    const pending = nodes.filter((node) => node.project);
+    while (pending.length) {
+      for (const parent of pending.pop()!.parents) {
+        if (parent.project) continue;
+        parent.project = true;
+        pending.push(parent);
+      }
+    }
+    const refreshNodes = new Map<object, RecordNode>();
+    for (const node of nodes) {
+      if (!node.project) continue;
+      node.target = recordCache.get(node.source);
+      if (!node.target) {
+        node.target = Array.isArray(node.source)
+          ? []
+          : Object.create(Object.getPrototypeOf(node.source));
+        recordCache.set(node.source, node.target!);
+        // A public record can return with newly assigned functions. Scan its
+        // current contents again while preserving the same projection object.
+        recordCache.set(node.target!, node.target!);
+      }
+      if (registryRecords.has(node.source)) registryRecords.add(node.target!);
+      // Refresh each target once. Prefer the raw record when its cached public
+      // alias is also present; a projection-only echo still scans its own entries.
+      if (node.source !== node.target || !refreshNodes.has(node.target!))
+        refreshNodes.set(node.target!, node);
+    }
+    for (const node of refreshNodes.values()) {
+      if (!node.target) continue;
+      // Refresh on an explicit read or result boundary; this is not a reactive
+      // value channel. Held projections keep identity and observe that refresh.
+      for (const key of Reflect.ownKeys(node.target))
+        if (!Array.isArray(node.target) || key !== 'length')
+          Reflect.deleteProperty(node.target, key);
+      if (Array.isArray(node.target) && Array.isArray(node.source))
+        node.target.length = node.source.length;
+      for (const [key, entry, enumerable] of node.entries) {
+        const projected =
+          typeof entry === 'function'
+            ? registry && node === root
+              ? wrapCallable(
+                  entry as (...args: unknown[]) => unknown,
+                  rootReceiver,
+                  () => lastRaw ?? rootReceiver
+                )
+              : wrapCallable(entry as (...args: unknown[]) => unknown, node.source)
+            : entry !== null && typeof entry === 'object'
+              ? (graph.get(entry)?.target ?? entry)
+              : entry;
+        defineEntry(node.target, key, projected, enumerable);
+      }
+    }
+    return root.target ?? value;
+  }
 
   return {
     read(record) {
       if (!live) return {};
-      if (record !== lastRaw) {
-        lastRaw = record;
-        lastWrapped = wrapRecord(record);
-      }
-      return { ...lastWrapped };
+      lastRaw = record;
+      const snapshot = { ...(projectValue(record, true) as Record<string, unknown>) };
+      registryRecords.add(snapshot);
+      return snapshot;
     },
     invalidate() {
       if (!live) return;
       live = false;
       lastRaw = null;
-      lastWrapped = {};
     },
   };
 }

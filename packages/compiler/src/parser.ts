@@ -6,8 +6,6 @@ import { admittedHookOperation } from './hook-admission';
 
 import {
   OPERATION_RULES,
-  checkedCallbackMatches,
-  PACKAGED_HOOKS,
   operationCallbackRule,
   operationArgumentRule,
   operationResultType,
@@ -18,6 +16,8 @@ import {
   capabilityMemberType,
   capabilityBinaryType,
   stateValue,
+  stateDeclarationData,
+  finiteStringKeys,
   FOCUS_OPTIONS_TYPE,
   FOCUS_ACTIVATION_OPTIONS_TYPE,
   type ArgumentRule,
@@ -34,6 +34,8 @@ import {
   sourceName,
   sourceSpan,
   scalarInitializer,
+  isSourceFunction,
+  CORE_FUNCTIONS,
   type FunctionNode,
   type SourceModule,
 } from './parser-module';
@@ -43,12 +45,35 @@ import {
   inferUnaryType,
   memberDataType,
   conditionRefinements,
+  stablePredicate,
+  invalidateHeapFlow,
 } from './expression-types';
 import { extractContextKeyDeclaration, type ContextKeyIR } from './context-declarations';
 import { parseSourceDataType } from './source-types';
+import { sourceTypeIdentity } from './source-type-resolution';
+import { parseSourceValueType, type TypeSubstitutions } from './source-values';
+import { deriveHookCapture, derivePrototypeCaptures, mergeHookCaptures } from './capture-analysis';
+import { callableEffectIssue } from './callable-effects';
+import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
+import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 import {
-  extractStaticCapability,
+  valueTypeEqual,
+  valueAssignable,
+  joinValueTypes,
+  objectFields,
+  objectValueType,
+  memberValueType,
+  functionValueType,
+  callableValue,
+  checkedCall,
+  intrinsicResult,
+  valueAlternatives,
+  canNarrowValue,
+  erasesRuntimeAuthority,
+} from './value-types';
+import {
   STATIC_CORE_VALUES,
+  extractStaticCapability,
   extractModuleDeclaration,
   tableStructureFamily,
 } from './static-declarations';
@@ -61,6 +86,8 @@ import {
   isPublicValueType,
   isCapabilityAssignable,
   lexicalValueType,
+  lexicalStoredType,
+  isSetupResultType,
   statementsTerminate,
   type AuthoredHookIR,
   type CompileResult,
@@ -83,14 +110,26 @@ import {
 
 interface Binding {
   type: ValueType;
-  lexical?: PrimitiveType;
+  lexical?: ValueType;
   helper?: FunctionIR;
+  declaration?: ts.VariableDeclaration | FunctionNode;
+  module?: SourceModule;
+  pendingScope?: Scope;
+  parsed?: ExpressionIR;
+  parsing?: boolean;
+  initializerParsed?: boolean;
+  declarationScope?: object;
+  emittedName?: string;
+  bindingId?: string;
   phase?: Phase;
   keyId?: string;
   stateId?: string;
+  stateData?: DataType;
+  predicate?: ExpressionIR;
+  flowBase?: ValueType;
+  flowAt?: FlowMark;
+  uninitializedParameter?: boolean;
   style?: StyleTokenHandle;
-  uninitialized?: true;
-  callableOrigins?: ReadonlySet<object>;
 }
 type Scope = Map<string, Binding>;
 const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
@@ -101,43 +140,22 @@ const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
   'control-label-request': 'ControlLabelRequest',
 };
 
-function coreTypeReference(module: SourceModule, node: ts.TypeNode, exported: string): boolean {
-  if (
-    !ts.isTypeReferenceNode(node) ||
-    !ts.isIdentifier(node.typeName) ||
-    node.typeArguments?.length
-  )
-    return false;
-  const name = node.typeName.text;
-  if (
-    module.file.statements.some(
-      (statement) =>
-        (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
-        statement.name.text === name
-    )
-  )
-    return false;
-  return module.file.statements.some(
-    (statement) =>
-      ts.isImportDeclaration(statement) &&
-      ts.isStringLiteral(statement.moduleSpecifier) &&
-      statement.moduleSpecifier.text === '@proto.ui/core' &&
-      statement.importClause?.namedBindings &&
-      ts.isNamedImports(statement.importClause.namedBindings) &&
-      statement.importClause.namedBindings.elements.some(
-        (binding) =>
-          binding.name.text === name &&
-          (binding.propertyName?.text ?? binding.name.text) === exported
-      )
-  );
-}
-
 function sameType(a: ValueType, b: ValueType): boolean {
-  return a === b || (isDataValueType(a) && isDataValueType(b) && dataTypeEqual(a, b));
+  return valueTypeEqual(a, b);
+}
+function operationReceiverType(type: ValueType): ValueType {
+  const present = joinValueTypes(
+    valueAlternatives(type).filter((member) => member !== 'null' && member !== 'void')
+  );
+  return stateValue(present)
+    ? 'state:boolean'
+    : typeof present !== 'string' && present.kind === 'capture'
+      ? 'authored-result'
+      : present;
 }
 function assignable(actual: ValueType, expected: ValueType): boolean {
   return (
-    sameType(actual, expected) ||
+    valueAssignable(actual, expected) ||
     (expected === 'template' && isTemplateChildType(actual)) ||
     isCapabilityAssignable(actual, expected) ||
     (isDataValueType(actual) && isDataValueType(expected) && isAssignable(actual, expected))
@@ -149,9 +167,7 @@ function union(types: readonly ValueType[], node: ts.Node): ValueType {
   const eventJoin = eventValueJoin(types);
   if (eventJoin !== undefined) return eventJoin;
   if (!types.every(isDataValueType) && types.every(isTemplateChildType)) return 'template';
-  if (!types.every(isDataValueType))
-    rejectNode(node, 'PUI1006', 'Branches return incompatible semantic capabilities.');
-  return parseDataType({ kind: 'union', members: types });
+  return joinValueTypes(types);
 }
 class Frontend {
   readonly graph: SourceGraph;
@@ -164,7 +180,6 @@ class Frontend {
   readonly requirements = new Set<string>();
   readonly activeHooks = new Set<string>();
   readonly activeHelpers = new Set<string>();
-  private readonly builtinHooks = new Set<Operation>();
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
   private context: FunctionContext = 'setup';
@@ -174,56 +189,287 @@ class Frontend {
   private readonly moduleValues = new Map<string, Binding & { name: string }>();
   private readonly moduleHelpers = new Map<string, { name: string; fn: FunctionIR }>();
   private readonly sourceNames = new Set<string>();
-  // Callable parameters are checked for synchronous helper invocation. Their
-  // actual bodies have no declared authority in a later registered callback.
-  private readonly callableCaptures = new WeakMap<FunctionIR, ReadonlySet<object>>();
-  private readonly callableFrames: {
-    parameters: ReadonlySet<object>;
-    captures: Set<object>;
-    blocked: ReadonlySet<object>;
-  }[] = [];
+  private flow: FlowProof;
+  private substitutions: TypeSubstitutions = new Map();
+  private returnContext?: ValueType;
+  private renderReturn = false;
+  private readonly statementPrefixes: StatementIR[][] = [];
+  private previewingCaptures = false;
+  private lexicalExecution: object = {};
 
-  private readCallable(binding: Binding | undefined, node: ts.Node): void {
-    const frame = this.callableFrames[this.callableFrames.length - 1];
-    if (!frame) return;
-    for (const origin of binding?.callableOrigins ?? []) {
-      if (frame.blocked.has(origin))
-        rejectNode(
-          node,
-          'PUI1007',
-          'Checked callable parameters cannot be captured by a registered callback or renderer.'
+  private previewExpression(module: SourceModule, node: ts.Expression, scope: Scope): ValueType {
+    if (
+      ts.isParenthesizedExpression(node) ||
+      ts.isAsExpression(node) ||
+      ts.isNonNullExpression(node)
+    )
+      return this.previewExpression(module, node.expression, scope);
+    if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword)
+      return 'boolean';
+    if (node.kind === ts.SyntaxKind.NullKeyword) return 'null';
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return 'string';
+    if (ts.isNumericLiteral(node)) return 'number';
+    if (ts.isPrefixUnaryExpression(node))
+      return node.operator === ts.SyntaxKind.ExclamationToken ? 'boolean' : 'number';
+    if (ts.isIdentifier(node))
+      return (
+        scope.get(node.text)?.lexical ??
+        scope.get(node.text)?.type ??
+        (node.text === 'undefined' ? 'void' : 'unknown')
+      );
+    if (ts.isArrowFunction(node) || ts.isFunctionExpression(node))
+      return this.previewFunction(module, node, scope);
+    if (ts.isConditionalExpression(node))
+      return joinValueTypes([
+        this.previewExpression(module, node.whenTrue, scope),
+        this.previewExpression(module, node.whenFalse, scope),
+      ]);
+    if (ts.isBinaryExpression(node)) {
+      const operator = ts.tokenToString(node.operatorToken.kind) ?? '';
+      if (['===', '!==', '<', '>', '<=', '>='].includes(operator)) return 'boolean';
+      if (['&&', '||', '??'].includes(operator)) {
+        const left = this.previewExpression(module, node.left, scope),
+          right = this.previewExpression(module, node.right, scope);
+        return sameType(left, right) ? left : joinValueTypes([left, right]);
+      }
+      return 'number';
+    }
+    if (ts.isPropertyAccessExpression(node)) {
+      const owner = this.previewExpression(module, node.expression, scope);
+      try {
+        return (
+          capabilityMemberType(owner, node.name.text, !!node.questionDotToken) ??
+          memberValueType(owner, node.name.text, !!node.questionDotToken)
         );
-      if (!frame.parameters.has(origin)) frame.captures.add(origin);
+      } catch {
+        return 'unknown';
+      }
+    }
+    if (ts.isCallExpression(node)) {
+      if (ts.isPropertyAccessExpression(node.expression)) {
+        const member = node.expression;
+        const paths: string[] = [];
+        let root: ts.Expression = member;
+        let optional = !!node.questionDotToken;
+        while (ts.isPropertyAccessExpression(root)) {
+          optional ||= !!root.questionDotToken;
+          paths.unshift(root.name.text);
+          root = root.expression;
+        }
+        const receiver = operationReceiverType(this.previewExpression(module, root, scope));
+        const path =
+          receiver === 'render' && paths.join('.') === 'r.slot' ? 'slot' : paths.join('.');
+        const rule =
+          Object.values(OPERATION_RULES).find(
+            (rule) => sameType(rule.receiver, receiver) && rule.path === path
+          ) ??
+          Object.values(OPERATION_RULES).find(
+            (rule) =>
+              rule.path === member.name.text &&
+              sameType(
+                rule.receiver,
+                operationReceiverType(this.previewExpression(module, member.expression, scope))
+              )
+          );
+        // A forward capture needs the declared value type, not execution of the
+        // initializer. Receiver/argument-dependent results remain unproven here.
+        if (rule && !rule.resultFrom)
+          return optional ? joinValueTypes([rule.result, 'void']) : rule.result;
+      }
+      const type = this.previewExpression(module, node.expression, scope);
+      try {
+        return callableValue(type, !!node.questionDotToken).returnType;
+      } catch {
+        return 'unknown';
+      }
+    }
+    return 'unknown';
+  }
+
+  private previewFunction(
+    module: SourceModule,
+    node: FunctionNode,
+    scope: Scope,
+    contextual?: ValueType
+  ): Extract<ValueType, { kind: 'callable' }> {
+    const expected =
+      contextual && typeof contextual !== 'string' && contextual.kind === 'callable'
+        ? contextual
+        : undefined;
+    const local = new Map(scope);
+    for (const parameter of node.parameters)
+      local.set(identifier(parameter.name), { type: 'unknown' });
+    for (let pass = 0; pass <= node.parameters.length; pass++)
+      node.parameters.forEach((parameter, index) => {
+        const contextual = expected?.parameters[index]?.type;
+        const type = parameter.type
+          ? parseSourceValueType(module, parameter.type, this.substitutions)
+          : contextual !== undefined && contextual !== 'unknown'
+            ? contextual
+            : parameter.initializer
+              ? this.previewExpression(module, parameter.initializer, local)
+              : 'unknown';
+        local.set(identifier(parameter.name), { type });
+      });
+    const parameters = node.parameters.map((parameter, index) => {
+      const name = identifier(parameter.name);
+      const type = local.get(name)!.type;
+      return {
+        name,
+        type,
+        ...(parameter.questionToken || parameter.initializer ? { optional: true } : {}),
+      };
+    });
+    let returnType = node.type
+      ? parseSourceValueType(module, node.type, this.substitutions)
+      : expected?.returnType;
+    if (returnType === undefined) {
+      if (node.body && !ts.isBlock(node.body))
+        returnType = this.previewExpression(module, node.body, local);
+      else {
+        const returns: ValueType[] = [];
+        const visit = (part: ts.Node): void => {
+          if (part !== node.body && ts.isFunctionLike(part)) return;
+          if (ts.isReturnStatement(part))
+            returns.push(
+              part.expression ? this.previewExpression(module, part.expression, local) : 'void'
+            );
+          else ts.forEachChild(part, visit);
+        };
+        if (node.body) visit(node.body);
+        returnType = returns.length ? joinValueTypes(returns) : 'void';
+      }
+    }
+    return { kind: 'callable', parameters, returnType };
+  }
+
+  private resolvePending(binding: Binding): void {
+    if (
+      !binding.declaration ||
+      binding.parsed ||
+      binding.parsing ||
+      !binding.module ||
+      !binding.pendingScope
+    )
+      return;
+    const declaration = binding.declaration;
+    const init = ts.isVariableDeclaration(declaration) ? declaration.initializer : declaration;
+    if (!init) return;
+    if (!isSourceFunction(init)) {
+      // Earlier declarations may have resolved a receiver since predeclaration.
+      // Refresh only an unannotated, still-unparsed type preview. This must not
+      // execute the initializer or replace a checked binding/refinement.
+      if (
+        ts.isVariableDeclaration(declaration) &&
+        !declaration.type &&
+        !binding.initializerParsed &&
+        (binding.lexical ?? binding.type) === 'unknown'
+      ) {
+        const type = this.previewExpression(binding.module, init, binding.pendingScope);
+        if (binding.lexical !== undefined) {
+          binding.lexical = type;
+          binding.type =
+            type === 'boolean' || type === 'number' || type === 'string'
+              ? `lexical:${type}`
+              : { kind: 'cell', value: type };
+        } else binding.type = type;
+      }
+      return;
+    }
+    binding.parsing = true;
+    try {
+      const signature =
+        typeof binding.type !== 'string' && binding.type.kind === 'callable'
+          ? binding.type
+          : this.previewFunction(binding.module, init, binding.pendingScope);
+      const fn = this.function(
+        binding.module,
+        init,
+        binding.pendingScope,
+        this.helperPhase(binding.module, init, binding.pendingScope),
+        signature.parameters.map((parameter) => parameter.type),
+        'helper',
+        ts.isVariableDeclaration(declaration) && declaration.type ? signature.returnType : undefined
+      );
+      binding.helper = fn;
+      binding.phase = fn.phase;
+      binding.type = functionValueType(fn);
+      binding.parsed = {
+        kind: 'function',
+        function: fn,
+        type: binding.type,
+        span: sourceSpan(init),
+      };
+    } finally {
+      binding.parsing = false;
     }
   }
 
-  private checkCallableReturn(value: ExpressionIR, scope: Scope, node: ts.Node): void {
-    if (value.kind === 'conditional') {
-      this.checkCallableReturn(value.whenTrue, scope, node);
-      this.checkCallableReturn(value.whenFalse, scope, node);
-    } else if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator)) {
-      this.checkCallableReturn(value.left, scope, node);
-      this.checkCallableReturn(value.right, scope, node);
+  private predeclare(
+    module: SourceModule,
+    nodes: readonly ts.Statement[],
+    scope: Scope,
+    forbidden: ReadonlySet<string> = new Set()
+  ): void {
+    const declarations: (ts.VariableDeclaration | FunctionNode)[] = [];
+    const names = new Set<string>();
+    for (const node of nodes) {
+      if (ts.isVariableStatement(node)) declarations.push(...node.declarationList.declarations);
+      else if (ts.isFunctionDeclaration(node) && node.name) declarations.push(node);
     }
-    const origins =
-      value.kind === 'reference'
-        ? scope.get(value.name)?.callableOrigins
-        : value.kind === 'function'
-          ? this.callableCaptures.get(value.function)
-          : undefined;
-    if (origins?.size)
-      rejectNode(
-        node,
-        'PUI1007',
-        'Checked callable parameters cannot escape through a returned function.'
-      );
+    for (const declaration of declarations) {
+      const name = identifier(declaration.name!);
+      if (names.has(name) || forbidden.has(name))
+        rejectNode(declaration, 'PUI1005', `Duplicate local ${name}.`);
+      names.add(name);
+      const init = ts.isVariableDeclaration(declaration) ? declaration.initializer : declaration;
+      const annotation = ts.isVariableDeclaration(declaration) ? declaration.type : undefined;
+      const type = annotation
+        ? parseSourceValueType(module, annotation, this.substitutions)
+        : init && isSourceFunction(init)
+          ? this.previewFunction(module, init, scope)
+          : init
+            ? this.previewExpression(module, init as ts.Expression, scope)
+            : 'unknown';
+      const mutable =
+        ts.isVariableDeclaration(declaration) &&
+        ts.isVariableDeclarationList(declaration.parent) &&
+        !!(declaration.parent.flags & ts.NodeFlags.Let);
+      const emittedName = scope.has(name) ? this.moduleName() : name;
+      scope.set(name, {
+        type: mutable
+          ? type === 'boolean' || type === 'number' || type === 'string'
+            ? `lexical:${type}`
+            : { kind: 'cell', value: type }
+          : type,
+        ...(mutable ? { lexical: type } : {}),
+        ...(ts.isVariableDeclaration(declaration)
+          ? { declarationScope: this.lexicalExecution }
+          : {}),
+        declaration,
+        module,
+        pendingScope: scope,
+        emittedName,
+        bindingId: `${module.file.fileName}#${declaration.pos}`,
+      });
+    }
+    // All declarations exist before resolving closure bodies; later lexical values are not read here.
+    for (const declaration of declarations) {
+      const binding = scope.get(identifier(declaration.name!))!,
+        init = ts.isVariableDeclaration(declaration) ? declaration.initializer : declaration;
+      if (init && isSourceFunction(init))
+        binding.type = this.previewFunction(module, init, scope, binding.type);
+    }
   }
 
   constructor(
     input: string,
-    readonly options: ParseOptions
+    readonly options: ParseOptions,
+    private readonly writtenFields: ReadonlySet<string> = new Set(),
+    private readonly captureTypes: ReadonlyMap<string, import('./ir').HookCaptureIR> = new Map()
   ) {
     this.graph = new SourceGraph(input, options);
+    this.flow = new FlowProof(this.writtenFields);
   }
 
   private helperPhase(module: SourceModule, node: FunctionNode, scope: Scope): Phase {
@@ -233,11 +479,7 @@ class Frontend {
       if (ts.isCallExpression(part)) {
         if (ts.isIdentifier(part.expression) && module.imports.has(part.expression.text)) {
           const imported = this.graph.resolveBinding(module, part.expression.text);
-          if (
-            imported.module === null &&
-            (imported.imported.module === '@proto.ui/hooks' ||
-              Object.hasOwn(PACKAGED_HOOKS, imported.imported.module))
-          )
+          if (imported.module === null && imported.imported.module === '@proto.ui/hooks')
             phase = 'setup';
         } else if (ts.isPropertyAccessExpression(part.expression)) {
           const paths: string[] = [];
@@ -247,7 +489,9 @@ class Frontend {
             root = root.expression;
           }
           if (ts.isIdentifier(root)) {
-            const receiver = scope.get(root.text)?.type;
+            const binding = scope.get(root.text);
+            const raw = binding?.lexical ?? binding?.type;
+            const receiver = raw && stateValue(raw) ? 'state:boolean' : raw;
             const rule = Object.values(OPERATION_RULES).find(
               (rule) => rule.receiver === receiver && rule.path === paths.join('.')
             );
@@ -257,9 +501,9 @@ class Frontend {
       }
       ts.forEachChild(part, inspect);
     };
+    if (node.body) inspect(node.body);
     for (const parameter of node.parameters)
       if (parameter.initializer) inspect(parameter.initializer);
-    if (node.body) inspect(node.body);
     return phase;
   }
 
@@ -271,106 +515,202 @@ class Frontend {
       throw error;
     }
   }
+  private checkedValue(node: ts.Node, action: () => ValueType): ValueType {
+    try {
+      return action();
+    } catch (error) {
+      if (error instanceof TypeError) rejectNode(node, 'PUI1006', error.message);
+      throw error;
+    }
+  }
+  private refinedScope(scope: Scope, condition: ExpressionIR, truth: boolean): Scope {
+    this.normalizeFlow(scope);
+    const next = new Map(scope);
+    if (condition.kind === 'reference') {
+      const binding = [...scope].find(
+        ([key, binding]) => (binding.emittedName ?? key) === condition.name
+      )?.[1];
+      if (binding?.predicate && !binding.lexical)
+        return this.refinedScope(scope, binding.predicate, truth);
+    }
+    for (const [name, type] of conditionRefinements(condition, truth, this.flow.current)) {
+      const entry = [...next].find(([key, binding]) => (binding.emittedName ?? key) === name);
+      if (entry)
+        next.set(entry[0], {
+          ...entry[1],
+          flowAt: this.flow.mark(entry[1].bindingId ?? entry[1].emittedName ?? entry[0]),
+          ...(entry[1].lexical
+            ? { lexical: type }
+            : { type, flowBase: entry[1].flowBase ?? entry[1].type }),
+        });
+    }
+    return next;
+  }
+  private normalizeFlow(scope: Scope): void {
+    for (const [name, binding] of scope) {
+      const mark = binding.flowAt;
+      if (!mark) continue;
+      const key = binding.bindingId ?? binding.emittedName ?? name;
+      const stored = lexicalStoredType(binding.type);
+      if (stored && this.flow.cellChanged(mark, key))
+        scope.set(name, { ...binding, lexical: stored, flowAt: this.flow.mark(key) });
+      else if (this.flow.heapChanged(mark))
+        scope.set(name, {
+          ...binding,
+          ...(stored
+            ? { lexical: invalidateHeapFlow(binding.lexical ?? stored, stored, this.writtenFields) }
+            : {
+                type: invalidateHeapFlow(
+                  binding.type,
+                  binding.flowBase ?? binding.type,
+                  this.writtenFields
+                ),
+              }),
+          flowAt: this.flow.mark(key),
+        });
+    }
+  }
+
+  private invalidateFlow(scope: Scope, cells: boolean, allFields = false): void {
+    if (cells) this.flow.call();
+    else this.flow.writeHeap();
+    for (const [name, binding] of scope) {
+      const original = binding.flowBase ?? binding.type;
+      const fields = allFields
+        ? new Set(objectFields(original)?.map((field) => field.name))
+        : this.writtenFields;
+      if (binding.lexical) {
+        const stored = lexicalStoredType(binding.type)!;
+        scope.set(name, {
+          ...binding,
+          lexical: cells ? stored : invalidateHeapFlow(binding.lexical, stored, fields),
+        });
+      } else if (binding.flowBase) {
+        scope.set(name, { ...binding, type: invalidateHeapFlow(binding.type, original, fields) });
+      }
+    }
+  }
+
+  private originalValueType(value: ExpressionIR, scope: Scope): ValueType {
+    if (value.kind === 'reference') {
+      const entry = [...scope].find(
+        ([name, binding]) => (binding.emittedName ?? name) === value.name
+      )?.[1];
+      return entry?.flowBase ?? entry?.type ?? value.type;
+    }
+    if (value.kind === 'lexical-read')
+      return lexicalStoredType(this.originalValueType(value.cell, scope)) ?? value.type;
+    if (value.kind === 'member') {
+      const base = this.originalValueType(value.object, scope);
+      return this.memberType(
+        joinValueTypes(
+          valueAlternatives(base).filter((type) => type !== 'null' && type !== 'void')
+        ),
+        value.property,
+        value.optional
+      );
+    }
+    return value.type;
+  }
+
+  private memberType(type: ValueType, property: string, optional: boolean): ValueType {
+    return joinValueTypes(
+      valueAlternatives(type).map((owner) => {
+        if (owner === 'void' || owner === 'null') {
+          if (optional) return 'void';
+          throw new TypeError(`Cannot read ${property} on a nullish value.`);
+        }
+        const capability = capabilityMemberType(owner, property, optional);
+        if (capability !== undefined) return capability;
+        if (owner === 'props') {
+          const prop = this.props.get(property);
+          if (!prop) throw new TypeError(`Read of undeclared prop ${property}.`);
+          return prop.type;
+        }
+        if (owner === 'exception') return 'exception';
+        const event = eventPayloadMemberType(owner, property);
+        if (event !== undefined) return event;
+        return memberValueType(owner, property, optional);
+      })
+    );
+  }
 
   private parameterType(
     module: SourceModule,
     parameter: ts.ParameterDeclaration,
     expected?: ValueType,
-    body?: ts.ConciseBody
+    body?: ts.ConciseBody,
+    outer: Scope = new Map()
   ): ValueType {
     if (parameter.type) {
-      if (ts.isTypeReferenceNode(parameter.type) && ts.isIdentifier(parameter.type.typeName)) {
-        const name = parameter.type.typeName.text;
-        if (name === 'FocusRequestOptions') return FOCUS_OPTIONS_TYPE;
-        const activationImport = module.file.statements.some(
-          (statement) =>
-            ts.isImportDeclaration(statement) &&
-            ts.isStringLiteral(statement.moduleSpecifier) &&
-            statement.moduleSpecifier.text === '@proto.ui/core' &&
-            statement.importClause?.namedBindings &&
-            ts.isNamedImports(statement.importClause.namedBindings) &&
-            statement.importClause.namedBindings.elements.some(
-              (binding) =>
-                binding.name.text === name &&
-                (binding.propertyName?.text ?? binding.name.text) === 'FocusScopeActivationOptions'
-            )
-        );
-        const shadowsActivationImport = module.file.statements.some(
-          (statement) =>
-            (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
-            statement.name.text === name
-        );
-        if (activationImport && !shadowsActivationImport && !parameter.type.typeArguments?.length)
-          return FOCUS_ACTIVATION_OPTIONS_TYPE;
-
-        const semanticImport = module.file.statements.some(
-          (statement) =>
-            ts.isImportDeclaration(statement) &&
-            ts.isStringLiteral(statement.moduleSpecifier) &&
-            statement.moduleSpecifier.text === '@proto.ui/core' &&
-            statement.importClause?.namedBindings &&
-            ts.isNamedImports(statement.importClause.namedBindings) &&
-            statement.importClause.namedBindings.elements.some(
-              (binding) =>
-                binding.name.text === name &&
-                Object.values(CAPABILITY_ANNOTATIONS).includes(
-                  binding.propertyName?.text ?? binding.name.text
-                )
-            )
-        );
-        const shadowed = module.file.statements.some(
-          (statement) =>
-            (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) &&
-            statement.name.text === name
-        );
-        if (semanticImport && !shadowed) {
-          const imported = module.file.statements
-            .flatMap((statement) =>
-              ts.isImportDeclaration(statement) &&
-              ts.isStringLiteral(statement.moduleSpecifier) &&
-              statement.moduleSpecifier.text === '@proto.ui/core' &&
-              statement.importClause?.namedBindings &&
-              ts.isNamedImports(statement.importClause.namedBindings)
-                ? [...statement.importClause.namedBindings.elements]
-                : []
-            )
-            .find((binding) => binding.name.text === name)!;
-          const semantic = Object.entries(CAPABILITY_ANNOTATIONS).find(
-            ([, annotation]) => annotation === (imported.propertyName?.text ?? imported.name.text)
-          )?.[0] as ValueType | undefined;
-          if (
-            semantic &&
-            (expected === semantic || (expected === undefined && this.context === 'helper'))
-          )
-            return semantic;
-        }
-        if (expected && typeof expected === 'string' && CAPABILITY_ANNOTATIONS[expected] === name)
+      const identity = sourceTypeIdentity(module, parameter.type);
+      if (identity?.module === '@proto.ui/core') {
+        if (identity.name === 'FocusRequestOptions') return FOCUS_OPTIONS_TYPE;
+        if (identity.name === 'FocusScopeActivationOptions') return FOCUS_ACTIVATION_OPTIONS_TYPE;
+        if (
+          expected &&
+          typeof expected === 'string' &&
+          CAPABILITY_ANNOTATIONS[expected] === identity.name
+        )
           return expected;
       }
-      if (ts.isFunctionTypeNode(parameter.type)) return 'function';
-      return parseSourceDataType(module, parameter.type);
+      return parseSourceValueType(module, parameter.type, this.substitutions);
     }
     if (expected !== undefined && expected !== 'unknown') return expected;
-    // Constraint from the public focus request signature, not from a component/key name.
-    let focusOptions = false;
-    const name = ts.isIdentifier(parameter.name) ? parameter.name.text : '';
-    const inspect = (node: ts.Node): void => {
-      if (
-        ts.isCallExpression(node) &&
-        ts.isPropertyAccessExpression(node.expression) &&
-        node.expression.name.text === 'focusSelf' &&
-        node.arguments.some((arg) => ts.isIdentifier(arg) && arg.text === name)
-      )
-        focusOptions = true;
-      ts.forEachChild(node, inspect);
-    };
-    if (body) inspect(body);
-    if (focusOptions) return FOCUS_OPTIONS_TYPE;
+    if (parameter.initializer)
+      return this.expression(module, parameter.initializer, outer, 'callback').type;
+    const constraint = this.parameterConstraint(parameter, body, outer);
+    if (constraint) return constraint.type;
     rejectNode(
       parameter,
       'PUI1006',
-      'A data parameter needs an explicit serializable type annotation.'
+      'A data parameter needs a resolved operation constraint or an explicit serializable type annotation.'
     );
+  }
+
+  /** Infer only from a resolved receiver and the shared operation signature. */
+  private parameterConstraint(
+    parameter: ts.ParameterDeclaration,
+    body: ts.ConciseBody | undefined,
+    outer: Scope
+  ): { type: ValueType; optional: boolean } | undefined {
+    const name = ts.isIdentifier(parameter.name) ? parameter.name.text : '';
+    let constraint: { type: ValueType; optional: boolean } | undefined;
+    const inspect = (node: ts.Node): void => {
+      if (node !== body && ts.isFunctionLike(node)) return;
+      if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
+        let root: ts.Expression = node.expression;
+        const path: string[] = [];
+        while (ts.isPropertyAccessExpression(root)) {
+          path.unshift(root.name.text);
+          root = root.expression;
+        }
+        const receiver = ts.isIdentifier(root) ? outer.get(root.text)?.type : undefined;
+        const operation = Object.entries(OPERATION_RULES).find(
+          ([, rule]) =>
+            receiver !== undefined &&
+            sameType(rule.receiver, receiver) &&
+            rule.path === path.join('.')
+        );
+        if (operation)
+          node.arguments.forEach((argument, index) => {
+            if (!ts.isIdentifier(argument) || argument.text !== name) return;
+            const rule = operationArgumentRule(operation[0], index);
+            const type = rule?.schema ?? (rule?.types?.length === 1 ? rule.types[0] : undefined);
+            if (type === undefined) return;
+            if (constraint && !sameType(constraint.type, type))
+              rejectNode(
+                parameter,
+                'PUI1006',
+                'Operation constraints disagree; annotate the parameter explicitly.'
+              );
+            constraint = { type, optional: (constraint?.optional ?? true) && !!rule?.optional };
+          });
+      }
+      ts.forEachChild(node, inspect);
+    };
+    if (body) inspect(body);
+    return constraint;
   }
 
   function(
@@ -379,7 +719,9 @@ class Frontend {
     outer: Scope,
     phase: Phase,
     expected: readonly ValueType[] = [],
-    context: FunctionContext = phase === 'callback' ? 'helper' : phase
+    context: FunctionContext = phase === 'callback' ? 'helper' : phase,
+    expectedReturn?: ValueType,
+    renderReturn = context === 'setup'
   ): FunctionIR {
     if (
       node.modifiers?.some((m) => m.kind === ts.SyntaxKind.AsyncKeyword) ||
@@ -388,118 +730,75 @@ class Frontend {
     )
       rejectNode(node, 'PUI1004', 'Async/generator/external functions are unsupported.');
     const previousContext = this.context;
+    const previousReturn = this.returnContext;
+    const previousRenderReturn = this.renderReturn;
+    const previousFlow = this.flow;
+    const previousExecution = this.lexicalExecution;
+    this.lexicalExecution = {};
+    this.flow = new FlowProof(this.writtenFields);
     this.context = context;
-    const blocked = new Set(this.callableFrames[this.callableFrames.length - 1]?.blocked);
-    if (context !== 'helper')
-      for (const binding of outer.values())
-        for (const origin of binding.callableOrigins ?? []) blocked.add(origin);
-    const callableFrame = {
-      parameters: new Set<object>(node.parameters),
-      captures: new Set<object>(),
-      blocked,
-    };
-    this.callableFrames.push(callableFrame);
+    this.renderReturn = renderReturn;
+    this.returnContext = node.type
+      ? parseSourceValueType(module, node.type, this.substitutions)
+      : expectedReturn;
     try {
-      const scope = new Map(outer);
+      const scope: Scope = new Map(
+        [...outer].map(([name, binding]) => [
+          name,
+          binding.lexical
+            ? { ...binding, lexical: lexicalStoredType(binding.type) }
+            : binding.uninitializedParameter
+              ? { ...binding, uninitializedParameter: false }
+              : binding,
+        ])
+      );
+      this.invalidateFlow(scope, false);
       const names = new Set<string>();
-      // Parameter defaults cannot fall back to an outer binding shadowed by a
-      // current or later parameter. Later-parameter closure defaults stay unsupported.
-      for (const parameter of node.parameters)
-        scope.set(identifier(parameter.name), { type: 'unknown', uninitialized: true });
+      const preview = this.previewFunction(module, node, scope, {
+        kind: 'callable',
+        parameters: node.parameters.map((parameter, index) => ({
+          name: identifier(parameter.name),
+          type: expected[index] ?? 'unknown',
+        })),
+        returnType: 'unknown',
+      });
+      node.parameters.forEach((parameter, index) =>
+        scope.set(identifier(parameter.name), {
+          type: preview.parameters[index].type,
+          bindingId: `${module.file.fileName}#${parameter.pos}`,
+          uninitializedParameter: true,
+        })
+      );
       const parameters: ParameterIR[] = node.parameters.map((parameter, index) => {
-        if (parameter.dotDotDotToken || (parameter.initializer && context !== 'helper'))
-          rejectNode(
-            parameter,
-            'PUI1004',
-            'Rest parameters and defaults on registered callbacks are unsupported.'
-          );
+        if (parameter.dotDotDotToken)
+          rejectNode(parameter, 'PUI1004', 'Rest callback parameters are unsupported.');
         const name = identifier(parameter.name);
         if (names.has(name)) rejectNode(parameter, 'PUI1005', `Duplicate parameter ${name}.`);
         names.add(name);
-        const type = this.parameterType(module, parameter, expected[index], node.body);
+        const type = this.parameterType(module, parameter, expected[index], node.body, scope);
+        const fallback = parameter.initializer
+          ? this.expression(module, parameter.initializer, scope, phase, undefined, type)
+          : undefined;
+        if (
+          fallback &&
+          !assignable(fallback.type, type) &&
+          !assignable(argumentData(fallback) ?? fallback.type, type)
+        )
+          rejectNode(parameter, 'PUI1006', 'Parameter default does not satisfy its type.');
         const optional =
           !!parameter.questionToken ||
           !!parameter.initializer ||
-          (!parameter.type && isDataValueType(type) && dataTypeEqual(type, FOCUS_OPTIONS_TYPE));
-        if (
-          optional &&
-          !parameter.initializer &&
-          [
-            'function',
-            'def',
-            'run',
-            'render',
-            'event',
-            'control-label',
-            'control-label-handle',
-            'control-label-request',
-          ].includes(String(type))
-        )
-          rejectNode(
-            parameter,
-            'PUI1006',
-            'Optional semantic helper parameters require a checked default.'
-          );
-        const callback =
-          parameter.type && ts.isFunctionTypeNode(parameter.type)
-            ? {
-                parameters: parameter.type.parameters.map((param) => {
-                  if (param.initializer || param.dotDotDotToken)
-                    rejectNode(
-                      param,
-                      'PUI1004',
-                      'Callback signatures cannot contain parameter initializers or rest parameters.'
-                    );
-                  return {
-                    name: identifier(param.name),
-                    type: this.parameterType(module, param),
-                    ...(param.questionToken ? { optional: true } : {}),
-                  };
-                }),
-                returnType: parseSourceDataType(module, parameter.type.type),
-              }
-            : undefined;
-        const initial = parameter.initializer
-          ? this.expression(module, parameter.initializer, scope, phase)
-          : undefined;
-        if (initial && !assignable(initial.type, type))
-          rejectNode(parameter, 'PUI1006', 'Default parameter type mismatch.');
-        if (initial && callback) {
-          const fn =
-            initial.kind === 'function'
-              ? initial.function
-              : initial.kind === 'reference'
-                ? scope.get(initial.name)?.helper
-                : undefined;
-          if (!checkedCallbackMatches(fn, callback))
-            rejectNode(
-              parameter,
-              'PUI1006',
-              'Default callback does not satisfy its checked signature.'
-            );
-        }
-        const callable = callback
-          ? {
-              ...callback,
-              body: [],
-              phase,
-              context: 'helper' as const,
-              span: sourceSpan(parameter),
-            }
-          : undefined;
+          (!parameter.type && !!this.parameterConstraint(parameter, node.body, outer)?.optional);
         scope.set(name, {
-          type:
-            optional && !initial && isDataValueType(type) ? union([type, 'void'], parameter) : type,
-          ...(callable
-            ? { helper: callable, phase, callableOrigins: new Set<object>([parameter]) }
-            : {}),
+          type: optional && !fallback ? union([type, 'void'], parameter) : type,
+          bindingId: `${module.file.fileName}#${parameter.pos}`,
         });
         return {
           name,
           type,
+          bindingId: `${module.file.fileName}#${parameter.pos}`,
           ...(optional ? { optional: true } : {}),
-          ...(callback ? { callback } : {}),
-          ...(initial ? { default: initial } : {}),
+          ...(fallback ? { default: fallback } : {}),
         };
       });
       if (
@@ -507,13 +806,22 @@ class Frontend {
         (parameters.length > 1 || (parameters.length === 1 && parameters[0].type !== 'def'))
       )
         rejectNode(node, 'PUI1006', 'Setup accepts at most one definition handle parameter.');
-      let body: StatementIR[];
-      if (ts.isBlock(node.body)) body = this.statements(module, node.body.statements, scope, phase);
-      else {
-        const value = this.expression(module, node.body, scope, phase);
-        this.checkCallableReturn(value, scope, node.body);
-        body = [{ kind: 'return', value, span: sourceSpan(node.body) }];
-      }
+      const body = ts.isBlock(node.body)
+        ? this.statements(module, node.body.statements, scope, phase, names)
+        : [
+            {
+              kind: 'return' as const,
+              value: this.expression(
+                module,
+                node.body,
+                scope,
+                phase,
+                undefined,
+                this.returnContext
+              ),
+              span: sourceSpan(node.body),
+            },
+          ];
       const returns: ValueType[] = [];
       const gather = (items: readonly StatementIR[]): boolean => {
         for (const statement of items) {
@@ -541,27 +849,76 @@ class Frontend {
       };
       if (!gather(body)) returns.push('void');
       let returnType: ValueType = returns.length ? union(returns, node) : 'void';
-      if (
-        node.type &&
-        !(
-          context === 'setup' &&
-          coreTypeReference(module, node.type, 'RenderFn') &&
-          returnType === 'function'
-        )
-      ) {
-        const declared = parseSourceDataType(module, node.type);
+      if (this.returnContext) {
+        const declared = this.returnContext;
+        if (erasesRuntimeAuthority(returnType, declared))
+          rejectNode(
+            node.type ?? node,
+            'PUI1006',
+            'A return type cannot hide runtime callable or capability fields.'
+          );
         if (returns.length && !assignable(returnType, declared))
-          rejectNode(node.type, 'PUI1006', 'Function return does not satisfy its declared type.');
+          rejectNode(
+            node.type ?? node,
+            'PUI1006',
+            'Function return does not satisfy its declared type.'
+          );
         returnType = declared;
       }
-      if (context === 'setup' && returnType !== 'function' && returnType !== 'void')
+      if (renderReturn && !isSetupResultType(returnType))
         rejectNode(node, 'PUI1006', 'Setup must return a render function or void.');
-      const result = { parameters, body, phase, context, returnType, span: sourceSpan(node) };
-      this.callableCaptures.set(result, callableFrame.captures);
-      return result;
+      const captures: NonNullable<FunctionIR['captures']> = [];
+      const seen = new Set<string>();
+      const outerBindings = new Map(
+        [...outer]
+          .filter(([, binding]) => !!binding.bindingId)
+          .map(([name, binding]) => [
+            binding.bindingId!,
+            { name: binding.emittedName ?? name, binding },
+          ])
+      );
+      const capture = (value: unknown): void => {
+        if (!value || typeof value !== 'object') return;
+        if (Array.isArray(value)) {
+          value.forEach(capture);
+          return;
+        }
+        const record = value as Record<string, unknown>;
+        if (
+          record.kind === 'reference' &&
+          typeof record.bindingId === 'string' &&
+          !seen.has(record.bindingId)
+        ) {
+          const resolved = outerBindings.get(record.bindingId);
+          if (resolved) {
+            seen.add(record.bindingId);
+            captures.push({
+              bindingId: record.bindingId,
+              name: resolved.name,
+              storage: lexicalStoredType(resolved.binding.type) ? 'cell' : 'value',
+            });
+          }
+        }
+        for (const [key, child] of Object.entries(record))
+          if (key !== 'type' && key !== 'span' && key !== 'captures') capture(child);
+      };
+      capture(body);
+      for (const parameter of parameters) capture(parameter.default);
+      return {
+        parameters,
+        body,
+        phase,
+        context,
+        returnType,
+        ...(captures.length ? { captures } : {}),
+        span: sourceSpan(node),
+      };
     } finally {
-      this.callableFrames.pop();
       this.context = previousContext;
+      this.returnContext = previousReturn;
+      this.renderReturn = previousRenderReturn;
+      this.flow = previousFlow;
+      this.lexicalExecution = previousExecution;
     }
   }
 
@@ -569,9 +926,27 @@ class Frontend {
     module: SourceModule,
     nodes: readonly ts.Statement[],
     scope: Scope,
-    phase: Phase
+    phase: Phase,
+    forbidden: ReadonlySet<string> = new Set()
   ): StatementIR[] {
     const output: StatementIR[] = [];
+    this.statementPrefixes.push(output);
+    try {
+      return this.lowerStatements(module, nodes, scope, phase, forbidden, output);
+    } finally {
+      this.statementPrefixes.pop();
+    }
+  }
+
+  private lowerStatements(
+    module: SourceModule,
+    nodes: readonly ts.Statement[],
+    scope: Scope,
+    phase: Phase,
+    forbidden: ReadonlySet<string>,
+    output: StatementIR[]
+  ): StatementIR[] {
+    this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
       if (ts.isVariableStatement(node)) {
@@ -580,34 +955,40 @@ class Frontend {
           rejectNode(node, 'PUI1004', 'Use block-scoped const or let bindings.');
         for (const declaration of node.declarationList.declarations) {
           const name = identifier(declaration.name);
-          if (scope.has(name) || module.imports.has(name))
-            rejectNode(declaration, 'PUI1005', `Shadowing/rebinding ${name} is not admitted.`);
+          const pending = scope.get(name)!;
           if (!declaration.initializer)
             rejectNode(declaration, 'PUI1004', 'Binding requires a value.');
           const init = declaration.initializer;
           let value: ExpressionIR;
           if (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) {
-            this.activeHelpers.add(name);
-            scope.set(name, { type: 'function', phase: 'callback' });
-            const fn = this.function(
-              module,
-              init,
-              scope,
-              this.helperPhase(module, init, scope),
-              [],
-              'helper'
-            );
-            this.activeHelpers.delete(name);
-            scope.set(name, {
-              type: 'function',
-              helper: fn,
-              phase: fn.phase,
-              callableOrigins: this.callableCaptures.get(fn),
-            });
-            value = { kind: 'function', type: 'function', function: fn, span: sourceSpan(init) };
+            this.resolvePending(pending);
+            value = pending.parsed!;
           } else {
-            value = this.expression(module, init, scope, phase);
-            const alias = value.kind === 'reference' ? scope.get(value.name) : undefined;
+            const expected = declaration.type
+              ? parseSourceValueType(module, declaration.type, this.substitutions)
+              : undefined;
+            value = this.expression(module, init, scope, phase, undefined, expected);
+            if (expected && erasesRuntimeAuthority(value.type, expected))
+              rejectNode(
+                declaration,
+                'PUI1006',
+                'A structural type view cannot hide runtime callable or capability fields.'
+              );
+            if (
+              expected &&
+              !assignable(value.type, expected) &&
+              !assignable(argumentData(value) ?? value.type, expected)
+            )
+              rejectNode(declaration, 'PUI1006', 'Initializer does not satisfy its declared type.');
+            if (expected && !sameType(value.type, expected))
+              value = { kind: 'narrow', value, type: expected, span: sourceSpan(init) };
+            const aliasName = value.kind === 'reference' ? value.name : undefined;
+            const alias =
+              aliasName !== undefined
+                ? [...scope].find(
+                    ([key, binding]) => (binding.emittedName ?? key) === aliasName
+                  )?.[1]
+                : undefined;
             const stateId =
               value.kind === 'operation' &&
               value.operation.startsWith('state.') &&
@@ -617,37 +998,70 @@ class Frontend {
                 : stateValue(value.type) && value.kind === 'member'
                   ? `#observed:${value.span.file}:${value.span.start}`
                   : alias?.stateId;
-            scope.set(name, {
-              ...alias,
+            Object.assign(pending, {
               type: value.type,
+              ...(alias?.helper ? { helper: alias.helper, phase: alias.phase } : {}),
               stateId,
-              ...(value.kind === 'context-key' ? { keyId: value.keyId } : {}),
-              ...(value.kind === 'style-handle' ? { style: value.handle } : {}),
+              stateData: stateDeclarationData(value) ?? alias?.stateData,
+              predicate:
+                (value.kind === 'binary' || value.kind === 'unary') && stablePredicate(value)
+                  ? value
+                  : alias?.predicate,
+              ...(value.kind === 'context-key'
+                ? { keyId: value.keyId }
+                : alias?.keyId
+                  ? { keyId: alias.keyId }
+                  : {}),
+              ...(value.kind === 'style-handle'
+                ? { style: value.handle }
+                : alias?.style
+                  ? { style: alias.style }
+                  : {}),
             });
           }
           if (mutable) {
             const type = declaration.type
-              ? parseSourceDataType(module, declaration.type)
+              ? parseSourceValueType(module, declaration.type, this.substitutions)
               : value.type;
-            if (type !== 'boolean' && type !== 'number' && type !== 'string')
-              rejectNode(
-                declaration,
-                'PUI1004',
-                'Lexical let currently requires a scalar data type.'
-              );
-            if (!assignable(value.type, type))
+            if (
+              !assignable(value.type, type) &&
+              !assignable(argumentData(value) ?? value.type, type)
+            )
               rejectNode(declaration, 'PUI1006', 'Lexical initializer does not satisfy its type.');
-            scope.set(name, { type: `lexical:${type}`, lexical: type });
+            const cellType: ValueType =
+              type === 'boolean' || type === 'number' || type === 'string'
+                ? `lexical:${type}`
+                : { kind: 'cell', value: type };
+            Object.assign(pending, { type: cellType, lexical: type });
             value = {
               kind: 'lexical-cell',
               value,
-              type: `lexical:${type}`,
+              type: cellType,
               span: sourceSpan(init),
             };
           }
-          output.push({ kind: 'const', name, value, span: sourceSpan(declaration) });
+          pending.initializerParsed = true;
+          scope.set(name, pending);
+          output.push({
+            kind: 'const',
+            name: pending.emittedName ?? name,
+            bindingId: pending.bindingId,
+            value,
+            span: sourceSpan(declaration),
+          });
         }
-      } else if (ts.isExpressionStatement(node))
+      } else if (ts.isFunctionDeclaration(node) && node.name) {
+        const binding = scope.get(node.name.text)!;
+        this.resolvePending(binding);
+        output.unshift({
+          kind: 'const',
+          name: binding.emittedName ?? node.name.text,
+          bindingId: binding.bindingId,
+          value: binding.parsed!,
+          span,
+        });
+      } else if (ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node)) continue;
+      else if (ts.isExpressionStatement(node))
         output.push({
           kind: 'effect',
           expression: this.expression(module, node.expression, scope, phase),
@@ -655,12 +1069,7 @@ class Frontend {
         });
       else if (ts.isIfStatement(node)) {
         const condition = this.expression(module, node.expression, scope, phase);
-        const branch = (truth: boolean): Scope => {
-          const next = new Map(scope);
-          for (const [name, type] of conditionRefinements(condition, truth))
-            if (next.has(name)) next.set(name, { ...next.get(name)!, type });
-          return next;
-        };
+        const branch = (truth: boolean): Scope => this.refinedScope(scope, condition, truth);
         const thenScope = branch(true),
           elseScope = branch(false);
         const then = this.statements(
@@ -683,7 +1092,24 @@ class Frontend {
           : statementsTerminate(otherwise)
             ? thenScope
             : undefined;
-        if (continuing) for (const name of scope.keys()) scope.set(name, continuing.get(name)!);
+        if (continuing)
+          for (const [name, binding] of scope) {
+            const next = continuing.get(name)!;
+            if (next.bindingId === binding.bindingId) scope.set(name, next);
+          }
+        else
+          for (const [name, binding] of scope) {
+            const a = thenScope.get(name)!,
+              b = elseScope.get(name)!;
+            if (binding.lexical)
+              scope.set(name, {
+                ...binding,
+                lexical: joinValueTypes([
+                  a.bindingId === binding.bindingId ? a.lexical! : binding.lexical,
+                  b.bindingId === binding.bindingId ? b.lexical! : binding.lexical,
+                ]),
+              });
+          }
       } else if (ts.isThrowStatement(node)) {
         const value = this.expression(module, node.expression, scope, phase);
         if (!isDataValueType(value.type) && value.type !== 'exception')
@@ -695,6 +1121,7 @@ class Frontend {
         output.push({ kind: 'throw', value, span });
       } else if (ts.isTryStatement(node)) {
         const body = this.statements(module, node.tryBlock.statements, new Map(scope), phase);
+        this.invalidateFlow(scope, true);
         let caught: Extract<StatementIR, { kind: 'try' }>['catch'];
         if (node.catchClause) {
           const catchScope = new Map(scope);
@@ -736,10 +1163,11 @@ class Frontend {
             : {}),
           span,
         });
+        this.invalidateFlow(scope, true);
       } else if (ts.isReturnStatement(node)) {
         if (!node.expression) output.push({ kind: 'return', span });
         else if (
-          phase === 'setup' &&
+          this.renderReturn &&
           (ts.isArrowFunction(node.expression) || ts.isFunctionExpression(node.expression))
         ) {
           const fn = this.function(module, node.expression, scope, 'render', ['render']);
@@ -753,15 +1181,19 @@ class Frontend {
             },
             span,
           });
-        } else {
-          const value = this.expression(module, node.expression, scope, phase);
-          this.checkCallableReturn(value, scope, node.expression);
+        } else
           output.push({
             kind: 'return',
-            value,
+            value: this.expression(
+              module,
+              node.expression,
+              scope,
+              phase,
+              undefined,
+              this.returnContext
+            ),
             span,
           });
-        }
       } else if (!ts.isEmptyStatement(node))
         rejectNode(node, 'PUI1004', `Unsupported ${ts.SyntaxKind[node.kind]} statement.`);
     }
@@ -789,53 +1221,139 @@ class Frontend {
     node: ts.Expression,
     scope: Scope,
     phase: Phase,
-    argumentRule?: ArgumentRule
+    argumentRule?: ArgumentRule,
+    expectedType?: ValueType
+  ): ExpressionIR {
+    this.normalizeFlow(scope);
+    const value = this.expressionValue(module, node, scope, phase, argumentRule, expectedType);
+    if (value.kind === 'intrinsic' && value.name === 'array.every')
+      this.invalidateFlow(scope, true);
+    this.flow.observe(value);
+    return value;
+  }
+
+  private expressionValue(
+    module: SourceModule,
+    node: ts.Expression,
+    scope: Scope,
+    phase: Phase,
+    argumentRule?: ArgumentRule,
+    expectedType?: ValueType
   ): ExpressionIR {
     if (ts.isParenthesizedExpression(node))
-      return this.expression(module, node.expression, scope, phase, argumentRule);
+      return this.expression(module, node.expression, scope, phase, argumentRule, expectedType);
     if (ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
-      const value = this.expression(module, node.expression, scope, phase, argumentRule);
-      if (value.type !== 'exception')
-        rejectNode(node, 'PUI1006', 'A type assertion cannot grant data or capability provenance.');
+      const constant =
+        ts.isTypeReferenceNode(node.type) &&
+        ts.isIdentifier(node.type.typeName) &&
+        node.type.typeName.text === 'const';
+      const asserted = constant
+        ? undefined
+        : parseSourceValueType(module, node.type, this.substitutions);
+      const value = this.expression(
+        module,
+        node.expression,
+        scope,
+        phase,
+        argumentRule,
+        asserted ?? expectedType
+      );
+      if (constant && value.kind === 'literal')
+        return { ...value, type: { kind: 'literal', value: value.value } };
+      if (asserted && canNarrowValue(value.type, asserted) && !sameType(value.type, asserted))
+        return { kind: 'narrow', value, type: asserted, span: sourceSpan(node) };
+      if (
+        value.type !== 'exception' &&
+        asserted &&
+        !assignable(value.type, asserted) &&
+        !assignable(argumentData(value) ?? value.type, asserted)
+      )
+        rejectNode(
+          node,
+          'PUI1006',
+          'A type assertion cannot grant unproven data or capability provenance.'
+        );
       return value;
     }
+    if (ts.isSatisfiesExpression(node))
+      return this.expression(
+        module,
+        node.expression,
+        scope,
+        phase,
+        argumentRule,
+        parseSourceValueType(module, node.type, this.substitutions)
+      );
+    if (ts.isNonNullExpression(node)) {
+      const value = this.expression(
+          module,
+          node.expression,
+          scope,
+          phase,
+          argumentRule,
+          expectedType
+        ),
+        type = joinValueTypes(
+          valueAlternatives(value.type).filter((type) => type !== 'null' && type !== 'void')
+        );
+      return { kind: 'narrow', value, type, span: sourceSpan(node) };
+    }
     const span = sourceSpan(node);
+    const literalType = (value: string | number | boolean | null): ValueType =>
+      expectedType && assignable({ kind: 'literal', value }, expectedType)
+        ? { kind: 'literal', value }
+        : value === null
+          ? 'null'
+          : (typeof value as ValueType);
     if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword)
       return {
         kind: 'literal',
         value: node.kind === ts.SyntaxKind.TrueKeyword,
-        type: 'boolean',
+        type: literalType(node.kind === ts.SyntaxKind.TrueKeyword),
         span,
       };
     if (node.kind === ts.SyntaxKind.NullKeyword)
       return { kind: 'literal', value: null, type: 'null', span };
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
-      return { kind: 'literal', value: node.text, type: 'string', span };
+      return { kind: 'literal', value: node.text, type: literalType(node.text), span };
     if (ts.isNumericLiteral(node)) {
       const value = Number(node.text);
       if (!Number.isFinite(value)) rejectNode(node, 'PUI1006', 'Numeric literals must be finite.');
-      return { kind: 'literal', value, type: 'number', span };
+      return { kind: 'literal', value, type: literalType(value), span };
     }
     if (ts.isIdentifier(node)) {
       const binding = scope.get(node.text);
-      if (binding?.uninitialized)
+      this.requireInitializedBinding(binding, node);
+      if (binding?.uninitializedParameter)
         rejectNode(
           node,
           'PUI1006',
-          'Default expressions cannot access the current or a later parameter.'
+          'A parameter default cannot read its current or a later uninitialized parameter.'
         );
-      this.readCallable(binding, node);
+      if (binding) this.resolvePending(binding);
       if (binding?.lexical)
         return {
           kind: 'lexical-read',
-          cell: { kind: 'reference', name: node.text, type: binding.type, span },
+          cell: {
+            kind: 'reference',
+            name: binding.emittedName ?? node.text,
+            bindingId: binding.bindingId,
+            type: binding.type,
+            span,
+          },
           type: binding.lexical,
           span,
         };
       if (binding)
         return binding.keyId
           ? { kind: 'context-key', keyId: binding.keyId, type: 'context-key', span }
-          : { kind: 'reference', name: node.text, type: binding.type, span };
+          : {
+              kind: 'reference',
+              name: binding.emittedName ?? node.text,
+              bindingId: binding.bindingId,
+              type: binding.type,
+              span,
+            };
       if (module.declarations.has(node.text) || module.imports.has(node.text)) {
         const resolved = this.graph.resolveBinding(module, node.text);
         if (
@@ -886,6 +1404,16 @@ class Frontend {
           };
           return data(STATIC_CORE_VALUES[resolved.name]);
         }
+        if (resolved.module && isSourceFunction(resolved.node)) {
+          const helper = this.moduleHelper(
+            resolved.module,
+            resolved.name,
+            resolved.node,
+            [],
+            undefined
+          );
+          return { kind: 'reference', name: helper.name, type: functionValueType(helper.fn), span };
+        }
         if (resolved.module && scalarInitializer(resolved.node as ts.Expression)) {
           const binding = this.moduleValue(
             resolved.module,
@@ -923,35 +1451,76 @@ class Frontend {
         `Unresolved capture ${node.text}; only declared lexical values and semantic handles are admitted.`
       );
     }
-    if (ts.isConditionalExpression(node)) {
-      const condition = this.expression(module, node.condition, scope, phase);
-      const branch = (truth: boolean) => {
-        const next = new Map(scope);
-        for (const [name, type] of conditionRefinements(condition, truth))
-          if (next.has(name)) next.set(name, { ...next.get(name)!, type });
-        return next;
-      };
-      const whenTrue = this.expression(module, node.whenTrue, branch(true), phase, argumentRule);
-      const whenFalse = this.expression(module, node.whenFalse, branch(false), phase, argumentRule);
-      return {
-        kind: 'conditional',
-        condition,
-        whenTrue,
-        whenFalse,
-        type: union([whenTrue.type, whenFalse.type], node),
-        span,
-      };
-    }
     if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
+      const expected =
+        expectedType && typeof expectedType !== 'string' && expectedType.kind === 'callable'
+          ? expectedType
+          : undefined;
       const fn = this.function(
         module,
         node,
         scope,
         this.helperPhase(module, node, scope),
-        [],
-        'helper'
+        expected?.parameters.map((parameter) => parameter.type) ?? [],
+        'helper',
+        expected?.returnType === 'unknown' ? undefined : expected?.returnType
       );
-      return { kind: 'function', type: 'function', function: fn, span };
+      return { kind: 'function', function: fn, type: functionValueType(fn), span };
+    }
+    if (ts.isTypeOfExpression(node))
+      return {
+        kind: 'intrinsic',
+        name: 'typeof',
+        arguments: [this.expression(module, node.expression, scope, phase)],
+        type: 'string',
+        span,
+      };
+    if (
+      ts.isNewExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'Error' &&
+      !scope.has('Error') &&
+      !module.declarations.has('Error') &&
+      !module.imports.has('Error')
+    ) {
+      const args = (node.arguments ?? []).map((argument) =>
+        this.expression(module, argument, scope, phase)
+      );
+      const type = this.checkedValue(node, () =>
+        intrinsicResult(
+          'error',
+          args.map((arg) => arg.type)
+        )
+      );
+      return { kind: 'intrinsic', name: 'error', arguments: args, type, span };
+    }
+    if (ts.isConditionalExpression(node)) {
+      const condition = this.expression(module, node.condition, scope, phase);
+      const branch = (truth: boolean): Scope => this.refinedScope(scope, condition, truth);
+      const then = this.expression(
+          module,
+          node.whenTrue,
+          branch(true),
+          phase,
+          argumentRule,
+          expectedType
+        ),
+        otherwise = this.expression(
+          module,
+          node.whenFalse,
+          branch(false),
+          phase,
+          argumentRule,
+          expectedType
+        );
+      return {
+        kind: 'conditional',
+        condition,
+        then,
+        otherwise,
+        type: joinValueTypes([then.type, otherwise.type]),
+        span,
+      };
     }
     if (ts.isArrayLiteralExpression(node)) {
       const elements = node.elements.flatMap((element) => {
@@ -978,12 +1547,51 @@ class Frontend {
     }
     if (ts.isObjectLiteralExpression(node)) {
       const keys = new Set<string>();
-      const entries = node.properties.map((property) => {
-        if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property))
-          rejectNode(property, 'PUI1004', 'Object spread and methods are unsupported.');
+      const parts: Extract<ExpressionIR, { kind: 'object-spread' }>['parts'] = [];
+      const entries: { key: string; value: ExpressionIR }[] = [];
+      const fields = new Map<
+        string,
+        { name: string; type: ValueType; optional?: boolean; readonly?: boolean }
+      >();
+      const entry = (
+        property: ts.ObjectLiteralElementLike
+      ): { key: string; value: ExpressionIR } => {
+        if (
+          !ts.isPropertyAssignment(property) &&
+          !ts.isShorthandPropertyAssignment(property) &&
+          !ts.isMethodDeclaration(property)
+        )
+          rejectNode(property, 'PUI1004', 'Object members require data or ordinary methods.');
         const key = propertyName(property.name);
         if (keys.has(key)) rejectNode(property, 'PUI1006', `Duplicate object key ${key}.`);
         keys.add(key);
+        const expected = expectedType
+          ? objectFields(expectedType)?.find((field) => field.name === key)?.type
+          : undefined;
+        if (ts.isMethodDeclaration(property)) {
+          const signature =
+            expected && typeof expected !== 'string' && expected.kind === 'callable'
+              ? expected
+              : undefined;
+          const fn = this.function(
+            module,
+            property,
+            scope,
+            this.helperPhase(module, property, scope),
+            signature?.parameters.map((parameter) => parameter.type) ?? [],
+            'helper',
+            signature?.returnType
+          );
+          return {
+            key,
+            value: {
+              kind: 'function',
+              function: fn,
+              type: functionValueType(fn),
+              span: sourceSpan(property),
+            } as ExpressionIR,
+          };
+        }
         const initializer = ts.isPropertyAssignment(property)
           ? property.initializer
           : property.name;
@@ -1011,8 +1619,28 @@ class Frontend {
             } as ExpressionIR,
           };
         }
-        return { key, value: this.expression(module, initializer, scope, phase, field) };
-      });
+        return {
+          key,
+          value: this.expression(module, initializer, scope, phase, field, expected),
+        };
+      };
+      for (const property of node.properties) {
+        if (ts.isSpreadAssignment(property)) {
+          const value = this.expression(module, property.expression, scope, phase);
+          const spread = objectFields(value.type);
+          if (!spread)
+            rejectNode(property, 'PUI1006', 'Object spread requires a checked ordinary record.');
+          parts.push({ kind: 'spread', value });
+          for (const { readonly: _readonly, ...field } of spread) fields.set(field.name, field);
+        } else {
+          const parsed = entry(property);
+          entries.push(parsed);
+          parts.push({ kind: 'entry', ...parsed });
+          fields.set(parsed.key, { name: parsed.key, type: parsed.value.type });
+        }
+      }
+      if (node.properties.some(ts.isSpreadAssignment))
+        return { kind: 'object-spread', parts, type: objectValueType([...fields.values()]), span };
       if (entries.some((entry) => !isDataValueType(entry.value.type))) {
         if (
           phase === 'render' &&
@@ -1021,18 +1649,16 @@ class Frontend {
           entries[0].value.type === 'style-handle'
         )
           return { kind: 'record', type: 'template-props', entries, span };
-        if (
-          entries.some(
-            (entry) =>
-              ['def', 'run', 'render'].includes(String(entry.value.type)) ||
-              (entry.value.type === 'function' && !argumentRule?.fields?.[entry.key]?.callback)
-          )
-        )
-          rejectNode(
-            node,
-            'PUI1006',
-            'Configuration records cannot capture execution-scope handles or escaping callbacks.'
-          );
+        if (!argumentRule?.types?.includes('module-config'))
+          return {
+            kind: 'record',
+            entries,
+            type: {
+              kind: 'object',
+              fields: entries.map((entry) => ({ name: entry.key, type: entry.value.type })),
+            },
+            span,
+          };
         return { kind: 'record', type: 'module-config', entries, span };
       }
       return {
@@ -1053,6 +1679,7 @@ class Frontend {
       const cell = this.lexicalTarget(module, node.operand, scope);
       if (lexicalValueType(cell.type) !== 'number')
         rejectNode(node, 'PUI1006', 'Lexical increment/decrement requires a number.');
+      if (cell.kind === 'reference') this.flow.writeCell(cell.bindingId ?? cell.name);
       return {
         kind: 'lexical-update',
         cell,
@@ -1080,9 +1707,55 @@ class Frontend {
         node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
         node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
       ) {
+        if (ts.isPropertyAccessExpression(node.left) || ts.isElementAccessExpression(node.left)) {
+          if (operator !== '=')
+            rejectNode(
+              node,
+              'PUI1004',
+              'Compound property writes require an explicit read and assignment.'
+            );
+          const property = ts.isPropertyAccessExpression(node.left)
+            ? node.left.name.text
+            : ts.isStringLiteral(node.left.argumentExpression)
+              ? node.left.argumentExpression.text
+              : undefined;
+          if (property === undefined)
+            rejectNode(node.left, 'PUI1004', 'Member writes require a static key.');
+          let object = this.expression(module, node.left.expression, scope, phase);
+          const base = this.originalValueType(object, scope);
+          const widened = invalidateHeapFlow(
+            object.type,
+            base,
+            new Set(
+              valueAlternatives(base).flatMap(
+                (type) => objectFields(type)?.map((field) => field.name) ?? []
+              )
+            )
+          );
+          if (!sameType(object.type, widened))
+            object = { kind: 'narrow', value: object, type: widened, span: object.span };
+          const field =
+            objectFields(object.type)?.find((field) => field.name === property) ??
+            (typeof object.type !== 'string' &&
+            object.type.kind === 'object' &&
+            object.type.index !== undefined
+              ? { name: property, type: object.type.index }
+              : undefined);
+          if (!field || field.readonly)
+            rejectNode(
+              node.left,
+              'PUI1006',
+              'Member write requires a declared mutable ordinary field.'
+            );
+          const value = this.expression(module, node.right, scope, phase, undefined, field.type);
+          if (!assignable(value.type, field.type))
+            rejectNode(node.right, 'PUI1006', 'Member write type mismatch.');
+          this.invalidateFlow(scope, false, true);
+          return { kind: 'member-write', object, property, value, type: value.type, span };
+        }
         const cell = this.lexicalTarget(module, node.left, scope);
-        const type = lexicalValueType(cell.type)!;
-        let value = this.expression(module, node.right, scope, phase);
+        const type = lexicalStoredType(cell.type)!;
+        let value = this.expression(module, node.right, scope, phase, undefined, type);
         if (operator !== '=') {
           const binary = operator.slice(0, -1);
           if (!['+', '-', '*', '/', '%', '&&', '||', '??'].includes(binary))
@@ -1095,8 +1768,10 @@ class Frontend {
           };
           if (!isDataValueType(value.type))
             rejectNode(node.right, 'PUI1006', 'Lexical writes require data.');
+          if (!isDataValueType(type))
+            rejectNode(node, 'PUI1006', 'Compound writes require primitive data storage.');
           const result = this.checkedData(node, () =>
-            inferBinaryType(binary, type, value.type as DataType)
+            inferBinaryType(binary, type as DataType, value.type as DataType)
           );
           value = {
             kind: 'binary',
@@ -1109,13 +1784,59 @@ class Frontend {
         }
         if (!assignable(value.type, type))
           rejectNode(node.right, 'PUI1006', 'Lexical write does not satisfy its declared type.');
+        if (cell.kind === 'reference') {
+          const entry = [...scope].find(
+            ([name, binding]) => (binding.emittedName ?? name) === cell.name
+          );
+          if (entry) {
+            this.flow.writeCell(entry[1].bindingId ?? entry[1].emittedName ?? entry[0]);
+            scope.set(entry[0], {
+              ...entry[1],
+              lexical: type,
+              flowAt: this.flow.mark(entry[1].bindingId ?? entry[1].emittedName ?? entry[0]),
+            });
+          }
+        }
         return { kind: 'lexical-write', cell, value, type, span };
       }
       const left = this.expression(module, node.left, scope, phase),
-        right = this.expression(module, node.right, scope, phase);
+        right = this.expression(
+          module,
+          node.right,
+          operator === '&&' || operator === '||'
+            ? this.refinedScope(scope, left, operator === '&&')
+            : scope,
+          phase,
+          undefined,
+          operator === '??'
+            ? joinValueTypes(
+                valueAlternatives(left.type).filter((type) => type !== 'null' && type !== 'void')
+              )
+            : undefined
+        );
       const capabilityType = capabilityBinaryType(operator, left.type, right.type);
       if (capabilityType)
         return { kind: 'binary', operator: '??', left, right, type: capabilityType, span };
+      if (
+        ['&&', '||', '??'].includes(operator) &&
+        (!isDataValueType(left.type) || !isDataValueType(right.type))
+      ) {
+        const retained = valueAlternatives(left.type).filter((type) =>
+          operator === '??'
+            ? type !== 'null' && type !== 'void'
+            : operator === '&&'
+              ? type === 'null' || type === 'void' || type === 'boolean'
+              : type !== 'null' && type !== 'void'
+        );
+        return {
+          kind: 'binary',
+          operator: operator as '&&' | '||' | '??',
+          left,
+          right,
+          type: joinValueTypes([...retained, right.type]),
+          span,
+        };
+      }
       if (
         (operator === '===' || operator === '!==') &&
         (!isDataValueType(left.type) || !isDataValueType(right.type))
@@ -1140,36 +1861,52 @@ class Frontend {
         ts.isElementAccessExpression(node) &&
         !ts.isStringLiteral(node.argumentExpression) &&
         !ts.isNumericLiteral(node.argumentExpression)
-      )
-        rejectNode(node, 'PUI1004', 'Member access requires a checked static string or index.');
+      ) {
+        const object = this.expression(module, node.expression, scope, phase),
+          index = this.expression(module, node.argumentExpression, scope, phase);
+        const optional = ts.isElementAccessChain(node);
+        let type: ValueType;
+        if (
+          typeof object.type !== 'string' &&
+          object.type.kind === 'array' &&
+          index.type === 'number'
+        )
+          type = joinValueTypes([object.type.element, 'void']);
+        else if (
+          typeof object.type !== 'string' &&
+          object.type.kind === 'object' &&
+          object.type.index !== undefined &&
+          index.type === 'string'
+        )
+          type = joinValueTypes([object.type.index, 'void']);
+        else if (objectFields(object.type) && index.type === 'string')
+          // Structural records may contain additional fields absent from this type view.
+          type = 'unknown';
+        else rejectNode(node, 'PUI1006', 'Dynamic index requires a checked array or record.');
+        return { kind: 'element', object, index, optional, type, span };
+      }
       const property = ts.isPropertyAccessExpression(node)
         ? node.name.text
         : (node.argumentExpression as ts.StringLiteral | ts.NumericLiteral).text;
       const object = this.expression(module, node.expression, scope, phase);
       const optional = ts.isPropertyAccessChain(node) || ts.isElementAccessChain(node);
-      let type: ValueType;
-      const capabilityType = capabilityMemberType(object.type, property, optional);
-      if (capabilityType !== undefined) type = capabilityType;
-      else if (object.type === 'exception') type = 'exception';
-      else if (object.type === 'props') {
-        const prop = this.props.get(property);
-        if (!prop) rejectNode(node, 'PUI1006', `Read of undeclared prop ${property}.`);
-        type = prop.type;
-      } else if (eventPayloadMemberType(object.type, property) !== undefined)
-        type = eventPayloadMemberType(object.type, property)!;
-      else if (isDataValueType(object.type))
-        type = this.checkedData(node, () =>
-          memberDataType(object.type as DataType, property, { optional })
-        );
-      else rejectNode(node, 'PUI1004', `Unsupported member ${property} on ${String(object.type)}.`);
+      const type = this.checkedValue(node, () => this.memberType(object.type, property, optional));
       return { kind: 'member', object, property, optional, type, span };
     }
-    if (ts.isCallExpression(node)) return this.call(module, node, scope, phase);
+    if (ts.isCallExpression(node)) return this.call(module, node, scope, phase, expectedType);
     if (ts.isTemplateExpression(node)) {
       let value: ExpressionIR = { kind: 'literal', value: node.head.text, type: 'string', span };
       for (const part of node.templateSpans) {
         const item = this.expression(module, part.expression, scope, phase);
-        if (item.type !== 'string' && item.type !== 'number' && item.type !== 'boolean')
+        if (
+          !valueAlternatives(item.type).every(
+            (type) =>
+              type === 'string' ||
+              type === 'number' ||
+              type === 'boolean' ||
+              (typeof type !== 'string' && type.kind === 'literal' && type.value !== null)
+          )
+        )
           rejectNode(
             part.expression,
             'PUI1006',
@@ -1200,10 +1937,12 @@ class Frontend {
     );
   }
 
-  private contextType(expression?: ExpressionIR): DataType | undefined {
+  private contextType(expression?: ExpressionIR): ValueType | undefined {
     return expression?.kind === 'context-key'
       ? this.contextKeys.get(expression.keyId)?.type
-      : undefined;
+      : expression?.type === 'context-key'
+        ? { kind: 'object', fields: [], index: 'unknown' }
+        : undefined;
   }
 
   private moduleValue(
@@ -1217,29 +1956,48 @@ class Frontend {
     const initial = this.expression(module, value, new Map(), 'setup');
     if (initial.type !== 'boolean' && initial.type !== 'number' && initial.type !== 'string')
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    if (
-      ts.isVariableDeclaration(value.parent) &&
-      value.parent.type &&
-      !assignable(initial.type, parseSourceDataType(module, value.parent.type))
-    )
+    const annotation = ts.isVariableDeclaration(value.parent) ? value.parent.type : undefined;
+    const stored = annotation
+      ? parseSourceValueType(module, annotation, this.substitutions)
+      : initial.type;
+    if (!isDataValueType(stored))
       rejectNode(
-        value.parent.type,
+        annotation ?? value,
+        'PUI1006',
+        'Shared module storage requires finite data; owner closures and capabilities cannot escape into module storage.'
+      );
+    if (!assignable(initial.type, stored))
+      rejectNode(
+        annotation ?? value,
         'PUI1006',
         'Module initializer does not satisfy its declared type.'
       );
     const mutable = module.mutableBindings.has(name);
     const binding: Binding & { name: string } = {
       name: this.moduleName(),
-      type: mutable ? `lexical:${initial.type}` : initial.type,
-      ...(mutable ? { lexical: initial.type } : {}),
+      type: mutable
+        ? stored === 'boolean' || stored === 'number' || stored === 'string'
+          ? `lexical:${stored}`
+          : { kind: 'cell', value: stored }
+        : stored,
+      ...(mutable ? { lexical: stored } : {}),
     };
     this.moduleValues.set(id, binding);
     this.moduleBindings.push({
       kind: 'const',
       name: binding.name,
       value: mutable
-        ? { kind: 'lexical-cell', value: initial, type: binding.type, span: sourceSpan(value) }
-        : initial,
+        ? {
+            kind: 'lexical-cell',
+            value: sameType(initial.type, stored)
+              ? initial
+              : { kind: 'narrow', value: initial, type: stored, span: initial.span },
+            type: binding.type,
+            span: sourceSpan(value),
+          }
+        : sameType(initial.type, stored)
+          ? initial
+          : { kind: 'narrow', value: initial, type: stored, span: initial.span },
       span: sourceSpan(value),
     });
     return binding;
@@ -1272,7 +2030,19 @@ class Frontend {
     }
     if (!binding?.lexical)
       rejectNode(node, 'PUI1004', 'Mutation requires a declared lexical let binding.');
-    return { kind: 'reference', name, type: binding.type, span: sourceSpan(node) };
+    this.requireInitializedBinding(binding, node);
+    return {
+      kind: 'reference',
+      name: binding.emittedName ?? name,
+      bindingId: binding.bindingId,
+      type: binding.type,
+      span: sourceSpan(node),
+    };
+  }
+
+  private requireInitializedBinding(binding: Binding | undefined, node: ts.Node): void {
+    if (binding?.declarationScope === this.lexicalExecution && !binding.initializerParsed)
+      rejectNode(node, 'PUI1005', 'A lexical binding cannot be read before its initialization.');
   }
 
   private enforceHelperContext(fn: FunctionIR, origin: FunctionContext, phase: Phase): void {
@@ -1283,8 +2053,8 @@ class Frontend {
         return;
       }
       const record = value as Record<string, unknown>;
-      if (record.kind === 'function' && (record.function as FunctionIR).context !== 'helper')
-        return;
+      // Creating a closure does not execute its body or create a lifecycle boundary.
+      if (record.kind === 'function') return;
       if (record.kind === 'operation') {
         const issues = validateOperationPhase(
           String(record.operation),
@@ -1302,37 +2072,315 @@ class Frontend {
       for (const [key, child] of Object.entries(record))
         if (key !== 'span' && key !== 'type') inspect(child);
     };
-    fn.parameters.forEach((parameter) => {
-      if (parameter.default) inspect(parameter.default);
-    });
     inspect(fn.body);
   }
 
-  call(module: SourceModule, node: ts.CallExpression, scope: Scope, phase: Phase): ExpressionIR {
-    if (node.questionDotToken) rejectNode(node, 'PUI1004', 'Optional calls are unsupported.');
+  private previewCaptures(value: ExpressionIR, scope: Scope): void {
+    if (this.previewingCaptures || !this.hooks.size) return;
+    if (value.kind === 'authored-hook' && !value.arguments?.length) return;
+    this.previewingCaptures = true;
+    try {
+      const prefix = this.statementPrefixes.flatMap((body) => body);
+      const declared = new Set(
+        prefix.flatMap((statement) =>
+          statement.kind === 'const' ? [statement.bindingId ?? statement.name] : []
+        )
+      );
+      const parameters = [...scope]
+        .filter(([name, binding]) => !declared.has(binding.bindingId ?? name))
+        .map(([name, binding]) => ({
+          name: binding.emittedName ?? name,
+          bindingId: binding.bindingId,
+          type: binding.type,
+        }));
+      const setup: FunctionIR = {
+        parameters,
+        phase: 'setup',
+        context: 'setup',
+        returnType: 'void',
+        span: value.span,
+        body: [...prefix, { kind: 'effect', expression: value, span: value.span }],
+      };
+      const captures = derivePrototypeCaptures(
+        { setup, hooks: [...this.hooks.values()], moduleBindings: this.moduleBindings },
+        false
+      );
+      for (const [id, capture] of captures) {
+        const hook = this.hooks.get(id)!;
+        if (!this.captureTypes.has(id))
+          hook.capture = mergeHookCaptures([hook.capture!, capture], hook.span);
+      }
+    } catch (error) {
+      // A declaration may be parsed before its caller's actual arguments exist.
+      // The complete closed-graph derivation below remains the authoritative proof.
+      if (
+        !(error instanceof CompilerRejection) ||
+        !error.diagnostic.message.startsWith('Callable provenance')
+      )
+        throw error;
+    } finally {
+      this.previewingCaptures = false;
+    }
+  }
+
+  private ordinaryCall(
+    module: SourceModule,
+    node: ts.CallExpression,
+    callee: ExpressionIR,
+    scope: Scope,
+    phase: Phase,
+    known?: FunctionIR
+  ): ExpressionIR {
+    const optional = !!node.questionDotToken;
+    let signature: ReturnType<typeof callableValue>;
+    try {
+      signature = callableValue(callee.type, optional);
+    } catch (error) {
+      rejectNode(node, 'PUI1006', (error as Error).message);
+    }
+    const args = node.arguments.map((argument, index) =>
+      this.expression(module, argument, scope, phase, undefined, signature.parameters[index]?.type)
+    );
+    const type = this.checkedValue(node, () =>
+      checkedCall(
+        callee.type,
+        args.map((argument, index) =>
+          argument.type === 'props'
+            ? {
+                kind: 'record',
+                fields: [...this.props].map(([name, prop]) => ({ name, type: prop.type })),
+              }
+            : assignable(argument.type, signature.parameters[index]?.type ?? 'unknown')
+              ? argument.type
+              : (argumentData(argument) ?? argument.type)
+        ),
+        optional
+      )
+    );
+    if (known && this.context !== 'helper' && this.context !== 'expose-method')
+      this.enforceHelperContext(known, this.context, phase);
+    if (
+      functionCanMutateFlow(
+        known ?? (callee.kind === 'function' ? callee.function : undefined),
+        args
+      )
+    )
+      this.invalidateFlow(scope, true);
+    const value: ExpressionIR = {
+      kind: 'call',
+      callee,
+      arguments: args,
+      optional,
+      type,
+      span: sourceSpan(node),
+    };
+    const hasCapture = (type: ValueType): boolean =>
+      typeof type !== 'string' &&
+      (type.kind === 'capture' ||
+        (type.kind === 'value-union' && type.members.some(hasCapture)) ||
+        (type.kind === 'object' && type.fields.some((field) => hasCapture(field.type))));
+    if (hasCapture(type)) this.previewCaptures(value, scope);
+    return value;
+  }
+
+  private moduleHelper(
+    module: SourceModule,
+    name: string,
+    node: FunctionNode,
+    args: readonly ExpressionIR[],
+    typeArguments: readonly ts.TypeNode[] | undefined
+  ): { name: string; fn: FunctionIR } {
+    const previous = this.substitutions,
+      replacements = new Map<string, ValueType>();
+    const parameters = node.typeParameters ?? [];
+    parameters.forEach((parameter, index) => {
+      if (typeArguments?.[index])
+        replacements.set(
+          parameter.name.text,
+          parseSourceValueType(module, typeArguments[index], previous)
+        );
+    });
+    const infer = (type: ts.TypeNode, value: ValueType): void => {
+      if (
+        ts.isTypeReferenceNode(type) &&
+        ts.isIdentifier(type.typeName) &&
+        parameters.some(
+          (parameter) => parameter.name.text === (type.typeName as ts.Identifier).text
+        )
+      ) {
+        if (!replacements.has(type.typeName.text)) replacements.set(type.typeName.text, value);
+        return;
+      }
+      if (ts.isUnionTypeNode(type)) {
+        const concrete = type.types.filter(
+          (type) =>
+            type.kind !== ts.SyntaxKind.UndefinedKeyword &&
+            !(ts.isLiteralTypeNode(type) && type.literal.kind === ts.SyntaxKind.NullKeyword)
+        );
+        if (concrete.length === 1)
+          infer(
+            concrete[0],
+            joinValueTypes(
+              valueAlternatives(value).filter((type) => type !== 'null' && type !== 'void')
+            )
+          );
+      }
+      if (ts.isArrayTypeNode(type) && typeof value !== 'string' && value.kind === 'array')
+        infer(type.elementType, value.element);
+    };
+    node.parameters.forEach((parameter, index) => {
+      if (parameter.type && args[index]) infer(parameter.type, args[index].type);
+    });
+    parameters.forEach((parameter) => {
+      if (!replacements.has(parameter.name.text))
+        replacements.set(
+          parameter.name.text,
+          parameter.constraint
+            ? parseSourceValueType(module, parameter.constraint, previous)
+            : 'unknown'
+        );
+    });
+    const id = `${module.file.fileName}#${name}${parameters.length ? JSON.stringify([...replacements]) : ''}`;
+    const cached = this.moduleHelpers.get(id);
+    if (cached) return cached;
+    this.substitutions = replacements;
+    try {
+      const signature = this.previewFunction(module, node, new Map());
+      const fn: FunctionIR = {
+        parameters: signature.parameters,
+        body: [],
+        returnType: signature.returnType,
+        phase: this.helperPhase(
+          module,
+          node,
+          new Map(
+            node.parameters.map((parameter, index) => [
+              identifier(parameter.name),
+              { type: args[index]?.type ?? signature.parameters[index].type },
+            ])
+          )
+        ),
+        context: 'helper',
+        span: sourceSpan(node),
+      };
+      const helper = { name: this.moduleName(), fn };
+      this.moduleHelpers.set(id, helper);
+      const declaration: Extract<StatementIR, { kind: 'const' }> = {
+        kind: 'const',
+        name: helper.name,
+        value: { kind: 'function', function: fn, type: functionValueType(fn), span: fn.span },
+        span: fn.span,
+      };
+      this.moduleBindings.push(declaration);
+      Object.assign(
+        fn,
+        this.function(
+          module,
+          node,
+          new Map(),
+          fn.phase,
+          args.map((arg) => arg.type),
+          'helper'
+        )
+      );
+      declaration.value.type = functionValueType(fn);
+      return helper;
+    } finally {
+      this.substitutions = previous;
+    }
+  }
+
+  call(
+    module: SourceModule,
+    node: ts.CallExpression,
+    scope: Scope,
+    phase: Phase,
+    expectedType?: ValueType
+  ): ExpressionIR {
     const span = sourceSpan(node);
+    if (ts.isPropertyAccessExpression(node.expression)) {
+      const owner = node.expression.expression,
+        property = node.expression.name.text;
+      if (
+        ts.isIdentifier(owner) &&
+        !scope.has(owner.text) &&
+        !module.declarations.has(owner.text) &&
+        !module.imports.has(owner.text)
+      ) {
+        const name =
+          owner.text === 'Number' && property === 'isFinite'
+            ? 'number.isFinite'
+            : owner.text === 'Object' && property === 'freeze'
+              ? 'object.freeze'
+              : owner.text === 'Object' && property === 'hasOwn'
+                ? 'object.hasOwn'
+                : undefined;
+        if (name) {
+          const args = node.arguments.map((argument) =>
+            this.expression(
+              module,
+              argument,
+              scope,
+              phase,
+              undefined,
+              name === 'object.freeze' ? expectedType : undefined
+            )
+          );
+          return {
+            kind: 'intrinsic',
+            name,
+            arguments: args,
+            type: this.checkedValue(node, () =>
+              intrinsicResult(
+                name,
+                args.map((arg) => arg.type)
+              )
+            ),
+            span,
+          };
+        }
+      }
+      if (property === 'every') {
+        const array = this.expression(module, owner, scope, phase);
+        if (typeof array.type !== 'string' && array.type.kind === 'array') {
+          const callback = node.arguments[0];
+          if (!callback || node.arguments.length !== 1)
+            rejectNode(node, 'PUI1006', 'Array every requires one callback.');
+          const value = this.expression(module, callback, scope, phase, undefined, {
+            kind: 'callable',
+            parameters: [{ name: 'value', type: array.type.element }],
+            returnType: 'unknown',
+          });
+          return {
+            kind: 'intrinsic',
+            name: 'array.every',
+            arguments: [array, value],
+            type: this.checkedValue(node, () =>
+              intrinsicResult('array.every', [array.type, value.type])
+            ),
+            span,
+          };
+        }
+      }
+    }
     let operation: SemanticOperation | undefined, receiver: ExpressionIR | undefined;
+    let optionalOperation = false;
     if (ts.isIdentifier(node.expression)) {
       const name = node.expression.text,
         binding = scope.get(name);
       if (binding) {
-        this.readCallable(binding, node.expression);
+        this.resolvePending(binding);
         if (
-          [
-            'style-disposer',
-            'subscription-disposer',
-            'binding-disposer',
-            'transition-action',
-          ].includes(String(binding.type))
+          ['style-disposer', 'subscription-disposer', 'binding-disposer'].includes(
+            String(binding.type)
+          )
         ) {
           const release: SemanticOperation =
             binding.type === 'style-disposer'
               ? 'feedback.style.release'
               : binding.type === 'subscription-disposer'
                 ? 'subscription.release'
-                : binding.type === 'binding-disposer'
-                  ? 'binding.release'
-                  : 'transitionAction.call';
+                : 'binding.release';
           const arguments_ = node.arguments.map((argument) =>
             this.expression(module, argument, scope, phase)
           );
@@ -1355,132 +2403,58 @@ class Frontend {
             span,
           };
         }
-        if (this.activeHelpers.has(name))
-          rejectNode(node, 'PUI1008', `Recursive helper ${name} is unsupported.`);
-        if (!binding.helper || binding.type !== 'function')
-          rejectNode(node, 'PUI1004', `Calling ${name} is not an admitted static helper.`);
-        const args = node.arguments.map((argument) =>
-          this.expression(module, argument, scope, phase)
+        const callee = this.expression(module, node.expression, scope, phase);
+        return this.ordinaryCall(
+          module,
+          node,
+          callee,
+          scope,
+          phase,
+          binding.parsing || binding.lexical ? undefined : binding.helper
         );
-        const required = binding.helper.parameters.filter(
-          (parameter) => !parameter.optional
-        ).length;
-        if (args.length < required || args.length > binding.helper.parameters.length)
-          rejectNode(node, 'PUI1006', `Helper ${name} argument count mismatch.`);
-        args.forEach((argument, index) => {
-          const signature = binding.helper!.parameters[index].callback;
-          const fn =
-            argument.kind === 'function'
-              ? argument.function
-              : argument.kind === 'reference'
-                ? scope.get(argument.name)?.helper
-                : undefined;
-          if (signature && !checkedCallbackMatches(fn, signature))
-            rejectNode(
-              node.arguments[index],
-              'PUI1006',
-              'Helper callback requires a compatible checked signature.'
-            );
-          if (signature && fn && this.context !== 'helper')
-            this.enforceHelperContext(fn, this.context, phase);
-          const expected = binding.helper!.parameters[index].type;
-          if (
-            !assignable(argument.type, expected) &&
-            !assignable(
+      }
+      if (!module.imports.has(name) && !module.declarations.has(name))
+        rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
+      const resolved = this.graph.resolveBinding(module, name);
+      if (resolved.module && isSourceFunction(resolved.node)) {
+        const signature = resolved.node.typeParameters?.length
+          ? undefined
+          : this.previewFunction(resolved.module, resolved.node, new Map());
+        const args = node.arguments.map((argument, index) =>
+          this.expression(
+            module,
+            argument,
+            scope,
+            phase,
+            undefined,
+            signature?.parameters[index]?.type
+          )
+        );
+        const helper = this.moduleHelper(
+          resolved.module,
+          resolved.name,
+          resolved.node,
+          args,
+          node.typeArguments
+        );
+        this.checkedValue(node, () =>
+          checkedCall(
+            functionValueType(helper.fn),
+            args.map((argument, index) =>
               argument.type === 'props'
                 ? {
                     kind: 'record',
                     fields: [...this.props].map(([name, prop]) => ({ name, type: prop.type })),
                   }
-                : (argumentData(argument) ?? argument.type),
-              expected
+                : assignable(argument.type, helper.fn.parameters[index]?.type ?? 'unknown')
+                  ? argument.type
+                  : (argumentData(argument) ?? argument.type)
             )
           )
-            rejectNode(node.arguments[index], 'PUI1006', 'Helper argument type mismatch.');
-        });
-        if (this.context !== 'helper')
-          this.enforceHelperContext(binding.helper, this.context, phase);
-        return {
-          kind: 'helper-call',
-          name,
-          arguments: args,
-          type: binding.helper.returnType,
-          span,
-        };
-      }
-      if (!module.imports.has(name) && !module.declarations.has(name))
-        rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
-      const resolved = this.graph.resolveBinding(module, name);
-      if (
-        resolved.module &&
-        (ts.isFunctionDeclaration(resolved.node) ||
-          ts.isArrowFunction(resolved.node) ||
-          ts.isFunctionExpression(resolved.node))
-      ) {
-        const args = node.arguments.map((argument) =>
-          this.expression(module, argument, scope, phase)
         );
-        const id = `${resolved.module.file.fileName}#${resolved.name}`;
-        if (this.activeHelpers.has(id))
-          rejectNode(node, 'PUI1008', 'Recursive module helper is unsupported.');
-        let helper = this.moduleHelpers.get(id);
-        if (!helper) {
-          this.activeHelpers.add(id);
-          const name = this.moduleName();
-          const parameters: Scope = new Map();
-          resolved.node.parameters.forEach((parameter, index) => {
-            if (ts.isIdentifier(parameter.name) && args[index])
-              parameters.set(parameter.name.text, { type: args[index].type });
-          });
-          const fn = this.function(
-            resolved.module,
-            resolved.node,
-            new Map(),
-            this.helperPhase(resolved.module, resolved.node, parameters),
-            args.map((argument) => argument.type),
-            'helper'
-          );
-          this.activeHelpers.delete(id);
-          helper = { name, fn };
-          this.moduleHelpers.set(id, helper);
-          this.moduleBindings.push({
-            kind: 'const',
-            name,
-            value: {
-              kind: 'function',
-              function: fn,
-              type: 'function',
-              span: sourceSpan(resolved.node),
-            },
-            span: sourceSpan(resolved.node),
-          });
-        }
-        const required = helper.fn.parameters.filter((parameter) => !parameter.optional).length;
-        if (args.length < required || args.length > helper.fn.parameters.length)
-          rejectNode(node, 'PUI1006', 'Module helper argument count mismatch.');
-        args.forEach((argument, index) => {
-          const signature = helper!.fn.parameters[index].callback;
-          const fn =
-            argument.kind === 'function'
-              ? argument.function
-              : argument.kind === 'reference'
-                ? scope.get(argument.name)?.helper
-                : undefined;
-          if (signature && !checkedCallbackMatches(fn, signature))
-            rejectNode(
-              node.arguments[index],
-              'PUI1006',
-              'Helper callback requires a compatible checked signature.'
-            );
-          if (signature && fn && this.context !== 'helper')
-            this.enforceHelperContext(fn, this.context, phase);
-          if (
-            !assignable(argument.type, helper!.fn.parameters[index].type) &&
-            !assignable(argumentData(argument) ?? argument.type, helper!.fn.parameters[index].type)
-          )
-            rejectNode(node.arguments[index], 'PUI1006', 'Module helper argument type mismatch.');
-        });
-        if (this.context !== 'helper') this.enforceHelperContext(helper.fn, this.context, phase);
+        if (this.context !== 'helper' && this.context !== 'expose-method')
+          this.enforceHelperContext(helper.fn, this.context, phase);
+        if (functionCanMutateFlow(helper.fn, args)) this.invalidateFlow(scope, true);
         return {
           kind: 'helper-call',
           name: helper.name,
@@ -1502,15 +2476,29 @@ class Frontend {
         };
       if (resolved.module === null && resolved.imported.module === '@proto.ui/hooks')
         operation = admittedHookOperation(resolved.name);
-      else if (resolved.module === null && Object.hasOwn(PACKAGED_HOOKS, resolved.imported.module))
-        operation = PACKAGED_HOOKS[resolved.imported.module][resolved.name];
+      else if (
+        resolved.module === null &&
+        resolved.imported.module === '@proto.ui/core' &&
+        Object.hasOwn(CORE_FUNCTIONS, resolved.name)
+      )
+        operation = CORE_FUNCTIONS[resolved.name as keyof typeof CORE_FUNCTIONS];
       else if (resolved.module !== null && ts.isCallExpression(resolved.node)) {
-        if (phase !== 'setup' || node.arguments.length)
-          rejectNode(node, 'PUI1007', 'Authored hooks require a static no-argument setup call.');
+        const factory = ts.isIdentifier(resolved.node.expression)
+          ? this.graph.resolveCoreImport(resolved.module, resolved.node.expression.text)
+          : undefined;
+        if (
+          (phase !== 'setup' && this.context !== 'helper') ||
+          (factory === 'defineAsHook' && node.arguments.length) ||
+          node.arguments.length > 1
+        )
+          rejectNode(
+            node,
+            'PUI1007',
+            'Authored hooks install during setup; as-hooks accept no arguments.'
+          );
         if (
           !ts.isIdentifier(resolved.node.expression) ||
-          this.graph.resolveCoreImport(resolved.module, resolved.node.expression.text) !==
-            'defineAsHook'
+          (factory !== 'defineAsHook' && factory !== 'defineHook')
         )
           rejectNode(node, 'PUI1004', 'Only static authored-hook source calls are admitted.');
         const definition = { module: resolved.module, node: resolved.node };
@@ -1521,28 +2509,134 @@ class Frontend {
           this.activeHooks.add(id);
           const descriptor = this.graph.descriptor(definition.module, definition.node);
           this.addModuleDeclarations(descriptor.modules);
-          const setup = this.function(definition.module, descriptor.setup, new Map(), 'setup', [
-            'def',
-          ]);
-          this.hooks.set(id, { id, name: descriptor.name, setup, span: descriptor.span });
+          const optionsNode =
+            definition.node.typeArguments?.[3] ?? descriptor.setup.parameters[1]?.type;
+          const optionsType =
+            factory === 'defineHook'
+              ? optionsNode
+                ? parseSourceValueType(
+                    optionsNode === definition.node.typeArguments?.[3]
+                      ? definition.module
+                      : descriptor.setupModule,
+                    optionsNode,
+                    this.substitutions
+                  )
+                : 'void'
+              : undefined;
+          const setup = this.function(
+            descriptor.setupModule,
+            descriptor.setup,
+            new Map(),
+            'setup',
+            factory === 'defineHook' ? ['def', optionsType!, HOOK_API_TYPE] : ['def'],
+            factory === 'defineHook' ? 'helper' : 'setup',
+            undefined,
+            true
+          );
+          if (
+            factory === 'defineHook' &&
+            (setup.parameters.length > 3 ||
+              setup.parameters.some(
+                (parameter, index) =>
+                  !sameType(
+                    parameter.type,
+                    (['def', optionsType!, HOOK_API_TYPE] satisfies ValueType[])[index]
+                  )
+              ))
+          )
+            rejectNode(
+              descriptor.setup,
+              'PUI1006',
+              'Hook setup receives def, options, and its per-installation API.'
+            );
+          const capture =
+            this.captureTypes.get(id) ??
+            deriveHookCapture(
+              setup,
+              this.moduleBindings,
+              new Map([...this.hooks].map(([id, hook]) => [id, hook.name])),
+              [...this.hooks.values()]
+            );
+          const hook: AuthoredHookIR = {
+            id,
+            name: descriptor.name,
+            kind: factory === 'defineAsHook' ? 'as-hook' : 'hook',
+            mode: descriptor.mode ?? 'once',
+            ...(optionsType !== undefined ? { optionsType } : {}),
+            setup,
+            capture,
+            span: descriptor.span,
+          };
+          this.hooks.set(id, hook);
+          if (descriptor.configure) {
+            hook.configure = this.function(
+              descriptor.configureModule ?? definition.module,
+              descriptor.configure,
+              new Map(),
+              'setup',
+              [HOOK_API_TYPE, optionsType!, HOOK_TOOLS_TYPE],
+              'helper',
+              'void'
+            );
+            if (
+              hook.configure.parameters.length > 3 ||
+              hook.configure.parameters.some(
+                (parameter, index) =>
+                  !sameType(parameter.type, [HOOK_API_TYPE, optionsType!, HOOK_TOOLS_TYPE][index])
+              )
+            )
+              rejectNode(
+                descriptor.configure,
+                'PUI1006',
+                'Hook configure receives its per-installation API, options, and configure tools.'
+              );
+          }
+          if (descriptor.projectHandle)
+            hook.projectHandle = this.function(
+              descriptor.projectModule ?? definition.module,
+              descriptor.projectHandle,
+              new Map(),
+              'setup',
+              [{ kind: 'capture', hookId: id }],
+              'helper'
+            );
           this.activeHooks.delete(id);
         }
         this.requirements.add('authored-hook');
-        return { kind: 'authored-hook', hookId: id, type: 'authored-result', span };
+        const hook = this.hooks.get(id)!;
+        const args = node.arguments.map((argument) =>
+          this.expression(module, argument, scope, phase, undefined, hook.optionsType)
+        );
+        if (
+          args.some(
+            (argument) => argument.type !== 'void' && !assignable(argument.type, hook.optionsType!)
+          )
+        )
+          rejectNode(node, 'PUI1006', 'Hook options do not satisfy the declared caller input.');
+        const invocation: ExpressionIR = {
+          kind: 'authored-hook',
+          hookId: id,
+          ...(args.length ? { arguments: args } : {}),
+          type: hook.projectHandle?.returnType ?? { kind: 'capture', hookId: id },
+          span,
+        };
+        this.previewCaptures(invocation, scope);
+        return invocation;
       } else rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
     } else if (ts.isPropertyAccessExpression(node.expression)) {
       // Resolve the public path against the single operation table, including renderer.read.*.
       const paths: string[] = [];
       let root: ts.Expression = node.expression;
       while (ts.isPropertyAccessExpression(root)) {
+        optionalOperation ||= !!root.questionDotToken;
         paths.unshift(root.name.text);
         root = root.expression;
       }
       if (ts.isIdentifier(root) && scope.has(root.text)) {
-        const value = scope.get(root.text)!;
+        const value = this.expression(module, root, scope, phase);
         const fullPath =
           value.type === 'render' && paths.join('.') === 'r.slot' ? 'slot' : paths.join('.');
-        const family = stateValue(value.type) ? 'state:boolean' : value.type;
+        const family = operationReceiverType(value.type);
         const match = Object.entries(OPERATION_RULES).find(
           ([, rule]) => rule.path === fullPath && sameType(rule.receiver, family)
         );
@@ -1553,7 +2647,7 @@ class Frontend {
       }
       if (!operation) {
         receiver = this.expression(module, node.expression.expression, scope, phase);
-        const family = stateValue(receiver.type) ? 'state:boolean' : receiver.type;
+        const family = operationReceiverType(receiver.type);
         const path = node.expression.name.text;
         const match = Object.entries(OPERATION_RULES).find(
           ([, rule]) => rule.path === path && sameType(rule.receiver, family)
@@ -1562,10 +2656,12 @@ class Frontend {
       }
     }
     if (!operation)
-      rejectNode(
+      return this.ordinaryCall(
+        module,
         node,
-        'PUI1004',
-        `Call ${node.expression.getText(module.file)} is outside the supported semantic operation set.`
+        this.expression(module, node.expression, scope, phase),
+        scope,
+        phase
       );
     const rule: OperationRule = OPERATION_RULES[operation];
     const phaseIssues = validateOperationPhase(
@@ -1573,10 +2669,7 @@ class Frontend {
       phase,
       this.context === 'setup' || this.context === 'render' ? undefined : this.context
     );
-    if (
-      phaseIssues.length &&
-      !(this.context === 'helper' && phaseIssues.every((issue) => issue.code === 'context'))
-    )
+    if (phaseIssues.length && this.context !== 'helper')
       rejectNode(node, 'PUI1007', phaseIssues[0].message);
     if (node.arguments.length < rule.min || node.arguments.length > rule.max)
       rejectNode(node, 'PUI1006', `Invalid argument count for ${operation}.`);
@@ -1614,10 +2707,34 @@ class Frontend {
       };
     }
     const bindings: OperationBindings = {
+      declaredEvents: new Set(this.eventKinds.keys()),
       propNames: new Set(this.props.keys()),
       stateValueType: stateValue(receiver?.type),
+      stateDataType:
+        receiver?.kind === 'reference'
+          ? [...scope.values()].find((binding) => (binding.emittedName ?? '') === receiver.name)
+              ?.stateData
+          : undefined,
       ...(phase === 'callback' ? { callbackContext: this.context as CallbackContext } : {}),
     };
+    const receiverType = receiver
+      ? joinValueTypes(
+          valueAlternatives(receiver.type).filter((type) => type !== 'null' && type !== 'void')
+        )
+      : undefined;
+    const checkedReceiver =
+      receiverType && typeof receiverType !== 'string' && receiverType.kind === 'capture'
+        ? 'authored-result'
+        : receiverType;
+    if (receiverType && typeof receiverType !== 'string' && receiverType.kind === 'capture') {
+      bindings.capture = this.hooks.get(receiverType.hookId)?.capture;
+      bindings.childHandles = new Map(
+        [...this.hooks].map(([id, hook]) => [
+          id,
+          hook.projectHandle?.returnType ?? { kind: 'capture', hookId: id },
+        ])
+      );
+    }
     const args: ExpressionIR[] = [];
     for (const [index, argument] of node.arguments.entries()) {
       const callback = operationCallbackRule(operation, index);
@@ -1627,8 +2744,16 @@ class Frontend {
           ts.isArrowFunction(argument) ||
           ts.isFunctionExpression(argument))
       ) {
-        if (!ts.isArrowFunction(argument) && !ts.isFunctionExpression(argument))
-          rejectNode(argument, 'PUI1005', 'Registration requires an inline checked callback.');
+        if (!ts.isArrowFunction(argument) && !ts.isFunctionExpression(argument)) {
+          const value = this.expression(module, argument, scope, phase);
+          const signature = callableValue(value.type);
+          if (callback.parameterPolicy === 'declared-method') {
+            bindings.methodParameters = signature.parameters;
+            bindings.methodReturnType = signature.returnType;
+          }
+          args.push(value);
+          continue;
+        }
         let expected = callback.parameters;
         if (
           callback.parameterPolicy === 'context-value' ||
@@ -1654,35 +2779,66 @@ class Frontend {
             );
           expected = ['run', `state-event:${bindings.stateValueType}`];
         }
-        const context = callback.contextFrom === 'caller' ? this.context : callback.context;
-        const fn = this.function(module, argument, scope, callback.phase, expected, context);
+        const context =
+          callback.parameterPolicy === 'declared-method'
+            ? 'helper'
+            : callback.contextFrom === 'caller'
+              ? this.context
+              : callback.context;
+        const fn = this.function(
+          module,
+          argument,
+          scope,
+          callback.parameterPolicy === 'declared-method'
+            ? this.helperPhase(module, argument, scope)
+            : callback.phase,
+          expected,
+          context
+        );
         if (callback.parameterPolicy === 'declared-method') {
           bindings.methodParameters = fn.parameters;
           bindings.methodReturnType = fn.returnType;
         }
-        args.push({ kind: 'function', type: 'function', function: fn, span: sourceSpan(argument) });
+        args.push({
+          kind: 'function',
+          type: callback.parameterPolicy === 'declared-method' ? functionValueType(fn) : 'function',
+          function: fn,
+          span: sourceSpan(argument),
+        });
       } else
         args.push(
           this.expression(module, argument, scope, phase, operationArgumentRule(operation, index))
         );
       if (index === 0) {
+        if (operation.startsWith('capture.'))
+          bindings.captureKey = this.literalString(args[0], argument);
         bindings.contextValueType = this.contextType(args[0]);
         if (operation === 'event.on' || operation === 'event.onGlobal') {
           const type = this.literalString(args[0], argument);
           bindings.inputPayloadType = type.startsWith('host:') ? 'host-event' : 'event';
         }
         if (operation === 'expose.emit') {
-          const name = this.literalString(args[0], argument);
-          const exposure = this.exposes.get(name);
-          if (!exposure || exposure.kind !== 'event')
-            rejectNode(argument, 'PUI1006', `Emit requires a declared outward event ${name}.`);
-          bindings.eventPayloadType = exposure.payload;
+          const names = finiteStringKeys(args[0]);
+          if (!names) rejectNode(argument, 'PUI1006', 'Emit requires finite declared event keys.');
+          const types = names.map((name) => {
+            const exposure = this.exposes.get(name);
+            if (!exposure || exposure.kind !== 'event')
+              rejectNode(argument, 'PUI1006', `Emit requires a declared outward event ${name}.`);
+            return exposure.payload;
+          });
+          if (!types.every((type) => sameType(type, types[0])))
+            rejectNode(
+              argument,
+              'PUI1006',
+              'Dynamic event keys require one shared payload signature.'
+            );
+          bindings.eventPayloadType = types[0];
         }
       }
     }
     if (operation === 'expose.emit') {
-      const name = this.literalString(args[0], node.arguments[0]);
-      const kind = this.eventKinds.get(name)!;
+      const names = finiteStringKeys(args[0])!;
+      const kind = this.eventKinds.get(names[0])!;
       const payload = args[1]?.type ?? 'void';
       if (
         !isDataValueType(payload) ||
@@ -1690,10 +2846,10 @@ class Frontend {
         (kind === 'json' && payload === 'void')
       )
         rejectNode(node, 'PUI1006', 'Outward payload does not match its declared data boundary.');
-      this.eventPayloads.get(name)!.push(payload);
+      for (const name of names) this.eventPayloads.get(name)!.push(payload);
       bindings.eventPayloadType = kind === 'void' ? 'void' : payload;
     }
-    const issues = validateOperationArguments(operation, args, receiver?.type, bindings);
+    const issues = validateOperationArguments(operation, args, checkedReceiver, bindings);
     if (issues.length)
       rejectNode(
         node.arguments[issues[0].argument ?? -1] ?? node,
@@ -1701,13 +2857,21 @@ class Frontend {
         issues[0].message
       );
     this.metadata(operation, node, args, receiver);
-    const type = operationResultType(operation, receiver?.type, bindings);
+    let type = operationResultType(operation, checkedReceiver, bindings);
     if (type === undefined)
       rejectNode(node, 'PUI1006', 'Semantic result type could not be resolved.');
+    if (optionalOperation) type = joinValueTypes([type, 'void']);
+    if (
+      OPERATION_RULES[operation].effects.some((effect) =>
+        ['write', 'signal', 'request-update'].includes(effect.kind)
+      )
+    )
+      this.invalidateFlow(scope, true);
     return {
       kind: 'operation',
       operation,
       ...(receiver ? { receiver } : {}),
+      ...(optionalOperation ? { optional: true } : {}),
       arguments: args,
       type,
       span,
@@ -1724,46 +2888,6 @@ class Frontend {
     if (operation === 'hook.asTableStructure') {
       const family = tableStructureFamily(span);
       if (!this.staticDeclarations.has(family.id)) this.staticDeclarations.set(family.id, family);
-    }
-    if (operation === 'hook.asTransition' && !this.builtinHooks.has(operation)) {
-      this.builtinHooks.add(operation);
-      for (const [name, type] of Object.entries({
-        open: 'boolean',
-        defaultOpen: 'boolean',
-        appear: 'boolean',
-        enterDuration: 'number',
-        leaveDuration: 'number',
-        interrupt: 'string',
-      })) {
-        const prior = this.props.get(name);
-        if (prior && !sameType(prior.type, type as DataType))
-          rejectNode(
-            node,
-            'PUI1006',
-            `Transition prop ${name} conflicts with the existing schema.`
-          );
-        this.props.set(name, { name, type: type as DataType, span });
-      }
-      for (const name of ['beforeEnter', 'afterEnter', 'beforeLeave', 'afterLeave']) {
-        this.exposes.set(name, { name, kind: 'event', payload: 'void', span });
-        this.eventKinds.set(name, 'void');
-        this.eventPayloads.set(name, []);
-      }
-      this.exposes.set('transitionState', {
-        name: 'transitionState',
-        kind: 'state',
-        type: 'string',
-        span,
-      });
-      this.exposes.set('isPresent', { name: 'isPresent', kind: 'state', type: 'boolean', span });
-      for (const name of ['enter', 'leave', 'complete'])
-        this.exposes.set(name, { name, kind: 'method', parameters: [], returnType: 'void', span });
-      this.exposes.set('controls', {
-        name: 'controls',
-        kind: 'value',
-        type: 'transition-controls',
-        span,
-      });
     }
     if (operation === 'collection.configure' || operation === 'collectionItem.configure') {
       if (args[0].kind !== 'record')
@@ -1813,18 +2937,21 @@ class Frontend {
         if (entry.value.kind !== 'record')
           rejectNode(node, 'PUI1006', 'Prop schema must be a literal record.');
         const item = entry.value.entries.find((value) => value.key === 'type');
-        const declaredKind = item?.value.kind === 'literal' ? item.value.value : undefined;
-        let type: DataType;
-        if (declaredKind === 'enum') {
-          const options = entry.value.entries.find((field) => field.key === 'options')?.value;
+        let type: DataType | undefined =
+          item?.value.kind === 'literal' &&
+          ['boolean', 'number', 'string'].includes(String(item.value.value))
+            ? (item.value.value as DataType)
+            : undefined;
+        if (item?.value.kind === 'literal' && item.value.value === 'enum') {
+          const options = entry.value.entries.find((entry) => entry.key === 'options')?.value;
           if (
             options?.kind !== 'array' ||
             !options.elements.length ||
-            options.elements.some(
-              (option) => option.kind !== 'literal' || typeof option.value !== 'string'
+            !options.elements.every(
+              (option) => option.kind === 'literal' && typeof option.value === 'string'
             )
           )
-            rejectNode(node, 'PUI1006', 'Enum props require a nonempty checked string array.');
+            rejectNode(node, 'PUI1006', 'Enum props require finite static string options.');
           type = parseDataType({
             kind: 'union',
             members: options.elements.map((option) => ({
@@ -1832,18 +2959,9 @@ class Frontend {
               value: (option as Extract<ExpressionIR, { kind: 'literal' }>).value,
             })),
           });
-        } else if (
-          declaredKind === 'boolean' ||
-          declaredKind === 'number' ||
-          declaredKind === 'string'
-        )
-          type = declaredKind;
-        else
-          rejectNode(
-            node,
-            'PUI1006',
-            'Props require a checked primitive or enum data declaration.'
-          );
+        }
+        if (type === undefined)
+          rejectNode(node, 'PUI1006', 'Only declared primitive props are currently admitted.');
         const prior = this.props.get(entry.key);
         if (prior && !sameType(prior.type, type))
           rejectNode(node, 'PUI1006', `Conflicting prop type ${entry.key}.`);
@@ -1890,9 +3008,8 @@ class Frontend {
           );
         exposure = { name, kind: 'value', type: args[1].type, span };
       } else {
-        if (args[1].kind !== 'function')
-          rejectNode(node, 'PUI1006', 'Expose method needs a checked callback.');
-        if (!isPublicValueType(args[1].function.returnType))
+        const method = args[1].kind === 'function' ? args[1].function : callableValue(args[1].type);
+        if (!isPublicValueType(method.returnType))
           rejectNode(
             node,
             'PUI1006',
@@ -1901,8 +3018,8 @@ class Frontend {
         exposure = {
           name,
           kind: 'method',
-          parameters: args[1].function.parameters,
-          returnType: args[1].function.returnType,
+          parameters: method.parameters,
+          returnType: method.returnType,
           span,
         };
       }
@@ -1950,7 +3067,9 @@ class Frontend {
       rejectNode(definition.node, 'PUI1002', 'A subjectless asHook requires a caller prototype.');
     const descriptor = this.graph.descriptor(definition.module, definition.node);
     this.addModuleDeclarations(descriptor.modules);
-    const setup = this.function(definition.module, descriptor.setup, new Map(), 'setup', ['def']);
+    const setup = this.function(descriptor.setupModule, descriptor.setup, new Map(), 'setup', [
+      'def',
+    ]);
     for (const loaded of this.graph.modules.values())
       for (const [name, declaration] of loaded.declarations) {
         if (ts.isCallExpression(declaration)) {
@@ -1978,13 +3097,11 @@ class Frontend {
       if (exposure.kind === 'event' && this.eventKinds.get(name) !== 'void')
         exposure.payload = union(values, descriptor.setup) as DataType;
     }
-    const sourceFiles = [
-      ...new Map(
-        [...this.graph.modules]
-          .map(([name, module]) => [name, module.file] as [string, ts.SourceFile])
-          .concat([...this.graph.typeSources])
-      ),
-    ]
+    const recordedSources = new Map(
+      [...this.graph.modules].map(([name, module]) => [name, module.file])
+    );
+    for (const [name, file] of this.graph.typeSources) recordedSources.set(name, file);
+    const sourceFiles = [...recordedSources]
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([file, value]) => ({
         file,
@@ -2020,7 +3137,36 @@ export function parsePrototype(
   options: ParseOptions = {}
 ): CompileResult<PrototypeIR> {
   try {
-    return { ok: true, value: new Frontend(source, options).compile() };
+    // Readonly is a view permission, not a promise that aliases never mutate.
+    // Derive the write footprint from lowered code, then recheck observations
+    // with the same footprint that a source-free IR importer independently sees.
+    let fields: ReadonlySet<string> = new Set();
+    let captures: ReadonlyMap<string, import('./ir').HookCaptureIR> = new Map();
+    let value: PrototypeIR;
+    const observedFootprints = new Set<string>();
+    for (;;) {
+      const key = JSON.stringify([[...fields].sort(), [...captures]]);
+      if (observedFootprints.has(key))
+        throw new Error('Member-write flow analysis did not reach a stable checked graph.');
+      observedFootprints.add(key);
+      value = new Frontend(source, options, fields, captures).compile();
+      const closedCaptures = derivePrototypeCaptures(value);
+      const capturesStable = JSON.stringify([...captures]) === JSON.stringify([...closedCaptures]);
+      for (const hook of value.hooks) hook.capture = closedCaptures.get(hook.id);
+      const loweredFields = writtenMemberFields(value);
+      if (
+        capturesStable &&
+        fields.size === loweredFields.size &&
+        [...fields].every((field) => loweredFields.has(field))
+      )
+        break;
+      fields = loweredFields;
+      captures = closedCaptures;
+    }
+    const effect = callableEffectIssue(value);
+    if (effect)
+      throw new CompilerRejection({ code: 'PUI1007', category: 'unsupported-input', ...effect });
+    return { ok: true, value };
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
     const file = sourceName(options.fileName ?? 'input.proto.ts');

@@ -26,6 +26,13 @@ import {
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { loadPrototypes } from './prototype-modules';
+import {
+  externalProjectionPortalRoots,
+  lockExternalPortalRoot,
+  removeExternalGenerationSurfaces,
+  sealExternalProjectionPortals,
+  unlockExternalPortalRoot,
+} from './projection-portal-seal';
 import { releaseHostMount } from './runtimes/host-mount';
 import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 
@@ -47,6 +54,15 @@ export type ProjectionMaterializerOptions = Readonly<{
   yieldAfterPaint?: boolean;
   /** First-view preparation can yield while another consumer is preparing. */
   backgroundPreparation?: Readonly<{ signal: AbortSignal; isPending(): boolean }>;
+  /**
+   * Host-owned seal for the open portals of the generation that is leaving.
+   *
+   * A control switch request is applied after the control's own close
+   * handback, so the host must seal the outgoing generation's portals in the
+   * request's own turn. The host owns the whole scope, so it can seal the
+   * candidates this composition does not own.
+   */
+  sealOutgoingPortals?: () => void;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -54,6 +70,12 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
     host: HTMLElement;
     scope: HTMLElement;
     setThemeSurfaceStyle(theme: ProjectionThemeSurfaceStyle): void;
+   /**
+    * Seal this generation's open external portals without switching.
+    * Candidates that do not own external portals (e.g. typography) may omit
+    * this; the callback is a no-op for them.
+    */
+   sealExternalPortals?(): void;
   }>;
 
 // A focus lease belongs to the exact materialized composition, not a DOM role.
@@ -96,100 +118,6 @@ function generationHosts(mount: HTMLElement, ownerId: string): HTMLElement[] {
   return Array.from(
     mount.querySelectorAll<HTMLElement>('[data-projection-generation-host]')
   ).filter((host) => host.dataset.projectionOwnerHost === ownerId);
-}
-
-type InlineStyleSnapshot = Readonly<{
-  value: string;
-  priority: string;
-}>;
-
-type ExternalPortalVisibilitySnapshot = Readonly<{
-  inert: boolean;
-  ariaHidden: string | null;
-  visibility: InlineStyleSnapshot;
-  pointerEvents: InlineStyleSnapshot;
-}>;
-
-const externalPortalVisibilitySnapshots = new WeakMap<
-  HTMLElement,
-  ExternalPortalVisibilitySnapshot
->();
-
-function inlineStyleSnapshot(element: HTMLElement, property: string): InlineStyleSnapshot {
-  return {
-    value: element.style.getPropertyValue(property),
-    priority: element.style.getPropertyPriority(property),
-  };
-}
-
-function restoreInlineStyle(
-  element: HTMLElement,
-  property: string,
-  snapshot: InlineStyleSnapshot
-): void {
-  if (snapshot.value) element.style.setProperty(property, snapshot.value, snapshot.priority);
-  else element.style.removeProperty(property);
-}
-
-function lockExternalPortalRoot(root: HTMLElement): void {
-  if (!externalPortalVisibilitySnapshots.has(root)) {
-    externalPortalVisibilitySnapshots.set(root, {
-      inert: root.inert,
-      ariaHidden: root.getAttribute('aria-hidden'),
-      visibility: inlineStyleSnapshot(root, 'visibility'),
-      pointerEvents: inlineStyleSnapshot(root, 'pointer-events'),
-    });
-  }
-  root.inert = true;
-  root.setAttribute('aria-hidden', 'true');
-  root.style.setProperty('visibility', 'hidden', 'important');
-  root.style.setProperty('pointer-events', 'none', 'important');
-}
-
-function unlockExternalPortalRoot(root: HTMLElement): void {
-  const snapshot = externalPortalVisibilitySnapshots.get(root);
-  if (!snapshot) return;
-  root.inert = snapshot.inert;
-  if (snapshot.ariaHidden === null) root.removeAttribute('aria-hidden');
-  else root.setAttribute('aria-hidden', snapshot.ariaHidden);
-  restoreInlineStyle(root, 'visibility', snapshot.visibility);
-  restoreInlineStyle(root, 'pointer-events', snapshot.pointerEvents);
-  externalPortalVisibilitySnapshots.delete(root);
-}
-
-function externalProjectionPortalRoots(
-  mount: HTMLElement,
-  ownerId: string,
-  generation?: number
-): HTMLElement[] {
-  const generationValue = generation === undefined ? undefined : String(generation);
-  const ownsGeneration = (element: Element): boolean =>
-    element.getAttribute('data-projection-owner') === ownerId &&
-    (generationValue === undefined ||
-      element.getAttribute('data-projection-generation') === generationValue);
-  const sameOwnedGeneration = (left: Element, right: Element): boolean =>
-    left.getAttribute('data-projection-owner') === right.getAttribute('data-projection-owner') &&
-    left.getAttribute('data-projection-generation') ===
-      right.getAttribute('data-projection-generation');
-  const selector = /^[A-Za-z0-9_-]+$/.test(ownerId)
-    ? `[data-projection-owner="${ownerId}"][data-projection-generation]`
-    : '[data-projection-owner][data-projection-generation]';
-  const externalSurfaces = Array.from(
-    mount.ownerDocument.querySelectorAll<HTMLElement>(selector)
-  ).filter(
-    (element) => !mount.contains(element) && !element.contains(mount) && ownsGeneration(element)
-  );
-
-  return externalSurfaces.filter((surface) => {
-    let ancestor = surface.parentElement;
-    // Consumer shells may publish the same owner/generation as their mount.
-    // They are never external portals, nor roots of a genuine sibling portal.
-    while (ancestor && !mount.contains(ancestor) && !ancestor.contains(mount)) {
-      if (sameOwnedGeneration(surface, ancestor)) return false;
-      ancestor = ancestor.parentElement;
-    }
-    return true;
-  });
 }
 
 type PortalObserverRegistration = Readonly<{
@@ -323,17 +251,6 @@ function observeExternalProjectionPortals(
   };
 }
 
-function removeExternalGenerationSurfaces(
-  mount: HTMLElement,
-  ownerId: string,
-  generation: number
-): void {
-  for (const root of externalProjectionPortalRoots(mount, ownerId, generation)) {
-    externalPortalVisibilitySnapshots.delete(root);
-    root.remove();
-  }
-}
-
 function setGenerationVisibility(host: HTMLElement, visible: boolean): void {
   host.inert = !visible;
   host.dataset.projectionGenerationState = visible ? 'active' : 'staging';
@@ -457,6 +374,7 @@ async function prepareProjectionCandidate(
     contentRecipe: options.content?.recipe,
     controls: options.controls,
     controlIds: options.controlIds,
+    sealOutgoingPortals: options.sealOutgoingPortals,
     themeSurfaceStyle,
     scopeInlineStyle: seed.cssText,
     locked: true,
@@ -596,6 +514,10 @@ async function prepareProjectionCandidate(
         if (disposed) return;
         composition.setThemeSurfaceStyle(theme);
         applyProjectionThemeSurfaceStyle(scope, theme);
+      },
+      sealExternalPortals() {
+        if (disposed) return;
+        sealExternalProjectionPortals(options.mount, options.ownerId, request.generation);
       },
       async dispose() {
         if (disposed) return;

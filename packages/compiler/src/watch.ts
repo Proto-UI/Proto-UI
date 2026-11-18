@@ -4,7 +4,12 @@ import path from 'node:path';
 import { compileProject } from './project';
 import { sourceName } from './source-resolution';
 import { deferred } from './deferred';
-import type { CompileProjectOptions, CompilerProject, ProjectCompilation, ProjectCompileResult } from './project';
+import type {
+  CompileProjectOptions,
+  CompilerProject,
+  ProjectCompilation,
+  ProjectCompileResult,
+} from './project';
 import type { CompileResult, CompilerDiagnostic } from './ir';
 
 export type ProjectWatchReport =
@@ -66,9 +71,15 @@ const nativeRuntime: ProjectWatchRuntime = {
   },
 };
 
-function diagnostic(code: string, message: string, category: CompilerDiagnostic['category']): CompilerDiagnostic {
+function diagnostic(
+  code: string,
+  message: string,
+  category: CompilerDiagnostic['category']
+): CompilerDiagnostic {
   return {
-    code, category, message,
+    code,
+    category,
+    message,
     span: { file: '<watch>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
   };
 }
@@ -79,7 +90,10 @@ function message(error: unknown): string {
 
 function inside(root: string, filename: string): boolean {
   const relative = path.relative(root, filename);
-  return relative === '' || (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`));
+  return (
+    relative === '' ||
+    (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`))
+  );
 }
 
 interface WatchedDirectory {
@@ -98,21 +112,43 @@ export async function watchProject(
   runtime: ProjectWatchRuntime = nativeRuntime
 ): Promise<CompileResult<ProjectWatch>> {
   const debounceMs = options.debounceMs ?? 40;
-  if (!Number.isFinite(debounceMs) || debounceMs < 0 || debounceMs > 2_147_483_647 ||
-      typeof options.onReport !== 'function') {
-    return { ok: false, diagnostics: [diagnostic('PUI4001', 'Watch requires a callback and a finite nonnegative debounce interval.', 'invalid-input')] };
+  if (
+    !Number.isFinite(debounceMs) ||
+    debounceMs < 0 ||
+    debounceMs > 2_147_483_647 ||
+    typeof options.onReport !== 'function'
+  ) {
+    return {
+      ok: false,
+      diagnostics: [
+        diagnostic(
+          'PUI4001',
+          'Watch requires a callback and a finite nonnegative debounce interval.',
+          'invalid-input'
+        ),
+      ],
+    };
   }
 
   let root: string;
   let requestedRoot: string;
   let dependencies: Set<string>;
+  let dependencyRoots = new Set<string>();
+  let resolutionFiles = new Set<string>();
   try {
     requestedRoot = path.resolve(options.root);
     root = await realpath(requestedRoot);
     if (!(await stat(root)).isDirectory()) throw new Error('Watch root must be a directory');
-    dependencies = new Set([...options.entries, ...(options.configFiles ?? [])].map((filename) => sourcePath(filename)));
+    dependencies = new Set(
+      [...options.entries, ...(options.configFiles ?? [])].map((filename) => sourcePath(filename))
+    );
   } catch (error) {
-    return { ok: false, diagnostics: [diagnostic('PUI4001', `Cannot watch project: ${message(error)}`, 'invalid-input')] };
+    return {
+      ok: false,
+      diagnostics: [
+        diagnostic('PUI4001', `Cannot watch project: ${message(error)}`, 'invalid-input'),
+      ],
+    };
   }
 
   function sourcePath(filename: string): string {
@@ -124,6 +160,17 @@ export async function watchProject(
     if (!inside(root, absolute) || absolute === root)
       throw new Error(`Watch dependency escapes the project root: ${filename}`);
     return path.resolve(root, sourceName(path.relative(root, absolute).split(path.sep).join('/')));
+  }
+
+  function resolvedDependencyPath(filename: string): string {
+    const absolute = path.resolve(root, filename);
+    if (inside(root, absolute)) return sourcePath(filename);
+    if (
+      resolutionFiles.has(absolute) ||
+      [...dependencyRoots].some((directory) => inside(directory, absolute))
+    )
+      return absolute;
+    throw new Error(`Watch dependency has no resolved package authority: ${filename}`);
   }
 
   const watchers = new Map<string, WatchedDirectory>();
@@ -151,9 +198,19 @@ export async function watchProject(
   function closeWatchers(): void {
     for (const [directory, watcher] of watchers) {
       watchers.delete(directory);
-      try { watcher.handle.close(); }
-      catch (error) {
-        terminal = { ok: false, diagnostics: [diagnostic('PUI4002', `Cannot close project watcher: ${message(error)}`, 'unsupported-input')] };
+      try {
+        watcher.handle.close();
+      } catch (error) {
+        terminal = {
+          ok: false,
+          diagnostics: [
+            diagnostic(
+              'PUI4002',
+              `Cannot close project watcher: ${message(error)}`,
+              'unsupported-input'
+            ),
+          ],
+        };
       }
     }
   }
@@ -175,25 +232,45 @@ export async function watchProject(
 
   function deliver(report: ProjectWatchReport): void {
     if (closed) return;
-    try { onReport(report); }
-    catch (error) {
-      terminal = { ok: false, diagnostics: [diagnostic('PUI4004', `Watch report callback failed: ${message(error)}`, 'compiler-defect')] };
+    try {
+      onReport(report);
+    } catch (error) {
+      terminal = {
+        ok: false,
+        diagnostics: [
+          diagnostic(
+            'PUI4004',
+            `Watch report callback failed: ${message(error)}`,
+            'compiler-defect'
+          ),
+        ],
+      };
       close();
     }
   }
 
   function fail(error: unknown): void {
     if (closed) return;
-    const diagnostics = [diagnostic('PUI4002', `Native project watch failed: ${message(error)}`, 'unsupported-input')];
+    const diagnostics = [
+      diagnostic('PUI4002', `Native project watch failed: ${message(error)}`, 'unsupported-input'),
+    ];
     terminal = { ok: false, diagnostics };
-    deliver({ status: 'failure', revision, changedFiles: [...changedFiles].sort(), diagnostics, lastSuccessful, fatal: true });
+    deliver({
+      status: 'failure',
+      revision,
+      changedFiles: [...changedFiles].sort(),
+      diagnostics,
+      lastSuccessful,
+      fatal: true,
+    });
     close();
   }
 
   function invalidate(filename: string | null): void {
     if (closed) return;
     revision++;
-    if (filename !== null) changedFiles.add(path.relative(root, filename).split(path.sep).join('/') || '.');
+    if (filename !== null)
+      changedFiles.add(path.relative(root, filename).split(path.sep).join('/') || '.');
     ready = false;
     clearTimeout(timer);
     timer = setTimeout(() => {
@@ -210,16 +287,29 @@ export async function watchProject(
     return false;
   }
 
-  async function directoryIdentity(directory: string, sentinel: boolean): Promise<string | undefined> {
+  async function directoryIdentity(
+    directory: string,
+    sentinel: boolean
+  ): Promise<string | undefined> {
     try {
       const info = await stat(directory);
       if (!info.isDirectory()) return undefined;
       const canonical = await realpath(directory);
-      if (!sentinel && !inside(root, canonical)) return undefined;
+      if (
+        !sentinel &&
+        !inside(root, canonical) &&
+        ![...dependencyRoots].some((directory) => inside(directory, canonical))
+      )
+        return undefined;
       return `${canonical}\0${info.dev}:${info.ino}`;
     } catch (error) {
-      if (error && typeof error === 'object' && 'code' in error &&
-          (error.code === 'ENOENT' || error.code === 'ENOTDIR')) return undefined;
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error.code === 'ENOENT' || error.code === 'ENOTDIR')
+      )
+        return undefined;
       throw error;
     }
   }
@@ -268,17 +358,38 @@ export async function watchProject(
       if (next === parent) throw new Error('No existing directory can observe the project root');
       parent = next;
     }
-    const candidates = new Set<string>([root]);
+    const candidates = new Map<string, boolean>([[root, false]]);
     for (const dependency of dependencies) {
+      const boundary = inside(root, dependency)
+        ? root
+        : [...dependencyRoots]
+            .filter((directory) => inside(directory, dependency))
+            .sort((a, b) => b.length - a.length)[0];
       let directory = path.dirname(dependency);
-      while (inside(root, directory)) {
-        candidates.add(directory);
-        if (directory === root) break;
-        directory = path.dirname(directory);
+      if (boundary) {
+        while (inside(boundary, directory)) {
+          candidates.set(directory, false);
+          if (directory === boundary) break;
+          directory = path.dirname(directory);
+        }
+        directory = path.dirname(boundary);
+      }
+      // Only ancestors of an explicit resolution/dependency path are sentinels.
+      // A directory watch filters exact files and replacement ancestors; it never scans siblings.
+      for (;;) {
+        const identity = await directoryIdentity(directory, true);
+        if (identity !== undefined) {
+          candidates.set(directory, true);
+          break;
+        }
+        const parent = path.dirname(directory);
+        if (parent === directory)
+          throw new Error('No existing directory can observe dependency: ' + dependency);
+        directory = parent;
       }
     }
-    for (const directory of candidates) {
-      const identity = await directoryIdentity(directory, false);
+    for (const [directory, sentinel] of candidates) {
+      const identity = await directoryIdentity(directory, sentinel);
       if (identity !== undefined) desired.set(directory, identity);
     }
     if (closed) return false;
@@ -291,23 +402,27 @@ export async function watchProject(
       let watcher: WatchedDirectory | undefined;
       let failedSetup = false;
       let setupError: unknown;
-      const handle = runtime.watchDirectory(directory, (event, filename) => {
-        if (closed || watcher === undefined || watchers.get(directory) !== watcher) return;
-        if (filename === null) {
-          invalidate(null);
-          return;
+      const handle = runtime.watchDirectory(
+        directory,
+        (event, filename) => {
+          if (closed || watcher === undefined || watchers.get(directory) !== watcher) return;
+          if (filename === null) {
+            invalidate(null);
+            return;
+          }
+          const absolute = path.resolve(directory, filename);
+          // Some hosts report a watched directory's own deletion under its basename.
+          if (relevant(absolute) || (event === 'rename' && filename === path.basename(directory)))
+            invalidate(relevant(absolute) ? absolute : null);
+        },
+        (error) => {
+          if (watcher === undefined) {
+            failedSetup = true;
+            setupError = error;
+          } else if (!closed && watchers.get(directory) === watcher)
+            checkWatcherError(directory, watcher, error);
         }
-        const absolute = path.resolve(directory, filename);
-        // Some hosts report a watched directory's own deletion under its basename.
-        if (relevant(absolute) || (event === 'rename' && filename === path.basename(directory)))
-          invalidate(relevant(absolute) ? absolute : null);
-      }, (error) => {
-        if (watcher === undefined) {
-          failedSetup = true;
-          setupError = error;
-        }
-        else if (!closed && watchers.get(directory) === watcher) checkWatcherError(directory, watcher, error);
-      });
+      );
       if (failedSetup) {
         handle.close();
         throw setupError;
@@ -337,15 +452,36 @@ export async function watchProject(
         if (!closed && buildRevision === revision) {
           const reportChanges = [...changedFiles].sort();
           changedFiles.clear();
-          deliver({ status: 'failure', revision: buildRevision, changedFiles: reportChanges,
-            diagnostics: [diagnostic('PUI4003', `Project compilation threw: ${message(error)}`, 'compiler-defect')],
-            lastSuccessful, fatal: false });
+          deliver({
+            status: 'failure',
+            revision: buildRevision,
+            changedFiles: reportChanges,
+            diagnostics: [
+              diagnostic(
+                'PUI4003',
+                `Project compilation threw: ${message(error)}`,
+                'compiler-defect'
+              ),
+            ],
+            lastSuccessful,
+            fatal: false,
+          });
         }
         return;
       }
       if (closed) return;
       project = result.ok ? result.value.project : result.project;
-      const nextDependencies = new Set((result.ok ? result.value.dependencies : result.dependencies).map(sourcePath));
+      const nextRoots = new Set(
+        (project?.dependencyRoots ?? []).map((directory) => path.resolve(directory))
+      );
+      const nextResolutionFiles = new Set(
+        (project?.resolutionFiles ?? []).map((filename) => path.resolve(filename))
+      );
+      for (const directory of nextRoots) dependencyRoots.add(directory);
+      for (const filename of nextResolutionFiles) resolutionFiles.add(filename);
+      const nextDependencies = new Set(
+        (result.ok ? result.value.dependencies : result.dependencies).map(resolvedDependencyPath)
+      );
       let expanded = false;
       for (const dependency of nextDependencies) {
         if (!dependencies.has(dependency)) expanded = true;
@@ -368,7 +504,9 @@ export async function watchProject(
         }
       }
       dependencies = nextDependencies;
-      if (removed && await synchronize()) {
+      dependencyRoots = nextRoots;
+      resolutionFiles = nextResolutionFiles;
+      if (removed && (await synchronize())) {
         if (!closed && buildRevision === revision) ready = true;
         return;
       }
@@ -377,9 +515,21 @@ export async function watchProject(
       changedFiles.clear();
       if (result.ok) {
         lastSuccessful = result.value;
-        deliver({ status: 'success', revision: buildRevision, changedFiles: reportChanges, compilation: result.value });
+        deliver({
+          status: 'success',
+          revision: buildRevision,
+          changedFiles: reportChanges,
+          compilation: result.value,
+        });
       } else {
-        deliver({ status: 'failure', revision: buildRevision, changedFiles: reportChanges, diagnostics: result.diagnostics, lastSuccessful, fatal: false });
+        deliver({
+          status: 'failure',
+          revision: buildRevision,
+          changedFiles: reportChanges,
+          diagnostics: result.diagnostics,
+          lastSuccessful,
+          fatal: false,
+        });
       }
     } catch (error) {
       if (closed) return;
@@ -399,13 +549,24 @@ export async function watchProject(
   try {
     await synchronize();
   } catch (error) {
-    terminal = { ok: false, diagnostics: [diagnostic('PUI4002', `Cannot start native project watch: ${message(error)}`, 'unsupported-input')] };
+    terminal = {
+      ok: false,
+      diagnostics: [
+        diagnostic(
+          'PUI4002',
+          `Cannot start native project watch: ${message(error)}`,
+          'unsupported-input'
+        ),
+      ],
+    };
     close();
     return terminal;
   }
 
   const controller: ProjectWatch = {
-    get closed() { return closed; },
+    get closed() {
+      return closed;
+    },
     finished,
     async stop() {
       close();

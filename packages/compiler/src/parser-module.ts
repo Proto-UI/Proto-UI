@@ -17,16 +17,29 @@ import {
   extractModuleDeclaration,
 } from './static-declarations';
 import type { ModuleDeclarationIR } from './ir';
-import { PACKAGED_HOOKS } from './operations';
 import { hookAdmission } from './hook-admission';
+import {
+  identifier,
+  isSourceFunction,
+  propertyName,
+  rejectNode,
+  scalarInitializer,
+  sourceSpan,
+  unwrapSourceExpression,
+  type FunctionNode,
+} from './source-syntax';
 
 export { sourceName } from './source-resolution';
-
-export type FunctionNode =
-  | ts.FunctionDeclaration
-  | ts.FunctionExpression
-  | ts.ArrowFunction
-  | ts.MethodDeclaration;
+export {
+  identifier,
+  isSourceFunction,
+  propertyName,
+  rejectNode,
+  scalarInitializer,
+  sourceSpan,
+  unwrapSourceExpression,
+  type FunctionNode,
+} from './source-syntax';
 export interface Imported {
   module: string;
   exported: string;
@@ -47,7 +60,15 @@ export interface SourceModule {
   readonly runtimeEdges: readonly SourceEdge[];
   readonly typeEdges: readonly SourceEdge[];
 }
-const FACTORIES: Record<string, true> = { definePrototype: true, defineAsHook: true };
+const FACTORIES: Record<string, true> = {
+  definePrototype: true,
+  defineAsHook: true,
+  defineHook: true,
+};
+export const CORE_FUNCTIONS = {
+  delay: 'scheduler.delay',
+  snapshotPresentationCompletionConfig: 'presentation.snapshotCompletion',
+} as const;
 const CORE_DECLARATIONS: Record<string, true> = {
   createContextKey: true,
   tw: true,
@@ -55,63 +76,39 @@ const CORE_DECLARATIONS: Record<string, true> = {
     Object.keys(STATIC_CAPABILITY_FACTORIES).map((name) => [name, true as const])
   ),
 };
-
-/** Pure scalar initializers have no module-evaluation effects to execute or erase. */
-export function scalarInitializer(node: ts.Expression): boolean {
-  if (ts.isParenthesizedExpression(node)) return scalarInitializer(node.expression);
+function admittedPackageSymbol(module: string, name: string): boolean {
+  if (module === '@proto.ui/core')
+    return (
+      Object.hasOwn(FACTORIES, name) ||
+      Object.hasOwn(CORE_DECLARATIONS, name) ||
+      Object.hasOwn(CORE_FUNCTIONS, name) ||
+      Object.hasOwn(STATIC_CORE_VALUES, name)
+    );
+  if (module === '@proto.ui/hooks') return hookAdmission(name)?.status === 'admitted';
   return (
-    ts.isStringLiteral(node) ||
-    ts.isNoSubstitutionTemplateLiteral(node) ||
-    ts.isNumericLiteral(node) ||
-    node.kind === ts.SyntaxKind.TrueKeyword ||
-    node.kind === ts.SyntaxKind.FalseKeyword ||
-    (ts.isPrefixUnaryExpression(node) &&
-      (node.operator === ts.SyntaxKind.MinusToken || node.operator === ts.SyntaxKind.PlusToken) &&
-      ts.isNumericLiteral(node.operand))
+    Object.hasOwn(STATIC_MODULE_FACTORIES[module] ?? {}, name) ||
+    !!STATIC_PACKAGE_CAPABILITIES[module]?.includes(name)
   );
-}
-
-export function sourceSpan(node: ts.Node): SourceSpan {
-  const file = node.getSourceFile();
-  const start = node.getStart(file);
-  const first = file.getLineAndCharacterOfPosition(start);
-  const last = file.getLineAndCharacterOfPosition(node.end);
-  return {
-    file: sourceName(file.fileName),
-    start,
-    end: node.end,
-    line: first.line + 1,
-    column: first.character + 1,
-    endLine: last.line + 1,
-    endColumn: last.character + 1,
-  };
-}
-
-export function rejectNode(node: ts.Node, code: string, message: string): never {
-  return reject(code, message, sourceSpan(node));
-}
-
-export function identifier(node: ts.Node): string {
-  if (!ts.isIdentifier(node) || !/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(node.text))
-    return rejectNode(node, 'PUI1004', 'Use a simple static identifier.');
-  return node.text;
-}
-
-export function propertyName(node: ts.PropertyName): string {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node)) return node.text;
-  return rejectNode(node, 'PUI1004', 'Computed/numeric property names are not admitted.');
 }
 
 /** Resolves only explicitly supplied sources. No import/evaluation of input modules occurs. */
 export class SourceGraph {
   readonly modules = new Map<string, SourceModule>();
-  readonly sources: Record<string, string>;
+  /** Erased type dependencies are parsed for symbols, never admitted as executable modules. */
   readonly typeSources = new Map<string, ts.SourceFile>();
+  readonly sources: Record<string, string>;
+  readonly sourceImports: Readonly<Record<string, string>>;
   private readonly loading = new Set<string>();
   private readonly exportReads = new Map<SourceModule, ts.ExportAssignment>();
 
   constructor(input: string, options: ParseOptions) {
     this.sources = Object.create(null);
+    this.sourceImports = Object.fromEntries(
+      Object.entries(options.sourceImports ?? {}).map(([specifier, target]) => [
+        specifier,
+        sourceName(target),
+      ])
+    );
     const span: SourceSpan = {
       file: '<input>',
       start: 0,
@@ -225,34 +222,37 @@ export class SourceGraph {
         if (
           specifier !== '@proto.ui/core' &&
           specifier !== '@proto.ui/hooks' &&
-          !Object.hasOwn(PACKAGED_HOOKS, specifier) &&
           !Object.hasOwn(STATIC_MODULE_FACTORIES, specifier) &&
           !Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier) &&
-          !isLocalSourceSpecifier(specifier)
+          !this.hasSourceSpecifier(specifier)
         )
-          rejectNode(statement, 'PUI1003', `Unsupported source package ${specifier}.`);
+          rejectNode(
+            statement,
+            'PUI1003',
+            `Source package ${specifier} requires an explicit proto export or sourceImports mapping.`
+          );
         for (const { name, exported, node } of bindings) {
           const hook = specifier === '@proto.ui/hooks' ? hookAdmission(exported) : undefined;
-          if (hook?.status === 'unsupported')
+          if (hook?.status === 'unsupported' && !Object.hasOwn(this.sourceImports, specifier))
             rejectNode(
               node,
               'PUI1003',
               `Unsupported import ${exported} from ${specifier}: ${hook.reason}`
             );
           if (
-            specifier === '@proto.ui/core'
+            !Object.hasOwn(this.sourceImports, specifier) &&
+            (specifier === '@proto.ui/core'
               ? !Object.hasOwn(FACTORIES, exported) &&
                 !Object.hasOwn(CORE_DECLARATIONS, exported) &&
+                !Object.hasOwn(CORE_FUNCTIONS, exported) &&
                 !Object.hasOwn(STATIC_CORE_VALUES, exported)
               : specifier === '@proto.ui/hooks'
                 ? hook?.status !== 'admitted'
-                : Object.hasOwn(PACKAGED_HOOKS, specifier)
-                  ? !Object.hasOwn(PACKAGED_HOOKS[specifier], exported)
-                  : Object.hasOwn(STATIC_MODULE_FACTORIES, specifier)
-                    ? !Object.hasOwn(STATIC_MODULE_FACTORIES[specifier], exported)
-                    : Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier)
-                      ? !STATIC_PACKAGE_CAPABILITIES[specifier].includes(exported)
-                      : false
+                : Object.hasOwn(STATIC_MODULE_FACTORIES, specifier)
+                  ? !Object.hasOwn(STATIC_MODULE_FACTORIES[specifier], exported)
+                  : Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier)
+                    ? !STATIC_PACKAGE_CAPABILITIES[specifier].includes(exported)
+                    : false)
           )
             rejectNode(node, 'PUI1003', `Unsupported import ${exported} from ${specifier}.`);
           if (result.imports.has(name))
@@ -277,11 +277,8 @@ export class SourceGraph {
           for (const declaration of statement.declarationList.declarations) {
             if (!declaration.initializer)
               rejectNode(declaration, 'PUI1004', 'A declaration requires an initializer.');
-            const value = declaration.initializer;
-            if (
-              scalarInitializer(value) ||
-              (!mutable && (ts.isArrowFunction(value) || ts.isFunctionExpression(value)))
-            ) {
+            const value = unwrapSourceExpression(declaration.initializer);
+            if (scalarInitializer(value)) {
               const name = identifier(declaration.name);
               this.add(result, name, value, statement);
               if (mutable) result.mutableBindings.add(name);
@@ -291,15 +288,24 @@ export class SourceGraph {
               rejectNode(
                 value,
                 'PUI1004',
-                'Module let currently requires a pure scalar initializer.'
+                'Shared module mutable storage requires pure scalar data; owner closures and capabilities cannot escape into module storage.'
               );
+            if (
+              ts.isArrowFunction(value) ||
+              ts.isFunctionExpression(value) ||
+              ts.isIdentifier(value)
+            ) {
+              this.add(result, identifier(declaration.name), value, statement);
+              continue;
+            }
             if (!ts.isCallExpression(value) || !ts.isIdentifier(value.expression))
               rejectNode(
                 value,
                 'PUI1004',
                 'Top-level runtime bindings must be admitted static core declarations.'
               );
-            const imported = result.imports.get(value.expression.text);
+            const resolved = this.resolveBinding(result, value.expression.text);
+            const imported = resolved.module === null ? resolved.imported : undefined;
             if (
               !imported ||
               !(imported.module === '@proto.ui/core'
@@ -345,11 +351,7 @@ export class SourceGraph {
             statement.exportClause.elements.every((element) => element.isTypeOnly)
           )
             continue;
-          if (
-            statement.moduleSpecifier &&
-            (!ts.isStringLiteral(statement.moduleSpecifier) ||
-              !isLocalSourceSpecifier(statement.moduleSpecifier.text))
-          )
+          if (statement.moduleSpecifier && !ts.isStringLiteral(statement.moduleSpecifier))
             rejectNode(statement, 'PUI1003', 'Only local static re-exports are admitted.');
           if (!statement.exportClause) {
             if (!statement.moduleSpecifier || !ts.isStringLiteral(statement.moduleSpecifier))
@@ -367,11 +369,17 @@ export class SourceGraph {
             if (element.isTypeOnly) continue;
             const local = element.propertyName?.text ?? element.name.text;
             if (statement.moduleSpecifier) {
+              if (!ts.isStringLiteral(statement.moduleSpecifier))
+                rejectNode(statement, 'PUI1003', 'Only static named re-exports are admitted.');
               if (
-                !ts.isStringLiteral(statement.moduleSpecifier) ||
-                !isLocalSourceSpecifier(statement.moduleSpecifier.text)
+                !this.hasSourceSpecifier(statement.moduleSpecifier.text) &&
+                !admittedPackageSymbol(statement.moduleSpecifier.text, local)
               )
-                rejectNode(statement, 'PUI1003', 'Only local named re-exports are admitted.');
+                rejectNode(
+                  element,
+                  'PUI1003',
+                  `Unsupported re-export ${local} from ${statement.moduleSpecifier.text}.`
+                );
               this.publishExport(
                 result,
                 element.name.text,
@@ -394,7 +402,7 @@ export class SourceGraph {
       // All runtime edges are checked, including empty binding lists and stars;
       // type-only edges retain provenance but never introduce runtime behavior.
       for (const edge of result.runtimeEdges) {
-        if (isLocalSourceSpecifier(edge.specifier))
+        if (this.hasSourceSpecifier(edge.specifier))
           this.importedModule(result, { module: edge.specifier, exported: '*', node: edge.node });
       }
       return result;
@@ -418,6 +426,16 @@ export class SourceGraph {
         }
       }
       for (const name of module.imports.keys()) this.resolveBinding(module, name);
+      for (const [name, declaration] of module.declarations) {
+        if (!ts.isIdentifier(declaration)) continue;
+        const target = this.resolveBinding(module, name);
+        if (target.module !== null && !isSourceFunction(target.node))
+          rejectNode(
+            declaration,
+            'PUI1004',
+            'Module aliases require a static function or an admitted package symbol.'
+          );
+      }
     }
   }
 
@@ -445,10 +463,27 @@ export class SourceGraph {
     visiting: Set<string>
   ): ResolvedSourceBinding {
     const node = module.declarations.get(name);
-    if (node) return { module, name, node };
+    if (node) {
+      if (!ts.isIdentifier(node)) return { module, name, node };
+      const id = `${module.file.fileName}#binding:${name}`;
+      if (visiting.has(id)) rejectNode(node, 'PUI1008', `Cyclic source alias ${name}.`);
+      visiting.add(id);
+      try {
+        const target = this.binding(module, node.text, visiting);
+        if (
+          target.module === module &&
+          !ts.isFunctionDeclaration(target.node) &&
+          target.node.pos > node.pos
+        )
+          rejectNode(node, 'PUI1008', `Module alias reads ${node.text} before initialization.`);
+        return target;
+      } finally {
+        visiting.delete(id);
+      }
+    }
     const imported = module.imports.get(name);
     if (!imported) rejectNode(module.file, 'PUI1002', `No local ${name} binding.`);
-    if (!isLocalSourceSpecifier(imported.module))
+    if (!this.hasSourceSpecifier(imported.module))
       return { module: null, name: imported.exported, imported };
     const target = this.importedModule(module, imported);
     const binding = this.exportBinding(target, imported.exported, visiting);
@@ -489,6 +524,8 @@ export class SourceGraph {
       }
       if (exported) {
         if ('expression' in exported) return { module, name, node: exported.expression };
+        if (!this.hasSourceSpecifier(exported.module))
+          return { module: null, name: exported.exported, imported: exported };
         const target = this.importedModule(module, exported);
         const binding = this.exportBinding(target, exported.exported, visiting);
         if (!binding)
@@ -572,10 +609,11 @@ export class SourceGraph {
   }
 
   importedModule(module: SourceModule, imported: Imported): SourceModule {
-    if (!isLocalSourceSpecifier(imported.module))
+    if (!this.hasSourceSpecifier(imported.module))
       rejectNode(imported.node, 'PUI1003', `Not an admitted local source: ${imported.module}.`);
-    const base = localSourceBase(module.file.fileName, imported.module);
-    const found = localSourceCandidates(base).find((candidate) =>
+    const mapped = this.sourceImports[imported.module];
+    const base = mapped ?? localSourceBase(module.file.fileName, imported.module);
+    const found = (mapped ? [mapped] : localSourceCandidates(base)).find((candidate) =>
       Object.hasOwn(this.sources, candidate)
     );
     if (!found)
@@ -593,6 +631,10 @@ export class SourceGraph {
     return this.load(found);
   }
 
+  hasSourceSpecifier(specifier: string): boolean {
+    return isLocalSourceSpecifier(specifier) || Object.hasOwn(this.sourceImports, specifier);
+  }
+
   definition(
     module: SourceModule,
     exportName: string
@@ -608,20 +650,40 @@ export class SourceGraph {
     module = binding.module;
     if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression))
       rejectNode(node, 'PUI1002', 'Entry must be a static prototype/asHook descriptor.');
-    const factory = module.imports.get(node.expression.text);
-    if (factory?.module !== '@proto.ui/core' || !Object.hasOwn(FACTORIES, factory.exported))
+    const factory = this.resolveCoreImport(module, node.expression.text);
+    if (!factory || !Object.hasOwn(FACTORIES, factory))
       rejectNode(node, 'PUI1002', 'Factory must resolve to the admitted core import.');
-    return { module, node, factory: factory.exported };
+    return { module, node, factory };
   }
 
   descriptor(
     module: SourceModule,
     node: ts.CallExpression
-  ): { name: string; setup: FunctionNode; modules: ModuleDeclarationIR[]; span: SourceSpan } {
+  ): {
+    name: string;
+    setup: FunctionNode;
+    setupModule: SourceModule;
+    projectHandle?: FunctionNode;
+    projectModule?: SourceModule;
+    configure?: FunctionNode;
+    configureModule?: SourceModule;
+    mode?: 'once' | 'multiple' | 'configurable';
+    modules: ModuleDeclarationIR[];
+    span: SourceSpan;
+  } {
     if (node.arguments.length !== 1 || !ts.isObjectLiteralExpression(node.arguments[0]))
       rejectNode(node, 'PUI1006', 'Definition requires one literal object.');
     let name: string | undefined;
     let setup: FunctionNode | undefined;
+    let setupModule = module;
+    let projectHandle: FunctionNode | undefined,
+      projectModule: SourceModule | undefined,
+      configure: FunctionNode | undefined,
+      configureModule: SourceModule | undefined,
+      mode: 'once' | 'multiple' | 'configurable' | undefined;
+    const factory = ts.isIdentifier(node.expression)
+      ? this.resolveCoreImport(module, node.expression.text)
+      : undefined;
     const modules: ModuleDeclarationIR[] = [];
     const keys = new Set<string>();
     for (const property of node.arguments[0].properties) {
@@ -657,23 +719,49 @@ export class SourceGraph {
           ids.add(declaration.id);
           modules.push(declaration);
         }
-      } else if (key === 'setup') {
+      } else if (
+        key === 'mode' &&
+        factory === 'defineHook' &&
+        ts.isPropertyAssignment(property) &&
+        ts.isStringLiteral(property.initializer) &&
+        ['once', 'multiple', 'configurable'].includes(property.initializer.text)
+      ) {
+        mode = property.initializer.text as typeof mode;
+      } else if (
+        key === 'setup' ||
+        (key === 'projectHandle' && factory === 'defineAsHook') ||
+        (key === 'configure' && factory === 'defineHook')
+      ) {
         const value = ts.isMethodDeclaration(property)
           ? property
           : ts.isShorthandPropertyAssignment(property)
             ? property.name
             : property.initializer;
+        let fn: FunctionNode,
+          owner = module;
         if (
           ts.isMethodDeclaration(value) ||
           ts.isArrowFunction(value) ||
           ts.isFunctionExpression(value)
         )
-          setup = value;
+          fn = value;
         else if (ts.isIdentifier(value)) {
-          const declaration = module.declarations.get(value.text);
-          if (declaration && ts.isFunctionDeclaration(declaration)) setup = declaration;
-          else rejectNode(value, 'PUI1006', 'Setup must resolve to a local source function.');
-        } else rejectNode(value, 'PUI1006', 'Setup must be a static function.');
+          const declaration = this.resolveBinding(module, value.text);
+          if (declaration.module !== null && isSourceFunction(declaration.node)) {
+            fn = declaration.node;
+            owner = declaration.module;
+          } else rejectNode(value, 'PUI1006', 'Setup must resolve to a static source function.');
+        } else rejectNode(value, 'PUI1006', 'Descriptor callbacks must be static functions.');
+        if (key === 'setup') {
+          setup = fn;
+          setupModule = owner;
+        } else if (key === 'projectHandle') {
+          projectHandle = fn;
+          projectModule = owner;
+        } else {
+          configure = fn;
+          configureModule = owner;
+        }
       } else
         rejectNode(
           property,
@@ -683,6 +771,15 @@ export class SourceGraph {
     }
     if (!name || !setup)
       rejectNode(node, 'PUI1006', 'Definition requires a nonempty name and static setup.');
-    return { name, setup, modules, span: sourceSpan(node) };
+    return {
+      name,
+      setup,
+      setupModule,
+      ...(projectHandle ? { projectHandle, projectModule } : {}),
+      ...(configure ? { configure, configureModule } : {}),
+      ...(mode ? { mode } : {}),
+      modules,
+      span: sourceSpan(node),
+    };
   }
 }

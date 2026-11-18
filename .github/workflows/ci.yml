@@ -76,6 +76,12 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     uses: ./.github/workflows/ci-production-suites.yml
 
+  compiler-gpui-consumers:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/compiler-gpui-source-consumers.yml
+    permissions:
+      contents: read
+
   cycle-plan:
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
@@ -610,7 +616,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 10
       matrix: ${{ fromJSON(needs.test-plan.outputs.matrix) }}
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -935,6 +941,7 @@ jobs:
         release-consumer-react,
         cli-smoke,
         production-suites,
+        compiler-gpui-consumers,
       ]
     runs-on: ubuntu-latest
     timeout-minutes: 10

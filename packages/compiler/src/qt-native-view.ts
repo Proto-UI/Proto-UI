@@ -19,7 +19,6 @@ NativeNode {
     property string hitMode: "participating"
     property var overlayOptions: ({open:true})
     property var modalMask: null
-    property int transitionTicket: 0
     property Item chromeSurface: null
     property string chromeAxis: "vertical"
     property var textOptions: ({})
@@ -82,8 +81,6 @@ NativeNode {
             modalMask=modalComponent.createObject(nativeWindow.contentItem,{width:nativeWindow.width,height:nativeWindow.height,z:node.z-1})
         } else if((!config.modal || !config.open) && modalMask) {modalMask.destroy();modalMask=null}
     }
-    function startTransition(duration,ticket) { transitionTimer.stop(); transitionTicket=ticket; transitionTimer.interval=Math.max(0,duration); transitionTimer.start() }
-    function cancelTransition() { transitionTimer.stop(); ++transitionTicket }
     function syncScrollChrome(surface,orientation,thumbRole) {
         chromeSurface=surface
         chromeAxis=orientation && orientation.get ? orientation.get() : orientation || "vertical"
@@ -141,11 +138,6 @@ NativeNode {
         onContentWidthChanged: node.publishScroll()
         onContentHeightChanged: node.publishScroll()
         onMovingChanged: node.publishScroll()
-    }
-    Timer {
-        id: transitionTimer
-        repeat: false
-        onTriggered: if(node.owner)node.owner.transitionComplete(node.transitionTicket)
     }
     Component {
         id: modalComponent
@@ -292,6 +284,6 @@ NativeNode {
         onEntered: node.owner.nativeEvent("pointerenter", {accepted:false})
         onExited: node.owner.nativeEvent("pointerleave", {accepted:false})
     }
-    Component.onDestruction: { transitionTimer.stop(); if(modalMask)modalMask.destroy() }
+    Component.onDestruction: { if(modalMask)modalMask.destroy() }
 }
 `;

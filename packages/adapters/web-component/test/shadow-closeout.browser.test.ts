@@ -3744,10 +3744,12 @@ describe('Shadow closeout native boundaries', () => {
         const adopted = host.getAttribute('tabindex');
 
         style.sheet!.insertRule('#retained-adopted-entry button { visibility: hidden; }');
-        await Promise.resolve();
+        // Stylesheet invalidation and the entry sample coalesce in separate
+        // microtasks. Observe their result at the destination's render boundary.
+        await settle(foreignWindow);
         const hidden = host.getAttribute('tabindex');
         style.sheet!.deleteRule(0);
-        await Promise.resolve();
+        await settle(foreignWindow);
         const visible = host.getAttribute('tabindex');
         frame.remove();
         return { initial, adopted, hidden, visible };

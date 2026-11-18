@@ -73,7 +73,13 @@ export default definePrototype({name:'physical-ssr-${kind}',${declaration}setup(
     renderToString(props: object, options: object): { html: string; carrier: Carrier };
   };
   const client = loadGeneratedModule(files, 'Component.client.ts') as { register(): void };
-  const helper = loadGeneratedModule(files, '.proto-ui/web-component/ssr-v1.ts') as unknown as {
+  const supportPlan = output.value.provenance?.nativeSupport;
+  if (!supportPlan || supportPlan.version !== 2)
+    throw new Error('Physical SSR fixture requires its emitted native support plan.');
+  const helper = loadGeneratedModule(
+    files,
+    `.proto-ui/web-component/ssr-${supportPlan.id}-v2.ts`
+  ) as unknown as {
     createBrowserPort(
       host: HTMLElement,
       mode: Mode,

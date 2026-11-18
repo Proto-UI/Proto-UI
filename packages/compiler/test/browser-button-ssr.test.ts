@@ -9,6 +9,7 @@ import type {
 } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { TARGET_PROFILES, resolveTargetProfile } from '../src/targets';
 import { buildButtonSsrFixture } from './button-ssr-fixture';
+import { buttonSsrKernelPath } from './button-ssr-evidence';
 import { captureButtonFirstPaint } from './button-ssr-first-paint';
 import {
   sha256,
@@ -796,7 +797,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
       'Component.ts',
       'Component.client.ts',
       'Component.environment.css',
-      '.proto-ui/web-component/ssr-v1.ts',
+      buttonSsrKernelPath,
     ]) {
       expect(files.some((file) => file.path === expected)).toBe(true);
     }

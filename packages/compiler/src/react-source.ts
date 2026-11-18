@@ -1,4 +1,28 @@
+import { pruneDeadValues } from './demand-pruning';
+import {
+  nativePublicCallsArtifact,
+  hasPublicCallable,
+  emitPublicValueCheck,
+  emitPublicValue,
+  emitPublicMethodProjection,
+} from './native-public-values';
+import { nativeHostAtomPlan, emitNativeHostAtom } from './native-async';
+import {
+  nativeAuthoredHooksArtifact,
+  emitAuthoredHookDefinition,
+  emitPrivilegedHookCall,
+} from './native-authored-hooks';
+import {
+  createJavaScriptValueReader,
+  emitJavaScriptMember,
+  emitJavaScriptValue,
+  emitJavaScriptParameters,
+  emitUninvokedJavaScriptFunction,
+  formatJavaScriptValueType,
+  emitOptionalOperation,
+} from './native-value-lowering';
 import { resolvedPropFacts } from './resolved-props';
+import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import { unsupportedControlLabel, unsupportedPointerFacts } from './pointer-facts-admission';
 import { dataTypeEqual, formatDataType } from './data-types';
 import type { DataType } from './data-types';
@@ -8,12 +32,12 @@ import { checkTargetOperations, resolveTargetProfile } from './targets';
 import { isDataValueType, isPublicValueType } from './ir';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
-import { nativeInteractionArtifact, nativeInteractionArtifacts } from './native-interaction';
-import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
-import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { nativeSupportArtifacts, planNativeSupport } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
 import { partitionModuleBindings } from './source-module-bindings';
+import { observableSemantics, type PropsUpdatePolicy } from './observable-semantics';
+import { emitRecordedNotification } from './notification-plan';
 import type {
   CompileResult,
   ExpressionIR,
@@ -28,11 +52,12 @@ import type {
 /** Native DOM lowering. The generated program executes checked functions, never an IR interpreter. */
 export function emitReactSource(
   input: PrototypeIR,
-  options: { componentName?: string; ssr?: boolean } = {}
+  options: { componentName?: string; ssr?: boolean; propsUpdatePolicy?: PropsUpdatePolicy } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
-  const ir = validated.value;
+  const ir = pruneDeadValues(validated.value);
+  const readValue = createJavaScriptValueReader(ir, typeName);
   const moduleParts = partitionModuleBindings(ir);
   const resolvedFacts = resolvedPropFacts(ir);
   if (options.ssr) {
@@ -47,11 +72,12 @@ export function emitReactSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const supportPlan = planNativeSupport(ir, admitted.value);
   const unsupportedMethods = ir.exposes.filter(
     (value) =>
       (value.kind === 'method' && !isPublicValueType(value.returnType)) ||
       (value.kind === 'method' &&
-        value.parameters.some((parameter) => !isDataValueType(parameter.type)))
+        value.parameters.some((parameter) => !isPublicValueType(parameter.type)))
   );
   if (unsupportedMethods.length)
     return {
@@ -60,19 +86,13 @@ export function emitReactSource(
         code: 'PUI4003',
         category: 'unsupported-input',
         message:
-          'react-dom-source-v1 exposed methods require checked serializable parameter and return types, not semantic capabilities or unknown.',
+          'react-dom-source-v1 exposed methods require checked public value signatures; setup and runtime authority cannot cross this boundary.',
         span: value.span,
       })),
     };
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const reachedFunctions = new Set(admitted.value.functions);
-  const interaction =
-    ir.moduleDeclarations.length > 0 ||
-    admitted.value.operations.some((operation) =>
-      /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(
-        operation
-      )
-    );
+  const interaction = supportPlan.features.length > 0;
   // Demand is derived from reached operations/expressions, never component identity.
   let usesStyle = admitted.value.operations.some((operation) =>
     /^(style\.|rule\.|feedback\.style\.)/.test(operation)
@@ -182,6 +202,13 @@ export function emitReactSource(
   collect(ir);
   let p = '__pui';
   while ([...names].some((name) => name.startsWith(p))) p += '_';
+  const atoms = nativeHostAtomPlan(admitted.value.operations, p);
+  const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
+  const publicCalls = ir.exposes.some(
+    (entry) =>
+      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+  );
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${p}Hook${index}`]));
   const contextArtifacts = buildNativeContextArtifacts(ir);
   const staticArtifacts = buildNativeStaticDeclarations(
@@ -210,13 +237,29 @@ export function emitReactSource(
   const transportFile = '.proto-ui/context/react-v1.ts';
 
   function typeName(type: ValueType): string {
+    const atom = atoms.typeName(type, `${p}Run`);
+    if (atom) return atom;
+    if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
+    if (typeof type !== 'string' && !isDataValueType(type))
+      return formatJavaScriptValueType(type, typeName);
+    if (type === 'context-key')
+      return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'exception') return 'unknown';
-    if (typeof type !== 'string')
+    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
+    if (isDataValueType(type))
       return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
         ? `${p}NativeFocusOptions`
         : formatDataType(type as DataType);
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
     if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
+    if (
+      !interaction &&
+      (['focus', 'accessible', 'event', 'event-control', 'event-or-control'].includes(type) ||
+        type.startsWith('observed:'))
+    )
+      return 'unknown';
+    if (!usesStyle && ['style-handle', 'rule-handle', 'template-props'].includes(type))
+      return 'unknown';
     if (type.startsWith('borrowed:'))
       return `${p}State<${type.slice(9)}> & { watch(callback: (run: ${p}Run, event: ${p}StateEvent<${type.slice(9)}>) => void): () => void }`;
     if (type.startsWith('state-event:')) return `${p}StateEvent<${type.slice(12)}>`;
@@ -247,28 +290,33 @@ export function emitReactSource(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values
-      .map(
-        (value) =>
-          `${value.name}${value.optional && !value.default ? '?' : ''}: ${value.callback ? `(${parameters(value.callback.parameters)}) => ${typeName(value.callback.returnType)}` : typeName(value.type)}${value.default ? ` = ${expression(value.default, 0)}` : ''}`
-      )
-      .join(', ');
+    return emitJavaScriptParameters(values, (value) => expression(value, 0), typeName);
   }
+
   function fn(value: FunctionIR, depth: number): string {
-    return `(${parameters(value.parameters)}) => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    if (!reachedFunctions.has(value)) return emitUninvokedJavaScriptFunction(value);
+    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
+      case 'narrow':
+      case 'member-write':
+      case 'element':
+      case 'conditional':
+      case 'call':
+      case 'intrinsic':
+      case 'object-spread':
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName)!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
         return JSON.stringify(value.value);
       case 'reference':
-        return value.name;
+        return readValue(value, value.name);
       case 'lexical-cell':
         return expression(value.value, depth);
       case 'lexical-read':
-        return expression(value.cell, depth);
+        return readValue(value, expression(value.cell, depth));
       case 'lexical-write':
         return `(${expression(value.cell, depth)} = ${expression(value.value, depth)})`;
       case 'lexical-update': {
@@ -285,11 +333,15 @@ export function emitReactSource(
       case 'rule':
         return emitNativeRule(value, (item) => expression(item, depth), `${p}Style`, 'resolved');
       case 'member':
-        return `(${expression(value.object, depth)}${value.object.type === 'exception' ? ' as { readonly [key: string]: unknown }' : ''})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+        return emitJavaScriptMember(
+          value,
+          (item) => expression(item, depth),
+          typeName,
+          true,
+          readValue
+        );
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'conditional':
-        return `(${expression(value.condition, depth)} ? ${expression(value.whenTrue, depth)} : ${expression(value.whenFalse, depth)})`;
       case 'binary':
         return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
       case 'array':
@@ -301,8 +353,43 @@ export function emitReactSource(
       case 'helper-call':
         return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
       case 'authored-hook':
-        return `${hooks.get(value.hookId)}()`;
+        return `${hooks.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'operation': {
+        const optional = emitOptionalOperation(
+          value,
+          (item) => expression(item, depth),
+          `${p}OptionalReceiver`,
+          typeName
+        );
+        if (optional !== undefined) return optional;
+        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), p);
+        if (atom !== undefined) return atom;
+        if (hasAuthoredHooks && value.operation.startsWith('hook.'))
+          return emitPrivilegedHookCall({
+            value: value,
+            manager: `${p}Authored`,
+            callee: `${p}Interaction.${OPERATION_RULES[value.operation].path}`,
+            prefix: p,
+            emit: (item) => expression(item, depth),
+            typeName,
+            typed: true,
+          });
+        if (value.operation === 'expose.value' && hasPublicCallable(value.arguments[1].type))
+          return `${expression(value.receiver!, depth)}.expose.value(${expression(value.arguments[0], depth)}, ${emitPublicValue({ value: expression(value.arguments[1], depth), type: value.arguments[1].type, wrap: `${p}WrapPublic`, prefix: p, typeName, typed: true })})`;
+        if (value.operation === 'expose.method') {
+          const projection = emitPublicMethodProjection(value.arguments[1].type, {
+            wrap: `${p}WrapPublic`,
+            prefix: p,
+            typeName,
+            typed: true,
+          });
+          if (projection)
+            return `${expression(value.receiver!, depth)}.expose.method(${value.arguments.map((item) => expression(item, depth)).join(', ')}, ${projection})`;
+        }
+        if (value.operation.startsWith('capture.'))
+          return `(${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}?.(${value.arguments.map((item) => expression(item, depth)).join(', ')}) as ${typeName(value.type)})`;
+        if (value.operation === 'state.get')
+          return `(${expression(value.receiver!, depth)}.get() as ${typeName(value.type)})`;
         const rule = OPERATION_RULES[value.operation];
         if (rule.path === 'call')
           return `${expression(value.receiver!, depth)}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
@@ -328,19 +415,13 @@ export function emitReactSource(
     return body
       .slice(0, terminator < 0 ? body.length : terminator + 1)
       .map((value) => {
-        if (
-          value.kind === 'const' &&
-          value.value.kind === 'function' &&
-          !reachedFunctions.has(value.value.function)
-        )
-          return '';
         const sourceFile = JSON.stringify(value.span.file)
           .replaceAll('\u2028', '\\u2028')
           .replaceAll('\u2029', '\\u2029');
         const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
         switch (value.kind) {
           case 'const':
-            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name} = ${expression(value.value, depth)};\n`;
+            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(value.expression, depth)};\n`;
           case 'return':
@@ -383,10 +464,22 @@ export function emitReactSource(
     .join('\n');
   const methodSchemas = ir.exposes
     .filter((value) => value.kind === 'method')
-    .map(
-      (value) =>
-        `    ${JSON.stringify(value.name)}: { parameters: ${JSON.stringify(value.parameters.map((parameter) => ({ type: parameter.type, ...(parameter.optional ? { optional: true } : {}) })))}, result: ${JSON.stringify(isDataValueType(value.returnType) ? value.returnType : null)} },`
-    )
+    .map((value) => {
+      const check = (expression: string, type: ValueType) =>
+        emitPublicValueCheck(
+          expression,
+          type,
+          (expression, schema) => `${p}Accepts(${JSON.stringify(schema)}, ${expression})`
+        );
+      const checks = value.parameters.map((parameter, index) => {
+        const argument = `args[${index}]`,
+          test = check(argument, parameter.type);
+        return parameter.optional || parameter.default
+          ? `(${argument} === undefined || ${test})`
+          : test;
+      });
+      return `    ${JSON.stringify(value.name)}: { args: (args: unknown[]) => args.length <= ${value.parameters.length}${checks.map((test) => ` && ${test}`).join('')}, result: (result: unknown) => ${check('result', value.returnType)} },`;
+    })
     .join('\n');
   const eventSchemas = ir.exposes
     .filter((value) => value.kind === 'event')
@@ -400,14 +493,16 @@ export function emitReactSource(
     ir.hooks
       .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
       .map(
-        (hook) => `  const ${hooks.get(hook.id)} = () => {
-    if (${p}HookResults.has(${JSON.stringify(hook.name)})) return ${p}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
-    ${p}HookResults.set(${JSON.stringify(hook.name)}, undefined);
-    (${fn(hook.setup, 2)})(${p}Def);
-    const result = Object.freeze(Object.create(null));
-    ${p}HookResults.set(${JSON.stringify(hook.name)}, result);
-    return result;
-  };`
+        (hook) =>
+          '  ' +
+          emitAuthoredHookDefinition({
+            hook,
+            name: hooks.get(hook.id)!,
+            manager: `${p}Authored`,
+            def: `${p}Def`,
+            emit: (value) => fn(value, 2),
+            typeName,
+          })
       )
       .join('\n');
 
@@ -415,6 +510,9 @@ export function emitReactSource(
 // Inline owner lowering and emitted shared checked-data/Context helpers v1; no Proto-UI Runtime/Core/Adapter dependencies.
 // Source graph SHA-256: ${ir.source.sha256}
 import * as ${p}React from 'react';
+${atoms.imports}
+${publicCalls ? `import { createNativePublicCalls as ${p}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${p}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
 ${
   ssr
@@ -427,8 +525,8 @@ import { createContextScope as ${p}CreateContextScope, acceptsContextValue as ${
 import type { ContextScope as ${p}ContextScope } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import { ContextTransport as ${p}ContextTransport } from './.proto-ui/context/react-v1';
 ${usesStyle ? `import { createNativeStyle as ${p}CreateNativeStyle, templateStyleTokens as ${p}TemplateStyleTokens, type NativeStyle as ${p}NativeStyle, type NativeStyleHandle as ${p}NativeStyleHandle, type NativeRuleHandle as ${p}NativeRuleHandle } from './.proto-ui/style/native-v1';` : ''}
-${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction, type NativeInteraction as ${p}NativeInteraction, type NativeFocus as ${p}NativeFocus, type NativeAccessible as ${p}NativeAccessible, type NativeObservedState as ${p}NativeObservedState, type NativeInput as ${p}NativeInput, type NativeFocusOptions as ${p}NativeFocusOptions } from './.proto-ui/interaction/native-v1';` : ''}
-${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
+${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction, type NativeInteraction as ${p}NativeInteraction, type NativeFocus as ${p}NativeFocus, type NativeAccessible as ${p}NativeAccessible, type NativeObservedState as ${p}NativeObservedState, type NativeInput as ${p}NativeInput, type NativeFocusOptions as ${p}NativeFocusOptions } from './${supportPlan.interactionPath.slice(0, -3)}';` : ''}
+${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './${supportPlan.modulesPath.slice(0, -3)}';` : ''}
 ${contextImports}
 ${staticImports}
 ${statements(moduleParts.shared, 0)}
@@ -620,7 +718,7 @@ ${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonl
   const previousValid: Record<string, unknown> = Object.create(null);
   const stateNames = new Set<string>();
   // Reserve before setup; only successful setup publishes a reusable opaque result.
-  const ${p}HookResults = new Map<string, object | undefined>();
+
   const stateSubscribers = new Set<Set<(event: ${p}StateEvent<unknown>) => void>>();
   const pendingStateEvents: (() => void)[] = [];
   const authorStateWatchCleanups: (() => void)[] = [];
@@ -630,7 +728,7 @@ ${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonl
   const watchers: ${p}ResolvedWatcher[] = [];
   const rawWatchers: ${p}RawWatcher[] = [], rawAllWatchers: ${p}RawWatcher[] = [];
   const exposes: Record<string, unknown> = Object.create(null);
-  const methodSchemas: Record<string, { parameters: readonly { type: ${p}DataSchema; optional?: boolean }[]; result: ${p}DataSchema | null }> = {
+  const methodSchemas: Record<string, { args(args: unknown[]): boolean; result(value: unknown): boolean }> = {
 ${methodSchemas}
   };
   const eventSchemas: Record<string, ${p}DataSchema> = {
@@ -664,6 +762,16 @@ ${propSchemas}
     try { return callback(); }
     finally { phase = previous; --callbackDepth; if (!callbackDepth) schedule(); }
   }
+  ${atoms.owner({ setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run` })}
+${
+  hasAuthoredHooks
+    ? `  const ${p}Authored = ${p}CreateAuthored({setup: () => ensurePhase('setup'), borrow(value) {
+    const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown>;
+    return Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
+  } });`
+    : ''
+}
+  ${publicCalls ? `const ${p}WrapPublic = ${p}CreatePublicCalls({alive: ensureExternal, invoke});` : ''}
   const context = ${p}CreateContextScope({
     getParent, isAlive: () => lifetime !== 'disposed', invoke,
     validate: ${contextValidation},
@@ -684,7 +792,9 @@ ${
 `
     : ''
 }  function dispatch(list: readonly ((run: ${p}Run) => void)[]) {
-    invoke(() => { for (const callback of list) callback(${p}RunHandle); });
+    if (list === callbacks.unmounted) { ${atoms.detach} }
+    try { invoke(() => { for (const callback of list) callback(${p}RunHandle); }); }
+    finally { if (list === callbacks.unmounted) { ${atoms.detach} } }
   }
   function schedule() {
 ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
@@ -776,7 +886,7 @@ ${
   };
   function ${p}CreateState<T extends boolean | string | number>(name: string, initialValue: T, spec: ${p}StateSpec): ${p}State<T> {
     ensurePhase('setup');
-    if (typeof name !== 'string' || name.length === 0 || stateNames.has(name)) throw new Error('[State] illegal or duplicate state name: ' + name);
+${hasAuthoredHooks ? `    ${p}Authored.claimState(name);` : `    if (typeof name !== 'string' || name.length === 0 || stateNames.has(name)) throw new Error('[State] illegal or duplicate state name: ' + name);`}
     spec = Object.freeze({ ...spec, ...(spec.options ? { options: Object.freeze([...spec.options]) } : {}) });
     const type = spec.kind === 'bool' ? 'boolean' : spec.kind === 'string' || spec.kind === 'enum' ? 'string' : 'number';
     if (spec.options?.some((option) => typeof option !== type || typeof option === 'number' && !Number.isFinite(option)))
@@ -819,22 +929,19 @@ ${
         const event: ${p}StateEvent<T> = { type: 'next', prev: value, next, reason };
         value = next;
 ${usesStyle ? `        ${p}Style.refresh();` : ''}
-${interaction ? `        ${p}Interaction.refresh();\n` : ''}        pendingStateEvents.push(() => { for (const callback of [...subscribers]) callback(event); });
-        if (emittingState) return;
-        emittingState = true;
-        try { while (pendingStateEvents.length) pendingStateEvents.shift()!(); }
-        finally { emittingState = false; }
+${interaction ? `        ${p}Interaction.refresh();\n` : ''}        ${emitRecordedNotification({ queue: 'pendingStateEvents', draining: 'emittingState', subscribers: 'subscribers', deliver: 'subscriber(event)' })}
       },
     };
     const external: ${p}ExternalState<T> = Object.freeze({
       get() { ensureExternal(); return state.get(); },
       subscribe(callback: (event: ${p}StateEvent<T>) => void) {
-        ensureExternal(); subscribers.add(callback); return () => { subscribers.delete(callback); };
+        ensureExternal(); const registration: typeof callback = event => callback(event); subscribers.add(registration); return () => { subscribers.delete(registration); };
       },
       unsubscribe(off: () => void) { off(); },
       spec: Object.freeze(spec),
     });
     externalStates.set(state, external);
+${hasAuthoredHooks ? `    ${p}Authored.state(name, state);` : ''}
     return state;
   }
   const externalStates = new WeakMap<object, unknown>();
@@ -847,17 +954,13 @@ ${
     observedStateCleanups.push(state.subscribe((event) => {
 ${usesStyle ? `      ${p}Style.refresh();` : ''}
       ${p}Interaction.refresh();
-      pendingStateEvents.push(() => { for (const callback of [...subscribers]) callback(event); });
-      if (emittingState) return;
-      emittingState = true;
-      try { while (pendingStateEvents.length) pendingStateEvents.shift()!(); }
-      finally { emittingState = false; }
+      ${emitRecordedNotification({ queue: 'pendingStateEvents', draining: 'emittingState', subscribers: 'subscribers', deliver: 'subscriber(event)' })}
     }));
     const kind = typeof state.get();
     const external: ${p}ExternalState<T> = Object.freeze({
       get() { ensureExternal(); return state.get(); },
       subscribe(callback: (event: ${p}StateEvent<T>) => void) {
-        ensureExternal(); subscribers.add(callback); return () => { subscribers.delete(callback); };
+        ensureExternal(); const registration: typeof callback = event => callback(event); subscribers.add(registration); return () => { subscribers.delete(registration); };
       },
       unsubscribe(off: () => void) { off(); },
       spec: Object.freeze({ kind: kind === 'boolean' ? 'bool' as const : kind === 'number' ? 'number.discrete' as const : 'string' as const }),
@@ -886,7 +989,6 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
       const state = value && typeof value === 'object' ? externalStates.get(value) : undefined;
       if (state) registerExpose(key, state);
       else if (typeof value === 'function') registerExpose(key, (...args: unknown[]) => { ensureExternal(); return invoke(() => value(...args)); });
-      else if (key === 'controls' && value && typeof value === 'object') registerExpose(key, Object.fromEntries(Object.entries(value).map(([name, action]) => [name, (...args: unknown[]) => { ensureExternal(); return invoke(() => (action as Function)(...args)); }])));
       else registerExpose(key, value);
     },
     createOwnedState: <T extends boolean | string | number>(name: string, value: T, spec?: ${p}StateSpec) => ${p}CreateState(name, value, spec ?? { kind: typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string' }),
@@ -898,12 +1000,6 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
       authorStateWatchCleanups.push(off); return off;
     },
     isPropProvided: key => Object.hasOwn(raw, key),
-    declareTransition(hooks) {
-      ${p}Def.props.define({ open: {type:'boolean'}, defaultOpen: {type:'boolean',default:false}, appear: {type:'boolean',default:false}, enterDuration: {type:'number',default:300}, leaveDuration: {type:'number',default:200}, interrupt: {type:'string',default:'reverse'} });
-      for (const name of ['beforeEnter','afterEnter','beforeLeave','afterLeave']) ${p}Def.expose.event(name);
-      callbacks.created.push(hooks.created); callbacks.mounted.push(hooks.mounted); callbacks.unmounted.push(hooks.unmounted); callbacks.beforeDispose.push(hooks.beforeDispose);
-      ${p}Def.props.watch(['open','interrupt','enterDuration','leaveDuration'], hooks.propsChanged);
-    },
     setPresent: value => ${p}RunHandle.lifecycle.setPresent(value),
     requestHostUpdate() {
       if (hostScheduled || lifetime !== 'alive'${ssr ? ' || server' : ''}) return;
@@ -962,7 +1058,7 @@ ${usesStyle ? `    feedback: { style: ${p}Style },` : ''}
     exposes[key] = value;
   }
   const ${p}Def = {
-${interaction ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    feedback: { style: { use: ${p}Style.use } },` : ''}
+${supportPlan.features.includes('event') ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    feedback: { style: { use: ${p}Style.use } },` : ''}
     context: Object.freeze({
       provide<T>(key: object, value: T) { ensurePhase('setup'); context.provide(key, value); },
       subscribe<T>(key: object, callback?: (run: ${p}Run, next: T, prev: T) => void) {
@@ -1046,17 +1142,17 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         if (!Object.hasOwn(eventSchemas, key)) throw new Error('[Expose] missing checked event schema: ' + key);
         registerExpose(key, Object.freeze({ kind: 'event', payload: eventSchemas[key] }));
       },
-      method<A extends unknown[], R>(key: string, callback: (...args: A) => R) {
+      method<A extends unknown[], R>(key: string, callback: (...args: A) => R, project?: (value: R) => R) {
+${hasAuthoredHooks ? `        ${p}Authored.method(key, callback);` : ''}
         registerExpose(key, (...args: A): R => {
           ensureExternal();
           return invoke(() => {
           const schema = methodSchemas[key];
-          if (!schema || args.length > schema.parameters.length || schema.parameters.some((parameter, index) =>
-            !(parameter.optional && args[index] === undefined) && !${p}Accepts(parameter.type, args[index])))
+          if (!schema || !schema.args(args))
             throw new TypeError('[Expose] invalid method arguments: ' + key);
           const result = callback(...args);
-          if (schema.result !== null && !${p}Accepts(schema.result, result)) throw new TypeError('[Expose] invalid method result: ' + key);
-          return result;
+          if (!schema.result(result)) throw new TypeError('[Expose] invalid method result: ' + key);
+          return project ? project(result) : result;
           });
         });
       },
@@ -1074,7 +1170,7 @@ ${hookDefinitions}
   try {
     render = (${fn(ir.setup, 1)})(${p}Def) ?? (() => ${p}Renderer.slot());
     if (typeof render !== 'function') throw new Error('[Prototype] setup must return a render function or void.');
-  } catch (error) { ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); throw error; }
+  } catch (error) { for (const off of authorStateWatchCleanups.splice(0)) off(); ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} throw error; }
   phase = 'idle';
   function applyProps(nextHost: GeneratedComponentProps) {
     ensureAlive();
@@ -1082,17 +1178,17 @@ ${hookDefinitions}
 ${controlLabel ? `    ${p}Interaction.refresh();` : emitUndeclaredInstanceAssociations('nextHost.instanceAssociations', `${p}Associations`)}
     const nextRaw: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(nextHost)) {
-      if (key === 'children' || key === 'instanceAssociations' || key.startsWith('on') && typeof value === 'function') continue;
+      if (key === 'children' || key === 'instanceAssociations' || !Object.hasOwn(specs, key) && (['class', 'className', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) || /^on[A-Z]/.test(key) && typeof value === 'function')) continue;
       nextRaw[key] = value;
     }
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
-      && Object.keys(nextRaw).every((key) => Object.hasOwn(raw, key) && Object.is(raw[key], nextRaw[key]))) return;
+      && Object.keys(nextRaw).every((key) => Object.hasOwn(raw, key) && Object.is(raw[key], nextRaw[key]))) return false;
     const previous = resolved;
     const previousRaw = raw;
     raw = Object.freeze(nextRaw);
     resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, true);
 ${usesStyle ? `    ${p}Style.refresh();` : ''}
-${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hydrated = true; return; }
+${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hydrated = true; return false; }
     const nextResolved = resolved, nextRawSnapshot = raw;
     invoke(() => {
       const previousWindow = propsWindow;
@@ -1116,10 +1212,11 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
       }
       } finally { propsWindow = previousWindow; }
     });
+    return true;
   }
   const handle: GeneratedHandle = Object.freeze({
     update() { ensureExternal(); invoke(() => ${p}RunHandle.update()); },
-    getExposes() { ensureExternal(); return exposes as GeneratedExposes; },
+    getExposes() { ensureExternal(); return { ...exposes } as GeneratedExposes; },
     invokeInCallbackScope<T>(callback: () => T): T { ensureExternal(); return invoke(callback); },
   });
 ${
@@ -1127,11 +1224,12 @@ ${
     ? `  function disposeNow() {
     if (lifetime !== 'alive') return;
     lifetime = 'disposing'; phase = 'callback';
+    for (const off of authorStateWatchCleanups.splice(0)) off();
     let failure: unknown;
     try { dispatch(callbacks.beforeDispose); } catch (error) { failure = error; }
     finally {
 ${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }` : ''}
-      try { context.dispose(); } catch (error) { failure ??= error; }
+      try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= error; }
       lifetime = 'disposed'; phase = 'idle'; connected = false;
       for (const subscribers of stateSubscribers) subscribers.clear();
       pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
@@ -1210,7 +1308,7 @@ ${
     : ''
 }        schedule();
       }
-      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); lifetime = 'disposed'; connected = false;`} throw error; }
+      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} lifetime = 'disposed'; connected = false;`} throw error; }
     },
     applyProps,
     accept(frame: ${p}Frame) {
@@ -1241,6 +1339,7 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
       queueMicrotask(() => {
         if (connected || cleanupVersion !== version || lifetime !== 'alive') return;
         lifetime = 'disposing';
+        for (const off of authorStateWatchCleanups.splice(0)) off();
         phase = 'callback';
         let failure: unknown;
 ${
@@ -1262,7 +1361,7 @@ ${
 }          ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
           root = null;
 ${usesStyle ? `          ${p}Style.dispose();` : ''}
-          context.dispose();
+          context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''}
           lifetime = 'disposed'; phase = 'idle';
           for (const subscribers of stateSubscribers) subscribers.clear();
           pendingStateEvents.length = 0;
@@ -1361,7 +1460,7 @@ ${
     owner.connect();
     return () => { owner.disconnect(); };
   }, [${ssr ? 'parentReady' : ''}]);
-  ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ownerRef.current?.' : 'ownerRef.current!.'}applyProps(props); }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
+  ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ' : ''}const owner = ownerRef.current; ${options.propsUpdatePolicy === 'host' ? 'if (owner?.applyProps(props)) owner.handle.update();' : 'owner?.applyProps(props);'} }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
   ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);
   ${p}React.useImperativeHandle(ref, () => ${
     ssr
@@ -1412,10 +1511,13 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
       code,
       profile,
       supportingFiles: [
+        ...atoms.files,
+        ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...contextArtifacts.files,
         ...staticArtifacts.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
-        ...(interaction ? nativeInteractionArtifacts('full', { controlLabel }) : []),
+        ...(interaction ? nativeSupportArtifacts(supportPlan) : []),
         ...(ssr ? [reactSSRTransportArtifact] : []),
         {
           path: transportFile,
@@ -1424,9 +1526,26 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
         },
       ],
       dependencies: selected.value.dependencies
-        .filter((dependency) => interaction || dependency.name !== '@floating-ui/dom')
+        .filter(
+          (dependency) =>
+            supportPlan.packages.includes(dependency.name) || dependency.name !== '@floating-ui/dom'
+        )
         .map((dependency) => ({ ...dependency })),
-      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
+      provenance: {
+        source: ir.source,
+        irVersion: ir.schemaVersion,
+        backend: profile,
+        observableSemantics: observableSemantics('react', 'source', options.propsUpdatePolicy),
+        ...(interaction
+          ? {
+              nativeSupport: {
+                version: 2 as const,
+                id: supportPlan.id,
+                features: [...supportPlan.features],
+              },
+            }
+          : {}),
+      },
     },
   };
 }

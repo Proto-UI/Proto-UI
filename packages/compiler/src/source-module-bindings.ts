@@ -1,9 +1,12 @@
-import type { PrototypeIR } from './ir';
+import type { Operation, PrototypeIR } from './ir';
 
 type ModuleBinding = NonNullable<PrototypeIR['moduleBindings']>[number];
 
 /** Semantic helpers close over the current generated owner; scalar module cells do not. */
-export function partitionModuleBindings(ir: PrototypeIR): {
+export function partitionModuleBindings(
+  ir: PrototypeIR,
+  operationUsesOwner: (operation: Operation) => boolean = () => true
+): {
   shared: ModuleBinding[];
   owned: ModuleBinding[];
 } {
@@ -20,7 +23,11 @@ export function partitionModuleBindings(ir: PrototypeIR): {
         return;
       }
       const node = value as Record<string, unknown>;
-      if (node.kind === 'operation' || node.kind === 'authored-hook') owned.add(binding.name);
+      if (
+        node.kind === 'authored-hook' ||
+        (node.kind === 'operation' && operationUsesOwner(node.operation as Operation))
+      )
+        owned.add(binding.name);
       if (
         (node.kind === 'helper-call' || node.kind === 'reference') &&
         typeof node.name === 'string'
@@ -29,7 +36,9 @@ export function partitionModuleBindings(ir: PrototypeIR): {
       for (const [key, child] of Object.entries(node))
         if (key !== 'type' && key !== 'span') visit(child);
     }
-    visit(binding.value.function);
+    // Defaults execute on invocation and may close over this owner or another owned helper.
+    for (const parameter of binding.value.function.parameters) visit(parameter.default);
+    visit(binding.value.function.body);
     dependencies.set(binding.name, calls);
   }
   let changed: boolean;

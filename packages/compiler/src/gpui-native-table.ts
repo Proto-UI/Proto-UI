@@ -1,6 +1,21 @@
+import { tableStructureFamily } from './static-declarations';
+
+// The known package export is an explicit shared SDK declaration. Authored
+// families remain private Rust statics; matching source descriptors do not link.
+export const gpuiTableFamily = tableStructureFamily({
+  file: '@proto.ui/module-table-structure',
+  start: 0,
+  end: 0,
+  line: 1,
+  column: 1,
+  endLine: 1,
+  endColumn: 1,
+});
+
 // Table geometry is semantic; host cells are discovered by exact Anatomy family identity.
 export const gpuiNativeTableSource = String.raw`
 const TABLE_FAMILY_ID:&str="@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY";
+pub static TABLE_STRUCTURE_FAMILY:StaticDeclaration=StaticDeclaration{id:TABLE_FAMILY_ID,kind:"anatomy-family",config:||Value::json(serde_json::from_str(r#"${JSON.stringify(gpuiTableFamily.config)}"#).expect("checked Table family declaration"))};
 #[derive(Default)]
 pub struct TableModule{pub role:String,pub config:BTreeMap<String,Value>,pub snapshot:Value}
 #[derive(Clone)]
@@ -16,8 +31,9 @@ fn table_relation(owner:&OwnerRef,key:&str,targets:Vec<Value>){owner.borrow_mut(
 fn table_refresh(owners:&[OwnerRef]){
     for owner in owners{if !owner.borrow().modules.topology.table.role.is_empty(){table_clear(owner)}}
     for root in owners{
-        if !ready(root)||root.borrow().modules.topology.table.role!="root"||!root.borrow().modules.topology.claims.get(TABLE_FAMILY_ID).is_some_and(|c|c.role=="root"){continue}
-        let mut diagnostics=Vec::new();let domain=anatomy_members(root,TABLE_FAMILY_ID,None,false);let mut records=Vec::new();for owner in domain{let o=owner.borrow();let role=&o.modules.topology.table.role;if role.is_empty(){continue}if o.modules.topology.claims[TABLE_FAMILY_ID].role!=*role{diagnostics.push(table_diagnostic("role-mismatch",Some(&owner),None,None));}else{drop(o);records.push(owner);}}
+        let family=TABLE_STRUCTURE_FAMILY.identity();
+        if !ready(root)||root.borrow().modules.topology.table.role!="root"||!root.borrow().modules.topology.claims.get(&family).is_some_and(|c|c.role=="root"){continue}
+        let mut diagnostics=Vec::new();let domain=anatomy_members(root,family,None,false);let mut records=Vec::new();for owner in domain{let o=owner.borrow();let role=&o.modules.topology.table.role;if role.is_empty(){continue}if o.modules.topology.claims[&family].role!=*role{diagnostics.push(table_diagnostic("role-mismatch",Some(&owner),None,None));}else{drop(o);records.push(owner);}}
         let captions:Vec<_>=records.iter().filter(|o|o.borrow().modules.topology.table.role=="caption").cloned().collect();let rows:Vec<_>=records.iter().filter(|o|o.borrow().modules.topology.table.role=="row").cloned().collect();if captions.len()>1{diagnostics.push(table_diagnostic("multiple-captions",None,None,None))}if rows.is_empty(){diagnostics.push(table_diagnostic("missing-row",None,None,None))}
         let mut row_cells:Vec<Vec<OwnerRef>>=vec![vec![];rows.len()];let mut headers=0;let mut normal=0;
         for owner in records.iter().filter(|o|["headerCell","cell"].contains(&o.borrow().modules.topology.table.role.as_str())){let mut parent=owner.borrow().parent.upgrade();let mut row=None;while let Some(p)=parent{if let Some(index)=rows.iter().position(|r|Rc::ptr_eq(r,&p)){row=Some(index);break}if Rc::ptr_eq(&p,root){break}parent=p.borrow().parent.upgrade();}if let Some(row)=row{row_cells[row].push(owner.clone());}else{diagnostics.push(table_diagnostic("missing-row-parent",Some(owner),None,None));}}

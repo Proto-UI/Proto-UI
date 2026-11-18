@@ -78,7 +78,7 @@ describe('activation-local focus entry admission', () => {
         )
       ).toMatchObject({
         ok: false,
-        diagnostics: [{ code: 'PUI1006', message: 'Helper argument type mismatch.' }],
+        diagnostics: [{ code: 'PUI1006', message: 'Callable argument 1 type mismatch.' }],
       });
     }
   );
@@ -102,8 +102,8 @@ describe('activation-local focus entry admission', () => {
     const callback = registration.expression.arguments[1];
     if (callback?.kind !== 'function') throw new Error('Missing exposed method callback');
     const statement = callback.function.body[0];
-    if (statement?.kind !== 'effect' || statement.expression.kind !== 'helper-call')
-      throw new Error('Missing helper call');
+    if (statement?.kind !== 'effect' || statement.expression.kind !== 'call')
+      throw new Error('Missing checked ordinary call');
     const request = statement.expression.arguments[0];
     const entry =
       request?.kind === 'record'
@@ -113,7 +113,7 @@ describe('activation-local focus entry admission', () => {
     entry.value = 'first';
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI2002', message: 'Helper argument type mismatch.' }],
+      diagnostics: [{ code: 'PUI2002', message: 'IR expression type mismatch.', span: entry.span }],
     });
   });
   it.each(["{entry:'first'}", '{entry:true}', "{entry:'manual',target:'arbitrary'}"])(
@@ -169,7 +169,15 @@ describe('activation-local focus entry admission', () => {
         { fileName: 'ordinary-entry.proto.ts' }
       );
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-      expect(emit(parsed.value).ok).toBe(true);
+      const result = emit(parsed.value);
+      if (emit === emitGpuiSource)
+        expect(result).toMatchObject({
+          ok: false,
+          diagnostics: expect.arrayContaining([
+            expect.objectContaining({ code: 'PUI_GPUI_SDK_CAPABILITY' }),
+          ]),
+        });
+      else expect(result.ok).toBe(true);
     }
   );
 });

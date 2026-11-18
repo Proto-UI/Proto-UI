@@ -224,6 +224,7 @@ function resolution(
  * semantic decision supplies enough evidence to classify them.
  */
 export function classifyTwTokenApplicationRoleV0(token: string): TwTokenApplicationRoleResolution {
+  if (token === 'overflow-y-auto') return resolution(token, 'surface', 'canonical');
   if (token === 'scroll-my-1' || token === 'scroll-my-1.5')
     return resolution(token, 'placement', 'canonical');
   if (isPlaceholderColorTokenV0(token)) return resolution(token, 'surface', 'canonical');

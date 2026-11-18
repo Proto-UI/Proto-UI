@@ -1,6 +1,26 @@
-import type { FunctionIR, ParameterIR } from './ir';
-import type { Phase, ValueType, FunctionContext, ModuleCapabilityType } from './ir';
+import type {
+  Phase,
+  ValueType,
+  FunctionContext,
+  ModuleCapabilityType,
+  HookCaptureIR,
+  ExpressionIR,
+} from './ir';
 import { isCapabilityAssignable } from './ir';
+import {
+  valueAssignable,
+  valueTypeEqual,
+  joinValueTypes,
+  isTemplateChildType,
+} from './value-types';
+export { isTemplateChildType } from './value-types';
+import {
+  COMPLETION_REQUEST_TYPE,
+  PRESENTATION_COMPLETION_TYPE,
+  PRESENTATION_FRAME_TYPE,
+  PRESENTATION_OUTCOME_TYPE,
+  PRESENTATION_RECEIPT_TYPE,
+} from './core-value-types';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
 
 export type CallbackContext =
@@ -32,7 +52,10 @@ export type SemanticResource =
   | 'focus'
   | 'accessibility'
   | 'update-queue'
-  | 'style';
+  | 'style'
+  | 'presence'
+  | 'scheduler'
+  | 'meta';
 export interface OperationEffect {
   kind: 'read' | 'write' | 'declare' | 'subscribe' | 'signal' | 'request-update';
   resource: SemanticResource;
@@ -64,6 +87,7 @@ export type ArgumentRole =
   | 'static-keys'
   | 'prop-key'
   | 'declared-prop-keys'
+  | 'declared-event-key'
   | 'state-handle'
   | 'receiver-value'
   | 'context-key'
@@ -95,10 +119,18 @@ export interface OperationRule {
   requiredCapabilities: readonly string[];
   /** When present, permission requires a concrete callback origin, never an unqualified helper. */
   contexts?: readonly CallbackContext[];
-  resultFrom?: 'receiver-value' | 'context-value' | 'context-value-or-null';
+  resultFrom?:
+    | 'receiver-value'
+    | 'context-value'
+    | 'context-value-or-null'
+    | 'capture-state'
+    | 'capture-method'
+    | 'capture-child'
+    | 'capture-handle';
 }
 
 const setup: readonly Phase[] = ['setup'];
+const readPhase: readonly Phase[] = ['setup', 'callback', 'render'];
 const callbackPhase: readonly Phase[] = ['callback'];
 const bindingPhase: readonly Phase[] = ['setup', 'callback'];
 const runtime: readonly Phase[] = ['callback', 'render'];
@@ -120,6 +152,9 @@ const aliveContexts: readonly CallbackContext[] = [
 const key: ArgumentRule = { role: 'static-key', types: ['string'] };
 const record: ArgumentRule = { role: 'value', types: ['record'] };
 const boolean: ArgumentRule = { role: 'value', types: ['boolean'] };
+// Native watch cleanup has a fixed callable ABI. A coarse 'function' marker
+// cannot prove either its invocation contract or its setup-result transport.
+const watchDisposer: ValueType = { kind: 'callable', parameters: [], returnType: 'void' };
 const contextKey: ArgumentRule = { role: 'context-key' };
 const stringSpec: DataType = {
   kind: 'record',
@@ -372,15 +407,107 @@ const contextNext: ArgumentRule = {
   },
 };
 
-export const PACKAGED_HOOKS: Readonly<Record<string, Readonly<Record<string, SemanticOperation>>>> =
-  {
-    '@proto.ui/prototypes-base': { asTransition: 'hook.asTransition' },
-    '@proto.ui/prototypes-base/tools': { asTransition: 'hook.asTransition' },
-    '@proto.ui/prototypes-base/transition': { asTransition: 'hook.asTransition' },
-  };
-
 /** The single admission/emission vocabulary. Paths are exact public handle names. */
 export const OPERATION_RULES = {
+  'capture.getState': rule('authored-result', 'getState', readPhase, 'unknown', [key], [], {
+    resultFrom: 'capture-state',
+  }),
+  'capture.getMethod': rule('authored-result', 'getMethod', readPhase, 'unknown', [key], [], {
+    resultFrom: 'capture-method',
+  }),
+  'capture.getAsHook': rule('authored-result', 'getAsHook', readPhase, 'unknown', [key], [], {
+    resultFrom: 'capture-child',
+  }),
+  'capture.getAsHookHandle': rule(
+    'authored-result',
+    'getAsHookHandle',
+    readPhase,
+    'unknown',
+    [key],
+    [],
+    { resultFrom: 'capture-handle' }
+  ),
+  'scheduler.delay': rule(
+    'void',
+    'delay',
+    callbackPhase,
+    'delay-task',
+    [{ role: 'value', types: ['number'] }, cb('helper', [], { returnType: 'void' })],
+    [effect('subscribe', 'scheduler', 'subscription')]
+  ),
+  'delay.cancel': rule(
+    'delay-task',
+    'cancel',
+    ['setup', 'callback'],
+    'void',
+    [],
+    [effect('write', 'scheduler', 'subscription')]
+  ),
+  'presence.owner': rule(
+    'def',
+    'feedback.presence.owner',
+    setup,
+    'presence-owner',
+    [],
+    [effect('declare', 'presence')]
+  ),
+  'presence.onCompletionRequest': rule(
+    'presence-owner',
+    'onCompletionRequest',
+    setup,
+    'void',
+    [cb('event', ['run', COMPLETION_REQUEST_TYPE])],
+    [effect('subscribe', 'presence', 'subscription')]
+  ),
+  'presence.publish': rule(
+    'run',
+    'feedback.presence.publish',
+    callbackPhase,
+    'void',
+    [
+      { role: 'value', types: ['presentation-owner-writer'] },
+      { role: 'value', types: [PRESENTATION_FRAME_TYPE] },
+    ],
+    [effect('write', 'presence')]
+  ),
+  'presence.settle': rule(
+    'run',
+    'feedback.presence.settle',
+    callbackPhase,
+    'void',
+    [
+      { role: 'value', types: ['presentation-owner-writer'] },
+      { role: 'value', types: [PRESENTATION_OUTCOME_TYPE] },
+    ],
+    [effect('write', 'presence')]
+  ),
+  'presence.isCurrent': rule(
+    'run',
+    'feedback.presence.isCurrent',
+    callbackPhase,
+    'boolean',
+    [
+      { role: 'value', types: ['presentation-owner-writer'] },
+      { role: 'value', types: [PRESENTATION_RECEIPT_TYPE] },
+    ],
+    [effect('read', 'presence')]
+  ),
+  'presentation.snapshotCompletion': rule(
+    'void',
+    'snapshotPresentationCompletionConfig',
+    ['setup', 'callback', 'render'],
+    PRESENTATION_COMPLETION_TYPE,
+    [{ role: 'value', types: [PRESENTATION_COMPLETION_TYPE] }],
+    []
+  ),
+  'meta.get': rule(
+    'run',
+    'meta.get',
+    ['setup', 'callback', 'render'],
+    'unknown',
+    [{ role: 'value', types: ['string'] }],
+    [effect('read', 'meta')]
+  ),
   'style.tw': rule(
     'void',
     'tw',
@@ -426,14 +553,6 @@ export const OPERATION_RULES = {
     'void',
     [],
     [effect('write', 'view', 'subscription')]
-  ),
-  'transitionAction.call': rule(
-    'transition-action',
-    'call',
-    callbackPhase,
-    'void',
-    [],
-    [effect('write', 'view-intent')]
   ),
   'feedback.style.patch': styleRule('run', 'feedback.style.patch', callbackPhase, 'void'),
   'feedback.style.suppress': styleRule('run', 'feedback.style.suppress', callbackPhase, 'void'),
@@ -576,7 +695,7 @@ export const OPERATION_RULES = {
     'def',
     'props.watch',
     setup,
-    'function',
+    watchDisposer,
     [{ role: 'declared-prop-keys' }, cb('props-watch', watchParameters)],
     [effect('subscribe', 'props', 'subscription')]
   ),
@@ -584,7 +703,7 @@ export const OPERATION_RULES = {
     'def',
     'props.watchAll',
     setup,
-    'function',
+    watchDisposer,
     [cb('props-watch', watchParameters)],
     [effect('subscribe', 'props', 'subscription')]
   ),
@@ -592,7 +711,7 @@ export const OPERATION_RULES = {
     'def',
     'props.watchRaw',
     setup,
-    'function',
+    watchDisposer,
     [{ role: 'static-keys' }, cb('props-watch', rawWatchParameters)],
     [effect('subscribe', 'raw-props', 'subscription')]
   ),
@@ -600,7 +719,7 @@ export const OPERATION_RULES = {
     'def',
     'props.watchRawAll',
     setup,
-    'function',
+    watchDisposer,
     [cb('props-watch', rawWatchParameters)],
     [effect('subscribe', 'raw-props', 'subscription')]
   ),
@@ -765,7 +884,11 @@ export const OPERATION_RULES = {
     'expose.emit',
     callbackPhase,
     'void',
-    [key, { role: 'event-payload', optional: true }, optionalRecord],
+    [
+      { role: 'declared-event-key', types: ['string'] },
+      { role: 'event-payload', optional: true },
+      optionalRecord,
+    ],
     [effect('signal', 'expose')]
   ),
   'lifecycle.setPresent': rule(
@@ -966,7 +1089,7 @@ export const OPERATION_RULES = {
     'def',
     'context.subscribe',
     setup,
-    'function',
+    { kind: 'callable', parameters: [], returnType: 'void' },
     [
       contextKey,
       {
@@ -980,7 +1103,7 @@ export const OPERATION_RULES = {
     'def',
     'context.trySubscribe',
     setup,
-    'function',
+    { kind: 'callable', parameters: [], returnType: 'void' },
     [
       contextKey,
       {
@@ -1146,47 +1269,6 @@ export const OPERATION_RULES = {
     [],
     [effect('declare', 'view')],
     { requiredCapabilities: ['view-render'] }
-  ),
-  'hook.asTransition': rule(
-    'void',
-    'asTransition',
-    setup,
-    'transition',
-    [],
-    [effect('declare', 'view')],
-    { requiredCapabilities: ['view-render'] }
-  ),
-  'transition.configure': rule(
-    'transition',
-    'configure',
-    setup,
-    'void',
-    [record],
-    [effect('declare', 'view-intent')]
-  ),
-  'transitionControls.enter': rule(
-    'transition-controls',
-    'enter',
-    callbackPhase,
-    'void',
-    [],
-    [effect('write', 'view-intent')]
-  ),
-  'transitionControls.leave': rule(
-    'transition-controls',
-    'leave',
-    callbackPhase,
-    'void',
-    [],
-    [effect('write', 'view-intent')]
-  ),
-  'transitionControls.complete': rule(
-    'transition-controls',
-    'complete',
-    callbackPhase,
-    'void',
-    [],
-    [effect('write', 'view-intent')]
   ),
   'focusEntry.configure': rule(
     'focus-entry',
@@ -1966,18 +2048,23 @@ export interface OperationContractIssue {
   parameter?: number;
 }
 export interface OperationBindings {
+  declaredEvents?: ReadonlySet<string>;
+  capture?: HookCaptureIR;
+  captureKey?: string;
+  childHandles?: ReadonlyMap<string, ValueType>;
   callbackContext?: CallbackContext;
   propNames?: ReadonlySet<string>;
-  contextValueType?: DataType;
+  contextValueType?: ValueType;
   stateValueType?: 'boolean' | 'number' | 'string';
+  stateDataType?: DataType;
   eventPayloadType?: DataType;
   inputPayloadType?: 'event' | 'host-event';
   methodParameters?: readonly { type: ValueType; optional?: boolean }[];
   methodReturnType?: ValueType;
 }
 export interface OperationArgument {
-  whenTrue?: OperationArgument;
-  whenFalse?: OperationArgument;
+  then?: OperationArgument;
+  otherwise?: OperationArgument;
   kind: string;
   type: ValueType;
   value?: unknown;
@@ -1990,6 +2077,27 @@ export interface OperationCallback {
   context?: FunctionContext;
   parameters: readonly { type: ValueType; optional?: boolean }[];
   returnType?: ValueType;
+}
+export function finiteStringKeys(argument: OperationArgument): string[] | undefined {
+  if (argument.kind === 'literal' && typeof argument.value === 'string' && argument.value)
+    return [argument.value];
+  const type = argument.type,
+    members =
+      typeof type !== 'string' && (type.kind === 'union' || type.kind === 'value-union')
+        ? type.members
+        : [type];
+  if (
+    !members.length ||
+    !members.every(
+      (type) =>
+        typeof type !== 'string' &&
+        type.kind === 'literal' &&
+        typeof type.value === 'string' &&
+        type.value
+    )
+  )
+    return undefined;
+  return members.map((type) => (type as { value: string }).value);
 }
 
 function lookup(operation: string): OperationRule | undefined {
@@ -2014,7 +2122,9 @@ function data(type: ValueType): DataType | undefined {
   }
 }
 function assignable(actual: ValueType, expected: ValueType): boolean {
-  if (actual === expected || isCapabilityAssignable(actual, expected)) return true;
+  if (valueAssignable(actual, expected)) return true;
+  if (expected === 'module-config' && typeof actual !== 'string' && actual.kind === 'object')
+    return true;
   const a = data(actual);
   const e = data(expected);
   if (a && e) return isAssignable(a, e);
@@ -2023,22 +2133,6 @@ function assignable(actual: ValueType, expected: ValueType): boolean {
     : expected === 'array'
       ? typeof a === 'object' && a.kind === 'array'
       : false;
-}
-export function isTemplateChildType(type: ValueType): boolean {
-  if (typeof type === 'string')
-    return ['array', 'template', 'string', 'number', 'null'].includes(type);
-  switch (type.kind) {
-    case 'union':
-      return type.members.every(isTemplateChildType);
-    case 'array':
-      return isTemplateChildType(type.element);
-    case 'literal':
-      return (
-        type.value === null || typeof type.value === 'string' || typeof type.value === 'number'
-      );
-    default:
-      return false;
-  }
 }
 function templateProps(type: ValueType): boolean {
   return (
@@ -2067,7 +2161,23 @@ export function stateValue(receiver?: ValueType): 'boolean' | 'number' | 'string
     return 'string';
   return undefined;
 }
+
+export function stateDeclarationData(
+  value: OperationArgument & { operation?: string; arguments?: readonly OperationArgument[] }
+): DataType | undefined {
+  if (value.kind !== 'operation' || value.operation !== 'state.enum') return undefined;
+  const options = value.arguments?.[2]?.entries?.find((entry) => entry.key === 'options')?.value;
+  if (options?.kind !== 'array' || !options.elements?.length) return undefined;
+  if (!options.elements.every((item) => item.kind === 'literal' && typeof item.value === 'string'))
+    return undefined;
+  return parseDataType({
+    kind: 'union',
+    members: options.elements.map((item) => ({ kind: 'literal', value: item.value })),
+  });
+}
 const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueType>>>> = {
+  'presence-owner': { ref: 'presentation-owner-ref', writer: 'presentation-owner-writer' },
+  'context-key': { __brand: { kind: 'literal', value: 'ContextKey' } },
   'control-label-request': {
     source: {
       kind: 'union',
@@ -2119,16 +2229,6 @@ const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueTy
     column: 'state:number',
     rowSpan: 'state:number',
     columnSpan: 'state:number',
-  },
-  transition: {
-    transitionState: 'borrowed:string',
-    isPresent: 'borrowed:boolean',
-    controls: 'transition-controls',
-  },
-  'transition-controls': {
-    enter: 'transition-action',
-    leave: 'transition-action',
-    complete: 'transition-action',
   },
   'boundary-outside-event': {
     classification: { kind: 'literal', value: 'outside' },
@@ -2239,9 +2339,29 @@ export function capabilityMemberType(
     ? capabilityMembers[owner][property]
     : undefined;
 }
-function nullable(type: DataType): DataType {
-  return { kind: 'union', members: [type, 'null'] };
+function nullable(type: ValueType): ValueType {
+  return joinValueTypes([type, 'null']);
 }
+/** Privileged registration identities are intrinsic semantics, never authored hook-name matching. */
+export function privilegedHookCaptures(
+  value: Extract<ExpressionIR, { kind: 'operation' }>
+): HookCaptureIR['children'] {
+  if (!value.operation.startsWith('hook.')) return [];
+  const name = value.operation.slice(5);
+  if (value.operation !== 'hook.asTableStructure') return [{ id: value.operation, name }];
+  const argument = value.arguments[0];
+  const roles =
+    argument?.kind === 'literal' && typeof argument.value === 'string'
+      ? [argument.value]
+      : ['root', 'row', 'headerCell', 'cell', 'caption'];
+  return roles.map((role) => ({ id: `${value.operation}:${role}`, name: `${name}:${role}` }));
+}
+
+export function privilegedCaptureType(id: string): ValueType | undefined {
+  if (!id.startsWith('hook.')) return undefined;
+  return lookup(id.split(':')[0])?.result;
+}
+
 export function operationResultType(
   operation: string,
   receiver?: ValueType,
@@ -2250,8 +2370,43 @@ export function operationResultType(
   const contract = lookup(operation);
   if (!contract) return undefined;
   switch (contract.resultFrom) {
+    case 'capture-state': {
+      const state = bindings.capture?.states.find((state) => state.name === bindings.captureKey);
+      const primitive = stateValue(state?.type);
+      return primitive ? joinValueTypes([`borrowed:${primitive}`, 'void']) : 'void';
+    }
+    case 'capture-method': {
+      const method = bindings.capture?.methods.find(
+        (method) => method.name === bindings.captureKey
+      );
+      return method ? joinValueTypes([method.type, 'void']) : 'void';
+    }
+    case 'capture-handle':
+    case 'capture-child': {
+      const child = bindings.capture?.children.find((child) => child.name === bindings.captureKey);
+      if (!child) return 'void';
+      const privileged = privilegedCaptureType(child.id);
+      const handle = privileged ??
+        bindings.childHandles?.get(child.id) ?? { kind: 'capture', hookId: child.id };
+      return joinValueTypes([
+        contract.resultFrom === 'capture-handle'
+          ? handle
+          : {
+              kind: 'object',
+              fields: [
+                { name: 'name', type: 'string' },
+                { name: 'order', type: 'number' },
+                { name: 'privileged', type: 'boolean' },
+                { name: 'mode', type: 'string' },
+                { name: 'result', type: privileged ?? { kind: 'capture', hookId: child.id } },
+                { name: 'handle', type: handle },
+              ],
+            },
+        'void',
+      ]);
+    }
     case 'receiver-value':
-      return stateValue(receiver);
+      return bindings.stateDataType ?? stateValue(receiver);
     case 'context-value':
       return bindings.contextValueType;
     case 'context-value-or-null':
@@ -2361,13 +2516,7 @@ export function validateOperationCallback(
   callback.parameters.forEach((parameter, index) => {
     const expected = parameters[index];
     if (!expected) return;
-    const actualData = data(parameter.type);
-    const expectedData = data(expected.type);
-    if (
-      actualData && expectedData
-        ? !dataTypeEqual(actualData, expectedData)
-        : parameter.type !== expected.type
-    )
+    if (!valueTypeEqual(parameter.type, expected.type))
       issues.push({
         code: 'callback-type',
         message: `Callback parameter ${index + 1} does not match its semantic type.`,
@@ -2402,6 +2551,11 @@ function staticKey(argument: OperationArgument): argument is OperationArgument &
 }
 /** Literal-aware data evidence after the source or IR expression boundary is checked. */
 export function argumentData(argument: OperationArgument): DataType | undefined {
+  if (argument.kind === 'conditional' && argument.then && argument.otherwise) {
+    const yes = argumentData(argument.then),
+      no = argumentData(argument.otherwise);
+    return yes && no ? parseDataType({ kind: 'union', members: [yes, no] }) : undefined;
+  }
   if (
     argument.kind === 'literal' &&
     (argument.value === null ||
@@ -2410,11 +2564,6 @@ export function argumentData(argument: OperationArgument): DataType | undefined 
       typeof argument.value === 'boolean')
   )
     return { kind: 'literal', value: argument.value };
-  if (argument.kind === 'conditional' && argument.whenTrue && argument.whenFalse) {
-    const a = argumentData(argument.whenTrue),
-      b = argumentData(argument.whenFalse);
-    return a && b ? parseDataType({ kind: 'union', members: [a, b] }) : undefined;
-  }
   if (argument.kind === 'record' && argument.entries) {
     const fields: { name: string; type: DataType }[] = [];
     for (const entry of argument.entries) {
@@ -2487,6 +2636,44 @@ export function validateOperationArguments(
       issues.push({ code, message, argument: index });
     if (requirement.types && !requirement.types.some((type) => assignable(argument.type, type)))
       reject('argument-type', `Argument ${index + 1} has an incompatible type.`);
+    if (
+      requirement.types?.includes('module-config') &&
+      typeof argument.type !== 'string' &&
+      argument.type.kind === 'object'
+    ) {
+      const ordinary = (type: ValueType): boolean => {
+        if (typeof type === 'string')
+          return !['def', 'run', 'render', 'function', 'unknown'].includes(type);
+        if (type.kind === 'callable' || type.kind === 'cell' || type.kind === 'capture')
+          return false;
+        if (type.kind === 'object')
+          return type.index === undefined && type.fields.every((field) => ordinary(field.type));
+        if (type.kind === 'value-union') return type.members.every(ordinary);
+        return true;
+      };
+      for (const field of argument.type.fields) {
+        const callback = requirement.fields?.[field.name]?.callback;
+        if (callback && typeof field.type !== 'string' && field.type.kind === 'callable') {
+          for (const issue of validateOperationCallback(
+            {
+              phase: callback.phase,
+              context: callback.context,
+              parameters: field.type.parameters,
+              returnType: field.type.returnType,
+            },
+            { at: index, ...callback },
+            bindings
+          ))
+            issues.push({ ...issue, argument: index });
+        } else if (!ordinary(field.type))
+          reject(
+            'argument-type',
+            `Configuration field ${field.name} cannot carry execution-scope handles or an ungoverned callback.`
+          );
+      }
+      if (argument.type.index !== undefined)
+        reject('argument-type', 'Configuration records require a finite checked field set.');
+    }
     if (requirement.schema) {
       const actual = argumentData(argument);
       const expected: DataType = requirement.optional
@@ -2518,6 +2705,16 @@ export function validateOperationArguments(
         reject('argument-type', 'The entry override is only admitted by focus scope activation.');
     }
     switch (requirement.role) {
+      case 'declared-event-key': {
+        const keys = finiteStringKeys(argument);
+        if (
+          !keys ||
+          !bindings.declaredEvents ||
+          keys.some((name) => !bindings.declaredEvents!.has(name))
+        )
+          reject('undeclared-key', 'Event keys must resolve to a finite set of declared events.');
+        break;
+      }
       case 'host-target':
         if (
           !['host-target', 'nullable:host-target', 'optional:host-target', 'null', 'void'].includes(
@@ -2596,7 +2793,19 @@ export function validateOperationArguments(
       requirement.callback &&
       (!requirement.callback.acceptsValue || argument.kind === 'function')
     ) {
-      if (argument.kind !== 'function' || argument.type !== 'function' || !argument.function)
+      if (typeof argument.type !== 'string' && argument.type.kind === 'callable') {
+        for (const issue of validateOperationCallback(
+          {
+            phase: requirement.callback.phase,
+            context: requirement.callback.context,
+            parameters: argument.type.parameters,
+            returnType: argument.type.returnType,
+          },
+          { at: index, ...requirement.callback },
+          bindings
+        ))
+          issues.push({ ...issue, argument: index });
+      } else if (argument.kind !== 'function' || argument.type !== 'function' || !argument.function)
         reject('argument-type', 'An inline checked callback is required.');
       else
         for (const issue of validateOperationCallback(
@@ -2643,28 +2852,4 @@ export function validateOperationArguments(
       });
   }
   return issues;
-}
-
-/** A callable parameter can only receive a statically checked synchronous signature. */
-export function checkedCallbackMatches(
-  actual: Pick<FunctionIR, 'parameters' | 'returnType'> | undefined,
-  expected: NonNullable<ParameterIR['callback']>
-): boolean {
-  if (!actual) return false;
-  if (
-    actual.parameters.filter((parameter) => !parameter.optional).length >
-    expected.parameters.filter((parameter) => !parameter.optional).length
-  )
-    return false;
-  if (expected.returnType !== 'void' && !assignable(actual.returnType, expected.returnType))
-    return false;
-  return actual.parameters.every((parameter, index) => {
-    const supplied = expected.parameters[index];
-    if (!supplied) return parameter.optional === true;
-    if (!assignable(supplied.type, parameter.type) || (supplied.optional && !parameter.optional))
-      return false;
-    return parameter.callback
-      ? !!supplied.callback && checkedCallbackMatches(supplied.callback, parameter.callback)
-      : !supplied.callback;
-  });
 }
