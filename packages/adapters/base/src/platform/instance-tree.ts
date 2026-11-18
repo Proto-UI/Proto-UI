@@ -1,4 +1,5 @@
 import type { Prototype } from '@proto.ui/core';
+import { retainBridgedKeyboardReset } from '../events/keyboard-press-owner';
 
 const PROTO_PARENT_INSTANCE = Symbol.for('@proto.ui/adapter-base/__proto_parent_instance');
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
@@ -38,15 +39,31 @@ export function createRebindableEventTarget(): RebindableEventTarget {
     EventListener,
     AbortSignal?,
     (() => void)?,
+    (() => void)?,
   ];
 
   let target: EventTarget | null = null;
   const registrations: Registration[] = [];
+  const attach = (host: EventTarget, registration: Registration) => {
+    const [type, listener, capture, passive, once, wrapped, signal] = registration;
+    const release =
+      type === 'keydown' && capture && !passive && !once && !signal
+        ? retainBridgedKeyboardReset(host, listener)
+        : undefined;
+    if (release) registration[8] = release;
+    else host.addEventListener(type, wrapped, { capture, passive });
+  };
+  const detach = (host: EventTarget, registration: Registration) => {
+    const release = registration[8];
+    registration[8] = undefined;
+    if (release) release();
+    else host.removeEventListener(registration[0], registration[5], registration[2]);
+  };
   const remove = (registration: Registration) => {
     const index = registrations.indexOf(registration);
     if (index < 0) return;
     registrations.splice(index, 1);
-    target?.removeEventListener(registration[0], registration[5], registration[2]);
+    if (target) detach(target, registration);
     if (registration[7]) registration[6]?.removeEventListener('abort', registration[7]);
   };
 
@@ -86,10 +103,7 @@ export function createRebindableEventTarget(): RebindableEventTarget {
         signal.addEventListener('abort', registration[7], { once: true });
       }
       registrations.push(registration);
-      target?.addEventListener(type, registration[5], {
-        capture,
-        passive: registration[3],
-      });
+      if (target) attach(target, registration);
     },
     removeEventListener(
       type: string,
@@ -109,18 +123,11 @@ export function createRebindableEventTarget(): RebindableEventTarget {
     setTarget(nextTarget: EventTarget | null) {
       if (target === nextTarget) return;
       if (target) {
-        for (const entry of registrations) {
-          target.removeEventListener(entry[0], entry[5], entry[2]);
-        }
+        for (const entry of registrations) detach(target, entry);
       }
       target = nextTarget;
       if (target) {
-        for (const entry of registrations) {
-          target.addEventListener(entry[0], entry[5], {
-            capture: entry[2],
-            passive: entry[3],
-          });
-        }
+        for (const entry of registrations) attach(target, entry);
       }
     },
     getTarget() {
