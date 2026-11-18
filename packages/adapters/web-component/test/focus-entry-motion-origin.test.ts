@@ -140,6 +140,30 @@ describe('WC entry native transition origin', () => {
     expect(fixture.target.hasAttribute('tabindex')).toBe(false);
   });
 
+  it('keeps nested logical Portal transitions before observation refresh', () => {
+    const fixture = entry();
+    const outer = document.createElement('div');
+    const inner = document.createElement('div');
+    const button = document.createElement('button');
+    inner.append(button);
+    outer.append(inner);
+    fixture.target.append(outer);
+    const outerPortal = createWebComponentPortalMount();
+    const innerPortal = createWebComponentPortalMount();
+    outerPortal.mount(outer);
+    innerPortal.mount(inner);
+    disposals.push(
+      () => innerPortal.unmount(inner),
+      () => outerPortal.unmount(outer)
+    );
+    expect(fixture.target.contains(button)).toBe(false);
+    expect(fixture.target.tabIndex).toBe(0);
+
+    transition(button);
+
+    expect(fixture.target.hasAttribute('tabindex')).toBe(false);
+  });
+
   it('keeps an external checked radio peer transition', async () => {
     const fixture = entry();
     const inside = document.createElement('input');
