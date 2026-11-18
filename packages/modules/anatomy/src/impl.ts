@@ -75,8 +75,8 @@ type ClaimRecord = {
 
 // Share reads only within one synchronous notification. A parent-getter identity
 // identifies one logical host tree; independent bridges must not share domains.
-// Each recipient still resolves its own current root and reads current targets.
-// No cached read survives a notification or an author callback.
+// Each recipient still reads current host targets. Logical ancestry can be
+// shared until an author callback or host observer registration runs.
 type OrderComparisons = Map<
   AnatomyRootTarget,
   {
@@ -84,11 +84,19 @@ type OrderComparisons = Map<
     positions: Map<AnatomyRootTarget, number>;
   }
 >;
-type DomainClaims = Map<AnatomyInstanceToken, ClaimRecord[]>;
+type NotificationDomains = {
+  claimsByRoot?: Map<AnatomyInstanceToken, ClaimRecord[]>;
+  rootsByInstance: Map<AnatomyInstanceToken, AnatomyInstanceToken | null>;
+};
 type OrderNotificationReads = {
   comparisons: OrderComparisons;
-  domains: Map<AnatomyParentGetter, DomainClaims>;
+  domains: Map<AnatomyParentGetter, NotificationDomains>;
 };
+
+function clearOrderNotificationReads(reads?: OrderNotificationReads): void {
+  reads?.comparisons.clear();
+  reads?.domains.clear();
+}
 
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
 
@@ -930,7 +938,11 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
   }
 
-  private ensureOrderObserver(family: AnatomyFamily, currentRoot?: AnatomyInstanceToken): void {
+  private ensureOrderObserver(
+    family: AnatomyFamily,
+    currentRoot?: AnatomyInstanceToken,
+    reads?: OrderNotificationReads
+  ): void {
     if (this.disposed || this.mountPhase !== 'mounted' || !this.orderListeners.has(family)) return;
     const observedRoot = this.observedOrderRoots.get(family);
     if (currentRoot === undefined && observedRoot !== undefined) return;
@@ -939,6 +951,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     const rootInstance =
       currentRoot === undefined ? this.findDomainRoot(this.getSelfToken(), family) : currentRoot;
     if (observedRoot === rootInstance) return;
+    // The host disposer or new observer can change the logical tree before
+    // the next recipient, even when this recipient's signature is unchanged.
+    clearOrderNotificationReads(reads);
     if (observedRoot !== undefined) this.teardownOrderObserver(family);
     if (!rootInstance) return;
     const target = CENTER.getClaim(rootInstance, family)?.getRootTarget(rootInstance);
@@ -1005,7 +1020,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     const next = this.computeOrderSignature(domain, reads);
     // Follow the current host root before the next native order mutation.
     if ((this.observedOrderRoots.get(family) ?? null) !== domain.rootInstance)
-      this.ensureOrderObserver(family, domain.rootInstance);
+      this.ensureOrderObserver(family, domain.rootInstance, reads);
     if (typeof prev !== 'undefined' && prev === next) return;
 
     this.orderSignatureByFamily.set(family, next);
@@ -1017,15 +1032,13 @@ export class AnatomyModuleImpl extends ModuleBase {
     // Callback scopes may synchronously reparent, mount or retire claims and
     // move or replace host targets, including through a nested notification.
     // Later recipients must read the resulting structure and order afresh.
-    reads?.comparisons.clear();
-    reads?.domains.clear();
+    clearOrderNotificationReads(reads);
     try {
       this.orderDispatch((ctx) => {
         for (const listener of listeners) listener(ctx);
       });
     } finally {
-      reads?.comparisons.clear();
-      reads?.domains.clear();
+      clearOrderNotificationReads(reads);
     }
   }
 
@@ -1224,11 +1237,16 @@ export class AnatomyModuleImpl extends ModuleBase {
   private resolveCurrentDomain(
     family: AnatomyFamily,
     strict = true,
-    domains?: Map<AnatomyParentGetter, DomainClaims>
+    domains?: Map<AnatomyParentGetter, NotificationDomains>
   ): CurrentDomain {
     const instance = this.getSelfToken();
     const getParent = this.getParentGetter();
-    const rootInstance = this.findDomainRoot(instance, family, getParent);
+    let cached = domains?.get(getParent);
+    if (domains && !cached) {
+      cached = { rootsByInstance: new Map() };
+      domains.set(getParent, cached);
+    }
+    const rootInstance = this.findDomainRoot(instance, family, getParent, cached?.rootsByInstance);
     if (!rootInstance) {
       if (!strict) return { rootInstance: null, claims: [], profile: null };
       throw anatomyError(
@@ -1238,20 +1256,25 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
 
     let claims: ClaimRecord[];
-    if (domains) {
-      let byRoot = domains.get(getParent);
+    if (cached) {
+      let byRoot = cached.claimsByRoot;
       if (!byRoot) {
         byRoot = new Map();
         // This cache belongs to this family notification only. Preserve the
         // registration order inside each root, including stable host fallback.
         for (const claim of CENTER.listClaims(family)) {
-          const root = this.findDomainRoot(claim.instance, family, getParent);
+          const root = this.findDomainRoot(
+            claim.instance,
+            family,
+            getParent,
+            cached.rootsByInstance
+          );
           if (!root) continue;
           let members = byRoot.get(root);
           if (!members) byRoot.set(root, (members = []));
           members.push(claim);
         }
-        domains.set(getParent, byRoot);
+        cached.claimsByRoot = byRoot;
       }
       claims = byRoot.get(rootInstance) ?? [];
     } else {
@@ -1272,16 +1295,32 @@ export class AnatomyModuleImpl extends ModuleBase {
   private findDomainRoot(
     instance: AnatomyInstanceToken,
     family: AnatomyFamily,
-    getParent = this.getParentGetter()
+    getParent = this.getParentGetter(),
+    roots?: Map<AnatomyInstanceToken, AnatomyInstanceToken | null>
   ): AnatomyInstanceToken | null {
+    const cached = roots?.get(instance);
+    if (cached !== undefined) return cached;
+    const visited: AnatomyInstanceToken[] | undefined = roots ? [] : undefined;
+    let root: AnatomyInstanceToken | null = null;
     let cur: AnatomyInstanceToken | null = instance;
     while (cur) {
-      if (CENTER.isRetiredBoundary(cur, family)) return null;
-      const claim = CENTER.getClaim(cur, family);
-      if (claim?.role === 'root') return cur;
+      visited?.push(cur);
+      if (CENTER.isRetiredBoundary(cur, family)) break;
+      if (CENTER.getClaim(cur, family)?.role === 'root') {
+        root = cur;
+        break;
+      }
       cur = getParent(cur);
+      const parentRoot = roots?.get(cur);
+      if (parentRoot !== undefined) {
+        root = parentRoot;
+        break;
+      }
     }
-    return null;
+    if (roots && visited) {
+      for (const token of visited) roots.set(token, root);
+    }
+    return root;
   }
 
   private hasAncestorRole(
