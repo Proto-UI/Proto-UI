@@ -57,20 +57,20 @@ export function getWebComponentPortalProjectionForOrigin(node: Node): HTMLElemen
   return projection && activeProjections.has(projection) ? projection : null;
 }
 
-/** True only when target is physically inside an active projection whose
- * logical origin remains beneath root (including an open ShadowRoot chain). */
+/** True only when target is inside an active projection whose logical
+ * origin chain remains beneath root (including an open ShadowRoot chain). */
 export function isWebComponentPortalTargetOwnedBy(root: Node, target: Element): boolean {
-  let projection: Element | null = target;
-  while (projection && !activeProjections.has(projection as HTMLElement)) {
-    const tree = projection.getRootNode();
-    projection =
-      projection.parentElement ?? (isShadowRootNode(tree) ? (tree.host as Element) : null);
-  }
-  const origin = projection ? originMarkerByProjection.get(projection as HTMLElement) : undefined;
-  let current: Node | null = origin ?? null;
+  let current: Node | null = target;
+  let projections: Set<Node> | null = null;
   while (current) {
-    if (current === root) return true;
-    current = isShadowRootNode(current) ? current.host : current.parentNode;
+    if (current === root) return projections !== null;
+    if (current.nodeType === 1 && activeProjections.has(current as HTMLElement)) {
+      if (projections?.has(current)) return false;
+      (projections ??= new Set()).add(current);
+      current = originMarkerByProjection.get(current as HTMLElement) ?? null;
+    } else {
+      current = isShadowRootNode(current) ? current.host : current.parentNode;
+    }
   }
   return false;
 }

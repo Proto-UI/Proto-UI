@@ -150,6 +150,7 @@ import {
   createWebComponentPortalMount,
   getWebComponentPortalProjectionForOrigin,
   isWebComponentPortaled,
+  isWebComponentPortalTargetOwnedBy,
 } from '../portal-mount';
 import {
   composedParentElement,
@@ -2313,6 +2314,39 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 if (event.type.startsWith('transition')) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (!propertyAffectsEntryEligibility(propertyName)) return;
+                  const path = event.composedPath();
+                  const origin = path[0];
+                  if (
+                    event.isTrusted &&
+                    !hasExternalStyleInputs &&
+                    origin instanceof view!.Element
+                  ) {
+                    let related = path.includes(target) || belongsToObservedEntryTree(origin);
+                    // Portals and slotted regions can have physical or composed
+                    // ancestors outside the container. Consult their live paths.
+                    for (const root of observedRoots) {
+                      if (related) break;
+                      if (isWebComponentPortalTargetOwnedBy(root, origin)) {
+                        related = true;
+                        break;
+                      }
+                      let ancestor: Node | null = root;
+                      while (ancestor) {
+                        if (ancestor === origin) {
+                          related = true;
+                          break;
+                        }
+                        ancestor =
+                          (ancestor as Node & { assignedSlot?: HTMLSlotElement | null })
+                            .assignedSlot ??
+                          ancestor.parentNode ??
+                          (ancestor.nodeType === 11 && 'host' in ancestor
+                            ? (ancestor as ShadowRoot).host
+                            : null);
+                      }
+                    }
+                    if (!related) return;
+                  }
                 }
                 if (event.type === 'animationstart')
                   trackEligibilityAnimation(event as AnimationEvent);
