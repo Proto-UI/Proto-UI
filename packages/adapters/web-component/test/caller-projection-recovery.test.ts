@@ -8,7 +8,7 @@ let id = 0;
 // The original native18 remains the selected-text oracle. These cases cover
 // recovery admission and the shell slot's lifetime after owner retirement.
 describe('failed initial split caller projection recovery', () => {
-  it.each(['restore', 'adopt', 'remove nested', 'replace nested'] as const)(
+  it.each(['restore', 'adopt', 'remove nested', 'replace nested', 'redistribute text'] as const)(
     'retains a caller-only slot only after a complete rollback (%s)',
     async (mutation) => {
       const suffix = ++id;
@@ -18,7 +18,14 @@ describe('failed initial split caller projection recovery', () => {
       const container = document.createElement('div');
       const button = document.createElement('button');
       button.setAttribute('aria-label', 'Action');
-      container.append(button);
+      const firstSpan = document.createElement('span');
+      const secondSpan = document.createElement('span');
+      const firstText = document.createTextNode('A');
+      const secondText = document.createTextNode('B');
+      firstSpan.append(firstText);
+      secondSpan.append(secondText);
+      if (mutation === 'redistribute text') container.append(firstSpan, secondSpan);
+      else container.append(button);
       const caller = mutation === 'restore' || mutation === 'adopt' ? input : container;
       const foreign = document.implementation.createHTMLDocument();
       let reacted = false;
@@ -30,7 +37,10 @@ describe('failed initial split caller projection recovery', () => {
             reacted = true;
             if (mutation === 'remove nested') button.remove();
             else if (mutation === 'replace nested') button.replaceWith(button.cloneNode());
-            else {
+            else if (mutation === 'redistribute text') {
+              firstText.data = 'AB';
+              secondText.data = '';
+            } else {
               input.value = 'Reset';
               if (mutation === 'adopt') foreign.body.append(foreign.adoptNode(input));
             }
@@ -107,7 +117,12 @@ describe('failed initial split caller projection recovery', () => {
         }
         expect(host.firstChild).toBe(caller);
         if (caller === input) expect(input.value).toBe('Caller');
-        else {
+        else if (mutation === 'redistribute text') {
+          expect(firstSpan.firstChild).toBe(firstText);
+          expect(secondSpan.firstChild).toBe(secondText);
+          expect(firstText.data).toBe('A');
+          expect(secondText.data).toBe('B');
+        } else {
           expect(container.firstChild).toBe(button);
           expect(button.nextSibling).toBeNull();
         }

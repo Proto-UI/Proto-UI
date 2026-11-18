@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import dialogMask from '../../../prototypes/shadcn/src/dialog/overlay.proto';
 import dialogRoot from '../../../prototypes/shadcn/src/dialog/root.proto';
 import { AdaptToWebComponent, setElementProps } from '../src';
+import {
+  isNativeFocusTargetReady,
+  subscribeFocusTargetOwnerReady,
+} from '../src/platform/instance-tree';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
@@ -33,6 +37,8 @@ describe('composed Shadow prototype admission', () => {
     };
     const environmentListeners = new Set<() => void>();
     const lifecycleEvents: string[] = [];
+    let readyPublications = 0;
+    let unsubscribeReady: (() => void) | undefined;
     let finishDisposal!: () => void;
     const disposed = new Promise<void>((resolve) => {
       finishDisposal = resolve;
@@ -56,7 +62,12 @@ describe('composed Shadow prototype admission', () => {
       },
       diagnostics: {
         onLifecycleEvent(event) {
-          lifecycleEvents.push(event.type);
+          lifecycleEvents.push(event.type === 'mount.phase' ? event.phase : event.type);
+          if (event.type === 'mount.commit.done') {
+            unsubscribeReady = subscribeFocusTargetOwnerReady(host, () => {
+              if (isNativeFocusTargetReady(host)) readyPublications++;
+            });
+          }
           if (event.type === 'instance.dispose.done') finishDisposal();
         },
       },
@@ -82,7 +93,9 @@ describe('composed Shadow prototype admission', () => {
       expect(errors[0]).toBeInstanceOf(Error);
       await disposed;
       expect(lifecycleEvents).toContain('mount.commit.done');
+      expect(lifecycleEvents).not.toContain('mounted');
       expect(lifecycleEvents).not.toContain('mount.mounted');
+      expect(readyPublications).toBe(0);
       expect(environmentListeners.size).toBe(0);
       expect(host.getExposes?.() ?? {}).toEqual({});
       expect(host.hasAttribute('data-pui-color-scheme')).toBe(false);
@@ -90,6 +103,7 @@ describe('composed Shadow prototype admission', () => {
       expect(host.shadowRoot?.childNodes.length).toBe(0);
       expect(errors).toHaveLength(1);
     } finally {
+      unsubscribeReady?.();
       parent.remove();
       await Promise.resolve();
       window.removeEventListener('error', capture);

@@ -670,8 +670,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._exposes = record;
       };
 
-      // Admit split effects before forwarding Runtime's mounted task to the host.
-      // Keep delivery inside the original scheduler call, including sync failures.
+      // Admit split effects before forwarding the mounted phase to observers.
       let admitViewProjection: (() => void) | null = null;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
@@ -761,10 +760,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           host: thisEl,
           root: nativeLinkTarget ?? thisRoot,
           shadowViewTarget: splitResources?.surface,
-          schedule: (task) => {
-            admitViewProjection?.();
-            schedule(task);
-          },
+          schedule,
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
           viewOperations: { capture: () => owner.captureViewOperation() },
@@ -793,6 +789,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: (event) => {
+            if (event.type === 'mount.phase' && event.phase === 'mounted') admitViewProjection?.();
             opt.diagnostics?.onLifecycleEvent?.(event);
             if (event.type === 'mount.phase') {
               focusIngressReady = event.phase === 'mounted';
@@ -1237,7 +1234,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: createHostSession,
           });
-          // Presence may defer scheduling; admit the completed acquisition now.
+          // Presence may defer the mounted transition; admit the completed acquisition now.
           // Non-split views retain their existing post-attach admission boundary.
           admitProjection();
         } catch (error) {

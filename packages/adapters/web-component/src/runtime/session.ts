@@ -331,6 +331,7 @@ function captureSplitCallerProjection(
             (node.nodeType === 1 ? (node as Element).getAttribute('slot') : null) ===
               content[index].slot
         ) &&
+        textNodes.every(({ node, data }) => node.data === data) &&
         controls.every(({ node, state }) => host.contains(node) && state.isCurrent())
       );
     },
