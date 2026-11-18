@@ -16,8 +16,8 @@ function prototypes(node: DemoChild): string[] {
 }
 
 // Button is published for base, shadcn, brutalist, bootstrap-2-3-2, and
-// liquid-glass. All declare initialRuntime="wc". base exposes a three-runtime
-// selector (no vue2); bootstrap exposes a four-runtime selector (including vue2);
+// liquid-glass. All declare initialRuntime="wc". Base and Bootstrap expose
+// four-runtime selectors (including Vue 2).
 // shadcn and liquid-glass each render four separate single-runtime preview blocks,
 // so they have no combined runtimes array. base/shadcn use `button.mdx`; brutalist
 // publishes at `components/button.mdx`. base has no manifest entry (non-manifest
@@ -29,7 +29,7 @@ const BUTTON_FAMILIES = [
   {
     family: 'base',
     mdxPath: 'button.mdx',
-    runtimes: "runtimes={['wc', 'react', 'vue']}",
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
     slug: 'ui-libraries/base/button',
     manifestBound: false,
     mdxDemoId: 'demo-base-button',
