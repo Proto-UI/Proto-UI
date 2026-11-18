@@ -30,6 +30,8 @@ Scalar State domain validation is also profile-specific. The legacy Core/Runtime
 
 Public record fields are projected again at an explicit registry read or public call result. This refresh preserves aliases and guards newly assigned functions before that result crosses the owner boundary. Holding a record does not install automatic tracking of every later external assignment; a mutation with no subsequent read or returned result does not create another projection boundary.
 
+In `vue-source-v1`, an already-issued external State subscription cancellation remains callable during and after terminal disposal. It becomes inert when the public owner is invalidated; owner teardown clears the remaining subscriptions. Fresh `get`, `subscribe` and `unsubscribe` calls still reject terminal access. While the owner is live, cancellation removes its registration, including during notification delivery.
+
 Public callable records require statically known named fields. Portable IR rejects typed index signatures because their dynamic fields have no implemented public projection contract. The opaque `index: unknown` view used by internal `JsonObject` and hook stores remains available inside the checked program and is not a public value contract.
 
 ## Source resolution

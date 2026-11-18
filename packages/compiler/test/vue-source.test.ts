@@ -241,9 +241,46 @@ describe('Vue 3 native source', () => {
       expect(() => exposed.focused.get()).toThrow(/disposed/);
       expect(() => exposed.focused.subscribe(() => {})).toThrow(/disposed/);
       expect(() => exposed.focused.unsubscribe(off)).toThrow(/disposed/);
-      expect(() => off()).toThrow(/disposed/);
+      expect(() => off()).not.toThrow();
       expect(() => exposed.focus()).toThrow(/disposed/);
       expect(phase.at(-1)).toBe('disposed');
+    } finally { app.unmount(); host.remove(); }
+  });
+
+  it.each(['owned', 'observed'] as const)('retires issued %s State cancellations during and after terminal invalidation', async (kind) => {
+    const Generated = component(kind === 'owned' ? counterSource : interactionSource);
+    const host = document.createElement('div'); document.body.append(host);
+    let terminalOff = () => {};
+    let terminalCancellations = 0;
+    const app = Vue.createApp(Generated, { onPhase: (phase: string) => {
+      if (phase === 'disposed') { terminalOff(); terminalCancellations++; }
+    } });
+    const owner = app.mount(host) as unknown as { getExposes(): CounterExposes & InteractionExposes };
+    try {
+      await settle();
+      const exposed = owner.getExposes();
+      const state: PublicState<number | boolean> = kind === 'owned' ? exposed.counter : exposed.focused;
+      const values: Array<number | boolean> = [], cancelledValues: Array<number | boolean> = [];
+      let offLater = () => {};
+      const off = state.subscribe((event) => { values.push(event.next); offLater(); });
+      offLater = state.subscribe((event) => cancelledValues.push(event.next));
+      if (kind === 'owned') { exposed.write(3); exposed.write(4); }
+      else { exposed.focus({ reason: 'keyboard' }); exposed.disable(true); }
+      expect(values).toEqual(kind === 'owned' ? [3, 4] : [true, false]);
+      // Cancelling during delivery skips a registration already recorded for that event.
+      expect(cancelledValues).toEqual([]);
+      off(); off();
+      if (kind === 'owned') exposed.write(5);
+      else { exposed.disable(false); exposed.focus(); }
+      expect(values).toHaveLength(2);
+      terminalOff = state.subscribe(() => {});
+      app.unmount();
+      expect(terminalCancellations).toBe(1);
+      expect(() => terminalOff()).not.toThrow();
+      expect(() => terminalOff()).not.toThrow();
+      expect(() => state.get()).toThrow(/disposed/);
+      expect(() => state.subscribe(() => {})).toThrow(/disposed/);
+      expect(() => state.unsubscribe(terminalOff)).toThrow(/disposed/);
     } finally { app.unmount(); host.remove(); }
   });
 

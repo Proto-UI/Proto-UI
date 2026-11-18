@@ -933,7 +933,7 @@ ${
           ${n('PublicAlive')}();
           const registration = (event: ${n('StateEvent')}<T>) => callback(event);
           subscribers.add(registration);
-          return () => { ${n('PublicAlive')}(); subscribers.delete(registration); };
+          return () => { if (!${n('Disposed')} && !${n('Disposing')}) subscribers.delete(registration); };
         },
         unsubscribe(off: () => void) { ${n('PublicAlive')}(); off(); },
       });
@@ -1141,7 +1141,7 @@ ${usesStyle ? `          ${n('Style')}.refresh();` : ''}
 ${usesInteraction ? `          ${n('Interaction')}.refresh();` : ''}
           ${emitRecordedNotification({ queue: n('StateQueue'), draining: n('EmittingState'), subscribers: 'subscribers', deliver: 'subscriber(event)' })}
         },
-        subscribe(callback) { ${n('PublicAlive')}(); const registration: typeof callback = event => callback(event); subscribers.add(registration); return () => { ${n('PublicAlive')}(); subscribers.delete(registration); }; },
+        subscribe(callback) { ${n('PublicAlive')}(); const registration: typeof callback = event => callback(event); subscribers.add(registration); return () => { if (!${n('Disposed')} && !${n('Disposing')}) subscribers.delete(registration); }; },
         unsubscribe(off) { ${n('PublicAlive')}(); off(); },
       };
       ${n('States')}.add(handle);
