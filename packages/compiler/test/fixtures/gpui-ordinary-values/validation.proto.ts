@@ -5,7 +5,7 @@ export default definePrototype({
   name: 'state-validation-boundary',
   setup(def) {
     const scroll = asScrollSurface();
-    scroll.configure({ axes: 'vertical' });
+    scroll.configure({ axes: 'vertical', endFollow: { mode: 'while-at-end', axis: 'vertical' } });
     def.expose.method('scrollTo', () =>
       scroll.request({ kind: 'to', axis: 'vertical', position: 0.5 })
     );
@@ -28,6 +28,9 @@ export default definePrototype({
     def.expose.method('scrollEnd', () => scroll.request({ kind: 'to-end', axis: 'vertical' }).kind);
     def.expose.method('scrollWrongAxis', () =>
       scroll.request({ kind: 'to', axis: 'horizontal', position: 0.5 })
+    );
+    def.expose.method('scrollEndWrongAxis', () =>
+      scroll.request({ kind: 'to-end', axis: 'horizontal' })
     );
     const value = def.state.numberRange('value', 0, { min: 0, max: 1 });
     def.expose.method('attempt', () => {

@@ -13,9 +13,24 @@ pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
     {
         let o=owner.borrow();
         if !o.modules.hooks.contains("scroll"){return scroll_rejected("not-declared")}
-        if !o.mounted{return scroll_rejected("not-mounted")}
     }
-    if !ready(&owner){return scroll_rejected("unavailable")}
+    // Refusal paths inspect only a literal kind, without coercion or property errors.
+    let to_end=match &request{
+        Value::Record(record)=>record.fields.try_borrow().is_ok_and(|fields|matches!(fields.get("kind"),Some(Value::Json(Json::String(kind))) if kind=="to-end")),
+        Value::Json(Json::Object(fields))=>fields.get("kind").and_then(Json::as_str)==Some("to-end"),
+        _=>false,
+    };
+    {
+        let mut o=owner.borrow_mut();
+        if !o.mounted{
+            if to_end{o.modules.scroll.request_status="rejected".into();}
+            return scroll_rejected("not-mounted")
+        }
+    }
+    if !ready(&owner){
+        if to_end{owner.borrow_mut().modules.scroll.request_status="rejected".into();}
+        return scroll_rejected("unavailable")
+    }
     let axis=request.member("axis",false).text();
     assert!(axis=="horizontal"||axis=="vertical","invalid scroll axis");
     let horizontal=axis=="horizontal";
@@ -25,7 +40,7 @@ pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
     let s=&mut o.modules.scroll;
     let axes=text_or(field(&s.config,"axes"),"both");
     if axes!="both"&&axes!=axis||s.handle.is_none(){
-        s.request_status="rejected".into();
+        if kind=="to-end"{s.request_status="rejected".into();}
         return scroll_rejected("unavailable")
     }
     if kind=="to-end"{
@@ -67,10 +82,13 @@ pub fn scroll_frame(owner:&OwnerRef,window:&mut Window){
     let configured=!follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end";
     let axis=if configured{text_or(follow.member("axis",false),"vertical")}else{"vertical".into()};
     let mut end=None;
+    let mut retired_end=false;
     if let Some((horizontal,requested_epoch))=s.pending_end.take(){
-        if requested_epoch==epoch{end=Some(horizontal)}else{s.request_status="rejected".into();}
+        if requested_epoch==epoch{end=Some(horizontal)}else{s.request_status="rejected".into();retired_end=true;}
     }
-    if end.is_none()&&configured&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
+    // Retirement discards this frame's growth observation; updating previous_max
+    // below consumes it rather than deferring old-view movement to a later frame.
+    if !retired_end&&end.is_none()&&configured&&s.following&&max!=s.previous_max{end=Some(axis=="horizontal");}
     if let Some(horizontal)=end{
         let mut offset=s.handle().offset();
         if horizontal{offset.x=-max.x}else{offset.y=-max.y}
