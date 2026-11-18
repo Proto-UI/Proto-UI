@@ -241,7 +241,16 @@ export function hasBorderBoxInlineClipping(
       const start = layoutInlineStart(parent) + parent.clientLeft;
       const available = parent.clientWidth;
       if (!Number.isFinite(start) || !Number.isFinite(available) || available < 0) return null;
-      if (left < start - 1 || left + width > start + available + 1) return true;
+      if (left < start - 1 || left + width > start + available + 1) {
+        console.info('[select-size] ' + JSON.stringify({ where: 'clipping-ancestor',
+          target: target.getAttribute('data-demo-ref'), ancestor: parent.getAttribute('data-demo-ref'),
+          left, width, start, available, overflow, clientLeft: parent.clientLeft,
+          ancestorRect: parent.getBoundingClientRect().toJSON(),
+          targetRect: target.getBoundingClientRect().toJSON(),
+          offsetWidth: parent.offsetWidth, scrollWidth: parent.scrollWidth,
+          padding: [style.paddingLeft, style.paddingRight], direction: style.direction }));
+        return true;
+      }
     }
     if (parent === frame) return false;
     if (
