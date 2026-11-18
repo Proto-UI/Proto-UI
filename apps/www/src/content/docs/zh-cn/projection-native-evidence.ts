@@ -1,11 +1,40 @@
 import { appendFile, mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { performance as nodePerformance } from 'node:perf_hooks';
 import type { Page } from 'playwright-core';
 
 // Evidence-only companion. It never writes component state, CSS or control facts.
 const outputRoot = process.env.PROTO_UI_PROJECTION_EVIDENCE_DIR;
+type GeometryTransport = { context: string; ids: number[]; samples: { id: number; sample: unknown }[] };
+type GeometryCache = { context: string; samples: Map<number, unknown> };
+const geometryCaches = new WeakMap<Page, GeometryCache>();
 const pages = new WeakMap<Page, { id: number; testName: string; sequence: number }>();
 let nextPage = 0;
+
+// A capture owns its cache copy across awaits, including overlapping captures and navigation.
+function materializeGeometry(transport: GeometryTransport, previous?: GeometryCache): GeometryCache {
+  if (typeof transport.context !== 'string' || !transport.context)
+    throw new Error('Geometry context identity is missing.');
+  const samples = new Map(previous?.context === transport.context ? previous.samples : []);
+  const ids = new Set<number>();
+  for (const id of transport.ids) {
+    if (!Number.isSafeInteger(id) || id <= 0 || ids.has(id))
+      throw new Error('Geometry window has an invalid or duplicate sample identity.');
+    ids.add(id);
+  }
+  const received = new Set<number>();
+  for (const entry of transport.samples) {
+    if (!ids.has(entry.id) || received.has(entry.id) || samples.has(entry.id))
+      throw new Error('Geometry transfer has an unexpected or duplicate sample identity.');
+    if (!entry.sample || typeof entry.sample !== 'object' || Array.isArray(entry.sample))
+      throw new Error('Geometry transfer has no sample record.');
+    received.add(entry.id);
+    samples.set(entry.id, entry.sample);
+  }
+  for (const id of ids) if (!samples.has(id)) throw new Error(`Geometry sample ${id} is missing.`);
+  for (const id of samples.keys()) if (!ids.has(id)) samples.delete(id);
+  return { context: transport.context, samples };
+}
 
 export async function installProjectionEvidence(page: Page, testName: string): Promise<void> {
   if (!outputRoot) throw new Error('PR1472 native evidence requires its output directory.');
@@ -23,6 +52,7 @@ export async function installProjectionEvidence(page: Page, testName: string): P
     type EvidenceWindow = Window & { __pui1472NativeEvidence?: {
       events: Observation[];
       geometry: Observation[];
+      transport(context: string | null, known: number[]): GeometryTransport;
       readLayout(element: HTMLElement): Record<string, unknown>;
     } };
     const view = window as EvidenceWindow;
@@ -79,7 +109,22 @@ export async function installProjectionEvidence(page: Page, testName: string): P
         },
       };
     };
-    view.__pui1472NativeEvidence = { events, geometry, readLayout };
+    const context = crypto.randomUUID();
+    const sampleIds = new WeakMap<Observation, number>();
+    let nextSampleId = 0;
+    const transport = (knownContext: string | null, known: number[]): GeometryTransport => {
+      const retained = new Set(knownContext === context ? known : []);
+      const ids: number[] = [];
+      const samples: GeometryTransport['samples'] = [];
+      for (const sample of geometry) {
+        const id = sampleIds.get(sample);
+        if (id === undefined) throw new Error('Geometry sample has no assigned identity.');
+        ids.push(id);
+        if (!retained.has(id)) samples.push({ id, sample });
+      }
+      return { context, ids, samples };
+    };
+    view.__pui1472NativeEvidence = { events, geometry, readLayout, transport };
     let previousGeometry = '';
     const sampleGeometry = (phase: string) => {
       const boxes = [...document.querySelectorAll<HTMLElement>(
@@ -103,7 +148,10 @@ export async function installProjectionEvidence(page: Page, testName: string): P
       const signature = JSON.stringify(boxes);
       if (signature === previousGeometry) return;
       previousGeometry = signature;
-      geometry.push({ phase, time: performance.now(), fonts: document.fonts.status, boxes });
+      // All nested values are freshly read scalar/plain records, never mutated after insertion.
+      const sample = { phase, time: performance.now(), fonts: document.fonts.status, boxes };
+      sampleIds.set(sample, ++nextSampleId);
+      geometry.push(sample);
       if (geometry.length > 128) geometry.shift();
     };
     // Read-only observations at actual DOM delivery/frame boundaries. A synchronous
@@ -152,12 +200,27 @@ export async function captureProjectionEvidence(
   let snapshotWritten = false;
   let screenshotWritten = false;
   const failures: { phase: string; error: unknown }[] = [];
+  const timings: { phase: string; startedAt: string; endedAt: string; durationMs: number; outcome: string }[] = [];
+  const timed = async <T,>(phase: string, operation: () => T | Promise<T>): Promise<T> => {
+    const startedAt = new Date().toISOString();
+    const start = nodePerformance.now();
+    let outcome = 'failed';
+    try { const result = await operation(); outcome = 'completed'; return result; }
+    finally { timings.push({ phase, startedAt, endedAt: new Date().toISOString(), durationMs: nodePerformance.now() - start, outcome }); }
+  };
+  const previous = geometryCaches.get(page);
+  // This is the received reduced transport, never a successfully materialized snapshot.
+  let transferred: { snapshot: string; browserEvaluate: { started: number; ended: number; durationMs: number } } | null = null;
+  let browserEvaluate: { started: number; ended: number; durationMs: number } | null = null;
+  let snapshotPhase = 'native-snapshot';
   try {
-    snapshot = await page.evaluate(() => {
+    const handle = await timed('evaluate', () => page.evaluateHandle(known => {
+      const evaluateStarted = performance.now();
       type EvidenceWindow = Window & {
         __pui1472NativeEvidence?: {
           events: unknown[];
           geometry: unknown[];
+          transport(context: string | null, known: number[]): GeometryTransport;
           readLayout(element: HTMLElement): Record<string, unknown>;
         };
         __puiProjectionPortalProbe?: { running: boolean; samples: unknown[] };
@@ -171,11 +234,11 @@ export async function captureProjectionEvidence(
       const elements = [...document.querySelectorAll<HTMLElement>(
         '[role="combobox"], [role="listbox"], [role="option"], [data-projection-prototype$="select-surface"], [data-projection-prototype$="select-viewport"], [data-projection-prototype$="select-item-text"], [data-projection-scope], [data-pui-portal-mount]'
       )];
-      return {
+      const snapshot = {
         url: location.href, timestamp: performance.now(), viewport: { width: innerWidth, height: innerHeight, devicePixelRatio },
         activeElement: scalar(document.activeElement),
         events: (window as EvidenceWindow).__pui1472NativeEvidence?.events ?? [],
-        geometryTrace: (window as EvidenceWindow).__pui1472NativeEvidence?.geometry ?? [],
+        geometryTrace: evidence.transport(known.context, known.ids),
         originalPortalProbe: (window as EvidenceWindow).__puiProjectionPortalProbe ?? null,
         surfaces: elements.map(element => {
           const style = getComputedStyle(element);
@@ -199,20 +262,42 @@ export async function captureProjectionEvidence(
           };
         }),
       };
-    });
+      // Freeze the JSON fact set in this synchronous evaluation. In particular,
+      // events and the original portal probe may change before handle.jsonValue().
+      const serialized = JSON.stringify(snapshot);
+      const evaluateEnded = performance.now();
+      return { snapshot: serialized, browserEvaluate: { started: evaluateStarted, ended: evaluateEnded, durationMs: evaluateEnded - evaluateStarted } };
+    }, { context: previous?.context ?? null, ids: previous ? [...previous.samples.keys()] : [] }));
+    try {
+      snapshotPhase = 'native-protocol';
+      const received = await timed('protocol', () => handle.jsonValue());
+      transferred = received;
+      browserEvaluate = received.browserEvaluate;
+      snapshotPhase = 'geometry-materialize';
+      snapshot = await timed('materialize', () => {
+        const partial = JSON.parse(received.snapshot) as { geometryTrace: GeometryTransport } & Record<string, unknown>;
+        const cache = materializeGeometry(partial.geometryTrace, previous);
+        const full = { ...partial, geometryTrace: partial.geometryTrace.ids.map(id => cache.samples.get(id)) };
+        geometryCaches.set(page, cache);
+        return full;
+      });
+    } finally {
+      try { await timed('protocol-dispose', () => handle.dispose()); }
+      catch (error) { failures.push({ phase: 'protocol-dispose', error }); }
+    }
     snapshotCaptured = true;
     // Retain native facts and the original assertion context before image work.
-    await writeFile(path.join(outputRoot, `${stem}.json`), JSON.stringify({ ...metadata, sequence, stage, extra, snapshot }, null, 2) + '\n');
+    await timed('write', () => writeFile(path.join(outputRoot, `${stem}.json`), JSON.stringify({ ...metadata, sequence, stage, extra, snapshot }) + '\n'));
     snapshotWritten = true;
     // PNG encodes the current page state; it does not advance animations or inject UI state.
     try {
-      await page.screenshot({ path: path.join(outputRoot, `${stem}.png`), timeout: 5_000 });
+      await timed('screenshot', () => page.screenshot({ path: path.join(outputRoot, `${stem}.png`), timeout: 5_000 }));
       screenshotWritten = true;
     } catch (error) {
       failures.push({ phase: 'screenshot', error });
     }
   } catch (error) {
-    failures.push({ phase: snapshotCaptured ? 'raw-retention' : 'native-snapshot', error });
+    failures.push({ phase: snapshotCaptured ? 'raw-retention' : snapshotPhase, error });
   } finally {
     const describe = (failure: { phase: string; error: unknown }) => ({
       phase: failure.phase, errorPresent: true, thrownType: typeof failure.error, error: String(failure.error),
@@ -223,7 +308,7 @@ export async function captureProjectionEvidence(
         json: snapshotWritten ? `${stem}.json` : null,
         png: screenshotWritten ? `${stem}.png` : null,
         snapshotCaptured, snapshotWritten, screenshotWritten,
-        failures: failures.map(describe),
+        failures: failures.map(describe), timings, browserEvaluate,
       }) + '\n');
     } catch (error) {
       failures.push({ phase: 'observation-index', error });
@@ -233,7 +318,10 @@ export async function captureProjectionEvidence(
         ...metadata, sequence, stage, extra, snapshotCaptured, snapshotWritten, screenshotWritten,
         rawSnapshotFile: snapshotWritten ? `${stem}.json` : null,
         rawSnapshot: snapshotCaptured && !snapshotWritten ? snapshot : null,
-        failures: failures.map(describe),
+        // Keep the exact already-received string on materialization failure. No
+        // re-evaluation, full-window fallback, or snapshot-success substitution.
+        rawTransportEnvelope: !snapshotCaptured ? transferred : null,
+        failures: failures.map(describe), timings, browserEvaluate,
       };
       // Secondary evidence failures never replace the original test failure,
       // including falsy throws. The supervisor rejects incomplete captures.
