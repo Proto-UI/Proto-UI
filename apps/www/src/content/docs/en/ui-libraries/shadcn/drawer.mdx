@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+This page explicitly selects **Shadcn Rhea** for profile-aware parts. Each headless Trigger and Close directly contains a public outline Button, which supplies the group's physical interaction surface and Rhea appearance. Browser, native-host and visual acceptance still require evidence for this composition. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
 An edge-attached modal panel with four placement choices.
 
@@ -20,7 +20,7 @@ An edge-attached modal panel with four placement choices.
 
 Rhea Content uses transparent outer padding (`p-4`) around its owned inset popover surface, whose radius is capped at 24px and whose shadow belongs to the public prototype. Header/Footer keep their profile-owned padding. The bottom Handle remains a real resize control: its shared 100px width and 1rem top margin pair with Rhea's 0.375rem height, rather than the old New York 0.5rem height. Non-bottom resize controls are retained. The handle is not yet the upstream bottom-only decorative indicator or full-Content drag surface; accepted extent/side semantics and those remaining interaction differences stay explicit.
 
-The short example uses the upstream demo's centered full-width max-w-sm interior; this is consumer composition, not a width imposed on every Drawer. The historical New York Trigger/Close Button paint (2.25rem default height, 1rem inline padding, optional wrap) remains only in that compatibility profile. Modern Rhea Trigger/Close are headless semantic owners. A shared passive Rhea action body must be composed before this page can claim complete Rhea button presentation; no second Button hook or nested focus owner is added to hide that gap.
+The short example uses the upstream demo's centered full-width max-w-sm interior; this is consumer composition, not a width imposed on every Drawer. The historical New York Trigger/Close Button paint (2.25rem default height, 1rem inline padding, optional wrap) remains only in that compatibility profile. Modern Rhea Trigger/Close stay headless. The directly nested public Button uses Rhea's default 2rem height and 0.75rem inline padding; set `wrap` on that Button for a long label. Its minimum remains 2rem while the label can grow within the supplied width. The existing continuous Trigger group makes the Button the sole physical activation and focus surface, while the outer Drawer member retains open-request ownership (`C-AS-TRIGGER-0001-D/F/J`).
 
 Top/bottom Content fits its content by default. Its retained compatibility maximum is the available height minus 6 root-text units, always bounded by the safe available region. This does not implement New York’s viewport-relative max-h-80vh and separate mt-24/mb-24 spacing. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right use fractional width, with a default maximum of 20 root-text units. An explicit maxExtent replaces that default; width, edge attachment and drag preview all use the same capped extent. For example, `maxExtent={{ unit: 'logical', value: 480 }}` gives a full-snap width of 480 logical units when space permits. The available unit is a fraction of the current safe width; valid minimum is ignored in fractional mode. Use maxExtent to size the sheet, rather than a separate CSS width.
 
@@ -28,7 +28,7 @@ The project composes Content as a vertical Scroll surface. The pinned New York D
 
 Root is the logical owner and still renders a wrapper. When placing it directly inside an application grid, use `hostStyle={{ display: 'contents' }}` on the React Root (or `display: contents` on the Web Component Root) to avoid an empty grid row. The neutral Root has no interactive role; Content, focus scope and naming retain their own semantic nodes. Keep application header/main regions outside the modal Content.
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Each example forwards the Trigger/Close's exposed effective disabled state to its Button, including Root inheritance and local command changes. The Button starts disabled until the current command snapshot is bound. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
 
 For top/bottom, omitted, null or empty snapPoints selects content-fit mode. Left/right keep fractional mode with a default point of one. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid point arrays or length records on any edge are rejected, not converted to full height.
 
@@ -75,5 +75,10 @@ These props belong to Root. Content defaults `side` to `bottom`. Trigger and Clo
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml']}
+  files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml', 'P-SHADCN-BUTTON.yaml']}
+/>
+
+<SpecEntityLinks
+  directory="spec/contracts"
+  files={['C-AS-TRIGGER-0001.yaml']}
 />

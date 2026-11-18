@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { definePrototype, type Prototype } from '@proto.ui/core';
+import { asOverlay } from '@proto.ui/hooks';
+import { asTransition } from '../../../prototypes/base/src/transition/as-transition.proto';
 
 import { createMountedVue2Adapter, flushVue2 } from './utils/vue2';
 
@@ -106,6 +108,57 @@ describe('adapter-vue2: expose', () => {
     expect(mounted.vm.getExposes().phase).toBe(phase);
 
     mounted.unmount();
+  });
+
+  it('supersedes pending Presence leave before destroy returns and retires held callables', async () => {
+    let terminalCleanup = false;
+    let heldPing: (() => string) | undefined;
+    let cleanupResult: string | undefined;
+    const proto: Prototype = {
+      name: 'vue2-expose-pending-presence-disposal',
+      setup(def) {
+        const overlay = asOverlay();
+        overlay.configure({ defaultOpen: true, portal: false });
+        const transition = asTransition();
+        transition.configure({ enterDuration: 0, leaveDuration: 60_000 });
+        overlay.bindPresence({
+          present: transition.isPresent,
+          enter: transition.controls.enter,
+          leave: transition.controls.leave,
+        });
+        def.expose.value('commands', {
+          close: () => overlay.close('programmatic'),
+          ping: () => 'pong',
+        });
+        def.lifecycle.onBeforeDispose(() => {
+          cleanupResult = heldPing?.();
+          terminalCleanup = true;
+        });
+        return (r) => r.el('div', 'pending leave');
+      },
+    };
+    const mounted = createMountedVue2Adapter(proto);
+    try {
+      await flushVue2();
+      const exposes = mounted.vm.getExposes();
+      const ping = exposes.commands.ping;
+      heldPing = ping;
+      exposes.commands.close();
+      expect(exposes.transitionState.get()).toBe('leaving');
+      expect(exposes.isPresent.get()).toBe(true);
+      expect(ping()).toBe('pong');
+
+      mounted.vm.$destroy();
+
+      // No timer advancement or flush: terminal destruction is authoritative
+      // even while ordinary close is waiting for its leave transition.
+      expect(terminalCleanup).toBe(true);
+      expect(cleanupResult).toBe('pong');
+      expect(mounted.vm.getExposes()).toEqual({});
+      expect(() => ping()).toThrow(/terminal disposal/);
+    } finally {
+      mounted.unmount();
+    }
   });
 
   it('keeps exposed callables stable and invalidates held callables after destroy', async () => {
