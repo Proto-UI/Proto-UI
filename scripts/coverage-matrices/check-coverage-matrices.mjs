@@ -168,6 +168,11 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
+  // Import-edge allowances only: an inline entry without a `sourceSha256`
+  // certifies the exact specifier or resolved path, never the source body.
+  // Post-admission body drift is invisible to this gate and stays source-review
+  // debt under #420; the affected sources and their owning rows are enumerated
+  // in internal/website/self-hosting-coverage-matrix.md.
   // Exact #652 acceptance compositions. Their App controls remain blocked
   // consumers, not an infrastructure or stable-prototype exemption.
   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
@@ -261,8 +266,9 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
   }),
-  // Accepted main integrations: exact source owners and public inputs only.
-  // These bindings do not promote draft components or admit sibling imports.
+  // Main integration sources: exact source owners and public inputs only.
+  // These bindings do not promote draft components or admit sibling imports,
+  // and they do not certify the admitted source body (see the note above).
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
