@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 // Use the same installed React18 pair as the production website. These are
 // actual frameworks/portals/Transition, but input and a bounded initial native

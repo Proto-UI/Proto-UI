@@ -2,8 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Window } from 'happy-dom';
 import { definePrototype } from '@proto.ui/core';
 import * as drawer from '@proto.ui/prototypes-shadcn/drawer';
+import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
 import drawerDemo from '../../content/docs/demo-shadcn-drawer.demo';
+import drawerScrollDemo from '../../content/docs/demo-shadcn-drawer-scroll.demo';
+import drawerSnapDemo from '../../content/docs/demo-shadcn-drawer-snap.demo';
 import { renderDemo } from './demo-renderer';
 import { registerPrototype } from './registry';
 import type { DemoRenderResult, DemoRuntimeApi, DemoSetupContext } from './demo-types';
@@ -24,7 +27,12 @@ registerPrototype(
       def.expose.method('send', (key: string, payload: unknown) =>
         current.expose.emit(key, payload)
       );
-      def.expose.method('raw', () => current.props.getRaw());
+      // Compare before the Adapter projects returned callable records into
+      // callback scope; the original authored function identities are the oracle.
+      def.expose.method('rawMatches', (expected: Record<string, unknown>) => {
+        const raw = current.props.getRaw();
+        return Object.entries(expected).every(([key, value]) => Object.is(raw[key], value));
+      });
     },
   })
 );
@@ -82,12 +90,12 @@ describe('WC DemoRuntimeApi callback projection', () => {
     send(api, payload);
     expect(callback.mock.calls).toEqual([[payload]]);
     expect(callback.mock.calls[0]![0]).toBe(payload);
-    expect(api.call('subject', 'raw')).toMatchObject({
+    expect(api.call('subject', 'rawMatches', {
       onValueChange: callback,
       onwork: ordinary,
       compute: ordinary,
       label: 'retained',
-    });
+    })).toBe(true);
     dispatch(element, payload, 'work');
     dispatch(element, payload, 'compute');
     expect(ordinary).not.toHaveBeenCalled();
@@ -437,21 +445,29 @@ it('stops old tree construction when a connected prototype replaces the host', a
   expect(current.mock.calls).toEqual([['current']]);
 });
 
-it('the actual public Drawer demo updates status from the real Root outward signal across open/close', async () => {
+it.each([drawerDemo, drawerScrollDemo, drawerSnapDemo])('public Drawer demo %# retains one physical surface and Root open/close signals', async (demo) => {
   vi.stubGlobal('CSS', { supports: () => true });
   registerPrototype(styleScope.name, styleScope);
+  registerPrototype(shadcnButton.name, shadcnButton);
   for (const value of Object.values(drawer)) {
     if (value && typeof value === 'object' && 'name' in value)
       registerPrototype(value.name, value as any);
   }
   const host = document.createElement('div');
   document.body.append(host);
-  const view = await renderDemo({ host, runtime: 'wc', demo: drawerDemo });
+  const view = await renderDemo({ host, runtime: 'wc', demo });
   views.push(view);
   const root = host.querySelector('wc-shadcn-drawer-root')!;
   const events: unknown[] = [];
   root.addEventListener('openChange', (event) => events.push((event as CustomEvent).detail));
-  const trigger = host.querySelector<HTMLElement>('wc-shadcn-drawer-trigger')!;
+  const triggerOwner = host.querySelector<HTMLElement>('wc-shadcn-drawer-trigger')!;
+  const trigger = host.querySelector<HTMLElement>('[data-demo-ref="trigger-action"]')!;
+  // C-AS-TRIGGER-0001-D/F/J: the inner public Button is the sole physical
+  // surface; the headless Drawer member retains the open-request behavior.
+  expect(triggerOwner.hasAttribute('role')).toBe(false);
+  expect(triggerOwner.tabIndex).toBeLessThan(0);
+  expect(trigger.getAttribute('role')).toBe('button');
+  expect(trigger.tabIndex).toBe(0);
   trigger.click();
   for (let i = 0; i < 50; i++) await Promise.resolve();
   expect(events).toMatchObject([{ open: true }]);
@@ -459,7 +475,8 @@ it('the actual public Drawer demo updates status from the real Root outward sign
     (root as HTMLElement & { getExposes(): { open: { get(): boolean } } }).getExposes().open.get()
   ).toBe(true);
   expect(host.querySelector('[data-demo-ref=status]')?.textContent).toMatch(/^Opened:/);
-  document.querySelector<HTMLElement>('wc-shadcn-drawer-close')!.click();
+  await expect.poll(() => document.querySelector<HTMLElement>('[data-demo-ref="close-action"]')?.isConnected).toBe(true);
+  document.querySelector<HTMLElement>('[data-demo-ref="close-action"]')!.click();
   for (let i = 0; i < 50; i++) await Promise.resolve();
   expect(events).toMatchObject([{ open: true }, { open: false }]);
   expect(

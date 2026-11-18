@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "subject": "shared browser code-scroll evidence output ownership",
+  "outputOwnerCheck": {
+    "at": "2026-11-17T09:15:26.097Z",
+    "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "worktree": "/workspace/scratch/8077f6e9f3a8/proto-ui-scroll-evidence",
+    "dependencySource": "/workspace/scratch/8077f6e9f3a8/proto-ui-native/package.json",
+    "typescript": "5.9.3",
+    "source": "apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts",
+    "beforeSha256": "f422044eafdea2cc96b259febf4bc315d36abe1cae638d3fbba66ebc988655d3",
+    "afterSha256": "7325bf1c52fc2abcea3f6c4799941c578ce49969dad95a4ab5602006401c9980",
+    "oldOutputDeclaration": "const out = process.env.PROTO_UI_CODE_SCROLL_EVIDENCE_DIR ?? '/tmp/pui-code-scroll-chain';",
+    "newOutputDeclaration": "const out =\n  process.env.PROTO_UI_CODE_SCROLL_EVIDENCE_DIR ??\n  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR\n    ? join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'code-scroll-chain')\n    : '/tmp/pui-code-scroll-chain');",
+    "allOtherBytesPreserved": true,
+    "conservedBytesSha256": "2c9f6a00a6d3a60ba669f8c165faca3a20a54de0a0281ecf06780f596c830091",
+    "sourceParseErrors": 0,
+    "transpileErrors": 0,
+    "initializerCases": [
+      {
+        "name": "neither",
+        "env": {},
+        "expected": "/tmp/pui-code-scroll-chain",
+        "actual": "/tmp/pui-code-scroll-chain",
+        "passed": true
+      },
+      {
+        "name": "dedicated",
+        "env": {
+          "PROTO_UI_CODE_SCROLL_EVIDENCE_DIR": "/runner-temp/dedicated-code-scroll"
+        },
+        "expected": "/runner-temp/dedicated-code-scroll",
+        "actual": "/runner-temp/dedicated-code-scroll",
+        "passed": true
+      },
+      {
+        "name": "shared",
+        "env": {
+          "PROTO_UI_RUNTIME_EVIDENCE_DIR": "/runner-temp/runtime-ci"
+        },
+        "expected": "/runner-temp/runtime-ci/code-scroll-chain",
+        "actual": "/runner-temp/runtime-ci/code-scroll-chain",
+        "passed": true
+      },
+      {
+        "name": "both",
+        "env": {
+          "PROTO_UI_CODE_SCROLL_EVIDENCE_DIR": "/runner-temp/dedicated-code-scroll",
+          "PROTO_UI_RUNTIME_EVIDENCE_DIR": "/runner-temp/runtime-ci"
+        },
+        "expected": "/runner-temp/dedicated-code-scroll",
+        "actual": "/runner-temp/dedicated-code-scroll",
+        "passed": true
+      }
+    ],
+    "frozenCandidates": [
+      {
+        "path": "proto-ui-native/apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts",
+        "expected": "6aad5a64d0142810d6b5fa9bd63708e1cfd7ec23f001964f53743140f9d1e3dd",
+        "actual": "6aad5a64d0142810d6b5fa9bd63708e1cfd7ec23f001964f53743140f9d1e3dd",
+        "unchanged": true
+      },
+      {
+        "path": "proto-ui-native/internal/records/2026-11-17-card-response-control-owner.md",
+        "expected": "8a6d8f2692a485fb35a03b232c6125063f6296031670fa01d64f51a69f9a7b0e",
+        "actual": "8a6d8f2692a485fb35a03b232c6125063f6296031670fa01d64f51a69f9a7b0e",
+        "unchanged": true
+      },
+      {
+        "path": "proto-ui-code-tree/apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts",
+        "expected": "af63811c790096f25fdd3f5ac4f70de9b96a52f79c1dbb47050af1ca14888146",
+        "actual": "af63811c790096f25fdd3f5ac4f70de9b96a52f79c1dbb47050af1ca14888146",
+        "unchanged": true
+      },
+      {
+        "path": "proto-ui-code-tree/internal/records/2026-11-17-code-example-tree-admission.md",
+        "expected": "f88c96f78b43b43c56b1c9894b30f98348d00c017550ecccb337e32a2f1341f1",
+        "actual": "f88c96f78b43b43c56b1c9894b30f98348d00c017550ecccb337e32a2f1341f1",
+        "unchanged": true
+      }
+    ],
+    "nativeRuns": 0,
+    "runtimeSuitesRun": 0,
+    "scope": "Source, syntax, and actual initializer path audit only; no native product acceptance."
+  },
+  "commandReceipts": [
+    {
+      "name": "source-path-audit",
+      "command": "node /workspace/scratch/8077f6e9f3a8/short-pre-diagnosis-20261117/check-output-owner.mjs",
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-scroll-evidence",
+      "exitCode": 0,
+      "wallTimeSeconds": 0.70217266,
+      "chunkId": "bc92e9",
+      "log": "source-path-audit.log",
+      "reportedTokenCount": 893
+    },
+    {
+      "name": "format-check",
+      "command": "corepack pnpm@10.32.1 exec prettier --check /workspace/scratch/8077f6e9f3a8/proto-ui-scroll-evidence/apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts /workspace/scratch/8077f6e9f3a8/proto-ui-scroll-evidence/internal/records/2026-11-17-code-scroll-evidence-owner.md",
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-native",
+      "exitCode": 0,
+      "wallTimeSeconds": 1.124816925,
+      "chunkId": "7bbce3",
+      "log": "format-check.log",
+      "reportedTokenCount": 17
+    },
+    {
+      "name": "diff-check",
+      "command": "git diff --check",
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-scroll-evidence",
+      "exitCode": 0,
+      "wallTimeSeconds": 0.818011173,
+      "chunkId": "88d03d",
+      "log": "diff-check.log",
+      "reportedTokenCount": 0
+    }
+  ],
+  "report": {
+    "status": "bounded evidence-only candidate ready for independent review",
+    "frozenManifest": {
+      "reference": "/workspace/scratch/8077f6e9f3a8/short-pre-diagnosis-20261117/frozen-manifest.json",
+      "sha256": "8bed20df0ffce3fe0af2b5fc695cb23168cdc7146554ba38fd5b4d90f5008972"
+    },
+    "source": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "changedBehavior": "Existing code-scroll evidence follows the shared CI upload root when no dedicated override is present.",
+    "staticEvidence": {
+      "syntaxErrors": 0,
+      "transpileErrors": 0,
+      "actualInitializerChoicesPassed": 4,
+      "allOtherSourceBytesPreserved": true,
+      "prettierFilesPassed": 2,
+      "diffCheckExit": 0,
+      "patchIntegrityExit": 0,
+      "priorFrozenFilesUnchanged": 4
+    },
+    "nativeEvidence": {
+      "source": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "run": 44038705347,
+      "job": 133887873514,
+      "suiteCases": 6,
+      "passed": 5,
+      "failed": 1,
+      "failure": "expected 785 to be less than 285",
+      "knownStage": "unresolved between initial product wheel group and product-auto after contain-negative",
+      "artifact": 14308629288,
+      "artifactContainsScrollObservations": false,
+      "candidateNativeRuns": 0,
+      "candidateRuntimeSuitesRun": 0
+    },
+    "scopeWith1485": {
+      "head": "52c89701fec2a6afaa4cd341fafb707795901fc8",
+      "stateAtInspection": "open",
+      "existingNativeBoundary": "Dialog inner surface vertical scrolling, caller focus and Escape",
+      "testedRuntimeHashesMatchInspectedHead": true,
+      "shortPreOrPassiveCrossoverAcceptance": false,
+      "sourceEditsOverlap": false
+    },
+    "nextAcceptance": "Run unchanged original six native cases on a usable runner at the candidate head and retain source-hashed code-scroll-chain/observations.json; classify actual phase/input/product cause from those observations.",
+    "limits": [
+      "No repaired native pass claimed.",
+      "No fixture-input versus product-cause classification is established without actual stage/event records.",
+      "The existing observer already contains the facts needed for this failure, so it is unchanged.",
+      "No workflows, product overflow, assertions, input sequences, or deadlines changed."
+    ],
+    "authorization": "human-assisted/current-user; no additional human gate",
+    "terminal": true,
+    "blocked": false
+  },
+  "rootIndependentReview": {
+    "sourceRead": true,
+    "sharedWorkflowUploadRootRead": true,
+    "onlyOutputDeclarationDiffVerified": true,
+    "candidateSourceSha256": "7325bf1c52fc2abcea3f6c4799941c578ce49969dad95a4ab5602006401c9980",
+    "formalApproval": false
+  }
+}

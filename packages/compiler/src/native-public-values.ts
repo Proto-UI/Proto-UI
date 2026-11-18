@@ -3,6 +3,24 @@ import { isDataValueType, type GeneratedModule, type ValueType } from './ir';
 import type { DataType } from './data-types';
 import { callableValue, joinValueTypes, valueAlternatives } from './value-types';
 
+/** Needed only when a checked call site can target both authored and external functions. */
+export const nativeAuthoredCallablesArtifact: NonNullable<
+  GeneratedModule['supportingFiles']
+>[number] = {
+  path: '.proto-ui/owner/authored-callables-v1.ts',
+  kind: 'source',
+  contents: `// Identity marks for checked mixed call sites; marking neither wraps nor invokes.
+const authored = new WeakSet<Function>();
+export function markNativeAuthoredCallable<T extends Function>(callback: T): T {
+  authored.add(callback);
+  return callback;
+}
+export function isNativeAuthoredCallable(callback: Function): boolean {
+  return authored.has(callback);
+}
+`,
+};
+
 export const nativePublicCallsArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] = {
   path: '.proto-ui/owner/public-callables-v1.ts',
   kind: 'source',

@@ -6,6 +6,48 @@ import { createVue2Adapter } from '../src/adapt';
 import { createMountedVue2Adapter, flushVue2, Vue2Any, Vue2RuntimeAny } from './utils/vue2';
 
 describe('adapter-vue2: lifecycle', () => {
+  it.each([new Error('terminal callback failed'), 0, null])(
+    'reports a disposal rejection through Vue without an unhandled rejection (%s)',
+    async (failure) => {
+      const reports: Array<{ error: unknown; vm: unknown; info: string }> = [];
+      const unhandled: unknown[] = [];
+      const onUnhandled = (event: PromiseRejectionEvent) => unhandled.push(event.reason);
+      const previous = Vue2Any.config.errorHandler;
+      Vue2Any.config.errorHandler = (error: unknown, vm: unknown, info: string) => {
+        reports.push({ error, vm, info });
+      };
+      window.addEventListener('unhandledrejection', onUnhandled);
+      let mounted: ReturnType<typeof createMountedVue2Adapter> | undefined;
+      try {
+        const proto: Prototype = {
+          name: 'vue2-disposal-error-reporting',
+          setup(def) {
+            def.expose.value('ping', () => 'pong');
+            def.lifecycle.onBeforeDispose(() => {
+              throw failure;
+            });
+            return (r) => r.el('div', 'error reporting');
+          },
+        };
+        mounted = createMountedVue2Adapter(proto);
+        await flushVue2();
+        const ping = mounted.vm.getExposes().ping;
+        mounted.vm.$destroy();
+        expect(() => ping()).toThrow(/terminal disposal/);
+        await flushVue2();
+        expect(reports).toHaveLength(1);
+        expect(reports[0].error).toBe(failure);
+        expect(reports[0].vm).toBe(mounted.vm);
+        expect(reports[0].info).toBe('beforeDestroy hook (Promise/async)');
+        expect(unhandled).toEqual([]);
+      } finally {
+        mounted?.unmount();
+        window.removeEventListener('unhandledrejection', onUnhandled);
+        Vue2Any.config.errorHandler = previous;
+      }
+    }
+  );
+
   it('runs Proto lifecycle hooks through Vue 2 mount and destroy', async () => {
     const calls: string[] = [];
 

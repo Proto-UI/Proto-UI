@@ -10,6 +10,7 @@ import {
   operationArgumentRule,
   operationResultType,
   argumentData,
+  argumentValue,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -66,6 +67,7 @@ import {
   functionValueType,
   callableValue,
   checkedCall,
+  arrayEveryCallbackParameters,
   intrinsicResult,
   valueAlternatives,
   canNarrowValue,
@@ -977,7 +979,7 @@ class Frontend {
             if (
               expected &&
               !assignable(value.type, expected) &&
-              !assignable(argumentData(value) ?? value.type, expected)
+              !assignable(argumentValue(value), expected)
             )
               rejectNode(declaration, 'PUI1006', 'Initializer does not satisfy its declared type.');
             if (expected && !sameType(value.type, expected))
@@ -2348,7 +2350,7 @@ class Frontend {
             rejectNode(node, 'PUI1006', 'Array every requires one callback.');
           const value = this.expression(module, callback, scope, phase, undefined, {
             kind: 'callable',
-            parameters: [{ name: 'value', type: array.type.element }],
+            parameters: arrayEveryCallbackParameters(array.type),
             returnType: 'unknown',
           });
           return {

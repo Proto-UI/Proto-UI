@@ -37,6 +37,14 @@ describe('feedback style application-role classification v0', () => {
     });
   });
 
+  it('resolves the exact vertical scroll token on the surface', () => {
+    expect(classifyTwTokenApplicationRoleV0('overflow-y-auto')).toEqual({
+      token: 'overflow-y-auto',
+      role: 'surface',
+      roleSource: 'canonical',
+    });
+  });
+
   it.each([
     'order-2',
     'self-start',
@@ -89,6 +97,8 @@ describe('feedback style application-role classification v0', () => {
     'invisible',
     'visible',
     'overflow-auto',
+    'overflow-x-auto',
+    'overflow-y-hidden',
     'pointer-events-auto',
     'translate-x-2',
     '-translate-x-1/3',

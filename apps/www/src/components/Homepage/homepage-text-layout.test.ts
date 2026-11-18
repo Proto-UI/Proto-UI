@@ -4,7 +4,7 @@ import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import { createHomepageShowcase } from './homepage-showcase';
 import { composeHomepageText } from './homepage-text';
 import type { DemoNode } from '../PrototypePreviewer/demo-types';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 beforeAll(() => {
   installGeneratedProtoUiStylesheet();

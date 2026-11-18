@@ -641,6 +641,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   const themeSource: SearchThemeSource = { scope: root, family, isCurrent: () => alive };
   let attempt = 0;
   const retired = new Set<Promise<void>>();
+  let destroyPromise: Promise<void> | null = null;
   // The public Dialog is only needed once the user opens Search. Defer its
   // prototype loading and rendering so the open command can activate within
   // the initial-ready budget instead of waiting for the full dialog tree.
@@ -788,18 +789,23 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   return {
     ready: observe(controller.start()),
     refresh,
-    async destroy() {
-      if (!alive) return;
+    destroy(): Promise<void> {
+      if (destroyPromise) return destroyPromise;
+      if (!alive) return Promise.resolve();
       alive = false;
       offDialogOpen?.();
       document.removeEventListener('focusin', onDialogFocus, true);
       document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);
-      try {
-        await controller.destroy();
-        if (dialogController) await dialogController.destroy();
-      } finally {
-        await Promise.allSettled([...retired]);
-      }
+      // These controllers own independent leases. A failed opener must not
+      // prevent Dialog retirement; keep the existing first-failure policy.
+      destroyPromise = Promise.allSettled([controller.destroy(), dialogController?.destroy()]).then(
+        async (results) => {
+          await Promise.allSettled([...retired]);
+          const failed = results.find((result) => result.status === 'rejected');
+          if (failed?.status === 'rejected') throw failed.reason;
+        }
+      );
+      return destroyPromise;
     },
   };
 }

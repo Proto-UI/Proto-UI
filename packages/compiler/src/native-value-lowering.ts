@@ -8,7 +8,109 @@ import {
   type PrototypeIR,
   type ValueType,
 } from './ir';
-import { memberValueType, parameterValueType, valueTypeEqual } from './value-types';
+import {
+  memberValueType,
+  minimumArgumentCount,
+  parameterValueType,
+  valueTypeEqual,
+} from './value-types';
+import { traceCallableDemand } from './callable-effects';
+import { emitPublicValue, hasPublicCallable } from './native-public-values';
+
+type OrdinaryCall = Extract<ExpressionIR, { kind: 'call' }>;
+export interface JavaScriptCallBoundaries {
+  calls: ReadonlyMap<OrdinaryCall, { mixed: boolean }>;
+  authored: ReadonlySet<FunctionIR>;
+}
+
+/** Reuse checked callable provenance; a function's type alone does not prove an escape. */
+export function planJavaScriptCallBoundaries(ir: PrototypeIR): JavaScriptCallBoundaries {
+  const sites = new Map<OrdinaryCall, { external: boolean; authored: Set<FunctionIR> }>();
+  traceCallableDemand(ir, {
+    expression() {},
+    function() {},
+    hook() {},
+    opaque() {}, // Validation/admission owns unresolved callable edges, never a runtime fallback.
+    call(value, provenance) {
+      if (!value.arguments.some((argument) => hasPublicCallable(argument.type))) return;
+      let site = sites.get(value);
+      if (!site) {
+        site = { external: false, authored: new Set() };
+        sites.set(value, site);
+      }
+      site.external ||= provenance.external;
+      provenance.authored.forEach((fn) => site!.authored.add(fn));
+    },
+  });
+  const calls = new Map<OrdinaryCall, { mixed: boolean }>();
+  const authored = new Set<FunctionIR>();
+  for (const [value, site] of sites) {
+    if (!site.external) continue;
+    calls.set(value, { mixed: site.authored.size > 0 });
+    site.authored.forEach((fn) => authored.add(fn));
+  }
+  return { calls, authored };
+}
+
+interface JavaScriptCallBoundaryContext {
+  plan: JavaScriptCallBoundaries;
+  wrap: string;
+  prefix: string;
+  isAuthored: string;
+}
+
+/** Evaluate the original call before projecting its arguments across the owner boundary. */
+function emitJavaScriptExternalCall(
+  value: OrdinaryCall,
+  emit: (value: ExpressionIR) => string,
+  typeName: (type: ValueType) => string,
+  typed: boolean,
+  context: JavaScriptCallBoundaryContext
+): string {
+  const target = `${context.prefix}CallTarget`;
+  const receiver = `${context.prefix}CallReceiver`;
+  const args = `${context.prefix}CallArguments`;
+  const cast = (code: string, type: string) =>
+    typed ? `(${code} as ${type})` : `/** @type {${type}} */ (${code})`;
+  const parameter = (name: string, type: ValueType) =>
+    typed ? `${name}: ${typeName(type)}` : name;
+  const annotation = (name: string, type: ValueType) =>
+    typed ? '' : `/** @param {${typeName(type)}} ${name} */ `;
+  let callee = value.callee;
+  while (callee.kind === 'narrow') callee = callee.value;
+  const member = callee.kind === 'member' || callee.kind === 'element' ? callee : undefined;
+  // A member call keeps the original receiver. Extracting only its function
+  // would erase JavaScript's Reference receiver; both object and key run once.
+  const readTarget = member
+    ? cast(
+        `(${receiver})${member.optional ? '?.' : ''}[${member.kind === 'member' ? JSON.stringify(member.property) : emit(member.index)}]`,
+        typeName(value.callee.type)
+      )
+    : emit(value.callee);
+  const rawArguments = `[${value.arguments.map(emit).join(', ')}]`;
+  const argumentType = `[${value.arguments.map((argument) => typeName(argument.type)).join(', ')}]`;
+  const projected = `[${value.arguments
+    .map((argument, index) =>
+      emitPublicValue({
+        value: `${args}[${index}]`,
+        type: argument.type,
+        wrap: context.wrap,
+        prefix: context.prefix,
+        typeName,
+        typed,
+      })
+    )
+    .join(', ')}]`;
+  const actualArguments = context.plan.calls.get(value)!.mixed
+    ? `${context.isAuthored}(${target}) ? ${args} : ${projected}`
+    : projected;
+  const invocation = `Reflect.apply(${target}, ${member ? receiver : 'undefined'}, ${actualArguments})`;
+  const body = `${value.optional ? `if (${target} === null || ${target} === undefined) return undefined; ` : ''}const ${args} = ${cast(rawArguments, argumentType)}; return ${cast(invocation, typeName(value.type))};`;
+  const call = `(${annotation(target, value.callee.type)}(${parameter(target, value.callee.type)}) => { ${body} })(${readTarget})`;
+  return member
+    ? `(${annotation(receiver, member.object.type)}(${parameter(receiver, member.object.type)}) => ${call})(${emit(member.object)})`
+    : call;
+}
 
 /** Compile-time decisions shared by the JavaScript hosts. No evaluator ships. */
 export function formatJavaScriptValueType(
@@ -27,8 +129,17 @@ export function formatJavaScriptValueType(
         type.members.map((member) => `(${formatJavaScriptValueType(member, atom)})`).join(' | ') ||
         'never'
       );
-    case 'callable':
-      return `(${type.parameters.map((parameter) => `${parameter.name}${parameter.optional || parameter.default ? '?' : ''}: ${formatJavaScriptValueType(parameter.type, atom)}`).join(', ')}) => ${formatJavaScriptValueType(type.returnType, atom)}`;
+    case 'callable': {
+      const required = minimumArgumentCount(type.parameters);
+      const parameters = type.parameters.map((parameter, index) => {
+        const optional = !!(parameter.optional || parameter.default);
+        const value = formatJavaScriptValueType(parameter.type, atom);
+        // A leading default still occupies a required argument position. Its
+        // type accepts undefined; only the trailing optional suffix uses '?'.
+        return `${parameter.name}${optional && index >= required ? '?' : ''}: ${optional && index < required ? `(${value}) | undefined` : value}`;
+      });
+      return `(${parameters.join(', ')}) => ${formatJavaScriptValueType(type.returnType, atom)}`;
+    }
     case 'object':
       return `{ ${type.fields
         .map(
@@ -156,7 +267,7 @@ export function emitUninvokedJavaScriptFunction(value: FunctionIR, typed = true)
     .join(', ');
   const annotations =
     !typed && value.parameters.length
-      ? `/** ${value.parameters.map((parameter) => `@param {unknown} ${parameter.optional || parameter.default ? `[${parameter.name}]` : parameter.name}`).join(' ')} */ `
+      ? `/** ${value.parameters.map((parameter) => `@param {unknown} ${parameter.optional && !parameter.default ? `[${parameter.name}]` : parameter.name}`).join(' ')} */ `
       : '';
   return `${annotations}(${parameters}) => { throw new Error('[Compiler] unreachable authored callable invoked'); }`;
 }
@@ -165,7 +276,8 @@ export function emitJavaScriptValue(
   value: ExpressionIR,
   emit: (value: ExpressionIR) => string,
   typeName?: (type: ValueType) => string,
-  typed = true
+  typed = true,
+  callBoundary?: JavaScriptCallBoundaryContext
 ): string | undefined {
   switch (value.kind) {
     case 'narrow':
@@ -181,6 +293,8 @@ export function emitJavaScriptValue(
     case 'conditional':
       return `(${emit(value.condition)} ? ${emit(value.then)} : ${emit(value.otherwise)})`;
     case 'call':
+      if (callBoundary?.plan.calls.has(value) && typeName)
+        return emitJavaScriptExternalCall(value, emit, typeName, typed, callBoundary);
       return `(${emit(value.callee)})${value.optional ? '?.' : ''}(${value.arguments.map(emit).join(', ')})`;
     case 'object-spread':
       return `({ ${value.parts.map((part) => (part.kind === 'spread' ? `...(${emit(part.value)})` : `[${JSON.stringify(part.key)}]: ${emit(part.value)}`)).join(', ')} })`;

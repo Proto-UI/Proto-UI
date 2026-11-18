@@ -177,6 +177,60 @@ describe('documentation image viewer PUI integration', () => {
     await vi.waitFor(() => expect(diagram.querySelector('[data-docs-image-trigger]')).toBeNull());
     expect(diagram.querySelector('path')).toBe(path);
   });
+  it('leaves previewer SVG updates out of the article inventory until its owner marker is removed', async () => {
+    await fixture();
+    const flow = document.querySelector('[data-doc-flow]')!;
+    const preview = document.createElement('div');
+    preview.setAttribute('data-previewer-id', 'interactive-example');
+    preview.innerHTML =
+      '<svg viewBox="0 0 20 20" aria-label="Example"><path d="M0 0L20 20"/></svg>';
+    flow.append(preview);
+    await (
+      window as unknown as { happyDOM: { waitUntilComplete(): Promise<void> } }
+    ).happyDOM.waitUntilComplete();
+    const queries = vi.spyOn(document, 'querySelectorAll');
+    const delivered = new Promise<void>((resolve) => {
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        resolve();
+      });
+      observer.observe(preview, { attributes: true, childList: true, subtree: true });
+    });
+    preview.querySelector('path')!.setAttribute('d', 'M0 0L15 15');
+    await delivered;
+    await settle();
+    expect(queries).not.toHaveBeenCalledWith('[data-doc-flow]');
+    expect(preview.querySelector('[data-docs-image-trigger]')).toBeNull();
+
+    preview.removeAttribute('data-previewer-id');
+    await vi.waitFor(() =>
+      expect(preview.querySelector('[data-docs-image-trigger]')).not.toBeNull()
+    );
+  });
+  it('reconciles an article scope that is added or removed inside a previewer', async () => {
+    await fixture();
+    const preview = document.createElement('div');
+    preview.setAttribute('data-prototype-previewer', '');
+    const article = document.createElement('article');
+    article.innerHTML = '<img src="/diagram.png" alt="Article diagram">';
+    preview.append(article);
+    document.querySelector('[data-doc-flow]')!.append(preview);
+    await settle();
+    expect(article.querySelector('[data-docs-image-trigger]')).toBeNull();
+
+    article.setAttribute('data-doc-flow', '');
+    await vi.waitFor(() =>
+      expect(article.querySelector('[data-docs-image-trigger]')).not.toBeNull()
+    );
+    article.querySelector('img')!.setAttribute('alt', '');
+    await vi.waitFor(() => expect(article.querySelector('[data-docs-image-trigger]')).toBeNull());
+    article.querySelector('img')!.setAttribute('alt', 'Updated article diagram');
+    await vi.waitFor(() =>
+      expect(article.querySelector('[data-docs-image-trigger]')).not.toBeNull()
+    );
+    article.removeAttribute('data-doc-flow');
+    await vi.waitFor(() => expect(article.querySelector('[data-docs-image-trigger]')).toBeNull());
+  });
   it('provides the preview action name through PUI-owned content naming', async () => {
     const { trigger } = await fixture();
     expect(trigger.textContent).toContain('Enlarge image:');

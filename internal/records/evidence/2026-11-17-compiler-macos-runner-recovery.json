@@ -1,0 +1,249 @@
+{
+  "scope": "Only GPUI macOS runner label",
+  "parent": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+  "recordedAt": "2026-11-17T10:08:41.538477+00:00",
+  "workflow": ".github/workflows/compiler-gpui-source-consumers.yml",
+  "beforeSha256": "70a6f17bb61834f0c53551589de571f1f2a90e12ce93ac2a7e2545e8d5f3a3eb",
+  "afterSha256": "051dfc6c56eb6f507d08b861b0bfc119c60f39baae31bb4af118c23bba2100dd",
+  "singleReplacementConserved": true,
+  "officialSources": [
+    {
+      "url": "https://github.blog/changelog/2026-10-01-github-actions-macos-14-runner-image-retirement/",
+      "observed": "GitHub Actions macOS14 retired2026-11-02"
+    },
+    {
+      "url": "https://github.com/actions/runner-images/blob/main/README.md",
+      "observed": "Explicit standard macos-15 is macOS15 ARM64; AzureDevOps macOS14 extension does not apply to GitHubActions"
+    }
+  ],
+  "actualOldRun": {
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/43795529524",
+    "head": "3d1fc914e5f9f7dfada8da27f61dbb92783a84bf",
+    "macOS": {
+      "jobId": 133063369758,
+      "conclusion": "cancelled",
+      "steps": 0
+    },
+    "linux": {
+      "jobId": 133063369932,
+      "conclusion": "success",
+      "steps": 16
+    }
+  },
+  "nativeCandidateExecution": "not-run",
+  "publication": "Prepared only; ordinary current-permission connector publication will be separately read back",
+  "validation": [
+    "Initial scheduling policy20/21 failed because old label was also hard-coded in the existing strict expectation; original failure retained.",
+    "Final same scheduling policy21/21,exit0;only expected label changed.",
+    "Release-source-ledger21/21,exit0;its inputs unchanged by the policy expected-label correction.",
+    "Workflow inventory parser exit0;all workflow bytes unchanged since that run."
+  ],
+  "initialValidation": {
+    "started": {
+      "parent": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+      "startedAt": "2026-11-17T10:09:30.773898+00:00",
+      "inputs": {
+        ".github/workflows/accordion-family-evidence.yml": "190917dd7630d1b0414bc7933124743a216061bbc5f3fae8d8cbf4c20f1ffe9d",
+        ".github/workflows/agent-operations-fixtures.yml": "10260508e30dc0ace6db2a54cf11c4302e95dbb6d53a4d96fd2a851ae30f5407",
+        ".github/workflows/agent-operations-shadow.yml": "36ffd845bb6c90ca3fa735c9e78e896b311067923c715d1d9aaab7e4861c7315",
+        ".github/workflows/bootstrap-state-controls-evidence.yml": "52fd2fdfa0cb1e9a617d1372ce36eb4007eb3957825108a93f91cb9f8adf1bb3",
+        ".github/workflows/browser-suite-repair-evidence.yml": "286f1111a31d8f0e697041181f0880f73025f3af6fca365d3608d4a7682dd6df",
+        ".github/workflows/brutalist-contrast-evidence.yml": "fdb1b8fe25074cb49fc12b87d1f604e9f442dcf1991ac01e7be37f5e68d10989",
+        ".github/workflows/brutalist-design-evidence.yml": "4bc8aeb88ea2143ac32438afdf7c982b14ee5bd4becd4774f848cf5391af9a41",
+        ".github/workflows/brutalist-spinner-evidence.yml": "17ff7322584cf07c6949baf0b91bccdf3adba059aceb6dc47a1c2727a744fa1e",
+        ".github/workflows/ci-production-suites.yml": "9090878a02748089e9f9151d50da7878ebbb5118e760cf93f343a822d7cee61f",
+        ".github/workflows/ci.yml": "27a75f710b971b3d215251ec1c2d9cd0cf3268935ff2396bdd2869cb8eb418c9",
+        ".github/workflows/code-scroll-chain-evidence.yml": "1297e39080c874f6954f3d13f4f5010064eb284acd5ab319f92d1138ea76135b",
+        ".github/workflows/collapsible-projections-evidence.yml": "013d644c80067c44114448cb2511da393dec091bdab38616c6dcd38cc189bd00",
+        ".github/workflows/compiler-button-ssr-evidence.yml": "118a6989e4d4008de91d5d93906146de8db962624327885ade397839c74c7a30",
+        ".github/workflows/compiler-gpui-source-consumers.yml": "051dfc6c56eb6f507d08b861b0bfc119c60f39baae31bb4af118c23bba2100dd",
+        ".github/workflows/compiler-isolated-static-smoke.yml": "180a1bdcebf39e5273984a780ed7535b61dcb17110ff36f5a7fb028589f77103",
+        ".github/workflows/compiler-wc-native-evidence.yml": "b98355b1ab2c0ebbb5bce4b189b20045f8a45f5624beefc37320af57f329ee59",
+        ".github/workflows/compiler-wc-runner-preflight.yml": "fbe64c2b17a3ee1ad950cb37ee71929b9f5672de0a1ef65a537bcbc19ceeadaf",
+        ".github/workflows/coverage-governance.yml": "de082cbbe6b28a384719c2f3679816e21410644c419c0a1af8b07bdf1bcff329",
+        ".github/workflows/demo-matrix-startup-diagnostic.yml": "c90e3fa1ce88e3e72e18f62aed6f332d955e866ad65f1acf75e54c8ce346629a",
+        ".github/workflows/dialog-available-space-evidence.yml": "c988f6e4e31e6191ef6599a1355d648e220a16611584c99664a8a20db09f444f",
+        ".github/workflows/documentation-image-preview.yml": "df2f08190802dff7088503b7241f7ede410c9bd2edcca523a08a3babed81ca68",
+        ".github/workflows/effect-graph-model.yml": "f502a6362cdd2b2df3dde10c65d8ba5bf8ebb7ad15b3cf607451aa128c15e2ba",
+        ".github/workflows/field-family-evidence.yml": "e10dbb96c1d8484a5bfec7fc099af45809f1fb440b3649e2ee697b0c286ade02",
+        ".github/workflows/finf-button-ghost-component-evidence.yml": "23b345df7fa8b7d888339836b83371b96106ee41fd9adfc3128cd261d61de2b3",
+        ".github/workflows/finf-button-ghost-evidence.yml": "8fe490bcfba76ca1e2958a4956f628c51a52fc1895bffd2bfc8d4d0b64a59047",
+        ".github/workflows/finf-representative-features-evidence.yml": "0554221c5370f9ac77a15c31f767ad5ceec8669cad312f90b33bbf2841b96a0c",
+        ".github/workflows/header-select-elevation-evidence.yml": "7c586ec53d2ad728eb49e0bc59f104ff75bacd3e51e9655334eef741a2aee27b",
+        ".github/workflows/homepage-visual-evidence.yml": "d3a43d6b738f23e2b047bb63f424aec6df24bd3d142ba8839f7b77aae01507f3",
+        ".github/workflows/interaction-benchmark-calibration.yml": "4aa2c25e1cee8f25a31cae1fa7213002fe3783b7c6f6a275208170668d08d355",
+        ".github/workflows/intranet-preview-build.yml": "442f4f6cb530ce48fb5b450253555d0afe1805b100d5efb397f40700c65c4e57",
+        ".github/workflows/intranet-preview-checks.yml": "ebc54f5b5fbd6d5bc96ebc5683efaef5c9a2f388973c2810b7297fecf96ebc81",
+        ".github/workflows/language-select-navigation-evidence.yml": "805adc6e2da6c3104d03a9e84c43b449a8d2db5078d218866e2a7f0f913838ac",
+        ".github/workflows/liquid-card-candidate-evidence.yml": "d7b0f4474ed19f937dc11c46ab4b55c5729b48e7435091785333634e2294d41d",
+        ".github/workflows/liquid-elevation-control-evidence.yml": "ab22ff003e30586eb8f41d4cc28fd2a1a143e24ddd3fdaa64fae83d18f4f94e5",
+        ".github/workflows/liquid-material-evidence.yml": "59870762273a9b33946298dcd03ed1042c99968f69a1714fde1f09ea9e14a356",
+        ".github/workflows/liquidgl-upstream-baseline.yml": "aa71d868929dd94ea20b8ecdd178e785367af34515b0f9509a11a1b8488050dd",
+        ".github/workflows/material-initial-paint-evidence.yml": "316febfabfff2c5f16c3dbd253de899a8655194a40e4ad22ebe4983ea5e6e3c6",
+        ".github/workflows/material-source-specializer.yml": "4bd05e7dc9db5143c9a6b72d77a0ef01e2a75cacf7c787f57a8bc8d42a12ae9b",
+        ".github/workflows/native-text-width-evidence.yml": "ff7304fb46f12638f77001a942192463196f6dc26dee107e22debe1d11db517d",
+        ".github/workflows/optical-backdrop-probe.yml": "65354556b32d1fbf2c802b9f269211cd50de97c00afc1c48639f6d436f57a17b",
+        ".github/workflows/overlay-portal-direction-evidence.yml": "7d0fdedd56fbeaf8a796e0b4b8c82c896ec98e9f3d3c225b8cd2412e8b7ee8c7",
+        ".github/workflows/owned-blueprint-reuse-evidence.yml": "13e2151b3a0b96f490c68fdf7b4f013717cca04dedcf4b451e826130ce6f9489",
+        ".github/workflows/owned-caller-relocation-evidence.yml": "141d222ed19286ee7a54e82aba3bc18177209937b2d72a05534d803bc426a60d",
+        ".github/workflows/owned-decoration-evidence.yml": "eb4427ccd67dc56284f0725b28719408ae8eb9fd1ba6a1c51de2731bff946011",
+        ".github/workflows/owned-decoration-portal-evidence.yml": "6e5fadbbd2199ff9d806fdba037879d74543878f2d6dde4858eeec831a8e1eb4",
+        ".github/workflows/owned-decoration-web-evidence.yml": "674e7e067d5c6f34f9c508aae3d3cc1c5fdff1f0dca227a45248cc16e7817eb9",
+        ".github/workflows/passive-atom-docs-evidence.yml": "b5fd6a77cd264aedee9772c03c110cac030469093c5c259ac5b12b80095e54e5",
+        ".github/workflows/preference-source-evidence.yml": "260940818cc0b88f6f2436c53bdf08e459b970806fafee6de58422d35f6a4a37",
+        ".github/workflows/projection-family-evidence.yml": "3cfe89112425021f482a58e325c025d200d329f7a5a7e48251f61ff1d886c8e2",
+        ".github/workflows/quick-start-first-frame-evidence.yml": "f0475f0c99c4f1fde05ddb96ff465567aca2f9dd22fc9c55ef04629f5132c09c",
+        ".github/workflows/reading-reference-evidence.yml": "b3ae9995cdce8df556744497a43f0dc8ee7c5e8c8925ff5ccfc16fe70a231eb4",
+        ".github/workflows/release-cadence.yml": "53a312630a0cbc18ab47ace7e69219c9accfac98320cde1ac23ce558258a9411",
+        ".github/workflows/release-packages.yml": "f0dde69a583ce3b4683ba147bf0d85f475a624ede06dd642ce67a88b5cff90f7",
+        ".github/workflows/reposteward-portfolio-shadow.yml": "4081fa339d5e4fd85bb20a679991ccb0c58804ca634983c1fd9af05c7f2ac378",
+        ".github/workflows/runtime-switching-evidence.yml": "6a447830eeeab23e925138de830c6d6f5c5928c246ee366db1f53c3bdd1d4840",
+        ".github/workflows/scroll-area-corner-evidence.yml": "db7ca184c3a76a73a1280266452ce8ebcff8a45aff124cf111da68351da96d5e",
+        ".github/workflows/search-cold-open-parity.yml": "7b9f735aab266913652563c4d404b54049b925e8f8925d3ebe2f208bdf6a9e5c",
+        ".github/workflows/search-intent-ab.yml": "dbce3304e6f6fc8d777f7e9900520e7aa11198785b73d1d5023451b0d34a35e3",
+        ".github/workflows/search-startup-profile.yml": "fbcf1560d2412a5f23ff1a10b53730d56182371e45e1f98565a90196ba53551f",
+        ".github/workflows/select-click-diagnostic.yml": "80115da74f4f51f6f1a8e88f48bfd0db894804c2b96a260bdb1b097ded05d550",
+        ".github/workflows/select-draft-projections-evidence.yml": "f9886bd848c6e2405a1ac966b2935cab226da5c555eb584621a4769482b1f71c",
+        ".github/workflows/select-item-sizing-evidence.yml": "5649fa00d38df9139516883a9375a08fff667018bcd1a82f9f8f3f2ff8476311",
+        ".github/workflows/select-target-alignment-evidence.yml": "e4170dffbaaf29400614aeecdc880f14335e4ff239e75cf57a0ca11a94c86083",
+        ".github/workflows/shadcn-card-style.yml": "0561c77dd69d53bf9c2189195c381e290f7dc82c1ceee07e7da5d2d197f808a0",
+        ".github/workflows/shadcn-command-style.yml": "2b93e85cce8be591d7757525cba42a48dd9079e6fadfe088423c6b42d1826110",
+        ".github/workflows/shadcn-select-style.yml": "445f4d86cb80ce81ad732e740d23e3bac070ee2b21ae803f7bd3fce0469967c3",
+        ".github/workflows/shadcn-style-source.yml": "455e36941afe558557f1dc4af55746130f04da2604eb481e716e894ee5008215",
+        ".github/workflows/shadcn-switch-style.yml": "cbdf6f4ec9d7184ac71617d27bec8f64e74fb486bb929692719181f0f0d4511c",
+        ".github/workflows/shadcn-tabs-style.yml": "aa1d155e8e11f66eb10f65aed14a3faae62b0b8cb8540c3aa68d72b3c7d78932",
+        ".github/workflows/shadcn-textarea-style.yml": "0e6fbb78a6f1511c111ba16f917695177d4435adb29bf0a567ff250edf20a7cc",
+        ".github/workflows/site-startup-theme-evidence.yml": "ea701390138456d47d12e91bd84efae317c477c8e545c756209febc23cb57a57",
+        ".github/workflows/site-typography-evidence.yml": "99e96e4a327d0c274f1a180cccefaa111f5a464021eecc466707e18e88d35aad",
+        ".github/workflows/static-hit-inset-evidence.yml": "648d369703101f0643ae2649fd90f88a3aa575f984e4c5e2df1f99d5cea2dc2f",
+        ".github/workflows/template-style-evidence.yml": "39bf55989120bda8c5a0d90c54c829a35acc3d9d6513ad0252830b1454827084",
+        ".github/workflows/toc-motion-evidence.yml": "9ca7ff0cdbcefbe7a76205db7aebd90bd0932b375140e888ab32508c61f7270b",
+        ".github/workflows/transition-gif-evidence.yml": "3782a6256051d0a61e5a2a518fc88da40f1fcc016aea0b090a1acf6f562e365e",
+        ".github/workflows/web-optical-artifact-evidence.yml": "f524cc9c893577c22659862cf92708d98416ffe56f09750b3274d8c7ea92fda1",
+        ".github/workflows/whitepaper-diagram-evidence.yml": "712f06c10b10cc48f63eb555ba9b4709a29c16001de7c33a2db825ba5766e3ce",
+        "scripts/ci/test/ci-scheduling-policy.test.mjs": "1cf87d3460f9da619c24e5ac9c8f213b60ac8e8a465d8697b8d6d931ac189901",
+        "scripts/ci/test/release-source-ledger-checkpoints.test.mjs": "8dad27ab9641c8242e6beb6acff0a59580f50e6b8b8cb5da96ff823f98530365",
+        "scripts/ci/check-ci-schedule.mjs": "b4d5ccbb24aed597c1cea3c916d2d5cc88285ba6b4a28c47a108c248b4e09132",
+        "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8"
+      }
+    },
+    "endedAt": "2026-11-17T10:09:34.977272+00:00",
+    "inputsUnchanged": true,
+    "runs": [
+      {
+        "name": "scheduling-policy",
+        "command": [
+          "node",
+          "--test",
+          "scripts/ci/test/ci-scheduling-policy.test.mjs"
+        ],
+        "exitCode": 1,
+        "wallSeconds": 3.49,
+        "log": "/workspace/scratch/8077f6e9f3a8/macos-runner-recovery-evidence/scheduling-policy.log",
+        "sha256": "914c17813b88986850bcbf727a24d60c547fd2bd40fd9bd8c72e29dd93a5c3a1",
+        "summary": "      at TestContext.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-followup/scripts/ci/test/ci-scheduling-policy.test.mjs:438:10)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1402:25)\n      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)\n      at Test.postRun (node:internal/test_runner/test:1542:19)\n      at Test.run (node:internal/test_runner/test:1467:12)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: [ 'ubuntu-24.04', 'macos-15' ],\n    expected: [ 'ubuntu-24.04', 'macos-14' ],\n    operator: 'deepStrictEqual',\n    diff: 'simple'\n  }"
+      },
+      {
+        "name": "release-source-ledger",
+        "command": [
+          "node",
+          "--test",
+          "scripts/ci/test/release-source-ledger-checkpoints.test.mjs"
+        ],
+        "exitCode": 0,
+        "wallSeconds": 0.435,
+        "log": "/workspace/scratch/8077f6e9f3a8/macos-runner-recovery-evidence/release-source-ledger.log",
+        "sha256": "e8c4c61659e481d91c522055fd2c618bdac80b383c5aa8c05f204a502a81674b",
+        "summary": "✔ the effective ledger restores all five Issue #649 conditions with the frozen snapshot untouched (9.564636ms)\n✔ the effective reader rejects rebound snapshot identities and altered source bodies (60.805833ms)\n✔ the effective reader rejects valid-looking rewrites and false completion (57.481696ms)\n✔ the effective reader rejects duplicate identities and incomplete corrections (30.05976ms)\n✔ current checkpoints can bind restored criteria but still reject unrelated keys (0.285468ms)\n✔ the effective reader rejects a companion that omits the recorded correction entry (20.800951ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 349.468663"
+      },
+      {
+        "name": "workflow-inventory",
+        "command": [
+          "node",
+          "scripts/ci/check-ci-schedule.mjs"
+        ],
+        "exitCode": 0,
+        "wallSeconds": 0.277,
+        "log": "/workspace/scratch/8077f6e9f3a8/macos-runner-recovery-evidence/workflow-inventory.log",
+        "sha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+        "summary": "[ci-schedule] OK: no push triggers, single 3-slot regression owner, guarded event contexts"
+      }
+    ]
+  },
+  "finalPolicyValidation": {
+    "start": {
+      "command": [
+        "node",
+        "--test",
+        "scripts/ci/test/ci-scheduling-policy.test.mjs"
+      ],
+      "startedAt": "2026-11-17T10:12:05.501481+00:00",
+      "testBeforeSha256": "1cf87d3460f9da619c24e5ac9c8f213b60ac8e8a465d8697b8d6d931ac189901",
+      "testAfterSha256": "5bb5ee6c87c629be9b8e670194c73888c02d31aeb9d366f20c049c04164834d0",
+      "workflowSha256": "051dfc6c56eb6f507d08b861b0bfc119c60f39baae31bb4af118c23bba2100dd",
+      "singleExpectedLabelReplacement": true
+    },
+    "result": {
+      "exitCode": 0,
+      "wallSeconds": 1.464,
+      "endedAt": "2026-11-17T10:12:06.966045+00:00",
+      "testInputUnchanged": true,
+      "logSha256": "d8f59525784418973c970d9a43266bcc0dd4b0c0363c102d1061fac565a1cb3d",
+      "summary": "✔ GPUI source consumers run once per full cycle with retained, exact-source evidence (52.845901ms)\n✔ GPUI Cargo target is initialized after runner allocation in the shared step environment (57.562185ms)\nℹ tests 21\nℹ suites 0\nℹ pass 21\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1364.526594"
+    }
+  },
+  "independentStaticReview": {
+    "sha256": "fd39ec1e028754a4eb3b04f510b9ec5762a7a650ced961cb83da97e46e01b46e",
+    "content": {
+      "scope": "compiler-macos-runner-label-recovery",
+      "reviewer": "/root/current_ci_review",
+      "kind": "independent-local-static-review-not-GitHub-approval",
+      "recordedAt": "2026-11-17T10:11:50.205947+00:00",
+      "parent": "e329c21ef07a5e7d05b093250ee5ae2be80a3eed",
+      "sourcePath": ".github/workflows/compiler-gpui-source-consumers.yml",
+      "beforeSha256": "70a6f17bb61834f0c53551589de571f1f2a90e12ce93ac2a7e2545e8d5f3a3eb",
+      "afterSha256": "051dfc6c56eb6f507d08b861b0bfc119c60f39baae31bb4af118c23bba2100dd",
+      "singleReplacementConserved": true,
+      "selection": "Pinned standard macos-15 ARM64 is a current official migration option after GitHub Actions macOS 14 retirement. Existing Linux lane and all other workflow bytes remain unchanged.",
+      "officialSourcesRead": [
+        {
+          "url": "https://github.com/actions/runner-images/blob/main/README.md",
+          "retrievalRef": "turn737265609view0",
+          "facts": [
+            "macos-15 is listed under macOS 15 ARM64",
+            "GitHub Actions macOS 14 retired 2026-11-02; Azure DevOps Intel extension does not apply"
+          ]
+        },
+        {
+          "url": "https://github.blog/changelog/2026-10-01-github-actions-macos-14-runner-image-retirement/",
+          "retrievalRef": "turn737265609view1",
+          "facts": [
+            "Retirement 2026-11-02",
+            "macos-15 explicitly listed as a migration option"
+          ]
+        }
+      ],
+      "priorRepositoryRecord": "internal/records/2026-11-16-compiler-isolated-acceptance.zh-CN.md",
+      "newWhyRecord": "internal/records/2026-11-17-compiler-macos-runner-recovery.zh-CN.md",
+      "findings": [],
+      "limits": [
+        "No local tests or configuration validators run by this reviewer.",
+        "Historical annotation is read from the preserved repository record; root separately re-read Actions.",
+        "No claim of new runner allocation, Rust SDK compilation, native consumers, permissions, publication or macOS acceptance.",
+        "Any previous workflow permission rejection remains a live service-side boundary."
+      ],
+      "supplementedAt": "2026-11-17T10:13:28.450562+00:00",
+      "necessaryTestProjection": {
+        "sourcePath": "scripts/ci/test/ci-scheduling-policy.test.mjs",
+        "beforeSha256": "1cf87d3460f9da619c24e5ac9c8f213b60ac8e8a465d8697b8d6d931ac189901",
+        "afterSha256": "5bb5ee6c87c629be9b8e670194c73888c02d31aeb9d366f20c049c04164834d0",
+        "singleReplacementConserved": true,
+        "explanation": "The existing strict deepEqual expected matrix must track the governed runner migration; only its macos-14 literal changes to macos-15. Every other assertion and byte is unchanged.",
+        "baselineEvidence": "Root reports the previous CI scheduling file had 20 passed / 1 failed due to this exact old expected literal. Reviewer has not run or yet inspected final execution."
+      },
+      "scopeDescription": "Two executable-file single-literal updates: workflow matrix and its existing strict policy assertion, plus WHY/evidence records."
+    }
+  },
+  "policyTest": "scripts/ci/test/ci-scheduling-policy.test.mjs",
+  "policyTestSingleReplacementConserved": true
+}
