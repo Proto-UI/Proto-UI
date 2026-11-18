@@ -610,6 +610,22 @@ for (const family of ['shadcn', 'brutalist'] as const)
             unbroken.clientWidth + 1
           );
           await reachableActions(page, dialog, family, `${family}-${runtime}-320-unbroken-font200`);
+          // Restore the localized label so the following zoom phase keeps
+          // exercising the CJK label that the unbroken Latin phase replaced.
+          await dialog.getByRole('button', {
+            name: 'UnbrokenActionLabel'.repeat(12),
+            exact: true,
+          }).evaluate((e) => {
+            const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+              if (node.textContent?.trim() === 'UnbrokenActionLabel'.repeat(12)) {
+                node.textContent = '保存全部个人资料更改并继续下一步';
+                return;
+              }
+            }
+            throw new Error('Missing unbroken action label text node');
+          });
+          await frames(page);
         }
         await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
         await dialog.locator('[data-dialog-long-fixture]').evaluate((e) => e.remove());
