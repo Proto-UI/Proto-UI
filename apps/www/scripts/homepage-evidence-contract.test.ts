@@ -982,8 +982,11 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     })),
   };
   assert.equal(observe(facts, 32).length, 0);
-  assert.equal(observe({ ...facts, cards: [...facts.cards].reverse() }, 32).length, 0,
-    'Membership and physical spacing do not depend on stale DOM ordering');
+  assert.equal(
+    observe({ ...facts, cards: [...facts.cards].reverse() }, 32).length,
+    0,
+    'Membership and physical spacing do not depend on stale DOM ordering'
+  );
   const narrow = {
     columnGap: '24px',
     cards: ids.map((id, i) => ({
@@ -1028,7 +1031,7 @@ test('density observer rejects missing cards and incorrect physical multicol spa
   }
 });
 
-test('only composition restores a hash-keyed font package without extending existing budgets', () => {
+test('isolated controls verify the exact font package within the existing budgets', () => {
   const workflow = parse(
     readFileSync(
       new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
@@ -1039,35 +1042,44 @@ test('only composition restores a hash-keyed font package without extending exis
   const job = workflow.jobs['isolated-controls'];
   assert.equal(job['timeout-minutes'], 15);
   const cache = job.steps.find(
-    (step: { name?: string }) => step.name === 'Restore the exact composition font package only'
+    (step: { uses?: string }) => step.uses === 'actions/cache/restore@v4'
   );
-  assert.equal(cache.if, "matrix.name == 'homepage-composition'");
-  assert.equal(cache.uses, 'actions/cache@v4');
+  assert.ok(cache, 'Every isolated control restores the exact package');
+  assert.equal(cache.if, undefined);
   assert.equal(cache['timeout-minutes'], 1);
-  assert.equal(
-    cache.with.path,
-    '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb'
-  );
-  assert.equal(
-    cache.with.key,
-    'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c'
-  );
-  assert.equal(cache.with['restore-keys'], undefined);
+  assert.deepEqual(cache.with, {
+    path: '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb',
+    key: 'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c',
+  });
   const prep = job.steps.find(
     (step: { name?: string }) =>
       step.name === 'Install locked dependencies and the same official font package'
   );
   assert.equal(prep['timeout-minutes'], 5);
+  assert.equal(prep.if, undefined);
+  assert.equal(prep['continue-on-error'], undefined);
   assert.match(prep.run, /pnpm@10\.32\.1 install --frozen-lockfile --ignore-scripts/);
-  assert.match(prep.run, /if \[\[ '\$\{\{ matrix.name \}\}' == 'homepage-composition' \]\]; then/);
   assert.match(
     prep.run,
     /timeout --signal=TERM --kill-after=5s 220s bash apps\/www\/scripts\/prepare-homepage-composition-fonts.sh/
   );
-  assert.match(
-    prep.run,
-    /else\s+sudo apt-get update -qq\s+sudo apt-get install -y --no-install-recommends fonts-noto-cjk\s+fi/
+  assert.doesNotMatch(prep.run, /matrix\.name|apt-get/);
+  const save = job.steps.find((step: { uses?: string }) => step.uses === 'actions/cache/save@v4');
+  assert.equal(save['timeout-minutes'], 1);
+  assert.equal(
+    save.if,
+    "matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true'"
   );
+  assert.equal(save.with.path, cache.with.path);
+  assert.equal(save.with.key, '${{ steps.isolated-font-cache.outputs.cache-primary-key }}');
+  const browser = job.steps.find(
+    (step: { name?: string }) => step.name === 'Execute the exact isolated browser suite'
+  );
+  assert.equal(browser['timeout-minutes'], 12);
+  assert.match(browser.run, /timeout --signal=TERM --kill-after=10s 600s/);
+  assert.ok(job.steps.indexOf(cache) < job.steps.indexOf(prep));
+  assert.ok(job.steps.indexOf(prep) < job.steps.indexOf(browser));
+  assert.ok(job.steps.indexOf(browser) < job.steps.indexOf(save));
 });
 
 test('font acceptance rejects missing Chinese glyphs and malformed selected-face charsets', () => {

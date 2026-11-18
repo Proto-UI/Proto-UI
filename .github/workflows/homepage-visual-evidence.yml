@@ -278,10 +278,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Restore the exact composition font package only
-        if: matrix.name == 'homepage-composition'
+      - name: Restore the exact isolated-control font package only
+        id: isolated-font-cache
         timeout-minutes: 1
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
           key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
@@ -291,12 +291,7 @@ jobs:
           set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          if [[ '${{ matrix.name }}' == 'homepage-composition' ]]; then
-            timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh
-          else
-            sudo apt-get update -qq
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-          fi
+          timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh
       - name: Select runner Chrome and the supported toolbar preference
         run: |
           set -euo pipefail
@@ -329,6 +324,14 @@ jobs:
             timeout --signal=TERM --kill-after=10s 600s \
               corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/isolated-regressions.log"
+      - name: Save the verified composition font package
+        if: matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 1
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ${{ steps.isolated-font-cache.outputs.cache-primary-key }}
       - name: Preserve this suite's actual images, measurements and failures
         if: always()
         uses: actions/upload-artifact@v4
