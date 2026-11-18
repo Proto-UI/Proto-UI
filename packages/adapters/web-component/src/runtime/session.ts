@@ -206,13 +206,7 @@ function activeWithinOpenTree(root: Document | ShadowRoot): Element | null {
 function captureSplitCallerSelection(
   host: HTMLElement,
   root: Document | ShadowRoot
-):
-  | (CallerSnapshot & {
-      anchorNode: Node | null;
-      focusNode: Node | null;
-      boundaries: readonly { startContainer: Node; endContainer: Node }[];
-    })
-  | undefined {
+): CallerSnapshot | undefined {
   const document = host.ownerDocument;
   const ownsNode = (node: Node | null) => node === document || node?.ownerDocument === document;
   const selectionRoot = root as (Document | ShadowRoot) & { getSelection?(): Selection | null };
@@ -231,9 +225,6 @@ function captureSplitCallerSelection(
     endOffset,
   }));
   return {
-    anchorNode,
-    focusNode,
-    boundaries,
     isCurrent() {
       const current = read();
       return (
@@ -301,55 +292,28 @@ function captureSplitCallerProjection(
     text: node.textContent,
     slot: node.nodeType === 1 ? (node as Element).getAttribute('slot') : null,
   }));
-  // Keep captured text, controls, choices and selection containers parent first.
-  const parents = new Map<ParentNode, ChildNode[]>();
-  const captureParents = (node: Node): void => {
-    const parent = node.parentNode;
-    if (!parent || parent === host || parents.has(parent)) return;
-    captureParents(parent);
-    parents.set(parent, Array.from(parent.childNodes));
-  };
+  // Snapshot light DOM edges parent first, including empty elements that can gain children.
+  const parents: [Element, readonly ChildNode[]][] = [];
+  const emptyChildren: readonly ChildNode[] = [];
   const textNodes: { node: Text; data: string }[] = [];
-  const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
-  while (walker.nextNode()) {
-    const node = walker.currentNode as Text;
-    captureParents(node);
-    textNodes.push({ node, data: node.data });
-  }
-  const selector = 'input, textarea, select';
-  const controls = children
-    .flatMap((node) => {
-      if (node.nodeType !== 1) return [];
+  const controls: { node: Element; state: CallerSnapshot }[] = [];
+  let node: Node | null = host.firstChild;
+  while (node && node !== host) {
+    if (node.nodeType === 3) {
+      const text = node as Text;
+      textNodes.push({ node: text, data: text.data });
+    } else if (node.nodeType === 1) {
       const element = node as Element;
-      const descendants = Array.from(element.querySelectorAll(selector));
-      return element.matches(selector) ? [element, ...descendants] : descendants;
-    })
-    .map((node) => {
-      captureParents(node);
-      if (node.localName === 'select') {
-        if (!parents.has(node)) parents.set(node, Array.from(node.childNodes));
-        for (const child of node.querySelectorAll('optgroup, option')) {
-          captureParents(child);
-          if (!parents.has(child)) parents.set(child, Array.from(child.childNodes));
-        }
-      }
-      return { node, state: captureCallerControlState(node) };
-    });
-  if (selection) {
-    const captureContainer = (node: Node | null) => {
-      if (!node || node === host || !host.contains(node)) return;
-      captureParents(node);
-      if (node.nodeType === 1) {
-        const element = node as Element;
-        if (!parents.has(element)) parents.set(element, Array.from(element.childNodes));
-      }
-    };
-    captureContainer(selection.anchorNode);
-    captureContainer(selection.focusNode);
-    for (const { startContainer, endContainer } of selection.boundaries) {
-      captureContainer(startContainer);
-      captureContainer(endContainer);
+      parents.push([element, element.firstChild ? Array.from(element.childNodes) : emptyChildren]);
+      if (element.matches('input, textarea, select'))
+        controls.push({ node: element, state: captureCallerControlState(element) });
     }
+    if (node.firstChild) {
+      node = node.firstChild;
+      continue;
+    }
+    while (node && node !== host && !node.nextSibling) node = node.parentNode;
+    node = node && node !== host ? node.nextSibling : null;
   }
   return {
     isCurrent() {

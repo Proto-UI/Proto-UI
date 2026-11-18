@@ -1,6 +1,4 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { repairHappyDomTextWalker } from '../../../../scripts/test/happy-dom-text-walker.mjs';
-import type { HappyDomTextWalkerCorrection } from '../../../../scripts/test/happy-dom-text-walker.mjs';
 import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
 import { asTransition, type TransitionProps } from '@proto.ui/prototypes-base/transition';
 import { AdaptToWebComponent, setElementProps } from '../src';
@@ -9,14 +7,8 @@ import type { PropsBaseType } from '@proto.ui/types';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 
 let id = 0;
-let callerTextWalker: HappyDomTextWalkerCorrection | undefined;
 afterEach(() => {
-  try {
-    document.body.replaceChildren();
-  } finally {
-    callerTextWalker?.restore();
-    callerTextWalker = undefined;
-  }
+  document.body.replaceChildren();
 });
 const settle = async () => {
   await Promise.resolve();
@@ -583,7 +575,6 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       }
     );
     const host = new C();
-    callerTextWalker = repairHappyDomTextWalker(window, host);
     const wrapper = document.createElement('div');
     const input = document.createElement('input');
     input.value = 'Caller input';

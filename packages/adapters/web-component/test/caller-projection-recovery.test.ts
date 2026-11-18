@@ -8,13 +8,18 @@ let id = 0;
 // The original native18 remains the selected-text oracle. These cases cover
 // recovery admission and the shell slot's lifetime after owner retirement.
 describe('failed initial split caller projection recovery', () => {
-  it.each(['restore', 'adopt'] as const)(
+  it.each(['restore', 'adopt', 'remove nested', 'replace nested'] as const)(
     'retains a caller-only slot only after a complete rollback (%s)',
     async (mutation) => {
       const suffix = ++id;
       const reactionTag = `pui-caller-recovery-reaction-${suffix}`;
-      const caller = document.createElement('input');
-      caller.value = 'Caller';
+      const input = document.createElement('input');
+      input.value = 'Caller';
+      const container = document.createElement('div');
+      const button = document.createElement('button');
+      button.setAttribute('aria-label', 'Action');
+      container.append(button);
+      const caller = mutation === 'restore' || mutation === 'adopt' ? input : container;
       const foreign = document.implementation.createHTMLDocument();
       let reacted = false;
       customElements.define(
@@ -23,8 +28,12 @@ describe('failed initial split caller projection recovery', () => {
           connectedCallback() {
             if (reacted) return;
             reacted = true;
-            caller.value = 'Reset';
-            if (mutation === 'adopt') foreign.body.append(foreign.adoptNode(caller));
+            if (mutation === 'remove nested') button.remove();
+            else if (mutation === 'replace nested') button.replaceWith(button.cloneNode());
+            else {
+              input.value = 'Reset';
+              if (mutation === 'adopt') foreign.body.append(foreign.adoptNode(input));
+            }
           }
         }
       );
@@ -76,9 +85,9 @@ describe('failed initial split caller projection recovery', () => {
         } catch (error) {
           errors.push(error);
         }
-        await disposed;
         expect(reacted).toBe(true);
         expect(errors).toHaveLength(1);
+        await disposed;
         expect(errors[0]).toBeInstanceOf(Error);
         expect((errors[0] as Error).name).toBe('Error');
         expect((errors[0] as Error).message).toContain('decoration caller projection changed');
@@ -92,12 +101,16 @@ describe('failed initial split caller projection recovery', () => {
         if (mutation === 'adopt') {
           expect(caller.ownerDocument).toBe(foreign);
           expect(caller.parentNode).toBe(foreign.body);
-          expect(caller.value).toBe('Reset');
+          expect(input.value).toBe('Reset');
           expect(root.childNodes).toHaveLength(0);
           return;
         }
         expect(host.firstChild).toBe(caller);
-        expect(caller.value).toBe('Caller');
+        if (caller === input) expect(input.value).toBe('Caller');
+        else {
+          expect(container.firstChild).toBe(button);
+          expect(button.nextSibling).toBeNull();
+        }
         expect(root.childNodes).toHaveLength(1);
         const recoverySlot = root.firstChild as HTMLSlotElement;
         expect(recoverySlot.localName).toBe('slot');
