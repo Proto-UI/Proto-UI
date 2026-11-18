@@ -185,6 +185,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/Homepage/HomepageRuntime.astro` | `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `907729ef5fed83479c0e9ac4daa01e0f52c3657445fa0974bd0a71b9e3ee0705` |
 | `apps/www/src/components/Homepage/home-action-icons.ts` | `www.shell.hero-actions` | `f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c` |
 | `apps/www/src/components/Homepage/homepage-demo-participant.ts` | `www.demo.home-demo-select` | `3bd20a467e5921228ac529ce295ac65df9caf593176a9fb8d07ea15a060b1c41` |
+| `apps/www/src/components/Homepage/homepage-gallery-icons.ts` | `www.demo.home-demo-select` | `ee553761832372e9d3df502d2b0ca15e62604c9d3c5bfb5b1a9cb157b461f0c7` |
 | `apps/www/src/components/Homepage/homepage-gallery-parts.ts` | `www.demo.home-demo-select` | `1e9535ee22abb05f75f4fc1f0a422abc553128aee238588fe1809a0983f69cbb` |
 | `apps/www/src/content/docs/zh-cn/label-selection-observer.ts` | `www.demo.home-demo-select` | `0f3d2218bbc973f9feeb3f46b7adeec0863a3fcd3a0a8408950aa64361c8ee05` |
 | `apps/www/src/components/Homepage/homepage-live-preview.ts` | `www.demo.home-demo-select` | `f154381eeb8b5cdabdbd6eb49cc35bd4b51c80f4a64cb738364f12d232cf2c91` |
