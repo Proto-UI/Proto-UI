@@ -1255,6 +1255,7 @@ function resolveWebComponentTriggerSurface(
 
 type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   el: HTMLElement;
+  splitSurface?: boolean;
   instanceToken: LogicalInstanceToken;
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: WebTextControl | null;
@@ -1436,7 +1437,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     // Eligibility is an owner capability available during setup; physical
     // bindings are still acquired only after the complete first view stages.
     .use('feedback', [
-      ...(!el.shadowRoot &&
+      ...((!el.shadowRoot || args.splitSurface) &&
       !args.textControlTarget &&
       !args.imageViewTarget &&
       !args.nativeLinkTarget
@@ -1490,6 +1491,7 @@ export type FocusIntentState = {
 
 export function createWebComponentModules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
+  splitSurface?: boolean;
   surfaceProjection: HostSurfaceProjection<HTMLElement>;
   /** Presentation surface may differ from the accessibility/event target in Shadow. */
   feedbackSurfaceProjection?: HostSurfaceProjection<HTMLElement>;
@@ -1666,7 +1668,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     subscribeControlLabelSurface
   )
     .use('feedback', [
-      ...(!el.shadowRoot &&
+      ...((!el.shadowRoot || args.splitSurface) &&
       !args.textControlTarget &&
       !args.imageViewTarget &&
       !args.nativeLinkTarget
