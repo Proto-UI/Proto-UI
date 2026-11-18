@@ -846,8 +846,7 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   // Family publication must not inspect every unrelated Runtime owner. Keep
   // only subscribed owners, ordered by creation rather than subscription time.
-  // A numeric cursor preserves the old live-Set traversal when a callback adds,
-  // cancels or disposes a recipient, including a nested family publication.
+  // Resume by owner order if a callback moves or removes the current cursor.
   private static subscriberAfter(owners: readonly AnatomyModuleImpl[], order: number): number {
     let start = 0;
     let end = owners.length;
@@ -884,14 +883,19 @@ export class AnatomyModuleImpl extends ModuleBase {
     index: Map<AnatomyFamily, AnatomyModuleImpl[]>,
     family: AnatomyFamily
   ): Iterable<AnatomyModuleImpl> {
-    let lastOrder = -1;
+    let previous: AnatomyModuleImpl | undefined;
+    let position = 0;
     while (true) {
       // Re-read after each callback: the last subscriber can be removed and a
       // later owner can recreate the family index before this traversal resumes.
       const owners = index.get(family);
-      const next = owners?.[this.subscriberAfter(owners, lastOrder)];
+      if (!owners) return;
+      if (previous && owners[position - 1] !== previous)
+        position = this.subscriberAfter(owners, previous.instanceOrder);
+      const next = owners[position];
       if (!next) return;
-      lastOrder = next.instanceOrder;
+      previous = next;
+      position++;
       yield next;
     }
   }

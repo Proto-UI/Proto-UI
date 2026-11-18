@@ -107,6 +107,40 @@ describe('Anatomy family subscriber notification', () => {
     expect(target).toHaveBeenCalledTimes(3);
   });
 
+  it('advances through stable order and target subscribers without rereading owner order', () => {
+    const f = fixture();
+    const owners = Array.from({ length: 32 }, () => f.make());
+    const order = vi.fn();
+    const target = vi.fn();
+    for (const owner of owners) {
+      owner.port.subscribeOrder(f.family, order);
+      owner.port.subscribeTargets(f.family, target);
+    }
+    const reads = vi.fn();
+    const descriptors = owners.map((owner) => {
+      const descriptor = Object.getOwnPropertyDescriptor(owner, 'instanceOrder')!;
+      Object.defineProperty(owner, 'instanceOrder', {
+        configurable: true,
+        enumerable: descriptor.enumerable,
+        get() {
+          reads();
+          return descriptor.value;
+        },
+      });
+      return descriptor;
+    });
+    try {
+      f.notify();
+    } finally {
+      owners.forEach((owner, index) =>
+        Object.defineProperty(owner, 'instanceOrder', descriptors[index]!)
+      );
+    }
+    expect(order).not.toHaveBeenCalled();
+    expect(target).toHaveBeenCalledTimes(owners.length);
+    expect(reads).not.toHaveBeenCalled();
+  });
+
   for (const kind of ['order', 'target'] as const) {
     const subscribe = (
       owner: AnatomyModuleImpl,
