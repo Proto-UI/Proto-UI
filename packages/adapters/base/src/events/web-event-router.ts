@@ -62,6 +62,26 @@ type Listener = {
 
 const payloadStateByNativeEvent = new WeakMap<object, Record<PropertyKey, unknown>>();
 const activeRouterByRoot = new WeakMap<HTMLElement, object>();
+const windowKeyboardResetUses = new WeakMap<Window, number>();
+
+function clearKeyboardPressOwner(native: Event): void {
+  delete (native as Event & { [KEYBOARD_PRESS_OWNER]?: object })[KEYBOARD_PRESS_OWNER];
+}
+
+function retainWindowKeyboardReset(target: Window): Unsub {
+  const uses = windowKeyboardResetUses.get(target) ?? 0;
+  if (uses === 0) target.addEventListener('keydown', clearKeyboardPressOwner, true);
+  windowKeyboardResetUses.set(target, uses + 1);
+  return () => {
+    const current = windowKeyboardResetUses.get(target) ?? 0;
+    if (current > 1) {
+      windowKeyboardResetUses.set(target, current - 1);
+    } else if (current === 1) {
+      windowKeyboardResetUses.delete(target);
+      target.removeEventListener('keydown', clearKeyboardPressOwner, true);
+    }
+  };
+}
 
 export function createWebProtoEventRouter(opt: {
   rootEl: HTMLElement;
@@ -612,14 +632,24 @@ export function createWebProtoEventRouter(opt: {
 
   // The owner marker is shared through the native Event while routers process one dispatch.
   // Clear a prior dispatch's marker before either a root-local or global route can observe it.
-  const clearKeyboardPressOwner = (native: Event) => {
-    delete (native as Event & { [KEYBOARD_PRESS_OWNER]?: object })[KEYBOARD_PRESS_OWNER];
-  };
-  rootEl.addEventListener('keydown', clearKeyboardPressOwner, true);
-  unsubs.push(() => rootEl.removeEventListener('keydown', clearKeyboardPressOwner, true));
+  const resetAtRoot = (native: Event) => clearKeyboardPressOwner(native);
+  rootEl.addEventListener('keydown', resetAtRoot, true);
+  unsubs.push(() => rootEl.removeEventListener('keydown', resetAtRoot, true));
   if (globalEl !== rootEl) {
-    globalEl.addEventListener('keydown', clearKeyboardPressOwner, true);
-    unsubs.push(() => globalEl.removeEventListener('keydown', clearKeyboardPressOwner, true));
+    const view = rootEl.ownerDocument.defaultView;
+    if (
+      view &&
+      globalEl === view &&
+      view.addEventListener === view.EventTarget.prototype.addEventListener &&
+      view.removeEventListener === view.EventTarget.prototype.removeEventListener
+    ) {
+      // The marker is private to dispatch. One native Window capture reset
+      // serves all of its routers before their existing bubble listeners run.
+      unsubs.push(retainWindowKeyboardReset(view));
+    } else {
+      globalEl.addEventListener('keydown', resetAtRoot, true);
+      unsubs.push(() => globalEl.removeEventListener('keydown', resetAtRoot, true));
+    }
   }
 
   // key -> key.* (global)
