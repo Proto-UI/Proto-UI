@@ -92,11 +92,11 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-expose-event']),
   }),
   'packages/modules/event/src/create.ts': Object.freeze({
-    sourceSha256: '09ace2db7971cf8577226c77e686b00166084fbfe6daf7fe81d600a5af09df36',
+    sourceSha256: 'dfe7d953c9763325d4581f7edba433a48a17ef795be465b935c5d903b15edccd',
     specifiers: Object.freeze(['./impl', './types', '@proto.ui/module-base']),
   }),
   'packages/modules/event/src/impl.ts': Object.freeze({
-    sourceSha256: '1e01fe634435cbc61514662ad456a6e7c145b2642d3286e9aa70733a4f77ff9f',
+    sourceSha256: '84fc4386e0cb897554179824f31c0f7b212e5603af5ec3f9642385224850d28c',
     specifiers: Object.freeze([
       './caps',
       './error',
@@ -111,11 +111,11 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./caps', './create', './error', './types']),
   }),
   'packages/modules/event/src/kernel.ts': Object.freeze({
-    sourceSha256: 'aece802470861303b91206fcfdfecc02d337eca8368bf97a4ae2dc7ac622f518',
+    sourceSha256: 'f83c6f2673a9004604357a1516e0a8f2ed484f941dca82f730218eefec8b808b',
     specifiers: Object.freeze(['./types']),
   }),
   'packages/modules/event/src/types.ts': Object.freeze({
-    sourceSha256: 'a856623826a4764b87a96bf599f81e8c06b7b2681d7d31298a3f167e113b0eab',
+    sourceSha256: 'd62695f83cd5b7233a77fc8445fa0ffd871cab719b85b9d0196422eab909493e',
     specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-expose-event']),
   }),
   'packages/modules/feedback/src/caps.ts': Object.freeze({
