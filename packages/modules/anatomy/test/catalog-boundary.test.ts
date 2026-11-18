@@ -275,3 +275,86 @@ it('T-ANATOMY-0004-CASE-ORDER: real DOM observation reports role order changes o
     root.remove();
   }
 });
+
+it('observes subsequent host order changes after a subscriber moves to another domain', async () => {
+  const { createDomOrderObserver } = await import('../src/web/order-observer');
+  const family = createAnatomyFamily('moving-order-observer', {
+    roles: {
+      root: { cardinality: { min: 1, max: 1 } },
+      item: { cardinality: { min: 0, max: '*' } },
+    },
+  });
+  const rootA = document.createElement('div');
+  const rootB = document.createElement('div');
+  const moving = document.createElement('div');
+  const peer = document.createElement('div');
+  document.body.append(rootA, rootB);
+  rootA.append(moving);
+  rootB.append(peer);
+  const started: unknown[] = [];
+  const stopped: unknown[] = [];
+  const modules = [rootA, rootB, moving, peer].map((instance, index) => {
+    const caps = makeCaps({
+      instance,
+      getParent: (target) => (target as HTMLElement).parentElement,
+      getPrototype: () => ({ name: 'moving-order-part' }),
+      getRootTarget: (target) => target,
+      orderObserver: (target, notify) => {
+        started.push(target);
+        const off = createDomOrderObserver(target as HTMLElement, notify);
+        return () => {
+          stopped.push(target);
+          off();
+        };
+      },
+    });
+    const impl = new AnatomyModuleImpl(caps, 'part', {
+      get: () => index,
+      getAll: () => ({}),
+      has: () => true,
+      keys: () => [],
+    });
+    impl.claim(family, { role: index < 2 ? 'root' : 'item' });
+    return { impl, caps };
+  });
+  const stable = modules[0]!.impl;
+  const mover = modules[2]!.impl;
+  const seen: unknown[][] = [];
+  const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 5));
+  try {
+    stable.subscribeParts(family, 'item', vi.fn());
+    mover.subscribeParts(family, 'item', (_ctx, parts) =>
+      seen.push(parts.map((part) => part.getExpose('id')))
+    );
+    for (const { impl, caps } of modules) {
+      caps.__sys.__setExecPhase('callback');
+      impl.onMountPhase('mounted', 1);
+    }
+    expect(started).toEqual([rootA]);
+
+    rootB.append(moving);
+    mover.port.syncStructure();
+    await flush();
+    expect(seen).toEqual([[3, 2]]);
+
+    rootB.prepend(moving);
+    await flush();
+    expect(seen).toEqual([
+      [3, 2],
+      [2, 3],
+    ]);
+    expect(started).toEqual([rootA, rootB]);
+    expect(stopped).toEqual([]);
+
+    rootA.append(moving);
+    mover.port.syncStructure();
+    await flush();
+    expect(seen).toEqual([[3, 2], [2, 3], [2]]);
+    expect(started).toEqual([rootA, rootB]);
+    expect(stopped).toEqual([rootB]);
+  } finally {
+    for (const { impl } of modules.reverse()) impl.dispose();
+    rootA.remove();
+    rootB.remove();
+  }
+});
