@@ -1,4 +1,3 @@
-import { recordWCPhase } from '../../../../scripts/test/wc-caller-phase-observer.mjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { repairHappyDomTextWalker } from '../../../../scripts/test/happy-dom-text-walker.mjs';
 import type { HappyDomTextWalkerCorrection } from '../../../../scripts/test/happy-dom-text-walker.mjs';
@@ -9,18 +8,14 @@ import { createRuntimeSession } from '@proto.ui/runtime';
 import type { PropsBaseType } from '@proto.ui/types';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
 
-recordWCPhase('test-module-evaluated');
 let id = 0;
 let callerTextWalker: HappyDomTextWalkerCorrection | undefined;
 afterEach(() => {
-  recordWCPhase('cleanup-enter');
   try {
     document.body.replaceChildren();
   } finally {
-    recordWCPhase('cleanup-exit');
     callerTextWalker?.restore();
     callerTextWalker = undefined;
-    recordWCPhase('harness-restored');
   }
 });
 const settle = async () => {
@@ -517,19 +512,14 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
   ] as const)(
     'preserves caller state across a split connection reaction (%s)',
     (mutation) => {
-      recordWCPhase('fixture-enter', { mutation });
       const tag = `pui-decoration-caller-state-${++id}`;
-      recordWCPhase('foreign-document-construction-enter');
       const foreign = document.implementation.createHTMLDocument('Foreign caller');
-      recordWCPhase('foreign-document-construction-exit');
       let reacted = false;
       customElements.define(
         tag,
         class extends HTMLElement {
           connectedCallback() {
-            recordWCPhase('mutator-connected', { mutation });
             const owner = (this.getRootNode() as ShadowRoot).host;
-            recordWCPhase('mutator-owner-read', { hasOwner: !!owner });
             if (!owner) return;
             if (mutation === 'input value') {
               const input = owner.querySelector('input')!;
@@ -575,11 +565,9 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
               (owner.firstElementChild as HTMLElement).slot = 'other';
             }
             reacted = true;
-            recordWCPhase('mutator-reaction-complete', { mutation });
           }
         }
       );
-      recordWCPhase('adapter-registration-enter');
       const C = AdaptToWebComponent(
         definePrototype({
           name: `owned-decoration-caller-state-${id}`,
@@ -596,12 +584,8 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
           },
         }
       );
-      recordWCPhase('adapter-registration-exit');
-      recordWCPhase('host-construction-enter');
       const host = new C();
-      recordWCPhase('host-construction-exit');
       callerTextWalker = repairHappyDomTextWalker(window, host);
-      recordWCPhase('harness-installed');
       const wrapper = document.createElement('div');
       const input = document.createElement('input');
       input.value = 'Caller input';
@@ -609,7 +593,6 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       const text = document.createElement('span');
       const originalText = document.createTextNode('Caller text');
       text.append(originalText);
-      recordWCPhase('select-construction-enter');
       const select = document.createElement('select');
       select.multiple = true;
       const first = document.createElement('option');
@@ -629,18 +612,9 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
       select.append(first, group);
       wrapper.append(input, text, select);
       host.append(wrapper);
-      recordWCPhase('caller-dom-prepared');
-      const mount = () => {
-        recordWCPhase('mount-enter');
-        try {
-          return document.body.append(host);
-        } finally {
-          recordWCPhase('mount-exit');
-        }
-      };
+      const mount = () => document.body.append(host);
       if (mutation === 'unchanged') expect(mount).not.toThrow();
       else expect(mount).toThrow('decoration caller projection changed');
-      recordWCPhase('mount-expectation-complete');
       expect(reacted).toBe(true);
       expect(host.firstChild).toBe(wrapper);
       expect(host.childNodes).toHaveLength(1);
@@ -725,14 +699,7 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
         laterOption.selected = true;
         second.replaceWith(laterOption);
         third.selected = false;
-        expect(() => {
-          recordWCPhase('update-enter');
-          try {
-            return host.update();
-          } finally {
-            recordWCPhase('update-exit');
-          }
-        }).not.toThrow();
+        expect(() => host.update()).not.toThrow();
         expect(wrapper.firstChild).toBe(laterInput);
         expect(text.firstChild).toBe(laterText);
         expect(text.textContent).toBe('Updated caller text');
@@ -753,7 +720,6 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
         expect(select.value).toBe('later');
         expect([third.selected, laterOption.selected]).toEqual([false, true]);
       }
-      recordWCPhase('fixture-assertions-complete');
     }
   );
 
