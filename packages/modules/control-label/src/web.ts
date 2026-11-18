@@ -59,14 +59,25 @@ function observeScope(scope: Node, anchor: Node, notify: () => void): () => void
   if (!entry) {
     const members = new Set<ScopeMember>();
     const observer = new Observer((mutations) => {
+      const attributes = new Set<Node>();
+      const subtrees = new Set<Node>();
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes') attributes.add(mutation.target);
+        else {
+          for (const node of mutation.addedNodes) subtrees.add(node);
+          for (const node of mutation.removedNodes) subtrees.add(node);
+        }
+      }
       for (const member of [...members]) {
-        const affected = mutations.some((mutation) => {
-          if (mutation.type === 'attributes') return mutation.target === member.anchor;
-          return [...mutation.addedNodes, ...mutation.removedNodes].some(
-            (node) => node === member.anchor || node.contains(member.anchor)
-          );
-        });
-        if (affected && members.has(member)) member.notify();
+        if (!members.has(member)) continue;
+        let affected = attributes.has(member.anchor);
+        // A preceding notification may move this anchor before its turn.
+        // Walk the live DOM ancestry without crossing ShadowRoot boundaries.
+        if (subtrees.size) {
+          for (let node: Node | null = member.anchor; node && !affected; node = node.parentNode)
+            affected = subtrees.has(node);
+        }
+        if (affected) member.notify();
       }
     });
     observer.observe(scope, {
