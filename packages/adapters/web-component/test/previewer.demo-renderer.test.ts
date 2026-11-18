@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
+import {
+  collectPrototypeIds,
+  type DemoSpec,
+} from '../../../../apps/www/src/components/PrototypePreviewer/demo-types';
 import { loadPrototypes } from '../../../../apps/www/src/components/PrototypePreviewer/prototype-modules';
 import { renderDemo } from '../../../../apps/www/src/components/PrototypePreviewer/demo-renderer';
-import demo from '../../../../apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs.demo';
+import shadcnTabsDemo from '../../../../apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs.demo';
+import newYorkTabsDemo from '../../../../apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-new-york-v4.demo';
 import baseDialogDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-dialog.demo';
 import shadcnDialogDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.demo';
 import baseHoverCardDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-hover-card.demo';
@@ -10,6 +15,12 @@ import baseTextareaDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-b
 
 function styleContains(el: Element | null, token: string): boolean {
   return (el?.getAttribute('data-pui-style') ?? '').split(/\s+/).includes(token);
+}
+
+async function loadDemoPrototypes(root: DemoSpec['root']) {
+  const ids = new Set<string>();
+  collectPrototypeIds(root, ids);
+  await loadPrototypes([...ids]);
 }
 
 async function settle() {
@@ -58,12 +69,7 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
 
   it('renders the Base Dropdown demo with keyboard focus entry and portaled positioning', async () => {
     vi.useFakeTimers();
-    await loadPrototypes([
-      'base-dropdown-root',
-      'base-dropdown-trigger',
-      'base-dropdown-content',
-      'base-dropdown-item',
-    ]);
+    await loadDemoPrototypes(baseDropdownDemo.root as DemoSpec['root']);
     const host = document.createElement('div');
     document.body.appendChild(host);
     const session = await renderDemo({ runtime: 'wc', demo: baseDropdownDemo as any, host });
@@ -123,61 +129,61 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
     }
   });
 
-  it('renders shadcn tabs parts with host styles in demo wc mode', async () => {
-    await loadPrototypes([
-      'shadcn-button',
-      'shadcn-tabs-root',
-      'shadcn-tabs-list',
-      'shadcn-tabs-trigger',
-      'shadcn-tabs-content',
-    ]);
+  it.each([
+    { profile: 'Rhea', demo: shadcnTabsDemo, listHeight: 'h-8', triggerRadius: 'rounded-2xl' },
+    { profile: 'New York', demo: newYorkTabsDemo, listHeight: 'h-9', triggerRadius: 'rounded-md' },
+  ])(
+    'renders $profile shadcn tabs parts with host styles in demo wc mode',
+    async ({ demo, listHeight, triggerRadius }) => {
+      await loadDemoPrototypes(demo.root);
 
-    const host = document.createElement('div');
-    document.body.appendChild(host);
+      const host = document.createElement('div');
+      document.body.appendChild(host);
 
-    const session = await renderDemo({
-      runtime: 'wc',
-      demo: demo as any,
-      host,
-    });
+      const session = await renderDemo({
+        runtime: 'wc',
+        demo: demo as any,
+        host,
+      });
 
-    await Promise.resolve();
-    await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
 
-    const root = host.querySelector('wc-shadcn-tabs-root') as HTMLElement | null;
-    const list = host.querySelector('wc-shadcn-tabs-list') as HTMLElement | null;
-    const triggers = Array.from(host.querySelectorAll('wc-shadcn-tabs-trigger')) as HTMLElement[];
-    const trigger = triggers[0] ?? null;
-    const content = host.querySelector('wc-shadcn-tabs-content') as HTMLElement | null;
+      const root = host.querySelector('wc-shadcn-tabs-root') as HTMLElement | null;
+      const list = host.querySelector('wc-shadcn-tabs-list') as HTMLElement | null;
+      const triggers = Array.from(host.querySelectorAll('wc-shadcn-tabs-trigger')) as HTMLElement[];
+      const trigger = triggers[0] ?? null;
+      const content = host.querySelector('wc-shadcn-tabs-content') as HTMLElement | null;
 
-    expect(root).not.toBeNull();
-    expect(list).not.toBeNull();
-    expect(trigger).not.toBeNull();
-    expect(content).not.toBeNull();
-    expect(styleContains(root, 'flex')).toBe(true);
-    expect(styleContains(root, 'gap-2')).toBe(true);
-    expect(root?.className).toContain('w-[420px]');
-    expect(styleContains(list, 'inline-flex')).toBe(true);
-    expect(styleContains(list, 'w-fit')).toBe(true);
-    expect(styleContains(list, 'h-9')).toBe(true);
-    expect(styleContains(trigger, 'rounded-md')).toBe(true);
-    expect(styleContains(trigger, 'flex-1')).toBe(true);
-    expect(triggers[1]?.getAttribute('tabindex')).toBe('-1');
-    expect(styleContains(content, 'flex-1')).toBe(true);
-    expect(styleContains(content, 'outline-none')).toBe(true);
+      expect(root).not.toBeNull();
+      expect(list).not.toBeNull();
+      expect(trigger).not.toBeNull();
+      expect(content).not.toBeNull();
+      expect(styleContains(root, 'flex')).toBe(true);
+      expect(styleContains(root, 'gap-2')).toBe(true);
+      expect(root?.className).toContain('w-[420px]');
+      expect(styleContains(list, 'inline-flex')).toBe(true);
+      expect(styleContains(list, 'w-fit')).toBe(true);
+      expect(styleContains(list, listHeight)).toBe(true);
+      expect(styleContains(trigger, triggerRadius)).toBe(true);
+      expect(styleContains(trigger, 'flex-1')).toBe(true);
+      expect(triggers[1]?.getAttribute('tabindex')).toBe('-1');
+      expect(styleContains(content, 'flex-1')).toBe(true);
+      expect(styleContains(content, 'outline-none')).toBe(true);
 
-    trigger?.focus();
-    trigger?.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
-    );
-    await settle();
+      trigger?.focus();
+      trigger?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true })
+      );
+      await settle();
 
-    expect(document.activeElement).toBe(triggers[1]);
-    expect(triggers[1]?.getAttribute('aria-selected')).toBe('true');
+      expect(document.activeElement).toBe(triggers[1]);
+      expect(triggers[1]?.getAttribute('aria-selected')).toBe('true');
 
-    await session.destroy();
-    host.remove();
-  });
+      await session.destroy();
+      host.remove();
+    }
+  );
 
   it('moves focus into the base dialog demo when opened', async () => {
     await loadPrototypes([
@@ -227,19 +233,7 @@ describe('PrototypePreviewer demo-renderer / wc', () => {
   });
 
   it('moves focus into the shadcn dialog demo when opened', async () => {
-    await loadPrototypes([
-      'shadcn-dialog-root',
-      'shadcn-dialog-trigger',
-      'shadcn-dialog-mask',
-      'shadcn-dialog-content',
-      'shadcn-dialog-title',
-      'shadcn-dialog-description',
-      'shadcn-dialog-close',
-      'shadcn-dialog-close-icon',
-      'shadcn-dialog-header',
-      'shadcn-dialog-footer',
-      'shadcn-button',
-    ]);
+    await loadDemoPrototypes(shadcnDialogDemo.root);
 
     const host = document.createElement('div');
     document.body.appendChild(host);
