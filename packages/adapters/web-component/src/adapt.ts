@@ -881,6 +881,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           const eventPort = owner.session?.caps.getPort<EventPort>('event');
           const router = (resources.router = createWebProtoEventRouter({
             rootRegistrations: eventPort,
+            globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
             globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
             rootEl: thisEl,
             // The eager native bridge owns focus/blur before provider construction.

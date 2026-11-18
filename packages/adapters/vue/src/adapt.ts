@@ -748,6 +748,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           const eventPort = hostSession?.caps.getPort<EventPort>('event');
           const router = createWebProtoEventRouter({
             rootRegistrations: eventPort,
+            globalKeyDown: eventPort?.hasGlobalRegistration?.('key.down') !== false,
             globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
             rootEl,
             instanceToken,
