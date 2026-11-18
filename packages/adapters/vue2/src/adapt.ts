@@ -594,8 +594,13 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         state.propWatchDisposer = null;
         // Runtime State disconnect observers still release exposed subscriptions.
         // The session's onAfterUnmount invalidates exposes after that cleanup.
-        void state.owner.dispose();
-        state.lastInitRoot = null;
+        try {
+          // Vue 2 observes returned lifecycle promises and reports rejection
+          // through errorCaptured / config.errorHandler, preserving the error.
+          return state.owner.dispose();
+        } finally {
+          state.lastInitRoot = null;
+        }
       },
       methods: {
         update() {
