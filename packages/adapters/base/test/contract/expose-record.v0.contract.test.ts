@@ -553,3 +553,117 @@ describe('replacement expose snapshot callable identity', () => {
     expect(() => (first.readLabel as () => string)()).toThrow(/terminal disposal/);
   });
 });
+
+describe('mixed raw and projected expose snapshots', () => {
+  it.each([
+    ['read', 'raw-first'],
+    ['read', 'projection-first'],
+    ['result', 'raw-first'],
+    ['result', 'projection-first'],
+  ] as const)('refreshes object aliases through %s (%s)', (boundary, order) => {
+    const reader = createScopedExposesReader(() => (call) => call());
+    let reads = 0;
+    type Value = {
+      value: number;
+      obsolete?: string;
+      readonly sampled: number;
+      read(): number;
+      self?: Value;
+    };
+    type Pair = { current: Value; echo: Value };
+    const value: Value = {
+      value: 1,
+      obsolete: 'remove',
+      get sampled() {
+        reads++;
+        return this.value;
+      },
+      read() {
+        return this.value;
+      },
+    };
+    value.self = value;
+    const pair = (echo: Value): Pair =>
+      order === 'raw-first' ? { current: value, echo } : { echo, current: value };
+    const first = reader.read({ value, pair }) as { value: Value; pair(echo: Value): Pair };
+    const projected = first.value;
+    const originalRead = projected.read;
+    expect(reads).toBe(1);
+
+    value.value = 2;
+    delete value.obsolete;
+    value.read = function () {
+      return this.value + 10;
+    };
+    // Raw mutation alone is not an outward refresh or a subscription.
+    expect(projected.value).toBe(1);
+    expect(projected.read).toBe(originalRead);
+
+    const next =
+      boundary === 'read'
+        ? (reader.read({ pair: pair(projected) }).pair as Pair)
+        : first.pair(projected);
+    expect(next.current).toBe(projected);
+    expect(next.echo).toBe(projected);
+    expect(projected.self).toBe(projected);
+    expect(projected.value).toBe(2);
+    expect(projected.sampled).toBe(2);
+    expect(reads).toBe(2);
+    expect(Object.hasOwn(projected, 'obsolete')).toBe(false);
+    expect(projected.read).not.toBe(originalRead);
+    expect(next.echo.read).toBe(next.current.read);
+    expect(next.echo.read()).toBe(12);
+
+    const replacementRead = projected.read;
+    reader.invalidate();
+    expect(() => originalRead()).toThrow(/terminal disposal/);
+    expect(() => replacementRead()).toThrow(/terminal disposal/);
+  });
+
+  it('refreshes projection-only edits and guards a late callable in its own owner', () => {
+    const invoke = vi.fn((call: () => void) => call());
+    const peerInvoke = vi.fn((call: () => void) => call());
+    const reader = createScopedExposesReader(() => invoke);
+    const peer = createScopedExposesReader(() => peerInvoke);
+    type Value = { value: number; obsolete?: string; action?(): number };
+    const value: Value = { value: 1, obsolete: 'remove' };
+    const first = reader.read({ value, echo: (entry: Value) => entry }) as {
+      value: Value;
+      echo(entry: Value): Value;
+    };
+    const second = peer.read({ value, ping: () => 'peer' }) as {
+      value: Value;
+      ping(): string;
+    };
+    const projected = first.value;
+    let calls = 0;
+    const action = function (this: Value) {
+      calls++;
+      return this.value;
+    };
+    projected.value = 2;
+    delete projected.obsolete;
+    projected.action = action;
+
+    const echoed = first.echo(projected);
+    expect(echoed).toBe(projected);
+    expect(echoed.value).toBe(2);
+    expect(Object.hasOwn(echoed, 'obsolete')).toBe(false);
+    expect(echoed.action).not.toBe(action);
+    expect(echoed.action!()).toBe(2);
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(peerInvoke).not.toHaveBeenCalled();
+    expect(second.value).not.toBe(projected);
+    expect(second.value.value).toBe(1);
+    expect(second.value.action).toBeUndefined();
+    expect(value).toEqual({ value: 1, obsolete: 'remove' });
+
+    const heldAction = echoed.action!;
+    reader.invalidate();
+    expect(() => heldAction()).toThrow(/terminal disposal/);
+    expect(calls).toBe(1);
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(second.ping()).toBe('peer');
+    expect(peerInvoke).toHaveBeenCalledOnce();
+  });
+});
