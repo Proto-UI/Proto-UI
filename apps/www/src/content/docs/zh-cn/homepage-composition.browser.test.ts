@@ -711,6 +711,13 @@ describe.sequential(
             await restrictNetwork(context, blockedRequests);
             page = await context.newPage();
             page.on('pageerror', (error) => errors.push(error.message));
+            const selectTrace: unknown[] = [];
+            record.selectTrace = selectTrace;
+            page.on('console', (message) => {
+              const prefix = '[select-close-trace] ';
+              const text = message.text();
+              if (text.startsWith(prefix)) selectTrace.push(JSON.parse(text.slice(prefix.length)));
+            });
             await stage('navigate');
             await page.goto(`${baseUrl}/en/`, { waitUntil: 'networkidle' });
             await ready(page, 'wc', 'shadcn');
@@ -909,6 +916,32 @@ describe.sequential(
               expect(background).not.toBe('transparent');
               expect(background).not.toBe('rgba(0, 0, 0, 0)');
               await capture('select-rhea-open');
+              await trigger.evaluate((element) => {
+                const doc = element.ownerDocument;
+                const describe = (target: EventTarget | null) =>
+                  target instanceof Element
+                    ? [target.localName, target.getAttribute('role'), target.id, target.textContent?.trim().slice(0, 40)]
+                    : null;
+                const log = (kind: string, detail: object = {}) =>
+                  console.info('[select-close-trace] ' + JSON.stringify({
+                    kind, ...detail, active: describe(doc.activeElement),
+                    expanded: element.getAttribute('aria-expanded'),
+                  }));
+                for (const kind of ['keydown', 'keyup', 'click', 'focusin', 'focusout']) {
+                  doc.addEventListener(kind, (event) => {
+                    log(kind, {
+                      target: describe(event.composedPath()[0] ?? null),
+                      trusted: event.isTrusted,
+                      key: event instanceof KeyboardEvent ? event.key : undefined,
+                      detail: event instanceof MouseEvent ? event.detail : undefined,
+                    });
+                  }, { capture: true });
+                }
+                new MutationObserver((records) => {
+                  for (const entry of records) log('expanded-mutation', { old: entry.oldValue });
+                }).observe(element, { attributes: true, attributeOldValue: true, attributeFilter: ['aria-expanded'] });
+                log('before-end');
+              });
               await page.keyboard.press('End');
               await page.keyboard.press('Enter');
               await attribute(trigger, 'aria-expanded', 'false');

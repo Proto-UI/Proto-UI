@@ -138,6 +138,10 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     const closeOnSelect = run.props.isProvided('closeOnSelect')
       ? !!run.props.get().closeOnSelect
       : ctx.closeOnSelect;
+    console.info('[select-close-trace] ' + JSON.stringify({
+      kind: 'item-close-intent', id: ctx.rootId, value: ownValue, reason,
+      closeOnSelect, before: ctx.open,
+    }));
     if (closeOnSelect) {
       requestSelectOpen(run, { open: false, reason: 'item.select', focusReason: reason });
     }

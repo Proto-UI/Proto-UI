@@ -154,6 +154,12 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
       textValue: textValue.get(),
     };
     snapshot = next;
+    if (next.open !== published?.open) {
+      console.info('[select-close-trace] ' + JSON.stringify({
+        kind: 'root-open-projection', id: next.rootId, open: next.open,
+        value: next.value, reason: next.requestReason,
+      }));
+    }
     if (sameContext(published, next)) return;
     published = next;
     run.context.update(SELECT_CONTEXT, next);
@@ -197,6 +203,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   });
 
   submitOpenRequest = (run, request) => {
+    console.info('[select-close-trace] ' + JSON.stringify({
+      kind: 'root-open-request', id: snapshot.rootId, ...request,
+      active: !!currentRun, before: snapshot.open, controlled: snapshot.controlledOpen,
+    }));
     if (!currentRun || snapshot.disabled) return false;
     const epoch = viewEpoch;
     snapshot = {
