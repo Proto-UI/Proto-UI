@@ -474,6 +474,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   getSlotProjector: () => SlotProjector | null;
   ensureSlotProjector: () => SlotProjector;
   clearSlotProjector: () => void;
+  /** Internal restoration notification. Must not throw; rejection preserves the original error. */
+  onCallerProjectionRestored?: () => void;
   onAfterUnmount?: () => void;
   initialMount?: 'eager' | 'manual';
 }): ReturnType<typeof createAdapterHost<Props>> & { host: HTMLElement } {
@@ -624,6 +626,13 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (turn === commitTurn && ownsDecorationRoot()) {
         try {
           callerProjection.restore();
+          if (
+            turn === commitTurn &&
+            ownsDecorationRoot() &&
+            currentFeedback() === feedback &&
+            callerProjection.isCurrent()
+          )
+            args.onCallerProjectionRestored?.();
         } catch (rollbackError) {
           throw new AggregateError([error, rollbackError], error.message);
         }

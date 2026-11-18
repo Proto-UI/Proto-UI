@@ -132,6 +132,8 @@ The Light/split/mixed scene and public-dist Chrome journey cover controlled acce
 
 ### Remaining limits and validation
 
+If an ordinary split element rejects its initial owned-decoration publication after successfully restoring a changed caller projection, the failed owner and its view resources are retired. The permanent ShadowRoot then retains an unstyled default slot for the restored default-slot caller content. Named-slotted caller children are not covered. Other initial failures retain the empty failed-state ShadowRoot. This recovery slot has no Runtime or Module authority and is removed before a later connection acquires a new owner. Restored caller controls can re-enter a surrounding focus scope's ordinary descendant sampling; no failed-owner focus authority survives. Native text, image and link projections do not use this recovery path.
+
 Image View, Form/validation, rich text, auto-resize, new selection APIs, explicit author role prefixes, asynchronous style loading, strict CSP/nonce guarantees and arbitrary CSS sizing are not added. Closed Shadow and cross-document composition are not admitted. The separately tracked Dialog rapid-reopen issue [#645](https://github.com/Proto-UI/Proto-UI/issues/645) is not repaired by this feature.
 
 The local Demo Matrix exposes `#shadow-split-s1` through `#shadow-split-s5` under `/zh-cn/internal/demo-matrix/` and `/en/internal/demo-matrix/`. These cover customization, settings, Tabs, Dialog and native editors respectively. Public-dist consumer scripts complement website tests; the S5 performance script reports measurements, not a cross-machine frame budget.
