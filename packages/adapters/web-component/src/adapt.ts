@@ -669,6 +669,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._exposes = record;
       };
 
+      // Admit split effects before forwarding Runtime's mounted task to the host.
+      // Keep delivery inside the original scheduler call, including sync failures.
+      let admitViewProjection: (() => void) | null = null;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
@@ -757,7 +760,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           host: thisEl,
           root: nativeLinkTarget ?? thisRoot,
           shadowViewTarget: splitResources?.surface,
-          schedule,
+          schedule: (task) => {
+            admitViewProjection?.();
+            schedule(task);
+          },
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
           viewOperations: { capture: () => owner.captureViewOperation() },
@@ -1099,6 +1105,18 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 release: releaseFinalStyleSink,
               }
             : undefined;
+          const admitProjection = () => {
+            // Retire before committing the sink, which can reenter host code.
+            admitViewProjection = null;
+            acquiringProjection = false;
+            if (acquisitionFailed) throw acquisitionError;
+            if (pendingVisualFrame) {
+              const frame = pendingVisualFrame;
+              pendingVisualFrame = null;
+              deferredVisualSink!.commit(frame);
+            }
+          };
+          admitViewProjection = splitResources ? admitProjection : null;
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
@@ -1218,14 +1236,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: createHostSession,
           });
-          acquiringProjection = false;
-          if (acquisitionFailed) throw acquisitionError;
-          if (pendingVisualFrame) {
-            const frame = pendingVisualFrame;
-            pendingVisualFrame = null;
-            deferredVisualSink!.commit(frame);
-          }
+          // Presence may defer scheduling; admit the completed acquisition now.
+          // Non-split views retain their existing post-attach admission boundary.
+          admitProjection();
         } catch (error) {
+          admitViewProjection = null;
           // Initial failure is retired by the guarded connection transaction,
           // so callback reentry cannot race a partly cleaned logical owner.
           if (initial) throw error;
