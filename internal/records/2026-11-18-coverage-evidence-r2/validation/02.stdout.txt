@@ -1,0 +1,19 @@
+
+Interrupted while running:
+
+⚠ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:1:1)
+✖ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (900492.672408ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 0
+ℹ cancelled 1
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 900492.195242
+
+✖ failing tests:
+
+test at scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:1:1
+✖ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (900492.672408ms)
+  'Promise resolution is still pending but the event loop has already resolved'

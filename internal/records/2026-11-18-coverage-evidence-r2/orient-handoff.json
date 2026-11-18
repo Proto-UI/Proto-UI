@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-orient",
+  "nextSkillId": "pui-trace",
+  "artifacts": [
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/orientation.json"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/bounded-subject.json"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Current-user bounded local integration; two future decisions remain open without blocking the authorized annotations."
+  ]
+}

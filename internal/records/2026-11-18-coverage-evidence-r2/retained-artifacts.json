@@ -1,0 +1,81 @@
+{
+  "source": "/tmp/contributor-eight-1117/coverage-unearned-repair-r1/r2",
+  "note": "Original historical R2 inputs copied verbatim; historical claims remain scoped to their recorded revision, not this applied worktree. Original directory untouched.",
+  "files": [
+    {
+      "path": "retained-r2/README.md",
+      "bytes": 9775,
+      "sha256": "b9a635730ae8bfc5b679b91fd7827f9f15aed42dd63b93f4b6aa0edf14b0c437"
+    },
+    {
+      "path": "retained-r2/bindings.json",
+      "bytes": 9105,
+      "sha256": "3605f2550d16755757853e776e32d6216933f3bfca23f7ccb57cc83ac72b2e16"
+    },
+    {
+      "path": "retained-r2/candidate.patch",
+      "bytes": 7524,
+      "sha256": "9033492613908868a802d70180b2ce06f8f2d163acf5e09e5dde6ba4ebc04e0e"
+    },
+    {
+      "path": "retained-r2/dispositions.json",
+      "bytes": 45560,
+      "sha256": "85c3fd25e7de69540eac15ca0a0a930e12e76852823e5ecbb4a5f7710941071f"
+    },
+    {
+      "path": "retained-r2/evidence/allowlist-drift-recompute.json",
+      "bytes": 8394,
+      "sha256": "a91f56adabc3381f352ac616b3c96d5d95ccf5228ce4a9abe3d501c24bef6a7f"
+    },
+    {
+      "path": "retained-r2/evidence/ledger-drift-recompute.json",
+      "bytes": 3208,
+      "sha256": "3dd4ff058f2abf6b8676717ad4626351306e061801f0dd6ebd37456d0da571c0"
+    },
+    {
+      "path": "retained-r2/evidence/recompute-ledger-drift.py",
+      "bytes": 3907,
+      "sha256": "77a8eb3942ccec8ace10a516b8ee05b49b10bf768c2abd80706085e2e7adb0d2"
+    },
+    {
+      "path": "retained-r2/evidence/reference/README.txt",
+      "bytes": 215,
+      "sha256": "8d29739b763bc731969c1663b14c704f3d0bafe85bbbdbc15905294f0d305d92"
+    },
+    {
+      "path": "retained-r2/evidence/reference/internal-agent-harness-dogfood-coverage-matrix.md@ff75a0a2",
+      "bytes": 122676,
+      "sha256": "69d91f2a39becfaa8d09e159a9ac9edf8ccd09779277cf7a0aa5a61f110ffe73"
+    },
+    {
+      "path": "retained-r2/evidence/reference/internal-website-self-hosting-coverage-matrix.md@ff75a0a2",
+      "bytes": 163933,
+      "sha256": "c241bc15fe1ea38765e9e31e80df7b24534468f939e232a08897df3560e6e1b2"
+    },
+    {
+      "path": "retained-r2/evidence/reference/scripts-coverage-matrices-check-coverage-matrices.mjs@ff75a0a2",
+      "bytes": 512283,
+      "sha256": "0a4deb256dc734df0d12b3616efbd1f1ed6a2505f49060bb4cde20990296f598"
+    },
+    {
+      "path": "retained-r2/evidence/reference/scripts-coverage-matrices-prototype-coverage.mjs@ff75a0a2",
+      "bytes": 92512,
+      "sha256": "a2393ecf8a2254b77b93252d33cc40eccbe74cf105609e95cb0ebc2081894f3f"
+    },
+    {
+      "path": "retained-r2/evidence/reference/scripts-coverage-matrices-test-check-coverage-matrices.test.mjs@ff75a0a2",
+      "bytes": 750149,
+      "sha256": "8a91f329af226eb112579150c7a12d484646489141ecbb2f29f270db169270cd"
+    },
+    {
+      "path": "retained-r2/evidence/source-last-change.json",
+      "bytes": 1761,
+      "sha256": "d29dee70f199e6cb4cc710dcaaffd70e5c517abec0f46723edb8781d263ca6bf"
+    },
+    {
+      "path": "retained-r2/parent-checks.json",
+      "bytes": 7811,
+      "sha256": "9af975601dfc7738608863bce5cc6d9595ad443f51bc769e1ebd79e2cbae0d81"
+    }
+  ]
+}

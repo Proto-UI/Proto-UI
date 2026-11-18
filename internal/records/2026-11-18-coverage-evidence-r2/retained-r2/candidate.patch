@@ -1,0 +1,69 @@
+diff --git a/scripts/coverage-matrices/check-coverage-matrices.mjs b/scripts/coverage-matrices/check-coverage-matrices.mjs
+--- a/scripts/coverage-matrices/check-coverage-matrices.mjs
++++ b/scripts/coverage-matrices/check-coverage-matrices.mjs
+@@ -168,6 +168,11 @@
+ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
+   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
++  // Import-edge allowances only: an inline entry without a `sourceSha256`
++  // certifies the exact specifier or resolved path, never the source body.
++  // Post-admission body drift is invisible to this gate and stays source-review
++  // debt under #420; the affected sources and their owning rows are enumerated
++  // in internal/website/self-hosting-coverage-matrix.md.
+   // Exact #652 acceptance compositions. Their App controls remain blocked
+   // consumers, not an infrastructure or stable-prototype exemption.
+   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
+@@ -261,8 +266,9 @@
+   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
+     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+   }),
+-  // Accepted main integrations: exact source owners and public inputs only.
+-  // These bindings do not promote draft components or admit sibling imports.
++  // Main integration sources: exact source owners and public inputs only.
++  // These bindings do not promote draft components or admit sibling imports,
++  // and they do not certify the admitted source body (see the note above).
+   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
+     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
+   }),
+@@ -449,8 +455,13 @@
+   return HARNESS_GENERATED_FACADE_SOURCE_PATHS.has(relativeToHarnessSource);
+ }
+ const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
+-  // M0 authorizes only the React Adapter entry. Any prototype/facade entry
+-  // must be admitted here exactly in the same change that approves it.
++  // M0 policy for the planned Harness bootstrap (dogfood row
++  // harness.infrastructure.react-bootstrap, #533). The Harness app does not
++  // exist at this revision, so this entry admits nothing today and is not an
++  // earned admission; it is not prior approval for a file that later appears at
++  // this path. Any prototype/facade entry must be admitted here exactly in the
++  // same change that approves it, and this entry must be re-admitted with the
++  // Harness application's own review under #533.
+   'apps/agent-harness/src/proto-ui/bootstrap.tsx': Object.freeze({
+     specifiers: Object.freeze(['@proto.ui/adapter-react']),
+   }),
+diff --git a/internal/website/self-hosting-coverage-matrix.md b/internal/website/self-hosting-coverage-matrix.md
+--- a/internal/website/self-hosting-coverage-matrix.md
++++ b/internal/website/self-hosting-coverage-matrix.md
+@@ -120,6 +120,10 @@
+ | infrastructure-exempt |    17 |
+ 
+ ## Source-scan bindings
++
++Review debt recorded on 2026-11-17 against `ff75a0a2b356005d8d2d3b73268d7e7a9a258447`: the specifier-only allowances for `apps/www/src/components/site-link-recipes.ts`, `apps/www/src/components/site-native-controls.ts`, `apps/www/src/components/site-search-commands.ts`, `apps/www/src/components/PrototypePreviewer/demo-renderer.ts`, `apps/www/src/components/PrototypePreviewer/registry.ts`, `apps/www/src/components/PrototypePreviewer/prototype-modules.ts`, and `apps/www/src/components/PrototypePreviewer/projection-theme.ts` constrain import edges only. Their changed source bodies have no retained re-review in this coverage audit. Those allowances are not source-body acceptance or evidence that a consumer is earned. Owners remain the existing website shell/search and demonstration owners; #420/#1323 retain the source and consumer review debt. Re-review the exact source delta and applicable owning row before claiming acceptance; do not refresh hashes to clear the gate.
++
++The same audit identifies seven stale bindings without previously named source-review debt: `apps/www/src/components/PrototypePreviewer/demo-associations.ts` (`www.demo.prototype-previewer`), `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` (`www.demo.demo-matrix`), `apps/www/src/components/PrototypePreviewer/preview-material-scene.ts` (`www.demo.raw-adapter-runtimes`), `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` (`www.demo.prototype-previewer`), `apps/www/src/components/PrototypePreviewer/projection-theme.ts` (`www.demo.brutalist-theme-style`, `www.demo.demo-matrix`), `apps/www/src/components/PrototypePreviewer/wc-registry.ts` (`www.demo.raw-adapter-runtimes`), and `apps/www/src/components/SiteLibraryStyle.astro` (`www.build.style-generation`). These are explicit #420 source-review debt owned by the named rows' existing owners. Their infrastructure dispositions do not certify the drifted bytes. The old reviewed hashes below remain unchanged, so fingerprint mismatch remains a real failure until exact-delta review establishes an admissible replacement or the source is restored. This debt annotation changes no row state, removes no prior blocker, and supplies no runtime evidence.
+ 
+ The private bilingual `test/liquid-library-card` route owns the explicitly enabled Liquid Card producer. Its separate `library-liquid-card-client.ts` entry installs the actual family Surface over the directly owned visible Canvas in `library-liquid-scene.ts`; the ordinary Gallery client has no material import. Exact private capture imports below do not admit a default optical consumer or stable capability. No-JS remains the opaque accessible Card until checked real producer assets, responsive eligibility and native continuity are separately verified. The original Card gates remain unchanged.
+ 
+diff --git a/internal/agent-harness/dogfood-coverage-matrix.md b/internal/agent-harness/dogfood-coverage-matrix.md
+--- a/internal/agent-harness/dogfood-coverage-matrix.md
++++ b/internal/agent-harness/dogfood-coverage-matrix.md
+@@ -138,6 +138,8 @@
+ 
+ The sole initial raw Adapter integration allowlist is apps/agent-harness/src/proto-ui/bootstrap.tsx. It may import @proto.ui/adapter-react and the exact approved public/private prototype entries required to build facades once. It may not import Runtime internals, Core authoring APIs, Modules, Host Capabilities, Adapter internals, or private implementation files. No other ordinary UI path may import any raw layer. Any expansion needs a matrix row, a linked issue, an owner, an expiry or re-review trigger, and #533 enforcement coverage.
+ 
++Review debt recorded on 2026-11-17 against `ff75a0a2b356005d8d2d3b73268d7e7a9a258447`: the checker allowance that enforces the allowlist named above, `apps/agent-harness/src/proto-ui/bootstrap.tsx`, names a path that does not exist at this revision, so it admits nothing today, it is not an earned admission, and it is not prior approval for a file that later appears at that path. Under [#533](https://github.com/Proto-UI/Proto-UI/issues/533) the exact entry must be re-admitted together with the Harness application's own review in the change that creates that application; until then the allowance stays inert, no row is dogfooded, and no consumer acceptance follows from it.
++
+ WC and Vue dependencies belong only to focused evidence fixtures. The production bundle must contain one React host path, one intended design-language family, and no accidental Web Component or Vue shell runtime.
+ 
+ ### App-owned data and services
