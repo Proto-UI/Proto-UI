@@ -4,10 +4,10 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: grouped-select-trace-${{ github.ref }}
+  group: grouped-select-verification-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CANDIDATE_SHA: ${{ github.sha }}
+  CANDIDATE_SHA: da8684562cb6212def0de315366d6846d2882966
 jobs:
   isolated-controls:
     runs-on: ubuntu-24.04
@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: grouped-select-trace
+          - name: grouped-select-verification
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,7 +74,6 @@ jobs:
             echo "Selected suite: $FILE"
             timeout --signal=TERM --kill-after=10s 600s \
               corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}" \
-                --testNamePattern 'real grouped Select: ltr light rem16' \
                 --reporter=default --reporter=json \
                 --outputFile.json="$RUNNER_TEMP/homepage-evidence/vitest.json"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/isolated-regressions.log"
