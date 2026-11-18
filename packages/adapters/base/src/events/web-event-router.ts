@@ -696,7 +696,7 @@ export function createWebProtoEventRouter(opt: {
   // contextmenu -> context.menu
   unsubs.push(
     listen(rootEl, 'contextmenu', (e) => {
-      if (!isEnabled()) return;
+      if (!isEnabled() || !shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
       emitFromPhysicalRoot('context.menu', e);
     })
   );
