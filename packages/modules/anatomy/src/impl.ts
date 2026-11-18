@@ -91,9 +91,13 @@ const ORDER_PRECEDING = typeof Node !== 'undefined' ? Node.DOCUMENT_POSITION_PRE
 
 const CENTER = (() => {
   const families = new Map<AnatomyFamily, NormalizedFamily>();
-  const claimsByInstance = new Map<AnatomyInstanceToken, Map<AnatomyFamily, ClaimRecord>>();
-  // Reuse the instance registration order until a claim in that family changes.
-  const claimsByFamily = new Map<AnatomyFamily, readonly ClaimRecord[]>();
+  type InstanceClaims = { order: number; claims: Map<AnatomyFamily, ClaimRecord> };
+  let nextInstanceOrder = 0;
+  const claimsByInstance = new Map<AnatomyInstanceToken, InstanceClaims>();
+  const claimsByFamily = new Map<
+    AnatomyFamily,
+    { owners: Set<InstanceClaims>; ordered?: readonly ClaimRecord[] }
+  >();
   // A terminal owner can be disposed before its framework descendants. Keep
   // only its logical boundary (not its claim/exposes) while live claims still
   // traverse it, so those descendants cannot briefly join an outer domain.
@@ -102,8 +106,8 @@ const CENTER = (() => {
     const retired = retiredBoundaries.get(family);
     if (!retired) return;
     const needed = new Set<AnatomyInstanceToken>();
-    for (const [instance, claims] of claimsByInstance) {
-      const claim = claims.get(family);
+    for (const [instance, registration] of claimsByInstance) {
+      const claim = registration.claims.get(family);
       if (!claim) continue;
       // Different renderer connections may carry independent logical trees.
       // A foreign disposer cannot interpret or retire this claim's ancestry.
@@ -124,7 +128,7 @@ const CENTER = (() => {
   };
 
   const getClaim = (instance: AnatomyInstanceToken, family: AnatomyFamily) =>
-    claimsByInstance.get(instance)?.get(family) ?? null;
+    claimsByInstance.get(instance)?.claims.get(family) ?? null;
 
   return {
     setFamily(family: AnatomyFamily, def: NormalizedFamily) {
@@ -137,42 +141,45 @@ const CENTER = (() => {
       const retired = retiredBoundaries.get(record.family);
       retired?.delete(record.instance);
       if (retired?.size === 0) retiredBoundaries.delete(record.family);
-      let byFamily = claimsByInstance.get(record.instance);
-      if (!byFamily) {
-        byFamily = new Map();
-        claimsByInstance.set(record.instance, byFamily);
+      let registration = claimsByInstance.get(record.instance);
+      if (!registration) {
+        registration = { order: nextInstanceOrder++, claims: new Map() };
+        claimsByInstance.set(record.instance, registration);
       }
-      byFamily.set(record.family, record);
-      claimsByFamily.delete(record.family);
+      registration.claims.set(record.family, record);
+      let family = claimsByFamily.get(record.family);
+      if (!family) claimsByFamily.set(record.family, (family = { owners: new Set() }));
+      family.owners.add(registration);
+      family.ordered = undefined;
     },
     getClaim,
     isRetiredBoundary: (instance: AnatomyInstanceToken, family: AnatomyFamily) =>
       retiredBoundaries.get(family)?.has(instance) ?? false,
     pruneRetiredBoundaries,
     retireClaims(instance: AnatomyInstanceToken, families: readonly AnatomyFamily[]) {
-      const byFamily = claimsByInstance.get(instance);
-      if (!byFamily) return;
+      const registration = claimsByInstance.get(instance);
+      if (!registration) return;
       for (const family of families) {
-        if (!byFamily.has(family)) continue;
+        if (!registration.claims.has(family)) continue;
         let retired = retiredBoundaries.get(family);
         if (!retired) retiredBoundaries.set(family, (retired = new Set()));
         retired.add(instance);
-        byFamily.delete(family);
-        claimsByFamily.delete(family);
+        registration.claims.delete(family);
+        const membership = claimsByFamily.get(family)!;
+        membership.owners.delete(registration);
+        if (membership.owners.size === 0) claimsByFamily.delete(family);
+        else membership.ordered = undefined;
       }
-      if (byFamily.size === 0) claimsByInstance.delete(instance);
+      if (registration.claims.size === 0) claimsByInstance.delete(instance);
       for (const family of families) pruneRetiredBoundaries(family);
     },
     listClaims(family: AnatomyFamily): readonly ClaimRecord[] {
-      const cached = claimsByFamily.get(family);
-      if (cached) return cached;
-      const out: ClaimRecord[] = [];
-      for (const byFamily of claimsByInstance.values()) {
-        const claim = byFamily.get(family);
-        if (claim) out.push(claim);
-      }
-      claimsByFamily.set(family, out);
-      return out;
+      const membership = claimsByFamily.get(family);
+      if (!membership) return [];
+      // A later family claim inherits the instance's original fallback order.
+      return (membership.ordered ??= [...membership.owners]
+        .sort((left, right) => left.order - right.order)
+        .map((registration) => registration.claims.get(family)!));
     },
   };
 })();
