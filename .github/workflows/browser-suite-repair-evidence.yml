@@ -4,10 +4,10 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: homepage-select-entry-${{ github.ref }}
+  group: browser-style-alignment-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CANDIDATE_SHA: 1114af3c43821989496e3a6443214e366f03d6e2
+  CANDIDATE_SHA: a9c05c2cb7ba4927bd59b3a164109c0087650cd9
 jobs:
   isolated-controls:
     runs-on: ubuntu-24.04
@@ -16,8 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: homepage-composition
-            suite: homepage-composition
+          - name: style-and-alignment
+            suite: demo-prototype-style-closure
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,6 +62,10 @@ jobs:
           FILE="apps/www/src/content/docs/zh-cn/${SUITE}.browser.test.ts"
           test -f "$FILE"
           files=("$FILE")
+          files+=(packages/web-conformance/test/select-target-alignment.browser.test.ts)
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git rev-parse HEAD | tee "$RUNNER_TEMP/homepage-evidence/source-sha.txt"
+          export PROTO_UI_TARGET_ALIGNMENT_EVIDENCE="$RUNNER_TEMP/homepage-evidence/select-alignment"
           if [[ -n "$CONTRACT" ]]; then
             CONTRACT_FILE="apps/www/src/content/docs/zh-cn/${CONTRACT}.test.ts"
             test -f "$CONTRACT_FILE"
