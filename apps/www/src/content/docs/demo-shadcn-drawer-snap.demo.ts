@@ -1,4 +1,5 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
+import { bindDrawerCommandDisabled } from './drawer-command-disabled.shared';
 import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 export default withShadcnRheaDemo({
@@ -14,7 +15,16 @@ export default withShadcnRheaDemo({
           {
             'kind': 'proto',
             'prototypeId': 'shadcn-drawer-trigger',
-            'children': ['Open Drawer'],
+            'ref': 'trigger',
+            'children': [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-button',
+                ref: 'trigger-action',
+                props: { variant: 'outline', disabled: true },
+                children: ['Open Drawer'],
+              },
+            ],
           },
           {
             'kind': 'proto',
@@ -55,7 +65,16 @@ export default withShadcnRheaDemo({
                   {
                     'kind': 'proto',
                     'prototypeId': 'shadcn-drawer-close',
-                    'children': ['Close'],
+                    'ref': 'close',
+                    'children': [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        ref: 'close-action',
+                        props: { variant: 'outline', disabled: true },
+                        children: ['Close'],
+                      },
+                    ],
                   },
                 ],
               },
@@ -95,5 +114,6 @@ export default withShadcnRheaDemo({
         refs.status.textContent = `${detail.open ? 'Opened' : 'Closed'}: ${detail.reason}`;
       },
     });
+    return bindDrawerCommandDisabled(api);
   },
 } satisfies DemoSpec);
