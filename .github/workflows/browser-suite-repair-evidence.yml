@@ -7,7 +7,7 @@ concurrency:
   group: grouped-select-react-style-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CANDIDATE_SHA: 224486ed7a663e301d1006d5447e53568dbc3be6
+  CANDIDATE_SHA: c268dad7536ad56669ac55664217948698c2eff8
 jobs:
   isolated-controls:
     runs-on: ubuntu-24.04
