@@ -71,7 +71,13 @@ type ClaimRecord = {
 // identifies one logical host tree; independent bridges must not share domains.
 // Each recipient still resolves its own current root and reads current targets.
 // No cached read survives a notification or an author callback.
-type OrderComparisons = Map<AnatomyRootTarget, Map<AnatomyRootTarget, number>>;
+type OrderComparisons = Map<
+  AnatomyRootTarget,
+  {
+    compare: NonNullable<AnatomyRootTarget['compareDocumentPosition']>;
+    positions: Map<AnatomyRootTarget, number>;
+  }
+>;
 type DomainClaims = Map<AnatomyInstanceToken, ClaimRecord[]>;
 type OrderNotificationReads = {
   comparisons: OrderComparisons;
@@ -1038,17 +1044,19 @@ export class AnatomyModuleImpl extends ModuleBase {
     const aTarget = a.getRootTarget(a.instance);
     const bTarget = b.getRootTarget(b.instance);
     if (!aTarget || !bTarget || aTarget === bTarget) return 0;
-    if (typeof aTarget.compareDocumentPosition !== 'function') return 0;
+    const compare = aTarget.compareDocumentPosition;
+    if (typeof compare !== 'function') return 0;
 
-    const cached = comparisons?.get(aTarget)?.get(bTarget);
+    let entry = comparisons?.get(aTarget);
+    if (entry?.compare !== compare) entry = undefined;
+    const cached = entry?.positions.get(bTarget);
     if (cached !== undefined) return cached;
 
-    const pos = aTarget.compareDocumentPosition(bTarget as AnatomyRootTarget);
+    const pos = compare.call(aTarget, bTarget);
     const result = pos & ORDER_FOLLOWING ? -1 : pos & ORDER_PRECEDING ? 1 : 0;
     if (comparisons) {
-      let targets = comparisons.get(aTarget);
-      if (!targets) comparisons.set(aTarget, (targets = new Map()));
-      targets.set(bTarget, result);
+      if (!entry) comparisons.set(aTarget, (entry = { compare, positions: new Map() }));
+      entry.positions.set(bTarget, result);
     }
     return result;
   }
