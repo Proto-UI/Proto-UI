@@ -1055,6 +1055,7 @@ test('isolated controls verify the exact font package within the existing budget
     (step: { name?: string }) =>
       step.name === 'Install locked dependencies and the same official font package'
   );
+  assert.equal(prep.id, 'prepare-isolated-fonts');
   assert.equal(prep['timeout-minutes'], 5);
   assert.equal(prep.if, undefined);
   assert.equal(prep['continue-on-error'], undefined);
@@ -1068,7 +1069,7 @@ test('isolated controls verify the exact font package within the existing budget
   assert.equal(save['timeout-minutes'], 1);
   assert.equal(
     save.if,
-    "matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true'"
+    "${{ !cancelled() && steps.prepare-isolated-fonts.outcome == 'success' && matrix.name == 'homepage-composition' && steps.isolated-font-cache.outputs.cache-hit != 'true' }}"
   );
   assert.equal(save.with.path, cache.with.path);
   assert.equal(save.with.key, '${{ steps.isolated-font-cache.outputs.cache-primary-key }}');
