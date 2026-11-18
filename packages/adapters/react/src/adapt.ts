@@ -401,14 +401,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         decoration?: WebOwnedDecorationStage;
       }>({ children: null, version: 0 });
       const hostTokenRevisionRef = runtime.useRef(0);
-      const [hostStyle, setHostStyle] = runtime.useState<{ tokens: string[]; revision: number }>({
-        tokens: [],
-        revision: 0,
-      });
-      const setHostTokens = (tokens: string[]) => {
-        const revision = ++hostTokenRevisionRef.current;
-        setHostStyle({ tokens, revision });
-      };
+      const [hostStyleRevision, setHostStyleRevision] = runtime.useState(0);
       const [shouldExist, setShouldExist] = runtime.useState(!supportsOwnerContext);
       const projectionReadyRef = runtime.useRef(false);
       const viewReadyRef = runtime.useRef(false);
@@ -690,7 +683,6 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             hostSessionRef.current = null;
             controllerRef.current = null;
             exposesRef.current = {};
-            setHostTokens([]);
           },
           initialMount,
         });
@@ -746,7 +738,6 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           detachedEl?.removeAttribute(PUI_VIEW_REVEALING_ATTR);
           eventGateRef.current?.disable?.();
           if (ownerRef.current?.hasView) void ownerRef.current.detachView();
-          setHostTokens([]);
           pendingRevealStyleRevisionRef.current = null;
           projectionReadyRef.current = false;
           viewReadyRef.current = false;
@@ -790,7 +781,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         bindLogicalEventTarget(instanceTokenRef.current, router.rootTarget);
         const viewGeneration = ++viewGenerationRef.current;
         let viewDisposed = false;
-        let ownedVisualStyle: string | null = null;
+        let ownedStyle: string | null = null;
         let focusRetryGeneration = 0;
         let releaseRequestedTargetReady: (() => void) | undefined;
         const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -828,8 +819,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           const releases = [
             () => {
               if (
-                ownedVisualStyle !== null &&
-                rootEl.getAttribute('data-pui-style') === ownedVisualStyle
+                ownedStyle !== null &&
+                rootEl.getAttribute('data-pui-style') === ownedStyle
               )
                 rootEl.removeAttribute('data-pui-style');
             },
@@ -871,16 +862,14 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         const effectsPort = createReactEffectsPort((tokens) => {
           if (viewDisposed || rootRef.current !== rootEl) return;
-          setHostTokens(tokens);
+          // Positioning and visual providers can measure this view during the
+          // same Effects transaction. React acknowledges the revision later.
+          ownedStyle = serializeStyleTokens(tokens) ?? null;
+          if (ownedStyle === null) rootEl.removeAttribute('data-pui-style');
+          else if (rootEl.getAttribute('data-pui-style') !== ownedStyle)
+            rootEl.setAttribute('data-pui-style', ownedStyle);
           if (viewDisposed || rootRef.current !== rootEl) return;
-          // The opted-in visual provider samples final style in this transaction.
-          // Keep this attribute out of React's deferred VDOM ownership below.
-          if (createVisualSink) {
-            ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
-            if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
-            else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
-              rootEl.setAttribute('data-pui-style', ownedVisualStyle);
-          }
+          setHostStyleRevision(++hostTokenRevisionRef.current);
         });
 
         const rawPropsSource = rawPropsSourceRef.current as RawPropsSource<Props>;
@@ -1096,7 +1085,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             viewGenerationRef.current !== pending.viewGeneration ||
             rootRef.current !== pending.root ||
             !pending.root ||
-            hostStyle.revision < pending.styleRevision
+            hostStyleRevision < pending.styleRevision
           ) {
             return;
           }
@@ -1172,8 +1161,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         const requiredStyleRevision = pendingRevealStyleRevisionRef.current;
         if (requiredStyleRevision === null) return;
         if (
-          hostStyle.revision < requiredStyleRevision ||
-          hostStyle.revision !== hostTokenRevisionRef.current
+          hostStyleRevision < requiredStyleRevision ||
+          hostStyleRevision !== hostTokenRevisionRef.current
         ) {
           return;
         }
@@ -1201,7 +1190,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         }
         eventGateRef.current?.enable();
         notifyFocusTargetReady();
-      }, [renderCommit.version, hostStyle.revision]);
+      }, [renderCommit.version, hostStyleRevision]);
 
       // A renderer can replace the host element after the Proto commit that
       // first announced readiness. Re-advertise the current ref after every
@@ -1267,9 +1256,6 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
                 'data-pui-root': '',
                 [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
                 [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
-                ...(createVisualSink
-                  ? {}
-                  : { 'data-pui-style': serializeStyleTokens(hostStyle.tokens) }),
                 'data-demo-ref': props['data-demo-ref' as keyof typeof props] as string | undefined,
               },
               // Without a view there is no template to place the slot into, so the
