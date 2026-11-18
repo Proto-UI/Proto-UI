@@ -117,6 +117,7 @@ for (const direction of ['ltr', 'rtl'] as const)
                 y: rect.y,
                 width: rect.width,
                 height: rect.height,
+                layoutHeight: style.height,
                 paddingLeft: style.paddingLeft,
                 paddingRight: style.paddingRight,
                 paddingTop: style.paddingTop,
@@ -185,7 +186,7 @@ for (const direction of ['ltr', 'rtl'] as const)
             expect(label.tabIndex).toBe(-1);
           }
           const separator = geometry.parts.separator;
-          expect(separator.height).toBe(1);
+          expect(separator.layoutHeight).toBe('1px');
           expect(separator.marginLeft).toBe(`${rem * -0.25}px`);
           expect(separator.marginRight).toBe(`${rem * -0.25}px`);
           expect(separator.marginTop).toBe(`${rem * 0.25}px`);
