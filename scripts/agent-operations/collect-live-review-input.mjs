@@ -252,6 +252,8 @@ export function buildLiveReviewInput(
 ) {
   const pullRequestPayload = payload?.data?.repository?.pullRequest;
   if (!pullRequestPayload) throw new Error('live pull-request payload is incomplete');
+  if (!/^[a-f0-9]{40,64}$/.test(pullRequestPayload.baseRef?.target?.oid ?? ''))
+    throw new Error('live base ref target SHA is unavailable or malformed');
   if (!payload?.data?.viewer?.login || !payload?.data?.repository?.viewerPermission) {
     throw new Error('live viewer identity or permission is unavailable');
   }
@@ -323,7 +325,7 @@ export function buildLiveReviewInput(
     pullRequestAuthor: pullRequestPayload.author.login,
     isDraft: pullRequestPayload.isDraft,
     baseRefName: pullRequestPayload.baseRefName,
-    baseSha: pullRequestPayload.baseRefOid,
+    baseSha: pullRequestPayload.baseRef.target.oid,
     headSha: pullRequestPayload.headRefOid,
     pullRequestBody: pullRequestPayload.body ?? '',
     changedFiles: changedFilePayload.map((file) => ({
@@ -841,6 +843,8 @@ export function submitGitHubMerge(
 
   // GitHub's PUT supports a head SHA precondition, not a base SHA CAS. Re-read
   // both the PR and the actual base ref, then verify the resulting parent below.
+  // REST PR base.sha is a comparison baseline, not the current branch target.
+  // Keep its repository/ref identity fence and obtain the target from git/ref.
   // A base change in the final read/write interval can still merge irreversibly;
   // that result must never produce a receipt bound to the old reviewed base.
   const before = read(`${prefix}/pulls/${pullRequest}`);
@@ -849,7 +853,6 @@ export function submitGitHubMerge(
     before.state !== 'open' ||
     before.merged !== false ||
     before.draft !== false ||
-    before.base.sha !== expectedBaseSha ||
     (before.body ?? '') !== input.pullRequestBody
   )
     throw new Error('merge preflight head, base, target or open state changed; no PUT attempted');

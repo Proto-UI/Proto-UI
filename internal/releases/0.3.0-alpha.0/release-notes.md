@@ -1,6 +1,6 @@
 # Proto UI 0.3.0-alpha.0
 
-> Draft release notes. This release has not been published. npm, Git tag, GitHub prerelease, dist-tag, and immutable snapshot evidence remain pending.
+> Published on September 7, 2026 under the npm `next` channel. The 43 public packages named by the published `package-bom-0.3.0-alpha.0.json` release asset, the `v0.3.0-alpha.0` tag, the prerelease GitHub Release and the immutable spec snapshot share this exact release identity.
 
 Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution train. Alpha is intentional: this line may include reviewed architecture changes, top-level API changes, and new capabilities. It is not a release candidate or a stable compatibility promise.
 
@@ -30,14 +30,14 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 
 - Adds the public `@proto.ui/module-image-view` package and admits it to the exact 43-package release identity as the host-mediated image presentation protocol used by Base Image and Runtime.
 - Covers generation-bound loading, stale completion rejection, replacement visual clearing, explicit accessibility mode, and direct `source` projection with executable fake-host and runtime evidence.
-- Keeps the first `@proto.ui/module-image-view` npm identity bootstrap, protected release-workflow configuration, and registry readiness as explicit pre-publication gates; bootstrap must not claim `latest` or `next`.
+- Keeps the first `@proto.ui/module-image-view` npm identity bootstrap, protected release-workflow configuration, and registry readiness as explicit pre-publication gates; for this package the registry still resolves `latest` to the deprecated `0.0.0-bootstrap.0` version and `next` to `0.3.0-alpha.1` (observed 2026-11-17).
 
 ## Official Vue 2 Adapter
 
 - Admits `@proto.ui/adapter-vue2` as the official Web Adapter profile for Vue `>=2.6.0 <2.7`, separate from the Vue 3 `@proto.ui/adapter-vue` package.
 - Adds Vue 2 to the public Previewer registry and the shared Dialog, Select controlled-value, and Scroll Area Move conformance journeys.
 - Adds public package metadata, exact-version BOM participation, lifecycle/view-epoch regression evidence, and the `A-VUE-2-0001` profile.
-- Keeps first npm identity bootstrap and Trusted Publisher configuration as explicit pre-publication gates; this draft does not claim the package is already available from npm.
+- Keeps first npm identity bootstrap and Trusted Publisher configuration as explicit pre-publication gates; `@proto.ui/adapter-vue2` now has published npm versions `0.3.0-alpha.0` and `0.3.0-alpha.1` (observed 2026-11-17).
 
 ## A11y direct-reference transport
 
@@ -48,6 +48,8 @@ Proto UI 0.3.0-alpha.0 opens the 0.3 architecture, API, and prototype evolution 
 - Re-resolves surviving generated-reference dependents when a shared explicit-id contribution changes or is released, including writer updates and detached terminal disposal, while preserving reservation availability and host-baseline provenance.
 - Keeps the anatomy family/domain/role/key matcher and Tabs migration from #549 / PR #553 outside this lower-level transport slice.
 
-## Publication status
+## Release validation
 
-This preparation does not publish packages, create `v0.3.0-alpha.0`, move npm `next`, or activate `V-PROTO-UI-0009`. Those actions require merge to `main`, a complete release rehearsal over the final reviewed package set, protected publication, and a separate evidence review.
+The protected release workflow run <https://github.com/Proto-UI/Proto-UI/actions/runs/34125326136> concluded `success` for head `f0a9c95e988ee882a5815e319a8211e69924b968`, which is also the commit that the `v0.3.0-alpha.0` lightweight tag resolves to. npm wrote the first package at `2026-09-07T13:06:11.110Z` and the last at `2026-09-07T13:13:21.196Z`; the prerelease GitHub Release was published at `2026-09-07T13:11:41Z`. The immutable spec snapshot attached to that release has SHA-256 `1d908781ac057312c7a6e17b0c51cbe5ba3ac505b13bca24088de976ff36fcdd`, matching its published checksum file. Every one of the 43 packages still exists at exactly `0.3.0-alpha.0` in the registry, but the `next` dist-tag has since advanced to `0.3.0-alpha.1`, which is the state the following release established. npm did not publish a `gitHead` for these versions, so the commit binding comes from the release workflow head and the tag target rather than from registry metadata.
+
+These publication facts were re-read from the npm registry and the GitHub release API on 2026-11-17 and 2026-11-18. They describe this published release only: they do not activate `V-PROTO-UI-0009`, and they make no claim about any later release train.

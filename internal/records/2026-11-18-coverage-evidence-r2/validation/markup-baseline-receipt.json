@@ -1,0 +1,47 @@
+{
+  "kind": "coverage-matrix-checker-verification",
+  "recordedAt": "2026-11-18T15:20Z",
+  "candidate": {
+    "branch": "fix/coverage-markup-provenance-20261118",
+    "base": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53",
+    "worktree": "/workspace/worktrees/markup-provenance-apply-1118",
+    "files": [
+      "scripts/coverage-matrices/library-card-imports.mjs",
+      "internal/website/self-hosting-coverage-matrix.md"
+    ],
+    "packet": "/tmp/contributor-eight-1117/markup-provenance-repair-r1/r2",
+    "independentReview": "the packet was produced by the MiniMax evidence worker; the applied bytes are bound by the packet source-bindings and re-verified by the checker runs below"
+  },
+  "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs (Node 24.22.3, no repository install; dependency links point at the existing main-1116 cache)",
+  "results": {
+    "baseUnmodified": {
+      "exitCode": 1,
+      "issues": 1197,
+      "output": "/tmp/markup-checker-base-1118.txt"
+    },
+    "candidateApplied": {
+      "exitCode": 1,
+      "issues": 1156,
+      "output": "/tmp/markup-checker-final-1118.txt"
+    },
+    "lineNumberIndependentSetComparison": {
+      "baseUniqueIssues": 1197,
+      "candidateUniqueIssues": 1156,
+      "issuesPresentOnlyInCandidate": 0,
+      "issuesRemovedByCandidate": 41
+    }
+  },
+  "interpretation": "The candidate removes 41 checker findings and introduces none. The raw text diff shows paired additions and removals only because the candidate adds matrix rows, which shifts the reported line numbers of the unchanged stale-fingerprint messages; comparing the findings as sets removes that artefact.",
+  "whatRemainsOpen": [
+    "74 matrix rows stay stale on purpose; each keeps its own provenance and next action, and a mass refresh without a per-file delta review is not acceptable",
+    "The Issue 834 capture profile still declares revision 0607c6c5c with 25 members of which 8 no longer match; closing it needs a real browser re-capture at the new head, and no digest was fabricated",
+    "The promotion resolver fingerprint is not admitted: the current configuration bytes differ from the newest accepted profile by 1179 added and 168 removed lines, including a resolver extraction and a plugin addition that the existing fingerprints do not bind, and the existing mutation controls are ineffective against the current bytes, so adding a constant alone would leave the controls toothless",
+    "The allowlist annotation and the promotion-profile admission remain separate regions of the same checker file, so they can land independently"
+  ],
+  "claims": {
+    "checkerGreen": false,
+    "coverageEarned": false,
+    "productPass": false,
+    "note": "The checker still fails on the retained pre-existing findings; this candidate reduces them and binds one previously unbound governed source."
+  }
+}

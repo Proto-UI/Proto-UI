@@ -7,10 +7,10 @@ import type { Locator, Page } from 'playwright-core';
 import {
   createAccordionActivationObservation,
   installAccordionInputJournal,
-} from './accordion-activation-observation';
+} from '../../../../test/helpers/accordion-activation-observation';
 
 const state = vi.hoisted(() => ({ observer: null as any, install: vi.fn() }));
-vi.mock('./docs-query-timing.mjs', () => ({
+vi.mock('../../../../test/helpers/docs-query-timing.mjs', () => ({
   installDocsCallTimingObserver: (...args: unknown[]) => {
     state.install(...args);
     return state.observer;

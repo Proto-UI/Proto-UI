@@ -74,6 +74,7 @@ function payload(overrides = {}) {
           body: 'Bounded target',
           baseRefName: 'main',
           baseRefOid: sha('a'),
+          baseRef: { target: { oid: sha('a') } },
           headRefOid: sha('b'),
           author: { login: 'contributor' },
           commits: {
@@ -615,6 +616,7 @@ function mergeAuthorizationFixture({
   const raw = payload();
   const pull = raw.data.repository.pullRequest;
   pull.baseRefOid = baseSha;
+  pull.baseRef.target.oid = baseSha;
   pull.headRefOid = headSha;
   pull.commits.nodes[0].commit.oid = headSha;
   if (historicalMessage !== null) pull.commits.nodes[0].commit.message = historicalMessage;
@@ -813,7 +815,10 @@ function mergeFixture({
       if (args[1] === 'repos/Proto-UI/Proto-UI/git/ref/heads/main')
         return json({
           ref: 'refs/heads/main',
-          object: { type: 'commit', sha: branchSha ?? open.base.sha },
+          object: {
+            type: 'commit',
+            sha: branchSha ?? currentAuthorization.authorizationContext.input.baseSha,
+          },
         });
       if (args[1] === `repos/Proto-UI/Proto-UI/git/commits/${sha('c')}`)
         return json({
@@ -1198,20 +1203,64 @@ test('merge preserves historical DCO text as quotations, never current trailers'
   );
 });
 
-test('merge refuses a changed live base before any PUT', () => {
+test('merge accepts stale PR comparison bases when the actual branch target is stable', () => {
   const fixture = mergeFixture({
     before: { base: { sha: sha('d'), ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } } },
+    branchSha: sha('a'),
+    alterAuthorization(f) {
+      f.raw.data.repository.pullRequest.baseRefOid = sha('e');
+    },
+  });
+  const receipt = submitGitHubMerge(
+    repositoryId,
+    487,
+    { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+    fixture.runner,
+    fastVerification
+  );
+  assert.equal(fixture.writes, 1);
+  assert.equal(receipt.baseSha, sha('a'));
+  assert.equal(receipt.mergeParentSha, sha('a'));
+  assert.equal(
+    JSON.parse(fixture.calls.find((call) => call.args.includes('PUT')).options.input).sha,
+    sha('b')
+  );
+});
+
+for (const boundary of ['second scan', 'final state read']) {
+  test(`merge refuses an actual base target move at the ${boundary} before any PUT`, () => {
+    const fixture = mergeFixture();
+    let scans = 0;
+    const runner = (command, args, options) => {
+      const output = fixture.runner(command, args, options);
+      if (!args.includes('graphql')) return output;
+      const query = args.find((arg) => arg.startsWith('query='));
+      if (query.includes('query ProtoUiReviewInput(')) scans += 1;
+      const response = JSON.parse(output);
+      if (
+        scans === 2 &&
+        (boundary === 'second scan' || query.includes('query ProtoUiReviewState('))
+      )
+        response.data.repository.pullRequest.baseRef.target.oid = sha('d');
+      return JSON.stringify(response);
+    };
+    assert.throws(
+      () => submitGitHubMerge(repositoryId, 487, mergeOptions, runner, fastVerification),
+      /changed.*collection/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
+
+test('merge refuses a missing actual base target despite a valid comparison base before any PUT', () => {
+  const fixture = mergeFixture({
+    alterAuthorization(f) {
+      f.raw.data.repository.pullRequest.baseRef = null;
+    },
   });
   assert.throws(
-    () =>
-      submitGitHubMerge(
-        'github.com:Proto-UI/Proto-UI',
-        487,
-        mergeOptions,
-        fixture.runner,
-        fastVerification
-      ),
-    /base|preflight/
+    () => submitGitHubMerge(repositoryId, 487, mergeOptions, fixture.runner, fastVerification),
+    /binding.*malformed/
   );
   assert.equal(fixture.writes, 0);
 });
@@ -1291,6 +1340,10 @@ for (const [name, before] of [
   [
     'repository',
     { base: { sha: sha('a'), ref: 'main', repo: { full_name: 'outsider/Proto-UI' } } },
+  ],
+  [
+    'base ref name',
+    { base: { sha: sha('a'), ref: 'other', repo: { full_name: 'Proto-UI/Proto-UI' } } },
   ],
   ['PR identity', { number: 488 }],
   ['draft', { draft: true }],
@@ -1803,6 +1856,20 @@ test('live collector fails closed when the REST changed-file list is incomplete'
   assert.throws(
     () => buildLiveReviewInput(truncated, 'github.com:Proto-UI/Proto-UI', 487, [], changedFiles),
     /changed-file collection is incomplete/
+  );
+});
+
+test('raw canonical input requires the actual ref target and never falls back to comparison base', () => {
+  const raw = payload();
+  raw.data.repository.pullRequest.baseRefOid = sha('d');
+  assert.equal(
+    buildLiveReviewInput(raw, repositoryId, 487, [], changedFiles).input.baseSha,
+    sha('a')
+  );
+  delete raw.data.repository.pullRequest.baseRef;
+  assert.throws(
+    () => buildLiveReviewInput(raw, repositoryId, 487, [], changedFiles),
+    /live base ref target SHA is unavailable/
   );
 });
 

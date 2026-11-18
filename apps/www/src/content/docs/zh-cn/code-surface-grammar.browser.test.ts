@@ -544,18 +544,19 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                 expect(await panel.locator('pre, [data-site-copy], [data-code-file-tabs]').count()).toBe(0);
                 expect(await panel.textContent()).toContain('WIP');
               } else {
-                // A newly selected host keeps native file controls until its queued
-                // Tree projection commits. Observe that boundary before inspecting it.
-                await panel
-                  .locator('[data-code-example-tree][role="tree"]')
-                  .waitFor({ state: 'visible' });
-                expect(await panel.locator('[data-code-example-tree]').count()).toBe(1);
+                const tree = panel.locator('[data-code-example-tree]');
+                // Host selection publishes before its next idle Tree acquisition.
+                // Observe real admission under a fixed cap, then keep every grammar assertion.
+                await panel.locator('[data-code-example-tree][role="tree"]').waitFor({
+                  state: 'visible',
+                  timeout: 1_000,
+                });
+                expect(await tree.count()).toBe(1);
                 expect(await panel.locator('[data-code-example-command] pre').textContent()).toContain('npx @proto.ui/cli@latest');
                 expect(await panel.locator('[data-code-example-command] [role="tab"], [data-code-example-command] [role="tabpanel"]').count()).toBe(0);
                 expect(await panel.locator('[data-code-example-tree]').textContent()).not.toContain('install.sh');
                 expect(await panel.locator('[data-code-example-command] [data-code-example-tree]').count()).toBe(0);
                 expect(await panel.locator('[data-code-file-browser] [data-code-example-command]').count()).toBe(0);
-                const tree = panel.locator('[data-code-example-tree]');
                 const embedded = await tree.evaluate((node) => {
                   const root = getComputedStyle(node);
                   const row = node.querySelector<HTMLElement>('[data-code-tree-kind="folder"]')!;

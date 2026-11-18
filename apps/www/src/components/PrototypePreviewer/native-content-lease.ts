@@ -36,12 +36,26 @@ function resolve(boundary: Boundary | null): { node: Node; offset: number } | nu
   }
   return boundary.node.isConnected ? { node: boundary.node, offset: boundary.offset } : null;
 }
+function activeElement(document: Document): HTMLElement | null {
+  let active = document.activeElement as HTMLElement | null;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  return active;
+}
 /** Preserve browser-owned focus and directional Selection around a physical
  * composition move. Source nodes are retained, never cloned or serialized. */
 export function withNativeContentLease(scope: HTMLElement, move: () => void): void {
   const document = scope.ownerDocument;
-  const focused = document.activeElement as HTMLElement | null;
-  const ownedFocus = focused && (focused === scope || scope.contains(focused));
+  const focused = activeElement(document);
+  let focusOwner: Node | null = focused;
+  const focusRoots: ShadowRoot[] = [];
+  while (focusOwner && !scope.contains(focusOwner)) {
+    const root = focusOwner.getRootNode();
+    if (root.nodeType === 11 && 'host' in root) {
+      focusRoots.push(root as ShadowRoot);
+      focusOwner = (root as ShadowRoot).host;
+    } else focusOwner = null;
+  }
+  const ownedFocus = !!focusOwner;
   const selection = document.getSelection();
   const anchor = capture(selection?.anchorNode, selection?.anchorOffset ?? 0);
   const extent = capture(selection?.focusNode, selection?.focusOffset ?? 0);
@@ -54,21 +68,82 @@ export function withNativeContentLease(scope: HTMLElement, move: () => void): vo
       (sourceContainers.has(boundary.node) &&
         [boundary.previous, boundary.next].some((node) => !!node && scope.contains(node))));
   const ownedSelection = !!selection && (ownsBoundary(anchor) || ownsBoundary(extent));
-  move();
-  if (ownedFocus && focused.isConnected && document.activeElement !== focused)
-    focused.focus({ preventScroll: true });
-  const nextAnchor = resolve(anchor),
-    nextExtent = resolve(extent);
-  if (ownedSelection && nextAnchor && nextExtent) {
-    try {
-      selection!.setBaseAndExtent(
-        nextAnchor.node,
-        nextAnchor.offset,
-        nextExtent.node,
-        nextExtent.offset
-      );
-    } catch {
-      /* Connected callbacks may edit source lengths. Cleanup still completes. */
+  let focusRevoked = false;
+  const removals = ownedFocus ? new MutationObserver(() => {}) : null;
+  let blurPath: Set<EventTarget> | null = null;
+  const onFocus = () => {
+    if (activeElement(document) !== focused) focusRevoked = true;
+  };
+  const onBlur = (event: Event) => {
+    if (!focused?.isConnected || !event.composedPath().includes(focused)) return;
+    // Native focusout can precede its removal while the field is still connected.
+    // Only subsequent removal of this path identifies transport-induced loss.
+    removals!.takeRecords();
+    blurPath = new Set(event.composedPath());
+  };
+  const settleBlur = () => {
+    if (!blurPath) return;
+    const path = blurPath;
+    blurPath = null;
+    const moved = removals!
+      .takeRecords()
+      .some((record) => Array.from(record.removedNodes).some((node) => path.has(node)));
+    if (!moved) focusRevoked = true;
+  };
+  if (ownedFocus) {
+    removals!.observe(scope.parentNode ?? scope, { childList: true, subtree: true });
+    for (const root of focusRoots) removals!.observe(root, { childList: true, subtree: true });
+    document.addEventListener('focusin', onFocus, true);
+    document.addEventListener('focusout', onBlur, true);
+  }
+  try {
+    move();
+    settleBlur();
+    if (!focusRevoked && ownedFocus && focused?.isConnected && activeElement(document) !== focused)
+      focused.focus({ preventScroll: true });
+    settleBlur();
+    // Move and focus callbacks may replace the value or select a newer range.
+    const input =
+      !focusRevoked && ownedFocus && activeElement(document) === focused
+        ? (focused as HTMLInputElement | HTMLTextAreaElement)
+        : null;
+    const inputSelection =
+      input && typeof input.selectionStart === 'number'
+        ? ([
+            input.selectionStart,
+            input.selectionEnd,
+            input.selectionDirection ?? undefined,
+          ] as const)
+        : null;
+    const nextAnchor = resolve(anchor),
+      nextExtent = resolve(extent);
+    if (!focusRevoked && ownedSelection && nextAnchor && nextExtent) {
+      try {
+        selection!.setBaseAndExtent(
+          nextAnchor.node,
+          nextAnchor.offset,
+          nextExtent.node,
+          nextExtent.offset
+        );
+      } catch {
+        /* Connected callbacks may edit source lengths. Cleanup still completes. */
+      }
+    }
+    settleBlur();
+    // Restoring the document range can reset the focused text control's caret.
+    if (
+      !focusRevoked &&
+      inputSelection &&
+      input?.isConnected &&
+      activeElement(document) === input &&
+      typeof input.selectionStart === 'number'
+    )
+      input.setSelectionRange(...inputSelection);
+  } finally {
+    if (ownedFocus) {
+      document.removeEventListener('focusin', onFocus, true);
+      document.removeEventListener('focusout', onBlur, true);
+      removals!.disconnect();
     }
   }
 }

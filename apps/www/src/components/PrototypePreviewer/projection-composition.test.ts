@@ -587,9 +587,10 @@ describe('Website projection composition', () => {
       controls: controls(requests),
     });
     const { host, refs } = mountDemoTree(composition.demo);
+    let open = false;
     const api: DemoRuntimeApi = {
       call: () => undefined,
-      getExposes: () => undefined,
+      getExposes: () => ({ open: { get: () => open } }),
       setProps: () => undefined,
     };
     const cleanup = composition.demo.setup?.({ host, refs, api });
@@ -630,9 +631,9 @@ describe('Website projection composition', () => {
     refs[runtimeRoot.ref]!.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'react' } })
     );
-    await Promise.resolve();
     expect(requests).toEqual(['runtime:react']);
 
+    open = true;
     composition.setEventGateOpen(false);
     requests.length = 0;
     refs[runtimeRoot.ref]!.dispatchEvent(
@@ -943,9 +944,10 @@ describe('Website projection composition', () => {
       });
       const { host, refs } = mountDemoTree(composition.demo);
       const propsByRef = new Map<string, Record<string, unknown>>();
+      let open = false;
       const api: DemoRuntimeApi = {
         call: () => undefined,
-        getExposes: () => undefined,
+        getExposes: () => ({ open: { get: () => open } }),
         setProps(ref, props) {
           propsByRef.set(ref, { ...(propsByRef.get(ref) ?? {}), ...props });
         },
@@ -972,9 +974,9 @@ describe('Website projection composition', () => {
       await Promise.resolve();
       expect(requests).toEqual([]);
       (onValueChange as (detail: unknown) => void)({ value: 'wc' });
-      await Promise.resolve();
       expect(requests).toEqual(['runtime:wc']);
 
+      open = true;
       (onValueChange as (detail: unknown) => void)({ value: 'react' });
       composition.setEventGateOpen(false);
       composition.setEventGateOpen(true);

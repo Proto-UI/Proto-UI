@@ -38,6 +38,7 @@ vi.mock('../../../apps/www/src/components/PrototypePreviewer/runtimes/vue2-runti
 
 const WEB_ADAPTERS = ['wc', 'react', 'vue', 'vue2'] as const satisfies readonly RuntimeId[];
 const DIALOG_PROTOTYPES = [
+  'shadcn-style-scope',
   'shadcn-dialog-root',
   'shadcn-dialog-trigger',
   'shadcn-dialog-mask',
@@ -132,6 +133,10 @@ function expectTransparentSemanticParent(target: HTMLElement): void {
 
 function expectConsumerActionLayout(target: HTMLElement): HTMLElement {
   expectTransparentSemanticParent(target);
+  // Inspect the mounted public Button's recipe, not a source file or its
+  // transparent Close parent. Native CSS and unbroken text are checked below
+  // in dialog-available-space.browser.test.ts.
+  expect(styleContains(target, 'wrap-anywhere')).toBe(true);
   const close = target.parentElement?.closest<HTMLElement>('[data-pui-root]');
   const layout = close?.parentElement;
   expect(layout?.tagName).toBe('DIV');
@@ -141,9 +146,6 @@ function expectConsumerActionLayout(target: HTMLElement): HTMLElement {
   expect(layout?.hasAttribute('role')).toBe(false);
   expect(layout?.tabIndex).toBe(-1);
   expect(styleContains(layout!.parentElement!, 'flex-wrap-reverse')).toBe(true);
-  for (const token of ['min-w-0', 'max-w-full', 'h-auto', 'whitespace-normal', 'break-words']) {
-    expect(styleContains(target, token), `Button retains its ${token} opt-in`).toBe(true);
-  }
   return layout!;
 }
 

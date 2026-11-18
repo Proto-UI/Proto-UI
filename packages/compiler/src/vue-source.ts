@@ -1,6 +1,7 @@
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
+  nativeAuthoredCallablesArtifact,
   hasPublicCallable,
   emitPublicValueCheck,
   emitPublicValue,
@@ -15,6 +16,7 @@ import {
 import { ordinaryValueChildren } from './value-children';
 import {
   createJavaScriptValueReader,
+  planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -58,7 +60,12 @@ export function emitVueSource(
   if (!validated.ok) return validated;
   const ir = pruneDeadValues(validated.value);
   const readValue = createJavaScriptValueReader(ir, typeName);
-  const moduleParts = partitionModuleBindings(ir);
+  const callBoundaries = planJavaScriptCallBoundaries(ir);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    undefined,
+    (value) => value.kind === 'call' && callBoundaries.calls.has(value)
+  );
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue-source SSR');
     if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
@@ -113,11 +120,13 @@ export function emitVueSource(
   const n = (name: string): string => `${prefix}${name}`;
   const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
-  const publicCalls = ir.exposes.some(
-    (entry) =>
-      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
-      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
-  );
+  const publicCalls =
+    callBoundaries.calls.size > 0 ||
+    ir.exposes.some(
+      (entry) =>
+        (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+        (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+    );
   const contextArtifacts = buildNativeContextArtifacts(ir);
   const staticDeclarations = buildNativeStaticDeclarations(
     ir.staticDeclarations,
@@ -413,7 +422,10 @@ export function emitVueSource(
       needsCallbackScope &&
       value.phase === 'callback' &&
       !['helper', 'context-update', 'expose-method'].includes(value.context);
-    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => ${scoped ? `${n('Invoke')}(${JSON.stringify(value.context)}, () => ` : ''}{\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
+    const callable = `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => ${scoped ? `${n('Invoke')}(${JSON.stringify(value.context)}, () => ` : ''}{\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}${scoped ? ')' : ''}`;
+    return callBoundaries.authored.has(value)
+      ? `${prefix}MarkAuthoredCallable(${callable})`
+      : callable;
   }
   function expression(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
@@ -424,7 +436,12 @@ export function emitVueSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
-        return emitJavaScriptValue(node, (item) => expression(item, depth), typeName)!;
+        return emitJavaScriptValue(node, (item) => expression(item, depth), typeName, true, {
+          plan: callBoundaries,
+          wrap: `${prefix}WrapPublic`,
+          prefix: prefix,
+          isAuthored: `${prefix}IsAuthoredCallable`,
+        })!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -796,6 +813,7 @@ ${ir.contextKeys.map((key) => `      [${contextNames.get(key.id)}, (value: unkno
 // Source graph SHA-256: ${ir.source.sha256}
 ${atoms.imports}
 ${publicCalls ? `import { createNativePublicCalls as ${n('CreatePublicCalls')} } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${prefix}MarkAuthoredCallable, isNativeAuthoredCallable as ${prefix}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${n('CreateAuthored')} } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 import * as ${n('Vue')} from 'vue';
 ${
@@ -1686,6 +1704,7 @@ export default ${componentName};
             supportingFiles: [
               ...atoms.files,
               ...(publicCalls ? [nativePublicCallsArtifact] : []),
+              ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
               ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
               ...(contextArtifacts?.files ?? []),
               ...staticDeclarations.files,

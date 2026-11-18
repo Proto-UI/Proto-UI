@@ -20,6 +20,10 @@ export function registerPrototype(id: string, proto: Prototype<any, any>) {
   map.set(id, proto);
 }
 
+export function findRegisteredPrototype(id: string): Prototype<any, any> | undefined {
+  return map?.get(id);
+}
+
 export function getPrototype(id: string): Prototype<any, any> {
   // SSR 环境下的友好提示
   if (!isBrowser || !map) {
@@ -28,7 +32,7 @@ export function getPrototype(id: string): Prototype<any, any> {
     );
   }
 
-  const p = map.get(id);
+  const p = findRegisteredPrototype(id);
   if (!p) {
     // 提供更详细的错误信息
     const available = Array.from(map.keys());

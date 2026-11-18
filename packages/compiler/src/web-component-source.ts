@@ -1,6 +1,7 @@
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
+  nativeAuthoredCallablesArtifact,
   hasPublicCallable,
   emitPublicValue,
   emitPublicMethodProjection,
@@ -13,6 +14,7 @@ import {
 } from './native-authored-hooks';
 import {
   createJavaScriptValueReader,
+  planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -145,7 +147,12 @@ export function emitWebComponentSource(
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
   const readValue = createJavaScriptValueReader(ir, typeName);
-  const moduleParts = partitionModuleBindings(ir);
+  const callBoundaries = planJavaScriptCallBoundaries(ir);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    undefined,
+    (value) => value.kind === 'call' && callBoundaries.calls.has(value)
+  );
   if (
     options.controlLabelHydration !== undefined &&
     (!options.ssr || options.controlLabelHydration !== 'client-only')
@@ -381,11 +388,13 @@ export function emitWebComponentSource(
     : '';
   const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
-  const publicCalls = ir.exposes.some(
-    (entry) =>
-      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
-      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
-  );
+  const publicCalls =
+    callBoundaries.calls.size > 0 ||
+    ir.exposes.some(
+      (entry) =>
+        (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+        (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+    );
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
     const atom = atoms.typeName(type, `${prefix}Run`);
@@ -553,7 +562,10 @@ export function emitWebComponentSource(
     try {
       const renderer =
         !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      return `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+      return callBoundaries.authored.has(node)
+        ? `${prefix}MarkAuthoredCallable(${callable})`
+        : callable;
     } finally {
       nativeScope = savedNativeScope;
     }
@@ -568,7 +580,12 @@ export function emitWebComponentSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
-        return emitJavaScriptValue(node, (item) => expr(item, depth), typeName)!;
+        return emitJavaScriptValue(node, (item) => expr(item, depth), typeName, true, {
+          plan: callBoundaries,
+          wrap: `${prefix}WrapPublic`,
+          prefix: prefix,
+          isAuthored: `${prefix}IsAuthoredCallable`,
+        })!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -805,6 +822,7 @@ export function emitWebComponentSource(
     const helpers = [
       ...atoms.files,
       ...(publicCalls ? [nativePublicCallsArtifact] : []),
+      ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
       ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
       ...context.files,
       ...staticDeclarations.files,
@@ -843,7 +861,8 @@ export function emitWebComponentSource(
     };
     const imports = `${atoms.imports}
 ${controlLabel ? `import {validateNativeInstanceAssociations as ${prefix}ValidateAssociations} from './.proto-ui/interaction/control-label-v1';` : ''}
-${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}\n${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}\n${contextImports}${styled ? `import {createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens, type NativeStyle as ${prefix}Style, type NativeStyleHandle as ${prefix}NativeStyleHandle, type NativeRuleHandle as ${prefix}NativeRuleHandle} from './.proto-ui/style/native-v1';\n` : ''}${
+${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${prefix}MarkAuthoredCallable, isNativeAuthoredCallable as ${prefix}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}\n${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}\n${contextImports}${styled ? `import {createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens, type NativeStyle as ${prefix}Style, type NativeStyleHandle as ${prefix}NativeStyleHandle, type NativeRuleHandle as ${prefix}NativeRuleHandle} from './.proto-ui/style/native-v1';\n` : ''}${
       interacting
         ? `import type {NativeInteraction as ${prefix}NativeInteraction, NativeFocus as ${prefix}NativeFocus, NativeAccessible as ${prefix}NativeAccessible, NativeObservedState as ${prefix}NativeObservedState, NativeInput as ${prefix}NativeInput, NativeFocusOptions as ${prefix}NativeFocusOptions} from './${supportPlan.interactionPath.slice(0, -3)}';
 \n`
@@ -962,6 +981,7 @@ ${staticImports}
 ${atoms.imports}
 ${controlLabel ? `import {validateNativeInstanceAssociations as ${prefix}ValidateAssociations} from './.proto-ui/interaction/control-label-v1';` : ''}
 ${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${prefix}MarkAuthoredCallable, isNativeAuthoredCallable as ${prefix}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${statements(moduleParts.shared, 0)}
 import { createNativeBrowserPort, type NativeBrowserPort, type NativeFrameBuilder } from './.proto-ui/web-component/browser-v1';
@@ -1086,6 +1106,7 @@ export default ${className};
       supportingFiles: [
         ...atoms.files,
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...context.files,
         ...staticDeclarations.files,

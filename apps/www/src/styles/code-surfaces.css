@@ -100,9 +100,10 @@
   }
   .expressive-code .frame pre {
     padding: var(--docs-code-padding);
-  }
-  .expressive-code .frame:not(:has([data-code-toolbar])) pre {
     padding-inline-end: 3.5rem;
+  }
+  .expressive-code .frame > [data-code-toolbar] ~ pre {
+    padding-inline-end: var(--docs-code-padding);
   }
 
   .expressive-code pre,

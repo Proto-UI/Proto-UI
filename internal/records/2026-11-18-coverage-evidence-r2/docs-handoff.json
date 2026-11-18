@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-docs",
+  "nextSkillId": "pui-validate",
+  "artifacts": [
+    {
+      "type": "authority-map",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/authority-map.json"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/candidate-change.json"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Run exactly four user-requested checks; retain expected checker failure and compare against recorded 1156 unique findings."
+  ]
+}

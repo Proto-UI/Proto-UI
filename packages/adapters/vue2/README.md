@@ -22,6 +22,12 @@ const Component = adapt(prototype);
 
 The Adapter uses Vue 2 options lifecycle and `render(h)` APIs; it does not require the Vue 2.7 Composition API. `@proto.ui/adapter-vue` remains the separate Vue 3 Adapter.
 
+On component destruction, the owning Runtime finishes State disconnect notifications and subscription cleanup before the Adapter invalidates exposed callables. Retained callables become unavailable after terminal disposal; repeatable view detach keeps the instance's exposed surfaces alive.
+
+Terminal owner destruction supersedes a pending Presence leave transition rather than waiting for its duration. Exposed callables remain available to terminal cleanup until the Runtime completes that pass. In the ordinary pending-leave case, cleanup and invalidation finish before `$destroy()` returns. The availability boundary is Runtime terminal completion, including when destruction reenters an already-running cleanup callback; component destruction beginning is not a separate invalidation boundary. This does not turn a repeatable view detach into terminal disposal.
+
+The `beforeDestroy` hook returns the Runtime disposal promise to Vue 2. Disposal rejection is reported through Vue's ancestor `errorCaptured` hooks and `Vue.config.errorHandler` (or Vue's default error reporting), with the original rejection value. Vue does not await that promise before completing `$destroy()`; this reporting bridge defines neither recovery nor continuation for other lifecycle callback failures.
+
 ## Document theme
 
 The default `colorScheme` reader follows root `class` / `data-theme` markers and then the system preference. Mounted colorScheme Rule consumers update their existing style contribution when that effective value changes; view detach and terminal disposal release their subscription.

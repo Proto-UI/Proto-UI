@@ -163,7 +163,6 @@ describe('Demo Matrix committed projection observations', () => {
     for (const candidate of candidates) {
       const textarea = candidate.querySelector('textarea')!;
       textarea.removeAttribute('role');
-      textarea.removeAttribute('aria-label');
     }
     // Change one adapter to use a native <input type="text"> instead.
     const input = document.createElement('input');

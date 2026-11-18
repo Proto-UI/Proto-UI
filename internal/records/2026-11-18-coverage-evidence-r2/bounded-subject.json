@@ -1,0 +1,10 @@
+{
+  "scope": "coverage-evidence-r2",
+  "base": "56e3b443fa7774a464a5464935b9154a89d81143",
+  "files": [
+    "scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "internal/website/self-hosting-coverage-matrix.md",
+    "internal/agent-harness/dogfood-coverage-matrix.md"
+  ],
+  "authority": "Current user explicitly authorizes prepared comment/prose candidate, four checks and signed local commits."
+}

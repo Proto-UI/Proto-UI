@@ -1,0 +1,448 @@
+{
+  "scopeId": "compiler-non-trailing-defaults-20261117",
+  "result": "passed",
+  "base": "0b8b403179759250664587a4a0e990a5354e02e4",
+  "candidateProductPatchSha256": "3175838c49f0bcb796ae0d0a8a665313e88ea6904ce9b976fbb6c53ea3ccd4bb",
+  "productFiles": {
+    "packages/compiler/src/value-types.ts": "2cec1c92745bec0906f91e275ad987c5cae93998643c37e9d1c63ee47e44f171",
+    "packages/compiler/src/ir-validation.ts": "98c4761780663c6f1d02db5b7ab6b75bedb46325fa7527f647ab4dd8b919a637",
+    "packages/compiler/src/native-value-lowering.ts": "4b6c58ad24206b21121b8c9082a8802c961df4e0f6797dd12126f395771bdd85"
+  },
+  "original21FixtureHashes": {
+    "packages/compiler/test/non-trailing-default-arguments.test.ts": "51fbb1c896c2ccb39d1a882f2df9612ff3087140dba5363e7ea044c0e4fca21f",
+    "packages/compiler/test/non-trailing-default-types.test.ts": "caafc178004e7e6487b5160aaa1672c1a04b2715250c99be35218a7d8fbaebbe"
+  },
+  "original21ByteIdenticalToRed": true,
+  "original21OrderedCaseNamesMatchRed": true,
+  "additionalConsumer": {
+    "path": "packages/compiler/test/non-trailing-default-consumer.test.ts",
+    "sha256": "2d8c607f967082f68881d306e0881ae23284da26ff25de2ea57cd89ee82e1bdf",
+    "cases": 4,
+    "oldProductExecution": "not-run",
+    "purpose": "Real module/local helper calls through ordinary DOM imports, provided/undefined default counts and uninvoked identity/default control",
+    "candidateExecution": "4 passed; actual compile/write/import/mount/public observations"
+  },
+  "baseline": [
+    {
+      "label": "baseline-source",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/baseline-source.json",
+        "packages/compiler/test/non-trailing-default-arguments.test.ts"
+      ],
+      "exitCode": 1,
+      "timedOut": false,
+      "wallSeconds": 2.63,
+      "counts": {
+        "numTotalTests": 13,
+        "numPassedTests": 8,
+        "numFailedTests": 5,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "fileResults": [
+        {
+          "path": "packages/compiler/test/non-trailing-default-arguments.test.ts",
+          "executed": 13,
+          "passed": 8,
+          "failed": 5,
+          "unselected": 0
+        }
+      ],
+      "unhandledErrors": [],
+      "inputsUnchanged": true,
+      "inputCount": 24,
+      "exactAffectedFilesMatch": true,
+      "startReceiptSha256": "d1719bb8c7e5f810bbd6bd213c551a4cf2c222636660669b9289e12fd641fc56",
+      "resultReceiptSha256": "62624de160655ca45e8f2a840460158dbf7d384cc7d7a258a4ec8fb1db6e73d9",
+      "logSha256": "c31622be6785f56f2a333a9949a77b3dd737216d183a520790860ccccd6deece",
+      "jsonSha256": "ac4d77118d296cdab2f6b8b3b4653fb0f8c0faaf5c024f368b1a177411320237",
+      "failureCases": [
+        {
+          "name": "default parameters keep their positional call contract admits explicit undefined before the required final argument through module source and portable IR",
+          "status": "failed",
+          "failures": [
+            "Error: [{\"code\":\"PUI2002\",\"category\":\"invalid-ir\",\"message\":\"Helper argument type mismatch.\",\"span\":{\"file\":\"input.proto.ts\",\"start\":227,\"end\":243,\"line\":5,\"column\":20,\"endLine\":5,\"endColumn\":36}}]\n    at portable (/workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:33:25)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:64:18\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+          ]
+        },
+        {
+          "name": "default parameters keep their positional call contract rechecks a missing required final argument in module portable IR",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected { ok: true, value: { …(13) } } to match object { Object (ok, diagnostics) }\n(14 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:88:58\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+          ]
+        },
+        {
+          "name": "default parameters keep their positional call contract rejects assigning a two-position callable to a one-position source view",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected { ok: true, value: { …(12) } } to match object { ok: false, …(1) }\n(13 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:102:7\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+          ]
+        },
+        {
+          "name": "default parameters keep their positional call contract rejects the same shortened callable view in independently validated portable IR",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected { ok: true, value: { …(12) } } to match object { ok: false, …(1) }\n(13 matching properties omitted from actual)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1134:13)\n    at Proxy.<anonymous> (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:117:56\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+          ]
+        },
+        {
+          "name": "default parameters keep their positional call contract accepts a positional view that explicitly admits undefined for the leading default",
+          "status": "failed",
+          "failures": [
+            "Error: [{\"code\":\"PUI1006\",\"category\":\"unsupported-input\",\"message\":\"Initializer does not satisfy its declared type.\",\"span\":{\"file\":\"input.proto.ts\",\"start\":205,\"end\":262,\"line\":4,\"column\":15,\"endLine\":4,\"endColumn\":72}}]\n    at parsed (/workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:27:25)\n    at portable (/workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:32:55)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-arguments.test.ts:124:5\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "baseline-strict",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/baseline-strict.json",
+        "packages/compiler/test/non-trailing-default-types.test.ts"
+      ],
+      "exitCode": 1,
+      "timedOut": false,
+      "wallSeconds": 17.127,
+      "counts": {
+        "numTotalTests": 8,
+        "numPassedTests": 3,
+        "numFailedTests": 5,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "fileResults": [
+        {
+          "path": "packages/compiler/test/non-trailing-default-types.test.ts",
+          "executed": 8,
+          "passed": 3,
+          "failed": 5,
+          "unselected": 0
+        }
+      ],
+      "unhandledErrors": [],
+      "inputsUnchanged": true,
+      "inputCount": 24,
+      "exactAffectedFilesMatch": true,
+      "startReceiptSha256": "75f5b4a450e761289adeb1394c89d05d050c855f67c6a0e2b8d9c5946fc3c441",
+      "resultReceiptSha256": "e351414b1c82d91fcf53e84d7875fa792a216b6d143cdb5dbcc1c7aedd4bfda3",
+      "logSha256": "d853486252ab4c55fcc886f3d9aa1b0ee8b2cee7e5ff2464d721fbe544601e58",
+      "jsonSha256": "f75f01d8703b01d9b307c7ef381ceefeca965a1f6a69e89afb04c57d215d24ec",
+      "failureCases": [
+        {
+          "name": "react-dom-source-v1 checks the complete non-trailing-default artifact graph for called record member",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected [ { code: 1016, …(2) } ] to deeply equal []\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-types.test.ts:109:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "vue-source-v1 checks the complete non-trailing-default artifact graph for called record member",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected [ { code: 1016, …(2) } ] to deeply equal []\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-types.test.ts:109:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "vue2-source-v1 checks the complete non-trailing-default artifact graph for called record member",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected [ { code: 1016, …(2) } ] to deeply equal []\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-types.test.ts:109:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "vue2-source-v1 checks the complete non-trailing-default artifact graph for identity-observed uninvoked allocation",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected [ { code: 1016, …(2) } ] to deeply equal []\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-types.test.ts:109:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "web-component-source-v1 checks the complete non-trailing-default artifact graph for called record member",
+          "status": "failed",
+          "failures": [
+            "AssertionError: expected [ { code: 1016, …(2) } ] to deeply equal []\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/packages/compiler/test/non-trailing-default-types.test.ts:109:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-defaults-arity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        }
+      ]
+    }
+  ],
+  "candidate": [
+    {
+      "label": "candidate-source",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/candidate-source.json",
+        "packages/compiler/test/non-trailing-default-arguments.test.ts"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 3.003,
+      "counts": {
+        "numTotalTests": 13,
+        "numPassedTests": 13,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "fileResults": [
+        {
+          "path": "packages/compiler/test/non-trailing-default-arguments.test.ts",
+          "executed": 13,
+          "passed": 13,
+          "failed": 0,
+          "unselected": 0
+        }
+      ],
+      "unhandledErrors": [],
+      "inputsUnchanged": true,
+      "inputCount": 31,
+      "exactAffectedFilesMatch": true,
+      "startReceiptSha256": "77c77689e590920dc53ba263b57e2d174a3647f6af10eb5c3b8f469b17f90ef8",
+      "resultReceiptSha256": "8651083d14a6088cbc1123046533047b0058f2cf05e1633075b8d527df8c863d",
+      "logSha256": "11f95b34a4da93f2f8eadf2bd642cac180ed5472a5ebb9624ea491fd26348373",
+      "jsonSha256": "67feaad24a4517ef532aa8e3efc23bc6d659dad953166cfac412cf7c541be32c",
+      "failureCases": []
+    },
+    {
+      "label": "candidate-strict",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/candidate-strict.json",
+        "packages/compiler/test/non-trailing-default-types.test.ts"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 14.865,
+      "counts": {
+        "numTotalTests": 8,
+        "numPassedTests": 8,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "fileResults": [
+        {
+          "path": "packages/compiler/test/non-trailing-default-types.test.ts",
+          "executed": 8,
+          "passed": 8,
+          "failed": 0,
+          "unselected": 0
+        }
+      ],
+      "unhandledErrors": [],
+      "inputsUnchanged": true,
+      "inputCount": 31,
+      "exactAffectedFilesMatch": true,
+      "startReceiptSha256": "329eac3532ef7ad25541e20891b79fe5fdccb875ea76062362bd68e8dda0d23d",
+      "resultReceiptSha256": "4dacc44f24bcc4d3978e058d62cb69deb562d41396add0118204a96bbe8a2491",
+      "logSha256": "f81487cd192c29a844abffc11cec197948a3c14c324f762a4fd37887436abff0",
+      "jsonSha256": "51e5c1767b6d2aa851a209ce3052eb97c84ac5a43a6dd4e33637854ae45da9c5",
+      "failureCases": []
+    },
+    {
+      "label": "candidate-affected",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/candidate-affected.json",
+        "packages/compiler/test/control-label-callable-context.test.ts",
+        "packages/compiler/test/structural-authority.test.ts",
+        "packages/compiler/test/array-every-callback.test.ts",
+        "packages/compiler/test/array-every-consumer.test.ts",
+        "packages/compiler/test/array-every-types.test.ts",
+        "packages/compiler/test/non-trailing-default-consumer.test.ts"
+      ],
+      "exitCode": 0,
+      "timedOut": false,
+      "wallSeconds": 27.889,
+      "counts": {
+        "numTotalTests": 109,
+        "numPassedTests": 109,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "fileResults": [
+        {
+          "path": "packages/compiler/test/array-every-callback.test.ts",
+          "executed": 15,
+          "passed": 15,
+          "failed": 0,
+          "unselected": 0
+        },
+        {
+          "path": "packages/compiler/test/array-every-consumer.test.ts",
+          "executed": 16,
+          "passed": 16,
+          "failed": 0,
+          "unselected": 0
+        },
+        {
+          "path": "packages/compiler/test/array-every-types.test.ts",
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "unselected": 0
+        },
+        {
+          "path": "packages/compiler/test/control-label-callable-context.test.ts",
+          "executed": 57,
+          "passed": 57,
+          "failed": 0,
+          "unselected": 0
+        },
+        {
+          "path": "packages/compiler/test/non-trailing-default-consumer.test.ts",
+          "executed": 4,
+          "passed": 4,
+          "failed": 0,
+          "unselected": 0
+        },
+        {
+          "path": "packages/compiler/test/structural-authority.test.ts",
+          "executed": 13,
+          "passed": 13,
+          "failed": 0,
+          "unselected": 0
+        }
+      ],
+      "unhandledErrors": [],
+      "inputsUnchanged": true,
+      "inputCount": 31,
+      "exactAffectedFilesMatch": true,
+      "startReceiptSha256": "d157ceb9d755344d234f88ff116206de86e3c707f9a0220241d1547af55efff1",
+      "resultReceiptSha256": "bedb10c0a18b9a68088a8a3eee82fc024d2b523fecf303fb059e92021d295ad4",
+      "logSha256": "27c2098f8f0fd80a4a8f10a098400de78a333a3880c1d4a261b3c8ca9fe9e5a7",
+      "jsonSha256": "88babd9fa0d6c515dd26cb179c36128703a8ea142bda416947e516ae3b5f8a79",
+      "failureCases": []
+    }
+  ],
+  "candidateInputManifestSha256": "b37321415ff76f75b788db5a1c52819860cd9aa8cc702ec37a6967369c8cd48d",
+  "candidateInputs": {
+    "AGENTS.md": "ebc148bcf223e812ae02bfd87d6565f6f85cf92bc6c48cd3c48cb317a6559e84",
+    ".agents/skills/pui-dev/SKILL.md": "9d2d78a0ef085bb1f1ac362ab7692ee9a5898d2594335534fbe03e19436ee9cd",
+    "package.json": "6e8dab4330a2e69a19b6f1c533edf7570ef73b5e3be1f5684e3a485ab66818b5",
+    "pnpm-lock.yaml": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "pnpm-workspace.yaml": "d14b5597e55a86bf722be768e3bb1fbc8dd2df0fdd12af5e699f0c92b6aa3329",
+    "vitest.config.ts": "b39b97da5d2cbc2e469899dfeaf62b753e5880d4d551779f2214058f675dc6da",
+    "tsconfig.json": "f0e0085455b433e6f1ad390815c9a00ee834a582dd7c1072a79052c475e30cb2",
+    "packages/compiler/src/native-value-lowering.ts": "4b6c58ad24206b21121b8c9082a8802c961df4e0f6797dd12126f395771bdd85",
+    "packages/compiler/src/value-types.ts": "2cec1c92745bec0906f91e275ad987c5cae93998643c37e9d1c63ee47e44f171",
+    "packages/compiler/src/ir-validation.ts": "98c4761780663c6f1d02db5b7ab6b75bedb46325fa7527f647ab4dd8b919a637",
+    "packages/compiler/src/parser.ts": "e8785ee81d2b0765beab8aac9dbed45096e05f4b66ae160212df23c5ac394034",
+    "packages/compiler/src/callable-effects.ts": "ebccbb347ad60998bd99d91a535d6c374f6680948d5095317ffaf9705de9021b",
+    "packages/compiler/src/react-source.ts": "4711772199e0101f61dce65af22637be3cb1565b7ce95d6c405c4bd1fed7bf5b",
+    "packages/compiler/src/vue-source.ts": "01eb1c94bcc009103a222ec665ad0e129d10a0191294a7feaa270a597da4b262",
+    "packages/compiler/src/vue2-source.ts": "e4046bd198106dbeeb9af49fef1c42a6b376e7d884447f7a3445d9a5e788b13b",
+    "packages/compiler/src/web-component-source.ts": "5ff4325add9a79034533fe09a0d22d9b42eb58cdf08e07d208683a646e82c0ed",
+    "packages/compiler/src/compile.ts": "e4cc79f7321f555a063055e22bdc6d818db8b6e8e529e97c533786de83cff76c",
+    "packages/compiler/src/emitter-map.ts": "f7abd459f03889a189fc3a1d3d98d811a416a91fdedd320323c01b5cc8838e5f",
+    "packages/compiler/src/ir.ts": "9c4e978e614389279e250bf6dad2f8be1f9aa66bf2c8780bafd0c59c1ae507dc",
+    "packages/compiler/src/source-values.ts": "cac72ddfba92050e4a997ae12ca094646d5bfec252b0644cd2fd13c42d85f570",
+    "packages/compiler/src/data-types.ts": "57e974df306ff4c4cb071d68fa4d29b41c9a98138956a61b03efb500aa467ee4",
+    "packages/compiler/src/source-module-bindings.ts": "5b8989a637383f7c128c2dbd403ec11ce377cd20718faa194165ccc6b7cf06af",
+    "packages/compiler/test/non-trailing-default-arguments.test.ts": "51fbb1c896c2ccb39d1a882f2df9612ff3087140dba5363e7ea044c0e4fca21f",
+    "packages/compiler/test/non-trailing-default-types.test.ts": "caafc178004e7e6487b5160aaa1672c1a04b2715250c99be35218a7d8fbaebbe",
+    "packages/compiler/test/non-trailing-default-consumer.test.ts": "2d8c607f967082f68881d306e0881ae23284da26ff25de2ea57cd89ee82e1bdf",
+    "packages/compiler/test/native-owner-consumer.ts": "e65c3d239c48067d57d9d829dd3d6dab5d3abb73ee7f8f6c33e4cf9652d949ba",
+    "packages/compiler/test/control-label-callable-context.test.ts": "f144e182e2c22d7ae9465be824b1cbef149fff8db98a2bc46721bab2f5f8eff7",
+    "packages/compiler/test/structural-authority.test.ts": "3fde4327cba493c8263b6db230b9ca1375963fcbaaa56e71686856dd797f1a89",
+    "packages/compiler/test/array-every-callback.test.ts": "43e740c103119568d549190b353ca0114dea088bb800dbdf49f01016ca914dc7",
+    "packages/compiler/test/array-every-consumer.test.ts": "8102473bd1894c072b9db79e63db5b15f4044aa1e86343b7f64b4d655af5332d",
+    "packages/compiler/test/array-every-types.test.ts": "a0c2fc4f9c921afac2579f2ef73abea57e14561142bbf792d820f94b5bd82465"
+  },
+  "inputBindingScope": "31 explicitly enumerated source/configuration/fixture/helper inputs before and after each candidate command. The original 24-input red manifests are retained. This is not a claimed complete import-graph enumeration.",
+  "boundedConditions": [
+    {
+      "id": "source-and-portable-positional-default-contract",
+      "result": "passed",
+      "evidence": "Same 13 assertions: old product 8 pass / 5 fail; candidate 13 pass. Correct existing checkedCall source/portable missing-final controls retain their outcomes."
+    },
+    {
+      "id": "complete-generated-strict-artifact-graph",
+      "result": "passed",
+      "evidence": "Same 8 complete artifact consumers: old product 3 pass / 5 TS1016 failures; candidate 8 pass. Both called record members and identity-observed uninvoked allocations are checked across four DOM source profiles."
+    },
+    {
+      "id": "ordinary-generated-dom-default-behavior",
+      "result": "passed",
+      "evidence": "Four actual compile/write/import/mount consumers independently observe module/local provided=5 with default count 0, explicit undefined=10 with default count exactly 1, and uninvoked alias identity with default count 0. These four have no old-product red claim."
+    },
+    {
+      "id": "affected-authority-and-every-controls",
+      "result": "passed",
+      "evidence": "Unchanged existing files: control-label-callable-context 57, structural-authority 13, Array.every source 15 / consumer 16 / strict types 4 = 105."
+    }
+  ],
+  "visualEvidence": {
+    "requestParaphrase": "Preserve legal non-trailing default parameter call/assignment semantics and strict generated output while retaining authority boundaries.",
+    "disposition": "not-applicable-to-internal-compiler-change",
+    "uploadedVisuals": [],
+    "scope": "Exact base plus the three-source patch and separately hashed fixtures; ordinary HappyDOM consumers are executable behavior evidence, not browser captures.",
+    "nextAgentAction": "Root independently reviews the frozen patch and binds any later integration verification to the actual combined candidate."
+  },
+  "environment": {
+    "node": "v24.22.1",
+    "pnpm": "10.32.1",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9",
+    "ownPhysicalOfflineDependencies": true,
+    "maxWorkers": 1,
+    "fileParallelism": false,
+    "commandTimeoutSeconds": 90
+  },
+  "limitations": [
+    "Only the fixed original 21 cases have an old-product red baseline; the additional four ordinary consumers were first run on this candidate.",
+    "Temporary emitted artifact directories are cleaned by the fixtures. Original commands, diagnostic logs and Vitest JSON are retained; generated bytes are not archived.",
+    "No whole-workspace type check, native browser, full CI, non-DOM backend, release acceptance or formal GitHub review approval is asserted.",
+    "No execution or acceptance for a later combination with finite-index, Scroll or other unpublished changes is implied."
+  ],
+  "externalWrites": false,
+  "validationReportSha256": "510bed8d96873f98876a6dd1e8d8b035fbe192db3d84a06a712b3ffae2b8da7b"
+}

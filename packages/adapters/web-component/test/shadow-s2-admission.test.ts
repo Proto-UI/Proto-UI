@@ -84,6 +84,9 @@ describe('S2 current public admission boundary', () => {
 
     it(`${entry.proto.name}: activates the complete prototype and releases resources across reconnect`, async () => {
       const closure = (await collectProtoStyleTokens(entry.directory)) as string[];
+      // Shadcn Button also uses the Base Button setup styles.
+      if (entry.proto === button)
+        closure.push(...(await collectProtoStyleTokens('packages/prototypes/base/src/button')));
       const artifact = renderProtoShadowSplitStyleArtifact(closure);
       const listeners = new Set<() => void>();
       const source = {

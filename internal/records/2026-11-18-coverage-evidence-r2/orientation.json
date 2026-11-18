@@ -1,0 +1,14 @@
+{
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "base": "56e3b443fa7774a464a5464935b9154a89d81143",
+  "scope": "Apply retained R2 comment/prose candidate, four requested checks, signed semantic commits; no push/publication.",
+  "observed": "Detached exact base; node_modules untracked dependency link; Node default v22.23.2, Node24 located at /tmp/pui-node24-1155/node-v24.21.0-linux-x64/bin/node.",
+  "assessment": "advisory; no independent review claimed",
+  "humanGates": [],
+  "openDecisions": [
+    "D1 removal and migration deferred; retain-and-annotate authorized now",
+    "D2 owner of exact-delta re-review unresolved; retain seven hashes"
+  ],
+  "permissions": "Local work only; no GitHub writes authorized"
+}

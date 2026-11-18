@@ -435,7 +435,7 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const job = workflow.jobs['native-consumer'];
-  assert.deepEqual(job.strategy.matrix.os, ['ubuntu-24.04', 'macos-14']);
+  assert.deepEqual(job.strategy.matrix.os, ['ubuntu-24.04', 'macos-15']);
   const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
   assert.equal(checkout.with.ref, '${{ github.sha }}');
   assert.equal(checkout.with['persist-credentials'], false);

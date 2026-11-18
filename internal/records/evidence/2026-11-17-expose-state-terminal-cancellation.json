@@ -1,0 +1,1051 @@
+{
+  "scope": "input-shell-terminal-cancellation-20261117",
+  "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+  "createdAt": "2026-11-17T10:07:47.288678+00:00",
+  "criterion": [
+    "P-SHADCN-INPUT-SHELL-BINDING-LIFETIME",
+    "M-EXPOSE-STATE-0001-C/D/E",
+    "C-EXPOSE-STATE-0001-D/H/I",
+    "C-STATE-0012-C/D/E",
+    "M-EXPOSE-0001-H"
+  ],
+  "catalogStatus": "draft; no promotion",
+  "productPatchSha256": "d63d3bf86329f6bcc6fb19d30a247f72c9b490273a96ae170019c01e02574d50",
+  "candidateSourceSha256": {
+    "packages/adapters/base/src/host/exposes.ts": "8055395e61c081505f38abe7c1a89850e3719af532e9c604a18887ea1436ca99",
+    "packages/modules/expose-state/src/impl.ts": "1670bf6c98775baf4c484298da7b5bb5e2e89ba106576cfa2114bd12ceb0bfad",
+    "packages/modules/expose-state/src/index.ts": "8f2a0aec500bde0a2e13fa1cceed3ad414d2edee4f431e5a5e3732e5cfab737d",
+    "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911"
+  },
+  "baselineClassification": {
+    "newCases": {
+      "passed": 4,
+      "failed": 11,
+      "fixtureFailures": 0,
+      "failure": "All 11 raw-log result diffs contain [AdapterHost] cannot invoke an exposed callable after terminal disposal. Assertions fail at cancellation outcome or original-error identity, after real registration/disposal setup."
+    },
+    "exactSearchFailureMatchesEarlierBf8": true,
+    "sameThreeErrorMessagesAndFrames": [
+      {
+        "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+        "frames": [
+          "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+          "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+          "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+          "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+          "❯ packages/modules/expose-state/src/impl.ts:170:11",
+          "❯ packages/modules/state/src/impl.ts:106:42",
+          "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+          "❯ value packages/modules/state/src/kernel.ts:144:48",
+          "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+          "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+        ]
+      },
+      {
+        "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+        "frames": [
+          "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+          "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+          "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+          "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+          "❯ packages/modules/expose-state/src/impl.ts:170:11",
+          "❯ packages/modules/state/src/impl.ts:106:42",
+          "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+          "❯ value packages/modules/state/src/kernel.ts:144:48",
+          "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+          "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+        ]
+      },
+      {
+        "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+        "frames": [
+          "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+          "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+          "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+          "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+          "❯ packages/modules/expose-state/src/impl.ts:170:11",
+          "❯ packages/modules/state/src/impl.ts:106:42",
+          "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+          "❯ value packages/modules/state/src/kernel.ts:144:48",
+          "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+          "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+        ]
+      }
+    ],
+    "note": "The 2 Search assertion passes do not make the baseline run successful: the process exits 1 with these 3 unhandled rejections."
+  },
+  "runs": {
+    "runtime-baseline": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/runtime-baseline.json",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts"
+      ],
+      "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+      "startedAt": "2026-11-17T10:00:50.537674+00:00",
+      "node": "v24.22.1",
+      "exitCode": 1,
+      "wallSeconds": 3.33,
+      "counts": {
+        "numTotalTests": 15,
+        "numPassedTests": 4,
+        "numFailedTests": 11,
+        "numPendingTests": 0,
+        "success": false
+      },
+      "unhandledSections": 0,
+      "unhandledErrors": [],
+      "exactSelectionMatches": null,
+      "inputs": {
+        "packages/adapters/base/src/host/exposes.ts": "1175f026f16288b5dbc67e6bf4579049d46ec74937be1e04ca2448a3cb3256e6",
+        "packages/adapters/vue2/src/adapt.ts": "d3dbe1ef581402fbdd9bdb3f6995de1a30a1c19b3e8cd0b1fa09721d50295096",
+        "packages/modules/expose-state/src/impl.ts": "ba353f17374de569e70eceee6971660b08ba640c135260b3cd00c0e8fcd05926",
+        "packages/modules/expose-state/src/types.ts": "b02c5dbc17f5ae7566e6126013abeebb20faae673efb59a700c9c3eca2a34cd2",
+        "packages/modules/expose-state/src/index.ts": "399644b206140e8d8dd8457a397bf3747cb4929581e8850238735e4edea204d1",
+        "packages/modules/state/src/impl.ts": "4ff8c2e80bf1703481f6ff1632d78d327a6025099cea75d0c834dd9126ee19d0",
+        "packages/prototypes/shadcn/src/input-shell/bind-control.ts": "92d0046c9d1b374caaf1df149f7917b178ff666e68300b9d2846d5e25f4c2315",
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61"
+      },
+      "inputsUnchanged": true,
+      "logSha256": "826c3305451a88e40fcb8cb6d7a00aaf376abc0a846ea19f2206543dc41a26bc",
+      "jsonSha256": "8544a9c970a730454a967993faf4fea71b5fc47ed9aa4bab898a44ec860da114",
+      "receiptSha256": "4266038f5dd5ea76d64666dd9d5c7a506e84cd3f3c0554e7cdeef35a68945ec4",
+      "files": [
+        {
+          "path": "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+          "passed": 4,
+          "failed": 11,
+          "notSelectedOrSkipped": 0
+        }
+      ],
+      "executedCases": [
+        {
+          "name": "external State cancellation and terminal InputShell binding cancels a real subscription after reader retirement without entering its owner again",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected { status: 'rejected', …(1) } to deeply equal { status: 'fulfilled' }"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding keeps an issued cancellation idempotent after complete instance disposal",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected [ { status: 'rejected', …(1) }, …(1) ] to deeply equal [ { status: 'fulfilled' }, …(1) ]"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding retires both real public facts inside terminal disconnect and releases the binding owner",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected { status: 'rejected', …(1) } to deeply equal { status: 'fulfilled' }"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves external identity and subscriptions across a repeatable view detach",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding keeps ordinary methods and factory-returned functions terminal-invalid",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding does not grant cancellation authority to an authored lookalike subscribe result",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding does not grant cancellation authority to an authored brandedLookalike subscribe result",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real undefined cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be undefined // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real null cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be null // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real false cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be false // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real zero cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be +0 // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real negative zero cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be -0 // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real NaN cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be NaN // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real empty string cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be '' // Object.is equality"
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real Error cancellation failure after attempting all cleanups",
+          "status": "failed",
+          "firstFailure": "AssertionError: expected Error: [AdapterHost] cannot invoke an exp… to be Error: first cancellation // Object.is equality"
+        }
+      ]
+    },
+    "vue2-baseline": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/vue2-baseline.json",
+        "-t",
+        "^(?:Docs\\ shadcn/vue2\\ returns\\ focus\\ to\\ the\\ current\\ opener\\ after\\ a\\ runtime\\ replacement|public\\-mode\\ Search\\ through\\ the\\ actual\\ projection\\ materializer\\ vue2/shadcn:\\ staged\\ activation,\\ close/reopen\\ and\\ generation\\ replacement\\ retain\\ the\\ live\\ query)$",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts"
+      ],
+      "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+      "startedAt": "2026-11-17T10:00:58.148757+00:00",
+      "node": "v24.22.1",
+      "exitCode": 1,
+      "wallSeconds": 8.261,
+      "counts": {
+        "numTotalTests": 34,
+        "numPassedTests": 2,
+        "numFailedTests": 0,
+        "numPendingTests": 32,
+        "success": true
+      },
+      "unhandledSections": 3,
+      "unhandledErrors": [
+        {
+          "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+          "frames": [
+            "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+            "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+            "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+            "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+            "❯ packages/modules/expose-state/src/impl.ts:170:11",
+            "❯ packages/modules/state/src/impl.ts:106:42",
+            "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+            "❯ value packages/modules/state/src/kernel.ts:144:48",
+            "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+            "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+          ]
+        },
+        {
+          "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+          "frames": [
+            "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+            "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+            "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+            "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+            "❯ packages/modules/expose-state/src/impl.ts:170:11",
+            "❯ packages/modules/state/src/impl.ts:106:42",
+            "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+            "❯ value packages/modules/state/src/kernel.ts:144:48",
+            "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+            "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+          ]
+        },
+        {
+          "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+          "frames": [
+            "❯ wrapped packages/adapters/base/src/host/exposes.ts:54:24",
+            "❯ retire packages/prototypes/shadcn/src/input-shell/bind-control.ts:74:9",
+            "❯ dispose packages/prototypes/shadcn/src/input-shell/bind-control.ts:93:7",
+            "❯ packages/prototypes/shadcn/src/input-shell/bind-control.ts:177:44",
+            "❯ packages/modules/expose-state/src/impl.ts:170:11",
+            "❯ packages/modules/state/src/impl.ts:106:42",
+            "❯ subscriber packages/modules/state/src/kernel.ts:74:50",
+            "❯ value packages/modules/state/src/kernel.ts:144:48",
+            "❯ StateKernel.emit packages/modules/state/src/kernel.ts:160:11",
+            "❯ StateKernel.disconnect packages/modules/state/src/kernel.ts:82:10"
+          ]
+        }
+      ],
+      "exactSelectionMatches": true,
+      "inputs": {
+        "packages/adapters/base/src/host/exposes.ts": "1175f026f16288b5dbc67e6bf4579049d46ec74937be1e04ca2448a3cb3256e6",
+        "packages/adapters/vue2/src/adapt.ts": "d3dbe1ef581402fbdd9bdb3f6995de1a30a1c19b3e8cd0b1fa09721d50295096",
+        "packages/modules/expose-state/src/impl.ts": "ba353f17374de569e70eceee6971660b08ba640c135260b3cd00c0e8fcd05926",
+        "packages/modules/expose-state/src/types.ts": "b02c5dbc17f5ae7566e6126013abeebb20faae673efb59a700c9c3eca2a34cd2",
+        "packages/modules/expose-state/src/index.ts": "399644b206140e8d8dd8457a397bf3747cb4929581e8850238735e4edea204d1",
+        "packages/modules/state/src/impl.ts": "4ff8c2e80bf1703481f6ff1632d78d327a6025099cea75d0c834dd9126ee19d0",
+        "packages/prototypes/shadcn/src/input-shell/bind-control.ts": "92d0046c9d1b374caaf1df149f7917b178ff666e68300b9d2846d5e25f4c2315",
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61"
+      },
+      "inputsUnchanged": true,
+      "logSha256": "44216d10b9dffdd5d694d68c7402c652687f0bbba9bf3df9a219ac82771c534d",
+      "jsonSha256": "56b9040de86256b511dca9a3458a1c641e0d3f697a700a14bab6d95858792bbc",
+      "receiptSha256": "3e073e065e267c9de52d9bfd89ef22aff1ef8071409dd9e713c8006ab97554a9",
+      "files": [
+        {
+          "path": "apps/www/src/components/site-search-commands.public-mode.test.ts",
+          "passed": 2,
+          "failed": 0,
+          "notSelectedOrSkipped": 32
+        }
+      ],
+      "executedCases": [
+        {
+          "name": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "firstFailure": null
+        }
+      ]
+    },
+    "affected-green": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/affected-green.json",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+        "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+        "packages/modules/expose-state/test/impl-spec.test.ts",
+        "packages/prototypes/shadcn/test/input-shell-binding.test.ts"
+      ],
+      "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+      "startedAt": "2026-11-17T10:04:26.931510+00:00",
+      "node": "v24.22.1",
+      "exitCode": 0,
+      "wallSeconds": 6.102,
+      "counts": {
+        "numTotalTests": 86,
+        "numPassedTests": 86,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      },
+      "unhandledSections": 0,
+      "unhandledErrors": [],
+      "exactSelectionMatches": null,
+      "inputs": {
+        "packages/adapters/base/src/host/exposes.ts": "8055395e61c081505f38abe7c1a89850e3719af532e9c604a18887ea1436ca99",
+        "packages/adapters/vue2/src/adapt.ts": "d3dbe1ef581402fbdd9bdb3f6995de1a30a1c19b3e8cd0b1fa09721d50295096",
+        "packages/modules/expose-state/src/impl.ts": "1670bf6c98775baf4c484298da7b5bb5e2e89ba106576cfa2114bd12ceb0bfad",
+        "packages/modules/expose-state/src/types.ts": "b02c5dbc17f5ae7566e6126013abeebb20faae673efb59a700c9c3eca2a34cd2",
+        "packages/modules/expose-state/src/index.ts": "8f2a0aec500bde0a2e13fa1cceed3ad414d2edee4f431e5a5e3732e5cfab737d",
+        "packages/modules/state/src/impl.ts": "4ff8c2e80bf1703481f6ff1632d78d327a6025099cea75d0c834dd9126ee19d0",
+        "packages/prototypes/shadcn/src/input-shell/bind-control.ts": "92d0046c9d1b374caaf1df149f7917b178ff666e68300b9d2846d5e25f4c2315",
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61"
+      },
+      "inputsUnchanged": true,
+      "logSha256": "f6a9efd8a6dcff4406a2e6cffce92f2b3eaee6e1658846c92d316a1f93dbebb0",
+      "jsonSha256": "ac1e2c0ff7348df8da2820e729169332c2da78e0a7d312ad33fcc93fff0d51d5",
+      "receiptSha256": "7233b623a0f4064d14b725ef86af440807607b6643882f3514243e4247c015af",
+      "files": [
+        {
+          "path": "packages/modules/expose-state/test/impl-spec.test.ts",
+          "passed": 9,
+          "failed": 0,
+          "notSelectedOrSkipped": 0
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/input-shell-binding.test.ts",
+          "passed": 46,
+          "failed": 0,
+          "notSelectedOrSkipped": 0
+        },
+        {
+          "path": "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts",
+          "passed": 16,
+          "failed": 0,
+          "notSelectedOrSkipped": 0
+        },
+        {
+          "path": "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts",
+          "passed": 15,
+          "failed": 0,
+          "notSelectedOrSkipped": 0
+        }
+      ],
+      "executedCases": [
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) keeps the legacy sink token as an alias of the finalized record sink",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) projects exposed state handle into external handle shape",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) retains branded signal declarations for Adapter translation without confusing author values",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) external subscribe receives StateEvent without run",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) preserves external handle identity across reads and publications",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) dispose invalidates external handles and clears external subscriptions",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) publishes external exposes to host sink",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) dispose clears host exposes",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "ExposeStateModuleImpl (contract-ish) clears a replaced or removed host sink before publishing elsewhere",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle retires terminal facts without reading the disconnected source and releases both identities",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle attempts every unsubscribe and preserves a terminal cleanup failure",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle does not let an old generation disconnect retire its replacement",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle cleans subscriptions returned after synchronous terminal notification before writing",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle reads current public facts and detaches all subscriptions exactly once",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replaces the actual control and never responds to the retired one",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle rejects duplicate target wrappers and duplicate real control instances",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle fails closed for missing focusVisible expose and retires a replaced binding",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle fails closed for missing disabled expose and retires a replaced binding",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle rejects invalid runtime facts and cleans up before surfacing the failure",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle allows synchronous subscription notifications without writing half-attached facts",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle cleans a subscription returned after synchronous owner destruction",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle makes no writes when onDispose retires synchronously",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle flushes a reentrant factual change instead of losing it",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle checks generation even if a stale subscription callback arrives after replacement",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle attempts every cleanup and prevents writes even if an unsubscribe throws",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first undefined throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first null throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first false throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first zero throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first empty string throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle dispose cleanup failure retains the first Error throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first undefined throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first null throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first false throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first zero throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first empty string throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle replace cleanup failure retains the first Error throw while retiring every resource",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup undefined when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup null when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup false when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup zero when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup empty string when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure surfaces the owner cleanup Error when every control unsubscribe succeeds",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first undefined control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first null control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first false control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first zero control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first empty string control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first Error control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps a later control unsubscribe failure when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the first control unsubscribe failure when both controls and the owner fail",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "single-control input shell composition lifecycle owner cleanup failure keeps the original replacement failure and attaches no new control when owner cleanup also fails",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "never publishes an old snapshot when a fact getter replaces its source",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "does not reserve a replacement when an old unsubscribe retires the owner",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "rechecks owner retirement after attachment validation getters without reserving a dead source",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) preserves arbitrary keys and invokes nested methods in callback scope",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) keeps collection coordination entries on the internal channel",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) preserves the owning receiver when projecting nested methods",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) preserves opaque host values and data-only graph identities",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) projects array callables in callback scope while preserving cycles",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) invalidates held callables at terminal disposal instead of bypassing callback scope",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) fails explicitly when a callable has no live callback scope",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) preserves a finalized external state handle across record replacement",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "adapter-base contract: expose record (v0) omits branded signal declarations from the public record without removing author values",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary wraps returned functions once and preserves their identity across factory aliases",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary preserves cyclic callable-record identity through values and results",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary refreshes a cached projection without rerunning accessors during discovery",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary does not wrap an already projected returned callable or record again",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary keeps owner caches separate even for a shared author object",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "returned expose values share the owner boundary keeps returned registry snapshots detached and propagates thrown values unchanged",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "replacement expose snapshot callable identity retains root callables with current receiver while distinguishing nested receivers",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding cancels a real subscription after reader retirement without entering its owner again",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding keeps an issued cancellation idempotent after complete instance disposal",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding retires both real public facts inside terminal disconnect and releases the binding owner",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves external identity and subscriptions across a repeatable view detach",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding keeps ordinary methods and factory-returned functions terminal-invalid",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding does not grant cancellation authority to an authored lookalike subscribe result",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding does not grant cancellation authority to an authored brandedLookalike subscribe result",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real undefined cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real null cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real false cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real zero cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real negative zero cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real NaN cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real empty string cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "external State cancellation and terminal InputShell binding preserves the first real Error cancellation failure after attempting all cleanups",
+          "status": "passed",
+          "firstFailure": null
+        }
+      ]
+    },
+    "vue2-green": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=verbose",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/input-shell-cancellation-evidence/vue2-green.json",
+        "-t",
+        "^(?:Docs\\ shadcn/vue2\\ returns\\ focus\\ to\\ the\\ current\\ opener\\ after\\ a\\ runtime\\ replacement|public\\-mode\\ Search\\ through\\ the\\ actual\\ projection\\ materializer\\ vue2/shadcn:\\ staged\\ activation,\\ close/reopen\\ and\\ generation\\ replacement\\ retain\\ the\\ live\\ query)$",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts"
+      ],
+      "base": "c22e02f4613b5a890e436f633309f3c2debbf9a3",
+      "startedAt": "2026-11-17T10:04:39.953101+00:00",
+      "node": "v24.22.1",
+      "exitCode": 0,
+      "wallSeconds": 7.979,
+      "counts": {
+        "numTotalTests": 34,
+        "numPassedTests": 2,
+        "numFailedTests": 0,
+        "numPendingTests": 32,
+        "success": true
+      },
+      "unhandledSections": 0,
+      "unhandledErrors": [],
+      "exactSelectionMatches": true,
+      "inputs": {
+        "packages/adapters/base/src/host/exposes.ts": "8055395e61c081505f38abe7c1a89850e3719af532e9c604a18887ea1436ca99",
+        "packages/adapters/vue2/src/adapt.ts": "d3dbe1ef581402fbdd9bdb3f6995de1a30a1c19b3e8cd0b1fa09721d50295096",
+        "packages/modules/expose-state/src/impl.ts": "1670bf6c98775baf4c484298da7b5bb5e2e89ba106576cfa2114bd12ceb0bfad",
+        "packages/modules/expose-state/src/types.ts": "b02c5dbc17f5ae7566e6126013abeebb20faae673efb59a700c9c3eca2a34cd2",
+        "packages/modules/expose-state/src/index.ts": "8f2a0aec500bde0a2e13fa1cceed3ad414d2edee4f431e5a5e3732e5cfab737d",
+        "packages/modules/state/src/impl.ts": "4ff8c2e80bf1703481f6ff1632d78d327a6025099cea75d0c834dd9126ee19d0",
+        "packages/prototypes/shadcn/src/input-shell/bind-control.ts": "92d0046c9d1b374caaf1df149f7917b178ff666e68300b9d2846d5e25f4c2315",
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "packages/adapters/base/test/contract/expose-state-cancellation.v0.contract.test.ts": "56f9d3cc2755ba49d8412fe237a5788a00038fa143dc810844df8a2dda6ac911",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61"
+      },
+      "inputsUnchanged": true,
+      "logSha256": "d1e2fa5fb142130f7e499d227ce7992b461dcf190bdc2c07583f090fbcbb73d1",
+      "jsonSha256": "bb006fb2eae7c06289a80c9d14f1c826d42c457ca693c1b9427312d90871b524",
+      "receiptSha256": "c914b1d6e48b11de1a2040838c50b97dba3c139c82debc34630e40d6246db5b3",
+      "files": [
+        {
+          "path": "apps/www/src/components/site-search-commands.public-mode.test.ts",
+          "passed": 2,
+          "failed": 0,
+          "notSelectedOrSkipped": 32
+        }
+      ],
+      "executedCases": [
+        {
+          "name": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed",
+          "firstFailure": null
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed",
+          "firstFailure": null
+        }
+      ]
+    }
+  },
+  "existingFixtureSourceAudit": {
+    "sha256": {
+      "packages/adapters/base/test/contract/expose-record.v0.contract.test.ts": "2c1c9c0938cd7132100b1318939c5abbbfd651aa1362e0c6ab2b1cf58aada345",
+      "packages/modules/expose-state/test/impl-spec.test.ts": "6763e7b2ef7bcacb48f5a91528814646a81744eafef13c763748f200d3dec975",
+      "packages/prototypes/shadcn/test/input-shell-binding.test.ts": "7c0162a819f3af6a70e911edb14bbe0f6a62d71e4a4de9799730f41030316b17"
+    },
+    "allByteIdenticalToBase": true,
+    "timing": "The three unchanged existing fixture hashes were audited after the run against their c22 git blobs; they were not individually enumerated in the original 10-input runner receipt. The named files and their assertion counts are independently read from Vitest JSON."
+  },
+  "testModel": {
+    "actual": [
+      "RuntimeSession",
+      "State registration and terminal disconnect",
+      "ExposeState external handle and trackedOff",
+      "Adapter scoped reader",
+      "bindInputShellControl",
+      "existing Vue2 Search projection materializer"
+    ],
+    "injected": [
+      "Passive binding target and explicit owner model for the Node fixture",
+      "StatePort.watch observation delegates to real watch and real off; configured errors are thrown only after real unregister",
+      "Reader invalidation before RuntimeSession.dispose models Vue2 beforeDestroy ordering"
+    ],
+    "discriminatingObservations": [
+      "Cancelling both facts during the actual disconnect callback, not merely later module cleanup",
+      "First-error identity for undefined, null, false, 0, -0, NaN, empty string and Error after all cleanup attempts",
+      "Ordinary callable and factory return remain terminal-invalid",
+      "Unbranded and exported-brand subscribe lookalikes cannot acquire cancellation exemption",
+      "Repeatable detach retains actual external handle identity and updates"
+    ]
+  },
+  "limits": [
+    "No native browser, CSS, performance deadline, full CI or release acceptance claim.",
+    "No persistent-leak claim is inferred from the original exception; State already attempted final raw cleanup.",
+    "No InputShell, State, Vue2 Adapter or Search product file was changed.",
+    "Mutable exposed-record identity and late mutation remain a separate task."
+  ],
+  "parentIndependentReview": {
+    "sha256": "b7f6a28e81d7877c48bd63c86d7709dc1698a2fe6b1eefd1395d208b5dfacdff",
+    "content": {
+      "reviewer": "/root",
+      "reviewedAt": "2026-11-17T10:18:24.415973+00:00",
+      "kind": "independent local source/test/evidence review; not GitHub approval",
+      "frozenPatchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b",
+      "sourceAndFixtureReview": "Read all three source diffs and complete15-case fixture; trusted membership only added at issued trackedOff creation, all ordinary scopes preserved; actual State watch/off is delegated before injected failures.",
+      "rawRunsVerified": [
+        {
+          "name": "runtime-baseline",
+          "exitCode": 1,
+          "declaredCounts": {
+            "numTotalTests": 15,
+            "numPassedTests": 4,
+            "numFailedTests": 11,
+            "numPendingTests": 0,
+            "success": false
+          },
+          "actualCounts": {
+            "numTotalTests": 15,
+            "numPassedTests": 4,
+            "numFailedTests": 11,
+            "numPendingTests": 0,
+            "success": false
+          },
+          "unhandledErrors": 0,
+          "inputsUnchanged": true,
+          "cases": 15
+        },
+        {
+          "name": "vue2-baseline",
+          "exitCode": 1,
+          "declaredCounts": {
+            "numTotalTests": 34,
+            "numPassedTests": 2,
+            "numFailedTests": 0,
+            "numPendingTests": 32,
+            "success": true
+          },
+          "actualCounts": {
+            "numTotalTests": 34,
+            "numPassedTests": 2,
+            "numFailedTests": 0,
+            "numPendingTests": 32,
+            "success": true
+          },
+          "unhandledErrors": 3,
+          "inputsUnchanged": true,
+          "cases": 2
+        },
+        {
+          "name": "affected-green",
+          "exitCode": 0,
+          "declaredCounts": {
+            "numTotalTests": 86,
+            "numPassedTests": 86,
+            "numFailedTests": 0,
+            "numPendingTests": 0,
+            "success": true
+          },
+          "actualCounts": {
+            "numTotalTests": 86,
+            "numPassedTests": 86,
+            "numFailedTests": 0,
+            "numPendingTests": 0,
+            "success": true
+          },
+          "unhandledErrors": 0,
+          "inputsUnchanged": true,
+          "cases": 86
+        },
+        {
+          "name": "vue2-green",
+          "exitCode": 0,
+          "declaredCounts": {
+            "numTotalTests": 34,
+            "numPassedTests": 2,
+            "numFailedTests": 0,
+            "numPendingTests": 32,
+            "success": true
+          },
+          "actualCounts": {
+            "numTotalTests": 34,
+            "numPassedTests": 2,
+            "numFailedTests": 0,
+            "numPendingTests": 32,
+            "success": true
+          },
+          "unhandledErrors": 0,
+          "inputsUnchanged": true,
+          "cases": 2
+        }
+      ],
+      "integrationRelevantSourceUnchangedFromC22": [
+        "packages/adapters/base",
+        "packages/modules/expose-state",
+        "packages/prototypes/shadcn/src/input-shell",
+        "packages/runtime",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts"
+      ],
+      "conclusion": "No blocking finding; preserve exact original-failure and limited Search-selection evidence; PR1491 raw graph combination remains separately unexecuted."
+    }
+  },
+  "integration": {
+    "parent": "5b2fa32be7e2ea9673997cf1878e33355231bdef",
+    "appliedFrozenPatchSha256": "015f8ca047115685f8534d1d16d687f06b414e19be9e436f6781b604fe6a886b",
+    "allSixFrozenFilesMatchedBeforeEvidenceAppend": true,
+    "productAndFixtureUnchanged": true,
+    "note": "Relevant runtime/adapter/ExposeState/InputShell/Search inputs are unchanged from testedc22; root added only this review and provenance to the record. No extra combined run claimed."
+  }
+}

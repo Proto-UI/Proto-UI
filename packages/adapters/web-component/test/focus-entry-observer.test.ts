@@ -48,6 +48,39 @@ afterEach(async () => {
 });
 
 describe('WC live focus-entry resolver inputs', () => {
+  it('schedules inline style sampling only while an entry observes external inputs', async () => {
+    const host = panel(false);
+    const peer = document.createElement('input');
+    const inside = document.createElement('input');
+    for (const radio of [inside, peer]) {
+      radio.type = 'radio';
+      radio.name = 'entry-inline-observation';
+      radio.tabIndex = 0;
+    }
+    peer.checked = true;
+    document.body.append(peer);
+    await settle();
+    const queue = vi.spyOn(globalThis, 'queueMicrotask');
+    peer.style.setProperty('display', 'none');
+    expect(queue).not.toHaveBeenCalled();
+
+    host.append(inside);
+    await settle();
+    expect(host.hasAttribute('tabindex')).toBe(false);
+    queue.mockClear();
+    peer.style.removeProperty('display');
+    expect(queue).toHaveBeenCalledTimes(1);
+    await settle();
+    expect(host.tabIndex).toBe(0);
+
+    inside.remove();
+    await settle();
+    queue.mockClear();
+    peer.style.setProperty('display', 'none');
+    expect(queue).not.toHaveBeenCalled();
+    expect(host.tabIndex).toBe(0);
+  });
+
   it('resamples when inline styles hide a checked radio outside the entry', async () => {
     const form = document.createElement('form');
     const peerContainer = document.createElement('div');
