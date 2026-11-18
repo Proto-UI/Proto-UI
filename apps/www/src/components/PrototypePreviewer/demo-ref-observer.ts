@@ -1,5 +1,5 @@
 function demoOwnedRefSelector(owner: string): string {
-  return `[data-demo-owner="${owner}"][data-demo-ref], .pui-owner-${owner}[data-demo-ref]`;
+  return `[data-demo-ref]:is([data-demo-owner="${owner}"], .pui-owner-${owner})`;
 }
 export function collectOwnedDemoRefs(host: HTMLElement, owner: string) {
   const selector = demoOwnedRefSelector(owner);
