@@ -129,9 +129,16 @@ describe('Anatomy family subscriber notification', () => {
       });
       return descriptor;
     });
+    const get = vi.spyOn(Map.prototype, 'get');
+    let listReads: number;
     try {
       f.notify();
+      listReads = get.mock.results.filter(
+        (result) =>
+          result.type === 'return' && Array.isArray(result.value) && result.value[0] === owners[0]
+      ).length;
     } finally {
+      get.mockRestore();
       owners.forEach((owner, index) =>
         Object.defineProperty(owner, 'instanceOrder', descriptors[index]!)
       );
@@ -139,6 +146,7 @@ describe('Anatomy family subscriber notification', () => {
     expect(order).not.toHaveBeenCalled();
     expect(target).toHaveBeenCalledTimes(owners.length);
     expect(reads).not.toHaveBeenCalled();
+    expect(listReads).toBe(2);
   });
 
   for (const kind of ['order', 'target'] as const) {
