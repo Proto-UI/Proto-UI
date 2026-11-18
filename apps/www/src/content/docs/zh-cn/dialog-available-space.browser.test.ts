@@ -345,6 +345,7 @@ async function reachableActions(
         scrollWidth: e.scrollWidth,
         clientWidth: e.clientWidth,
         whiteSpace: getComputedStyle(e).whiteSpace,
+        overflowWrap: getComputedStyle(e).overflowWrap,
         rootFontSize: getComputedStyle(document.documentElement).fontSize,
         semanticParent: close && {
           style: close.getAttribute('data-pui-style'),
@@ -390,6 +391,7 @@ async function reachableActions(
       expect(fact.layout!.left).toBeGreaterThanOrEqual(fact.contentLeft - 1);
       expect(fact.layout!.right).toBeLessThanOrEqual(fact.contentRight + 1);
       expect(fact.whiteSpace).toBe('normal');
+      expect(fact.overflowWrap).toBe('anywhere');
       expect(
         fact.scrollWidth,
         'The long action label remains inside its Button'
@@ -585,6 +587,29 @@ for (const family of ['shadcn', 'brutalist'] as const)
           ).toBeLessThanOrEqual(narrow.clientWidth + 1);
           await reachableActions(page, dialog, family, `${family}-${runtime}-320-long-font200`);
           await capture(page, dialog, `${family}-${runtime}-320-long-action-reachable`);
+          // A contiguous Latin label discriminates anywhere wrapping from the
+          // existing CJK fixture, which also wraps at ordinary line boundaries.
+          // Keep the real Button, handlers, passive layout and generated CSS.
+          await dialog.getByRole('button', {
+            name: '保存全部个人资料更改并继续下一步',
+            exact: true,
+          }).evaluate((e) => {
+            const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+              if (node.textContent?.trim() === '保存全部个人资料更改并继续下一步') {
+                node.textContent = 'UnbrokenActionLabel'.repeat(12);
+                return;
+              }
+            }
+            throw new Error('Missing localized action label text node');
+          });
+          await frames(page);
+          const unbroken = await capture(page, dialog, `${family}-${runtime}-320-unbroken-font200`);
+          bounded(unbroken);
+          expect(unbroken.scrollWidth, 'Unbroken footer fits the inline region').toBeLessThanOrEqual(
+            unbroken.clientWidth + 1
+          );
+          await reachableActions(page, dialog, family, `${family}-${runtime}-320-unbroken-font200`);
         }
         await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
         await dialog.locator('[data-dialog-long-fixture]').evaluate((e) => e.remove());

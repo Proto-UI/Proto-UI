@@ -133,6 +133,10 @@ function expectTransparentSemanticParent(target: HTMLElement): void {
 
 function expectConsumerActionLayout(target: HTMLElement): HTMLElement {
   expectTransparentSemanticParent(target);
+  // Inspect the mounted public Button's recipe, not a source file or its
+  // transparent Close parent. Native CSS and unbroken text are checked below
+  // in dialog-available-space.browser.test.ts.
+  expect(styleContains(target, 'wrap-anywhere')).toBe(true);
   const close = target.parentElement?.closest<HTMLElement>('[data-pui-root]');
   const layout = close?.parentElement;
   expect(layout?.tagName).toBe('DIV');
