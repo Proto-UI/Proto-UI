@@ -509,219 +509,216 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     'remove optgroup',
     'foreign option adoption',
     'slot assignment',
-  ] as const)(
-    'preserves caller state across a split connection reaction (%s)',
-    (mutation) => {
-      const tag = `pui-decoration-caller-state-${++id}`;
-      const foreign = document.implementation.createHTMLDocument('Foreign caller');
-      let reacted = false;
-      customElements.define(
-        tag,
-        class extends HTMLElement {
-          connectedCallback() {
-            const owner = (this.getRootNode() as ShadowRoot).host;
-            if (!owner) return;
-            if (mutation === 'input value') {
-              const input = owner.querySelector('input')!;
-              input.value = 'Reset';
-            } else if (mutation === 'text content') {
-              const leaf = owner.querySelector('span')!.firstChild as Text;
-              leaf.data = 'Reset';
-            } else if (mutation === 'nested text replacement') {
-              owner.querySelector('span')!.textContent = 'Reset';
-            } else if (mutation === 'nested control removal') {
-              const input = owner.querySelector('input')!;
-              input.value = 'Reset';
-              input.setSelectionRange(0, 5, 'forward');
-              input.remove();
-            } else if (mutation === 'foreign text adoption') {
-              const leaf = owner.querySelector('span')!.firstChild as Text;
-              foreign.body.append(foreign.adoptNode(leaf));
-              leaf.data = 'Foreign text';
-            } else if (mutation === 'foreign control adoption') {
-              const input = owner.querySelector('input')!;
-              foreign.body.append(foreign.adoptNode(input));
-              input.value = 'Foreign input';
-              input.setSelectionRange(0, 7, 'forward');
-            } else if (mutation === 'remove empty option') {
-              const option = owner.querySelector('option')!;
-              option.remove();
-              option.selected = false;
-            } else if (mutation === 'reorder empty options') {
-              const group = owner.querySelector('optgroup')!;
-              group.prepend(group.lastChild!);
-            } else if (mutation === 'remove optgroup') {
-              const group = owner.querySelector('optgroup')!;
-              const second = group.firstElementChild as HTMLOptionElement;
-              const third = group.lastElementChild as HTMLOptionElement;
-              group.remove();
-              second.selected = true;
-              third.selected = false;
-            } else if (mutation === 'foreign option adoption') {
-              const option = owner.querySelector<HTMLOptionElement>('optgroup option')!;
-              foreign.body.append(foreign.adoptNode(option));
-              option.selected = true;
-            } else if (mutation === 'slot assignment') {
-              (owner.firstElementChild as HTMLElement).slot = 'other';
-            }
-            reacted = true;
+  ] as const)('preserves caller state across a split connection reaction (%s)', (mutation) => {
+    const tag = `pui-decoration-caller-state-${++id}`;
+    const foreign = document.implementation.createHTMLDocument('Foreign caller');
+    let reacted = false;
+    customElements.define(
+      tag,
+      class extends HTMLElement {
+        connectedCallback() {
+          const owner = (this.getRootNode() as ShadowRoot).host;
+          if (!owner) return;
+          if (mutation === 'input value') {
+            const input = owner.querySelector('input')!;
+            input.value = 'Reset';
+          } else if (mutation === 'text content') {
+            const leaf = owner.querySelector('span')!.firstChild as Text;
+            leaf.data = 'Reset';
+          } else if (mutation === 'nested text replacement') {
+            owner.querySelector('span')!.textContent = 'Reset';
+          } else if (mutation === 'nested control removal') {
+            const input = owner.querySelector('input')!;
+            input.value = 'Reset';
+            input.setSelectionRange(0, 5, 'forward');
+            input.remove();
+          } else if (mutation === 'foreign text adoption') {
+            const leaf = owner.querySelector('span')!.firstChild as Text;
+            foreign.body.append(foreign.adoptNode(leaf));
+            leaf.data = 'Foreign text';
+          } else if (mutation === 'foreign control adoption') {
+            const input = owner.querySelector('input')!;
+            foreign.body.append(foreign.adoptNode(input));
+            input.value = 'Foreign input';
+            input.setSelectionRange(0, 7, 'forward');
+          } else if (mutation === 'remove empty option') {
+            const option = owner.querySelector('option')!;
+            option.remove();
+            option.selected = false;
+          } else if (mutation === 'reorder empty options') {
+            const group = owner.querySelector('optgroup')!;
+            group.prepend(group.lastChild!);
+          } else if (mutation === 'remove optgroup') {
+            const group = owner.querySelector('optgroup')!;
+            const second = group.firstElementChild as HTMLOptionElement;
+            const third = group.lastElementChild as HTMLOptionElement;
+            group.remove();
+            second.selected = true;
+            third.selected = false;
+          } else if (mutation === 'foreign option adoption') {
+            const option = owner.querySelector<HTMLOptionElement>('optgroup option')!;
+            foreign.body.append(foreign.adoptNode(option));
+            option.selected = true;
+          } else if (mutation === 'slot assignment') {
+            (owner.firstElementChild as HTMLElement).slot = 'other';
           }
+          reacted = true;
         }
-      );
-      const C = AdaptToWebComponent(
-        definePrototype({
-          name: `owned-decoration-caller-state-${id}`,
-          setup(def) {
-            const target = def.feedback.style.declareDecoration();
-            return (r) => [r.decoration(target), r.slot(), r.el(tag, {})];
-          },
-        }),
-        {
-          shadow: {
-            mode: 'open',
-            presentation: 'split',
-            styleArtifact: renderProtoShadowSplitStyleArtifact([]),
-          },
-        }
-      );
-      const host = new C();
-      callerTextWalker = repairHappyDomTextWalker(window, host);
-      const wrapper = document.createElement('div');
-      const input = document.createElement('input');
-      input.value = 'Caller input';
-      input.setSelectionRange(1, 6, 'backward');
-      const text = document.createElement('span');
-      const originalText = document.createTextNode('Caller text');
-      text.append(originalText);
-      const select = document.createElement('select');
-      select.multiple = true;
-      const first = document.createElement('option');
-      first.label = 'First';
-      first.value = 'first';
-      first.selected = true;
-      const second = document.createElement('option');
-      second.label = 'Second';
-      second.value = 'second';
-      const third = document.createElement('option');
-      third.label = 'Third';
-      third.value = 'third';
-      third.selected = true;
-      const group = document.createElement('optgroup');
-      group.label = 'Group';
-      group.append(second, third);
-      select.append(first, group);
-      wrapper.append(input, text, select);
-      host.append(wrapper);
-      const mount = () => document.body.append(host);
-      if (mutation === 'unchanged') expect(mount).not.toThrow();
-      else expect(mount).toThrow('decoration caller projection changed');
-      expect(reacted).toBe(true);
-      expect(host.firstChild).toBe(wrapper);
-      expect(host.childNodes).toHaveLength(1);
-      expect(wrapper.getAttribute('slot')).toBeNull();
-      if (mutation === 'foreign control adoption') {
-        expect(wrapper.firstChild).toBe(text);
-        expect(wrapper.childNodes).toHaveLength(2);
-        expect(input.ownerDocument).toBe(foreign);
-        expect(input.parentNode).toBe(foreign.body);
-        expect(input.value).toBe('Foreign input');
-        expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
-          0,
-          7,
-          'forward',
-        ]);
-      } else {
-        expect(wrapper.firstChild).toBe(input);
-        expect(wrapper.childNodes).toHaveLength(3);
-        expect(input.ownerDocument).toBe(document);
-        expect(input.value).toBe('Caller input');
-        expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
-          1,
-          6,
-          'backward',
-        ]);
       }
-      expect(text.parentNode).toBe(wrapper);
-      if (mutation === 'foreign text adoption') {
-        expect(text.childNodes).toHaveLength(0);
-        expect(originalText.ownerDocument).toBe(foreign);
-        expect(originalText.parentNode).toBe(foreign.body);
-        expect(originalText.data).toBe('Foreign text');
-      } else {
-        expect(text.firstChild).toBe(originalText);
-        expect(text.childNodes).toHaveLength(1);
-        expect(originalText.ownerDocument).toBe(document);
-        expect(originalText.data).toBe('Caller text');
-        expect(text.textContent).toBe('Caller text');
+    );
+    const C = AdaptToWebComponent(
+      definePrototype({
+        name: `owned-decoration-caller-state-${id}`,
+        setup(def) {
+          const target = def.feedback.style.declareDecoration();
+          return (r) => [r.decoration(target), r.slot(), r.el(tag, {})];
+        },
+      }),
+      {
+        shadow: {
+          mode: 'open',
+          presentation: 'split',
+          styleArtifact: renderProtoShadowSplitStyleArtifact([]),
+        },
       }
-      expect(wrapper.lastChild).toBe(select);
-      expect(select.firstChild).toBe(first);
-      expect(select.lastChild).toBe(group);
-      expect(select.childNodes).toHaveLength(2);
-      expect(group.parentNode).toBe(select);
-      expect(select.value).toBe('first');
-      if (mutation === 'foreign option adoption') {
-        expect(group.firstChild).toBe(third);
-        expect(group.childNodes).toHaveLength(1);
-        expect(select.options).toHaveLength(2);
-        expect(select.options[0]).toBe(first);
-        expect(select.options[1]).toBe(third);
-        expect(second.ownerDocument).toBe(foreign);
-        expect(second.parentNode).toBe(foreign.body);
-        expect(second.selected).toBe(true);
-      } else {
-        expect(group.firstChild).toBe(second);
-        expect(group.lastChild).toBe(third);
-        expect(group.childNodes).toHaveLength(2);
-        expect(select.options).toHaveLength(3);
-        expect(select.options[0]).toBe(first);
-        expect(select.options[1]).toBe(second);
-        expect(select.options[2]).toBe(third);
-        expect(second.selected).toBe(false);
-      }
-      expect(first.selected).toBe(true);
-      expect(third.selected).toBe(true);
-      for (const option of [first, second, third]) expect(option.childNodes).toHaveLength(0);
-      expect([first.label, second.label, third.label]).toEqual(['First', 'Second', 'Third']);
-      expect([first.value, second.value, third.value]).toEqual(['first', 'second', 'third']);
-      if (mutation === 'unchanged') {
-        const laterText = document.createTextNode('Updated caller text');
-        const laterInput = document.createElement('input');
-        laterInput.value = 'Updated caller input';
-        laterInput.setSelectionRange(2, 8, 'forward');
-        text.replaceChildren(laterText);
-        input.replaceWith(laterInput);
-        group.prepend(third);
-        first.remove();
-        const laterOption = document.createElement('option');
-        laterOption.label = 'Later';
-        laterOption.value = 'later';
-        laterOption.selected = true;
-        second.replaceWith(laterOption);
-        third.selected = false;
-        expect(() => host.update()).not.toThrow();
-        expect(wrapper.firstChild).toBe(laterInput);
-        expect(text.firstChild).toBe(laterText);
-        expect(text.textContent).toBe('Updated caller text');
-        expect(laterInput.value).toBe('Updated caller input');
-        expect([
-          laterInput.selectionStart,
-          laterInput.selectionEnd,
-          laterInput.selectionDirection,
-        ]).toEqual([2, 8, 'forward']);
-        expect(select.firstChild).toBe(group);
-        expect(select.childNodes).toHaveLength(1);
-        expect(select.options).toHaveLength(2);
-        expect(select.options[0]).toBe(third);
-        expect(select.options[1]).toBe(laterOption);
-        expect(first.parentNode).toBeNull();
-        expect(second.parentNode).toBeNull();
-        expect(laterOption.childNodes).toHaveLength(0);
-        expect(select.value).toBe('later');
-        expect([third.selected, laterOption.selected]).toEqual([false, true]);
-      }
+    );
+    const host = new C();
+    callerTextWalker = repairHappyDomTextWalker(window, host);
+    const wrapper = document.createElement('div');
+    const input = document.createElement('input');
+    input.value = 'Caller input';
+    input.setSelectionRange(1, 6, 'backward');
+    const text = document.createElement('span');
+    const originalText = document.createTextNode('Caller text');
+    text.append(originalText);
+    const select = document.createElement('select');
+    select.multiple = true;
+    const first = document.createElement('option');
+    first.label = 'First';
+    first.value = 'first';
+    first.selected = true;
+    const second = document.createElement('option');
+    second.label = 'Second';
+    second.value = 'second';
+    const third = document.createElement('option');
+    third.label = 'Third';
+    third.value = 'third';
+    third.selected = true;
+    const group = document.createElement('optgroup');
+    group.label = 'Group';
+    group.append(second, third);
+    select.append(first, group);
+    wrapper.append(input, text, select);
+    host.append(wrapper);
+    const mount = () => document.body.append(host);
+    if (mutation === 'unchanged') expect(mount).not.toThrow();
+    else expect(mount).toThrow('decoration caller projection changed');
+    expect(reacted).toBe(true);
+    expect(host.firstChild).toBe(wrapper);
+    expect(host.childNodes).toHaveLength(1);
+    expect(wrapper.getAttribute('slot')).toBeNull();
+    if (mutation === 'foreign control adoption') {
+      expect(wrapper.firstChild).toBe(text);
+      expect(wrapper.childNodes).toHaveLength(2);
+      expect(input.ownerDocument).toBe(foreign);
+      expect(input.parentNode).toBe(foreign.body);
+      expect(input.value).toBe('Foreign input');
+      expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
+        0,
+        7,
+        'forward',
+      ]);
+    } else {
+      expect(wrapper.firstChild).toBe(input);
+      expect(wrapper.childNodes).toHaveLength(3);
+      expect(input.ownerDocument).toBe(document);
+      expect(input.value).toBe('Caller input');
+      expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
+        1,
+        6,
+        'backward',
+      ]);
     }
-  );
+    expect(text.parentNode).toBe(wrapper);
+    if (mutation === 'foreign text adoption') {
+      expect(text.childNodes).toHaveLength(0);
+      expect(originalText.ownerDocument).toBe(foreign);
+      expect(originalText.parentNode).toBe(foreign.body);
+      expect(originalText.data).toBe('Foreign text');
+    } else {
+      expect(text.firstChild).toBe(originalText);
+      expect(text.childNodes).toHaveLength(1);
+      expect(originalText.ownerDocument).toBe(document);
+      expect(originalText.data).toBe('Caller text');
+      expect(text.textContent).toBe('Caller text');
+    }
+    expect(wrapper.lastChild).toBe(select);
+    expect(select.firstChild).toBe(first);
+    expect(select.lastChild).toBe(group);
+    expect(select.childNodes).toHaveLength(2);
+    expect(group.parentNode).toBe(select);
+    expect(select.value).toBe('first');
+    if (mutation === 'foreign option adoption') {
+      expect(group.firstChild).toBe(third);
+      expect(group.childNodes).toHaveLength(1);
+      expect(select.options).toHaveLength(2);
+      expect(select.options[0]).toBe(first);
+      expect(select.options[1]).toBe(third);
+      expect(second.ownerDocument).toBe(foreign);
+      expect(second.parentNode).toBe(foreign.body);
+      expect(second.selected).toBe(true);
+    } else {
+      expect(group.firstChild).toBe(second);
+      expect(group.lastChild).toBe(third);
+      expect(group.childNodes).toHaveLength(2);
+      expect(select.options).toHaveLength(3);
+      expect(select.options[0]).toBe(first);
+      expect(select.options[1]).toBe(second);
+      expect(select.options[2]).toBe(third);
+      expect(second.selected).toBe(false);
+    }
+    expect(first.selected).toBe(true);
+    expect(third.selected).toBe(true);
+    for (const option of [first, second, third]) expect(option.childNodes).toHaveLength(0);
+    expect([first.label, second.label, third.label]).toEqual(['First', 'Second', 'Third']);
+    expect([first.value, second.value, third.value]).toEqual(['first', 'second', 'third']);
+    if (mutation === 'unchanged') {
+      const laterText = document.createTextNode('Updated caller text');
+      const laterInput = document.createElement('input');
+      laterInput.value = 'Updated caller input';
+      laterInput.setSelectionRange(2, 8, 'forward');
+      text.replaceChildren(laterText);
+      input.replaceWith(laterInput);
+      group.prepend(third);
+      first.remove();
+      const laterOption = document.createElement('option');
+      laterOption.label = 'Later';
+      laterOption.value = 'later';
+      laterOption.selected = true;
+      second.replaceWith(laterOption);
+      third.selected = false;
+      expect(() => host.update()).not.toThrow();
+      expect(wrapper.firstChild).toBe(laterInput);
+      expect(text.firstChild).toBe(laterText);
+      expect(text.textContent).toBe('Updated caller text');
+      expect(laterInput.value).toBe('Updated caller input');
+      expect([
+        laterInput.selectionStart,
+        laterInput.selectionEnd,
+        laterInput.selectionDirection,
+      ]).toEqual([2, 8, 'forward']);
+      expect(select.firstChild).toBe(group);
+      expect(select.childNodes).toHaveLength(1);
+      expect(select.options).toHaveLength(2);
+      expect(select.options[0]).toBe(third);
+      expect(select.options[1]).toBe(laterOption);
+      expect(first.parentNode).toBeNull();
+      expect(second.parentNode).toBeNull();
+      expect(laterOption.childNodes).toHaveLength(0);
+      expect(select.value).toBe('later');
+      expect([third.selected, laterOption.selected]).toEqual([false, true]);
+    }
+  });
 
   it.each(['remove', 'replace'] as const)(
     'rejects a split connection reaction that can %s a caller before acknowledgement',
