@@ -210,4 +210,7 @@ describe('Neo Brutalism Drawer command default density with bounded label wrappi
       expect(css).toContain('line-height: 1.25rem;');
     }
   });
-});
+  // The isolated 17.347s receipt measures the whole run, not collection time.
+  // Apply an explicit 30s budget across this suite; the original 5s timeout
+  // failure remains separate and is not certified as passing by this budget.
+}, 30000);

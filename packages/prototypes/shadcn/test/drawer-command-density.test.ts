@@ -9,7 +9,9 @@ import {
 import * as drawer from '../src/drawer';
 
 // Independent oracle: shadcn-drawer-command-density.presentation.v0.md;
-// Fixed New York Button default density; wrapping is an explicit opt-in adaptation.
+// Unscoped commands retain the New York compatibility baseline. The website's
+// explicit Rhea scope instead composes public Button surfaces; it is not this oracle.
+// Wrapping here is the legacy command's explicit opt-in adaptation.
 // Preserve paint/state: this is not full upstream Button equivalence.
 // Source-host evidence below is not browser geometry or hit-area evidence.
 const sourceRoot = path.resolve('packages/prototypes/shadcn/src');
@@ -71,7 +73,7 @@ afterEach(async () => {
   await expect.poll(() => lives.disposed).toBe(lives.created);
 });
 
-describe('Shadcn Drawer command default density with bounded label wrapping', () => {
+describe('Shadcn Drawer New York compatibility density with bounded label wrapping', () => {
   for (const part of commands) {
     it(`${part} contributes executable Document and Shadow CSS through its real source host`, async () => {
       const nodes = fixture();

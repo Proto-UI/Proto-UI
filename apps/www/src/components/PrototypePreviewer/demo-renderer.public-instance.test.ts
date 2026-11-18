@@ -9,7 +9,13 @@ import {
   inputShellControl,
   bindInputShellControl,
 } from '@proto.ui/prototypes-shadcn/input-shell';
-import type { DemoSetupContext, DemoSpec } from './demo-types';
+import shadcnButton from '@proto.ui/prototypes-shadcn/button';
+import * as shadcnDrawer from '@proto.ui/prototypes-shadcn/drawer';
+import { styleScope } from '@proto.ui/prototypes-shadcn/style-scope';
+import drawerDemo from '../../content/docs/demo-shadcn-drawer.demo';
+import drawerScrollDemo from '../../content/docs/demo-shadcn-drawer-scroll.demo';
+import drawerSnapDemo from '../../content/docs/demo-shadcn-drawer-snap.demo';
+import type { DemoNode, DemoSetupContext, DemoSpec } from './demo-types';
 // Only CDN acquisition is substituted; hosts, adapters, instances and binding helper are real.
 vi.mock('./runtimes/react-runtime', async (original) => {
   const actual = await original<typeof import('./runtimes/react-runtime')>();
@@ -48,12 +54,19 @@ beforeAll(() => {
     inputRoot,
     dialogRoot,
     dialogContent,
+    shadcnButton,
+    styleScope,
   ])
     registerPrototype(prototype.name, prototype);
+  for (const prototype of Object.values(shadcnDrawer)) {
+    if (prototype && typeof prototype === 'object' && 'name' in prototype)
+      registerPrototype(prototype.name, prototype);
+  }
 });
 afterEach(async () => {
   for (const view of views.splice(0).reverse()) await view.destroy();
   document.body.replaceChildren();
+  vi.unstubAllGlobals();
 });
 const flush = async () => {
   for (let i = 0; i < 16; i++) await Promise.resolve();
@@ -617,4 +630,167 @@ describe('actual public prototype instance lookup', () => {
       expect(cleanups.size).toBe(0);
     });
   }
+});
+
+describe('actual Drawer command disabled surfaces', () => {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    for (const [name, original] of [
+      ['standard', drawerDemo],
+      ['scroll', drawerScrollDemo],
+      ['snap', drawerSnapDemo],
+    ] as const)
+      it.each([false, true])(
+        `${runtime}/${name}: projects effective disabled from initial %s through updates and reopening`,
+        async (initialDisabled) => {
+          vi.stubGlobal('CSS', { supports: () => true });
+          const root = structuredClone(original.root);
+          const configure = (node: DemoNode) => {
+            if (node.kind === 'proto' && node.ref === 'root')
+              node.props = { ...node.props, open: true, disabled: initialDisabled };
+            if (node.kind === 'proto' && node.ref === 'panel') {
+              node.props = { ...node.props, enterDuration: 0, leaveDuration: 0 };
+              node.children = [
+                ...(node.children ?? []),
+                { kind: 'box', tag: 'span', attrs: { tabindex: '0' }, ref: 'focus-probe', children: ['Focus control'] },
+              ];
+            }
+            if ('children' in node)
+              for (const child of node.children ?? [])
+                if (typeof child !== 'string') configure(child);
+          };
+          configure(root);
+          let context!: DemoSetupContext;
+          const host = document.createElement('div');
+          document.body.append(host);
+          const view = await renderDemo({
+            host,
+            runtime,
+            demo: {
+              ...original,
+              root,
+              setup(ctx) {
+                context = ctx;
+                return original.setup?.(ctx);
+              },
+            },
+          });
+          views.push(view);
+          const { api, refs } = context;
+          const requests: Array<{ open: boolean }> = [];
+          const clicks = { 'trigger-action': vi.fn(), 'close-action': vi.fn() };
+          api.setProps('root', {
+            onOpenChange: (detail: { open: boolean }) => requests.push(detail),
+          });
+          for (const ref of ['trigger-action', 'close-action'] as const)
+            api.setProps(ref, { onClick: clicks[ref] });
+          const state = (ref: string, key: string): boolean => {
+            const handle = api.getExposes(ref)?.[key];
+            if (!handle || typeof handle !== 'object' || !('get' in handle) || typeof handle.get !== 'function')
+              throw new Error(`Missing public ${ref}.${key} state.`);
+            const value = handle.get();
+            if (typeof value !== 'boolean') throw new Error(`Invalid public ${ref}.${key} state.`);
+            return value;
+          };
+          const waitForPanel = async () => {
+            await expect.poll(() => Boolean(
+              api.getPublicInstance?.('close-action') &&
+              refs['close-action']?.isConnected && refs['focus-probe']?.isConnected &&
+              refs.panel && !refs.panel.hasAttribute('data-pui-view-detached')
+            )).toBe(true);
+            await expect.poll(() => state('panel', 'isPresent')).toBe(true);
+          };
+          const assertDisabled = async (trigger: boolean, close: boolean) => {
+            await expect.poll(() => {
+              // Read the projected Button before its source command, so a source
+              // get() cannot repair a missing update before this assertion.
+              for (const [ref, expected] of [
+                ['trigger-action', trigger],
+                ['close-action', close],
+                ['trigger', trigger],
+                ['close', close],
+              ] as const)
+                expect(state(ref, 'disabled'), ref).toBe(expected);
+              for (const [ref, expected] of [
+                ['trigger-action', trigger],
+                ['close-action', close],
+              ] as const) {
+                expect(refs[ref].getAttribute('aria-disabled')).toBe(String(expected));
+                if (expected) expect(refs[ref].tabIndex).toBeLessThan(0);
+                else expect(refs[ref].tabIndex).toBe(0);
+              }
+              return true;
+            }).toBe(true);
+          };
+          const assertSuppressed = async () => {
+            const requested = requests.length;
+            for (const ref of ['trigger-action', 'close-action'] as const) {
+              const clicked = clicks[ref].mock.calls.length;
+              const probe = refs['focus-probe'];
+              probe.focus();
+              expect(document.activeElement).toBe(probe);
+              refs[ref].click();
+              api.call(ref, 'focusSelf', { reason: 'keyboard' });
+              await flush();
+              expect(document.activeElement).toBe(probe);
+              expect(clicks[ref]).toHaveBeenCalledTimes(clicked);
+              expect(state(ref, 'hovered')).toBe(false);
+              expect(state(ref, 'pressed')).toBe(false);
+            }
+            expect(requests).toHaveLength(requested);
+          };
+          await waitForPanel();
+          await assertDisabled(initialDisabled, initialDisabled);
+          api.setProps('root', { disabled: true });
+          await assertDisabled(true, true);
+          await assertSuppressed();
+
+          api.setProps('trigger', { disabled: true });
+          api.setProps('close', { disabled: true });
+          api.setProps('root', { disabled: false });
+          await assertDisabled(true, true);
+          api.setProps('trigger', { disabled: false });
+          await assertDisabled(false, true);
+          api.setProps('root', { disabled: true });
+          api.setProps('close', { disabled: false });
+          await assertDisabled(true, true);
+          api.setProps('root', { disabled: false });
+          await assertDisabled(false, false);
+          api.call('close-action', 'focusSelf', { reason: 'keyboard' });
+          await flush();
+          expect(document.activeElement).toBe(refs['close-action']);
+          refs['close-action'].click();
+          await flush();
+          expect(clicks['close-action']).toHaveBeenCalledTimes(1);
+          expect(requests).toMatchObject([{ open: false }]);
+          expect(state('root', 'open')).toBe(true); // The controlled owner refuses.
+
+          api.setProps('root', { open: false });
+          await expect.poll(() => state('root', 'open')).toBe(false);
+          await expect.poll(() => state('panel', 'isPresent')).toBe(false);
+          // C-HOST-VIEW-ATTACHMENT-0001: detached views retain authored
+          // children; DOM connectivity is not the close-completion oracle.
+          await expect.poll(() => {
+            const transition = api.getExposes('panel')?.transitionState as
+              | { get(): unknown }
+              | undefined;
+            return transition?.get();
+          }).toBe('closed');
+          // WC retains the connected owner and authored descendants. Observe
+          // its governed detached marker instead of demanding DOM removal.
+          if (runtime === 'wc')
+            await expect.poll(() => refs.panel?.hasAttribute('data-pui-view-detached')).toBe(true);
+          api.setProps('root', { disabled: true });
+          api.setProps('root', { open: true });
+          await waitForPanel();
+          await assertDisabled(true, true);
+          await assertSuppressed();
+          api.setProps('root', { disabled: false });
+          await assertDisabled(false, false);
+          refs['close-action'].click();
+          await flush();
+          expect(clicks['close-action']).toHaveBeenCalledTimes(2);
+          expect(requests).toMatchObject([{ open: false }, { open: false }]);
+          expect(state('root', 'open')).toBe(true);
+        }
+      );
 });

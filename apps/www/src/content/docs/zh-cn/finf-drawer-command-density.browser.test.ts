@@ -47,9 +47,11 @@ const candidate = {
 };
 const references = {
   shadcn: 'internal/contracts/overlay/shadcn-drawer-command-density.presentation.v0.md',
+  shadcnProfile: 'spec/prototypes/P-SHADCN-BUTTON.yaml',
+  ownership: 'spec/contracts/C-AS-TRIGGER-0001.yaml',
   brutalist: 'internal/contracts/overlay/brutalist-drawer-command-density.presentation.v0.md',
   adaptation:
-    'Shadcn uses fixed New York h-9 by default and explicitly opts long labels into min-h-9/py-1 wrapping; Neo retains its separate minimum-height/wrapping contract. This is bounded density, not full upstream paint parity or a 44px target guarantee.',
+    'The Shadcn page selects Rhea and composes public outline Buttons directly inside headless Drawer commands. P-SHADCN-BUTTON-RHEA-LUMA-PROFILES and P-SHADCN-BUTTON-WRAP-PROP govern their geometry; New York command density is a separate compatibility contract. Neo retains its own minimum-height/wrapping contract. This is bounded density, not full upstream paint parity or a 44px target guarantee.',
 };
 const writeJson = (name: string, value: unknown) =>
   writeFile(path.join(output, name), JSON.stringify(value, null, 2) + '\n');
@@ -61,8 +63,15 @@ beforeAll(async () => {
   const sourceHashes: Record<string, string> = {};
   for (const file of [
     references.shadcn,
+    references.shadcnProfile,
+    references.ownership,
     references.brutalist,
     'packages/prototypes/shadcn/src/button/paint.ts',
+    'packages/prototypes/shadcn/src/button/button.proto.ts',
+    'packages/prototypes/shadcn/src/button/profiles.ts',
+    'packages/prototypes/shadcn/src/drawer/command-paint.ts',
+    'packages/prototypes/shadcn/src/style-scope/selection.ts',
+    'apps/www/src/content/docs/shadcn-demo-style.ts',
     'packages/prototypes/shadcn/src/drawer/types.ts',
     ...families.flatMap((family) =>
       ['trigger', 'close'].map(
@@ -74,6 +83,7 @@ beforeAll(async () => {
       (part) => `packages/prototypes/shadcn/src/drawer/${part}.proto.ts`
     ),
     'apps/www/src/content/docs/demo-shadcn-drawer.demo.ts',
+    'apps/www/src/content/docs/drawer-command-disabled.shared.ts',
     'packages/prototypes/base/src/drawer/accepted-side.proto.ts',
     'packages/prototypes/base/src/drawer/presentation-context.ts',
     'packages/prototypes/base/src/drawer/content.proto.ts',
@@ -154,6 +164,8 @@ async function metrics(locator: Locator) {
         cssWidth: css.width,
         boxSizing: css.boxSizing,
         display: css.display,
+        alignItems: css.alignItems,
+        justifyContent: css.justifyContent,
         padding: [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft],
         border: [
           css.borderTopWidth,
@@ -179,7 +191,9 @@ async function metrics(locator: Locator) {
         lineHeight: css.lineHeight,
         fontWeight: css.fontWeight,
         fontFamily: css.fontFamily,
-        availableParentWidth: node.parentElement?.getBoundingClientRect().width ?? null,
+        availableParentWidth:
+          (node.closest('[data-drawer-density-lane]') ?? node.parentElement)
+            ?.getBoundingClientRect().width ?? null,
         parentFont: node.parentElement
           ? {
               size: getComputedStyle(node.parentElement).fontSize,
@@ -210,8 +224,14 @@ function assertDensity(
 ) {
   const c = actual.control,
     rem = Number.parseFloat(actual.rootFont);
+  // The actual public Shadcn consumer inherits Rhea, not New York.
+  // Draft P-SHADCN-BUTTON-RHEA-LUMA-PROFILES fixes its default at 2rem,
+  // px3, 14/20 text and theme radius +8px (pinned 3d98900e style-rhea.css,
+  // .cn-button:71-73 and .cn-button-size-default:107-109).
+  // P-SHADCN-BUTTON-WRAP-PROP separately retains that minimum with py1.
+  // Brutalist keeps its independent cited 2.5rem minimum/px4/py2 contract.
   const neo = family === 'brutalist',
-    minimum = (neo ? 2.5 : 2.25) * rem;
+    minimum = (neo ? 2.5 : 2) * rem;
   expect(c.boxSizing).toBe('border-box');
   if (neo || long) expect(Number.parseFloat(c.minHeight)).toBeCloseTo(minimum, 4);
   else expect(c.minHeight === 'auto' || Number.parseFloat(c.minHeight) === 0).toBe(true);
@@ -219,24 +239,30 @@ function assertDensity(
   if (long || multiline) expect(c.rect.height).toBeGreaterThan(minimum);
   else expect(c.rect.height).toBeCloseTo(minimum, 4);
   expect(c.padding.map(Number.parseFloat)).toEqual(
-    neo || !long ? [rem / 2, rem, rem / 2, rem] : [rem / 4, rem, rem / 4, rem]
+    neo
+      ? [rem / 2, rem, rem / 2, rem]
+      : [long ? rem / 4 : 0, rem * 0.75, long ? rem / 4 : 0, rem * 0.75]
   );
   expect(c.border.map(Number.parseFloat)).toEqual(neo ? [2, 2, 2, 2] : [1, 1, 1, 1]);
   expect(Number.parseFloat(c.fontSize)).toBeCloseTo(rem * 0.875, 4);
   expect(Number.parseFloat(c.lineHeight)).toBeCloseTo(rem * 1.25, 4);
   expect(c.fontWeight).toBe('500');
   expect(c.fontFamily).toBe(c.parentFont?.family);
-  const radius = (neo ? c.baseRadiusToken : c.radiusToken).match(/^([\d.]+)(px|rem)$/);
+  const radius = c.baseRadiusToken.match(/^([\d.]+)(px|rem)$/);
   expect(radius).not.toBeNull();
   const radiusPx = Number(radius![1]) * (radius![2] === 'rem' ? rem : 1);
   if (neo) expect(radiusPx).toBe(5);
-  // Existing family theme mapping remains radius-2px; no new upstream root-scaling parity claim.
   for (const value of c.radii)
-    expect(Number.parseFloat(value)).toBeCloseTo(neo ? radiusPx : Math.max(radiusPx - 2, 0), 4);
+    expect(Number.parseFloat(value)).toBeCloseTo(neo ? radiusPx : radiusPx + 8, 4);
   expect(c.whiteSpace).toBe(neo || long ? 'normal' : 'nowrap');
-  if (neo || long) {
-    expect(c.overflowWrap).toBe('anywhere');
-    expect(c.textAlign).toBe('center');
+  if (neo || long) expect(c.overflowWrap).toBe('anywhere');
+  if (neo) expect(c.textAlign).toBe('center');
+  else {
+    // The modern Button centers its flex contents, independently of inherited
+    // multiline text alignment (3d98900e bases/base/ui/button.tsx).
+    expect(['flex', 'inline-flex']).toContain(c.display);
+    expect(c.alignItems).toBe('center');
+    expect(c.justifyContent).toBe('center');
   }
   expect(c.scroll.width).toBeLessThanOrEqual(c.client.width + 1);
   expect(c.scroll.height).toBeLessThanOrEqual(c.client.height + 1);
@@ -332,13 +358,71 @@ async function mountLongLabel(
       type Child = import('../../../components/PrototypePreviewer/demo-types').DemoChild;
       function transform(node: Child): Child {
         if (typeof node === 'string' || node.kind === 'text') return node;
+        if (
+          family === 'shadcn' &&
+          node.kind === 'proto' &&
+          node.prototypeId === 'shadcn-drawer-content'
+        ) {
+          const layout = node.children?.find(
+            (child) => typeof child !== 'string' && child.kind === 'box'
+          );
+          const footer =
+            layout && typeof layout !== 'string' && layout.kind === 'box'
+              ? layout.children?.find(
+                  (child) =>
+                    typeof child !== 'string' &&
+                    child.kind === 'proto' &&
+                    child.prototypeId === 'shadcn-drawer-footer'
+                )
+              : undefined;
+          const close =
+            footer && typeof footer !== 'string' && footer.kind === 'proto'
+              ? footer.children?.[0]
+              : undefined;
+          if (
+            !footer ||
+            typeof footer === 'string' ||
+            footer.kind !== 'proto' ||
+            footer.children?.length !== 1 ||
+            !close ||
+            typeof close === 'string' ||
+            close.kind !== 'proto' ||
+            close.prototypeId !== 'shadcn-drawer-close' ||
+            close.ref !== 'close'
+          )
+            throw new Error('Rhea density fixture requires the authored Footer/Close composition.');
+          // This constrained-label fixture promises a full 160/240px lane,
+          // not Footer geometry. Place the intact Close > Button group directly
+          // in Content so Footer p-4 does not consume the lane a second time.
+          // Content/Header/Footer recipes, portal ownership and refs stay intact.
+          footer.children = [];
+          node.children!.push(close);
+        }
         if (node.kind === 'proto' && /-drawer-(trigger|close)$/.test(node.prototypeId)) {
-          node.ref = node.prototypeId.endsWith('trigger') ? 'density-trigger' : 'density-close';
-          node.children = [label];
-          if (family === 'shadcn') node.props = { ...node.props, wrap: true };
+          const ref = node.prototypeId.endsWith('trigger') ? 'density-trigger' : 'density-close';
+          if (family === 'shadcn') {
+            const action = node.children?.[0];
+            if (
+              !action ||
+              typeof action === 'string' ||
+              action.kind !== 'proto' ||
+              action.prototypeId !== 'shadcn-button' ||
+              node.children?.length !== 1
+            )
+              throw new Error('Rhea Drawer command must directly compose one public Button.');
+            // Preserve the authored refs used by its effective-disabled binding.
+            action.children = [label];
+            action.props = { ...action.props, wrap: true };
+          } else {
+            node.ref = ref;
+            node.children = [label];
+          }
           return {
             kind: 'box',
-            attrs: { style: `width: ${width}px; max-width: 100%; min-width: 0` },
+            attrs: {
+              'data-drawer-density-lane': ref,
+              style: `width: ${width}px; max-width: 100%; min-width: 0`,
+            },
             children: [node],
           };
         }
@@ -361,8 +445,18 @@ async function mountLongLabel(
       host.style.cssText =
         'width: calc(100% - 32px); margin: 16px; min-width: 0; --runtime-box-content-padding: 0';
       document.body.append(host);
-      if (demo.root.kind === 'box')
-        demo.root.attrs = { ...demo.root.attrs, style: 'padding: 0; min-width: 0; width: 100%' };
+      const contentRoot =
+        demo.root.kind === 'box'
+          ? demo.root
+          : demo.root.kind === 'proto'
+            ? demo.root.children?.[0]
+            : undefined;
+      if (!contentRoot || typeof contentRoot === 'string' || contentRoot.kind !== 'box')
+        throw new Error('Drawer recipe must retain its consumer layout box.');
+      contentRoot.attrs = {
+        ...contentRoot.attrs,
+        style: 'padding: 0; min-width: 0; width: 100%',
+      };
       const { createRuntimePreviewSurface, runtimePreviewFamily } = (await browserImport(
         '/src/components/PrototypePreviewer/runtime-preview-surface.ts'
       )) as typeof import('../../../components/PrototypePreviewer/runtime-preview-surface');
@@ -662,7 +756,9 @@ for (const family of families)
                   await page.goto(baseUrl + routeFor(family), { waitUntil: 'networkidle' })
                 )?.status()
               ).toBe(200);
-              const previewer = page.locator('[data-previewer-id]').first();
+              const previewer = page.locator(
+                `[data-previewer-id][data-demo-id="demo-${family}-drawer"]`
+              );
               await previewer.scrollIntoViewIfNeeded();
               await selectRuntime(page, previewer, runtime, '[data-demo-ref="root"]', 1);
               await applyColorScheme(page, scheme);
@@ -674,8 +770,18 @@ for (const family of families)
                 fixture = await mountLongLabel(page, family, runtime, scenario.label, width);
               await page.evaluate(() => document.fonts.ready);
               const trigger = scenario.label
-                ? page.locator('[data-drawer-density-fixture] [data-demo-ref="density-trigger"]')
-                : previewer.getByRole('button', { name: 'Open Drawer', exact: true });
+                ? page.locator(
+                    `[data-drawer-density-fixture] [data-demo-ref="${family === 'shadcn' ? 'trigger-action' : 'density-trigger'}"]`
+                  )
+                : family === 'shadcn'
+                  ? previewer.locator('[data-demo-ref="trigger-action"]')
+                  : previewer
+                      .getByRole('button', { name: 'Open Drawer', exact: true })
+                      .and(previewer.locator('[aria-expanded][aria-controls]'));
+              // All four adapters project the group's ARIA onto its innermost
+              // public Button surface; the outer Drawer anchor is stripped.
+              // Use that same surface for panel lookup, geometry and pointer input.
+              const triggerSurface = trigger;
               const record = async (name: string, control: Locator) => {
                 await control.scrollIntoViewIfNeeded();
                 const actual = await metrics(control),
@@ -699,6 +805,9 @@ for (const family of families)
                   expect(line.bottom).toBeLessThanOrEqual(text.bounds.bottom + 1);
                 }
                 if (scenario.label) {
+                  // Keep the original promised lane width. Whether the fixture
+                  // should instead exercise a constrained Rhea lane is a separate
+                  // acceptance decision; no relaxed width is applied here.
                   expect(actual.control.availableParentWidth).toBeCloseTo(width, 3);
                   expect(actual.control.rect.width).toBeLessThanOrEqual(width + 1);
                   expect(
@@ -714,8 +823,8 @@ for (const family of families)
                 await capture(name);
               };
               stage = 'trigger';
-              await record(stage, trigger);
-              await clickTopInset(page, trigger, pointerInputs, 'open');
+              await record(stage, triggerSurface);
+              await clickTopInset(page, triggerSurface, pointerInputs, 'open');
               const panel = await panelFor(page, trigger);
               if (family === 'shadcn') {
                 const structure = await panel.evaluate((node) => {
@@ -724,15 +833,26 @@ for (const family of families)
                     display: css.display,
                     direction: css.flexDirection,
                     padding: [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft],
+                    rootFont: getComputedStyle(document.documentElement).fontSize,
                   };
                 });
+                // Rhea keeps the same flex-column structure with p-4, rather
+                // than New York's zero-padding outer Content (repo source:
+                // packages/prototypes/shadcn/src/drawer/recipes.ts).
                 expect(structure.display).toBe('flex');
                 expect(structure.direction).toBe('column');
-                expect(structure.padding.map(Number.parseFloat)).toEqual([0, 0, 0, 0]);
+                const panelPadding = Number.parseFloat(structure.rootFont);
+                expect(structure.padding.map(Number.parseFloat)).toEqual(
+                  [panelPadding, panelPadding, panelPadding, panelPadding]
+                );
               }
               const close = scenario.label
-                ? panel.locator('[data-demo-ref="density-close"]')
-                : panel.getByRole('button', { name: 'Close', exact: true });
+                ? panel.locator(
+                    `[data-demo-ref="${family === 'shadcn' ? 'close-action' : 'density-close'}"]`
+                  )
+                : family === 'shadcn'
+                  ? panel.locator('[data-demo-ref="close"] [data-demo-ref="close-action"]')
+                  : panel.getByRole('button', { name: 'Close', exact: true });
               stage = 'close';
               await record(stage, close);
               if (family === 'brutalist') {
@@ -754,7 +874,7 @@ for (const family of families)
               await panel.waitFor({ state: 'hidden' });
               await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
               stage = 'reopen-escape';
-              await clickTopInset(page, trigger, pointerInputs, 'reopen');
+              await clickTopInset(page, triggerSurface, pointerInputs, 'reopen');
               await panelFor(page, trigger);
               await page.keyboard.press('Escape');
               await panel.waitFor({ state: 'hidden' });
@@ -818,7 +938,7 @@ for (const family of families)
                   deniedRequests,
                   browser: browser.version(),
                   limit:
-                    'Root scaling is not browser zoom. Long-label fixture changes consumer text/container width and explicitly enables Shadcn wrap. No full paint, GPUI, or complete accessibility certification.',
+                    'Root scaling is not browser zoom. Long-label fixture changes consumer text/container width and enables wrap on the actual Rhea Button surface without breaking its direct Drawer trigger group. No full paint, GPUI, or complete accessibility certification.',
                 });
               } finally {
                 await context?.close();
