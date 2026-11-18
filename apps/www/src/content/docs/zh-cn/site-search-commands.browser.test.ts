@@ -10,7 +10,7 @@ import type { Browser, CDPSession, Locator, Page, Request } from 'playwright-cor
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 import { settleFamilyQueryBatch } from './family-query-observer';
-import { installDocsCallTimingObserver } from './docs-query-timing.mjs';
+import { installDocsCallTimingObserver } from '../../../../test/helpers/docs-query-timing.mjs';
 import { createQueryDispatchTrace } from './query-dispatch-trace.mjs';
 import {
   installSearchStartupTrace,

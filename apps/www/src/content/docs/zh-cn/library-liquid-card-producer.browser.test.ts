@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
+import { createServer } from 'node:http';
 import path from 'node:path';
 import os from 'node:os';
 import ts from 'typescript';
@@ -784,7 +785,50 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
     }, 90_000);
 });
 
-// Real Chromium requests through owned routes, separate from the twelve Card cases.
+function createResponseControlServer(arm: string, font: Buffer, prefix: string) {
+  return createServer((request, response) => {
+    const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+    if (url.pathname === prefix + '/index') {
+      response.writeHead(200, { 'content-type': 'text/html' });
+      return response.end(
+        '<!doctype html><link rel="icon" href="data:,"><title>Owned response control</title>'
+      );
+    }
+    if (url.pathname === prefix + '/redirect') {
+      if (arm === 'missing-location') {
+        response.writeHead(302);
+        return response.end();
+      }
+      if (arm === 'invalid-location') {
+        response.writeHead(302, { location: 'http://[' });
+        return response.end();
+      }
+      if (arm === 'unknown-status') {
+        response.writeHead(300, { location: prefix + '/font' });
+        return response.end();
+      }
+      const step = Number(url.searchParams.get('step') ?? '0');
+      const statuses = [301, 302, 303, 307, 308];
+      if (!Number.isInteger(step) || step < 0 || step >= statuses.length) return response.destroy();
+      const target =
+        step === statuses.length - 1 ? prefix + '/font' : prefix + '/redirect?step=' + (step + 1);
+      response.writeHead(statuses[step], { location: target });
+      return response.end();
+    }
+    if (url.pathname === prefix + '/font') {
+      if (arm === 'request-abort') return response.destroy();
+      if (arm === 'http-error') {
+        response.writeHead(404, { 'content-type': 'text/plain' });
+        return response.end('Owned terminal error');
+      }
+      response.writeHead(200, { 'content-type': 'font/ttf' });
+      return response.end(font);
+    }
+    return response.destroy();
+  });
+}
+
+// Real Chromium requests through an owned HTTP origin, separate from the twelve Card cases.
 // These validate capture mechanics, not the still-unknown live redirect provenance.
 describe('same-origin response collector native controls', () => {
   for (const arm of [
@@ -801,54 +845,28 @@ describe('same-origin response collector native controls', () => {
         const directory = path.join(output, 'response-controls', arm);
         await mkdir(directory, { recursive: true });
         const font = await readFile('apps/www/src/styles/assets/font/geist/Geist-Variable.ttf');
-        const origin = new URL(baseUrl).origin,
-          prefix = '/__pui_response_collector__';
+        const prefix = '/__pui_response_collector__';
+        const server = createResponseControlServer(arm, font, prefix);
         const context = await browser.newContext();
         let failed = false;
         try {
+          await new Promise<void>((resolve, reject) => {
+            server.once('error', reject);
+            server.listen(0, '127.0.0.1', () => {
+              server.off('error', reject);
+              resolve();
+            });
+          });
+          const address = server.address();
+          if (!address || typeof address === 'string')
+            throw new Error('Owned response control has no TCP address');
+          const origin = 'http://127.0.0.1:' + address.port;
           await context.route('**/*', async (route) => {
             const url = new URL(route.request().url());
             if (url.origin !== origin || !url.pathname.startsWith(prefix + '/'))
               return route.abort();
-            if (url.pathname === prefix + '/index')
-              return route.fulfill({
-                status: 200,
-                contentType: 'text/html',
-                body: '<!doctype html><link rel="icon" href="data:,"><title>Owned response control</title>',
-              });
-            if (url.pathname === prefix + '/redirect') {
-              if (arm === 'missing-location') return route.fulfill({ status: 302, body: '' });
-              if (arm === 'invalid-location')
-                return route.fulfill({ status: 302, headers: { location: 'http://[' }, body: '' });
-              if (arm === 'unknown-status')
-                return route.fulfill({
-                  status: 300,
-                  headers: { location: prefix + '/font' },
-                  body: '',
-                });
-              const step = Number(url.searchParams.get('step') ?? '0');
-              const statuses = [301, 302, 303, 307, 308];
-              const target =
-                step === statuses.length - 1
-                  ? prefix + '/font'
-                  : prefix + '/redirect?step=' + (step + 1);
-              return route.fulfill({
-                status: statuses[step],
-                headers: { location: target },
-                body: '',
-              });
-            }
-            if (url.pathname === prefix + '/font') {
-              if (arm === 'request-abort') return route.abort('failed');
-              if (arm === 'http-error')
-                return route.fulfill({
-                  status: 404,
-                  contentType: 'text/plain',
-                  body: 'Owned terminal error',
-                });
-              return route.fulfill({ status: 200, contentType: 'font/ttf', body: font });
-            }
-            return route.abort();
+            // Redirect successors remain owned even when routing sees only the first hop.
+            return route.continue();
           });
           const page = await context.newPage();
           await page.goto(origin + prefix + '/index', { waitUntil: 'networkidle' });
@@ -939,7 +957,15 @@ describe('same-origin response collector native controls', () => {
           results.push({ name: 'response-control-' + arm, passed: false, error: String(error) });
           throw error;
         } finally {
-          await closeEvidenceContext(context, failed);
+          try {
+            await closeEvidenceContext(context, failed);
+          } finally {
+            if (server.listening)
+              await new Promise<void>((resolve, reject) => {
+                server.close((error) => (error ? reject(error) : resolve()));
+                server.closeAllConnections();
+              });
+          }
         }
       },
       30_000

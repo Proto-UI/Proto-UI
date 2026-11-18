@@ -53,9 +53,7 @@ it('compiles scoped native document fallback declarations without targeting Text
   expect(css).toContain('--leading-tight: 1.25');
   for (const rule of [title!, description!]) {
     expect(rule[1]).toContain("[data-site-library-family='shadcn']");
-    expect(rule[1]).toContain('main[data-pagefind-body]');
-    // HomepageRuntime is in the sibling Header, not an ancestor of main.
-    expect(rule[1]).toContain(':not(:has([data-homepage-runtime]))');
+    expect(rule[1]).toContain('main[data-pagefind-body]:not(.homepage-canvas *)');
     expect(rule[1]).toContain(':where(aside *, .starlight-aside *, [data-previewer-id] *)');
     expect(rule[1]).not.toContain('data-pui-style');
   }

@@ -1,0 +1,11 @@
+{
+  "base": "56e3b443fa7774a464a5464935b9154a89d81143",
+  "scope": "coverage-evidence-r2",
+  "changes": [
+    "C1/C2 website import-edge scope comments",
+    "C3/C5 retained inert Harness allowance and adjacent debt",
+    "C4 two byte-preserved prepared website paragraphs"
+  ],
+  "conflicts": "Patch applied directly at Source-scan bindings heading; all existing markup bindings and startup prose retained.",
+  "noEarnedCoverage": true
+}

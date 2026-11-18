@@ -42,6 +42,20 @@ export function functionValueType(fn: Pick<FunctionIR, 'parameters' | 'returnTyp
   };
 }
 
+/** A default accepts undefined at its input, even before a later required slot. */
+export function parameterArgumentType(parameter: ParameterIR): ValueType {
+  return parameter.optional || parameter.default
+    ? joinValueTypes([parameter.type, 'void'])
+    : parameter.type;
+}
+
+export function minimumArgumentCount(parameters: readonly ParameterIR[]): number {
+  return parameters.reduce(
+    (last, parameter, index) => (parameter.optional || parameter.default ? last : index + 1),
+    0
+  );
+}
+
 export function valueTypeEqual(a: ValueType, b: ValueType): boolean {
   if (a === b) return true;
   if (isDataValueType(a) && isDataValueType(b)) return dataTypeEqual(a, b);
@@ -198,16 +212,16 @@ export function valueAssignable(actual: ValueType, expected: ValueType): boolean
     typeof expected !== 'string' &&
     expected.kind === 'callable'
   ) {
-    if (
-      actual.parameters.filter((parameter) => !parameter.optional).length >
-      expected.parameters.filter((parameter) => !parameter.optional).length
-    )
+    if (minimumArgumentCount(actual.parameters) > minimumArgumentCount(expected.parameters))
       return false;
     return (
       actual.parameters.every(
         (parameter, index) =>
           !expected.parameters[index] ||
-          valueAssignable(expected.parameters[index].type, parameter.type)
+          valueAssignable(
+            parameterArgumentType(expected.parameters[index]),
+            parameterArgumentType(parameter)
+          )
       ) &&
       (expected.returnType === 'void' || valueAssignable(actual.returnType, expected.returnType))
     );
@@ -275,10 +289,7 @@ export function checkedCall(
   optional = false
 ): ValueType {
   const fn = callableValue(type, optional);
-  const required = fn.parameters.reduce(
-    (last, parameter, index) => (parameter.optional ? last : index + 1),
-    0
-  );
+  const required = minimumArgumentCount(fn.parameters);
   if (args.length < required || args.length > fn.parameters.length)
     throw new TypeError('Callable argument count mismatch.');
   args.forEach((argument, index) => {
@@ -296,6 +307,17 @@ export function checkedCall(
     valueAlternatives(type).some((member) => member === 'null' || member === 'void')
     ? joinValueTypes([fn.returnType, 'void'])
     : fn.returnType;
+}
+
+/** Every supplies these three values even when the callback declares fewer formals. */
+export function arrayEveryCallbackParameters(
+  array: Extract<ValueType, { kind: 'array' }>
+): CallableType['parameters'] {
+  return [
+    { name: 'value', type: array.element },
+    { name: 'index', type: 'number' },
+    { name: 'array', type: array },
+  ];
 }
 
 export function intrinsicResult(name: string, args: readonly ValueType[]): ValueType {
@@ -318,7 +340,12 @@ export function intrinsicResult(name: string, args: readonly ValueType[]): Value
     args[0].kind === 'array'
   ) {
     const fn = callableValue(args[1]);
-    checkedCall(fn, [args[0].element]);
+    checkedCall(
+      fn,
+      arrayEveryCallbackParameters(args[0])
+        .slice(0, fn.parameters.length)
+        .map((parameter) => parameter.type)
+    );
     return 'boolean';
   }
   throw new TypeError(`Invalid intrinsic ${name} arguments.`);

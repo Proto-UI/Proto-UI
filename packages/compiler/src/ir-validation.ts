@@ -30,6 +30,7 @@ import {
   operationArgumentRule,
   operationResultType,
   argumentData,
+  argumentValue,
   validateOperationArguments,
   validateOperationPhase,
   isTemplateChildType,
@@ -67,6 +68,7 @@ import {
   memberValueType,
   functionValueType,
   checkedCall,
+  minimumArgumentCount,
   intrinsicResult,
   parameterValueType,
   canNarrowValue,
@@ -1134,7 +1136,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'narrow': {
             const source = expression(node.value, scope, phase, context, true),
               target = valueType(node.type, location);
-            if (!canNarrowValue(source, target))
+            // Only use literal/nominal evidence after recursively validating the
+            // complete source expression and all its declared types above.
+            if (
+              !canNarrowValue(source, target) &&
+              !valueAssignable(argumentValue(node.value as ExpressionIR), target)
+            )
               bad('Type narrowing cannot grant unproven data or capability authority.', location);
             type = target;
             break;
@@ -1594,7 +1601,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const helper = binding?.helper;
             if (!helper) bad('Unknown or recursive helper call.', location);
             const args = array(node.arguments),
-              required = helper.parameters.filter((param) => !param.optional).length;
+              signature = functionValueType(helper),
+              required = minimumArgumentCount(signature.parameters);
             if (args.length < required || args.length > helper.parameters.length)
               bad('Helper argument count mismatch.', location);
             args.forEach((argument, index) => {
@@ -1606,7 +1614,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 actual === 'props'
                   ? { kind: 'record', fields: [...props].map(([name, type]) => ({ name, type })) }
                   : (argumentData(argument as ExpressionIR) ?? actual);
-              if (!assignable(actual, expected) && !assignable(supplied, expected))
+              if (
+                !(actual === 'void' && signature.parameters[index].optional) &&
+                !assignable(actual, expected) &&
+                !assignable(supplied, expected)
+              )
                 bad('Helper argument type mismatch.', location);
             });
             if (context !== 'helper') helperContext(helper, context, phase);

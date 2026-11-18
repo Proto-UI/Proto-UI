@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAnatomyFamily } from '@proto.ui/core';
+import type { AnatomyRootTargetGetter } from '../src/caps';
 import { AnatomyModuleImpl } from '../src/impl';
 import { makeCaps } from './utils/fake-caps';
 
@@ -9,7 +10,7 @@ afterEach(() => {
   for (const owner of cleanup.splice(0).reverse()) owner.dispose();
 });
 
-function fixture() {
+function fixture(getRootTarget?: AnatomyRootTargetGetter) {
   const family = createAnatomyFamily('subscriber-fanout', {
     roles: {
       root: { cardinality: { min: 1, max: 1 } },
@@ -17,12 +18,14 @@ function fixture() {
     },
   });
   const rootToken = {};
+  const getParent = (instance: unknown) => (instance === rootToken ? null : rootToken);
   const make = (role?: 'root' | 'item') => {
     const token = role === 'root' ? rootToken : {};
     const caps = makeCaps({
       instance: token,
-      getParent: (instance) => (instance === rootToken ? null : rootToken),
+      getParent,
       getPrototype: () => ({ name: 'fanout-owner', setup() {} }),
+      getRootTarget,
     });
     const owner = new AnatomyModuleImpl(caps, 'fanout-owner', {
       get: () => undefined,
@@ -39,6 +42,35 @@ function fixture() {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  it('uses the current host comparator when the target identity is unchanged', () => {
+    const itemTarget = { compareDocumentPosition: () => 2 };
+    const rootTarget = { compareDocumentPosition: () => 4 };
+    let rootReads = 0;
+    let replaceComparator = false;
+    let rootInstance: unknown;
+    const f = fixture((instance) => {
+      if (instance !== rootInstance) return itemTarget;
+      if (replaceComparator && ++rootReads === 2) {
+        itemTarget.compareDocumentPosition = () => 4;
+        rootTarget.compareDocumentPosition = () => 2;
+      }
+      return rootTarget;
+    });
+    rootInstance = f.root.port.resolveSelfInstance();
+    f.make('item');
+    const first = f.make();
+    const second = f.make();
+    const firstOrder = vi.fn();
+    const secondOrder = vi.fn();
+    first.port.subscribeOrder(f.family, firstOrder);
+    second.port.subscribeOrder(f.family, secondOrder);
+
+    replaceComparator = true;
+    f.notify();
+    expect(firstOrder).not.toHaveBeenCalled();
+    expect(secondOrder).toHaveBeenCalledTimes(1);
+  });
+
   it('does not inspect unrelated owners when one family publishes a structural change', () => {
     const f = fixture();
     const listener = f.make('item');
@@ -73,6 +105,48 @@ describe('Anatomy family subscriber notification', () => {
     f.notify();
     expect(order).toHaveBeenCalledTimes(1);
     expect(target).toHaveBeenCalledTimes(3);
+  });
+
+  it('advances through stable order and target subscribers without rereading owner order', () => {
+    const f = fixture();
+    const owners = Array.from({ length: 32 }, () => f.make());
+    const order = vi.fn();
+    const target = vi.fn();
+    for (const owner of owners) {
+      owner.port.subscribeOrder(f.family, order);
+      owner.port.subscribeTargets(f.family, target);
+    }
+    const reads = vi.fn();
+    const descriptors = owners.map((owner) => {
+      const descriptor = Object.getOwnPropertyDescriptor(owner, 'instanceOrder')!;
+      Object.defineProperty(owner, 'instanceOrder', {
+        configurable: true,
+        enumerable: descriptor.enumerable,
+        get() {
+          reads();
+          return descriptor.value;
+        },
+      });
+      return descriptor;
+    });
+    const get = vi.spyOn(Map.prototype, 'get');
+    let listReads: number;
+    try {
+      f.notify();
+      listReads = get.mock.results.filter(
+        (result) =>
+          result.type === 'return' && Array.isArray(result.value) && result.value[0] === owners[0]
+      ).length;
+    } finally {
+      get.mockRestore();
+      owners.forEach((owner, index) =>
+        Object.defineProperty(owner, 'instanceOrder', descriptors[index]!)
+      );
+    }
+    expect(order).not.toHaveBeenCalled();
+    expect(target).toHaveBeenCalledTimes(owners.length);
+    expect(reads).not.toHaveBeenCalled();
+    expect(listReads).toBe(2);
   });
 
   for (const kind of ['order', 'target'] as const) {

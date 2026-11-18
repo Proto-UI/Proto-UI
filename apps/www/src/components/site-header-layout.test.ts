@@ -15,7 +15,7 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
     .replace(/^---[\s\S]*?---\s*/, '')
     .replace('<SiteCopyBootstrap />', '')
     .replace('<slot />', section);
-  document.body.innerHTML = `<div class="site-page-frame"><header data-docs-site-header></header><main>${body}</main></div>`;
+  document.body.innerHTML = `<div class="site-page-frame"><header><div data-docs-site-header></div></header><div><main>${body}</main></div></div>`;
   const heading = document.querySelector<HTMLHeadingElement>('#actual-doc-heading')!;
   if (heading) expect(heading.closest('[data-doc-flow]')).not.toBeNull();
   expect(document.querySelector('.sl-markdown-content')).toBeNull();
@@ -126,9 +126,19 @@ describe('Docs header offset targets the actual MarkdownContent wrapper', () => 
     expect(match![2]).toBe('calc(var(--header-height) + 1rem)');
   });
 
+  it('derives anchor clearance from the real Header, even with a matching marker inside the content', () => {
+    const heading = actualMarkdownFixture();
+    const marker = document.querySelector('header > [data-docs-site-header]')!;
+    const match = frame.match(/:global\(([^{}]*?)\)\s*\{\s*scroll-margin-top:/)!;
+    const selector = match[1]!.replace(/\s+/g, ' ').trim();
+    expect(heading.matches(selector)).toBe(true);
+    document.querySelector('main')!.prepend(marker);
+    expect(heading.matches(selector)).toBe(false);
+  });
+
   it('removes the upstream root offset only when our measured docs Header owns clearance', () => {
     expect(frame).toMatch(
-      /:global\(html:has\(\.site-page-frame \[data-docs-site-header\]\)\)\s*\{\s*scroll-padding-top: 0;/
+      /:global\(html:has\(\.site-page-frame > header \[data-docs-site-header\]\)\)\s*\{\s*scroll-padding-top: 0;/
     );
     expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
   });
@@ -381,7 +391,7 @@ it('keeps the page-top anchor at the initial reading inset when deferred modules
   expect(columns).toContain('lg:[--docs-reading-inset:2rem]');
   expect(columns).toContain('py-[var(--docs-reading-inset)]');
   expect(frame).toMatch(
-    /:global\(\.site-page-frame:has\(\[data-docs-site-header\]\) main h1\[data-site-typography='h1'\]\)\s*\{\s*scroll-margin-top: calc\(var\(--header-height\) \+ var\(--docs-reading-inset, 1rem\)\);/
+    /:global\(\s*\.site-page-frame\s*> :where\(header\):has\(\[data-docs-site-header\]\)\s*\+ :where\(div\)\s+main\s+h1\[data-site-typography='h1'\]\s*\)\s*\{\s*scroll-margin-top: calc\(var\(--header-height\) \+ var\(--docs-reading-inset, 1rem\)\);/
   );
   // Ordinary section clearance stays independent of the page-top inset.
   expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');

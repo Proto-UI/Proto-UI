@@ -565,6 +565,8 @@ class NativeScroll {
   final NativeScrollFollowFacts endFollow;
   Map<String, Object?> config = {}, chrome = {};
   bool following = false, _mounted = false;
+  int _requestGeneration = 0;
+  int? _pendingEndGeneration;
   late final void Function() _offCommit;
   final Map<NativeHostTarget, (NativeHostGeometry?, void Function(PointerEvent)?, NativeHostGeometry?, void Function(PointerEvent))> _chromeOwned = {};
   final Map<int, PointerRoute> _dragRoutes = {};
@@ -629,17 +631,36 @@ class NativeScroll {
   }
   void _releaseTarget(NativeHostTarget target) { final old = _chromeOwned.remove(target); if (old == null || !target.alive) return; if (target.geometry.value == old.$3) target.geometry.value = old.$1; if (target.pointerRoute == old.$4) target.pointerRoute = old.$2; }
   void _releaseChrome() { for (final target in List.of(_chromeOwned.keys)) _releaseTarget(target); for (final entry in _dragRoutes.entries) GestureBinding.instance.pointerRouter.removeRoute(entry.key,entry.value); _dragRoutes.clear(); }
-  void request(Map<String, Object?> request) {
-    owner.ensureRuntime(); final axis = request['axis'] as String? ?? 'vertical'; final control = _controller(axis);
-    if (!owner.ready || !control.hasClients || axes.get() != 'both' && axes.get() != axis) { if (request['kind'] == 'to-end') endFollow.requestStatus.publish('rejected'); return; }
-    final metrics = control.position;
+  Map<String, Object?> request(Map<String, Object?> request) {
+    owner.ensureRuntime();
     final kind = request['kind'];
+    final generation = ++_requestGeneration, epoch = owner.epoch;
+    Map<String, Object?> reject(String reason) {
+      if (kind == 'to-end' && owner.alive && owner.epoch == epoch && (generation == _requestGeneration || _pendingEndGeneration == generation)) {
+        if (_pendingEndGeneration == generation) _pendingEndGeneration = null;
+        endFollow.requestStatus.publish('rejected');
+      }
+      return {'kind':'rejected','reason':reason};
+    }
+    if (!owner.hookNames.contains('asScrollSurface')) return reject('not-declared');
+    if (!owner.ready) return reject('not-mounted');
+    final axis = request['axis'] as String? ?? 'vertical';
+    final control = _controller(axis);
+    if (!control.hasClients || axes.get() != 'both' && axes.get() != axis) return reject('unavailable');
+    final metrics = control.position;
     if (!['by','page','to-end','to','control-drag'].contains(kind)) throw ArgumentError('Unknown Scroll request');
+    if (!metrics.hasContentDimensions) return reject('unavailable');
+    bool current() => owner.alive && owner.ready && owner.epoch == epoch && generation == _requestGeneration && control.hasClients && identical(control.position, metrics);
     final destination = kind == 'by' ? metrics.pixels + (request['delta'] as num).toDouble() : kind == 'page' ? metrics.pixels + metrics.viewportDimension * (request['direction'] == 'before' ? -1 : 1) : kind == 'to-end' ? metrics.maxScrollExtent : metrics.minScrollExtent + (metrics.maxScrollExtent - metrics.minScrollExtent) * (request['position'] as num).clamp(0,1);
-    if (kind == 'to-end') endFollow.requestStatus.publish('pending');
+    if (kind == 'to-end') { _pendingEndGeneration = generation; endFollow.requestStatus.publish('pending'); }
+    if (!current()) return reject('unavailable');
     control.jumpTo(destination.clamp(metrics.minScrollExtent, metrics.maxScrollExtent).toDouble());
+    if (!current()) return reject('unavailable');
     following = kind == 'to-end' || metrics.pixels >= metrics.maxScrollExtent - 1;
-    if (kind == 'to-end') endFollow.requestStatus.publish('applied'); _refresh();
+    _refresh();
+    if (!current()) return reject('unavailable');
+    if (kind == 'to-end') { _pendingEndGeneration = null; endFollow.requestStatus.publish('applied'); }
+    return current() ? const {'kind':'dispatched'} : const {'kind':'rejected','reason':'unavailable'};
   }
   Map<String, Object?> getSnapshot() { owner.ensureAlive(); return {'axes': axes.get(), 'scrolling': scrolling.get(), 'projection': projection.get(), 'horizontal': horizontal.snapshot(), 'vertical': vertical.snapshot(), 'endFollow': {'state': endFollow.state.get(), 'requestStatus': endFollow.requestStatus.get()}}; }
   Widget wrap(Widget root) {
@@ -657,7 +678,7 @@ class NativeScroll {
     return NotificationListener<ScrollNotification>(onNotification: (event) { if (event is ScrollStartNotification) scrolling.publish(true); if (event is ScrollEndNotification) scrolling.publish(false); if (event is UserScrollNotification) following = event.metrics.pixels >= event.metrics.maxScrollExtent - 1; _refresh(); return false; }, child: result);
   }
   void mount() { if (!_mounted) { _mounted = true; final preference = config['requireProjection'] ?? config['projection']; projection.publish(preference == 'composed' ? 'composed' : 'system'); final policy = config['endFollow']; following = policy is Map<String,Object?> && policy['mode'] == 'while-at-end' && _controller(policy['axis'] as String).hasClients && _controller(policy['axis'] as String).position.extentAfter <= 1; } _refresh(); }
-  void unmount() { _mounted = false; _releaseChrome(); horizontal.reset(); vertical.reset(); scrolling.publish(false); projection.publish('unresolved'); endFollow.requestStatus.publish('idle'); following = false; _followFacts(); }
+  void unmount() { _mounted = false; _pendingEndGeneration = null; _releaseChrome(); horizontal.reset(); vertical.reset(); scrolling.publish(false); projection.publish('unresolved'); endFollow.requestStatus.publish('idle'); following = false; _followFacts(); }
   void dispose() { _offCommit(); _releaseChrome(); _verticalControl.dispose(); _horizontalControl.dispose(); vertical.dispose(); horizontal.dispose(); axes.subscribers.clear(); projection.subscribers.clear(); scrolling.subscribers.clear(); endFollow.dispose(); }
 }
 class NativeTextControl<P> {

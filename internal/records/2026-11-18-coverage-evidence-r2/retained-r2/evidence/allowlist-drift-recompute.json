@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "kind": "coverage-unearned-repair-r2-allowlist-drift-recompute",
+  "generatedAt": "2026-11-18T14:33:16+08:00",
+  "revision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+  "readPath": "git show <revision>:<path> (committed blobs only)",
+  "method": {
+    "digest": "sha256 over utf8 source with CRLF/CR normalised to LF (same normalisation as sourceScanDigest at scripts/coverage-matrices/check-coverage-matrices.mjs:11189)",
+    "allowanceIntroduction": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "sourceLastChange": "git log -1 <revision> -- <path>"
+  },
+  "specifierOnlyAllowanceEntries": [
+    {
+      "path": "apps/www/src/components/site-link-recipes.ts",
+      "checkerLine": 272,
+      "bindingFields": [
+        "specifiers"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+      "bytes": 11099,
+      "sourceLastChangeAtRevision": "752af98fc|2026-11-15T08:59:47+08:00|fix(bootstrap): retain accessible blue Header and public consumers",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/site-native-controls.ts",
+      "checkerLine": 278,
+      "bindingFields": [
+        "specifiers"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+      "bytes": 20906,
+      "sourceLastChangeAtRevision": "752af98fc|2026-11-15T08:59:47+08:00|fix(bootstrap): retain accessible blue Header and public consumers",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "checkerLine": 287,
+      "bindingFields": [
+        "specifiers",
+        "resolvedPaths"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857",
+      "bytes": 31634,
+      "sourceLastChangeAtRevision": "02bb0d7fe|2026-11-16T00:56:10+00:00|perf(www): initialize Docs search themes from one owner lease",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "checkerLine": 309,
+      "bindingFields": [
+        "specifiers"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "384fb860d62e933f6c9eaeb90afc5f9a0674772e54e621f282f789a947dca762",
+      "bytes": 74024,
+      "sourceLastChangeAtRevision": "8a5f6ad96|2026-11-17T17:58:15+08:00|Integrate pull request #1486",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/registry.ts",
+      "checkerLine": 321,
+      "bindingFields": [
+        "specifiers"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "d4719840fd5a8a0d036c66d079494bb8c7306df571769531323210aca08445c9",
+      "bytes": 1527,
+      "sourceLastChangeAtRevision": "e485e75c8|2026-11-17T18:43:57+08:00|Integrate pull request #1487",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/prototype-modules.ts",
+      "checkerLine": 342,
+      "bindingFields": [
+        "categories"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "bbcbd108b836d0e3b46a84be731d8602d12221ddd34dbbf5a3f59ee761f74700",
+      "bytes": 72284,
+      "sourceLastChangeAtRevision": "e485e75c8|2026-11-17T18:43:57+08:00|Integrate pull request #1487",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "checkerLine": 348,
+      "bindingFields": [
+        "resolvedPaths"
+      ],
+      "hasSourceSha256": false,
+      "nativeSha256": "357e2274d3f5d7e68889cf0aeec47663289fb7f7a3b0cf96e50f6621d93e4324",
+      "bytes": 7583,
+      "sourceLastChangeAtRevision": "fad057af5|2026-11-16T03:26:27+00:00|perf(docs): ignore unchanged visibility and theme notifications",
+      "allowanceIntroduction": {
+        "commit": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+        "evidence": "git log -S<path> -- scripts/coverage-matrices/check-coverage-matrices.mjs returns only a46b18cd2, the repository's shallow boundary, so the allowance existed no later than 2026-11-11 and no earlier introduction is provable here",
+        "limitation": "shallow history: the exact introduction commit is not recoverable"
+      },
+      "postAdmissionDrift": true
+    }
+  ],
+  "harnessAllowance": {
+    "path": "apps/agent-harness/src/proto-ui/bootstrap.tsx",
+    "specifiers": [
+      "@proto.ui/adapter-react"
+    ],
+    "targetExistsAtRevision": false,
+    "appsTreeAtRevision": [
+      "040000 tree 34a19b1339d1c883d74f85baad0ba1160b87ef64\tapps/workspace",
+      "040000 tree 1ffdf52c6c586d8a9ab73800047481375cf094ea\tapps/www"
+    ],
+    "evidence": [
+      "git ls-tree ff75a0a2 apps/ lists only apps/workspace and apps/www",
+      "internal/agent-harness/dogfood-coverage-matrix.md:31 'No row is dogfooded at M0 because apps/agent-harness does not yet exist'",
+      "internal/agent-harness/dogfood-coverage-matrix.md:100 row harness.infrastructure.react-bootstrap, state infrastructure-exempt, 'Absent; Harness not implemented'",
+      "internal/agent-harness/dogfood-coverage-matrix.md:321 owner and re-review issue #533",
+      "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:2418 control test asserts the React Adapter import is admitted at that path"
+    ]
+  },
+  "reproduce": "python3 r2/evidence/recompute-ledger-drift.py /workspace/worktrees/main-1116 ff75a0a2b356005d8d2d3b73268d7e7a9a258447"
+}

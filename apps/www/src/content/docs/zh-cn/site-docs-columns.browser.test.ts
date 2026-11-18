@@ -579,6 +579,25 @@ it.each(['en', 'zh-cn'])(
       expect(parseFloat(facts.maxWidth)).toBe(88 * 16);
       expect(facts.width).toBeGreaterThan(0);
       expect(facts.overflow).toBeLessThanOrEqual(1);
+
+      const fallback = await page.evaluate(() => {
+        const header = document.querySelector('[data-docs-site-header]')!;
+        const marker = document.createElement('span');
+        marker.setAttribute('data-docs-site-header', '');
+        const readPadding = () =>
+          parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop);
+        header.removeAttribute('data-docs-site-header');
+        try {
+          const withoutHeaderMarker = readPadding();
+          document.querySelector('main')!.append(marker);
+          return { withoutHeaderMarker, withContentMarker: readPadding() };
+        } finally {
+          marker.remove();
+          header.setAttribute('data-docs-site-header', '');
+        }
+      });
+      expect(fallback.withoutHeaderMarker).toBeGreaterThan(0);
+      expect(fallback.withContentMarker).toBe(fallback.withoutHeaderMarker);
     } catch (error) {
       await page.screenshot({ path: path.join(evidence, `${id}-failure.png`) }).catch(() => {});
       throw error;

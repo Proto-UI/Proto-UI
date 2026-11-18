@@ -1,6 +1,6 @@
 # Proto UI 0.3.0-alpha.1
 
-> Draft release notes. This release has not been published. npm, Git tag, GitHub prerelease, dist-tag, and immutable snapshot evidence remain pending.
+> Published on September 20, 2026 under the npm `next` channel. The 43 public packages named by the published `package-bom-0.3.0-alpha.1.json` release asset, the `v0.3.0-alpha.1` tag, the prerelease GitHub Release and the immutable spec snapshot share this exact release identity.
 
 Proto UI 0.3.0-alpha.1 is a testable continuation of the 0.3 alpha train. It remains an alpha release: it is neither a release candidate nor a stable compatibility promise.
 
@@ -20,6 +20,8 @@ Proto UI 0.3.0-alpha.1 is a testable continuation of the 0.3 alpha train. It rem
 - Keeps npm's deprecated bootstrap `latest` residue outside the release channel when npm refuses to remove the tag from the sole bootstrap version.
 - Permits that residue only after `next` names an existing non-bootstrap prerelease; it neither changes `latest` nor manufactures a replacement stable version.
 
-## Publication status
+## Release validation
 
-This preparation does not publish packages, create `v0.3.0-alpha.1`, move npm `next`, or activate `V-PROTO-UI-0010`. Those actions require merge to `main`, a complete release rehearsal over the final reviewed package set, protected publication, and a separate evidence review.
+The protected release workflow run <https://github.com/Proto-UI/Proto-UI/actions/runs/35504873221> concluded `success` for head `e7961001af1d313b1518be694f866b0e98337b0d`, which is also the commit that the `v0.3.0-alpha.1` lightweight tag resolves to. npm wrote the first package at `2026-09-20T10:24:41.722Z` and the last at `2026-09-20T10:31:33.390Z`; the prerelease GitHub Release was published at `2026-09-20T10:28:40Z`. All 43 packages of the published release BOM exist at `0.3.0-alpha.1` with a registry integrity value, and `next` resolves to `0.3.0-alpha.1` for every one of them. The immutable spec snapshot attached to that release has SHA-256 `e483b661a09bb333b12c99d9639c016cb5bb6829281b939012859864ea8754ee`, matching its published checksum file. npm did not publish a `gitHead` for these versions, so the commit binding comes from the release workflow head and the tag target rather than from registry metadata.
+
+These publication facts were re-read from the npm registry and the GitHub release API on 2026-11-17 and 2026-11-18. They describe this published release only: they do not activate `V-PROTO-UI-0010`, and they make no claim about any later release train.

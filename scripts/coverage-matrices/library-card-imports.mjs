@@ -16,7 +16,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback', './program']),
   }),
   'packages/adapters/base/src/material/initial-paint-receipt.ts': Object.freeze({
-    sourceSha256: 'cbee21d09ff8e43ca7bd0a61e1deb40a2b8c3aa09249550ae8446175e2419155',
+    sourceSha256: '26a4568ffe77dd689f1516ec50935e23bfb854490cf98a204583f986d690ecb6',
     specifiers: Object.freeze(['@proto.ui/module-feedback', './program', './style']),
   }),
   'packages/adapters/base/src/material/preferences.ts': Object.freeze({
@@ -24,7 +24,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: 'e94e9a2c7078189f79b44eafa12177ebad4aa3926bd26898b46448f6b10d4635',
+    sourceSha256: 'e5de14a554483dc0877673b8ea6618a4162e26b58a113a232e8102379a000ae9',
     specifiers: Object.freeze([
       './initial-paint-bridge',
       './paint-mutations',
@@ -32,6 +32,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './contact-motion',
       './contact-carrier',
       './contact-profile',
+      './style-tint-profile',
       './image-prepare',
       './geometry-watch',
       '@proto.ui/core',
@@ -45,7 +46,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/adapters/base/src/material/initial-paint-experiment.ts': Object.freeze({
-    sourceSha256: '4a5526992ba29b83df17917deb7560af47ea7ab7e53a04379535bb354f534451',
+    sourceSha256: 'ab70cf1a0698f1b0dab6c581dbf33cc66f46d30b74051e3a1685379d5ae69952',
     specifiers: Object.freeze([
       '@proto.ui/module-feedback',
       './program',
@@ -72,11 +73,19 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: '478e8eaaaf0cd0e8d5043acb4f2544c0c303791b1ccc0c38cb331215f9709876',
+    sourceSha256: 'a58a50d68d67fdca2a22e3312191372658daf4b8349855c7d6b5e73872c521bb',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
       '../../../../packages/prototypes/liquid-glass/src/theme',
+    ]),
+  }),
+  'packages/adapters/base/src/material/style-tint-profile.ts': Object.freeze({
+    sourceSha256: '5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246',
+    specifiers: Object.freeze([
+      './contact-profile',
+      './liquidgl-kernel.generated',
+      './style',
     ]),
   }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({
@@ -113,5 +122,8 @@ export const LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES = Object.freeze({
       .sourceSha256,
   'packages/adapters/base/src/material/preferences.ts':
     LIBRARY_CARD_IMPORT_ALLOWLIST['packages/adapters/base/src/material/preferences.ts']
+      .sourceSha256,
+  'packages/adapters/base/src/material/style-tint-profile.ts':
+    LIBRARY_CARD_IMPORT_ALLOWLIST['packages/adapters/base/src/material/style-tint-profile.ts']
       .sourceSha256,
 });

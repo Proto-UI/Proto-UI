@@ -1685,6 +1685,25 @@ async function alertDialogJourney({ page, previewer, capture }: Journey) {
 
 async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'wc', '[data-demo-ref="form"]', 1);
+  const hoverFacts = async () =>
+    (await runtimeControls(previewer)).getByRole('tab').evaluateAll((tabs) =>
+      tabs.map((tab) => ({
+        runtime: tab.getAttribute('data-runtime-tab'),
+        nativeHovered: tab.matches(':hover'),
+        hovered: (tab as HTMLElement & { getExposes(): { hovered: { get(): boolean } } })
+          .getExposes()
+          .hovered.get(),
+      }))
+    );
+  // Initial selection is a native click. Establish the unhovered state before
+  // comparing resting inactive ink with selected ink; hover intentionally uses
+  // the same foreground as selection in the underline appearance.
+  const hoverBeforeRest = await hoverFacts();
+  await page.mouse.move(0, 0);
+  await expect
+    .poll(async () => (await hoverFacts()).some((tab) => tab.nativeHovered || tab.hovered))
+    .toBe(false);
+  const hoverAfterRest = await hoverFacts();
   // These Form pages are generic embeds. Observe their real public commit event
   // and DOM ownership, rather than inventing a fixed-family generation counter.
   expect(await previewer.getAttribute('data-projection-mode')).not.toBe('fixed-family');
@@ -1706,7 +1725,11 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
       .elementHandle();
   const snapshots = [];
   try {
-    await capture('wc-rest', { labels: await labels(), events: await publications() }, previewer);
+    await capture(
+      'wc-rest',
+      { labels: await labels(), events: await publications(), hoverBeforeRest, hoverAfterRest },
+      previewer
+    );
     expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
     const expectedEvents: string[] = [];
     for (const [from, to, key] of [
@@ -1743,6 +1766,7 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
           oldSurfaceDisconnected: true,
           selected,
           inactive,
+          hover: await hoverFacts(),
         });
         await capture(`${to}-selected`, snapshots.at(-1), previewer);
         expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));

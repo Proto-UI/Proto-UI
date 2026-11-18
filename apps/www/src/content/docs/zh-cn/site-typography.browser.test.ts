@@ -1001,14 +1001,18 @@ describe.sequential('document reading native fallback', () => {
           expect(paint.size).toBe(titleSize);
           expect(paint.leading).toBe(titleLeading);
           expect(await page.locator('[data-typography-prototype]').count()).toBe(0);
-          if (name === 'shadcn') {
+          if (name === 'shadcn' || name === 'homepage') {
             record.descriptionPaint = await page
               .locator('main[data-pagefind-body] p[data-site-typography="tagline"]')
               .evaluate((node) => {
                 const style = getComputedStyle(node);
                 return { size: style.fontSize, leading: style.lineHeight };
               });
-            expect(record.descriptionPaint).toEqual({ size: '16px', leading: '26px' });
+            expect(record.descriptionPaint).toEqual(
+              name === 'homepage'
+                ? { size: '18px', leading: '28px' }
+                : { size: '16px', leading: '26px' }
+            );
           }
           await capture(page, record, `reading-fallback-${name}`);
         },

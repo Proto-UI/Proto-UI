@@ -8,8 +8,8 @@ import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 // D1 pilot boundary + D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 C/K:
 // the actual asDialogMask -> asTransition closure requires an I1 hidden recipe.
 describe('composed Shadow prototype admission', () => {
-  it('rejects an old companion for the full Dialog Mask without claiming current full Mask support', async () => {
-    const Parent = AdaptToWebComponent(dialogRoot, { registerAs: 'x-split-mask-parent' });
+  it.each([false, true])('rejects an old companion before mounted publication (deferred sink: %s)', async (deferred) => {
+    const Parent = AdaptToWebComponent(dialogRoot, { registerAs: `x-split-mask-parent-${deferred}` });
     const parent = new Parent();
     setElementProps(parent, { open: true });
     document.body.append(parent);
@@ -38,7 +38,8 @@ describe('composed Shadow prototype admission', () => {
       finishDisposal = resolve;
     });
     const Mask = AdaptToWebComponent(dialogMask, {
-      registerAs: 'x-split-mask-admission',
+      registerAs: `x-split-mask-admission-${deferred}`,
+      ...(deferred ? { createVisualSink: () => null } : {}),
       shadow: {
         mode: 'open',
         presentation: 'split',

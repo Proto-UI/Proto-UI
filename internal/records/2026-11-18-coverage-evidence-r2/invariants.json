@@ -1,0 +1,26 @@
+{
+  "method": "Native file bytes compared to git show of exact markup base; these are preservation checks, not runtime acceptance.",
+  "base": "56e3b443fa7774a464a5464935b9154a89d81143",
+  "checkerNonCommentBytesIdentical": true,
+  "websiteEqualsBasePlusOnlyPreparedParagraphBytes": true,
+  "preparedParagraphsSha256": "d47ee9afa4d785cf3aae6bcc69fff189c08509de44f95809199a16aba06169d1",
+  "websiteMatrixMarkedTableByteIdentical": true,
+  "harnessMatrixMarkedTableByteIdentical": true,
+  "libraryCardImportBindingsByteIdentical": true,
+  "styleTintProfileBindingRetained": true,
+  "startupClosureAndAllExistingWebsiteBytesRetained": true,
+  "sourceBindings": [
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "sha256": "771a174643f41e14131df075fc0b90ee5c9f452f383439e0cc1a0f9867c7e288"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "7483fa83f75c614c0617bf727d0c57fb0e8ac6001f8ba5a0eae5f4859fb1be75"
+    },
+    {
+      "path": "internal/agent-harness/dogfood-coverage-matrix.md",
+      "sha256": "df2ae3c9795b30c14530c008a0a819f2b4c2cd35f0600d4ad75d3b15322666da"
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "scope": "coverage-evidence-r2 annotations over markup base 56e3b443fa7774a464a5464935b9154a89d81143",
+  "commands": [
+    {
+      "command": "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "exitCode": 1,
+      "durationSeconds": 154.072,
+      "stdout": "validation/01.stdout.txt",
+      "stderr": "validation/01.stderr.txt",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "eafc2c35234ea6e9bdeb2308f0e0080ed28b57831d7865d12c2aa9f005a2604a"
+    },
+    {
+      "command": "/home/ezra/.omp/agent/bin/agent-heavy --wait 60 -- timeout --signal=TERM --kill-after=15s 600s /home/ezra/.cache/pnpm/dlx/55b47cd453c3906a2868fc6e903d16a7ab130112125c4e2693c915a341ef83ab/1a1e4020ca9-125746/node_modules/.pnpm/node@24.22.3/node_modules/node/bin/node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "requestedTestCommand": "node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "runtime": "v24.22.3",
+      "exitCode": 124,
+      "elapsedAtCollectionSeconds": 605.99,
+      "stdout": "validation/02-node24.22.3.stdout.txt",
+      "stderr": "validation/02-node24.22.3.stderr.txt",
+      "firstIndividualTestNames": [],
+      "startupObservation": "No individual test emitted before finite deadline; only file-level cancellation, zero passes. Static import set includes checker/spec-schema, TypeScript, MDX, parse5, Astro and Vue. No timing probes established whether import cost, catalog work or an event-loop stall caused startup delay."
+    },
+    {
+      "command": "node scripts/coverage-matrices/prototype-coverage.mjs --check",
+      "exitCode": 1,
+      "durationSeconds": 32.105,
+      "stdout": "validation/03.stdout.txt",
+      "stderr": "validation/03.stderr.txt",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "b282a6a33adb0c272319db3f8c2ae15021d0acc0ef7065444bed5f0cb8a17f8f"
+    },
+    {
+      "command": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check",
+      "exitCode": 0,
+      "durationSeconds": 39.127,
+      "stdout": "validation/04.stdout.txt",
+      "stderr": "validation/04.stderr.txt",
+      "stdoutSha256": "0daafc34a6e8e89fa0e8dfa5e960b3b5f7fdea46753c436bffc54a0761cf7799",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "runtime": {
+    "checkerProjectionAndGovernance": "v24.21.0",
+    "guardedFullTest": "v24.22.3",
+    "packageManager": "corepack pnpm@10.32.1 (repository resolver transitions)"
+  },
+  "testAttempts": [
+    {
+      "deadlineSeconds": 240,
+      "outcome": "supervisor timeout; partial pipe output not retained; exact orphan terminated"
+    },
+    {
+      "deadlineSeconds": 900,
+      "outcome": "supervisor timeout; file-level cancelled output retained"
+    },
+    {
+      "deadlineSeconds": 600,
+      "guardian": "/home/ezra/.omp/agent/bin/agent-heavy",
+      "runtime": "v24.22.3",
+      "outcome": "timeout124; no individual test emitted; no further retries"
+    }
+  ],
+  "projection": {
+    "exitCode": 1,
+    "sourceFieldDriftCount": 264,
+    "otherDiagnostics": [
+      "Candidate source cannot be validated: ENOENT: no such file or directory, open '/workspace/worktrees/markup-provenance-apply-1118/internal/fixtures/shadcn-style-source/LICENSE.md'",
+      "Readable view is stale; run with --write",
+      "Finf checklist view is stale"
+    ],
+    "attribution": "Pre-existing at exact markup base: both marked matrix tables are byte-identical; no projection regeneration authorized or performed."
+  },
+  "claims": {
+    "noExecutableChange": true,
+    "noNewOrRemovedCheckerDiagnosticIdentities": true,
+    "harnessControlPassed": false,
+    "harnessControlStatus": "not observed; full suite never emitted individual tests",
+    "coverageEarned": false,
+    "runtimeAcceptance": false,
+    "independentReview": false,
+    "push": false,
+    "publication": false,
+    "pushScope": "The applying seat performed no push of its own. The parent pushed this branch to origin/fix/coverage-evidence-r2-20261118 and opened pull request 1513 at this head after the record was written; no release, tag, dist-tag or version was published or activated."
+  },
+  "skipped": [
+    "No builds, installs, linters, formatters, browser/native instances, broad suites or generators.",
+    "Git hooks disabled per invocation to keep validation inside the exact requested four-command scope."
+  ]
+}

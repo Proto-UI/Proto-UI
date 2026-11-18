@@ -15,6 +15,16 @@ export type WebPresencePresentationOptions = {
     invalidate: (document: Document, phase: 'retire' | 'ready') => void
   ) => () => void;
 };
+const ownedOpacity = new WeakMap<HTMLElement, { value: string; priority: string }>();
+
+/** True only while this presentation lease still owns its zero-opacity write. */
+export function hasOwnedWebPresenceZeroOpacity(node: Element): boolean {
+  const el = node as HTMLElement;
+  const write = ownedOpacity.get(el);
+  return !!write && Number.parseFloat(write.value) === 0 &&
+    el.style.getPropertyValue('opacity') === write.value &&
+    el.style.getPropertyPriority('opacity') === write.priority;
+}
 /** Document identity is part of the physical binding, never semantic phase authority. */
 export function createWebPresencePresentationSink(
   el: HTMLElement,
@@ -170,9 +180,11 @@ function createDocumentPresenceSink(
         lost.add(name);
         writes.delete(name);
         baseline.delete(name);
+        if (name === 'opacity' && ownedOpacity.get(el) === value) ownedOpacity.delete(el);
       }
   };
   const clear = () => {
+    if (ownedOpacity.get(el) === writes.get('opacity')) ownedOpacity.delete(el);
     translation?.release();
     translation = null;
     for (const [name, value] of writes)
@@ -197,6 +209,7 @@ function createDocumentPresenceSink(
       value: el.style.getPropertyValue(name),
       priority: el.style.getPropertyPriority(name),
     });
+    if (name === 'opacity') ownedOpacity.set(el, writes.get(name)!);
     return true;
   };
   const px = (value: string | undefined) =>

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-trace",
+  "nextSkillId": "pui-docs",
+  "artifacts": [
+    {
+      "type": "authority-map",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/authority-map.json"
+    },
+    {
+      "type": "documentation-scope",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/bounded-subject.json"
+    },
+    {
+      "type": "implementation-authorization",
+      "reference": "/workspace/worktrees/markup-provenance-apply-1118/internal/records/2026-11-18-coverage-evidence-r2/orientation.json"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Exact prepared prose/comments authorized; decisions about future gate removal and hash re-review remain open."
+  ]
+}

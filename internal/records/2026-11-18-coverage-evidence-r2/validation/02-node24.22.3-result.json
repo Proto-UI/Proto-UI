@@ -1,0 +1,11 @@
+{
+  "command": "/home/ezra/.omp/agent/bin/agent-heavy --wait 60 -- timeout --signal=TERM --kill-after=15s 600s /home/ezra/.cache/pnpm/dlx/55b47cd453c3906a2868fc6e903d16a7ab130112125c4e2693c915a341ef83ab/1a1e4020ca9-125746/node_modules/.pnpm/node@24.22.3/node_modules/node/bin/node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+  "requestedTestCommand": "node --test scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+  "runtime": "v24.22.3",
+  "exitCode": 124,
+  "elapsedAtCollectionSeconds": 605.99,
+  "stdout": "validation/02-node24.22.3.stdout.txt",
+  "stderr": "validation/02-node24.22.3.stderr.txt",
+  "firstIndividualTestNames": [],
+  "startupObservation": "No individual test emitted before finite deadline; only file-level cancellation, zero passes. Static import set includes checker/spec-schema, TypeScript, MDX, parse5, Astro and Vue. No timing probes established whether import cost, catalog work or an event-loop stall caused startup delay."
+}

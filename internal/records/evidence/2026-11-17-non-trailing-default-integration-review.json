@@ -1,0 +1,79 @@
+{
+  "reviewer": "root",
+  "recordedAt": "2026-11-17T10:54:47.000418+00:00",
+  "applicationParent": "5f02229e911b4ef90f76843341c43f6d1c531af0",
+  "candidateBase": "0b8b403179759250664587a4a0e990a5354e02e4",
+  "interveningChanges": [
+    "internal/records/2026-11-17-compiler-array-every-callback.zh-CN.md",
+    "internal/records/2026-11-17-exposes-composition-review.zh-CN.md",
+    "internal/records/evidence/2026-11-17-compiler-array-every-callback.json",
+    "internal/records/evidence/2026-11-17-exposes-composition-review.json"
+  ],
+  "patchSha256": "9ace0411d844ecfc785b3886fd01b31421278cded5394fb4f89922a2414b0260",
+  "allEightFilesMatchFrozenCandidate": true,
+  "all31ValidationInputsMatchTestedCandidate": true,
+  "runtimeProductionOutsideThePatchUnchangedSinceCandidateBase": true,
+  "rawEvidenceReview": {
+    "path": "/workspace/scratch/8077f6e9f3a8/non-trailing-default-evidence/root-evidence-review.json",
+    "sha256": "c26fb78c8e31904b614d5df2a78f16717afde6796dd1d829a495d0e4b519aa3d"
+  },
+  "claim": "The independently read frozen candidate applies exactly to the published parent. The 13/8/109 runs are reused with byte-identical enumerated inputs; no new test run or full-head CI is claimed.",
+  "rawEvidenceInspection": {
+    "reviewer": "root",
+    "reviewedAt": "2026-11-17T10:52:45.231176+00:00",
+    "scope": "Independent raw evidence and source hash inspection; product3 and fixtures3 read in full separately.",
+    "runs": [
+      {
+        "label": "baseline-source",
+        "exitCode": 1,
+        "counts": [13, 8, 5, 0],
+        "inputsCount": 24,
+        "rawLogAndJsonHashesVerified": true,
+        "inputsUnchanged": true
+      },
+      {
+        "label": "baseline-strict",
+        "exitCode": 1,
+        "counts": [8, 3, 5, 0],
+        "inputsCount": 24,
+        "rawLogAndJsonHashesVerified": true,
+        "inputsUnchanged": true
+      },
+      {
+        "label": "candidate-source",
+        "exitCode": 0,
+        "counts": [13, 13, 0, 0],
+        "inputsCount": 31,
+        "rawLogAndJsonHashesVerified": true,
+        "inputsUnchanged": true
+      },
+      {
+        "label": "candidate-strict",
+        "exitCode": 0,
+        "counts": [8, 8, 0, 0],
+        "inputsCount": 31,
+        "rawLogAndJsonHashesVerified": true,
+        "inputsUnchanged": true
+      },
+      {
+        "label": "candidate-affected",
+        "exitCode": 0,
+        "counts": [109, 109, 0, 0],
+        "inputsCount": 31,
+        "rawLogAndJsonHashesVerified": true,
+        "inputsUnchanged": true
+      }
+    ],
+    "unchangedOriginal21Fixtures": true,
+    "notFormalApproval": true,
+    "baselineAndCandidateOriginalFixtureHashesIndependentlyCompared": {
+      "packages/compiler/test/non-trailing-default-arguments.test.ts": "51fbb1c896c2ccb39d1a882f2df9612ff3087140dba5363e7ea044c0e4fca21f",
+      "packages/compiler/test/non-trailing-default-types.test.ts": "caafc178004e7e6487b5160aaa1672c1a04b2715250c99be35218a7d8fbaebbe"
+    }
+  },
+  "languageReferenceCheckedByRoot": {
+    "url": "https://www.typescriptlang.org/docs/handbook/functions.html",
+    "section": "Optional and Default Parameters",
+    "verification": "Official text explicitly permits a default before a required parameter and requires an explicit undefined argument to select that default."
+  }
+}

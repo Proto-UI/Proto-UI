@@ -1,6 +1,6 @@
 # Proto UI 0.3.0-alpha.1
 
-> Draft release notes。本版本尚未发布；npm、Git tag、GitHub prerelease、dist-tag 与不可变 snapshot 证据仍待完成。
+> 已于 2026 年 9 月 20 日通过 npm `next` channel 发布。已发布 `package-bom-0.3.0-alpha.1.json` 发行物料列出的 43 个公开 package、`v0.3.0-alpha.1` tag、prerelease GitHub Release 与不可变 spec snapshot 共享这一精确发行身份。
 
 Proto UI 0.3.0-alpha.1 是 0.3 alpha release train 的可测试延续。它仍然是 alpha：不是 release candidate，也不构成 stable compatibility 承诺。
 
@@ -20,6 +20,8 @@ Proto UI 0.3.0-alpha.1 是 0.3 alpha release train 的可测试延续。它仍�
 - npm 无法移除唯一 bootstrap 版本上的 `latest` 时，保留其 deprecated bootstrap 遗留状态，但不让它进入 release channel。
 - 仅当 `next` 指向一个已存在的非 bootstrap prerelease 时允许该遗留状态；它不改变 `latest`，也不伪造 stable 替换版本。
 
-## 发布状态
+## 发版验证
 
-本准备变更不发布 package、不创建 `v0.3.0-alpha.1`、不移动 npm `next`，也不激活 `V-PROTO-UI-0010`。这些动作必须在变更合入 `main` 后，基于最终已评审 package set 通过完整 release rehearsal、受保护发布与独立 evidence review 完成。
+受保护的发布 workflow 运行 <https://github.com/Proto-UI/Proto-UI/actions/runs/35504873221> 对 head `e7961001af1d313b1518be694f866b0e98337b0d` 的结论为 `success`，该 commit 正是 `v0.3.0-alpha.1` lightweight tag 解析到的对象。npm 在 `2026-09-20T10:24:41.722Z` 写入首个 package，在 `2026-09-20T10:31:33.390Z` 写入最后一个 package；prerelease GitHub Release 的发布时间为 `2026-09-20T10:28:40Z`。已发布发行 BOM 中的全部 43 个 package 都存在精确版本 `0.3.0-alpha.1` 且带 registry integrity，`next` 对每一个都解析到 `0.3.0-alpha.1`。该 Release 附带的不可变 spec snapshot 的 SHA-256 为 `e483b661a09bb333b12c99d9639c016cb5bb6829281b939012859864ea8754ee`，与其已发布 checksum 文件一致。npm 未为这些版本发布 `gitHead`，因此 commit 绑定来自发布 workflow 的 head 与 tag 目标，而不是 registry metadata。
+
+这些发行事实已于 2026-11-17 与 2026-11-18 从 npm registry 与 GitHub release API 复读。它们只描述本次已发布发行：不激活 `V-PROTO-UI-0010`，也不对后续任何 release train 作断言。
