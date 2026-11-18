@@ -22,6 +22,8 @@ const Component = adapt(prototype);
 
 The Adapter uses Vue 2 options lifecycle and `render(h)` APIs; it does not require the Vue 2.7 Composition API. `@proto.ui/adapter-vue` remains the separate Vue 3 Adapter.
 
+On component destruction, the owning Runtime finishes State disconnect notifications and subscription cleanup before the Adapter invalidates exposed callables. Retained callables become unavailable after terminal disposal; repeatable view detach keeps the instance's exposed surfaces alive.
+
 ## Document theme
 
 The default `colorScheme` reader follows root `class` / `data-theme` markers and then the system preference. Mounted colorScheme Rule consumers update their existing style contribution when that effective value changes; view detach and terminal disposal release their subscription.

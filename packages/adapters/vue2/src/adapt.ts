@@ -592,8 +592,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         state.activationVersion += 1;
         state.propWatchDisposer?.();
         state.propWatchDisposer = null;
-        state.scopedExposesReader.invalidate();
-        state.invoke = null;
+        // Runtime State disconnect observers still release exposed subscriptions.
+        // The session's onAfterUnmount invalidates exposes after that cleanup.
         void state.owner.dispose();
         state.lastInitRoot = null;
       },
