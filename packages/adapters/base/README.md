@@ -8,6 +8,8 @@ Provides the base template, shared host wiring, and common runtime bridges for b
 
 When terminal Runtime disposal completes synchronously, `createAdapterHost().dispose()` invokes `afterUnmount` once and rejects with its thrown value, including falsy values. An earlier Runtime disposal failure remains the primary rejection on this path; repeated disposal returns the same completion.
 
+An issued Expose State cancellation keeps its identity when returned again through the same Adapter reader, including inside a public record. It cancels the subscription while the owner is live and becomes inert after reader invalidation. New exposed calls still require a live callback scope.
+
 `createDefaultWebColorSchemeSource(getter)` pairs a `createDefaultWebMetaGetter()` reader with lazy document-theme invalidation. Within one loaded module, subscribers share a root MutationObserver and color-scheme media-query listener; the last release removes both. Root dark markers take precedence, followed by explicit light and the system preference. Without Document or MutationObserver no source is supplied; without matchMedia the existing root-marker and light fallback behavior remains.
 
 This is the default same-document light-DOM realization of [HC-COLOR-SCHEME-INVALIDATION-0001](../../../spec/host-caps/HC-COLOR-SCHEME-INVALIDATION-0001.yaml), which remains draft. It is not a general custom-provider, subtree-theme, cross-document or SSR interface.

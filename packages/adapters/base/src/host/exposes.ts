@@ -63,12 +63,15 @@ export function createScopedExposesReader(
         const projected = projectValue(Reflect.apply(value, currentReceiver(), args));
         // An issued State cancellation can be called during terminal
         // notification. Expose State owns teardown once this scope retires.
-        result =
-          stateSubscribe && typeof projected === 'function'
-            ? () => {
-                if (live) projected();
-              }
-            : projected;
+        if (stateSubscribe && typeof projected === 'function') {
+          const cancel = () => {
+            if (live) projected();
+          };
+          projectedCallables.add(cancel);
+          result = cancel;
+        } else {
+          result = projected;
+        }
       });
       return result;
     };
