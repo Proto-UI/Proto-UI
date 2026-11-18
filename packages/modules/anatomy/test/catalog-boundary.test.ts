@@ -96,6 +96,67 @@ describe('Anatomy catalog boundaries', () => {
     }
   });
 
+  it('enumerates only family claims in instance registration order', () => {
+    const family = createAnatomyFamily('claim-enumeration', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: '*' } },
+      },
+    });
+    const unrelated = createAnatomyFamily('claim-enumeration', family.decl);
+    const modules: AnatomyModuleImpl[] = [];
+    const root = {};
+    const make = (name: string, instance = {}) => {
+      const caps = makeCaps({
+        instance,
+        getParent: (token) => (token === root ? null : root),
+        getPrototype: () => ({ name }),
+      });
+      const owner = new AnatomyModuleImpl(caps, name, {
+        has: () => true,
+        get: () => name,
+        getAll: () => ({}),
+        keys: () => [],
+      });
+      modules.push(owner);
+      return owner;
+    };
+    const rootOwner = make('root', root);
+    const readNames = () => rootOwner.port.parts(family)?.map((part) => part.getExpose('name'));
+    try {
+      rootOwner.claim(family, { role: 'root' });
+      const sharedToken = {};
+      const shared = make('shared', sharedToken);
+      shared.claim(unrelated, { role: 'item' });
+      make('family-only').claim(family, { role: 'item' });
+      for (let i = 0; i < 24; i++) make('unrelated').claim(unrelated, { role: 'item' });
+      expect(readNames()).toEqual(['root', 'family-only']);
+
+      shared.claim(family, { role: 'item' });
+      const get = vi.spyOn(Map.prototype, 'get');
+      let unrelatedReads = 0;
+      try {
+        expect(readNames()).toEqual(['root', 'shared', 'family-only']);
+        unrelatedReads = get.mock.calls.filter(([key], index) => {
+          const bucket = get.mock.contexts[index];
+          return (
+            key === family && bucket instanceof Map && bucket.has(unrelated) && !bucket.has(family)
+          );
+        }).length;
+      } finally {
+        get.mockRestore();
+      }
+
+      shared.dispose();
+      expect(readNames()).toEqual(['root', 'family-only']);
+      make('renewed', sharedToken).claim(family, { role: 'item' });
+      expect(readNames()).toEqual(['root', 'family-only', 'renewed']);
+      expect(unrelatedReads).toBe(0);
+    } finally {
+      modules.reverse().forEach((owner) => owner.dispose());
+    }
+  });
+
   it('T-ANATOMY-0004-CASE-HOST: isolates nearest domains and uses stable fallback without host targets', () => {
     const family = createAnatomyFamily('identity', {
       roles: {
