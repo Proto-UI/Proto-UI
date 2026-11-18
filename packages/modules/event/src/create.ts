@@ -31,6 +31,7 @@ export function createEventModule(ctx: ModuleFactoryArgs): EventModule {
         },
         port: {
           hasRootRegistration: (type) => impl.hasRootRegistration(type),
+          hasGlobalRegistration: (type) => impl.hasGlobalRegistration(type),
           getGlobalInputScope: () => impl.getGlobalInputScope(),
           getInputContext: (payload) => impl.getInputContext(payload),
           on: ((type: EventTypeV0, cb: EventInternalCallback, options?: HostEventListenerOptions) =>

@@ -299,6 +299,10 @@ export class EventModuleImpl extends ModuleBase {
     return this.kernel.hasAny('root', type);
   }
 
+  hasGlobalRegistration(type: EventTypeV0): boolean {
+    return this.kernel.hasAny('global', type);
+  }
+
   bind(dispatch: EventDispatch) {
     this.ensureRuntime('rt.event.bind');
 

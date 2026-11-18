@@ -85,6 +85,8 @@ export function createWebProtoEventRouter(opt: {
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
   /** Setup-time registration inventory for stateless root events. */
   rootRegistrations?: { hasRootRegistration?(type: SemanticEventType): boolean };
+  /** Setup-time global key.up demand if the adapter has the complete inventory. */
+  globalKeyUp?: boolean;
   globalEl?: EventTarget; // window by default
   isEnabled: () => boolean; // bridge to eventGate
 }) {
@@ -676,16 +678,23 @@ export function createWebProtoEventRouter(opt: {
     })
   );
 
-  unsubs.push(
-    listen(globalEl, 'keyup', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;
-      emit(protoGlobalBus, 'key.up', e);
-      if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
-        emit(protoRootBus, 'key.up', e);
-      }
-      if (isCommitKey(e.key)) queueMicrotask(() => (suppressFollowupDirectClick = false));
-    })
-  );
+  // A committed key still uses release to retire its follow-up click suppression.
+  if (
+    opt.globalKeyUp !== false ||
+    rootRegistrations?.hasRootRegistration?.('key.up') !== false ||
+    rootRegistrations?.hasRootRegistration?.('press.commit') !== false
+  ) {
+    unsubs.push(
+      listen(globalEl, 'keyup', (e: KeyboardEvent) => {
+        if (!isEnabled()) return;
+        emit(protoGlobalBus, 'key.up', e);
+        if (rootProxy.__hasProtoListeners('key.up') && shouldRouteToCurrentRoot(e)) {
+          emit(protoRootBus, 'key.up', e);
+        }
+        if (isCommitKey(e.key)) queueMicrotask(() => (suppressFollowupDirectClick = false));
+      })
+    );
+  }
 
   // click -> press.commit (root)
   // 只响应真实的 MouseEvent；由 event.emit() 分发的 CustomEvent 不触发 press.commit，
