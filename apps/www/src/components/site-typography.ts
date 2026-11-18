@@ -397,8 +397,17 @@ export function siteTypographyParticipant(
         if (disposed) return;
         disposed = true;
         restoreNative();
-        // Legal renderer parent ownership restored before framework teardown.
-        if (batch) for (const view of views) batch.append(view.carrier);
+        // Keep the renderer's teardown order without reconnecting an already
+        // restored batch. Appending the carriers would produce this same suffix.
+        if (batch) {
+          let tail = batch.lastChild;
+          let index = views.length - 1;
+          while (index >= 0 && tail === views[index]!.carrier) {
+            tail = tail.previousSibling;
+            index--;
+          }
+          if (index >= 0) for (const view of views) batch.append(view.carrier);
+        }
         try {
           if (renderer) await renderer.destroy();
           else releaseHostMount(host);
