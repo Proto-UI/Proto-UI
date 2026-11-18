@@ -89,10 +89,46 @@ for (const direction of ['ltr', 'rtl'] as const)
               '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}',
           });
           await page.addScriptTag({ content: bundle });
-          await page.evaluate((dir) => window.selectGroupProof.mount(dir), direction);
+          const mark = (stage: string) => console.info('[grouped-select-stage]', stage);
+          mark('mount-start');
+          await page.evaluate((dir) => {
+            const report = document.documentElement.dataset;
+            report.selectGroupMount = 'pending';
+            void window.selectGroupProof.mount(dir).then(
+              () => { report.selectGroupMount = 'fulfilled'; },
+              (error: unknown) => { report.selectGroupMount = `rejected: ${String(error)}`; }
+            );
+          }, direction);
+          try {
+            await page.waitForFunction(
+              () => document.documentElement.dataset.selectGroupMount !== 'pending',
+              undefined,
+              { timeout: 3_000 }
+            );
+          } finally {
+            console.info('[grouped-select-mount]', await page.evaluate(() => ({
+              mount: document.documentElement.dataset.selectGroupMount,
+              state: window.selectGroupProof.readState(),
+              hasTrigger: Boolean(document.querySelector('[data-demo-ref="trigger"]')),
+              groupCount: document.querySelectorAll('[role="group"]').length,
+            })));
+          }
+          expect(await page.locator('html').getAttribute('data-select-group-mount')).toBe('fulfilled');
+          mark('trigger-click');
           await page.locator(ref('trigger')).click();
-          await page.locator(ref('react')).waitFor({ state: 'visible' });
+          mark('trigger-clicked');
+          try {
+            await page.locator(ref('react')).waitFor({ state: 'visible', timeout: 3_000 });
+          } finally {
+            console.info('[grouped-select-open]', await page.evaluate(() => ({
+              state: window.selectGroupProof.readState(),
+              expanded: document.querySelector('[data-demo-ref="trigger"]')?.getAttribute('aria-expanded'),
+              item: document.querySelector('[data-demo-ref="react"]')?.getBoundingClientRect().toJSON(),
+            })));
+          }
+          mark('item-visible');
           await page.waitForFunction(() => window.selectGroupProof.readState().phase === 'entered');
+          mark('entered');
           expect(await page.evaluate(() => window.selectGroupProof.readState().diagnostic)).toBe(
             ''
           );

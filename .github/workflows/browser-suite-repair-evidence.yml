@@ -4,10 +4,10 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: browser-style-alignment-${{ github.ref }}
+  group: grouped-select-trace-${{ github.ref }}
   cancel-in-progress: false
 env:
-  CANDIDATE_SHA: a9c05c2cb7ba4927bd59b3a164109c0087650cd9
+  CANDIDATE_SHA: ${{ github.sha }}
 jobs:
   isolated-controls:
     runs-on: ubuntu-24.04
@@ -16,8 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: style-and-alignment
-            suite: demo-prototype-style-closure
+          - name: grouped-select-trace
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,10 +58,9 @@ jobs:
           PROTO_UI_CODE_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/code-surfaces
         run: |
           set -euo pipefail
-          FILE="apps/www/src/content/docs/zh-cn/${SUITE}.browser.test.ts"
+          FILE=packages/web-conformance/test/select-group.browser.test.ts
           test -f "$FILE"
           files=("$FILE")
-          files+=(packages/web-conformance/test/select-target-alignment.browser.test.ts)
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           git rev-parse HEAD | tee "$RUNNER_TEMP/homepage-evidence/source-sha.txt"
           export PROTO_UI_TARGET_ALIGNMENT_EVIDENCE="$RUNNER_TEMP/homepage-evidence/select-alignment"
@@ -76,6 +74,7 @@ jobs:
             echo "Selected suite: $FILE"
             timeout --signal=TERM --kill-after=10s 600s \
               corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${files[@]}" \
+                --testNamePattern 'real grouped Select: ltr light rem16' \
                 --reporter=default --reporter=json \
                 --outputFile.json="$RUNNER_TEMP/homepage-evidence/vitest.json"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/isolated-regressions.log"
