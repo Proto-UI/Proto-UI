@@ -724,6 +724,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         thisEl.replaceChildren(...externalChildren);
       };
 
+      let assertPendingSplitAdmission: (() => void) | undefined;
       const createHostSession = (wiring: ReturnType<typeof createHostWiring>) =>
         createWebComponentHostSession({
           proto,
@@ -757,6 +758,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: (event) => {
+            if (event.type === 'mount.phase' && event.phase === 'mounted')
+              assertPendingSplitAdmission?.();
             opt.diagnostics?.onLifecycleEvent?.(event);
             if (event.type === 'mount.phase') {
               focusIngressReady = event.phase === 'mounted';
@@ -799,6 +802,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           acquiredFinalStyleSink.release(view);
         };
         let disposed = false;
+        let acquiringProjection = true;
+        let acquisitionFailed = false;
+        let acquisitionError: unknown;
+        const assertSplitAdmission = () => {
+          if (acquisitionFailed) throw acquisitionError;
+        };
         let focusRetryGeneration = 0;
         let disposeFocusBridge: (() => void) | null = null;
         let releaseRequestedTargetReady: (() => void) | undefined;
@@ -812,6 +821,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         const disposeView = () => {
           if (disposed) return;
           disposed = true;
+          if (assertPendingSplitAdmission === assertSplitAdmission)
+            assertPendingSplitAdmission = undefined;
           focusRetryGeneration += 1;
           const releases = [
             releaseFinalStyleSink,
@@ -986,9 +997,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           // During acquisition, retain a split admission failure without queuing
           // an observer error, then reject the complete view transaction below.
           // Once acquired, ordinary projection failures keep their usual path.
-          let acquiringProjection = true;
-          let acquisitionFailed = false;
-          let acquisitionError: unknown;
           const project = (action: () => void) => {
             if (acquiringProjection && acquisitionFailed) return;
             try {
@@ -1070,6 +1078,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 release: releaseFinalStyleSink,
               }
             : undefined;
+          // The mounted transition can flush initial Rule styles before
+          // attachView returns. Reject a failed split view before forwarding it.
+          if (splitEffects) assertPendingSplitAdmission = assertSplitAdmission;
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
@@ -1189,7 +1200,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             createSession: createHostSession,
           });
           acquiringProjection = false;
-          if (acquisitionFailed) throw acquisitionError;
+          assertSplitAdmission();
           if (pendingVisualFrame) {
             const frame = pendingVisualFrame;
             pendingVisualFrame = null;
@@ -1207,6 +1218,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             disposeView();
           } catch {}
           throw error;
+        } finally {
+          if (assertPendingSplitAdmission === assertSplitAdmission)
+            assertPendingSplitAdmission = undefined;
         }
         // A retained owner already has its terminal disposer and public binding.
         // Publication failure leaves this fully owned view available for cleanup.

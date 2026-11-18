@@ -56,6 +56,7 @@ describe('composed Shadow prototype admission', () => {
       diagnostics: {
         onLifecycleEvent(event) {
           lifecycleEvents.push(event.type);
+          if (event.type === 'mount.phase') lifecycleEvents.push(event.phase);
           if (event.type === 'instance.dispose.done') finishDisposal();
         },
       },
@@ -79,8 +80,10 @@ describe('composed Shadow prototype admission', () => {
       }
       expect(errors).toHaveLength(1);
       expect(errors[0]).toBeInstanceOf(Error);
+      expect(String(errors[0])).toMatch(/hidden.*I1 recipe/);
       await disposed;
       expect(lifecycleEvents).toContain('mount.commit.done');
+      expect(lifecycleEvents).not.toContain('mounted');
       expect(lifecycleEvents).not.toContain('mount.mounted');
       expect(environmentListeners.size).toBe(0);
       expect(host.getExposes?.() ?? {}).toEqual({});
