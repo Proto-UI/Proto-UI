@@ -383,9 +383,15 @@ export function createTargetAlignmentLease(
             for (const target of sizeTargets) {
               const clipped = hasBorderBoxInlineClipping(target, frame);
               if (clipped !== false) {
+                const sample = (node: HTMLElement) => {
+                  const css = view.getComputedStyle(node);
+                  return { box: node.getBoundingClientRect().toJSON(), tokens: node.getAttribute('data-pui-style'),
+                    sizing: css.boxSizing, width: css.width, padding: css.padding, border: css.borderWidth,
+                    margin: css.margin, overflow: css.overflow, inline: node.style.cssText };
+                };
                 console.info('[select-size] ' + JSON.stringify({ where: 'inline-clipping', clipped,
                   target: target.getAttribute('data-demo-ref'), rect: target.getBoundingClientRect().toJSON(),
-                  frame: frame.getBoundingClientRect().toJSON() }));
+                  frame: sample(frame), surface: sample(targets.surface), viewport: sample(targets.scrollport) }));
                 rejectAdmission(clipped === null ? 'invalid-geometry' : 'size-conflict');
                 return;
               }
