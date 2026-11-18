@@ -675,7 +675,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           expect(geometry.border).toBe('0px');
           expect(geometry.shadow).toBe('none');
           expect(geometry.columns).toBe(width >= 1200 ? 4 : width >= 640 ? 2 : 1);
-          const expectedTriggerHeight = width >= 768 ? 36 : 44;
+          const expectedTriggerHeight = 44;
           if (
             !Number.isFinite(geometry.triggerHeight) ||
             Math.abs(geometry.triggerHeight - expectedTriggerHeight) >= 0.5
@@ -714,7 +714,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
               );
             }
           }
-          expect(geometry.triggerHeight).toBeCloseTo(44, 0);
+          expect(geometry.triggerHeight).toBeCloseTo(expectedTriggerHeight, 0);
           expect(geometry.fits, `${colorScheme} ${width}px overflow`).toBe(true);
         }
         expect(await home.locator('[data-projection-control="component"]').count()).toBe(0);
