@@ -138,7 +138,7 @@ describe('Docs header offset targets the actual MarkdownContent wrapper', () => 
 
   it('removes the upstream root offset only when our measured docs Header owns clearance', () => {
     expect(frame).toMatch(
-      /:global\(html:has\(\.site-page-frame \[data-docs-site-header\]\)\)\s*\{\s*scroll-padding-top: 0;/
+      /:global\(html:has\(\.site-page-frame > header \[data-docs-site-header\]\)\)\s*\{\s*scroll-padding-top: 0;/
     );
     expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
   });

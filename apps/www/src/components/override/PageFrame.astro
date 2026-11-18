@@ -142,7 +142,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   /* Our measured Header margin owns anchor clearance for every native main
      target, including PageTitle and legacy anchors outside MarkdownContent.
      Starlight root padding would otherwise add a second header offset. */
-  :global(html:has(.site-page-frame [data-docs-site-header])) {
+  :global(html:has(.site-page-frame > header [data-docs-site-header])) {
     scroll-padding-top: 0;
   }
   /* Keep the Header condition local so content mutations cannot invalidate
