@@ -192,6 +192,34 @@ describe('Website owner ref observation, using real MutationObserver delivery', 
     expect(writes).toBe(1);
   });
 
+  it('does not recheck indexed elements after removing only text and comment nodes', async () => {
+    const beforeMutation = observeMutationDelivery();
+    const a = mount('demo-a');
+    const b = mount('demo-b');
+    const text = document.createTextNode('label');
+    const comment = document.createComment('marker');
+    const attached = beforeMutation(a.host, { type: 'childList' }, (record) =>
+      [...record.addedNodes].includes(text)
+    );
+    a.host.append(text, comment);
+    await attached.delivered;
+    await Promise.resolve();
+
+    const checks = vi.spyOn(document, 'contains');
+    const delivered = beforeMutation(a.host, { type: 'childList' }, (record) =>
+      [...record.removedNodes].includes(text)
+    );
+    text.remove();
+    comment.remove();
+    await delivered.delivered;
+    await settle();
+
+    expect(delivered.observerCount).toBeGreaterThan(0);
+    expect(a.refs.item).toBe(a.item);
+    expect(b.refs.item).toBe(b.item);
+    expect(checks).not.toHaveBeenCalledWith(b.item);
+  });
+
   it('prunes indexed refs when a removed ancestor is emptied and its markers disappear before delivery', async () => {
     const a = mount('demo-a');
     const wrapper = document.createElement('section');

@@ -1,11 +1,12 @@
-import type { Operation, PrototypeIR } from './ir';
+import type { ExpressionIR, Operation, PrototypeIR } from './ir';
 
 type ModuleBinding = NonNullable<PrototypeIR['moduleBindings']>[number];
 
 /** Semantic helpers close over the current generated owner; scalar module cells do not. */
 export function partitionModuleBindings(
   ir: PrototypeIR,
-  operationUsesOwner: (operation: Operation) => boolean = () => true
+  operationUsesOwner: (operation: Operation) => boolean = () => true,
+  expressionUsesOwner: (expression: ExpressionIR) => boolean = () => false
 ): {
   shared: ModuleBinding[];
   owned: ModuleBinding[];
@@ -25,7 +26,8 @@ export function partitionModuleBindings(
       const node = value as Record<string, unknown>;
       if (
         node.kind === 'authored-hook' ||
-        (node.kind === 'operation' && operationUsesOwner(node.operation as Operation))
+        (node.kind === 'operation' && operationUsesOwner(node.operation as Operation)) ||
+        expressionUsesOwner(node as unknown as ExpressionIR)
       )
         owned.add(binding.name);
       if (

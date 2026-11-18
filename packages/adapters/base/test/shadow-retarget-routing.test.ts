@@ -75,7 +75,10 @@ describe('C-EVENT-0003-E: retargeted physical root events are not portal fallbac
       expect(calls).toBe(i + 1);
     }
   });
-  it('routes a descendant owner only to its own root', () => {
+  it.each([
+    ['click', 'press.commit'],
+    ['contextmenu', 'context.menu'],
+  ])('routes descendant %s only to its own root', (native, semantic) => {
     const f = fixture(2);
     const child = document.createElement('button');
     f.root.append(child);
@@ -84,9 +87,9 @@ describe('C-EVENT-0003-E: retargeted physical root events are not portal fallbac
       childRouter = f.routerFor(child);
     let parentCalls = 0,
       childCalls = 0;
-    parentRouter.rootTarget.addEventListener('press.commit', () => parentCalls++);
-    childRouter.rootTarget.addEventListener('press.commit', () => childCalls++);
-    dispatch(child, 'click');
+    parentRouter.rootTarget.addEventListener(semantic, () => parentCalls++);
+    childRouter.rootTarget.addEventListener(semantic, () => childCalls++);
+    dispatch(child, native);
     expect(childCalls).toBe(1);
     expect(parentCalls).toBe(0);
   });

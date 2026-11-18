@@ -658,7 +658,7 @@ function rewriteManifestField(manifest, field) {
 }
 
 function rewriteExports(value, isTypes = false, authored = false) {
-  if (authored) return value;
+  if (authored || (typeof value === 'string' && value.endsWith('.proto.ts'))) return value;
   if (typeof value === 'string') return rewritePath(value, isTypes || value.endsWith('.d.ts'));
   if (Array.isArray(value)) return value.map((item) => rewriteExports(item, isTypes));
   if (value && typeof value === 'object') {

@@ -11,6 +11,7 @@ import {
   valueAssignable,
   valueTypeEqual,
   joinValueTypes,
+  objectValueType,
   isTemplateChildType,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
@@ -20,6 +21,8 @@ import {
   PRESENTATION_FRAME_TYPE,
   PRESENTATION_OUTCOME_TYPE,
   PRESENTATION_RECEIPT_TYPE,
+  SCROLL_REQUEST_TYPE,
+  SCROLL_REQUEST_OUTCOME_TYPE,
 } from './core-value-types';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
 
@@ -104,6 +107,8 @@ export interface ArgumentRule {
   fields?: Readonly<Record<string, ArgumentRule>>;
   /** Fields are checked structurally; this is a data contract, not a TypeScript AST schema. */
   schema?: DataType;
+  /** A finite checked record contract may also retain nominal host capabilities. */
+  valueSchema?: ValueType;
   callback?: Omit<CallbackRule, 'at'>;
 }
 export interface OperationRule {
@@ -1925,8 +1930,8 @@ export const OPERATION_RULES = {
     'scroll',
     'request',
     callbackPhase,
-    'void',
-    [record],
+    SCROLL_REQUEST_OUTCOME_TYPE,
+    [{ role: 'value', valueSchema: SCROLL_REQUEST_TYPE }],
     [effect('write', 'view')]
   ),
   'scroll.getSnapshot': rule(
@@ -2581,6 +2586,18 @@ export function argumentData(argument: OperationArgument): DataType | undefined 
   return data(argument.type);
 }
 
+/** Literal evidence after expression validation, retaining each checked nominal field.
+ * References keep their checked type; this never recovers facts from a stale initializer. */
+export function argumentValue(argument: OperationArgument): ValueType {
+  if (argument.kind === 'conditional' && argument.then && argument.otherwise)
+    return joinValueTypes([argumentValue(argument.then), argumentValue(argument.otherwise)]);
+  if (argument.kind === 'record' && argument.entries)
+    return objectValueType(
+      argument.entries.map(({ key, value }) => ({ name: key, type: argumentValue(value) }))
+    );
+  return argumentData(argument) ?? argument.type;
+}
+
 /** Receiver, argument and callback validation shared by source admission and external IR.
  * Declaration/reference resolution (prop/expose/context ownership) remains caller-owned. */
 export function validateOperationArguments(
@@ -2636,6 +2653,11 @@ export function validateOperationArguments(
       issues.push({ code, message, argument: index });
     if (requirement.types && !requirement.types.some((type) => assignable(argument.type, type)))
       reject('argument-type', `Argument ${index + 1} has an incompatible type.`);
+    if (
+      requirement.valueSchema &&
+      !valueAssignable(argumentValue(argument), requirement.valueSchema)
+    )
+      reject('argument-type', `Argument ${index + 1} does not satisfy its checked value schema.`);
     if (
       requirement.types?.includes('module-config') &&
       typeof argument.type !== 'string' &&

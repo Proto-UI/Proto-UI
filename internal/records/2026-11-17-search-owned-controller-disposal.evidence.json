@@ -1,0 +1,1303 @@
+{
+  "schemaVersion": 1,
+  "report": {
+    "scope": "issue-1488-E-search-owned-controller-disposal",
+    "createdAt": "2026-11-17T09:25:36.659041+00:00",
+    "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+    "candidate": {
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "branch": "fix/www-search-disposal-20261117",
+      "worktree": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "files": [
+        "apps/www/src/components/site-search-commands.ts",
+        "apps/www/src/components/site-search-commands.disposal.test.ts",
+        "internal/records/2026-11-17-search-owned-controller-disposal.md"
+      ],
+      "fileHashes": {
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "9f5af06f14f109841469a20806a0e211e0c7a9ac7fac2165ea4b11ef98023085",
+        "internal/records/2026-11-17-search-owned-controller-disposal.md": "d0616578914b02f0ed24cd0a6f5710fca1e44c6f94ebebf2fe9ca7a525f249f6"
+      },
+      "patch": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/candidate.patch",
+      "patchSha256": "9a89810b52fb689a3be8d3dbe77653cb390c837615af0443eb1c3fedf165fded",
+      "productPatchSha256": "6acc71998ef85e32087ab5e9c850bcb28cd5330eda1dfaff5414cd459fadff78",
+      "status": "local uncommitted candidate; no external writes",
+      "policyFilesChanged": false,
+      "sourceDelta": "one documentation owner function: cache shared teardown promise; allSettled independent opener/Dialog; wait retired unchanged; throw first rejected value unchanged",
+      "finalRuntimeLogicVsAffectedRun": "byte identical after removing only the two incorrect comments about candidate callback scheduling"
+    },
+    "status": "focused passed; affected public-mode remains failed on baseline and initial candidate",
+    "environment": {
+      "node": "v24.22.1",
+      "pnpm": "10.32.1",
+      "vitest": "2.1.9",
+      "DOM": "happy-dom 15.11.7",
+      "dependencies": "isolated physical node_modules; offline frozen-lockfile ignore-scripts install; no borrowed generated assets"
+    },
+    "checks": [
+      {
+        "label": "red-initial",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-initial.receipt.json",
+        "receiptSha256": "7c250a6e83cf5e5bc262715ae4a08cedfa19ae79cec261ba1099a8697d1e0af4",
+        "returncode": 1,
+        "elapsedSeconds": 8.24,
+        "summary": {
+          "numTotalTests": 9,
+          "numPassedTests": 2,
+          "numFailedTests": 7,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": false
+        },
+        "unhandledRejectionSections": 0,
+        "logSha256": "0946413e8eb916a190dbfe7b45f242a90202865990c80590ddae95c872581f36"
+      },
+      {
+        "label": "green-initial",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/green-initial.receipt.json",
+        "receiptSha256": "a7ec224b9d52b76868847a2109b806e5d59b66129e7bc13096201163b2d38805",
+        "returncode": 0,
+        "elapsedSeconds": 7.743,
+        "summary": {
+          "numTotalTests": 9,
+          "numPassedTests": 9,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": true
+        },
+        "unhandledRejectionSections": 0,
+        "logSha256": "c511de2fde2731377af028080dda65bdddba53897064d95a90a064ae75700017"
+      },
+      {
+        "label": "affected",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/affected.receipt.json",
+        "receiptSha256": "fbe7cfec5fcccb7fb912b48dfaf852030f821a2eb1355eabd2e793ba9704cbc9",
+        "returncode": 1,
+        "elapsedSeconds": 34.364,
+        "summary": {
+          "numTotalTests": 48,
+          "numPassedTests": 48,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": true
+        },
+        "unhandledRejectionSections": 3,
+        "logSha256": "c71d5888cf64aca5516ee59edcab02936e7fccf8f67348be1d6e49070bab06ee"
+      },
+      {
+        "label": "red-reentry",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-reentry.receipt.json",
+        "receiptSha256": "4dc643c0a40dbca43cb20e2d3c15acf3e05bfe70ce401157a1eab0a0185ac921",
+        "returncode": 1,
+        "elapsedSeconds": 8.01,
+        "summary": {
+          "numTotalTests": 10,
+          "numPassedTests": 9,
+          "numFailedTests": 1,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": false
+        },
+        "unhandledRejectionSections": 0,
+        "logSha256": "5306b495a0099482748ce432120b760022c39f9f9fcdd98b37619c8ef7dbb867"
+      },
+      {
+        "label": "red-expanded",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-expanded.receipt.json",
+        "receiptSha256": "106c4bd7134f65832d17a7927c4be29ddf70f3594bf9cd509fd3bd8dc3cbe0c5",
+        "returncode": 1,
+        "elapsedSeconds": 8.339,
+        "summary": {
+          "numTotalTests": 10,
+          "numPassedTests": 2,
+          "numFailedTests": 8,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": false
+        },
+        "unhandledRejectionSections": 0,
+        "logSha256": "fc39d0eed084b1010913cfb9794f61641c3055fcc5ec1b2ccda3fcb0a9bdaf3b"
+      },
+      {
+        "label": "baseline-vue2-existing",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/baseline-vue2-existing.receipt.json",
+        "receiptSha256": "20b34ca874e3bbc68cfed08aadd5a83ba05b483ce658cec4b163f32a19a90636",
+        "returncode": 1,
+        "elapsedSeconds": 7.382,
+        "summary": {
+          "numTotalTests": 34,
+          "numPassedTests": 2,
+          "numFailedTests": 0,
+          "numPendingTests": 32,
+          "numTodoTests": 0,
+          "success": true
+        },
+        "unhandledRejectionSections": 3,
+        "logSha256": "0a8b3347dfaed1fb156741b0f067eddcb578be9bb18da3457ada827c893d8778"
+      },
+      {
+        "label": "green-final",
+        "receipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/green-final.receipt.json",
+        "receiptSha256": "a91d609729758273c2ea205e764b16a1c208f7405123b378f49ed877f9182b51",
+        "returncode": 0,
+        "elapsedSeconds": 12.723,
+        "summary": {
+          "numTotalTests": 24,
+          "numPassedTests": 24,
+          "numFailedTests": 0,
+          "numPendingTests": 0,
+          "numTodoTests": 0,
+          "success": true
+        },
+        "unhandledRejectionSections": 0,
+        "logSha256": "2d2ce03552e0533f10b668c2ba373b177ed859f261ca86b245c9335cafc21121"
+      }
+    ],
+    "criteria": [
+      {
+        "criterion": "all independent owned controllers attempted even if opener rejects",
+        "result": "passed",
+        "evidence": "final disposal10 including opener, Dialog, both, undefined and successful active controls"
+      },
+      {
+        "criterion": "unstarted/pending/active Dialog and duplicate/callback-reentry wait/error preservation",
+        "result": "passed",
+        "evidence": "actual unchanged bf8 red10 2/8 and exact same fixture final10 10/0; callback reached observed, not assumed"
+      },
+      {
+        "criterion": "owned generation hosts/surfaces/listeners retired",
+        "result": "passed within real WC/Shadcn Happy DOM composition",
+        "limit": "No native browser portal timing/visual or four-host acceptance; data/session resource is a separate owner"
+      },
+      {
+        "criterion": "legacy documentation command/theme integration",
+        "result": "passed",
+        "evidence": "existing8+6 with focused10 total24/24 exit0 no skip/unhandled"
+      },
+      {
+        "criterion": "existing public-mode integration",
+        "result": "failed",
+        "evidence": "affected48 assertions passed but exit1 with3 actual Vue2 bind-control unhandled; baseline named2 same3 errors,32 unselected. Not a clean integration gate."
+      }
+    ],
+    "firstAttemptHandling": {
+      "red-initial": "valid product red; preserved",
+      "red-reentry": "fixture mistake: queried candidate callback result before real controller microtask; preserved and explicitly excluded as product failure",
+      "red-expanded": "valid corrected10-case product red on bf8",
+      "green-final": "exact red-expanded test bytes unchanged; 24/24 exit0"
+    },
+    "unrelatedFailure": {
+      "message": "[AdapterHost] cannot invoke an exposed callable after terminal disposal",
+      "ownerFiles": [
+        "packages/prototypes/shadcn/src/input-shell/bind-control.ts",
+        "packages/adapters/base/src/host/exposes.ts"
+      ],
+      "stack": [
+        "bind-control.ts:74 retire",
+        "bind-control.ts:93 dispose",
+        "bind-control.ts:177 disconnect subscriber",
+        "expose-state/src/impl.ts:170",
+        "state/src/kernel.ts:82 disconnect"
+      ],
+      "baselineReceipt": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/baseline-vue2-existing.receipt.json",
+      "disposition": "separate follow-up; no masking, no source changes here"
+    },
+    "boundaries": [
+      "no Search1000ms deadline changes",
+      "no gates/owners/fingerprint/matrix/spec lifecycle changes",
+      "no controller primitive/materializer/adapters changes",
+      "no full types/build/browser/full-CI execution",
+      "no commit/push/Issue/comment by child"
+    ],
+    "visualEvidence": {
+      "mode": "human-assisted/current-user",
+      "request": "Failure-safe cleanup and original error preservation under documentation Search disposal",
+      "uploadedVisuals": [],
+      "status": "no visual acceptance claimed; functional Happy DOM observations only",
+      "nextAction": "root decides candidate-bound native integration evidence separately; no fabricated uploads or blanket gate"
+    },
+    "developmentCondition": "Local implementation and focused Node evidence for Issue1488-E are complete, pending root independent candidate review/integration",
+    "remaining": [
+      "root independent review of exact three-file patch",
+      "separate Vue2 InputShell terminal-unsubscribe issue",
+      "current full integration/native acceptance remains unverified"
+    ],
+    "validation": {
+      "inputHandoff": "/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/regression-handoff.json",
+      "inputHandoffSha256": "fa636e158d88bd2667078b2f71533c3f82b65e4becde778eae7b1700cd94c794",
+      "candidatePatchDigestRecomputed": "9a89810b52fb689a3be8d3dbe77653cb390c837615af0443eb1c3fedf165fded",
+      "sourceFileDigestsVerified": true,
+      "sameValidRedGreenFixtureBytes": true,
+      "diffCheckExit": 0,
+      "unhandledStackComparison": {
+        "candidateRun": "affected",
+        "baselineRun": "baseline-vue2-existing",
+        "count": 3,
+        "exactStackTextEqual": true,
+        "stackSha256": "b1ecfa1dc7cfbb42003a208dad2dfafb6cf4fa329187a3427cd12f2299821b65",
+        "allThreeIdentical": true,
+        "candidateRuntimeSourceDiffToFinal": "only removal of two inaccurate comment lines; no runtime-code change",
+        "scope": "same two implicated Vue2 public-mode cases; no claim the other32 baseline cases executed"
+      },
+      "newTestsRerunDuringValidation": false,
+      "reason": "Focused regression and affected checks already executed on recorded sources; validation inspected exact current artifact hashes, red/green and limitations. No additional risk requires rerun."
+    }
+  },
+  "receipts": {
+    "red-initial": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-initial.vitest.json",
+        "apps/www/src/components/site-search-commands.disposal.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:14:47.072829+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "a82d52d430b9b6699acba66adc64c080edcac02c27cc87b57c32f29ffe0c5772"
+      },
+      "productDiff": "",
+      "returncode": 1,
+      "elapsedSeconds": 8.24,
+      "logSha256": "0946413e8eb916a190dbfe7b45f242a90202865990c80590ddae95c872581f36",
+      "summary": {
+        "numTotalTests": 9,
+        "numPassedTests": 2,
+        "numFailedTests": 7,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      "failures": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "messages": [
+            "AssertionError: expected 'fulfilled' to be 'rejected' // Object.is equality\n    at expectOutcome (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:221:27)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:283:39\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:228:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:282:13\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at processTimers (node:internal/timers:615:9)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:228:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:282:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:228:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:282:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "messages": [
+            "AssertionError: expected 'fulfilled' to be 'rejected' // Object.is equality\n    at expectOutcome (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:221:27)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:283:39\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "messages": [
+            "AssertionError: expected [ true, true ] to deeply equal [ false, false ]\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:316:23\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "messages": [
+            "AssertionError: expected [ false, true ] to deeply equal [ false, false ]\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:316:23\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        }
+      ],
+      "vitestJsonSha256": "05402894c0f5ee73b1db7585ec2e4b586d662df94650f5536590d3e2c8dd7724",
+      "assertions": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "failed"
+        }
+      ]
+    },
+    "green-initial": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/green-initial.vitest.json",
+        "apps/www/src/components/site-search-commands.disposal.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:16:15.493024+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "8d0da8e71cc1026aa0aba6dc521a256971f9d267197af9df3c0529f0057e437c",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "a82d52d430b9b6699acba66adc64c080edcac02c27cc87b57c32f29ffe0c5772"
+      },
+      "productPatchSha256": "9d82107e0df79035dd04e3c91e9b28eadb71a29efbd299a76d7c2702f6af5850",
+      "returncode": 0,
+      "elapsedSeconds": 7.743,
+      "logSha256": "c511de2fde2731377af028080dda65bdddba53897064d95a90a064ae75700017",
+      "summary": {
+        "numTotalTests": 9,
+        "numPassedTests": 9,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "failures": [],
+      "vitestJsonSha256": "10598ef3d6a8b5313cc3e4a7d8834ed8c47a68aa6f32153b34e82187260ef1b1",
+      "assertions": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "passed"
+        }
+      ]
+    },
+    "affected": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/affected.vitest.json",
+        "apps/www/src/components/site-search-commands.test.ts",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts",
+        "apps/www/src/components/site-search-commands.theme-lease.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:16:57.688318+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.test.ts": "2033abc4036de3acbf036c077bfb1d474002258c3e8db2787024000f4762755a",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61",
+        "apps/www/src/components/site-search-commands.theme-lease.test.ts": "b0d8e5155dd0d9882100c1434275146de81f2547db23089383708176a358842f",
+        "apps/www/src/components/site-search-commands.ts": "8d0da8e71cc1026aa0aba6dc521a256971f9d267197af9df3c0529f0057e437c"
+      },
+      "returncode": 1,
+      "elapsedSeconds": 34.364,
+      "logSha256": "c71d5888cf64aca5516ee59edcab02936e7fccf8f67348be1d6e49070bab06ee",
+      "summary": {
+        "numTotalTests": 48,
+        "numPassedTests": 48,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "executedFiles": [
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.public-mode.test.ts",
+          "status": "passed",
+          "assertions": 34
+        },
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.test.ts",
+          "status": "passed",
+          "assertions": 8
+        },
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.theme-lease.test.ts",
+          "status": "passed",
+          "assertions": 6
+        }
+      ],
+      "failures": [],
+      "vitestJsonSha256": "661cd4375d40d57df92895ad8441c1a5f72e8277debdd31897d1b103b1ae3b76",
+      "assertions": [
+        {
+          "name": "Docs shadcn/wc returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs shadcn/react returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs shadcn/vue returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs brutalist/wc returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs brutalist/react returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs brutalist/vue returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs brutalist/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs replacement handback preserves newer focus during the closing transition",
+          "status": "passed"
+        },
+        {
+          "name": "Docs replacement handback is revoked when the closing owner is disposed",
+          "status": "passed"
+        },
+        {
+          "name": "Docs replacement handback does not survive an interrupted close",
+          "status": "passed"
+        },
+        {
+          "name": "returns focus to the current Homepage opener after dismissing a replacement Dialog",
+          "status": "passed"
+        },
+        {
+          "name": "keeps Bootstrap Homepage Search materializable with the registered Dialog and Command",
+          "status": "passed"
+        },
+        {
+          "name": "returns focus to the current Homepage opener when the shortcut closes a replacement Dialog",
+          "status": "passed"
+        },
+        {
+          "name": "carries the focused 'Close' control through a Homepage Dialog replacement",
+          "status": "passed"
+        },
+        {
+          "name": "carries the focused 'Retry' control through a Homepage Dialog replacement",
+          "status": "passed"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'cancellation'",
+          "status": "passed"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'preparation failure'",
+          "status": "passed"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'newer focus'",
+          "status": "passed"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'session close'",
+          "status": "passed"
+        },
+        {
+          "name": "keeps newer focus when a replacement Dialog finishes leaving",
+          "status": "passed"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with query focus",
+          "status": "passed"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with close focus",
+          "status": "passed"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with newer focus focus",
+          "status": "passed"
+        },
+        {
+          "name": "does not return focus from an interrupted replacement Dialog close",
+          "status": "passed"
+        },
+        {
+          "name": "revokes pending opener focus when a closing replacement Dialog is disposed",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer wc/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer wc/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer react/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer react/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) cleans two successful siblings after one initial failure and retries with a fresh owner namespace",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) treats materializer theme failure as a failed whole generation and disposes prepared siblings",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) reports a deferred dialog materialization failure instead of swallowing it",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) revokes a pending generation on dispose, waits for its cleanup and ignores later preference changes",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) refuses a second independent scope for homepage Search",
+          "status": "passed"
+        },
+        {
+          "name": "registers Search fixed glyph prototypes before starting any command generation",
+          "status": "passed"
+        },
+        {
+          "name": "keeps shadcn Header open recipe separate from non-Header and dialog commands",
+          "status": "passed"
+        },
+        {
+          "name": "keeps brutalist Header open recipe separate from non-Header and dialog commands",
+          "status": "passed"
+        },
+        {
+          "name": "initializes the real Docs opener from one unchanged owner theme bank",
+          "status": "passed"
+        },
+        {
+          "name": "does not reread an unchanged theme bank after the Vue to React candidates are prepared",
+          "status": "passed"
+        },
+        {
+          "name": "keeps preparation hidden and applies a theme changed during real Dialog rendering",
+          "status": "passed"
+        },
+        {
+          "name": "retains the prior live theme owner when replacement publication fails",
+          "status": "passed"
+        },
+        {
+          "name": "rejects a missing owner token even when a mount retains a complete theme copy",
+          "status": "passed"
+        },
+        {
+          "name": "revokes theme work on disposal even with an already queued owner-style mutation",
+          "status": "passed"
+        }
+      ]
+    },
+    "red-reentry": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-reentry.vitest.json",
+        "apps/www/src/components/site-search-commands.disposal.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:19:33.724127+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "8d0da8e71cc1026aa0aba6dc521a256971f9d267197af9df3c0529f0057e437c",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "7a738f63634e28e9a91b273fc929553a700d476b45ba1e8886ab79d2c5fc0be2"
+      },
+      "productPatchSha256": "9d82107e0df79035dd04e3c91e9b28eadb71a29efbd299a76d7c2702f6af5850",
+      "returncode": 1,
+      "elapsedSeconds": 8.01,
+      "logSha256": "5306b495a0099482748ce432120b760022c39f9f9fcdd98b37619c8ef7dbb867",
+      "summary": {
+        "numTotalTests": 10,
+        "numPassedTests": 9,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      "failures": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "messages": [
+            "AssertionError: expected undefined to be defined\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:346:23\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        }
+      ],
+      "vitestJsonSha256": "941d0a2e2fa5d012a871196c668e2c36eb567ba1ecbff6d9becd742f5528d4f5",
+      "assertions": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "status": "failed"
+        }
+      ]
+    },
+    "red-expanded": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/red-expanded.vitest.json",
+        "apps/www/src/components/site-search-commands.disposal.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:21:11.930476+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "9f5af06f14f109841469a20806a0e211e0c7a9ac7fac2165ea4b11ef98023085"
+      },
+      "productDiff": "",
+      "returncode": 1,
+      "elapsedSeconds": 8.339,
+      "logSha256": "fc39d0eed084b1010913cfb9794f61641c3055fcc5ec1b2ccda3fcb0a9bdaf3b",
+      "unhandledSections": 0,
+      "summary": {
+        "numTotalTests": 10,
+        "numPassedTests": 2,
+        "numFailedTests": 8,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": false
+      },
+      "failures": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "messages": [
+            "AssertionError: expected 'fulfilled' to be 'rejected' // Object.is equality\n    at expectOutcome (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:231:27)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:293:39\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:238:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:292:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:238:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:292:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "messages": [
+            "AssertionError: expected \"spy\" to be called 1 times, but got 0 times\n    at expectRetired (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:238:29)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:292:13\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "messages": [
+            "AssertionError: expected 'fulfilled' to be 'rejected' // Object.is equality\n    at expectOutcome (/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:231:27)\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:293:39\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "messages": [
+            "AssertionError: expected [ true, true ] to deeply equal [ false, false ]\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:326:23\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "messages": [
+            "AssertionError: expected [ false, true ] to deeply equal [ false, false ]\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:326:23\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "messages": [
+            "AssertionError: expected [ true, true ] to deeply equal [ false, false ]\n    at /workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts:367:21\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        }
+      ],
+      "executedTests": [
+        "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+        "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+        "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+        "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+        "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+        "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+        "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+        "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+        "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+        "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry"
+      ],
+      "vitestJsonSha256": "08273ef050cbea956d90a1c64ab7012aaaa29d159790671180ce177cd4564fa6",
+      "assertions": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "failed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "status": "failed"
+        }
+      ]
+    },
+    "baseline-vue2-existing": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/baseline-vue2-existing.vitest.json",
+        "-t",
+        "Docs shadcn/vue2|vue2/shadcn:",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:21:20.296954+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857",
+        "apps/www/src/components/site-search-commands.public-mode.test.ts": "ec9afa184127006536bb3667533a68a939a79a2ede417399af8607a0650efc61"
+      },
+      "productDiff": "",
+      "returncode": 1,
+      "elapsedSeconds": 7.382,
+      "logSha256": "0a8b3347dfaed1fb156741b0f067eddcb578be9bb18da3457ada827c893d8778",
+      "unhandledSections": 3,
+      "summary": {
+        "numTotalTests": 34,
+        "numPassedTests": 2,
+        "numFailedTests": 0,
+        "numPendingTests": 32,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "failures": [],
+      "executedTests": [
+        "Docs shadcn/wc returns focus to the current opener after a runtime replacement",
+        "Docs shadcn/react returns focus to the current opener after a runtime replacement",
+        "Docs shadcn/vue returns focus to the current opener after a runtime replacement",
+        "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+        "Docs brutalist/wc returns focus to the current opener after a runtime replacement",
+        "Docs brutalist/react returns focus to the current opener after a runtime replacement",
+        "Docs brutalist/vue returns focus to the current opener after a runtime replacement",
+        "Docs brutalist/vue2 returns focus to the current opener after a runtime replacement",
+        "Docs replacement handback preserves newer focus during the closing transition",
+        "Docs replacement handback is revoked when the closing owner is disposed",
+        "Docs replacement handback does not survive an interrupted close",
+        "returns focus to the current Homepage opener after dismissing a replacement Dialog",
+        "keeps Bootstrap Homepage Search materializable with the registered Dialog and Command",
+        "returns focus to the current Homepage opener when the shortcut closes a replacement Dialog",
+        "carries the focused 'Close' control through a Homepage Dialog replacement",
+        "carries the focused 'Retry' control through a Homepage Dialog replacement",
+        "restores retained Homepage Search focus only when eligible after 'cancellation'",
+        "restores retained Homepage Search focus only when eligible after 'preparation failure'",
+        "restores retained Homepage Search focus only when eligible after 'newer focus'",
+        "restores retained Homepage Search focus only when eligible after 'session close'",
+        "keeps newer focus when a replacement Dialog finishes leaving",
+        "restores the retained Homepage Search after a late publication failure with query focus",
+        "restores the retained Homepage Search after a late publication failure with close focus",
+        "restores the retained Homepage Search after a late publication failure with newer focus focus",
+        "does not return focus from an interrupted replacement Dialog close",
+        "revokes pending opener focus when a closing replacement Dialog is disposed",
+        "public-mode Search through the actual projection materializer wc/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer wc/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer react/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer react/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer vue/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer vue/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+        "public-mode Search through the actual projection materializer vue2/brutalist: staged activation, close/reopen and generation replacement retain the live query"
+      ],
+      "vitestJsonSha256": "3a3bbefe389994e594064bd4b06a3b962cb80ab7919ab52b0468b4e1bfd16426",
+      "assertions": [
+        {
+          "name": "Docs shadcn/wc returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs shadcn/react returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs shadcn/vue returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs shadcn/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "passed"
+        },
+        {
+          "name": "Docs brutalist/wc returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs brutalist/react returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs brutalist/vue returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs brutalist/vue2 returns focus to the current opener after a runtime replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs replacement handback preserves newer focus during the closing transition",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs replacement handback is revoked when the closing owner is disposed",
+          "status": "skipped"
+        },
+        {
+          "name": "Docs replacement handback does not survive an interrupted close",
+          "status": "skipped"
+        },
+        {
+          "name": "returns focus to the current Homepage opener after dismissing a replacement Dialog",
+          "status": "skipped"
+        },
+        {
+          "name": "keeps Bootstrap Homepage Search materializable with the registered Dialog and Command",
+          "status": "skipped"
+        },
+        {
+          "name": "returns focus to the current Homepage opener when the shortcut closes a replacement Dialog",
+          "status": "skipped"
+        },
+        {
+          "name": "carries the focused 'Close' control through a Homepage Dialog replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "carries the focused 'Retry' control through a Homepage Dialog replacement",
+          "status": "skipped"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'cancellation'",
+          "status": "skipped"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'preparation failure'",
+          "status": "skipped"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'newer focus'",
+          "status": "skipped"
+        },
+        {
+          "name": "restores retained Homepage Search focus only when eligible after 'session close'",
+          "status": "skipped"
+        },
+        {
+          "name": "keeps newer focus when a replacement Dialog finishes leaving",
+          "status": "skipped"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with query focus",
+          "status": "skipped"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with close focus",
+          "status": "skipped"
+        },
+        {
+          "name": "restores the retained Homepage Search after a late publication failure with newer focus focus",
+          "status": "skipped"
+        },
+        {
+          "name": "does not return focus from an interrupted replacement Dialog close",
+          "status": "skipped"
+        },
+        {
+          "name": "revokes pending opener focus when a closing replacement Dialog is disposed",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer wc/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer wc/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer react/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer react/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/shadcn: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "passed"
+        },
+        {
+          "name": "public-mode Search through the actual projection materializer vue2/brutalist: staged activation, close/reopen and generation replacement retain the live query",
+          "status": "skipped"
+        }
+      ]
+    },
+    "green-final": {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/8077f6e9f3a8/current-ci-review/search-disposal/green-final.vitest.json",
+        "apps/www/src/components/site-search-commands.disposal.test.ts",
+        "apps/www/src/components/site-search-commands.test.ts",
+        "apps/www/src/components/site-search-commands.theme-lease.test.ts"
+      ],
+      "cwd": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup",
+      "base": "bf8b1f55f93a89f3c689276d6e339d83891f4dba",
+      "startedAt": "2026-11-17T09:22:31.790881+00:00",
+      "sourceHashes": {
+        "apps/www/src/components/site-search-commands.ts": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+        "apps/www/src/components/site-search-commands.disposal.test.ts": "9f5af06f14f109841469a20806a0e211e0c7a9ac7fac2165ea4b11ef98023085",
+        "apps/www/src/components/site-search-commands.test.ts": "2033abc4036de3acbf036c077bfb1d474002258c3e8db2787024000f4762755a",
+        "apps/www/src/components/site-search-commands.theme-lease.test.ts": "b0d8e5155dd0d9882100c1434275146de81f2547db23089383708176a358842f"
+      },
+      "productPatchSha256": "6acc71998ef85e32087ab5e9c850bcb28cd5330eda1dfaff5414cd459fadff78",
+      "returncode": 0,
+      "elapsedSeconds": 12.723,
+      "logSha256": "2d2ce03552e0533f10b668c2ba373b177ed859f261ca86b245c9335cafc21121",
+      "unhandledSections": 0,
+      "summary": {
+        "numTotalTests": 24,
+        "numPassedTests": 24,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "success": true
+      },
+      "executedFiles": [
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.disposal.test.ts",
+          "status": "passed",
+          "assertions": 10
+        },
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.test.ts",
+          "status": "passed",
+          "assertions": 8
+        },
+        {
+          "name": "/workspace/scratch/8077f6e9f3a8/proto-ui-search-cleanup/apps/www/src/components/site-search-commands.theme-lease.test.ts",
+          "status": "passed",
+          "assertions": 6
+        }
+      ],
+      "failures": [],
+      "vitestJsonSha256": "5114bdc2f69f11ef955c65d8728eade86f08211b599ae8b9baaac2bcc278d275",
+      "assertions": [
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'unstarted Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, undefined opener rejec…'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, both disposers fail'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, only Dialog fails'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal 'active Dialog, successful cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'opener failure'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal awaits pending Dialog and repeated destroy after 'successful opener cleanup'",
+          "status": "passed"
+        },
+        {
+          "name": "Docs Search exhaustive owned-controller disposal shares pending teardown and its first error with synchronous disposer reentry",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) cleans two successful siblings after one initial failure and retries with a fresh owner namespace",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) treats materializer theme failure as a failed whole generation and disposes prepared siblings",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) reports a deferred dialog materialization failure instead of swallowing it",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) revokes a pending generation on dispose, waits for its cleanup and ignores later preference changes",
+          "status": "passed"
+        },
+        {
+          "name": "Search projection failure and lifetime boundaries (materializer fault doubles) refuses a second independent scope for homepage Search",
+          "status": "passed"
+        },
+        {
+          "name": "registers Search fixed glyph prototypes before starting any command generation",
+          "status": "passed"
+        },
+        {
+          "name": "keeps shadcn Header open recipe separate from non-Header and dialog commands",
+          "status": "passed"
+        },
+        {
+          "name": "keeps brutalist Header open recipe separate from non-Header and dialog commands",
+          "status": "passed"
+        },
+        {
+          "name": "initializes the real Docs opener from one unchanged owner theme bank",
+          "status": "passed"
+        },
+        {
+          "name": "does not reread an unchanged theme bank after the Vue to React candidates are prepared",
+          "status": "passed"
+        },
+        {
+          "name": "keeps preparation hidden and applies a theme changed during real Dialog rendering",
+          "status": "passed"
+        },
+        {
+          "name": "retains the prior live theme owner when replacement publication fails",
+          "status": "passed"
+        },
+        {
+          "name": "rejects a missing owner token even when a mount retains a complete theme copy",
+          "status": "passed"
+        },
+        {
+          "name": "revokes theme work on disposal even with an already queued owner-style mutation",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "localIndependentReview": {
+    "reviewer": "root local engineering review, not formal GitHub approval",
+    "reviewedAt": "2026-11-17T09:32:50.896074+00:00",
+    "sourceAndTestFilesVerified": 3,
+    "rawRunReceiptsAndLogsVerified": 7,
+    "sameExpandedRedGreenTestHash": "9f5af06f14f109841469a20806a0e211e0c7a9ac7fac2165ea4b11ef98023085",
+    "integrationParent": "2e4f8f19713e3626ccf0492bbadaf8a4fcb1d889",
+    "sourceReview": "Independent controllers attempted and awaited; stable first rejected value including undefined; cached promise shared with real microtask disposer reentry; original retired-error treatment preserved",
+    "runtimeClaim": "24 tests are the exact frozen isolated candidate execution; integration did not rerun or relabel the failed 48-case public-mode invocation",
+    "openFinding": "Three Vue2 InputShell terminal-unsubscribe unhandled errors reproduced on untouched baseline; independent follow-up"
+  }
+}

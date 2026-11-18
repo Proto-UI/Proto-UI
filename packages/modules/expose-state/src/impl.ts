@@ -17,6 +17,12 @@ import { EXPOSES_RECORD_SINK_CAP, type ExposesRecordSink } from './caps';
 
 const STATE_ID = '__stateId';
 const STATE_SPEC = '__stateSpec';
+const subscriptionCancellations = new WeakSet<Function>();
+
+/** Only this Module's issued subscription cancellations may outlive callback scope. */
+export function isExposeStateSubscriptionCancellation(value: unknown): value is () => void {
+  return typeof value === 'function' && subscriptionCancellations.has(value);
+}
 
 function isStateHandleLike(x: any): x is OwnedStateHandle<any> {
   return !!x && typeof x === 'object' && typeof x.get === 'function' && !!x[STATE_ID];
@@ -173,6 +179,7 @@ export class ExposeStateModuleImpl extends ModuleBase {
           this.externalSubscriptions.delete(trackedOff);
           off();
         };
+        subscriptionCancellations.add(trackedOff);
         this.externalSubscriptions.add(trackedOff);
         return trackedOff;
       },

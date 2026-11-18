@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { initHomepageRuntime } from './homepage-runtime-client';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
 import * as projectionScope from '../PrototypePreviewer/projection-scope';
