@@ -1,5 +1,13 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -14,7 +22,7 @@ import {
   getPublicPackages,
   publicPackageSourceEntries,
 } from '../../build/public-packages.mjs';
-import { createPublishManifest, writeSupportingFiles } from '../lib.mjs';
+import { createPublishManifest, stagePackage, writeSupportingFiles } from '../lib.mjs';
 import { localManifest } from '../../build/draft-prototype-packages.mjs';
 
 function fixture(t) {
@@ -61,6 +69,76 @@ function fixture(t) {
     pkg: { dir, manifest, name: manifest.name, version: manifest.version },
   };
 }
+
+for (const form of ['root', 'subpath']) {
+  test(`direct authored ${form} exports remain reachable after release staging`, (t) => {
+    const { pkg, root } = fixture(t);
+    const target = './src/logic.proto.ts';
+    const runtime = {
+      types: './src/index.ts',
+      import: './src/index.ts',
+      default: './src/index.ts',
+    };
+    pkg.manifest.exports = form === 'root' ? target : { '.': runtime, './behavior': target };
+    const result = stagePackage(pkg, { outDir: path.join(root, 'release') });
+    const manifest = JSON.parse(readFileSync(path.join(result.stageDir, 'package.json'), 'utf8'));
+    assert.deepEqual(
+      manifest.exports,
+      form === 'root'
+        ? target
+        : {
+            '.': {
+              types: './dist/index.d.ts',
+              import: './dist/index.js',
+              default: './dist/index.js',
+            },
+            './behavior': target,
+          }
+    );
+    assert.deepEqual(
+      manifest.files.filter((file) => file.startsWith('src/')),
+      ['src/helper.ts', 'src/logic.proto.ts']
+    );
+    for (const file of ['src/helper.ts', 'src/logic.proto.ts'])
+      assert.equal(
+        readFileSync(path.join(result.stageDir, file), 'utf8'),
+        readFileSync(path.join(pkg.dir, file), 'utf8')
+      );
+    assert.equal(existsSync(path.join(result.stageDir, 'dist/logic.proto.js')), false);
+    assert.equal(result.publishResult, null);
+  });
+}
+
+test('direct authored leaves preserve nested conditions and array runtime/type rewrites', (t) => {
+  const { pkg } = fixture(t);
+  pkg.manifest.exports = {
+    '.': {
+      node: {
+        types: ['./src/index.ts', './src/index.d.ts'],
+        import: [{ proto: './src/index.ts', default: './src/index.ts' }, './src/logic.proto.ts'],
+        default: './src/index.ts',
+      },
+      default: './src/index.ts',
+    },
+    './behavior': './src/logic.proto.ts',
+    './blocked': null,
+  };
+  const original = structuredClone(pkg.manifest.exports);
+  const manifest = createPublishManifest(pkg, { access: 'public' });
+  assert.deepEqual(manifest.exports, {
+    '.': {
+      node: {
+        types: ['./dist/index.d.ts', './dist/index.d.ts'],
+        import: [{ proto: './src/index.ts', default: './dist/index.js' }, './src/logic.proto.ts'],
+        default: './dist/index.js',
+      },
+      default: './dist/index.js',
+    },
+    './behavior': './src/logic.proto.ts',
+    './blocked': null,
+  });
+  assert.deepEqual(pkg.manifest.exports, original);
+});
 
 test('source staging preserves explicit proto exports and the complete source/type closure', (t) => {
   const { pkg, stage } = fixture(t);

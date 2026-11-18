@@ -4,7 +4,7 @@ import { renderDemo } from '../PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from '../PrototypePreviewer/prototype-modules';
 import type { DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import { createHomepageShowcase } from './homepage-showcase';
-import { installGeneratedProtoUiStylesheet } from './generated-stylesheet';
+import { installGeneratedProtoUiStylesheet } from '../../../test/helpers/generated-stylesheet';
 
 // Real prototypes require the same generated host layout rules as the website.
 installGeneratedProtoUiStylesheet();

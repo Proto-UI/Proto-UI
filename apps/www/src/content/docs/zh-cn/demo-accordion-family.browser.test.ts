@@ -25,7 +25,7 @@ import { revealHeaderPreferences } from './site-header-browser';
 import {
   installAccordionInputJournal,
   createAccordionActivationObservation,
-} from './accordion-activation-observation';
+} from '../../../../test/helpers/accordion-activation-observation';
 let activation: ReturnType<typeof createAccordionActivationObservation> = null;
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/accordion/`;

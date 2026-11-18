@@ -5,6 +5,7 @@ import { resolvedPropFacts } from './resolved-props';
 import { emitUndeclaredInstanceAssociations } from './native-instance-associations';
 import {
   nativePublicCallsArtifact,
+  nativeAuthoredCallablesArtifact,
   hasPublicCallable,
   emitPublicValue,
   emitPublicMethodProjection,
@@ -17,6 +18,7 @@ import {
 } from './native-authored-hooks';
 import {
   createJavaScriptValueReader,
+  planJavaScriptCallBoundaries,
   emitJavaScriptMember,
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -73,7 +75,12 @@ export function emitVue2Source(
   if (!validated.ok) return validated;
   const ir = pruneDeadValues(validated.value);
   const readValue = createJavaScriptValueReader(ir, typeName, false);
-  const moduleParts = partitionModuleBindings(ir);
+  const callBoundaries = planJavaScriptCallBoundaries(ir);
+  const moduleParts = partitionModuleBindings(
+    ir,
+    undefined,
+    (value) => value.kind === 'call' && callBoundaries.calls.has(value)
+  );
   if (options.ssr) {
     const controlLabelDiagnostics = unsupportedControlLabel(ir, 'vue2-source SSR');
     if (controlLabelDiagnostics.length) return { ok: false, diagnostics: controlLabelDiagnostics };
@@ -313,11 +320,13 @@ export function emitVue2Source(
   );
   const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
-  const publicCalls = ir.exposes.some(
-    (entry) =>
-      (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
-      (entry.kind === 'method' && hasPublicCallable(entry.returnType))
-  );
+  const publicCalls =
+    callBoundaries.calls.size > 0 ||
+    ir.exposes.some(
+      (entry) =>
+        (entry.kind === 'value' && hasPublicCallable(entry.type)) ||
+        (entry.kind === 'method' && hasPublicCallable(entry.returnType))
+    );
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
     const atom = atoms.typeName(type, `${prefix}Run`);
@@ -347,6 +356,8 @@ export function emitVue2Source(
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
+    if (type.startsWith('state-next:'))
+      return `Extract<${prefix}StateEvent<${type.slice(11)}>, {type:'next'}>`;
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'focus') return `${prefix}NativeFocus`;
@@ -361,7 +372,8 @@ export function emitVue2Source(
     if (
       type === 'control-label' ||
       type === 'control-label-handle' ||
-      type === 'control-label-request'
+      type === 'control-label-request' ||
+      (usesInteraction && (type === 'anatomy-family' || type === 'anatomy-part'))
     )
       return `import(${JSON.stringify('./' + supportPlan.modulesPath.slice(0, -3))}).NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
@@ -401,7 +413,7 @@ export function emitVue2Source(
             parameter.type === 'unknown' || parameter.type === 'template'
               ? nativeTemplate?.parameterType(parameter)
               : undefined;
-          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional ? `[${parameter.name}]` : parameter.name}`;
+          return `@param {${contextual ?? typeName(parameter.type)}} ${parameter.optional && !parameter.default ? `[${parameter.name}]` : parameter.name}`;
         })
         .join(' ');
       const returns =
@@ -409,7 +421,10 @@ export function emitVue2Source(
         !['function', 'unknown', 'template'].includes(value.returnType as string)
           ? ` @returns {${typeName(value.returnType)}}`
           : '';
-      return `${annotations || returns ? `/** ${annotations}${returns} */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      const callable = `${annotations || returns ? `/** ${annotations}${returns} */ ` : ''}(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth))}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+      return callBoundaries.authored.has(value)
+        ? `${prefix}MarkAuthoredCallable(${callable})`
+        : callable;
     } finally {
       nativeScope = saved;
     }
@@ -424,7 +439,12 @@ export function emitVue2Source(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
-        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false)!;
+        return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false, {
+          plan: callBoundaries,
+          wrap: `${prefix}WrapPublic`,
+          prefix: prefix,
+          isAuthored: `${prefix}IsAuthoredCallable`,
+        })!;
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -675,7 +695,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
         : '',
       handle: contextArtifacts ? 'contextScope,' : '',
       dispose: contextArtifacts
-        ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }'
+        ? 'try { contextScope.dispose(); } catch (error) { failure ??= { error }; }'
         : '',
       setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
     },
@@ -702,6 +722,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {un
 // Source graph SHA-256: ${ir.source.sha256}
 ${atoms.jsImports}
 ${publicCalls ? `import { createNativePublicCalls as ${prefix}CreatePublicCalls } from './.proto-ui/owner/public-callables-v1';` : ''}
+${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${prefix}MarkAuthoredCallable, isNativeAuthoredCallable as ${prefix}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${prefix}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${contextImports}
 ${staticImports}
@@ -816,6 +837,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
       supportingFiles: [
         ...atoms.files,
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
+        ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...(contextArtifacts?.files ?? []),
         ...staticDeclarations.files,
@@ -1769,21 +1791,21 @@ ${
       terminal = true; ++epoch; renderedCommit = null; pending = null; queued = false;
       ${hasAuthoredHooks ? 'for (const off of PUIAuthoredWatchCleanups.splice(0)) off();' : ''}
       unwatch?.(); unwatch = undefined;
-      let failure;
-      try { detach(); } catch (error) { failure = error; }
-      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= error; }
+      /** @type {{ error: unknown } | undefined} */ let failure;
+      try { detach(); } catch (error) { failure = { error }; }
+      ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= { error }; }
 ${
   stateful
     ? String.raw`      for (const state of states) {
-        try { state.dispose(); } catch (error) { failure ??= error; }
+        try { state.dispose(); } catch (error) { failure ??= { error }; }
       }
 `
     : ''
 }      ${context.dispose}
-      ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= error; }' : ''}
+      ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= { error }; }' : ''}
       ${
         styled
-          ? `try { style.dispose(); } catch (error) { failure ??= error; }
+          ? `try { style.dispose(); } catch (error) { failure ??= { error }; }
       const target = vm.$el;
       if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');`
           : ''
@@ -1803,7 +1825,7 @@ ${
       }`
           : ''
       }
-      if (failure) throw failure;
+      if (failure) throw failure.error;
     },
   };
   return owner;

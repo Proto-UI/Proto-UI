@@ -345,12 +345,14 @@ export function emitFlutterSource(
       } as Record<string, string>
     )[name];
   }
-  function predicate(value: string, spec: DataType, known = false): string {
+  function predicate(value: string, spec: DataType, known = false, native = false): string {
     if (typeof spec === 'string')
       return spec === 'void' || spec === 'null'
         ? known
           ? 'true'
-          : `${value} == null`
+          : native && spec === 'void'
+            ? `${value} is NativeVoid`
+            : `${value} == null`
         : spec === 'number'
           ? known
             ? `${value}.isFinite`
@@ -360,17 +362,24 @@ export function emitFlutterSource(
             : `${value} is ${data(spec)}`;
     if (spec.kind === 'literal') return `${value} == ${quote(spec.value)}`;
     if (spec.kind === 'union') {
-      if (spec.members.includes('void'))
+      if (spec.members.includes('void') && !native)
         return `(${known ? '' : `${value} is ${data(spec)} && `}(!${value}.present || ${predicate(`${value}.value`, { kind: 'union', members: spec.members.filter((member) => member !== 'void') }, known)}))`;
       if (
         known &&
         spec.members.every((member) => typeof member !== 'string' && member.kind === 'literal')
       )
         return `(${spec.members.map((member) => predicate(value, member, true)).join(' || ')})`;
-      return `(${spec.members.map((entry) => predicate(value, entry)).join(' || ') || 'false'})`;
+      return `(${spec.members.map((entry) => predicate(value, entry, false, native)).join(' || ') || 'false'})`;
     }
     if (spec.kind === 'array')
-      return `(${known ? '' : `${value} is ${data(spec)} && `}${value}.every((item) => ${predicate('item', spec.element, true)}))`;
+      return `(${known ? '' : `${value} is ${native ? 'List<Object?>' : data(spec)} && `}${value}.every((item) => ${predicate('item', spec.element, !native, native)}))`;
+    if (native)
+      return `(${value} is Map<String, Object?>${spec.fields
+        .map((field) => {
+          const check = `nativeProject<Object?, bool>(${value}[${quote(field.name)}], (field) => ${predicate('field', field.type, false, true)})`;
+          return ` && ${field.optional ? `(!${value}.containsKey(${quote(field.name)}) || ${check})` : `(${value}.containsKey(${quote(field.name)}) && ${check})`}`;
+        })
+        .join('')})`;
     return `(${known ? 'true' : `${value} is ${data(spec)}`}${spec.fields.map((field) => ` && ${field.optional ? `(!${value}.${publicName(field.name)}.present || ${predicate(`${value}.${publicName(field.name)}.value`, field.type, true)})` : `(${value}.${publicName(field.name)}.present && ${predicate(`${value}.${publicName(field.name)}.value`, field.type, true)})`}`).join('')})`;
   }
   function nativeData(value: string, spec: DataType, knownRecord = false): string {
@@ -383,6 +392,24 @@ export function emitFlutterSource(
       const member = spec.members.find((entry) => entry !== 'null' && entry !== 'void');
       if (member && spec.members.length === 2 && spec.members.includes('null'))
         return `nativeProject<Object?, ${data(spec)}>(${value}, (item) => item == null ? null : ${nativeData('item', member)})`;
+      if (
+        spec.members.some(
+          (entry) => typeof entry !== 'string' && ['record', 'array', 'union'].includes(entry.kind)
+        )
+      ) {
+        const result = data(spec),
+          optional = spec.members.includes('void');
+        const branches = spec.members.map((entry) => {
+          const converted =
+            entry === 'void'
+              ? 'const NativeOptional<Never>.absent()'
+              : optional
+                ? `nativeOptionalResult<${result.slice(15, -1)}>(${nativeData('item', entry)})`
+                : nativeData('item', entry);
+          return `if (${predicate('item', entry, false, true)}) return ${converted};`;
+        });
+        return `nativeProject<Object?, ${result}>(nativeValue(${value}), (item) { ${branches.join(' ')} throw StateError('Invalid checked native data union'); })`;
+      }
       return `(${value} as ${data(spec)})`;
     }
     if (!spec.fields.length) return 'const NativeEmptyRecord()';

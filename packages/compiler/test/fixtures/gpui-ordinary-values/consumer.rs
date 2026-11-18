@@ -7,7 +7,7 @@ use gpui::{
 use proto_ui_gpui_native::gpui_native_owner::{
     catch_authored, detach_native_view, dispatch, event_fields, expose_event, expose_method,
     expose_value, focus_setup, focus_setup_config, invoke, native_owner_allocation_count,
-    native_resource_counts, record, strict_equal, NativeSnapshot, Owner, OwnerRef, Value,
+    native_resource_counts, record, scroll_frame, scroll_request, strict_equal, NativeSnapshot, Owner, OwnerRef, Value,
     TABLE_STRUCTURE_FAMILY,
 };
 use serde_json::{json, Value as Json};
@@ -145,6 +145,132 @@ fn event_names(owner: &OwnerRef) -> Vec<String> {
         .iter()
         .map(|(name, _)| name.clone())
         .collect()
+}
+
+#[gpui::test]
+fn generated_scroll_request_outcomes_and_retired_end_work(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    let component = window.update(cx, |host, window, cx| {
+        let component = validation::CompiledComponent::create(json!({}), None, window, cx)
+            .expect("native scroll consumer construction");
+        let owner = component.read(cx).owner.clone();
+        let before = exposed(&owner, "scrollTo").call(vec![]).expect("unmounted outcome");
+        assert_eq!(before.member("kind", false).text(), "rejected");
+        assert_eq!(before.member("reason", false).text(), "not-mounted");
+        assert!(owner.borrow().modules.scroll.request_status.is_empty());
+        for malformed in [record(vec![]), Value::Undefined] {
+            let refused = catch_authored(|| scroll_request(&Rc::downgrade(&owner), malformed))
+                .expect("unmounted refusal precedes kind validation");
+            assert_eq!(refused.member("reason", false).text(), "not-mounted");
+        }
+        assert!(owner.borrow().modules.scroll.request_status.is_empty());
+        assert_eq!(exposed(&owner, "scrollEnd").call(vec![]).unwrap().text(), "rejected");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+        let plain = host.plain.read(cx).owner.clone();
+        let undeclared = scroll_request(&Rc::downgrade(&plain), record(vec![]));
+        assert_eq!(undeclared.member("reason", false).text(), "not-declared");
+        let undeclared_end = scroll_request(&Rc::downgrade(&plain), record(vec![("kind", Value::string("to-end"))]));
+        assert_eq!(undeclared_end.member("reason", false).text(), "not-declared");
+        assert!(plain.borrow().modules.scroll.request_status.is_empty());
+        host.scope.update(cx, |scope, cx| {
+            scope.set_slot(vec![NativeSnapshot::native_view(component.clone().into())], cx)
+                .expect("mount native scroll consumer");
+        });
+        component
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, native_window, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(owner.borrow().mounted);
+        let missing_kind = record(vec![("axis", Value::string("vertical"))]);
+        assert!(catch_authored(|| scroll_request(&Rc::downgrade(&owner), missing_kind)).is_err());
+        for method in ["scrollToKind", "scrollBy", "scrollPage", "scrollDrag", "scrollEnd"] {
+            assert_eq!(exposed(&owner, method).call(vec![]).expect("structured outcome member").text(), "dispatched");
+        }
+        let wrong_axis = exposed(&owner, "scrollWrongAxis").call(vec![]).expect("axis rejection");
+        assert_eq!(wrong_axis.member("kind", false).text(), "rejected");
+        assert_eq!(wrong_axis.member("reason", false).text(), "unavailable");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "pending");
+        assert_eq!(exposed(&owner, "scrollEndWrongAxis").call(vec![]).unwrap().member("reason", false).text(), "unavailable");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+
+        // A declared, mounted view can still be unavailable. Restore presence
+        // before any host frame so this is an isolated readiness refusal.
+        assert_eq!(exposed(&owner, "scrollEnd").call(vec![]).unwrap().text(), "dispatched");
+        let was_present = owner.borrow().present;
+        owner.borrow_mut().present = false;
+        let unavailable_position = exposed(&owner, "scrollTo").call(vec![]);
+        let position_status = owner.borrow().modules.scroll.request_status.clone();
+        let missing_kind = catch_authored(|| scroll_request(&Rc::downgrade(&owner), record(vec![])));
+        let nullish_request = catch_authored(|| scroll_request(&Rc::downgrade(&owner), Value::Undefined));
+        let unavailable_end = exposed(&owner, "scrollEnd").call(vec![]);
+        let end_status = owner.borrow().modules.scroll.request_status.clone();
+        owner.borrow_mut().present = was_present;
+        let unavailable_position = unavailable_position.expect("not-present position refusal");
+        let unavailable_end = unavailable_end.expect("not-present end refusal");
+        assert_eq!(missing_kind.expect("not-ready refusal precedes kind validation").member("reason", false).text(), "unavailable");
+        assert_eq!(nullish_request.expect("not-ready refusal precedes property access").member("reason", false).text(), "unavailable");
+        assert_eq!(unavailable_position.member("kind", false).text(), "rejected");
+        assert_eq!(unavailable_position.member("reason", false).text(), "unavailable");
+        assert_eq!(position_status, "pending");
+        assert_eq!(unavailable_end.text(), "rejected");
+        assert_eq!(end_status, "rejected");
+
+        // A missing handle refuses end delivery without allowing a position
+        // refusal to overwrite the pending end status. Restore the real handle.
+        assert_eq!(exposed(&owner, "scrollEnd").call(vec![]).unwrap().text(), "dispatched");
+        let handle = owner.borrow_mut().modules.scroll.handle.take();
+        let unavailable_position = exposed(&owner, "scrollTo").call(vec![]);
+        let position_status = owner.borrow().modules.scroll.request_status.clone();
+        let unavailable_end = exposed(&owner, "scrollEnd").call(vec![]);
+        let end_status = owner.borrow().modules.scroll.request_status.clone();
+        owner.borrow_mut().modules.scroll.handle = handle;
+        let unavailable_position = unavailable_position.expect("missing-handle position refusal");
+        let unavailable_end = unavailable_end.expect("missing-handle end refusal");
+        assert_eq!(unavailable_position.member("reason", false).text(), "unavailable");
+        assert_eq!(position_status, "pending");
+        assert_eq!(unavailable_end.text(), "rejected");
+        assert_eq!(end_status, "rejected");
+        // An accepted end request belongs to this view epoch. Detaching before
+        // its next layout must not apply that work to the replacement view.
+        assert_eq!(exposed(&owner, "scrollEnd").call(vec![]).unwrap().text(), "dispatched");
+        assert!(owner.borrow().modules.scroll.pending_end.is_some());
+        detach_native_view(&owner);
+        let detached = exposed(&owner, "scrollTo").call(vec![]).expect("detached outcome");
+        assert_eq!(detached.member("reason", false).text(), "not-mounted");
+        assert_eq!(owner.borrow().modules.scroll.request_status, "pending");
+        // Keep while-at-end configured and following, and control only the
+        // historical max observation. The current max/offset come from the
+        // real ScrollHandle; this does not claim nonzero physical overflow.
+        let offset_before = {
+            let mut o = owner.borrow_mut();
+            let s = &mut o.modules.scroll;
+            let handle = s.handle.as_ref().unwrap();
+            let max = handle.max_offset();
+            let offset = handle.offset();
+            s.following = true;
+            s.previous_max = gpui::point(max.x + px(1.), max.y + px(1.));
+            assert_ne!(max, s.previous_max);
+            offset
+        };
+        scroll_frame(&owner, native_window);
+        assert!(owner.borrow().modules.scroll.pending_end.is_none());
+        // On this no-overflow surface, rejected status distinguishes stale-work
+        // suppression from fallback application; offset equality alone cannot.
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+        assert_eq!(owner.borrow().modules.scroll.handle.as_ref().unwrap().offset(), offset_before);
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |_, _, cx| {
+        let owner = component.read(cx).owner.clone();
+        assert!(owner.borrow().mounted);
+        assert!(owner.borrow().modules.scroll.pending_end.is_none());
+        assert_eq!(owner.borrow().modules.scroll.request_status, "rejected");
+        assert_eq!(exposed(&owner, "scrollToKind").call(vec![]).unwrap().text(), "dispatched");
+        let retained = exposed(&owner, "scrollToKind");
+        Owner::dispose(&owner);
+        assert!(retained.call(vec![]).is_err());
+    }).unwrap();
 }
 
 #[gpui::test]
