@@ -383,6 +383,9 @@ export function createTargetAlignmentLease(
             for (const target of sizeTargets) {
               const clipped = hasBorderBoxInlineClipping(target, frame);
               if (clipped !== false) {
+                console.info('[select-size] ' + JSON.stringify({ where: 'inline-clipping', clipped,
+                  target: target.getAttribute('data-demo-ref'), rect: target.getBoundingClientRect().toJSON(),
+                  frame: frame.getBoundingClientRect().toJSON() }));
                 rejectAdmission(clipped === null ? 'invalid-geometry' : 'size-conflict');
                 return;
               }

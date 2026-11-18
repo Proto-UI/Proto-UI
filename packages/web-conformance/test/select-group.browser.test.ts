@@ -86,10 +86,14 @@ for (const direction of ['ltr', 'rtl'] as const)
           await page.addStyleTag({
             content:
               css +
-              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}',
+              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}' +
+              '\n[data-demo-ref="trigger"]{width:100%}',
           });
           await page.addScriptTag({ content: bundle });
           const mark = (stage: string) => console.info('[grouped-select-stage]', stage);
+          page.on('console', (message) => {
+            if (message.text().startsWith('[select-size]')) console.info(message.text());
+          });
           mark('mount-start');
           await page.evaluate((dir) => {
             const report = document.documentElement.dataset;

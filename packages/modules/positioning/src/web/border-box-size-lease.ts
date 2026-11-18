@@ -155,8 +155,12 @@ export function createBorderBoxSizeLease(
         Math.abs(targetHeight - height) > 1 ||
         target.scrollHeight > target.clientHeight + 1 ||
         target.scrollWidth > target.clientWidth + 1
-      )
+      ) {
+        console.info('[select-size] ' + JSON.stringify({ where: 'lease-verify', width, height, targetWidth, targetHeight,
+          target: target.getAttribute('data-demo-ref'), scrollWidth: target.scrollWidth, scrollHeight: target.scrollHeight,
+          clientWidth: target.clientWidth, clientHeight: target.clientHeight }));
         return unavailable('size-conflict');
+      }
     }
     const finalWidth = reference.offsetWidth,
       finalHeight = reference.offsetHeight;
