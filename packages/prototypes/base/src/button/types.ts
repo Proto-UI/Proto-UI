@@ -3,6 +3,8 @@ import { ExposeEvent, ExposeMethod, ExposeState, FocusRequestOptions, State } fr
 export interface ButtonProps {
   // P-BASE-BUTTON-PROP-DISABLED
   disabled?: boolean;
+  // P-BASE-BUTTON-PROP-A11Y-LABEL
+  a11yLabel?: string;
   // P-BASE-BUTTON-PROP-NO-EVENT-CALLBACK: click is exposed as a signal, not accepted as props.
 }
 
