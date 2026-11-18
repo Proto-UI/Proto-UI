@@ -138,6 +138,8 @@ Ordinary files under apps/agent-harness/src must import UI only from:
 
 The sole initial raw Adapter integration allowlist is apps/agent-harness/src/proto-ui/bootstrap.tsx. It may import @proto.ui/adapter-react and the exact approved public/private prototype entries required to build facades once. It may not import Runtime internals, Core authoring APIs, Modules, Host Capabilities, Adapter internals, or private implementation files. No other ordinary UI path may import any raw layer. Any expansion needs a matrix row, a linked issue, an owner, an expiry or re-review trigger, and #533 enforcement coverage.
 
+Review debt recorded on 2026-11-17 against `ff75a0a2b356005d8d2d3b73268d7e7a9a258447`: the checker allowance that enforces the allowlist named above, `apps/agent-harness/src/proto-ui/bootstrap.tsx`, names a path that does not exist at this revision, so it admits nothing today, it is not an earned admission, and it is not prior approval for a file that later appears at that path. Under [#533](https://github.com/Proto-UI/Proto-UI/issues/533) the exact entry must be re-admitted together with the Harness application's own review in the change that creates that application; until then the allowance stays inert, no row is dogfooded, and no consumer acceptance follows from it.
+
 WC and Vue dependencies belong only to focused evidence fixtures. The production bundle must contain one React host path, one intended design-language family, and no accidental Web Component or Vue shell runtime.
 
 ### App-owned data and services

@@ -455,8 +455,13 @@ function isGeneratedHarnessFacadeSource(relativeToHarnessSource) {
   return HARNESS_GENERATED_FACADE_SOURCE_PATHS.has(relativeToHarnessSource);
 }
 const HARNESS_RAW_IMPORT_ALLOWLIST = Object.freeze({
-  // M0 authorizes only the React Adapter entry. Any prototype/facade entry
-  // must be admitted here exactly in the same change that approves it.
+  // M0 policy for the planned Harness bootstrap (dogfood row
+  // harness.infrastructure.react-bootstrap, #533). The Harness app does not
+  // exist at this revision, so this entry admits nothing today and is not an
+  // earned admission; it is not prior approval for a file that later appears at
+  // this path. Any prototype/facade entry must be admitted here exactly in the
+  // same change that approves it, and this entry must be re-admitted with the
+  // Harness application's own review under #533.
   'apps/agent-harness/src/proto-ui/bootstrap.tsx': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-react']),
   }),

@@ -1,0 +1,14 @@
+{
+  "apps/www/src/components/PrototypePreviewer/demo-associations.ts": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+  "apps/www/src/components/PrototypePreviewer/demo-renderer.ts": "8a5f6ad96|2026-11-17T17:58:15+08:00|Integrate pull request #1486",
+  "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+  "apps/www/src/components/PrototypePreviewer/projection-materializer.ts": "b80be11d9|2026-11-16T22:09:19+08:00|fix(www): seal the outgoing generation's external portals in the switch turn",
+  "apps/www/src/components/PrototypePreviewer/projection-theme.ts": "fad057af5|2026-11-16T03:26:27+00:00|perf(docs): ignore unchanged visibility and theme notifications",
+  "apps/www/src/components/PrototypePreviewer/prototype-modules.ts": "e485e75c8|2026-11-17T18:43:57+08:00|Integrate pull request #1487",
+  "apps/www/src/components/PrototypePreviewer/registry.ts": "e485e75c8|2026-11-17T18:43:57+08:00|Integrate pull request #1487",
+  "apps/www/src/components/PrototypePreviewer/wc-registry.ts": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+  "apps/www/src/components/SiteLibraryStyle.astro": "a46b18cd2|2026-11-11T13:45:49+08:00|Integrate pull request #1436",
+  "apps/www/src/components/site-link-recipes.ts": "752af98fc|2026-11-15T08:59:47+08:00|fix(bootstrap): retain accessible blue Header and public consumers",
+  "apps/www/src/components/site-native-controls.ts": "752af98fc|2026-11-15T08:59:47+08:00|fix(bootstrap): retain accessible blue Header and public consumers",
+  "apps/www/src/components/site-search-commands.ts": "02bb0d7fe|2026-11-16T00:56:10+00:00|perf(www): initialize Docs search themes from one owner lease"
+}

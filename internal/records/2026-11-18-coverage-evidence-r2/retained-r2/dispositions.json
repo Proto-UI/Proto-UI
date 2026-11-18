@@ -1,0 +1,758 @@
+{
+  "schemaVersion": 1,
+  "kind": "coverage-unearned-repair-r2-dispositions",
+  "generatedAt": "2026-11-18T14:31:49+08:00",
+  "subject": {
+    "repository": "Proto-UI/Proto-UI",
+    "auditedRevision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+    "auditedRevisionCommit": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447|2026-11-17T20:59:41+08:00|fix(coverage): bind earned startup prerender import admission (#1493)",
+    "auditArtifact": "/tmp/contributor-eight-1117/coverage-allowlist-audit-r1/allowlist-audit.json",
+    "auditCounts": {
+      "entries": 339,
+      "byClassification": {
+        "earned": 236,
+        "blocked-by-debt": 88,
+        "unearned": 15
+      },
+      "byMechanism": {
+        "startup-prerender-imports": {
+          "earned": 69
+        },
+        "library-card-imports": {
+          "earned": 8,
+          "blocked-by-debt": 4
+        },
+        "website-raw-import-inline": {
+          "earned": 36,
+          "unearned": 7
+        },
+        "harness-raw-import": {
+          "unearned": 1
+        },
+        "promotion-config-fingerprint": {
+          "blocked-by-debt": 10,
+          "earned": 2
+        },
+        "website-embed-baseline": {
+          "earned": 1
+        },
+        "optical-host-source": {
+          "earned": 1
+        },
+        "website-source-scan-bindings": {
+          "earned": 77,
+          "blocked-by-debt": 74,
+          "unearned": 7
+        },
+        "github-governance-snapshot": {
+          "earned": 8
+        },
+        "prototype-main-source-evidence": {
+          "earned": 1
+        },
+        "website-production-bundle-allowlists": {
+          "earned": 8
+        },
+        "markup-provenance-test-fixture": {
+          "earned": 25
+        }
+      },
+      "notes": [
+        "339 entries cover every digest-bearing allowlist/fingerprint mechanism plus the two path-set/fixture mechanisms",
+        "88 blocked-by-debt = 74 website ledger + 10 config profiles + 4 library-card",
+        "15 unearned = 7 website ledger (infrastructure-only drift) + 7 specifier-only inline drifts + 1 dangling Harness path"
+      ],
+      "fingerprintLevelMismatchesNote": "81 website ledger + 4 library-card + 10 config profiles = 95 stale entry-bindings; initial-paint-experiment.ts and UiLibraryGallery.astro appear in both the ledger and library sets, so 93 distinct files/profiles.",
+      "staleEntryBindings": 95,
+      "distinctStaleTargets": 93
+    }
+  },
+  "policy": "This audit deliberately does NOT propose refreshing fingerprints to force passes. Re-binding a digest is only acceptable after an independent review of the exact drift, recorded as coverage-review evidence.",
+  "totals": {
+    "unearned": 15,
+    "blockedByDebt": 88,
+    "earned": 236,
+    "entries": 339,
+    "changedByCandidate": 15,
+    "stillUnearnedAfterCandidate": 15,
+    "newlyEarned": 0
+  },
+  "unearnedDispositions": [
+    {
+      "id": "U01",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 272,
+      "path": "apps/www/src/components/site-link-recipes.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907 (bytes not compared by the gate)",
+        "source last changed 752af98fc|2026-11-15|fix(bootstrap): retain accessible blue Header and public consumers"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+      "digestComparedByGate": false,
+      "owningRows": [
+        "www.shell.native-link-presentation"
+      ],
+      "owningRowDisposition": {
+        "www.shell.native-link-presentation": "website matrix owner-disposition row 462"
+      },
+      "nextAction": "Re-review the exact source delta at 752af98fc|2026-11-15|fix(bootstrap): retain accessible blue Header and public consumers against the admitted scope of the owning row (www.shell.native-link-presentation) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U02",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 278,
+      "path": "apps/www/src/components/site-native-controls.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80 (bytes not compared by the gate)",
+        "source last changed 752af98fc|2026-11-15|fix(bootstrap): retain accessible blue Header and public consumers"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+      "digestComparedByGate": false,
+      "owningRows": [
+        "www.shell.native-link-presentation",
+        "www.shell.table-of-contents"
+      ],
+      "owningRowDisposition": {
+        "www.shell.native-link-presentation": "website matrix owner-disposition row 462",
+        "www.shell.table-of-contents": "website matrix owner-disposition row 404"
+      },
+      "nextAction": "Re-review the exact source delta at 752af98fc|2026-11-15|fix(bootstrap): retain accessible blue Header and public consumers against the admitted scope of the owning row (www.shell.native-link-presentation, www.shell.table-of-contents) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U03",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 287,
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857 (bytes not compared by the gate)",
+        "source last changed 02bb0d7fe|2026-11-16|perf(www): initialize Docs search themes from one owner lease"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "27d71f162e4076c6fe14440ebd16583c292413e25891fd8428b8b0473135e857",
+      "digestComparedByGate": false,
+      "owningRows": [
+        "www.search.dialog",
+        "www.search.launcher",
+        "www.search.loading-failure"
+      ],
+      "owningRowDisposition": {
+        "www.search.dialog": "website matrix owner-disposition row 411",
+        "www.search.launcher": "website matrix owner-disposition row 410",
+        "www.search.loading-failure": "website matrix owner-disposition row 413"
+      },
+      "nextAction": "Re-review the exact source delta at 02bb0d7fe|2026-11-16|perf(www): initialize Docs search themes from one owner lease against the admitted scope of the owning row (www.search.dialog, www.search.launcher, www.search.loading-failure) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U04",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 309,
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 384fb860d62e933f6c9eaeb90afc5f9a0674772e54e621f282f789a947dca762 (bytes not compared by the gate)",
+        "source last changed 8a5f6ad96|2026-11-17|Integrate pull request #1486"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "384fb860d62e933f6c9eaeb90afc5f9a0674772e54e621f282f789a947dca762",
+      "digestComparedByGate": false,
+      "owningRows": [
+        "www.demo.demo-matrix"
+      ],
+      "owningRowDisposition": {
+        "www.demo.demo-matrix": "website matrix owner-disposition row 446"
+      },
+      "nextAction": "Re-review the exact source delta at 8a5f6ad96|2026-11-17|Integrate pull request #1486 against the admitted scope of the owning row (www.demo.demo-matrix) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U05",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 321,
+      "path": "apps/www/src/components/PrototypePreviewer/registry.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 d4719840fd5a8a0d036c66d079494bb8c7306df571769531323210aca08445c9 (bytes not compared by the gate)",
+        "source last changed e485e75c8|2026-11-17|Integrate pull request #1487"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "d4719840fd5a8a0d036c66d079494bb8c7306df571769531323210aca08445c9",
+      "digestComparedByGate": false,
+      "owningRows": [],
+      "owningRowDisposition": {},
+      "nextAction": "Re-review the exact source delta at e485e75c8|2026-11-17|Integrate pull request #1487 against the admitted scope of the owning row (the inline demo allowance group) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U06",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 342,
+      "path": "apps/www/src/components/PrototypePreviewer/prototype-modules.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 bbcbd108b836d0e3b46a84be731d8602d12221ddd34dbbf5a3f59ee761f74700 (bytes not compared by the gate)",
+        "source last changed e485e75c8|2026-11-17|Integrate pull request #1487"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "bbcbd108b836d0e3b46a84be731d8602d12221ddd34dbbf5a3f59ee761f74700",
+      "digestComparedByGate": false,
+      "owningRows": [],
+      "owningRowDisposition": {},
+      "nextAction": "Re-review the exact source delta at e485e75c8|2026-11-17|Integrate pull request #1487 against the admitted scope of the owning row (the inline demo allowance group) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U07",
+      "mechanism": "website-raw-import-inline",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 348,
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "specifier-only+post-admission-drift",
+      "auditNextAction": "Body changed after admission with no byte binding or recorded re-review; add an explicit reviewed source admission or show the change is outside the admitted edge. Not a hash-refresh task.",
+      "auditEvidence": [
+        "no sourceSha256: admission certifies import edges only; body bytes are not certified",
+        "native sha256 357e2274d3f5d7e68889cf0aeec47663289fb7f7a3b0cf96e50f6621d93e4324 (bytes not compared by the gate)",
+        "source last changed fad057af5|2026-11-16|perf(docs): ignore unchanged visibility and theme notifications"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "import-edge-only debt recorded; not an earned source-body admission",
+      "candidateChanges": [
+        "C1",
+        "C2",
+        "C4"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:171-175 and 269-271 (comments only) and internal/website/self-hosting-coverage-matrix.md:124",
+      "pinnedDigest": null,
+      "currentDigest": "357e2274d3f5d7e68889cf0aeec47663289fb7f7a3b0cf96e50f6621d93e4324",
+      "digestComparedByGate": false,
+      "owningRows": [
+        "www.demo.brutalist-theme-style",
+        "www.demo.demo-matrix"
+      ],
+      "owningRowDisposition": {
+        "www.demo.brutalist-theme-style": "website matrix owner-disposition row 449",
+        "www.demo.demo-matrix": "website matrix owner-disposition row 446"
+      },
+      "nextAction": "Re-review the exact source delta at fad057af5|2026-11-16|perf(docs): ignore unchanged visibility and theme notifications against the admitted scope of the owning row (www.demo.brutalist-theme-style, www.demo.demo-matrix) and record the decision as coverage-review evidence. Add a byte binding only if the admission is meant to be byte-scoped. Until that record exists the allowance certifies the import edge only and the consumer is not earned.",
+      "pendingReason": "No retained independent re-review of the changed body exists; a hash refresh is not acceptance."
+    },
+    {
+      "id": "U08",
+      "mechanism": "harness-raw-import",
+      "file": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "parentLine": 452,
+      "path": "apps/agent-harness/src/proto-ui/bootstrap.tsx",
+      "bindingKind": "specifier-only",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": "dangling-target",
+      "auditNextAction": "Remove the dead allowance, or bind it when the Harness app lands. Do not add entries for absent paths.",
+      "auditEvidence": [
+        "apps/agent-harness does not exist at ff75a0a2 (git ls-tree apps/ -> only apps/workspace, apps/www)",
+        "internal/agent-harness/dogfood-coverage-matrix.md:31 \"No row is dogfooded at M0 because apps/agent-harness does not yet exist\"",
+        "HARNESS_RAW_IMPORT_ALLOWLIST has exactly this one entry, so the Harness consumer wall admits nothing"
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "dangling pre-authorization annotated as inert and not earned; entry retained, claim corrected",
+      "candidateChanges": [
+        "C3",
+        "C5"
+      ],
+      "candidateEvidence": "scripts/coverage-matrices/check-coverage-matrices.mjs:458-464 (comment only) and internal/agent-harness/dogfood-coverage-matrix.md:141",
+      "pinnedDigest": null,
+      "currentDigest": null,
+      "digestComparedByGate": false,
+      "owningRows": [
+        "harness.infrastructure.react-bootstrap"
+      ],
+      "owningRowDisposition": {
+        "harness.infrastructure.react-bootstrap": "dogfood matrix row 100; owner/re-review issue #533 (row 321)"
+      },
+      "nextAction": "Under #533, re-admit the exact entry together with the Harness application's own review in the change that creates that application. Until then the allowance stays inert, admits nothing, and is not prior approval for a file that later appears at that path.",
+      "pendingReason": "The Harness app does not exist at this revision, so the allowance is unreviewable today and admits nothing.",
+      "openDecision": "Removal (audit F7 nextAction) versus retained-and-annotated. This candidate annotates and retains, because removal changes the gate's Harness consumer-wall semantics, contradicts the governed dogfood row, and breaks the retained control test 'allows only the reviewed Adapter entry at the Harness bootstrap boundary' (scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:2418). The removal option and its exact migration list are recorded for the parent/reviewer."
+    },
+    {
+      "id": "U09",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 176,
+      "path": "apps/www/src/components/PrototypePreviewer/demo-associations.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:176 pinned fb14207f0239 != normalized native ce19da5e43e2",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed a46b18cd2|2026-11-11|Integrate pull request #1436",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "fb14207f02391aef52b3fa1c113368c1953989ddb5298b55b5aae907938d3666",
+      "currentDigest": "ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.prototype-previewer"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.prototype-previewer": "website matrix owner-disposition row 439"
+      },
+      "nextAction": "Re-review the exact drift at a46b18cd2|2026-11-11|Integrate pull request #1436 against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U10",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 202,
+      "path": "apps/www/src/components/PrototypePreviewer/demo-renderer.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:202 pinned 2e38950b1753 != normalized native 384fb860d62e",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed 8a5f6ad96|2026-11-17|Integrate pull request #1486",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "2e38950b1753e2a77481d0d43b8bbc8bd63b264bd3de741c5cffca0c456800c8",
+      "currentDigest": "384fb860d62e933f6c9eaeb90afc5f9a0674772e54e621f282f789a947dca762",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.demo-matrix"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.demo-matrix": "website matrix owner-disposition row 446"
+      },
+      "nextAction": "Re-review the exact drift at 8a5f6ad96|2026-11-17|Integrate pull request #1486 against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U11",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 203,
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:203 pinned d6c67d3aee7d != normalized native 7e32aeafb2e0",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed a46b18cd2|2026-11-11|Integrate pull request #1436",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "d6c67d3aee7d6adb2bdb17dc72f9637f4a9ecf8ebe3e3d40a580d3a0747d5838",
+      "currentDigest": "7e32aeafb2e0dc92e524233a6999e8e43b812297e47f267262bb43dc5d6e2006",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.raw-adapter-runtimes"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.raw-adapter-runtimes": "website matrix owner-disposition row 447"
+      },
+      "nextAction": "Re-review the exact drift at a46b18cd2|2026-11-11|Integrate pull request #1436 against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U12",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 215,
+      "path": "apps/www/src/components/PrototypePreviewer/projection-materializer.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:215 pinned 20542fe478bc != normalized native a9a174a9de80",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed b80be11d9|2026-11-16|fix(www): seal the outgoing generation's external portals in the switch turn",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a",
+      "currentDigest": "a9a174a9de802704781b7c0ec3d259b95380077a54f668730b1a11fb5355299d",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.prototype-previewer"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.prototype-previewer": "website matrix owner-disposition row 439"
+      },
+      "nextAction": "Re-review the exact drift at b80be11d9|2026-11-16|fix(www): seal the outgoing generation's external portals in the switch turn against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U13",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 216,
+      "path": "apps/www/src/components/PrototypePreviewer/projection-theme.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:216 pinned d2fabc425800 != normalized native 357e2274d3f5",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed fad057af5|2026-11-16|perf(docs): ignore unchanged visibility and theme notifications",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "d2fabc42580014e9a1cdb52be5207d1931ca5823d6019822b17f0b3f18d5cb0e",
+      "currentDigest": "357e2274d3f5d7e68889cf0aeec47663289fb7f7a3b0cf96e50f6621d93e4324",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.brutalist-theme-style",
+        "www.demo.demo-matrix"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.brutalist-theme-style": "website matrix owner-disposition row 449",
+        "www.demo.demo-matrix": "website matrix owner-disposition row 446"
+      },
+      "nextAction": "Re-review the exact drift at fad057af5|2026-11-16|perf(docs): ignore unchanged visibility and theme notifications against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U14",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 219,
+      "path": "apps/www/src/components/PrototypePreviewer/wc-registry.ts",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:219 pinned 376b4407e8f9 != normalized native f90717fb2920",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed a46b18cd2|2026-11-11|Integrate pull request #1436",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "376b4407e8f93385a57979fc44ea96790a78e7c84b4f3b5a9e71371a30525102",
+      "currentDigest": "f90717fb29208d07dcd7635f5a0d1768ddb951e5d6bf1bb459b02c96021fa80e",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.demo.raw-adapter-runtimes"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.demo.raw-adapter-runtimes": "website matrix owner-disposition row 447"
+      },
+      "nextAction": "Re-review the exact drift at a46b18cd2|2026-11-11|Integrate pull request #1436 against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    },
+    {
+      "id": "U15",
+      "mechanism": "website-source-scan-bindings",
+      "file": "internal/website/self-hosting-coverage-matrix.md",
+      "parentLine": 222,
+      "path": "apps/www/src/components/SiteLibraryStyle.astro",
+      "bindingKind": "sha256-normalized-source",
+      "auditClassification": "unearned",
+      "auditEvidenceKind": null,
+      "auditNextAction": "Re-review the exact drift commit against the infrastructure row's purpose and admit or revert; a mechanical hash refresh is not acceptance.",
+      "auditEvidence": [
+        "internal/website/self-hosting-coverage-matrix.md:222 pinned f5c612c3841e != normalized native 7fec23169c16",
+        "checker emits \"source fingerprint ... does not match its reviewed SHA-256\" (check-coverage-matrices.mjs:12477)",
+        "source last changed a46b18cd2|2026-11-11|Integrate pull request #1436",
+        "internal/website/self-hosting-coverage-matrix.md:373 \"Current source drift ... remain outstanding\""
+      ],
+      "status": "pending",
+      "earned": false,
+      "scopeNote": "Recorded against this row only. It does not withhold acceptance of unrelated bounded consumer work that these rows do not own.",
+      "disposition": "stale binding recorded as explicit source-review debt; reviewed hash retained",
+      "candidateChanges": [
+        "C4"
+      ],
+      "candidateEvidence": "internal/website/self-hosting-coverage-matrix.md:126",
+      "pinnedDigest": "f5c612c3841e7dd9e5441db733f6ac991aac7b9875338c167ffa1caa7667584e",
+      "currentDigest": "7fec23169c164d43f266b8fc71efbf55aaadba2bb4561f8670dc69e3d8c49e33",
+      "digestComparedByGate": true,
+      "owningRows": [
+        "www.build.style-generation"
+      ],
+      "owningRowStates": [
+        "`infrastructure-exempt`"
+      ],
+      "owningRowDisposition": {
+        "www.build.style-generation": "website matrix owner-disposition row 458"
+      },
+      "nextAction": "Re-review the exact drift at a46b18cd2|2026-11-11|Integrate pull request #1436 against the owning row's purpose and admit or revert; a mechanical hash refresh is not acceptance. The retained hash keeps the fingerprint mismatch a real checker failure until an admissible replacement is established by that review.",
+      "pendingReason": "The owning rows are infrastructure-exempt, so no named debt covered these drifts."
+    }
+  ],
+  "blockedRollup": [
+    {
+      "mechanism": "library-card-imports",
+      "count": 4,
+      "namedDebt": [
+        "Card/optical material admission (internal/records/2026-11-16-0.3-release-blocking-list.md:71)"
+      ],
+      "representativePaths": [
+        "apps/www/src/components/UiLibraryGallery.astro",
+        "packages/adapters/base/src/material/initial-paint-experiment.ts",
+        "packages/adapters/base/src/material/initial-paint-receipt.ts",
+        "packages/adapters/base/src/material/sink.ts"
+      ],
+      "auditNextAction": "Do not rebind to green. Re-review the exact material bytes against the blocked Card owner and the optical-material debt, then admit or reject in a coverage-review change.",
+      "status": "pending",
+      "earned": false,
+      "candidateChanges": [],
+      "treatment": "Left untouched: these entries are already owned by a named open debt, so the repair neither refreshes their fingerprints nor removes their allowances.",
+      "scopeNote": "No unrelated bounded development criterion is withheld by this debt; it stays attached to the named rows only."
+    },
+    {
+      "mechanism": "promotion-config-fingerprint",
+      "count": 10,
+      "namedDebt": [
+        "config/virtual-provider admission (blocking list:71 \"virtual/config provider \u51c6\u5165 ... \u4ecd\u5f00\u653e\")"
+      ],
+      "representativePaths": [
+        "apps/www/astro.config.mjs"
+      ],
+      "auditNextAction": "Re-review the exact config/plugin delta and add a reviewed profile with parity tests. Never copy the current hash into the accepted list.",
+      "status": "pending",
+      "earned": false,
+      "candidateChanges": [],
+      "treatment": "Left untouched: these entries are already owned by a named open debt, so the repair neither refreshes their fingerprints nor removes their allowances.",
+      "scopeNote": "No unrelated bounded development criterion is withheld by this debt; it stays attached to the named rows only."
+    },
+    {
+      "mechanism": "website-source-scan-bindings",
+      "count": 74,
+      "namedDebt": [
+        "website consumer source drift / #420 deferral / #1323; gate reported red as 1,637 validation items (blocking list:54)"
+      ],
+      "representativePaths": [
+        "apps/www/src/components/CodeExample.astro",
+        "apps/www/src/components/Homepage/HomeActions.astro",
+        "apps/www/src/components/Homepage/HomepageRuntime.astro",
+        "apps/www/src/components/Homepage/homepage-gallery-parts.ts",
+        "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+        "apps/www/src/components/Homepage/homepage-showcase.ts"
+      ],
+      "auditNextAction": "Do not refresh the fingerprint to green. Resolve/re-review the owning rows' consumer evidence under #1323 (0.4 deferral) or re-review the exact drift against each row's acceptance, then record a reviewed source admission.",
+      "status": "pending",
+      "earned": false,
+      "candidateChanges": [],
+      "treatment": "Left untouched: these entries are already owned by a named open debt, so the repair neither refreshes their fingerprints nor removes their allowances.",
+      "scopeNote": "No unrelated bounded development criterion is withheld by this debt; it stays attached to the named rows only."
+    }
+  ],
+  "earnedNonRegression": {
+    "total": 236,
+    "byMechanism": {
+      "startup-prerender-imports": 69,
+      "library-card-imports": 8,
+      "website-raw-import-inline": 36,
+      "promotion-config-fingerprint": 2,
+      "website-embed-baseline": 1,
+      "optical-host-source": 1,
+      "website-source-scan-bindings": 77,
+      "github-governance-snapshot": 8,
+      "prototype-main-source-evidence": 1,
+      "website-production-bundle-allowlists": 8,
+      "markup-provenance-test-fixture": 25
+    },
+    "treatment": "No earned entry was modified. The candidate changes only comments and two governance prose annotations, and it refreshes no fingerprint, admits no import and certifies no new consumer."
+  },
+  "decisionsRequired": [
+    {
+      "id": "D1",
+      "topic": "Harness raw-import allowance (U08)",
+      "question": "Retain the inert allowance with the corrected claim (this candidate), or remove it as audit F7 suggests and migrate its callers?",
+      "removalCost": [
+        "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:2418 'allows only the reviewed Adapter entry at the Harness bootstrap boundary' asserts the React Adapter import is admitted at that path and would fail",
+        "internal/agent-harness/dogfood-coverage-matrix.md:139 states the allowance as the sole initial raw Adapter integration allowlist and would need a matching correction",
+        "the governed dogfood row harness.infrastructure.react-bootstrap (#533) names that path as the reviewed integration path"
+      ],
+      "recommendedByThisCandidate": "Retain and annotate (status pending, next action bound to #533). The removal remains a valid follow-up once the Harness application lands or once the reviewer rules that the pre-authorization must not stand.",
+      "decisionOwner": "parent / independent reviewer",
+      "notDecidedHere": true
+    },
+    {
+      "id": "D2",
+      "topic": "Seven stale Source-scan bindings (U09-U15)",
+      "question": "Who performs the exact-delta re-review that would replace the retained hashes?",
+      "recommendation": "Owning rows' existing owners under #420, as recorded in the matrix owner-disposition table; no fingerprint refresh and no new pass may be produced from historical green runs or source text.",
+      "decisionOwner": "row owners / parent",
+      "notDecidedHere": true
+    }
+  ],
+  "notExecuted": [
+    "node scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "node scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+    "node scripts/coverage-matrices/prototype-coverage.mjs --check",
+    "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check",
+    "any build, lint, formatter, browser or CI run"
+  ]
+}

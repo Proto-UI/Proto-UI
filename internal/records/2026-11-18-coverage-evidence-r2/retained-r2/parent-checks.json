@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "kind": "coverage-unearned-repair-r2-parent-checks",
+  "generatedAt": "2026-11-18T14:32:11+08:00",
+  "purpose": "Prove the private R2 candidate applies to one exact parent and changes nothing else.",
+  "repository": {
+    "remote": "https://github.com/Proto-UI/Proto-UI.git",
+    "localReadOnlyClone": "/workspace/worktrees/main-1116"
+  },
+  "parents": {
+    "candidateParent": {
+      "revision": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447",
+      "commit": "ff75a0a2b356005d8d2d3b73268d7e7a9a258447|2026-11-17T20:59:41+08:00|fix(coverage): bind earned startup prerender import admission (#1493)",
+      "why": "The retained coverage audit is bound to this revision; the candidate repairs exactly the unearned entries it classified.",
+      "files": {
+        "scripts/coverage-matrices/check-coverage-matrices.mjs": {
+          "blob": "ad3d71ed455fb28cbd0180cc90506fc2bc6659ca",
+          "sha256": "0a4deb256dc734df0d12b3616efbd1f1ed6a2505f49060bb4cde20990296f598"
+        },
+        "internal/website/self-hosting-coverage-matrix.md": {
+          "blob": "2f22213944f43638e6607304260fdad62aa1fc9d",
+          "sha256": "c241bc15fe1ea38765e9e31e80df7b24534468f939e232a08897df3560e6e1b2"
+        },
+        "internal/agent-harness/dogfood-coverage-matrix.md": {
+          "blob": "a42db9241bdbf7c122eb61e083706097d3a21519",
+          "sha256": "69d91f2a39becfaa8d09e159a9ac9edf8ccd09779277cf7a0aa5a61f110ffe73"
+        }
+      }
+    },
+    "contentIdenticalAlternative": {
+      "revision": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53",
+      "commit": "0f0955a9d624e0ef5e250f56a0eaa0fc52bbfb53|2026-11-17T22:03:44+08:00|fix(compiler): repair owner defaults, record indexing and exposed lifetimes (#1491)",
+      "note": "Observed as refs/heads/main by read-only `git ls-remote origin refs/heads/main` on 2026-11-18; all three candidate files are byte-identical to the candidate parent, so the same patch applies. Recorded as a historical observation, not as a live-head claim.",
+      "files": {
+        "scripts/coverage-matrices/check-coverage-matrices.mjs": {
+          "blob": "ad3d71ed455fb28cbd0180cc90506fc2bc6659ca",
+          "sha256": "0a4deb256dc734df0d12b3616efbd1f1ed6a2505f49060bb4cde20990296f598"
+        },
+        "internal/website/self-hosting-coverage-matrix.md": {
+          "blob": "2f22213944f43638e6607304260fdad62aa1fc9d",
+          "sha256": "c241bc15fe1ea38765e9e31e80df7b24534468f939e232a08897df3560e6e1b2"
+        },
+        "internal/agent-harness/dogfood-coverage-matrix.md": {
+          "blob": "a42db9241bdbf7c122eb61e083706097d3a21519",
+          "sha256": "69d91f2a39becfaa8d09e159a9ac9edf8ccd09779277cf7a0aa5a61f110ffe73"
+        }
+      }
+    },
+    "excludedOlderMain": {
+      "revision": "1954cd3566b8f93e388352e282701dd086df2cdd",
+      "commit": "1954cd3566b8f93e388352e282701dd086df2cdd|2026-11-16T22:11:38+08:00|Merge pull request #1480 from Proto-UI/fix/projection-portal-seal-land-1116",
+      "note": "internal/website/self-hosting-coverage-matrix.md differs here (blob f835783b), so the candidate does not target this revision.",
+      "files": {
+        "scripts/coverage-matrices/check-coverage-matrices.mjs": {
+          "blob": "ad3d71ed455fb28cbd0180cc90506fc2bc6659ca",
+          "sha256": "0a4deb256dc734df0d12b3616efbd1f1ed6a2505f49060bb4cde20990296f598"
+        },
+        "internal/website/self-hosting-coverage-matrix.md": {
+          "blob": "f835783b3a341c5d4705c47572f75f53832bb064",
+          "sha256": "27f6439993c4754ec04187b3cf66782345be9cf6d341cfae4d17c4ae71bfd25a"
+        },
+        "internal/agent-harness/dogfood-coverage-matrix.md": {
+          "blob": "a42db9241bdbf7c122eb61e083706097d3a21519",
+          "sha256": "69d91f2a39becfaa8d09e159a9ac9edf8ccd09779277cf7a0aa5a61f110ffe73"
+        }
+      }
+    }
+  },
+  "applyChecks": [
+    {
+      "cwd": "r2/parent-check (parent blobs extracted read-only from ff75a0a2)",
+      "command": "git apply --check -p1 ../candidate.patch",
+      "rc": 0,
+      "meaning": "patch applies cleanly to the exact parent"
+    },
+    {
+      "cwd": "r2/parent-check-applied",
+      "command": "git apply -p1 ../candidate.patch",
+      "rc": 0,
+      "meaning": "patch applied"
+    },
+    {
+      "cwd": "r2/parent-check-current-main",
+      "command": "git apply --check -p1 ../candidate.patch",
+      "rc": 0,
+      "meaning": "patch also applies where the three files are byte-identical"
+    }
+  ],
+  "appliedResult": {
+    "directory": "r2/parent-check-applied",
+    "identicalToProposed": {
+      "scripts/coverage-matrices/check-coverage-matrices.mjs": true,
+      "internal/website/self-hosting-coverage-matrix.md": true,
+      "internal/agent-harness/dogfood-coverage-matrix.md": true
+    }
+  },
+  "artifactDigests": {
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": {
+      "r2Proposed": {
+        "path": "r2/proposed/scripts/coverage-matrices/check-coverage-matrices.mjs",
+        "sha256": "771a174643f41e14131df075fc0b90ee5c9f452f383439e0cc1a0f9867c7e288"
+      },
+      "before": {
+        "path": "before/scripts/coverage-matrices/check-coverage-matrices.mjs",
+        "sha256": "0a4deb256dc734df0d12b3616efbd1f1ed6a2505f49060bb4cde20990296f598",
+        "origin": "R1 prepared set (byte-identical to the candidate parent blob)"
+      },
+      "r1PreparedAfter": {
+        "path": "after/scripts/coverage-matrices/check-coverage-matrices.mjs",
+        "sha256": "cb1f40ab3756f5d4e47a994a2ad8c7f8b55df4055e0d96e64e8ceb8294069f7e",
+        "relation": "diverges from r2Proposed: see README section \"R1 to R2 refinements\""
+      }
+    },
+    "internal/website/self-hosting-coverage-matrix.md": {
+      "r2Proposed": {
+        "path": "r2/proposed/internal/website/self-hosting-coverage-matrix.md",
+        "sha256": "b233be9604a6d3ea1a86c3010a2b2a4cc640b55dde6d5218306f83ecff9beaec"
+      },
+      "before": {
+        "path": "before/internal/website/self-hosting-coverage-matrix.md",
+        "sha256": "c241bc15fe1ea38765e9e31e80df7b24534468f939e232a08897df3560e6e1b2",
+        "origin": "R1 prepared set (byte-identical to the candidate parent blob)"
+      },
+      "r1PreparedAfter": {
+        "path": "after/internal/website/self-hosting-coverage-matrix.md",
+        "sha256": "b233be9604a6d3ea1a86c3010a2b2a4cc640b55dde6d5218306f83ecff9beaec",
+        "relation": "identical to r2Proposed"
+      }
+    },
+    "internal/agent-harness/dogfood-coverage-matrix.md": {
+      "r2Proposed": {
+        "path": "r2/proposed/internal/agent-harness/dogfood-coverage-matrix.md",
+        "sha256": "df2ae3c9795b30c14530c008a0a819f2b4c2cd35f0600d4ad75d3b15322666da"
+      },
+      "before": {
+        "path": "r2/parent-check/internal/agent-harness/dogfood-coverage-matrix.md",
+        "sha256": "69d91f2a39becfaa8d09e159a9ac9edf8ccd09779277cf7a0aa5a61f110ffe73",
+        "origin": "candidate parent blob extracted read-only from ff75a0a2 (the R1 prepared set did not include this file)"
+      },
+      "r1PreparedAfter": {
+        "path": null,
+        "relation": "not present in the R1 prepared set"
+      }
+    }
+  },
+  "patch": {
+    "path": "r2/candidate.patch",
+    "sha256": "9033492613908868a802d70180b2ce06f8f2d163acf5e09e5dde6ba4ebc04e0e",
+    "bytes": 7524
+  },
+  "noSideEffects": {
+    "liveWorktreeEdits": 0,
+    "commits": 0,
+    "pushes": 0,
+    "githubWrites": 0,
+    "builds": 0,
+    "tests": 0,
+    "linters": 0,
+    "formatters": 0,
+    "browsers": 0,
+    "installs": 0,
+    "networkWrites": 0,
+    "readOnlyGitOperations": [
+      "git show",
+      "git rev-parse",
+      "git ls-tree",
+      "git log -S",
+      "git merge-base --is-ancestor",
+      "git ls-remote origin refs/heads/main"
+    ],
+    "note": "All Git access was read-only against committed blobs; the patch application ran only inside this private candidate directory."
+  }
+}
