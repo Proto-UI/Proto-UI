@@ -885,11 +885,8 @@ export class AnatomyModuleImpl extends ModuleBase {
   ): Iterable<AnatomyModuleImpl> {
     let previous: AnatomyModuleImpl | undefined;
     let position = 0;
-    while (true) {
-      // Re-read after each callback: the last subscriber can be removed and a
-      // later owner can recreate the family index before this traversal resumes.
-      const owners = index.get(family);
-      if (!owners) return;
+    let owners = index.get(family);
+    while (owners) {
       if (previous && owners[position - 1] !== previous)
         position = this.subscriberAfter(owners, previous.instanceOrder);
       const next = owners[position];
@@ -897,6 +894,9 @@ export class AnatomyModuleImpl extends ModuleBase {
       previous = next;
       position++;
       yield next;
+      // Subscriber mutations are in place until the list is emptied. A
+      // callback can then create a new list for the same family.
+      if (!owners.length) owners = index.get(family);
     }
   }
 
