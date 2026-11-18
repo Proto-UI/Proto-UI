@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import vm from 'node:vm';
 import ts from 'typescript';
+import { BROWSER_SUITES } from '../../../../../../scripts/test/runtime-test-plan.mjs';
 const css = readFileSync('apps/www/src/styles/code-surfaces.css', 'utf8');
 const browser = readFileSync(
   'apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts',
@@ -135,9 +136,10 @@ it('keeps the original reverse input and independently asserts internal, boundar
   };
   check(browser);
   for (const token of tokens) expect(() => check(browser.replaceAll(token, ''))).toThrow();
-  const plan = readFileSync('scripts/test/runtime-test-plan.mjs', 'utf8');
   expect(
-    plan.match(/'apps\/www\/src\/content\/docs\/zh-cn\/code-scroll-chain.browser.test.ts'/g)
+    BROWSER_SUITES.filter(
+      (file: string) => file === 'apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts'
+    )
   ).toHaveLength(1);
 });
 
