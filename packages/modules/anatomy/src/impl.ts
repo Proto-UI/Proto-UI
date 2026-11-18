@@ -951,10 +951,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     const rootInstance =
       currentRoot === undefined ? this.findDomainRoot(this.getSelfToken(), family) : currentRoot;
     if (observedRoot === rootInstance) return;
-    // The host disposer or new observer can change the logical tree before
-    // the next recipient, even when this recipient's signature is unchanged.
-    clearOrderNotificationReads(reads);
-    if (observedRoot !== undefined) this.teardownOrderObserver(family);
+    if (observedRoot !== undefined) this.teardownOrderObserver(family, reads);
     if (!rootInstance) return;
     const target = CENTER.getClaim(rootInstance, family)?.getRootTarget(rootInstance);
     if (!target) return;
@@ -969,6 +966,9 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!entry) {
       const observer = this.caps.get(ANATOMY_ORDER_OBSERVER_CAP) as AnatomyOrderObserver;
       const listeners = new Set<AnatomyModuleImpl>();
+      // Host registration can move a later recipient even without changing
+      // the current recipient's signature.
+      clearOrderNotificationReads(reads);
       const off = observer(target, () => {
         const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
         for (const impl of listeners) {
@@ -983,7 +983,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     this.observedOrderRoots.set(family, rootInstance);
   }
 
-  private teardownOrderObserver(family: AnatomyFamily): void {
+  private teardownOrderObserver(family: AnatomyFamily, reads?: OrderNotificationReads): void {
     const rootInstance = this.observedOrderRoots.get(family);
     if (!rootInstance) return;
     this.observedOrderRoots.delete(family);
@@ -995,6 +995,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     entry.listeners.delete(this);
     if (entry.listeners.size > 0) return;
 
+    clearOrderNotificationReads(reads);
     entry.off();
     byRoot?.delete(rootInstance);
     if (byRoot && byRoot.size === 0) {

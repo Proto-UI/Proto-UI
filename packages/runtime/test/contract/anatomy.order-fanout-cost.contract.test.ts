@@ -242,6 +242,22 @@ describe('Runtime Anatomy synchronous order fanout cost', () => {
     expect(domain.notifications.get(later!)).toEqual([callbackQuery]);
   });
 
+  it('keeps shared order reads while the root target is unavailable', () => {
+    const domain = createDomain(0, 0, true);
+    domain.unreadyTargets.add(domain.root);
+    const bridge: Owner = { id: 'bridge' };
+    domain.parents.set(bridge, domain.root);
+    for (let index = 0; index < 12; index++) {
+      domain.add('reader-' + index, 'item', bridge, true, domain.element);
+    }
+    domain.reset();
+
+    domain.sync();
+
+    expect(domain.parentReads.get(bridge)).toBe(1);
+    expect([...domain.notifications.values()].flat()).toEqual([]);
+  });
+
   it('rebuilds domain reads when attaching a host observer moves a later subscriber', () => {
     const domain = createDomain(0, 0, true);
     const inner = domain.add('inner-root', 'root');
