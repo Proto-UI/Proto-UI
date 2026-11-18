@@ -55,6 +55,12 @@ type NormalizedFamily = {
   profiles: Record<string, NormalizedProfile>;
 };
 
+type CurrentDomain = {
+  rootInstance: AnatomyInstanceToken | null;
+  claims: ClaimRecord[];
+  profile: string | null;
+};
+
 type ClaimRecord = {
   instance: AnatomyInstanceToken;
   family: AnatomyFamily;
@@ -917,12 +923,16 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
   }
 
-  private ensureOrderObserver(family: AnatomyFamily): void {
-    if (this.mountPhase !== 'mounted') return;
-    if (this.observedOrderRoots.has(family)) return;
+  private ensureOrderObserver(family: AnatomyFamily, currentRoot?: AnatomyInstanceToken): void {
+    if (this.disposed || this.mountPhase !== 'mounted' || !this.orderListeners.has(family)) return;
+    const observedRoot = this.observedOrderRoots.get(family);
+    if (currentRoot === undefined && observedRoot !== undefined) return;
     if (!this.caps.has(ANATOMY_ORDER_OBSERVER_CAP)) return;
 
-    const rootInstance = this.findDomainRoot(this.getSelfToken(), family);
+    const rootInstance =
+      currentRoot === undefined ? this.findDomainRoot(this.getSelfToken(), family) : currentRoot;
+    if (observedRoot === rootInstance) return;
+    if (observedRoot !== undefined) this.teardownOrderObserver(family);
     if (!rootInstance) return;
     const target = CENTER.getClaim(rootInstance, family)?.getRootTarget(rootInstance);
     if (!target) return;
@@ -972,7 +982,7 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private primeOrderSignature(family: AnatomyFamily): void {
     if (this.orderSignatureByFamily.has(family)) return;
-    const signature = this.computeOrderSignature(family);
+    const signature = this.computeOrderSignature(this.resolveCurrentDomain(family, false));
     this.orderSignatureByFamily.set(family, signature);
     this.orderVersionByFamily.set(family, 0);
   }
@@ -984,7 +994,11 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private emitOrderChangeIfNeeded(family: AnatomyFamily, reads?: OrderNotificationReads): void {
     const prev = this.orderSignatureByFamily.get(family);
-    const next = this.computeOrderSignature(family, reads);
+    const domain = this.resolveCurrentDomain(family, false, reads?.domains);
+    const next = this.computeOrderSignature(domain, reads);
+    // Follow the current host root before the next native order mutation.
+    if ((this.observedOrderRoots.get(family) ?? null) !== domain.rootInstance)
+      this.ensureOrderObserver(family, domain.rootInstance);
     if (typeof prev !== 'undefined' && prev === next) return;
 
     this.orderSignatureByFamily.set(family, next);
@@ -1008,8 +1022,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     }
   }
 
-  private computeOrderSignature(family: AnatomyFamily, reads?: OrderNotificationReads): string {
-    const domain = this.resolveCurrentDomain(family, false, reads?.domains);
+  private computeOrderSignature(domain: CurrentDomain, reads?: OrderNotificationReads): string {
     if (!domain.rootInstance) return 'missing-domain';
     const ordered = this.sortClaims(domain.claims, reads?.comparisons);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
@@ -1205,11 +1218,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     family: AnatomyFamily,
     strict = true,
     domains?: Map<AnatomyParentGetter, DomainClaims>
-  ): {
-    rootInstance: AnatomyInstanceToken | null;
-    claims: ClaimRecord[];
-    profile: string | null;
-  } {
+  ): CurrentDomain {
     const instance = this.getSelfToken();
     const getParent = this.getParentGetter();
     const rootInstance = this.findDomainRoot(instance, family, getParent);
