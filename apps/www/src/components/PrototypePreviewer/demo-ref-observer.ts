@@ -178,8 +178,12 @@ export function observeOwnedDemoRefs(
           }
           if (ids.size) pending.add(element);
         } else {
-          if (record.removedNodes.length) removalsPending = true;
-          for (const node of [...record.addedNodes, ...record.removedNodes]) pending.add(node);
+          for (const node of record.addedNodes) pending.add(node);
+          for (const node of record.removedNodes) {
+            // A text or comment removal cannot detach an indexed element.
+            if (node.nodeType === 1) removalsPending = true;
+            pending.add(node);
+          }
         }
       }
       if ((!pending.size && !pendingOwners.size) || scheduled) return;
