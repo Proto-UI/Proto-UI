@@ -1,4 +1,10 @@
 // packages/adapters/base/src/events/web-event-router.ts
+import {
+  clearKeyboardPressOwner,
+  KEYBOARD_PRESS_OWNER,
+  markBridgedKeyboardReset,
+  retainNativeKeyboardReset,
+} from './keyboard-press-owner';
 import { readPointerSampleField } from './pointer-sample';
 import { createWebPointerContactWriter, type WebPointerContact } from './pointer-contact';
 import {
@@ -9,7 +15,6 @@ import {
 
 type Unsub = () => void;
 const PRESS_COMMIT_EMITTED_ROOTS = Symbol.for('@proto.ui/router/press-commit-emitted-roots');
-const KEYBOARD_PRESS_OWNER = Symbol.for('@proto.ui/router/keyboard-press-owner');
 const PROTO_PARENT_INSTANCE_MARK = Symbol.for('@proto.ui/adapter-base/__proto_parent_instance');
 const PROTO_INSTANCE_MARKS = [
   Symbol.for('@proto.ui/adapter-web-component/__proto_instance'),
@@ -62,26 +67,6 @@ type Listener = {
 
 const payloadStateByNativeEvent = new WeakMap<object, Record<PropertyKey, unknown>>();
 const activeRouterByRoot = new WeakMap<HTMLElement, object>();
-const windowKeyboardResetUses = new WeakMap<Window, number>();
-
-function clearKeyboardPressOwner(native: Event): void {
-  delete (native as Event & { [KEYBOARD_PRESS_OWNER]?: object })[KEYBOARD_PRESS_OWNER];
-}
-
-function retainWindowKeyboardReset(target: Window): Unsub {
-  const uses = windowKeyboardResetUses.get(target) ?? 0;
-  if (uses === 0) target.addEventListener('keydown', clearKeyboardPressOwner, true);
-  windowKeyboardResetUses.set(target, uses + 1);
-  return () => {
-    const current = windowKeyboardResetUses.get(target) ?? 0;
-    if (current > 1) {
-      windowKeyboardResetUses.set(target, current - 1);
-    } else if (current === 1) {
-      windowKeyboardResetUses.delete(target);
-      target.removeEventListener('keydown', clearKeyboardPressOwner, true);
-    }
-  };
-}
 
 export function createWebProtoEventRouter(opt: {
   rootEl: HTMLElement;
@@ -636,17 +621,13 @@ export function createWebProtoEventRouter(opt: {
   rootEl.addEventListener('keydown', resetAtRoot, true);
   unsubs.push(() => rootEl.removeEventListener('keydown', resetAtRoot, true));
   if (globalEl !== rootEl) {
-    const view = rootEl.ownerDocument.defaultView;
-    if (
-      view &&
-      globalEl === view &&
-      view.addEventListener === view.EventTarget.prototype.addEventListener &&
-      view.removeEventListener === view.EventTarget.prototype.removeEventListener
-    ) {
-      // The marker is private to dispatch. One native Window capture reset
-      // serves all of its routers before their existing bubble listeners run.
-      unsubs.push(retainWindowKeyboardReset(view));
+    // The marker is private to dispatch. One native Window capture reset
+    // serves its routers before their existing bubble listeners run.
+    const release = retainNativeKeyboardReset(globalEl, rootEl);
+    if (release) {
+      unsubs.push(release);
     } else {
+      markBridgedKeyboardReset(resetAtRoot, rootEl);
       globalEl.addEventListener('keydown', resetAtRoot, true);
       unsubs.push(() => globalEl.removeEventListener('keydown', resetAtRoot, true));
     }
