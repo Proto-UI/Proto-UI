@@ -544,13 +544,14 @@ describe.sequential('CodeExample host coverage and upstream visual hierarchy', (
                 expect(await panel.locator('pre, [data-site-copy], [data-code-file-tabs]').count()).toBe(0);
                 expect(await panel.textContent()).toContain('WIP');
               } else {
-                expect(await panel.locator('[data-code-example-tree]').count()).toBe(1);
+                const tree = panel.locator('[data-code-example-tree]');
+                await tree.first().waitFor({ state: 'attached' });
+                expect(await tree.count()).toBe(1);
                 expect(await panel.locator('[data-code-example-command] pre').textContent()).toContain('npx @proto.ui/cli@latest');
                 expect(await panel.locator('[data-code-example-command] [role="tab"], [data-code-example-command] [role="tabpanel"]').count()).toBe(0);
                 expect(await panel.locator('[data-code-example-tree]').textContent()).not.toContain('install.sh');
                 expect(await panel.locator('[data-code-example-command] [data-code-example-tree]').count()).toBe(0);
                 expect(await panel.locator('[data-code-file-browser] [data-code-example-command]').count()).toBe(0);
-                const tree = panel.locator('[data-code-example-tree]');
                 const embedded = await tree.evaluate((node) => {
                   const root = getComputedStyle(node);
                   const row = node.querySelector<HTMLElement>('[data-code-tree-kind="folder"]')!;
