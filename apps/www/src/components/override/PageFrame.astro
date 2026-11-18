@@ -145,7 +145,9 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   :global(html:has(.site-page-frame [data-docs-site-header])) {
     scroll-padding-top: 0;
   }
-  :global(.site-page-frame:has([data-docs-site-header]) main [id]) {
+  /* Keep the Header condition local so content mutations cannot invalidate
+     the anchors through a frame-wide relational match. */
+  :global(.site-page-frame > :where(header):has([data-docs-site-header]) + :where(div) main [id]) {
     scroll-margin-top: calc(var(--header-height) + 1rem);
   }
   /* The page-top fragment should preserve the same reading inset as a page
@@ -154,7 +156,13 @@ const { hasSidebar } = Astro.locals.starlightRoute;
      document up by 8px/16px despite unchanged layout. Keep this tied to the
      responsive reading padding rather than introducing a scroll correction.
      Splash pages have no docs inset and retain their original 1rem clearance. */
-  :global(.site-page-frame:has([data-docs-site-header]) main h1[data-site-typography='h1']) {
+  :global(
+    .site-page-frame
+      > :where(header):has([data-docs-site-header])
+      + :where(div)
+      main
+      h1[data-site-typography='h1']
+  ) {
     scroll-margin-top: calc(var(--header-height) + var(--docs-reading-inset, 1rem));
   }
   /* Documentation composition: independent outer gutters, rails and reading
