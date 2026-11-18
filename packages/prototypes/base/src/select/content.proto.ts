@@ -406,11 +406,13 @@ function setupSelectContent(
       // not replace a newer Item or external Focus owner after entry completed.
       if (entryCancelled || admission.preserveFocus) return true;
       if (!row) {
-        // Popper preserves its own selected-or-boundary entry policy. The
-        // current size request admitted readiness; no deferred stale task.
-        const ctx = readContext(_run);
-        if (!ctx || !current()) return false;
-        resolveOpenFocusAction(_run, ctx, false);
+        entryTask?.cancel();
+        entryTask = delay(0, () => {
+          entryTask = null;
+          if (entryCancelled || !current()) return;
+          const ctx = readContext(_run);
+          if (ctx && current()) resolveOpenFocusAction(_run, ctx, false);
+        });
         return true;
       }
       const focus = row.getExpose('focusSelf') as
