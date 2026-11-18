@@ -3,6 +3,7 @@ import {
   createWebOwnedDecorationStage,
   type WebOwnedDecorationStage,
 } from '@proto.ui/adapter-base';
+import type { EventPort } from '@proto.ui/module-event';
 import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
 import { refreshVue2PortalDestination } from './runtime/modules';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
@@ -779,6 +780,9 @@ function initSession<Props extends PropsBaseType>(
   state.eventGate = eventGate;
 
   const router = createWebProtoEventRouter({
+    rootContextMenu:
+      state.hostSession?.caps.getPort<EventPort>('event')?.hasRootRegistration?.('context.menu') !==
+      false,
     rootEl,
     instanceToken: state.instanceToken,
     resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

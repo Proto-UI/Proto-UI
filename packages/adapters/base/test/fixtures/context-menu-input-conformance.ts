@@ -1,6 +1,6 @@
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { createAnatomyFamily, definePrototype, type ContextMenuInputIntent } from '@proto.ui/core';
-import { asContextMenuInput } from '@proto.ui/hooks';
+import { asContextMenuInput, asTrigger } from '@proto.ui/hooks';
 import type { ScrollMount, ScrollTree } from './scroll-catalog-conformance';
 import { resolveWebInputOriginAnchor } from '../../../../modules/positioning/src/web/input-origin-anchor';
 
@@ -9,6 +9,73 @@ export function contextMenuInputConformance(
   name: string,
   mount: (tree: ScrollTree[]) => Promise<ScrollMount>
 ) {
+  it.each([false, true])(
+    `${name}: binds native context-menu routing for declared root demand (%s)`,
+    async (semantic) => {
+      const calls: string[] = [];
+      const rootListeners = vi.spyOn(HTMLElement.prototype, 'addEventListener');
+      const globalListeners = vi.spyOn(window, 'addEventListener');
+      const proto = definePrototype({
+        name: `context-demand-${name}-${semantic}`,
+        setup(def) {
+          def.event.on('host:contextmenu', () => calls.push('host'));
+          if (semantic) def.event.on('context.menu', () => calls.push('proto'));
+        },
+      });
+      try {
+        const mounted = await mount([{ proto }]);
+        try {
+          await mounted.flush();
+          const root = mounted.host.querySelector<HTMLElement>('[data-pui-root]')!;
+          expect(root).toBeTruthy();
+          const countRoot = rootListeners.mock.calls.filter(
+            ([type], index) => type === 'contextmenu' && rootListeners.mock.contexts[index] === root
+          ).length;
+          const countGlobal = globalListeners.mock.calls.filter(
+            ([type]) => type === 'contextmenu'
+          ).length;
+          expect(countRoot).toBe(semantic ? 2 : 1);
+          expect(countGlobal).toBe(semantic ? 1 : 0);
+          await mounted.dispatch(root, new MouseEvent('contextmenu', { bubbles: true }));
+          await mounted.flush();
+          expect(calls).toEqual(semantic ? ['proto', 'host'] : ['host']);
+        } finally {
+          await mounted.unmount();
+        }
+      } finally {
+        globalListeners.mockRestore();
+        rootListeners.mockRestore();
+      }
+    }
+  );
+  it(`${name}: retains redirected context-menu demand on the active Trigger surface`, async () => {
+    let calls = 0;
+    const owner = definePrototype({
+      name: `context-demand-owner-${name}`,
+      setup(def) {
+        asTrigger();
+        def.event.on('context.menu', () => calls++);
+        return (r) => r.slot();
+      },
+    });
+    const surface = definePrototype({
+      name: `context-demand-surface-${name}`,
+      setup() {
+        asTrigger();
+      },
+    });
+    const mounted = await mount([{ proto: owner, children: [{ proto: surface }] }]);
+    try {
+      await mounted.flush();
+      const roots = mounted.host.querySelectorAll<HTMLElement>('[data-pui-root]');
+      expect(roots).toHaveLength(2);
+      await mounted.dispatch(roots[1]!, new MouseEvent('contextmenu', { bubbles: true }));
+      await mounted.flush();
+      expect(calls).toBe(1);
+    } finally {
+      await mounted.unmount();
+    }
+  });
   it(`${name}: context input keeps pointer point host-local, keyboard element-based, and cancels long-press`, async () => {
     const family = createAnatomyFamily(`context-input-${name}`, {
       roles: { root: { cardinality: { min: 0, max: 1 } } },

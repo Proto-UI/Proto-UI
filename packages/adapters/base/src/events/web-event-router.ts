@@ -82,6 +82,8 @@ export function createWebProtoEventRouter(opt: {
   ) => SemanticEventRouteResolution | null;
   /** @deprecated Use resolveSemanticEventRoute so non-surface hits can be rejected. */
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
+  /** Setup-time root registration intent when the adapter has the complete inventory. */
+  rootContextMenu?: boolean;
   globalEl?: EventTarget; // window by default
   isEnabled: () => boolean; // bridge to eventGate
 }) {
@@ -704,21 +706,24 @@ export function createWebProtoEventRouter(opt: {
     })
   );
 
-  // contextmenu -> context.menu
-  unsubs.push(
-    listen(rootEl, 'contextmenu', (e) => {
-      if (!isEnabled() || !shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
-      emitFromPhysicalRoot('context.menu', e);
-    })
-  );
+  // Keep native order and account for root registrations redirected to a Trigger surface.
+  if (opt.rootContextMenu !== false || opt.resolveSemanticEventRoute?.(rootEl)) {
+    // contextmenu -> context.menu
+    unsubs.push(
+      listen(rootEl, 'contextmenu', (e) => {
+        if (!isEnabled() || !shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
+        emitFromPhysicalRoot('context.menu', e);
+      })
+    );
 
-  unsubs.push(
-    listen(globalEl, 'contextmenu', (e) => {
-      if (!isEnabled()) return;
-      if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
-      emit(protoRootBus, 'context.menu', e);
-    })
-  );
+    unsubs.push(
+      listen(globalEl, 'contextmenu', (e) => {
+        if (!isEnabled()) return;
+        if (!shouldRouteGlobalRootEvent(e, { includeActiveFallback: false })) return;
+        emit(protoRootBus, 'context.menu', e);
+      })
+    );
+  }
 
   // -------------------------
   // (B) 懒绑定：host:* host-bound events

@@ -295,6 +295,10 @@ export class EventModuleImpl extends ModuleBase {
   // runtime port
   // -------------------------
 
+  hasRootRegistration(type: EventTypeV0): boolean {
+    return this.kernel.hasAny('root', type);
+  }
+
   bind(dispatch: EventDispatch) {
     this.ensureRuntime('rt.event.bind');
 
