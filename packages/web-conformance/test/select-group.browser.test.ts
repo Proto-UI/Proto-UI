@@ -86,7 +86,10 @@ for (const direction of ['ltr', 'rtl'] as const)
           await page.addStyleTag({
             content:
               css +
-              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}',
+              '\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--pui-background);color:var(--pui-foreground)}button{font-family:inherit}' +
+              // The item-aligned popup gives every row the Trigger's width. Leave room
+              // for Web Components even when the shorter React label is selected.
+              '\n[data-demo-ref="trigger"]{width:100%}',
           });
           await page.addScriptTag({ content: bundle });
           await page.evaluate((dir) => window.selectGroupProof.mount(dir), direction);
