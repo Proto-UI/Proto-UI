@@ -118,7 +118,9 @@ describe('failed initial split caller projection recovery', () => {
         const publishedAssignments = surface.querySelector('slot')!.assignedNodes();
         expect(publishedAssignments).toHaveLength(1);
         expect(publishedAssignments[0]).toBe(caller);
-        expect(host.getExposes().ping()).toBe('live');
+        const exposes = host.getExposes();
+        if (typeof exposes.ping !== 'function') throw new Error('Missing public ping method.');
+        expect(exposes.ping()).toBe('live');
       } finally {
         host.remove();
         await Promise.resolve();

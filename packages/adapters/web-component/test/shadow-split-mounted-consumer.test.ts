@@ -115,7 +115,9 @@ describe('split mounted consumer delivery', () => {
         ]);
         expect(f.caller.value).toBe('Mounted caller');
         expect(f.host.firstChild).toBe(f.caller);
-        expect(f.host.getExposes().ping()).toBe('live');
+        const exposes = f.host.getExposes();
+        if (typeof exposes.ping !== 'function') throw new Error('Missing public ping method.');
+        expect(exposes.ping()).toBe('live');
         f.host.click();
         expect(f.actions).toEqual([{ source: 'host' }]);
         expect(f.environmentListeners.size).toBe(1);
