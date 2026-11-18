@@ -621,7 +621,11 @@ export function createInstanceTreeMarkers(
 
   const PROTO_PARENT_BY_INSTANCE = new WeakMap<HTMLElement, HTMLElement>();
 
-  function setProtoParent(instance: HTMLElement, parent: HTMLElement | null): void {
+  function setProtoParent(
+    instance: HTMLElement,
+    parent: HTMLElement | null,
+    options?: { retainMatchingPhysicalParent: boolean }
+  ): void {
     if (parent) {
       PROTO_PARENT_BY_INSTANCE.set(instance, parent);
       writeProtoParentMark(instance, parent);
@@ -632,6 +636,12 @@ export function createInstanceTreeMarkers(
 
     const token = TOKEN_BY_INSTANCE.get(instance);
     if (!token || OWNER_PARENT_TOKENS.has(token)) return;
+    const previous = PARENT_BY_TOKEN.get(token);
+    if (!parent && options?.retainMatchingPhysicalParent && previous) {
+      // A reconnect may clear an old projection without changing the owner.
+      const physicalParent = getProtoParent(instance);
+      if (physicalParent && TOKEN_BY_INSTANCE.get(physicalParent) === previous) return;
+    }
     const parentRoot = parent ? (isProtoInstance(parent) ? parent : getProtoParent(parent)) : null;
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     setLogicalParentInternal(token, parentToken ?? null);
