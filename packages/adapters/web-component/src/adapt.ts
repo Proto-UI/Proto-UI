@@ -878,8 +878,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               })
             : undefined);
           const eventGate = (resources.eventGate = createEventGate());
+          const eventPort = owner.session?.caps.getPort<EventPort>('event');
           const router = (resources.router = createWebProtoEventRouter({
-            rootRegistrations: owner.session?.caps.getPort<EventPort>('event'),
+            rootRegistrations: eventPort,
+            globalKeyUp: eventPort?.hasGlobalRegistration?.('key.up') !== false,
             rootEl: thisEl,
             // The eager native bridge owns focus/blur before provider construction.
             // Router subscriptions stay on a private target, avoiding a second

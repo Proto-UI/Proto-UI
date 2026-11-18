@@ -79,6 +79,56 @@ export function pointerFactsConformance(
       },
     });
   describe(`${name}: public author pointer sample contract`, () => {
+    it.each(['host', 'root', 'global', 'press'] as const)(
+      'keeps native keyup routing for setup demand %s',
+      async (demand) => {
+        const calls: string[] = [];
+        const nativeListeners = vi.spyOn(window, 'addEventListener');
+        const prototype = definePrototype({
+          name: `keyup-demand-${name}-${++serial}`,
+          setup(def) {
+            def.event.onGlobal('host:keyup', () => calls.push('host'));
+            if (demand === 'root') def.event.on('key.up', () => calls.push('root'));
+            if (demand === 'global') def.event.onGlobal('key.up', () => calls.push('global'));
+            if (demand === 'press') def.event.on('press.commit', () => calls.push('press'));
+            return (r) => r.el('span', 'key release');
+          },
+        });
+        try {
+          const mounted = await mount(prototype);
+          try {
+            await mounted.flush();
+            expect(nativeListeners.mock.calls.filter(([event]) => event === 'keyup')).toHaveLength(
+              demand === 'host' ? 1 : 2
+            );
+            if (demand === 'press') {
+              await mounted.dispatch(
+                mounted.root,
+                new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+              );
+              await mounted.dispatch(mounted.root, new MouseEvent('click', { bubbles: true }));
+              expect(calls).toEqual(['press']);
+            }
+            await mounted.dispatch(
+              mounted.root,
+              new KeyboardEvent('keyup', { key: 'Enter', bubbles: true })
+            );
+            await mounted.flush();
+            if (demand === 'press') {
+              await mounted.dispatch(mounted.root, new MouseEvent('click', { bubbles: true }));
+              expect(calls).toEqual(['press', 'host', 'press']);
+            } else {
+              expect(calls).toEqual(demand === 'host' ? ['host'] : [demand, 'host']);
+            }
+          } finally {
+            await mounted.unmount();
+          }
+        } finally {
+          nativeListeners.mockRestore();
+        }
+      }
+    );
+
     it.each(['pointer.enter', 'pointer.leave'] as const)(
       'binds the declared root boundary %s alongside independent host listeners',
       async (type) => {
