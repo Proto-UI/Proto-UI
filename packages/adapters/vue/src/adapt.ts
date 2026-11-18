@@ -746,10 +746,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           eventGateRef.value = eventGate;
 
           const router = createWebProtoEventRouter({
-            rootContextMenu:
-              hostSession?.caps
-                .getPort<EventPort>('event')
-                ?.hasRootRegistration?.('context.menu') !== false,
+            rootRegistrations: hostSession?.caps.getPort<EventPort>('event'),
             rootEl,
             instanceToken,
             resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

@@ -780,9 +780,7 @@ function initSession<Props extends PropsBaseType>(
   state.eventGate = eventGate;
 
   const router = createWebProtoEventRouter({
-    rootContextMenu:
-      state.hostSession?.caps.getPort<EventPort>('event')?.hasRootRegistration?.('context.menu') !==
-      false,
+    rootRegistrations: state.hostSession?.caps.getPort<EventPort>('event'),
     rootEl,
     instanceToken: state.instanceToken,
     resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

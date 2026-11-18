@@ -777,10 +777,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         eventGateRef.current = eventGate;
 
         const router = createWebProtoEventRouter({
-          rootContextMenu:
-            hostSessionRef.current?.caps
-              .getPort<EventPort>('event')
-              ?.hasRootRegistration?.('context.menu') !== false,
+          rootRegistrations: hostSessionRef.current?.caps.getPort<EventPort>('event'),
           rootEl,
           instanceToken: instanceTokenRef.current,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,

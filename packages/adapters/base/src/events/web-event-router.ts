@@ -1,4 +1,5 @@
 // packages/adapters/base/src/events/web-event-router.ts
+import type { SemanticEventType } from '@proto.ui/types';
 import {
   clearKeyboardPressOwner,
   KEYBOARD_PRESS_OWNER,
@@ -82,8 +83,8 @@ export function createWebProtoEventRouter(opt: {
   ) => SemanticEventRouteResolution | null;
   /** @deprecated Use resolveSemanticEventRoute so non-surface hits can be rejected. */
   resolveEventRouteOwner?: (target: EventTarget | null) => object | null;
-  /** Setup-time root registration intent when the adapter has the complete inventory. */
-  rootContextMenu?: boolean;
+  /** Setup-time registration inventory for stateless root events. */
+  rootRegistrations?: { hasRootRegistration?(type: SemanticEventType): boolean };
   globalEl?: EventTarget; // window by default
   isEnabled: () => boolean; // bridge to eventGate
 }) {
@@ -94,6 +95,11 @@ export function createWebProtoEventRouter(opt: {
 
   const rootEl = opt.rootEl;
   const globalEl = opt.globalEl ?? window;
+  // Trigger surfaces can also serve a different owner's registrations.
+  const rootRegistrations =
+    opt.rootRegistrations?.hasRootRegistration && !opt.resolveSemanticEventRoute?.(rootEl)
+      ? opt.rootRegistrations
+      : undefined;
   const routerIdentity = {};
   activeRouterByRoot.set(rootEl, routerIdentity);
   const isEnabled = () => activeRouterByRoot.get(rootEl) === routerIdentity && opt.isEnabled();
@@ -530,18 +536,22 @@ export function createWebProtoEventRouter(opt: {
       emitFromPhysicalRoot('pointer.cancel', e);
     })
   );
-  unsubs.push(
-    listen(rootEl, 'pointerenter', (e) => {
-      if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.enter', e);
-    })
-  );
-  unsubs.push(
-    listen(rootEl, 'pointerleave', (e) => {
-      if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.leave', e);
-    })
-  );
+  if (rootRegistrations?.hasRootRegistration?.('pointer.enter') !== false) {
+    unsubs.push(
+      listen(rootEl, 'pointerenter', (e) => {
+        if (!isEnabled()) return;
+        emit(protoRootBus, 'pointer.enter', e);
+      })
+    );
+  }
+  if (rootRegistrations?.hasRootRegistration?.('pointer.leave') !== false) {
+    unsubs.push(
+      listen(rootEl, 'pointerleave', (e) => {
+        if (!isEnabled()) return;
+        emit(protoRootBus, 'pointer.leave', e);
+      })
+    );
+  }
 
   unsubs.push(
     listen(rootEl, 'lostpointercapture', (e: PointerEvent) => {
@@ -706,8 +716,7 @@ export function createWebProtoEventRouter(opt: {
     })
   );
 
-  // Keep native order and account for root registrations redirected to a Trigger surface.
-  if (opt.rootContextMenu !== false || opt.resolveSemanticEventRoute?.(rootEl)) {
+  if (rootRegistrations?.hasRootRegistration?.('context.menu') !== false) {
     // contextmenu -> context.menu
     unsubs.push(
       listen(rootEl, 'contextmenu', (e) => {
