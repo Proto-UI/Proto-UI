@@ -1,3 +1,4 @@
+import './preview-material-scene.css';
 import { registerWebPortalDestination } from '@proto.ui/adapter-base';
 import {
   createCanvasBackdropLease,
