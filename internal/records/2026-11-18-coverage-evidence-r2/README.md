@@ -1,6 +1,6 @@
 # Coverage evidence R2 integration — 2026-11-18
 
-This record binds the retained private R2 comment/prose candidate to markup base `56e3b443fa7774a464a5464935b9154a89d81143` on local branch `fix/coverage-evidence-r2-20261118`. The current user authorized local application, the four named checks and signed semantic commits. No push, GitHub write or publication was performed. Independent review of the applied diff remains with the parent.
+This record binds the retained private R2 comment/prose candidate to markup base `56e3b443fa7774a464a5464935b9154a89d81143` on local branch `fix/coverage-evidence-r2-20261118`. The current user authorized local application, the four named checks and signed semantic commits. The applying seat performed no push, GitHub write or publication of its own; the parent subsequently pushed this branch to `origin/fix/coverage-evidence-r2-20261118` and opened pull request 1513 at this head, and no release, tag, dist-tag or version was published or activated. Independent review of the applied diff remains with the parent.
 
 ## Applied scope and preservation
 

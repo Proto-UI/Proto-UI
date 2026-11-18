@@ -80,7 +80,8 @@
     "runtimeAcceptance": false,
     "independentReview": false,
     "push": false,
-    "publication": false
+    "publication": false,
+    "pushScope": "The applying seat performed no push of its own. The parent pushed this branch to origin/fix/coverage-evidence-r2-20261118 and opened pull request 1513 at this head after the record was written; no release, tag, dist-tag or version was published or activated."
   },
   "skipped": [
     "No builds, installs, linters, formatters, browser/native instances, broad suites or generators.",
