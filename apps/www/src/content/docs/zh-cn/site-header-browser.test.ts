@@ -140,12 +140,12 @@ it('preserves a failed owner-docking wait without clicking or bypassing it', asy
   expect(f.menu.click).not.toHaveBeenCalled();
 });
 
-it('aligns child diagnostic capture with its unchanged 36px/44px geometry assertion', () => {
+it('aligns child diagnostic capture with its 44px geometry assertion', () => {
   const source = readFileSync(
     'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
     'utf8'
   );
-  expect(source).toContain('expect(geometry.triggerHeight).toBeCloseTo(width >= 768 ? 36 : 44, 0)');
+  expect(source).toContain('expect(geometry.triggerHeight).toBeCloseTo(expectedTriggerHeight, 0)');
   const match = source.match(/const expectedTriggerHeight = ([^;]+);\s*if \(([\s\S]*?)\) \{/);
   expect(match).not.toBeNull();
   const captureRequired = new Function(
@@ -154,12 +154,12 @@ it('aligns child diagnostic capture with its unchanged 36px/44px geometry assert
     `const expectedTriggerHeight = ${match![1]}; return (${match![2]});`
   ) as (width: number, geometry: { triggerHeight: number }) => boolean;
   for (const [width, height, expected] of [
-    [1440, 36, false],
-    [1440, 44, true],
+    [1440, 44, false],
+    [1440, 36, true],
     [390, 44, false],
     [390, 36, true],
-    [1440, 36.49, false],
-    [1440, 36.5, true],
+    [1440, 44.49, false],
+    [1440, 44.5, true],
     [390, Number.NaN, true],
   ] as const)
     expect(captureRequired(width, { triggerHeight: height })).toBe(expected);
