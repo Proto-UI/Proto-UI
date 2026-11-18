@@ -245,8 +245,12 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
   .material-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    /* Leave room for the contact paint after the fixture moves a control. */
+    gap: 21px;
     align-items: center;
+  }
+  .material-controls [data-demo-ref='regular'] {
+    position: relative;
   }
   @media (max-width: 700px) {
     main {
