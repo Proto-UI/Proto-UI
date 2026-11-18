@@ -440,7 +440,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         const previousParent = getLogicalParent(this._instanceToken);
         const previousRoot = previousParent ? getLogicalRoot(previousParent) : null;
         try {
-          if (!isWebComponentPortaled(this)) setProtoParent(this, null);
+          if (!isWebComponentPortaled(this))
+            setProtoParent(this, null, { retainMatchingPhysicalParent: true });
           markProtoInstance(
             this,
             proto as Prototype<any>,

@@ -25,6 +25,8 @@ type Enhancement = {
 
 const PREVIEW_MEDIA = 'img, svg';
 const PREVIEW_SOURCE = 'img, svg, picture, source, figcaption';
+const INVENTORY_OWNER = '[data-doc-flow], [data-docs-image-trigger]';
+const PREVIEW_BOUNDARY = '[data-doc-flow], [data-previewer-id], [data-prototype-previewer]';
 const PREVIEW_ADMISSION_ATTRIBUTES = new Set([
   'aria-hidden',
   'hidden',
@@ -62,6 +64,33 @@ function affectsPreviewInventory(record: MutationRecord): boolean {
     ((PREVIEW_ADMISSION_ATTRIBUTES.has(attribute) || /^on/i.test(attribute)) &&
       !!target.querySelector(PREVIEW_MEDIA))
   );
+}
+
+function isExcludedPreviewMutation(record: MutationRecord): boolean {
+  const attribute = record.attributeName;
+  if (
+    attribute === 'data-doc-flow' ||
+    attribute === 'data-docs-image-trigger' ||
+    attribute === 'data-previewer-id' ||
+    attribute === 'data-prototype-previewer'
+  )
+    return false;
+  const target = record.target as Element;
+  const boundary = target.closest(PREVIEW_BOUNDARY);
+  if (!boundary || boundary.hasAttribute('data-doc-flow')) return false;
+
+  // A nested article may still admit its own images. Retain scans for it and
+  // for owned triggers that may need cleanup after removal or relocation.
+  if (target.matches(INVENTORY_OWNER) || target.querySelector(INVENTORY_OWNER)) return false;
+  for (const node of record.removedNodes) {
+    if (
+      node.nodeType === 1 &&
+      ((node as Element).matches(INVENTORY_OWNER) ||
+        (node as Element).querySelector(INVENTORY_OWNER))
+    )
+      return false;
+  }
+  return true;
 }
 
 /** Media selection/loading is application data. PUI owns modal presence,
@@ -427,7 +456,12 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   createDialog();
   scan();
   const contentObserver = new MutationObserver((records) => {
-    if (records.some(affectsPreviewInventory)) scan();
+    if (
+      records.some(
+        (record) => affectsPreviewInventory(record) && !isExcludedPreviewMutation(record)
+      )
+    )
+      scan();
     geometry();
   });
   for (const body of doc.querySelectorAll('[data-doc-flow]'))

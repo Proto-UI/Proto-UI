@@ -56,6 +56,46 @@ function wrapMatchingRulesInFalseSupports(cssText: string, selector: string): st
 
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 K: preflight is atomic; cleanup is owned.
 describe('private Shadow split effects', () => {
+  it('keeps the exact vertical scrollport inside the max-height boundary', () => {
+    const tokens = ['max-h-[calc(100%_-_2rem)]', 'overflow-y-auto'];
+    const { host, surface, effects, options } = setup(tokens);
+    const hostSelector = `:host([${ROOT}~="overflow-y-auto"])`;
+    const surfaceSelector = `${hostSelector} > [${SURFACE}][data-pui-style~="overflow-y-auto"]`;
+    expect(options.artifact.cssText).toContain(`${surfaceSelector} {\n    overflow-y: auto;`);
+    expect(options.artifact.cssText).not.toContain(`${hostSelector} {`);
+    effects.queueStyle(effect(tokens));
+    effects.requestFlush();
+    expect(host.getAttribute(ROOT)).toBe(tokens.join(' '));
+    expect(surface.getAttribute('data-pui-style')).toBe('consumer overflow-y-auto');
+    effects.dispose();
+
+    const moved = rewriteSplitRuleDeclarations(
+      options.artifact.cssText.replace(surfaceSelector, hostSelector),
+      hostSelector,
+      (declarations) => declarations
+    );
+    const wrongValue = rewriteSplitRuleDeclarations(
+      options.artifact.cssText,
+      surfaceSelector,
+      (declarations) => declarations.replace('overflow-y: auto;', 'overflow-y: hidden;')
+    );
+    const missing = renderProtoShadowSplitStyleArtifact([tokens[0]!]).cssText;
+    for (const cssText of [moved, wrongValue, missing]) {
+      const target = createShadowSplitEffectsPort({
+        ...options,
+        artifact: { ...options.artifact, cssText },
+      });
+      const before = [host.outerHTML, surface.outerHTML];
+      expect(() => target.queueStyle(effect(tokens))).toThrow(/overflow-y-auto.*missing token/);
+      expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+      target.dispose();
+    }
+    const native = setup(['overflow-y-auto'], 'input');
+    expect(() => native.effects.queueStyle(effect(['overflow-y-auto']))).toThrow(
+      /native scrollport/
+    );
+    native.effects.dispose();
+  });
   it('admits native static selection but atomically rejects invalid receipts and variant combinations', () => {
     const tokens = ['bg-black', 'selection:bg-primary', 'selection:text-primary-foreground'];
     const { host, surface, effects, options } = setup(tokens, 'input');
@@ -236,9 +276,7 @@ describe('private Shadow split effects', () => {
       },
     });
     expect(() =>
-      withoutCompanion.queueStyle(
-        effect(['block', 'border', 'border-2', 'transition-all'])
-      )
+      withoutCompanion.queueStyle(effect(['block', 'border', 'border-2', 'transition-all']))
     ).toThrow(/H1 recipe/);
     withoutCompanion.dispose();
     expect(surface.outerHTML).not.toContain('border');
