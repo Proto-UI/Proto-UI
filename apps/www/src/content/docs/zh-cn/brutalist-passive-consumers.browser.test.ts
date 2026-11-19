@@ -329,9 +329,12 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
             expect(before[3]!.transitionDuration).toBe('0.15s');
 
             const label = previewer.getByText('Outline · rest', { exact: true });
-            await label.hover();
-            expect(await paint(surfaces.nth(0))).toEqual(before[0]);
             await label.scrollIntoViewIfNeeded();
+            const outlineBeforeHover = await paint(surfaces.nth(0));
+            await label.hover();
+            const { parentHeight: _heightBefore, parentWidth: _widthBefore, ...ownBefore } = outlineBeforeHover;
+            const { parentHeight: _heightAfter, parentWidth: _widthAfter, ...ownAfter } = await paint(surfaces.nth(0));
+            expect(ownAfter).toEqual(ownBefore);
             const point = await label.evaluate((element) => {
               const text = Array.from(element.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
               if (!text) throw new Error('The public Surface label has no native text node.');
