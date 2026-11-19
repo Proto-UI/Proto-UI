@@ -8486,29 +8486,38 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
       'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts',
     ]);
     if (!owners.has(sourcePath) || !rootDir) return false;
+    const configPath = path.join(rootDir, 'apps/www/astro.config.mjs');
     const inputs = [
-      [
-        'apps/www/astro.config.mjs',
-        [PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256, PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256],
-      ],
       [PROMOTION_RETRY_PLUGIN_PATH, PROMOTION_RETRY_PLUGIN_SHA256],
       [PROMOTION_AUDIT_PLUGIN_PATH, PROMOTION_AUDIT_PLUGIN_SHA256],
     ];
     try {
+      assertPromotionModulePath(rootDir, configPath);
+      if (!fs.lstatSync(configPath).isFile()) return false;
+      const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
+      if (configSha === WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256) {
+        inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
+      } else if (
+        ![
+          PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256,
+          PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256,
+        ].includes(configSha)
+      ) {
+        return false;
+      }
       for (const [relative, sha] of inputs) {
         const target = path.join(rootDir, relative);
         assertPromotionModulePath(rootDir, target);
         if (
           !fs.lstatSync(target).isFile() ||
-          !(Array.isArray(sha) ? sha : [sha]).includes(
-            createHash('sha256').update(fs.readFileSync(target)).digest('hex')
-          )
+          createHash('sha256').update(fs.readFileSync(target)).digest('hex') !== sha
         )
           return false;
       }
     } catch {
       return false;
     }
+    metadata.add(configPath);
     for (const [relative] of inputs) metadata.add(path.join(rootDir, relative));
     return true;
   }
@@ -9323,6 +9332,21 @@ const PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256 =
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
+// This configuration admits only the four owners of the public Retry virtual ID.
+// Bind its extracted resolver and optional probe as metadata without admitting
+// the current configuration to the general package resolver profiles below.
+const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7';
+const WEBSITE_RETRY_VIRTUAL_HELPERS = [
+  [
+    'apps/www/src/utils/proto-ui-source.mjs',
+    'b9b4d823e36d846b3e56809ecf73e89ccc1d3ea392c4b2f23e61336c6de2a833',
+  ],
+  [
+    'apps/www/scripts/accordion-activation-probe.mjs',
+    '9b9e82637133a60cfdb2440bb994113510885503fa9c5469f7f4a3d1acd8b32b',
+  ],
+];
 export function promotionBarePackageTargets(root, specifier, metadata) {
   const unverified = () =>
     new Error(`promotion package closure for ${specifier} remains unverified`);
