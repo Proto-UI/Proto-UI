@@ -25,11 +25,15 @@ use proto_ui_gpui_native::gpui_native_move::{
 
 #[derive(Clone, Default)]
 struct MoveLog {
+    refuse: Rc<Cell<bool>>,
     events: Rc<RefCell<Vec<&'static str>>>,
     samples: Rc<RefCell<Vec<MoveGestureSample>>>,
     cancels: Rc<RefCell<Vec<MoveGestureCancelReason>>>,
 }
 impl MoveGestureBinding for MoveLog {
+    fn should_start(&self, _: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) -> bool {
+        !self.refuse.get()
+    }
     fn on_start(&self, sample: &MoveGestureSample, _: &mut Window, _: &mut gpui::App) {
         self.events.borrow_mut().push("start");
         self.samples.borrow_mut().push(*sample);
@@ -221,6 +225,24 @@ fn move_gesture_refuses_duplicate_ownership_and_replacement_cancels_old_session(
     }).unwrap();
     assert_eq!(*log.events.borrow(), ["start", "cancel"]);
     assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::TargetReplaced]);
+}
+
+#[gpui::test]
+fn move_gesture_should_start_refusal_and_owner_disposal_are_bounded(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    log.refuse.set(true);
+    let (window, lease) = move_window(cx, log.clone());
+    move_down(window, cx);
+    assert!(!lease.is_active());
+    assert!(log.events.borrow().is_empty());
+    log.refuse.set(false);
+    move_down(window, cx);
+    assert!(lease.is_active());
+    window.update(cx, |host, _, cx| Owner::dispose(&host.target.read(cx).owner)).unwrap();
+    assert!(!lease.is_active());
+    lease.dispose();
+    assert_eq!(*log.events.borrow(), ["start", "cancel"]);
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::Disposed]);
 }
 
 struct Harness {
