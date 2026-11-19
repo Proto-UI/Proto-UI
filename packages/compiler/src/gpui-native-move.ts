@@ -124,35 +124,43 @@ impl MoveGestureLease{
         let released=MOVE_ENTRIES.with(|entries|{
             let mut entries=entries.borrow_mut();
             let Some(index)=entries.iter().position(|entry|entry.id==self.id)else{return None};
-            let entry=entries.remove(index);
-            entry.session.map(|session|session.binding)
+            Some(entries.remove(index))
         });
-        if let Some(binding)=released{binding.on_cancel(MoveGestureCancelReason::Disposed,None)}
+        if let Some(entry)=released{if let Some(session)=entry.session{session.binding.on_cancel(MoveGestureCancelReason::Disposed,None)}}
     }
     /// Replace the attached binding, and optionally the target.
     ///
     /// Replacing the target while a session is accepted ends that session with
     /// \`TargetReplaced\`. Replacing only the binding keeps the accepted session.
     pub fn update(&self,target:OwnerWeak,binding:Box<dyn MoveGestureBinding>,window:&mut Window,cx:&mut App)->Result<(),String>{
-        let Some(_owner)=target.upgrade()else{return Err("move gesture target is no longer available".to_string())};
+        let Some(owner)=target.upgrade()else{return Err("move gesture target is no longer available".to_string())};
+        if owner.borrow().disposed||owner.borrow().disposing{return Err("move gesture target is disposed".to_string())}
         if binding.activation()!=MoveGestureActivation::Immediate{
             return Err("move gesture activation other than immediate is not admitted by this GPUI realization".to_string());
         }
         let binding:Rc<dyn MoveGestureBinding>=Rc::from(binding);
         let axis=binding.axis();
-        let replaced=MOVE_ENTRIES.with(|entries|entries.borrow().iter().find(|entry|entry.id==self.id).map(|entry|!same_owner(&entry.target,&target)).unwrap_or(false));
+        let replaced=MOVE_ENTRIES.with(|entries|{
+            let entries=entries.borrow();
+            let Some(entry)=entries.iter().find(|entry|entry.id==self.id)else{return Err("move gesture lease is disposed".to_string())};
+            if entries.iter().any(|entry|entry.id!=self.id&&same_owner(&entry.target,&target)){return Err("move gesture target already has an attached lease".to_string())}
+            Ok(!same_owner(&entry.target,&target))
+        })?;
         if replaced{cancel_session(self.id,MoveGestureCancelReason::TargetReplaced,Some((window,cx)))}
-        MOVE_ENTRIES.with(|entries|{
+        let previous=MOVE_ENTRIES.with(|entries|{
             let mut entries=entries.borrow_mut();
             if let Some(entry)=entries.iter_mut().find(|entry|entry.id==self.id){
                 entry.target=target;
-                entry.binding=binding;
                 entry.axis=axis;
-            }
+                Some(std::mem::replace(&mut entry.binding,binding))
+            }else{None}
         });
+        drop(previous);
         Ok(())
     }
 }
+
+impl Drop for MoveGestureLease{fn drop(&mut self){self.dispose()}}
 
 fn cancel_session(id:u64,reason:MoveGestureCancelReason,host:Option<(&mut Window,&mut App)>){
     let cancelled=MOVE_ENTRIES.with(|entries|{
@@ -206,9 +214,12 @@ pub fn move_detach(owner:&OwnerRef){
 /// Cancel the session of a target that is being disposed and release its binding.
 pub fn move_dispose(owner:&OwnerRef){
     let weak=Rc::downgrade(owner);
-    let ids=MOVE_ENTRIES.with(|entries|entries.borrow().iter().filter(|entry|same_owner(&entry.target,&weak)).map(|entry|entry.id).collect::<Vec<_>>());
-    for id in ids{cancel_session(id,MoveGestureCancelReason::Disposed,None)}
-    MOVE_ENTRIES.with(|entries|entries.borrow_mut().retain(|entry|!same_owner(&entry.target,&weak)));
+    let released=MOVE_ENTRIES.with(|entries|{
+        let mut entries=entries.borrow_mut();
+        let index=entries.iter().position(|entry|same_owner(&entry.target,&weak))?;
+        Some(entries.remove(index))
+    });
+    if let Some(entry)=released{if let Some(session)=entry.session{session.binding.on_cancel(MoveGestureCancelReason::Disposed,None)}}
 }
 
 fn move_mouse_down(event:&MouseDownEvent,phase:gpui::DispatchPhase,window:&mut Window,cx:&mut App){
@@ -246,6 +257,7 @@ fn move_mouse_down(event:&MouseDownEvent,phase:gpui::DispatchPhase,window:&mut W
         let mut entries=entries.borrow_mut();
         if entries.iter().any(|entry|entry.session.is_some()&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window))){return false}
         let Some(entry)=entries.iter_mut().find(|entry|entry.id==id)else{return false};
+        if !same_owner(&entry.target,&Rc::downgrade(&owner))||!Rc::ptr_eq(&entry.binding,&binding){return false}
         if entry.session.is_some(){return false}
         entry.session=Some(MoveSession{binding:binding.clone(),start:event.position,previous:event.position});
         true
