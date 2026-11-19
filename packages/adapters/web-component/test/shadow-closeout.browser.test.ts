@@ -1227,6 +1227,8 @@ describe('Shadow closeout native boundaries', () => {
                 animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
             );
             const frames = (transition?.effect as KeyframeEffect | null)?.getKeyframes();
+            const exactTarget = (transition?.effect as KeyframeEffect | null)?.target === surface;
+            const progress = transition?.effect?.getComputedTiming().progress;
             const projectionWrites = observer.takeRecords().length;
             if (mode === 'external concealment') {
               const external = new CSSStyleSheet();
@@ -1256,9 +1258,9 @@ describe('Shadow closeout native boundaries', () => {
               delay: getComputedStyle(surface).transitionDelay,
               projectionWrites,
               transition: !!transition,
-              exactTarget: (transition?.effect as KeyframeEffect | null)?.target === surface,
+              exactTarget,
               endpoints: [frames?.[0]?.opacity, frames?.at(-1)?.opacity],
-              progress: transition?.effect?.getComputedTiming().progress,
+              progress,
               concealedOpacity: getComputedStyle(surface).opacity,
               owned: p.ownsSplitZeroOpacity(surface),
               retainedTransition: !!transition && surface.getAnimations().includes(transition),
@@ -1313,7 +1315,7 @@ describe('Shadow closeout native boundaries', () => {
         const leave = await page.evaluate(() =>
           (window as unknown as SelectorOpacityWindow).selectorOpacity.leave
         );
-        expect(leave).toMatchObject({
+        expect(leave, `Native exit observation: ${JSON.stringify(leave)}`).toMatchObject({
           trusted: mode !== 'foreign withdrawal', hovered: false, opacity: '0', projectionWrites: 0,
           transition: true, exactTarget: true, endpoints: ['0', '1'], progress: 0, identity,
           owned: mode === 'native',
