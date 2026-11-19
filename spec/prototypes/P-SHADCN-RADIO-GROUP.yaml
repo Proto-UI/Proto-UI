@@ -44,6 +44,13 @@ criteria:
 
       zh-CN: >-
         不增加 asChild、form submission/validation、required/invalid state、native input、Toolbar、公开 orientation/loop、callback prop 或视觉 variant/size API。Base 不拥有相应语义，因此不投射 upstream aria-invalid 样式或 prop forwarding。显式 Indicator 与 host-neutral 居中为有意呈现差异，不构成 Radix 兼容性声明。
+  - id: P-SHADCN-RADIO-GROUP-RHEA-ROOT-SPACING
+    text:
+      en: >-
+        The Rhea style profile projects the pinned upstream Root grid with gap-3, so the density rows keep a 0.75rem gap. The base-nova gap-2 criterion above describes the content-pinned base-nova comparison surface and does not govern the Rhea profile.
+
+      zh-CN: >-
+        Rhea style profile 投射固定上游 Root grid 的 gap-3，密度行保持 0.75rem 间距。上面的 base-nova gap-2 准则描述内容固定的 base-nova 对照面，不治理 Rhea profile。
 
 
 sources:
@@ -55,6 +62,8 @@ sources:
     label: Bounded Shadcn Radio Group projection admission
   - path: https://ui.shadcn.com/r/styles/base-nova/radio-group.json
     label: base-nova snapshot retrieved 2026-10-10; registry SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7; TSX SHA256 f779542f2370b82fcbb91278fb94f7ad4af59d0f36512633492604b27da48e8d
+  - path: internal/fixtures/shadcn-style-source/upstream/apps/v4/registry/styles/style-rhea.css
+    label: Pinned upstream Rhea style at 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the retained fixture records grid gap-3 for the radio group Root.
 inherits:
   prototypes: [P-BASE-RADIO-GROUP]
 dependsOn:
@@ -70,4 +79,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded the pinned upstream Rhea Root gap-3 spacing separately from the base-nova comparison criterion; Base and public anatomy ownership are unchanged.
 tags: [prototype, shadcn, radio-group, selection, focus, visual, compatibility]

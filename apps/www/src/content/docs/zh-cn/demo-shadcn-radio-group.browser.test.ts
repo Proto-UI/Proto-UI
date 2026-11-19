@@ -258,7 +258,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         observations.light = initial;
         expect(initial.map((item) => item.checked)).toEqual(['false', 'true', 'false']);
         expect(initial.map((item) => item.dotOpacity)).toEqual(['0', '1', '0']);
-        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('8px');
+        // The Rhea profile projects gap-3, so the density rows keep a 12px gap.
+        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('12px');
         for (const item of initial) {
           expect(item.width).toBeCloseTo(16, 1);
           expect(item.height).toBeCloseTo(16, 1);

@@ -70,6 +70,7 @@ cases:
     title: Real package previews render and interact across Web Component React Vue and Vue 2 in both themes and narrow layouts
     covers:
       - P-SHADCN-RADIO-GROUP-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-RHEA-ROOT-SPACING
       - P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
       - P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
       - P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
