@@ -62,6 +62,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     rootId: '',
     collectionRevision: 0,
     focusHandoff: 0,
+    focusHandoffBaseline: 0,
+    pendingOpen: false,
     open: false,
     controlledOpen: false,
     value: '',
@@ -101,6 +103,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   // A state/Context notification may retire and remount this same instance.
   // Run-handle identity alone cannot distinguish the old continuation.
   let viewEpoch = 0;
+  let openRequestSequence = 0;
   let selectionSequence = 0;
   let pendingControlledChanges = 0;
   let queuedControlledNotifications = 0;
@@ -150,6 +153,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     const previous = snapshot;
     const next = {
       ...previous,
+      controlledOpen: run.props.isProvided('open'),
       controlDisabled: !!run.props.get().disabled,
       controlReadOnly: !!run.props.get().readOnly,
       disabled: !!run.props.get().disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
@@ -158,7 +162,11 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
       value: value.get(),
       textValue: textValue.get(),
     };
-    if (!next.open || next.value !== previous.value) next.focusHandoff = 0;
+    if ((previous.open && !next.open) || next.value !== previous.value) {
+      next.focusHandoffBaseline = next.focusHandoff ?? 0;
+      next.pendingOpen = false;
+    }
+    if (next.open || !next.controlledOpen) next.pendingOpen = false;
     snapshot = next;
     if (sameContext(published, next)) return;
     published = next;
@@ -167,7 +175,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
 
   // The Root remains observable while Content's opening view is being installed.
   boundary.subscribeOutside((event) => {
-    if (event.observation !== 'focus.move' || !currentRun || !snapshot.open) return;
+    if (event.observation !== 'focus.move' || !currentRun) return;
+    if (!snapshot.open && !snapshot.pendingOpen) return;
     snapshot = recordSelectFocusHandoff(snapshot);
     syncContext(currentRun);
   });
@@ -204,33 +213,57 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     refreshSelectedText(run);
   });
 
-  def.context.subscribe(SELECT_CONTEXT, (_run, next) => {
-    snapshot = next;
-    published = next;
+  def.context.subscribe(SELECT_CONTEXT, (run) => {
+    // A prior subscriber can publish a newer owner during this notification.
+    snapshot = run.context.read(SELECT_CONTEXT);
+    published = snapshot;
   });
 
   submitOpenRequest = (run, request) => {
     if (!currentRun || snapshot.disabled) return false;
     const epoch = viewEpoch;
+    const sequence = ++openRequestSequence;
+    const pendingOpen = snapshot.controlledOpen && request.open && !snapshot.open;
     snapshot = {
       ...snapshot,
+      pendingOpen,
+      // A refused or superseded closed request cannot lend its handoff to the next one.
+      focusHandoffBaseline: snapshot.open
+        ? snapshot.focusHandoffBaseline
+        : (snapshot.focusHandoff ?? 0),
       activeValue: request.open ? (snapshot.open ? snapshot.activeValue : snapshot.value) : '',
       requestReason: request.reason,
       requestFocusReason: request.focusReason,
       requestEntry: request.open ? (request.entry ?? 'selected-or-first') : null,
     };
-    if (!snapshot.controlledOpen) {
-      open?.set(request.open, 'reason: select root accepted open request');
-      if (!ownsView(epoch)) return true;
+    let delivered = false;
+    try {
+      if (!snapshot.controlledOpen) {
+        open?.set(request.open, 'reason: select root accepted open request');
+        if (!ownsView(epoch) || sequence !== openRequestSequence) return true;
+      }
+      syncContext(run);
+      if (!ownsView(epoch) || sequence !== openRequestSequence) return true;
+      run.expose.emit('openChange', {
+        open: request.open,
+        reason: request.reason,
+        focusReason: request.focusReason,
+      });
+      delivered = true;
+      return true;
+    } finally {
+      if (pendingOpen && !delivered && ownsView(epoch) && sequence === openRequestSequence) {
+        // An internal delivery failure grants no exemption. Expose Event isolates
+        // host callback throws, so those remain delivered requests. A delivery stays
+        // bounded to this latest opening until acceptance or supersession.
+        snapshot = {
+          ...snapshot,
+          pendingOpen: false,
+          focusHandoffBaseline: snapshot.focusHandoff ?? 0,
+        };
+        syncContext(run);
+      }
     }
-    syncContext(run);
-    if (!ownsView(epoch)) return true;
-    run.expose.emit('openChange', {
-      open: request.open,
-      reason: request.reason,
-      focusReason: request.focusReason,
-    });
-    return true;
   };
 
   const submitValueRequest = (run: any, request: SelectValueRequest): boolean => {
@@ -351,6 +384,12 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
 
   const retireView = () => {
     viewEpoch++;
+    openRequestSequence++;
+    snapshot = {
+      ...snapshot,
+      pendingOpen: false,
+      focusHandoffBaseline: snapshot.focusHandoff ?? 0,
+    };
     pendingControlledChanges = 0;
     queuedControlledNotifications = 0;
     valueRequestDepth = 0;

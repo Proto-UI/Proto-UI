@@ -1,5 +1,5 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, type DefHandle, type ExposeMethod } from '@proto.ui/core';
+import { asAccessible, asCollectionItem, asFocusable } from '@proto.ui/hooks';
 import { setupSelectCommand } from './command';
 import {
   notifySelectItemSnapshotChanged,
@@ -16,6 +16,7 @@ import type { SelectItemAsHookContract, SelectItemExposes, SelectItemProps } fro
 function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): void {
   const accessible = asAccessible();
   const command = setupSelectCommand(def, 'select item');
+  const focusable = asFocusable<SelectItemProps>();
   const active = def.state.bool('active', false);
   const selected = def.state.fromAccessibility('selected');
   const collectionItem = asCollectionItem();
@@ -61,7 +62,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     const ownValue = run.props.get().value ?? '';
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     command.syncDisabled(nextDisabled);
-    if (!ctx.open) {
+    if (!ctx.open && !ctx.pendingOpen) {
       command.resetInteraction('reason: select popup close => reset item interaction', {
         blur: true,
       });
@@ -119,6 +120,15 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
       prev.activeValue === ownValue ? { ...prev, activeValue: '' } : prev
     );
   };
+
+  // This private port shares the Item's expose registry without adding public API.
+  const entryFocusDef = def as DefHandle<
+    SelectItemProps,
+    SelectItemExposes & { __cancelPendingEntryFocus: ExposeMethod<() => void> }
+  >;
+  entryFocusDef.expose.method('__cancelPendingEntryFocus', () => {
+    focusable.blur();
+  });
 
   def.event.on('key.down', (run, ev) => {
     if (ev.key !== 'Tab' || command.disabled.get() || !command.focused.get()) return;

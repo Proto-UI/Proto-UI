@@ -46,7 +46,9 @@ cases:
     expectation: popper-focus-does-not-suppress-native-scroll-and-item-aligned-policy-is-preserved
     notes:
       - Covers selected and enabled boundary entry, reopen, and uncommitted typeahead across Base, Shadcn and Brutalist with complete and legacy parts.
-      - Complete Popper entry preserves newer Item and external focus owners from controlled and uncontrolled opening callbacks, while a new committed value or reopening can admit focus.
+      - WC cases exercise complete Popper Item and external handoffs from uncontrolled and synchronously accepting controlled callbacks across Base, Shadcn and Brutalist.
+      - Real React cases exercise a batched controlled setOpen followed by actual external button focus across Base and Shadcn, plus refusal, supersession, an Expose Event-isolated callback throw followed by owner acceptance, genuine value replacement and close/reopen. They do not establish batched Item focus, Vue, native or compiled-host behavior.
+      - WC cases distinguish automatic entry from a newer reentrant owner, prohibit reacquisition after that handoff or a record update, retain genuine value/open admission, and replace Content after a named structural abort without closing Root. These repair assertions require candidate execution.
       - Host focus options under Happy DOM establish policy delivery, not actual browser clipping, scroll offsets or assistive-technology acceptance.
   - id: T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     title: Content retains leave view and portals a collision-aware Trigger-anchored surface
@@ -67,13 +69,15 @@ cases:
 implementations:
   - id: prototypes-base-select-popper-focus-scroll
     kind: adapter-test
-    status: passing
+    status: needs-review
     path: packages/prototypes/base/test/select-popper-focus-scroll.test.ts
     required: true
-    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL]
+    consumesCases:
+      - T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
+      - T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
     exercises: [P-BASE-SELECT-CONTENT]
     notes:
-      - Real Web Component Adapter focus calls exercise all three 0.3 families; native Calendar current-year visibility remains a separate browser journey.
+      - Real WC focus calls cover all three 0.3 families, including same-open Root Content replacement after a named abort. New candidate cases are unexecuted; the prior PR1555 pass does not cover them. Native Calendar current-year visibility remains a separate browser journey.
   - id: prototypes-base-select-current-request-lease
     kind: module-test
     status: needs-review
@@ -123,9 +127,11 @@ implementations:
     consumesCases:
       - T-BASE-SELECT-CONTENT-0001-CASE-ALIGNMENT-ADMISSION
       - T-BASE-SELECT-CONTENT-0001-CASE-UNIFORM-SIZE-BOUNDARY
+      - T-BASE-SELECT-CONTENT-0001-CASE-POPPER-FOCUS-SCROLL
     exercises: [P-BASE-SELECT-CONTENT]
     notes:
       - Real React with bounded Happy DOM geometry covers Base and Shadcn close, geometry rejection without self-readmission, and committed close/reopen. Native direction and paint remain separate evidence.
+      - The additional real React controlled-opening cases use ordinary batched state setters and native element focus without injected layout. Pending handoff, supersession, failed callback, value replacement and reopening assertions require new candidate execution.
   - id: adapter-react-select-content-entry-stability
     kind: adapter-test
     status: passing
@@ -165,6 +171,9 @@ verifies:
         ]
 exercises: { prototypes: [P-BASE-SELECT-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Map unexecuted real React batched controlled-opening and real WC abort-to-Content-replacement regressions, with pending-request and automatic-entry ownership controls; retain host and prior-result boundaries.
   - version: 0.3.0-alpha.2
     change: extended
     summary: Add mode-specific host focus scroll policy regression evidence for popper selected entry, reopen and typeahead without altering item-aligned positioning.

@@ -22,6 +22,10 @@ export type SelectContextValue = {
   collectionRevision?: number;
   /** A successful focus handoff for this opening and committed value. */
   focusHandoff?: number;
+  /** Handoffs through this epoch no longer exempt automatic entry. */
+  focusHandoffBaseline?: number;
+  /** The latest controlled opening still awaits its owner prop acceptance. */
+  pendingOpen?: boolean;
   open: boolean;
   controlledOpen: boolean;
   value: string;
@@ -43,8 +47,16 @@ export type SelectContextValue = {
 let nextFocusHandoff = 0;
 
 export function recordSelectFocusHandoff(ctx: SelectContextValue): SelectContextValue {
-  if (!ctx.open) return ctx;
+  if (!ctx.open && !ctx.pendingOpen) return ctx;
   return { ...ctx, focusHandoff: ++nextFocusHandoff };
+}
+
+export function retireSelectFocusHandoff(
+  ctx: SelectContextValue,
+  handoff: number
+): SelectContextValue {
+  if ((ctx.focusHandoffBaseline ?? 0) >= handoff) return ctx;
+  return { ...ctx, focusHandoffBaseline: handoff };
 }
 
 let nextSelectRootId = 0;
