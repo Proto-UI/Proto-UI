@@ -17679,7 +17679,13 @@ for (const [source, specifiers] of [
     const relative = `apps/www/src/components/${source}`;
     const copy = `apps/www/src/components/Copied${path.basename(source)}`;
     const code = specifiers.map((specifier) => `import '${specifier}';`).join('\n');
-    const content = source.endsWith('.astro') ? `<script>${code}</script>` : code;
+    // Search now admits exact reviewed importer bytes rather than a synthetic body.
+    const content =
+      source === 'site-search-commands.ts'
+        ? fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8')
+        : source.endsWith('.astro')
+          ? `<script>${code}</script>`
+          : code;
     for (const file of [relative, copy]) {
       fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
       fs.writeFileSync(path.join(root, file), content);
@@ -17704,6 +17710,50 @@ for (const [source, specifiers] of [
       )
     );
   });
+
+for (const [source, allowed, foreign] of [
+  [
+    'site-search-commands.ts',
+    [
+      '@proto.ui/module-expose-state',
+      '../../../../packages/prototypes/lucide/src/icons/search',
+      '../../../../packages/prototypes/lucide/src/icons/arrow-right',
+      '../../../../packages/prototypes/lucide/src/icons/x',
+    ],
+    '../../../../packages/prototypes/lucide/src/icons/arrow-left',
+  ],
+  [
+    'site-search-composition.ts',
+    ['@proto.ui/prototypes-shadcn/input-shell'],
+    '@proto.ui/prototypes-shadcn/input',
+  ],
+]) {
+  test(`Search static import boundary remains literal, content-bound and owner-bound: ${source}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/${source}`;
+    const copy = `apps/www/src/components/Copied${source}`;
+    const target = path.join(root, relative);
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, reviewed);
+    fs.writeFileSync(path.join(root, copy), reviewed);
+    const raw = (file, specifier) => `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const exact = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of allowed) {
+      assert.ok(!exact.includes(raw(relative, specifier)), exact);
+      assert.ok(exact.includes(raw(copy, specifier)), exact);
+    }
+    fs.writeFileSync(target, reviewed + '\n// Changed importer bytes require review.\n');
+    const changed = validationMessage(root);
+    for (const specifier of allowed) {
+      assert.ok(changed.includes(raw(relative, specifier)), changed);
+    }
+    fs.writeFileSync(target, reviewed + `\nimport '${foreign}';\n`);
+    const adjacent = validationMessage(root);
+    assert.ok(adjacent.includes(raw(relative, foreign)), adjacent);
+  });
+}
 
 for (const kind of ['website', 'harness']) {
   for (const [name, source, reject] of [
