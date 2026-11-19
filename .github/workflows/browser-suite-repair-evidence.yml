@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: 4ceca204aff5d410055521d66140a1533e8b2e2a
+  CANDIDATE_SHA: 3e510630572c3472de1e993593cdf4404fdb4529
 
 jobs:
   brutalist-passive:
