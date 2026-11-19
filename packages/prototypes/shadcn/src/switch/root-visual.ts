@@ -181,6 +181,10 @@ export function setupSwitchRootVisual(
       'peer relative inline-flex shrink-0 items-center p-0 outline-none select-none transition-all duration-150 ease-in-out'
     )
   );
+  def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('transition-none')),
+  });
   // Match the physical origin to the existing direction policy only for
   // the explicit drag enhancement; ordinary upstream toggle paint is unchanged.
   // Explicit direction also prevents inherited document direction reversing it twice.
