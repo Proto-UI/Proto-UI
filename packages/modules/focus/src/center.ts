@@ -15,6 +15,17 @@ import type {
 } from '@proto.ui/core';
 import type { FocusInstanceToken, FocusOrderTargets, FocusParentGetter } from './caps';
 
+// Private diagnostic overlay only; the observer must never affect event outcomes.
+export function traceRovingProbe(stage: string, read: () => Record<string, unknown>): void {
+  try {
+    (globalThis as typeof globalThis & {
+      __puiRovingProbe?: (stage: string, read: () => Record<string, unknown>) => void;
+    }).__puiRovingProbe?.(stage, read);
+  } catch {
+    // Diagnostic collection is best effort; retain the original control flow.
+  }
+}
+
 export type FocusRequestBehavior = Readonly<{
   bypassGate?: boolean;
   syncFacts?: boolean;
@@ -572,6 +583,23 @@ export class FocusCenter {
     // may attach before the provider's own host view callback in React/Vue.
     this.entries.set(provider.instance, provider);
     const members = this.getRovingMembers(provider);
+    const probe = (stage: string, extra: Record<string, unknown> = {}) => {
+      if (op !== 'next' || !options?.requireFocusedMember) return;
+      traceRovingProbe(stage, () => ({
+        root: provider.getRootTarget(), provider: provider.instance,
+        parent: provider.getParent(provider.instance), op,
+        requireFocusedMember: options.requireFocusedMember,
+        config: { ...provider.getRovingConfig() }, epoch: this.requestEpoch,
+        memberCount: members.length,
+        members: members.slice(0, 16).map((entry) => ({
+          instance: entry.instance, parent: entry.getParent(entry.instance),
+          root: entry.getRootTarget(), facts: { ...entry.getFacts() },
+          config: { ...entry.getFocusableConfig() },
+        })),
+        ...extra,
+      }));
+    };
+    probe('center.members');
     if (members.length === 0) {
       if (options?.entryRequest?.defer && (op === 'first' || op === 'last' || op === 'selected')) {
         this.pendingRovingEntries.set(provider.instance, {
@@ -586,7 +614,10 @@ export class FocusCenter {
 
     const focusedIndex = members.findIndex((entry) => entry.getFacts().focused);
     const activeIndex = members.findIndex((entry) => entry.getFacts().rovingActive);
-    if (options?.requireFocusedMember && focusedIndex < 0) return false;
+    if (options?.requireFocusedMember && focusedIndex < 0) {
+      probe('center.result', { focusedIndex, activeIndex, result: 'no-focused-member' });
+      return false;
+    }
     const currentIndex = focusedIndex >= 0 ? focusedIndex : activeIndex;
 
     const loop = provider.getRovingConfig().loop;
@@ -615,12 +646,22 @@ export class FocusCenter {
       target = op === 'prev' ? (members[members.length - 1] ?? null) : (members[0] ?? null);
     }
 
-    if (!target) return false;
+    if (!target) {
+      probe('center.result', { focusedIndex, activeIndex, result: 'no-target' });
+      return false;
+    }
+    probe('center.attempt', {
+      focusedIndex, activeIndex, target: target.instance,
+    });
     // Prevent focus-fact state updates from re-entering this same provider
     // intent while the host request is still on the stack. A pending outcome
     // is restored below with the member that was actually attempted.
     this.pendingRovingEntries.delete(provider.instance);
     const outcome = this.requestFocusOutcome(target, intent, { syncFacts: true });
+    probe('center.result', {
+      focusedIndex, activeIndex, target: target.instance,
+      result: outcome,
+    });
     if (outcome === 'pending' && options?.entryRequest?.defer) {
       this.pendingRovingEntries.set(provider.instance, {
         op: op as 'first' | 'last' | 'selected',

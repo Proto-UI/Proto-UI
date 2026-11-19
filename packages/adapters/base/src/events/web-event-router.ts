@@ -14,6 +14,17 @@ import {
   suppressDirectionalClick,
 } from '../gestures/web-move-click-arbitration';
 
+// Private diagnostic overlay only; the observer must never affect event outcomes.
+function traceRovingProbe(stage: string, read: () => Record<string, unknown>): void {
+  try {
+    (globalThis as typeof globalThis & {
+      __puiRovingProbe?: (stage: string, read: () => Record<string, unknown>) => void;
+    }).__puiRovingProbe?.(stage, read);
+  } catch {
+    // Diagnostic collection is best effort; retain the original control flow.
+  }
+}
+
 type Unsub = () => void;
 const PRESS_COMMIT_EMITTED_ROOTS = Symbol.for('@proto.ui/router/press-commit-emitted-roots');
 const PROTO_PARENT_INSTANCE_MARK = Symbol.for('@proto.ui/adapter-base/__proto_parent_instance');
@@ -650,7 +661,21 @@ export function createWebProtoEventRouter(opt: {
   // key -> key.* (global)
   unsubs.push(
     listen(globalEl, 'keydown', (e: KeyboardEvent) => {
-      if (!isEnabled()) return;
+      const enabled = isEnabled();
+      if (e.key === 'ArrowRight') {
+        traceRovingProbe('router.ingress', () => ({
+          root: rootEl, router: routerIdentity, instance: opt.instanceToken,
+          globalTarget: globalEl, nativeEvent: e, enabled,
+          currentRouter: activeRouterByRoot.get(rootEl) === routerIdentity,
+        }));
+      }
+      if (!enabled) return;
+      if (e.key === 'ArrowRight') {
+        traceRovingProbe('router.dispatch', () => ({
+          root: rootEl, router: routerIdentity, instance: opt.instanceToken,
+          nativeEvent: e,
+        }));
+      }
       emit(protoGlobalBus, 'key.down', e);
       if (rootProxy.__hasProtoListeners('key.down') && shouldRouteToCurrentRoot(e)) {
         emit(protoRootBus, 'key.down', e);

@@ -132,6 +132,62 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
               if (events.length < 160) events.push(event);
               else dropped++;
             };
+            // Private overlay: snapshot synchronously at each owning layer, before assertions.
+            const probeEvents: unknown[] = [];
+            let probeDropped = 0;
+            let probeErrors = 0;
+            let arrowAttempt = 0;
+            let identity = 0;
+            const objectIds = new WeakMap<object, number>();
+            const symbolIds = new Map<symbol, number>();
+            const id = (value: unknown): number | null => {
+              if (typeof value === 'symbol') {
+                if (!symbolIds.has(value)) symbolIds.set(value, ++identity);
+                return symbolIds.get(value)!;
+              }
+              if ((typeof value !== 'object' || value === null) && typeof value !== 'function')
+                return null;
+              const object = value as object;
+              if (!objectIds.has(object)) objectIds.set(object, ++identity);
+              return objectIds.get(object)!;
+            };
+            const snapshot = (value: unknown, key = '', depth = 0): unknown => {
+              if (value instanceof Element) return { id: id(value), ...describe(value) };
+              if (value instanceof KeyboardEvent) return {
+                id: id(value), key: value.key, trusted: value.isTrusted,
+                timeStamp: value.timeStamp, target: snapshot(value.target),
+              };
+              if (['instance', 'provider', 'parent', 'entry', 'target', 'router', 'globalTarget']
+                .includes(key)) return id(value);
+              if (typeof value === 'symbol') return id(value);
+              if (Array.isArray(value)) return value.slice(0, 16).map((v) => snapshot(v, '', depth + 1));
+              if (value && typeof value === 'object') {
+                if (depth >= 4) return { id: id(value), truncated: true };
+                return Object.fromEntries(Object.entries(value).slice(0, 24)
+                  .map(([k, v]) => [k, snapshot(v, k, depth + 1)]));
+              }
+              return value;
+            };
+            const probeWindow = window as typeof window & {
+              __puiRovingProbe?: (stage: string, read: () => Record<string, unknown>) => void;
+            };
+            const previousProbe = probeWindow.__puiRovingProbe;
+            const probe = (stage: string, read: () => Record<string, unknown>) => {
+              try {
+                if (!arrowAttempt) return;
+                if (probeEvents.length >= 96) { probeDropped++; return; }
+                const detail = read();
+                // Limit the overlay to the existing closed Menubar root path.
+                if (!(detail.root instanceof Element) || detail.root.getAttribute('role') !== 'menubar')
+                  return;
+                probeEvents.push({
+                  stage, attempt: arrowAttempt, time: performance.now(),
+                  fontSize: document.documentElement.style.fontSize,
+                  active: snapshot(document.activeElement), detail: snapshot(detail),
+                });
+              } catch { probeErrors++; }
+            };
+            probeWindow.__puiRovingProbe = probe;
             const offListeners: Array<() => void> = [];
             for (const type of ['focusin', 'focusout', 'keydown']) {
               const listener = (event: Event) => {
@@ -144,6 +200,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
                   )
                 )
                   return;
+                if (event instanceof KeyboardEvent && event.key === 'ArrowRight') arrowAttempt++;
                 record({
                   kind: type,
                   time: performance.now(),
@@ -190,12 +247,19 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             observer.observe(document.documentElement, { childList: true, subtree: true });
             (
               window as typeof window & {
-                __menubarTrace?: { events: unknown[]; dropped(): number; stop(): void };
+                __menubarTrace?: { events: unknown[]; dropped(): number; probe(): unknown; stop(): void };
               }
             ).__menubarTrace = {
               events,
               dropped: () => dropped,
+              probe: () => ({
+                events: probeEvents, dropped: probeDropped, errors: probeErrors, cap: 96,
+                memberCap: 16,
+                limitation: 'Private synchronous diagnostic overlay. IDs are page-local identities; timestamps reflect hook execution. Additional read-only snapshots may perturb timing. No hook is physical focus-success proof; use native focus events and active snapshots. Missing events can reflect an absent or retired subscription; dropped/errors must be checked.',
+              }),
               stop: () => {
+                if (probeWindow.__puiRovingProbe === probe)
+                  probeWindow.__puiRovingProbe = previousProbe;
                 observer.disconnect();
                 offListeners.forEach((off) => off());
               },
@@ -383,7 +447,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
               interactionTrace = await page.evaluate(() => {
                 const trace = (
                   window as typeof window & {
-                    __menubarTrace?: { events: unknown[]; dropped(): number; stop(): void };
+                    __menubarTrace?: { events: unknown[]; dropped(): number; probe(): unknown; stop(): void };
                   }
                 ).__menubarTrace;
                 trace?.stop();
@@ -391,6 +455,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
                   events: trace?.events ?? [],
                   dropped: trace?.dropped() ?? 0,
                   cap: 160,
+                  rovingProbe: trace?.probe() ?? null,
                   limitation:
                     'Mutation timestamps describe observer delivery, not mutation instants. Mutation observation covers the document light DOM, not open or closed shadow contents; focus evidence is limited to composed events reaching this document. Empty or truncated trace is not proof of no event.',
                 };

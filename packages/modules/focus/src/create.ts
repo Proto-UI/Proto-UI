@@ -53,6 +53,7 @@ import {
 } from './caps';
 import {
   FOCUS_CENTER,
+  traceRovingProbe,
   type FocusCenterEntry,
   type FocusRequestBehavior,
   type FocusRequestOutcome,
@@ -896,14 +897,26 @@ class FocusModuleImpl extends ModuleBase {
     this.rovingEventsWired = true;
 
     this.eventPort.onGlobal('key.down', (ev) => {
+      const probe = (stage: string, extra: Record<string, unknown> = {}) => {
+        if (ev.key !== 'ArrowRight') return;
+        traceRovingProbe(stage, () => ({
+          root: this.getRootTarget(), instance: this.getSelfToken(),
+          prototype: this.prototypeName, rovingDeclared: this.rovingDeclared,
+          config: { ...this.rovingConfig }, ...extra,
+        }));
+      };
+      probe('wire.ingress');
       if (!this.rovingDeclared) return;
       const op = this.resolveRovingKeyOperation(ev);
+      probe('wire.operation', { op });
       if (!op) return;
 
       const entry = this.createCenterEntry();
+      probe('wire.entry', { entry: entry?.instance ?? null });
       if (!entry) return;
 
       const handled = FOCUS_CENTER.focusInRoving(entry, op, { requireFocusedMember: true });
+      probe('wire.result', { op, handled });
       if (!handled) return;
 
       ev.control.requestDefaultActionPrevention({
