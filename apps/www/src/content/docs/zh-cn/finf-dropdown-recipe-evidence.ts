@@ -136,43 +136,76 @@ export function channelsClose(actual: readonly number[], expected: readonly numb
   );
 }
 
-export async function observeDropdownGeometry(locator: Locator) {
-  return locator.evaluate((element) => {
-    const css = getComputedStyle(element);
-    const rect = element.getBoundingClientRect();
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
-    let node: Node | null;
-    let textX: number | null = null;
-    while ((node = walker.nextNode())) {
-      if (!node.textContent?.trim() || node.parentElement?.closest('svg')) continue;
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      textX = range.getBoundingClientRect().x;
-      break;
-    }
-    const svg = element.querySelector('svg');
-    const icon = svg?.getBoundingClientRect();
-    return {
-      x: rect.x,
-      width: rect.width,
-      height: rect.height,
-      textX,
-      paddingLeft: Number.parseFloat(css.paddingLeft),
-      paddingRight: Number.parseFloat(css.paddingRight),
-      direction: css.direction,
-      rem: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
-      icon:
-        svg && icon
-          ? {
-              width: icon.width,
-              height: icon.height,
-              viewBox: svg.getAttribute('viewBox'),
-              paths: [...svg.querySelectorAll('path')].map((shape) => shape.getAttribute('d')),
-              shapes: svg.querySelectorAll('path,rect,circle,line,polyline,polygon,ellipse').length,
-            }
-          : null,
+async function readDropdownGeometries(locator: Locator, refs: readonly string[]) {
+  return locator.evaluate((boundary, refs) => {
+    const measure = (element: Element) => {
+      const css = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      let textX: number | null = null;
+      while ((node = walker.nextNode())) {
+        if (!node.textContent?.trim() || node.parentElement?.closest('svg')) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        textX = range.getBoundingClientRect().x;
+        break;
+      }
+      const svg = element.querySelector('svg');
+      const icon = svg?.getBoundingClientRect();
+      return {
+        x: rect.x,
+        width: rect.width,
+        height: rect.height,
+        textX,
+        paddingLeft: Number.parseFloat(css.paddingLeft),
+        paddingRight: Number.parseFloat(css.paddingRight),
+        direction: css.direction,
+        rem: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+        icon:
+          svg && icon
+            ? {
+                width: icon.width,
+                height: icon.height,
+                viewBox: svg.getAttribute('viewBox'),
+                paths: [...svg.querySelectorAll('path')].map((shape) => shape.getAttribute('d')),
+                shapes: svg.querySelectorAll('path,rect,circle,line,polyline,polygon,ellipse')
+                  .length,
+              }
+            : null,
+      };
     };
-  });
+    if (!refs.length) return { settled: true, geometries: [measure(boundary)] };
+
+    const style = getComputedStyle(boundary);
+    const settled =
+      style.opacity === '1' &&
+      ['none', 'matrix(1, 0, 0, 1, 0, 0)'].includes(style.transform) &&
+      boundary.getAnimations().every((animation) => animation.playState === 'finished');
+    const geometries = refs.map((ref) => {
+      const matches = boundary.querySelectorAll(`[data-demo-ref=${JSON.stringify(ref)}]`);
+      if (matches.length !== 1) throw new Error(`Expected exactly one Dropdown ref "${ref}".`);
+      return measure(matches[0]!);
+    });
+    return { settled, geometries };
+  }, refs);
+}
+
+export async function observeDropdownGeometry(locator: Locator) {
+  const { geometries } = await readDropdownGeometries(locator, []);
+  return geometries[0]!;
+}
+
+export async function observeDropdownGeometries<const Ref extends string>(
+  menu: Locator,
+  refs: readonly Ref[]
+) {
+  const { settled, geometries } = await readDropdownGeometries(menu, refs);
+  const parts = Object.fromEntries(refs.map((ref, i) => [ref, geometries[i]!])) as Record<
+    Ref,
+    (typeof geometries)[number]
+  >;
+  return { settled, parts };
 }
 
 /** Missing ID relationships are a failure, including the null === null case. */

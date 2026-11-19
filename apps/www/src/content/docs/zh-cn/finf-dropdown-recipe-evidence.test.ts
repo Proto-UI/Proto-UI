@@ -92,6 +92,7 @@ it('separates rest/focus/held press, checks disabled ownership and inset/Lucide 
     "page.keyboard.press('Space')",
     "menu.waitFor({ state: 'hidden' })",
     'measured.rem * insetRem',
+    'observeDropdownGeometries(menu, refs)',
     'label.rem * 0.5',
     "viewBox: '0 0 24 24'",
     'width: 16',

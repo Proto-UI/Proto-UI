@@ -31,6 +31,7 @@ import {
   dropdownInsetRem,
   observeDropdownItem,
   observeDropdownGeometry,
+  observeDropdownGeometries,
   channelsClose,
   hasNamedDropdownGroup,
   type DropdownRecipe,
@@ -336,13 +337,38 @@ for (const { recipe, profile } of dropdownEvidenceRecipes)
           } else {
             await expect.poll(() => hasFocus(ref('copy'))).toBe(true);
             expect(await menu.getByRole('menuitem').count()).toBe(4);
-            const copy = await icon(ref('copy'), 'M4 16');
-            const cut = await icon(ref('cut'), 'M8.12 8.12');
             expect(await menu.locator('svg').count()).toBe(2);
-            const label = await observeDropdownGeometry(ref('actions-label'));
-            const inset = await observeDropdownGeometry(ref('more-label'));
-            const paste = await observeDropdownGeometry(ref('paste'));
-            const rename = await observeDropdownGeometry(ref('rename'));
+            const refs = ['copy', 'cut', 'actions-label', 'more-label', 'paste', 'rename'] as const;
+            let layout = await observeDropdownGeometries(menu, refs);
+            // Every position must come from a single settled browser sample.
+            await expect
+              .poll(
+                async () => {
+                  layout = await observeDropdownGeometries(menu, refs);
+                  return (
+                    layout.settled &&
+                    (layout.parts.copy.icon?.shapes ?? 0) > 0 &&
+                    (layout.parts.cut.icon?.shapes ?? 0) > 0
+                  );
+                },
+                { timeout: 10_000 }
+              )
+              .toBe(true);
+            const {
+              copy,
+              cut,
+              'actions-label': label,
+              'more-label': inset,
+              paste,
+              rename,
+            } = layout.parts;
+            for (const [glyph, fragment] of [
+              [copy.icon, 'M4 16'],
+              [cut.icon, 'M8.12 8.12'],
+            ] as const) {
+              expect(glyph).toMatchObject({ width: 16, height: 16, viewBox: '0 0 24 24' });
+              expect(glyph!.paths.join('|')).toContain(fragment);
+            }
             const insetRem = dropdownInsetRem[profile];
             expect(label.paddingLeft).toBeCloseTo(label.rem * 0.5, 3);
             for (const measured of [inset, paste, rename]) {
