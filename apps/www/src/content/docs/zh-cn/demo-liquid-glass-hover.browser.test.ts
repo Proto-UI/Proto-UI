@@ -25,7 +25,7 @@ import {
   planLiquidHoverEvidence,
   selectLiquidHoverRuntimes,
   writeLiquidHoverJsonAtomic,
-} from './liquid-hover-plan';
+} from '../../../../test/helpers/liquid-hover-plan';
 
 // C/T-LIQUID-GLASS-COMMAND-INTERACTION-0001. This adds evidence, never replaces
 // or relaxes the existing thirteen Toggle scenarios or structured-detail gates.

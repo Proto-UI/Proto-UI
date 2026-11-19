@@ -28,3 +28,9 @@ The eight affected Homepage files then passed **59/59 tests, zero failed or skip
 Three importing browser test files have path-only changes and have not run here. Whole types, the full website/public-package build, the whole scanner fixture suite and full CI are not represented by the bounded checks above. The CLI build alone is not a complete website or release build.
 
 The accompanying JSON records source and log hashes, complete commands, the exact six-diagnostic difference, and the source-preservation audit. A separate local agent reviewed the file placement and import resolution; this is local engineering review and is not a formal GitHub approval.
+
+## Liquid hover evidence helper placement follow-up
+
+The follow-up based on `af43d613171fe18a8acf61fe3fbffec5610f67a1` moves the Node-only evidence helper `apps/www/src/content/docs/zh-cn/liquid-hover-plan.ts` to `apps/www/test/helpers/liquid-hover-plan.ts`. Its browser-harness type and hover-fixture imports retain their original targets, and its two test consumers use the new path. The helper's behavior and all test assertions are unchanged. Historical migration inventories retain their original paths and hashes. Scanner and server-readiness sources are unchanged.
+
+The validation results above describe the earlier placement repair only; they do not establish validation of this follow-up.
