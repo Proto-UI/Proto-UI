@@ -5,18 +5,28 @@
 // author API: D-MOVE-GESTURE-0001 forbids publishing `asMove()`/`asDrag()`, and
 // no portable author surface exposes pointer coordinates.
 //
-// The published GPUI revision has no public pointer-capture API, so the session
-// owns the contact itself: recognition is immediate (a primary mouse-down inside
-// the target's physical bounds), and the session continues to receive window-scoped
-// mouse events after the pointer leaves those bounds. A contact that leaves the
-// window, or a target that is detached, disposed or replaced, ends the session with
-// an explicit cancel reason.
+// The pinned GPUI revision does expose a public pointer-capture API
+// (Window::capture_pointer), but this realization does not depend on it. The host
+// gesture arena claims a touch contact once, at its start position, and keeps
+// routing that contact to the window, so the session owns the contact itself:
+// recognition is immediate (a primary mouse-down inside the target's physical
+// bounds, or a touch that starts inside it), and the session continues to receive
+// window-scoped events after the contact leaves those bounds. A contact that
+// leaves the window, or a target that is detached, disposed or replaced, ends the
+// session with an explicit cancel reason.
+//
+// One contact owns one session. A touch contact is claimed in the host arena with
+// prevent_default on the touch drag start, keeps the arena's original start
+// position as its origin, and continues outside the target while the window still
+// owns it. Mouse input is ignored while a touch contact is live, touch input is
+// ignored while a mouse contact is live. Host cancellation, target replacement
+// and detach end the session exactly once.
 export const gpuiNativeMoveSource = String.raw`use std::cell::{Cell,RefCell};
 use std::collections::BTreeMap;
 use std::rc::{Rc,Weak};
 use std::sync::OnceLock;
 use std::time::Instant;
-use gpui::{App,MouseButton,MouseDownEvent,MouseExitEvent,MouseMoveEvent,MouseUpEvent,Point,Pixels,Window};
+use gpui::{App,MouseButton,MouseDownEvent,MouseExitEvent,MouseMoveEvent,MouseUpEvent,Point,Pixels,TouchDragEvent,TouchPhase,Window};
 use crate::gpui_native_owner::{native_host_hit,OwnerRef,OwnerWeak};
 
 /// A host-local point. Units are the host's own pixels and never portable author state.
@@ -68,13 +78,14 @@ pub trait MoveGestureBinding{
     fn on_cancel(&self,_reason:MoveGestureCancelReason,_context:Option<MoveGestureCancelContext<'_>>){}
 }
 
-struct MoveSession{binding:Rc<dyn MoveGestureBinding>,start:Point<Pixels>,previous:Point<Pixels>}
+struct MoveSession{binding:Rc<dyn MoveGestureBinding>,input:MoveGestureInput,start:Point<Pixels>,previous:Point<Pixels>}
 struct MoveEntry{id:u64,target:OwnerWeak,binding:Rc<dyn MoveGestureBinding>,axis:MoveGestureAxis,session:Option<MoveSession>}
 
 thread_local!{
     static MOVE_ENTRIES:RefCell<BTreeMap<u64,MoveEntry>>=RefCell::new(BTreeMap::new());
     static MOVE_NEXT_ID:Cell<u64>=Cell::new(1);
     static MOVE_DISPATCHED:Cell<bool>=Cell::new(false);
+    static MOVE_TOUCH_DISPATCHED:Cell<bool>=Cell::new(false);
 }
 
 fn same_owner(left:&OwnerWeak,right:&OwnerWeak)->bool{Weak::ptr_eq(left,right)}
@@ -85,6 +96,10 @@ fn local_point(point:Point<Pixels>,origin:Point<Pixels>)->MoveGesturePoint{
 }
 fn window_delta(point:Point<Pixels>,previous:Point<Pixels>)->MoveGesturePoint{
     MoveGesturePoint{x:f64::from(f32::from(point.x))-f64::from(f32::from(previous.x)),y:f64::from(f32::from(point.y))-f64::from(f32::from(previous.y))}
+}
+
+fn has_live_session(window:&Window)->bool{
+    MOVE_ENTRIES.with(|entries|entries.borrow().values().any(|entry|entry.session.is_some()&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window))))
 }
 
 /// Attach a move gesture to a generated host target.
@@ -180,7 +195,7 @@ pub fn move_owner_has_binding(owner:&OwnerRef)->bool{
     MOVE_ENTRIES.with(|entries|entries.borrow().values().any(|entry|same_owner(&entry.target,&weak)))
 }
 
-/// Install the window-scoped mouse listeners that carry a move session.
+/// Install the window-scoped mouse and touch listeners that carry a move session.
 pub fn register_move_input(window:&mut Window,target:OwnerWeak){
     let id=MOVE_ENTRIES.with(|entries|entries.borrow().values().find(|entry|same_owner(&entry.target,&target)).map(|entry|entry.id));
     let Some(id)=id else{return};
@@ -189,7 +204,9 @@ pub fn register_move_input(window:&mut Window,target:OwnerWeak){
     window.on_mouse_event::<MouseMoveEvent>(move|event,phase,window,cx|move_mouse_move(event,phase,id,&moved,window,cx));
     let released=target.clone();
     window.on_mouse_event::<MouseUpEvent>(move|event,phase,window,cx|move_mouse_up(event,phase,id,&released,window,cx));
-    window.on_mouse_event::<MouseExitEvent>(move|event,phase,window,cx|move_mouse_exit(event,phase,id,&target,window,cx));
+    let exited=target.clone();
+    window.on_mouse_event::<MouseExitEvent>(move|event,phase,window,cx|move_mouse_exit(event,phase,id,&exited,window,cx));
+    window.on_mouse_event::<TouchDragEvent>(move|event,phase,window,cx|move_touch_drag(event,phase,id,&target,window,cx));
 }
 
 pub fn move_blur(owner:&OwnerRef){
@@ -225,7 +242,8 @@ fn move_mouse_down(event:&MouseDownEvent,phase:gpui::DispatchPhase,window:&mut W
     if phase.capture(){MOVE_DISPATCHED.with(|dispatched|dispatched.set(false));return}
     if !phase.bubble()||MOVE_DISPATCHED.with(|dispatched|dispatched.replace(true)){return}
     if event.button!=MouseButton::Left{return}
-    if MOVE_ENTRIES.with(|entries|entries.borrow().values().any(|entry|entry.session.is_some()&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window)))){return}
+    // One contact owns one window: a live touch contact ignores mouse input.
+    if has_live_session(window){return}
     let candidate=MOVE_ENTRIES.with(|entries|{
         let entries=entries.borrow();
         let mut best:Option<(u64,OwnerRef,u64)>=None;
@@ -258,7 +276,7 @@ fn move_mouse_down(event:&MouseDownEvent,phase:gpui::DispatchPhase,window:&mut W
         let Some(entry)=entries.get_mut(&id)else{return false};
         if !same_owner(&entry.target,&Rc::downgrade(&owner))||!Rc::ptr_eq(&entry.binding,&binding){return false}
         if entry.session.is_some(){return false}
-        entry.session=Some(MoveSession{binding:binding.clone(),start:event.position,previous:event.position});
+        entry.session=Some(MoveSession{binding:binding.clone(),input:MoveGestureInput::Mouse,start:event.position,previous:event.position});
         true
     });
     if !accepted{return}
@@ -272,6 +290,7 @@ fn move_mouse_move(event:&MouseMoveEvent,phase:gpui::DispatchPhase,id:u64,target
         let entry=entries.get(&id)?;
         if !same_owner(&entry.target,target){return None}
         let session=entry.session.as_ref()?;
+        if session.input!=MoveGestureInput::Mouse{return None}
         let owner=entry.target.upgrade()?;
         if !owns_window(&owner,window){return None}
         Some((entry.id,session.binding.clone(),session.start,session.previous,owner))
@@ -306,6 +325,7 @@ fn move_mouse_up(event:&MouseUpEvent,phase:gpui::DispatchPhase,id:u64,target:&Ow
         let entry=entries.get(&id)?;
         if !same_owner(&entry.target,target){return None}
         let session=entry.session.as_ref()?;
+        if session.input!=MoveGestureInput::Mouse{return None}
         let owner=entry.target.upgrade()?;
         if !owns_window(&owner,window){return None}
         Some((entry.id,session.binding.clone(),session.start,session.previous,owner))
@@ -331,7 +351,103 @@ fn move_mouse_up(event:&MouseUpEvent,phase:gpui::DispatchPhase,id:u64,target:&Ow
 
 fn move_mouse_exit(_event:&MouseExitEvent,phase:gpui::DispatchPhase,id:u64,target:&OwnerWeak,window:&mut Window,cx:&mut App){
     if !phase.capture(){return}
-    let owned=MOVE_ENTRIES.with(|entries|entries.borrow().get(&id).is_some_and(|entry|same_owner(&entry.target,target)&&entry.session.is_some()&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window))));
+    let owned=MOVE_ENTRIES.with(|entries|entries.borrow().get(&id).is_some_and(|entry|same_owner(&entry.target,target)&&entry.session.as_ref().is_some_and(|session|session.input==MoveGestureInput::Mouse)&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window))));
     if owned{cancel_session(id,MoveGestureCancelReason::LostOwnership,Some((window,cx)))}
 }
+
+/// The window-scoped touch listener that carries a touch session.
+///
+/// The host gesture arena offers a touch drag at the contact's start position and
+/// keeps routing that contact to the window while the drag is claimed. The claim
+/// is taken with prevent_default on the started drag, which is what tells the
+/// arena that this window owns the contact.
+fn move_touch_drag(event:&TouchDragEvent,phase:gpui::DispatchPhase,id:u64,target:&OwnerWeak,window:&mut Window,cx:&mut App){
+    if event.phase==TouchPhase::Started{
+        if phase.capture(){MOVE_TOUCH_DISPATCHED.with(|dispatched|dispatched.set(false));return}
+        if !phase.bubble()||MOVE_TOUCH_DISPATCHED.with(|dispatched|dispatched.replace(true)){return}
+        move_touch_start(event,window,cx);
+        return
+    }
+    if !phase.capture(){return}
+    let active=MOVE_ENTRIES.with(|entries|{
+        let entries=entries.borrow();
+        let entry=entries.get(&id)?;
+        if !same_owner(&entry.target,target){return None}
+        let session=entry.session.as_ref()?;
+        if session.input!=MoveGestureInput::Touch||session.start!=event.start_position{return None}
+        let owner=entry.target.upgrade()?;
+        if !owns_window(&owner,window){return None}
+        Some((session.binding.clone(),session.start,session.previous,owner))
+    });
+    let Some((binding,start,previous,owner))=active else{return};
+    if event.phase==TouchPhase::Cancelled{cancel_session(id,MoveGestureCancelReason::HostCancel,Some((window,cx)));return}
+    let Some(origin)=live_origin(&owner)else{cancel_session(id,MoveGestureCancelReason::TargetDetached,Some((window,cx)));return};
+    let sample=MoveGestureSample{
+        input:MoveGestureInput::Touch,
+        position:local_point(event.position,origin),
+        delta:window_delta(event.position,previous),
+        total_delta:window_delta(event.position,start),
+        timestamp:now_millis(),
+        modifiers:window.modifiers(),
+    };
+    let ended=event.phase==TouchPhase::Ended;
+    let updated=MOVE_ENTRIES.with(|entries|{
+        let mut entries=entries.borrow_mut();
+        let Some(entry)=entries.get_mut(&id)else{return false};
+        let Some(session)=entry.session.as_mut()else{return false};
+        if ended{entry.session.take();}else{session.previous=event.position;}
+        true
+    });
+    if !updated{return}
+    if ended{binding.on_end(&sample,window,cx)}else{binding.on_move(&sample,window,cx)}
+}
+
+/// Start a touch session for a contact that begins inside the target.
+///
+/// The contact is recognized against the target's live hitbox at the arena's
+/// start position, and the session keeps that start position as its origin.
+fn move_touch_start(event:&TouchDragEvent,window:&mut Window,cx:&mut App){
+    if has_live_session(window){return}
+    let candidate=MOVE_ENTRIES.with(|entries|{
+        let entries=entries.borrow();
+        let mut best:Option<(u64,OwnerRef,u64)>=None;
+        for entry in entries.values(){
+            let Some(owner)=entry.target.upgrade()else{continue};
+            if !owns_window(&owner,window){continue}
+            if !native_host_hit(&owner,event.start_position,window){continue}
+            let order=owner.borrow().modules.topology.order;
+            if best.as_ref().map_or(true,|(_,_,current)|order>*current){best=Some((entry.id,owner,order))}
+        }
+        best
+    });
+    let Some((id,owner,_))=candidate else{return};
+    let Some(origin)=live_origin(&owner)else{return};
+    let binding=MOVE_ENTRIES.with(|entries|entries.borrow().get(&id).map(|entry|entry.binding.clone()));
+    let Some(binding)=binding else{return};
+    let sample=MoveGestureSample{
+        input:MoveGestureInput::Touch,
+        position:local_point(event.start_position,origin),
+        delta:MoveGesturePoint{x:0.0,y:0.0},
+        total_delta:MoveGesturePoint{x:0.0,y:0.0},
+        timestamp:now_millis(),
+        modifiers:window.modifiers(),
+    };
+    if !binding.should_start(&sample,window,cx){return}
+    if !native_host_hit(&owner,event.start_position,window){return}
+    let accepted=MOVE_ENTRIES.with(|entries|{
+        let mut entries=entries.borrow_mut();
+        if entries.values().any(|entry|entry.session.is_some()&&entry.target.upgrade().is_some_and(|owner|owns_window(&owner,window))){return false}
+        let Some(entry)=entries.get_mut(&id)else{return false};
+        if !same_owner(&entry.target,&Rc::downgrade(&owner))||!Rc::ptr_eq(&entry.binding,&binding){return false}
+        if entry.session.is_some(){return false}
+        entry.session=Some(MoveSession{binding:binding.clone(),input:MoveGestureInput::Touch,start:event.start_position,previous:event.start_position});
+        true
+    });
+    if !accepted{return}
+    // Claim the contact: the arena keeps routing it to this window only while the
+    // claim stands.
+    window.prevent_default();
+    binding.on_start(&sample,window,cx);
+}
+
 `;

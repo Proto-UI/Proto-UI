@@ -54,7 +54,7 @@ Native callbacks without a return channel report failures through stderr and the
 ## Explicit capability boundary
 
 The native SDK's `gpui_native_move` module realizes the draft
-`C-MOVE-GESTURE-0001` / `HC-MOVE-GESTURE-0001` immediate mouse-contact slice.
+`C-MOVE-GESTURE-0001` / `HC-MOVE-GESTURE-0001` immediate mouse and direct-touch slice.
 Native consumers attach an `OwnerWeak` and `MoveGestureBinding` after construction,
 including before first paint. Recognition waits for committed mount, the same
 window's physical hitbox and HitParticipation eligibility. No portable author
@@ -63,13 +63,14 @@ coordinate API or `asMove` / `asDrag` hook is added.
 `MoveGestureSample.position` subtracts the live target hitbox origin. `delta` and
 `total_delta` measure pointer displacement in window coordinates, preserving motion
 when the target's origin changes. Samples include modifiers and monotonic milliseconds.
-The axis remains a recognition hint; directional activation fails with an explicit
-unsupported error. The pinned GPUI mouse stream establishes no touch/pen, threshold,
-velocity, keyboard-move or gesture-arena guarantee.
+The axis remains a recognition hint. Directional activation returns an unsupported error.
 
 Mouse move/up listeners run during native capture and are qualified by the exact
 target owner and window. An accepted contact continues outside its initial hit region
 within that window; exit, missing primary-button ownership and window blur cancel it.
+For touch, GPUI offers the contact at its original position and keeps delivering
+it to the window after the binding claims the drag. The same lease receives move
+and terminal samples in capture. A competing contact cannot take over the lease.
 Replacement, detach, owner disposal and lease disposal terminate accepted sessions
 with explicit reasons. `cancel` leaves the binding attached for a subsequent contact;
 `dispose` and Rust `Drop` release it. Cancellation callbacks receive optional live
@@ -79,8 +80,10 @@ Callbacks run after registry and owner borrows have ended.
 The `move_gesture_*` tests in the same full `ordinary.rs` consumer exercise early
 attachment, local samples, movement outside the initial bounds, modifiers, release
 before a downstream child's stopped bubble, restart after cancellation, detach,
-disposal, cross-window isolation and loss of ownership. Run the complete consumer
-command above; these are framework dispatch checks, not OS-device certification.
+disposal, cross-window isolation and loss of ownership. The touch controls dispatch
+raw GPUI contacts through the gesture recognizer, covering refusal, competing
+inputs, cancellation and target replacement. Run the complete consumer command
+above to verify framework dispatch. OS-device delivery requires platform tests.
 No new Cargo feature is required on the published pin. A workspace-selected modern
 GPUI revision uses the existing `gpui-modern-element-api` SDK feature for its element
 ABI; this move module introduces no additional ABI feature or dependency.

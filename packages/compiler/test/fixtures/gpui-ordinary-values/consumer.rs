@@ -2,7 +2,7 @@
 //! TestAppContext is a native framework consumer, not an OS input/paint claim.
 use generated_gpui_component::CompiledComponent;
 use gpui::{
-    prelude::*, px, size, Context, Entity, Focusable, Render, TestAppContext, Window, WindowHandle,
+    prelude::*, px, size, Context, Entity, Focusable, InputEvent, Render, TestAppContext, Window, WindowHandle,
 };
 use proto_ui_gpui_native::gpui_native_owner::{
     catch_authored, detach_native_view, dispatch, event_fields, expose_event, expose_method,
@@ -20,7 +20,7 @@ use std::{
 
 use proto_ui_gpui_native::gpui_native_move::{
     attach_move_gesture, MoveGestureBinding, MoveGestureCancelContext,
-    MoveGestureCancelReason, MoveGestureSample,
+    MoveGestureCancelReason, MoveGestureInput, MoveGestureSample,
 };
 
 #[derive(Clone, Default)]
@@ -56,13 +56,26 @@ struct MoveHarness {
     target: Entity<plain::CompiledComponent>,
     stop_up: Rc<Cell<bool>>,
     stopped: Rc<Cell<bool>>,
+    scroll_steps: Rc<RefCell<Vec<gpui::ScrollDelta>>>,
 }
 impl Render for MoveHarness {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
         let stop = self.stop_up.clone();
         let stopped = self.stopped.clone();
+        let scroll_steps = self.scroll_steps.clone();
         gpui::div().size_full().child(self.target.clone()).child(
             gpui::canvas(|_, _, _| (), move |_, _, window, _| {
+                window.on_mouse_event::<gpui::ScrollWheelEvent>(move |event, phase, _, _| {
+                    if phase.bubble() { scroll_steps.borrow_mut().push(event.delta); }
+                });
+                let touch_stop = stop.clone();
+                let touch_stopped = stopped.clone();
+                window.on_mouse_event::<gpui::TouchDragEvent>(move |event, phase, _, cx| {
+                    if phase.bubble() && event.phase == gpui::TouchPhase::Ended && touch_stop.get() {
+                        touch_stopped.set(true);
+                        cx.stop_propagation();
+                    }
+                });
                 window.on_mouse_event::<gpui::MouseUpEvent>(move |_, phase, _, cx| {
                     if phase.bubble() && stop.get() {
                         stopped.set(true);
@@ -89,7 +102,12 @@ fn move_window(cx: &mut TestAppContext, log: Rc<MoveLog>) -> (WindowHandle<MoveH
         let owner = target.read(cx).owner.clone();
         assert!(!owner.borrow().mounted, "attachment precedes first committed mount");
         lease = Some(attach_move_gesture(Rc::downgrade(&owner), Box::new(log.as_ref().clone())).unwrap());
-        MoveHarness { target, stop_up: Rc::new(Cell::new(false)), stopped: Rc::new(Cell::new(false)) }
+        MoveHarness {
+            target,
+            stop_up: Rc::new(Cell::new(false)),
+            stopped: Rc::new(Cell::new(false)),
+            scroll_steps: Rc::new(RefCell::new(Vec::new())),
+        }
     });
     window.update(cx, |_, window, _| window.activate_window()).unwrap();
     move_frames(window, cx);
@@ -104,6 +122,160 @@ fn move_down(window: WindowHandle<MoveHarness>, cx: &mut TestAppContext) -> gpui
         }), cx);
         position
     }).unwrap()
+}
+
+fn move_touch(window: &mut Window, cx: &mut gpui::App, id: u64, phase: gpui::TouchPhase, position: gpui::Point<gpui::Pixels>) {
+    // Exercise GPUI's own arena and prevent_default claim, not a fabricated drag.
+    window.dispatch_event(gpui::PlatformInput::Touch(gpui::TouchEvent {
+        id: gpui::TouchId(id), phase, position, ..Default::default()
+    }), cx);
+}
+
+#[gpui::test]
+fn move_gesture_leaves_independent_scroll_input_available(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    window.update(cx, |host, window, cx| {
+        let start = host.target.read(cx).owner.borrow().bounds.unwrap().origin + gpui::point(px(2.), px(2.));
+        let displacement = gpui::point(px(60.), px(0.));
+        log.refuse.set(true);
+        move_touch(window, cx, 40, gpui::TouchPhase::Started, start);
+        move_touch(window, cx, 40, gpui::TouchPhase::Moved, start + displacement);
+        assert!(!lease.is_active());
+        assert!(host.scroll_steps.borrow().iter().any(|delta| {
+            matches!(delta, gpui::ScrollDelta::Pixels(p) if p.x != px(0.))
+        }), "an unclaimed touch remains available for native scrolling");
+        move_touch(window, cx, 40, gpui::TouchPhase::Cancelled, start + displacement);
+        host.scroll_steps.borrow_mut().clear();
+
+        log.refuse.set(false);
+        move_touch(window, cx, 41, gpui::TouchPhase::Started, start);
+        assert!(lease.is_active());
+        window.dispatch_event(gpui::ScrollWheelEvent {
+            position: start,
+            delta: gpui::ScrollDelta::Pixels(displacement),
+            ..Default::default()
+        }.to_platform_input(), cx);
+        assert!(matches!(host.scroll_steps.borrow().as_slice(), [gpui::ScrollDelta::Pixels(delta)] if *delta == displacement));
+        assert!(lease.is_active());
+        move_touch(window, cx, 41, gpui::TouchPhase::Ended, start);
+        assert_eq!(*log.events.borrow(), ["start", "end"]);
+    }).unwrap();
+}
+
+#[gpui::test]
+fn move_gesture_touch_claim_retains_origin_and_ignores_rival_input(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    let (start, origin) = window.update(cx, |host, window, cx| {
+        let bounds = host.target.read(cx).owner.borrow().bounds.unwrap();
+        let start = bounds.origin + gpui::point(px(2.), px(2.));
+        move_touch(window, cx, 1, gpui::TouchPhase::Started, start);
+        (start, bounds.origin)
+    }).unwrap();
+    assert!(lease.is_active());
+    let outside = gpui::point(px(500.), px(300.));
+    window.update(cx, |host, window, cx| {
+        assert!(!host.target.read(cx).owner.borrow().bounds.unwrap().contains(&outside));
+        // Rival finger input stays with GPUI's original logical contact.
+        move_touch(window, cx, 2, gpui::TouchPhase::Started, start);
+        move_touch(window, cx, 2, gpui::TouchPhase::Moved, outside);
+        move_touch(window, cx, 2, gpui::TouchPhase::Cancelled, outside);
+        // Hover, primary release and exit from a mouse cannot consume the touch.
+        window.dispatch_event(gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+            position: start, button: gpui::MouseButton::Left, ..Default::default()
+        }), cx);
+        window.dispatch_event(gpui::PlatformInput::MouseMove(gpui::MouseMoveEvent {
+            position: outside, pressed_button: None, ..Default::default()
+        }), cx);
+        window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+            position: outside, button: gpui::MouseButton::Left, ..Default::default()
+        }), cx);
+        window.dispatch_event(gpui::PlatformInput::MouseExited(gpui::MouseExitEvent::default()), cx);
+        assert!(lease.is_active());
+        assert_eq!(*log.events.borrow(), ["start"]);
+        move_touch(window, cx, 1, gpui::TouchPhase::Moved, outside);
+        host.stop_up.set(true);
+        move_touch(window, cx, 1, gpui::TouchPhase::Ended, outside);
+        assert!(host.stopped.get(), "touch release completes before a stopped child bubble");
+    }).unwrap();
+    assert!(!lease.is_active());
+    assert_eq!(*log.events.borrow(), ["start", "move", "end"]);
+    let samples = log.samples.borrow();
+    assert!(samples.iter().all(|sample| sample.input == MoveGestureInput::Touch));
+    assert_eq!((samples[0].position.x, samples[0].position.y), (2., 2.));
+    assert_eq!(samples[1].position.x, f64::from(f32::from(outside.x)) - f64::from(f32::from(origin.x)));
+    assert_eq!(samples[1].position.y, f64::from(f32::from(outside.y)) - f64::from(f32::from(origin.y)));
+    assert_eq!(samples[1].total_delta.x, f64::from(f32::from(outside.x)) - f64::from(f32::from(start.x)));
+    assert_eq!(samples[1].total_delta.y, f64::from(f32::from(outside.y)) - f64::from(f32::from(start.y)));
+    assert_eq!(samples[2].delta.x, 0.);
+    assert_eq!(samples[2].delta.y, 0.);
+    assert!(log.cancels.borrow().is_empty());
+}
+
+#[gpui::test]
+fn move_gesture_touch_refusal_cancel_detach_replacement_and_reuse(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    let start = window.update(cx, |host, _, cx| {
+        host.target.read(cx).owner.borrow().bounds.unwrap().origin + gpui::point(px(2.), px(2.))
+    }).unwrap();
+    window.update(cx, |_, window, cx| {
+        move_touch(window, cx, 10, gpui::TouchPhase::Started, gpui::point(px(500.), px(300.)));
+        assert!(!lease.is_active(), "touch must hit the attached target");
+        move_touch(window, cx, 10, gpui::TouchPhase::Cancelled, start);
+        log.refuse.set(true);
+        move_touch(window, cx, 11, gpui::TouchPhase::Started, start);
+        assert!(!lease.is_active(), "should_start refusal must leave the arena unclaimed");
+        move_touch(window, cx, 11, gpui::TouchPhase::Cancelled, start);
+        assert!(log.events.borrow().is_empty());
+        log.refuse.set(false);
+        move_touch(window, cx, 12, gpui::TouchPhase::Started, start);
+        assert!(lease.is_active());
+        move_touch(window, cx, 12, gpui::TouchPhase::Cancelled, start);
+        move_touch(window, cx, 12, gpui::TouchPhase::Cancelled, start);
+        assert!(!lease.is_active());
+        move_touch(window, cx, 13, gpui::TouchPhase::Started, start);
+        assert!(lease.is_active(), "the same lease admits a new contact after host cancellation");
+    }).unwrap();
+    window.update(cx, |host, window, cx| {
+        detach_native_view(&host.target.read(cx).owner);
+        move_touch(window, cx, 13, gpui::TouchPhase::Cancelled, start);
+        host.target.update(cx, |_, cx| cx.notify());
+    }).unwrap();
+    move_frames(window, cx);
+    window.update(cx, |_, window, cx| {
+        move_touch(window, cx, 14, gpui::TouchPhase::Started, start);
+        assert!(lease.is_active());
+        let replacement = plain::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let owner = replacement.read(cx).owner.clone();
+        lease.update(Rc::downgrade(&owner), Box::new(MoveLog::default()), window, cx).unwrap();
+        move_touch(window, cx, 14, gpui::TouchPhase::Cancelled, start);
+    }).unwrap();
+    lease.dispose();
+    assert_eq!(*log.events.borrow(), ["start", "cancel", "start", "cancel", "start", "cancel"]);
+    assert_eq!(*log.cancels.borrow(), [MoveGestureCancelReason::HostCancel, MoveGestureCancelReason::TargetDetached, MoveGestureCancelReason::TargetReplaced]);
+}
+
+#[gpui::test]
+fn move_gesture_touch_cannot_modify_a_live_mouse_session(cx: &mut TestAppContext) {
+    let log = Rc::new(MoveLog::default());
+    let (window, lease) = move_window(cx, log.clone());
+    let start = move_down(window, cx);
+    window.update(cx, |_, window, cx| {
+        move_touch(window, cx, 20, gpui::TouchPhase::Started, start);
+        move_touch(window, cx, 20, gpui::TouchPhase::Moved, gpui::point(px(500.), px(300.)));
+        move_touch(window, cx, 20, gpui::TouchPhase::Cancelled, start);
+        assert!(lease.is_active());
+        assert_eq!(*log.events.borrow(), ["start"]);
+        window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+            position: start, button: gpui::MouseButton::Left, ..Default::default()
+        }), cx);
+    }).unwrap();
+    assert!(!lease.is_active());
+    assert_eq!(*log.events.borrow(), ["start", "end"]);
+    assert!(log.samples.borrow().iter().all(|sample| sample.input == MoveGestureInput::Mouse));
+    assert!(log.cancels.borrow().is_empty());
 }
 
 #[gpui::test]
