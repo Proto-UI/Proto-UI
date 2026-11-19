@@ -16,6 +16,7 @@ jobs:
         with:
           node-version: 24
       - name: Prepare locked dependencies and browser
+        id: setup
         env:
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/overlay-entry
         run: |
@@ -29,7 +30,17 @@ jobs:
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           "$chrome" --version > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.txt"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Verify ordinary React and Vue reveal guards
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/overlay-entry
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run packages/adapters/react/test/view-reveal-style.integration.test.ts \
+            packages/adapters/vue/test/view-reveal-style.integration.test.ts \
+            --no-file-parallelism --maxWorkers=1 --reporter=default --reporter=json \
+            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/guards-vitest.json"
       - name: Observe the public Dialog and Search motion in Chrome
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         env:
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/overlay-entry
         run: |
@@ -37,6 +48,15 @@ jobs:
           corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/overlay-first-open.observation.browser.test.ts \
             --no-file-parallelism --maxWorkers=1 --reporter=default --reporter=json \
             --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
+      - name: Verify the permanent first visible frame regression
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/overlay-entry
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts \
+            -t 'starts public Dialog entry on the first visible' --no-file-parallelism --maxWorkers=1 \
+            --reporter=default --reporter=json --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/regression-vitest.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
