@@ -54,32 +54,38 @@ describe('site Shadcn control bridge', () => {
     expect(trigger.getAttribute('aria-labelledby')).toBe('runtime-label');
   });
 
-  it('registers and seeds complete public parts without overriding family placement', async () => {
-    const root = document.createElement('wc-shadcn-select-root') as SiteSelectRoot;
-    root.dataset.siteSelectRoot = '1';
-    root.dataset.siteInitialValue = 'vue';
-    root.innerHTML = `
-      <wc-shadcn-select-trigger aria-label="Runtime"><wc-shadcn-select-value></wc-shadcn-select-value></wc-shadcn-select-trigger>
-      <wc-shadcn-select-content><wc-shadcn-select-surface><wc-shadcn-select-viewport>
-        <wc-shadcn-select-item data-value="react" data-text-value="React"><wc-shadcn-select-item-text>React</wc-shadcn-select-item-text></wc-shadcn-select-item>
-        <wc-shadcn-select-item data-value="vue" data-text-value="Vue"><wc-shadcn-select-item-text>Vue</wc-shadcn-select-item-text></wc-shadcn-select-item>
-      </wc-shadcn-select-viewport></wc-shadcn-select-surface></wc-shadcn-select-content>`;
-    document.body.append(root);
-    const content = root.querySelector('wc-shadcn-select-content') as SiteSelectRoot;
-    const replay = vi.spyOn(content, 'setProps');
-    initSiteShadcnControls(document);
-    await settle();
-    for (const part of ['surface', 'viewport', 'item-text'])
-      expect(customElements.get(`wc-shadcn-select-${part}`)).toBeDefined();
-    expect(replay).toHaveBeenCalledWith({});
-    expect(selectValue(root)).toBe('vue');
-    expect(root.querySelector('wc-shadcn-select-value')?.textContent).toBe('Vue');
-    expect(root.querySelector('[data-value="vue"]')?.getAttribute('aria-selected')).toBe('true');
-    setSelectValue(root, 'react');
-    await settle();
-    expect(selectValue(root)).toBe('react');
-    expect(root.querySelector('wc-shadcn-select-value')?.textContent).toBe('React');
-  });
+  it.each(['shadcn', 'bootstrap-2-3-2'])(
+    'registers and seeds complete %s parts without overriding family placement',
+    async (family) => {
+      const root = document.createElement(`wc-${family}-select-root`) as SiteSelectRoot;
+      root.dataset.siteSelectRoot = '1';
+      root.dataset.siteInitialValue = 'vue';
+      root.innerHTML = `
+        <wc-${family}-select-trigger aria-label="Runtime"><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
+        <wc-${family}-select-content><wc-${family}-select-surface><wc-${family}-select-viewport>
+          <wc-${family}-select-item data-value="react" data-text-value="React"><wc-${family}-select-item-text>React</wc-${family}-select-item-text></wc-${family}-select-item>
+          <wc-${family}-select-item data-value="vue" data-text-value="Vue"><wc-${family}-select-item-text>Vue</wc-${family}-select-item-text></wc-${family}-select-item>
+        </wc-${family}-select-viewport></wc-${family}-select-surface></wc-${family}-select-content>`;
+      document.body.append(root);
+      const content = root.querySelector(`wc-${family}-select-content`) as SiteSelectRoot;
+      expect(typeof content.setProps).toBe('function');
+      const replay = vi.spyOn(content, 'setProps');
+      initSiteShadcnControls(document);
+      await settle();
+      for (const part of ['surface', 'viewport', 'item-text'])
+        expect(customElements.get(`wc-${family}-select-${part}`)).toBeDefined();
+      expect(root.dataset.siteControlFamily).toBe(family);
+      expect(content.dataset.siteControlFamily).toBe(family);
+      expect(replay).toHaveBeenCalledWith({});
+      expect(selectValue(root)).toBe('vue');
+      expect(root.querySelector(`wc-${family}-select-value`)?.textContent).toBe('Vue');
+      expect(root.querySelector('[data-value="vue"]')?.getAttribute('aria-selected')).toBe('true');
+      setSelectValue(root, 'react');
+      await settle();
+      expect(selectValue(root)).toBe('react');
+      expect(root.querySelector(`wc-${family}-select-value`)?.textContent).toBe('React');
+    }
+  );
 
   it('closes a portaled Select after item commit and restores trigger focus', async () => {
     const root = document.createElement('wc-shadcn-select-root') as SiteSelectRoot;
