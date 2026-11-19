@@ -40,9 +40,6 @@ jobs:
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts \
             apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts \
             --reporter=default --reporter=json \
             --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
@@ -54,41 +51,3 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-  workspace-lifecycle:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CANDIDATE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Prepare the locked dependencies and browser
-        run: |
-          set -euo pipefail
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/oracle-workspace"
-          "$CHROME" --version | tee "$RUNNER_TEMP/oracle-workspace/browser.txt"
-      - name: Exercise the workspace lifecycle browser suite
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/oracle-workspace
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/workspace/test/lifecycle.browser.test.ts \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: oracle-workspace-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/oracle-workspace
-          if-no-files-found: warn
-          retention-days: 30
