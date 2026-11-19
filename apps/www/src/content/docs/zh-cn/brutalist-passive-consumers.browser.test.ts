@@ -329,11 +329,19 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
             expect(before[3]!.transitionDuration).toBe('0.15s');
 
             const label = previewer.getByText('Outline · rest', { exact: true });
+            const outline = surfaces.nth(0);
             await label.scrollIntoViewIfNeeded();
-            const outlineBeforeHover = await paint(surfaces.nth(0));
+            await page.mouse.move(0, 0);
+            const waitForOutline = (hovered: boolean) => expect.poll(() => outline.evaluate((element, hovered) =>
+              element.matches(':hover') === hovered &&
+              element.getAnimations().every((animation) => !animation.pending && animation.playState !== 'running'), hovered
+            )).toBe(true);
+            await waitForOutline(false);
+            const outlineBeforeHover = await paint(outline);
             await label.hover();
+            await waitForOutline(true);
             const { parentHeight: _heightBefore, parentWidth: _widthBefore, ...ownBefore } = outlineBeforeHover;
-            const { parentHeight: _heightAfter, parentWidth: _widthAfter, ...ownAfter } = await paint(surfaces.nth(0));
+            const { parentHeight: _heightAfter, parentWidth: _widthAfter, ...ownAfter } = await paint(outline);
             expect(ownAfter).toEqual(ownBefore);
             const point = await label.evaluate((element) => {
               const text = Array.from(element.childNodes).find((node) => node.nodeType === Node.TEXT_NODE);
