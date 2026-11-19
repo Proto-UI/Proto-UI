@@ -1216,13 +1216,17 @@ describe('Shadow closeout native boundaries', () => {
                 name: 'closeout-owned-split-opacity-withdrawal',
                 setup(def) {
                   setups++;
-                  const concealed = def.state.bool('concealed', true);
+                  const concealed = def.state.bool('concealed', false);
                   def.feedback.style.use(p.tw('transition-opacity'));
                   def.rule({
                     when: (w) => w.state(concealed).eq(true),
                     intent: (i) => i.feedback.style.use(p.tw('opacity-0')),
                   });
-                  def.event.on('host:click', () => concealed.set(false));
+                  let nextConcealed = true;
+                  def.event.on('host:click', () => {
+                    concealed.set(nextConcealed);
+                    nextConcealed = !nextConcealed;
+                  });
                   const decoration = def.feedback.style.declareDecoration();
                   return (r) => [r.decoration(decoration), r.slot()];
                 },
@@ -1265,16 +1269,24 @@ describe('Shadow closeout native boundaries', () => {
               }
             }
             const acquired = !!controller && !!resources && !!decoration;
+            // Apply the Rule on a live surface, then settle its native entry transition.
+            const beforeRuleOpacity = getComputedStyle(surface).opacity;
+            host.click();
+            await Promise.resolve();
+            const ruleTokens = surface.getAttribute('data-pui-style');
+            const findOpacityTransition = () =>
+              surface.getAnimations().find(
+                (animation: Animation) =>
+                  animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+              );
+            findOpacityTransition()?.finish();
+            const initialOpacity = getComputedStyle(surface).opacity;
             // Native CSS delay holds the withdrawal's actual zero phase.
             surface.style.transitionDelay = '1s';
-            const initialOpacity = getComputedStyle(surface).opacity;
             host.click();
             await Promise.resolve();
             const duringOpacity = getComputedStyle(surface).opacity;
-            const transition = surface.getAnimations().find(
-              (animation: Animation) =>
-                animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
-            );
+            const transition = findOpacityTransition();
             const during = {
               opacity: duringOpacity,
               tokens: surface.getAttribute('data-pui-style'),
@@ -1314,6 +1326,8 @@ describe('Shadow closeout native boundaries', () => {
             }
             return {
               acquired,
+              beforeRuleOpacity,
+              ruleTokens,
               initialOpacity,
               during,
               settled,
@@ -1344,6 +1358,8 @@ describe('Shadow closeout native boundaries', () => {
           setups: 1,
         };
         expect(result.acquired).toBe(true);
+        expect(result.beforeRuleOpacity).toBe('1');
+        expect(result.ruleTokens?.split(/\s+/u)).toContain('opacity-0');
         expect(result.initialOpacity).toBe('0');
         expect(result.during).toEqual({
           opacity: '0',
