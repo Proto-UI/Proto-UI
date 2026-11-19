@@ -234,15 +234,18 @@ test('the actual Transition package source export stages its machine and types u
     'src/transition/transition.proto.ts',
     'src/transition/types.ts',
   ];
-  assert.deepEqual(protoSourceFiles(pkg), expected);
+  // Every Base family now declares a proto source export, so the staged
+  // closure is a superset; Transition's own files must all be in it.
+  const closure = protoSourceFiles(pkg);
+  for (const file of expected) assert.ok(closure.includes(file), file);
   const manifest = createPublishManifest(pkg, { access: 'public' });
   assert.equal(manifest.exports['./transition'].proto, './src/transition/index.ts');
   assert.deepEqual(
     manifest.files.filter((file) => file.startsWith('src/')),
-    expected
+    closure
   );
   writeSupportingFiles(pkg, root);
-  for (const file of expected)
+  for (const file of closure)
     assert.equal(
       readFileSync(path.join(root, file), 'utf8'),
       readFileSync(path.join(pkg.dir, file), 'utf8')
