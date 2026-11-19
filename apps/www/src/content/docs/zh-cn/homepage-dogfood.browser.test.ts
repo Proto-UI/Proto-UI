@@ -972,6 +972,16 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       });
       try {
         await page.goto(`${baseUrl}${familyRoutes[family]}`, { waitUntil: 'networkidle' });
+        if (family === 'bootstrap-2-3-2') {
+          // Idle pagination enhancement can shrink the short article while it
+          // is scrolled to the bottom. Finish it before measuring wheel ownership.
+          const pagination = page.locator('footer .pagination-links a');
+          expect(await pagination.count()).toBe(2);
+          await page
+            .locator('footer .pagination-links a:not([data-site-link-enhanced])')
+            .first()
+            .waitFor({ state: 'detached' });
+        }
         const root = page.locator('[data-site-contents-command]');
         const command = root.locator(
           '[data-projection-generation-state="active"] [data-site-contents-button]'
