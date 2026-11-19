@@ -646,6 +646,7 @@ pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
 pub struct NativeTranslation{x:crate::gpui_native_style::Dimension,y:crate::gpui_native_style::Dimension}
 impl NativeTranslation{const ZERO:Self=Self{x:crate::gpui_native_style::Dimension::ZERO,y:crate::gpui_native_style::Dimension::ZERO};fn is_zero(self)->bool{self.x==Self::ZERO.x&&self.y==Self::ZERO.y}}
 struct TranslatedElement{element:AnyElement,translation:NativeTranslation,owner:Option<OwnerWeak>}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl gpui::IntoElement for TranslatedElement{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for TranslatedElement{
     type RequestLayoutState=();type PrepaintState=();
@@ -884,6 +885,7 @@ pub fn restore_window_input(owner:&OwnerRef,focus:&FocusHandle,window:&mut Windo
 // A non-tab-stop dispatch carrier, not the component's authored Focus or Root.
 // Its listeners run only while no actual control owns native keyboard focus.
 struct WindowInput{element:AnyElement,focus:FocusHandle,owner:OwnerWeak}
+#[cfg(not(feature = "gpui-modern-element-api"))]
 impl IntoElement for WindowInput{type Element=Self;fn into_element(self)->Self{self}}
 impl gpui::Element for WindowInput{
     type RequestLayoutState=();type PrepaintState=();

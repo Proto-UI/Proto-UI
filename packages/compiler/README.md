@@ -85,6 +85,8 @@ Equal debug names or matching source text do not make two independently owned de
 
 The library manifest/linker currently covers the Web source artifacts. GPUI's independently generated Rust crates use ordinary Cargo linking and explicit SDK declarations. Those native consumers do not establish support for the Web artifact-library manifest on Rust targets.
 
+An embedding Rust workspace can pass `gpuiDependency: 'workspace'` to the compiler API. The generated component and bundled SDK inherit `[workspace.dependencies].gpui`, so the host and component share native types. This mode uses the GPUI element API with a blanket `IntoElement` implementation and cached path IDs, as in Zed revision `48741fd17d0dec28be6ad664b0a06dc7202086be`. The workspace selects its required GPUI features. With `nativeSdkPath`, generate the shared SDK in the same dependency mode. Standalone generation uses the profile's original pinned GPUI revision.
+
 ## Artifact and SDK compatibility
 
 Serialized IR is versioned separately from generated support ABI. Old IR is rejected with a source-recompilation diagnostic. Exact historical emitted support can be recognized by its recorded byte identity; historical provenance is retained. An old native artifact containing the retired copied Transition implementation is rejected before writes and must be recompiled from source. An unrelated authored method with the same spelling is not a migration marker.
