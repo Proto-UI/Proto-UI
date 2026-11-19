@@ -3,7 +3,10 @@ type: host-cap
 title: Host recognizes and owns bounded Move Gesture sessions
 status: draft
 since: 0.2.0-rc.7
-summary: The host resolves a move target, recognizes a primary continuous movement, owns platform capture or gesture arbitration, emits local samples, and cleans up the session.
+lifecycleRationale:
+  zh-CN: 既有 Web 证据保留；原生 claim、竞争与未 claim 输入互不干扰的证据仍需按宿主与输入路径审查。框架 dispatch fixture 不等于 OS 或真实触摸设备接受，故保持 draft，不发布 portable author API。
+  en: Existing Web evidence is retained; native claim, competition and unclaimed-input evidence still require host and input-path review. Framework dispatch fixtures do not establish OS or physical touch-device acceptance, so the capability remains draft without a portable author API.
+summary: The host resolves a move target, recognizes a primary continuous movement, owns platform capture or gesture arbitration, emits local samples, and cleans up the session; a native platform direct-touch claim is bounded to one accepted contact and terminates exactly once.
 statement:
   zh-CN: >-
     Move Gesture host capability 必须把 logical binding 翻译为当前宿主的连续移动 recognizer。Web 可以使用 Pointer Events/pointer capture，Flutter 可以使用 GestureRecognizer/Gesture Arena；宿主必须协调 direct manipulation 与 selection 等默认行为，维持单一所有权，报告本地 samples，并在 end、cancel、replacement、detach 或 dispose 时释放全部资源。
@@ -30,15 +33,65 @@ criteria:
     text:
       zh-CN: Lease update/dispose 与 target detach 必须遵守 `C-MOVE-GESTURE-0001` 的终止和资源恢复规则。
       en: Lease update and disposal plus target detachment must obey the termination and resource-restoration rules of `C-MOVE-GESTURE-0001`.
+  - id: HC-MOVE-GESTURE-0001-E
+    text:
+      zh-CN: 原生 direct-touch claim 必须通过宿主机制取得，只绑定到被接受的 contact、target 与 lease，且每个 binding 最多持有一个会话。拒绝、不可用或未命中的 target 不得 claim；并发 contact 与其他 binding 不得夺取已有所有权，旧 contact 的结束不得终止较新的会话。
+      en: A native direct-touch claim must use the host mechanism and bind only to the accepted contact, target and lease, with at most one session per binding. Refused, unavailable or missed targets must not claim; concurrent contacts and other bindings must not steal existing ownership, and an old contact's termination must not terminate a newer session.
+    references:
+      contracts:
+        - id: C-MOVE-GESTURE-0001
+          anchors: [C-MOVE-GESTURE-0001-A]
+  - id: HC-MOVE-GESTURE-0001-F
+    text:
+      zh-CN: 已 claim 的会话必须恰好终止一次：end 与 cancel 对同一会话互斥；失去平台 ownership 的 claim 必须以明确 reason 恰好 cancel 一次，已因 release、cancel、replacement、detach、ownership loss 或 dispose 终止的会话不得再发出 sample 或第二个终止结果。本条不规定 recognizer handover，也不证明一般 multi-recognizer conformance。
+      en: >-
+        A claimed session must terminate exactly once: end and cancel remain mutually exclusive for the same session; a claim that loses platform ownership must be cancelled exactly once with an explicit reason, and a session already terminated by release, cancel, replacement, detach, ownership loss, or disposal must emit no later sample and no second terminal outcome. This does not prescribe recognizer handover or establish general multi-recognizer conformance.
+    references:
+      contracts:
+        - id: C-MOVE-GESTURE-0001
+          anchors: [C-MOVE-GESTURE-0001-B, C-MOVE-GESTURE-0001-D]
+  - id: HC-MOVE-GESTURE-0001-G
+    text:
+      zh-CN: Host 不得吞掉或改写未被任何已接受 Move 会话拥有的 wheel/scroll 输入；未被 claim 的 touch 必须仍可被平台的普通滚动路径处理，一个 Move 会话也不得取消无关的 wheel 滚动。
+      en: The host must not consume or rewrite wheel or scroll input that no accepted Move session owns; an unclaimed touch must remain available to the platform's ordinary scroll path, and one Move session must not cancel an unrelated wheel scroll.
+    references:
+      contracts:
+        - id: C-MOVE-GESTURE-0001
+          anchors: [C-MOVE-GESTURE-0001-E]
+  - id: HC-MOVE-GESTURE-0001-H
+    text:
+      zh-CN: Sample 的 position、delta、totalDelta、contact identity 与坐标单位必须保持宿主所有，并按宿主自己的 target bounds 与窗口坐标计算；宿主不得要求作者提供屏幕坐标，本能力也不定义任何自动延续、重复或边界驱动的移动延续策略，这些策略仍由应用拥有。
+      en: A sample's position, delta, totalDelta, contact identity, and coordinate units must remain host-owned and computed from the host's own target bounds and window coordinates; the host must not require author-supplied screen coordinates, and this capability must define no automatic continuation, repetition, or boundary-driven movement policy — those policies remain application-owned.
+    references:
+      contracts:
+        - id: C-MOVE-GESTURE-0001
+          anchors: [C-MOVE-GESTURE-0001-C]
+      knowledge:
+        - id: K-MOVE-GESTURE-0001
+          anchors: [K-MOVE-GESTURE-0001-B]
 satisfies:
   contracts: [C-MOVE-GESTURE-0001]
+dependsOn:
+  knowledge: [K-MOVE-GESTURE-0001]
+  decisions: [D-MOVE-GESTURE-0001]
 verifies:
   tests: [T-MOVE-GESTURE-0001]
 sources:
   - path: packages/core/src/move.ts
   - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+  - path: packages/compiler/src/gpui-native-move.ts
+  - path: packages/compiler/src/gpui-native-sdk.ts
+  - path: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs
+  - path: packages/compiler/test/fixtures/gpui-ordinary-values/README.md
+  - path: https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui/src/gestures.rs
+    label: GPUI touch gesture arena at the unchanged default SDK pin
+  - path: https://github.com/zed-industries/zed/blob/48741fd17d0dec28be6ad664b0a06dc7202086be/crates/gpui/src/gestures.rs
+    label: GPUI touch gesture arena at the workspace-selected revision
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Bounded the draft native direct-touch claim, exact-once termination and competition, unclaimed wheel/scroll preservation, and host-owned coordinates to the native GPUI realization at the unchanged default SDK pin, with application-owned continuation and no portable author surface.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged cross-host Move recognition and ownership with the Web host as the first realization.
-tags: [host-capability, move, gesture, pointer-capture, gesture-arena]
+tags: [host-capability, move, gesture, pointer-capture, gesture-arena, direct-touch-claim, native-gpui]
