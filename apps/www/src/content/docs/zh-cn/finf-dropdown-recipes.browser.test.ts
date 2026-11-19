@@ -13,6 +13,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
+import type * as DropdownEvidence from './finf-dropdown-recipe-evidence';
 import {
   RUNTIMES,
   COLOR_SCHEMES,
@@ -25,6 +26,9 @@ import {
 import {
   DROPDOWN_DEMOS,
   dropdownPreviewSelector,
+  dropdownFixtureSelector,
+  dropdownEvidenceRecipes,
+  dropdownInsetRem,
   observeDropdownItem,
   observeDropdownGeometry,
   channelsClose,
@@ -45,7 +49,7 @@ const references = {
     'P-SHADCN-DROPDOWN-MENU-LABEL-INSET',
   ],
   limits:
-    'Source-derived fixed New York tint/physical-left inset oracle; pressed is the local same-palette extension. Not a same-state upstream pixel comparison or native/packed acceptance.',
+    'Fixed New York fixture tint and physical-left inset; public Rhea inset uses its authored style scope. Pressed is the local New York same-palette extension. No upstream pixel-comparison or native/packed acceptance claim.',
 };
 const writeJson = (name: string, value: unknown) =>
   writeFile(path.join(output, name), JSON.stringify(value, null, 2) + '\n');
@@ -60,7 +64,8 @@ beforeAll(async () => {
     demos: DROPDOWN_DEMOS,
     runtimes: RUNTIMES,
     schemes: COLOR_SCHEMES,
-    expectedCases: 16,
+    recipes: dropdownEvidenceRecipes,
+    expectedCases: dropdownEvidenceRecipes.length * RUNTIMES.length * COLOR_SCHEMES.length,
   });
   try {
     if (process.env.GITHUB_ACTIONS !== 'true' || !process.env.CANDIDATE_SHA)
@@ -161,11 +166,30 @@ async function icon(item: Locator, pathFragment: string) {
   return value;
 }
 
-for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
+async function mountNewYork(
+  page: Page,
+  recipe: DropdownRecipe,
+  runtime: (typeof RUNTIMES)[number]
+) {
+  return page.evaluateHandle(
+    async ({ recipe, runtime }) => {
+      const browserImport = new Function('url', 'return import(url)') as (
+        url: string
+      ) => Promise<unknown>;
+      const { mountNewYorkDropdownFixture } = (await browserImport(
+        '/src/content/docs/zh-cn/finf-dropdown-recipe-evidence.ts'
+      )) as typeof DropdownEvidence;
+      return mountNewYorkDropdownFixture(recipe, runtime);
+    },
+    { recipe, runtime }
+  );
+}
+
+for (const { recipe, profile } of dropdownEvidenceRecipes)
   for (const runtime of RUNTIMES)
     for (const scheme of COLOR_SCHEMES)
-      it(`Dropdown ${recipe} ${runtime} ${scheme} actual recipe paint and native input`, async () => {
-        const id = `dropdown-${recipe}-${runtime}-${scheme}`;
+      it(`Dropdown ${recipe} ${profile} ${runtime} ${scheme} actual recipe paint and native input`, async () => {
+        const id = `dropdown-${recipe}-${profile}-${runtime}-${scheme}`;
         const screenshots: unknown[] = [];
         const errors: unknown[] = [];
         const deniedRequests: string[] = [];
@@ -175,6 +199,7 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
         let mouseHeld = false;
         let context: BrowserContext | undefined;
         let diagnosticPage: Page | undefined;
+        let fixture: Awaited<ReturnType<typeof mountNewYork>> | undefined;
         let watchdog: ReturnType<typeof setTimeout> | undefined;
         let watchdogExpired = false;
         try {
@@ -205,13 +230,25 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
           stage = 'navigate';
           const response = await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'networkidle' });
           expect(response?.status()).toBe(200);
-          const previewer = page.locator(dropdownPreviewSelector(recipe));
-          expect(await previewer.count()).toBe(1);
-          await previewer.scrollIntoViewIfNeeded();
-          await previewer.waitFor({ state: 'visible' });
+          const publicPreviewer = page.locator(dropdownPreviewSelector(recipe));
+          expect(await publicPreviewer.count()).toBe(1);
+          await publicPreviewer.scrollIntoViewIfNeeded();
+          await publicPreviewer.waitFor({ state: 'visible' });
           stage = 'runtime-readiness';
-          await selectRuntime(page, previewer, runtime, '[data-demo-ref="trigger"]', 1);
+          await selectRuntime(page, publicPreviewer, runtime, '[data-demo-ref="trigger"]', 1);
           await applyColorScheme(page, scheme);
+          let previewer = publicPreviewer;
+          if (profile === 'new-york-v4') {
+            stage = 'new-york-fixture';
+            fixture = await mountNewYork(page, recipe, runtime);
+            expect(
+              await fixture.evaluate(({ publicProfile, fixtureProfile }) => ({
+                publicProfile,
+                fixtureProfile,
+              }))
+            ).toEqual({ publicProfile: 'rhea', fixtureProfile: 'new-york-v4' });
+            previewer = page.locator(dropdownFixtureSelector(recipe));
+          }
           const trigger = previewer.locator('[data-demo-ref="trigger"]');
           expect(await trigger.count()).toBe(1);
           const capture = async (state: string, observation: unknown, menu?: Locator) => {
@@ -223,6 +260,7 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
               revision,
               tree,
               demoId: DROPDOWN_DEMOS[recipe],
+              profile,
               state,
               file,
               sha256: createHash('sha256').update(bytes).digest('hex'),
@@ -305,14 +343,24 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
             const inset = await observeDropdownGeometry(ref('more-label'));
             const paste = await observeDropdownGeometry(ref('paste'));
             const rename = await observeDropdownGeometry(ref('rename'));
+            const insetRem = dropdownInsetRem[profile];
             expect(label.paddingLeft).toBeCloseTo(label.rem * 0.5, 3);
             for (const measured of [inset, paste, rename]) {
-              expect(measured.paddingLeft).toBeCloseTo(measured.rem * 2, 3);
+              expect(measured.paddingLeft).toBeCloseTo(measured.rem * insetRem, 3);
               expect(measured.textX).not.toBeNull();
-              expect(measured.textX! - measured.x).toBeCloseTo(measured.rem * 2, 3);
+              expect(measured.textX! - measured.x).toBeCloseTo(measured.rem * insetRem, 3);
               expect(measured.icon).toBeNull();
             }
-            expect(Math.abs(paste.textX! - copy.textX!)).toBeLessThan(0.5);
+            if (profile === 'new-york-v4') {
+              expect(Math.abs(paste.textX! - copy.textX!)).toBeLessThan(0.5);
+            } else {
+              // Rhea retains the same icon and gap with a shorter inset.
+              expect(copy.x).toBeCloseTo(paste.x, 3);
+              expect(copy.textX! - paste.textX!).toBeCloseTo(
+                copy.paddingLeft + copy.icon!.width + copy.rem * 0.5 - paste.paddingLeft,
+                3
+              );
+            }
             expect(Math.abs(inset.textX! - rename.textX!)).toBeLessThan(0.5);
             for (const [group, labelName] of [
               ['actions-group', 'actions-label'],
@@ -359,7 +407,7 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
                       const geometry = await observeDropdownGeometry(ref(name));
                       return geometry.paddingLeft / geometry.rem;
                     })
-                    .toBe(enabled ? 2 : 0.5);
+                    .toBe(enabled ? insetRem : 0.5);
                   const geometry = await observeDropdownGeometry(ref(name));
                   expect(geometry.paddingRight).toBeCloseTo(geometry.rem * 0.5, 3);
                   expect(geometry.direction).toBe(direction);
@@ -396,6 +444,11 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
           await expect.poll(() => hasFocus(trigger)).toBe(true);
           await menu.waitFor({ state: 'hidden' });
           await capture('closed', { focused: await hasFocus(trigger) });
+          if (fixture) {
+            await fixture.evaluate((view) => view.destroy());
+            await fixture.dispose();
+            fixture = undefined;
+          }
           expect(watchdogExpired).toBe(false);
           expect(errors).toEqual([]);
           expect(deniedRequests).toEqual([]);
@@ -424,12 +477,18 @@ for (const recipe of Object.keys(DROPDOWN_DEMOS) as DropdownRecipe[])
         } finally {
           if (watchdog) clearTimeout(watchdog);
           if (mouseHeld) await diagnosticPage?.mouse.up().catch(() => {});
+          await fixture
+            ?.evaluate((view) => view.destroy())
+            .catch((error) => {
+              errors.push({ stage: 'new-york-fixture-cleanup', message: String(error) });
+            });
           try {
             await writeJson(`${id}.json`, {
               revision,
               tree,
               references,
               demoId: DROPDOWN_DEMOS[recipe],
+              profile,
               runtime,
               scheme,
               result,

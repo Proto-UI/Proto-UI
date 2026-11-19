@@ -1,4 +1,6 @@
 import type { Locator } from 'playwright-core';
+import type { DemoRenderResult, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
+import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
 
 export const DROPDOWN_DEMOS = {
   destructive: 'demo-shadcn-dropdown-destructive',
@@ -7,6 +9,82 @@ export const DROPDOWN_DEMOS = {
 export type DropdownRecipe = keyof typeof DROPDOWN_DEMOS;
 export const dropdownPreviewSelector = (recipe: DropdownRecipe) =>
   `[data-previewer-id][data-demo-id="${DROPDOWN_DEMOS[recipe]}"]`;
+
+export const dropdownEvidenceRecipes = [
+  { recipe: 'destructive', profile: 'new-york-v4' },
+  { recipe: 'inset', profile: 'new-york-v4' },
+  { recipe: 'inset', profile: 'rhea' },
+] as const;
+
+export const dropdownInsetRem = { 'new-york-v4': 2, rhea: 1.75 } as const;
+export const dropdownFixtureSelector = (recipe: DropdownRecipe) =>
+  `[data-dropdown-evidence-fixture="${recipe}"]`;
+
+export function newYorkDropdownDemo(original: DemoSpec): DemoSpec {
+  if (
+    original.root.kind !== 'proto' ||
+    original.root.prototypeId !== 'shadcn-style-scope' ||
+    original.root.props?.styleProfile !== 'rhea'
+  )
+    throw new Error('Public Shadcn Dropdown recipe must retain its declared Rhea scope.');
+  const root = structuredClone(original.root);
+  root.props = { ...root.props, styleProfile: 'new-york-v4' };
+  return { ...original, root };
+}
+
+/** Render a separate consumer of the authored recipe under the fixed New York scope. */
+export async function mountNewYorkDropdownFixture(recipe: DropdownRecipe, runtime: RuntimeId) {
+  const { loadDemo } = await import('../../../components/PrototypePreviewer/demo-modules');
+  const { renderDemo } = await import('../../../components/PrototypePreviewer/demo-renderer');
+  const { collectPrototypeIds } = await import('../../../components/PrototypePreviewer/demo-types');
+  const { loadPrototypes } =
+    await import('../../../components/PrototypePreviewer/prototype-modules');
+  const { resolveProjectionThemeSurfaceStyle } =
+    await import('../../../components/PrototypePreviewer/projection-theme');
+  const { createRuntimePreviewSurface, runtimePreviewFamily } =
+    await import('../../../components/PrototypePreviewer/runtime-preview-surface');
+  const previewer = document.querySelector<HTMLElement>(dropdownPreviewSelector(recipe));
+  if (!previewer || runtimePreviewFamily(previewer) !== 'shadcn')
+    throw new Error('Public Shadcn Dropdown preview missing.');
+  const original = await loadDemo(DROPDOWN_DEMOS[recipe]);
+  const surface = createRuntimePreviewSurface(
+    newYorkDropdownDemo(original),
+    'shadcn',
+    resolveProjectionThemeSurfaceStyle('shadcn', previewer),
+    runtime
+  );
+  const ids = new Set<string>();
+  collectPrototypeIds(surface.demo.root, ids);
+  const host = document.createElement('div');
+  host.dataset.dropdownEvidenceFixture = recipe;
+  document.body.append(host);
+  let view: DemoRenderResult | undefined;
+  try {
+    await loadPrototypes([...ids]);
+    view = await renderDemo({ host, demo: surface.demo, runtime });
+    await surface.ready;
+  } catch (error) {
+    try {
+      await view?.destroy();
+    } finally {
+      host.remove();
+    }
+    throw error;
+  }
+
+  const mountedView = view;
+  return {
+    publicProfile: 'rhea',
+    fixtureProfile: 'new-york-v4',
+    async destroy() {
+      try {
+        await mountedView.destroy();
+      } finally {
+        host.remove();
+      }
+    },
+  } as const;
+}
 
 /** Canvas resolves the browser's real computed paint without adding DOM/CSS. */
 export async function observeDropdownItem(item: Locator, tintPercent: number) {
