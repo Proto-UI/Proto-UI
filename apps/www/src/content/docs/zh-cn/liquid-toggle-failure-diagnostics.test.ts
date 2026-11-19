@@ -7,7 +7,7 @@ import { INPUT_PREFIX } from '../../../../scripts/diagnose-select-click';
 import {
   attachLiquidToggleFailureDiagnostics,
   readLiquidToggleTriggerFacts,
-} from './liquid-toggle-failure-diagnostics';
+} from '../../../../test/helpers/liquid-toggle-failure-diagnostics';
 
 afterEach(() => vi.useRealTimers());
 const never = () => new Promise<never>(() => {});

@@ -268,7 +268,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
-  // and they do not certify the admitted source body (see the note above).
+  // and unpinned entries do not certify the source body (see the note above).
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
@@ -291,11 +291,18 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/module-expose-state']),
-    resolvedPaths: Object.freeze([
-      'packages/prototypes/lucide/src/icons/search',
-      'packages/prototypes/lucide/src/icons/x',
+    sourceSha256: '7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3',
+    specifiers: Object.freeze([
+      '@proto.ui/module-expose-state',
+      '../../../../packages/prototypes/lucide/src/icons/search',
+      '../../../../packages/prototypes/lucide/src/icons/arrow-right',
+      '../../../../packages/prototypes/lucide/src/icons/x',
     ]),
+  }),
+  // Public InputShell binding only; neither Search source gains UI acceptance.
+  'apps/www/src/components/site-search-composition.ts': Object.freeze({
+    sourceSha256: '2ae76ee72be64dcec48ae013d16d880a8e8b8f92fc4dbb315e550b00315c801e',
+    specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),

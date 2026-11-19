@@ -13,7 +13,7 @@ import { deadline } from '../../../../scripts/diagnose-select-click';
 import {
   attachLiquidToggleFailureDiagnostics,
   readLiquidToggleTriggerFacts,
-} from './liquid-toggle-failure-diagnostics';
+} from '../../../../test/helpers/liquid-toggle-failure-diagnostics';
 import {
   RUNTIMES,
   choosePreviewRuntime,

@@ -1,7 +1,7 @@
 import type { CDPSession, ConsoleMessage, Locator, Page } from 'playwright-core';
 // The script's main() is guarded by its exact entry path; importing these
 // helpers launches neither a browser nor a server.
-import { deadline, inputProbe, INPUT_PREFIX } from '../../../../scripts/diagnose-select-click';
+import { deadline, inputProbe, INPUT_PREFIX } from '../../scripts/diagnose-select-click';
 
 /** Locator timeout covers resolution, not a stalled renderer-side evaluate.
  * Keep a Node-side bound around the complete optional diagnostic read. */
