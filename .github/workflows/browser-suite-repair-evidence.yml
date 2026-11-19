@@ -29,13 +29,21 @@ jobs:
           git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           "$chrome" --version > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/browser.txt"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Observe WC failure and Vue 2 control
+      - name: Verify Focus Center lifecycle and order
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/menubar-roving
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run packages/modules/focus/test/center.test.ts \
+            packages/modules/focus/test/center-order.test.ts --no-file-parallelism --maxWorkers=1 \
+            --reporter=default --reporter=json --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/focus-vitest.json"
+      - name: Verify two native Menubar journeys on each host
         env:
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/menubar-roving
         run: |
           set -euo pipefail
           corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts \
-            -t '(wc (light|dark)|vue2 light) preserves closed focus' --no-file-parallelism --maxWorkers=1 \
+            --no-file-parallelism --maxWorkers=1 \
             --reporter=default --reporter=json --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
       - uses: actions/upload-artifact@v4
         if: always()
