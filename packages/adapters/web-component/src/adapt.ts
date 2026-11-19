@@ -106,7 +106,11 @@ import {
   createWebComponentOwnerModules,
   type FocusIntentState,
 } from './runtime/modules';
-import { completeCleanup, createWebComponentHostSession } from './runtime/session';
+import {
+  completeCleanup,
+  createWebComponentHostSession,
+  RestoredSplitCallerProjectionError,
+} from './runtime/session';
 import { createShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
@@ -263,6 +267,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     private _root: Element | ShadowRoot;
     private _splitResources: ShadowSplitResources | null = null;
+    private _lateSplitUpgrade = false;
+    private _rollbackCallerSlot: HTMLSlotElement | null = null;
     private _portalConceal = createPortalConcealBarrier(this);
     private _slotProjector: SlotProjector | null = null;
     private _hostDisplay: HostDisplayController | null = null;
@@ -279,6 +285,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       super();
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
+      this._lateSplitUpgrade = !!split && this.isConnected && this.hasChildNodes();
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
       if ([textControl, imageView, nativeLink].filter(Boolean).length > 1) {
         throw new Error('WC:text/image/native-link conflict');
@@ -415,12 +422,37 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         );
       }
       const initializing = !this._mountedOnce;
+      const document = this.ownerDocument;
+      const callerSlot =
+        initializing && this._rollbackCallerSlot?.parentNode === this._root
+          ? this._rollbackCallerSlot
+          : null;
+      if (initializing) {
+        callerSlot?.remove();
+        this._rollbackCallerSlot = null;
+      }
       try {
         this._connectOwner(() => this._instanceToken === owner && !!relocation?.());
+        this._lateSplitUpgrade = false;
       } catch (error) {
         // Preserve the synchronous failure; the guarded terminal transaction
         // also owns partial activation and callback reentry for every profile.
-        if (initializing) void this.retireOwner().catch(() => {});
+        if (initializing) {
+          void this.retireOwner().catch(() => {});
+          if (
+            this.isConnected &&
+            this.ownerDocument === document &&
+            !this._root.hasChildNodes() &&
+            (callerSlot ||
+              (this._lateSplitUpgrade && error instanceof RestoredSplitCallerProjectionError))
+          ) {
+            // A connected upgrade cannot detach its new ShadowRoot. Keep the
+            // restored caller visible without keeping a rejected view alive.
+            const slot = callerSlot ?? document.createElement('slot');
+            this._root.appendChild(slot);
+            this._rollbackCallerSlot = slot;
+          }
+        }
         throw error;
       }
     }

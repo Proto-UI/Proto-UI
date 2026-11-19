@@ -733,6 +733,89 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
+  it('keeps restored caller projection until a successful late split retry', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.addScriptTag({ content: script });
+      const result = await page.evaluate(async (artifact) => {
+        const { adapt, define } = (
+          window as unknown as {
+            Closeout: { adapt: typeof AdaptToWebComponent; define: typeof definePrototype };
+          }
+        ).Closeout;
+        const host = document.createElement('closeout-split-caller-retry');
+        const caller = document.createTextNode('Caller text');
+        host.append(caller);
+        document.body.append(host);
+        const errors: string[] = [];
+        window.addEventListener('error', (event) => {
+          errors.push(event.message);
+          event.preventDefault();
+        });
+        let reactions = 0;
+        customElements.define(
+          'closeout-split-caller-retry-reaction',
+          class extends HTMLElement {
+            connectedCallback() {
+              if (++reactions === 1) caller.data = 'Rejected text';
+            }
+          }
+        );
+        adapt(
+          define({
+            name: 'closeout-split-caller-retry',
+            setup(def) {
+              const target = def.feedback.style.declareDecoration();
+              return (r) => [
+                r.decoration(target),
+                r.slot(),
+                r.el('closeout-split-caller-retry-reaction', {}),
+              ];
+            },
+          }),
+          { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+        );
+        const rejectedSlot = host.shadowRoot?.querySelector('slot');
+        const rejected = {
+          text: caller.data,
+          projectsCaller: rejectedSlot?.assignedNodes()[0] === caller,
+          hasDecoration: !!host.shadowRoot?.querySelector('[data-pui-owned-decoration]'),
+        };
+        host.remove();
+        await Promise.resolve();
+        document.body.append(host);
+        await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+        const published = host.shadowRoot?.querySelector(
+          '[part="surface"] slot'
+        ) as HTMLSlotElement | null;
+        return {
+          rejected,
+          errors,
+          reactions,
+          retiredSlot: rejectedSlot?.parentNode === null,
+          slots: host.shadowRoot?.querySelectorAll('slot').length,
+          publishedCaller: published?.assignedNodes()[0] === caller,
+          publishedDecoration: !!host.shadowRoot?.querySelector('[data-pui-owned-decoration]'),
+        };
+      }, renderProtoShadowSplitStyleArtifact([]));
+      expect(result.rejected).toEqual({
+        text: 'Caller text',
+        projectsCaller: true,
+        hasDecoration: false,
+      });
+      expect(result.errors).toEqual([
+        expect.stringContaining('decoration caller projection changed'),
+      ]);
+      expect(result.reactions).toBe(2);
+      expect(result.retiredSlot).toBe(true);
+      expect(result.slots).toBe(1);
+      expect(result.publishedCaller).toBe(true);
+      expect(result.publishedDecoration).toBe(true);
+    } finally {
+      await page.close();
+    }
+  });
+
   it.each(['unchanged', 'replace selection', 'mutate the assigned list'] as const)(
     'preserves caller file membership through split publication (%s)',
     async (mutation) => {

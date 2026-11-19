@@ -133,6 +133,8 @@ function hasSameChildren(parent: Node, expected: readonly ChildNode[]): boolean 
 
 type CallerSnapshot = { isCurrent(): boolean; restore(): void };
 
+export class RestoredSplitCallerProjectionError extends Error {}
+
 function captureCallerControlState(node: Element): CallerSnapshot {
   const document = node.ownerDocument;
   if (node.localName === 'select') {
@@ -325,8 +327,9 @@ function captureSplitCallerProjection(
     parents.set(parent, Array.from(parent.childNodes));
   };
   const textNodes: { node: Text; data: string }[] = [];
-  const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+  const walker = document.createTreeWalker(host);
   while (walker.nextNode()) {
+    if (walker.currentNode.nodeType !== 3) continue;
     const node = walker.currentNode as Text;
     captureParents(node);
     textNodes.push({ node, data: node.data });
@@ -642,6 +645,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         } catch (rollbackError) {
           throw new AggregateError([error, rollbackError], error.message);
         }
+        if (turn === commitTurn && ownsDecorationRoot() && callerProjection.isCurrent())
+          throw new RestoredSplitCallerProjectionError(error.message);
       }
       throw error;
     };
