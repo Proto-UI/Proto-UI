@@ -406,6 +406,7 @@ export function createShadowSplitEffectsPort({
   let flushing = false;
   let flushRequested = false;
   let zeroOpacityTransition: { animation: CSSTransition; target: string | null } | null = null;
+  let hoveredZero: { projection: Projection; tokens: string[] } | null = null;
   const isLiveSurfaceToken = (token: string) => {
     const selector = compiledReceiptSelector(token, 'element');
     return (
@@ -423,7 +424,9 @@ export function createShadowSplitEffectsPort({
     target !== null
       ? isLiveSurfaceToken(target) === true
       : !!applied &&
-        !applied.surface.some((token) => /(?:^|:)opacity-/.test(token)) &&
+        !applied.surface.some(
+          (token) => /(?:^|:)opacity-/.test(token) && isLiveSurfaceToken(token)
+        ) &&
         applied.surface.some(
           (token) =>
             /(?:^|:)transition-(?:opacity|all)$/.test(token) && isLiveSurfaceToken(token)
@@ -463,12 +466,27 @@ export function createShadowSplitEffectsPort({
       if (surface.parentNode !== host.shadowRoot) return false;
       if (ownsZeroOpacity() || ownsZeroOpacityAnimation('in') || ownsZeroOpacityAnimation('out'))
         return true;
+      if (zeroOpacityTransition && !surface.getAnimations().includes(zeroOpacityTransition.animation))
+        zeroOpacityTransition = null;
       const transition = zeroOpacityTransition;
       return (
         !!transition &&
         isCurrentOpacityTarget(transition.target) &&
         (transition.animation.pending || transition.animation.playState === 'running') &&
-        surface.getAnimations().includes(transition.animation)
+        captureZeroOpacityTransition([transition.target], [])?.animation === transition.animation &&
+        !surface.getAnimations().some((animation) => {
+          if (animation === transition.animation) return false;
+          const effect = animation.effect;
+          const view = surface.ownerDocument.defaultView;
+          return (
+            !!view?.KeyframeEffect &&
+            effect instanceof view.KeyframeEffect &&
+            effect.target === surface &&
+            !effect.pseudoElement &&
+            effect.getComputedTiming().progress !== null &&
+            effect.getKeyframes().some((frame) => frame.opacity !== undefined)
+          );
+        })
       );
     },
   });
@@ -507,6 +525,41 @@ export function createShadowSplitEffectsPort({
     }
     return null;
   };
+
+  const observeHoveredZero = (event: PointerEvent) => {
+    if (!event.isTrusted || event.target !== host) return;
+    const tokens = applied?.surface.filter(
+      (token) =>
+        token.endsWith(':opacity-0') &&
+        splitReceiptVariants(token).includes('hover') &&
+        isLiveSurfaceToken(token)
+    );
+    hoveredZero = applied && tokens?.length ? { projection: applied, tokens } : null;
+  };
+  const observeHoverExit = (event: PointerEvent) => {
+    const witness = hoveredZero;
+    // Consume this input edge even when it produces no eligible transition.
+    // A later foreign stylesheet withdrawal cannot reuse old hover history.
+    hoveredZero = null;
+    if (
+      !event.isTrusted ||
+      event.target !== host ||
+      !witness ||
+      witness.projection !== applied ||
+      disposed ||
+      surface.parentNode !== host.shadowRoot ||
+      host.matches(':hover') ||
+      !witness.tokens.some((token) => !isLiveSurfaceToken(token)) ||
+      !isCurrentOpacityTarget(null)
+    )
+      return;
+    const candidate = captureZeroOpacityTransition([null], []);
+    zeroOpacityTransition =
+      candidate?.animation.effect?.getComputedTiming().progress === 0 ? candidate : null;
+  };
+  host.addEventListener('pointerenter', observeHoveredZero);
+  host.addEventListener('pointermove', observeHoveredZero);
+  host.addEventListener('pointerleave', observeHoverExit);
 
   const fail = (entry: RootStyleEntry, reason: string): never => {
     throw invalid(
@@ -648,6 +701,7 @@ export function createShadowSplitEffectsPort({
             : [null]
           : [];
       const before = eligible.length && surface.getAnimations ? surface.getAnimations() : null;
+      hoveredZero = null;
       host.setAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR, next.root);
       if (nativeText) host.setAttribute(NATIVE_TEXT_ATTR, '');
       surface.setAttribute(SHADOW_SPLIT_SURFACE_ATTR, '');
@@ -693,6 +747,10 @@ export function createShadowSplitEffectsPort({
     dispose() {
       if (disposed) return;
       disposed = true;
+      hoveredZero = null;
+      host.removeEventListener('pointerenter', observeHoveredZero);
+      host.removeEventListener('pointermove', observeHoveredZero);
+      host.removeEventListener('pointerleave', observeHoverExit);
       activeBindings.delete(host);
       splitPaintOwners.delete(surface);
       const errors: unknown[] = [];
@@ -716,6 +774,7 @@ export function createShadowSplitEffectsPort({
         if (nativeText && applied && host.getAttribute(NATIVE_TEXT_ATTR) === '')
           host.removeAttribute(NATIVE_TEXT_ATTR);
       });
+      zeroOpacityTransition = null;
       applied = latest = null;
       if (errors.length) throw errors[0];
     },
