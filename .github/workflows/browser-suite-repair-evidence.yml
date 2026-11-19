@@ -2,54 +2,58 @@ name: Browser suite repair evidence
 
 on:
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   contents: read
 
-concurrency:
-  group: browser-suite-repair-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  focused-browser:
+  switch-motion-restoration:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 3
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install locked dependencies
+      - name: Bind the source and test delta
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/switch-motion-restoration
         run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          echo "EVIDENCE_DIR=$EVIDENCE_DIR" >> "$GITHUB_ENV"
+          source=$(git rev-parse HEAD^)
+          test "$(git diff --name-only "$source" HEAD)" = '.github/workflows/browser-suite-repair-evidence.yml'
+          test "$(git rev-parse "$source^" )" = '37a4999352892c6ba2721ce4caed0dcf630976d0'
+          test "$(git diff --name-only "$source^" "$source")" = 'packages/prototypes/shadcn/test/switch-motion.browser.test.ts'
+          git checkout --detach "$source"
+          git rev-parse HEAD > "$EVIDENCE_DIR/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE_DIR/source-tree.txt"
+          sha256sum packages/prototypes/shadcn/test/switch-motion.browser.test.ts > "$EVIDENCE_DIR/fixture-sha256.txt"
+      - name: Install locked workspace dependencies
+        run: |
+          set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-      - name: Disable only the supported Astro development toolbar
+          chrome=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$chrome" --version > "$EVIDENCE_DIR/browser.txt"
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+      - name: Exercise live preference changes on the mounted control
         run: |
           set -euo pipefail
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
-      - name: Exercise unchanged controls with failure diagnostics
-        env:
-          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
-        run: |
-          set -euo pipefail
-          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
-          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
-            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
-            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
-      - name: Retain source-bound public Base Image captures
+          export PUI_FINF_FEATURE_EVIDENCE_DIR="$EVIDENCE_DIR/samples"
+          corepack pnpm@10.32.1 exec vitest run packages/prototypes/shadcn/test/switch-motion.browser.test.ts \
+            --no-file-parallelism --maxWorkers=1 -t 'New York .* Switch' \
+            --reporter=default --reporter=json --outputFile="$EVIDENCE_DIR/vitest.json" \
+            2>&1 | tee "$EVIDENCE_DIR/browser.log"
+      - name: Retain successful and failed observations
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
-          path: ${{ runner.temp }}/browser-suite-repair
-          if-no-files-found: warn
+          name: switch-motion-restoration-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/switch-motion-restoration/
+          if-no-files-found: error
           retention-days: 30
