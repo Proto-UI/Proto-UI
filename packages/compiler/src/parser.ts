@@ -950,6 +950,7 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
+    nodes = lowerObjectPatterns(nodes);
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
       const span = sourceSpan(node);
@@ -3280,4 +3281,108 @@ function deepReadonly(type: ValueType): ValueType | undefined {
       : undefined;
   }
   return undefined;
+}
+
+const loweredPatterns = new WeakMap<ts.Statement, ts.Statement>();
+
+/**
+ * `const { a, b: c } = source` declares `a` and `c` as reads of `source.a` and
+ * `source.b`. A source that is not a plain identifier is evaluated once into a
+ * compiler-named binding first, so its effects and its value are not repeated.
+ * Each synthesized node keeps the source range it came from, so diagnostics,
+ * binding identities and provenance still point at the authored pattern.
+ * Defaults, rest elements, nested and computed patterns keep an explicit
+ * diagnostic until they have their own definition.
+ */
+function lowerObjectPatterns(nodes: readonly ts.Statement[]): readonly ts.Statement[] {
+  if (!nodes.some(hasObjectPattern)) return nodes;
+  return nodes.map((node) => {
+    if (!hasObjectPattern(node)) return node;
+    const cached = loweredPatterns.get(node);
+    if (cached) return cached;
+    const statement = node as ts.VariableStatement;
+    const factory = ts.factory;
+    const ranged = <T extends ts.Node>(created: T, from: ts.TextRange): T =>
+      ts.setTextRange(created, from);
+    const declarations: ts.VariableDeclaration[] = [];
+    for (const declaration of statement.declarationList.declarations) {
+      const pattern = declaration.name;
+      if (!ts.isObjectBindingPattern(pattern)) {
+        declarations.push(declaration);
+        continue;
+      }
+      if (!declaration.initializer)
+        rejectNode(declaration, 'PUI1004', 'A destructuring declaration requires an initializer.');
+      const init = declaration.initializer;
+      let source: () => ts.Expression;
+      if (ts.isIdentifier(init) && !declaration.type) {
+        source = () => ranged(factory.createIdentifier(init.text), init);
+      } else {
+        const name = `__puiPattern${declaration.pos}`;
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(name), pattern),
+              undefined,
+              declaration.type,
+              init
+            ),
+            declaration
+          )
+        );
+        source = () => ranged(factory.createIdentifier(name), init);
+      }
+      for (const element of pattern.elements) {
+        if (element.dotDotDotToken)
+          rejectNode(
+            element,
+            'PUI1004',
+            'Rest elements in a destructuring pattern are not admitted.'
+          );
+        if (element.initializer)
+          rejectNode(element, 'PUI1004', 'Defaults in a destructuring pattern are not admitted.');
+        if (!ts.isIdentifier(element.name))
+          rejectNode(element, 'PUI1004', 'Nested destructuring patterns are not admitted.');
+        const key = element.propertyName;
+        if (key && !ts.isIdentifier(key) && !ts.isStringLiteral(key))
+          rejectNode(key, 'PUI1004', 'A destructured key must be a static name.');
+        const field = key ? key.text : element.name.text;
+        const read = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(field)
+          ? factory.createPropertyAccessExpression(source(), field)
+          : factory.createElementAccessExpression(source(), factory.createStringLiteral(field));
+        declarations.push(
+          ranged(
+            factory.createVariableDeclaration(
+              ranged(factory.createIdentifier(element.name.text), element.name),
+              undefined,
+              undefined,
+              ranged(read, element)
+            ),
+            element
+          )
+        );
+      }
+    }
+    const list = ranged(
+      factory.createVariableDeclarationList(
+        declarations,
+        statement.declarationList.flags & (ts.NodeFlags.Const | ts.NodeFlags.Let)
+      ),
+      statement.declarationList
+    );
+    const lowered = ranged(factory.createVariableStatement(statement.modifiers, list), statement);
+    (lowered as { parent: ts.Node }).parent = statement.parent;
+    ts.setParentRecursive(lowered, true);
+    loweredPatterns.set(node, lowered);
+    return lowered;
+  });
+}
+
+function hasObjectPattern(node: ts.Statement): boolean {
+  return (
+    ts.isVariableStatement(node) &&
+    node.declarationList.declarations.some((declaration) =>
+      ts.isObjectBindingPattern(declaration.name)
+    )
+  );
 }

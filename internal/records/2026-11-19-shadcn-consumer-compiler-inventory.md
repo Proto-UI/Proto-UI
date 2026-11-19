@@ -37,3 +37,16 @@ These are the first remaining diagnostic for each family, found by compiling the
 | drawer | PUI1003: Axis Input lowering is not implemented (`base/src/drawer/handle.proto.ts:2`) |
 
 Object destructuring blocks the most families. It needs its own definition: a binding pattern with static keys, lowered to member reads of one evaluated value. It is the next delivery unit.
+
+## Update: object destructuring
+
+Object destructuring in declarations is now admitted (see `source-language.md`). With it, button, toggle and separator stop one step later, at `asX().stateHandles`, and report `Undeclared object member stateHandles`.
+
+Core types an as-hook result's `stateHandles` as the borrowed handles of its named states, and the runtime collects them after setup. The compiler instead models an as-hook result as an opaque capture that is read through `getState(name)`, and its capture schema is an upper bound in which every state may be absent. To lower `stateHandles`, two things need a definition first:
+
+- which states an installation definitely declares;
+- whether `stateHandles` is present whenever an as-hook has no `projectHandle`.
+
+Writing the definition is the next delivery unit.
+
+The `scroll-reveal-consumers` React case failed intermittently in full-suite runs. It fails in about half of the runs on this branch, and passes when run alone and when run on `origin/main`. The family's generated output (`compilation.json`, `writer.json` and `output/`) is byte-identical between `origin/main` and this branch, so the failure is timing in the test harness, not a change in lowering.
