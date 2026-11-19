@@ -2,6 +2,7 @@ import { gpuiNativeOwnerSource } from './gpui-native-owner';
 import { gpuiNativeA11ySource } from './gpui-native-a11y';
 import { gpuiNativeHostSource } from './gpui-native-host';
 import { gpuiNativeKeySource } from './gpui-native-key';
+import { gpuiNativeMoveSource } from './gpui-native-move';
 import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import type { GeneratedModule } from './ir';
 
@@ -50,12 +51,13 @@ export function gpuiNativeSdkFiles(useWorkspace = false): NonNullable<GeneratedM
     ),
     source(
       'src/lib.rs',
-      `#[path = "gpui-native-owner.rs"] pub mod gpui_native_owner;\n#[path = "gpui-native-a11y.rs"] pub mod gpui_native_a11y;\n#[path = "gpui-native-host.rs"] pub mod gpui_native_host;\n#[path = "gpui-native-key.rs"] pub mod gpui_native_key;\n#[path = "style/mod.rs"] pub mod gpui_native_style;\n#[path = "style/mapping.rs"] pub mod gpui_native_style_mapping;\n`
+      `#[path = "gpui-native-owner.rs"] pub mod gpui_native_owner;\n#[path = "gpui-native-a11y.rs"] pub mod gpui_native_a11y;\n#[path = "gpui-native-host.rs"] pub mod gpui_native_host;\n#[path = "gpui-native-key.rs"] pub mod gpui_native_key;\n#[path = "gpui-native-move.rs"] pub mod gpui_native_move;\n#[path = "style/mod.rs"] pub mod gpui_native_style;\n#[path = "style/mapping.rs"] pub mod gpui_native_style_mapping;\n`
     ),
     source('src/gpui-native-owner.rs', gpuiNativeOwnerSource),
     source('src/gpui-native-a11y.rs', gpuiNativeA11ySource),
     source('src/gpui-native-host.rs', gpuiNativeHostSource),
     source('src/gpui-native-key.rs', gpuiNativeKeySource),
+    source('src/gpui-native-move.rs', gpuiNativeMoveSource),
     ...style.files.map((file) =>
       source(
         `src/${file.path.slice('.proto-ui/'.length)}`,
