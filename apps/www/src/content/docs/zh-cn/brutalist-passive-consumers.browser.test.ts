@@ -301,6 +301,15 @@ describe.sequential('Brutalist passive public consumer evidence', () => {
             await profile(page, value);
             await page.emulateMedia({ reducedMotion: 'no-preference' });
             await expect.poll(async () => (await paint(surfaces.nth(3))).transitionProperty).toBe('all');
+            // Root font changes can start a transition on the raised offset.
+            // Compare the motion policies at the same authored endpoint.
+            await expect
+              .poll(() => surfaces.nth(3).evaluate((element) =>
+                element.getAnimations().some((animation) =>
+                  animation.pending || animation.playState === 'running'
+                )
+              ))
+              .toBe(false);
             const before = await Promise.all(Array.from({ length: 4 }, (_, index) => paint(surfaces.nth(index))));
             await capture(previewer, 'surface', runtime, scheme, value, 'supplied-states', before);
             for (const item of before) {
