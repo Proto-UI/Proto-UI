@@ -733,6 +733,144 @@ describe('Shadow closeout native boundaries', () => {
     }
   );
 
+  it.each(['unchanged', 'remove second', 'replace second', 'reverse', 'clear'] as const)(
+    'validates caller file membership through late split publication (%s)',
+    async (mutation) => {
+      const page = await browser.newPage();
+      try {
+        await page.addScriptTag({ content: script });
+        const result = await page.evaluate(
+          ({ artifact, mutation }) => {
+            const fixture = window as unknown as {
+              Closeout: {
+                adapt: typeof AdaptToWebComponent;
+                define: typeof definePrototype;
+              };
+            };
+            const p = fixture.Closeout;
+            const host = document.createElement('closeout-split-files-upgrade');
+            const wrapper = document.createElement('div');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            const initial = new DataTransfer();
+            initial.items.add(new File(['first'], 'first.txt', { type: 'text/plain' }));
+            initial.items.add(new File(['second'], 'second.txt', { type: 'text/plain' }));
+            input.files = initial.files;
+            const original = Array.from(input.files);
+            const beforeValue = input.value;
+            wrapper.append(input);
+            host.append(wrapper);
+            document.body.append(host);
+            let reaction = false;
+            let reactionValue = '';
+            let reactionFiles: number[] = [];
+            customElements.define(
+              'closeout-split-files-reaction',
+              class extends HTMLElement {
+                connectedCallback() {
+                  reaction = true;
+                  if (mutation === 'clear') input.value = '';
+                  else {
+                    const changed = new DataTransfer();
+                    changed.items.add(original[mutation === 'reverse' ? 1 : 0]);
+                    if (mutation === 'unchanged') changed.items.add(original[1]);
+                    else if (mutation === 'reverse') changed.items.add(original[0]);
+                    else if (mutation === 'replace second') {
+                      const second = original[1];
+                      // Matching name and metadata must not substitute for File identity.
+                      changed.items.add(
+                        new File(['second'], second.name, {
+                          type: second.type,
+                          lastModified: second.lastModified,
+                        })
+                      );
+                    }
+                    input.files = changed.files;
+                  }
+                  reactionValue = input.value;
+                  reactionFiles = Array.from(input.files!, (file) => original.indexOf(file));
+                }
+              }
+            );
+            const errors: string[] = [];
+            const errorNames: string[] = [];
+            window.addEventListener('error', (event) => {
+              errors.push(event.message);
+              errorNames.push(event.error?.name ?? 'unknown');
+              event.preventDefault();
+            });
+            p.adapt(
+              p.define({
+                name: 'closeout-split-files-upgrade',
+                setup(def) {
+                  const leaf = def.feedback.style.declareDecoration();
+                  return (r) => [
+                    r.decoration(leaf),
+                    r.slot(),
+                    r.el('closeout-split-files-reaction', {}),
+                  ];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+            );
+            return {
+              initialCount: original.length,
+              beforeValue,
+              reaction,
+              reactionValue,
+              reactionFiles,
+              errors,
+              errorNames,
+              wrapperRetained: host.firstChild === wrapper && host.childNodes.length === 1,
+              inputRetained: wrapper.firstChild === input && wrapper.childNodes.length === 1,
+              files: Array.from(input.files!, (file) => original.indexOf(file)),
+              value: input.value,
+              published: !!host.shadowRoot!.querySelector('[data-pui-owned-decoration]'),
+              projected: host.shadowRoot!.querySelector('slot')!.assignedNodes()[0] === wrapper,
+            };
+          },
+          { artifact: renderProtoShadowSplitStyleArtifact([]), mutation }
+        );
+        expect(result.initialCount).toBe(2);
+        expect(result.beforeValue).toBe('C:\\fakepath\\first.txt');
+        expect(result.reaction).toBe(true);
+        const expectedReactionFiles = {
+          unchanged: [0, 1],
+          'remove second': [0],
+          'replace second': [0, -1],
+          reverse: [1, 0],
+          clear: [],
+        };
+        expect(result.reactionFiles).toEqual(expectedReactionFiles[mutation]);
+        if (
+          mutation === 'unchanged' ||
+          mutation === 'remove second' ||
+          mutation === 'replace second'
+        )
+          expect(result.reactionValue).toBe(result.beforeValue);
+        else if (mutation === 'clear') expect(result.reactionValue).toBe('');
+        expect(result.wrapperRetained).toBe(true);
+        expect(result.inputRetained).toBe(true);
+        expect(result.files).toEqual([0, 1]);
+        expect(result.value).toBe(result.beforeValue);
+        expect(result.projected).toBe(true);
+        expect(result.published).toBe(mutation === 'unchanged');
+        if (mutation === 'unchanged') {
+          expect(result.errors).toEqual([]);
+          expect(result.errorNames).toEqual([]);
+        } else {
+          expect(result.errors).toEqual([
+            expect.stringContaining('decoration caller projection changed'),
+          ]);
+          expect(result.errorNames).toEqual(['Error']);
+        }
+      } finally {
+        await page.close();
+      }
+    }
+  );
+
   it('accepts an admitted split exit animation at its retained zero opacity', async () => {
     const page = await browser.newPage();
     try {

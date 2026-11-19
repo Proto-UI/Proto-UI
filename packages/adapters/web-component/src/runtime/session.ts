@@ -167,21 +167,40 @@ function captureCallerControlState(node: Element): CallerSnapshot {
   const { value, selectionStart, selectionEnd, selectionDirection } = control;
   const checked = input?.checked;
   const indeterminate = input?.indeterminate;
-  const files = input?.files;
+  const fileList = input?.files;
+  // FileList can change in place, and value names only the first selected file.
+  const files: readonly File[] | undefined = fileList ? Array.from(fileList) : undefined;
   return {
-    isCurrent: () =>
-      control.value === value &&
-      control.selectionStart === selectionStart &&
-      control.selectionEnd === selectionEnd &&
-      control.selectionDirection === selectionDirection &&
-      input?.checked === checked &&
-      input?.indeterminate === indeterminate,
+    isCurrent() {
+      const currentFiles = input?.files;
+      return (
+        control.value === value &&
+        control.selectionStart === selectionStart &&
+        control.selectionEnd === selectionEnd &&
+        control.selectionDirection === selectionDirection &&
+        input?.checked === checked &&
+        input?.indeterminate === indeterminate &&
+        (!files ||
+          (!!currentFiles &&
+            currentFiles.length === files.length &&
+            files.every((file, index) => currentFiles[index] === file)))
+      );
+    },
     restore() {
       if (control.ownerDocument !== document) return;
-      if (control.value !== value) {
-        if (input?.type === 'file' && files) input.files = files;
-        else control.value = value;
-      }
+      if (input?.type === 'file') {
+        const currentFiles = input.files;
+        if (
+          files &&
+          (!currentFiles ||
+            currentFiles.length !== files.length ||
+            files.some((file, index) => currentFiles[index] !== file))
+        ) {
+          const transfer = new (document.defaultView?.DataTransfer ?? DataTransfer)();
+          for (const file of files) transfer.items.add(file);
+          input.files = transfer.files;
+        }
+      } else if (control.value !== value) control.value = value;
       if (input && checked !== undefined && input.checked !== checked) input.checked = checked;
       if (input && indeterminate !== undefined && input.indeterminate !== indeterminate)
         input.indeterminate = indeterminate;
