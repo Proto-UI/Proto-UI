@@ -154,9 +154,21 @@ export function scheduleProjectionThemeRead<T>(scope: Element, read: () => T): P
       pendingPublicationReads.delete(document);
       for (const read of batch) read();
     };
-    const view = document.defaultView;
-    if (view) view.setTimeout(flush, 0);
-    else queueMicrotask(flush);
+    const view = document.defaultView as
+      | (Window & {
+          scheduler?: {
+            postTask(callback: () => void, options: { priority: 'user-blocking' }): Promise<void>;
+          };
+        })
+      | null;
+    const scheduleMicrotask = () => {
+      if (view) view.queueMicrotask(flush);
+      else queueMicrotask(flush);
+    };
+    // This batch gates first publication. Avoid leaving it behind other timers.
+    const task = view?.scheduler?.postTask?.(flush, { priority: 'user-blocking' });
+    if (task) void task.catch(scheduleMicrotask);
+    else scheduleMicrotask();
   });
 }
 

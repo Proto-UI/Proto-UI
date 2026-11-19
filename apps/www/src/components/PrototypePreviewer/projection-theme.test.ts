@@ -55,6 +55,57 @@ describe('Website projection theme inputs', () => {
     }
   });
 
+  it.each([false, true])(
+    'schedules one urgent publication task and handles rejection (%s)',
+    async (rejected) => {
+      const scope = document.documentElement;
+      const view = scope.ownerDocument.defaultView!;
+      const previous = Object.getOwnPropertyDescriptor(view, 'scheduler');
+      const postTask = vi.fn((callback: () => void) =>
+        rejected
+          ? Promise.reject(new Error('scheduler unavailable'))
+          : Promise.resolve().then(callback)
+      );
+      Object.defineProperty(view, 'scheduler', { configurable: true, value: { postTask } });
+      const firstRead = vi.fn(() => 'first');
+      const secondRead = vi.fn(() => 'second');
+      try {
+        const pending = [
+          scheduleProjectionThemeRead(scope, firstRead),
+          scheduleProjectionThemeRead(scope, secondRead),
+        ];
+        await expect(Promise.all(pending)).resolves.toEqual(['first', 'second']);
+        expect(postTask).toHaveBeenCalledOnce();
+        expect(postTask).toHaveBeenCalledWith(expect.any(Function), {
+          priority: 'user-blocking',
+        });
+        expect(firstRead).toHaveBeenCalledOnce();
+        expect(secondRead).toHaveBeenCalledOnce();
+      } finally {
+        if (previous) Object.defineProperty(view, 'scheduler', previous);
+        else Reflect.deleteProperty(view, 'scheduler');
+      }
+    }
+  );
+
+  it('samples within a microtask when the document has no priority scheduler', async () => {
+    const scope = document.documentElement;
+    const view = scope.ownerDocument.defaultView!;
+    const previous = Object.getOwnPropertyDescriptor(view, 'scheduler');
+    Object.defineProperty(view, 'scheduler', { configurable: true, value: undefined });
+    const read = vi.fn(() => 'current theme');
+    try {
+      const pending = scheduleProjectionThemeRead(scope, read);
+      await Promise.resolve();
+      const atCheckpoint = read.mock.calls.length;
+      await expect(pending).resolves.toBe('current theme');
+      expect(atCheckpoint).toBe(1);
+    } finally {
+      if (previous) Object.defineProperty(view, 'scheduler', previous);
+      else Reflect.deleteProperty(view, 'scheduler');
+    }
+  });
+
   it('leaves other queued publications readable when a theme read fails', async () => {
     const scope = document.documentElement;
     const invalid = scheduleProjectionThemeRead(scope, () => {
