@@ -86,6 +86,16 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
         });
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
+        const entryDiagnostics: Array<{ fontSize: number | null; text: string }> = [];
+        let entryDiagnosticsDropped = 0;
+        let diagnosticFontSize: number | null = null;
+        page.on('console', (message) => {
+          const text = message.text();
+          if (!text.startsWith('[pui-menubar-entry] ')) return;
+          if (entryDiagnostics.length < 256)
+            entryDiagnostics.push({ fontSize: diagnosticFontSize, text });
+          else entryDiagnosticsDropped++;
+        });
         const observations: unknown[] = [];
         let interactionTrace: unknown = null;
         let failure: string | null = null;
@@ -208,6 +218,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
           const editMenu = page.getByRole('menu', { name: 'Edit commands', exact: true });
           await bar.scrollIntoViewIfNeeded();
           for (const fontSize of [16, 32]) {
+            diagnosticFontSize = fontSize;
             await page.evaluate((size) => {
               document.documentElement.style.fontSize = `${size}px`;
             }, fontSize);
@@ -416,6 +427,13 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
                   failure,
                   observations,
                   interactionTrace,
+                  entryDiagnostics: {
+                    events: entryDiagnostics,
+                    dropped: entryDiagnosticsDropped,
+                    cap: 256,
+                    limitation:
+                      'Fixed-stage Base diagnostics only; focusFirst.returned records logical dispatch, not host focus. A trace.limit event or dropped messages prevents absence-based conclusions. Font size labels describe the test phase at console delivery.',
+                  },
                   screenshots,
                   limitations: [
                     'No New York native parity claim',

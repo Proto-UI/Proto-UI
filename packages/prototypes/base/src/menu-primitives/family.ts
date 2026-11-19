@@ -27,6 +27,17 @@ import type * as T from './types';
 type Context = { id: string; value: string; current: string; disabled: boolean };
 let nextId = 0;
 export function createMenuFamily(slug: string, navigation: boolean) {
+  // Temporary native-entry diagnostics: fixed stages and local counters only.
+  let nextEntryTrace = 0;
+  let entryTraceMessages = 0;
+  const traceEntry = (attempt: number, stage: string) => {
+    if (navigation || entryTraceMessages > 192) return;
+    if (entryTraceMessages++ === 192) {
+      console.info('[pui-menubar-entry]', 0, 'trace.limit');
+      return;
+    }
+    console.info('[pui-menubar-entry]', attempt, stage);
+  };
   const family = createAnatomyFamily('base-' + slug, {
     roles: {
       root: { cardinality: { min: 1, max: 1 } },
@@ -284,6 +295,8 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       requireSourceFocus = true,
       reason = 'keyboard'
     ) => {
+      const attempt = navigation ? 0 : ++nextEntryTrace;
+      traceEntry(attempt, last ? 'trigger.begin.last' : 'trigger.begin.first');
       // Capture the initiating Trigger's admitted view, not the portaled Content.
       // Reconciliation checks this same identity; it must never recapture a
       // withdrawn source or cancel Focus ownership after valid entry delivery.
@@ -303,8 +316,18 @@ export function createMenuFamily(slug: string, navigation: boolean) {
           }
         }
       }
+      traceEntry(attempt, prepared ? 'trigger.prepared' : 'trigger.no-prepared-content');
+      traceEntry(attempt, 'trigger.request-value');
       invoke(run, 'requestValue', value, reason);
-      if (!mounted || viewEpoch !== epoch) return;
+      traceEntry(attempt, 'trigger.request-value.returned');
+      if (!mounted) {
+        traceEntry(attempt, 'trigger.reject.unmounted');
+        return;
+      }
+      if (viewEpoch !== epoch) {
+        traceEntry(attempt, 'trigger.reject.view-epoch');
+        return;
+      }
       const panels = run.anatomy.partsOf(family, 'content');
       const panel = panels.find((p) => {
         const state = p.getExpose('open') as { get?(): boolean } | undefined;
@@ -312,20 +335,52 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       });
       if (!navigation) {
         const request = prepared?.part.getExpose('__requestEntry');
-        if (prepared && typeof request === 'function')
+        if (prepared && typeof request === 'function') {
+          traceEntry(attempt, 'trigger.request-entry');
           request(
             last,
-            () =>
-              sourceOperation?.isCurrent() === true &&
-              mounted &&
-              viewEpoch === epoch &&
-              entryRevision === revision &&
-              focusEpoch === sourceFocusEpoch &&
-              (!requireSourceFocus || focus.focused.get()) &&
-              expanded.get() &&
-              !disabled.get(),
-            prepared.token
+            () => {
+              traceEntry(attempt, 'source.check');
+              if (sourceOperation?.isCurrent() !== true) {
+                traceEntry(attempt, 'source.reject.operation');
+                return false;
+              }
+              if (!mounted) {
+                traceEntry(attempt, 'source.reject.unmounted');
+                return false;
+              }
+              if (viewEpoch !== epoch) {
+                traceEntry(attempt, 'source.reject.view-epoch');
+                return false;
+              }
+              if (entryRevision !== revision) {
+                traceEntry(attempt, 'source.reject.entry-revision');
+                return false;
+              }
+              if (focusEpoch !== sourceFocusEpoch) {
+                traceEntry(attempt, 'source.reject.focus-epoch');
+                return false;
+              }
+              if (requireSourceFocus && !focus.focused.get()) {
+                traceEntry(attempt, 'source.reject.source-focus');
+                return false;
+              }
+              if (!expanded.get()) {
+                traceEntry(attempt, 'source.reject.expanded');
+                return false;
+              }
+              if (disabled.get()) {
+                traceEntry(attempt, 'source.reject.disabled');
+                return false;
+              }
+              traceEntry(attempt, 'source.accept');
+              return true;
+            },
+            prepared.token,
+            attempt
           );
+          traceEntry(attempt, 'trigger.request-entry.returned');
+        } else traceEntry(attempt, 'trigger.reject.request-entry-unavailable');
         return;
       }
       const fn = panel?.getExpose(last ? 'focusLast' : 'focusFirst');
@@ -425,11 +480,14 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     let runNow: RunHandle<T.MenuContentProps> | null = null;
     let contentValue = '';
     let entryEpoch = 0;
+    let pendingEntryTrace = 0;
     let cancelEntry: (() => void) | null = null;
     const retireEntry = () => {
       entryEpoch++;
+      if (pendingEntryTrace) traceEntry(pendingEntryTrace, 'content.retire');
       cancelEntry?.();
       cancelEntry = null;
+      pendingEntryTrace = 0;
     };
     if (!navigation) {
       def.expose.method('__prepareEntry' as any, (value: string) => {
@@ -439,18 +497,49 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       });
       def.expose.method(
         '__requestEntry' as any,
-        (last: boolean, current: () => boolean, epoch: number) => {
-          if (entryEpoch !== epoch) return;
-          if (!open.get() || typeof current !== 'function' || !current()) return;
+        (last: boolean, current: () => boolean, epoch: number, attempt = 0) => {
+          traceEntry(attempt, 'content.request-entry');
+          if (entryEpoch !== epoch) {
+            traceEntry(attempt, 'content.reject.entry-epoch');
+            return;
+          }
+          if (!open.get()) {
+            traceEntry(attempt, 'content.reject.closed');
+            return;
+          }
+          if (typeof current !== 'function') {
+            traceEntry(attempt, 'content.reject.continuation-unavailable');
+            return;
+          }
+          if (!current()) {
+            traceEntry(attempt, 'content.reject.continuation');
+            return;
+          }
+          pendingEntryTrace = attempt;
+          traceEntry(attempt, 'reconcile.register');
           cancelEntry = overlay.afterViewReconciled(() => {
-            if (entryEpoch !== epoch) return;
+            traceEntry(attempt, 'reconcile.callback');
+            if (entryEpoch !== epoch) {
+              traceEntry(attempt, 'reconcile.reject.entry-epoch');
+              return;
+            }
             cancelEntry = null;
-            if (!open.get() || !current()) return;
+            if (!open.get()) {
+              traceEntry(attempt, 'reconcile.reject.closed');
+              return;
+            }
+            if (!current()) {
+              traceEntry(attempt, 'reconcile.reject.continuation');
+              return;
+            }
             // The consumer still owns first/last policy. Overlay has only finished
             // its resource pass; Focus continues to own renderer target readiness.
+            traceEntry(attempt, last ? 'focusLast.call' : 'focusFirst.call');
             if (last) roving.focusLast(entryOptions);
             else roving.focusFirst(entryOptions);
+            traceEntry(attempt, last ? 'focusLast.returned' : 'focusFirst.returned');
           });
+          traceEntry(attempt, 'reconcile.registered');
         }
       );
     }
