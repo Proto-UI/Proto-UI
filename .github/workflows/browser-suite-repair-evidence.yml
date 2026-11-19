@@ -1,181 +1,55 @@
 name: Browser suite repair evidence
+
 on:
   workflow_dispatch:
+  workflow_call:
+
 permissions:
   contents: read
-concurrency:
-  group: oracle-repairs-evidence-${{ github.ref }}
-  cancel-in-progress: false
 
-env:
-  CANDIDATE_SHA: b8c7f77fa94a3ae6102a90c82ffef4825a9e212a
+concurrency:
+  group: browser-suite-repair-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  style-closure:
+  focused-browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.CANDIDATE_SHA }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Prepare the locked dependencies and browser
+      - name: Install locked dependencies
         run: |
-          set -euo pipefail
           corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/oracle-style"
-          "$CHROME" --version | tee "$RUNNER_TEMP/oracle-style/browser.txt"
+      - name: Disable only the supported Astro development toolbar
+        run: |
+          set -euo pipefail
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Verify the scoped style closure oracle
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Exercise unchanged controls with failure diagnostics
         env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/oracle-style
+          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts \
-            -t 'loads only scoped Proto UI physical styles and mounts every real runtime' \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-      - uses: actions/upload-artifact@v4
+          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
+          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
+          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
+            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
+      - name: Retain source-bound public Base Image captures
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: oracle-style-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/oracle-style
-          if-no-files-found: warn
-          retention-days: 30
-
-  accordion:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CANDIDATE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Prepare the locked dependencies and browser
-        run: |
-          set -euo pipefail
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/oracle-accordion"
-          "$CHROME" --version | tee "$RUNNER_TEMP/oracle-accordion/browser.txt"
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Verify the Accordion family oracle
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/oracle-accordion
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts \
-            -t 'keeps long labels and overflow inside the page' \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: oracle-accordion-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/oracle-accordion
-          if-no-files-found: warn
-          retention-days: 30
-
-  select-text:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CANDIDATE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Prepare the locked dependencies and browser
-        run: |
-          set -euo pipefail
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/oracle-select-text"
-          "$CHROME" --version | tee "$RUNNER_TEMP/oracle-select-text/browser.txt"
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Verify the family Text typography oracle
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/oracle-select-text
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts \
-            -t 'document Text stays selectable beside nonselectable Select content' \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: oracle-select-text-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/oracle-select-text
-          if-no-files-found: warn
-          retention-days: 30
-
-  shadcn-controls:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.CANDIDATE_SHA }}
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: Prepare the locked dependencies and browser
-        run: |
-          set -euo pipefail
-          corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
-          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/oracle-controls"
-          "$CHROME" --version | tee "$RUNNER_TEMP/oracle-controls/browser.txt"
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Verify the ghost Select and Checkbox surface oracles
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/oracle-controls
-        run: |
-          set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts \
-            -t 'paints empty ghost Select text with the interaction foreground' \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts \
-            -t 'paints the dark tint on the unfilled box only, in all runtimes' \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest-checkbox.json"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: oracle-controls-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/oracle-controls
+          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/browser-suite-repair
           if-no-files-found: warn
           retention-days: 30
