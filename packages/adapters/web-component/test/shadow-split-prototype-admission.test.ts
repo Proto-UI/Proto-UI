@@ -62,7 +62,8 @@ describe('composed Shadow prototype admission', () => {
       },
       diagnostics: {
         onLifecycleEvent(event) {
-          lifecycleEvents.push(event.type === 'mount.phase' ? event.phase : event.type);
+          lifecycleEvents.push(event.type);
+          if (event.type === 'mount.phase') lifecycleEvents.push(event.phase);
           if (event.type === 'mount.commit.done') {
             unsubscribeReady = subscribeFocusTargetOwnerReady(host, () => {
               if (isNativeFocusTargetReady(host)) readyPublications++;
@@ -91,6 +92,7 @@ describe('composed Shadow prototype admission', () => {
       }
       expect(errors).toHaveLength(1);
       expect(errors[0]).toBeInstanceOf(Error);
+      expect(String(errors[0])).toMatch(/hidden.*I1 recipe/);
       await disposed;
       expect(lifecycleEvents).toContain('mount.commit.done');
       expect(lifecycleEvents).not.toContain('mounted');
