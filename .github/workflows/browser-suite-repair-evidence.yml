@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: 36a799b77f96b094d9163474596176246531cdca
+  CANDIDATE_SHA: f6ba776c032169bd799037453e82ea354c229d12
 
 jobs:
   shadcn-radio-scroll:
