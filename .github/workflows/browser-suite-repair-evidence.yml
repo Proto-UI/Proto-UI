@@ -1,52 +1,55 @@
 name: Browser suite repair evidence
+
 on:
   workflow_dispatch:
+  workflow_call:
+
 permissions:
   contents: read
-concurrency:
-  group: brutalist-separator-native-evidence-${{ github.ref }}
-  cancel-in-progress: false
 
-env:
-  CANDIDATE_SHA: 5c9df18d1796270e5589f5e2878e617e923f37dc
+concurrency:
+  group: browser-suite-repair-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  separator-fixed-pixel:
+  focused-browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 14
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.CANDIDATE_SHA }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Prepare the locked dependencies and browser
+      - name: Install locked dependencies
         run: |
-          set -euo pipefail
           corepack enable
-          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
-          mkdir -p "$RUNNER_TEMP/brutalist-separator-native"
-          "$CHROME" --version | tee "$RUNNER_TEMP/brutalist-separator-native/browser.txt"
-          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
-      - name: Exercise the complete Brutalist passive consumer suite
-        env:
-          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/brutalist-separator-native
+      - name: Disable only the supported Astro development toolbar
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
-          git rev-parse HEAD > "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            apps/www/src/content/docs/zh-cn/brutalist-passive-consumers.browser.test.ts \
-            --reporter=default --reporter=json \
-            --outputFile.json="$PROTO_UI_RUNTIME_EVIDENCE_DIR/vitest.json"
-      - uses: actions/upload-artifact@v4
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Exercise unchanged controls with failure diagnostics
+        env:
+          PROTO_UI_IMAGE_SCREENSHOT_DIR: ${{ runner.temp }}/browser-suite-repair
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_IMAGE_SCREENSHOT_DIR"
+          git rev-parse HEAD > "$PROTO_UI_IMAGE_SCREENSHOT_DIR/source-sha.txt"
+          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts \
+            apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts
+      - name: Retain source-bound public Base Image captures
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: brutalist-separator-native-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/brutalist-separator-native
+          name: browser-suite-repair-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/browser-suite-repair
           if-no-files-found: warn
           retention-days: 30
