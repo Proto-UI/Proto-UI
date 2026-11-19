@@ -500,6 +500,7 @@ const WEBSITE_NON_INTERACTIVE_PATHS = Object.freeze({
   'www.gallery.prototype-library-cards': Object.freeze([
     'apps/www/astro.config.mjs',
     'apps/www/src/components/site-navigation.ts',
+    'apps/www/src/components/PrototypeDocumentationIndex.astro',
     'packages/prototypes/base/package.json',
     'packages/prototypes/shadcn/package.json',
     'packages/prototypes/brutalist/package.json',
