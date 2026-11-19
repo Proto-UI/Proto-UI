@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CANDIDATE_SHA: 6cea4c8ed
+  CANDIDATE_SHA: 6cea4c8edd2ed7a7c0d45c1cb7bcc5037e5366f0
 
 jobs:
   oracle-repairs:
