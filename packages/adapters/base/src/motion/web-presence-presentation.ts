@@ -9,22 +9,19 @@ import {
   createDefaultWebPreferenceSource,
   readWebPreference,
 } from '../platform/web-preference-source';
+const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
+
+/** True only while this live presentation lease still owns its zero-opacity write. */
+export function hasOwnedWebPresenceZeroOpacity(element: Element): boolean {
+  return zeroOpacityOwners.get(element)?.() ?? false;
+}
+
 export type WebPresencePresentationOptions = {
   /** Native host adoption signal. Cleanup belongs to this physical view. */
   subscribeDocumentChange?: (
     invalidate: (document: Document, phase: 'retire' | 'ready') => void
   ) => () => void;
 };
-const ownedOpacity = new WeakMap<HTMLElement, { value: string; priority: string }>();
-
-/** True only while this presentation lease still owns its zero-opacity write. */
-export function hasOwnedWebPresenceZeroOpacity(node: Element): boolean {
-  const el = node as HTMLElement;
-  const write = ownedOpacity.get(el);
-  return !!write && Number.parseFloat(write.value) === 0 &&
-    el.style.getPropertyValue('opacity') === write.value &&
-    el.style.getPropertyPriority('opacity') === write.priority;
-}
 /** Document identity is part of the physical binding, never semantic phase authority. */
 export function createWebPresencePresentationSink(
   el: HTMLElement,
@@ -174,17 +171,26 @@ function createDocumentPresenceSink(
   const owned = (name: string, value: { value: string; priority: string }) =>
     el.style.getPropertyValue(name) === value.value &&
     el.style.getPropertyPriority(name) === value.priority;
+  const ownsZeroOpacity = () => {
+    const opacity = writes.get('opacity');
+    return (
+      live() && !!opacity && Number.parseFloat(opacity.value) === 0 && owned('opacity', opacity)
+    );
+  };
+  const clearZeroOpacityOwner = () => {
+    if (zeroOpacityOwners.get(el) === ownsZeroOpacity) zeroOpacityOwners.delete(el);
+  };
   const detectLoss = () => {
     for (const [name, value] of writes)
       if (!owned(name, value)) {
         lost.add(name);
         writes.delete(name);
         baseline.delete(name);
-        if (name === 'opacity' && ownedOpacity.get(el) === value) ownedOpacity.delete(el);
+        if (name === 'opacity') clearZeroOpacityOwner();
       }
   };
   const clear = () => {
-    if (ownedOpacity.get(el) === writes.get('opacity')) ownedOpacity.delete(el);
+    clearZeroOpacityOwner();
     translation?.release();
     translation = null;
     for (const [name, value] of writes)
@@ -209,7 +215,11 @@ function createDocumentPresenceSink(
       value: el.style.getPropertyValue(name),
       priority: el.style.getPropertyPriority(name),
     });
-    if (name === 'opacity') ownedOpacity.set(el, writes.get(name)!);
+    if (name === 'opacity') {
+      if (Number.parseFloat(value) === 0 && ownsZeroOpacity())
+        zeroOpacityOwners.set(el, ownsZeroOpacity);
+      else clearZeroOpacityOwner();
+    }
     return true;
   };
   const px = (value: string | undefined) =>
