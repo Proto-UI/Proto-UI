@@ -185,7 +185,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/code-example-tree.ts': Object.freeze({
-    sourceSha256: '062bda52d104c20b998a73305a437d79af47540d52201129a4de32a998736b17',
+    sourceSha256: '1420259e7f613f5cf6980615a9cec9ed2147593d074948766435a8845f9dc336',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/tree',
