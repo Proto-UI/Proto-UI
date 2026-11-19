@@ -273,7 +273,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           expect(item.indicatorRole).toBeNull();
           expect(item.indicatorTabIndex).toBeNull();
           expect(item.indicatorControls).toBe(0);
-          expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0);
+          // The Rhea profile paints an unchecked item with bg-input/90.
+          expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0.9);
           expect(item.duration).toBe('0s');
         }
         expect(initial[2]).toMatchObject({
