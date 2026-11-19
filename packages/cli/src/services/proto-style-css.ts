@@ -1087,6 +1087,17 @@ function renderShadowSplitCss(tokens: string[]): string {
       pushSplitRule(lines, `${selector}:host([data-pui-split-text-control])`, ['display: none;']);
     }
   }
+  // The split host owns geometry; its preference override must follow the
+  // host's ordinary declarations. The inner surface is handled separately.
+  const transformRules = rules.filter(
+    (rule) => splitVariants(rule.token).at(-1) === 'transition-transform'
+  );
+  if (transformRules.length > 0) {
+    lines.push(`@media ${SYSTEM_REDUCED_MOTION_MEDIA_QUERY} {`);
+    for (const rule of transformRules)
+      pushSplitRule(lines, buildSplitHostSelector(rule.token), ['transition-property: none;']);
+    lines.push('}');
+  }
   lines.push('}', '');
   return lines.join('\n');
 }
