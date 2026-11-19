@@ -1182,7 +1182,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         viewReadyRef.current = true;
         const revealedRoot = rootRef.current;
         const revealGeneration = ++revealGenerationRef.current;
-        revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, '');
+        const presenceBound = ownerRef.current?.session?.caps
+          .getPort<OverlayPort>('overlay')
+          ?.hasPresenceBinding();
+        revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, presenceBound ? 'presence' : '');
         revealedRoot?.removeAttribute(PUI_VIEW_PENDING_ATTR);
         if (revealedRoot) {
           scheduleAfterWebLayout(
