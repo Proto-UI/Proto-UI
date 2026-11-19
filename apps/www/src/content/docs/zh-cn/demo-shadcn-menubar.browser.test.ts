@@ -57,6 +57,7 @@ async function facts(locator: Locator) {
       x: box.x,
       y: box.y,
       width: box.width,
+      layoutWidth: (element as HTMLElement).offsetWidth,
       height: box.height,
       minWidth: css.minWidth,
       paddingTop: css.paddingTop,
@@ -283,7 +284,8 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             expect(content.y).toBeGreaterThanOrEqual(0);
             expect(content.y + content.height).toBeLessThanOrEqual(1000);
             expect(Number.parseFloat(content.minWidth)).toBeCloseTo(fontSize * 9, 1);
-            expect(content.width).toBeGreaterThanOrEqual(fontSize * 9 - 0.1);
+            // The entry animation scales the painted rectangle, while min-width constrains layout.
+            expect(content.layoutWidth).toBeGreaterThanOrEqual(fontSize * 9);
             observations.push({ fontSize, state: 'open-keyboard-item', content, item });
             await capture(editMenu, `${fontSize}-open-menu`);
 
