@@ -88,6 +88,37 @@ const request = (
   family: 'shadcn' | 'brutalist' = 'shadcn'
 ) => ({ generation, selection: { runtimeId: runtime, projectionFamilyId: family } });
 describe('batched real typography adapters and stable native semantic owners', () => {
+  it('uses current native targets when runtime preparation completes', async () => {
+    document.body.innerHTML =
+      '<main data-site-family-scope><div data-doc-flow><p>Retained source</p><p>Outgoing source</p></div></main>';
+    const root = document.querySelector<HTMLElement>('main')!;
+    const flow = root.querySelector('[data-doc-flow]')!;
+    const [retained, outgoing] = flow.querySelectorAll('p');
+    const retainedText = retained!.firstChild;
+    const participant = siteTypographyParticipant(root);
+    const preparing = participant.materialize(request('wc', 1));
+
+    const added = document.createElement('h3');
+    const addedText = document.createTextNode('Incoming source');
+    added.append(addedText);
+    outgoing!.replaceWith(added);
+    const first = await preparing;
+    candidates.push(first);
+    expect(first.scope?.querySelectorAll('[data-site-typography-carrier]')).toHaveLength(2);
+
+    first.activate();
+    expect(retained!.querySelector('[data-site-typography-slot]')?.firstChild).toBe(retainedText);
+    expect(added.querySelector('[data-site-typography-slot]')?.firstChild).toBe(addedText);
+    expect(added.dataset.typographyGeneration).toBe('1');
+    expect(participant.needsRefresh()).toBe(false);
+
+    await first.dispose();
+    expect(retained!.firstChild).toBe(retainedText);
+    expect(added.firstChild).toBe(addedText);
+    expect(outgoing!.hasAttribute('data-typography-owner')).toBe(false);
+    participant.destroy();
+  });
+
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
     it(`${runtime}: valid inline slots, one native source, repeated replacement and complete teardown`, async () => {
       const root = fixture();

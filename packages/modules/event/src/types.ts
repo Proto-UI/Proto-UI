@@ -39,6 +39,9 @@ export type EventModule = ModuleInstance<EventFacade> & {
 export type EventInputContext = Readonly<{ scope: object; sample: object }>;
 
 export type EventPort = ModulePort & {
+  /** Query the completed setup registrations before attaching a view. */
+  hasRootRegistration?(type: SemanticEventType): boolean;
+  hasGlobalRegistration?(type: SemanticEventType): boolean;
   /** Opaque shared scope; neither the scope nor sample token exposes host objects. */
   getGlobalInputScope?(): object | null;
   /** Available only during the synchronous dispatch of this exact payload. */

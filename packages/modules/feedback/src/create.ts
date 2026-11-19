@@ -730,7 +730,10 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         private canProject(): boolean {
           return (
-            !this.disposed && (this.mountPhase === 'mounting' || this.mountPhase === 'mounted')
+            !this.disposed &&
+            this.instancePhase !== 'disposing' &&
+            this.instancePhase !== 'disposed' &&
+            (this.mountPhase === 'mounting' || this.mountPhase === 'mounted')
           );
         }
 

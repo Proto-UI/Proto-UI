@@ -1,4 +1,3 @@
-import type { ExposedStateHandle } from '@proto.ui/core';
 import {
   materializeProjectionCandidate,
   type MaterializedProjectionCandidate,
@@ -11,6 +10,13 @@ import type {
 import { withNativeContentLease } from './PrototypePreviewer/native-content-lease';
 import { siteContentsNavigation, type SiteContentsPresentation } from './site-header-disclosure';
 import { headerIconButtonLayout } from './site-header-control-recipes';
+
+type ContentsFact<Value> = {
+  get(): Value;
+  subscribe(
+    listener: (event: { type: 'next'; next: Value } | { type: 'disconnect' }) => void
+  ): () => void;
+};
 
 const controls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
@@ -135,9 +141,9 @@ export function contentsPanelParticipant(header: HTMLElement) {
       let live = true;
       let published = false;
       let requestedOpen = false;
-      let openFact: ExposedStateHandle<boolean> | undefined;
-      let presentFact: ExposedStateHandle<boolean> | undefined;
-      let transitionFact: ExposedStateHandle<string> | undefined;
+      let openFact: ContentsFact<boolean> | undefined;
+      let presentFact: ContentsFact<boolean> | undefined;
+      let transitionFact: ContentsFact<string> | undefined;
       let releaseFacts: (() => void) | undefined;
       let releaseInstances: (() => void) | undefined;
       let closeBarrier: Promise<void> | undefined;
@@ -392,11 +398,9 @@ export function contentsPanelParticipant(header: HTMLElement) {
                 presentFact = undefined;
                 transitionFact = undefined;
                 const exposes = snapshot['contents-panel']?.getExposes();
-                const open = exposes?.open as ExposedStateHandle<boolean> | undefined;
-                const present = exposes?.isPresent as ExposedStateHandle<boolean> | undefined;
-                const transition = exposes?.transitionState as
-                  | ExposedStateHandle<string>
-                  | undefined;
+                const open = exposes?.open as ContentsFact<boolean> | undefined;
+                const present = exposes?.isPresent as ContentsFact<boolean> | undefined;
+                const transition = exposes?.transitionState as ContentsFact<string> | undefined;
                 if (
                   !open?.get ||
                   !open.subscribe ||

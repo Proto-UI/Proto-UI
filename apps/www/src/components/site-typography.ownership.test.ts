@@ -103,6 +103,40 @@ const request = (runtime: 'wc' | 'react' | 'vue' | 'vue2', generation = 1) => ({
 });
 
 describe('independent typography owner review', () => {
+  it.each([false, true])(
+    'restores the retired carrier order only when needed (reordered=%s)',
+    async (reordered) => {
+      document.body.innerHTML =
+        '<main data-site-family-scope><div data-doc-flow><p>Alpha</p><p>Beta</p></div></main>';
+      const root = document.querySelector<HTMLElement>('main')!;
+      const paragraphs = Array.from(root.querySelectorAll('p'));
+      const source = paragraphs.map((paragraph) => paragraph.firstChild);
+      const participant = siteTypographyParticipant(root);
+      const previous = await participant.materialize(request('wc', 1));
+      candidates.push(previous);
+      previous.activate();
+      const batch = previous.scope!;
+      const carriers = paragraphs.map((paragraph) => paragraph.firstElementChild!);
+
+      const next = await participant.materialize(request('wc', 2));
+      candidates.push(next);
+      next.activate();
+      expect(Array.from(batch.children)).toEqual(carriers);
+      if (reordered) batch.prepend(carriers[1]!);
+      const append = vi.spyOn(batch, 'append');
+      await previous.dispose();
+      expect(append.mock.calls).toEqual(reordered ? carriers.map((carrier) => [carrier]) : []);
+      expect(batch.isConnected).toBe(false);
+
+      paragraphs.forEach((paragraph, i) =>
+        expect(paragraph.querySelector('[data-site-typography-slot]')!.firstChild).toBe(source[i])
+      );
+      await next.dispose();
+      paragraphs.forEach((paragraph, i) => expect(paragraph.firstChild).toBe(source[i]));
+      participant.destroy();
+    }
+  );
+
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
     it(`${runtime}: forwards language and preserves source with an explicit HappyDOM :lang fixture`, async () => {
       document.body.innerHTML =

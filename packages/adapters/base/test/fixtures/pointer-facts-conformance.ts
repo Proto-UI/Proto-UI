@@ -79,6 +79,98 @@ export function pointerFactsConformance(
       },
     });
   describe(`${name}: public author pointer sample contract`, () => {
+    it.each(['host', 'root', 'global', 'press'] as const)(
+      'keeps native keyup routing for setup demand %s',
+      async (demand) => {
+        const calls: string[] = [];
+        const nativeListeners = vi.spyOn(window, 'addEventListener');
+        const prototype = definePrototype({
+          name: `keyup-demand-${name}-${++serial}`,
+          setup(def) {
+            def.event.onGlobal('host:keyup', () => calls.push('host'));
+            if (demand === 'root') def.event.on('key.up', () => calls.push('root'));
+            if (demand === 'global') def.event.onGlobal('key.up', () => calls.push('global'));
+            if (demand === 'press') def.event.on('press.commit', () => calls.push('press'));
+            return (r) => r.el('span', 'key release');
+          },
+        });
+        try {
+          const mounted = await mount(prototype);
+          try {
+            await mounted.flush();
+            expect(nativeListeners.mock.calls.filter(([event]) => event === 'keyup')).toHaveLength(
+              demand === 'host' ? 1 : 2
+            );
+            if (demand === 'press') {
+              await mounted.dispatch(
+                mounted.root,
+                new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })
+              );
+              await mounted.dispatch(mounted.root, new MouseEvent('click', { bubbles: true }));
+              expect(calls).toEqual(['press']);
+            }
+            await mounted.dispatch(
+              mounted.root,
+              new KeyboardEvent('keyup', { key: 'Enter', bubbles: true })
+            );
+            await mounted.flush();
+            if (demand === 'press') {
+              await mounted.dispatch(mounted.root, new MouseEvent('click', { bubbles: true }));
+              expect(calls).toEqual(['press', 'host', 'press']);
+            } else {
+              expect(calls).toEqual(demand === 'host' ? ['host'] : [demand, 'host']);
+            }
+          } finally {
+            await mounted.unmount();
+          }
+        } finally {
+          nativeListeners.mockRestore();
+        }
+      }
+    );
+
+    it.each(['pointer.enter', 'pointer.leave'] as const)(
+      'binds the declared root boundary %s alongside independent host listeners',
+      async (type) => {
+        const calls: string[] = [];
+        const nativeListeners = vi.spyOn(HTMLElement.prototype, 'addEventListener');
+        const prototype = definePrototype({
+          name: `pointer-boundary-${name}-${++serial}`,
+          setup(def) {
+            def.event.on('host:pointerenter', () => calls.push('host enter'));
+            def.event.on('host:pointerleave', () => calls.push('host leave'));
+            def.event.on(type, () => calls.push('proto'));
+            return (r) => r.el('span', 'native pointer boundary');
+          },
+        });
+        try {
+          const mounted = await mount(prototype);
+          try {
+            await mounted.flush();
+            const count = (name: string) =>
+              nativeListeners.mock.calls.filter(
+                ([event], index) =>
+                  event === name && nativeListeners.mock.contexts[index] === mounted.root
+              ).length;
+            expect(count('pointerenter')).toBe(type === 'pointer.enter' ? 2 : 1);
+            expect(count('pointerleave')).toBe(type === 'pointer.leave' ? 2 : 1);
+            await mounted.dispatch(mounted.root, nativeSample('pointer.enter', 'mouse', 0));
+            await mounted.dispatch(mounted.root, nativeSample('pointer.leave', 'mouse', 0));
+            await mounted.flush();
+            expect(calls).toEqual(
+              type === 'pointer.enter'
+                ? ['proto', 'host enter', 'host leave']
+                : ['host enter', 'proto', 'host leave']
+            );
+          } finally {
+            await mounted.unmount();
+          }
+        } finally {
+          nativeListeners.mockRestore();
+        }
+      }
+    );
+
     for (const scope of ['root', 'global'] as const) {
       for (const unavailable of ['pointerType', 'buttons', 'both'] as const)
         it(`${scope}: throwing ${unavailable} getter preserves independent unknown author facts`, async () => {
