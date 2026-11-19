@@ -61,8 +61,7 @@ const CHECKBOX_COUNT = 5;
 
 /** Upstream transitions exactly these two properties, at the Tailwind defaults. */
 const TRANSITION_PROPERTY = 'color, box-shadow';
-/** The public page uses the Rhea recipe, which declares its own 200ms duration. */
-const TRANSITION_DURATION = '0.2s';
+const TRANSITION_DURATION = '0.15s';
 const TRANSITION_TIMING = 'cubic-bezier(0.4, 0, 0.2, 1)';
 
 type BoxPaint = {
@@ -152,7 +151,8 @@ async function waitForStableEditorProjection(page: Page): Promise<void> {
       const tokens = editor.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
       return (
         tokens.includes('transition-[color,box-shadow]') &&
-        tokens.includes('duration-200')
+        tokens.includes('duration-150') &&
+        tokens.includes('ease-in-out')
       );
     },
     undefined,
@@ -526,19 +526,13 @@ describe.sequential('shadcn control documentation browser regressions', () => {
         // The background is outside the transition set, so each read is the
         // settled value and no animation-aware waiting is needed here.
         await applyColorScheme(page, 'light');
-        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-before`).toBeCloseTo(
-          0.5,
-          1
-        );
+        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-before`).toBe(0);
 
         await applyColorScheme(page, 'dark');
         expect((await editorStyle(page)).backgroundAlpha, `${runtime}/dark`).toBeGreaterThan(0);
 
         await applyColorScheme(page, 'light');
-        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-after`).toBeCloseTo(
-          0.5,
-          1
-        );
+        expect((await editorStyle(page)).backgroundAlpha, `${runtime}/light-after`).toBe(0);
       }
     } finally {
       await context.close();
