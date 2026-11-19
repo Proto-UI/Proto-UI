@@ -21,9 +21,9 @@ jobs:
       matrix:
         include:
           - control: baseline
-            source: cd4a9e5ca21d2843ef4be8b651bbc97e80346988
+            source: acdf2a386bcd94bd1604afc9e6793a060d16d809
           - control: repaired
-            source: 73a7b6c3f284e7c3fe22ef4f70c98d893f6cf35e
+            source: 627b12a1dee3bca27a60453c56807e19c4541d1d
     steps:
       - uses: actions/checkout@v4
         with:
